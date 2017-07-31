@@ -55,10 +55,11 @@ bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoin
   return true;
 }
 
-void NotebookOptionChains::CreateControls() {    
+void NotebookOptionChains::CreateControls() {   
   
-  Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
-  Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
+  // Page Change events cause issues during OnDestroy
+  //Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
+  //Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
   
   //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
@@ -87,25 +88,30 @@ void NotebookOptionChains::SetName( const std::string& sName ) {
   wxNotebook::SetName( sName );
 }
 
-void NotebookOptionChains::Clear() {
-  m_mapOptionExpiry.clear();
-}
-
 void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
   
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
+    
     std::string sDate = boost::lexical_cast<std::string>( date.year() );
     sDate += std::string( "/" ) 
       + ( date.month().as_number() < 10 ? "0" : "" ) 
       + boost::lexical_cast<std::string>( date.month().as_number() );
     sDate += std::string( "/" ) + ( date.day()   < 10 ? "0" : "" ) + boost::lexical_cast<std::string>( date.day() );
     
-    auto* p = new GridOptionDetails( this, -1, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
+    auto* pPanel = new wxPanel( this, wxID_ANY );
+    auto* pSizer = new wxBoxSizer(wxVERTICAL);
+    pPanel->SetSizer( pSizer );
+    auto* pDetails = new GridOptionDetails( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
+    pSizer->Add( pDetails, 1, wxALL|wxEXPAND, 1 );
+    pDetails->m_fOnRowClicked = [this, date](double strike, const std::string& sCall, const std::string& sPut, const GridOptionDetails::DatumUpdateFunctions& funcs ){ 
+      if ( nullptr != m_fOnRowClicked) 
+        m_fOnRowClicked( date, strike, sCall, sPut, funcs );
+    };
     
     iterExpiry = m_mapOptionExpiry.insert( 
-      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, p ) ) );
+      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pDetails ) ) );
     
     struct Reindex {
       size_t ix;
@@ -119,7 +125,7 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
       m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), 
         [&reindex](mapOptionExpiry_t::value_type& v){ reindex( v.second ); } );
         
-    InsertPage( iterExpiry->second.ixTab, p, sDate );
+    InsertPage( iterExpiry->second.ixTab, pPanel, sDate );
     
     SetSelection( 0 );
   }
@@ -144,26 +150,23 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   
   iterExpiry->second.pWinOptionsDetails->Add( strike, side, sSymbol );
   
-  
-}
-
-// build grids on demand, or pre-build?
-void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
-  event.Skip();
-}
-
-void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
-  event.Skip();
 }
 
 void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  // Page change events occur during Deletion of Pages, causing problems
+  //Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
+  //Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
   
+  Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
+  
+  //DestroyChildren();
   DeleteAllPages();
+  
+  DeletePendingEvents();
   
   //m_timerGuiRefresh.Stop();
   //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  
-  Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
   
   //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );

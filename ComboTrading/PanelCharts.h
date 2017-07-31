@@ -40,6 +40,8 @@
 #include <OUCharting/ChartDataView.h>
 #include <TFVuTrading/ModelChartHdf5.h>
 
+#include <TFVuTrading/GridOptionDetails.h>
+
 #include "TreeItem.h"
 #include "InstrumentActions.h"
 
@@ -235,8 +237,6 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
-  //GridOptionDetails* m_pWinOptionDetails;
-  //WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
   
   wxWindow* m_winRightDetail;
@@ -245,7 +245,7 @@ private:
   wxSplitterWindow* m_splitter;
   wxBoxSizer* m_sizerRight;
   
-  void UpdateOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
+  void AddOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
   void UpdateInstrumentStructures( const std::string& name );
   
   void HandleTreeOpsChanging( wxTreeItemId id );
@@ -271,6 +271,13 @@ private:
   
   void RemoveRightDetail();
   void ReplaceRightDetail( wxWindow* );
+  void HandleGridClick( 
+    boost::gregorian::date date, double strike, 
+    const std::string& sCall, const std::string& sPut, 
+    const ou::tf::GridOptionDetails::DatumUpdateFunctions& functions );
+  
+  void OnPageChanged( wxBookCtrlEvent& event );
+  void OnPageChanging( wxBookCtrlEvent& event );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
   

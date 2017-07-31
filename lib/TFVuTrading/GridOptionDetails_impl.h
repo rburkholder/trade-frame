@@ -27,7 +27,7 @@
 #include <boost/fusion/include/filter.hpp>
 
 #include <wx/stattext.h>
-#include <wx/sizer.h>
+//#include <wx/sizer.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -79,56 +79,57 @@ struct GridOptionDetails_impl {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
   
-  class OptionValueRow {
-  public:
-    //OptionValueRow( wxGrid& grid, int nRow ): m_grid( grid ), m_nRow( nRow ) { Init(); }
-    //OptionValueRow( wxGrid& grid ): m_grid( grid ), m_nRow {} { Init(); }
+  struct OptionValueRow {
+  //public:
     OptionValueRow( wxGrid& grid, double strike )
-      : m_grid( grid ), m_nRow {} 
+      : m_grid( grid ), m_nRow {}, m_bSelected( false )
       { 
 	Init(); 
-        boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike);
+        boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike );
        }
     OptionValueRow( const OptionValueRow& rhs )
-      : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ) 
+      : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ), m_bSelected( rhs.m_bSelected )
     { 
-      Init();
+      Init(); 
       boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Strike>( rhs.m_vModelCells ).GetValue() );
     }
     ~OptionValueRow( void ) {}
     
-    void SetRowIndex( int nRow ) { m_nRow = nRow; }
-    int GetRowIndex() const { return m_nRow; }
-    
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
-    void UpdateCallGreeks( ou::tf::Greek& greek ) {
+    void UpdateCallGreeks( const ou::tf::Greek& greek ) {
       boost::fusion::at_c<COL_CallIV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
       boost::fusion::at_c<COL_CallDelta>( m_vModelCells ).SetValue( greek.Delta() );
       boost::fusion::at_c<COL_CallGamma>( m_vModelCells ).SetValue( greek.Gamma() );
     }
-    void UpdateCallQuote( ou::tf::Quote& quote ) {
+    void UpdateCallQuote( const ou::tf::Quote& quote ) {
       boost::fusion::at_c<COL_CallBid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_CallAsk>( m_vModelCells ).SetValue( quote.Ask() );
     }
-    void UpdateCallTrade( ou::tf::Trade& trade ) {
+    void UpdateCallTrade( const ou::tf::Trade& trade ) {
       boost::fusion::at_c<COL_CallLast>( m_vModelCells ).SetValue( trade.Price() );
     }
-    void UpdatePutGreeks( ou::tf::Greek& greek ) {
+    void UpdatePutGreeks( const ou::tf::Greek& greek ) {
       boost::fusion::at_c<COL_PutIV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
       boost::fusion::at_c<COL_PutDelta>( m_vModelCells ).SetValue( greek.Delta() );
       boost::fusion::at_c<COL_PutGamma>( m_vModelCells ).SetValue( greek.Gamma() );
 }
-    void UpdatePutQuote( ou::tf::Quote& quote ) {
+    void UpdatePutQuote( const ou::tf::Quote& quote ) {
       boost::fusion::at_c<COL_PutBid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_PutAsk>( m_vModelCells ).SetValue( quote.Ask() );
     }
-    void UpdatePutTrade( ou::tf::Trade& trade ) {
+    void UpdatePutTrade( const ou::tf::Trade& trade ) {
       boost::fusion::at_c<COL_PutLast>( m_vModelCells ).SetValue( trade.Price() );
     }
-  protected:
-  private:
+  //protected:
+  //private:
+    
+    std::string m_sCallName;
+    std::string m_sPutName;
+    
+    bool m_bSelected;
+    
     wxGrid& m_grid;
     int m_nRow;
     vModelCells_t m_vModelCells;
@@ -137,7 +138,7 @@ struct GridOptionDetails_impl {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
     }
-  };
+  };  // struct OptionValueRow
   
   typedef std::map<double,OptionValueRow> mapOptionValueRow_t;
   typedef mapOptionValueRow_t::iterator mapOptionValueRow_iter;
@@ -146,17 +147,13 @@ struct GridOptionDetails_impl {
   mapOptionValueRow_iter FindOptionValueRow( double );
   
   void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
+  void SetSelected( double strike, bool bSelected );
   
-  void UpdateCallGreeks( double strike, ou::tf::Greek& );
-  void UpdateCallQuote( double strike, ou::tf::Quote& );
-  void UpdateCallTrade( double strike, ou::tf::Trade& );  
-  void UpdatePutGreeks( double strike, ou::tf::Greek& );
-  void UpdatePutQuote( double strike, ou::tf::Quote& );
-  void UpdatePutTrade( double strike, ou::tf::Trade& );  
-
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
   void DestroyControls();
+  
+  void OnGridLeftClick( wxGridEvent& event );
   
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );

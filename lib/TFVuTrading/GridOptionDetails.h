@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -44,7 +46,7 @@ public:
     const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
     long style = GRID_OPTIONDETAILS_STYLE,
     const wxString& = GRID_OPTIONDETAILS_TITLE );
-  ~GridOptionDetails(void);
+  virtual ~GridOptionDetails(void);
 
   bool Create( wxWindow* parent, 
     wxWindowID id = GRID_OPTIONDETAILS_IDNAME, 
@@ -52,16 +54,23 @@ public:
     const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
     long style = GRID_OPTIONDETAILS_STYLE,
     const wxString& = GRID_OPTIONDETAILS_TITLE );
-  
-  void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
-  
-  void UpdateCallGreeks( double strike, ou::tf::Greek& );
-  void UpdateCallQuote( double strike, ou::tf::Quote& );
-  void UpdateCallTrade( double strike, ou::tf::Trade& );  
-  void UpdatePutGreeks( double strike, ou::tf::Greek& );
-  void UpdatePutQuote( double strike, ou::tf::Quote& );
-  void UpdatePutTrade( double strike, ou::tf::Trade& );  
 
+  void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
+
+  void SetSelected( double strike, bool bSelected );
+  
+  struct DatumUpdateFunctions {
+    std::function<void( const ou::tf::Greek& )> fCallGreek;
+    std::function<void( const ou::tf::Quote& )> fCallQuote;
+    std::function<void( const ou::tf::Trade& )> fCallTrade;  
+    std::function<void( const ou::tf::Greek& )> fPutGreek;
+    std::function<void( const ou::tf::Quote& )> fPutQuote;
+    std::function<void( const ou::tf::Trade& )> fPutTrade;  
+  };
+
+  typedef std::function<void(double, const std::string&, const std::string&, const DatumUpdateFunctions& )> fOnRowClicked_t;
+  fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
+  
 protected:
 
   void Init();
@@ -79,7 +88,6 @@ private:
 
   void HandleSize( wxSizeEvent& event );
   void OnDestroy( wxWindowDestroyEvent& event );
-  void HandleGuiRefresh( wxTimerEvent& event );
   
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

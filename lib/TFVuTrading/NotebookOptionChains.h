@@ -22,6 +22,7 @@
 #define WINOPTIONCHAINS_H
 
 #include <map>
+#include <functional>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -71,8 +72,10 @@ public:
     const wxString& name = SYMBOL_OPTIONCHAINS_TITLE  );
   
   void SetName( const std::string& sName );  // underlying
-  void Clear();
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::enumOptionSide, const std::string& sSymbol );
+  
+  typedef std::function<void(boost::gregorian::date, double, const std::string&, const std::string&, const GridOptionDetails::DatumUpdateFunctions& )> fOnRowClicked_t;
+  fOnRowClicked_t m_fOnRowClicked; // called when a row is selected
   
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
@@ -111,7 +114,7 @@ private:
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;
   
   mapOptionExpiry_t m_mapOptionExpiry;
-
+  
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
   

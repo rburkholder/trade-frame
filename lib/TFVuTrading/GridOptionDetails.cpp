@@ -31,8 +31,7 @@ GridOptionDetails::GridOptionDetails(
 }
 
 GridOptionDetails::~GridOptionDetails(void) {
-  // this destructor is called prior to window destruction
-  m_pimpl->DestroyControls();
+  // this destructor is called prior to window destruction (because of unique_ptr?
 }
 
 void GridOptionDetails::Init( void ) {
@@ -51,7 +50,7 @@ bool GridOptionDetails::Create(
 
 void GridOptionDetails::CreateControls() {    
   
-  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
+  //Bind( wxEVT_CLOSE_WINDOW, &GridOptionDetails::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &GridOptionDetails::OnDestroy, this );
   
   //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
@@ -77,28 +76,8 @@ void GridOptionDetails::Add( double strike, ou::tf::OptionSide::enumOptionSide s
   m_pimpl->Add( strike, side, sSymbol );
 }
 
-void GridOptionDetails::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
-  m_pimpl->UpdateCallGreeks( strike, greek );
-}
-
-void GridOptionDetails::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
-  m_pimpl->UpdateCallQuote( strike, quote );
-}
-
-void GridOptionDetails::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
-  m_pimpl->UpdateCallTrade( strike, trade );
-}
-
-void GridOptionDetails::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
-  m_pimpl->UpdatePutGreeks( strike, greek );
-}
-
-void GridOptionDetails::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
-  m_pimpl->UpdatePutQuote( strike, quote );
-}
-
-void GridOptionDetails::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
-  m_pimpl->UpdatePutTrade( strike, trade );
+void GridOptionDetails::SetSelected( double strike, bool bSelected) {
+  m_pimpl->SetSelected( strike, bSelected );
 }
 
 template void GridOptionDetails::serialize<boost::archive::text_iarchive>(
@@ -114,15 +93,13 @@ template void GridOptionDetails::serialize<boost::archive::text_oarchive>(
 void GridOptionDetails::HandleSize( wxSizeEvent& event ) { 
 }
 
-void GridOptionDetails::HandleGuiRefresh( wxTimerEvent& event ) {
-  event.Skip();
-}
-
 void GridOptionDetails::OnDestroy( wxWindowDestroyEvent& event ) {
   
-  //m_pimpl->DestroyControls();
+  //m_pimpl->DestroyControls();  // performed in the destructor
   //m_timerGuiRefresh.Stop();
   //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  m_pimpl->DestroyControls();
   
   Unbind( wxEVT_DESTROY, &GridOptionDetails::OnDestroy, this );
   

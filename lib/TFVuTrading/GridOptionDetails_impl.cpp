@@ -56,10 +56,15 @@ void GridOptionDetails_impl::CreateControls() {
       
   //m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
+  m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
+  m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
+
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( &m_details );
   m_details.Bind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   m_timerGuiRefresh.Start( 250 );
+
+  m_details.EnableEditing( false );
 
 }
 
@@ -75,7 +80,7 @@ void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionS
     struct Reindex {
       size_t ix;
       Reindex(): ix{} {}
-      void operator()( OptionValueRow& row ) { row.SetRowIndex( ix ); ix++; }
+      void operator()( OptionValueRow& row ) { row.m_nRow = ix; ix++; }
     };
     
     Reindex reindex; 
@@ -83,7 +88,16 @@ void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionS
       m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
         [&reindex](mapOptionValueRow_t::value_type& v){ reindex( v.second ); } );
         
-    assert( m_details.InsertRows( iter->second.GetRowIndex() ) );
+    assert( m_details.InsertRows( iter->second.m_nRow ) );
+  }
+  
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      iter->second.m_sCallName = sSymbol;
+      break;
+    case ou::tf::OptionSide::Put:
+      iter->second.m_sPutName = sSymbol;
+      break;
   }
 }
 
@@ -96,62 +110,60 @@ GridOptionDetails_impl::FindOptionValueRow( double strike ) {
   return iter;
 }
 
-void GridOptionDetails_impl::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
+void GridOptionDetails_impl::SetSelected(double strike, bool bSelected) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdateCallGreeks( greek );
-  iter->second.UpdateGui();  // TODO:  do a timed update
-}
-
-void GridOptionDetails_impl::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
-  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdateCallQuote( quote );
-  iter->second.UpdateGui();  // TODO:  do a timed update
-}
-
-void GridOptionDetails_impl::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
-  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdateCallTrade( trade );
-  iter->second.UpdateGui();  // TODO:  do a timed update
-}
-
-void GridOptionDetails_impl::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
-  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdatePutGreeks( greek );
-  iter->second.UpdateGui();  // TODO:  do a timed update
-}
-
-void GridOptionDetails_impl::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
-  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdatePutQuote( quote );
-  iter->second.UpdateGui();  // TODO:  do a timed update
-}
-
-void GridOptionDetails_impl::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
-  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
-  iter->second.UpdatePutTrade( trade );
-  iter->second.UpdateGui();  // TODO:  do a timed update
+  wxColour colour = bSelected ? *wxWHITE : m_details.GetDefaultCellBackgroundColour();
+  m_details.SetCellBackgroundColour( iter->second.m_nRow, -1, colour );
 }
 
 void GridOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-    [](mapOptionValueRow_t::value_type& value) {
-      value.second.UpdateGui();
+    [this](mapOptionValueRow_t::value_type& value) {
+      if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
+        value.second.UpdateGui();
+      }
     }
     );
+}
+
+void GridOptionDetails_impl::OnGridLeftClick( wxGridEvent& event ) {
+  // use to toggle monitoring
+  int nRow = event.GetRow();
+  if ( 0 <= nRow && event.ControlDown() ) {
+    assert( nRow < m_mapOptionValueRow.size() );
+    mapOptionValueRow_t::iterator iter;
+    iter = std::find_if( 
+      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+      [nRow]( mapOptionValueRow_t::value_type& vt ){ return nRow == vt.second.m_nRow; } );
+    assert( m_mapOptionValueRow.end() != iter );
+    if ( nullptr != m_details.m_fOnRowClicked ) {
+      GridOptionDetails::DatumUpdateFunctions functions;
+      functions.fCallGreek = std::bind( &OptionValueRow::UpdateCallGreeks, &iter->second, std::placeholders::_1 );
+      functions.fCallQuote = std::bind( &OptionValueRow::UpdateCallQuote,  &iter->second, std::placeholders::_1 );
+      functions.fCallTrade = std::bind( &OptionValueRow::UpdateCallTrade,  &iter->second, std::placeholders::_1 );
+      functions.fPutGreek  = std::bind( &OptionValueRow::UpdatePutGreeks,  &iter->second, std::placeholders::_1 );
+      functions.fPutQuote  = std::bind( &OptionValueRow::UpdatePutQuote,   &iter->second, std::placeholders::_1 );
+      functions.fPutTrade  = std::bind( &OptionValueRow::UpdatePutTrade,   &iter->second, std::placeholders::_1 );
+      m_details.m_fOnRowClicked( iter->first, iter->second.m_sCallName, iter->second.m_sPutName, functions );
+    }
+  }
+  
+  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
+  // column header is -1, first row is 0
+  event.Skip();
 }
 
 void GridOptionDetails_impl::DestroyControls() { 
   
   m_timerGuiRefresh.Stop();
+  m_timerGuiRefresh.DeletePendingEvents();
   m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+
+  m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
+  m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
   
   //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
-
-//void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
-  
-//  event.Skip();
-//}
 
 } // namespace tf
 } // namespace ou

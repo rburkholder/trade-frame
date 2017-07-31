@@ -33,7 +33,7 @@
 
 // need to check why this exists
 #include <wx/toplevel.h>
-#include <wx-3.0/wx/sizer.h>
+#include <wx/sizer.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
@@ -95,8 +95,8 @@ bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, c
    m_sizerPM = new wxBoxSizer(wxVERTICAL);
   SetSizer(m_sizerPM);
 
-  //m_scrollPM = new wxScrolledWindow( m_pFPPOE, -1, wxDefaultPosition, wxSize(200, 400), wxVSCROLL );
-  m_scrollPM = new wxScrolledWindow( this, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
+  //m_scrollPM = new wxScrolledWindow( m_pFPPOE, wxID_ANY, wxDefaultPosition, wxSize(200, 400), wxVSCROLL );
+  m_scrollPM = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerPM->Add(m_scrollPM, 1, wxGROW|wxALL, 5);
   m_scrollPM->SetScrollbars(1, 1, 0, 0);
 
@@ -162,6 +162,7 @@ void PanelCharts::CreateControls() {
   // initialize the tree
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
+  // close doesn't seem to be hit with panels
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
   
@@ -319,7 +320,7 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
   };
   
   RemoveRightDetail();
-  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
+  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, "a name" );
   ReplaceRightDetail( pNotebookOptionChains );
 
   // maybe turn this bit of code into a lambda and pass in the function to be run on success
@@ -349,11 +350,11 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
     assert( 0 != sSymbol.length() );
     
     // obtain the option list
-    OptionList list;
-    signalRetrieveOptionList( 
-      sSymbol, 
-      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
-      );
+//    OptionList list;
+//    signalRetrieveOptionList( 
+//      sSymbol, 
+//      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
+//      );
       
     pNotebookOptionChains->SetName( sSymbol );
     
@@ -366,8 +367,27 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
       }
       );
       
+    namespace args = std::placeholders;
+    pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4, args::_5 );
+    pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &PanelCharts::OnPageChanging, this );
+    pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &PanelCharts::OnPageChanged, this );
   }
-  
+}
+
+void PanelCharts::OnPageChanging( wxBookCtrlEvent& event ) {
+  // deletion
+  event.Skip();
+}
+
+void PanelCharts::OnPageChanged( wxBookCtrlEvent& event ) {
+  event.Skip();
+}
+
+void PanelCharts::HandleGridClick( 
+  boost::gregorian::date date, double strike, 
+  const std::string& sCall, const std::string& sPut, 
+  const ou::tf::GridOptionDetails::DatumUpdateFunctions& functions ) {
+  std::cout << "GridClick: " << date << "," << strike << "," << sCall << "," << sPut << std::endl;
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
@@ -404,19 +424,19 @@ PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
   return pInstrumentWatch;
 }
 
-void PanelCharts::UpdateOptionWatch( 
+void PanelCharts::AddOptionWatch( 
   const std::string& sUnderlying, pWatch_t pInstrumentWatch ) {
 
   if ( pInstrumentWatch->GetInstrument()->IsOption() || pInstrumentWatch->GetInstrument()->IsFuturesOption() ) {
     mapInstrumentWatch_t::iterator iterUnderlying = m_mapInstrumentWatch.find( sUnderlying );
     if ( m_mapInstrumentWatch.end() == iterUnderlying ) {
-      std::cout << "PanelCharts::UpdateOptionWatch: didn't find underlying (" << sUnderlying << ")" << std::endl;
+      std::cout << "PanelCharts::AddOptionWatch: didn't find underlying (" << sUnderlying << ")" << std::endl;
     }
     else {
       Instrument::idInstrument_cref idInstrument( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
       mapOptionWatch_t::iterator iterOptionWatch = m_mapOptionWatch.find( idInstrument );
       if ( m_mapOptionWatch.end() != iterOptionWatch ) {
-        std::cout << "PanelCharts::UpdateOptionWatch: OptionWatch already exists" << std::endl;
+        std::cout << "PanelCharts::AddOptionWatch: OptionWatch already exists" << std::endl;
       }
       else {
         m_mapOptionWatch.insert( 
@@ -443,7 +463,7 @@ void PanelCharts::HandleLoadInstrument(
   }
   
   if ( !sUnderlying.empty() ) {
-    UpdateOptionWatch( sUnderlying, pInstrumentWatch );
+    AddOptionWatch( sUnderlying, pInstrumentWatch );
   }
   
 }
@@ -510,7 +530,7 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
 
         if ( !wxsUnderlying.empty() ) {
           const std::string sUnderlying( wxsUnderlying );
-          UpdateOptionWatch( sUnderlying, pInstrumentWatch );
+          AddOptionWatch( sUnderlying, pInstrumentWatch );
         }
         
       }
@@ -639,19 +659,13 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
 }
 
 void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
-  // catches 'destroy' of any child window
-  
-  //if ( 0 != m_pTreeOps ) {
-  //  delete m_pTreeOps;
-  //  m_pTreeOps = 0;
-  //}
   
   //m_pInstrumentActions.reset();
   
   int id1 = event.GetId();
   wxWindowID id2 = this->GetId();
   
-  if ( id1 == id2 ) {
+  if ( id1 == id2 ) { // catches 'destroy' of any child window
     m_connGetInstrumentActions.disconnect();
 
     m_connNewInstrument.disconnect();
@@ -664,8 +678,10 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
     m_connComposeComposite.disconnect();
 
     m_connChanging.disconnect();
+    
+    Unbind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
+    Unbind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
   }
-  
   
   event.Skip();  // auto followed by Destroy();
 
