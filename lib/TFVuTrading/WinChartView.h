@@ -35,6 +35,9 @@
 #include <OUCharting/ChartMaster.h>
 #include <OUCharting/ChartDataView.h>
 
+#include <TFVuTrading/InterfaceBoundEvents.h>
+
+// replace this with CallAfter?
 #include "EventDrawChart.h"
 
 #define SYMBOL_WIN_CHARTINTERACTIVE_STYLE wxTAB_TRAVERSAL
@@ -46,7 +49,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class WinChartView: public wxWindow {
+class WinChartView: public wxWindow, public InterfaceBoundEvents {
 public:
   
   WinChartView();
@@ -65,6 +68,10 @@ public:
   void SetChartDataView( ou::ChartDataView* m_pChartDataView );
   ou::ChartDataView* GetChartDataView( void ) { return m_pChartDataView; }
 
+  // really don't want these here, but necessary to deal with searchdynamiceventtable issues
+  virtual void BindEvents();
+  virtual void UnbindEvents();
+  
 protected:
   
   void Init();
@@ -94,6 +101,8 @@ private:
   boost::mutex m_mutexThreadDrawChart;
   boost::condition_variable m_cvThreadDrawChart;
   boost::thread* m_pThreadDrawChart;
+  
+  bool m_bBound;
   
   void ThreadDrawChart1( void );  // thread starts here
   void ThreadDrawChart2( const MemBlock& m );  // a callback here to perform bitmap

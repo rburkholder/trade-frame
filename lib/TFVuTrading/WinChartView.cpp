@@ -53,6 +53,7 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init( void ) {
   
+  m_bBound = false;
   m_bInDrawChart = false;
   m_bThreadDrawChartActive = false;
 
@@ -71,25 +72,36 @@ bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
   return true;
 }
 
+void WinChartView::BindEvents() {
+  
+  if ( !m_bBound ) {
+
+    Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+    Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
+
+    Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+    Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+    Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+    Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
+
+    // this GuiRefresh initialization should come after all else
+    m_timerGuiRefresh.SetOwner( this );
+    Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_timerGuiRefresh.Start( 250 );
+    
+    m_bBound = true;
+  }
+  
+}
+
 void WinChartView::CreateControls() {    
   
   //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
   
-  Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-  Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
-  
-  Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-  Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-  Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
-  Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-
-  Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
-
-  // this GuiRefresh initialization should come after all else
-  m_timerGuiRefresh.SetOwner( this );
-  Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start( 250 );
+  BindEvents();
 
 }
 
@@ -137,12 +149,17 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       << "Wheel: " << delta << "," << rotation << ",sca:" 
       << bShift << bControl << bAlt
       << std::endl;
+
+  // TODO: will need to keep to within a min/max
   if ( 0 > rotation ) {
-    m_tdViewPortWidth /= 1.4;
+    m_tdViewPortWidth *= 12;
+    m_tdViewPortWidth /= 10;
   }
   else {
-    m_tdViewPortWidth *= 1.4;
+    m_tdViewPortWidth *= 10;
+    m_tdViewPortWidth /= 12;
   }
+  
   DrawChart();
   //event.Skip();
 }
@@ -212,6 +229,7 @@ void WinChartView::ThreadDrawChart1( void ) {
       // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
       boost::posix_time::ptime now = ou::TimeSource::Instance().External();
 
+      // chart moves at 1s step - not sure if this is trader friendly though
       static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
       boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
       boost::posix_time::ptime dtEnd = now + td; 
@@ -260,26 +278,35 @@ void WinChartView::HandleDrawChart( const MemBlock& m ) {
   cdc.DrawBitmap(bmp, 0, 0);
 }
 
+void WinChartView::UnbindEvents( void ) {
+  
+  if ( m_bBound ) {
+    
+    SetChartDataView( nullptr );
+
+    assert( Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this ) );
+
+    m_timerGuiRefresh.Stop();
+    assert( Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() ) );
+
+    assert( Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this ) );
+    assert( Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this ) );
+
+    assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this ) );
+    assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this ) );
+    assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this ) );  
+    assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this ) );
+
+    m_bBound = false;
+  }
+
+}
+
 void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
   
-  SetChartDataView( nullptr );
+  UnbindEvents();
   
-  Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
-  
-  m_timerGuiRefresh.Stop();
-  Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  
-  Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
-  
-  Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-  Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this );
-  
-  Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-  Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-  Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
-  Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-
-  m_pChartBitmap.reset();
+  assert( Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this ) );
   
   event.Skip();  // auto followed by Destroy();
 }

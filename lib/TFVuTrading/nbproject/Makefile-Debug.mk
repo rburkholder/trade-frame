@@ -49,6 +49,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/GridIBPositionDetails_impl.o \
 	${OBJECTDIR}/GridOptionDetails.o \
 	${OBJECTDIR}/GridOptionDetails_impl.o \
+	${OBJECTDIR}/InterfaceBoundEvents.o \
 	${OBJECTDIR}/ModelBase.o \
 	${OBJECTDIR}/ModelCell.o \
 	${OBJECTDIR}/ModelChartHdf5.o \
@@ -173,6 +174,11 @@ ${OBJECTDIR}/GridOptionDetails_impl.o: GridOptionDetails_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionDetails_impl.o GridOptionDetails_impl.cpp
+
+${OBJECTDIR}/InterfaceBoundEvents.o: InterfaceBoundEvents.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InterfaceBoundEvents.o InterfaceBoundEvents.cpp
 
 ${OBJECTDIR}/ModelBase.o: ModelBase.cpp
 	${MKDIR} -p ${OBJECTDIR}

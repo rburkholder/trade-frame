@@ -42,6 +42,7 @@ NotebookOptionChains::~NotebookOptionChains() {
 }
 
 void NotebookOptionChains::Init() {
+  m_bBound = false;
 }
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -55,33 +56,50 @@ bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoin
   return true;
 }
 
+void NotebookOptionChains::BindEvents() {
+  if ( !m_bBound ) {
+    // Page Change events cause issues during OnDestroy
+    Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
+    Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
+
+    //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+    //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+
+    //Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+    //Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+    //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+    //Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
+
+    // this GuiRefresh initialization should come after all else
+    //m_timerGuiRefresh.SetOwner( this );
+    //Bind( wxEVT_TIMER, &GridOptionDetails::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    //m_timerGuiRefresh.Start( 250 );
+    
+    m_bBound = true;
+  }
+}
+
 void NotebookOptionChains::CreateControls() {   
-  
-  // Page Change events cause issues during OnDestroy
-  //Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
-  //Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
   
   //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
-  
-  //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-  //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
-  
-  //Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-  //Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-  //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
-  //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
-  //Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
-
-  // this GuiRefresh initialization should come after all else
-  //m_timerGuiRefresh.SetOwner( this );
-  //Bind( wxEVT_TIMER, &GridOptionDetails::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  //m_timerGuiRefresh.Start( 250 );
+  BindEvents();
   
   //auto p = new GridOptionDetails( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
   //AddPage( p, "page 1", true );
 
+}
+
+void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
+  // deletion
+  event.Skip();
+}
+
+void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
+  event.Skip();
 }
 
 void NotebookOptionChains::SetName( const std::string& sName ) {
@@ -152,30 +170,38 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   
 }
 
+void NotebookOptionChains::UnbindEvents() {
+  if ( m_bBound ) {
+    // Page change events occur during Deletion of Pages, causing problems
+    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
+    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
+
+    //m_timerGuiRefresh.Stop();
+    //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+
+    //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+    //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+
+    //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+    //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+    //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+    
+    m_bBound = false;
+  }
+}
+
 void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
-  // Page change events occur during Deletion of Pages, causing problems
-  //Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
-  //Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
-  
-  Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
-  
+  UnbindEvents();
+
   //DestroyChildren();
   DeleteAllPages();
-  
-  DeletePendingEvents();
-  
-  //m_timerGuiRefresh.Stop();
-  //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  
-  //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-  //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
-  
-  //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-  //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
-  //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
+  //DeletePendingEvents();
+  
+  assert( Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this ) );
+  
   event.Skip();  // auto followed by Destroy();
 }
 

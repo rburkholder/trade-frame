@@ -34,6 +34,7 @@
 // need to check why this exists
 #include <wx/toplevel.h>
 #include <wx/sizer.h>
+#include <wx-3.0/wx/list.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
@@ -74,7 +75,6 @@ void PanelCharts::Init( void ) {
   
   m_pTreeOps = 0;
   m_winRightDetail = 0;
-  //m_pWinOptionDetails = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
@@ -163,7 +163,7 @@ void PanelCharts::CreateControls() {
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
   // close doesn't seem to be hit with panels
-  Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
+  //Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
   
   namespace args = boost::phoenix::arg_names;
@@ -212,19 +212,29 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
 }
 
 void PanelCharts::RemoveRightDetail() {
-  if ( 0 != m_winRightDetail ) {
-    m_sizerRight->Detach( m_winRightDetail );
-    m_panelSplitterRightPanel->DestroyChildren();
-    m_winRightDetail = 0;
+  auto winRightDetail = m_winRightDetail;
+  if ( 0 != winRightDetail ) {
+    assert( 0 != winRightDetail );
+    dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents(); 
+    // perform this afterwards as the DynamicEventTable seems to have problems
+    CallAfter([this,winRightDetail](){ 
+      assert( 0 != winRightDetail );
+      m_sizerRight->Detach( winRightDetail );
+      assert( winRightDetail->Destroy() );
+    } );
+    m_winRightDetail = 0; 
   }
 }
 
+
 void PanelCharts::ReplaceRightDetail( wxWindow* pWindow ) {
   assert( 0 != pWindow );
-  //RemoveRightDetail();
-  m_winRightDetail = pWindow;
-  m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
-  m_sizerRight->Layout();
+  CallAfter([this,pWindow](){ // Delayed actions in RemoveRightDetail, so same delay here
+    assert( 0 == m_winRightDetail );
+    m_winRightDetail = pWindow;
+    m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
+    m_sizerRight->Layout(); 
+  });
 }
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
@@ -275,13 +285,15 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
 
     m_ChartDataView.Clear();
     iter->second->ApplyDataTo( &m_ChartDataView );
-
+    
     WinChartView* pWinChartView = nullptr;
     pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-    pWinChartView->SetChartDataView( &m_ChartDataView );
     
+    // has postponed gui related assignments
     ReplaceRightDetail( pWinChartView );
 
+    // starts update thread
+    CallAfter( [this,pWinChartView](){ pWinChartView->SetChartDataView( &m_ChartDataView ); } );
   }
 }
 
@@ -320,57 +332,58 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
   };
   
   RemoveRightDetail();
-  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, "a name" );
+  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, _T( "a name" ) );
   ReplaceRightDetail( pNotebookOptionChains );
 
-  // maybe turn this bit of code into a lambda and pass in the function to be run on success
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
     std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
   }
   else {
-    // obtain instrument name (future requires special handling)
-    ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
-    std::string sSymbol;
-    switch ( p->GetInstrumentType() ) { 
-      case ou::tf::InstrumentType::Stock:
-        sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
-        break;
-      case ou::tf::InstrumentType::Future: {
-        std::string sTemp = p->GetInstrumentName();
-        size_t pos = sTemp.find( '-' );
-        assert( 0 != pos );
-        sSymbol = sTemp.substr( 0, pos );
-        }
-        break;
-      default:
-        assert(0);
-        break;
-    }
-    assert( 0 != sSymbol.length() );
-    
-    // obtain the option list
-//    OptionList list;
-//    signalRetrieveOptionList( 
-//      sSymbol, 
-//      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
-//      );
-      
-    pNotebookOptionChains->SetName( sSymbol );
-    
-    // populate tabs of notebook
-    signalRetrieveOptionList(
-      sSymbol,
-      [pNotebookOptionChains]( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
-        boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
-        pNotebookOptionChains->Add( date, row.dblStrike, row.eOptionSide, row.sSymbol );
+    CallAfter([this,pNotebookOptionChains,iter]{
+      // obtain instrument name (future requires special handling)
+      ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
+      std::string sSymbol;
+      switch ( p->GetInstrumentType() ) { 
+        case ou::tf::InstrumentType::Stock:
+          sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
+          break;
+        case ou::tf::InstrumentType::Future: {
+          std::string sTemp = p->GetInstrumentName();
+          size_t pos = sTemp.find( '-' );
+          assert( 0 != pos );
+          sSymbol = sTemp.substr( 0, pos );
+          }
+          break;
+        default:
+          assert(0);
+          break;
       }
-      );
-      
-    namespace args = std::placeholders;
-    pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4, args::_5 );
-    pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &PanelCharts::OnPageChanging, this );
-    pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &PanelCharts::OnPageChanged, this );
+      assert( 0 != sSymbol.length() );
+
+      // obtain the option list
+  //    OptionList list;
+  //    signalRetrieveOptionList( 
+  //      sSymbol, 
+  //      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
+  //      );
+
+      pNotebookOptionChains->SetName( sSymbol );
+
+      // populate tabs of notebook
+      signalRetrieveOptionList(
+        sSymbol,
+        [pNotebookOptionChains]( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
+          boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
+          pNotebookOptionChains->Add( date, row.dblStrike, row.eOptionSide, row.sSymbol );
+        }
+        );
+
+      namespace args = std::placeholders;
+      pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4, args::_5 );
+      //pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &PanelCharts::OnPageChanging, this );
+      //pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &PanelCharts::OnPageChanged, this );
+    });
   }
 }
 
@@ -665,7 +678,7 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
   int id1 = event.GetId();
   wxWindowID id2 = this->GetId();
   
-  if ( id1 == id2 ) { // catches 'destroy' of any child window
+  if ( id1 == id2 ) { // ignores 'destroy' of any child window
     m_connGetInstrumentActions.disconnect();
 
     m_connNewInstrument.disconnect();
@@ -678,12 +691,13 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
     m_connComposeComposite.disconnect();
 
     m_connChanging.disconnect();
-    
-    Unbind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
+
+    //Unbind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );
     Unbind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
+
   }
   
-  event.Skip();  // auto followed by Destroy();
+  event.Skip(); 
 
 }
 

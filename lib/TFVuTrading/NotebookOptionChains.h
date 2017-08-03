@@ -32,6 +32,7 @@
 #include <wx/wx.h>
 #include <wx/notebook.h>
 
+#include <TFVuTrading/InterfaceBoundEvents.h>
 #include <TFTrading/TradingEnumerations.h>
 #include <TFOptions/Option.h>
 #include <TFVuTrading/GridOptionDetails.h>
@@ -46,7 +47,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_OPTIONCHAINS_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
 
-class NotebookOptionChains: public wxNotebook {
+class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
 public:
   
   typedef Watch::pWatch_t pWatch_t;
@@ -80,6 +81,10 @@ public:
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
 
+// really don't want these here, but necessary to deal with searchdynamiceventtable issues
+  virtual void BindEvents();
+  virtual void UnbindEvents();
+  
 protected:
   void Init();
   void CreateControls();
@@ -114,6 +119,8 @@ private:
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;
   
   mapOptionExpiry_t m_mapOptionExpiry;
+  
+  bool m_bBound;
   
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
