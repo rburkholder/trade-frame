@@ -851,7 +851,8 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
-  m_vExchanges.insert( "OPRA" );
+  // m_vExchanges.insert( "OPRA" );  // needed for GLD, but ignore for now
+  m_vExchanges.insert( "COMEX" );
   m_vExchanges.insert( "COMEX,COMEX_GBX" );
   //m_vExchanges.insert( "TSE" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
@@ -863,6 +864,8 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   m_vClassifiers.clear();
   m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
   m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Future );
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::FOption );
 
   std::cout << "Subsetting symbols ... " << std::endl;
   ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
@@ -880,6 +883,7 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   // next step will be to add in the options for the underlyings selected.
 }
 
+// TODO: set flag to only load once?  Otherwise, is the structure cleared first?
 void AppComboTrading::HandleMenuActionLoadSymbolSubset( void ) {
   //std::string sFileName( sFileNameMarketSymbolSubset );
   std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
