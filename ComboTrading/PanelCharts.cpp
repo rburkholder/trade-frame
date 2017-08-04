@@ -14,6 +14,9 @@
 
 // started December 6, 2015, 1:26 PM
 
+#include <vector>
+#include <algorithm>
+
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/core/argument.hpp>
 
@@ -174,7 +177,7 @@ void PanelCharts::CreateControls() {
   m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2, args::arg3 ) );
   m_connEmitValues = m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
   m_connLiveChart = m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
-  m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionList, this, args::arg1 ) );
+  m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionChainList, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   
   m_connLookupDescription = m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
@@ -196,7 +199,7 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   }
 }
 
-void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor ) {
+void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQFeed libor ) {
   for ( mapOptionWatch_t::iterator iter = m_mapOptionWatch.begin(); m_mapOptionWatch.end() != iter; ++iter ) {
     ou::tf::option::binomial::structInput input;
     ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.m_pWatchOption.get() );
@@ -204,8 +207,8 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
       ou::tf::Quote quoteUnderlying = iter->second.m_quoteLastUnderlying = iter->second.m_pWatchUnderlying->LastQuote();
       if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
         input.S = quoteUnderlying.Midpoint();
-        pOption->CalcRate( input, dt, libor );  // can this be moved out of the loop?
-        pOption->CalcGreeks( input, dt, true );
+        pOption->CalcRate( input, dtUtcNow, libor );  // can this be moved out of the loop? -- no, depends upon expiry
+        pOption->CalcGreeks( input, dtUtcNow, true );
       }
     }
   }
@@ -263,11 +266,6 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
   }
   else {
     RemoveRightDetail();
-//    if ( 0 != m_pWinChartView ) {
-//      m_pWinChartView->SetChartDataView( nullptr );
-//      m_pWinChartView->Close(); // need to remove from sizer and slider
-//      m_pWinChartView = 0;
-//    }
     // TODO: does/is the watch info already stopped?
     m_mapWatchInfo.erase( iter );
   }
@@ -297,7 +295,7 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   }
 }
 
-void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
+void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
   
   struct OptionList {
     
@@ -380,27 +378,60 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
         );
 
       namespace args = std::placeholders;
-      pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4, args::_5 );
-      //pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &PanelCharts::OnPageChanging, this );
-      //pNotebookOptionChains->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &PanelCharts::OnPageChanged, this );
+      pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
+      pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
+      pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4 );
     });
   }
 }
 
-void PanelCharts::OnPageChanging( wxBookCtrlEvent& event ) {
-  // deletion
-  event.Skip();
+void PanelCharts::OnOptionChainPageChanging( boost::gregorian::date date ) {
 }
 
-void PanelCharts::OnPageChanged( wxBookCtrlEvent& event ) {
-  event.Skip();
+void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 }
 
 void PanelCharts::HandleGridClick( 
   boost::gregorian::date date, double strike, 
-  const std::string& sCall, const std::string& sPut, 
-  const ou::tf::GridOptionDetails::DatumUpdateFunctions& functions ) {
-  std::cout << "GridClick: " << date << "," << strike << "," << sCall << "," << sPut << std::endl;
+  const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcCall,
+  const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcPut ) 
+{
+  std::cout << "GridClick: " << date << "," << strike << "," << funcCall.sSymbolName << "," << funcPut.sSymbolName << std::endl;
+  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
+    std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
+  }
+  else {
+    std::vector<const ou::tf::GridOptionDetails::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
+    std::for_each( vFuncs.begin(), vFuncs.end(),
+      [this](const ou::tf::GridOptionDetails::OptionUpdateFunctions* func){
+        mapGridOptionDetails_t::iterator iterOption = m_mapGridOptionDetails.find( func->sSymbolName );
+        if ( m_mapGridOptionDetails.end() == iterOption ) {
+          pInstrument_t pInstrument = m_funcBuildInstrumentFromIqfeed( func->sSymbolName );
+          assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
+          ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
+          iterOption = m_mapGridOptionDetails.insert( m_mapGridOptionDetails.begin(), mapGridOptionDetails_t::value_type( func->sSymbolName, GridOptionDetails() ) );
+          iterOption->second.pOption.reset( pOption );
+        }
+        ou::tf::option::Option* pOption( iterOption->second.pOption.get() );
+        assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
+        assert( 0 != pOption );
+        if ( iterOption->second.bOn ) { // go off
+          iterOption->second.bOn = false;
+          pOption->StopWatch();
+          pOption->OnQuote.Remove( func->fQuote );
+          pOption->OnTrade.Remove( func->fTrade );
+          pOption->OnGreek.Remove( func->fGreek );
+        }
+        else { // go on
+          pOption->OnQuote.Add( func->fQuote );
+          pOption->OnTrade.Add( func->fTrade );
+          pOption->OnGreek.Add( func->fGreek );
+          pOption->StartWatch();
+          iterOption->second.bOn = true;
+        }
+      }
+      );
+  }
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
@@ -663,11 +694,6 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
   
-  // should happen automatically when children are deleted
-  //if ( 0 != m_pWinChartView ) {
-  //  m_pWinChartView->SetChartDataView( nullptr );
-  //}
-
   event.Skip();  // auto followed by Destroy();
 }
 

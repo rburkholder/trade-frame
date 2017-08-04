@@ -15,12 +15,14 @@
 
 #pragma once
 
-#include <functional>
+//#include <functional>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
 #include <wx/grid.h>
+
+#include <OUCommon/FastDelegate.h>
 
 #include <TFOptions/Option.h>
 
@@ -59,16 +61,23 @@ public:
 
   void SetSelected( double strike, bool bSelected );
   
-  struct DatumUpdateFunctions {
-    std::function<void( const ou::tf::Greek& )> fCallGreek;
-    std::function<void( const ou::tf::Quote& )> fCallQuote;
-    std::function<void( const ou::tf::Trade& )> fCallTrade;  
-    std::function<void( const ou::tf::Greek& )> fPutGreek;
-    std::function<void( const ou::tf::Quote& )> fPutQuote;
-    std::function<void( const ou::tf::Trade& )> fPutTrade;  
+//  struct DatumUpdateFunctions {
+//    std::function<void( const ou::tf::Greek& )> fCallGreek;
+//    std::function<void( const ou::tf::Quote& )> fCallQuote;
+//    std::function<void( const ou::tf::Trade& )> fCallTrade;  
+//    std::function<void( const ou::tf::Greek& )> fPutGreek;
+//    std::function<void( const ou::tf::Quote& )> fPutQuote;
+//    std::function<void( const ou::tf::Trade& )> fPutTrade;  
+//  };
+  
+  struct OptionUpdateFunctions {
+    std::string sSymbolName;
+    fastdelegate::FastDelegate<void(const ou::tf::Quote&)> fQuote;
+    fastdelegate::FastDelegate<void(const ou::tf::Trade&)> fTrade;
+    fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fGreek;
   };
-
-  typedef std::function<void(double, const std::string&, const std::string&, const DatumUpdateFunctions& )> fOnRowClicked_t;
+  
+  typedef std::function<void(double, const OptionUpdateFunctions&, const OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
   
 protected:

@@ -33,6 +33,7 @@
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Option.h>
+//#include <TFOptions/Strike.h>
 
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
@@ -105,13 +106,16 @@ public:
   typedef boost::signals2::signal<void(const std::string&,fSymbol_t)> signalRetrieveOptionList_t;
   typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
   signalRetrieveOptionList_t signalRetrieveOptionList;
+  
+  std::function<pInstrument_t(const std::string&)> m_funcBuildInstrumentFromIqfeed;
 
-  void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
+  void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract id has arrived
   
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
   
+  // called from owner to perform regular updates
   void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor );
   
   void SaveSeries( const std::string& sPrefix );
@@ -191,18 +195,18 @@ private:
 
   // facilitates option greek calculations  
   struct OptionWatch {
-    const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
-    unsigned int m_cntDown;
+    //const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
+    //unsigned int m_cntDown;
     ou::tf::Quote m_quoteLastUnderlying;
     ou::tf::Quote m_quoteLastOption;
     pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items
     pWatch_t m_pWatchOption;  // uses m_pWatchUnderlying for current value
     OptionWatch( pWatch_t& pWatchUnderlying, pWatch_t& pWatchOption ):
-      m_cntDown( m_cntDownStartingValue ), 
+      //m_cntDown( m_cntDownStartingValue ), 
       m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
   };
   
-  // unique list of instrument/watches
+  // unique list of instrument/watches -- does this include the options?
   typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
   mapInstrumentWatch_t m_mapInstrumentWatch;
   
@@ -213,6 +217,15 @@ private:
   
   typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
   mapOptionWatch_t m_mapOptionWatch;
+  
+  struct GridOptionDetails {
+    bool bOn;
+    ou::tf::option::Option::pOption_t pOption;  // watch should automatically be killed
+    GridOptionDetails(): bOn( false ) {}
+  };
+  
+  typedef std::map<std::string,GridOptionDetails> mapGridOptionDetails_t;
+  mapGridOptionDetails_t m_mapGridOptionDetails;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -265,7 +278,7 @@ private:
   void HandleInstrumentLiveChart( const wxTreeItemId& );
 
   void HandleEmitValues( const wxTreeItemId& );
-  void HandleOptionList( const wxTreeItemId& );
+  void HandleOptionChainList( const wxTreeItemId& );
   
   void HandleMenuItemDelete( const wxTreeItemId& id );
   
@@ -273,11 +286,11 @@ private:
   void ReplaceRightDetail( wxWindow* );
   void HandleGridClick( 
     boost::gregorian::date date, double strike, 
-    const std::string& sCall, const std::string& sPut, 
-    const ou::tf::GridOptionDetails::DatumUpdateFunctions& functions );
+    const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcCall,
+    const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcPut );
   
-  void OnPageChanged( wxBookCtrlEvent& event );
-  void OnPageChanging( wxBookCtrlEvent& event );
+  void OnOptionChainPageChanging( boost::gregorian::date );
+  void OnOptionChainPageChanged( boost::gregorian::date );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
   

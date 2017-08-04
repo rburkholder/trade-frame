@@ -129,14 +129,19 @@ void GridOptionDetails_impl::OnGridLeftClick( wxGridEvent& event ) {
       [nRow]( mapOptionValueRow_t::value_type& vt ){ return nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iter );
     if ( nullptr != m_details.m_fOnRowClicked ) {
-      GridOptionDetails::DatumUpdateFunctions functions;
-      functions.fCallGreek = std::bind( &OptionValueRow::UpdateCallGreeks, &iter->second, std::placeholders::_1 );
-      functions.fCallQuote = std::bind( &OptionValueRow::UpdateCallQuote,  &iter->second, std::placeholders::_1 );
-      functions.fCallTrade = std::bind( &OptionValueRow::UpdateCallTrade,  &iter->second, std::placeholders::_1 );
-      functions.fPutGreek  = std::bind( &OptionValueRow::UpdatePutGreeks,  &iter->second, std::placeholders::_1 );
-      functions.fPutQuote  = std::bind( &OptionValueRow::UpdatePutQuote,   &iter->second, std::placeholders::_1 );
-      functions.fPutTrade  = std::bind( &OptionValueRow::UpdatePutTrade,   &iter->second, std::placeholders::_1 );
-      m_details.m_fOnRowClicked( iter->first, iter->second.m_sCallName, iter->second.m_sPutName, functions );
+      
+      GridOptionDetails::OptionUpdateFunctions funcCall;
+      funcCall.sSymbolName = iter->second.m_sCallName;
+      funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
+      funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
+      funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
+      
+      GridOptionDetails::OptionUpdateFunctions funcPut;
+      funcPut.sSymbolName = iter->second.m_sPutName;
+      funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
+      funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
+      funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
+      m_details.m_fOnRowClicked( iter->first, funcCall, funcPut );
     }
   }
   

@@ -84,11 +84,36 @@ void NotebookOptionChains::CreateControls() {
 }
 
 void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
-  // deletion
+  int ixTab = event.GetInt();
+  mapOptionExpiry_t::iterator iter 
+   = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+     return ixTab == vt.second.ixTab;
+  });
+  if ( m_mapOptionExpiry.end() == iter ) {
+    std::cout << "NotebookOptionChains::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
+  }
+  else {
+    if ( nullptr != m_fOnPageChanging ) {
+      m_fOnPageChanging( iter->first );
+    }
+  }
   event.Skip();
 }
 
 void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
+  int ixTab = event.GetInt();
+  mapOptionExpiry_t::iterator iter 
+   = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+     return ixTab == vt.second.ixTab;
+  });
+  if ( m_mapOptionExpiry.end() == iter ) {
+    std::cout << "NotebookOptionChains::OnPageChanged: couldn't find tab index: " << ixTab << std::endl;
+  }
+  else {
+    if ( nullptr != m_fOnPageChanged ) {
+      m_fOnPageChanged( iter->first );
+    }
+  }
   event.Skip();
 }
 
@@ -113,9 +138,9 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     pPanel->SetSizer( pSizer );
     auto* pDetails = new GridOptionDetails( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
     pSizer->Add( pDetails, 1, wxALL|wxEXPAND, 1 );
-    pDetails->m_fOnRowClicked = [this, date](double strike, const std::string& sCall, const std::string& sPut, const GridOptionDetails::DatumUpdateFunctions& funcs ){ 
+    pDetails->m_fOnRowClicked = [this, date](double strike, const GridOptionDetails::OptionUpdateFunctions& funcsCall, const GridOptionDetails::OptionUpdateFunctions& funcsPut  ){ 
       if ( nullptr != m_fOnRowClicked) 
-        m_fOnRowClicked( date, strike, sCall, sPut, funcs );
+        m_fOnRowClicked( date, strike, funcsCall, funcsPut );
     };
     
     iterExpiry = m_mapOptionExpiry.insert( 

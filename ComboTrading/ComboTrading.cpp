@@ -296,6 +296,11 @@ void AppComboTrading::BuildFrameCharts( void ) {
   signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
   
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
+  m_pPanelCharts->m_funcBuildInstrumentFromIqfeed = 
+    [this](const std::string& sName){
+        ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sName ) );
+        return ou::tf::iqfeed::BuildInstrument( sName, trd );
+    };
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();

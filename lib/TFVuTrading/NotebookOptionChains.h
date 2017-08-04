@@ -50,11 +50,11 @@ namespace tf { // TradeFrame
 class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
 public:
   
-  typedef Watch::pWatch_t pWatch_t;
-  typedef boost::signals2::signal<pWatch_t ( const std::string& ), // string is the IQFeed name
-                                  ou::tf::FirstOrDefault<pWatch_t> > signalObtainWatch_t;
-  typedef signalObtainWatch_t::slot_type slotObtainWatch_t;
-  signalObtainWatch_t signalObtainWatch;
+  //typedef Watch::pWatch_t pWatch_t;
+  //typedef boost::signals2::signal<pWatch_t ( const std::string& ), // string is the IQFeed name
+  //                                ou::tf::FirstOrDefault<pWatch_t> > signalObtainWatch_t;
+  //typedef signalObtainWatch_t::slot_type slotObtainWatch_t;
+  //signalObtainWatch_t signalObtainWatch;
   
   NotebookOptionChains();
   NotebookOptionChains( 
@@ -75,8 +75,12 @@ public:
   void SetName( const std::string& sName );  // underlying
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::enumOptionSide, const std::string& sSymbol );
   
-  typedef std::function<void(boost::gregorian::date, double, const std::string&, const std::string&, const GridOptionDetails::DatumUpdateFunctions& )> fOnRowClicked_t;
-  fOnRowClicked_t m_fOnRowClicked; // called when a row is selected
+  typedef std::function<void(boost::gregorian::date, double, const GridOptionDetails::OptionUpdateFunctions&, const GridOptionDetails::OptionUpdateFunctions& )> fOnRowClicked_t;
+  fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
+  
+  typedef std::function<void(boost::gregorian::date)> funcPageEvent_t;
+  funcPageEvent_t m_fOnPageChanging; // about to depart page
+  funcPageEvent_t m_fOnPageChanged;  // new page in place
   
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
@@ -86,8 +90,6 @@ public:
   virtual void UnbindEvents();
   
 protected:
-  void Init();
-  void CreateControls();
 private:
   
   enum { 
@@ -125,6 +127,8 @@ private:
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
   
+  void Init();
+  void CreateControls();
   void OnDestroy( wxWindowDestroyEvent& event );
   
   wxBitmap GetBitmapResource( const wxString& name );
