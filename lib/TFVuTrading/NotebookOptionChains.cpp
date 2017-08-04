@@ -70,13 +70,6 @@ void NotebookOptionChains::BindEvents() {
     //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
     //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
-    //Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
-
-    // this GuiRefresh initialization should come after all else
-    //m_timerGuiRefresh.SetOwner( this );
-    //Bind( wxEVT_TIMER, &GridOptionDetails::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    //m_timerGuiRefresh.Start( 250 );
-    
     m_bBound = true;
   }
 }
@@ -88,9 +81,6 @@ void NotebookOptionChains::CreateControls() {
 
   BindEvents();
   
-  //auto p = new GridOptionDetails( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
-  //AddPage( p, "page 1", true );
-
 }
 
 void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
@@ -176,9 +166,6 @@ void NotebookOptionChains::UnbindEvents() {
     assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
     assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
 
-    //m_timerGuiRefresh.Stop();
-    //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-
     //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
     //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
 
@@ -195,11 +182,8 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  //DestroyChildren();
   DeleteAllPages();
 
-  //DeletePendingEvents();
-  
   assert( Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this ) );
   
   event.Skip();  // auto followed by Destroy();
