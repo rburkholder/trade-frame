@@ -78,9 +78,9 @@ public:
   typedef std::function<void(boost::gregorian::date, double, const GridOptionDetails::OptionUpdateFunctions&, const GridOptionDetails::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
   
-  typedef std::function<void(boost::gregorian::date)> funcPageEvent_t;
-  funcPageEvent_t m_fOnPageChanging; // about to depart page
-  funcPageEvent_t m_fOnPageChanged;  // new page in place
+  typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
+  fOnPageEvent_t m_fOnPageChanging; // about to depart page
+  fOnPageEvent_t m_fOnPageChanged;  // new page in place
   
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
