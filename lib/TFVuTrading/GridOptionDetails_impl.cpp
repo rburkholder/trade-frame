@@ -27,18 +27,10 @@ GridOptionDetails_impl::GridOptionDetails_impl( GridOptionDetails& details )
 
 void GridOptionDetails_impl::CreateControls() {
   
-    //GridOptionDetails* itemPanel1 = &m_details;
-
-    //wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
-    //itemPanel1->SetSizer(itemBoxSizer2);
-
-    //m_pGrid = new wxGrid( itemPanel1, m_details.ID_GRID_OPTIONDETAILS, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
     m_details.SetDefaultColSize(50);
     m_details.SetDefaultRowSize(22);
     m_details.SetColLabelSize(22);
     m_details.SetRowLabelSize(50);
-    //m_pGrid->CreateGrid(5, 5, wxGrid::wxGridSelectCells);
-    //itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
     
   m_details.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
