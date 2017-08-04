@@ -404,23 +404,23 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 
 void PanelCharts::HandleGridClick( 
   boost::gregorian::date date, double strike, 
-  const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcCall,
-  const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcPut ) 
+  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
+  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
 {
   std::cout << "GridClick: " << date << "," << strike << "," << funcCall.sSymbolName << "," << funcPut.sSymbolName << std::endl;
   if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
     std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
   }
   else {
-    std::vector<const ou::tf::GridOptionDetails::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
+    std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
     std::for_each( vFuncs.begin(), vFuncs.end(),
-      [this](const ou::tf::GridOptionDetails::OptionUpdateFunctions* func){
-        mapGridOptionDetails_t::iterator iterOption = m_mapGridOptionDetails.find( func->sSymbolName );
-        if ( m_mapGridOptionDetails.end() == iterOption ) {
+      [this](const ou::tf::GridOptionChain::OptionUpdateFunctions* func){
+        mapOptionChain_t::iterator iterOption = m_mapOptionChain.find( func->sSymbolName );
+        if ( m_mapOptionChain.end() == iterOption ) {
           pInstrument_t pInstrument = m_funcBuildInstrumentFromIqfeed( func->sSymbolName );
           assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
           ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
-          iterOption = m_mapGridOptionDetails.insert( m_mapGridOptionDetails.begin(), mapGridOptionDetails_t::value_type( func->sSymbolName, GridOptionDetails() ) );
+          iterOption = m_mapOptionChain.insert( m_mapOptionChain.begin(), mapOptionChain_t::value_type( func->sSymbolName, OptionChain() ) );
           iterOption->second.pOption.reset( pOption );
         }
         ou::tf::option::Option* pOption( iterOption->second.pOption.get() );

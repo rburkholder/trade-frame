@@ -29,33 +29,33 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define GRID_OPTIONDETAILS_STYLE wxWANTS_CHARS
-#define GRID_OPTIONDETAILS_TITLE _("Grid Option Details")
-#define GRID_OPTIONDETAILS_IDNAME ID_GRID_OPTIONDETAILS
-#define GRID_OPTIONDETAILS_SIZE wxSize(-1, -1)
-#define GRID_OPTIONDETAILS_POSITION wxDefaultPosition
+#define GRID_OPTIONCHAIN_STYLE wxWANTS_CHARS
+#define GRID_OPTIONCHAIN_TITLE _("Grid Option Chain")
+#define GRID_OPTIONCHAIN_IDNAME ID_GRID_OPTIONCHAIN
+#define GRID_OPTIONCHAIN_SIZE wxSize(-1, -1)
+#define GRID_OPTIONCHAIN_POSITION wxDefaultPosition
 
-class GridOptionDetails_impl;  // Forward Declaration
+class GridOptionChain_impl;  // Forward Declaration
 
-class GridOptionDetails: public wxGrid {
-  friend GridOptionDetails_impl;
+class GridOptionChain: public wxGrid {
+  friend GridOptionChain_impl;
 public:
 
-  GridOptionDetails(void);
-  GridOptionDetails( 
-    wxWindow* parent, wxWindowID id = GRID_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = GRID_OPTIONDETAILS_POSITION, 
-    const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
-    long style = GRID_OPTIONDETAILS_STYLE,
-    const wxString& = GRID_OPTIONDETAILS_TITLE );
-  virtual ~GridOptionDetails(void);
+  GridOptionChain(void);
+  GridOptionChain( 
+    wxWindow* parent, wxWindowID id = GRID_OPTIONCHAIN_IDNAME, 
+    const wxPoint& pos = GRID_OPTIONCHAIN_POSITION, 
+    const wxSize& size = GRID_OPTIONCHAIN_SIZE, 
+    long style = GRID_OPTIONCHAIN_STYLE,
+    const wxString& = GRID_OPTIONCHAIN_TITLE );
+  virtual ~GridOptionChain(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = GRID_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = GRID_OPTIONDETAILS_POSITION, 
-    const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
-    long style = GRID_OPTIONDETAILS_STYLE,
-    const wxString& = GRID_OPTIONDETAILS_TITLE );
+    wxWindowID id = GRID_OPTIONCHAIN_IDNAME, 
+    const wxPoint& pos = GRID_OPTIONCHAIN_POSITION, 
+    const wxSize& size = GRID_OPTIONCHAIN_SIZE, 
+    long style = GRID_OPTIONCHAIN_STYLE,
+    const wxString& = GRID_OPTIONCHAIN_TITLE );
 
   void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
 
@@ -87,10 +87,10 @@ protected:
 
 private:
   enum { 
-    ID_Null=wxID_HIGHEST, ID_GRID_OPTIONDETAILS
+    ID_Null=wxID_HIGHEST, ID_GRID_OPTIONCHAIN
   };
 
-  std::unique_ptr<GridOptionDetails_impl> m_pimpl;
+  std::unique_ptr<GridOptionChain_impl> m_pimpl;
   
   template<class Archive>
   void serialize(Archive & ar, const unsigned int file_version);

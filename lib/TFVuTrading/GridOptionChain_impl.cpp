@@ -21,11 +21,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionDetails_impl::GridOptionDetails_impl( GridOptionDetails& details )
+GridOptionChain_impl::GridOptionChain_impl( GridOptionChain& details )
 : m_details( details ) {
 }
 
-void GridOptionDetails_impl::CreateControls() {
+void GridOptionChain_impl::CreateControls() {
   
     m_details.SetDefaultColSize(50);
     m_details.SetDefaultRowSize(22);
@@ -48,22 +48,22 @@ void GridOptionDetails_impl::CreateControls() {
       
   //m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
-  m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
-  m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
+  m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
+  m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( &m_details );
-  m_details.Bind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_details.Bind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   m_timerGuiRefresh.Start( 250 );
 
   m_details.EnableEditing( false );
 
 }
 
-GridOptionDetails_impl::~GridOptionDetails_impl( void ) {
+GridOptionChain_impl::~GridOptionChain_impl( void ) {
 }
 
-void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
+void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
     iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.begin(),
@@ -93,8 +93,8 @@ void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionS
   }
 }
 
-GridOptionDetails_impl::mapOptionValueRow_iter
-GridOptionDetails_impl::FindOptionValueRow( double strike ) {
+GridOptionChain_impl::mapOptionValueRow_iter
+GridOptionChain_impl::FindOptionValueRow( double strike ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
     assert( 0 );
@@ -102,13 +102,13 @@ GridOptionDetails_impl::FindOptionValueRow( double strike ) {
   return iter;
 }
 
-void GridOptionDetails_impl::SetSelected(double strike, bool bSelected) {
+void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   wxColour colour = bSelected ? *wxWHITE : m_details.GetDefaultCellBackgroundColour();
   m_details.SetCellBackgroundColour( iter->second.m_nRow, -1, colour );
 }
 
-void GridOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
     [this](mapOptionValueRow_t::value_type& value) {
       if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
@@ -118,7 +118,7 @@ void GridOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
-void GridOptionDetails_impl::OnGridLeftClick( wxGridEvent& event ) {
+void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   // use to toggle monitoring
   int nRow = event.GetRow();
   if ( 0 <= nRow && event.ControlDown() ) {
@@ -130,13 +130,13 @@ void GridOptionDetails_impl::OnGridLeftClick( wxGridEvent& event ) {
     assert( m_mapOptionValueRow.end() != iter );
     if ( nullptr != m_details.m_fOnRowClicked ) {
       
-      GridOptionDetails::OptionUpdateFunctions funcCall;
+      GridOptionChain::OptionUpdateFunctions funcCall;
       funcCall.sSymbolName = iter->second.m_sCallName;
       funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
       funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
       funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
       
-      GridOptionDetails::OptionUpdateFunctions funcPut;
+      GridOptionChain::OptionUpdateFunctions funcPut;
       funcPut.sSymbolName = iter->second.m_sPutName;
       funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
       funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
@@ -150,14 +150,14 @@ void GridOptionDetails_impl::OnGridLeftClick( wxGridEvent& event ) {
   event.Skip();
 }
 
-void GridOptionDetails_impl::DestroyControls() { 
+void GridOptionChain_impl::DestroyControls() { 
   
   m_timerGuiRefresh.Stop();
   m_timerGuiRefresh.DeletePendingEvents();
-  m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_details.Unbind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
-  m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
-  m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionDetails_impl::OnGridLeftClick, this );
+  m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
+  m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   
   //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }

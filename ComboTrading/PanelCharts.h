@@ -222,14 +222,14 @@ private:
   typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
   mapOptionWatch_t m_mapOptionWatch;
   
-  struct GridOptionDetails {
+  struct OptionChain {
     bool bOn;
     ou::tf::option::Option::pOption_t pOption;  // watch should automatically be killed
-    GridOptionDetails(): bOn( false ) {}
+    OptionChain(): bOn( false ) {}
   };
   
-  typedef std::map<std::string,GridOptionDetails> mapGridOptionDetails_t;
-  mapGridOptionDetails_t m_mapGridOptionDetails;
+  typedef std::map<std::string,OptionChain> mapOptionChain_t;
+  mapOptionChain_t m_mapOptionChain;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -290,8 +290,8 @@ private:
   void ReplaceRightDetail( wxWindow* );
   void HandleGridClick( 
     boost::gregorian::date date, double strike, 
-    const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcCall,
-    const ou::tf::GridOptionDetails::OptionUpdateFunctions& funcPut );
+    const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
+    const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut );
   
   void OnOptionChainPageChanging( boost::gregorian::date );
   void OnOptionChainPageChanged( boost::gregorian::date );

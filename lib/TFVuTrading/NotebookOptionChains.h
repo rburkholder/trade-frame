@@ -75,7 +75,7 @@ public:
   void SetName( const std::string& sName );  // underlying
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::enumOptionSide, const std::string& sSymbol );
   
-  typedef std::function<void(boost::gregorian::date, double, const GridOptionDetails::OptionUpdateFunctions&, const GridOptionDetails::OptionUpdateFunctions& )> fOnRowClicked_t;
+  typedef std::function<void(boost::gregorian::date, double, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
   
   typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
@@ -93,7 +93,7 @@ protected:
 private:
   
   enum { 
-    ID_Null=wxID_HIGHEST, ID_OPTIONCHAINS, ID_NOTEBOOK_OPTIONDETAILS
+    ID_Null=wxID_HIGHEST, ID_NOTEBOOK_OPTIONDETAILS
   };
   
   // put/call at strike
@@ -111,11 +111,11 @@ private:
     size_t ixTab;
     std::string sDate;
     mapStrike_t mapStrike;
-    GridOptionDetails* pWinOptionsDetails;
-    Tab( int ix = 0, const std::string& s = "", ou::tf::GridOptionDetails* p = nullptr )
-      : ixTab( ix ), sDate( s ), pWinOptionsDetails( p ) {}
-    Tab( const std::string& s = "", ou::tf::GridOptionDetails* p = nullptr )
-      : ixTab{}, sDate( s ), pWinOptionsDetails( p ) {}
+    GridOptionChain* pWinOptionChain;
+    Tab( int ix = 0, const std::string& s = "", ou::tf::GridOptionChain* p = nullptr )
+      : ixTab( ix ), sDate( s ), pWinOptionChain( p ) {}
+    Tab( const std::string& s = "", ou::tf::GridOptionChain* p = nullptr )
+      : ixTab{}, sDate( s ), pWinOptionChain( p ) {}
   };
   
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;

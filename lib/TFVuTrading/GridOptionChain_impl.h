@@ -38,15 +38,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct GridOptionDetails_impl {
+struct GridOptionChain_impl {
 //public:
-  GridOptionDetails_impl( GridOptionDetails& );
-  ~GridOptionDetails_impl( void );
+  GridOptionChain_impl( GridOptionChain& );
+  ~GridOptionChain_impl( void );
 //protected:
 
 //private:
 
-  GridOptionDetails& m_details;
+  GridOptionChain& m_details;
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
@@ -183,7 +183,7 @@ struct GridOptionDetails_impl {
 };
 
 template<class Archive>
-void GridOptionDetails::serialize(Archive & ar, const unsigned int file_version){
+void GridOptionChain::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
 }  
 

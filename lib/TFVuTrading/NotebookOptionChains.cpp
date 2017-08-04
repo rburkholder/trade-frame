@@ -136,9 +136,9 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     auto* pPanel = new wxPanel( this, wxID_ANY );
     auto* pSizer = new wxBoxSizer(wxVERTICAL);
     pPanel->SetSizer( pSizer );
-    auto* pDetails = new GridOptionDetails( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
+    auto* pDetails = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
     pSizer->Add( pDetails, 1, wxALL|wxEXPAND, 1 );
-    pDetails->m_fOnRowClicked = [this, date](double strike, const GridOptionDetails::OptionUpdateFunctions& funcsCall, const GridOptionDetails::OptionUpdateFunctions& funcsPut  ){ 
+    pDetails->m_fOnRowClicked = [this, date](double strike, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){ 
       if ( nullptr != m_fOnRowClicked) 
         m_fOnRowClicked( date, strike, funcsCall, funcsPut );
     };
@@ -181,7 +181,7 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
       break;
   }
   
-  iterExpiry->second.pWinOptionsDetails->Add( strike, side, sSymbol );
+  iterExpiry->second.pWinOptionChain->Add( strike, side, sSymbol );
   
 }
 
