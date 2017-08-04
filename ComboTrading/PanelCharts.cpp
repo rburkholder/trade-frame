@@ -193,9 +193,11 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   m_pData2Provider = pData2Provider;
   m_pExecutionProvider = pExecutionProvider;
   if ( b ) {
-    for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); m_mapInstrumentWatch.end() != iter; ++iter ) {
-      iter->second->SetProvider( m_pData1Provider );
-    }
+    std::for_each( m_mapInstrumentWatch.begin(), m_mapInstrumentWatch.end(),
+      [this](mapInstrumentWatch_t::value_type& vt){
+        vt.second->SetProvider( m_pData1Provider );
+      }
+      );
   }
 }
 
@@ -244,6 +246,7 @@ void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
   RemoveRightDetail();
 }
 
+// TODO: has various indirect and side actions.  can this be cleaned up?
 PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   // create an entry for the menu item with its specific instrument and watch and indicators
@@ -259,15 +262,23 @@ PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const
 
 // signaled in TreeItemInstrument::~TreeItemInstrument
 void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
+  mapWatchInfo_t::iterator iterWatchInfo = m_mapWatchInfo.find( item.GetID() );
+  if ( m_mapWatchInfo.end() == iterWatchInfo ) {
     // this might be ok if deleting a group
     std::cout << "couldn't find the menuitem to delete" << std::endl;
   }
   else {
     RemoveRightDetail();
+    ou::tf::Instrument::idInstrument_t id = iterWatchInfo->second->GetWatch()->GetInstrument()->GetInstrumentName();
     // TODO: does/is the watch info already stopped?
-    m_mapWatchInfo.erase( iter );
+    m_mapWatchInfo.erase( iterWatchInfo );
+    mapInstrumentWatch_t::iterator iterWatch = m_mapInstrumentWatch.find( id );
+    if ( m_mapInstrumentWatch.end() == iterWatch ) {
+      std::cout << "PanelCharts::HandleMenuItemDelete: has no " << id << std::endl;
+    }
+    else {
+      std::cout << "PanelCharts::HandleMenuItemDelete has " << id << "(" << iterWatch->second.use_count() << "), delete it?" << std::endl;
+    }
   }
 }
 
@@ -338,7 +349,7 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
   }
   else {
-    CallAfter([this,pNotebookOptionChains,iter]{
+    CallAfter([this,pNotebookOptionChains,iter]{ // ensure iter is not invalidated in the meantime
       // obtain instrument name (future requires special handling)
       ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
       std::string sSymbol;
@@ -565,7 +576,7 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
         }
         else {
           values.name_ = idInstrument;
-          // are these lock types propogated properly?
+          // are these lock types propagated properly?
           //  ie, on load from file, are they set there?
           if ( pInstrumentWatch->GetInstrument()->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
           if ( pInstrumentWatch->GetInstrument()->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;

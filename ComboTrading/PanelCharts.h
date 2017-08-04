@@ -138,8 +138,10 @@ private:
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
   
+  // =======
   // need to put a lock on the structure or the container for threaded greek calc
   // or not, as m_mapInstrumentWatch is used for calcs
+  // is used for populating m_chartData for display of indicators on the LiveChartPanel
   struct WatchInfo {
   private:
     bool m_bActive;
@@ -166,7 +168,6 @@ private:
       }
     }
     void EmitValues( void ) { m_pWatch->EmitValues(); }
-    //ou::ChartDataView& GetChartDataView( void ) { return m_chartData.GetChartDataView(); }
     void ApplyDataTo( ou::ChartDataView* view ) {
       pInstrument_t pInstrument = m_pWatch->GetInstrument();
       if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
@@ -192,8 +193,20 @@ private:
       }
     }
   };
+  // =======
 
-  // facilitates option greek calculations  
+  // contains the watches as shown in the gui, used for EmitValues
+  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
+  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
+  mapWatchInfo_t m_mapWatchInfo;
+  
+  // unique list of instrument/watches, for all listed instruments, does not include option chains
+  // instruments have been registered with instrument manager
+  // used for saving series, and the underlying for option calcs
+  typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
+  mapInstrumentWatch_t m_mapInstrumentWatch;
+  
+  // facilitates option greek calculations, shares watch from m_mapInstrumentWatch
   struct OptionWatch {
     //const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
     //unsigned int m_cntDown;
@@ -205,15 +218,6 @@ private:
       //m_cntDown( m_cntDownStartingValue ), 
       m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
   };
-  
-  // unique list of instrument/watches -- does this include the options?
-  typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
-  mapInstrumentWatch_t m_mapInstrumentWatch;
-  
-  // contains the watches as show in the gui
-  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
-  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
-  mapWatchInfo_t m_mapWatchInfo;
   
   typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
   mapOptionWatch_t m_mapOptionWatch;
