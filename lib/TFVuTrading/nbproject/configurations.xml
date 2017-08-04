@@ -17,8 +17,8 @@
       <itemPath>GridIBAccountValues_impl.h</itemPath>
       <itemPath>GridIBPositionDetails.h</itemPath>
       <itemPath>GridIBPositionDetails_impl.h</itemPath>
-      <itemPath>GridOptionDetails.h</itemPath>
-      <itemPath>GridOptionDetails_impl.h</itemPath>
+      <itemPath>GridOptionChain.h</itemPath>
+      <itemPath>GridOptionChain_impl.h</itemPath>
       <itemPath>InterfaceBoundEvents.h</itemPath>
       <itemPath>ModelBase.h</itemPath>
       <itemPath>ModelCell.h</itemPath>
@@ -72,8 +72,8 @@
       <itemPath>GridIBAccountValues_impl.cpp</itemPath>
       <itemPath>GridIBPositionDetails.cpp</itemPath>
       <itemPath>GridIBPositionDetails_impl.cpp</itemPath>
-      <itemPath>GridOptionDetails.cpp</itemPath>
-      <itemPath>GridOptionDetails_impl.cpp</itemPath>
+      <itemPath>GridOptionChain.cpp</itemPath>
+      <itemPath>GridOptionChain_impl.cpp</itemPath>
       <itemPath>InterfaceBoundEvents.cpp</itemPath>
       <itemPath>ModelBase.cpp</itemPath>
       <itemPath>ModelCell.cpp</itemPath>
@@ -195,13 +195,13 @@
       </item>
       <item path="GridIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
+      <item path="GridOptionChain.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
+      <item path="GridOptionChain.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="GridOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      <item path="GridOptionChain_impl.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="GridOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
+      <item path="GridOptionChain_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="InterfaceBoundEvents.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -425,13 +425,13 @@
       </item>
       <item path="GridIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
+      <item path="GridOptionChain.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
+      <item path="GridOptionChain.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="GridOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      <item path="GridOptionChain_impl.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="GridOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
+      <item path="GridOptionChain_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="InterfaceBoundEvents.cpp" ex="false" tool="1" flavor2="0">
       </item>

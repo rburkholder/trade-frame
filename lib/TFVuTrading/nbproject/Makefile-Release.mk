@@ -47,8 +47,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/GridIBAccountValues_impl.o \
 	${OBJECTDIR}/GridIBPositionDetails.o \
 	${OBJECTDIR}/GridIBPositionDetails_impl.o \
-	${OBJECTDIR}/GridOptionDetails.o \
-	${OBJECTDIR}/GridOptionDetails_impl.o \
+	${OBJECTDIR}/GridOptionChain.o \
+	${OBJECTDIR}/GridOptionChain_impl.o \
 	${OBJECTDIR}/InterfaceBoundEvents.o \
 	${OBJECTDIR}/ModelBase.o \
 	${OBJECTDIR}/ModelCell.o \
@@ -165,15 +165,15 @@ ${OBJECTDIR}/GridIBPositionDetails_impl.o: GridIBPositionDetails_impl.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridIBPositionDetails_impl.o GridIBPositionDetails_impl.cpp
 
-${OBJECTDIR}/GridOptionDetails.o: GridOptionDetails.cpp
+${OBJECTDIR}/GridOptionChain.o: GridOptionChain.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionDetails.o GridOptionDetails.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionChain.o GridOptionChain.cpp
 
-${OBJECTDIR}/GridOptionDetails_impl.o: GridOptionDetails_impl.cpp
+${OBJECTDIR}/GridOptionChain_impl.o: GridOptionChain_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionDetails_impl.o GridOptionDetails_impl.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionChain_impl.o GridOptionChain_impl.cpp
 
 ${OBJECTDIR}/InterfaceBoundEvents.o: InterfaceBoundEvents.cpp
 	${MKDIR} -p ${OBJECTDIR}

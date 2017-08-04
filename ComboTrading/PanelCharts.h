@@ -41,7 +41,7 @@
 #include <OUCharting/ChartDataView.h>
 #include <TFVuTrading/ModelChartHdf5.h>
 
-#include <TFVuTrading/GridOptionDetails.h>
+#include <TFVuTrading/GridOptionChain.h>
 
 #include "TreeItem.h"
 #include "InstrumentActions.h"

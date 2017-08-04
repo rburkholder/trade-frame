@@ -16,7 +16,7 @@
 
 #include <functional>
 
-#include "GridOptionDetails_impl.h"
+#include "GridOptionChain_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

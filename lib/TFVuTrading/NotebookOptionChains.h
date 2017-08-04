@@ -35,7 +35,7 @@
 #include <TFVuTrading/InterfaceBoundEvents.h>
 #include <TFTrading/TradingEnumerations.h>
 #include <TFOptions/Option.h>
-#include <TFVuTrading/GridOptionDetails.h>
+#include <TFVuTrading/GridOptionChain.h>
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
 namespace ou { // One Unified
