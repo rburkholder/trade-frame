@@ -145,10 +145,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   bool bShift = event.ShiftDown();
   bool bControl = event.ControlDown();
   bool bAlt = event.AltDown();
-  std::cout 
-      << "Wheel: " << delta << "," << rotation << ",sca:" 
-      << bShift << bControl << bAlt
-      << std::endl;
+  //std::cout 
+  //      << "Wheel: " << delta << "," << rotation << ",sca:" 
+  //    << bShift << bControl << bAlt
+  //    << std::endl;
 
   // TODO: will need to keep to within a min/max
   if ( 0 > rotation ) {
