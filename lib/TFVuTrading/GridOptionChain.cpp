@@ -72,6 +72,9 @@ void GridOptionChain::CreateControls() {
   
 }
 
+void GridOptionChain::TimerActivate() { m_pimpl->TimerActivate(); }
+void GridOptionChain::TimerDeactivate() { m_pimpl->TimerDeactivate(); }
+
 void GridOptionChain::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   m_pimpl->Add( strike, side, sSymbol );
 }

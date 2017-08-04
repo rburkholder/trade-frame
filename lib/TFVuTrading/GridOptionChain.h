@@ -61,6 +61,9 @@ public:
 
   void SetSelected( double strike, bool bSelected );
   
+  void TimerActivate();
+  void TimerDeactivate();
+  
 //  struct DatumUpdateFunctions {
 //    std::function<void( const ou::tf::Greek& )> fCallGreek;
 //    std::function<void( const ou::tf::Quote& )> fCallQuote;

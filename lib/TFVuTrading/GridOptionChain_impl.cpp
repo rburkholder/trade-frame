@@ -22,7 +22,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 GridOptionChain_impl::GridOptionChain_impl( GridOptionChain& details )
-: m_details( details ) {
+: m_details( details ), m_bTimerActive( false ) {
 }
 
 void GridOptionChain_impl::CreateControls() {
@@ -50,17 +50,31 @@ void GridOptionChain_impl::CreateControls() {
 
   m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
-
-  // this GuiRefresh initialization should come after all else
-  m_timerGuiRefresh.SetOwner( &m_details );
-  m_details.Bind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start( 250 );
-
+  
   m_details.EnableEditing( false );
 
 }
 
 GridOptionChain_impl::~GridOptionChain_impl( void ) {
+}
+
+void GridOptionChain_impl::TimerActivate() {
+  if ( !m_bTimerActive ) {
+    m_bTimerActive = true;
+    // this GuiRefresh initialization should come after all else
+    m_timerGuiRefresh.SetOwner( &m_details );
+    m_details.Bind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_timerGuiRefresh.Start( 250 );
+  }
+}
+
+void GridOptionChain_impl::TimerDeactivate() {
+  if ( m_bTimerActive ) {
+    m_bTimerActive = false;
+    m_timerGuiRefresh.Stop();
+    m_timerGuiRefresh.DeletePendingEvents();
+    m_details.Unbind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  }
 }
 
 void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
@@ -151,11 +165,9 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 }
 
 void GridOptionChain_impl::DestroyControls() { 
-  
-  m_timerGuiRefresh.Stop();
-  m_timerGuiRefresh.DeletePendingEvents();
-  m_details.Unbind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
+  TimerDeactivate();  
+  
   m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   

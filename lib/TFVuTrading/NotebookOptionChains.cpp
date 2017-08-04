@@ -83,8 +83,10 @@ void NotebookOptionChains::CreateControls() {
   
 }
 
+// start leaving old page
 void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
-  int ixTab = event.GetInt();
+  int ixTab = event.GetOldSelection();
+  std::cout << "page changing: " << ixTab << std::endl;
   mapOptionExpiry_t::iterator iter 
    = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
      return ixTab == vt.second.ixTab;
@@ -93,6 +95,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
     std::cout << "NotebookOptionChains::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
   }
   else {
+    iter->second.pWinOptionChain->TimerDeactivate();
     if ( nullptr != m_fOnPageChanging ) {
       m_fOnPageChanging( iter->first );
     }
@@ -100,8 +103,10 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
   event.Skip();
 }
 
+// finishing arriving at new page
 void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
-  int ixTab = event.GetInt();
+  int ixTab = event.GetSelection();
+  std::cout << "page changed: " << ixTab << std::endl;
   mapOptionExpiry_t::iterator iter 
    = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
      return ixTab == vt.second.ixTab;
@@ -110,6 +115,7 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
     std::cout << "NotebookOptionChains::OnPageChanged: couldn't find tab index: " << ixTab << std::endl;
   }
   else {
+    iter->second.pWinOptionChain->TimerActivate();
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }

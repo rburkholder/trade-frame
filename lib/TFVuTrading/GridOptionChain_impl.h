@@ -149,6 +149,10 @@ struct GridOptionChain_impl {
   void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
   void SetSelected( double strike, bool bSelected );
   
+  bool m_bTimerActive;
+  void TimerActivate();
+  void TimerDeactivate();
+  
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
   void DestroyControls();
