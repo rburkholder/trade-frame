@@ -115,6 +115,16 @@ void ExpiryBundle::SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider,
   iter->second.AssignPut( pInstrument, pDataProvider, pGreekProvider );
 }
 
+void ExpiryBundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider ) {
+  mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
+  iter->second.AssignCall( pInstrument, pDataProvider );
+}
+
+void ExpiryBundle::SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider ) {
+  mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
+  iter->second.AssignPut( pInstrument, pDataProvider );
+}
+
 Call* ExpiryBundle::GetCall( double dblStrike ) {
   mapStrikes_t::iterator iter = FindStrike( dblStrike );
   return iter->second.Call();
@@ -151,7 +161,6 @@ void ExpiryBundle::SetWatchableOn( double dblStrike ) {
   if ( m_mapStrikes.end() != iter ) {
     iter->second.SetWatchableOn();
   }
-  
 }
 
 void ExpiryBundle::SetWatchableOff( double dblStrike ) {

@@ -58,6 +58,9 @@ public:
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
+  void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider );
+  void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider );
+  
   Call* GetCall( double dblStrike );
   Put* GetPut( double dblStrike );
 

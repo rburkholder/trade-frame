@@ -40,13 +40,16 @@ public:
   void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
+  void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider );
+  void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider );
+
   ou::tf::option::Call* Call( void ) { return m_call.get(); };
   ou::tf::option::Put*  Put( void )  { return m_put.get(); };
 
   void SetWatchableOn( void );  // watchable defaults to off at time of construction
   void SetWatchableOff( void );
 
-  void WatchStart( void );
+  void WatchStart( void ); // not started if watchable is off
   void WatchStop( void );
   bool IsWatching( void ) const { return 0 != m_nWatching; };
 

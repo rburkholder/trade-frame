@@ -240,12 +240,28 @@ Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pG
   m_sSide = "C";
 }
 
+Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider )
+: Option( pInstrument, pDataProvider )
+{
+  // assert instrument is a call
+  assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
+  m_sSide = "C";
+}
+
 //
 // ==================
 //
 
 Put::Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )
 : Option( pInstrument, pDataProvider,pGreekProvider )
+{
+  // assert instrument is a put
+  assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
+  m_sSide = "P";
+}
+
+Put::Put( pInstrument_t pInstrument, pProvider_t pDataProvider )
+: Option( pInstrument, pDataProvider )
 {
   // assert instrument is a put
   assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );

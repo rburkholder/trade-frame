@@ -35,7 +35,7 @@ public:
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
-  Option( const Option& rhs );
+  explicit Option( const Option& rhs );
   virtual ~Option( void );
 
   Option& operator=( const Option& rhs );
@@ -99,6 +99,7 @@ private:
 class Call: public Option {
 public:
   Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  Call( pInstrument_t pInstrument, pProvider_t pDataProvider );
   virtual ~Call( void ) {};
 protected:
 private:
@@ -111,6 +112,7 @@ private:
 class Put: public Option {
 public:
   Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  Put( pInstrument_t pInstrument, pProvider_t pDataProvider );
   virtual ~Put( void ) {};
 protected:
 private:
