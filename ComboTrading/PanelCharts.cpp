@@ -35,9 +35,9 @@
 #include <TFVuTrading/NotebookOptionChains.h>
 
 // need to check why this exists
-#include <wx/toplevel.h>
-#include <wx/sizer.h>
-#include <wx-3.0/wx/list.h>
+//#include <wx/toplevel.h>
+//#include <wx/sizer.h>
+//#include <wx/list.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
@@ -72,12 +72,13 @@ PanelCharts::~PanelCharts() {
 }
 
 void PanelCharts::Init( void ) {
+  
   m_panelSplitterRightPanel = 0;
   m_splitter = 0;
   m_sizerRight = 0;
+  m_winRightDetail = 0;
   
   m_pTreeOps = 0;
-  m_winRightDetail = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
@@ -107,24 +108,13 @@ bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, c
   m_scrollPM->SetSizer( m_sizerScrollPM );
 */
 
-/*
-void TreeItemProjectorArea::ConnectToSelectionEvent( TreeItemSceneElementBase* p ) {
-  namespace args = boost::phoenix::arg_names;
-  p->m_signalSelectionEventSetSelected.connect( boost::phoenix::bind( &TreeItemProjectorArea::HandleSetSelected, this, args::arg1 ) );
-  p->m_signalSelectionEventRemoveSelected.connect( boost::phoenix::bind( &TreeItemProjectorArea::HandleRemoveSelected, this, args::arg1 ) );
-}
-
-} */
-
 void PanelCharts::CreateControls() {    
 
-    PanelCharts* itemPanel1 = this;
+  PanelCharts* itemPanel1 = this;
 
-    wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-    itemPanel1->SetSizer(sizerMain);
+  wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+  itemPanel1->SetSizer(sizerMain);
 
-  // splitter
-  //wxSplitterWindow* splitter;
   m_splitter = new wxSplitterWindow( this );
   m_splitter->SetMinimumPaneSize(10);
   m_splitter->SetSashGravity(0.2);
@@ -146,7 +136,7 @@ void PanelCharts::CreateControls() {
   m_pTreeOps = new ou::tf::TreeOps( m_splitter );
   m_pTreeOps->PopulateResources( m_baseResources );
   
-  wxTreeItemId item = m_pTreeOps->AddRoot( "Root" );  // can be renamed
+  wxTreeItemId item = m_pTreeOps->AddRoot( "Instruments" );  // can be renamed
   boost::shared_ptr<TreeItemRoot> p( new TreeItemRoot( item, m_baseResources, m_resources ) );
   m_pTreeOps->SetRoot( p );
   //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
@@ -169,6 +159,7 @@ void PanelCharts::CreateControls() {
   //Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
   
+  // maybe use std::bind now
   namespace args = boost::phoenix::arg_names;
   
   m_connGetInstrumentActions = m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
@@ -188,32 +179,57 @@ void PanelCharts::CreateControls() {
 }
 
 void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
-  bool b( m_pData1Provider.get() != pData1Provider.get() );
+  bool bChangedData1Provider( m_pData1Provider.get() != pData1Provider.get() );
   m_pData1Provider = pData1Provider;
   m_pData2Provider = pData2Provider;
   m_pExecutionProvider = pExecutionProvider;
-  if ( b ) {
-    std::for_each( m_mapInstrumentWatch.begin(), m_mapInstrumentWatch.end(),
-      [this](mapInstrumentWatch_t::value_type& vt){
-        vt.second->SetProvider( m_pData1Provider );
+  if ( bChangedData1Provider ) {
+    std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(),
+      [this](mapInstrumentEntry_t::value_type& vt){
+        vt.second.m_pWatchInfo.reset();  // clear out existing WatchInfo, as it depends upon provider type
+        vt.second.m_mapSelectedChainOptions.clear();  // clear out existing chains, as they depend upon provider type
+        vt.second.m_pWatch->SetProvider( m_pData1Provider ); // set new provider
+        vt.second.m_pWatchInfo.reset( new WatchInfo( vt.second.m_pWatch ) ); // build new WatchInfo
       }
       );
   }
 }
 
-void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQFeed libor ) {
-  for ( mapOptionWatch_t::iterator iter = m_mapOptionWatch.begin(); m_mapOptionWatch.end() != iter; ++iter ) {
-    ou::tf::option::binomial::structInput input;
-    ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.m_pWatchOption.get() );
-    if ( pOption->Watching() ) {
-      ou::tf::Quote quoteUnderlying = iter->second.m_quoteLastUnderlying = iter->second.m_pWatchUnderlying->LastQuote();
-      if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
-        input.S = quoteUnderlying.Midpoint();
-        pOption->CalcRate( input, dtUtcNow, libor );  // can this be moved out of the loop? -- no, depends upon expiry
-        pOption->CalcGreeks( input, dtUtcNow, true );
+void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQFeed& libor ) {
+  std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(), 
+    [this,dtUtcNow,&libor](mapInstrumentEntry_t::value_type& vt){
+      InstrumentEntry& entry( vt.second );
+      if ( entry.m_pWatch->Watching() ) {
+        if ( entry.m_pWatch->GetInstrument()->IsOption() || entry.m_pWatch->GetInstrument()->IsFuturesOption() ) {
+          if ( 0 != entry.m_pWatchUnderlying.use_count() ) {
+            if ( entry.m_pWatchUnderlying->Watching() ) {
+              ou::tf::option::binomial::structInput input;
+              ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( entry.m_pWatch.get() );
+              ou::tf::Quote quoteUnderlying = entry.m_pWatchUnderlying->LastQuote();
+              if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
+                input.S = quoteUnderlying.Midpoint();
+                pOption->CalcRate( input, dtUtcNow, libor );  // can this be moved out of the loop? -- no, depends upon expiry
+                pOption->CalcGreeks( input, dtUtcNow, true );
+              }
+            }
+          }
+        }
+        else { // no option or foption
+          if ( 0 != entry.m_mapSelectedChainOptions.size() ) {
+            ou::tf::option::binomial::structInput input;
+            input.S = entry.m_pWatch->LastQuote().Midpoint();
+            std::for_each( entry.m_mapSelectedChainOptions.begin(), entry.m_mapSelectedChainOptions.end(), 
+              [this,dtUtcNow,&libor,&input](mapOption_t::value_type& vtOption) {
+                ou::tf::option::Option::pOption_t pOption( vtOption.second );
+                if ( pOption->Watching() ) {
+                  pOption->CalcRate( input, dtUtcNow, libor );
+                  pOption->CalcGreeks( input, dtUtcNow, true );
+                }
+              });
+          }
+        }
       }
-    }
-  }
+  });
 }
 
 void PanelCharts::RemoveRightDetail() {
@@ -247,62 +263,80 @@ void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
 }
 
 // TODO: has various indirect and side actions.  can this be cleaned up?
+// TOOD: does need fix ups as WatchInfo is no longer initialized
 PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  mapItemToInstrument_t::iterator iter = m_mapItemToInstrument.find( item.GetID() );
   // create an entry for the menu item with its specific instrument and watch and indicators
-  if ( m_mapWatchInfo.end() == iter ) {
-    pWatchInfo_t pWatchInfo( new WatchInfo );
-    m_mapWatchInfo.insert( mapWatchInfo_t::value_type( item.GetID(), pWatchInfo ) );
+  if ( m_mapItemToInstrument.end() == iter ) {
+    //pWatchInfo_t pWatchInfo( new WatchInfo );
+//    m_mapGuiEntry.insert( mapGuiEntry_t::value_type( item.GetID(), GuiEntry( new WatchInfo ) ) );
   }
   else {
-    std::cout << "getting actions for menu item already in existence" << std::endl;
+    std::cout << "PanelCharts::HandleGetInstrumentActions: menu item already in existence" << std::endl;
   }
-  return m_pInstrumentActions;
+  return m_pInstrumentActions;  // TODO: maybe turn this into a lambda now
 }
 
 // signaled in TreeItemInstrument::~TreeItemInstrument
 void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
-  mapWatchInfo_t::iterator iterWatchInfo = m_mapWatchInfo.find( item.GetID() );
-  if ( m_mapWatchInfo.end() == iterWatchInfo ) {
+  mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
+  if ( m_mapItemToInstrument.end() == iterIdItem ) {
     // this might be ok if deleting a group
-    std::cout << "couldn't find the menuitem to delete" << std::endl;
+    std::cout << "PanelCharts::HandleMenuItemDelete: no menuitem to delete" << std::endl;
   }
   else {
-    RemoveRightDetail();
-    ou::tf::Instrument::idInstrument_t id = iterWatchInfo->second->GetWatch()->GetInstrument()->GetInstrumentName();
-    // TODO: does/is the watch info already stopped?
-    m_mapWatchInfo.erase( iterWatchInfo );
-    mapInstrumentWatch_t::iterator iterWatch = m_mapInstrumentWatch.find( id );
-    if ( m_mapInstrumentWatch.end() == iterWatch ) {
-      std::cout << "PanelCharts::HandleMenuItemDelete: has no " << id << std::endl;
+    mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
+    if ( m_mapInstrumentEntry.end() == iterIdInstrument ) {
+      std::cout << "PanelCharts::HandleMenuItemDelete: no instrument found: " << iterIdItem->second << std::endl;;
     }
     else {
-      std::cout << "PanelCharts::HandleMenuItemDelete has " << id << "(" << iterWatch->second.use_count() << "), delete it?" << std::endl;
+      InstrumentEntry& entry( iterIdInstrument->second );
+      if ( 0 == entry.m_cntMenuDependents ) {
+        std::cout << "PanelCharts::HandleMenuItemDelete: inconsistent m_cntMenuDependents" << std::endl;
+      }
+      else {
+        if ( 2 < entry.m_pWatch.use_count() ) {
+          std::cout << "PanelCharts::HandleMenuItemDelete use_count:" << iterIdItem->second << "," << entry.m_pWatch.use_count() << std::endl;
+        }
+        else {
+          entry.m_cntMenuDependents--;
+          if ( 0 == entry.m_cntMenuDependents ) {
+            m_mapInstrumentEntry.erase( iterIdInstrument );
+          }
+        }
+      }
     }
+    RemoveRightDetail();
   }
 }
 
 void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "couldn't find the menuitem for HandleInstrumentLiveChart" << std::endl;
+  mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
+  if ( m_mapItemToInstrument.end() == iterIdItem ) {
+    std::cout << "PanelCharts::HandleInstrumentLiveChart: no menuitem" << std::endl;
   }
   else {
     
     RemoveRightDetail();
 
     m_ChartDataView.Clear();
-    iter->second->ApplyDataTo( &m_ChartDataView );
-    
-    WinChartView* pWinChartView = nullptr;
-    pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-    
-    // has postponed gui related assignments
-    ReplaceRightDetail( pWinChartView );
+    mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
+    if ( m_mapInstrumentEntry.end() == iterIdInstrument ) {
+      std::cout << "PanelCharts::HandleInstrumentLiveChart: no instrument " << iterIdItem->second << std::endl;
+    }
+    else {
+      iterIdInstrument->second.m_pWatchInfo->ApplyDataTo( &m_ChartDataView );
 
-    // starts update thread
-    CallAfter( [this,pWinChartView](){ pWinChartView->SetChartDataView( &m_ChartDataView ); } );
+      WinChartView* pWinChartView = nullptr;
+      pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+
+      // has postponed gui related assignments
+      ReplaceRightDetail( pWinChartView );
+
+      // starts update thread
+      CallAfter( [this,pWinChartView](){ pWinChartView->SetChartDataView( &m_ChartDataView ); } );
+    }
   }
 }
 
@@ -344,55 +378,66 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
   auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, _T( "a name" ) );
   ReplaceRightDetail( pNotebookOptionChains );
 
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
+  mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
+  if ( m_mapItemToInstrument.end() == iterIdItem ) {
+    std::cout << "PanelCharts::HandleOptionChainList: no menuitem" << std::endl;
   }
   else {
-    CallAfter([this,pNotebookOptionChains,iter]{ // ensure iter is not invalidated in the meantime
-      // obtain instrument name (future requires special handling)
-      ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
-      std::string sSymbol;
-      switch ( p->GetInstrumentType() ) { 
-        case ou::tf::InstrumentType::Stock:
-          sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
-          break;
-        case ou::tf::InstrumentType::Future: {
-          std::string sTemp = p->GetInstrumentName();
-          size_t pos = sTemp.find( '-' );
-          assert( 0 != pos );
-          sSymbol = sTemp.substr( 0, pos );
-          }
-          break;
-        default:
-          assert(0);
-          break;
-      }
-      assert( 0 != sSymbol.length() );
-
-      // obtain the option list
-  //    OptionList list;
-  //    signalRetrieveOptionList( 
-  //      sSymbol, 
-  //      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
-  //      );
-
-      pNotebookOptionChains->SetName( sSymbol );
-
-      // populate tabs of notebook
-      signalRetrieveOptionList(
-        sSymbol,
-        [pNotebookOptionChains]( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
-          boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
-          pNotebookOptionChains->Add( date, row.dblStrike, row.eOptionSide, row.sSymbol );
+    mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
+    if ( m_mapInstrumentEntry.end() == iterIdInstrument ) {
+      std::cout << "PanelCharts::HandleOptionChainList: no " << iterIdItem->second << std::endl;
+    }
+    else {
+      CallAfter([this,pNotebookOptionChains,iterIdInstrument]{ // ensure iter is not invalidated in the meantime
+        InstrumentEntry& entry( iterIdInstrument->second );
+        // obtain instrument name (future requires special handling)
+        ou::tf::Instrument::pInstrument_t p = entry.m_pWatch->GetInstrument();
+        std::string sSymbol;
+        switch ( p->GetInstrumentType() ) { 
+          case ou::tf::InstrumentType::Stock:
+            sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
+            break;
+          case ou::tf::InstrumentType::Future: {
+            //why not the Provider name here as well?
+            //   -- because it supplies something like QGCZ17, where we want only QGC for the seach
+            //sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
+            std::string sTemp = p->GetInstrumentName();
+            size_t pos = sTemp.find( '-' );
+            assert( 0 != pos );
+            sSymbol = sTemp.substr( 0, pos );
+            }
+            break;
+          default:
+            assert(0);
+            break;
         }
-        );
+        assert( 0 != sSymbol.length() );
 
-      namespace args = std::placeholders;
-      pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
-      pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
-      pNotebookOptionChains->m_fOnRowClicked = std::bind( &PanelCharts::HandleGridClick, this, args::_1, args::_2, args::_3, args::_4 );
-    });
+        // obtain the option list
+    //    OptionList list;
+    //    signalRetrieveOptionList( 
+    //      sSymbol, 
+    //      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
+    //      );
+
+        pNotebookOptionChains->SetName( sSymbol );
+
+        // populate tabs of notebook
+        signalRetrieveOptionList(
+          sSymbol,
+          [pNotebookOptionChains]( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
+            boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
+            pNotebookOptionChains->Add( date, row.dblStrike, row.eOptionSide, row.sSymbol );
+          }
+          );
+
+        namespace args = std::placeholders;
+        pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
+        pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
+        pNotebookOptionChains->m_fOnRowClicked 
+          = std::bind( &PanelCharts::HandleGridClick, this, iterIdInstrument->first, args::_1, args::_2, args::_3, args::_4 );
+      });
+    }
   }
 }
 
@@ -403,6 +448,7 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 }
 
 void PanelCharts::HandleGridClick( 
+  idInstrument_t idInstrument,
   boost::gregorian::date date, double strike, 
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
@@ -412,109 +458,161 @@ void PanelCharts::HandleGridClick(
     std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
   }
   else {
-    std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
-    std::for_each( vFuncs.begin(), vFuncs.end(),
-      [this](const ou::tf::GridOptionChain::OptionUpdateFunctions* func){
-        mapOptionChain_t::iterator iterOption = m_mapOptionChain.find( func->sSymbolName );
-        if ( m_mapOptionChain.end() == iterOption ) {
-          pInstrument_t pInstrument = m_funcBuildInstrumentFromIqfeed( func->sSymbolName );
-          assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
-          ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
-          iterOption = m_mapOptionChain.insert( m_mapOptionChain.begin(), mapOptionChain_t::value_type( func->sSymbolName, OptionChain() ) );
-          iterOption->second.pOption.reset( pOption );
-        }
-        ou::tf::option::Option* pOption( iterOption->second.pOption.get() );
-        assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
-        assert( 0 != pOption );
-        if ( iterOption->second.bOn ) { // go off
-          iterOption->second.bOn = false;
-          pOption->StopWatch();
-          pOption->OnQuote.Remove( func->fQuote );
-          pOption->OnTrade.Remove( func->fTrade );
-          pOption->OnGreek.Remove( func->fGreek );
-        }
-        else { // go on
-          pOption->OnQuote.Add( func->fQuote );
-          pOption->OnTrade.Add( func->fTrade );
-          pOption->OnGreek.Add( func->fGreek );
-          pOption->StartWatch();
-          iterOption->second.bOn = true;
-        }
-      }
-      );
+    mapInstrumentEntry_t::iterator iterInstrument = m_mapInstrumentEntry.find( idInstrument );
+    if ( m_mapInstrumentEntry.end() == iterInstrument ) {
+      std::cout << "PanelCharts::HandleGridClick: " << idInstrument << " not found" << std::endl;
+    }
+    else {
+      InstrumentEntry& entry( iterInstrument->second );
+      std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
+      std::for_each( vFuncs.begin(), vFuncs.end(),
+        [this,&entry](const ou::tf::GridOptionChain::OptionUpdateFunctions* func){
+          mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
+          if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
+            pInstrument_t pInstrument = m_funcBuildInstrumentFromIqfeed( func->sSymbolName );
+            assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
+            ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+            iterOption 
+              = entry.m_mapSelectedChainOptions.insert( 
+                entry.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( func->sSymbolName, pOption ) );
+          }
+          ou::tf::option::Option* pOption( iterOption->second.get() );
+          assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
+          assert( 0 != pOption );
+          if ( pOption->Watching() ) { // go off
+            pOption->StopWatch();
+            pOption->OnQuote.Remove( func->fQuote );
+            pOption->OnTrade.Remove( func->fTrade );
+            pOption->OnGreek.Remove( func->fGreek );
+          }
+          else { // go on
+            pOption->OnQuote.Add( func->fQuote );
+            pOption->OnTrade.Add( func->fTrade );
+            pOption->OnGreek.Add( func->fGreek );
+            pOption->StartWatch();
+          }
+        });
+    }
   }
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "couldn't find the menuitem for HandleEmitValues" << std::endl;
+  mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
+  if ( m_mapItemToInstrument.end() == iterIdItem ) {
+    std::cout << "PanelCharts::HandleEmitValues: no menuitem" << std::endl;
   }
   else {
-    iter->second->EmitValues();
-  }
-}
-
-PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
-  
-  pWatch_t pInstrumentWatch;
-  
-  const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
-  mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.find( sInstrumentId );
-  if ( m_mapInstrumentWatch.end() == iter ) {
-    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-      ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
-      pInstrumentWatch.reset( pOption );
+    mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
+    if ( m_mapInstrumentEntry.end() == iterIdInstrument ) {
+      std::cout << "PanelCharts::HandleEmitValues no " << iterIdItem->second << " found" << std::endl;
     }
     else {
-      pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+      iterIdInstrument->second.m_pWatch->EmitValues();
     }
     
-    m_mapInstrumentWatch.insert( mapInstrumentWatch_t::value_type( sInstrumentId, pInstrumentWatch ) );
-    signalRegisterInstrument( pInstrument );
   }
-  else {
-    pInstrumentWatch = iter->second;
-  }
-  return pInstrumentWatch;
 }
 
+// constructs entry in m_mapInstrumentEntry as necessary
+PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
+  
+  const ou::tf::Instrument::idInstrument_t idInstrument( pInstrument->GetInstrumentName() );
+  mapInstrumentEntry_t::iterator iterInstrument = m_mapInstrumentEntry.find( idInstrument );
+  if ( m_mapInstrumentEntry.end() == iterInstrument ) {
+    pWatch_t pWatch;
+    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+      pWatch.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+    }
+    else {
+      pWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    }
+    
+    signalRegisterInstrument( pInstrument );
+    pWatchInfo_t pWatchInfo( new WatchInfo( pWatch ) );
+    iterInstrument 
+      = m_mapInstrumentEntry.insert( m_mapInstrumentEntry.begin(), 
+          mapInstrumentEntry_t::value_type( idInstrument, InstrumentEntry( pWatch, pWatchInfo ) ) );
+  }
+  else {
+    std::cout << "PanelCharts::ConstructWatch: " << idInstrument << " exists." << std::endl;
+  }
+  
+  return iterInstrument->second.m_pWatch;
+}
+
+void PanelCharts::ConstructInstrumentEntry( void* id, pInstrument_t pInstrument, const std::string& sUnderlying ) {
+  
+  const ou::tf::Instrument::idInstrument_t idInstrument( pInstrument->GetInstrumentName() );
+  mapInstrumentEntry_t::iterator iterInstrument = m_mapInstrumentEntry.find( idInstrument );
+  if ( m_mapInstrumentEntry.end() == iterInstrument ) {
+    pWatch_t pWatch;
+    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+      pWatch.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+    }
+    else {
+      pWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    }
+    
+    signalRegisterInstrument( pInstrument );
+    pWatchInfo_t pWatchInfo( new WatchInfo( pWatch ) );
+    iterInstrument 
+      = m_mapInstrumentEntry.insert( m_mapInstrumentEntry.begin(), 
+          mapInstrumentEntry_t::value_type( idInstrument, InstrumentEntry( pWatch, pWatchInfo ) ) );
+  }
+  else {
+    std::cout << "PanelCharts::ConstructInstrumentEntry: " << idInstrument << " exists." << std::endl;
+  }
+  
+}
+
+// TODO: might be able to tune this further depending upon who call this
+//   things have been simplified as an extra data structure is no longer in use
 void PanelCharts::AddOptionWatch( 
   const std::string& sUnderlying, pWatch_t pInstrumentWatch ) {
 
   if ( pInstrumentWatch->GetInstrument()->IsOption() || pInstrumentWatch->GetInstrument()->IsFuturesOption() ) {
-    mapInstrumentWatch_t::iterator iterUnderlying = m_mapInstrumentWatch.find( sUnderlying );
-    if ( m_mapInstrumentWatch.end() == iterUnderlying ) {
+    mapInstrumentEntry_t::iterator iterUnderlying = m_mapInstrumentEntry.find( sUnderlying );
+    if ( m_mapInstrumentEntry.end() == iterUnderlying ) {
       std::cout << "PanelCharts::AddOptionWatch: didn't find underlying (" << sUnderlying << ")" << std::endl;
     }
     else {
-      Instrument::idInstrument_cref idInstrument( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
-      mapOptionWatch_t::iterator iterOptionWatch = m_mapOptionWatch.find( idInstrument );
-      if ( m_mapOptionWatch.end() != iterOptionWatch ) {
-        std::cout << "PanelCharts::AddOptionWatch: OptionWatch already exists" << std::endl;
+      Instrument::idInstrument_cref idOption( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
+      mapInstrumentEntry_t::iterator iterOption = m_mapInstrumentEntry.find( idOption );
+      if ( m_mapInstrumentEntry.end() == iterOption ) {
+        std::cout << "PanelCharts::AddOptionWatch: option " << idOption << " doesn't exist" << std::endl;
       }
       else {
-        m_mapOptionWatch.insert( 
-          mapOptionWatch_t::value_type(idInstrument, OptionWatch(iterUnderlying->second,pInstrumentWatch)));
+        if ( 0 != iterOption->second.m_pWatchUnderlying.use_count() ) {
+          std::cout << "PanelCharts::AddOptionWatch underlying already set " << sUnderlying << std::endl;
+        }
+        else {
+          iterOption->second.m_pWatchUnderlying = iterUnderlying->second.m_pWatch;
+        }
       }
     }
   }
-  
+  else {
+    std::cout << "PanelCharts::AddOptionWatch: supplied instrument not option or foption: " 
+      << pInstrumentWatch->GetInstrument()->GetInstrumentName() << std::endl;
+  }
 }
 
 // called by anything more than the serialization in TreeItemInstrument?
+// TODO: merge with the other caller of ConstructWatch?  
+//   ConstructWatch creates the data structure for the basic watch
 void PanelCharts::HandleLoadInstrument( 
   const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying 
 ) {
   
   pWatch_t pInstrumentWatch = ConstructWatch( signalLoadInstrument( sName ) );
   
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "HandleLoadInstrument: couldn't find mapWatchInfo item" << std::endl;
+  mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find ( item.GetID() );
+  if ( m_mapItemToInstrument.end() == iterIdItem ) {
+    std::cout << "HandleLoadInstrument: creating item entry" << std::endl;
+    m_mapItemToInstrument.insert( mapItemToInstrument_t::value_type( item.GetID(), sName ) );
   }
   else {
-    iter->second->Set( pInstrumentWatch );
+    std::cout << "HandleLoadInstrument: item entry exists: " << sName << std::endl;
   }
   
   if ( !sUnderlying.empty() ) {
@@ -568,19 +666,20 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
         
         pInstrumentWatch = ConstructWatch( m_pDialogPickSymbolCreatedInstrument );
         
-        Instrument::idInstrument_cref idInstrument( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
+        Instrument::idInstrument_cref idInstrument( m_pDialogPickSymbolCreatedInstrument->GetInstrumentName() );
         
-        mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
-        if ( m_mapWatchInfo.end() == iter ) {
-          std::cout << "PanelCharts::HandleNewInstrumentRequest: couldn't find mapWatchInfo item" << std::endl;
+        mapItemToInstrument_t::iterator iter = m_mapItemToInstrument.find ( item.GetID() );
+        if ( m_mapItemToInstrument.end() != iter ) {
+          std::cout << "PanelCharts::HandleNewInstrumentRequest: itemid already present" << std::endl;
         }
         else {
+          m_mapItemToInstrument.insert( mapItemToInstrument_t::value_type( item.GetID(), idInstrument ) );
           values.name_ = idInstrument;
           // are these lock types propagated properly?
           //  ie, on load from file, are they set there?
-          if ( pInstrumentWatch->GetInstrument()->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
-          if ( pInstrumentWatch->GetInstrument()->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
-          iter->second->Set( pInstrumentWatch );
+          if ( m_pDialogPickSymbolCreatedInstrument->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
+          if ( m_pDialogPickSymbolCreatedInstrument->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
+          //iter->second->Set( pInstrumentWatch );
         }
 
         if ( !wxsUnderlying.empty() ) {
@@ -590,7 +689,7 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
         
       }
       else {
-        std::cout << "PanelCharts::HandleNewInstrumentRequest is wxID_OK but no instrument" << std::endl;
+        std::cout << "PanelCharts::HandleNewInstrumentRequest has wxID_OK but no instrument" << std::endl;
       }
       break;
   }
@@ -739,9 +838,11 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
 }
 
 void PanelCharts::SaveSeries( const std::string& sPrefix ) {
-  for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); iter != m_mapInstrumentWatch.end(); ++ iter ) {
-    iter->second->SaveSeries( sPrefix );
-  }
+  std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(),
+    [](mapInstrumentEntry_t::value_type& vt) {
+      InstrumentEntry& entry( vt.second );
+      entry.m_pWatch->EmitValues();
+    });
 }
 
 void PanelCharts::Save( boost::archive::text_oarchive& oa) {

@@ -116,7 +116,7 @@ public:
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
   
   // called from owner to perform regular updates
-  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor );
+  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );
   
   void SaveSeries( const std::string& sPrefix );
   
@@ -139,17 +139,15 @@ private:
   pInstrumentActions_t m_pInstrumentActions;
   
   // =======
-  // need to put a lock on the structure or the container for threaded greek calc
+  // purpose: populates m_chartData for display of indicators on the LiveChartPanel
+  // maybe need to put a lock on the structure or the container for threaded greek calc?
   // or not, as m_mapInstrumentWatch is used for calcs
-  // is used for populating m_chartData for display of indicators on the LiveChartPanel
   struct WatchInfo {
-  private:
-    bool m_bActive;
-    pWatch_t m_pWatch;
-    ou::tf::ModelChartHdf5 m_chartData;
   public:
-    WatchInfo( void ): m_bActive( false ) {}
-    pWatch_t GetWatch() { return m_pWatch; }
+    typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
+    // TODO:  assign pWatch at time of construction, may simplify HandleGetInstrumentActions
+    //WatchInfo( void ): m_bActive( false ) {}
+    WatchInfo( pWatch_t pWatch ) { Set( pWatch ); }
     void Set( pWatch_t pWatch ) {
       if ( m_bActive ) {
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
@@ -167,19 +165,11 @@ private:
 	m_pWatch->StartWatch();
       }
     }
-    void EmitValues( void ) { m_pWatch->EmitValues(); }
-    void ApplyDataTo( ou::ChartDataView* view ) {
-      pInstrument_t pInstrument = m_pWatch->GetInstrument();
-      if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-        m_chartData.DefineChartOptions( view );
+    ~WatchInfo( void ) {
+      if ( 0 == m_pWatch.use_count() ) {
+	std::cout << "WatchInfo use_count is 0, bad thing" << std::endl;
       }
       else {
-        m_chartData.DefineChartEquities( view );
-      }
-      
-    }
-    ~WatchInfo( void ) {
-      if ( 0 != m_pWatch.use_count() ) {
         if ( m_bActive ) {
           m_bActive = false;
           m_pWatch->StopWatch();
@@ -192,44 +182,79 @@ private:
         }
       }
     }
+    //pWatch_t GetWatch() { return m_pWatch; }
+    //void EmitValues( void ) { m_pWatch->EmitValues(); }
+    void ApplyDataTo( ou::ChartDataView* view ) {
+      pInstrument_t pInstrument = m_pWatch->GetInstrument();
+      if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+        m_chartData.DefineChartOptions( view );
+      }
+      else {
+        m_chartData.DefineChartEquities( view );
+      }
+    }
+  private:
+    bool m_bActive;
+    pWatch_t m_pWatch;
+    ou::tf::ModelChartHdf5 m_chartData;
   };
   // =======
-
-  // contains the watches as shown in the gui, used for EmitValues
-  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
-  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
-  mapWatchInfo_t m_mapWatchInfo;
   
-  // unique list of instrument/watches, for all listed instruments, does not include option chains
+  typedef WatchInfo::pWatchInfo_t pWatchInfo_t;
+  
+  // TODO: better .second to reset chain display when map is cleared
+  //   chains shouldn't capture time series
+  typedef std::map<std::string,ou::tf::option::Option::pOption_t> mapOption_t; // iqfeed updates in the option chains
+  
+  typedef std::map<void*,ou::tf::Instrument::idInstrument_t> mapItemToInstrument_t;
+  mapItemToInstrument_t m_mapItemToInstrument;  // translate menu item id to instrument [many::1]
+  
+  // TODO: need to check move semantics to see if things get watched/unwatched
+  struct InstrumentEntry {
+    size_t m_cntMenuDependents;
+    pWatch_t m_pWatch;  // primary watch entry
+    pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items, when entry is option or foption
+    pWatchInfo_t m_pWatchInfo;  // live chart view
+    mapOption_t m_mapSelectedChainOptions;  // contains list of active watch options in chains
+    // position list -- to be implemented
+    // portfolio list -- to be implemented
+    InstrumentEntry( pWatch_t m_pWatch_, pWatchInfo_t pWatchInfo_ )
+      : m_cntMenuDependents {}, m_pWatch( m_pWatch_ ), m_pWatchInfo( pWatchInfo_ ) {}
+    virtual ~InstrumentEntry() {
+      m_mapSelectedChainOptions.clear();
+      m_pWatchInfo.reset();
+      m_pWatchUnderlying.reset();
+      m_pWatch.reset();
+    }
+  };
+  
+  // unique list of instrument/watches, for all listed instruments
   // instruments have been registered with instrument manager
   // used for saving series, and the underlying for option calcs
-  typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
-  mapInstrumentWatch_t m_mapInstrumentWatch;
+  typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
+  typedef std::map<idInstrument_t,InstrumentEntry> mapInstrumentEntry_t;
+  mapInstrumentEntry_t m_mapInstrumentEntry;
+  
+  // to be deprecated, and replaced with mapGuiEntry
+  //typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
+  //mapWatchInfo_t m_mapWatchInfo;
   
   // facilitates option greek calculations, shares watch from m_mapInstrumentWatch
-  struct OptionWatch {
+//  struct OptionWatch {
     //const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
     //unsigned int m_cntDown;
-    ou::tf::Quote m_quoteLastUnderlying;
-    ou::tf::Quote m_quoteLastOption;
-    pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items
-    pWatch_t m_pWatchOption;  // uses m_pWatchUnderlying for current value
-    OptionWatch( pWatch_t& pWatchUnderlying, pWatch_t& pWatchOption ):
+    //ou::tf::Quote m_quoteLastUnderlying;
+    //ou::tf::Quote m_quoteLastOption;
+//    pWatch_t m_pWatchOption;  // uses m_pWatchUnderlying for CalcIV
+//    pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items
+//    OptionWatch( pWatch_t& pWatchUnderlying, pWatch_t& pWatchOption ):
       //m_cntDown( m_cntDownStartingValue ), 
-      m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
-  };
+//      m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
+//  };
   
-  typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
-  mapOptionWatch_t m_mapOptionWatch;
-  
-  struct OptionChain {
-    bool bOn;
-    ou::tf::option::Option::pOption_t pOption;  // watch should automatically be killed
-    OptionChain(): bOn( false ) {}
-  };
-  
-  typedef std::map<std::string,OptionChain> mapOptionChain_t;
-  mapOptionChain_t m_mapOptionChain;
+  // need to use our generic instrument id here
+//  typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
+//  mapOptionWatch_t m_mapOptionWatch;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -278,6 +303,7 @@ private:
   
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
   pWatch_t ConstructWatch( pInstrument_t );
+  void ConstructInstrumentEntry( void* id, pInstrument_t, const std::string& sUnderlying );
   
   void HandleInstrumentLiveChart( const wxTreeItemId& );
 
@@ -289,6 +315,7 @@ private:
   void RemoveRightDetail();
   void ReplaceRightDetail( wxWindow* );
   void HandleGridClick( 
+    idInstrument_t,
     boost::gregorian::date date, double strike, 
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut );
