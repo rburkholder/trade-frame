@@ -287,9 +287,6 @@ private:
   wxSplitterWindow* m_splitter;
   wxBoxSizer* m_sizerRight;
   
-  void AddOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
-  void UpdateInstrumentStructures( const std::string& name );
-  
   void HandleTreeOpsChanging( wxTreeItemId id );
   
   void HandleLookUpDescription( const std::string&, std::string& );
@@ -302,8 +299,7 @@ private:
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
-  pWatch_t ConstructWatch( pInstrument_t );
-  void ConstructInstrumentEntry( void* id, pInstrument_t, const std::string& sUnderlying );
+  void ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t, const std::string& sUnderlying );
   
   void HandleInstrumentLiveChart( const wxTreeItemId& );
 
