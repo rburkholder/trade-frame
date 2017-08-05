@@ -51,7 +51,7 @@ public:
     double dblDividendAmount;
     double dblDividendRate;
     double dblDividendYield;
-    date dateExDividend;
+    boost::gregorian::date dateExDividend;
   };
 
   struct Summary_t {
