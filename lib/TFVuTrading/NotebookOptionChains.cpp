@@ -86,18 +86,20 @@ void NotebookOptionChains::CreateControls() {
 // start leaving old page
 void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
   int ixTab = event.GetOldSelection();
-  std::cout << "page changing: " << ixTab << std::endl;
-  mapOptionExpiry_t::iterator iter 
-   = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
-     return ixTab == vt.second.ixTab;
-  });
-  if ( m_mapOptionExpiry.end() == iter ) {
-    std::cout << "NotebookOptionChains::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
-  }
-  else {
-    iter->second.pWinOptionChain->TimerDeactivate();
-    if ( nullptr != m_fOnPageChanging ) {
-      m_fOnPageChanging( iter->first );
+  if ( -1 != ixTab ) {
+    //std::cout << "page changing: " << ixTab << std::endl;
+    mapOptionExpiry_t::iterator iter 
+     = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+       return ixTab == vt.second.ixTab;
+    });
+    if ( m_mapOptionExpiry.end() == iter ) {
+      std::cout << "NotebookOptionChains::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
+    }
+    else {
+      iter->second.pWinOptionChain->TimerDeactivate();
+      if ( nullptr != m_fOnPageChanging ) {
+        m_fOnPageChanging( iter->first );
+      }
     }
   }
   event.Skip();
@@ -106,7 +108,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
 // finishing arriving at new page
 void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
   int ixTab = event.GetSelection();
-  std::cout << "page changed: " << ixTab << std::endl;
+  //std::cout << "page changed: " << ixTab << std::endl;
   mapOptionExpiry_t::iterator iter 
    = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
      return ixTab == vt.second.ixTab;
@@ -125,6 +127,7 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
 
 void NotebookOptionChains::SetName( const std::string& sName ) {
   wxNotebook::SetName( sName );
+  m_sName = sName;
 }
 
 void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
@@ -132,7 +135,7 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
   
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
-    
+    // add another panel
     std::string sDate = boost::lexical_cast<std::string>( date.year() );
     sDate += std::string( "/" ) 
       + ( date.month().as_number() < 10 ? "0" : "" ) 
@@ -167,7 +170,7 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     InsertPage( iterExpiry->second.ixTab, pPanel, sDate );
     
     SetSelection( 0 );
-  }
+  } // end add panel
   
   mapStrike_t& mapStrike( iterExpiry->second.mapStrike ); // assumes single thread
   mapStrike_t::iterator iterStrike = mapStrike.find( strike );
@@ -187,6 +190,7 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
       break;
   }
   
+  // add option set to the expiry panel
   iterExpiry->second.pWinOptionChain->Add( strike, side, sSymbol );
   
 }

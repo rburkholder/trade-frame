@@ -124,6 +124,8 @@ private:
   
   bool m_bBound;
   
+  std::string m_sName;  // should be underlying so can use to lookup in PanelCharts
+  
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
   
