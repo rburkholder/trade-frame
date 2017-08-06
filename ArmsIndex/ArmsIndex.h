@@ -46,7 +46,7 @@ private:
   wxTimer m_timerGuiRefresh;
 
   FrameMain* m_pFrameMain;
-  FrameMain* m_pFPPOE;
+  //FrameMain* m_pFPPOE;
 
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelArmsIndex* m_pPanelArmsIndex;

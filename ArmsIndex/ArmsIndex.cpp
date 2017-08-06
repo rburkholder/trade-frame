@@ -46,11 +46,11 @@ bool AppArmsIndex::OnInit() {
 
   m_pPanelArmsIndex = new ou::tf::PanelArmsIndex( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(600, 200) );
   m_sizerMain->Add( m_pPanelArmsIndex, 1, wxALL | wxEXPAND, 2);
-//  m_pPanelArmsIndex->Show( true );
+  m_pPanelArmsIndex->Show( true );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize( -1, 125 ) );
   m_sizerMain->Add( m_pPanelLogging, 0, wxALL| wxALIGN_LEFT|wxALIGN_BOTTOM|wxEXPAND, 2 );
-//  m_pPanelLogging->Show( true );
+  m_pPanelLogging->Show( true );
 
   std::cout << "(c) 2013/12/13 One Unified Ltd.  All Rights Reserved.  info@oneunified.net" << std::endl;
 
@@ -87,6 +87,9 @@ bool AppArmsIndex::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppArmsIndex::OnClose, this );  // start close of windows and controls
 
   Bind( EVENT_PROVIDER_CONNECTED, &AppArmsIndex::HandleProviderConnected, this );
+
+  m_pFrameMain->SetAutoLayout( true );
+  m_pFrameMain->Layout();
 
   m_bData1Connected = false;
   m_bExecConnected = false;

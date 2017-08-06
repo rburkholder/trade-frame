@@ -15,10 +15,12 @@
 
 #pragma once
 
-#ifdef _M_X64
-#include <OUCharting/ChartDirector64/chartdir.h>
+#if defined(__x86_64__)
+#include "OUCharting/ChartDirector64/chartdir.h"
+#elif defined(_M_X64)
+#include "ChartDirector64/chartdir.h"
 #else
-#include <OUCharting/ChartDirector/chartdir.h>
+#include "ChartDirector/chartdir.h"
 #endif
 
 class ArmsChart {
