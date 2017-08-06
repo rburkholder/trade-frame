@@ -35,7 +35,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-//#include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
 #include <TFVuTrading/GridIBPositionDetails.h>
 #include <TFVuTrading/GridIBAccountValues.h>
@@ -104,7 +104,6 @@ private:
   // maybe serialize these settings?
   //bool m_bData1Connected;  // available in FrameWork01
   //bool m_bExecConnected;  // available in FrameWork01
-  bool m_bStarted;
 
   std::string m_sDbName;
   
@@ -162,7 +161,7 @@ private:
   
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-//  ou::tf::PanelManualOrder* m_pPanelManualOrder;
+  ou::tf::PanelManualOrder* m_pPanelManualOrder;
 //  MPPOE_t* m_pMPPOE;
 //  PPPOE_t* m_pPPPOE;
 //  CPPOE_t* m_pCPPOE;
@@ -199,10 +198,10 @@ private:
 
   virtual bool OnInit();
   virtual int OnExit();
+  virtual void OnAssertFailure( const wxChar*, int, const wxChar*, const wxChar*, const wxChar* );
+  //virtual void HandleEvent( wxEvtHandler*, wxEventFunction, wxEvent& ) const;
   void OnClose( wxCloseEvent& event );
 
-  void Start( void );
-  void Stop( void );
   void TestSymbols( void );
   
   void HandleMenuActionEmitYieldCurve( void );
@@ -214,7 +213,7 @@ private:
   void BuildFramePortfolioPosition( void );
   void BuildFrameInteractiveBrokers( void );
 
-//  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
+  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
   void HandlePanelFocusPropogate( unsigned int ix );
 
@@ -263,6 +262,7 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pFCharts;
     ar & *m_pFInteractiveBrokers;
+    ar & *m_pFPPOE;
     ar & m_splitPanels->GetSashPosition();
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
@@ -274,6 +274,9 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pFCharts;
     ar & *m_pFInteractiveBrokers;
+    if ( 2 <= version ) {
+      ar & *m_pFPPOE;
+    }
     int x;
     ar & x;
     m_splitPanels->SetSashPosition( x );
@@ -285,6 +288,6 @@ private:
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 1)
+BOOST_CLASS_VERSION(AppComboTrading, 2)
 DECLARE_APP(AppComboTrading)
 

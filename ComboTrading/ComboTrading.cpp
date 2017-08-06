@@ -95,6 +95,11 @@ IMPLEMENT_APP(AppComboTrading)
 const std::string sFileNameMarketSymbolSubset( "../combotrading.ser" );
 
 bool AppComboTrading::OnInit() {
+  
+  wxApp::OnInit();
+  wxApp::SetAppDisplayName( "Combo Trading" );
+  wxApp::SetVendorName( "OneUnified" );
+  wxApp:SetVendorDisplayName( "One Unified" );
 
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
@@ -134,12 +139,17 @@ bool AppComboTrading::OnInit() {
   m_tws->SetClientId( 3 );
 
   LinkToPanelProviderControl();
+/*
+  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
+  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
+  //m_pPanelManualOrder->Enable( true );  // portfolio isn't working properly with manual order instrument field
+  m_pPanelManualOrder->Show( true );
 
-//  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
-//  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-//  m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
-//  m_pPanelManualOrder->Show( true );
-
+  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppComboTrading::HandlePanelNewOrder ) );
+  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppComboTrading::HandlePanelSymbolText ) );
+  m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppComboTrading::HandlePanelFocusPropogate ) );
+*/
 /*
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
@@ -164,29 +174,8 @@ bool AppComboTrading::OnInit() {
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
   m_idPortfolioMaster = "master";  // keeps name constant over multiple days
   
-  m_sDbName = "ComboTrading.db";
-  try {
-    if ( boost::filesystem::exists( m_sDbName ) ) {
-  //    boost::filesystem::remove( sDbName );
-    }
-
-    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
-    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
-    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
-    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
-
-    m_sWorkingDirectory = "..";
-    m_sfnState = "ComboTrading.state";
-    
-    m_db.Open( m_sDbName );
-  }
-  catch(...) {
-    std::cout << "database fault on " << m_sDbName << std::endl;
-  }
-
   //m_bData1Connected = false;
   //m_bExecConnected = false;
-  m_bStarted = false;
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
@@ -213,10 +202,6 @@ bool AppComboTrading::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppComboTrading::OnClose, this );  // start close of windows and controls
 
-//  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppComboTrading::HandlePanelNewOrder ) );
-//  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppComboTrading::HandlePanelSymbolText ) );
-//  m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppComboTrading::HandlePanelFocusPropogate ) );
-
   Bind( EVENT_IB_INSTRUMENT, &AppComboTrading::HandleIBInstrument, this );
   
   m_pFrameMain->SetAutoLayout( true );
@@ -224,10 +209,54 @@ bool AppComboTrading::OnInit() {
   
   BuildFrameCharts();
   BuildFrameInteractiveBrokers();
-  //BuildFramePortfolioPosition();
+  BuildFramePortfolioPosition();
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
+  pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
+
+  m_sDbName = "ComboTrading.db";
+  try {
+    if ( boost::filesystem::exists( m_sDbName ) ) {
+  //    boost::filesystem::remove( sDbName );
+    }
+
+    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
+    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
+    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
+    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
+
+    m_sWorkingDirectory = "..";
+    m_sfnState = "ComboTrading.state";
+    
+    m_db.Open( m_sDbName );
+  }
+  catch(...) {
+    std::cout << "database fault on " << m_sDbName << std::endl;
+  }
 
   return 1;
+}
 
+int AppComboTrading::OnExit() {
+    
+  // called after destroying all application windows
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
+  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
+  
+//  DelinkFromPanelProviderControl();  generates stack errors
+  
+  m_timerGuiRefresh.Stop();
+  
+  m_db.OnRegisterTables.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
+  m_db.OnRegisterRows.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
+  
+  assert( m_db.IsOpen() );
+  m_db.Close();
+
+  return wxApp::OnExit();
 }
 
 void AppComboTrading::ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t function ) {
@@ -364,7 +393,8 @@ void AppComboTrading::BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstru
 void AppComboTrading::BuildFramePortfolioPosition( void ) {
   
   m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
-    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+//    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+        wxCAPTION|wxRESIZE_BORDER
     );
 
   m_sizerPM = new wxBoxSizer(wxVERTICAL);
@@ -378,50 +408,15 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
 
-  m_pFPPOE->SetAutoLayout( true );
-  m_pFPPOE->Layout();
-
   wxPoint point = m_pFPPOE->GetPosition();
   point.x += 500;
   point.y += 100;
   m_pFPPOE->SetPosition( point );
   m_pFPPOE->Show();
   
-}
+  m_pFPPOE->SetAutoLayout( true );
+  m_pFPPOE->Layout();
 
-void AppComboTrading::Start( void ) {
-  if ( !m_bStarted ) {  
-    // old stuff
-    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-    pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
-    pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
-
-    if ( 0 != m_pFPPOE ) {
-      m_pFPPOE->Update();
-      //m_pFPPOE->Refresh();
-      //m_pFPPOE->SetAutoLayout( true );
-      m_pFPPOE->Layout();  
-    }
-
-    m_bStarted = true;
-  }
-}
-
-void AppComboTrading::Stop( void ) {
-  if ( m_bStarted ) {  
-    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-    pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
-    pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
-
-    //if ( 0 != m_pFPPOE ) {
-      //m_pFPPOE->Update();
-      //m_pFPPOE->Refresh();
-      //m_pFPPOE->SetAutoLayout( true );
-      //m_pFPPOE->Layout();  
-    //}
-
-    m_bStarted = false;
-  }
 }
 
 // 20151124 priority:  get the symbols tracking, draw charts, and watch volatility on futures and equities
@@ -923,7 +918,7 @@ void AppComboTrading::HandlePopulateDatabase( void ) {
 
   m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-      m_idPortfolioMaster, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "StickShift" );
+      m_idPortfolioMaster, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "ComboTrading" );
 
   ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolioMaster, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
@@ -943,7 +938,7 @@ void AppComboTrading::HandleLoadDatabase( void ) {
     pm.LoadActivePortfolios();
 }
 
-/*
+// copied from StickShift2, maybe put in common place
 void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order ) {
   try {
     ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
@@ -979,7 +974,6 @@ void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order
     int i = 1;
   }
 }
-*/
 
 void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
   // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
@@ -1061,23 +1055,6 @@ void AppComboTrading::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-int AppComboTrading::OnExit() {
-    
-  // called after destroying all application windows
-
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
-
-//  DelinkFromPanelProviderControl();  generates stack errors
-  m_timerGuiRefresh.Stop();
-  if ( m_db.IsOpen() ) m_db.Close();
-
-//  delete m_pCPPOE;
-//  m_pCPPOE = 0;
-
-  return wxApp::OnExit();
-}
-
 // this probably isn't in the gui thread
 void AppComboTrading::OnData1Connecting( int status ) {
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
@@ -1085,9 +1062,9 @@ void AppComboTrading::OnData1Connecting( int status ) {
 
 // this probably isn't in the gui thread
 void AppComboTrading::OnData1Connected( int status ) {
-  if ( m_bData1Connected & m_bExecConnected ) {
-    Start();
-  }
+//  if ( m_bData1Connected & m_bExecConnected ) {
+//    Start();
+//  }
   //m_pPanelCharts->StartWatch();
 }
 
@@ -1098,9 +1075,9 @@ void AppComboTrading::OnData1Disconnecting( int status ) {
 
 // this probably isn't in the gui thread
 void AppComboTrading::OnData1Disconnected( int status ) {
-  if ( !m_bData1Connected & !m_bExecConnected ) {
-    Stop();
-  }
+//  if ( !m_bData1Connected & !m_bExecConnected ) {
+//    Stop();
+//  }
 }
 
 // this probably isn't in the gui thread
@@ -1111,7 +1088,7 @@ void AppComboTrading::OnExecConnecting( int status ) {
 // this probably isn't in the gui thread
 void AppComboTrading::OnExecConnected( int status ) {
   if ( m_bData1Connected & m_bExecConnected ) {
-    Start();
+//    Start();
   }
 }
 
@@ -1122,7 +1099,7 @@ void AppComboTrading::OnExecDisconnecting( int status ) {
 // this probably isn't in the gui thread
 void AppComboTrading::OnExecDisconnected( int status ) {
   if ( !m_bData1Connected & !m_bExecConnected ) {
-    Stop();
+//    Stop();
   }
 }
 
@@ -1143,4 +1120,18 @@ void AppComboTrading::HandleMenuActionEmitYieldCurve( void ) {
   std::cout << "FedRate: " << std::endl << m_fedrate;
 }
 
+void AppComboTrading::OnAssertFailure( 
+  const wxChar* file, int line, const wxChar* function, const wxChar* condition, const wxChar* message ) {
+  std::cout
+    << "wxAssert: "
+    << " file " << file
+    << " line " << line
+    << " function " << function
+    << " condition " << condition
+    << " message " << message
+    << std::endl;
+}
 
+//void AppComboTrading::HandleEvent( wxEvtHandler*, wxEventFunction, wxEvent& ) const {
+//   //wxASSERT( 0 );
+//}
