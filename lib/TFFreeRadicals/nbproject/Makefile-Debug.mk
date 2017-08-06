@@ -68,12 +68,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtffreeradicals.a: ${OBJECTFILES}
 ${OBJECTDIR}/HistoryDailyTick.o: HistoryDailyTick.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HistoryDailyTick.o HistoryDailyTick.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HistoryDailyTick.o HistoryDailyTick.cpp
 
 ${OBJECTDIR}/MarketStates.o: MarketStates.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketStates.o MarketStates.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketStates.o MarketStates.cpp
 
 # Subprojects
 .build-subprojects:

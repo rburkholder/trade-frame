@@ -41,6 +41,9 @@
         <ccTool>
           <architecture>2</architecture>
           <standard>8</standard>
+          <incDir>
+            <pElem>../</pElem>
+          </incDir>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
