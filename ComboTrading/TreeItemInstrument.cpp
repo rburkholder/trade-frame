@@ -29,7 +29,7 @@
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-  TreeItemResources( id, baseResources, resources ), m_lockType( InstrumentActions::ENewInstrumentLock::NoLock ) {
+  TreeItemResources( id, baseResources, resources ), m_lockType( InstrumentActions::ENewInstrumentLock::LockBasic ) {
   //std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
@@ -72,7 +72,7 @@ void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
   switch ( m_lockType ) {
-    case InstrumentActions::ENewInstrumentLock::NoLock:
+    case InstrumentActions::ENewInstrumentLock::LockBasic:
       pMenu->Append( MINewInstrument, "New Instrument" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
       break;
@@ -89,6 +89,9 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
       
       pMenu->Append( MIOptionList, "Option List" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
+      break;
+    case InstrumentActions::ENewInstrumentLock::LockNoInstrument:
+      // no menu for options, future options, etc
       break;
     default:
       std::cout << "TreeItemInstrument::BuildContextMenu has unknown lockType: " << m_lockType << std::endl;
@@ -140,7 +143,7 @@ void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) {
 }
 
 void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
-  InstrumentViaDialog( InstrumentActions::NoLock, "Instrument Name" );
+  InstrumentViaDialog( InstrumentActions::LockBasic, "Instrument Name" );
 }
 
 void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt ) {

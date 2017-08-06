@@ -185,6 +185,8 @@ private:
     //pWatch_t GetWatch() { return m_pWatch; }
     //void EmitValues( void ) { m_pWatch->EmitValues(); }
     void ApplyDataTo( ou::ChartDataView* view ) {
+      if ( 0 == m_pWatch.use_count() )
+        assert( 0 );
       pInstrument_t pInstrument = m_pWatch->GetInstrument();
       if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
         m_chartData.DefineChartOptions( view );

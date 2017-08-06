@@ -36,14 +36,14 @@ class InstrumentActions {
 public:
   
   // instrument dialog locks to option or futuresoption when adding sub-menu to underlying instrument
-  enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
+  enum ENewInstrumentLock { LockBasic, LockOption, LockFuturesOption, LockNoInstrument };
   
   typedef boost::shared_ptr<InstrumentActions> pInstrumentActions_t;
   
   struct values_t {
     std::string name_;
     ENewInstrumentLock lockType_;
-    values_t( void ): lockType_( ENewInstrumentLock::NoLock ) {}
+    values_t( void ): lockType_( ENewInstrumentLock::LockBasic ) {}
     values_t( const values_t& rhs ): name_( rhs.name_ ), lockType_( rhs.lockType_ ) {}
     values_t( const std::string& name, const ENewInstrumentLock lockType )
       : name_( name ), lockType_( lockType ) {}

@@ -105,6 +105,7 @@ public:
   
   virtual void SetDataExchange( DataExchange* pde );
   
+  void SetBasic( void ); // equities and futures
   void SetOptionOnly( void );
   void SetFuturesOptionOnly( void );
   

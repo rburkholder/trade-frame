@@ -271,6 +271,18 @@ void DialogPickSymbol::CreateControls() {
 
 }
 
+void DialogPickSymbol::SetBasic( void ) {
+  m_bOptionOnly = false;
+  m_bFuturesOptionOnly = false;
+  m_radioEquity->Enable();
+  m_radioFuture->Enable();
+  m_radioFOption->Disable();
+  m_radioOption->Disable();
+  m_radioOption->SetValue( false );
+  m_radioFOption->SetValue( false );
+  SetRadioOption();
+}
+
 void DialogPickSymbol::SetOptionOnly( void ) {
   m_bOptionOnly = true;
   m_radioEquity->Disable();
@@ -294,7 +306,7 @@ void DialogPickSymbol::SetFuturesOptionOnly( void ) {
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   
   //std::cout << "DialogPickSymbol::HandleIQFSymbolChanged entered" << std::endl;
-
+  
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   
   m_txtSymbolDescription->SetLabel( "" );
@@ -425,7 +437,7 @@ void DialogPickSymbol::UpdateComposite( void ) {
   UpdateContractId();
   
   pde->sIQFSymbolName = this->m_textIQFName->GetValue();
-  pde->sCompositeDescription = "";
+  pde->sCompositeDescription = "";  // UpdateContractId set button to ok, this undoes it
   pde->signalComposeComposite( pde );
   m_textComposite->SetValue( pde->sCompositeName );
   m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
@@ -434,7 +446,8 @@ void DialogPickSymbol::UpdateComposite( void ) {
 
 void DialogPickSymbol::UpdateBtnOk( void ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  m_btnOk->Enable( ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId ) );
+  bool bOk = ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId );
+  m_btnOk->Enable( bOk );
 }
 
 void DialogPickSymbol::UpdateContractId( void ) {
@@ -478,10 +491,42 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    wxDateTime dt = m_dateExpiry->GetValue();
-    pde->year = dt.GetYear();
-    pde->month = dt.GetMonth();
-    pde->day = dt.GetDay();
+    
+    std::vector<wxDateTime::Month> vMonth = { 
+      wxDateTime::Month::Jan,
+      wxDateTime::Month::Feb,
+      wxDateTime::Month::Mar,
+      wxDateTime::Month::Apr,
+      wxDateTime::Month::May,
+      wxDateTime::Month::Jun,
+      wxDateTime::Month::Jul,
+      wxDateTime::Month::Aug,
+      wxDateTime::Month::Sep,
+      wxDateTime::Month::Oct,
+      wxDateTime::Month::Nov,
+      wxDateTime::Month::Dec
+    };
+    wxDateTime::Month month = vMonth[ pde->month ];
+    if ( ( pde->year > 0 ) && ( pde->month > 0 ) && ( pde->day > 0 ) ) {
+      const wxDateTime dt( pde->day, month, pde->year, 0, 0 );
+      m_dateExpiry->SetValue( dt);
+    }
+    else {
+      wxDateTime dt = m_dateExpiry->GetValue();
+      pde->year = dt.GetYear();
+      pde->month = dt.GetMonth();
+      pde->day = dt.GetDay();
+    }
+    
+    switch ( pde->os ) {
+      case OptionSide::enumOptionSide::Call:
+        m_radioOptionCall->SetValue( true );
+        break;
+      case OptionSide::enumOptionSide::Put:
+        m_radioOptionPut->SetValue( true );
+        break;
+    }
+    
     //m_textIQFName->SetFocus();
   }
   else {

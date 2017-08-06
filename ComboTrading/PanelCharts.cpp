@@ -561,6 +561,7 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
 void PanelCharts::HandleLoadInstrument( 
   const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying 
 ) {
+  // need to set values/locks somewhere
   ConstructInstrumentEntry( item, signalLoadInstrument( sName ), sUnderlying );
 }
 
@@ -591,7 +592,12 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
     case InstrumentActions::ENewInstrumentLock::LockOption:
       m_pDialogPickSymbol->SetOptionOnly();
       break;
-    case InstrumentActions::ENewInstrumentLock::NoLock:
+    case InstrumentActions::ENewInstrumentLock::LockBasic:
+      m_pDialogPickSymbol->SetBasic();
+      break;
+    case InstrumentActions::ENewInstrumentLock::LockNoInstrument:
+      // should be no instrument popup
+      assert( 0 );
       break;
   }
   
@@ -618,6 +624,8 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
         //  ie, on load from file, are they set there?
         if ( m_pDialogPickSymbolCreatedInstrument->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
         if ( m_pDialogPickSymbolCreatedInstrument->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsOption() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockNoInstrument;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsFuturesOption() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockNoInstrument;
         //iter->second->Set( pInstrumentWatch );
 
       }
