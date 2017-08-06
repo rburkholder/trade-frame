@@ -176,61 +176,77 @@ void DialogPickSymbol::CreateControls() {
     m_textStrike->Enable(false);
     itemBoxSizer24->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer23->Add(itemBoxSizer27, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer23->Add(itemBoxSizer27, 0, wxGROW|wxALL, 2);
 
     wxStaticText* itemStaticText28 = new wxStaticText( itemPanel1, wxID_STATIC, _("Option Side:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer27->Add(itemStaticText28, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer27->Add(itemStaticText28, 0, wxALIGN_LEFT|wxALL, 2);
+
+    wxBoxSizer* itemBoxSizer29 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer27->Add(itemBoxSizer29, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 3);
 
     m_radioOptionPut = new wxRadioButton( itemPanel1, ID_RADIO_PUT, _("Put"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioOptionPut->SetValue(false);
     m_radioOptionPut->Enable(false);
-    itemBoxSizer27->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer29->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    itemBoxSizer29->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_radioOptionCall = new wxRadioButton( itemPanel1, ID_RADIO_CALL, _("Call"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioOptionCall->SetValue(false);
     m_radioOptionCall->Enable(false);
-    itemBoxSizer27->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer29->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer31 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer23->Add(itemBoxSizer31, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer33 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer22->Add(itemBoxSizer33, 0, wxALIGN_TOP|wxALL, 5);
 
-    wxStaticText* itemStaticText32 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer31->Add(itemStaticText32, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxBoxSizer* itemBoxSizer34 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer33->Add(itemBoxSizer34, 0, wxALIGN_LEFT|wxALL, 2);
+
+    wxStaticText* itemStaticText35 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer34->Add(itemStaticText35, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxSize(120, -1), wxDP_DEFAULT|wxDP_SHOWCENTURY );
     m_dateExpiry->Enable(false);
-    itemBoxSizer31->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer34->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer34 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer22->Add(itemBoxSizer34, 0, wxALIGN_TOP|wxALL, 2);
+    wxBoxSizer* itemBoxSizer37 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer33->Add(itemBoxSizer37, 0, wxGROW|wxALL, 2);
+
+    wxStaticText* itemStaticText38 = new wxStaticText( itemPanel1, wxID_STATIC, _("Currency:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer37->Add(itemStaticText38, 0, wxALIGN_LEFT|wxALL, 2);
+
+    wxBoxSizer* itemBoxSizer39 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer37->Add(itemBoxSizer39, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 3);
 
     m_radioCurrencyUSD = new wxRadioButton( itemPanel1, ID_RADIO_USD, _("USD"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioCurrencyUSD->SetValue(true);
     m_radioCurrencyUSD->Enable(false);
-    itemBoxSizer34->Add(m_radioCurrencyUSD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    itemBoxSizer39->Add(m_radioCurrencyUSD, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    itemBoxSizer39->Add(19, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_radioCurrencyCAD = new wxRadioButton( itemPanel1, ID_RADIO_CAD, _("CAD"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioCurrencyCAD->SetValue(false);
     m_radioCurrencyCAD->Enable(false);
-    itemBoxSizer34->Add(m_radioCurrencyCAD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    itemBoxSizer39->Add(m_radioCurrencyCAD, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer37 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer37, 0, wxGROW|wxALL, 2);
+    wxBoxSizer* itemBoxSizer43 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer43, 0, wxGROW|wxALL, 2);
 
-    itemBoxSizer37->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer43->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_btnOk = new wxButton( itemPanel1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     m_btnOk->Enable(false);
-    itemBoxSizer37->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
+    itemBoxSizer43->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
 
-    itemBoxSizer37->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer43->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_btnCancel = new wxButton( itemPanel1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer37->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer43->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    itemBoxSizer37->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
-    
+    itemBoxSizer43->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
     
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIQFSymbolChanged, this, ID_TEXT_IQF_SYMBOL );
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIBSymbolChanged, this, ID_TEXT_IB_SYMBOL );
