@@ -82,22 +82,23 @@ void DialogInstrumentSelect::CreateControls() {
     itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
     wxArrayString m_cbSymbolStrings;
-    m_cbSymbol = new wxComboBox( itemDialog1, ID_CBSymbol, wxEmptyString, wxDefaultPosition, wxSize(100, -1), m_cbSymbolStrings, wxCB_DROPDOWN );
-    itemBoxSizer3->Add(m_cbSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_cbSymbol = new wxComboBox( itemDialog1, ID_CBSymbol, wxEmptyString, wxDefaultPosition, wxSize(170, -1), m_cbSymbolStrings, wxCB_DROPDOWN );
+    itemBoxSizer3->Add(m_cbSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_lblDescription = new wxStaticText( itemDialog1, ID_LblDescription, _("Description"), wxDefaultPosition, wxSize(200, -1), 0 );
-    itemBoxSizer3->Add(m_lblDescription, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_lblDescription = new wxStaticText( itemDialog1, ID_LblDescription, _("Description"), wxDefaultPosition, wxSize(300, -1), 0 );
+    itemBoxSizer3->Add(m_lblDescription, 1, wxALIGN_CENTER_VERTICAL, 2);
 
     wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer6, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer2->Add(itemBoxSizer6, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
     m_btnOk = new wxButton( itemDialog1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_btnOk->Enable( false );
     itemBoxSizer6->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_btnCancel = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer6->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer6->Add(20, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+    m_btnCancel = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer6->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    
     Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogInstrumentSelect::HandleTextChange, this, ID_CBSymbol );
 
 }

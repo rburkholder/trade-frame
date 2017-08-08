@@ -1124,11 +1124,11 @@ void AppComboTrading::OnAssertFailure(
   const wxChar* file, int line, const wxChar* function, const wxChar* condition, const wxChar* message ) {
   std::cout
     << "wxAssert: "
-    << " file " << file
+    << " file " << *file
     << " line " << line
-    << " function " << function
-    << " condition " << condition
-    << " message " << message
+    << " function " << *function
+    << " condition " << *condition
+    << " message " << *message
     << std::endl;
 }
 

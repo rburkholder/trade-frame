@@ -202,7 +202,7 @@ void PanelPortfolioPosition_impl::OnPositionPopUpAddPosition( wxCommandEvent& ev
   std::cout << "add position" << std::endl;
   if ( !m_bDialogActive ) {
     m_bDialogActive = true;
-    m_pdialogInstrumentSelect = new ou::tf::DialogInstrumentSelect( &m_ppp );
+    m_pdialogInstrumentSelect = new ou::tf::DialogInstrumentSelect( &m_ppp, wxID_ANY, "Instrument Selection" );
     m_pdialogInstrumentSelect->SetDataExchange( &m_DialogInstrumentSelect_DataExchange );
     m_pdialogInstrumentSelect->SetOnDoneHandler( MakeDelegate( this, &PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone ) );
     m_pdialogInstrumentSelect->Show( true );
@@ -248,9 +248,6 @@ void PanelPortfolioPosition_impl::OnPositionPopUpClosePortfolio( wxCommandEvent&
 void PanelPortfolioPosition_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* ) {
   m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
   m_pdialogNewPortfolio->SetDataExchange( 0 );
-  delete m_pdialogNewPortfolio;
-  m_pdialogNewPortfolio = 0;
-  m_bDialogActive = false;
   if ( m_DialogNewPortfolio_DataExchange.bOk ) {
     if ( 0 != m_delegateConstructPortfolio ) {
       std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
@@ -258,14 +255,14 @@ void PanelPortfolioPosition_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::
       m_delegateConstructPortfolio( m_ppp, sPortfolioId, sDescription );
     }
   }
+  m_pdialogNewPortfolio->Destroy();
+  m_pdialogNewPortfolio = 0;
+  m_bDialogActive = false;
 }
 
 void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
   m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
   m_pdialogInstrumentSelect->SetDataExchange( 0 );
-  delete m_pdialogInstrumentSelect;
-  m_pdialogInstrumentSelect = 0;
-  m_bDialogActive = false;
   if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
     std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
     std::string s( m_DialogInstrumentSelect_DataExchange.sSymbolName );
@@ -273,14 +270,12 @@ void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBa
       m_delegateConstructPosition( s, m_pPortfolio, MakeDelegate( this, &PanelPortfolioPosition_impl::AddPosition ) ); 
     }
   }
+  m_pdialogInstrumentSelect->Destroy();
+  m_pdialogInstrumentSelect = 0;
+  m_bDialogActive = false;
 }
 
 void PanelPortfolioPosition_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* ) {
-  m_pdialogSimpleOneLineOrder->SetOnDoneHandler( 0 );
-  m_pdialogSimpleOneLineOrder->SetDataExchange( 0 );
-  delete m_pdialogSimpleOneLineOrder;
-  m_pdialogSimpleOneLineOrder = 0;
-  m_bDialogActive = false;
   if ( m_DialogSimpleOneLineOrder_DataExchange.bOk ) {
     // compose order and send it off
     // need to know for which position the order is meant
@@ -332,6 +327,11 @@ void PanelPortfolioPosition_impl::OnDialogSimpleOneLineOrderDone( ou::tf::Dialog
       }
     }
   }
+  m_pdialogSimpleOneLineOrder->SetOnDoneHandler( 0 );
+  m_pdialogSimpleOneLineOrder->SetDataExchange( 0 );
+  m_pdialogSimpleOneLineOrder->Destroy();
+  m_pdialogSimpleOneLineOrder = 0;
+  m_bDialogActive = false;
 }
 
 void PanelPortfolioPosition_impl::AddPosition( pPosition_t pPosition ) {
