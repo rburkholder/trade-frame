@@ -22,7 +22,6 @@
 #include <wx/radiobut.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
-//#include <wx/srchctrl.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 
@@ -48,7 +47,8 @@ private:
 wxDECLARE_EVENT( EVT_SetFocus, SetFocusEvent );
 
 //#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
-#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxCLOSE_BOX|wxTAB_TRAVERSAL
+//#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxCLOSE_BOX|wxTAB_TRAVERSAL
+#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxTAB_TRAVERSAL
 #define SYMBOL_PANELPICKSYMBOL_TITLE _("Dialog Pick Symbol")
 #define SYMBOL_PANELPICKSYMBOL_IDNAME ID_PANELPICKSYMBOL
 #define SYMBOL_PANELPICKSYMBOL_SIZE wxSize(400, 300)
