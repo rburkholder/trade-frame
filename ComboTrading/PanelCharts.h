@@ -295,7 +295,7 @@ private:
   
   InstrumentActions::values_t HandleNewInstrumentRequest( 
     const wxTreeItemId& item, 
-    const InstrumentActions::ENewInstrumentLock,
+    const InstrumentActions::EAllowedInstrumentSelectors,
     const wxString& sUnderlying
   );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );

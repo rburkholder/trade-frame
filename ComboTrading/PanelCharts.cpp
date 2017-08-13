@@ -567,7 +567,7 @@ void PanelCharts::HandleLoadInstrument(
 
 InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( 
   const wxTreeItemId& item, 
-  const InstrumentActions::ENewInstrumentLock lock,
+  const InstrumentActions::EAllowedInstrumentSelectors lock,
   const wxString& wxsUnderlying // optional
 ) {
   
@@ -586,16 +586,16 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
   m_pDialogPickSymbol->SetDataExchange( &m_de );
   
   switch ( lock ) {
-    case InstrumentActions::ENewInstrumentLock::LockFuturesOption:
+    case InstrumentActions::EAllowedInstrumentSelectors::FuturesOptionsAllowed:
       m_pDialogPickSymbol->SetFuturesOptionOnly();
       break;
-    case InstrumentActions::ENewInstrumentLock::LockOption:
+    case InstrumentActions::EAllowedInstrumentSelectors::OptionsAllowed:
       m_pDialogPickSymbol->SetOptionOnly();
       break;
-    case InstrumentActions::ENewInstrumentLock::LockBasic:
+    case InstrumentActions::EAllowedInstrumentSelectors::AllAllowed:
       m_pDialogPickSymbol->SetBasic();
       break;
-    case InstrumentActions::ENewInstrumentLock::LockNoInstrument:
+    case InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed:
       // should be no instrument popup
       assert( 0 );
       break;
@@ -622,10 +622,10 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
         values.name_ = idInstrument;
         // are these lock types propagated properly?
         //  ie, on load from file, are they set there?
-        if ( m_pDialogPickSymbolCreatedInstrument->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsOption() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockNoInstrument;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsFuturesOption() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockNoInstrument;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsStock() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::OptionsAllowed;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsFuture() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::FuturesOptionsAllowed;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsOption() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed;
+        if ( m_pDialogPickSymbolCreatedInstrument->IsFuturesOption() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed;
         //iter->second->Set( pInstrumentWatch );
 
       }

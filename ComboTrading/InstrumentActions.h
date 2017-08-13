@@ -35,22 +35,24 @@
 class InstrumentActions {
 public:
   
-  // instrument dialog locks to option or futuresoption when adding sub-menu to underlying instrument
-  enum ENewInstrumentLock { LockBasic, LockOption, LockFuturesOption, LockNoInstrument };
+  // * instrument dialog may be limited to a subset of instruments
+  // * menu tree presents certain options depending upon what is allowed
+  // * need to get this out of here for more generic use, maybe in the enumerations file
+  enum EAllowedInstrumentSelectors { AllAllowed, OptionsAllowed, FuturesOptionsAllowed, NoneAllowed };
   
   typedef boost::shared_ptr<InstrumentActions> pInstrumentActions_t;
   
   struct values_t {
     std::string name_;
-    ENewInstrumentLock lockType_;
-    values_t( void ): lockType_( ENewInstrumentLock::LockBasic ) {}
-    values_t( const values_t& rhs ): name_( rhs.name_ ), lockType_( rhs.lockType_ ) {}
-    values_t( const std::string& name, const ENewInstrumentLock lockType )
-      : name_( name ), lockType_( lockType ) {}
+    EAllowedInstrumentSelectors selector;
+    values_t( void ): selector( EAllowedInstrumentSelectors::AllAllowed ) {}
+    values_t( const values_t& rhs ): name_( rhs.name_ ), selector( rhs.selector ) {}
+    values_t( const std::string& name, const EAllowedInstrumentSelectors selector_ )
+      : name_( name ), selector( selector_ ) {}
   };
   
   // used in TreeItemInstrument
-  typedef boost::signals2::signal<values_t (const wxTreeItemId&, ENewInstrumentLock, const wxString&), 
+  typedef boost::signals2::signal<values_t (const wxTreeItemId&, EAllowedInstrumentSelectors, const wxString&), 
                                   ou::tf::FirstOrDefault<values_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrument;
@@ -59,10 +61,10 @@ public:
   typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
   signalLoadInstrument_t signalLoadInstrument;
   
-  typedef boost::signals2::signal<ENewInstrumentLock (const wxTreeItemId&),
-                                  ou::tf::FirstOrDefault<ENewInstrumentLock> > signalGetLockType_t;
-  typedef signalGetLockType_t::slot_type slotGetLockType_t;
-  signalGetLockType_t signalGetLockType;
+//  typedef boost::signals2::signal<EAllowedInstrumentSelectors (const wxTreeItemId&),
+//                                  ou::tf::FirstOrDefault<EAllowedInstrumentSelectors> > signalGetInstrumentSelector_t;
+//  typedef signalGetInstrumentSelector_t::slot_type slotGetInstrumentSelector_t;
+//  signalGetInstrumentSelector_t signalGetInstrumentSelector;
   
   typedef boost::signals2::signal<void (const wxTreeItemId&)> signalLiveChart_t;
   typedef signalLiveChart_t::slot_type slotLiveChart_t;

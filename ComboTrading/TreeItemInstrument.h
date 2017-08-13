@@ -38,7 +38,7 @@ public:
   void HandleMenuNewInstrument( wxCommandEvent& event );
   
   // todo: invocable only if no instrument already exists
-  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const wxString& wxsUnderlying = "" ); 
+  bool NewInstrumentViaDialog( InstrumentActions::EAllowedInstrumentSelectors lock, const wxString& wxsUnderlying = "" ); 
   
 protected:
 
@@ -70,11 +70,11 @@ private:
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
   
-  InstrumentActions::ENewInstrumentLock m_lockType;
+  InstrumentActions::EAllowedInstrumentSelectors m_InstrumentSelector;
 
   std::string m_sUnderlying;
     
-  void InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt );
+  void InstrumentViaDialog( InstrumentActions::EAllowedInstrumentSelectors lock, const std::string& sPrompt );
   
   // need to keep track of (load, save)
   //   * menu item text (as it can be changed)
@@ -84,7 +84,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const TreeItemResources>(*this);
     
-    ar & m_lockType;
+    ar & m_InstrumentSelector;
     ar & m_sUnderlying;
     
     const mapMembers_t::size_type n = m_mapMembers.size();
@@ -106,7 +106,7 @@ private:
   void load( Archive& ar, const unsigned int version ) {
     
     ar & boost::serialization::base_object<TreeItemResources>(*this);
-    ar & m_lockType;
+    ar & m_InstrumentSelector;
     ar & m_sUnderlying;
     
     // this is going to cause problems if renamed, so prevent a rename, ... is rename even available?
@@ -118,7 +118,7 @@ private:
     std::cout 
       << m_baseResources.signalGetItemText( m_id ) << "," 
       << m_sUnderlying << "," << n << "," 
-      << m_lockType 
+      << m_InstrumentSelector 
       << std::endl;
     for ( mapMembers_t::size_type ix = 0; ix < n; ++ix ) {
       unsigned int type;
