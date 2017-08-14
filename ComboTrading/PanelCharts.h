@@ -75,9 +75,9 @@ public:
     const wxSize& size = SYMBOL_PANEL_CHARTS_SIZE, 
     long style = SYMBOL_PANEL_CHARTS_STYLE );
   
-  typedef boost::signals2::signal<void(const std::string&, std::string&)> signalLookUpDescription_t;
-  typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
-  signalLookUpDescription_t signalLookUpDescription;
+  typedef boost::signals2::signal<void(const std::string&, std::string&)> signalLookUpIQFeedDescription_t;
+  typedef signalLookUpIQFeedDescription_t::slot_type slotLookUpIQFeedDescription_t;
+  signalLookUpIQFeedDescription_t signalLookUpIQFeedDescription;
   
   struct ValuesForBuildInstrument {
     const std::string& sKey;
@@ -298,7 +298,7 @@ private:
     const InstrumentActions::EAllowedInstrumentSelectors,
     const wxString& sUnderlying
   );
-  void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
+  void HandleComposeIQFeedFullName( ou::tf::DialogPickSymbol::DataExchange* );
   
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
   void ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t, const std::string& sUnderlying );

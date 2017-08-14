@@ -74,14 +74,14 @@ void DialogPickSymbol::Init() {
     m_radioOption = NULL;
     m_radioFuture = NULL;
     m_radioFOption = NULL;
-    m_textIQFName = NULL;
-    m_textIBName = NULL;
+    m_txtIQFRootName = NULL;
+    m_txtIBName = NULL;
     m_txtSymbolDescription = NULL;
-    m_textComposite = NULL;
+    m_txtIQFeedFullName = NULL;
     m_txtContractId = NULL;
-    m_txtCompositeDescription = NULL;
+    m_txtIQFeedDescription = NULL;
     m_dateExpiry = NULL;
-    m_textStrike = NULL;
+    m_txtStrike = NULL;
     m_radioOptionPut = NULL;
     m_radioOptionCall = NULL;
     m_radioCurrencyUSD = NULL;
@@ -130,17 +130,17 @@ void DialogPickSymbol::CreateControls() {
     wxStaticText* itemStaticText10 = new wxStaticText( itemPanel1, wxID_STATIC, _("IQFeed:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer9->Add(itemStaticText10, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_textIQFName = new wxTextCtrl( itemPanel1, ID_TEXT_IQF_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_textIQFName->Enable(false);
-    itemBoxSizer9->Add(m_textIQFName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_txtIQFRootName = new wxTextCtrl( itemPanel1, ID_TEXT_IQF_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtIQFRootName->Enable(false);
+    itemBoxSizer9->Add(m_txtIQFRootName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     itemBoxSizer9->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText13 = new wxStaticText( itemPanel1, wxID_STATIC, _("IB:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer9->Add(itemStaticText13, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_textIBName = new wxTextCtrl( itemPanel1, ID_TEXT_IB_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer9->Add(m_textIBName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_txtIBName = new wxTextCtrl( itemPanel1, ID_TEXT_IB_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(m_txtIBName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_txtSymbolDescription = new wxStaticText( itemPanel1, ID_STATIC_SYMBOL_DESCRIPTION, _("Symbol Description"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer8->Add(m_txtSymbolDescription, 0, wxALIGN_LEFT|wxALL, 2);
@@ -151,16 +151,16 @@ void DialogPickSymbol::CreateControls() {
     wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer16->Add(itemBoxSizer17, 0, wxGROW|wxALL, 5);
 
-    m_textComposite = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxSize(120, -1), wxTE_READONLY );
-    itemBoxSizer17->Add(m_textComposite, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_txtIQFeedFullName = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxSize(120, -1), wxTE_READONLY );
+    itemBoxSizer17->Add(m_txtIQFeedFullName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     itemBoxSizer17->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_txtContractId = new wxStaticText( itemPanel1, ID_STATIC_CONTRACTID, _("contract"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer17->Add(m_txtContractId, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtCompositeDescription = new wxStaticText( itemPanel1, ID_STATIC_COMPOSITE_DESCRIPTION, _("Composite Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer16->Add(m_txtCompositeDescription, 1, wxALIGN_LEFT|wxALL, 2);
+    m_txtIQFeedDescription = new wxStaticText( itemPanel1, ID_STATIC_COMPOSITE_DESCRIPTION, _("Composite Description"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(m_txtIQFeedDescription, 1, wxALIGN_LEFT|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer22 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer22, 0, wxGROW|wxALL, 5);
@@ -174,10 +174,10 @@ void DialogPickSymbol::CreateControls() {
     wxStaticText* itemStaticText25 = new wxStaticText( itemPanel1, wxID_STATIC, _("Strike:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer24->Add(itemStaticText25, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_textStrike = new wxTextCtrl( itemPanel1, ID_TEXT_STRIKE, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_textStrike->SetMaxLength(20);
-    m_textStrike->Enable(false);
-    itemBoxSizer24->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_txtStrike = new wxTextCtrl( itemPanel1, ID_TEXT_STRIKE, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtStrike->SetMaxLength(20);
+    m_txtStrike->Enable(false);
+    itemBoxSizer24->Add(m_txtStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer23->Add(itemBoxSizer27, 0, wxGROW|wxALL, 2);
@@ -249,7 +249,6 @@ void DialogPickSymbol::CreateControls() {
     itemBoxSizer43->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     itemBoxSizer43->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
-
     
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIQFSymbolChanged, this, ID_TEXT_IQF_SYMBOL );
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIBSymbolChanged, this, ID_TEXT_IB_SYMBOL );
@@ -316,16 +315,16 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   m_btnOk->Enable( false );
   pde->nContractId = 0;
   
-  wxString text( m_textIQFName->GetValue() );
+  wxString text( m_txtIQFRootName->GetValue() );
   std::string sText( text.c_str() );
 
   m_bIBSymbolChanging = true;
-  m_textIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need m_bIBSymbolChanging
+  m_txtIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need m_bIBSymbolChanging
   m_bIBSymbolChanging = false;
   pde->sIBSymbolName = text;
   
   std::string sDescription;
-  pde->signalLookupDescription( sText, sDescription );
+  pde->signalLookupIQFeedDescription( sText, sDescription );
   if ( 0 != sDescription.length() ) {
     m_txtSymbolDescription->SetLabel( sDescription );
   }
@@ -335,14 +334,14 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
 void DialogPickSymbol::HandleIBSymbolChanged( wxCommandEvent& event ) {
   if ( !m_bIBSymbolChanging ) {
     DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-    pde->sIBSymbolName = m_textIBName->GetValue();
+    pde->sIBSymbolName = m_txtIBName->GetValue();
   }
 }
 
 void DialogPickSymbol::HandleStrikeChanged(wxCommandEvent& event) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  std::string sStrike( m_textStrike->GetValue() );
+  std::string sStrike( m_txtStrike->GetValue() );
   switch ( pde->it ) {
     case InstrumentType::Option:
     case InstrumentType::FuturesOption:
@@ -362,7 +361,7 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
   DisableOptionFields();
   pde->it = InstrumentType::Stock;
   UpdateComposite();
-  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textIQFName ) );
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_txtIQFRootName ) );
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
@@ -376,9 +375,9 @@ void DialogPickSymbol::SetRadioOption( void ) {
   m_radioOptionPut->Enable();
   m_radioOptionCall->Enable();
   m_dateExpiry->Enable();
-  m_textStrike->Enable();
+  m_txtStrike->Enable();
   UpdateComposite();
-  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_txtStrike ) );
 }
 
 void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
@@ -402,9 +401,9 @@ void DialogPickSymbol::SetRadioFuturesOption( void ) {
   m_radioOptionPut->Enable();
   m_radioOptionCall->Enable();
   m_dateExpiry->Enable();
-  m_textStrike->Enable();
+  m_txtStrike->Enable();
   UpdateComposite();
-  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_txtStrike ) );
 }
   
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {
@@ -439,17 +438,17 @@ void DialogPickSymbol::UpdateComposite( void ) {
   
   UpdateContractId();
   
-  pde->sIQFSymbolName = this->m_textIQFName->GetValue();
-  pde->sCompositeDescription = "";  // UpdateContractId set button to ok, this undoes it
-  pde->signalComposeComposite( pde );
-  m_textComposite->SetValue( pde->sCompositeName );
-  m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
+  pde->sIQFSymbolName = this->m_txtIQFRootName->GetValue();
+  pde->sIQFeedDescription = "";  // UpdateContractId set button to ok, this undoes it
+  pde->signalComposeIQFeedFullName( pde );
+  m_txtIQFeedFullName->SetValue( pde->sIQFeedFullName );
+  m_txtIQFeedDescription->SetLabel( pde->sIQFeedDescription );
   UpdateBtnOk();
 }
 
 void DialogPickSymbol::UpdateBtnOk( void ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  bool bOk = ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId );
+  bool bOk = ( 0 != pde->sIQFeedDescription.length() ) && ( 0 != pde->nContractId );
   m_btnOk->Enable( bOk );
 }
 
@@ -475,7 +474,7 @@ void DialogPickSymbol::DisableOptionFields( void ) {
     m_radioOptionPut->Disable();
     m_radioOptionCall->Disable();
     m_dateExpiry->Disable();
-    m_textStrike->Disable();
+    m_txtStrike->Disable();
 }
 
 void DialogPickSymbol::HandleSetFocus( SetFocusEvent& event ) {
@@ -485,11 +484,11 @@ void DialogPickSymbol::HandleSetFocus( SetFocusEvent& event ) {
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-    m_textIQFName->Enable();
-    m_textIQFName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName ) );   // caps, alpha, numeric, @
-    m_textIBName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIBSymbolName ) );   // caps, alpha, numeric, @
+    m_txtIQFRootName->Enable();
+    m_txtIQFRootName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName ) );   // caps, alpha, numeric, @
+    m_txtIBName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIBSymbolName ) );   // caps, alpha, numeric, @
     //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
-    m_textStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
+    m_txtStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
     m_radioEquity->Enable();
     m_radioOption->Enable();
     m_radioFuture->Enable();
@@ -530,7 +529,7 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
         break;
     }
     
-    //m_textIQFName->SetFocus();
+    //m_textIQFRootName->SetFocus();
   }
   else {
     //m_textSymbol->SetValidator( wxDefaultValidator );
@@ -538,7 +537,7 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Disable();
     m_radioFuture->Disable();
     m_radioFOption->Disable();
-    m_textIQFName->Disable();
+    m_txtIQFRootName->Disable();
     DisableOptionFields();
   }
 }

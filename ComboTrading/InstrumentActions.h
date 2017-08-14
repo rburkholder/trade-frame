@@ -27,7 +27,7 @@
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
-// todo:  remove the references to pWatch_t.  a different class needs to handle the data, 
+// todo:
 //    this structure is for messaging
 // which suggests this should be sent to worker queues, or futures or packages
 // which work in the background, and ultimately generate gui events
@@ -60,11 +60,6 @@ public:
   typedef boost::signals2::signal<void (const wxTreeItemId&, const std::string&, const std::string&)> signalLoadInstrument_t;
   typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
   signalLoadInstrument_t signalLoadInstrument;
-  
-//  typedef boost::signals2::signal<EAllowedInstrumentSelectors (const wxTreeItemId&),
-//                                  ou::tf::FirstOrDefault<EAllowedInstrumentSelectors> > signalGetInstrumentSelector_t;
-//  typedef signalGetInstrumentSelector_t::slot_type slotGetInstrumentSelector_t;
-//  signalGetInstrumentSelector_t signalGetInstrumentSelector;
   
   typedef boost::signals2::signal<void (const wxTreeItemId&)> signalLiveChart_t;
   typedef signalLiveChart_t::slot_type slotLiveChart_t;

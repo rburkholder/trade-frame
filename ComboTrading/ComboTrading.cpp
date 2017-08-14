@@ -317,7 +317,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   psizer->Add(m_pPanelCharts, 1, wxGROW|wxALL, 2);
 
   namespace args = boost::phoenix::placeholders;
-  m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
+  m_pPanelCharts->signalLookUpIQFeedDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
   m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );

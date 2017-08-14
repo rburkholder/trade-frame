@@ -171,8 +171,8 @@ void PanelCharts::CreateControls() {
   m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionChainList, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   
-  m_connLookupDescription = m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
-  m_connComposeComposite = m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
+  m_connLookupDescription = m_de.signalLookupIQFeedDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
+  m_connComposeComposite = m_de.signalComposeIQFeedFullName.connect( boost::phoenix::bind( &PanelCharts::HandleComposeIQFeedFullName, this, args::arg1 ) );
   
   m_connChanging = m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
   
@@ -648,7 +648,7 @@ void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pI
   std::string sKey( pde.sIQFSymbolName );
   switch ( pde.it ) {
     case InstrumentType::Stock: {
-      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, 0 );
+      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, 0 );
       signalBuildInstrument( values );
     }
       break;
@@ -664,7 +664,7 @@ void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pI
       sKey += pde.os;
       sKey += "-" + boost::lexical_cast<std::string>( pde.dblStrike )
         ;
-      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, day );
+      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
       signalBuildInstrument( values );
     }
       break;
@@ -676,7 +676,7 @@ void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pI
         + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
         + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) );
         ;
-      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, day );
+      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
       signalBuildInstrument( values );
     }
       break;
@@ -684,35 +684,35 @@ void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pI
 }
 
 void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {
-  signalLookUpDescription( sSymbol, sDescription );
+  signalLookUpIQFeedDescription( sSymbol, sDescription );
 }
 
-void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) {
-  pde->sCompositeName = "";
-  pde->sCompositeDescription = "";
+void PanelCharts::HandleComposeIQFeedFullName( DialogPickSymbol::DataExchange* pde ) {
+  pde->sIQFeedFullName = "";
+  pde->sIQFeedDescription = "";
   switch ( pde->it ) {
     case ou::tf::InstrumentType::Stock:
-      pde->sCompositeName = pde->sIQFSymbolName;
+      pde->sIQFeedFullName = pde->sIQFSymbolName;
       break;
     case ou::tf::InstrumentType::Option:
-      pde->sCompositeName 
+      pde->sIQFeedFullName 
         = ou::tf::iqfeed::BuildOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os );
       break;
     case ou::tf::InstrumentType::Future:
-      pde->sCompositeName
+      pde->sIQFeedFullName
         = ou::tf::iqfeed::BuildFuturesName( pde->sIQFSymbolName, pde->year, pde->month + 1 );
       break;
     case ou::tf::InstrumentType::FuturesOption:
-      pde->sCompositeName 
+      pde->sIQFeedFullName 
         = ou::tf::iqfeed::BuildFuturesOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
       break;
     default: 
       throw std::runtime_error( "PanelCharts::HandleComposeComposite: unknown instrument type" );
       break;
   }
-  if ( "" != pde->sCompositeName ) {
-    signalLookUpDescription( pde->sCompositeName, pde->sCompositeDescription );
-    if ( "" != pde->sCompositeDescription ) { // means we have a satisfactory iqfeed symbol
+  if ( "" != pde->sIQFeedFullName ) {
+    signalLookUpIQFeedDescription( pde->sIQFeedFullName, pde->sIQFeedDescription );
+    if ( "" != pde->sIQFeedDescription ) { // means we have a satisfactory iqfeed symbol
       BuildInstrument( m_de, m_pDialogPickSymbolCreatedInstrument );
     }
   }

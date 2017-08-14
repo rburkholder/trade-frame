@@ -61,19 +61,19 @@ public:
   // maybe use boost::function or lambdas instead, might be more readable
   struct DataExchange: DialogBase::DataExchange {
     // Provides the description for the base name
-    typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpDescription_t;
-    typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
-    signalLookUpDescription_t signalLookupDescription; // // (1)in=name, (2)out=description
+    typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpIQFeedDescription_t;
+    typedef signalLookUpIQFeedDescription_t::slot_type slotLookUpIQFeedDescription_t;
+    signalLookUpIQFeedDescription_t signalLookupIQFeedDescription; // // (1)in=name, (2)out=description
 
     // Base name contributes to a composite name for futures, options, futuresoptions
-    typedef boost::signals2::signal<void (DataExchange*)> signalComposeComposite_t;
-    typedef signalComposeComposite_t::slot_type slotComposeComposite_t;
-    signalComposeComposite_t signalComposeComposite;
+    typedef boost::signals2::signal<void (DataExchange*)> signalComposeIQFeedFullName_t;
+    typedef signalComposeIQFeedFullName_t::slot_type slotComposeIQFeedFullName_t;
+    signalComposeIQFeedFullName_t signalComposeIQFeedFullName;
 
     wxString sIQFSymbolName;  // can't be std::string, needs to handle native DataExchange
     wxString sIBSymbolName;
-    std::string sCompositeName;
-    std::string sCompositeDescription;
+    std::string sIQFeedFullName;
+    std::string sIQFeedDescription;
     int32_t nContractId;
     double dblStrike;
     InstrumentType::enumInstrumentTypes it;
@@ -134,14 +134,14 @@ private:
     wxRadioButton* m_radioOption;
     wxRadioButton* m_radioFuture;
     wxRadioButton* m_radioFOption;
-    wxTextCtrl* m_textIQFName;
-    wxTextCtrl* m_textIBName;
+    wxTextCtrl* m_txtIQFRootName;
+    wxTextCtrl* m_txtIBName;
     wxStaticText* m_txtSymbolDescription;
-    wxTextCtrl* m_textComposite;
+    wxTextCtrl* m_txtIQFeedFullName;
     wxStaticText* m_txtContractId;
-    wxStaticText* m_txtCompositeDescription;
+    wxStaticText* m_txtIQFeedDescription;
     wxDatePickerCtrl* m_dateExpiry;
-    wxTextCtrl* m_textStrike;
+    wxTextCtrl* m_txtStrike;
     wxRadioButton* m_radioOptionPut;
     wxRadioButton* m_radioOptionCall;
     wxRadioButton* m_radioCurrencyUSD;
