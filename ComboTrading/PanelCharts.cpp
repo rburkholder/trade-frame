@@ -690,28 +690,13 @@ void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::stri
 void PanelCharts::HandleComposeIQFeedFullName( DialogPickSymbol::DataExchange* pde ) {
   pde->sIQFeedFullName = "";
   pde->sIQFeedDescription = "";
-  switch ( pde->it ) {
-    case ou::tf::InstrumentType::Stock:
-      pde->sIQFeedFullName = pde->sIQFSymbolName;
-      break;
-    case ou::tf::InstrumentType::Option:
-      pde->sIQFeedFullName 
-        = ou::tf::iqfeed::BuildOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os );
-      break;
-    case ou::tf::InstrumentType::Future:
-      pde->sIQFeedFullName
-        = ou::tf::iqfeed::BuildFuturesName( pde->sIQFSymbolName, pde->year, pde->month + 1 );
-      break;
-    case ou::tf::InstrumentType::FuturesOption:
-      pde->sIQFeedFullName 
-        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
-      break;
-    default: 
-      throw std::runtime_error( "PanelCharts::HandleComposeComposite: unknown instrument type" );
-      break;
-  }
+  pde->sIQFeedFullName 
+      = ou::tf::iqfeed::BuildName( 
+          ou::tf::iqfeed::NameParts( pde->it, pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os ) );
   if ( "" != pde->sIQFeedFullName ) {
     signalLookUpIQFeedDescription( pde->sIQFeedFullName, pde->sIQFeedDescription );
+    // need instrument built at this point, as IB provides the contract # as part of the process
+    // via InstrumentUpdated
     if ( "" != pde->sIQFeedDescription ) { // means we have a satisfactory iqfeed symbol
       BuildInstrument( m_de, m_pDialogPickSymbolCreatedInstrument );
     }

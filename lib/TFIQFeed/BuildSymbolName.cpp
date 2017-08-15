@@ -22,6 +22,32 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+const std::string BuildName( const NameParts& parts ) {
+  std::string sBuiltName;
+  switch ( parts.it ) {
+    case ou::tf::InstrumentType::Stock:
+      sBuiltName = parts.sRootName;
+      break;
+    case ou::tf::InstrumentType::Option:
+      assert( 0 != parts.day );
+      sBuiltName 
+        = ou::tf::iqfeed::BuildOptionName( parts.sRootName, parts.year, parts.month + 1, parts.day, parts.strike, parts.side );
+      break;
+    case ou::tf::InstrumentType::Future:
+      sBuiltName
+        = ou::tf::iqfeed::BuildFuturesName( parts.sRootName, parts.year, parts.month + 1 );
+      break;
+    case ou::tf::InstrumentType::FuturesOption:
+      sBuiltName 
+        = ou::tf::iqfeed::BuildFuturesOptionName( parts.sRootName, parts.year, parts.month + 1, parts.strike, parts.side );
+      break;
+    default: 
+      throw std::runtime_error( "ou::tf::iqfeed::BuildName: unknown instrument type" );
+      break;
+  }
+  return sBuiltName;
+}
+
 // something similar in Option.cpp  
 // need to deal with x10 type options
 // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
