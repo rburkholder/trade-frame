@@ -30,11 +30,23 @@ PanelPortfolioPosition::PanelPortfolioPosition( wxWindow* parent, wxWindowID id,
 }
 
 PanelPortfolioPosition::~PanelPortfolioPosition(void) {
-  std::cout << "PanelPortfolioPosition deleted" << std::endl;
+  //std::cout << "PanelPortfolioPosition deleted" << std::endl;
 }
 
 void PanelPortfolioPosition::Init() {
   m_pimpl.reset( new PanelPortfolioPosition_impl( *this ) ); 
+}
+
+bool PanelPortfolioPosition::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+
+    wxPanel::Create( parent, id, pos, size, style );
+
+    m_pimpl->CreateControls();
+    if (GetSizer())     {
+        GetSizer()->SetSizeHints(this);
+    }
+    Centre();
+    return true;
 }
 
 ou::tf::Portfolio::pPortfolio_t& PanelPortfolioPosition::GetPortfolio( void ) { 
@@ -55,18 +67,6 @@ void PanelPortfolioPosition::SetConstructPortfolio( DelegateConstructPortfolio_t
 
 void PanelPortfolioPosition::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pimpl->SetPortfolio( pPortfolio );
-}
-
-bool PanelPortfolioPosition::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
-
-    wxPanel::Create( parent, id, pos, size, style );
-
-    m_pimpl->CreateControls();
-    if (GetSizer())     {
-        GetSizer()->SetSizeHints(this);
-    }
-    Centre();
-    return true;
 }
 
 void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {

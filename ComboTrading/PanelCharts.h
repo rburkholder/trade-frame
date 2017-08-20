@@ -48,11 +48,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_CHARTS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_CHARTS_TITLE _("Panel Chart Data")
-#define SYMBOL_PANEL_CHARTS_IDNAME ID_PANEL_CHARTS
-#define SYMBOL_PANEL_CHARTS_SIZE wxSize(400, 300)
-#define SYMBOL_PANEL_CHARTS_POSITION wxDefaultPosition
+#define PANEL_CHARTS_STYLE wxTAB_TRAVERSAL
+#define PANEL_CHARTS_TITLE _("Panel Chart Data")
+#define PANEL_CHARTS_IDNAME ID_PANEL_CHARTS
+#define PANEL_CHARTS_SIZE wxSize(400, 300)
+#define PANEL_CHARTS_POSITION wxDefaultPosition
 
 class PanelCharts: public wxPanel {
 public:
@@ -61,17 +61,17 @@ public:
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   PanelCharts( void );
-  PanelCharts( wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_CHARTS_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_CHARTS_SIZE, 
-    long style = SYMBOL_PANEL_CHARTS_STYLE );
+  PanelCharts( wxWindow* parent, wxWindowID id = PANEL_CHARTS_IDNAME, 
+    const wxPoint& pos = PANEL_CHARTS_POSITION, 
+    const wxSize& size = PANEL_CHARTS_SIZE, 
+    long style =         PANEL_CHARTS_STYLE );
   virtual ~PanelCharts();
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_CHARTS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_CHARTS_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_CHARTS_SIZE, 
-    long style = SYMBOL_PANEL_CHARTS_STYLE );
+    wxWindowID id =      PANEL_CHARTS_IDNAME, 
+    const wxPoint& pos = PANEL_CHARTS_POSITION, 
+    const wxSize& size = PANEL_CHARTS_SIZE, 
+    long style =         PANEL_CHARTS_STYLE );
   
   typedef boost::signals2::signal<void(pInstrument_t)> signalRegisterInstrument_t;
   typedef signalRegisterInstrument_t::slot_type slotRegisterInstrument_t;

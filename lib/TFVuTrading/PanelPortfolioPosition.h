@@ -28,11 +28,11 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_TITLE _("Panel Portfolio Position")
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_IDNAME ID_PANEL_PORTFOLIOPOSITION
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE wxSize(-1, -1)
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_POSITION wxDefaultPosition
+#define PANEL_PORTFOLIOPOSITION_STYLE wxTAB_TRAVERSAL
+#define PANEL_PORTFOLIOPOSITION_TITLE _("Panel Portfolio Position")
+#define PANEL_PORTFOLIOPOSITION_IDNAME ID_PANEL_PORTFOLIOPOSITION
+#define PANEL_PORTFOLIOPOSITION_SIZE wxSize(-1, -1)
+#define PANEL_PORTFOLIOPOSITION_POSITION wxDefaultPosition
 
 class PanelPortfolioPosition_impl;  // Forward declaration
 
@@ -42,8 +42,10 @@ public:
 
   typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  
   typedef ou::tf::Portfolio::idPosition_t idPosition_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
+  
   typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
 
   typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
@@ -52,17 +54,17 @@ public:
 
   PanelPortfolioPosition(void);
   PanelPortfolioPosition( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE, 
-    long style = SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE );
-  ~PanelPortfolioPosition(void);
+    wxWindow* parent, wxWindowID id = PANEL_PORTFOLIOPOSITION_IDNAME, 
+    const wxPoint& pos =              PANEL_PORTFOLIOPOSITION_POSITION, 
+    const wxSize& size =              PANEL_PORTFOLIOPOSITION_SIZE, 
+    long style =                      PANEL_PORTFOLIOPOSITION_STYLE );
+  virtual ~PanelPortfolioPosition(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE, 
-    long style = SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE );
+    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
+    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
+    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
+    long style =         PANEL_PORTFOLIOPOSITION_STYLE );
 
   void SetPortfolio( pPortfolio_t pPortfolio );
   pPortfolio_t& GetPortfolio( void );

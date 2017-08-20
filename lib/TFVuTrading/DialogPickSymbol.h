@@ -50,11 +50,11 @@ wxDECLARE_EVENT( EVT_SetFocus, SetFocusEvent );
 
 //#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
 //#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxCLOSE_BOX|wxTAB_TRAVERSAL
-#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxTAB_TRAVERSAL
-#define SYMBOL_PANELPICKSYMBOL_TITLE _("Dialog Pick Symbol")
-#define SYMBOL_PANELPICKSYMBOL_IDNAME ID_PANELPICKSYMBOL
-#define SYMBOL_PANELPICKSYMBOL_SIZE wxSize(400, 300)
-#define SYMBOL_PANELPICKSYMBOL_POSITION wxDefaultPosition
+#define DIALOG_PICKSYMBOL_STYLE wxCAPTION|wxTAB_TRAVERSAL
+#define DIALOG_PICKSYMBOL_TITLE _("Dialog Pick Symbol")
+#define DIALOG_PICKSYMBOL_IDNAME ID_PANELPICKSYMBOL
+#define DIALOG_PICKSYMBOL_SIZE wxSize(400, 300)
+#define DIALOG_PICKSYMBOL_POSITION wxDefaultPosition
 
 class DialogPickSymbol: public DialogBase {
 public:
@@ -89,20 +89,20 @@ public:
   DialogPickSymbol();
   DialogPickSymbol( 
     wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELPICKSYMBOL_IDNAME,
-    const wxString& caption = SYMBOL_PANELPICKSYMBOL_TITLE, 
-    const wxPoint& pos = SYMBOL_PANELPICKSYMBOL_POSITION, 
-    const wxSize& size = SYMBOL_PANELPICKSYMBOL_SIZE, 
-    long style = SYMBOL_PANELPICKSYMBOL_STYLE );
+    wxWindowID id =           DIALOG_PICKSYMBOL_IDNAME,
+    const wxString& caption = DIALOG_PICKSYMBOL_TITLE, 
+    const wxPoint& pos =      DIALOG_PICKSYMBOL_POSITION, 
+    const wxSize& size =      DIALOG_PICKSYMBOL_SIZE, 
+    long style =              DIALOG_PICKSYMBOL_STYLE );
   virtual ~DialogPickSymbol();
   
   bool Create( 
     wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELPICKSYMBOL_IDNAME, 
-    const wxString& caption = SYMBOL_PANELPICKSYMBOL_TITLE, 
-    const wxPoint& pos = SYMBOL_PANELPICKSYMBOL_POSITION, 
-    const wxSize& size = SYMBOL_PANELPICKSYMBOL_SIZE, 
-    long style = SYMBOL_PANELPICKSYMBOL_STYLE );
+    wxWindowID id =           DIALOG_PICKSYMBOL_IDNAME, 
+    const wxString& caption = DIALOG_PICKSYMBOL_TITLE, 
+    const wxPoint& pos =      DIALOG_PICKSYMBOL_POSITION, 
+    const wxSize& size =      DIALOG_PICKSYMBOL_SIZE, 
+    long style =              DIALOG_PICKSYMBOL_STYLE );
   
   virtual void SetDataExchange( DataExchange* pde );
   
@@ -116,7 +116,9 @@ protected:
   
 private:
   
-  enum { ID_NULL=wxID_HIGHEST, ID_PANELPICKSYMBOL,
+  enum { 
+    ID_NULL=wxID_HIGHEST, 
+    ID_PANELPICKSYMBOL,
     ID_RADIO_EQUITY, ID_RADIO_OPTION, ID_RADIO_FUTURE, ID_RADIO_FOPTION,
     ID_TEXT_IQF_SYMBOL, ID_STATIC_SYMBOL_DESCRIPTION, 
     ID_TEXT_IB_SYMBOL, 
