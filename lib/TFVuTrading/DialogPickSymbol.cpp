@@ -336,6 +336,7 @@ void DialogPickSymbol::HandleIBSymbolChanged( wxCommandEvent& event ) {
   if ( !m_bIBSymbolChanging ) {
     DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
     pde->sIBSymbolName = m_txtIBName->GetValue();
+    UpdateComposite();
   }
 }
 
