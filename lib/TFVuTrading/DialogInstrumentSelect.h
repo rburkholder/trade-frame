@@ -26,11 +26,11 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_DIALOGINSTRUMENTSELECT_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
-#define SYMBOL_DIALOGINSTRUMENTSELECT_TITLE _("Select An Instrument")
-#define SYMBOL_DIALOGINSTRUMENTSELECT_IDNAME ID_DIALOG_INSTRUMENTSELECT
-#define SYMBOL_DIALOGINSTRUMENTSELECT_SIZE wxSize(400, 300)
-#define SYMBOL_DIALOGINSTRUMENTSELECT_POSITION wxDefaultPosition
+#define DIALOGINSTRUMENTSELECT_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
+#define DIALOGINSTRUMENTSELECT_TITLE _("Select An Instrument")
+#define DIALOGINSTRUMENTSELECT_IDNAME ID_DIALOG_INSTRUMENTSELECT
+#define DIALOGINSTRUMENTSELECT_SIZE wxSize(400, 300)
+#define DIALOGINSTRUMENTSELECT_POSITION wxDefaultPosition
 
 class DialogInstrumentSelect: public DialogBase {
   DECLARE_DYNAMIC_CLASS( DialogInstrumentSelect )
@@ -47,19 +47,19 @@ public:
 
   DialogInstrumentSelect(void);
   DialogInstrumentSelect( wxWindow* parent, 
-    wxWindowID id = SYMBOL_DIALOGINSTRUMENTSELECT_IDNAME, 
-    const wxString& caption = SYMBOL_DIALOGINSTRUMENTSELECT_TITLE, 
-    const wxPoint& pos = SYMBOL_DIALOGINSTRUMENTSELECT_POSITION, 
-    const wxSize& size = SYMBOL_DIALOGINSTRUMENTSELECT_SIZE, 
-    long style = SYMBOL_DIALOGINSTRUMENTSELECT_STYLE );
+    wxWindowID id =           DIALOGINSTRUMENTSELECT_IDNAME, 
+    const wxString& caption = DIALOGINSTRUMENTSELECT_TITLE, 
+    const wxPoint& pos =      DIALOGINSTRUMENTSELECT_POSITION, 
+    const wxSize& size =      DIALOGINSTRUMENTSELECT_SIZE, 
+    long style =              DIALOGINSTRUMENTSELECT_STYLE );
   ~DialogInstrumentSelect(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_DIALOGINSTRUMENTSELECT_IDNAME, 
-    const wxString& caption = SYMBOL_DIALOGINSTRUMENTSELECT_TITLE, 
-    const wxPoint& pos = SYMBOL_DIALOGINSTRUMENTSELECT_POSITION, 
-    const wxSize& size = SYMBOL_DIALOGINSTRUMENTSELECT_SIZE, 
-    long style = SYMBOL_DIALOGINSTRUMENTSELECT_STYLE );
+    wxWindowID id =           DIALOGINSTRUMENTSELECT_IDNAME, 
+    const wxString& caption = DIALOGINSTRUMENTSELECT_TITLE, 
+    const wxPoint& pos =      DIALOGINSTRUMENTSELECT_POSITION, 
+    const wxSize& size =      DIALOGINSTRUMENTSELECT_SIZE, 
+    long style =              DIALOGINSTRUMENTSELECT_STYLE );
 
   virtual void SetDataExchange( DataExchange* pde );
 
