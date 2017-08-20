@@ -123,9 +123,7 @@ private:
   struct WatchInfo {
   public:
     typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
-    // TODO:  assign pWatch at time of construction, may simplify HandleGetInstrumentActions
-    //WatchInfo( void ): m_bActive( false ) {}
-    WatchInfo( pWatch_t pWatch ) { Set( pWatch ); }
+    WatchInfo( pWatch_t pWatch ): m_bActive( false ) { Set( pWatch ); }
     void Set( pWatch_t pWatch ) {
       if ( m_bActive ) {
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
@@ -143,7 +141,7 @@ private:
 	m_pWatch->StartWatch();
       }
     }
-    ~WatchInfo( void ) {
+    virtual ~WatchInfo( void ) {
       if ( 0 == m_pWatch.use_count() ) {
 	std::cout << "WatchInfo use_count is 0, bad thing" << std::endl;
       }
