@@ -51,6 +51,8 @@ IQFeedInstrumentBuild::pInstrument_t
   
   assert( 0 == m_pDialogPickSymbol );
   
+  m_pDialogPickSymbolCreatedInstrument.reset();
+  
   m_de.sIQFSymbolName = wxsUnderlying;
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( m_pParentForDialog );
@@ -72,17 +74,16 @@ IQFeedInstrumentBuild::pInstrument_t
       break;
   }
   
-  m_pDialogPickSymbolCreatedInstrument.reset();
-  
   int status = m_pDialogPickSymbol->ShowModal();
   
+  std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest status " << status << std::endl;
   switch ( status ) {
     case wxID_CANCEL:
       //m_pDialogPickSymbolCreatedInstrument.reset();
       // menu item should be deleting
       break;
     case wxID_OK:
-      if ( 0 == m_pDialogPickSymbolCreatedInstrument.get() ) {
+      if ( nullptr == m_pDialogPickSymbolCreatedInstrument.get() ) {
         std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest has wxID_OK but no instrument" << std::endl;
       }
       break;
@@ -90,8 +91,6 @@ IQFeedInstrumentBuild::pInstrument_t
   
   m_pDialogPickSymbol->Destroy();
   m_pDialogPickSymbol = 0;
-  
-  m_pDialogPickSymbolCreatedInstrument.reset();
   
   return m_pDialogPickSymbolCreatedInstrument;
 }
@@ -164,6 +163,7 @@ void IQFeedInstrumentBuild::HandleComposeIQFeedFullName( DialogPickSymbol::DataE
 
 // IB has populated instrument with ContractID
 void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
+  std::cout << "IQFeedInstrumentBuild::InstrumentUpdated ..." << std::endl;
   if ( 0 == m_pDialogPickSymbol ) {
     std::cout << "IQFeedInstrumentBuild::InstrumentUpdated error:  not expecting instrument" << std::endl;
   } 
