@@ -29,7 +29,7 @@ const std::string BuildName( const NameParts& parts ) {
       sBuiltName = parts.sRootName;
       break;
     case ou::tf::InstrumentType::Option:
-      assert( 0 != parts.day );
+      if ( 0 != parts.day ) std::runtime_error( "ou::tf::iqfeed::BuildName: 0 == parts.day" );
       sBuiltName 
         = ou::tf::iqfeed::BuildOptionName( parts.sRootName, parts.year, parts.month + 1, parts.day, parts.strike, parts.side );
       break;
@@ -51,7 +51,7 @@ const std::string BuildName( const NameParts& parts ) {
 // something similar in Option.cpp  
 // need to deal with x10 type options
 // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
-const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+const std::string BuildOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
   std::string sName = sUnderlying;
   if ( 0 != year ) {
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
@@ -74,7 +74,7 @@ const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16
   return sName;
 }
 
-const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month ) {
+const std::string BuildFuturesName( const std::string& sUnderlying, uint16_t year, uint16_t month ) {
   static const char* code = { "FGHJKMNQUVXZ" };
   std::string sName = sUnderlying;
   if ( 0 != year ) {
@@ -84,7 +84,7 @@ const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint1
   return sName;
 }
 
-const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side ) {
   static const char* code = { "FGHJKMNQUVXZ" };
   std::string sName = sUnderlying;
   if ( 0 != year ) {
@@ -96,8 +96,8 @@ const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost:
   return sName;
 }
 
-const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
-  assert(0);  // day isn't used yet, need to fix
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+  std::runtime_error( "ou::tf::iqfeed::BuildFuturesOptionName: day not used yet" ); // day isn't used yet, need to fix
   static const char* code = { "FGHJKMNQUVXZ" };
   std::string sName = sUnderlying;
   if ( 0 != year ) {

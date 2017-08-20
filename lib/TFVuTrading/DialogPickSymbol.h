@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <wx/button.h>
 #include <wx/radiobut.h>
 #include <wx/stattext.h>
@@ -60,15 +62,14 @@ public:
   // 20161004 instead of signals, 
   // maybe use boost::function or lambdas instead, might be more readable
   struct DataExchange: DialogBase::DataExchange {
-    // Provides the description for the base name
-    typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpIQFeedDescription_t;
-    typedef signalLookUpIQFeedDescription_t::slot_type slotLookUpIQFeedDescription_t;
-    signalLookUpIQFeedDescription_t signalLookupIQFeedDescription; // // (1)in=name, (2)out=description
-
+    
     // Base name contributes to a composite name for futures, options, futuresoptions
-    typedef boost::signals2::signal<void (DataExchange*)> signalComposeIQFeedFullName_t;
-    typedef signalComposeIQFeedFullName_t::slot_type slotComposeIQFeedFullName_t;
-    signalComposeIQFeedFullName_t signalComposeIQFeedFullName;
+    typedef std::function<void (DataExchange*)> functionComposeIQFeedFullName_t;
+    functionComposeIQFeedFullName_t fComposeIQFeedFullName;
+
+    // Provides the description for the base name
+    typedef std::function<void (const std::string&, std::string&)> functionLookupIQFeedDescription_t;
+    functionLookupIQFeedDescription_t fLookupIQFeedDescription;
 
     wxString sIQFSymbolName;  // can't be std::string, needs to handle native DataExchange
     wxString sIBSymbolName;

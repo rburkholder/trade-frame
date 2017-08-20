@@ -15,13 +15,14 @@
 // started 2015/11/08
 
 #include <algorithm>
+#include <functional>
+#include <memory>
 
 #include <boost/lexical_cast.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-//#include <boost/function.hpp>
-
+// TODO:  can probably get rid of this?
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/stl/algorithm/querying.hpp>
@@ -33,9 +34,11 @@
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 
+#include <TFBitsNPieces/IQFeedInstrumentBuild.h>
+
+#include <wx/app.h>
 #include <wx/window.h>
 #include <wx/timer.h>
-#include <wx/app.h>
 
 #include "ComboTrading.h"
 
@@ -317,16 +320,25 @@ void AppComboTrading::BuildFrameCharts( void ) {
   psizer->Add(m_pPanelCharts, 1, wxGROW|wxALL, 2);
 
   namespace args = boost::phoenix::placeholders;
-  m_pPanelCharts->signalLookUpIQFeedDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
-  m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRetrieveOptionList.connect( boost::phoenix::bind( &AppComboTrading::ProvideOptionList, this, args::arg1, args::arg2 ) );
-  signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
+  //signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
   
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
-  m_pPanelCharts->m_funcBuildInstrumentFromIqfeed = 
-    [this](const std::string& sName){
+  m_pPanelCharts->m_fSelectInstrument =
+    [this](const ou::tf::Allowed::enumInstrument selector, const wxString& sUnderlying)->pInstrument_t {
+      std::unique_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
+      pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pPanelCharts ) );
+      namespace ph = std::placeholders;
+      pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
+      pBuild->fBuildInstrument = std::bind( &AppComboTrading::BuildInstrument, this, ph::_1 );
+      // TODO: turn signal into function
+      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) );
+      return pBuild->HandleNewInstrumentRequest( selector, sUnderlying );
+    };
+  m_pPanelCharts->m_fBuildInstrumentFromIqfeed = 
+    [this](const std::string& sName)->pInstrument_t {
         ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sName ) );
         return ou::tf::iqfeed::BuildInstrument( sName, trd );
     };
@@ -363,7 +375,7 @@ AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::strin
 //   map of instruments prior to contract
 //   map of instruments with contract
 //   map of instruments from instrument manager
-void AppComboTrading::BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& values ) {
+void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
     signalInstrumentFromIB( values.pInstrument );

@@ -33,10 +33,8 @@
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Option.h>
-//#include <TFOptions/Strike.h>
 
 #include <TFBitsNPieces/TreeOps.h>
-#include <TFVuTrading/DialogPickSymbol.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <TFVuTrading/ModelChartHdf5.h>
@@ -75,25 +73,6 @@ public:
     const wxSize& size = SYMBOL_PANEL_CHARTS_SIZE, 
     long style = SYMBOL_PANEL_CHARTS_STYLE );
   
-  typedef boost::signals2::signal<void(const std::string&, std::string&)> signalLookUpIQFeedDescription_t;
-  typedef signalLookUpIQFeedDescription_t::slot_type slotLookUpIQFeedDescription_t;
-  signalLookUpIQFeedDescription_t signalLookUpIQFeedDescription;
-  
-  struct ValuesForBuildInstrument {
-    const std::string& sKey;
-    const std::string& sIQF;
-    const std::string& sIB;
-    pInstrument_t& pInstrument;
-    boost::uint16_t day;
-    ValuesForBuildInstrument( const std::string& sKey_, const std::string& sIQF_, const std::string& sIB_, pInstrument_t& pInstrument_, boost::uint16_t day_) 
-      : sKey( sKey_ ), sIQF( sIQF_ ), sIB( sIB_ ), pInstrument( pInstrument_ ), day( day_ ) 
-      {}
-  };
-  
-  typedef boost::signals2::signal<void(ValuesForBuildInstrument&)> signalBuildInstrument_t;
-  typedef signalBuildInstrument_t::slot_type slotBuildInstrument_t;
-  signalBuildInstrument_t signalBuildInstrument;
-  
   typedef boost::signals2::signal<void(pInstrument_t)> signalRegisterInstrument_t;
   typedef signalRegisterInstrument_t::slot_type slotRegisterInstrument_t;
   signalRegisterInstrument_t signalRegisterInstrument;
@@ -106,10 +85,9 @@ public:
   typedef boost::signals2::signal<void(const std::string&,fSymbol_t)> signalRetrieveOptionList_t;
   typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
   signalRetrieveOptionList_t signalRetrieveOptionList;
-  
-  std::function<pInstrument_t(const std::string&)> m_funcBuildInstrumentFromIqfeed;
 
-  void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract id has arrived
+  std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument;
+  std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed;
   
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
@@ -237,27 +215,6 @@ private:
   typedef std::map<idInstrument_t,InstrumentEntry> mapInstrumentEntry_t;
   mapInstrumentEntry_t m_mapInstrumentEntry;
   
-  // to be deprecated, and replaced with mapGuiEntry
-  //typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
-  //mapWatchInfo_t m_mapWatchInfo;
-  
-  // facilitates option greek calculations, shares watch from m_mapInstrumentWatch
-//  struct OptionWatch {
-    //const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
-    //unsigned int m_cntDown;
-    //ou::tf::Quote m_quoteLastUnderlying;
-    //ou::tf::Quote m_quoteLastOption;
-//    pWatch_t m_pWatchOption;  // uses m_pWatchUnderlying for CalcIV
-//    pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items
-//    OptionWatch( pWatch_t& pWatchUnderlying, pWatch_t& pWatchOption ):
-      //m_cntDown( m_cntDownStartingValue ), 
-//      m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
-//  };
-  
-  // need to use our generic instrument id here
-//  typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
-//  mapOptionWatch_t m_mapOptionWatch;
-  
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
   pProvider_t m_pExecutionProvider;
@@ -273,13 +230,7 @@ private:
   boost::signals2::connection m_connLiveChart;
   boost::signals2::connection m_connOptionList;
   boost::signals2::connection m_connDelete;
-  boost::signals2::connection m_connLookupDescription;
-  boost::signals2::connection m_connComposeComposite;
   boost::signals2::connection m_connChanging;
-  
-  ou::tf::DialogPickSymbol* m_pDialogPickSymbol;
-  DialogPickSymbol::DataExchange m_de;
-  pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
   ou::ChartDataView m_ChartDataView;
   
@@ -291,14 +242,11 @@ private:
   
   void HandleTreeOpsChanging( wxTreeItemId id );
   
-  void HandleLookUpDescription( const std::string&, std::string& );
-  
   InstrumentActions::values_t HandleNewInstrumentRequest( 
     const wxTreeItemId& item, 
-    const InstrumentActions::EAllowedInstrumentSelectors,
+    const ou::tf::Allowed::enumInstrument,
     const wxString& sUnderlying
   );
-  void HandleComposeIQFeedFullName( ou::tf::DialogPickSymbol::DataExchange* );
   
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
   void ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t, const std::string& sUnderlying );
@@ -320,8 +268,6 @@ private:
   
   void OnOptionChainPageChanging( boost::gregorian::date );
   void OnOptionChainPageChanged( boost::gregorian::date );
-  
-  void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
   
   pInstrumentActions_t HandleGetInstrumentActions( const wxTreeItemId& );
 

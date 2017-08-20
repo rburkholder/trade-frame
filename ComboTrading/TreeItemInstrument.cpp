@@ -29,7 +29,7 @@
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-  TreeItemResources( id, baseResources, resources ), m_InstrumentSelector( InstrumentActions::EAllowedInstrumentSelectors::AllAllowed ) {
+  TreeItemResources( id, baseResources, resources ), m_InstrumentSelector( ou::tf::Allowed::All ) {
   //std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
@@ -72,25 +72,25 @@ void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
   switch ( m_InstrumentSelector ) {
-    case InstrumentActions::EAllowedInstrumentSelectors::AllAllowed:
+    case ou::tf::Allowed::All:
       pMenu->Append( MINewInstrument, "New Instrument" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
       break;
-    case InstrumentActions::EAllowedInstrumentSelectors::OptionsAllowed:
+    case ou::tf::Allowed::Options:
       pMenu->Append( MINewOption, "New Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
       
       pMenu->Append( MIOptionList, "Option List" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
-    case InstrumentActions::EAllowedInstrumentSelectors::FuturesOptionsAllowed:
+    case ou::tf::Allowed::FuturesOptions:
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
       
       pMenu->Append( MIOptionList, "Option List" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
-    case InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed:
+    case ou::tf::Allowed::None:
       // no menu for options, future options, etc
       break;
     default:
@@ -134,22 +134,22 @@ void TreeItemInstrument::ShowContextMenu( void ) {
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( InstrumentActions::OptionsAllowed, "Option" );
+  InstrumentViaDialog( ou::tf::Allowed::Options, "Option" );
 }
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( InstrumentActions::FuturesOptionsAllowed, "FuturesOption" );
+  InstrumentViaDialog( ou::tf::Allowed::FuturesOptions, "FuturesOption" );
 }
 
 void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
-  InstrumentViaDialog( InstrumentActions::AllAllowed, "Instrument Name" );
+  InstrumentViaDialog( ou::tf::Allowed::All, "Instrument Name" );
 }
 
-void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::EAllowedInstrumentSelectors lock, const std::string& sPrompt ) {
+void TreeItemInstrument::InstrumentViaDialog( ou::tf::Allowed::enumInstrument selector, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
   wxString wsx( m_baseResources.signalGetItemText( m_id ) );
-  if ( p->NewInstrumentViaDialog( lock, wsx ) ) {  // wsx is used as sUnderlying to new instrument, when needed
+  if ( p->NewInstrumentViaDialog( selector, wsx ) ) {  // wsx is used as sUnderlying to new instrument, when needed
     // continue with processing
   }
   else {
@@ -164,7 +164,7 @@ void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::EAllowedInstrum
 //   InstrumentViaDialog (above)
 //   TreeItemGroup::HandleAddInstrument
 bool TreeItemInstrument::NewInstrumentViaDialog( 
-  InstrumentActions::EAllowedInstrumentSelectors selector, const wxString& wxsUnderlying 
+  ou::tf::Allowed::enumInstrument selector, const wxString& wxsUnderlying 
   ) {
   // IQF underlying name, and IB underlying name will need to be provided for naming options during lock
   // need to assume/assert that this is a new dialog?  or communicate it is a replacement?

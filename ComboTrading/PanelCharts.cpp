@@ -21,12 +21,9 @@
 #include <boost/phoenix/core/argument.hpp>
 
 #include <wx/sizer.h>
-//#include <wx/dc.h>
 #include <wx/icon.h>
 #include <wx/menu.h>
 
-#include <TFVuTrading/DialogPickSymbol.h>
-#include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Option.h>
@@ -79,7 +76,6 @@ void PanelCharts::Init( void ) {
   m_winRightDetail = 0;
   
   m_pTreeOps = 0;
-  m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
 
@@ -170,10 +166,6 @@ void PanelCharts::CreateControls() {
   m_connLiveChart = m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
   m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionChainList, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
-  
-  m_connLookupDescription = m_de.signalLookupIQFeedDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
-  m_connComposeComposite = m_de.signalComposeIQFeedFullName.connect( boost::phoenix::bind( &PanelCharts::HandleComposeIQFeedFullName, this, args::arg1 ) );
-  
   m_connChanging = m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
   
 }
@@ -470,7 +462,7 @@ void PanelCharts::HandleGridClick(
         [this,&entry](const ou::tf::GridOptionChain::OptionUpdateFunctions* func){
           mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
           if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
-            pInstrument_t pInstrument = m_funcBuildInstrumentFromIqfeed( func->sSymbolName );
+            pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( func->sSymbolName );
             assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
             ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
             iterOption 
@@ -565,163 +557,39 @@ void PanelCharts::HandleLoadInstrument(
   ConstructInstrumentEntry( item, signalLoadInstrument( sName ), sUnderlying );
 }
 
+
 InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( 
   const wxTreeItemId& item, 
-  const InstrumentActions::EAllowedInstrumentSelectors lock,
+  const ou::tf::Allowed::enumInstrument selector,
   const wxString& wxsUnderlying // optional
 ) {
   
   // the item coming in represents the existing menu item 
   //   which might be a group item, or an instrument item
 
-  assert( 0 == m_pDialogPickSymbol );
-  
   InstrumentActions::values_t values;
   
-  if ( !wxsUnderlying.empty() ) {
-    m_de.sIQFSymbolName = wxsUnderlying;
-  }
+  // TODO: turn this into a std::function call
+  pInstrument_t pInstrument = m_fSelectInstrument( selector, wxsUnderlying );
   
-  m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
-  m_pDialogPickSymbol->SetDataExchange( &m_de );
-  
-  switch ( lock ) {
-    case InstrumentActions::EAllowedInstrumentSelectors::FuturesOptionsAllowed:
-      m_pDialogPickSymbol->SetFuturesOptionOnly();
-      break;
-    case InstrumentActions::EAllowedInstrumentSelectors::OptionsAllowed:
-      m_pDialogPickSymbol->SetOptionOnly();
-      break;
-    case InstrumentActions::EAllowedInstrumentSelectors::AllAllowed:
-      m_pDialogPickSymbol->SetBasic();
-      break;
-    case InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed:
-      // should be no instrument popup
-      assert( 0 );
-      break;
-  }
-  
-  int status = m_pDialogPickSymbol->ShowModal();
-  
-  pWatch_t pInstrumentWatch;
-  
-  switch ( status ) {
-    case wxID_CANCEL:
-      //m_pDialogPickSymbolCreatedInstrument.reset();
-      // menu item should be deleting
-      break;
-    case wxID_OK:
-      if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
-        
-        //pInstrumentWatch = ConstructWatch( m_pDialogPickSymbolCreatedInstrument );
-        const std::string sUnderlying( wxsUnderlying );
-        ConstructInstrumentEntry( item, m_pDialogPickSymbolCreatedInstrument, sUnderlying );
-        
-        Instrument::idInstrument_cref idInstrument( m_pDialogPickSymbolCreatedInstrument->GetInstrumentName() );
-        
-        values.name_ = idInstrument;
-        // are these lock types propagated properly?
-        //  ie, on load from file, are they set there?
-        if ( m_pDialogPickSymbolCreatedInstrument->IsStock() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::OptionsAllowed;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsFuture() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::FuturesOptionsAllowed;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsOption() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed;
-        if ( m_pDialogPickSymbolCreatedInstrument->IsFuturesOption() ) values.selector = InstrumentActions::EAllowedInstrumentSelectors::NoneAllowed;
-        //iter->second->Set( pInstrumentWatch );
+  if ( 0 != pInstrument.use_count() ) {
 
-      }
-      else {
-        std::cout << "PanelCharts::HandleNewInstrumentRequest has wxID_OK but no instrument" << std::endl;
-      }
-      break;
+    const std::string sUnderlying( wxsUnderlying );
+    ConstructInstrumentEntry( item, pInstrument, sUnderlying );
+
+    Instrument::idInstrument_cref idInstrument( pInstrument->GetInstrumentName() );
+    values.name_ = idInstrument;
+    
+    // are these selector types propagated properly?
+    //  ie, on load from file, are they set there?
+    if ( pInstrument->IsStock() )         values.selector = ou::tf::Allowed::Options;
+    if ( pInstrument->IsFuture() )        values.selector = ou::tf::Allowed::FuturesOptions;
+    if ( pInstrument->IsOption() )        values.selector = ou::tf::Allowed::None;
+    if ( pInstrument->IsFuturesOption() ) values.selector = ou::tf::Allowed::None;
+
   }
-  
-  m_pDialogPickSymbol->Destroy();
-  m_pDialogPickSymbol = 0;
-  
-  m_pDialogPickSymbolCreatedInstrument.reset();
   
   return values;
-}
-
-// extract this sometime because the string builder might be used elsewhere
-void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument ) {
-  std::string sKey( pde.sIQFSymbolName );
-  switch ( pde.it ) {
-    case InstrumentType::Stock: {
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, 0 );
-      signalBuildInstrument( values );
-    }
-      break;
-    case InstrumentType::Option:
-    case InstrumentType::FuturesOption:
-    {
-      boost::uint16_t month( pde.month + 1 ); // month is 0 based
-      boost::uint16_t day( pde.day ); // day is 1 based
-      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
-        + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
-      sKey += "-";
-      sKey += pde.os;
-      sKey += "-" + boost::lexical_cast<std::string>( pde.dblStrike )
-        ;
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
-      signalBuildInstrument( values );
-    }
-      break;
-    case InstrumentType::Future:
-    {
-      boost::uint16_t month( pde.month + 1 ); // month is 0 based
-      boost::uint16_t day( pde.day ); // day is 1 based
-      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
-        + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) );
-        ;
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
-      signalBuildInstrument( values );
-    }
-      break;
-  }
-}
-
-void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {
-  signalLookUpIQFeedDescription( sSymbol, sDescription );
-}
-
-void PanelCharts::HandleComposeIQFeedFullName( DialogPickSymbol::DataExchange* pde ) {
-  pde->sIQFeedFullName = "";
-  pde->sIQFeedDescription = "";
-  pde->sIQFeedFullName 
-      = ou::tf::iqfeed::BuildName( 
-          ou::tf::iqfeed::NameParts( pde->it, pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os ) );
-  if ( "" != pde->sIQFeedFullName ) {
-    signalLookUpIQFeedDescription( pde->sIQFeedFullName, pde->sIQFeedDescription );
-    // need instrument built at this point, as IB provides the contract # as part of the process
-    // via InstrumentUpdated
-    if ( "" != pde->sIQFeedDescription ) { // means we have a satisfactory iqfeed symbol
-      BuildInstrument( m_de, m_pDialogPickSymbolCreatedInstrument );
-    }
-  }
-}
-
-// IB has populated instrument with ContractID
-void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
-  if ( 0 != m_pDialogPickSymbol ) {
-    if ( pInstrument.get() == m_pDialogPickSymbolCreatedInstrument.get() ) {
-      // expecting contract id to already exist in instrument
-      // might put a lock on instrument changes until contract comes back
-      //assert( 0 != pInstrument->GetContract() );
-      if ( 0 == pInstrument->GetContract() ) {
-        std::cout << "PanelCharts::InstrumentUpdated missing contract " << pInstrument->GetInstrumentName() << std::endl;
-      }
-      else {
-        m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
-      }
-      
-    }
-    else {
-      std::cout << "PanelCharts::InstrumentUpdated error:  not expected instrument" << std::endl;
-    }
-  }
 }
 
 void PanelCharts::OnClose( wxCloseEvent& event ) {
@@ -748,9 +616,6 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
     m_connEmitValues.disconnect();
     m_connLiveChart.disconnect();
     m_connDelete.disconnect();
-
-    m_connLookupDescription.disconnect();
-    m_connComposeComposite.disconnect();
 
     m_connChanging.disconnect();
 

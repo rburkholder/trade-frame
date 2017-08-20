@@ -70,6 +70,16 @@ namespace Trading {
   static const std::string DbFileName = "TradeFrame.db4";
 }
 
+  // * instrument dialog may be limited to a subset of instruments
+  // * menu tree presents certain options depending upon what is allowed
+  // * need to get this out of here for more generic use, maybe in the enumerations file
+namespace Allowed {
+  enum enumInstrument { All, Options, FuturesOptions, None };
+}
+  
+  
+
+
 // currency pair    base/quote(aka counter)  - depicts how many units of the counter currency are needed to buy one unit of the base currency.
 // http://en.wikipedia.org/wiki/Currency_pair
 // bigger number, base is stronger

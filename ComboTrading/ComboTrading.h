@@ -183,7 +183,7 @@ private:
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
-  void BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& );
+  void BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& );
   void RegisterInstrument( pInstrument_t );
   pInstrument_t LoadInstrument( const std::string& );
   

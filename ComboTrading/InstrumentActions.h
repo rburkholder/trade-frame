@@ -25,6 +25,8 @@
 #include <wx/treebase.h>
 #include <wx/string.h>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
 // todo:
@@ -35,25 +37,21 @@
 class InstrumentActions {
 public:
   
-  // * instrument dialog may be limited to a subset of instruments
-  // * menu tree presents certain options depending upon what is allowed
-  // * need to get this out of here for more generic use, maybe in the enumerations file
-  enum EAllowedInstrumentSelectors { AllAllowed, OptionsAllowed, FuturesOptionsAllowed, NoneAllowed };
-  
   typedef boost::shared_ptr<InstrumentActions> pInstrumentActions_t;
   
   struct values_t {
     std::string name_;
-    EAllowedInstrumentSelectors selector;
-    values_t( void ): selector( EAllowedInstrumentSelectors::AllAllowed ) {}
+    ou::tf::Allowed::enumInstrument selector;
+    values_t( void ): selector( ou::tf::Allowed::All ) {}
     values_t( const values_t& rhs ): name_( rhs.name_ ), selector( rhs.selector ) {}
-    values_t( const std::string& name, const EAllowedInstrumentSelectors selector_ )
+    values_t( const std::string& name, const ou::tf::Allowed::enumInstrument selector_ )
       : name_( name ), selector( selector_ ) {}
   };
   
   // used in TreeItemInstrument
-  typedef boost::signals2::signal<values_t (const wxTreeItemId&, EAllowedInstrumentSelectors, const wxString&), 
-                                  ou::tf::FirstOrDefault<values_t> > signalNewInstrument_t;
+  typedef boost::signals2::signal<values_t (
+    const wxTreeItemId&, ou::tf::Allowed::enumInstrument, const wxString&), 
+      ou::tf::FirstOrDefault<values_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrument;
   

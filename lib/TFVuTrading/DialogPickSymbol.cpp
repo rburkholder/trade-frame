@@ -324,7 +324,8 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   pde->sIBSymbolName = text;
   
   std::string sDescription;
-  pde->signalLookupIQFeedDescription( sText, sDescription );
+  //pde->signalLookupIQFeedDescription( sText, sDescription );
+  pde->fLookupIQFeedDescription( sText, sDescription );
   if ( 0 != sDescription.length() ) {
     m_txtSymbolDescription->SetLabel( sDescription );
   }
@@ -440,7 +441,8 @@ void DialogPickSymbol::UpdateComposite( void ) {
   
   pde->sIQFSymbolName = this->m_txtIQFRootName->GetValue();
   pde->sIQFeedDescription = "";  // UpdateContractId set button to ok, this undoes it
-  pde->signalComposeIQFeedFullName( pde );
+  //pde->signalComposeIQFeedFullName( pde );
+  pde->fComposeIQFeedFullName( pde );
   m_txtIQFeedFullName->SetValue( pde->sIQFeedFullName );
   m_txtIQFeedDescription->SetLabel( pde->sIQFeedDescription );
   UpdateBtnOk();
