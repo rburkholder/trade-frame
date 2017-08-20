@@ -572,8 +572,8 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
   // TODO: turn this into a std::function call
   pInstrument_t pInstrument = m_fSelectInstrument( selector, wxsUnderlying );
   
-  if ( 0 != pInstrument.use_count() ) {
-
+  if ( nullptr != pInstrument.get() ) {
+    
     const std::string sUnderlying( wxsUnderlying );
     ConstructInstrumentEntry( item, pInstrument, sUnderlying );
 
