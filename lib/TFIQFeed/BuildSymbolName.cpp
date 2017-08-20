@@ -31,15 +31,15 @@ const std::string BuildName( const NameParts& parts ) {
     case ou::tf::InstrumentType::Option:
       if ( 0 != parts.day ) std::runtime_error( "ou::tf::iqfeed::BuildName: 0 == parts.day" );
       sBuiltName 
-        = ou::tf::iqfeed::BuildOptionName( parts.sRootName, parts.year, parts.month + 1, parts.day, parts.strike, parts.side );
+        = ou::tf::iqfeed::BuildOptionName( parts.sRootName, parts.year, parts.month, parts.day, parts.strike, parts.side );
       break;
     case ou::tf::InstrumentType::Future:
       sBuiltName
-        = ou::tf::iqfeed::BuildFuturesName( parts.sRootName, parts.year, parts.month + 1 );
+        = ou::tf::iqfeed::BuildFuturesName( parts.sRootName, parts.year, parts.month );
       break;
     case ou::tf::InstrumentType::FuturesOption:
       sBuiltName 
-        = ou::tf::iqfeed::BuildFuturesOptionName( parts.sRootName, parts.year, parts.month + 1, parts.strike, parts.side );
+        = ou::tf::iqfeed::BuildFuturesOptionName( parts.sRootName, parts.year, parts.month, parts.strike, parts.side );
       break;
     default: 
       throw std::runtime_error( "ou::tf::iqfeed::BuildName: unknown instrument type" );

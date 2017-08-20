@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <cassert>
 
 #include <TFTrading/TradingEnumerations.h>
 
@@ -40,11 +41,13 @@ struct NameParts {
     uint16_t year_, uint16_t month_, uint16_t day_,
     double strike_, ou::tf::OptionSide::enumOptionSide side_ )
       : it( it_ ), sRootName( sRootName_ ), year( year_ ), month( month_ ), day( day_ ),
-          strike( strike_ ), side( side_ ) {}
+          strike( strike_ ), side( side_ ) 
+             { assert( 0 < month ); assert( 12 >= month ); }
   NameParts(InstrumentType::enumInstrumentTypes it_, const std::string& sRootName_,
     uint16_t year_, uint16_t month_, uint16_t day_ )
       : it( it_ ), sRootName( sRootName_ ), year( year_ ), month( month_ ), day( day_ ), 
-          strike(0.0), side( ou::tf::OptionSide::Unknown) {}
+          strike(0.0), side( ou::tf::OptionSide::Unknown) 
+             { assert( 0 < month ); assert( 12 >= month ); }
 };
   
 // months are 1 .. 12
