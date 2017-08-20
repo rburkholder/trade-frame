@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <wx/choice.h>
+
 #include "DialogBase.h"
 
 namespace ou { // One Unified

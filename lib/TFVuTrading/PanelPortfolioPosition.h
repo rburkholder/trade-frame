@@ -15,15 +15,16 @@
 
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <functional>
 
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
+#include <wx/panel.h>
 
+//#include <OUCommon/FastDelegate.h>
+//using namespace fastdelegate;
+
+#include <TFTrading/Instrument.h>
 #include <TFTrading/Portfolio.h>
-
-#include <TFVuTrading/DialogInstrumentSelect.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -39,6 +40,8 @@ class PanelPortfolioPosition_impl;  // Forward declaration
 class PanelPortfolioPosition: public wxPanel {
   friend class PanelPortfolioPosition_impl;
 public:
+  
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
@@ -46,21 +49,33 @@ public:
   typedef ou::tf::Portfolio::idPosition_t idPosition_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
   
-  typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
+  //typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
 
-  typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
-  typedef FastDelegate3<const std::string&,pPortfolio_t,DelegateAddPosition_t,void> DelegateConstructPosition_t;
-  typedef FastDelegate3<PanelPortfolioPosition&,const std::string&, const std::string&> DelegateConstructPortfolio_t;
+  //typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
+  //typedef FastDelegate3<const std::string&,pPortfolio_t,DelegateAddPosition_t,void> DelegateConstructPosition_t;
+  //typedef FastDelegate3<PanelPortfolioPosition&,const std::string&, const std::string&> DelegateConstructPortfolio_t;
+  
+  std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
+  
+  typedef std::function<void(pPosition_t)> fAddPosition_t;
+  typedef std::function<void(pInstrument_t,pPortfolio_t,fAddPosition_t)> fConstructPosition_t;
+  typedef std::function<void(PanelPortfolioPosition&, const std::string&, const std::string&)> fConstructPortfolio_t;
+  
+  fAddPosition_t m_fAddPosition;
+  fConstructPosition_t m_fConstructPosition;
+  fConstructPortfolio_t m_fConstructPortfolio;
 
   PanelPortfolioPosition(void);
   PanelPortfolioPosition( 
-    wxWindow* parent, wxWindowID id = PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos =              PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size =              PANEL_PORTFOLIOPOSITION_SIZE, 
-    long style =                      PANEL_PORTFOLIOPOSITION_STYLE );
+    wxWindow* parent, 
+    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
+    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
+    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
+    long style =         PANEL_PORTFOLIOPOSITION_STYLE );
   virtual ~PanelPortfolioPosition(void);
 
-  bool Create( wxWindow* parent, 
+  bool Create( 
+    wxWindow* parent, 
     wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
     const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
     const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
@@ -69,9 +84,9 @@ public:
   void SetPortfolio( pPortfolio_t pPortfolio );
   pPortfolio_t& GetPortfolio( void );
 
-  void SetNameLookup( DelegateNameLookup_t function );
-  void SetConstructPosition( DelegateConstructPosition_t function );
-  void SetConstructPortfolio( DelegateConstructPortfolio_t function );
+  //void SetNameLookup( DelegateNameLookup_t function );
+  //void SetConstructPosition( DelegateConstructPosition_t function );
+  //void SetConstructPortfolio( DelegateConstructPortfolio_t function );
 
   void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 

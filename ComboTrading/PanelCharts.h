@@ -86,8 +86,8 @@ public:
   typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
   signalRetrieveOptionList_t signalRetrieveOptionList;
 
-  std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument;
-  std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed;
+  std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
+  std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
   
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;

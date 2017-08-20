@@ -74,7 +74,8 @@ private:
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+  //typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+  typedef ou::tf::PanelPortfolioPosition::fAddPosition_t fAddPostion_t;
   
   typedef std::vector<BundleTracking> vBundleTracking_t;
   
@@ -90,7 +91,8 @@ private:
 
   struct structConstructEquityPosition {
     pPortfolio_t pPortfolio;
-    DelegateAddPosition_t function;
+    fAddPostion_t fAddPosition;
+    //DelegateAddPosition_t function;
   } m_EquityPositionCallbackInfo;
 
   struct structPortfolio {
@@ -193,8 +195,9 @@ private:
   void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );
   
-  void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, DelegateAddPosition_t);  // step 1
-  void ConstructEquityPosition1( pInstrument_t& pInstrument ); // step 2
+  void ConstructEquityPosition1a( const std::string& sName, pPortfolio_t, fAddPostion_t);  // step 1
+  void ConstructEquityPosition1b( pInstrument_t, pPortfolio_t, fAddPostion_t);  // step 1
+  void ConstructEquityPosition2( pInstrument_t& pInstrument ); // step 2
 
   virtual bool OnInit();
   virtual int OnExit();

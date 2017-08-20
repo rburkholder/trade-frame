@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <vector>
+
 #define FUSION_MAX_VECTOR_SIZE 15
 
 #include <boost/fusion/container/vector/vector20.hpp>
@@ -51,10 +53,12 @@ struct PanelPortfolioPosition_impl {
 //public:
 
   PanelPortfolioPosition_impl( PanelPortfolioPosition& );
-  ~PanelPortfolioPosition_impl( void );
+  virtual ~PanelPortfolioPosition_impl( void );
 
 //protected:
 //private:
+  
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
@@ -208,15 +212,15 @@ struct PanelPortfolioPosition_impl {
   PanelPortfolioPosition& m_ppp; // passed in on construction 
 
   pPortfolio_t m_pPortfolio;
-  PanelPortfolioPosition::DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
-  PanelPortfolioPosition::DelegateConstructPortfolio_t m_delegateConstructPortfolio;  // used to construct the Portfolio
+  //PanelPortfolioPosition::DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
+  //PanelPortfolioPosition::DelegateConstructPortfolio_t m_delegateConstructPortfolio;  // used to construct the Portfolio
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
   vPortfolioValues_t m_vPortfolioValues;
 
-  ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
-  ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
+  //ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
+  //ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
 
   ou::tf::DialogSimpleOneLineOrder::DataExchange m_DialogSimpleOneLineOrder_DataExchange;
   ou::tf::DialogSimpleOneLineOrder* m_pdialogSimpleOneLineOrder;
@@ -238,7 +242,7 @@ struct PanelPortfolioPosition_impl {
   void OnPositionPopUpAddPortfolio( wxCommandEvent& event );
   void OnPositionPopUpClosePortfolio( wxCommandEvent& event );
 
-  void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
+//  void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
   void OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* );
   void OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* );
 

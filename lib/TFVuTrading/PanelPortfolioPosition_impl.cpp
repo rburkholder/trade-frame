@@ -12,7 +12,12 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+//#include "stdafx.h"
+
+#include <functional>
+
+#include <wx/textctrl.h>
+#include <wx/menu.h>
 
 #include "PanelPortfolioPosition_impl.h"
 
@@ -38,7 +43,7 @@ PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition
     m_menuGridLabelPositionPopUp = NULL;
     m_menuGridCellPositionPopUp = NULL;
 
-    m_pdialogInstrumentSelect = 0;
+    //m_pdialogInstrumentSelect = 0;
     m_pdialogSimpleOneLineOrder = 0;
 
     m_nRowRightClick = -1;
@@ -199,15 +204,28 @@ void PanelPortfolioPosition_impl::OnRightClickGridCell( wxGridEvent& event ) {
 }
 
 void PanelPortfolioPosition_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
-  std::cout << "add position" << std::endl;
-  if ( !m_bDialogActive ) {
-    m_bDialogActive = true;
-    m_pdialogInstrumentSelect = new ou::tf::DialogInstrumentSelect( &m_ppp, wxID_ANY, "Instrument Selection" );
-    m_pdialogInstrumentSelect->SetDataExchange( &m_DialogInstrumentSelect_DataExchange );
-    m_pdialogInstrumentSelect->SetOnDoneHandler( MakeDelegate( this, &PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone ) );
-    m_pdialogInstrumentSelect->Show( true );
+  pInstrument_t pInstrument = m_ppp.m_fSelectInstrument();
+  if ( 0 != pInstrument.use_count() ) {
+    namespace ph = std::placeholders;
+    m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
+      std::bind( &PanelPortfolioPosition_impl::AddPosition, this, ph::_1 ) );
   }
 }
+
+//void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
+//  m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
+//  m_pdialogInstrumentSelect->SetDataExchange( 0 );
+//  if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
+//    std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
+//    std::string s( m_DialogInstrumentSelect_DataExchange.sSymbolName );
+//    if ( 0 != m_delegateConstructPosition ) {
+//      m_delegateConstructPosition( s, m_pPortfolio, MakeDelegate( this, &PanelPortfolioPosition_impl::AddPosition ) ); 
+//    }
+//  }
+//  m_pdialogInstrumentSelect->Destroy();
+//  m_pdialogInstrumentSelect = 0;
+//  m_bDialogActive = false;
+//}
 
 void PanelPortfolioPosition_impl::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
   std::cout << "add order" << std::endl;
@@ -249,29 +267,14 @@ void PanelPortfolioPosition_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::
   m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
   m_pdialogNewPortfolio->SetDataExchange( 0 );
   if ( m_DialogNewPortfolio_DataExchange.bOk ) {
-    if ( 0 != m_delegateConstructPortfolio ) {
+    if ( nullptr != m_ppp.m_fConstructPortfolio ) {
       std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
       std::string sDescription( m_DialogNewPortfolio_DataExchange.sDescription );
-      m_delegateConstructPortfolio( m_ppp, sPortfolioId, sDescription );
+      m_ppp.m_fConstructPortfolio( m_ppp, sPortfolioId, sDescription );
     }
   }
   m_pdialogNewPortfolio->Destroy();
   m_pdialogNewPortfolio = 0;
-  m_bDialogActive = false;
-}
-
-void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
-  m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
-  m_pdialogInstrumentSelect->SetDataExchange( 0 );
-  if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
-    std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
-    std::string s( m_DialogInstrumentSelect_DataExchange.sSymbolName );
-    if ( 0 != m_delegateConstructPosition ) {
-      m_delegateConstructPosition( s, m_pPortfolio, MakeDelegate( this, &PanelPortfolioPosition_impl::AddPosition ) ); 
-    }
-  }
-  m_pdialogInstrumentSelect->Destroy();
-  m_pdialogInstrumentSelect = 0;
   m_bDialogActive = false;
 }
 

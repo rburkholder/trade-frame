@@ -107,15 +107,17 @@ bool AppComboTrading::OnInit() {
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
   
-  m_pFPPOE = 0;
-  m_sizerPM = 0;
-  m_scrollPM = 0;
-  m_sizerScrollPM = 0;
+  m_pFPPOE = nullptr;
+  m_sizerPM = nullptr;
+  m_scrollPM = nullptr;
+  m_sizerScrollPM = nullptr;
   
-  m_pFCharts = 0;
-  m_pFInteractiveBrokers = 0;
+  m_pLastPPP = nullptr;
+  
+  m_pFCharts = nullptr;
+  m_pFInteractiveBrokers = nullptr;
     
-  m_pPanelCharts = 0;
+  m_pPanelCharts = nullptr;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -412,7 +414,7 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   m_sizerPM = new wxBoxSizer(wxVERTICAL);
   m_pFPPOE->SetSizer(m_sizerPM);
 
-  //m_scrollPM = new wxScrolledWindow( m_pFPPOE, -1, wxDefaultPosition, wxSize(200, 400), wxVSCROLL );
+  //m_scrollPM is used for holding the PanelPortfolioPosition instances
   m_scrollPM = new wxScrolledWindow( m_pFPPOE, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerPM->Add(m_scrollPM, 1, wxGROW|wxALL, 5);
   m_scrollPM->SetScrollbars(1, 1, 0, 0);
@@ -679,14 +681,28 @@ void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrumen
 }
 
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
+  namespace ph = std::placeholders;
   //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   m_pLastPPP->SetPortfolio( pPortfolio );
-  m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );
-  m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition0 ) );  // *** this needs to be fixed
-  m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppComboTrading::HandleConstructPortfolio ) );
+  //m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );  // deprecated
+  //m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition1a ) );  // *** this needs to be fixed
+  m_pLastPPP->m_fConstructPosition = std::bind( &AppComboTrading::ConstructEquityPosition1b, this, ph::_1, ph::_2, ph::_3 );
+  //m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppComboTrading::HandleConstructPortfolio ) );
+  m_pLastPPP->m_fConstructPortfolio = std::bind( &AppComboTrading::HandleConstructPortfolio, this, ph::_1, ph::_2, ph::_3 );
+  m_pLastPPP->m_fSelectInstrument =
+    [this]()->pInstrument_t {
+      std::unique_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
+      pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
+      namespace ph = std::placeholders;
+      pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
+      pBuild->fBuildInstrument = std::bind( &AppComboTrading::BuildInstrument, this, ph::_1 );
+      // TODO: turn signal into function
+      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) );
+      return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" );
+    };
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
 }
 
@@ -733,15 +749,12 @@ void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::st
 // 20151122 Most of this is now obsolete.  Handled mostly in startup code.  Need to deal with option building though.
 //  the line with  ConstructEquityPosition1( pInstrument );  remains to be refactored elsewhere
 //   also ConstructEquityPosition1 needs to be fixed to match, as it has some callbacks set from here
-void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortfolio_t pPortfolio, DelegateAddPosition_t function ) {
+// 20170820 this probably can be deprecated after PanelPortfolioPosition fixed up?
+void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPortfolio_t pPortfolio, fAddPostion_t function ) {
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
-  m_EquityPositionCallbackInfo.function = function;
+  m_EquityPositionCallbackInfo.fAddPosition = function;
   
-  // QGC# for quote monitor
-  // test symbol:  QGCZ15P1200
-  // test symbol:  GLD1531X120
-
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
   
@@ -765,7 +778,7 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
 
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
   if ( im.Exists( sName, pInstrument ) ) {  // the call will supply instrument if it exists
-    ConstructEquityPosition1( pInstrument );
+    ConstructEquityPosition2( pInstrument );
   }
   else {
     // this is going to have to be changed to reflect various symbols types recovered from the IQF Market Symbols file
@@ -776,33 +789,33 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
       const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sName ) );
       
       switch ( trd.sc ) {
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
-//	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
-	  break;
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
-	{
-	  ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
-	  if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) { // change called name to IfExistsSupplyInstrument
-	  }
-	  else {
-	    // otherwise build instrument
-	    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
-	    switch (trdUnderlying.sc ) {
-	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-//		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
-		im.Register( pInstrumentUnderlying );
-		// 20151115 this instrument should also obtain ib contract details, as it will land in multi-expiry bundle and be used in various option delta scenarios
-		break;
-	      default:
-		throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
-	    }
-	  }
-//          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
-	}  // end case
-	  break;
-	default:
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+      //	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
+      	  break;
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
+        {
+          ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
+          if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) { // change called name to IfExistsSupplyInstrument
+          }
+          else {
+            // otherwise build instrument
+            const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
+            switch (trdUnderlying.sc ) {
+              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+      //		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
+          im.Register( pInstrumentUnderlying );
+          // 20151115 this instrument should also obtain ib contract details, as it will land in multi-expiry bundle and be used in various option delta scenarios
+          break;
+              default:
+          throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
+            }
+          }
+      //          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
+        }  // end case
+          break;
+        default:
           throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type" );
       } // end switch
       bConstructed = true;
@@ -820,8 +833,25 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
   }
 }
 
+void AppComboTrading::ConstructEquityPosition1b( pInstrument_t pInstrument, pPortfolio_t pPortfolio, fAddPostion_t function ) {
+
+  m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
+  m_EquityPositionCallbackInfo.fAddPosition = function;
+  
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  
+  // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
+  if ( im.Exists( pInstrument ) ) {
+  }
+  else {
+    im.Register( pInstrument );
+  }
+  
+  ConstructEquityPosition2( pInstrument );
+}
+
 // 20151025 problem with portfolio is 0 in m_EquityPositionCallbackInfo
-void AppComboTrading::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
+void AppComboTrading::ConstructEquityPosition2( pInstrument_t& pInstrument ) {
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
   try {
     pPosition_t pPosition( pm.ConstructPosition( 
@@ -834,8 +864,8 @@ void AppComboTrading::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
       this->m_pExecutionProvider, this->m_pData1Provider,
       pInstrument ) 
       );
-    if ( 0 != m_EquityPositionCallbackInfo.function ) {
-      m_EquityPositionCallbackInfo.function( pPosition );
+    if ( 0 != m_EquityPositionCallbackInfo.fAddPosition ) {
+      m_EquityPositionCallbackInfo.fAddPosition( pPosition );
     }
   }
   catch ( std::runtime_error& e ) {
