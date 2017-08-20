@@ -76,7 +76,7 @@ IQFeedInstrumentBuild::pInstrument_t
   
   int status = m_pDialogPickSymbol->ShowModal();
   
-  std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest status " << status << std::endl;
+  //std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest status " << status << std::endl;
   switch ( status ) {
     case wxID_CANCEL:
       //m_pDialogPickSymbolCreatedInstrument.reset();
@@ -163,7 +163,7 @@ void IQFeedInstrumentBuild::HandleComposeIQFeedFullName( DialogPickSymbol::DataE
 
 // IB has populated instrument with ContractID
 void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
-  std::cout << "IQFeedInstrumentBuild::InstrumentUpdated ..." << std::endl;
+  //std::cout << "IQFeedInstrumentBuild::InstrumentUpdated ..." << std::endl;
   if ( 0 == m_pDialogPickSymbol ) {
     std::cout << "IQFeedInstrumentBuild::InstrumentUpdated error:  not expecting instrument" << std::endl;
   } 
