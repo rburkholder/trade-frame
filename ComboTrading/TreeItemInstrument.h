@@ -20,6 +20,8 @@
 
 #include <wx/string.h>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include "InstrumentActions.h"
 #include "TreeItem.h"
 

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include "TreeItem.h"
 #include "TreeItemInstrument.h"
 

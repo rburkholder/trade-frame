@@ -74,7 +74,7 @@ namespace Trading {
   // * menu tree presents certain options depending upon what is allowed
   // * need to get this out of here for more generic use, maybe in the enumerations file
 namespace Allowed {
-  enum enumInstrument { All, Options, FuturesOptions, None };
+  enum enumInstrument { All, Basic, Options, FuturesOptions, None };
 }
   
   

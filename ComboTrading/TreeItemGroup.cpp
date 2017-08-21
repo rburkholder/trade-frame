@@ -35,7 +35,7 @@ void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
 
 void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) { 
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( "Instrument", IdInstrument, m_resources );
-  if ( p->NewInstrumentViaDialog( ou::tf::Allowed::All ) ) {
+  if ( p->NewInstrumentViaDialog( ou::tf::Allowed::Basic ) ) {
     // continue processing
   }
   else {

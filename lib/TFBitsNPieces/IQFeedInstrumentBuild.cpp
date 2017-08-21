@@ -59,14 +59,17 @@ IQFeedInstrumentBuild::pInstrument_t
   m_pDialogPickSymbol->SetDataExchange( &m_de );
   
   switch ( selector ) {
+    case ou::tf::Allowed::All:
+      m_pDialogPickSymbol->SetAll();
+      break;
+    case ou::tf::Allowed::Basic:
+      m_pDialogPickSymbol->SetBasic();
+      break;
     case ou::tf::Allowed::FuturesOptions:
       m_pDialogPickSymbol->SetFuturesOptionOnly();
       break;
     case ou::tf::Allowed::Options:
       m_pDialogPickSymbol->SetOptionOnly();
-      break;
-    case ou::tf::Allowed::All:
-      m_pDialogPickSymbol->SetBasic();
       break;
     case ou::tf::Allowed::None:
       // should be no instrument popup

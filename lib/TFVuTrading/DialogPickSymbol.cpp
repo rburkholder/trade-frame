@@ -282,7 +282,19 @@ void DialogPickSymbol::SetBasic( void ) {
   m_radioOption->Disable();
   m_radioOption->SetValue( false );
   m_radioFOption->SetValue( false );
-  SetRadioOption();
+  //SetRadioOption();
+}
+
+void DialogPickSymbol::SetAll( void ) {
+  m_bOptionOnly = false;
+  m_bFuturesOptionOnly = false;
+  m_radioEquity->Enable();
+  m_radioFuture->Enable();
+  m_radioFOption->Enable();
+  m_radioOption->Enable();
+  //m_radioOption->SetValue( false );
+  //m_radioFOption->SetValue( false );
+  //SetRadioOption();
 }
 
 void DialogPickSymbol::SetOptionOnly( void ) {

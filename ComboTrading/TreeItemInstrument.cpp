@@ -29,7 +29,7 @@
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-  TreeItemResources( id, baseResources, resources ), m_InstrumentSelector( ou::tf::Allowed::All ) {
+  TreeItemResources( id, baseResources, resources ), m_InstrumentSelector( ou::tf::Allowed::Basic ) {
   //std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
