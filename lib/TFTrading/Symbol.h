@@ -105,7 +105,7 @@ public:
   typedef boost::shared_ptr<S> pSymbol_t;
   Symbol( pInstrument_t pInstrument ) : SymbolBase( pInstrument ) {};
   Symbol( pInstrument_t pInstrument, const std::string& sName ) : SymbolBase( pInstrument, sName ) {};
-  ~Symbol( void ) {};
+  virtual ~Symbol( void ) {};
 protected:
 private:
 

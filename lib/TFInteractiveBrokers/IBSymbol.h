@@ -39,7 +39,7 @@ public:
   //IBSymbol( TickerId id, pInstrument_t pInstrument );
   IBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
   IBSymbol( pInstrument_t pInstrument, TickerId id );
-  ~IBSymbol(void);
+  virtual ~IBSymbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };
 

@@ -75,7 +75,7 @@ public:
   bool m_bNewOpen;
 
   IQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
-  ~IQFeedSymbol(void);
+  virtual ~IQFeedSymbol(void);
 
   ou::Delegate<IQFeedSymbol&> OnFundamentalMessage;
   ou::Delegate<IQFeedSymbol&> OnUpdateMessage;
