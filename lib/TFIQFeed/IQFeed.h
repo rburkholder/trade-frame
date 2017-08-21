@@ -45,7 +45,7 @@ public:
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   IQFeed(void);
-  ~IQFeed(void);
+  virtual ~IQFeed(void);
 
   // used for returning message buffer
   // linebuffer_t needs to be kept with msg as there are dynamic accesses from it

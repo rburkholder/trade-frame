@@ -39,7 +39,7 @@ public:
   typedef IQFeed<IQFeedProvider> IQFeed_t;
 
   IQFeedProvider( void );
-  ~IQFeedProvider( void );
+  virtual ~IQFeedProvider( void );
 
   // do these need to be virtual?  use crtp?
   virtual void Connect( void );

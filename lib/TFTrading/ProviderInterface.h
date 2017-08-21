@@ -148,7 +148,7 @@ public:
   typedef typename S::pSymbol_t pSymbol_t;
 
   ProviderInterface(void);
-  ~ProviderInterface(void);
+  virtual ~ProviderInterface(void);
 
   void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
   void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
