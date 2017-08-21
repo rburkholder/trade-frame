@@ -220,7 +220,7 @@ bool AppComboTrading::OnInit() {
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
   pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
 
-  m_sDbName = "ComboTrading.db";
+  m_sDbName = "../ComboTrading.db";
   try {
     if ( boost::filesystem::exists( m_sDbName ) ) {
   //    boost::filesystem::remove( sDbName );
