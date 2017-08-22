@@ -935,7 +935,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
     pInstrument->SetExchangeName( sExchange );
   }
 
-  m_mapSymbols_t::iterator iterSymbol;
+  mapSymbols_t::iterator iterSymbol;
   
   switch ( it ) {
     case InstrumentType::Stock: 

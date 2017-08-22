@@ -38,7 +38,7 @@ IQFeedProvider::~IQFeedProvider(void) {
 
 void IQFeedProvider::Connect() {
   if ( !m_bConnected ) {
-    OnConnecting( 0 );
+    ProviderInterfaceBase::OnConnecting( 0 );
     inherited_t::Connect();
     IQFeed_t::Connect();
   }
@@ -46,11 +46,13 @@ void IQFeedProvider::Connect() {
 
 void IQFeedProvider::OnIQFeedConnected( void ) {
   m_bConnected = true;
-  OnConnected( 0 );
+  inherited_t::ConnectionComplete();
+  ProviderInterfaceBase::OnConnected( 0 );
 }
 
 void IQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
+    inherited_t::Disconnecting();
     ProviderInterfaceBase::OnDisconnecting( 0 );
     IQFeed_t::Disconnect();
     inherited_t::Disconnect();
@@ -59,7 +61,7 @@ void IQFeedProvider::Disconnect() {
 
 void IQFeedProvider::OnIQFeedDisConnected( void ) {
   m_bConnected = false;
-  OnDisconnected( 0 );
+  ProviderInterfaceBase::OnDisconnected( 0 );
 }
 
 void IQFeedProvider::OnIQFeedError( size_t e ) {
@@ -107,33 +109,33 @@ void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
 }
 
 void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg ) {
-  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFUpdateMessage::QPSymbol ) );
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
+  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFUpdateMessage::QPSymbol ) );
   pSymbol_t pSym;
-  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = m_mapSymbols_Iter -> second;
+  if ( m_mapSymbols.end() != mapSymbols_iter ) {
+    pSym = mapSymbols_iter -> second;
     pSym ->HandleUpdateMessage( pMsg );
   }
   this->UpdateDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg ) {
-  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFSummaryMessage::QPSymbol ) );
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
+  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFSummaryMessage::QPSymbol ) );
   pSymbol_t pSym;
-  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = m_mapSymbols_Iter -> second;
+  if ( m_mapSymbols.end() != mapSymbols_iter ) {
+    pSym = mapSymbols_iter -> second;
     pSym ->HandleSummaryMessage( pMsg );
   }
   this->SummaryDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg ) {
-  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFFundamentalMessage::FSymbol ) );
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
+  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFFundamentalMessage::FSymbol ) );
   pSymbol_t pSym;
-  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = m_mapSymbols_Iter -> second;
+  if ( m_mapSymbols.end() != mapSymbols_iter ) {
+    pSym = mapSymbols_iter -> second;
     pSym ->HandleFundamentalMessage( pMsg );
   }
   this->FundamentalDone( pBuffer, pMsg );
@@ -141,7 +143,7 @@ void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFunda
 
 void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg ) {
 
-  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
 /*
   const char *ixFstColon = pMsg->m_sSymbolList.c_str();
   const char *ixLstColon = pMsg->m_sSymbolList.c_str();

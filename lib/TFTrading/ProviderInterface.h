@@ -16,6 +16,7 @@
 #include <map>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
 #include <boost/shared_ptr.hpp>
 
@@ -74,13 +75,18 @@ public:
     {};
   virtual ~ProviderInterfaceBase( void ) {};
 
-  virtual void Connect( void ) {};
+  
+  virtual void Connect( void ) {}; // called by inheriting provider
+  //virtual void Connecting( void ) {}; // called by inheriting provider
   ou::Delegate<int> OnConnecting;
   ou::Delegate<int> OnConnected;  // could be in another thread
+  //virtual void Connected( void ) {}; // called by inheriting provider
 
-  virtual  void Disconnect( void ) {};
+  //virtual void Disconnecting( void ) {}; // called by inheriting provider
   ou::Delegate<int> OnDisconnecting;
   ou::Delegate<int> OnDisconnected;  // could be in another thread
+  //virtual void Disconnected( void ) {}; // called by inheriting provider
+  virtual void Disconnect( void ) {}; // called by inheriting provider
 
   ou::Delegate<size_t> OnError;
 
@@ -169,15 +175,20 @@ public:
   pSymbol_t Add( pInstrument_cref pInstrument );
 
   pSymbol_t GetSymbol( const symbol_id_t& );
-
+  
   void  PlaceOrder( Order::pOrder_t pOrder );
   void CancelOrder( Order::pOrder_t pOrder );
 
 protected:
 
-  typedef std::map<symbol_id_t, pSymbol_t> m_mapSymbols_t;
+  typedef std::map<symbol_id_t, pSymbol_t> mapSymbols_t;
   typedef std::pair<symbol_id_t, pSymbol_t> pair_mapSymbols_t;
-  m_mapSymbols_t m_mapSymbols;
+  mapSymbols_t m_mapSymbols;
+
+  //void Connecting( void );
+  void ConnectionComplete( void );
+  void Disconnecting( void );
+  //void Disconnected( void );
 
   virtual void StartQuoteWatch( pSymbol_t pSymbol ) {};
   virtual void  StopQuoteWatch( pSymbol_t pSymbol ) {};
@@ -191,7 +202,7 @@ protected:
   virtual void StartGreekWatch( pSymbol_t pSymbol ) {};
   virtual void  StopGreekWatch( pSymbol_t pSymbol ) {};
 
-  bool Exists( pInstrument_cref pInstrument, typename m_mapSymbols_t::iterator& iter );
+  bool Exists( pInstrument_cref pInstrument, typename mapSymbols_t::iterator& iter );
 
   virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
   pSymbol_t AddCSymbol( pSymbol_t pSymbol );
@@ -219,14 +230,38 @@ ProviderInterface<P,S>::~ProviderInterface(void) {
 }
 
 template <typename P, typename S>
+void ProviderInterface<P,S>::ConnectionComplete(void) {
+  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(), 
+    [this](typename mapSymbols_t::value_type& vt){
+      if ( vt.second->GetQuoteHandlerCount() ) StartQuoteWatch( vt.second );
+      if ( vt.second->GetTradeHandlerCount() ) StartTradeWatch( vt.second );
+      if ( vt.second->GetDepthHandlerCount() ) StartDepthWatch( vt.second );
+      if ( vt.second->GetGreekHandlerCount() ) StartGreekWatch( vt.second );
+    }
+    );
+}
+
+template <typename P, typename S>
+void ProviderInterface<P,S>::Disconnecting(void) {
+  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(), 
+    [this](typename mapSymbols_t::value_type& vt){
+      if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
+      if ( vt.second->GetTradeHandlerCount() ) StopTradeWatch( vt.second );
+      if ( vt.second->GetDepthHandlerCount() ) StopDepthWatch( vt.second );
+      if ( vt.second->GetGreekHandlerCount() ) StopGreekWatch( vt.second );
+    }
+  );
+}
+
+template <typename P, typename S>
 bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument ) {
-  typename m_mapSymbols_t::iterator iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+  typename mapSymbols_t::iterator iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   bool b( m_mapSymbols.end() != iter );
   return b;
 }
 
 template <typename P, typename S>
-bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument, typename m_mapSymbols_t::iterator& iter ) {
+bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument, typename mapSymbols_t::iterator& iter ) {
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   bool b( m_mapSymbols.end() != iter );
   return b;
@@ -241,7 +276,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::Add( pInstrum
 template <typename P, typename S>
 typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( pSymbol_t pSymbol) {
   // todo:  add an assert to validate acceptable CSymbol type
-  typename m_mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
+  typename mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
   if ( m_mapSymbols.end() == iter ) {
     m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->GetId(), pSymbol ) );
     iter = m_mapSymbols.find( pSymbol->GetId() );
@@ -255,7 +290,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( p
 
 template <typename P, typename S>
 typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
     throw std::runtime_error( "GetSymbol did not find symbol " + id );
@@ -265,61 +300,61 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( co
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::AddQuoteHandler(pInstrument_cref pInstrument, quotehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
     iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
     assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddQuoteHandler( handler ) ) {
-    StartQuoteWatch( iter->second );
+    if ( m_bConnected ) StartQuoteWatch( iter->second );
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, quotehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveQuoteHandler( handler ) ) {
-      StopQuoteWatch( iter->second );
+      if ( !m_bConnected ) StopQuoteWatch( iter->second );
     }
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::AddTradeHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
     iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
     assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddTradeHandler( handler ) ) {
-    StartTradeWatch( iter->second );
+    if ( m_bConnected ) StartTradeWatch( iter->second );
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveTradeHandler( handler ) ) {
-      StopTradeWatch( iter->second );
+      if ( !m_bConnected ) StopTradeWatch( iter->second );
     }
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::AddOnOpenHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
     iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
@@ -330,10 +365,10 @@ void ProviderInterface<P,S>::AddOnOpenHandler(pInstrument_cref pInstrument, trad
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( 0 );
   }
   else {
     iter->second->RemoveOnOpenHandler( handler );
@@ -342,54 +377,54 @@ void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, t
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::AddDepthHandler(pInstrument_cref pInstrument, depthhandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
     iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
     assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddDepthHandler( handler ) ) {
-    StartDepthWatch( iter->second );
+    if ( m_bConnected ) StartDepthWatch( iter->second );
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveDepthHandler(pInstrument_cref pInstrument, depthhandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveDepthHandler( handler ) ) {
-      StopDepthWatch( iter->second );
+      if ( !m_bConnected ) StopDepthWatch( iter->second );
     }
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::AddGreekHandler(pInstrument_cref pInstrument, greekhandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
     iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
     assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddGreekHandler( handler ) ) {
-    StartGreekWatch( iter->second );
+    if ( m_bConnected ) StartGreekWatch( iter->second );
   }
 }
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, greekhandler_t handler) {
-  typename m_mapSymbols_t::iterator iter;
+  typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveGreekHandler( handler ) ) {
-      StopGreekWatch( iter->second );
+      if ( !m_bConnected ) StopGreekWatch( iter->second );
     }
   }
 }

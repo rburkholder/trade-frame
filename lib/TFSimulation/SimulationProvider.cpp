@@ -89,7 +89,7 @@ SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( SimulationSymbol::
 
 void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::AddQuoteHandler( pInstrument, handler );
-  inherited_t::m_mapSymbols_t::iterator iter;
+  inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
@@ -100,7 +100,7 @@ void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, Simulati
 
 void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::RemoveQuoteHandler( pInstrument, handler );
-  inherited_t::m_mapSymbols_t::iterator iter;
+  inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
@@ -115,7 +115,7 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
 
 void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::AddTradeHandler( pInstrument, handler );
-  inherited_t::m_mapSymbols_t::iterator iter;
+  inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
@@ -126,7 +126,7 @@ void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, Simulati
 
 void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::RemoveTradeHandler( pInstrument, handler );
-  inherited_t::m_mapSymbols_t::iterator iter;
+  inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
@@ -179,7 +179,7 @@ void SimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote, trade and greek series
   // datums from each series will be merged and emitted in chronological order
-  for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
+  for ( mapSymbols_t::iterator iter = m_mapSymbols.begin();
 
     iter != m_mapSymbols.end(); ++iter ) {
 
@@ -265,7 +265,7 @@ void SimulationProvider::Stop() {
 
 void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
-  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
+  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
     std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
   }
@@ -276,7 +276,7 @@ void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
 
 void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
   inherited_t::CancelOrder( pOrder );
-  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
+  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
     std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
   }
