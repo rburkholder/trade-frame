@@ -320,7 +320,7 @@ void ProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, qu
   }
   else {
     if ( iter->second->RemoveQuoteHandler( handler ) ) {
-      if ( !m_bConnected ) StopQuoteWatch( iter->second );
+      if ( m_bConnected ) StopQuoteWatch( iter->second );
     }
   }
 }
@@ -347,7 +347,7 @@ void ProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, tr
   }
   else {
     if ( iter->second->RemoveTradeHandler( handler ) ) {
-      if ( !m_bConnected ) StopTradeWatch( iter->second );
+      if ( m_bConnected ) StopTradeWatch( iter->second );
     }
   }
 }
@@ -397,7 +397,7 @@ void ProviderInterface<P,S>::RemoveDepthHandler(pInstrument_cref pInstrument, de
   }
   else {
     if ( iter->second->RemoveDepthHandler( handler ) ) {
-      if ( !m_bConnected ) StopDepthWatch( iter->second );
+      if ( m_bConnected ) StopDepthWatch( iter->second );
     }
   }
 }
@@ -424,7 +424,7 @@ void ProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, gr
   }
   else {
     if ( iter->second->RemoveGreekHandler( handler ) ) {
-      if ( !m_bConnected ) StopGreekWatch( iter->second );
+      if ( m_bConnected ) StopGreekWatch( iter->second );
     }
   }
 }
