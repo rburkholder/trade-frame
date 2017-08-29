@@ -22,6 +22,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+// month is 1 - 12
+// day is 1 - 31
 const std::string BuildName( const NameParts& parts ) {
   std::string sBuiltName;
   switch ( parts.it ) {
@@ -88,7 +90,7 @@ const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16
   static const char* code = { "FGHJKMNQUVXZ" };
   std::string sName = sUnderlying;
   if ( 0 != year ) {
-    sName += code[ month - 1 ];
+    sName += code[ month - 1 ]; // to get a zero index
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
     sName += (char) side;
     sName += boost::lexical_cast<std::string>( strike );
@@ -101,7 +103,7 @@ const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16
   static const char* code = { "FGHJKMNQUVXZ" };
   std::string sName = sUnderlying;
   if ( 0 != year ) {
-    sName += code[ month - 1 ];
+    sName += code[ month - 1]; // to get a zero index
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
     sName += (char) side;
   }
