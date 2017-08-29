@@ -80,14 +80,14 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
       pMenu->Append( MINewOption, "New Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
       
-      pMenu->Append( MIOptionList, "Option List" );
+      pMenu->Append( MIOptionList, "Option Chains" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
     case ou::tf::Allowed::FuturesOptions:
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
       
-      pMenu->Append( MIOptionList, "Option List" );
+      pMenu->Append( MIOptionList, "Option Chains" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
     case ou::tf::Allowed::None:

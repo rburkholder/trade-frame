@@ -742,6 +742,7 @@ void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::st
       sDescription = trd.sDescription;
     }
     catch ( std::runtime_error& e ) {
+      //std::cout << "AppComboTrading::LookupDescription error: " << e.what() <<std::endl;
     }
   }
 }

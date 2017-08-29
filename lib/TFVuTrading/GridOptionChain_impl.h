@@ -59,14 +59,14 @@ struct GridOptionChain_impl {
       (COL_CallAsk  , "Ask",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_CallIV   , "IV",    wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_CallDelta, "Delta", wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_CallGamma, "Gamma", wxALIGN_LEFT,  50, ModelCellDouble ), \
+      (COL_CallGamma, "Gamma", wxALIGN_LEFT,  60, ModelCellDouble ), \
       (COL_Strike   , "Strk",  wxALIGN_LEFT,  60, ModelCellDouble ), \
       (COL_PutLast  , "Last",  wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutBid   , "Bid",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutAsk   , "Ask",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutIV    , "IV",    wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutDelta , "Delta", wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_PutGamma , "Gamma", wxALIGN_LEFT,  50, ModelCellDouble ), \
+      (COL_PutGamma , "Gamma", wxALIGN_LEFT,  60, ModelCellDouble ), \
       ) \
     ) \
   /**/

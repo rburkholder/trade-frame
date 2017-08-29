@@ -91,7 +91,7 @@ void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::enumOptionSid
     
     Reindex reindex; 
     std::for_each( 
-      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+      m_mapOptionValueRow.rbegin(), m_mapOptionValueRow.rend(), 
         [&reindex](mapOptionValueRow_t::value_type& v){ reindex( v.second ); } );
         
     assert( m_details.InsertRows( iter->second.m_nRow ) );
