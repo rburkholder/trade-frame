@@ -82,7 +82,7 @@ IQFeedInstrumentBuild::pInstrument_t
   //std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest status " << status << std::endl;
   switch ( status ) {
     case wxID_CANCEL:
-      //m_pDialogPickSymbolCreatedInstrument.reset();
+      m_pDialogPickSymbolCreatedInstrument.reset();
       // menu item should be deleting
       break;
     case wxID_OK:

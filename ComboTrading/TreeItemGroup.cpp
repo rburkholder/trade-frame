@@ -41,7 +41,7 @@ void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) {
   else {
     // remove the place holder
     wxTreeItemId id( p->GetTreeItemId() );
-    this->m_baseResources.signalDelete( id );
+    m_baseResources.signalDelete( id );
     ou::tf::TreeItemBase::DeleteMember( id );
   }
 //  p->InstrumentViaDialog( InstrumentActions::NoLock, )
