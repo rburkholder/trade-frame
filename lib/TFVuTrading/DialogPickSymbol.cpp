@@ -325,7 +325,6 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   
   m_txtSymbolDescription->SetLabel( "" );
   m_btnOk->Enable( false );
-  pde->nContractId = 0;
   
   wxString text( m_txtIQFRootName->GetValue() );
   std::string sText( text.c_str() );
@@ -450,14 +449,15 @@ void DialogPickSymbol::UpdateComposite( void ) {
   
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   
+  pde->nContractId = 0;
   UpdateContractId();
   
   pde->sIQFSymbolName = this->m_txtIQFRootName->GetValue();
-  pde->sIQFeedDescription = "";  // UpdateContractId set button to ok, this undoes it
-  //pde->signalComposeIQFeedFullName( pde );
+  pde->sIQFeedDescription = "";
   pde->fComposeIQFeedFullName( pde );
   m_txtIQFeedFullName->SetValue( pde->sIQFeedFullName );
   m_txtIQFeedDescription->SetLabel( pde->sIQFeedDescription );
+  
   UpdateBtnOk();
 }
 
@@ -475,14 +475,14 @@ void DialogPickSymbol::UpdateContractId( void ) {
   else {
     m_txtContractId->SetLabel( boost::lexical_cast<std::string>( pde->nContractId ) );
   }
-  UpdateBtnOk();
 }
 
+// Called from background process to update contract id when received
 void DialogPickSymbol::UpdateContractId( int32_t nContractId ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->nContractId = nContractId;
-  //m_txtContractId->SetLabel( boost::lexical_cast<std::string>( nContractId ) );
   UpdateContractId();
+  UpdateBtnOk();
 }
 
 void DialogPickSymbol::DisableOptionFields( void ) {
