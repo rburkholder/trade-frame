@@ -59,15 +59,24 @@ void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
 
 template <typename T>
 void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
+  
   m_bNewTrade = m_bNewQuote = m_bNewOpen = false;
+
+  char chType;
+  ptime dtLastTrade;
+  double dblOpen, dblBid, dblAsk;
+  int nBidSize, nAskSize;
+     
   std::string sLastTradeTime = pMsg->Field( IQFPricingMessage<T>::QPLastTradeTime );
-  if ( sLastTradeTime.length() > 0 ) {  // can we do 'assume' anything if it is 0?
-    ptime dtLastTrade;
-    double dblOpen, dblBid, dblAsk;
-    int nBidSize, nAskSize;
-    char chType = sLastTradeTime[ sLastTradeTime.length() - 1 ];
-    m_dtLastTrade = pMsg->LastTradeTime();
-    switch ( chType ) {
+  if ( sLastTradeTime.length() > 0 ) {
+    chType = sLastTradeTime[ sLastTradeTime.length() - 1 ];
+  }
+  else {
+    chType = 'q';
+  }
+
+  m_dtLastTrade = pMsg->LastTradeTime();
+  switch ( chType ) {
     case 't':
     case 'T':
       m_dblTrade = pMsg->Double( IQFPricingMessage<T>::QPLast );
@@ -89,6 +98,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
       m_nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
       // fall through to processing bid / ask
+    case 'q':
     case 'b':
     case 'a':
       dblBid = pMsg->Double( IQFPricingMessage<T>::QPBid );
@@ -102,13 +112,21 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
       break;
     case 'o':
       break;
-    }
+    default:
+      std::cout << "IQFeedSymbol::DecodePricingMessage: " << this->m_pInstrument->GetInstrumentName() << " Unknown price type: " << chType << std::endl;
   }
+//  }
+  
+  std::cout 
+    << this->m_pInstrument->GetInstrumentName() 
+    << "," << chType 
+    << ",t=" << m_dblTrade 
+    << ",oi=" << m_nOpenInterest 
+    << ",b=" << m_dblBid
+    << ",a=" << m_dblAsk
+    << ",#=" << m_cntTrades
+    << std::endl;
 
-  //CString s;
-  //s.Format( "%s: %c %0.2f@%d b=%0.2f@%d a=%0.2f@%d #=%d", 
-  //  m_sSymbol, chType, dblTrade, TradeSize, dblBid, BidSize, dblAsk, AskSize, cntTrades );
-  //theApp.pConsoleMessages->WriteLine( s ); 
 }
 
 void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage *pMsg ) {
