@@ -117,15 +117,17 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
   }
 //  }
   
-  std::cout 
-    << this->m_pInstrument->GetInstrumentName() 
-    << "," << chType 
-    << ",t=" << m_dblTrade 
-    << ",oi=" << m_nOpenInterest 
-    << ",b=" << m_dblBid
-    << ",a=" << m_dblAsk
-    << ",#=" << m_cntTrades
-    << std::endl;
+  if ( false ) {
+    std::cout 
+      << this->m_pInstrument->GetInstrumentName() 
+      << "," << chType 
+      << ",t=" << m_dblTrade 
+      << ",oi=" << m_nOpenInterest 
+      << ",b=" << m_dblBid
+      << ",a=" << m_dblAsk
+      << ",#=" << m_cntTrades
+      << std::endl;
+  }
 
 }
 
