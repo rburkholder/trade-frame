@@ -740,6 +740,7 @@ void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::st
     try {
       const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sSymbolName ) );
       sDescription = trd.sDescription;
+      //std::cout << "AppComboTrading::LookupDescription: " << sSymbolName << "=" << sDescription << std::endl;
     }
     catch ( std::runtime_error& e ) {
       //std::cout << "AppComboTrading::LookupDescription error: " << e.what() <<std::endl;

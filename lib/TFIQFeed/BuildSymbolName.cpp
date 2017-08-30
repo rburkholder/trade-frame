@@ -87,10 +87,12 @@ const std::string BuildFuturesName( const std::string& sUnderlying, uint16_t yea
 }
 
 const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side ) {
-  static const char* code = { "FGHJKMNQUVXZ" };
+  assert( 1 <= month );
+  assert( 12 >= month );
+  static const char* code = { "-FGHJKMNQUVXZ" }; // hyphen to make as 1 index
   std::string sName = sUnderlying;
   if ( 0 != year ) {
-    sName += code[ month - 1 ]; // to get a zero index
+    sName += ( 12 == month ? code[ 1 ] : code[ month + 1 ] ); // need code of next month
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
     sName += (char) side;
     sName += boost::lexical_cast<std::string>( strike );
@@ -100,10 +102,12 @@ const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16
 
 const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
   std::runtime_error( "ou::tf::iqfeed::BuildFuturesOptionName: day not used yet" ); // day isn't used yet, need to fix
-  static const char* code = { "FGHJKMNQUVXZ" };
+  assert( 1 <= month );
+  assert( 12 >= month );
+  static const char* code = { "-FGHJKMNQUVXZ" }; // hyphen to make as 1 index
   std::string sName = sUnderlying;
   if ( 0 != year ) {
-    sName += code[ month - 1]; // to get a zero index
+    sName += ( 12 == month ? code[ 1 ] : code[ month + 1 ] ); // need code of next month
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
     sName += (char) side;
   }

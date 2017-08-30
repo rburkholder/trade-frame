@@ -110,8 +110,8 @@ void IQFeedInstrumentBuild::BuildInstrument( const DialogPickSymbol::DataExchang
     case InstrumentType::Option:
     case InstrumentType::FuturesOption:
     {
-      boost::uint16_t month( pde.month + 1 ); // month is 0 based
-      boost::uint16_t day( pde.day ); // day is 1 based
+      boost::uint16_t month( pde.month + 1 ); // dialog month is 0 based
+      boost::uint16_t day( pde.day ); // dialog day is 1 based
       sKey += "-" + boost::lexical_cast<std::string>( pde.year )
         + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
         + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
@@ -120,14 +120,13 @@ void IQFeedInstrumentBuild::BuildInstrument( const DialogPickSymbol::DataExchang
       sKey += "-" + boost::lexical_cast<std::string>( pde.dblStrike )
         ;
       ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
-      //signalBuildInstrument( values );
       fBuildInstrument( values );
     }
       break;
     case InstrumentType::Future:
     {
-      boost::uint16_t month( pde.month + 1 ); // month is 0 based
-      boost::uint16_t day( pde.day ); // day is 1 based
+      boost::uint16_t month( pde.month + 1 ); // dialog month is 0 based
+      boost::uint16_t day( pde.day ); // dialog day is 1 based
       sKey += "-" + boost::lexical_cast<std::string>( pde.year )
         + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
         + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) );
