@@ -175,7 +175,7 @@ void IBTWS::RequestContractDetails(
   contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
   contract.exchange = "SMART";
-  std::cout << "Exchange supplied to IBTWS: " << pInstrument->GetExchangeName() << std::endl;
+  //std::cout << "Exchange supplied to IBTWS: " << pInstrument->GetExchangeName() << std::endl;
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
@@ -816,25 +816,45 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
 
-  DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
-  pInstrument->SetTimeTrading( 
-    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
-    // store the values in utc
-    tzEST_t::local_to_utc( dtOpen ), 
-    tzEST_t::local_to_utc( dtClose ) 
-    );
+  if ( 0 == contractDetails.tradingHours.size() ) {
+    std::cout << "IBTWS::contractDetails tradingHours is zero length" << std::endl;
+  }
+  else {
+    try {
+      DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
+      pInstrument->SetTimeTrading( 
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+        // store the values in utc
+        tzEST_t::local_to_utc( dtOpen ), 
+        tzEST_t::local_to_utc( dtClose ) 
+        );
+    }
+    catch ( std::runtime_error& e ) {
+      std::cout << "IBTWS::contractDetails tradingHours error: " << e.what() << std::endl;
+    }
+  }
 
 //    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
 
-  DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
-  pInstrument->SetTimeLiquid( 
-    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
-    // store the values in utc
-    tzEST_t::local_to_utc( dtOpen ), 
-    tzEST_t::local_to_utc( dtClose )
-    );
+  if ( 0 == contractDetails.liquidHours.size() ) {
+    std::cout << "IBTWS::contractDetails liquidHours is zero length" << std::endl;
+  }
+  else {
+    try {
+      DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
+      pInstrument->SetTimeLiquid( 
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+        // store the values in utc
+        tzEST_t::local_to_utc( dtOpen ), 
+        tzEST_t::local_to_utc( dtClose )
+        );
+    }
+    catch ( std::runtime_error& e ) {
+      std::cout << "IBTWS::contractDetails liquidHours error: " << e.what() << std::endl;
+    }
+  }
 
 //    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
 
@@ -970,7 +990,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
           ) ); 
       }
       catch ( std::exception e ) {
-        std::cout << "IB option contract expiry is funny: " << e.what() << std::endl;
+        std::cout << "IB option contract expiry is funny: " << e.what() << " -- " << contract.localSymbol << std::endl;
       }
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
