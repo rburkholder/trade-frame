@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELLOGGING_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELLOGGING_TITLE _("Panel Logging")
 #define SYMBOL_PANELLOGGING_IDNAME ID_PANELLOGGING
-#define SYMBOL_PANELLOGGING_SIZE wxSize(400, 300)
+#define SYMBOL_PANELLOGGING_SIZE wxDefaultSize
 #define SYMBOL_PANELLOGGING_POSITION wxDefaultPosition
 
 typedef ou::ConsoleStreamBuf<char> csb_t;

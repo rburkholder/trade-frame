@@ -62,7 +62,7 @@ void PanelLogging::CreateControls() {
     m_txtLogging = new wxTextCtrl( itemPanel1, ID_TEXTLOGGING, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
     //m_txtLogging = new wxTextCtrl( itemPanel1, ID_TEXTLOGGING, wxEmptyString, wxDefaultPosition, wxSize(400, 300), wxTE_MULTILINE|wxTE_READONLY );
     //itemBoxSizer2->Add(m_txtLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 5);
-    itemBoxSizer2->Add(m_txtLogging, 1, wxALL | wxEXPAND, 5);
+    itemBoxSizer2->Add(m_txtLogging, 1, wxGROW|wxALL, 3);
 
     m_pOldStreamBuf = std::cout.rdbuf();
     //std::cout.rdbuf(m_txtLogging);
