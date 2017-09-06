@@ -106,39 +106,41 @@ void PanelArmsIndex::CreateControls() {
 
     PanelArmsIndex* itemPanel1 = this;
 
-    m_sizerPanelArmsIndex = new wxBoxSizer(wxVERTICAL);
+    m_sizerPanelArmsIndex = new wxBoxSizer(wxHORIZONTAL);
     itemPanel1->SetSizer(m_sizerPanelArmsIndex);
 
-    m_splitterArmsIndex = new wxSplitterWindow( itemPanel1, ID_SplitterArmsIndex, wxDefaultPosition, wxDefaultSize, wxSP_3DBORDER|wxSP_3DSASH );
-    m_splitterArmsIndex->SetMinimumPaneSize(100);
+    m_splitterArmsIndex = new wxSplitterWindow( itemPanel1, ID_SplitterArmsIndex, wxDefaultPosition, wxDefaultSize, wxSP_3DBORDER|wxSP_3DSASH|wxEXPAND );
+    m_splitterArmsIndex->SetMinimumPaneSize(50);
 
-    wxPanel* itemPanel4 = new wxPanel( m_splitterArmsIndex, ID_PANEL8, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    wxPanel* itemPanel4 = new wxPanel( m_splitterArmsIndex, ID_PanelLeft, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    itemPanel4->SetName(wxT("Panel Left"));
     wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxVERTICAL);
     itemPanel4->SetSizer(itemBoxSizer5);
 
     wxArrayString m_lbArmsIndexStrings;
-    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxSize(90, 80), m_lbArmsIndexStrings, wxLB_SINGLE );
+    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxSize(90, 150), m_lbArmsIndexStrings, wxLB_SINGLE );
     itemBoxSizer5->Add(m_lbArmsIndex, 0, wxGROW|wxALL, 2);
 
-    m_btnToggleView = new wxButton( itemPanel4, ID_BtnToggleView, _("Toggle View"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnToggleView = new wxButton( itemPanel4, ID_BtnToggleView, _("Time Frame"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer5->Add(m_btnToggleView, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
-    wxPanel* itemPanel8 = new wxPanel( m_splitterArmsIndex, ID_PANEL9, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    wxPanel* itemPanel8 = new wxPanel( m_splitterArmsIndex, ID_PanelRight, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    itemPanel8->SetName(wxT("Panel Right"));
     m_sizerCharts = new wxBoxSizer(wxVERTICAL);
     itemPanel8->SetSizer(m_sizerCharts);
 
-    m_panelIndex = new wxPanel( itemPanel8, ID_PanelIndex, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
+    m_panelIndex = new wxPanel( itemPanel8, ID_PanelIndex, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelIndex, 1, wxGROW|wxALL, 2);
 
-    m_panelTick = new wxPanel( itemPanel8, ID_PanelTick, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
+    m_panelTick = new wxPanel( itemPanel8, ID_PanelTick, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelTick, 1, wxGROW|wxALL, 2);
 
-    m_panelArmsVsIndex = new wxPanel( itemPanel8, ID_PanelArmsVsIndex, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
+    m_panelArmsVsIndex = new wxPanel( itemPanel8, ID_PanelArmsVsIndex, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelArmsVsIndex, 1, wxGROW|wxALL, 2);
 
-    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel8, 110);
+    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel8, 150);
     m_sizerPanelArmsIndex->Add(m_splitterArmsIndex, 1, wxGROW|wxALL, 2);
-
+    
 //  Bind( wxEVT_SIZE, &PanelArmsIndex::HandleOnSize, this, this->GetId() );
   Bind( wxEVT_COMMAND_LISTBOX_SELECTED, &PanelArmsIndex::HandleListBoxSelection, this, m_lbArmsIndex->GetId() );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelArmsIndex::HandleBtnToggleView, this, m_btnToggleView->GetId() );

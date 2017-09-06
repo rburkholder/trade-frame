@@ -46,10 +46,9 @@ private:
   wxTimer m_timerGuiRefresh;
 
   FrameMain* m_pFrameMain;
-  //FrameMain* m_pFPPOE;
 
-  ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelArmsIndex* m_pPanelArmsIndex;
+  ou::tf::PanelLogging* m_pPanelLogging;
 
   ou::tf::DBOps m_db;
 
@@ -62,10 +61,8 @@ private:
   void OnIQFeedConnected( int );
 
   void OnData1Connected( int );
-//  void OnData2Connected( int ) {};
   void OnExecConnected( int );
   void OnData1Disconnected( int );
-//  void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int );
 
   void HandlePopulateDatabase( void );

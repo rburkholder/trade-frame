@@ -60,10 +60,6 @@ public:
 
   void UpdateGUI( void );
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
-
 protected:
 
   void Init();
@@ -74,7 +70,8 @@ private:
   typedef ou::tf::ProviderInterfaceBase::pInstrument_t pInstrument_t;
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELARMSINDEX, ID_SplitterArmsIndex, ID_LbArmsIndex,
-    ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PANEL8, ID_PANEL9, ID_BtnToggleView
+    ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PanelLeft, ID_PanelRight, 
+    ID_BtnToggleView
   };
 
   //typedef std::vector<std::string> vSymbols_t;
@@ -137,6 +134,11 @@ private:
   void HandleOnSize( wxSizeEvent& event );
   void HandleListBoxSelection( wxCommandEvent& event );
   void HandleBtnToggleView( wxCommandEvent& event );
+  
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
+
 };
 
 } // namespace tf
