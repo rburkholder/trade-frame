@@ -46,7 +46,9 @@ git clone https://github.com/rburkholder/trade-frame.git
 
 # pre-build some of the example apps
 pushd trade-frame
-cd IQFeedMarketSymbols
+cd ArmsIndex
+make
+cd ../IQFeedMarketSymbols
 make
 cd ../IQFeedGetHistory
 make
