@@ -76,7 +76,7 @@ boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
 // setUSDates is in TFTimeSeries/ExchangeHolidays.cpp
 
 // want the year/month combination
-namespace local {
+namespace {
   
 boost::gregorian::date CalcNBusinessDaysBack( boost::gregorian::date date, unsigned int cnt, bool bAllowFriday ) {
   //boost::gregorian::date dateTemp( date.year(), date.month(), 1 );
@@ -119,16 +119,16 @@ boost::gregorian::date CalcNBusinessDaysBack( boost::gregorian::date date, unsig
   return *iterDay;
 }  
 
-} // namespace local
+} // namespace file local
 
 boost::gregorian::date FuturesExpiry( boost::gregorian::date date ) {
   // keep within current month, so move one month forward and step backwards into this month
-  return local::CalcNBusinessDaysBack( date + boost::gregorian::months( 1 ), 3, true );
+  return CalcNBusinessDaysBack( date + boost::gregorian::months( 1 ), 3, true );
 }
 
 boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
   // steps into previous month
-  return local::CalcNBusinessDaysBack( date, 4, false );
+  return CalcNBusinessDaysBack( date, 4, false );
 }
 
 

@@ -155,6 +155,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
       funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
       funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
+      
       m_details.m_fOnRowClicked( iter->first, funcCall, funcPut );
     }
   }
