@@ -56,8 +56,8 @@ cd ../LiveChart
 make
 cd ../ComboTrading
 make
-cd ../StickShift2
-make
+#cd ../StickShift2 <-- does not currently build
+#make
 #cd ../HedgedBollinger <-- does not currently build
 #make
 popd
