@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=trade-frame
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/trade-frame
+CND_ARTIFACT_NAME_Debug=stickshift
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/stickshift
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
-CND_PACKAGE_NAME_Debug=trade-frame.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/trade-frame.tar
+CND_PACKAGE_NAME_Debug=stickshift.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/stickshift.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
-CND_ARTIFACT_NAME_Release=trade-frame
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/trade-frame
+CND_ARTIFACT_NAME_Release=stickshift
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/stickshift
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
-CND_PACKAGE_NAME_Release=trade-frame.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/trade-frame.tar
+CND_PACKAGE_NAME_Release=stickshift.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/stickshift.tar
 #
 # include compiler specific variables
 #

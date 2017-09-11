@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=trade-frame
+PROJECTNAME=StickShift
 
 # Active Configuration
 DEFAULTCONF=Debug
