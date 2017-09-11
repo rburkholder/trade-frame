@@ -38,64 +38,66 @@ ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
   m_pModelOrder = new ModelOrder;
   m_pModelExecution = new ModelExecution;
 
-//  m_PortfolioManager.OnPortfolioLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-//  m_PortfolioManager.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-//  m_PortfolioManager.OnPortfolioUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
-//  m_PortfolioManager.OnPortfolioDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
+  m_PortfolioManager.OnPortfolioLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+  m_PortfolioManager.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+  m_PortfolioManager.OnPortfolioUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
+  m_PortfolioManager.OnPortfolioDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
-//  m_PortfolioManager.OnPositionLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-//  m_PortfolioManager.OnPositionAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-//  m_PortfolioManager.OnPositionUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
-//  m_PortfolioManager.OnPositionDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
+  m_PortfolioManager.OnPositionLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+  m_PortfolioManager.OnPositionAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+  m_PortfolioManager.OnPositionUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
+  m_PortfolioManager.OnPositionDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
 
 }
 
 ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
 
-//  m_PortfolioManager.OnPortfolioLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-//  m_PortfolioManager.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-//  m_PortfolioManager.OnPortfolioUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
-//  m_PortfolioManager.OnPortfolioDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
+  m_PortfolioManager.OnPortfolioLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+  m_PortfolioManager.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+  m_PortfolioManager.OnPortfolioUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
+  m_PortfolioManager.OnPortfolioDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
-//  m_PortfolioManager.OnPositionLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-//  m_PortfolioManager.OnPositionAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-//  m_PortfolioManager.OnPositionUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
-//  m_PortfolioManager.OnPositionDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
+  m_PortfolioManager.OnPositionLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+  m_PortfolioManager.OnPositionAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+  m_PortfolioManager.OnPositionUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
+  m_PortfolioManager.OnPositionDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
 
 }
 
-// this doesn't work as there is no arg1
 void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
   // load the portfolio with "" as id
 //  ItemChanged( m_itemNull );  // if this works, then the scan can happen during the resulting event of GetChildren/GetValue
 //  m_PortfolioManager.ScanPortfolios( 
 //    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
 //  Cleared();
-//  m_PortfolioManager.ScanPortfolios( 
-//    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio, this, boost::phoenix::arg_names::arg1 ) );
+  // portfolio may not be loaded yet, as ScanPortfolios works off of the map
+  m_PortfolioManager.ScanPortfolios( "master",
+    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio, this, boost::phoenix::arg_names::arg1 ) );
 }
 
-void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortfolio_t& idPortfolio ) {
-  // need the master portofolio first
+void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t& pPortfolio ) {
+  // need the master portfolio first
   // need currency masters next
   // basically need portfolios in hierarchical order
   // or stick portfolios in stack, and scan stack each time new portfolio arrives.  by time all portfolios arrived, stack should be clean
-  pPortfolio_t pPortfolio = m_PortfolioManager.GetPortfolio( idPortfolio );
+  //pPortfolio_t pPortfolio = m_PortfolioManager.GetPortfolio( idPortfolio );
+  idPortfolio_t idPortfolio = pPortfolio->Id();
   switch ( pPortfolio->GetRow().ePortfolioType ) {
   case Portfolio::Master: {
     m_pItemPortfolioMaster = new ItemPortfolioMaster( pPortfolio );
     m_pItemPortfolioMaster->pParent = &m_itemNull;
     m_mapItems.insert( mapItems_t::value_type( m_pItemPortfolioMaster->GetID(), m_pItemPortfolioMaster ) );
-    ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
-//    ItemChanged( *m_pItemPortfolioMaster );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, m_pItemPortfolioMaster ) );
+    ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
+    //HandleLoadMasterPortfolio( idPortfolio );
+//    ItemChanged( *m_pItemPortfolioMaster );
+    //m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), m_pItemPortfolioMaster ) );
+    //BuildTreeFromUnattachedTreeItems();
                           }
     break;
   case Portfolio::CurrencySummary: {
     ItemPortfolioCurrencySummary* p( new ItemPortfolioCurrencySummary( pPortfolio ) );
     m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
-//    ItemAdded( m_itemNull, *p );
-//    ItemChanged( *p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
     m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
     BuildTreeFromUnattachedTreeItems();
@@ -106,8 +108,6 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortf
   case Portfolio::MultiLeggedPosition: {
     ItemPortfolio* p( new ItemPortfolio( pPortfolio ) );
     m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
-//    ItemAdded( m_itemNull, *p );
-//    ItemChanged( *p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
     m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
     BuildTreeFromUnattachedTreeItems();
@@ -119,31 +119,38 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortf
 
 void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( void ) {
   bool bTreeUpdated;
-  do {
+  do { // process map multiple times 
     bTreeUpdated = false;
+    // the for loop may require rework, iter1 is invalidated at loop end, so may cause issue in for loop
+    // or restart map when an entry is erased
     for ( mapUnattachedTreeItems_t::iterator iter1 = m_mapUnattachedTreeItems.begin(); m_mapUnattachedTreeItems.end() != iter1; ++iter1 ) {
+      //DataViewItemPortfolio& dv1( *iter1->second );
       idPortfolio_t idOwner = iter1->second->Value()->GetRow().idOwner;
       assert( "" != idOwner );
       mapPortfolios_t::iterator iter2 = m_mapPortfolios.find( idOwner );
-      if ( m_mapPortfolios.end() != iter2 ) {
+      if ( m_mapPortfolios.end() != iter2 ) { // skip if parent hasn't been installed yet
+        //DataViewItemPortfolio& dv2( *iter2->second );
+        iter1->second->pParent = iter2->second;
         switch ( iter2->second->ixType ) {
-        case ePortfolioMaster:
-          iter1->second->pParent = iter2->second;
-          dynamic_cast<ItemPortfolioMaster*>( iter2->second )->mapItemPortfolioCurrencySummary.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
-          ItemAdded( *iter2->second, *iter1->second );
-          break;
-        case ePortfolioCurrency:
-          iter1->second->pParent = iter2->second;
-          dynamic_cast<ItemPortfolioCurrencySummary*>( iter2->second )->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
-          ItemAdded( *iter2->second, *iter1->second );
-          break;
-        case ePortfolio:
-          iter1->second->pParent = iter2->second;
-          dynamic_cast<ItemPortfolio*>( iter2->second )->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
-          ItemAdded( *iter2->second, *iter1->second );
-          break;
-        default: throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
+          case ePortfolioMaster:
+            dynamic_cast<ItemPortfolioMaster*>( iter2->second )
+              ->mapItemPortfolioCurrencySummary.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+            break;
+          case ePortfolioCurrency:
+            dynamic_cast<ItemPortfolioCurrencySummary*>( iter2->second )
+              ->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+            break;
+          case ePortfolio:
+            dynamic_cast<ItemPortfolio*>( iter2->second )
+              ->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+            break;
+          default: 
+            throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
         }
+        //ItemChanged( dv2 );
+        //ItemAdded( dv2, dv1 ); 
+        ItemAdded( *iter2->second, *iter1->second ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
+        //ItemAdded( m_itemNull, *iter1->second );
         m_mapUnattachedTreeItems.erase( iter1 );
         bTreeUpdated = true;
         break;
@@ -152,16 +159,16 @@ void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( voi
   } while ( bTreeUpdated );
 }
 
-void ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated( const idPortfolio_t& ) {
+void ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated( pPortfolio_t& ) {
 }
 
 void ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted( const idPortfolio_t& ) {
 }
 
-void ModelPortfolioPositionOrderExecution::HandleOnPositionAdded( const idPosition_t& ) {
+void ModelPortfolioPositionOrderExecution::HandleOnPositionAdded( pPosition_t& ) {
 }
 
-void ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated( const idPosition_t& ) {
+void ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated( pPosition_t& ) {
 }
 
 void ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted( const idPosition_t& ) {

@@ -107,7 +107,13 @@ bool AppComboTrading::OnInit() {
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
   
+  m_pFPP = nullptr;
+  
   m_pFPPOE = nullptr;
+  m_pMPPOE = nullptr;
+  m_pPPPOE = nullptr;
+  m_pCPPOE = nullptr;
+    
   m_sizerPM = nullptr;
   m_scrollPM = nullptr;
   m_sizerScrollPM = nullptr;
@@ -199,6 +205,7 @@ bool AppComboTrading::OnInit() {
   vItems.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
   vItems.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
+  //vItems.push_back( new mi( "Load DataBase", MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_timerGuiRefresh.SetOwner( this );
@@ -220,6 +227,20 @@ bool AppComboTrading::OnInit() {
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
   pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
 
+  if ( false ) {
+    m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio/Position/Order/Execution" );
+
+    m_pMPPOE = new MPPOE_t;
+
+    m_pPPPOE = new PPPOE_t( m_pMPPOE, m_pFPPOE );
+    m_pPPPOE->Show();
+
+    m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
+    //m_pCPPOE->LoadInitialData();
+
+    m_pFPPOE->Show();
+  }
+
   m_sDbName = "../ComboTrading.db";
   try {
     if ( boost::filesystem::exists( m_sDbName ) ) {
@@ -239,7 +260,7 @@ bool AppComboTrading::OnInit() {
   catch(...) {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
-
+  
   return 1;
 }
 
@@ -406,30 +427,30 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
 
 void AppComboTrading::BuildFramePortfolioPosition( void ) {
   
-  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
+  m_pFPP = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
 
   m_sizerPM = new wxBoxSizer(wxVERTICAL);
-  m_pFPPOE->SetSizer(m_sizerPM);
+  m_pFPP->SetSizer(m_sizerPM);
 
   //m_scrollPM is used for holding the PanelPortfolioPosition instances
-  m_scrollPM = new wxScrolledWindow( m_pFPPOE, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
+  m_scrollPM = new wxScrolledWindow( m_pFPP, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerPM->Add(m_scrollPM, 1, wxGROW|wxALL, 5);
   m_scrollPM->SetScrollbars(1, 1, 0, 0);
 
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
 
-  wxPoint point = m_pFPPOE->GetPosition();
+  wxPoint point = m_pFPP->GetPosition();
   point.x += 500;
   point.y += 100;
-  m_pFPPOE->SetPosition( point );
-  m_pFPPOE->Show();
+  m_pFPP->SetPosition( point );
+  m_pFPP->Show();
   
-  m_pFPPOE->SetAutoLayout( true );
-  m_pFPPOE->Layout();
+  m_pFPP->SetAutoLayout( true );
+  m_pFPP->Layout();
 
 }
 
@@ -686,6 +707,13 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
+  std::cout 
+    << "Adding Portfolio: " 
+    << "T=" << pPortfolio->GetRow().ePortfolioType 
+    << ",O=" << pPortfolio->GetRow().idOwner 
+    << ",ID=" << pPortfolio->GetRow().idPortfolio
+    << std::endl;
+  //this->m_pMPPOE->
   m_pLastPPP->SetPortfolio( pPortfolio );
   //m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );  // deprecated
   //m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition1a ) );  // *** this needs to be fixed
@@ -1089,8 +1117,6 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
 
 
 void AppComboTrading::OnClose( wxCloseEvent& event ) {
-//  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
-//  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePositionLoaded ) );
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();

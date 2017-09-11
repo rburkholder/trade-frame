@@ -46,9 +46,9 @@
 #include "BundleTracking.h"
 #include "PanelCharts.h"
 
-//#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
-//#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
-//#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
+#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
+#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
+#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
 
 /// \brief Option Combo Trading, code started 2015/11/08
 ///
@@ -67,9 +67,9 @@ private:
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
 
-//  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
-//  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
-//  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
+  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
+  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
+  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
@@ -155,6 +155,7 @@ private:
   ou::tf::PanelPortfolioPosition* m_pLastPPP;  // helps getting new positions to correct window
 
   FrameMain* m_pFrameMain;
+  FrameMain* m_pFPP;
   FrameMain* m_pFPPOE;
   FrameMain* m_pFCharts;
   FrameMain* m_pFInteractiveBrokers;
@@ -164,9 +165,10 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
-//  MPPOE_t* m_pMPPOE;
-//  PPPOE_t* m_pPPPOE;
-//  CPPOE_t* m_pCPPOE;
+  
+  MPPOE_t* m_pMPPOE;
+  PPPOE_t* m_pPPPOE;
+  CPPOE_t* m_pCPPOE;
   
     wxSplitterWindow* m_splitPanels;
     ou::tf::GridIBAccountValues* m_pPanelIBAccountValues;

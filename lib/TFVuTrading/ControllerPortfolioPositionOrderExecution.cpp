@@ -23,7 +23,7 @@ namespace tf { // TradeFrame
 ControllerPortfolioPositionOrderExecution::ControllerPortfolioPositionOrderExecution( MPPOE_t* pMPPOE, PPPOE_t* pPPPOE  ) 
   : m_pMPPOE( pMPPOE ), m_pPPPOE( pPPPOE )
 {
-  m_pMPPOE->LoadMasterPortfolio();
+  //m_pMPPOE->LoadMasterPortfolio();
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, &ControllerPortfolioPositionOrderExecution::HandleDVSelectionChanged, this );
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_COLLAPSED, &ControllerPortfolioPositionOrderExecution::HandleDVItemCollapsed, this );
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDED, &ControllerPortfolioPositionOrderExecution::HandleDVItemExpanded, this );
@@ -74,8 +74,8 @@ void ControllerPortfolioPositionOrderExecution::LoadInitialData( void ) {
 }
 
 void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {
-  m_pMPPOE = 0;
-  m_pPPPOE = 0;
+  m_pMPPOE = nullptr;
+  m_pPPPOE = nullptr;
   // also maybe set a flag for runtime issue checking
   // but not much more can happen with out event stimulus from the panel
 }

@@ -166,7 +166,7 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   pSplitOrderExecution->SplitHorizontally( m_pDVOrders, m_pDVExecutions );
   pPanelOrderExecution->Show( true );
 
-  Show( true );
+  //Show( true );
 
 }
 

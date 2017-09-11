@@ -71,7 +71,7 @@ public:
       ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "ownerid", idOwner );  // portfolio of portfolios for classifying and grouping positions
-      ou::db::Field( a, "portfoliotypetype", ePortfolioType );
+      ou::db::Field( a, "portfoliotype", ePortfolioType );
       ou::db::Field( a, "active", bActive );
       ou::db::Field( a, "currency", sCurrency );
       ou::db::Field( a, "description", sDescription );

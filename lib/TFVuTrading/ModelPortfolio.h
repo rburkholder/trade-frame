@@ -54,8 +54,8 @@ private:
   typedef mapItems_t::const_iterator mapItems_citer_t;
   mapItems_t m_mapItems;
 
-  unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
-  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
+  unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const;
+  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const;
 
   PortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
 

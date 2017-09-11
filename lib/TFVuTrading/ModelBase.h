@@ -40,9 +40,10 @@ public:
   }
 
   // can convert from virtual to CRTP type calls.
-  virtual bool IsContainer(	const wxDataViewItem&	item ) const { return false; };
-  virtual wxDataViewItem GetParent( const wxDataViewItem&	item ) const { return m_itemNull; };
-  virtual unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const { assert( 0 ); return 0; };// called when clicking on plus
+  virtual bool IsContainer( const wxDataViewItem& item ) const { return false; };
+  virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const { return m_itemNull; };
+//  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const { assert( 0 ); return 0; }; // called when clicking on plus
+  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const { return 0; }; // called when clicking on plus
   virtual unsigned int GetColumnCount( void ) const { return m_vColumnNames.size(); };
   virtual wxString GetColumnType( unsigned int	col ) const { return "string"; };
   virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const { assert( 0 ); };
