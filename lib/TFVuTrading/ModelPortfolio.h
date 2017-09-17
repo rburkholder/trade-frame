@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <map>
+//#include <map>
 #include <set>
 
 #include <TFTrading/PortfolioManager.h>
@@ -32,13 +32,18 @@ public:
 
   struct DataViewItemPortfolio: public DataViewItem<pPortfolio_t::element_type> {
     DataViewItemPortfolio( shared_ptr& ptr )
-      : DataViewItem<pPortfolio_t::element_type>( ptr ) { ixType = ePortfolio; };
-    void AssignFirstColumn( wxVariant& variant ) const {
-      variant = m_ptr->GetRow().idPortfolio;
+      : DataViewItem<pPortfolio_t::element_type>( EMTPortfolio, ptr ) {};
+    DataViewItemPortfolio( EModelType eModelType, shared_ptr& ptr )
+      : DataViewItem<pPortfolio_t::element_type>( eModelType, ptr ) {};
+    virtual void AssignFirstColumn( wxVariant& variant ) /* const */ {
+      variant = GetPtr()->GetRow().idPortfolio;
     }
   };
+  
+  struct wxDataViewItem_Portfolio: public wxDataViewItem_typed<DataViewItemPortfolio> {};
 
-  typedef std::map<void*,DataViewItemPortfolio*> mapItems_t;
+  //typedef std::map<void*,DataViewItemPortfolio*> mapItems_t;
+  typedef std::set<DataViewItemPortfolio*> setItems_t;
 
   ModelPortfolio(void);
   ~ModelPortfolio(void);
@@ -51,8 +56,9 @@ protected:
 private:
 
 //  typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
-  typedef mapItems_t::const_iterator mapItems_citer_t;
-  mapItems_t m_mapItems;
+  //typedef mapItems_t::const_iterator mapItems_citer_t;
+  typedef setItems_t::const_iterator setItems_citer_t;
+  setItems_t m_setItems;
 
   unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const;
   void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const;

@@ -22,6 +22,10 @@ using namespace boost::assign;
 
 #include "ModelPortfolioPositionOrderExecution.h"
 
+// need to use the following as example:
+// https://github.com/wxWidgets/wxWidgets/blob/v3.1.0/samples/dataview/mymodels.h
+// todo:  free up childrn?
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -85,10 +89,10 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t&
   switch ( pPortfolio->GetRow().ePortfolioType ) {
   case Portfolio::Master: {
     m_pItemPortfolioMaster = new ItemPortfolioMaster( pPortfolio );
-    m_pItemPortfolioMaster->pParent = &m_itemNull;
-    m_mapItems.insert( mapItems_t::value_type( m_pItemPortfolioMaster->GetID(), m_pItemPortfolioMaster ) );
+    //m_pItemPortfolioMaster->SetParent( nullptr );
+    m_setItems.insert( setItems_t::value_type( m_pItemPortfolioMaster ) );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, m_pItemPortfolioMaster ) );
-    ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
+    //ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( m_pItemPortfolioMaster ) );
     //HandleLoadMasterPortfolio( idPortfolio );
 //    ItemChanged( *m_pItemPortfolioMaster );
     //m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), m_pItemPortfolioMaster ) );
@@ -97,9 +101,10 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t&
     break;
   case Portfolio::CurrencySummary: {
     ItemPortfolioCurrencySummary* p( new ItemPortfolioCurrencySummary( pPortfolio ) );
-    m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
+    m_setItems.insert( p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
-    m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
+    //m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
+    m_setUnattachedTreeItems.insert( setUnattachedTreeItems_t::value_type( p ) );
     BuildTreeFromUnattachedTreeItems();
                                    }
     break;
@@ -107,9 +112,10 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t&
   case Portfolio::Basket:
   case Portfolio::MultiLeggedPosition: {
     ItemPortfolio* p( new ItemPortfolio( pPortfolio ) );
-    m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
+    m_setItems.insert( p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
-    m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
+    //m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
+    m_setUnattachedTreeItems.insert( setUnattachedTreeItems_t::value_type( p ) );
     BuildTreeFromUnattachedTreeItems();
                                        }
     break;
@@ -123,35 +129,37 @@ void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( voi
     bTreeUpdated = false;
     // the for loop may require rework, iter1 is invalidated at loop end, so may cause issue in for loop
     // or restart map when an entry is erased
-    for ( mapUnattachedTreeItems_t::iterator iter1 = m_mapUnattachedTreeItems.begin(); m_mapUnattachedTreeItems.end() != iter1; ++iter1 ) {
+    //for ( setUnattachedTreeItems_t::iterator iter1 = m_setUnattachedTreeItems.begin(); m_setUnattachedTreeItems.end() != iter1; ++iter1 ) {
+    for (auto iter1: m_setUnattachedTreeItems ) {
       //DataViewItemPortfolio& dv1( *iter1->second );
-      idPortfolio_t idOwner = iter1->second->Value()->GetRow().idOwner;
+      idPortfolio_t idOwner = iter1->GetPtr()->GetRow().idOwner;
       assert( "" != idOwner );
       mapPortfolios_t::iterator iter2 = m_mapPortfolios.find( idOwner );
       if ( m_mapPortfolios.end() != iter2 ) { // skip if parent hasn't been installed yet
         //DataViewItemPortfolio& dv2( *iter2->second );
-        iter1->second->pParent = iter2->second;
-        switch ( iter2->second->ixType ) {
-          case ePortfolioMaster:
+        iter1->SetParent( iter2->second );
+        switch ( iter2->second->GetModelType() ) {
+          case EMTPortfolioMaster:
             dynamic_cast<ItemPortfolioMaster*>( iter2->second )
-              ->mapItemPortfolioCurrencySummary.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+              ->setItemPortfolioCurrencySummary.insert( setItemsPortfolio_t::value_type( iter1 ) );
             break;
-          case ePortfolioCurrency:
+          case EMTPortfolioCurrency:
             dynamic_cast<ItemPortfolioCurrencySummary*>( iter2->second )
-              ->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( iter1 ) );
             break;
-          case ePortfolio:
+          case EMTPortfolio:
             dynamic_cast<ItemPortfolio*>( iter2->second )
-              ->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( iter1 ) );
             break;
           default: 
             throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
         }
         //ItemChanged( dv2 );
         //ItemAdded( dv2, dv1 ); 
-        ItemAdded( *iter2->second, *iter1->second ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
+        ItemAdded( wxDataViewItem( iter2->second ), wxDataViewItem( iter1 ) ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
         //ItemAdded( m_itemNull, *iter1->second );
-        m_mapUnattachedTreeItems.erase( iter1 );
+        //m_mapUnattachedTreeItems.erase( iter1 );
+        m_setUnattachedTreeItems.erase( iter1 );
         bTreeUpdated = true;
         break;
       }
@@ -177,9 +185,9 @@ void ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted( const idPosi
 
 void ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio( const idPortfolio_t& idPortfolio ) {
   m_pItemPortfolioMaster = new ItemPortfolioMaster( m_PortfolioManager.GetPortfolio( idPortfolio ) );
-  m_mapItems.insert( mapItems_t::value_type( m_pItemPortfolioMaster->GetID(), m_pItemPortfolioMaster ) );
-  ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
-  ItemChanged( *m_pItemPortfolioMaster );
+  m_setItems.insert( setItems_t::value_type( m_pItemPortfolioMaster ) );
+  ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( m_pItemPortfolioMaster ) );
+  //ItemChanged( *m_pItemPortfolioMaster );
 }
 
 bool ModelPortfolioPositionOrderExecution::IsContainer(	const wxDataViewItem&	item ) const {
@@ -188,20 +196,22 @@ bool ModelPortfolioPositionOrderExecution::IsContainer(	const wxDataViewItem&	it
     bReturn = true;
   }
   else {
-    mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
-    assert( m_mapItems.end() != iter );
-    bReturn = iter->second->IsContainer();
+    setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
+    assert( m_setItems.end() != iter );
+    //DataViewItemBase* p = *iter;
+    //bReturn = p->IsContainer();
+    (*iter)->IsContainer();
   }
   return bReturn;
 }
 
-wxDataViewItem ModelPortfolioPositionOrderExecution::GetParent( const wxDataViewItem&	item ) const {
-  if ( 0 == item.GetID() ) {
-    assert( 0 );
-  }
-  mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
-  assert( m_mapItems.end() != iter );
-  return ( *iter->second->pParent );
+wxDataViewItem ModelPortfolioPositionOrderExecution::GetParent( const wxDataViewItem& item ) const {
+  if ( !item.IsOk() )
+    return wxDataViewItem(0);
+  setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
+  assert( m_setItems.end() != iter );
+  DataViewItemBase* pParent = (*iter)->GetParent();
+  return wxDataViewItem( pParent );
 }
 
 unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
@@ -209,65 +219,65 @@ unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataView
   unsigned int count( 0 );
   if ( 0 == item.GetID() ) {
     if ( 0 != m_pItemPortfolioMaster ) {
-      children.Add( *m_pItemPortfolioMaster );
-      count = 1;
+      children.Add( wxDataViewItem( m_pItemPortfolioMaster ) );
+      count = 1;  // fix this, if multiple children at root
     }
   }
   else {
-    mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
-    assert( m_mapItems.end() != iter );
-    switch (iter->second->ixType) {
-    case ePortfolioMaster: {
-      mapItemsPortfolio_t& map( dynamic_cast<ItemPortfolioMaster*>( iter->second )->mapItemPortfolioCurrencySummary );
-      for ( mapItemsPortfolio_t::const_iterator iter = map.begin(); map.end() != iter; ++iter ) {
-        children.Add( *iter->second );
+    setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
+    assert( m_setItems.end() != iter );
+    switch ( (*iter)->GetModelType() ) {
+    case EMTPortfolioMaster: {
+      setItemsPortfolio_t& set( dynamic_cast<ItemPortfolioMaster*>( *iter )->setItemPortfolioCurrencySummary );
+      for ( setItemsPortfolio_t::const_iterator iter = set.begin(); set.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
         ++count;
       }
                            }
       break;
-    case ePortfolioCurrency: {
-      mapItemsPortfolio_t& map1( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPortfolio );
-      for ( mapItemsPortfolio_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
-        children.Add( *iter->second );
+    case EMTPortfolioCurrency: {
+      setItemsPortfolio_t& set1( dynamic_cast<ItemPortfolioCurrencySummary*>(*iter)->setItemPortfolio );
+      for ( setItemsPortfolio_t::const_iterator iter = set1.begin(); set1.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
         ++count;
       }
-      mapItemsPosition_t& map2( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPosition );
-      for ( mapItemsPosition_t::const_iterator iter = map2.begin(); map2.end() != iter; ++iter ) {
-        children.Add( *iter->second );
-        ++count;
-      }
-                           }
-      break;
-    case ePortfolio: {
-      mapItemsPortfolio_t& map1( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPortfolio );
-      for ( mapItemsPortfolio_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
-        children.Add( *iter->second );
-        ++count;
-      }
-      mapItemsPosition_t& map2( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPosition );
-      for ( mapItemsPosition_t::const_iterator iter = map2.begin(); map2.end() != iter; ++iter ) {
-        children.Add( *iter->second );
+      setItemsPosition_t& set2( dynamic_cast<ItemPortfolioCurrencySummary*>(*iter)->setItemPosition );
+      for ( setItemsPosition_t::const_iterator iter = set2.begin(); set2.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
         ++count;
       }
                            }
       break;
-    case ePosition: {
-      mapItemsOrder_t& map1( dynamic_cast<ItemPosition*>( iter->second )->mapItemOrder );
-      for ( mapItemsOrder_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
-        children.Add( *iter->second );
+    case EMTPortfolio: {
+      setItemsPortfolio_t& set1( dynamic_cast<ItemPortfolioCurrencySummary*>(*iter)->setItemPortfolio );
+      for ( setItemsPortfolio_t::const_iterator iter = set1.begin(); set1.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
+        ++count;
+      }
+      setItemsPosition_t& set2( dynamic_cast<ItemPortfolioCurrencySummary*>(*iter)->setItemPosition );
+      for ( setItemsPosition_t::const_iterator iter = set2.begin(); set2.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
+        ++count;
+      }
+                           }
+      break;
+    case EMTPosition: {
+      setItemsOrder_t& set1( dynamic_cast<ItemPosition*>(*iter)->setItemOrder );
+      for ( setItemsOrder_t::const_iterator iter = set1.begin(); set1.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
         ++count;
       }
                     }
       break;
-    case eOrder: {
-      mapItemsExecution_t& map1( dynamic_cast<ItemOrder*>( iter->second )->mapItemExecution );
-      for ( mapItemsExecution_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
-        children.Add( *iter->second );
+    case EMTOrder: {
+      setItemsExecution_t& set1( dynamic_cast<ItemOrder*>(*iter)->setItemExecution );
+      for ( setItemsExecution_t::const_iterator iter = set1.begin(); set1.end() != iter; ++iter ) {
+        children.Add( wxDataViewItem( *iter ) );
         ++count;
       }
                     }
       break;
-    case eExecution:
+    case EMTExecution:
       throw std::runtime_error( "eExecution found, shouldn't be" );
       break;
     }
@@ -276,54 +286,54 @@ unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataView
 }
 
 void ModelPortfolioPositionOrderExecution::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
-  mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
-  assert( iter != m_mapItems.end() );
-  iter->second->AssignFirstColumn( variant );
+  setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
+  assert( iter != m_setItems.end() );
+  (*iter)->AssignFirstColumn( variant );
 }
 
-void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( void* pItem ) {
-  mapItems_t::const_iterator iter = m_mapItems.find( pItem );
-  assert( iter != m_mapItems.end() );
-  switch (iter->second->ixType) {
-    case ePortfolioMaster:
+void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( DataViewItemBase* pItem ) {
+  setItems_t::const_iterator iter = m_setItems.find( pItem );
+  assert( iter != m_setItems.end() );
+  switch ( (*iter)->GetModelType() ) {
+    case EMTPortfolioMaster:
       m_pModelExecution->ClearItems();
       m_pModelOrder->ClearItems();
       m_pModelPosition->ClearItems();
       m_pModelPortfolio->ClearItems();
-      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( *iter ) );
       // add the currency summary portfolios as well?
       break;
-    case ePortfolioCurrency:
+    case EMTPortfolioCurrency:
       m_pModelExecution->ClearItems();
       m_pModelOrder->ClearItems();
       m_pModelPosition->ClearItems();
-      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( *iter ) );
       // show all sub portfolios and positions?  or just in tree?
       break;
-    case ePortfolio:
+    case EMTPortfolio:
       m_pModelExecution->ClearItems();
       m_pModelOrder->ClearItems();
       m_pModelPosition->ClearItems();
       m_pModelPortfolio->ClearItems();
-      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( *iter ) );
       // show sub portfolios and positions?  how to show sub portfolios as members?
       break;
-    case ePosition:
+    case EMTPosition:
       m_pModelExecution->ClearItems();
       m_pModelOrder->ClearItems();
       m_pModelPosition->ClearItems();
       // show orders?
       break;
-    case eOrder:
+    case EMTOrder:
       m_pModelExecution->ClearItems();
       m_pModelOrder->ClearItems();
       // show executions?
       break;
-    case eExecution:
+    case EMTExecution:
       m_pModelExecution->ClearItems();
       // not sure if we get here or not
       break;
-    case eUnknown:
+    case EMTUnknown:
       assert( 0 );
       break;
   }
@@ -331,9 +341,9 @@ void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( void* pItem ) {
 
 EModelType ModelPortfolioPositionOrderExecution::GetModelType( const wxDataViewItem& item ) {
   // replace other scattered code with a call to this method
-  mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
-  assert( iter != m_mapItems.end() );
-  return (iter->second->ixType);
+  setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
+  assert( iter != m_setItems.end() );
+  return ( (*iter)->GetModelType() );
 }
 
 } // namespace tf

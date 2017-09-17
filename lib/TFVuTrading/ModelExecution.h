@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <set>
+
 #include <TFTrading/OrderManager.h>
 
 #include "ModelBase.h"
@@ -29,14 +31,17 @@ public:
 
   struct DataViewItemExecution: public DataViewItem<pExecution_t::element_type> {
     DataViewItemExecution( shared_ptr& ptr )
-      : DataViewItem<pExecution_t::element_type>( ptr ) { ixType = eExecution; };
-    void AssignFirstColumn( wxVariant& variant ) const {
-      variant = (std::string&) m_ptr->GetRow().idExecution;
+      : DataViewItem<pExecution_t::element_type>( EMTExecution, ptr ) {};
+    void AssignFirstColumn( wxVariant& variant ) /* const */ {
+      variant = (std::string&) GetPtr()->GetRow().idExecution;
     }
   };
+  
+  struct wxDataViewItem_Execution: public wxDataViewItem_typed<DataViewItemExecution> {};
 
-  typedef std::map<void*, DataViewItemExecution*> mapItems_t;
-
+  //typedef std::map<void*, DataViewItemExecution*> mapItems_t;
+  typedef std::set<DataViewItemExecution*> setItems_t;
+  
   ModelExecution(void);
   ~ModelExecution(void);
 

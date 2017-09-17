@@ -57,31 +57,31 @@ bool PanelPortfolioPositionOrderExecution::Create( /*wxWindow* parent, const wxS
 }
 
 void PanelPortfolioPositionOrderExecution::Init( void ) {
-  m_vContextMenu.resize( eModelTypeCount );
+  m_vContextMenu.resize( EMTModelTypeCount );
   wxMenu* pMenu;
   pMenu = new wxMenu;
 //  pMenu->Append( 1, "Add Position" );
   pMenu->Append( eTreeCMPortfolioMasterAddCurrencySummary, "Place Holder" );
-  m_vContextMenu[ ePortfolioMaster ].reset( pMenu );
+  m_vContextMenu[ EMTPortfolioMaster ].reset( pMenu );
 
   pMenu = new wxMenu;
   pMenu->Append( eTreeCMPortfolioCurrencyAddPosition, "Add Position" );
   pMenu->Append( eTreeCMPortfolioCurrencyAddPortfolio, "Add Portfolio" );
-  m_vContextMenu[ ePortfolioCurrency ].reset( pMenu );
+  m_vContextMenu[ EMTPortfolioCurrency ].reset( pMenu );
 
   pMenu = new wxMenu;
   pMenu->Append( eTreeCMPortfolioAddPosition, "Add Position" );
   pMenu->Append( eTreeCMPortfolioAddPortfolio, "Add Portfolio" );
-  m_vContextMenu[ ePortfolio ].reset( pMenu );
+  m_vContextMenu[ EMTPortfolio ].reset( pMenu );
 
   pMenu = new wxMenu;
   pMenu->Append( eTreeCMPositionCreateOrder, "Create Order" );
   pMenu->Append( eTreeCMPositionClosePosition, "Close Position" ); // show only if position is non-zero
-  m_vContextMenu[ ePosition ].reset( pMenu );
+  m_vContextMenu[ EMTPosition ].reset( pMenu );
 
   pMenu = new wxMenu;
   pMenu->Append( eTreeCMOrderCancelOrder, "Cancel Order" );
-  m_vContextMenu[ eOrder ].reset( pMenu );
+  m_vContextMenu[ EMTOrder ].reset( pMenu );
 
 }
 

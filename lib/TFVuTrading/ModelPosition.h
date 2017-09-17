@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <set>
+
 #include <TFTrading/PortfolioManager.h>
 
 #include "ModelBase.h"
@@ -29,13 +31,16 @@ public:
 
   struct DataViewItemPosition: public DataViewItem<pPosition_t::element_type> {
     DataViewItemPosition( shared_ptr& ptr )
-      : DataViewItem<pPosition_t::element_type>( ptr ) { ixType = ePosition; };
-    void AssignFirstColumn( wxVariant& variant ) const {
-      variant = (std::string&) m_ptr->GetRow().idPosition;
+      : DataViewItem<pPosition_t::element_type>( EMTPosition, ptr ) {};
+    void AssignFirstColumn( wxVariant& variant ) /* const */ {
+      variant = (std::string&) GetPtr()->GetRow().idPosition;
     }
   };
+  
+  struct wxDataViewItem_Position: public wxDataViewItem_typed<DataViewItemPosition> {};
 
-  typedef std::map<void*, DataViewItemPosition*> mapItems_t;
+  //typedef std::map<void*, DataViewItemPosition*> mapItems_t;
+  typedef std::set<DataViewItemPosition*> setItems_t;
 
   ModelPosition(void);
   ~ModelPosition(void);

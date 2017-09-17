@@ -82,7 +82,7 @@ void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrde
 
 void ControllerPortfolioPositionOrderExecution::HandleDVSelectionChanged( wxDataViewEvent& event ) {
   m_dvLastClickedItem = event.GetItem();
-  m_pMPPOE->ClickedOnTreeItem( m_dvLastClickedItem.GetID() );
+  m_pMPPOE->ClickedOnTreeItem( reinterpret_cast<DataViewItemBase*>( m_dvLastClickedItem.GetID() ) );
 }
 
 void ControllerPortfolioPositionOrderExecution::HandleDVItemCollapsed( wxDataViewEvent& event ) {

@@ -227,7 +227,7 @@ bool AppComboTrading::OnInit() {
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
   pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
 
-  if ( false ) {
+  if ( true ) {
     m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio/Position/Order/Execution" );
 
     m_pMPPOE = new MPPOE_t;
