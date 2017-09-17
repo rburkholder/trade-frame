@@ -139,3 +139,44 @@ void EmitYieldCurve( void ) {
   bool b = ( v.end() == i3 );
   i4 = std::lower_bound( v.begin(), v.end(), 3 ); // value is 3
 */
+
+
+/*
+
+The short story is, use IRX.XO. The long story is longer, of course.
+
+Theoretically, if you want to be precise, that depends on two things. A call is a delayed purchase, so you are holding cash and earning the risk-free rate on that cash prior to purchase. The benefit of delaying the purchase with the call goes up as the interest rate on your cash goes up, so the price of the call goes up. So length of time and location in the world where you are holding your cash would both be factors.
+
+In the US, you might typically use T-bill rates that correspond to the time-to-expiry of the option.
+
+In Europe, you might typically use German Bund rates.
+
+However the LIBOR interbank over-night interest rates is also widely used for shorter terms.
+
+https://quant.stackexchange.com/questions/15916/which-risk-free-rate-is-assumed-by-market-when-pricing-american-options
+
+https://quant.stackexchange.com/questions/24414/how-to-use-the-black-scholes-formula-with-libor-rates
+
+https://quant.stackexchange.com/questions/28287/risk-free-rate-vs-libor
+
+Hull and White (authors of the canonical textbook on derivatives pricing)
+http://www-2.rotman.utoronto.ca/~hull/DownloadablePublications/LIBORvsOIS.pdf
+write in their abstract:
+"Traditionally practitioners have used LIBOR and LIBOR-swap rates as proxies for risk-free rates
+when valuing derivatives. This practice has been called into question by the credit crisis that
+started in 2007. Many banks now consider that overnight indexed swap (OIS) rates should be
+used as the risk-free rate when collateralized portfolios are valued and that LIBOR should be
+used for this purpose when portfolios are not collateralized. This paper examines this practice
+and concludes that OIS rates should be used in all situations."
+
+Beyond theory, in practice, the risk-free rate is both (nowadays) small and changes very slowly. Since you usually want to match your markets pricing, you would typically either (1) just use a 30-day t-bill price; or (2) just calibrate against what an average of what current prices are saying they are using for the risk free rate by backsolving for it.
+
+In even simpler practice, and for computing with IQFeed data, I would simply use the IRX.XO symbol:
+
+IRX.XO is the 13-week T-bill (Treasury bill) yield index, published by the CBOE. Currently it is about 1% so its not going to make a huge impact on your greeks anyway, but you've got to use something, so use IRX.XO. It is readily available in the IQFeed.
+
+---
+
+For those using IRX.XO (e.g. for the ~13week timeframe), remember to divide by 1000 to get a percentage (annualized percentage rate).
+
+*/
