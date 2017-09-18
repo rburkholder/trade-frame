@@ -23,6 +23,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// the model is designed for a table view
+
 class ModelPortfolio: public ModelBase<ModelPortfolio> {
 public:
 
@@ -42,13 +44,11 @@ public:
   
   struct wxDataViewItem_Portfolio: public wxDataViewItem_typed<DataViewItemPortfolio> {};
 
-  //typedef std::map<void*,DataViewItemPortfolio*> mapItems_t;
   typedef std::set<DataViewItemPortfolio*> setItems_t;
 
   ModelPortfolio(void);
   ~ModelPortfolio(void);
 
-  //void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
   void AddPortfolioToModel( DataViewItemPortfolio* );
   void ClearItems( void );
 
@@ -60,8 +60,11 @@ private:
   typedef setItems_t::const_iterator setItems_citer_t;
   setItems_t m_setItems;
 
-  unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const;
-  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const;
+  // refactor this to the inherited class
+  virtual bool IsContainer( const wxDataViewItem& item ) const;
+  virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const;
+  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const;
+  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const;
 
   PortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
 

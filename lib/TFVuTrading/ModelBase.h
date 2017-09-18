@@ -41,7 +41,7 @@ public:
 
   // can convert from virtual to CRTP type calls.
   virtual bool IsContainer( const wxDataViewItem& item ) const { 
-    assert( 0 );
+    assert( 0 );  // need to change this.  
     return false; 
   };
   virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const { 

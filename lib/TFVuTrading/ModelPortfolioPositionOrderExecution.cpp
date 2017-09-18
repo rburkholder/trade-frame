@@ -92,9 +92,9 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t&
     //m_pItemPortfolioMaster->SetParent( nullptr );
     m_setItems.insert( setItems_t::value_type( m_pItemPortfolioMaster ) );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, m_pItemPortfolioMaster ) );
-    //ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( m_pItemPortfolioMaster ) );
     //HandleLoadMasterPortfolio( idPortfolio );
-//    ItemChanged( *m_pItemPortfolioMaster );
+    ItemChanged( wxDataViewItem( m_pItemPortfolioMaster ) );
+    ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( m_pItemPortfolioMaster ) );
     //m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), m_pItemPortfolioMaster ) );
     //BuildTreeFromUnattachedTreeItems();
                           }
@@ -130,36 +130,37 @@ void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( voi
     // the for loop may require rework, iter1 is invalidated at loop end, so may cause issue in for loop
     // or restart map when an entry is erased
     //for ( setUnattachedTreeItems_t::iterator iter1 = m_setUnattachedTreeItems.begin(); m_setUnattachedTreeItems.end() != iter1; ++iter1 ) {
-    for (auto iter1: m_setUnattachedTreeItems ) {
+    for (auto dvib: m_setUnattachedTreeItems ) {
       //DataViewItemPortfolio& dv1( *iter1->second );
-      idPortfolio_t idOwner = iter1->GetPtr()->GetRow().idOwner;
+      idPortfolio_t idOwner = dvib->GetPtr()->GetRow().idOwner;
       assert( "" != idOwner );
       mapPortfolios_t::iterator iter2 = m_mapPortfolios.find( idOwner );
       if ( m_mapPortfolios.end() != iter2 ) { // skip if parent hasn't been installed yet
         //DataViewItemPortfolio& dv2( *iter2->second );
-        iter1->SetParent( iter2->second );
+        dvib->SetParent( iter2->second );
         switch ( iter2->second->GetModelType() ) {
           case EMTPortfolioMaster:
             dynamic_cast<ItemPortfolioMaster*>( iter2->second )
-              ->setItemPortfolioCurrencySummary.insert( setItemsPortfolio_t::value_type( iter1 ) );
+              ->setItemPortfolioCurrencySummary.insert( setItemsPortfolio_t::value_type( dvib ) );
             break;
           case EMTPortfolioCurrency:
             dynamic_cast<ItemPortfolioCurrencySummary*>( iter2->second )
-              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( iter1 ) );
+              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( dvib ) );
             break;
           case EMTPortfolio:
             dynamic_cast<ItemPortfolio*>( iter2->second )
-              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( iter1 ) );
+              ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( dvib ) );
             break;
           default: 
             throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
         }
         //ItemChanged( dv2 );
+        ItemChanged( wxDataViewItem( dvib ) );
         //ItemAdded( dv2, dv1 ); 
-        ItemAdded( wxDataViewItem( iter2->second ), wxDataViewItem( iter1 ) ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
+        //ItemAdded( wxDataViewItem( iter2->second ), wxDataViewItem( dvib ) ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
         //ItemAdded( m_itemNull, *iter1->second );
         //m_mapUnattachedTreeItems.erase( iter1 );
-        m_setUnattachedTreeItems.erase( iter1 );
+        m_setUnattachedTreeItems.erase( dvib );
         bTreeUpdated = true;
         break;
       }
@@ -198,9 +199,8 @@ bool ModelPortfolioPositionOrderExecution::IsContainer(	const wxDataViewItem&	it
   else {
     setItems_t::const_iterator iter = m_setItems.find( reinterpret_cast<DataViewItemBase*>( item.GetID() ) );
     assert( m_setItems.end() != iter );
-    //DataViewItemBase* p = *iter;
-    //bReturn = p->IsContainer();
-    (*iter)->IsContainer();
+    DataViewItemBase* dvib = (*iter);
+    bReturn = dvib->IsContainer();
   }
   return bReturn;
 }

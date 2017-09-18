@@ -46,13 +46,26 @@ void ModelPortfolio::AddPortfolioToModel( DataViewItemPortfolio* pItem ) {
 //    iter = m_mapItems.insert( m_mapItems.begin(), mapItems_t::value_type( idPortfolio, item ) );
 //    iter = m_mapItems.insert( m_mapItems.begin(), mapItems_t::value_type( pItem->GetID(), pItem ) );
     auto pair = m_setItems.insert( setItems_t::value_type( pItem ) );
-    ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( pItem ) );
-    //ItemChanged( *pItem );
+    ItemChanged( wxDataViewItem( pItem ) );
+    //ItemAdded( wxDataViewItem( nullptr ), wxDataViewItem( pItem ) );
   }
   // may desire to use boost::fusion to work on variable types
 }
 
 void ModelPortfolio::ProcessUpdatedItemDetails( DataViewItemPortfolio& item ) {
+}
+
+bool ModelPortfolio::IsContainer( const wxDataViewItem& item ) const {
+  if ( 0 != item.GetID() ) {
+    return false;
+  }
+  else {
+    return 0 != m_setItems.size();
+  }
+}
+
+wxDataViewItem ModelPortfolio::GetParent( const wxDataViewItem& item ) const {
+  return wxDataViewItem( nullptr );
 }
 
 unsigned int ModelPortfolio::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {

@@ -45,7 +45,9 @@ public:
   
   // get the const back again?
   virtual void AssignFirstColumn( wxVariant& variant ) /* const */ {};  // for getting polymorphic stuff for the tree
-  virtual bool IsContainer( void ) const { return false; };
+  virtual bool IsContainer( void ) const { 
+    return false; 
+  };
   EModelType GetModelType() const { return m_EModelType; }
   DataViewItemBase* GetParent() const { return m_pParent; }
   void SetParent( DataViewItemBase* pParent ) { m_pParent = pParent; }

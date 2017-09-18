@@ -81,31 +81,36 @@ private:
   struct ItemOrder: public DataViewItemOrder {
     ItemOrder( DataViewItemOrder::shared_ptr ptr ): DataViewItemOrder( ptr ) { };
     setItemsExecution_t setItemExecution;
-    virtual bool IsContainer( void ) { return ( 0 != setItemExecution.size() ); };
+    virtual bool IsContainer( void ) const { return ( 0 != setItemExecution.size() ); };
   };
   struct ItemPosition: public DataViewItemPosition {
     ItemPosition( DataViewItemPosition::shared_ptr ptr ): DataViewItemPosition( ptr ) { };
     setItemsOrder_t setItemOrder;
-    virtual bool IsContainer( void ) { return ( 0 != setItemOrder.size() ); };
+    virtual bool IsContainer( void ) const { return ( 0 != setItemOrder.size() ); };
   };
   struct ItemPortfolio: public DataViewItemPortfolio {
     ItemPortfolio( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( ptr ) { };
     setItemsPortfolio_t setItemPortfolio;
     setItemsPosition_t setItemPosition;
-    virtual bool IsContainer( void ) { 
-      return ( ( 0 != setItemPortfolio.size() ) || ( 0 != setItemPosition.size() ) ); };
+    virtual bool IsContainer( void ) const { 
+      return ( ( 0 != setItemPortfolio.size() ) || ( 0 != setItemPosition.size() ) ); 
+    }
+    
   };
   struct ItemPortfolioCurrencySummary: public DataViewItemPortfolio {
     ItemPortfolioCurrencySummary( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( EMTPortfolioCurrency, ptr ) {};
     setItemsPortfolio_t setItemPortfolio;
     setItemsPosition_t  setItemPosition;
-    virtual bool IsContainer( void ) { 
-      return ( ( 0 != setItemPortfolio.size() ) || ( 0 != setItemPosition.size() ) ); };
+    virtual bool IsContainer( void ) const { 
+      return ( ( 0 != setItemPortfolio.size() ) || ( 0 != setItemPosition.size() ) ); 
+    }
   };
   struct ItemPortfolioMaster: public DataViewItemPortfolio {
     ItemPortfolioMaster( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( EMTPortfolioMaster, ptr ) {};
     setItemsPortfolio_t setItemPortfolioCurrencySummary;
-    virtual bool IsContainer( void ) { return ( 0 != setItemPortfolioCurrencySummary.size() ); };
+    virtual bool IsContainer( void ) const { 
+      return ( 0 != setItemPortfolioCurrencySummary.size() ); 
+    }
   };
 
   ItemPortfolioMaster* m_pItemPortfolioMaster;
