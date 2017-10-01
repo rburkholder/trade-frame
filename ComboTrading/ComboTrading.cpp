@@ -1093,7 +1093,7 @@ void AppComboTrading::HandleSaveValues( void ) {
 }
 
 void AppComboTrading::HandleSave( wxCommandEvent& event ) {
-  std::cout << "Saving ..." << std::endl;
+  std::cout << "Saving Config ..." << std::endl;
   std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
@@ -1103,7 +1103,7 @@ void AppComboTrading::HandleSave( wxCommandEvent& event ) {
 
 void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
   try {
-    std::cout << "Loading ..." << std::endl;
+    std::cout << "Loading Config ..." << std::endl;
     std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
     boost::archive::text_iarchive ia(ifs);
     ia & * this;

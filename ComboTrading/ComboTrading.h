@@ -267,6 +267,7 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pFCharts;
     ar & *m_pFInteractiveBrokers;
+    ar & *m_pFPP;
     ar & *m_pFPPOE;
     ar & m_splitPanels->GetSashPosition();
     ar & *m_pPanelIBAccountValues;
@@ -279,6 +280,9 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pFCharts;
     ar & *m_pFInteractiveBrokers;
+    if ( 3 <= version ) {
+      ar & *m_pFPP;
+    }
     if ( 2 <= version ) {
       ar & *m_pFPPOE;
     }
@@ -293,6 +297,6 @@ private:
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 2)
+BOOST_CLASS_VERSION(AppComboTrading, 3)
 DECLARE_APP(AppComboTrading)
 
