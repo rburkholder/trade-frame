@@ -47,7 +47,7 @@ public:
   ChartDVBasics(void);
   virtual ~ChartDVBasics(void);
 
-  ou::ChartDataView& GetChartDataView( void ) { return m_dvChart; };
+  ou::ChartDataView* GetChartDataView( void ) { return &m_dvChart; };
 
 //  void HandleFirstQuote( const ou::tf::Quote& quote );
 //  void HandleFirstTrade( const ou::tf::Trade& trade );
