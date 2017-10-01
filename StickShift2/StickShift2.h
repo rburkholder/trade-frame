@@ -48,7 +48,7 @@ private:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
-
+  
 //  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
 //  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
 //  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
@@ -56,7 +56,8 @@ private:
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+  //typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+  typedef ou::tf::PanelPortfolioPosition::fAddPosition_t fAddPosition_t;
 
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
@@ -66,7 +67,7 @@ private:
 
   struct structConstructEquityPosition {
     pPortfolio_t pPortfolio;
-    DelegateAddPosition_t function;
+    fAddPosition_t function;
   } m_EquityPositionCallbackInfo;
 
   struct structPortfolio {
@@ -115,7 +116,7 @@ private:
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
 
-  void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, DelegateAddPosition_t);  // step 1
+  void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, fAddPosition_t );  // step 1
   void ConstructEquityPosition1( pInstrument_t& pInstrument ); // step 2
 
   virtual bool OnInit();

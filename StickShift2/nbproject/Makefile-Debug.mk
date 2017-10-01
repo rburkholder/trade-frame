@@ -53,11 +53,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_date_time-gcc63-mt-1_61 -lboost_filesystem-gcc63-mt-1_61 -lboost_regex-gcc63-mt-1_61 -lboost_serialization-gcc63-mt-1_61 -lboost_system-gcc63-mt-1_61 -lboost_thread-gcc63-mt-1_61
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_date_time-gcc-mt-1_61 -lboost_filesystem-gcc-mt-1_61 -lboost_regex-gcc-mt-1_61 -lboost_serialization-gcc-mt-1_61 -lboost_system-gcc-mt-1_61 -lboost_thread-gcc-mt-1_61
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a
 
@@ -97,6 +99,7 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 
 # Subprojects
 .build-subprojects:
+	cd ../lib/TFBitsNPieces && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug
@@ -115,6 +118,7 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 
 # Subprojects
 .clean-subprojects:
+	cd ../lib/TFBitsNPieces && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug clean

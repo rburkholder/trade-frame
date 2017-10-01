@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+#include <functional>
+
 // 2014/08/26  database opened on data connection, so add field to select database, switch between databases, ....
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -231,14 +233,19 @@ void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
 }
 
 void AppStickShift::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
+  namespace ph = std::placeholders;
+  assert( 0 );  // 20171001 don't think this will work properly without the events handled properly
+  //   ie, need to fix the assignment to m_fConstructPosition
   //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   m_pLastPPP->SetPortfolio( pPortfolio );
-  m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
-  m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
-  m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppStickShift::HandleConstructPortfolio ) );
+  //m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
+  //m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) ); // 20171001 need this to be called
+  //m_pLastPPP->m_fConstructPosition = std::bind( &AppStickShift::ConstructEquityPosition1, this, ph::_1 ); // 20171001 probably won't work as ...0 wasn't called
+  //m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppStickShift::HandleConstructPortfolio ) );
+  m_pLastPPP->m_fConstructPortfolio = std::bind( &AppStickShift::HandleConstructPortfolio, this, ph::_1, ph::_2, ph::_3 );
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
 }
 
@@ -262,7 +269,7 @@ void AppStickShift::LookupDescription( const std::string& sSymbolName, std::stri
   }
 }
 
-void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfolio_t pPortfolio, DelegateAddPosition_t function ) {
+void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfolio_t pPortfolio, fAddPosition_t function ) {
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.function = function;
