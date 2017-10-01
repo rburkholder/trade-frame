@@ -21,7 +21,7 @@
 ChartTest::ChartTest( pProvider_t pProvider ) 
   : ou::ChartDVBasics()
 {
-  this->GetChartDataView().SetNames( "LiveChart", "QGC#" );
+  this->GetChartDataView()->SetNames( "LiveChart", "QGC#" );
   ou::tf::Instrument::pInstrument_t pInstrument
     = ou::tf::InstrumentManager::Instance().ConstructInstrument( "QGC#", "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );

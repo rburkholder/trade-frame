@@ -181,7 +181,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
       m_bPaintingChart = true;
       wxSize size = m_winChart->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetChartDataView( &m_pChart->GetChartDataView() );
+      m_chartMaster.SetChartDataView( m_pChart->GetChartDataView() );
       m_chartMaster.SetOnDrawChart( MakeDelegate( this, &AppLiveChart::HandleDrawChart ) );
       m_chartMaster.DrawChart( );
     }
@@ -212,7 +212,7 @@ void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
     ptime dtEnd = now + td; 
     static boost::posix_time::time_duration tdLength( 0, 10, 0 );
     ptime dtBegin = dtEnd - tdLength;
-    m_pChart->GetChartDataView().SetViewPort( dtBegin, dtEnd );
+    m_pChart->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
 
     m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   }
