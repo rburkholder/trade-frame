@@ -1,3 +1,14 @@
+2017/10/01
+
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' ComboTrading/nbproject/configurations.xml
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' ComboTrading/nbproject/Makefile*
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' Weeklies/nbproject/configurations.xml
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' Weeklies/nbproject/Makefile*
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' ArmsIndex/nbproject/Makefile*
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' ArmsIndex/nbproject/configurations.xml
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' IQFeedGetHistory/nbproject/configurations.xml
+sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' IQFeedGetHistory/nbproject/Makefile*
+
 2017/01/22
 
 us treasury yield curve - probably best no risk interest rates
