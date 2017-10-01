@@ -717,7 +717,7 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
     }
     else {
       if ( !boost::regex_match( d.c_str(), what, rxTime ) ) {
-        std::runtime_error( "no time range found" );
+        throw std::runtime_error( "no time range found" );
       }
       else {
         std::string i( what[1].first, what[1].second );
@@ -831,7 +831,11 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
         );
     }
     catch ( std::runtime_error& e ) {
-      std::cout << "IBTWS::contractDetails tradingHours error: " << e.what() << std::endl;
+      std::cout << "IBTWS::contractDetails tradingHours runtime error: " << e.what() << std::endl;
+      std::cout << "  " << contractDetails.tradingHours << std::endl;
+    }
+    catch ( std::exception& e ) {
+      std::cout << "IBTWS::contractDetails tradingHours exception: " << e.what() << std::endl;
     }
   }
 
