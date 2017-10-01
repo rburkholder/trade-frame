@@ -129,7 +129,7 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameUnderlying = "QGC";
   //m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
-  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2017, 4 );
+  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2017, 12 );
   
   std::cout << "Underlying: " << m_sNameUnderlyingIQFeed << std::endl;
 
@@ -155,11 +155,11 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2017, 3, 28 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2017, 4, 25 );
+   m_dateFrontMonthOption = boost::gregorian::date( 2017, 10, 26 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2017, 11, 27 );
 
-  m_winChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  m_sizerFrame->Add( m_winChartView, 1, wxALL|wxEXPAND, 3);
+  m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
+  m_sizerFrame->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 3);
   
   // should already be initialized in the framework
   //m_bData1Connected = false;
@@ -226,11 +226,11 @@ void AppHedgedBollinger::HandleMenuActionEmitStrategyValues( void ) {
 }
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
-  m_winChartView->SetChartDataView( m_pStrategy->GetChartDataView() );
+  m_pWinChartView->SetChartDataView( m_pStrategy->GetChartDataView() );
 }
 
 void AppHedgedBollinger::HandleMenuActionStopChart( void ) {
-  m_winChartView->SetChartDataView( nullptr );
+  m_pWinChartView->SetChartDataView( nullptr );
 }
 
 void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
@@ -406,7 +406,8 @@ void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrument
 //      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
   m_pStrategy = new Strategy( m_pBundle, m_pPortfolioGCLongs, m_pPortfolioGCShorts, m_pExecutionProvider );
-  m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", m_sNameUnderlying );
+  // need to check next line for nullptr?
+  m_pStrategy->GetChartDataView()->SetNames( "HedgedBollinger", m_sNameUnderlying );
 
   m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
   m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );

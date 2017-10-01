@@ -21,7 +21,7 @@
 
 #include <OUCommon/Worker.h>
 
-//#include <TFVuTrading/WinChartView.h>
+#include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -37,6 +37,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "EventUpdateOptionTree.h"
 #include "Strategy1.h"
@@ -68,7 +69,7 @@ private:
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   
   ou::ChartMaster m_chart;
-  ou::tf::WinChartView m_winChartView;
+  ou::tf::WinChartView* m_pWinChartView;
 
   Strategy* m_pStrategy;
 

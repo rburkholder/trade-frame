@@ -60,8 +60,8 @@ cd ../ComboTrading
 make
 #cd ../StickShift2 <-- does not currently build
 #make
-#cd ../HedgedBollinger <-- does not currently build
-#make
+cd ../HedgedBollinger
+make
 popd
 
 ```
@@ -149,8 +149,8 @@ These are some of the currently supported applications:
 * Hdf5Chart - view the contents of the hdf5 data set
 * LiveChart - view an instrument in real time
 * ComboTrading - basics of trading multiple securities, such as various options strategies
-* StickShift2 - some rough code for some options ideas
-* HedgedBollinger - some experiements in futures
+* StickShift2 - some rough code for some option trading ideas
+* HedgedBollinger - some experiments in futures, mostly tracking at the money implied volatility
 
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 

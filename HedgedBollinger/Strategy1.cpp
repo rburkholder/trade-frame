@@ -629,8 +629,9 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
 //    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
 //    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
-    ou::ChartDVBasics::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    ou::ChartDVBasics::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    // check next two lines for nullptr?  Also simplify with one Get..
+    ou::ChartDVBasics::GetChartDataView()->Add( 3, bai.m_pceCallIV.get() );
+    ou::ChartDVBasics::GetChartDataView()->Add( 3, bai.m_pcePutIV.get() );
   }
   else {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );
