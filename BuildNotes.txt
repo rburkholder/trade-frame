@@ -1,3 +1,12 @@
+2017/10/29
+
+ln -s libboost_date_time-gcc63-mt-1_61.so libboost_date_time-gcc-mt-1_61.so
+ln -s libboost_regex-gcc63-mt-1_61.so libboost_regex-gcc-mt-1_61.so
+ln -s libboost_filesystem-gcc63-mt-1_61.so libboost_filesystem-gcc-mt-1_61.so
+ln -s libboost_serialization-gcc63-mt-1_61.so libboost_serialization-gcc-mt-1_61.so
+ln -s libboost_system-gcc63-mt-1_61.so libboost_system-gcc-mt-1_61.so
+ln -s libboost_thread-gcc63-mt-1_61.so libboost_thread-gcc-mt-1_61.so
+
 2017/10/01
 
 sed -i 's/gcc63-mt-1_61/gcc-mt-1_61/g' ComboTrading/nbproject/configurations.xml
