@@ -155,8 +155,8 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
-   m_dateFrontMonthOption = boost::gregorian::date( 2017, 10, 26 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2017, 11, 27 );
+   m_dateFrontMonthOption = boost::gregorian::date( 2018, 01, 25 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2018, 02, 22 );
 
   m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerFrame->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 3);
