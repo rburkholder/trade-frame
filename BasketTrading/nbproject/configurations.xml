@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>BasketTrading.h</itemPath>
+      <itemPath>ManagePortfolio.h</itemPath>
+      <itemPath>PanelBasketTradingMain.h</itemPath>
+      <itemPath>PanelPortfolioStats.h</itemPath>
+      <itemPath>Position.h</itemPath>
+      <itemPath>Resource.h</itemPath>
+      <itemPath>SymbolSelection.h</itemPath>
+      <itemPath>Worker.h</itemPath>
+      <itemPath>stdafx.h</itemPath>
+      <itemPath>targetver.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>BasketTrading.cpp</itemPath>
+      <itemPath>ManagePortfolio.cpp</itemPath>
+      <itemPath>PanelBasketTradingMain.cpp</itemPath>
+      <itemPath>PanelPortfolioStats.cpp</itemPath>
+      <itemPath>Position.cpp</itemPath>
+      <itemPath>SymbolSelection.cpp</itemPath>
+      <itemPath>Worker.cpp</itemPath>
+      <itemPath>stdafx.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../lib</pElem>
+          </incDir>
+          <commandLine>`/usr/local/bin/wx-config --cxxflags`</commandLine>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+            <Elem>wxUSE_GUI</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+          </linkerAddLib>
+          <linkerDynSerch>
+            <pElem>/usr/local/lib</pElem>
+          </linkerDynSerch>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFBitsNPieces"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFBitsNPieces"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfbitsnpieces.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIQFeed"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFIQFeed"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFInteractiveBrokers"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFInteractiveBrokers"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFSimulation"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFSimulation"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFVuTrading"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFVuTrading"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTrading"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTrading"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTimeSeries"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUCharting"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUCharting"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIndicators"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFIndicators"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFHDF5TimeSeries"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTimeSeries"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUStatistics"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUStatistics"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboustatistics.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUSqlite"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUSqlite"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUSQL"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUSQL"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousql.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUCommon"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUCommon"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucommon.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/ExcelFormat"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/ExcelFormat"
+                            BC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug"
+                            CC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUFormulas"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUFormulas"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
+            <linkerLibLibItem>hdf5</linkerLibLibItem>
+            <linkerLibLibItem>sz</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>dl</linkerLibLibItem>
+            <linkerLibLibItem>z</linkerLibLibItem>
+            <linkerLibLibItem>curl</linkerLibLibItem>
+            <linkerLibLibItem>chartdir</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc-mt-1_61</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="BasketTrading.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BasketTrading.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ManagePortfolio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManagePortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelBasketTradingMain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelPortfolioStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Position.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Position.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SymbolSelection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SymbolSelection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Worker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Worker.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="targetver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="BasketTrading.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BasketTrading.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ManagePortfolio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManagePortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelBasketTradingMain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelPortfolioStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Position.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Position.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SymbolSelection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SymbolSelection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Worker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Worker.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="targetver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

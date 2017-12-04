@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.cnd.makeproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/make-project/1">
+            <name>BasketTrading</name>
+            <c-extensions/>
+            <cpp-extensions>cpp</cpp-extensions>
+            <header-extensions>h</header-extensions>
+            <sourceEncoding>UTF-8</sourceEncoding>
+            <make-dep-projects>
+                <make-dep-project>../lib/TFIndicators</make-dep-project>
+                <make-dep-project>../lib/TFBitsNPieces</make-dep-project>
+                <make-dep-project>../lib/ExcelFormat</make-dep-project>
+                <make-dep-project>../lib/TFVuTrading</make-dep-project>
+                <make-dep-project>../lib/TFInteractiveBrokers</make-dep-project>
+                <make-dep-project>../lib/OUCharting</make-dep-project>
+                <make-dep-project>../lib/TFHDF5TimeSeries</make-dep-project>
+                <make-dep-project>../lib/TFIQFeed</make-dep-project>
+                <make-dep-project>../lib/TFTrading</make-dep-project>
+                <make-dep-project>../lib/OUStatistics</make-dep-project>
+                <make-dep-project>../lib/TFTimeSeries</make-dep-project>
+                <make-dep-project>../lib/TFSimulation</make-dep-project>
+                <make-dep-project>../lib/OUSqlite</make-dep-project>
+                <make-dep-project>../lib/OUFormulas</make-dep-project>
+                <make-dep-project>../lib/OUSQL</make-dep-project>
+                <make-dep-project>../lib/OUCommon</make-dep-project>
+                <make-dep-project>../lib/TFOptions</make-dep-project>
+            </make-dep-projects>
+            <sourceRootList/>
+            <confList>
+                <confElem>
+                    <name>Debug</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>Release</name>
+                    <type>1</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
+        </data>
+    </configuration>
+</project>
