@@ -56,18 +56,20 @@ Process::~Process(void) {
 void Process::Start( void ) {
 
   ou::tf::iqfeed::InMemoryMktSymbolList list;
+  
+  std::string sSymbols( "../symbols.ser" );
 
-  if (true) {
+  if (false) {
 //  if (false) {
     std::cout << "Downloading File ... ";
     ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );  // put this into a thread
   //  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );  // put this into a thread
-    std::cout << "Saving File ... ";
-    list.SaveToFile( "symbols.ser" );
+    std::cout << "Saving File " << sSymbols << " ... ";
+    list.SaveToFile( sSymbols );
   }
   else {
-    std::cout << "Loading From File ... ";
-    list.LoadFromFile( "symbols.ser" );
+    std::cout << "Loading From File " << sSymbols << " ...";
+    list.LoadFromFile( sSymbols );
   }
   std::cout << " done." << std::endl;
 
