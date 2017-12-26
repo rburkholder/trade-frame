@@ -62,6 +62,11 @@ IndicatorPackage::IndicatorPackage(
 
   m_ctViewEnd   = m_ctDayEnd   = Chart::chartTime( dtEnd.date().year(), dtEnd.date().month(), dtEnd.date().day(),
                                      dtEnd.time_of_day().hours(), dtEnd.time_of_day().minutes(), dtEnd.time_of_day().seconds() );
+  
+//  std::cout << pInstIndex->GetInstrumentName() 
+//            << ": " << dtBegin << "," << dtEnd 
+//            << "; " << m_ctViewBegin << "," << m_ctViewEnd
+//            << std::endl;
 
 }
 
