@@ -113,7 +113,6 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-
   m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedExitPositions( MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedStop( MakeDelegate( this, &AppBasketTrading::HandleStopButton ) );
@@ -141,24 +140,32 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 void AppBasketTrading::HandleStartButton(void) {
-  if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
-    // code currently does not allow a restart of session
-    std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
-    //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
-    // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
-  }
-  else {
-    // need to change this later.... only start up once providers have been started
-    // worker will change depending upon provider type
-    // big worker when going live, hdf5 worker when simulating
-    std::cout << "Starting Symbol Evaluation ... " << std::endl;
-    m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
-  }
+	CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
+		[this](){
+			if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
+				// code currently does not allow a restart of session
+				std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
+				//m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
+				// this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
+			}
+			else {
+				// need to change this later.... only start up once providers have been started
+				// worker will change depending upon provider type
+				// big worker when going live, hdf5 worker when simulating
+				std::cout << "Starting Symbol Evaluation ... " << std::endl;
+				// TODO: convert worker to something informative and use 
+				//   established wx based threading arrangements
+				m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
+			}
+		});
 }
 
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
-  std::cout << "Starting Symbol Test ... " << std::endl;
-  m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
+	CallAfter( 
+		[this](){
+			std::cout << "Starting Symbol Test ... " << std::endl;
+			m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
+		});
 }
 
 void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
@@ -166,7 +173,10 @@ void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
 }
 
 void AppBasketTrading::HandleStopButton(void) {
-  m_ManagePortfolio.Stop();
+	CallAfter( 
+		[this](){
+			m_ManagePortfolio.Stop();
+		});
 }
 
 void AppBasketTrading::HandleExitPositionsButton(void) {
@@ -174,20 +184,11 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
 }
 
 void AppBasketTrading::HandleSaveButton(void) {
-  m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
-}
-
-int AppBasketTrading::OnExit() {
-
-//  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
-  if ( 0 != m_pWorker ) {
-    delete m_pWorker;
-    m_pWorker = 0; 
-  }
-  if ( m_db.IsOpen() ) m_db.Close();
-
-  return 0;
+	CallAfter(
+		[this](){
+			m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
+		});
+  
 }
 
 void AppBasketTrading::HandleWorkerCompletion0( void ) {  // called in worker thread, generate gui event to start processing in gui thread
@@ -202,6 +203,50 @@ void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) { // process in
   m_pWorker = 0;
   m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
   m_timerGuiRefresh.Start( 250 );
+}
+
+void AppBasketTrading::OnData1Connected( int ) {
+  m_bData1Connected = true;
+  if ( m_bData1Connected & m_bExecConnected ) {
+    // set start to enabled
+  }
+}
+
+void AppBasketTrading::OnExecConnected( int ) {
+  m_bExecConnected = true;
+  if ( m_bData1Connected & m_bExecConnected ) {
+    // set start to enabled
+  }
+}
+
+void AppBasketTrading::OnData1Disconnected( int ) {
+  m_bData1Connected = false;
+}
+
+void AppBasketTrading::OnExecDisconnected( int ) {
+  m_bExecConnected = false;
+}
+
+void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+  m_timerGuiRefresh.Stop();
+  DelinkFromPanelProviderControl();
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a 
+  event.Skip();  // auto followed by Destroy();
+}
+
+int AppBasketTrading::OnExit() {
+
+//  DelinkFromPanelProviderControl();  generates stack errors
+  //m_timerGuiRefresh.Stop();
+  if ( 0 != m_pWorker ) {
+    delete m_pWorker;
+    m_pWorker = 0; 
+  }
+  if ( m_db.IsOpen() ) m_db.Close();
+
+  return 0;
 }
 
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
@@ -239,35 +284,4 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
     m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
 
-}
-
-void AppBasketTrading::OnClose( wxCloseEvent& event ) {
-  m_timerGuiRefresh.Stop();
-  DelinkFromPanelProviderControl();
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  event.Skip();  // auto followed by Destroy();
-}
-
-void AppBasketTrading::OnData1Connected( int ) {
-  m_bData1Connected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
-}
-
-void AppBasketTrading::OnExecConnected( int ) {
-  m_bExecConnected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
-}
-
-void AppBasketTrading::OnData1Disconnected( int ) {
-  m_bData1Connected = false;
-}
-
-void AppBasketTrading::OnExecDisconnected( int ) {
-  m_bExecConnected = false;
 }
