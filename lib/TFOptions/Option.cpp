@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <sstream>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
@@ -117,7 +119,13 @@ void Option::CalcRate(
 //              ConvertRegionalToUtc( dtUtcNow.date(), dtUtcNow.time_of_day(), "America/New_York", true );  
 
   ptime dtUtcExpiry( m_pInstrument->GetExpiryUtc() );
-  assert( dtUtcNow < dtUtcExpiry );
+  if ( dtUtcNow < dtUtcExpiry ) {
+  }
+  else {
+    std::stringstream s;
+    s << "Option::CalcRate - " << "now=" << dtUtcNow << "," << "expiry=" << dtUtcExpiry;
+    throw std::runtime_error( s.str().c_str() );
+  }
 
   CalcRate( input, libor, dtUtcNow, dtUtcExpiry );
 }
