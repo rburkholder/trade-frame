@@ -76,7 +76,7 @@ int FrameMain::AddFileMenuItem( const wxString& sText ) {
   return m_ixDynamicMenuItem;
 }
 
-void FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vItems ) {
+wxMenu* FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vItems ) {
   assert( 0 != vItems.size() );
   wxMenu* itemMenuAction = new wxMenu;
   for ( vpItems_t::const_iterator iter = vItems.begin(); vItems.end() != iter; ++iter ) {
@@ -90,6 +90,7 @@ void FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vItems
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnDynamicActionClick, this, m_ixDynamicMenuItem, -1, p );
   }
   m_menuBar->Append(itemMenuAction, root );
+	return itemMenuAction;
 }
 
 void FrameMain::OnDynamicActionClick( wxCommandEvent& event ) {

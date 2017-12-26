@@ -75,7 +75,7 @@ public:
 
   int AddFileMenuItem( const wxString& );
   
-  void AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
+  wxMenu* AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
   
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
