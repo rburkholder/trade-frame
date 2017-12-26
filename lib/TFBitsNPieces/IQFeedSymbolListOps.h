@@ -19,6 +19,7 @@
 #include <string>
 
 #include <boost/atomic.hpp>
+#include <boost/signals2.hpp>
 
 #include <OUCommon/Worker.h>
 
@@ -62,11 +63,22 @@ public:
       }
     }
   };
+  
+  typedef boost::signals2::signal<void( const std::string&)> signalStatus_t;
+  typedef signalStatus_t::slot_type slotStatus_t;
+  
+  enum ECompletionCode { ccDone, ccSaved, ccCleared };
+  
+  typedef boost::signals2::signal<void( ECompletionCode )> signalDone_t;
+  typedef signalDone_t::slot_type slotDone_t;
 
   IQFeedSymbolListOps( ou::tf::iqfeed::InMemoryMktSymbolList& );
   ~IQFeedSymbolListOps(void);
 
   bool Exists( const std::string& sName );
+  
+  signalStatus_t Status;
+  signalDone_t Done;
 
   void ObtainNewIQFeedSymbolListRemote( void );
   void ObtainNewIQFeedSymbolListLocal( void );
@@ -81,6 +93,9 @@ private:
   boost::atomic<int> m_fenceWorker;
   ou::action::Worker m_worker;
   ou::tf::iqfeed::InMemoryMktSymbolList& m_listIQFeedSymbols;
+  
+  void StatusBusy();
+  void StatusDone();
 
   void WorkerObtainNewIQFeedSymbolListRemote( void );
   void WorkerObtainNewIQFeedSymbolListLocal( void );

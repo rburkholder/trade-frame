@@ -24,6 +24,7 @@ IQFeedSymbolListOps::IQFeedSymbolListOps( ou::tf::iqfeed::InMemoryMktSymbolList&
 }
 
 IQFeedSymbolListOps::~IQFeedSymbolListOps(void) {
+	m_worker.Join();  // wait for processing to complete
 }
 
 bool IQFeedSymbolListOps::Exists( const std::string& sName ) {
@@ -43,16 +44,17 @@ void IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote( void ) {
   }
   else {
     m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
-    std::cout << "IQFeedSymbolList::WorkerObtainNewIQFeedSymbolListRemote is busy" << std::endl;
+		StatusBusy();
   }
 }
 
 void IQFeedSymbolListOps::WorkerObtainNewIQFeedSymbolListRemote( void ) {
-  std::cout << "Downloading Text File ... " << std::endl;
+	Status( "Downloading Text File ... " );
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true, iqfeed::detail::sFileNameMarketSymbolsText ); 
-  std::cout << "Saving Binary File ... " << std::endl;
+	Status( "Saving Binary File ... " );
   m_listIQFeedSymbols.SaveToFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
-  std::cout << " ... done." << std::endl;
+	StatusDone();
+	Done( ccDone );
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
 
@@ -62,16 +64,17 @@ void IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal( void ) {
   }
   else {
     m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
-    std::cout << "IQFeedSymbolList::WorkerObtainNewIQFeedSymbolListLocal is busy" << std::endl;
+		StatusBusy();
   }
 }
 
 void IQFeedSymbolListOps::WorkerObtainNewIQFeedSymbolListLocal( void ) {
-  std::cout << "Loading From Text File ... " << std::endl;
+	Status( "Loading From Text File ... " );
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false, iqfeed::detail::sFileNameMarketSymbolsText ); 
-  std::cout << "Saving Binary File ... " << std::endl;
+	Status( "Saving Binary File ... " );
   m_listIQFeedSymbols.SaveToFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
-  std::cout << " ... done." << std::endl;
+	StatusDone();
+	Done( ccDone );
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
 
@@ -81,35 +84,65 @@ void IQFeedSymbolListOps::LoadIQFeedSymbolList( void ) {
   }
   else {
     m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
-    std::cout << "IQFeedSymbolList::WorkerLoadIQFeedSymbolList is busy" << std::endl;
+		StatusBusy();
   }
 }
 
 void IQFeedSymbolListOps::WorkerLoadIQFeedSymbolList( void ) {
-  std::cout << "Loading From Binary File ..." << std::endl;
+	Status( "Loading From Binary File ..." );
   m_listIQFeedSymbols.LoadFromFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
-  std::cout << " ... done." << std::endl;
+	StatusDone();
+	Done( ccDone );
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
 
 void IQFeedSymbolListOps::SaveSymbolSubset( const std::string& sFileName, const ou::tf::iqfeed::InMemoryMktSymbolList& subset ) {
-//  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-  std::cout << "Saving subset to " << sFileName << " ..." << std::endl;
-//  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
-//  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
-  subset.SaveToFile( sFileName );  // __.ser
-  std::cout << " ... done." << std::endl;
+	if ( 0 == m_fenceWorker.fetch_add( 1, boost::memory_order_acquire ) ) {
+	//  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+		Status( "Saving subset to " + sFileName + " ..." );
+	//  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
+	//  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
+		subset.SaveToFile( sFileName );  // __.ser
+		StatusDone();
+		Done( ccSaved );
+	}
+	else {
+		StatusBusy();
+	}
+	m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
 
 void IQFeedSymbolListOps::LoadSymbolSubset( const std::string& sFileName ) {
-  std::cout << "Loading From " << sFileName << " ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( sFileName );  // __.ser
-  std::cout << " ... done." << std::endl;
+	if ( 0 == m_fenceWorker.fetch_add( 1, boost::memory_order_acquire ) ) {
+		Status( "Loading From " + sFileName + " ..." );
+		m_listIQFeedSymbols.LoadFromFile( sFileName );  // __.ser
+		StatusDone();
+		Done( ccDone );
+	}
+	else {
+		StatusBusy();
+	}
+	m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
 
 void IQFeedSymbolListOps::ClearIQFeedSymbolList( void ) {
-  m_listIQFeedSymbols.Clear();
-  std::cout << " Symbol List Cleared." << std::endl;
+	if ( 0 == m_fenceWorker.fetch_add( 1, boost::memory_order_acquire ) ) {
+		m_listIQFeedSymbols.Clear();
+		Status( " Symbol List Cleared." );
+		Done( ccCleared );
+	}
+	else {
+		StatusBusy();
+	}
+	m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
+}
+
+void IQFeedSymbolListOps::StatusBusy() {
+	Status( "IQFeedSymbolListOps is busy" );
+}
+
+void IQFeedSymbolListOps::StatusDone() {
+	Status( " ... done." );
 }
 
 } // namespace tf
