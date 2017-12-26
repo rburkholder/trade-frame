@@ -17,6 +17,8 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+
 #include "IQFeedGetHistory.h"
 
 IMPLEMENT_APP(AppIQFeedGetHistory)
@@ -79,24 +81,64 @@ bool AppIQFeedGetHistory::OnInit() {
 
   // maybe set scenario with database and with in memory data structure
 //  m_db.Open( "cav.db" );
+	
+	typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+	
+	m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
+	m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string& sStatus1 ){
+		CallAfter( [sStatus1](){ 
+			std::string sStatus2( sStatus1 );
+			std::cout << sStatus2 << std::endl; 
+		});
+	});
+	m_pIQFeedSymbolListOps->Done.connect( [this]( ou::tf::IQFeedSymbolListOps::ECompletionCode code ) {
+		switch ( code ) {
+			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccCleared:
+				DisableMenuActionDays();
+				break;
+			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccDone:
+				EnableMenuActionDays();
+				break;
+			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccSaved:
+				break;
+		}
+	});
+	
+	FrameMain::vpItems_t vItemsLoadSymbols;
+  vItemsLoadSymbols.push_back( new mi( "New Symbol List Remote", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListRemote ) ) );
+  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
+  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
+	wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
 
-  FrameMain::vpItems_t vItems;
-  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "10 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays10 ) ) );
-  vItems.push_back( new mi( "30 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays30 ) ) );
-  vItems.push_back( new mi( "100 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays100 ) ) );
-  vItems.push_back( new mi( "150 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays150 ) ) );
-  vItems.push_back( new mi( "200 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays200 ) ) );
-  vItems.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
-
+  FrameMain::vpItems_t vItemsLoadDays;
+  vItemsLoadDays.push_back( new mi( "10 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays10 ) ) );
+  vItemsLoadDays.push_back( new mi( "30 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays30 ) ) );
+  vItemsLoadDays.push_back( new mi( "100 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays100 ) ) );
+  vItemsLoadDays.push_back( new mi( "150 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays150 ) ) );
+  vItemsLoadDays.push_back( new mi( "200 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays200 ) ) );
+  vItemsLoadDays.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
+  m_pMenuLoadDays = m_pFrameMain->AddDynamicMenu( "Load History", vItemsLoadDays );
+	
+	DisableMenuActionDays();
 
   // test that iqfeed is connected.
 
-
-
   return 1;
 
+}
+
+void AppIQFeedGetHistory::DisableMenuActionDays() {
+	wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
+	std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
+		mi->Enable( false );
+	});
+}
+
+void AppIQFeedGetHistory::EnableMenuActionDays() {
+	wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
+	std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
+		mi->Enable( true );
+	});
 }
 
 int AppIQFeedGetHistory::OnExit() {
@@ -108,26 +150,57 @@ int AppIQFeedGetHistory::OnExit() {
   return 0;
 }
 
+void AppIQFeedGetHistory::HandleNewSymbolListRemote( void ) {
+	CallAfter(
+    [this](){
+			m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListRemote();
+		});
+	
+}
+
+void AppIQFeedGetHistory::HandleNewSymbolListLocal( void ) {
+	CallAfter(
+    [this](){
+			m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListLocal();
+		});
+}
+
+void AppIQFeedGetHistory::HandleLocalBinarySymbolList( void ) {
+	CallAfter(
+    [this](){
+			m_pIQFeedSymbolListOps->LoadIQFeedSymbolList();
+		});
+}
+
 void AppIQFeedGetHistory::HandleMenuActionDays10( void ) {
-  m_pWorker = new Worker( "", 10 );
+  StartWorker( "", 10 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays30( void ) {
-  m_pWorker = new Worker( "", 30 );
+  StartWorker( "", 30 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays100( void ) {
-  m_pWorker = new Worker( "", 100 );
+  StartWorker( "", 100 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays150( void ) {
-  m_pWorker = new Worker( "", 150 );
+  StartWorker( "", 150 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays200( void ) {
-  m_pWorker = new Worker( "", 200 );
+  StartWorker( "", 200 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays0( void ) {
-  m_pWorker = new Worker( "", 0 );
+  StartWorker( "", 0 );
+}
+
+void AppIQFeedGetHistory::StartWorker( const std::string& s, size_t nDatums ) {
+	if ( this->m_bIQFeedConnected ) {
+		m_pWorker = new Worker( m_listIQFeedSymbols, s, nDatums );
+	}
+	else {
+		std::cout << "No can do.  IQFeed not connected" << std::endl;
+	}
 }

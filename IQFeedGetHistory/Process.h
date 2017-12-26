@@ -27,7 +27,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
-//#include <TFIQFeed/IQFeedInstrumentFile.h>
+#include <TFIQFeed/InMemoryMktSymbolList.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 
 class Process: 
@@ -38,7 +38,11 @@ public:
 
   typedef ou::tf::iqfeed::HistoryBulkQuery<Process> inherited_t;
 
-  explicit Process( const std::string& sPrefixPath, size_t nDatums );
+  Process( 
+    ou::tf::iqfeed::InMemoryMktSymbolList&,
+    const std::string& sPrefixPath, 
+    size_t nDatums
+  );
   ~Process(void);
   void Start( void );
 
@@ -63,8 +67,7 @@ protected:
   
 private:
 
-//  ou::tf::CInstrumentFile m_IF;
-//  ou::tf::CInstrumentFile::iterator m_iterSymbols;
+  ou::tf::iqfeed::InMemoryMktSymbolList& m_list;
 
   boost::mutex m_mutexProcessResults;
 

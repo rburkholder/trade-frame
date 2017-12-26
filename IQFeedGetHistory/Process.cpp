@@ -33,8 +33,12 @@
 #pragma message( "** Note:  for msvc, compile in release mode, buffer checks make it slow in debug" )
 #endif
 
-Process::Process( const std::string& sPrefixPath, size_t nDatums )
-: ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
+Process::Process( 
+  ou::tf::iqfeed::InMemoryMktSymbolList& list,
+  const std::string& sPrefixPath, 
+	size_t nDatums )
+: ou::tf::iqfeed::HistoryBulkQuery<Process>(),
+	m_list( list ),
   m_sPrefixPath( sPrefixPath ), m_nDatums( nDatums )
   //m_cntBars( 25 )
 //  m_cntBars( 0 ) // 2013/09/17
@@ -55,10 +59,10 @@ Process::~Process(void) {
 
 void Process::Start( void ) {
 
-  ou::tf::iqfeed::InMemoryMktSymbolList list;
+  //ou::tf::iqfeed::InMemoryMktSymbolList list;
   
   std::string sSymbols( "../symbols.ser" );
-
+/*
   if (false) {
 //  if (false) {
     std::cout << "Downloading File ... ";
@@ -72,7 +76,8 @@ void Process::Start( void ) {
     list.LoadFromFile( sSymbols );
   }
   std::cout << " done." << std::endl;
-
+*/
+	
   typedef std::set<std::string> SymbolList_t;
   SymbolList_t setSelected;
 
@@ -88,7 +93,7 @@ void Process::Start( void ) {
     }
   };
 
-  list.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), SelectSymbols( setSelected ) );
+  m_list.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), SelectSymbols( setSelected ) );
   std::cout << "# symbols selected: " << setSelected.size() << std::endl;
 
   SetMaxSimultaneousQueries( 15 );
@@ -116,7 +121,7 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
     std::string sPath;
 
-    ou::tf::HDF5DataManager::DailyBarPath( bars->sSymbol, sPath );  // build hierchical path based upon symbol name
+    ou::tf::HDF5DataManager::DailyBarPath( bars->sSymbol, sPath );  // build hierarchical path based upon symbol name
 
     ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
     ou::tf::HDF5WriteTimeSeries<ou::tf::Bars> wts( dm, false, true, 0, 64 );
