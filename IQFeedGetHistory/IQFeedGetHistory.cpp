@@ -12,9 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// CAV.cpp : Defines the entry point for the application.
-//
-
 #include "stdafx.h"
 
 #include <algorithm>
@@ -22,13 +19,6 @@
 #include "IQFeedGetHistory.h"
 
 IMPLEMENT_APP(AppIQFeedGetHistory)
-
-#include <TFTrading/InstrumentManager.h>
-#include <TFTrading/AccountManager.h>
-#include <TFTrading/OrderManager.h>
-#include <TFTrading/PortfolioManager.h>
-
-//#include <TFIQFeed/ParseMktSymbolDiskFile.h>
 
 bool AppIQFeedGetHistory::OnInit() {
 
@@ -56,16 +46,7 @@ bool AppIQFeedGetHistory::OnInit() {
   m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
-/*
-  m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
-  m_pPanelOptionsParameters->Show( true );
-  m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
-  m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
-  m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
-  m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
-*/
+  
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -75,40 +56,32 @@ bool AppIQFeedGetHistory::OnInit() {
 
   m_pFrameMain->Show( true );
 
-//  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterTables ) );
-//  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterRows ) );
-//  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppCollectAndView::HandlePopulateDatabase ) );
-
-  // maybe set scenario with database and with in memory data structure
-//  m_db.Open( "cav.db" );
-	
 	typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
 	
-	m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
-	m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string& sStatus1 ){
-		CallAfter( [sStatus1](){ 
-			std::string sStatus2( sStatus1 );
-			std::cout << sStatus2 << std::endl; 
-		});
-	});
-	m_pIQFeedSymbolListOps->Done.connect( [this]( ou::tf::IQFeedSymbolListOps::ECompletionCode code ) {
-		switch ( code ) {
-			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccCleared:
-				DisableMenuActionDays();
-				break;
-			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccDone:
-				EnableMenuActionDays();
-				break;
-			case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccSaved:
-				break;
-		}
-	});
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
+  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
+    CallAfter( [sStatus](){ 
+      std::cout << sStatus << std::endl; 
+    });
+  });
+  m_pIQFeedSymbolListOps->Done.connect( [this]( ou::tf::IQFeedSymbolListOps::ECompletionCode code ) {
+    switch ( code ) {
+      case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccCleared:
+        DisableMenuActionDays();
+        break;
+      case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccDone:
+        EnableMenuActionDays();
+        break;
+      case ou::tf::IQFeedSymbolListOps::ECompletionCode::ccSaved:
+        break;
+    }
+  });
 	
-	FrameMain::vpItems_t vItemsLoadSymbols;
+  FrameMain::vpItems_t vItemsLoadSymbols;
   vItemsLoadSymbols.push_back( new mi( "New Symbol List Remote", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListRemote ) ) );
   vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
   vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
-	wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
+  wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
 
   FrameMain::vpItems_t vItemsLoadDays;
   vItemsLoadDays.push_back( new mi( "10 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays10 ) ) );
@@ -119,26 +92,24 @@ bool AppIQFeedGetHistory::OnInit() {
   vItemsLoadDays.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
   m_pMenuLoadDays = m_pFrameMain->AddDynamicMenu( "Load History", vItemsLoadDays );
 	
-	DisableMenuActionDays();
-
-  // test that iqfeed is connected.
+  DisableMenuActionDays();
 
   return 1;
 
 }
 
 void AppIQFeedGetHistory::DisableMenuActionDays() {
-	wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
-	std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
-		mi->Enable( false );
-	});
+  wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
+  std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
+    mi->Enable( false );
+  });
 }
 
 void AppIQFeedGetHistory::EnableMenuActionDays() {
-	wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
-	std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
-		mi->Enable( true );
-	});
+  wxMenuItemList& list( m_pMenuLoadDays->GetMenuItems() );
+  std::for_each( list.begin(), list.end(), []( wxMenuItem* mi ){
+    mi->Enable( true );
+  });
 }
 
 int AppIQFeedGetHistory::OnExit() {
@@ -151,25 +122,24 @@ int AppIQFeedGetHistory::OnExit() {
 }
 
 void AppIQFeedGetHistory::HandleNewSymbolListRemote( void ) {
-	CallAfter(
+  CallAfter(
     [this](){
-			m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListRemote();
-		});
-	
+      m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListRemote();
+    });
 }
 
 void AppIQFeedGetHistory::HandleNewSymbolListLocal( void ) {
-	CallAfter(
+  CallAfter(
     [this](){
-			m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListLocal();
-		});
+      m_pIQFeedSymbolListOps->ObtainNewIQFeedSymbolListLocal();
+    });
 }
 
 void AppIQFeedGetHistory::HandleLocalBinarySymbolList( void ) {
-	CallAfter(
+  CallAfter(
     [this](){
-			m_pIQFeedSymbolListOps->LoadIQFeedSymbolList();
-		});
+      m_pIQFeedSymbolListOps->LoadIQFeedSymbolList();
+    });
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays10( void ) {
@@ -197,10 +167,10 @@ void AppIQFeedGetHistory::HandleMenuActionDays0( void ) {
 }
 
 void AppIQFeedGetHistory::StartWorker( const std::string& s, size_t nDatums ) {
-	if ( this->m_bIQFeedConnected ) {
-		m_pWorker = new Worker( m_listIQFeedSymbols, s, nDatums );
-	}
-	else {
-		std::cout << "No can do.  IQFeed not connected" << std::endl;
-	}
+  if ( this->m_bIQFeedConnected ) {
+    m_pWorker = new Worker( m_listIQFeedSymbols, s, nDatums );
+  }
+  else {
+    std::cout << "No can do.  IQFeed not connected" << std::endl;
+  }
 }
