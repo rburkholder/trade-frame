@@ -191,22 +191,27 @@ bool AppComboTrading::OnInit() {
   m_dblMinPL = m_dblMaxPL = 0.0;
 
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols ); 
+  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
+    CallAfter( [sStatus](){ 
+      std::cout << sStatus << std::endl; 
+    });
+  });
 
-  FrameMain::vpItems_t vItems;
+  FrameMain::vpItems_t vItemsSymbols;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
-  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal ) ) );
-  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Symbol List", vItems );
+  vItemsSymbols.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
+  vItemsSymbols.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal ) ) );
+  vItemsSymbols.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItemsSymbols.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItemsSymbols.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionLoadSymbolSubset ) ) );
+  wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Symbol List", vItemsSymbols );
   
-  vItems.clear();
-  vItems.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
+  FrameMain::vpItems_t vItemsActions;
+  vItemsActions.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
-  vItems.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
+  vItemsActions.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
   //vItems.push_back( new mi( "Load DataBase", MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  wxMenu* pMenuActions = m_pFrameMain->AddDynamicMenu( "Actions", vItemsActions );
 
   m_timerGuiRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &AppComboTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
@@ -757,8 +762,11 @@ void AppComboTrading::CalcIV( void ) {
     m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
     m_CalcIV.m_bActive = false;  // need to pair up m_bActive better so is more obvious on setting
   }
+  catch ( std::runtime_error& e ) {
+    std::cout << "AppComboTrading::CalcIV runtime: " << e.what() << std::endl;
+  }
   catch (...) {
-    std::cout << "AppComboTrading::CalcIV exception" << std::endl;
+    std::cout << "AppComboTrading::CalcIV exception: unknown" << std::endl;
   }
 }
 
