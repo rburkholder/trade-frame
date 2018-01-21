@@ -1,4 +1,7 @@
 .dep.inc
+c_standard_headers_indexer.*
+cpp_standard_headers_indexer.*
+private.xml
 Hdf5Chart/build/
 Hdf5Chart/dist/
 HedgedBollinger/build/
@@ -56,3 +59,5 @@ LiveChart/dist/
 /lib/TFFreeRadicals/build/
 /Scanner/build/
 /Scanner/dist/
+/BasketTrading/build/
+/BasketTrading/dist/

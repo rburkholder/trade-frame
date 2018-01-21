@@ -32,12 +32,12 @@
             <url>ComboTrading.cpp</url>
             <bookmark id="3">
                 <name/>
-                <line>347</line>
+                <line>352</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>594</line>
+                <line>599</line>
                 <key/>
             </bookmark>
         </file>
@@ -82,6 +82,11 @@
             <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemGroup.h</file>
             <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.cpp</file>
             <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemInstrument.cpp</file>
+        </group>
+        <group>
+            <file>file:/var/local/rpb/projects/trade-frame/ComboTrading/ComboTrading.h</file>
+            <file>file:/var/local/rpb/projects/trade-frame/ComboTrading/ComboTrading.cpp</file>
+            <file>file:/var/local/rpb/projects/trade-frame/ComboTrading/InstrumentActions.cpp</file>
         </group>
     </open-files>
 </project-private>

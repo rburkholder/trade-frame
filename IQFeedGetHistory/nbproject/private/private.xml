@@ -14,5 +14,8 @@
             <file>file:/home/rpb/projects/TradeFrame/IQFeedGetHistory/Worker.h</file>
         </group>
         <group name="tf"/>
+        <group>
+            <file>file:/var/local/rpb/projects/trade-frame/IQFeedGetHistory/IQFeedGetHistory.h</file>
+        </group>
     </open-files>
 </project-private>

@@ -6,9 +6,6 @@
     </data>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.h</file>
-        </group>
         <group name="lib"/>
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.cpp</file>
@@ -21,5 +18,9 @@
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/lib/TFIQFeed/BuildInstrument.h</file>
         </group>
         <group name="trade-frame"/>
+        <group>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFIQFeed/BuildSymbolName.cpp</file>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFIQFeed/BuildInstrument.cpp</file>
+        </group>
     </open-files>
 </project-private>
