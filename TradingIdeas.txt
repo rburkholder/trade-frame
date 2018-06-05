@@ -1,3 +1,7 @@
+2018/02/10
+
+http://www.wildml.com/2018/02/introduction-to-learning-to-trade-with-reinforcement-learning/
+
 2012/11/20
 http://stockgumshoe.com/reviews/macro-trader/silvers-historic-price-glitch-will-it-jump-to-208-in-six-months/
 I follow about 75 gold/silver producers. Calculate a couple of ratios to find better values. In my opinion, the articles Hamilton of Zeal research wrote about the gold/silver ratios are FAR better than what the folks have written. He says to buy silver when the ratio gets above 55 and to sell when it drops to less than 45. Easy enough.
