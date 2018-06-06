@@ -1,3 +1,28 @@
+2018/06/05
+Can only build up to boost 1_62 at the moment.
+Will need to change code due to:
+
+g++ -m64 `/usr/local/bin/wx-config --cxxflags`    -c -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "build/Debug/GNU-Linux/TreeOpsItems.o.d" -o build/Debug/GNU-Linux/TreeOpsItems.o TreeOpsItems.cpp
+TreeOps.cpp: In member function ‘void ou::tf::TreeOps::PopulateResources(ou::tf::TreeItemResources&)’:
+TreeOps.cpp:191:117: error: no matching function for call to ‘bind(<unresolved overloaded function type>, ou::tf::TreeOps*, const type&, const wxPoint&)’
+   resources.signalPopupMenu.connect( boost::phoenix::bind( &TreeOps::PopupMenu, this, args::arg1, wxDefaultPosition ) );
+                                                                                                                     ^
+
+Boost 1_63 release notes for phoenix state:
+    Most of modules now support C++11 variadic templates.
+    Fixed type deduction failure with result type.
+So... some sort of change needs to be done for return type
+
+Solution maybe:
+
+  resources.signalPopupMenu.connect( boost::phoenix::bind(static_cast<bool(TreeOps::*)(wxMenu *,const wxPoint& )>(&TreeOps::PopupMenu), this, args::arg1, wxDefaultPosition ) );
+
+Somewhat, maybe related:
+
+https://isocpp.org/wiki/faq/pointers-to-members
+
+Alternatively, with lambdas now available, turn it into a direct labmda, without the phoenix overhead.
+
 2017/10/29
 
 ln -s libboost_date_time-gcc63-mt-1_61.so libboost_date_time-gcc-mt-1_61.so

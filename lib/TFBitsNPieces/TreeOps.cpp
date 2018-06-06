@@ -188,7 +188,7 @@ void TreeOps::PopulateResources( TreeItemResources& resources ) {
   resources.signalDelete.connect( boost::phoenix::bind( &TreeOps::Delete, this, args::arg1 ) );
   resources.signalGetInput.connect( boost::phoenix::bind( &TreeOps::GetInput, this, args::arg1, args::arg2 ) );
   resources.signalGetItemText.connect( boost::phoenix::bind( &TreeOps::GetItemText, this, args::arg1 ) );
-  resources.signalPopupMenu.connect( boost::phoenix::bind( &TreeOps::PopupMenu, this, args::arg1, wxDefaultPosition ) );
+  resources.signalPopupMenu.connect( boost::phoenix::bind(static_cast<bool(TreeOps::*)(wxMenu *,const wxPoint& )>(&TreeOps::PopupMenu), this, args::arg1, wxDefaultPosition ) );
   resources.signalSetItemText.connect( boost::phoenix::bind( &TreeOps::SetItemText, this, args::arg1, args::arg2 ) );
   resources.signalAppendItem.connect( boost::phoenix::bind( &TreeOps::AppendItem, this, args::arg1, args::arg2, -1, -1, (wxTreeItemData*)0 ) );
   resources.signalEnsureVisible.connect( boost::phoenix::bind( &TreeOps::EnsureVisible, this, args::arg1 ) );
