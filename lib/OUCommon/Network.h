@@ -588,7 +588,7 @@ void Network<ownerT,charT>::OnSendDoneCommon(
 //  InterlockedDecrement( &m_cntActiveSends );
   boost::interprocess::ipcdetail::atomic_dec32( &m_cntActiveSends );
 
-  if ( 0 != error ) {
+  if ( 0 != error.value() ) {
     if ( &Network<ownerT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
       static_cast<ownerT*>( this )->OnNetworkError( ERROR_WRITE );
     }
@@ -606,7 +606,7 @@ void Network<ownerT,charT>::OnSendDone(
         linebuffer_t* pbuffer
         ) {
   OnSendDoneCommon( error, bytes_transferred, pbuffer );
-  if ( 0 != error ) {
+  if ( 0 != error.value() ) {
     if ( &Network<ownerT, charT>::OnNetworkSendDone != &ownerT::OnNetworkSendDone ) {
       static_cast<ownerT*>( this )->OnNetworkSendDone();
     }
