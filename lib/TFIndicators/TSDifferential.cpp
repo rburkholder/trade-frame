@@ -13,6 +13,7 @@
  ************************************************************************/
 
 #include "stdafx.h"
+
 #include "TSDifferential.h"
 
 namespace ou { // One Unified
@@ -63,8 +64,8 @@ TSDifferential::~TSDifferential(void) {
 }
 
 void TSDifferential::Init( void ) {
-  m_dtAlphaTau = microseconds( m_dtTimeRange.total_microseconds() * m_alpha );
-  m_dtAlphaBetaTau = microseconds( m_dtTimeRange.total_microseconds() * m_alpha * m_beta );
+  m_dtAlphaTau = boost::posix_time::microseconds( (long long) std::round((double)m_dtTimeRange.total_microseconds() * m_alpha) );
+  m_dtAlphaBetaTau = boost::posix_time::microseconds( (long long) std::round((double)m_dtTimeRange.total_microseconds() * m_alpha * m_beta ) );
   m_pema1 = new TSEMA<Price>( m_seriesSource, m_dtAlphaTau );
   m_pema1->OnAppend.Add( MakeDelegate( this, &TSDifferential::HandleTerm1Update ) );
   m_pema2 = new TSEMA<Price>( *m_pema1, m_dtAlphaTau );
