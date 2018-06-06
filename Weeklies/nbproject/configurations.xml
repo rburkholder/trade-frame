@@ -247,12 +247,12 @@
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-gcc-mt-1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc-mt-1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc-mt-1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc-mt-1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc-mt-1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc63-mt-x64-1_67</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>

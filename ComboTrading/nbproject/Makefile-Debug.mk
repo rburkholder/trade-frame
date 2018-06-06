@@ -62,7 +62,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUCharting/dist/Debug/GNU-Linux/liboucharting.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Debug/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc-mt-1_61 -lboost_filesystem-gcc-mt-1_61 -lboost_regex-gcc-mt-1_61 -lboost_serialization-gcc-mt-1_61 -lboost_system-gcc-mt-1_61 -lboost_thread-gcc-mt-1_61
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUCharting/dist/Debug/GNU-Linux/liboucharting.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Debug/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc63-mt-x64-1_67 -lboost_filesystem-gcc63-mt-x64-1_67 -lboost_regex-gcc63-mt-x64-1_67 -lboost_serialization-gcc63-mt-x64-1_67 -lboost_system-gcc63-mt-x64-1_67 -lboost_thread-gcc63-mt-x64-1_67
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -111,57 +111,57 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ${OBJECTFILES}
 ${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
 
 ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
 
 ${OBJECTDIR}/InstrumentActions.o: InstrumentActions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentActions.o InstrumentActions.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentActions.o InstrumentActions.cpp
 
 ${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
 
 ${OBJECTDIR}/Process.o: Process.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
 
 ${OBJECTDIR}/TreeItem.o: TreeItem.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
 
 ${OBJECTDIR}/TreeItemGroup.o: TreeItemGroup.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
 
 ${OBJECTDIR}/TreeItemInstrument.o: TreeItemInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
 
 ${OBJECTDIR}/TreeItemPortfolio.o: TreeItemPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
 
 ${OBJECTDIR}/TreeItemPosition.o: TreeItemPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
 
 ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
 
 # Subprojects
 .build-subprojects:

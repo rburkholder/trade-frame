@@ -41,6 +41,12 @@
             <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/ModelChartHdf5.cpp</file>
             <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/DialogPickSymbol.cpp</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFVuTrading/WinChartView.cpp</file>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFVuTrading/WinChartView.h</file>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFVuTrading/InterfaceBoundEvents.h</file>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFVuTrading/PanelChartHdf5.cpp</file>
+            <file>file:/var/local/rpb/projects/trade-frame/lib/TFVuTrading/PanelChartHdf5.h</file>
+        </group>
     </open-files>
 </project-private>

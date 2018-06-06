@@ -118,10 +118,10 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
           if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
             CheckForDarvas( ii, bars.begin(), bars.end() );
           }
-          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
-          CheckForVolatility( ii, bars.end() - 20, bars.end() );
-          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
-          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
+//          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
+//          CheckForVolatility( ii, bars.end() - 20, bars.end() );
+//          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
+//          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
       }
   }
 }
