@@ -109,8 +109,9 @@ void InstrumentManager::Register( pInstrument_t& pInstrument ) {
     ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pQuery 
       = m_pSession->Insert<Instrument::TableRowDef>( const_cast<Instrument::TableRowDef&>( pInstrument->GetRow() ) );
     // save alternate instrument names
-    pInstrument->ScanAlternateNames( boost::phoenix::bind( &InstrumentManager::SaveAlternateInstrumentName, this, 
-      boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+    pInstrument->ScanAlternateNames( boost::phoenix::bind(
+      static_cast<void(InstrumentManager::*)(const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t&)>(&InstrumentManager::SaveAlternateInstrumentName), 
+        this, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
   }
 }
 
