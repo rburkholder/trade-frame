@@ -1,3 +1,12 @@
+2018/06/06
+
+phoenix adapting functions:
+https://www.boost.org/doc/libs/1_67_0/libs/phoenix/doc/html/phoenix/modules/function/adapting_functions.html
+https://lists.boost.org/boost-users/2011/08/70208.php
+https://theboostcpplibraries.com/boost.phoenix
+
+previous entry is old news, now builds with 1.67
+
 2018/06/05
 Can only build up to boost 1_62 at the moment.
 Will need to change code due to:
