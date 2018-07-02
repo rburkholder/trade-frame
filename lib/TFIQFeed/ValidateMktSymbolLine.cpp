@@ -238,7 +238,18 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
         trd.sUnderlying = pos1.sText;
         mapUnderlying[ trd.sSymbol ] = pos1.sText;
       }
-      assert( pos1.dblStrike == structOption.dblStrike );
+      if ( pos1.dblStrike != structOption.dblStrike ) {
+        //assert( false );
+        std::cout
+          << "option Symbol Decode, strike and comment do not match: " 
+          << trd.sSymbol << " - "
+          << pos1.dblStrike
+          << ","
+          << structOption.dblStrike
+          << std::endl;
+        structOption.dblStrike = pos1.dblStrike;
+      }
+      //assert( pos1.dblStrike == structOption.dblStrike );
     }
     else {
       std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;
