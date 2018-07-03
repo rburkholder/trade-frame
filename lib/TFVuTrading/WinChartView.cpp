@@ -127,9 +127,9 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
 }
 
 void WinChartView::HandleMouse( wxMouseEvent& event ) { 
-  if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
-  if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
-  if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
+  //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
+  //if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
+  //if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
   wxCoord x, y;
   event.GetPosition( &x, &y );
   //std::cout << x << "," << y << std::endl;
