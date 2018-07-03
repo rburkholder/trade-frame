@@ -70,9 +70,10 @@ ChartDVBasics::ChartDVBasics(void)
     m_dvChart.Add( 0, &ib.m_ceUpperBollinger );
     m_dvChart.Add( 0, &ib.m_ceLowerBollinger );
     //m_dvChart.Add( 5, &ib.m_ceRatio );
-    m_dvChart.Add( 6, &ib.m_ceSlope );
-    m_dvChart.Add( 7, &ib.m_ceSlopeBy2 );
-    m_dvChart.Add( 8, &ib.m_ceSlopeBy3 );
+// 2018/07/02 TODO: conditional include at some point
+//    m_dvChart.Add( 6, &ib.m_ceSlope );
+//    m_dvChart.Add( 7, &ib.m_ceSlopeBy2 );
+//    m_dvChart.Add( 8, &ib.m_ceSlopeBy3 );
   }
 
 //  m_cemRatio.AddMark(  2.0, ou::Colour::Black, "+2sd" );
@@ -81,13 +82,13 @@ ChartDVBasics::ChartDVBasics(void)
 //  m_dvChart.Add( 5, &m_cemRatio );
 
   m_cemSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
-  m_dvChart.Add( 6, &m_cemSlope );
+//  m_dvChart.Add( 6, &m_cemSlope )
 
   m_cemSlopeBy2.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
-  m_dvChart.Add( 7, &m_cemSlopeBy2 );
+//  m_dvChart.Add( 7, &m_cemSlopeBy2 );
 
   m_cemSlopeBy3.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
-  m_dvChart.Add( 8, &m_cemSlopeBy3 );
+//  m_dvChart.Add( 8, &m_cemSlopeBy3 );
 
   m_dvChart.Add( 0, &m_ceBars );
 
