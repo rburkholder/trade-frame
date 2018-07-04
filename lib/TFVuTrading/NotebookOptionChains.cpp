@@ -32,7 +32,7 @@ NotebookOptionChains::NotebookOptionChains(): wxNotebook() {
 }
 
 NotebookOptionChains::NotebookOptionChains( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxNotebook()
+: wxNotebook( parent, id, pos, size, style, name )
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -47,13 +47,22 @@ void NotebookOptionChains::Init() {
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
   
-  Init();
+  //Init();
   
   wxNotebook::Create(parent, id, pos, size, style, name );
   
   CreateControls();
 
   return true;
+}
+
+void NotebookOptionChains::CreateControls() {   
+  
+  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
+  Bind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
+
+  BindEvents();
+  
 }
 
 void NotebookOptionChains::BindEvents() {
@@ -74,13 +83,22 @@ void NotebookOptionChains::BindEvents() {
   }
 }
 
-void NotebookOptionChains::CreateControls() {   
-  
-  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
-  Bind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
+void NotebookOptionChains::UnbindEvents() {
+  if ( m_bBound ) {
+    // Page change events occur during Deletion of Pages, causing problems
+    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
+    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
 
-  BindEvents();
-  
+    //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+    //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+
+    //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+    //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+    //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+    
+    m_bBound = false;
+  }
 }
 
 // start leaving old page
@@ -130,6 +148,7 @@ void NotebookOptionChains::SetName( const std::string& sName ) {
   m_sName = sName;
 }
 
+// add specific put/call-at-strike pair to Notebook of OptionChaines
 void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
@@ -147,6 +166,9 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     pPanel->SetSizer( pSizer );
     auto* pDetails = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
     pSizer->Add( pDetails, 1, wxALL|wxEXPAND, 1 );
+    
+    // a control right click will signal through that strike should watch/unwatch
+    // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
     pDetails->m_fOnRowClicked = [this, date](double strike, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){ 
       if ( nullptr != m_fOnRowClicked) 
         m_fOnRowClicked( date, strike, funcsCall, funcsPut );
@@ -193,24 +215,6 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   // add option set to the expiry panel
   iterExpiry->second.pWinOptionChain->Add( strike, side, sSymbol );
   
-}
-
-void NotebookOptionChains::UnbindEvents() {
-  if ( m_bBound ) {
-    // Page change events occur during Deletion of Pages, causing problems
-    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
-    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
-
-    //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-    //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
-
-    //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-    //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-    //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
-    //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-    
-    m_bBound = false;
-  }
 }
 
 void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {

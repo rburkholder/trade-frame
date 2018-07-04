@@ -84,9 +84,9 @@ struct GridOptionChain_impl {
     OptionValueRow( wxGrid& grid, double strike )
       : m_grid( grid ), m_nRow {}, m_bSelected( false )
       { 
-	Init(); 
+	      Init(); 
         boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike );
-       }
+      }
     OptionValueRow( const OptionValueRow& rhs )
       : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ), m_bSelected( rhs.m_bSelected )
     { 

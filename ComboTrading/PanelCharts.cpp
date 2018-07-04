@@ -227,7 +227,6 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQ
 void PanelCharts::RemoveRightDetail() {
   auto winRightDetail = m_winRightDetail;
   if ( 0 != winRightDetail ) {
-    assert( 0 != winRightDetail );
     dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents(); 
     // perform this afterwards as the DynamicEventTable seems to have problems
     CallAfter([this,winRightDetail](){ 
@@ -459,7 +458,7 @@ void PanelCharts::HandleGridClick(
       InstrumentEntry& entry( iterInstrument->second );
       std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
       std::for_each( vFuncs.begin(), vFuncs.end(),
-        [this,&entry](const ou::tf::GridOptionChain::OptionUpdateFunctions* func){
+        [this, &entry](const ou::tf::GridOptionChain::OptionUpdateFunctions* func) -> bool {
           mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
           if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
             pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( func->sSymbolName );
@@ -484,6 +483,7 @@ void PanelCharts::HandleGridClick(
             pOption->OnGreek.Add( func->fGreek );
             pOption->StartWatch();
           }
+          return pOption->Watching();
         });
     }
   }

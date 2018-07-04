@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2014, One Unified. All rights reserved.                 *
+ * Copyright(c) 2014, One Unified. All rights reserved.                 * 
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -20,12 +20,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionChain::GridOptionChain(void) {
+GridOptionChain::GridOptionChain(void): wxGrid() {
   Init();
 }
 
 GridOptionChain::GridOptionChain( 
-  wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
+  wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) 
+: wxGrid( parent, id, pos, size, style, sTitle )
+{
   Init();
   Create(parent, id, pos, size, style, sTitle );
 }
@@ -128,4 +130,4 @@ wxIcon GridOptionChain::GetIconResource( const wxString& name ) {
 }
 
 } // namespace tf
-} // namespace ou
+} // namespace ou

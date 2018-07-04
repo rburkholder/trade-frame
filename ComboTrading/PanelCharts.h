@@ -129,7 +129,7 @@ private:
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
       }
       else {
-	m_bActive = true;
+        m_bActive = true;
 	m_pWatch = pWatch;
         pInstrument_t pInstrument = m_pWatch->GetInstrument();
         if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
@@ -210,7 +210,7 @@ private:
   // instruments have been registered with instrument manager
   // used for saving series, and the underlying for option calcs
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
-  typedef std::map<idInstrument_t,InstrumentEntry> mapInstrumentEntry_t;
+  typedef std::map<idInstrument_t, InstrumentEntry> mapInstrumentEntry_t;
   mapInstrumentEntry_t m_mapInstrumentEntry;
   
   pProvider_t m_pData1Provider;

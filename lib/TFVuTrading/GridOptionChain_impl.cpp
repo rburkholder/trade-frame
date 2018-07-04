@@ -80,7 +80,8 @@ void GridOptionChain_impl::TimerDeactivate() {
 void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
-    iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.begin(),
+    iter = m_mapOptionValueRow.insert( 
+      m_mapOptionValueRow.begin(),
       mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details, strike ) ) );
     
     struct Reindex {
@@ -123,6 +124,7 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
 }
 
 void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+  // need extra validation here, crash when redrawing with active options
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
     [this](mapOptionValueRow_t::value_type& value) {
       if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
@@ -135,7 +137,7 @@ void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
 void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   // use to toggle monitoring
   int nRow = event.GetRow();
-  if ( 0 <= nRow && event.ControlDown() ) {
+  if ( ( 0 <= nRow ) && event.ControlDown() ) {
     assert( nRow < m_mapOptionValueRow.size() );
     mapOptionValueRow_t::iterator iter;
     iter = std::find_if( 
