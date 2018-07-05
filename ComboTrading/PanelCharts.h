@@ -260,7 +260,7 @@ private:
   void ReplaceRightDetail( wxWindow* );
   void HandleGridClick( 
     idInstrument_t,
-    boost::gregorian::date date, double strike, 
+    boost::gregorian::date date, double strike, bool bSelected,
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut );
   

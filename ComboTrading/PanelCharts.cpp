@@ -427,7 +427,7 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
         pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
         pNotebookOptionChains->m_fOnRowClicked 
-          = std::bind( &PanelCharts::HandleGridClick, this, iterIdInstrument->first, args::_1, args::_2, args::_3, args::_4 );
+          = std::bind( &PanelCharts::HandleGridClick, this, iterIdInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
       });
     }
   }
@@ -441,7 +441,7 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 
 void PanelCharts::HandleGridClick( 
   idInstrument_t idInstrument,
-  boost::gregorian::date date, double strike, 
+  boost::gregorian::date date, double strike, bool bSelected, 
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
 {
@@ -458,7 +458,7 @@ void PanelCharts::HandleGridClick(
       InstrumentEntry& entry( iterInstrument->second );
       std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
       std::for_each( vFuncs.begin(), vFuncs.end(),
-        [this, &entry](const ou::tf::GridOptionChain::OptionUpdateFunctions* func) -> bool {
+        [this, &entry, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* func) {
           mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
           if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
             pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( func->sSymbolName );
@@ -471,19 +471,21 @@ void PanelCharts::HandleGridClick(
           ou::tf::option::Option* pOption( iterOption->second.get() );
           assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
           assert( 0 != pOption );
-          if ( pOption->Watching() ) { // go off
-            pOption->StopWatch();
-            pOption->OnQuote.Remove( func->fQuote );
-            pOption->OnTrade.Remove( func->fTrade );
-            pOption->OnGreek.Remove( func->fGreek );
+          if ( bSelected != pOption->Watching() ) {
+            if ( bSelected ) {
+              assert( !pOption->Watching() );
+              pOption->OnQuote.Add( func->fQuote );
+              pOption->OnTrade.Add( func->fTrade );
+              pOption->OnGreek.Add( func->fGreek );
+              pOption->StartWatch();						}
+            else {
+              assert( pOption->Watching() );
+              pOption->StopWatch();
+              pOption->OnQuote.Remove( func->fQuote );
+              pOption->OnTrade.Remove( func->fTrade );
+              pOption->OnGreek.Remove( func->fGreek );
+            }
           }
-          else { // go on
-            pOption->OnQuote.Add( func->fQuote );
-            pOption->OnTrade.Add( func->fTrade );
-            pOption->OnGreek.Add( func->fGreek );
-            pOption->StartWatch();
-          }
-          return pOption->Watching();
         });
     }
   }

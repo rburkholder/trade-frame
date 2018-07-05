@@ -14,6 +14,7 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
 #include <functional>
 
 #include "GridOptionChain_impl.h"
@@ -121,6 +122,7 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   wxColour colour = bSelected ? *wxWHITE : m_details.GetDefaultCellBackgroundColour();
   m_details.SetCellBackgroundColour( iter->second.m_nRow, -1, colour );
+  // TODO: actually enable/disable watch?
 }
 
 void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -135,6 +137,8 @@ void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
+  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
+  // column header is -1, first row is 0
   // use to toggle monitoring
   int nRow = event.GetRow();
   if ( ( 0 <= nRow ) && event.ControlDown() ) {
@@ -145,26 +149,51 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       [nRow]( mapOptionValueRow_t::value_type& vt ){ return nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iter );
     if ( nullptr != m_details.m_fOnRowClicked ) {
-      
+
       GridOptionChain::OptionUpdateFunctions funcCall;
       funcCall.sSymbolName = iter->second.m_sCallName;
       funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
       funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
       funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
-      
+
       GridOptionChain::OptionUpdateFunctions funcPut;
       funcPut.sSymbolName = iter->second.m_sPutName;
       funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
       funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
       funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
-      
-      m_details.m_fOnRowClicked( iter->first, funcCall, funcPut );
+
+      iter->second.m_bSelected = !iter->second.m_bSelected;
+
+      m_details.m_fOnRowClicked( iter->first, iter->second.m_bSelected, funcCall, funcPut );
     }
   }
-  
-  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
-  // column header is -1, first row is 0
+
   event.Skip();
+}
+
+void GridOptionChain_impl::StopWatch() {
+  std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), [this](mapOptionValueRow_t::value_type& value){
+    if ( value.second.m_bSelected ) {
+      value.second.m_bSelected = false;
+
+      if ( nullptr != m_details.m_fOnRowClicked ) {
+
+        GridOptionChain::OptionUpdateFunctions funcCall;
+        funcCall.sSymbolName = value.second.m_sCallName;
+//        funcCall.fQuote = nullptr;
+//        funcCall.fTrade = nullptr;
+//        funcCall.fGreek = nullptr;
+
+        GridOptionChain::OptionUpdateFunctions funcPut;
+        funcPut.sSymbolName = value.second.m_sPutName;
+//        funcPut.fQuote = nullptr;
+//        funcPut.fTrade = nullptr;
+//        funcPut.fGreek = nullptr;
+
+        m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, funcCall, funcPut );
+      }		
+    }
+  });
 }
 
 void GridOptionChain_impl::DestroyControls() { 

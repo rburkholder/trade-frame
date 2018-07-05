@@ -155,6 +155,8 @@ struct GridOptionChain_impl {
   
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
+	
+	void StopWatch();
   void DestroyControls();
   
   void OnGridLeftClick( wxGridEvent& event );

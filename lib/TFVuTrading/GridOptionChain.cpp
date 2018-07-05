@@ -26,14 +26,13 @@ GridOptionChain::GridOptionChain(void): wxGrid() {
 
 GridOptionChain::GridOptionChain( 
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) 
-: wxGrid( parent, id, pos, size, style, sTitle )
+: wxGrid(  )
 {
   Init();
   Create(parent, id, pos, size, style, sTitle );
 }
 
 GridOptionChain::~GridOptionChain(void) {
-  // this destructor is called prior to window destruction (because of unique_ptr?
 }
 
 void GridOptionChain::Init( void ) {
@@ -98,12 +97,16 @@ template void GridOptionChain::serialize<boost::archive::text_oarchive>(
 void GridOptionChain::HandleSize( wxSizeEvent& event ) { 
 }
 
+void GridOptionChain::PreDestroy() {
+  m_pimpl->StopWatch();
+}
+
 void GridOptionChain::OnDestroy( wxWindowDestroyEvent& event ) {
   
-  //m_pimpl->DestroyControls();  // performed in the destructor
   //m_timerGuiRefresh.Stop();
   //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   
+  //m_pimpl->StopWatch();
   m_pimpl->DestroyControls();
   
   Unbind( wxEVT_DESTROY, &GridOptionChain::OnDestroy, this );
@@ -130,4 +133,4 @@ wxIcon GridOptionChain::GetIconResource( const wxString& name ) {
 }
 
 } // namespace tf
-} // namespace ou
+} // namespace ou

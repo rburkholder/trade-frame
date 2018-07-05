@@ -32,7 +32,7 @@ NotebookOptionChains::NotebookOptionChains(): wxNotebook() {
 }
 
 NotebookOptionChains::NotebookOptionChains( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxNotebook( parent, id, pos, size, style, name )
+: wxNotebook()
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -46,8 +46,6 @@ void NotebookOptionChains::Init() {
 }
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
-  
-  //Init();
   
   wxNotebook::Create(parent, id, pos, size, style, name );
   
@@ -169,13 +167,14 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     
     // a control right click will signal through that strike should watch/unwatch
     // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
-    pDetails->m_fOnRowClicked = [this, date](double strike, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){ 
-      if ( nullptr != m_fOnRowClicked) 
-        m_fOnRowClicked( date, strike, funcsCall, funcsPut );
+    pDetails->m_fOnRowClicked = [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
+      if ( nullptr != m_fOnRowClicked) {
+        m_fOnRowClicked( date, strike, bSelected, funcsCall, funcsPut );
+      }
     };
     
     iterExpiry = m_mapOptionExpiry.insert( 
-      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pDetails ) ) );
+      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pDetails ) ) );
     
     struct Reindex {
       size_t ix;
@@ -221,8 +220,19 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  DeleteAllPages();
+  std::for_each( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), 
+    [](mapOptionExpiry_t::value_type& value){
+     value.second.pWinOptionChain->PreDestroy();
+     value.second.pWinOptionChain->Destroy();
+     value.second.pPanel->Destroy();
+   });
 
+  //DeleteAllPages();
+  while ( 0 != GetPageCount() ) {
+   //DeletePage( 0 );
+   RemovePage( 0 );
+  }
+	
   assert( Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this ) );
   
   event.Skip();  // auto followed by Destroy();

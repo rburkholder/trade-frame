@@ -75,7 +75,7 @@ public:
   void SetName( const std::string& sName );  // underlying
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::enumOptionSide, const std::string& sSymbol );
   
-  typedef std::function<void(boost::gregorian::date, double, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
+  typedef std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
   
   typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
@@ -111,11 +111,12 @@ private:
     size_t ixTab;
     std::string sDate;
     mapStrike_t mapStrike;
+		wxPanel* pPanel;
     GridOptionChain* pWinOptionChain;
-    Tab( int ix = 0, const std::string& s = "", ou::tf::GridOptionChain* p = nullptr )
-      : ixTab( ix ), sDate( s ), pWinOptionChain( p ) {}
-    Tab( const std::string& s = "", ou::tf::GridOptionChain* p = nullptr )
-      : ixTab{}, sDate( s ), pWinOptionChain( p ) {}
+    Tab( int ix = 0, const std::string& s = "", wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
+      : ixTab( ix ), sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
+    Tab( const std::string& s, wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
+      : ixTab{}, sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
   };
   
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;
