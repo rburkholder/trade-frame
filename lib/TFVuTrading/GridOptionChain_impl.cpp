@@ -17,6 +17,11 @@
 #include <algorithm>
 #include <functional>
 
+#include <wx/dnd.h>
+#include <wx/cursor.h>
+
+#include <TFVuTrading/DragDropInstrument.h>
+
 #include "GridOptionChain_impl.h"
 
 namespace ou { // One Unified
@@ -52,6 +57,11 @@ void GridOptionChain_impl::CreateControls() {
   m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   
+  m_details.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
+  m_details.Bind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
+  
+  m_details.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
+
   m_details.EnableEditing( false );
 
 }
@@ -136,39 +146,169 @@ void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
+void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
+  if ( event.Dragging() ) {
+
+    if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+
+      mapOptionValueRow_t::iterator iter;
+      iter = std::find_if( 
+        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+        [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
+      assert( m_mapOptionValueRow.end() != iter );
+      
+      std::cout << "column: " << m_nColumn << std::endl;
+
+      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+        // call drag and drop
+        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+        wxDropSource dragSource( &m_details );
+        dragSource.SetData( dndCall );
+        wxDragResult result = dragSource.DoDragDrop( true );
+      }
+
+      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+        // put drag and drop
+        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+        wxDropSource dragSource( &m_details );
+        dragSource.SetData( dndPut );
+        wxDragResult result = dragSource.DoDragDrop( true );
+      }
+    }
+  }
+}
+
+void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
+  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
+  // column header is -1, first row is 0
+  // use to toggle monitoring
+  
+  m_nRow = event.GetRow();
+  m_nColumn = event.GetCol();
+  
+    if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+
+      mapOptionValueRow_t::iterator iter;
+      iter = std::find_if( 
+        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+        [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
+      assert( m_mapOptionValueRow.end() != iter );
+
+      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+        // call drag and drop
+        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+        wxDropSource dragSource( &m_details );
+        dragSource.SetData( dndCall );
+        wxDragResult result = dragSource.DoDragDrop( true );
+      }
+
+      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+        // put drag and drop
+        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+        wxDropSource dragSource( &m_details );
+        dragSource.SetData( dndPut );
+        wxDragResult result = dragSource.DoDragDrop( true );
+      }
+    }
+}
+
 void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
-  int nRow = event.GetRow();
-  if ( ( 0 <= nRow ) && event.ControlDown() ) {
-    assert( nRow < m_mapOptionValueRow.size() );
+  
+  bool bSkip( true );
+  
+  m_nRow = event.GetRow();
+  m_nColumn = event.GetCol();
+  
+  if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+    
     mapOptionValueRow_t::iterator iter;
     iter = std::find_if( 
       m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
-      [nRow]( mapOptionValueRow_t::value_type& vt ){ return nRow == vt.second.m_nRow; } );
+      [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iter );
-    if ( nullptr != m_details.m_fOnRowClicked ) {
+    
+    if ( event.ShiftDown() && ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+      // call drag and drop
+      ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
 
-      GridOptionChain::OptionUpdateFunctions funcCall;
-      funcCall.sSymbolName = iter->second.m_sCallName;
-      funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
-      funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
-      funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
-
-      GridOptionChain::OptionUpdateFunctions funcPut;
-      funcPut.sSymbolName = iter->second.m_sPutName;
-      funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
-      funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
-      funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
-
-      iter->second.m_bSelected = !iter->second.m_bSelected;
-
-      m_details.m_fOnRowClicked( iter->first, iter->second.m_bSelected, funcCall, funcPut );
+#if defined(__WXMSW__) 
+      wxCursor cursor( wxCURSOR_HAND );
+      wxDropSource dragSource( dndCall, &m_details, cursor, cursor, cursor );
+#elif defined(__WXGTK__)
+      // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
+      wxDropSource dragSource( dndCall, &m_details );
+#else
+      assert(0);
+#endif
+      
+      //dragSource.SetData( dndCall );
+      //std::cout << "call drag start " << std::endl;
+      wxDragResult result = dragSource.DoDragDrop( true );
+      //std::cout << "call drag stop " << std::endl;
+      switch ( result ) {
+        case wxDragCopy:
+        case wxDragMove:
+          break;
+        default:
+          break;
+      }
+      bSkip = false;
     }
+
+    if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+      // put drag and drop
+      ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+
+#if defined(__WXMSW__) 
+      wxCursor cursor( wxCURSOR_HAND );
+      wxDropSource dragSource( dndPut, &m_details, cursor, cursor, cursor );
+#elif defined(__WXGTK__)
+      // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
+      wxDropSource dragSource( dndPut, &m_details );
+#else
+      assert(0);
+#endif
+
+      //dragSource.SetData( dndPut );
+      wxDragResult result = dragSource.DoDragDrop( true );
+      switch ( result ) {
+        case wxDragCopy:
+        case wxDragMove:
+          break;
+        default:
+          break;
+      }
+      bSkip = false;
+    }    
+
+    if ( nullptr != m_details.m_fOnRowClicked ) {
+      
+      if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
+        GridOptionChain::OptionUpdateFunctions funcCall;
+        funcCall.sSymbolName = iter->second.m_sCallName;
+        funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
+        funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
+        funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
+
+        GridOptionChain::OptionUpdateFunctions funcPut;
+        funcPut.sSymbolName = iter->second.m_sPutName;
+        funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
+        funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
+        funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
+
+        iter->second.m_bSelected = !iter->second.m_bSelected;
+
+        m_details.m_fOnRowClicked( iter->first, iter->second.m_bSelected, funcCall, funcPut );
+      }
+      
+    }
+  
   }
 
-  event.Skip();
+  event.Skip( bSkip );
 }
 
 void GridOptionChain_impl::StopWatch() {
@@ -203,7 +343,10 @@ void GridOptionChain_impl::DestroyControls() {
   m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   
-  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+  m_details.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
+  m_details.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
+  
+  m_details.Unbind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 
 } // namespace tf

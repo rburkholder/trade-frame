@@ -24,7 +24,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition& ppp ): m_ppp( ppp ) {
+PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition& ppp )
+: 
+  m_ppp( ppp ),
+  m_ddDataInstrumentTarget( &m_ddDataInstrument )
+{
 
   m_bDialogActive = false;
 
@@ -144,6 +148,11 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePosition, "Close Position" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
+  
+  m_ddDataInstrumentTarget.m_fOnIQFeedSymbolName = []( const std::string& sName ) { 
+    std::cout << "symbol name: " << sName << std::endl;; 
+  };
+  m_ppp.SetDropTarget( &m_ddDataInstrumentTarget );
   
   m_ppp.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_ppp.Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelPortfolioPosition_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?

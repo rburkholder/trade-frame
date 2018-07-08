@@ -459,6 +459,7 @@ void PanelCharts::HandleGridClick(
       std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
       std::for_each( vFuncs.begin(), vFuncs.end(),
         [this, &entry, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* func) {
+          
           mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
           if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
             pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( func->sSymbolName );
@@ -469,8 +470,8 @@ void PanelCharts::HandleGridClick(
                 entry.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( func->sSymbolName, pOption ) );
           }
           ou::tf::option::Option* pOption( iterOption->second.get() );
-          assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
           assert( 0 != pOption );
+          assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
           if ( bSelected != pOption->Watching() ) {
             if ( bSelected ) {
               assert( !pOption->Watching() );

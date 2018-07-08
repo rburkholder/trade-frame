@@ -41,6 +41,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/DialogNewPortfolio.o \
 	${OBJECTDIR}/DialogPickSymbol.o \
 	${OBJECTDIR}/DialogSimpleOneLineOrder.o \
+	${OBJECTDIR}/DragDropInstrument.o \
+	${OBJECTDIR}/DragDropInstrumentTarget.o \
 	${OBJECTDIR}/EventDrawChart.o \
 	${OBJECTDIR}/FrameMain.o \
 	${OBJECTDIR}/GridIBAccountValues.o \
@@ -134,6 +136,16 @@ ${OBJECTDIR}/DialogSimpleOneLineOrder.o: DialogSimpleOneLineOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogSimpleOneLineOrder.o DialogSimpleOneLineOrder.cpp
+
+${OBJECTDIR}/DragDropInstrument.o: DragDropInstrument.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DragDropInstrument.o DragDropInstrument.cpp
+
+${OBJECTDIR}/DragDropInstrumentTarget.o: DragDropInstrumentTarget.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DragDropInstrumentTarget.o DragDropInstrumentTarget.cpp
 
 ${OBJECTDIR}/EventDrawChart.o: EventDrawChart.cpp
 	${MKDIR} -p ${OBJECTDIR}

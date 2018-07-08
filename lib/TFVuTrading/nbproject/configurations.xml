@@ -11,6 +11,8 @@
       <itemPath>DialogNewPortfolio.h</itemPath>
       <itemPath>DialogPickSymbol.h</itemPath>
       <itemPath>DialogSimpleOneLineOrder.h</itemPath>
+      <itemPath>DragDropInstrument.h</itemPath>
+      <itemPath>DragDropInstrumentTarget.h</itemPath>
       <itemPath>EventDrawChart.h</itemPath>
       <itemPath>FrameMain.h</itemPath>
       <itemPath>GridIBAccountValues.h</itemPath>
@@ -66,6 +68,8 @@
       <itemPath>DialogNewPortfolio.cpp</itemPath>
       <itemPath>DialogPickSymbol.cpp</itemPath>
       <itemPath>DialogSimpleOneLineOrder.cpp</itemPath>
+      <itemPath>DragDropInstrument.cpp</itemPath>
+      <itemPath>DragDropInstrumentTarget.cpp</itemPath>
       <itemPath>EventDrawChart.cpp</itemPath>
       <itemPath>FrameMain.cpp</itemPath>
       <itemPath>GridIBAccountValues.cpp</itemPath>
@@ -170,6 +174,14 @@
       <item path="DialogSimpleOneLineOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DialogSimpleOneLineOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DragDropInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DragDropInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DragDropInstrumentTarget.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DragDropInstrumentTarget.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -400,6 +412,14 @@
       <item path="DialogSimpleOneLineOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DialogSimpleOneLineOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DragDropInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DragDropInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DragDropInstrumentTarget.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DragDropInstrumentTarget.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -111,7 +111,7 @@ private:
     size_t ixTab;
     std::string sDate;
     mapStrike_t mapStrike;
-		wxPanel* pPanel;
+    wxPanel* pPanel;
     GridOptionChain* pWinOptionChain;
     Tab( int ix = 0, const std::string& s = "", wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
       : ixTab( ix ), sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}

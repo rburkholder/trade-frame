@@ -911,14 +911,19 @@ void AppComboTrading::ConstructEquityPosition2( pInstrument_t& pInstrument ) {
   }
 }
 
-void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& ppp,const std::string& sPortfolioId, const std::string& sDescription ) {
+void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& ppp, const std::string& sPortfolioId, const std::string& sDescription ) {
   // check if portfolio exists
-  if ( ou::tf::PortfolioManager::Instance().PortfolioExists( sPortfolioId ) ) {
-    std::cout << "PortfolioId " << sPortfolioId << " already exists." << std::endl;
+  if ( sPortfolioId.empty() ) {
+    std::cout << "no portfolio id supplied " << std::endl;
   }
   else {
-    ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-      sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
+    if ( ou::tf::PortfolioManager::Instance().PortfolioExists( sPortfolioId ) ) {
+      std::cout << "PortfolioId " << sPortfolioId << " already exists." << std::endl;
+    }
+    else {
+      ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+        sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
+    }
   }
 }
 

@@ -44,6 +44,8 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
+#include <TFVuTrading/DragDropInstrumentTarget.h>
+
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
@@ -227,6 +229,9 @@ struct PanelPortfolioPosition_impl {
 
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
+  
+  DragDropDataInstrument m_ddDataInstrument;
+  DragDropInstrumentTarget m_ddDataInstrumentTarget;
 
   void CreateControls();
   void SetPortfolio( pPortfolio_t pPortfolio );

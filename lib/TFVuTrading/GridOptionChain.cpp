@@ -57,7 +57,6 @@ void GridOptionChain::CreateControls() {
   //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
   
-  //Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
   //Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
   //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
   //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );

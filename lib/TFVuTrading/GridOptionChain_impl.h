@@ -144,6 +144,9 @@ struct GridOptionChain_impl {
   typedef mapOptionValueRow_t::iterator mapOptionValueRow_iter;
   mapOptionValueRow_t m_mapOptionValueRow;
 
+  int m_nRow;
+  int m_nColumn;
+  
   mapOptionValueRow_iter FindOptionValueRow( double );
   
   void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
@@ -155,11 +158,13 @@ struct GridOptionChain_impl {
   
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
-	
-	void StopWatch();
+
+  void StopWatch();
   void DestroyControls();
   
   void OnGridLeftClick( wxGridEvent& event );
+  void OnGridRightClick( wxGridEvent& event );
+  void OnMouseMotion( wxMouseEvent& event );
   
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );
