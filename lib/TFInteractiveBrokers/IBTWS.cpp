@@ -166,9 +166,30 @@ void IBTWS::ProcessMessages( void ) {
 
 // ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
 
+// deprecated
 void IBTWS::RequestContractDetails( 
                                    const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
                                    OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone 
+) {
+  RequestContractDetails( sSymbolBaseName, pInstrument, 
+                         [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
+                           if ( 0 != fProcess ) {
+                             fProcess( details, pInstrument );
+                           }
+                         }, 
+                         [fDone](){
+                           if ( 0 != fDone ) {
+                             if ( 0 != fDone ) {
+                               fDone();
+                             }
+                           }
+                         });
+}
+
+// new and better
+void IBTWS::RequestContractDetails( 
+                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
+                                   fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone 
 ) {
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
@@ -203,14 +224,57 @@ void IBTWS::RequestContractDetails(
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
 }
 
+// deprecated
 void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // results supplied at contractDetails()
+  //pInstrument_t pInstrument;  // just allocate, and pass as empty
+  //RequestContractDetails( contract, fProcess, fDone, pInstrument );
+  RequestContractDetails( contract, 
+                         [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
+                           if ( 0 != fProcess ) {
+                             fProcess( details, pInstrument );
+                           }
+                         }, 
+                         [fDone](){
+                           if ( 0 != fDone ) {
+                             if ( 0 != fDone ) {
+                               fDone();
+                             }
+                           }
+                         }
+                         );
+}
+
+// new and better
+void IBTWS::RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone ) {
   // results supplied at contractDetails()
   pInstrument_t pInstrument;  // just allocate, and pass as empty
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
 }
 
+// deprecated
 void IBTWS::RequestContractDetails( 
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
+  RequestContractDetails( contract, 
+                         [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
+                           if ( 0 != fProcess ) {
+                             fProcess( details, pInstrument );
+                           }
+                         }, 
+                         [fDone](){
+                           if ( 0 != fDone ) {
+                             if ( 0 != fDone ) {
+                               fDone();
+                             }
+                           }
+                         },
+                         pInstrument
+                         );
+}
+
+// new and better
+void IBTWS::RequestContractDetails( 
+  const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t pInstrument ) {
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
   // pInstrument can be empty, or can have an instrument
   // results supplied at contractDetails()
@@ -225,8 +289,10 @@ void IBTWS::RequestContractDetails(
     pRequest = m_vInActiveRequestId.back();
     m_vInActiveRequestId.pop_back();
     pRequest->id = m_nxtReqId++;
-    pRequest->fProcess = fProcess;
-    pRequest->fDone = fDone;
+    //pRequest->fProcess = fProcess;
+    //pRequest->fDone = fDone;
+    pRequest->fOnContractDetail = fProcess;
+    pRequest->fOnContractDetailDone = fDone;
     pRequest->pInstrument = pInstrument;
   }
   m_mapActiveRequestId[ pRequest->id ] = pRequest;
@@ -766,7 +832,8 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   assert( 0 < contractDetails.summary.conId );
 
-  OnContractDetailsHandler_t handler = 0;
+  //OnContractDetailsHandler_t handler = 0;
+  fOnContractDetail_t handler = 0;
   mapActiveRequestId_t::iterator iterRequest;
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
@@ -776,7 +843,8 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     }
   }
 
-  handler = iterRequest->second->fProcess;
+  //handler = iterRequest->second->fProcess;
+  handler = iterRequest->second->fOnContractDetail;
   pInstrument_t pInstrument = iterRequest->second->pInstrument;  // might be empty
 
   // need some logic here:
@@ -866,14 +934,15 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
 
-  if ( 0 != handler ) 
+  if ( nullptr != handler ) 
     handler( contractDetails, pInstrument );
 
 }
 
 void IBTWS::contractDetailsEnd( int reqId ) {  
   // not called when no symbol available
-  OnContractDetailsDoneHandler_t handler = 0;
+  //OnContractDetailsDoneHandler_t handler = 0;
+  fOnContractDetailDone_t handler = 0;
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
     mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
@@ -881,7 +950,8 @@ void IBTWS::contractDetailsEnd( int reqId ) {
       throw std::runtime_error( "contractDetailsEnd out of sync" );
     }
     reqId_t id = iterRequest->second->id;
-    handler = iterRequest->second->fDone;
+    //handler = iterRequest->second->fDone;
+    handler = iterRequest->second->fOnContractDetailDone;
     m_vInActiveRequestId.push_back( iterRequest->second );
     m_mapActiveRequestId.erase( iterRequest );
 //    while ( 0 != m_mapActiveRequestId.size() ) {
@@ -892,7 +962,7 @@ void IBTWS::contractDetailsEnd( int reqId ) {
 //      m_mapActiveRequestId.erase( iterRequest );
 //    }
   }
-  if ( NULL != handler ) 
+  if ( nullptr != handler ) 
     handler();
 }
 

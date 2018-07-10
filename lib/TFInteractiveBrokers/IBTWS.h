@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <functional>
 
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING
@@ -92,16 +93,25 @@ public:
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
 
-  // TWS Function Calls
-  //  need to make a container of re-usable request ids to be looked up in order to return data to appropriate caller
-  //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
-  //   ie, may need an array of OnContractDetailsHandler_t
+  // old, deprecated set of event based handling, these are forwarded to the new set of handlers
+  
   typedef FastDelegate2<const ContractDetails&, pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
+  
   void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,            
                                                          OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
+  
+  // new set of event based handling
+
+  typedef std::function<void(const ContractDetails&, pInstrument_t&)> fOnContractDetail_t;
+  typedef std::function<void(void)> fOnContractDetailDone_t;
+  
+  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,            
+                                                         fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
+  void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
+  void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t );
 
   struct PositionDetail {
     std::string sSymbol;
@@ -293,12 +303,16 @@ private:
   struct structRequest_t {
     reqId_t id;
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
-    OnContractDetailsHandler_t fProcess;
-    OnContractDetailsDoneHandler_t fDone;
+    //OnContractDetailsHandler_t fProcess;
+    //OnContractDetailsDoneHandler_t fDone;
+    fOnContractDetail_t fOnContractDetail;
+    fOnContractDetailDone_t fOnContractDetailDone;
     //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
     //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
-    structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ ) 
-      : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
+    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ ) 
+    //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
+    structRequest_t( reqId_t id_, fOnContractDetail_t fProcess_, fOnContractDetailDone_t fDone_, pInstrument_t pInstrument_ ) 
+      : id( id_ ), fOnContractDetail( fProcess_ ), fOnContractDetailDone( fDone_ ), pInstrument( pInstrument_ ) {};
   };
 
   reqId_t m_nxtReqId; 
