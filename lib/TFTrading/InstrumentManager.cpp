@@ -101,6 +101,7 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency(
 }
 
 void InstrumentManager::Register( pInstrument_t& pInstrument ) {
+  // TODO: validate that IB id, IQF id, and IB contract present? ( or put into separate validator?)
   if ( Exists( pInstrument ) ) {
     throw std::runtime_error( "InstrumentManager::Construct: instrument already exists" );
   }

@@ -34,8 +34,37 @@ namespace tf { // TradeFrame
   }
 */
 
-  //static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
-  static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
+//static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
+static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
+
+std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike ) { // month is 1 based
+  std::string sGenericName;
+  std::string::size_type pos = sUnderlying.find_first_of( "-" );
+  if ( std::string::npos == pos ) {
+    sGenericName = sUnderlying;
+  }
+  else {
+    sGenericName = sUnderlying.substr( 0, pos );
+  }
+  //std::string sGenericName( sUnderlying );
+  sGenericName += "-" + boost::lexical_cast<std::string>( year )
+    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
+    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
+    ;
+  sGenericName += "-";
+  sGenericName += side;
+  sGenericName += "-" + boost::lexical_cast<std::string>( strike );
+  return sGenericName;
+}
+
+std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day ) { // month is 1 based
+ std::string sGenericName( sUnderlying );
+  sGenericName += "-" + boost::lexical_cast<std::string>( year )
+    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
+    + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) )
+    ;
+  return sGenericName;
+}
 
 Instrument::Instrument( const TableRowDef& row ) 
   : m_row( row ), 

@@ -47,6 +47,9 @@ public:
   typedef const idInstrument_t& idInstrument_cref;
   typedef boost::shared_ptr<Instrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
+  
+  static std::string BuildGenericOptionName( const std::string& sUnderlying, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike );
+  static std::string BuildGenericFutureName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day );
 
   struct TableRowDef {
     template<class A>
