@@ -100,38 +100,26 @@ IQFeedInstrumentBuild::pInstrument_t
 
 // extract this sometime because the string builder might be used elsewhere
 void IQFeedInstrumentBuild::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument ) {
-  std::string sKey( pde.sIQFSymbolName );
+  std::string sGenericName( pde.sIQFSymbolName );
   switch ( pde.it ) {
-    case InstrumentType::Stock: {
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, 0 );
+    case InstrumentType::Stock: 
+    {
+      ValuesForBuildInstrument values( sGenericName, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, 0 );
       fBuildInstrument( values );
     }
       break;
     case InstrumentType::Option:
     case InstrumentType::FuturesOption:
     {
-      boost::uint16_t month( pde.month + 1 ); // dialog month is 0 based
-      boost::uint16_t day( pde.day ); // dialog day is 1 based
-      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
-        + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
-      sKey += "-";
-      sKey += pde.os;
-      sKey += "-" + boost::lexical_cast<std::string>( pde.dblStrike )
-        ;
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
+      sGenericName = Instrument::BuildGenericOptionName( sGenericName, pde.os, pde.year, pde.month + 1, pde.day, pde.dblStrike );
+      ValuesForBuildInstrument values( sGenericName, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, pde.day );
       fBuildInstrument( values );
     }
       break;
     case InstrumentType::Future:
     {
-      boost::uint16_t month( pde.month + 1 ); // dialog month is 0 based
-      boost::uint16_t day( pde.day ); // dialog day is 1 based
-      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
-        + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) );
-        ;
-      ValuesForBuildInstrument values( sKey, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, day );
+      sGenericName = Instrument::BuildGenericFutureName( sGenericName, pde.year, pde.month + 1, pde.day );
+      ValuesForBuildInstrument values( sGenericName, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, pde.day );
       fBuildInstrument( values );
     }
       break;
