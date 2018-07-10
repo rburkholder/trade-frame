@@ -89,6 +89,9 @@ public:
   std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
   std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
   
+  typedef std::function<void(pInstrument_t, const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fBuildOptionInstrument_t;
+  fBuildOptionInstrument_t m_fBuildOptionInstrument; // build registered option instrument with IQF and IB info.
+  
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );

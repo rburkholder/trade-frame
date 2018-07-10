@@ -50,12 +50,6 @@ namespace tf { // TradeFrame
 class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
 public:
   
-  //typedef Watch::pWatch_t pWatch_t;
-  //typedef boost::signals2::signal<pWatch_t ( const std::string& ), // string is the IQFeed name
-  //                                ou::tf::FirstOrDefault<pWatch_t> > signalObtainWatch_t;
-  //typedef signalObtainWatch_t::slot_type slotObtainWatch_t;
-  //signalObtainWatch_t signalObtainWatch;
-  
   NotebookOptionChains();
   NotebookOptionChains( 
     wxWindow* parent, wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME, 
@@ -77,6 +71,9 @@ public:
   
   typedef std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
+  
+  typedef std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fOnInstrumentRetrieve_t;
+  fOnInstrumentRetrieve_t m_fOnInstrumentRetrieve;
   
   typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
   fOnPageEvent_t m_fOnPageChanging; // about to depart page

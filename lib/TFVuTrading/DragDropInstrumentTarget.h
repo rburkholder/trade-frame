@@ -44,8 +44,9 @@ public:
   virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult defResult);
   virtual void OnLeave();
   
-  typedef std::function<void(const std::string& sIQFeedSymbolName )> fOnIQFeedSymbolName_t;
-  fOnIQFeedSymbolName_t m_fOnIQFeedSymbolName;
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef std::function<void(pInstrument_t)> fOnInstrument_t;
+  fOnInstrument_t m_fOnInstrument;
   
 protected:
 private:

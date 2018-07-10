@@ -230,7 +230,7 @@ struct PanelPortfolioPosition_impl {
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
   
-  DragDropDataInstrument m_ddDataInstrument;
+  //DragDropDataInstrument* m_pddDataInstrument;
   DragDropInstrumentTarget m_ddDataInstrumentTarget;
 
   void CreateControls();

@@ -27,7 +27,7 @@ namespace tf { // TradeFrame
 PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition& ppp )
 : 
   m_ppp( ppp ),
-  m_ddDataInstrumentTarget( &m_ddDataInstrument )
+  m_ddDataInstrumentTarget( new DragDropDataInstrument( DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t() ) )
 {
 
   m_bDialogActive = false;
@@ -149,9 +149,14 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
   
-  m_ddDataInstrumentTarget.m_fOnIQFeedSymbolName = []( const std::string& sName ) { 
-    std::cout << "symbol name: " << sName << std::endl;; 
+  m_ddDataInstrumentTarget.m_fOnInstrument = []( pInstrument_t pInstrument ) { 
+    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
   };
+  //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
+  //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){
+  //    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl;
+  //  });
+  //}
   m_ppp.SetDropTarget( &m_ddDataInstrumentTarget );
   
   m_ppp.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?

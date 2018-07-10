@@ -27,6 +27,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// need to allow DragDropInstrumentTarget delete 'data'
 DragDropInstrumentTarget::DragDropInstrumentTarget( DragDropDataInstrument *data ): wxDropTarget( data ) {
 }
 
@@ -34,35 +35,50 @@ DragDropInstrumentTarget::~DragDropInstrumentTarget( ) {
 }
 
 bool DragDropInstrumentTarget::GetData() {
-  return wxDropTarget::GetData();
+  
+  bool bResult = wxDropTarget::GetData();
+  return bResult;
 }
  
 wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult defResult) { // second step of two
   bool bResult = GetData();
-  //std::cout << "DragDropInstrumentTarget OnData: " << bResult << "," << defResult << std::endl;
-  if ( nullptr != m_fOnIQFeedSymbolName ) {
-    m_fOnIQFeedSymbolName( reinterpret_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() )->GetIQFeedSymbolName() );
+  //wxDataObject obj = wxDropTarget::GetDataObject();
+  //DragDropDataInstrument* dddi = dynamic_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() );
+  DragDropDataInstrument* dddi = (DragDropDataInstrument*)wxDropTarget::GetDataObject();
+  //DragDropDataInstrument* dddi = wxDropTarget::GetDataObject();
+  if ( dddi->IsSupported( DragDropDataInstrument::DataFormatInstrumentClass ) ) {
+//    if ( nullptr != m_fOnInstrument ) {
+//      DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t 
+ //       fOnInstrumentRetrieveInitiate( reinterpret_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() )->GetInstrumentBuildInitiate() );
+  //    fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){m_fOnInstrument( pInstrument );
+   //   });
+      //m_fOnInstrument( reinterpret_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() )->GetInstrument() );
+    //}
+  }
+  if ( dddi->IsSupported( DragDropDataInstrument::DataFormatInstrumentFunction ) ) {
+      DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t fOnInstrumentRetrieveInitiate = dddi->GetInstrumentBuildInitiate();
+      if ( nullptr != fOnInstrumentRetrieveInitiate ) {
+        fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){m_fOnInstrument(pInstrument);});
+      }
+  }
+  if ( dddi->IsSupported( DragDropDataInstrument::DataFormatInstrumentIQFeedSymbolName) ) {
   }
   return defResult;
 }
  
 wxDragResult DragDropInstrumentTarget::OnDragOver(wxCoord x, wxCoord y, wxDragResult defResult) {
-  //std::cout << "DragDropInstrumentTarget OnDragOver" << std::endl;
   return defResult;
 }
  
 bool DragDropInstrumentTarget::OnDrop(wxCoord x, wxCoord y) {  // first step of two
-  //std::cout << "DragDropInstrumentTarget OnDrop" << std::endl;
   return true;
 }
  
 wxDragResult DragDropInstrumentTarget::OnEnter(wxCoord x, wxCoord y, wxDragResult defResult) {
-  //std::cout << "DragDropInstrumentTarget OnEnter" << std::endl;
   return defResult;
 }
  
 void DragDropInstrumentTarget::OnLeave() {
-   
 }
  
 } // namespace tf

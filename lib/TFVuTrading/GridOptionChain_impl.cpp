@@ -230,21 +230,24 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iter );
     
-    if ( event.ShiftDown() && ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+    if ( event.ShiftDown() && ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // call drag and drop
-      ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+      //ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+      ou::tf::DragDropDataInstrument dndCall( [this,iter]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iter->second.m_sCallName, iter->first, f );
+      } );
 
 #if defined(__WXMSW__) 
       wxCursor cursor( wxCURSOR_HAND );
       wxDropSource dragSource( dndCall, &m_details, cursor, cursor, cursor );
 #elif defined(__WXGTK__)
       // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
-      wxDropSource dragSource( dndCall, &m_details );
+      wxDropSource dragSource( &m_details );
 #else
       assert(0);
 #endif
       
-      //dragSource.SetData( dndCall );
+      dragSource.SetData( dndCall );
       //std::cout << "call drag start " << std::endl;
       wxDragResult result = dragSource.DoDragDrop( true );
       //std::cout << "call drag stop " << std::endl;
@@ -258,21 +261,24 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       bSkip = false;
     }
 
-    if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+    if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // put drag and drop
-      ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+      //ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+      ou::tf::DragDropDataInstrument dndPut( [this,iter]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iter->second.m_sPutName, iter->first, f );
+      } );
 
 #if defined(__WXMSW__) 
       wxCursor cursor( wxCURSOR_HAND );
       wxDropSource dragSource( dndPut, &m_details, cursor, cursor, cursor );
 #elif defined(__WXGTK__)
       // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
-      wxDropSource dragSource( dndPut, &m_details );
+      wxDropSource dragSource( &m_details );
 #else
       assert(0);
 #endif
 
-      //dragSource.SetData( dndPut );
+      dragSource.SetData( dndPut );
       wxDragResult result = dragSource.DoDragDrop( true );
       switch ( result ) {
         case wxDragCopy:

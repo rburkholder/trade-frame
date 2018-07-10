@@ -370,6 +370,33 @@ void AppComboTrading::BuildFrameCharts( void ) {
         ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sName ) );
         return ou::tf::iqfeed::BuildInstrument( sName, trd );
     };
+    
+  typedef std::function<void(pInstrument_t)> fOnInstrumentRetrieveComplete_t;
+  m_pPanelCharts->m_fBuildOptionInstrument =
+    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, fOnInstrumentRetrieveComplete_t f){
+      ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) );
+      std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pInstrumentUnderlying->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
+      pInstrument_t pInstrumentOption( ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() ) );
+      ou::tf::IBTWS::Contract contract;
+      contract.conId = pInstrumentUnderlying->GetContract();
+      m_tws->RequestContractDetails(
+        contract, 
+        [this,pInstrumentOption,f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+          //std::cout << "contract id: " << details.summary.conId << ", symbol: " << details.summary.symbol << std::endl;
+          m_tws->RequestContractDetails( 
+            details.summary.symbol, pInstrumentOption,
+            [f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+              //std::cout << pInstrument->GetInstrumentName() << " contract: " << pInstrument->GetContract() << std::endl;
+              if ( nullptr != f ) {
+                f( pInstrument );
+              }
+            }, 
+            nullptr
+            );    
+        }, 
+        nullptr, 
+        pInstrumentUnderlying );
+    };
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
@@ -640,9 +667,20 @@ void AppComboTrading::TestSymbols( void ) {
 
 void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument ) {
   if ( m_bIBConnected ) {
+    //m_tws->RequestContractDetails( 
+    //  sBaseName, pInstrument,
+    //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+    //m_tws->RequestContractDetails( 
+    //  sBaseName, pInstrument,
+    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);}, 
+    //  [this](void){HandleIBContractDetailsDone();}
+    //  );
+    namespace args = std::placeholders;
     m_tws->RequestContractDetails( 
       sBaseName, pInstrument,
-      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+      std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
+      std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
+      );
   }
   else {
     std::cout << "AppComboTrading::GetContractFor: IB Not Connected" << std::endl;
@@ -1071,9 +1109,20 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
     contract.symbol = sName;
     // IB responds only when symbol is found, bad symbols will not illicit a response
     //  m_pPanelManualOrder->SetInstrumentDescription( "" );
+    //m_tws->RequestContractDetails( 
+    //  contract, 
+    //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+    //m_tws->RequestContractDetails( 
+    //  contract,
+    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);}, 
+    //  [this](void){HandleIBContractDetailsDone();}
+    //  );
+    namespace args = std::placeholders;
     m_tws->RequestContractDetails( 
-      contract, 
-      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+      contract,
+      std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
+      std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
+      );
   }
   else {
     std::cout << "AppComboTrading::HandlePanelSymbolText: IB Not Connected" << std::endl;
