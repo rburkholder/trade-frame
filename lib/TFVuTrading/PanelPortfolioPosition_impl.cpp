@@ -149,8 +149,9 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
   
-  m_ddDataInstrumentTarget.m_fOnInstrument = []( pInstrument_t pInstrument ) { 
-    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
+  m_ddDataInstrumentTarget.m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
+    //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
+    AddInstrumentToPosition( pInstrument );
   };
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
   //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){
@@ -215,15 +216,6 @@ void PanelPortfolioPosition_impl::OnRightClickGridLabel( wxGridEvent& event ) {
 void PanelPortfolioPosition_impl::OnRightClickGridCell( wxGridEvent& event ) {
   m_nRowRightClick = event.GetRow();
   m_ppp.PopupMenu( m_menuGridCellPositionPopUp );
-}
-
-void PanelPortfolioPosition_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
-  pInstrument_t pInstrument = m_ppp.m_fSelectInstrument();
-  if ( 0 != pInstrument.use_count() ) {
-    namespace ph = std::placeholders;
-    m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
-      std::bind( &PanelPortfolioPosition_impl::AddPosition, this, ph::_1 ) );
-  }
 }
 
 //void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
@@ -349,6 +341,20 @@ void PanelPortfolioPosition_impl::OnDialogSimpleOneLineOrderDone( ou::tf::Dialog
   m_pdialogSimpleOneLineOrder->Destroy();
   m_pdialogSimpleOneLineOrder = 0;
   m_bDialogActive = false;
+}
+
+void PanelPortfolioPosition_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
+  pInstrument_t pInstrument = m_ppp.m_fSelectInstrument();
+  if ( 0 != pInstrument.use_count() ) {
+    AddInstrumentToPosition( pInstrument );
+  }
+}
+
+// 
+void PanelPortfolioPosition_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
+  namespace ph = std::placeholders;
+  m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
+    std::bind( &PanelPortfolioPosition_impl::AddPosition, this, ph::_1 ) );
 }
 
 void PanelPortfolioPosition_impl::AddPosition( pPosition_t pPosition ) {

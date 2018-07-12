@@ -67,6 +67,7 @@ struct PanelPortfolioPosition_impl {
 
   void UpdateGui( void );
   void AddPosition( pPosition_t pPosition );
+  void AddInstrumentToPosition( pInstrument_t pInstrument );
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
