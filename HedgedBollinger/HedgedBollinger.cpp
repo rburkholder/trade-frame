@@ -43,6 +43,12 @@
 
 #include "HedgedBollinger.h"
 
+/*
+ * 2018/07/10 use reversion to mean trading
+ *   on touch high bollinger, sell equity, and buy call to hedge
+ *   on touch low bollinger, buy equity, and buy put to hedge
+ */
+
 IMPLEMENT_APP(AppHedgedBollinger)
 
 const size_t atm = 125;
@@ -123,6 +129,8 @@ bool AppHedgedBollinger::OnInit() {
 //  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
 //  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
+  m_pFrameMain->SetAutoLayout( true );
+  m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
   
   // ** Note:  turn on iqfeed only, symbols not set for IB yet
