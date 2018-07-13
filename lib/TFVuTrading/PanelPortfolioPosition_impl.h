@@ -71,7 +71,7 @@ struct PanelPortfolioPosition_impl {
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
-#define GRID_ARRAY_COL_COUNT 15
+#define GRID_ARRAY_COL_COUNT 12
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
@@ -87,9 +87,6 @@ struct PanelPortfolioPosition_impl {
       (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/
@@ -215,8 +212,6 @@ struct PanelPortfolioPosition_impl {
   PanelPortfolioPosition& m_ppp; // passed in on construction 
 
   pPortfolio_t m_pPortfolio;
-  //PanelPortfolioPosition::DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
-  //PanelPortfolioPosition::DelegateConstructPortfolio_t m_delegateConstructPortfolio;  // used to construct the Portfolio
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
@@ -231,7 +226,6 @@ struct PanelPortfolioPosition_impl {
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
   
-  //DragDropDataInstrument* m_pddDataInstrument;
   DragDropInstrumentTarget m_ddDataInstrumentTarget;
 
   void CreateControls();
@@ -248,7 +242,6 @@ struct PanelPortfolioPosition_impl {
   void OnPositionPopUpAddPortfolio( wxCommandEvent& event );
   void OnPositionPopUpClosePortfolio( wxCommandEvent& event );
 
-//  void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
   void OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* );
   void OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* );
 

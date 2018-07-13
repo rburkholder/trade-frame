@@ -20,9 +20,6 @@
 
 #include <wx/panel.h>
 
-//#include <OUCommon/FastDelegate.h>
-//using namespace fastdelegate;
-
 #include <TFTrading/Instrument.h>
 #include <TFTrading/Portfolio.h>
 
@@ -48,12 +45,6 @@ public:
   
   typedef ou::tf::Portfolio::idPosition_t idPosition_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
-  
-  //typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
-
-  //typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
-  //typedef FastDelegate3<const std::string&,pPortfolio_t,DelegateAddPosition_t,void> DelegateConstructPosition_t;
-  //typedef FastDelegate3<PanelPortfolioPosition&,const std::string&, const std::string&> DelegateConstructPortfolio_t;
   
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
   
@@ -114,7 +105,6 @@ private:
   static bool ShowToolTips() { return true; };
 
 };
-
 
 } // namespace tf
 } // namespace ou
