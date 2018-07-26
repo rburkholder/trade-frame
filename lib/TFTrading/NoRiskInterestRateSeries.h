@@ -18,7 +18,7 @@
 // base class for Libor and for US Fed rate
 
 // code could be optimized to be calculated at specific intervals such as 1 second
-// value could then be used for all options expirying on same date
+// value could then be used for all options expiring on same date
 // rather than calculating each and every time a request is made.
 
 #pragma once
@@ -107,7 +107,7 @@ std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrir
 class LiborFromIQFeed: public NoRiskInterestRateSeries {
 public:
   LiborFromIQFeed( void );
-  ~LiborFromIQFeed( void );
+  virtual ~LiborFromIQFeed( void );
 protected:
 private:
 };
@@ -118,7 +118,7 @@ private:
 class FedRateFromIQFeed: public NoRiskInterestRateSeries {
 public:
   FedRateFromIQFeed( void );
-  ~FedRateFromIQFeed( void );
+  virtual ~FedRateFromIQFeed( void );
 protected:
 private:
 };

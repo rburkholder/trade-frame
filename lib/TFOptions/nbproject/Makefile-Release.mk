@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Binomial.o \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
+	${OBJECTDIR}/Engine.o \
 	${OBJECTDIR}/Formula.o \
 	${OBJECTDIR}/Margin.o \
 	${OBJECTDIR}/Option.o \
@@ -85,6 +86,11 @@ ${OBJECTDIR}/CalcExpiry.o: CalcExpiry.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CalcExpiry.o CalcExpiry.cpp
+
+${OBJECTDIR}/Engine.o: Engine.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Engine.o Engine.cpp
 
 ${OBJECTDIR}/Formula.o: Formula.cpp
 	${MKDIR} -p ${OBJECTDIR}

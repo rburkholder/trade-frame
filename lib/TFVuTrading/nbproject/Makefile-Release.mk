@@ -65,6 +65,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/PanelFinancialChart.o \
 	${OBJECTDIR}/PanelLogging.o \
 	${OBJECTDIR}/PanelManualOrder.o \
+	${OBJECTDIR}/PanelOptionCombo.o \
+	${OBJECTDIR}/PanelOptionCombo_impl.o \
 	${OBJECTDIR}/PanelPortfolioPosition.o \
 	${OBJECTDIR}/PanelPortfolioPositionOrderExecution.o \
 	${OBJECTDIR}/PanelPortfolioPosition_impl.o \
@@ -256,6 +258,16 @@ ${OBJECTDIR}/PanelManualOrder.o: PanelManualOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelManualOrder.o PanelManualOrder.cpp
+
+${OBJECTDIR}/PanelOptionCombo.o: PanelOptionCombo.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionCombo.o PanelOptionCombo.cpp
+
+${OBJECTDIR}/PanelOptionCombo_impl.o: PanelOptionCombo_impl.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionCombo_impl.o PanelOptionCombo_impl.cpp
 
 ${OBJECTDIR}/PanelPortfolioPosition.o: PanelPortfolioPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}

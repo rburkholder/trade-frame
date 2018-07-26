@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2014, One Unified. All rights reserved.                 *
+ * Copyright(c) 2018, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -11,7 +11,6 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started 2014/09/15
 
 // http://herbsutter.com/gotw/_100/pimpl stuff
 
@@ -46,16 +45,16 @@
 
 #include <TFVuTrading/DragDropInstrumentTarget.h>
 
-#include "PanelPortfolioPosition.h"
+#include "PanelOptionCombo.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct PanelPortfolioPosition_impl {
+struct PanelOptionCombo_impl {
 //public:
 
-  PanelPortfolioPosition_impl( PanelPortfolioPosition& );
-  virtual ~PanelPortfolioPosition_impl( void );
+  PanelOptionCombo_impl( PanelOptionCombo& );
+  virtual ~PanelOptionCombo_impl( void );
 
 //protected:
 //private:
@@ -71,7 +70,7 @@ struct PanelPortfolioPosition_impl {
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
-#define GRID_ARRAY_COL_COUNT 12
+#define GRID_ARRAY_COL_COUNT 15
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
@@ -87,6 +86,9 @@ struct PanelPortfolioPosition_impl {
       (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/
@@ -209,7 +211,7 @@ struct PanelPortfolioPosition_impl {
     wxMenu* m_menuGridLabelPositionPopUp;
     wxMenu* m_menuGridCellPositionPopUp;
 
-  PanelPortfolioPosition& m_ppp; // passed in on construction 
+  PanelOptionCombo& m_ppp; // passed in on construction 
 
   pPortfolio_t m_pPortfolio;
 

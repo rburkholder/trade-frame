@@ -20,6 +20,8 @@
 
 #include <OUCommon/SpinLock.h>
 
+// 2018/07/22 TODO: change the vector manipulation to std::move?
+
 // 2014/09/30 something to verify with existing code
 // http://preshing.com/20140709/the-purpose-of-memory_order_consume-in-cpp11/
 

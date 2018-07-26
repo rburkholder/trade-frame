@@ -81,7 +81,7 @@ void Option::StartWatch( void ) {
   }
 }
 
-void Option::CalcRate( 
+void Option::CalcRate( // version 1, called by version 2, updates input
   ou::tf::option::binomial::structInput& input,
   const ou::tf::LiborFromIQFeed& libor,
   boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry
@@ -107,7 +107,7 @@ void Option::CalcRate(
   input.b = rate; // is this correct?
 }
 
-void Option::CalcRate( 
+void Option::CalcRate( // version 2, calls version 1, uses instrument expiry date
   ou::tf::option::binomial::structInput& input,
         boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
 
@@ -132,6 +132,8 @@ void Option::CalcRate(
 
 void Option::CalcGreeks( 
   ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess ) {
+  // example caller: void ExpiryBundle::CalcGreeksAtStrike
+  
   // needs CalcRate before entering here
   // needs input.S (underlying price)
   

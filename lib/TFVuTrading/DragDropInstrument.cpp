@@ -138,6 +138,8 @@ wxDataFormat DragDropDataInstrument::GetPreferredFormat(Direction dir) const {
 //  }
 }
 
+// TODO: need to perform && std::move on reference so that lambda doesn't go out of scope
+// which is probably the problem for the segment fault earlier
 bool DragDropDataInstrument::SetData(const wxDataFormat &format, size_t len, const void *buf) {
   bool bCopied( false );
   if ( DataFormatInstrumentIQFeedSymbolName == format ) {

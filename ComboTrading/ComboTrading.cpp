@@ -1152,7 +1152,7 @@ void AppComboTrading::HandleSaveValues( void ) {
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
     std::string sPrefixSession( "/app/ComboTrading/" + m_sTSDataStreamStarted );
     m_pPanelCharts->SaveSeries( sPrefixSession );
-    this->m_libor.SaveSeries( sPrefixSession );
+    m_libor.SaveSeries( sPrefixSession );
   }
   catch(...) {
     // TODO: will occur when attempting over-write, may need to try a delete first in the code above

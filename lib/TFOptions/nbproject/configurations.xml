@@ -7,6 +7,7 @@
       <itemPath>Binomial.h</itemPath>
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
+      <itemPath>Engine.h</itemPath>
       <itemPath>Formula.h</itemPath>
       <itemPath>Margin.h</itemPath>
       <itemPath>Option.h</itemPath>
@@ -23,6 +24,7 @@
       <itemPath>Binomial.cpp</itemPath>
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
+      <itemPath>Engine.cpp</itemPath>
       <itemPath>Formula.cpp</itemPath>
       <itemPath>Margin.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
@@ -74,6 +76,10 @@
       <item path="CalcExpiry.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="CalcExpiry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Engine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Engine.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -134,6 +140,10 @@
       <item path="CalcExpiry.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="CalcExpiry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Engine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Engine.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>

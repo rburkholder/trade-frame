@@ -37,6 +37,8 @@
       <itemPath>PanelFinancialChart.h</itemPath>
       <itemPath>PanelLogging.h</itemPath>
       <itemPath>PanelManualOrder.h</itemPath>
+      <itemPath>PanelOptionCombo.h</itemPath>
+      <itemPath>PanelOptionCombo_impl.h</itemPath>
       <itemPath>PanelPortfolioPosition.h</itemPath>
       <itemPath>PanelPortfolioPositionOrderExecution.h</itemPath>
       <itemPath>PanelPortfolioPosition_impl.h</itemPath>
@@ -92,6 +94,8 @@
       <itemPath>PanelFinancialChart.cpp</itemPath>
       <itemPath>PanelLogging.cpp</itemPath>
       <itemPath>PanelManualOrder.cpp</itemPath>
+      <itemPath>PanelOptionCombo.cpp</itemPath>
+      <itemPath>PanelOptionCombo_impl.cpp</itemPath>
       <itemPath>PanelPortfolioPosition.cpp</itemPath>
       <itemPath>PanelPortfolioPositionOrderExecution.cpp</itemPath>
       <itemPath>PanelPortfolioPosition_impl.cpp</itemPath>
@@ -280,6 +284,14 @@
       <item path="PanelManualOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelManualOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelPortfolioPosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -518,6 +530,14 @@
       <item path="PanelManualOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelManualOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelOptionCombo_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelPortfolioPosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
