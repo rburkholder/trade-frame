@@ -50,14 +50,14 @@ public:
   typedef size_t size_type;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
-  typedef std::function<void(const ou::tf::Greek&)> fGreek_t; // engine provides callback of greek calculation
-  typedef std::function<void(pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreek_t&)> fCalc_t; // underlying quote, option quote
+  typedef std::function<void(const ou::tf::Greek&)> fGreekResultCallback_t; // engine provides callback of greek calculation
+  typedef std::function<void(pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreekResultCallback_t&)> fCalc_t; // underlying quote, option quote
   
 private:
   size_type cntInstances; 
   pWatch_t pUnderlying;
   pOption_t pOption;
-  fGreek_t fGreek;
+  fGreekResultCallback_t fGreek;
 
   bool m_bChanged;  // needs to be atomic (set in one thread, reset in the other)
   ou::tf::Quote m_quoteLastUnderlying;
@@ -73,7 +73,7 @@ public:
   OptionEntry( const OptionEntry& rhs ) = delete;
   OptionEntry( const OptionEntry&& rhs );
   
-  OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreek_t&& fGreek_ );
+  OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreekResultCallback_t&& fGreek_ );
   virtual ~OptionEntry();
   
   const std::string& OptionName() { return pOption->GetInstrument()->GetInstrumentName(); }
@@ -81,7 +81,7 @@ public:
   void Inc() { cntInstances++; }
   size_t Dec() { assert( 0 < cntInstances ); cntInstances--; return cntInstances; }
   
-  void Calc( fCalc_t& );  // supply underlying and option quotes
+  void Calc( const fCalc_t& );  // supply underlying and option quotes
 private:
   
   void HandleUnderlyingQuote( const ou::tf::Quote& );
@@ -103,12 +103,12 @@ public:
   
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
-  typedef OptionEntry::fGreek_t fGreek_t;
+  typedef OptionEntry::fGreekResultCallback_t fGreekResultCallback_t;
   
   Engine( ou::tf::NoRiskInterestRateSeries& );
   virtual ~Engine( );
   
-  void Add( pWatch_t pUnderlying, pOption_t pOption, fGreek_t&& ); // reference counted
+  void Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& ); // reference counted
   void Delete( pOption_t pOption ); // part of the reference counting, will change reference count on associated underlying and auto remove
   
 private:

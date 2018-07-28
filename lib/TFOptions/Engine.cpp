@@ -48,7 +48,7 @@ OptionEntry::OptionEntry( const OptionEntry&& rhs ) {
 
 OptionEntry::OptionEntry( pOption_t pOption_): pOption( pOption_ ) {}
 
-OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreek_t&& fGreek_ ):
+OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreekResultCallback_t&& fGreek_ ):
   pUnderlying( pUnderlying_ ), pOption( pOption_ ), fGreek( std::move( fGreek_ ) ), 
   m_bChanged( false ),
   cntInstances {} {
@@ -79,7 +79,7 @@ void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) {
   }
 }
 
-void OptionEntry::Calc( fCalc_t& fCalc ) {
+void OptionEntry::Calc( const fCalc_t& fCalc ) {
   if ( m_bChanged ) {
     fCalc( pOption, m_quoteLastUnderlying, m_quoteLastOption, fGreek );
     m_bChanged = false;
@@ -95,7 +95,7 @@ Engine::Engine( ou::tf::NoRiskInterestRateSeries& feed ): m_InterestRateFeed( fe
     m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
     
     m_fCalc = // also will need current date, expiry date
-      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, const ou::tf::Quote& quoteOption, OptionEntry::fGreek_t& fGreek){
+      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, const ou::tf::Quote& quoteOption, fGreekResultCallback_t& fGreek){
     };
   }
 }
@@ -103,7 +103,7 @@ Engine::Engine( ou::tf::NoRiskInterestRateSeries& feed ): m_InterestRateFeed( fe
 Engine::~Engine( ) {
 }
 
-void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreek_t&& fGreek ) {
+void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& fGreek ) {
   OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
@@ -154,9 +154,9 @@ void Engine::Scan() {
                 [this](mapOptionEntry_t::value_type& vt){
                   // TODO: do the calc and in the 
                   //m_srvc.post( boost::bind( &OptionEntry::Calc, &vt.second, m_fCalc ) );  
-                  vt.second.Calc( [this](OptionEntry::pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreek_t&){
+                  vt.second.Calc( [this](OptionEntry::pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreekResultCallback_t&){
                     m_srvc.post( [](){});
-                  })
+                  });
                 });
 }
 
