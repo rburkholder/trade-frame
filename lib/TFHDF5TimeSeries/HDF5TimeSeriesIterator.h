@@ -47,6 +47,8 @@ public:
   HDF5TimeSeriesIterator<DD>& operator=( const HDF5TimeSeriesIterator<DD>& other );
   HDF5TimeSeriesIterator<DD>& operator++(); // pre-increment
   HDF5TimeSeriesIterator<DD>  operator++( int ); // post-increment
+  HDF5TimeSeriesIterator<DD>& operator--(); // pre-decrement
+  HDF5TimeSeriesIterator<DD>  operator--( int ); // post-decrement
   HDF5TimeSeriesIterator<DD>& operator+=( const hsize_t inc );
   HDF5TimeSeriesIterator<DD>& operator-=( const hsize_t inc );
   HDF5TimeSeriesIterator<DD>  operator-( const hsize_t val );
@@ -129,6 +131,29 @@ HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator++( int ) { // po
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   ++m_ItemIndex;
+  //if ( m_ItemIndex < m_pAccessor->size() ) {
+  //  m_pAccessor->Retrieve( m_ItemIndex, &m_T );
+  //}
+  return( result ); 
+}
+
+template<class DD> 
+HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator--() { // pre-decrement
+  assert( m_bValidIndex );
+  assert( 0 < m_ItemIndex );
+  --m_ItemIndex;
+  //if ( m_ItemIndex < m_pAccessor->size() ) {
+  //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
+  //}
+  return( *this );
+}
+
+template<class DD> 
+HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator--( int ) { // post-decrement
+  HDF5TimeSeriesIterator<DD> result( *this );  // make a copy of what is before decrement
+  assert( m_bValidIndex );
+  assert( 0 < m_ItemIndex );
+  --m_ItemIndex;
   //if ( m_ItemIndex < m_pAccessor->size() ) {
   //  m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   //}
