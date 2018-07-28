@@ -51,7 +51,7 @@ public:
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
   typedef std::function<void(const ou::tf::Greek&)> fGreekResultCallback_t; // engine provides callback of greek calculation
-  typedef std::function<void(pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreekResultCallback_t&)> fCalc_t; // underlying quote, option quote
+  typedef std::function<void(pOption_t, const ou::tf::Quote&, fGreekResultCallback_t&)> fCalc_t; // underlying quote
   
 private:
   size_type cntInstances; 
@@ -61,7 +61,7 @@ private:
 
   bool m_bChanged;  // needs to be atomic (set in one thread, reset in the other)
   ou::tf::Quote m_quoteLastUnderlying;
-  ou::tf::Quote m_quoteLastOption;
+  ou::tf::Quote m_quoteLastOption;  // is this actually needed?
   //double m_dblLastUnderlyingQuote;  // should these be atomic as well?  can doubles be atomic?
   //double m_dblLastOptionQuote;
   
@@ -105,7 +105,7 @@ public:
   typedef Option::pOption_t pOption_t;
   typedef OptionEntry::fGreekResultCallback_t fGreekResultCallback_t;
   
-  Engine( ou::tf::NoRiskInterestRateSeries& );
+  Engine( const ou::tf::LiborFromIQFeed& );
   virtual ~Engine( );
   
   void Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& ); // reference counted
@@ -127,7 +127,7 @@ private:
   
   OptionEntry::fCalc_t m_fCalc;
   
-  NoRiskInterestRateSeries& m_InterestRateFeed;
+  const LiborFromIQFeed& m_InterestRateFeed;
   
   struct OptionEntryOperation {
     Action m_action;

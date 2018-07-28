@@ -28,6 +28,8 @@
 
 #include <algorithm>
 
+#include <OUCommon/TimeSource.h>
+
 #include "Engine.h"
 
 namespace ou { // One Unified
@@ -72,7 +74,7 @@ void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
   }
 }
 
-void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) {
+void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) { // should this be kept?
   if ( ! m_quoteLastOption.SameBidAsk( quote_ ) ) {
     m_quoteLastOption = quote_;
     m_bChanged = true;
@@ -81,21 +83,21 @@ void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) {
 
 void OptionEntry::Calc( const fCalc_t& fCalc ) {
   if ( m_bChanged ) {
-    fCalc( pOption, m_quoteLastUnderlying, m_quoteLastOption, fGreek );
+    fCalc( pOption, m_quoteLastUnderlying, fGreek );
     m_bChanged = false;
   }
 }
 
 // ====================
 
-Engine::Engine( ou::tf::NoRiskInterestRateSeries& feed ): m_InterestRateFeed( feed ) {
+Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): m_InterestRateFeed( feed ) {
   boost::asio::io_service::work work( m_srvc );  // keep things running while real work arrives
   for ( std::size_t ix = 0; ix < 1; ix++ ) {
     //m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
     m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
     
     m_fCalc = // also will need current date, expiry date
-      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, const ou::tf::Quote& quoteOption, fGreekResultCallback_t& fGreek){
+      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreek){
     };
   }
 }
@@ -150,12 +152,22 @@ void Engine::ProcessOptionEntryOperationQueue() {
 void Engine::Scan() {
 
   ProcessOptionEntryOperationQueue();
+  
+  // dtUtcNow needs to be passed by value
+  boost::posix_time::ptime dtUtcNow = ou::TimeSource::GlobalInstance().External();
+  
   std::for_each( m_mapOptionEntry.begin(), m_mapOptionEntry.end(), 
-                [this](mapOptionEntry_t::value_type& vt){
-                  // TODO: do the calc and in the 
-                  //m_srvc.post( boost::bind( &OptionEntry::Calc, &vt.second, m_fCalc ) );  
-                  vt.second.Calc( [this](OptionEntry::pOption_t, const ou::tf::Quote&, const ou::tf::Quote&, fGreekResultCallback_t&){
-                    m_srvc.post( [](){});
+                [this, dtUtcNow](mapOptionEntry_t::value_type& vt){
+                  vt.second.Calc( [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreekResultCallback ){
+                    m_srvc.post( [this, dtUtcNow, pOption, quoteUnderlying, fGreekResultCallback](){
+                      ou::tf::option::binomial::structInput input;
+                      input.S = quoteUnderlying.Midpoint();
+                      pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
+                      pOption->CalcGreeks( input, dtUtcNow, true );
+                      if ( nullptr != fGreekResultCallback ) {
+                        //fGreekResultCallback( pOption->LastGreek() ); // need to create the method
+                      }
+                    });
                   });
                 });
 }
