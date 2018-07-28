@@ -229,12 +229,12 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>

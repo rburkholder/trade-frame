@@ -243,12 +243,12 @@
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc63-mt-x64-1_67</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc63-mt-x64-1_67</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
         </linkerTool>
