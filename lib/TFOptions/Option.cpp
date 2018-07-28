@@ -109,7 +109,7 @@ void Option::CalcRate( // version 1, called by version 2, updates input
 
 void Option::CalcRate( // version 2, calls version 1, uses instrument expiry date
   ou::tf::option::binomial::structInput& input,
-        boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
+        const boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
 
   assert( boost::posix_time::not_a_date_time != dtUtcNow );
   
