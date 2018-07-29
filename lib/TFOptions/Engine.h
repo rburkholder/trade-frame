@@ -24,9 +24,9 @@
 
 #include <map>
 #include <queue>
-//#include <atomic>
 #include <mutex>
 #include <functional>
+#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -124,6 +124,7 @@ private:
   
   boost::asio::io_service m_srvc;
   boost::thread_group m_threads;
+  std::unique_ptr<boost::asio::io_service::work> m_pWork;
   
   OptionEntry::fCalc_t m_fCalc;
   

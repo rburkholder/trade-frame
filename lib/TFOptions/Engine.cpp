@@ -91,7 +91,8 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 // ====================
 
 Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): m_InterestRateFeed( feed ) {
-  boost::asio::io_service::work work( m_srvc );  // keep things running while real work arrives
+  //boost::asio::io_service::work work( m_srvc );  // keep things running while real work arrives !! this isn't going to work, work disappears with context
+  m_pWork.reset( new boost::asio::io_service::work( m_srvc ) );
   for ( std::size_t ix = 0; ix < 1; ix++ ) {
     //m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
     m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
@@ -103,18 +104,25 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): m_InterestRateFeed( feed 
 }
 
 Engine::~Engine( ) {
+  m_pWork.release();
+  m_threads.join_all();
+  //m_srvc.stop();
 }
 
 void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& fGreek ) {
-  OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
+  if ( nullptr != m_pWork.get() ) {
+    OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
+    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
+  }
 }
 
 void Engine::Delete( pOption_t pOption ) {
-  OptionEntry oe( pOption );
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
+  if ( nullptr != m_pWork.get() ) {
+    OptionEntry oe( pOption );
+    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
+  }
 }
 
 void Engine::ProcessOptionEntryOperationQueue() {
@@ -156,18 +164,25 @@ void Engine::Scan() {
   // dtUtcNow needs to be passed by value
   boost::posix_time::ptime dtUtcNow = ou::TimeSource::GlobalInstance().External();
   
+  // three step lambda call:
+  //  1) lambda for each active mapOptionEntry
+  //  2) capture private values from the OptionEntry
+  //  3) use the values in a background thread for calculations via post to io_service
   std::for_each( m_mapOptionEntry.begin(), m_mapOptionEntry.end(), 
                 [this, dtUtcNow](mapOptionEntry_t::value_type& vt){
-                  vt.second.Calc( [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreekResultCallback ){
-                    m_srvc.post( [this, dtUtcNow, pOption, quoteUnderlying, fGreekResultCallback](){
-                      ou::tf::option::binomial::structInput input;
-                      input.S = quoteUnderlying.Midpoint();
-                      pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
-                      pOption->CalcGreeks( input, dtUtcNow, true );
-                      if ( nullptr != fGreekResultCallback ) {
-                        //fGreekResultCallback( pOption->LastGreek() ); // need to create the method
-                      }
-                    });
+                  vt.second.Calc( 
+                    [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreekResultCallback ){
+                      double midpointUnderlying( quoteUnderlying.Midpoint() );
+                      m_srvc.post( 
+                        [this, dtUtcNow, pOption, midpointUnderlying, fGreekResultCallback](){
+                          ou::tf::option::binomial::structInput input;
+                          input.S = midpointUnderlying;
+                          pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
+                          pOption->CalcGreeks( input, dtUtcNow, true );
+                          if ( nullptr != fGreekResultCallback ) {
+                            fGreekResultCallback( pOption->LastGreek() ); // need to create the method
+                          }
+                      });
                   });
                 });
 }
