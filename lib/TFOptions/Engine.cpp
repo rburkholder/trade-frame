@@ -26,6 +26,9 @@
  * 
  */
 
+// old way: https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/reference/io_service.html
+// new way: https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/reference/io_context.html
+
 #include <algorithm>
 
 #include <OUCommon/TimeSource.h>
@@ -90,9 +93,9 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 
 // ====================
 
-Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): m_InterestRateFeed( feed ) {
-  //boost::asio::io_service::work work( m_srvc );  // keep things running while real work arrives !! this isn't going to work, work disappears with context
-  m_pWork.reset( new boost::asio::io_service::work( m_srvc ) );
+Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): 
+  m_InterestRateFeed( feed ), m_srvc_work(boost::asio::make_work_guard(m_srvc)) {
+  
   for ( std::size_t ix = 0; ix < 1; ix++ ) {
     //m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
     m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
@@ -104,13 +107,12 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): m_InterestRateFeed( feed 
 }
 
 Engine::~Engine( ) {
-  m_pWork.release();
+  m_srvc_work.reset();
   m_threads.join_all();
-  //m_srvc.stop();
 }
 
 void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& fGreek ) {
-  if ( nullptr != m_pWork.get() ) {
+  if ( m_srvc_work.owns_work() ) {
     OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
@@ -118,7 +120,7 @@ void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_
 }
 
 void Engine::Delete( pOption_t pOption ) {
-  if ( nullptr != m_pWork.get() ) {
+  if ( m_srvc_work.owns_work() ) {
     OptionEntry oe( pOption );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
@@ -173,7 +175,7 @@ void Engine::Scan() {
                   vt.second.Calc( 
                     [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreekResultCallback ){
                       double midpointUnderlying( quoteUnderlying.Midpoint() );
-                      m_srvc.post( 
+                      boost::asio::post( m_srvc, 
                         [this, dtUtcNow, pOption, midpointUnderlying, fGreekResultCallback](){
                           ou::tf::option::binomial::structInput input;
                           input.S = midpointUnderlying;

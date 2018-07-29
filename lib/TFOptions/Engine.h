@@ -26,7 +26,7 @@
 #include <queue>
 #include <mutex>
 #include <functional>
-#include <memory>
+//#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -122,9 +122,9 @@ private:
   //std::atomic<size_t> m_cntOptionEntryOperationQueueCount;
   std::mutex m_mutexOptionEntryOperationQueue;
   
-  boost::asio::io_service m_srvc;
+  boost::asio::io_context m_srvc;
   boost::thread_group m_threads;
-  std::unique_ptr<boost::asio::io_service::work> m_pWork;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_srvc_work;
   
   OptionEntry::fCalc_t m_fCalc;
   
