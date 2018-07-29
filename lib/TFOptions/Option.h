@@ -68,6 +68,8 @@ public:
   bool StopWatch( void );
 
   virtual void EmitValues( void );
+  
+  inline const Greek& LastGreek( void ) const { return m_greek; };  // may have thread sync issue
 
   ou::Delegate<const Greek&> OnGreek;
 
