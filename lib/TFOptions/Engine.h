@@ -25,11 +25,12 @@
 #include <map>
 #include <queue>
 #include <mutex>
+#include <chrono>
 #include <functional>
-//#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #include <TFTimeSeries/DatedDatum.h>
 
@@ -124,7 +125,8 @@ private:
   
   boost::asio::io_context m_srvc;
   boost::thread_group m_threads;
-  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_srvc_work;
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_srvcWork;
+  boost::asio::steady_timer m_timerScan;
   
   OptionEntry::fCalc_t m_fCalc;
   
@@ -145,8 +147,9 @@ private:
   
   dequeOptionEntryOperation_t m_dequeOptionEntryOperation;
   
+  void HandleTimerScan( const boost::system::error_code &ec );
   void ProcessOptionEntryOperationQueue();
-  void Scan();
+  void ScanOptionEntryQueue();
 
 };
 

@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+#include <boost/bind.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include "Engine.h"
@@ -94,25 +96,35 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 // ====================
 
 Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): 
-  m_InterestRateFeed( feed ), m_srvc_work(boost::asio::make_work_guard(m_srvc)) {
+  m_InterestRateFeed( feed ), 
+  m_srvcWork(boost::asio::make_work_guard(m_srvc)),
+  m_timerScan( m_srvc )
+{
   
   for ( std::size_t ix = 0; ix < 1; ix++ ) {
-    //m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
-    m_threads.create_thread( boost::bind( &boost::asio::io_service::run, &m_srvc ) ); // add handlers
+    m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
     
     m_fCalc = // also will need current date, expiry date
       [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreek){
     };
   }
+  
+  m_timerScan.expires_after( boost::asio::chrono::milliseconds(1000) );
+  m_timerScan.async_wait(
+    boost::bind( 
+      &Engine::HandleTimerScan, this, 
+      boost::asio::placeholders::error 
+      ) 
+    );
 }
 
 Engine::~Engine( ) {
-  m_srvc_work.reset();
+  m_srvcWork.reset();
   m_threads.join_all();
 }
 
 void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& fGreek ) {
-  if ( m_srvc_work.owns_work() ) {
+  if ( m_srvcWork.owns_work() ) {
     OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
@@ -120,10 +132,30 @@ void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_
 }
 
 void Engine::Delete( pOption_t pOption ) {
-  if ( m_srvc_work.owns_work() ) {
+  if ( m_srvcWork.owns_work() ) {
     OptionEntry oe( pOption );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
+  }
+}
+
+void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
+  if ( boost::asio::error::operation_aborted == ec ) {
+  }
+  else {
+    if ( m_srvcWork.owns_work() ) {
+      ScanOptionEntryQueue();
+      
+    // other ways:
+      //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
+      m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
+      m_timerScan.async_wait(
+        boost::bind( 
+          &Engine::HandleTimerScan, this, 
+          boost::asio::placeholders::error
+          )
+        );
+    }
   }
 }
 
@@ -159,7 +191,7 @@ void Engine::ProcessOptionEntryOperationQueue() {
 }
 
 // TODO: sort map by expiry?  // then Option::CalcRate is required less often
-void Engine::Scan() {
+void Engine::ScanOptionEntryQueue() {
 
   ProcessOptionEntryOperationQueue();
   
