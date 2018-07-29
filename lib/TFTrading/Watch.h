@@ -76,6 +76,7 @@ public:
 
   bool Watching( void ) const { return 0 != m_cntWatching; };
 
+  // TODO: these need spinlocks
   inline const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
   inline const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
 

@@ -69,7 +69,8 @@ public:
 
   virtual void EmitValues( void );
   
-  inline const Greek& LastGreek( void ) const { return m_greek; };  // may have thread sync issue
+  // TODO: needs spinlock
+  inline const Greek& LastGreek( void ) const { return m_greek; };
 
   ou::Delegate<const Greek&> OnGreek;
 
