@@ -186,8 +186,6 @@ private:
   typedef mapPortfolios_t::iterator mapPortfolios_iter_t;
   mapPortfolios_t m_mapSubPortfolios;
 
-  bool m_bCanUseDb;
-
   TableRowDef m_row;
 
   struct structPL {

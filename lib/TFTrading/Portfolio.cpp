@@ -32,8 +32,7 @@ namespace tf { // TradeFrame
 
 //Portfolio::Portfolio( // in memory
 //  const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
-//: m_row( idPortfolio, "", "", ePortfolioType, sCurrency, sDescription ),
-//  m_bCanUseDb( false )
+//: m_row( idPortfolio, "", "", ePortfolioType, sCurrency, sDescription )
 //{
 //}
 
@@ -41,16 +40,14 @@ namespace tf { // TradeFrame
 //  const idPortfolio_t& idPortfolio, 
 //  const idAccountOwner_t& idAccountOwner, currency_t sCurrency,
 //  const std::string& sDescription ) 
-//: m_row( idPortfolio, idAccountOwner, "", Master, sCurrency, sDescription ), 
-//  m_bCanUseDb( true )
+//: m_row( idPortfolio, idAccountOwner, "", Master, sCurrency, sDescription )
 //{
 //}
 
 Portfolio::Portfolio( // portfolio record
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
    EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
-: m_row( idPortfolio, idAccountOwner, idOwner, ePortfolioType, sCurrency, sDescription ),
-  m_bCanUseDb( true )
+: m_row( idPortfolio, idAccountOwner, idOwner, ePortfolioType, sCurrency, sDescription )
 {
   bool bOk = true;
   if ( "" == idPortfolio ) bOk = false;
@@ -62,7 +59,7 @@ Portfolio::Portfolio( // portfolio record
 }
 
 Portfolio::Portfolio( const TableRowDef& row ) 
-  : m_row( row ), m_bCanUseDb( true )
+  : m_row( row )
 {
   m_plCurrent.dblCommissionsPaid = m_row.dblCommissionsPaid;
   m_plCurrent.dblRealized = m_row.dblRealizedPL;
