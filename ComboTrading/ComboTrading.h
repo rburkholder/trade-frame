@@ -16,6 +16,7 @@
 
 #include <map>
 #include <vector>
+#include <memory>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -32,6 +33,8 @@
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
+
+#include <TFOptions/Engine.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -144,6 +147,8 @@ private:
   ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
   
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
+  
   Process m_process;  // single position
   
   vBundleTracking_t m_vBundleTracking; // one per underlying and related options to track
@@ -159,6 +164,7 @@ private:
   FrameMain* m_pFPPOE;
   FrameMain* m_pFCharts;
   FrameMain* m_pFInteractiveBrokers;
+  FrameMain* m_pFOC;
   
   ou::tf::PanelCharts* m_pPanelCharts;
   
@@ -181,6 +187,10 @@ private:
   ou::tf::DBOps m_db;
   std::string m_sWorkingDirectory;
   std::string m_sfnState;
+  
+  wxBoxSizer* m_sizerOC;
+  wxScrolledWindow* m_scrollOC;
+  wxBoxSizer* m_sizerScrollOC;
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
@@ -217,6 +227,8 @@ private:
   void BuildFrameCharts( void );
   void BuildFramePortfolioPosition( void );
   void BuildFrameInteractiveBrokers( void );
+  
+  void BuildFrameOptionCombo( void );
 
   void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
@@ -268,6 +280,7 @@ private:
     ar & *m_pFCharts;
     ar & *m_pFInteractiveBrokers;
     ar & *m_pFPP;
+    ar & *m_pFOC;
     ar & *m_pFPPOE;
     ar & m_splitPanels->GetSashPosition();
     ar & *m_pPanelIBAccountValues;
@@ -283,6 +296,9 @@ private:
     if ( 3 <= version ) {
       ar & *m_pFPP;
     }
+    if ( 4 <= version ) {
+      ar & *m_pFOC;
+    }
     if ( 2 <= version ) {
       ar & *m_pFPPOE;
     }
@@ -297,6 +313,6 @@ private:
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 3)
+BOOST_CLASS_VERSION(AppComboTrading, 4)
 DECLARE_APP(AppComboTrading)
 

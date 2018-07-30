@@ -25,11 +25,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define PANEL_PORTFOLIOPOSITION_STYLE wxTAB_TRAVERSAL
-#define PANEL_PORTFOLIOPOSITION_TITLE _("Panel Portfolio Position")
-#define PANEL_PORTFOLIOPOSITION_IDNAME ID_PANEL_PORTFOLIOPOSITION
-#define PANEL_PORTFOLIOPOSITION_SIZE wxSize(-1, -1)
-#define PANEL_PORTFOLIOPOSITION_POSITION wxDefaultPosition
+#define PANEL_OPTIONCOMBO_STYLE wxTAB_TRAVERSAL
+#define PANEL_OPTIONCOMBO_TITLE _("Panel Option Combo")
+#define PANEL_OPTIONCOMBO_IDNAME ID_PANEL_OPTIONCOMBO
+#define PANEL_OPTIONCOMBO_SIZE wxSize(-1, -1)
+#define PANEL_OPTIONCOMBO_POSITION wxDefaultPosition
 
 class PanelOptionCombo_impl;  // Forward declaration
 
@@ -58,18 +58,18 @@ public:
   PanelOptionCombo(void);
   PanelOptionCombo( 
     wxWindow* parent, 
-    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
-    long style =         PANEL_PORTFOLIOPOSITION_STYLE );
+    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME, 
+    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION, 
+    const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
+    long style =         PANEL_OPTIONCOMBO_STYLE );
   virtual ~PanelOptionCombo(void);
 
   bool Create( 
     wxWindow* parent, 
-    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
-    long style =         PANEL_PORTFOLIOPOSITION_STYLE );
+    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME, 
+    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION, 
+    const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
+    long style =         PANEL_OPTIONCOMBO_STYLE );
 
   void SetPortfolio( pPortfolio_t pPortfolio );
   pPortfolio_t& GetPortfolio( void );
@@ -88,7 +88,7 @@ protected:
 
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_PANEL_PORTFOLIOPOSITION, 
+  enum { ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONCOMBO, 
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
     ID_TxtDescription,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,

@@ -79,16 +79,16 @@ struct PanelOptionCombo_impl {
       (COL_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
       (COL_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
       (COL_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  70, ModelCellDouble ), \
+      (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  70, ModelCellDouble ), \
+      (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  70, ModelCellDouble ), \
       (COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble ), \
       ) \
     ) \
   /**/

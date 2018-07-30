@@ -36,6 +36,8 @@
 
 #include <TFBitsNPieces/IQFeedInstrumentBuild.h>
 
+#include <TFVuTrading/PanelOptionCombo.h>
+
 #include <wx/app.h>
 #include <wx/window.h>
 #include <wx/timer.h>
@@ -108,6 +110,7 @@ bool AppComboTrading::OnInit() {
   //SetExitOnFrameDelete( true );
   
   m_pFPP = nullptr;
+  m_pFOC = nullptr;
   
   m_pFPPOE = nullptr;
   m_pMPPOE = nullptr;
@@ -124,6 +127,8 @@ bool AppComboTrading::OnInit() {
   m_pFInteractiveBrokers = nullptr;
     
   m_pPanelCharts = nullptr;
+  
+  m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -227,6 +232,7 @@ bool AppComboTrading::OnInit() {
   BuildFrameCharts();
   BuildFrameInteractiveBrokers();
   BuildFramePortfolioPosition();
+  BuildFrameOptionCombo();
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
@@ -471,6 +477,8 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
         wxCAPTION|wxRESIZE_BORDER
     );
 
+  m_pFPP->SetAutoLayout( true );
+
   m_sizerPM = new wxBoxSizer(wxVERTICAL);
   m_pFPP->SetSizer(m_sizerPM);
 
@@ -488,8 +496,43 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   m_pFPP->SetPosition( point );
   m_pFPP->Show();
   
-  m_pFPP->SetAutoLayout( true );
   m_pFPP->Layout();
+
+}
+
+void AppComboTrading::BuildFrameOptionCombo( void ) {
+  
+  m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo", wxDefaultPosition, wxSize( 900, 500 ),  
+//    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+        wxCAPTION|wxRESIZE_BORDER
+    );
+
+  m_sizerOC = new wxBoxSizer(wxVERTICAL);
+  m_pFOC->SetSizer(m_sizerOC);
+
+  m_pFOC->SetAutoLayout( true );
+
+  //m_scrollOC is used for holding the PanelPortfolioPosition instances
+  m_scrollOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
+  m_sizerOC->Add(m_scrollOC, 1, wxGROW|wxALL, 4);
+  m_scrollOC->SetScrollbars(1, 1, 0, 0);
+
+  m_sizerScrollOC = new wxBoxSizer(wxVERTICAL);
+  m_scrollOC->SetSizer( m_sizerScrollOC );
+
+  wxPoint point = m_pFOC->GetPosition();
+  point.x += 700;
+  point.y += 200;
+  m_pFOC->SetPosition( point );
+  m_pFOC->Show();
+  
+  // might move this elsewhere, here as a test
+  auto* p = new ou::tf::PanelOptionCombo( m_scrollOC );
+  m_sizerScrollOC->Add( p, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  //m_sizerOC->Add( p, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_sizerScrollOC->Layout();
+  
+  m_pFOC->Layout();
 
 }
 
@@ -752,10 +795,12 @@ void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrumen
 }
 
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
-  namespace ph = std::placeholders;
+  
   //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_sizerScrollPM->Layout();
+  
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   std::cout 
     << "Adding Portfolio: " 
@@ -767,6 +812,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   m_pLastPPP->SetPortfolio( pPortfolio );
   //m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );  // deprecated
   //m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition1a ) );  // *** this needs to be fixed
+  namespace ph = std::placeholders;
   m_pLastPPP->m_fConstructPosition = std::bind( &AppComboTrading::ConstructEquityPosition1b, this, ph::_1, ph::_2, ph::_3 );
   //m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppComboTrading::HandleConstructPortfolio ) );
   m_pLastPPP->m_fConstructPortfolio = std::bind( &AppComboTrading::HandleConstructPortfolio, this, ph::_1, ph::_2, ph::_3 );
