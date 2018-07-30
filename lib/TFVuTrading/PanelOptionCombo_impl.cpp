@@ -344,17 +344,27 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
-  pInstrument_t pInstrument = m_ppp.m_fSelectInstrument();
-  if ( 0 != pInstrument.use_count() ) {
-    AddInstrumentToPosition( pInstrument );
+  if ( nullptr != m_ppp.m_fSelectInstrument ) {
+    pInstrument_t pInstrument = m_ppp.m_fSelectInstrument();
+    if ( 0 != pInstrument.use_count() ) {
+      AddInstrumentToPosition( pInstrument );
+    }
+  }
+  else {
+    std::cout << "PanelOptionCombo_impl::OnPositionPopUpAddPosition: no fSelectInstrument" << std::endl;
   }
 }
 
 // 
 void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
-  namespace ph = std::placeholders;
-  m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
-    std::bind( &PanelOptionCombo_impl::AddPosition, this, ph::_1 ) );
+  if ( nullptr != m_ppp.m_fConstructPosition) {
+    namespace ph = std::placeholders;
+    m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
+      std::bind( &PanelOptionCombo_impl::AddPosition, this, ph::_1 ) );
+  }
+  else {
+    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPosition" << std::endl;
+  }
 }
 
 void PanelOptionCombo_impl::AddPosition( pPosition_t pPosition ) {
