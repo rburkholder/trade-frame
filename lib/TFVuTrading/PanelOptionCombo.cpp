@@ -53,18 +53,6 @@ ou::tf::Portfolio::pPortfolio_t& PanelOptionCombo::GetPortfolio( void ) {
   return m_pimpl->m_pPortfolio; 
 }
 
-//void PanelOptionCombo::SetNameLookup( DelegateNameLookup_t function ) { 
-//  m_pimpl->m_DialogInstrumentSelect_DataExchange.lookup = function; 
-//}
-
-//void PanelOptionCombo::SetConstructPosition( DelegateConstructPosition_t function ) { 
-//  m_pimpl->m_delegateConstructPosition = function; 
-//}
-
-//void PanelOptionCombo::SetConstructPortfolio( DelegateConstructPortfolio_t function ) { 
-//  m_pimpl->m_delegateConstructPortfolio = function; 
-//}
-
 void PanelOptionCombo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pimpl->SetPortfolio( pPortfolio );
 }
