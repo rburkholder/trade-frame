@@ -49,7 +49,7 @@ OptionEntry::OptionEntry( const OptionEntry&& rhs ) {
 //  m_dblLastUnderlyingQuote = rhs.m_dblLastUnderlyingQuote;
 //  m_dblLastOptionQuote = rhs.m_dblLastOptionQuote;
   m_quoteLastUnderlying = rhs.m_quoteLastUnderlying;
-  m_quoteLastOption = rhs.m_quoteLastOption;
+//  m_quoteLastOption = rhs.m_quoteLastOption;
   m_bChanged = rhs.m_bChanged;
 }
 
@@ -61,13 +61,13 @@ OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreekResul
   cntInstances {} {
     pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
     pUnderlying->StartWatch();
-    pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
+    //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
     pOption->StartWatch();
 }
   
 OptionEntry::~OptionEntry() {
   pOption->StopWatch();
-  pOption->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
+  //pOption->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
   pUnderlying->StopWatch();
   pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
 }
@@ -79,12 +79,12 @@ void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
   }
 }
 
-void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) { // should this be kept?
-  if ( ! m_quoteLastOption.SameBidAsk( quote_ ) ) {
-    m_quoteLastOption = quote_;
-    m_bChanged = true;
-  }
-}
+//void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) { // should this be kept?
+//  if ( ! m_quoteLastOption.SameBidAsk( quote_ ) ) {
+//    m_quoteLastOption = quote_;
+//    m_bChanged = true;
+//  }
+//}
 
 void OptionEntry::Calc( const fCalc_t& fCalc ) {
   if ( m_bChanged ) {
@@ -97,14 +97,14 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 
 Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): 
   m_InterestRateFeed( feed ), 
-  m_srvcWork(boost::asio::make_work_guard(m_srvc)),
+  m_srvcWork(boost::asio::make_work_guard( m_srvc )),
   m_timerScan( m_srvc )
 {
   
   for ( std::size_t ix = 0; ix < 1; ix++ ) {
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
     
-    m_fCalc = // also will need current date, expiry date
+    m_fCalc =
       [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreek){
     };
   }
@@ -161,33 +161,35 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
 
 void Engine::ProcessOptionEntryOperationQueue() {
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
-  switch( oe.m_action ) {
-    case Action::AddOption: {
-      
-      mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
-      if ( m_mapOptionEntry.end() == iterOption ) {
-        iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type( oe.m_oe.OptionName(), std::move( oe.m_oe ) ) );
-      }
-      iterOption->second.Inc();
-    }
-      break;
-    case Action::RemoveOption: {
-      mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
-      if ( m_mapOptionEntry.end() == iterOption ) {
-        throw std::runtime_error( "Engine::Delete: can't find option" + oe.m_oe.OptionName() );
-      }
+  if ( !m_dequeOptionEntryOperation.empty() ) {
+    OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
+    switch( oe.m_action ) {
+      case Action::AddOption: {
 
-      OptionEntry::size_type cnt = iterOption->second.Dec();
-      if ( 0 == cnt ) {
-        m_mapOptionEntry.erase( iterOption );
+        mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+        if ( m_mapOptionEntry.end() == iterOption ) {
+          iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type( oe.m_oe.OptionName(), std::move( oe.m_oe ) ) );
+        }
+        iterOption->second.Inc();
       }
+        break;
+      case Action::RemoveOption: {
+        mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+        if ( m_mapOptionEntry.end() == iterOption ) {
+          throw std::runtime_error( "Engine::Delete: can't find option" + oe.m_oe.OptionName() );
+        }
+
+        OptionEntry::size_type cnt = iterOption->second.Dec();
+        if ( 0 == cnt ) {
+          m_mapOptionEntry.erase( iterOption );
+        }
+      }
+        break;
+      case Action::Unknown:
+        break;
     }
-      break;
-    case Action::Unknown:
-      break;
+    m_dequeOptionEntryOperation.pop_front();
   }
-  m_dequeOptionEntryOperation.pop_front();
 }
 
 // TODO: sort map by expiry?  // then Option::CalcRate is required less often

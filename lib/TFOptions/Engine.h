@@ -62,7 +62,7 @@ private:
 
   bool m_bChanged;  // needs to be atomic (set in one thread, reset in the other)
   ou::tf::Quote m_quoteLastUnderlying;
-  ou::tf::Quote m_quoteLastOption;  // is this actually needed?
+  //ou::tf::Quote m_quoteLastOption;  // is this actually needed?
   //double m_dblLastUnderlyingQuote;  // should these be atomic as well?  can doubles be atomic?
   //double m_dblLastOptionQuote;
   
@@ -86,7 +86,7 @@ public:
 private:
   
   void HandleUnderlyingQuote( const ou::tf::Quote& );
-  void HandleOptionQuote( const ou::tf::Quote& );
+  //void HandleOptionQuote( const ou::tf::Quote& );
 };
 
 class Engine {
@@ -106,7 +106,7 @@ public:
   typedef Option::pOption_t pOption_t;
   typedef OptionEntry::fGreekResultCallback_t fGreekResultCallback_t;
   
-  Engine( const ou::tf::LiborFromIQFeed& );
+  explicit Engine( const ou::tf::LiborFromIQFeed& );
   virtual ~Engine( );
   
   void Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& ); // reference counted
