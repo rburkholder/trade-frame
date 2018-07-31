@@ -329,7 +329,7 @@ private:
 
   typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
 
-  static const size_t m_nMillisecondsToSleep = 75;
+  static const size_t m_nMillisecondsToSleep;
 
   // used for containing parsed data and passing it on
   ou::BufferRepository<structTickDataPoint> m_reposTickDataPoint;
@@ -588,6 +588,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     }
   }
 }
+
+template <typename T> const size_t HistoryQuery<T>::m_nMillisecondsToSleep = 75;
 
 } // namespace iqfeed
 } // namespace tf
