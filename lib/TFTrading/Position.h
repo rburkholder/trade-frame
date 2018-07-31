@@ -259,7 +259,7 @@ protected:
 
   typedef SymbolBase::quote_t quote_t;
   typedef SymbolBase::trade_t trade_t;
-  typedef SymbolBase::greek_t greek_t;
+  //typedef SymbolBase::greek_t greek_t;
 
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
@@ -294,7 +294,7 @@ private:
 
   void HandleQuote( quote_t );
   void HandleTrade( trade_t );
-  void HandleGreek( greek_t );
+  //void HandleGreek( greek_t );
 
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 

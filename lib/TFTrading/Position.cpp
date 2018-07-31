@@ -85,9 +85,9 @@ void Position::Construction( void ) {
   if ( m_pDataProvider->ProvidesTrades() ) {
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
-  if ( m_pDataProvider->ProvidesGreeks() ) {
-    m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
-  }
+  //if ( m_pDataProvider->ProvidesGreeks() ) {
+  //  m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
+  //}
   m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
   m_bConnectedToDataProvider = true;
 }
@@ -128,9 +128,9 @@ void Position::DisconnectFromDataProvider( int ) {
   if ( m_pDataProvider->ProvidesTrades() ) {
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
-  if ( m_pDataProvider->ProvidesGreeks() ) {
-    m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
-  }
+  //if ( m_pDataProvider->ProvidesGreeks() ) {
+  //  m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
+  //}
   m_bConnectedToDataProvider = false;
 }
 
@@ -170,8 +170,8 @@ void Position::HandleTrade( trade_t trade ) {
   OnTrade( trade );
 }
 
-void Position::HandleGreek( greek_t greek ) {
-}
+//void Position::HandleGreek( greek_t greek ) {
+//}
 
 Order::pOrder_t Position::PlaceOrder( // market
   OrderType::enumOrderType eOrderType,
