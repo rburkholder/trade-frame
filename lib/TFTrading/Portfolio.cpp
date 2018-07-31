@@ -20,7 +20,7 @@
 // 2013/07/25
 // * position currency must match portfolio currency
 // * currency ratio between from sub-portfolio and portfolio needs to be maintained
-// * top level portfolio is always raio 1
+// * top level portfolio is always ratio 1
 // * first level of sub-portfolios can be alternate currency, and have non one ratio
 // * also portfolio type as 'multi-legged position'
 // * no further level sub-portfolios can have different currency
@@ -28,7 +28,6 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
 
 //Portfolio::Portfolio( // in memory
 //  const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
@@ -270,14 +269,13 @@ void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
 
 }
 
-//void Portfolio::EmitStats( std::stringstream& ss ) {
 std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {
   for ( Portfolio::mapPositions_t::const_iterator iter = portfolio.m_mapPositionsViaUserName.begin(); 
     portfolio.m_mapPositionsViaUserName.end() != iter; 
     ++iter ) {
       os << iter->second;
-//    iter->second->EmitStatus( ss );
   }
+  
   os << "Portfolio URPL=" << portfolio.m_plCurrent.dblUnRealized
     << ", RPL=" << portfolio.m_plCurrent.dblRealized 
     << ", Comm=" << portfolio.m_plCurrent.dblCommissionsPaid
@@ -285,7 +283,6 @@ std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {
     << ": Min=" << portfolio.m_plMin.dblNet
     << ", Net=" << portfolio.m_plCurrent.dblNet
     << ", Max=" << portfolio.m_plMax.dblNet
-    << std::endl
     ;
   return os;
 }

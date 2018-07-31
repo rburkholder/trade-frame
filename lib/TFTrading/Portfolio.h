@@ -135,7 +135,7 @@ public:
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, EPortfolioType ePortfolioType_, 
     currency_t eCurrency, const std::string& sDescription );
   Portfolio( const TableRowDef& row );
-  ~Portfolio(void);
+  virtual ~Portfolio(void);
 
   const idPortfolio_t& Id( void ) { return m_row.idPortfolio; };
 
@@ -149,7 +149,6 @@ public:
   void RemoveSubPortfolio( const idPortfolio_t& idPortfolio );
 //  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
 
-//  void EmitStats( std::stringstream& ss );
   void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid, double& dblTotal ) const {
     dblTotal  = ( dblUnRealized = m_plCurrent.dblUnRealized );
     dblTotal += ( dblRealized = m_plCurrent.dblRealized );

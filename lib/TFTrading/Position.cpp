@@ -85,9 +85,6 @@ void Position::Construction( void ) {
   if ( m_pDataProvider->ProvidesTrades() ) {
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
-  //if ( m_pDataProvider->ProvidesGreeks() ) {
-  //  m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
-  //}
   m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
   m_bConnectedToDataProvider = true;
 }
@@ -128,9 +125,6 @@ void Position::DisconnectFromDataProvider( int ) {
   if ( m_pDataProvider->ProvidesTrades() ) {
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
-  //if ( m_pDataProvider->ProvidesGreeks() ) {
-  //  m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
-  //}
   m_bConnectedToDataProvider = false;
 }
 
@@ -169,9 +163,6 @@ void Position::HandleQuote( quote_t quote ) {
 void Position::HandleTrade( trade_t trade ) {
   OnTrade( trade );
 }
-
-//void Position::HandleGreek( greek_t greek ) {
-//}
 
 Order::pOrder_t Position::PlaceOrder( // market
   OrderType::enumOrderType eOrderType,
@@ -488,7 +479,6 @@ void Position::HandleCommission( const Order& order ) {
   }
 }
 
-//void Position::EmitStatus( std::stringstream& ssStatus ) const {
 std::ostream& operator<<( std::ostream& os, const Position& position ) {
   os 
     << "Position " << position.m_pInstrument->GetInstrumentName() << ": "
@@ -497,7 +487,6 @@ std::ostream& operator<<( std::ostream& os, const Position& position ) {
     << ", RPL " << position.m_row.dblRealizedPL
     << ", Cmsn " << position.m_row.dblCommissionPaid
     << ", PL-C " << position.m_row.dblRealizedPL - position.m_row.dblCommissionPaid
-    << std::endl
     ;
   return os;
 }

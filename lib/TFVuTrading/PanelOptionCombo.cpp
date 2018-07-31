@@ -49,16 +49,16 @@ bool PanelOptionCombo::Create( wxWindow* parent, wxWindowID id, const wxPoint& p
     return true;
 }
 
-ou::tf::Portfolio::pPortfolio_t& PanelOptionCombo::GetPortfolio( void ) { 
-  return m_pimpl->m_pPortfolio; 
+ou::tf::PortfolioGreek::pPortfolioGreek_t& PanelOptionCombo::GetPortfolioGreek( void ) { 
+  return m_pimpl->m_pPortfolioGreek; 
 }
 
-void PanelOptionCombo::SetPortfolio( pPortfolio_t pPortfolio ) {
-  m_pimpl->SetPortfolio( pPortfolio );
+void PanelOptionCombo::SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek ) {
+  m_pimpl->SetPortfolioGreek( pPortfolioGreek );
 }
 
-void PanelOptionCombo::AddPosition( pPosition_t pPosition ) {
-  m_pimpl->AddPosition( pPosition );
+void PanelOptionCombo::AddPositionGreek( pPositionGreek_t pPositionGreek ) {
+  m_pimpl->AddPositionGreek( pPositionGreek );
 }
 
 void PanelOptionCombo::UpdateGui( void ) {

@@ -59,9 +59,11 @@ OBJECTFILES= \
 	${OBJECTDIR}/OrderManager.o \
 	${OBJECTDIR}/OrdersOutstanding.o \
 	${OBJECTDIR}/Portfolio.o \
+	${OBJECTDIR}/PortfolioGreek.o \
 	${OBJECTDIR}/PortfolioManager.o \
 	${OBJECTDIR}/Position.o \
 	${OBJECTDIR}/PositionCombo.o \
+	${OBJECTDIR}/PositionGreek.o \
 	${OBJECTDIR}/ProviderManager.o \
 	${OBJECTDIR}/RiskManager.o \
 	${OBJECTDIR}/Symbol.o \
@@ -216,6 +218,11 @@ ${OBJECTDIR}/Portfolio.o: Portfolio.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Portfolio.o Portfolio.cpp
 
+${OBJECTDIR}/PortfolioGreek.o: PortfolioGreek.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PortfolioGreek.o PortfolioGreek.cpp
+
 ${OBJECTDIR}/PortfolioManager.o: PortfolioManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -230,6 +237,11 @@ ${OBJECTDIR}/PositionCombo.o: PositionCombo.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PositionCombo.o PositionCombo.cpp
+
+${OBJECTDIR}/PositionGreek.o: PositionGreek.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PositionGreek.o PositionGreek.cpp
 
 ${OBJECTDIR}/ProviderManager.o: ProviderManager.cpp
 	${MKDIR} -p ${OBJECTDIR}

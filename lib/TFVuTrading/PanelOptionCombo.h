@@ -20,7 +20,7 @@
 #include <wx/panel.h>
 
 #include <TFTrading/Instrument.h>
-#include <TFTrading/Portfolio.h>
+#include <TFTrading/PortfolioGreek.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -39,21 +39,21 @@ public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
-  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::PortfolioGreek::idPortfolio_t idPortfolio_t;
+  typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
   
-  typedef ou::tf::Portfolio::idPosition_t idPosition_t;
-  typedef ou::tf::Portfolio::pPosition_t pPosition_t;
+  typedef ou::tf::PortfolioGreek::idPosition_t idPosition_t;
+  typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
   
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
   
-  typedef std::function<void(pPosition_t)> fAddPosition_t;
-  typedef std::function<void(pInstrument_t,pPortfolio_t,fAddPosition_t)> fConstructPosition_t;
-  typedef std::function<void(PanelOptionCombo&, const std::string&, const std::string&)> fConstructPortfolio_t;
+  typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
+  typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
+  typedef std::function<void(PanelOptionCombo&, const std::string&, const std::string&)> fConstructPortfolioGreek_t;
   
-  fAddPosition_t m_fAddPosition;
-  fConstructPosition_t m_fConstructPosition;
-  fConstructPortfolio_t m_fConstructPortfolio;
+  fAddPositionGreek_t m_fAddPosition;
+  fConstructPositionGreek_t m_fConstructPositionGreek;
+  fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
 
   PanelOptionCombo(void);
   PanelOptionCombo( 
@@ -71,14 +71,10 @@ public:
     const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
     long style =         PANEL_OPTIONCOMBO_STYLE );
 
-  void SetPortfolio( pPortfolio_t pPortfolio );
-  pPortfolio_t& GetPortfolio( void );
+  void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
+  pPortfolioGreek_t& GetPortfolioGreek( void );
 
-  //void SetNameLookup( DelegateNameLookup_t function );
-  //void SetConstructPosition( DelegateConstructPosition_t function );
-  //void SetConstructPortfolio( DelegateConstructPortfolio_t function );
-
-  void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
+  void AddPositionGreek( pPositionGreek_t pPositionGreek );
 
   void UpdateGui( void );
 

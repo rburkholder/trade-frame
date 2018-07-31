@@ -28,9 +28,11 @@
       <itemPath>OrderManager.h</itemPath>
       <itemPath>OrdersOutstanding.h</itemPath>
       <itemPath>Portfolio.h</itemPath>
+      <itemPath>PortfolioGreek.h</itemPath>
       <itemPath>PortfolioManager.h</itemPath>
       <itemPath>Position.h</itemPath>
       <itemPath>PositionCombo.h</itemPath>
+      <itemPath>PositionGreek.h</itemPath>
       <itemPath>ProviderInterface.h</itemPath>
       <itemPath>ProviderManager.h</itemPath>
       <itemPath>RiskManager.h</itemPath>
@@ -71,9 +73,11 @@
       <itemPath>OrderManager.cpp</itemPath>
       <itemPath>OrdersOutstanding.cpp</itemPath>
       <itemPath>Portfolio.cpp</itemPath>
+      <itemPath>PortfolioGreek.cpp</itemPath>
       <itemPath>PortfolioManager.cpp</itemPath>
       <itemPath>Position.cpp</itemPath>
       <itemPath>PositionCombo.cpp</itemPath>
+      <itemPath>PositionGreek.cpp</itemPath>
       <itemPath>ProviderManager.cpp</itemPath>
       <itemPath>RiskManager.cpp</itemPath>
       <itemPath>Symbol.cpp</itemPath>
@@ -211,6 +215,10 @@
       </item>
       <item path="Portfolio.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PortfolioGreek.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PortfolioGreek.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PortfolioManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PortfolioManager.h" ex="false" tool="3" flavor2="0">
@@ -222,6 +230,10 @@
       <item path="PositionCombo.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PositionCombo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PositionGreek.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PositionGreek.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProviderInterface.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -375,6 +387,10 @@
       </item>
       <item path="Portfolio.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PortfolioGreek.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PortfolioGreek.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PortfolioManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PortfolioManager.h" ex="false" tool="3" flavor2="0">
@@ -386,6 +402,10 @@
       <item path="PositionCombo.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PositionCombo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PositionGreek.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PositionGreek.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProviderInterface.h" ex="false" tool="3" flavor2="0">
       </item>

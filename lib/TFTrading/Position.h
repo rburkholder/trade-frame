@@ -171,7 +171,7 @@ public:
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
   Position( const TableRowDef& row );
   Position( void );
-  ~Position(void);
+  virtual ~Position(void);
 
   const std::string& Notes( void ) const { return m_row.sNotes; };
   void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
@@ -233,7 +233,7 @@ public:
   ou::Delegate<const ou::tf::Quote&> OnQuote;
   ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL
 
-  ou::Delegate<const Position&> OnPositionChanged;  // after order placement, order cancelled, order execution
+  ou::Delegate<const Position&> OnPositionChanged;  // after order placement, order canceled, order execution
 
   ou::Delegate<execution_delegate_t> OnExecutionRaw;
 
@@ -244,8 +244,6 @@ public:
   ou::Delegate<const PositionDelta_delegate_t&> OnExecution;   // < - used by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - used by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
-
-//  void EmitStatus( std::stringstream& ssStatus ) const;
 
   void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
@@ -259,8 +257,6 @@ protected:
 
   typedef SymbolBase::quote_t quote_t;
   typedef SymbolBase::trade_t trade_t;
-  //typedef SymbolBase::greek_t greek_t;
-
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
 
@@ -294,7 +290,6 @@ private:
 
   void HandleQuote( quote_t );
   void HandleTrade( trade_t );
-  //void HandleGreek( greek_t );
 
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 

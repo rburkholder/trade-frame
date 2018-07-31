@@ -61,11 +61,11 @@ struct PanelOptionCombo_impl {
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::Portfolio::pPosition_t pPosition_t;
+  typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
+  typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
 
   void UpdateGui( void );
-  void AddPosition( pPosition_t pPosition );
+  void AddPositionGreek( pPositionGreek_t pPositionGreek );
   void AddInstrumentToPosition( pInstrument_t pInstrument );
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
@@ -103,21 +103,21 @@ struct PanelOptionCombo_impl {
 
   class structPosition {
   public:
-    structPosition( pPosition_t pPosition, wxGrid& grid, int row )
-      : m_pPosition( pPosition ), m_grid( grid ), m_row( row ) {
+    structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int row )
+      : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_row( row ) {
         Init();
     }
     structPosition( const structPosition& rhs )
-      : m_pPosition( rhs.m_pPosition ), m_grid( rhs.m_grid ), m_row( rhs.m_row ) {
+      : m_pPositionGreek( rhs.m_pPositionGreek ), m_grid( rhs.m_grid ), m_row( rhs.m_row ) {
       Init();
     }
     ~structPosition( void ) {
-      m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
-      m_pPosition->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
-      m_pPosition->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
-      m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-      m_pPosition->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
-      m_pPosition->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      m_pPositionGreek->OnPositionChanged.Remove( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
+      m_pPositionGreek->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+      m_pPositionGreek->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+      m_pPositionGreek->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+      m_pPositionGreek->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPositionGreek->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
     }
     void UpdateGui( void ) {
       //m_pGrid->BeginBatch();
@@ -126,28 +126,28 @@ struct PanelOptionCombo_impl {
       //m_pGrid->Thaw();
       //m_pGrid->EndBatch();
     }
-    pPosition_t GetPosition( void ) { return m_pPosition; }
+    pPositionGreek_t GetPositionGreek( void ) { return m_pPositionGreek; }
     void SetPrecision( double dbl ) {
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
     }
   private:
     int m_row;
     wxGrid& m_grid;
-    pPosition_t m_pPosition;
+    pPositionGreek_t m_pPositionGreek;
     vModelCells_t m_vModelCells;
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
-      boost::fusion::at_c<COL_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
-      m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
-      m_pPosition->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
-      m_pPosition->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
-      m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-      m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
-      m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      boost::fusion::at_c<COL_Pos>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().sName );
+      m_pPositionGreek->OnPositionChanged.Add( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
+      m_pPositionGreek->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+      m_pPositionGreek->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+      m_pPositionGreek->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+      m_pPositionGreek->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPositionGreek->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
 
       // initialize row of values.
-      const Position::TableRowDef& row( m_pPosition->GetRow() );
+      const Position::TableRowDef& row( m_pPositionGreek->GetRow() );
       boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
       boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
       boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
@@ -159,19 +159,19 @@ struct PanelOptionCombo_impl {
     }
 
     void HandleOnPositionChanged( const Position& position ) {
-      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
-      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
-      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionActive );
-      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
-      boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
+      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionPending );
+      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSidePending ] );
+      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionActive );
+      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSideActive ] );
+      boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblConstructedValue );
     }
 
     void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
-      boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
+      boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblRealizedPL );
     }
 
     void HandleOnCommission( const Position::PositionDelta_delegate_t& tuple ) {
-      boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblCommissionPaid );
+      boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblCommissionPaid );
     }
 
 
@@ -186,6 +186,12 @@ struct PanelOptionCombo_impl {
     void HandleOnQuote( const ou::tf::Quote& quote ) {
       boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
+    }
+    
+    void HandleOnGreek( const ou::tf::Greek& greek ) {
+      boost::fusion::at_c<COL_ImpVol>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
+      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() );
+      boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() );
     }
   };  // structPosition
 
@@ -213,7 +219,7 @@ struct PanelOptionCombo_impl {
 
   PanelOptionCombo& m_ppp; // passed in on construction 
 
-  pPortfolio_t m_pPortfolio;
+  pPortfolioGreek_t m_pPortfolioGreek;
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
@@ -231,7 +237,7 @@ struct PanelOptionCombo_impl {
   DragDropInstrumentTarget m_ddDataInstrumentTarget;
 
   void CreateControls();
-  void SetPortfolio( pPortfolio_t pPortfolio );
+  void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
 
   void OnClose( wxCloseEvent& event );
 
@@ -252,8 +258,6 @@ struct PanelOptionCombo_impl {
   void HandleOnCommissionUpdate( const Portfolio& );
 
 };
-
-
 
 } // namespace tf
 } // namespace ou

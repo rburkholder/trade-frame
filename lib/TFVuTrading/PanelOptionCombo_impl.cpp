@@ -137,17 +137,17 @@ void PanelOptionCombo_impl::CreateControls() {
   m_ppp.Bind( wxEVT_CLOSE_WINDOW, &PanelOptionCombo_impl::OnClose, this );  // start close of windows and controls
 
   m_menuGridLabelPositionPopUp = new wxMenu;
-  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPosition, "Add Position" );
-  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
-  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
+  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPosition, "Add Greek Position" );
+  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Greek Portfolio" );
 
   m_menuGridCellPositionPopUp = new wxMenu;
-  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPosition, "Add Position" );
+  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPosition, "Add Greek Position" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddOrder, "Add Order" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuCancelOrders, "Cancel Orders" );
-  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePosition, "Close Position" );
-  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
-  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
+  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePosition, "Close Greek Position" );
+  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Greek Portfolio" );
   
   m_ddDataInstrumentTarget.m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
@@ -173,15 +173,15 @@ void PanelOptionCombo_impl::CreateControls() {
 
 }
 
-void PanelOptionCombo_impl::SetPortfolio( pPortfolio_t pPortfolio ) {
-  m_pPortfolio = pPortfolio;
-  m_lblIdPortfolio->SetLabelText( pPortfolio->GetRow().idPortfolio );
-  m_lblCurrency->SetLabelText( pPortfolio->GetRow().sCurrency );
-  m_txtDescription->SetValue( pPortfolio->GetRow().sDescription );
-  pPortfolio->OnUnRealizedPLUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnUnRealizedPLUpdate ) );
-  pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnExecutionUpdate ) );
-  pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnCommissionUpdate ) );
-  if ( ou::tf::Portfolio::Master == pPortfolio->GetRow().ePortfolioType ) {
+void PanelOptionCombo_impl::SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek ) {
+  m_pPortfolioGreek = pPortfolioGreek;
+  m_lblIdPortfolio->SetLabelText( m_pPortfolioGreek->GetRow().idPortfolio );
+  m_lblCurrency->SetLabelText( m_pPortfolioGreek->GetRow().sCurrency );
+  m_txtDescription->SetValue( m_pPortfolioGreek->GetRow().sDescription );
+  pPortfolioGreek->OnUnRealizedPLUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnUnRealizedPLUpdate ) );
+  pPortfolioGreek->OnExecutionUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnExecutionUpdate ) );
+  pPortfolioGreek->OnCommissionUpdate.Add( MakeDelegate( this, &PanelOptionCombo_impl::HandleOnCommissionUpdate ) );
+  if ( ou::tf::Portfolio::Master == pPortfolioGreek->GetRow().ePortfolioType ) {
     //m_gridPositions->Hide();
     //m_sizerMain->Detach( m_gridPositions );
     //m_sizerMain->Remove( m_gridPositions );
@@ -245,17 +245,17 @@ void PanelOptionCombo_impl::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpCancelOrders( wxCommandEvent& event ) {
-  m_vPositions[ m_nRowRightClick ].GetPosition()->CancelOrders();
+  m_vPositions[ m_nRowRightClick ].GetPositionGreek()->CancelOrders();
   std::cout << "cancel orders" << std::endl;
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpClosePosition( wxCommandEvent& event ) {
-  m_vPositions[ m_nRowRightClick ].GetPosition()->ClosePosition();
+  m_vPositions[ m_nRowRightClick ].GetPositionGreek()->ClosePosition();
   std::cout << "close position"  << std::endl;
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpAddPortfolio( wxCommandEvent& event ) {
-  std::cout << "add portfoio" << std::endl;
+  std::cout << "add portfolio" << std::endl;
   if ( !m_bDialogActive ) {
     m_bDialogActive = true;
     m_pdialogNewPortfolio = new ou::tf::DialogNewPortfolio( &m_ppp );
@@ -273,10 +273,10 @@ void PanelOptionCombo_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataEx
   m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
   m_pdialogNewPortfolio->SetDataExchange( 0 );
   if ( m_DialogNewPortfolio_DataExchange.bOk ) {
-    if ( nullptr != m_ppp.m_fConstructPortfolio ) {
+    if ( nullptr != m_ppp.m_fConstructPortfolioGreek ) {
       std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
       std::string sDescription( m_DialogNewPortfolio_DataExchange.sDescription );
-      m_ppp.m_fConstructPortfolio( m_ppp, sPortfolioId, sDescription );
+      m_ppp.m_fConstructPortfolioGreek( m_ppp, sPortfolioId, sDescription );
     }
   }
   m_pdialogNewPortfolio->Destroy();
@@ -290,7 +290,7 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
     // need to know for which position the order is meant
     ou::tf::OrderSide::enumOrderSide eOrderSide;
 //    ou::tf::OrderType::enumOrderType eOrderType;
-    pPosition_t pPosition( m_vPositions[ m_nRowRightClick ].GetPosition() );
+    pPositionGreek_t pPositionGreek( m_vPositions[ m_nRowRightClick ].GetPositionGreek() );
     bool bOk( true );
     bOk = m_nRowRightClick < m_vPositions.size();
     if ( bOk ) {
@@ -312,7 +312,7 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
     }
     if ( bOk ) {
       if ( "MKT" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
-        pPosition->PlaceOrder( OrderType::Market, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity );
+        pPositionGreek->PlaceOrder( OrderType::Market, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity );
       }
       else {
         if ( 0.0 >= m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 ) {
@@ -321,11 +321,11 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
         }
         else {
           if ( "LMT" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
-              pPosition->PlaceOrder( OrderType::Limit, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
+              pPositionGreek->PlaceOrder( OrderType::Limit, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
           }
           else {
             if ( "STP" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
-              pPosition->PlaceOrder( OrderType::Stop, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
+              pPositionGreek->PlaceOrder( OrderType::Stop, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
             }
             else {
               std::cout << "Unknown order type" << std::endl;
@@ -357,23 +357,23 @@ void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) 
 
 // 
 void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
-  if ( nullptr != m_ppp.m_fConstructPosition) {
+  if ( nullptr != m_ppp.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;
-    m_ppp.m_fConstructPosition( pInstrument, m_pPortfolio, 
-      std::bind( &PanelOptionCombo_impl::AddPosition, this, ph::_1 ) );
+    m_ppp.m_fConstructPositionGreek( pInstrument, m_pPortfolioGreek, 
+      std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
   }
   else {
-    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPosition" << std::endl;
+    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPositionGreek" << std::endl;
   }
 }
 
-void PanelOptionCombo_impl::AddPosition( pPosition_t pPosition ) {
+void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) {
 
   m_gridPositions->AppendRows( 1 );
 
   int row( m_vPositions.size() );
 
-  m_vPositions.push_back( structPosition( pPosition, *m_gridPositions, row ) );
+  m_vPositions.push_back( structPosition( pPositionGreek, *m_gridPositions, row ) );
 
   UpdateGui();
 }
@@ -386,7 +386,7 @@ void PanelOptionCombo_impl::UpdateGui( void ) {
   }
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPortfolioGreek->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
 
   m_vPortfolioValues[ 0 ].SetValue( dblUnRealized );
   if ( m_vPortfolioValues[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioValues[ 0 ].GetText() );
