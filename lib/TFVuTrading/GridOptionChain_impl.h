@@ -167,6 +167,7 @@ struct GridOptionChain_impl {
   void OnGridLeftClick( wxGridEvent& event );
   void OnGridRightClick( wxGridEvent& event );
   void OnMouseMotion( wxMouseEvent& event );
+  void OnGridCellBeginDrag( wxGridEvent& event );
   
   bool StartDragDrop( DragDropDataInstrument& );
   

@@ -58,6 +58,10 @@ void GridOptionChain_impl::CreateControls() {
   m_details.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
   m_details.Bind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
   
+  m_details.EnableDragCell( true );
+  
+  m_details.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
+  
   m_details.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
 
   m_details.EnableEditing( false );
@@ -133,6 +137,7 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
   // TODO: actually enable/disable watch?
 }
 
+// replace my the 'option engine'?
 void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
   // need extra validation here, crash when redrawing with active options
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
@@ -141,12 +146,13 @@ void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
         value.second.UpdateGui();
       }
     }
-    );
+  );
 }
 
 void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
   if ( event.Dragging() ) {
 
+    // 2018/08/02 obsolete?  replaced by LeftClick operations?
     if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
       mapOptionValueRow_t::iterator iter;
@@ -155,23 +161,23 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
         [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
       assert( m_mapOptionValueRow.end() != iter );
       
-      std::cout << "column: " << m_nColumn << std::endl;
+//      std::cout << "column: " << m_nColumn << std::endl;
 
-      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
-        // call drag and drop
-        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
-        wxDropSource dragSource( &m_details );
-        dragSource.SetData( dndCall );
-        wxDragResult result = dragSource.DoDragDrop( true );
-      }
+//      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+//        // call drag and drop
+//        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+//        wxDropSource dragSource( &m_details );
+//        dragSource.SetData( dndCall );
+//        wxDragResult result = dragSource.DoDragDrop( true );
+//      }
 
-      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
-        // put drag and drop
-        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
-        wxDropSource dragSource( &m_details );
-        dragSource.SetData( dndPut );
-        wxDragResult result = dragSource.DoDragDrop( true );
-      }
+//      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+//        // put drag and drop
+//        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+//        wxDropSource dragSource( &m_details );
+//        dragSource.SetData( dndPut );
+//        wxDragResult result = dragSource.DoDragDrop( true );
+//      }
     }
   }
 }
@@ -192,22 +198,68 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
         [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
       assert( m_mapOptionValueRow.end() != iter );
 
-      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
-        // call drag and drop
-        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
-        wxDropSource dragSource( &m_details );
-        dragSource.SetData( dndCall );
-        wxDragResult result = dragSource.DoDragDrop( true );
-      }
+      // 2018/08/02 obsolete?  replaced by LeftClick operations?
+//      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+//        // call drag and drop
+//        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
+//        wxDropSource dragSource( &m_details );
+//        dragSource.SetData( dndCall );
+//        wxDragResult result = dragSource.DoDragDrop( true );
+//      }
 
-      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
-        // put drag and drop
-        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
-        wxDropSource dragSource( &m_details );
-        dragSource.SetData( dndPut );
-        wxDragResult result = dragSource.DoDragDrop( true );
-      }
+//      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+//        // put drag and drop
+//        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
+//        wxDropSource dragSource( &m_details );
+//        dragSource.SetData( dndPut );
+//        wxDragResult result = dragSource.DoDragDrop( true );
+//      }
     }
+}
+
+void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
+  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
+  // column header is -1, first row is 0
+  // use to toggle monitoring
+  
+  bool bSkip( true );
+  
+  m_nRow = event.GetRow();
+  m_nColumn = event.GetCol();
+  
+  if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+    
+    mapOptionValueRow_t::iterator iterOptionValueRow;
+    iterOptionValueRow = std::find_if( 
+      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+      [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
+    assert( m_mapOptionValueRow.end() != iterOptionValueRow );
+    
+    if ( nullptr != m_details.m_fOnRowClicked ) {
+      
+      if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
+        GridOptionChain::OptionUpdateFunctions funcCall;
+        funcCall.sSymbolName = iterOptionValueRow->second.m_sCallName;
+        funcCall.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
+        funcCall.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
+        funcCall.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
+
+        GridOptionChain::OptionUpdateFunctions funcPut;
+        funcPut.sSymbolName = iterOptionValueRow->second.m_sPutName;
+        funcPut.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
+        funcPut.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
+        funcPut.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
+
+        iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
+
+        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
+      }
+      
+    }
+  
+  }
+
+  event.Skip( bSkip );
 }
 
 bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropDataInstrument& dddi ) {
@@ -237,8 +289,8 @@ bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropDataInstrument& dddi )
       return false; // bSkip
 }
 
-void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
-  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
+void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
+  std::cout << "Notebook Begin Drag: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
   
@@ -255,7 +307,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iterOptionValueRow );
     
-    if ( event.ShiftDown() && ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
+    if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // call drag and drop
       ou::tf::DragDropDataInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
         m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f );
@@ -264,7 +316,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       bSkip = StartDragDrop( dndCall );
     }
 
-    if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
+    if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // put drag and drop
       ou::tf::DragDropDataInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
         m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f );
@@ -273,28 +325,6 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       bSkip = StartDragDrop( dndPut );    
     }
 
-    if ( nullptr != m_details.m_fOnRowClicked ) {
-      
-      if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
-        GridOptionChain::OptionUpdateFunctions funcCall;
-        funcCall.sSymbolName = iterOptionValueRow->second.m_sCallName;
-        funcCall.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
-        funcCall.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
-        funcCall.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
-
-        GridOptionChain::OptionUpdateFunctions funcPut;
-        funcPut.sSymbolName = iterOptionValueRow->second.m_sPutName;
-        funcPut.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
-        funcPut.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
-        funcPut.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
-
-        iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
-
-        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
-      }
-      
-    }
-  
   }
 
   event.Skip( bSkip );
@@ -328,6 +358,8 @@ void GridOptionChain_impl::StopWatch() {
 void GridOptionChain_impl::DestroyControls() { 
 
   TimerDeactivate();  
+  
+  m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );
   
   m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
