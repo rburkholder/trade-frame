@@ -46,7 +46,7 @@ public:
   
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef std::function<void(pInstrument_t)> fOnInstrument_t;
-  fOnInstrument_t m_fOnInstrument;
+  fOnInstrument_t m_fOnInstrument;  // results of instrument drag, may or may not have contract
   
 protected:
 private:

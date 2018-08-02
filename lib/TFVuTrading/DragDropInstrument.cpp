@@ -116,7 +116,7 @@ DragDropDataInstrument::pInstrument_t DragDropDataInstrument::GetInstrument() {
 //  }
 }
 
-DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t DragDropDataInstrument::GetInstrumentBuildInitiate() {
+DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t& DragDropDataInstrument::GetInstrumentBuildInitiate() {
   return m_fOnInstrumentRetrieveInitiate;
 }
 

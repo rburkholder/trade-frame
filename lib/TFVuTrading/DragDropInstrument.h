@@ -59,7 +59,7 @@ public:
   
   const std::string& GetIQFeedSymbolName() const; // TODO: need to validate which Format flag was in use
   pInstrument_t GetInstrument();
-  fOnInstrumentRetrieveInitiate_t GetInstrumentBuildInitiate();
+  fOnInstrumentRetrieveInitiate_t& GetInstrumentBuildInitiate();
   
 protected:
 private:

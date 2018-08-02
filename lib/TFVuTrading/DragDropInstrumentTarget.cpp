@@ -56,9 +56,11 @@ wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult
     //}
   }
   if ( dddi->IsSupported( DragDropDataInstrument::DataFormatInstrumentFunction ) ) {
-      DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t fOnInstrumentRetrieveInitiate = dddi->GetInstrumentBuildInitiate();
+      DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t& fOnInstrumentRetrieveInitiate = dddi->GetInstrumentBuildInitiate();
       if ( nullptr != fOnInstrumentRetrieveInitiate ) {
-        fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){m_fOnInstrument(pInstrument);});
+        fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){
+          m_fOnInstrument(pInstrument);
+        });
       }
   }
   if ( dddi->IsSupported( DragDropDataInstrument::DataFormatInstrumentIQFeedSymbolName) ) {
