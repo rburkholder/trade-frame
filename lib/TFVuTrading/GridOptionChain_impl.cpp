@@ -20,8 +20,6 @@
 #include <wx/dnd.h>
 #include <wx/cursor.h>
 
-#include <TFVuTrading/DragDropInstrument.h>
-
 #include "GridOptionChain_impl.h"
 
 namespace ou { // One Unified
@@ -212,6 +210,33 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
     }
 }
 
+bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropDataInstrument& dddi ) {
+
+#if defined(__WXMSW__) 
+      wxCursor cursor( wxCURSOR_HAND );
+      wxDropSource dragSource( dndCall, &m_details, cursor, cursor, cursor );
+#elif defined(__WXGTK__)
+      // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
+      wxDropSource dragSource( &m_details );
+#else
+      assert(0);
+#endif
+      
+      dragSource.SetData( dddi );
+      //std::cout << "call drag start " << std::endl;
+      wxDragResult result = dragSource.DoDragDrop( true );
+      //std::cout << "call drag stop " << std::endl;
+      switch ( result ) {
+        case wxDragCopy:
+        case wxDragMove:
+          break;
+        default:
+          break;
+      }
+      //bSkip = false;
+      return false; // bSkip
+}
+
 void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
@@ -235,29 +260,8 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       ou::tf::DragDropDataInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
         m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f );
       } );
-
-#if defined(__WXMSW__) 
-      wxCursor cursor( wxCURSOR_HAND );
-      wxDropSource dragSource( dndCall, &m_details, cursor, cursor, cursor );
-#elif defined(__WXGTK__)
-      // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
-      wxDropSource dragSource( &m_details );
-#else
-      assert(0);
-#endif
       
-      dragSource.SetData( dndCall );
-      //std::cout << "call drag start " << std::endl;
-      wxDragResult result = dragSource.DoDragDrop( true );
-      //std::cout << "call drag stop " << std::endl;
-      switch ( result ) {
-        case wxDragCopy:
-        case wxDragMove:
-          break;
-        default:
-          break;
-      }
-      bSkip = false;
+      bSkip = StartDragDrop( dndCall );
     }
 
     if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
@@ -266,27 +270,8 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
         m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f );
       } );
 
-#if defined(__WXMSW__) 
-      wxCursor cursor( wxCURSOR_HAND );
-      wxDropSource dragSource( dndPut, &m_details, cursor, cursor, cursor );
-#elif defined(__WXGTK__)
-      // needs icon: docs.wxwidgets.org/3.0/classwx_drop_source.html
-      wxDropSource dragSource( &m_details );
-#else
-      assert(0);
-#endif
-
-      dragSource.SetData( dndPut );
-      wxDragResult result = dragSource.DoDragDrop( true );
-      switch ( result ) {
-        case wxDragCopy:
-        case wxDragMove:
-          break;
-        default:
-          break;
-      }
-      bSkip = false;
-    }    
+      bSkip = StartDragDrop( dndPut );    
+    }
 
     if ( nullptr != m_details.m_fOnRowClicked ) {
       

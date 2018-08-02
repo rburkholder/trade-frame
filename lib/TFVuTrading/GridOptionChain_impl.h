@@ -33,6 +33,8 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
+#include <TFVuTrading/DragDropInstrument.h>
+
 #include "GridOptionChain.h"
 
 namespace ou { // One Unified
@@ -165,6 +167,8 @@ struct GridOptionChain_impl {
   void OnGridLeftClick( wxGridEvent& event );
   void OnGridRightClick( wxGridEvent& event );
   void OnMouseMotion( wxMouseEvent& event );
+  
+  bool StartDragDrop( DragDropDataInstrument& );
   
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );
