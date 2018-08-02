@@ -37,6 +37,7 @@
 #include <TFBitsNPieces/IQFeedInstrumentBuild.h>
 
 #include <TFVuTrading/PanelOptionCombo.h>
+#include <TFVuTrading/DragDropInstrument.h>
 
 #include <wx/app.h>
 #include <wx/window.h>
@@ -379,10 +380,9 @@ void AppComboTrading::BuildFrameCharts( void ) {
     
   // build the callback for when PanelCharts/GridOptionChain_impl needs to build a full instrument 
   // for result of drag and drop operations
-  typedef std::function<void(pInstrument_t)> fOnInstrumentRetrieveComplete_t;
   m_pPanelCharts->m_fBuildOptionInstrument =
     // first lambda builds an instrument given IQFeed option name and parameters
-    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, fOnInstrumentRetrieveComplete_t f){
+    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::DragDropDataInstrument::fOnInstrumentRetrieveComplete_t f){
       ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) );
       std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pInstrumentUnderlying->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
       pInstrument_t pInstrumentOption( ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() ) );
