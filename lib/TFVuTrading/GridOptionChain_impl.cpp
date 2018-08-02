@@ -224,17 +224,16 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   
   if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
     
-    mapOptionValueRow_t::iterator iter;
-    iter = std::find_if( 
+    mapOptionValueRow_t::iterator iterOptionValueRow;
+    iterOptionValueRow = std::find_if( 
       m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
-    assert( m_mapOptionValueRow.end() != iter );
+    assert( m_mapOptionValueRow.end() != iterOptionValueRow );
     
     if ( event.ShiftDown() && ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // call drag and drop
-      //ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
-      ou::tf::DragDropDataInstrument dndCall( [this,iter]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iter->second.m_sCallName, iter->first, f );
+      ou::tf::DragDropDataInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f );
       } );
 
 #if defined(__WXMSW__) 
@@ -263,9 +262,8 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
     if ( event.ShiftDown() && ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // put drag and drop
-      //ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
-      ou::tf::DragDropDataInstrument dndPut( [this,iter]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iter->second.m_sPutName, iter->first, f );
+      ou::tf::DragDropDataInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f );
       } );
 
 #if defined(__WXMSW__) 
@@ -294,20 +292,20 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       
       if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
         GridOptionChain::OptionUpdateFunctions funcCall;
-        funcCall.sSymbolName = iter->second.m_sCallName;
-        funcCall.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallQuote );
-        funcCall.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallTrade );
-        funcCall.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdateCallGreeks );
+        funcCall.sSymbolName = iterOptionValueRow->second.m_sCallName;
+        funcCall.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
+        funcCall.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
+        funcCall.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
 
         GridOptionChain::OptionUpdateFunctions funcPut;
-        funcPut.sSymbolName = iter->second.m_sPutName;
-        funcPut.fQuote = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutQuote );
-        funcPut.fTrade = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutTrade );
-        funcPut.fGreek = fastdelegate::MakeDelegate( &iter->second, &OptionValueRow::UpdatePutGreeks );
+        funcPut.sSymbolName = iterOptionValueRow->second.m_sPutName;
+        funcPut.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
+        funcPut.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
+        funcPut.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
 
-        iter->second.m_bSelected = !iter->second.m_bSelected;
+        iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
 
-        m_details.m_fOnRowClicked( iter->first, iter->second.m_bSelected, funcCall, funcPut );
+        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
       }
       
     }
