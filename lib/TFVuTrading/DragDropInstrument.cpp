@@ -44,8 +44,8 @@ DragDropDataInstrument::DragDropDataInstrument(pInstrument_t pInstrument )
 {
 }
 
-DragDropDataInstrument::DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t fOnInstrumentRetrieveInitiate ) 
-: m_DataFormat( DataFormatInstrumentFunction ), m_fOnInstrumentRetrieveInitiate( fOnInstrumentRetrieveInitiate )
+DragDropDataInstrument::DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t&& fOnInstrumentRetrieveInitiate ) 
+: m_DataFormat( DataFormatInstrumentFunction ), m_fOnInstrumentRetrieveInitiate( std::move( fOnInstrumentRetrieveInitiate ) )
 {
 }
 
@@ -57,7 +57,17 @@ DragDropDataInstrument::DragDropDataInstrument( )
 DragDropDataInstrument::~DragDropDataInstrument( ) {
 }
 
+size_t DragDropDataInstrument::GetFormatCount(Direction dir) const {
+  if ( Get == dir ) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
 void DragDropDataInstrument::GetAllFormats(wxDataFormat *formats, Direction dir) const {
+  // when messing with this, update GetFormatCount()
   if ( Get == dir ) {
 //    formats[ 0 ] = DataFormatInstrumentIQFeedSymbolName;
 //    formats[ 1 ] = DataFormatInstrumentClass;
@@ -120,15 +130,6 @@ DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t& DragDropDataInstrument:
   return m_fOnInstrumentRetrieveInitiate;
 }
 
-size_t DragDropDataInstrument::GetFormatCount(Direction dir) const {
-  if ( Get == dir ) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-}
-
 wxDataFormat DragDropDataInstrument::GetPreferredFormat(Direction dir) const {
 //  if ( Get == dir ) {
     return DataFormatInstrumentFunction;
@@ -143,16 +144,19 @@ wxDataFormat DragDropDataInstrument::GetPreferredFormat(Direction dir) const {
 bool DragDropDataInstrument::SetData(const wxDataFormat &format, size_t len, const void *buf) {
   bool bCopied( false );
   if ( DataFormatInstrumentIQFeedSymbolName == format ) {
+    m_DataFormat = format;
     m_sIQFeedSymbolName = std::move( std::string( reinterpret_cast<const char*>( buf ) ) );
     bCopied = true;
   }
   if ( DataFormatInstrumentClass == format ) {
     assert( sizeof( pInstrument_t ) == len );
+    m_DataFormat = format;
     m_pInstrument = *reinterpret_cast<const pInstrument_t*>( buf );
     bCopied = true;
   }
   if ( DataFormatInstrumentFunction == format ) {
     assert( sizeof( fOnInstrumentRetrieveInitiate_ptr ) == len );
+    m_DataFormat = format;
     fOnInstrumentRetrieveInitiate_ptr p = *reinterpret_cast<const fOnInstrumentRetrieveInitiate_ptr*>( buf );
     m_fOnInstrumentRetrieveInitiate = *p;
     bCopied = true;

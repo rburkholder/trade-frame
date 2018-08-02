@@ -174,7 +174,6 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblCommissionPaid );
     }
 
-
     void HandleOnUnRealizedPL( const Position::PositionDelta_delegate_t& tuple ) {
       boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
     }
@@ -234,12 +233,8 @@ struct PanelOptionCombo_impl {
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
   
-  DragDropInstrumentTarget m_ddDataInstrumentTarget;
-
   void CreateControls();
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
-
-  void OnClose( wxCloseEvent& event );
 
   void OnRightClickGridLabel( wxGridEvent& event );
   void OnRightClickGridCell( wxGridEvent& event );
@@ -256,6 +251,8 @@ struct PanelOptionCombo_impl {
   void HandleOnUnRealizedPLUpdate( const Portfolio& );
   void HandleOnExecutionUpdate( const Portfolio& );
   void HandleOnCommissionUpdate( const Portfolio& );
+  
+  void HandleWindowDestroy( wxWindowDestroyEvent& event );
 
 };
 

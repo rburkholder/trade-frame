@@ -26,8 +26,7 @@ namespace tf { // TradeFrame
 
 PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition& ppp )
 : 
-  m_ppp( ppp ),
-  m_ddDataInstrumentTarget( new DragDropDataInstrument( DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t() ) )
+  m_ppp( ppp )
 {
 
   m_bDialogActive = false;
@@ -134,8 +133,6 @@ void PanelPortfolioPosition_impl::CreateControls() {
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
 
-  m_ppp.Bind( wxEVT_CLOSE_WINDOW, &PanelPortfolioPosition_impl::OnClose, this );  // start close of windows and controls
-
   m_menuGridLabelPositionPopUp = new wxMenu;
   m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPosition, "Add Position" );
   m_menuGridLabelPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
@@ -149,7 +146,9 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
   
-  m_ddDataInstrumentTarget.m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
+  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropDataInstrument( DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t() ) );
+  
+  pddDataInstrumentTarget->m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
     AddInstrumentToPosition( pInstrument );
   };
@@ -158,7 +157,7 @@ void PanelPortfolioPosition_impl::CreateControls() {
   //    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl;
   //  });
   //}
-  m_ppp.SetDropTarget( &m_ddDataInstrumentTarget );
+  m_ppp.SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
   
   m_ppp.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_ppp.Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelPortfolioPosition_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
@@ -168,9 +167,43 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpClosePosition, this, m_ppp.ID_MenuClosePosition, -1, 0 );
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddPortfolio, this, m_ppp.ID_MenuAddPortfolio, -1, 0 );
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpClosePortfolio, this, m_ppp.ID_MenuClosePortfolio, -1, 0 );
+  
+  m_ppp.Bind( wxEVT_DESTROY, &PanelPortfolioPosition_impl::HandleWindowDestroy, this );
 
   m_vPortfolioValues.resize( 4 );
 
+}
+
+void PanelPortfolioPosition_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
+  
+  m_ppp.SetDropTarget( nullptr );
+  
+  if ( nullptr != m_menuGridLabelPositionPopUp ) {
+    delete m_menuGridLabelPositionPopUp;
+    m_menuGridLabelPositionPopUp = nullptr;
+  }
+
+  if ( nullptr != m_menuGridCellPositionPopUp ) {
+    delete m_menuGridCellPositionPopUp;
+    m_menuGridCellPositionPopUp = nullptr;
+  }
+
+  // Exit Steps: #2 -> FrameMain::OnClose
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a 
+  //event.Skip();  // auto followed by Destroy();
+
+  m_ppp.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
+  m_ppp.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelPortfolioPosition_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddPosition, this, m_ppp.ID_MenuAddPosition, -1, 0 );
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddOrder, this, m_ppp.ID_MenuAddOrder, -1, 0 );
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpCancelOrders, this, m_ppp.ID_MenuCancelOrders, -1, 0 );
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpClosePosition, this, m_ppp.ID_MenuClosePosition, -1, 0 );
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddPortfolio, this, m_ppp.ID_MenuAddPortfolio, -1, 0 );
+  m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpClosePortfolio, this, m_ppp.ID_MenuClosePortfolio, -1, 0 );
+  
+  m_ppp.Unbind( wxEVT_DESTROY, &PanelPortfolioPosition_impl::HandleWindowDestroy, this );
 }
 
 void PanelPortfolioPosition_impl::SetPortfolio( pPortfolio_t pPortfolio ) {
@@ -406,26 +439,6 @@ void PanelPortfolioPosition_impl::UpdateGui( void ) {
     boost::lexical_cast<std::string>( m_dblMaxPL )
     );
     */
-}
-
-void PanelPortfolioPosition_impl::OnClose( wxCloseEvent& event ) {
-
-  // todo:  don't close if dialog is still open.
-
-  if ( 0 != m_menuGridLabelPositionPopUp ) {
-    delete m_menuGridLabelPositionPopUp;
-  }
-
-  if ( 0 != m_menuGridCellPositionPopUp ) {
-    delete m_menuGridCellPositionPopUp;
-  }
-
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  event.Skip();  // auto followed by Destroy();
-
 }
 
 } // namespace tf

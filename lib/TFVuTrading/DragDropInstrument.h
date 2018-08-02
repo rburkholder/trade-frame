@@ -46,7 +46,7 @@ public:
   DragDropDataInstrument( );
   explicit DragDropDataInstrument( const std::string& sIQFeedSymbolName );
   explicit DragDropDataInstrument( pInstrument_t );
-  explicit DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t );
+  explicit DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t&& );
   virtual ~DragDropDataInstrument( );
   
   virtual void GetAllFormats (wxDataFormat *formats, Direction dir=Get) const;

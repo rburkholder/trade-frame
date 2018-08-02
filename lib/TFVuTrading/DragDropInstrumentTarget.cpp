@@ -28,10 +28,11 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // need to allow DragDropInstrumentTarget delete 'data'
-DragDropInstrumentTarget::DragDropInstrumentTarget( DragDropDataInstrument *data ): wxDropTarget( data ) {
+DragDropInstrumentTarget::DragDropInstrumentTarget( DragDropDataInstrument* data ): wxDropTarget( data ) {
 }
 
 DragDropInstrumentTarget::~DragDropInstrumentTarget( ) {
+  wxDropTarget::SetDataObject( nullptr );
 }
 
 bool DragDropInstrumentTarget::GetData() {
