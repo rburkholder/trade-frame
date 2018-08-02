@@ -127,7 +127,12 @@ private:
   void HandleItemActivated( wxTreeEvent& event );
   void HandleItemDeleted( wxTreeEvent& event );
   
+  void HandleBeginDrag( wxTreeEvent& event );
+  void HandleEndDrag( wxTreeEvent& event );
+  
   void RemoveSelectOld( void );
+  
+  void HandleWindowDestroy( wxWindowDestroyEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

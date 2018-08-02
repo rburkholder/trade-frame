@@ -69,11 +69,25 @@ void TreeOps::CreateControls() {
   wxTreeCtrl::Bind( wxEVT_TREE_SEL_CHANGING, &TreeOps::HandleSelectionChanging, this );
   wxTreeCtrl::Bind( wxEVT_TREE_ITEM_ACTIVATED, &TreeOps::HandleItemActivated, this );
   wxTreeCtrl::Bind( wxEVT_TREE_DELETE_ITEM, &TreeOps::HandleItemDeleted, this );
+  wxTreeCtrl::Bind( wxEVT_TREE_BEGIN_DRAG, &TreeOps::HandleBeginDrag, this );
+  wxTreeCtrl::Bind( wxEVT_TREE_END_DRAG, &TreeOps::HandleEndDrag, this );
+  wxTreeCtrl::Bind( wxEVT_DESTROY, &TreeOps::HandleWindowDestroy, this );
   
   //wxTreeItemId id = wxTreeCtrl::AddRoot( "Root" );  // can be renamed
   //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
   //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
   
+}
+
+void TreeOps::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
+  wxTreeCtrl::Unbind( wxEVT_TREE_ITEM_MENU, &TreeOps::HandleContextMenu, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_SEL_CHANGED, &TreeOps::HandleSelectionChanged, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_SEL_CHANGING, &TreeOps::HandleSelectionChanging, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_ITEM_ACTIVATED, &TreeOps::HandleItemActivated, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_DELETE_ITEM, &TreeOps::HandleItemDeleted, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_BEGIN_DRAG, &TreeOps::HandleBeginDrag, this );
+  wxTreeCtrl::Unbind( wxEVT_TREE_END_DRAG, &TreeOps::HandleEndDrag, this );
+  wxTreeCtrl::Unbind( wxEVT_DESTROY, &TreeOps::HandleWindowDestroy, this );
 }
 
 void TreeOps::Add( const wxTreeItemId& id, pTreeItemBase_t pTreeItemBase ) {
@@ -141,6 +155,14 @@ void TreeOps::HandleItemActivated( wxTreeEvent& event ) {
 
 void TreeOps::HandleItemDeleted( wxTreeEvent& event ) {
   //std::cout << "HandleItemDeleted" << std::endl;
+}
+
+void TreeOps::HandleBeginDrag( wxTreeEvent& event ) {
+  std::cout << "HandleBeginDrag" << std::endl;
+}
+
+void TreeOps::HandleEndDrag( wxTreeEvent& event ) {
+  std::cout << "HandleEndDrag" << std::endl;
 }
 
 wxBitmap TreeOps::GetBitmapResource( const wxString& name ) {
