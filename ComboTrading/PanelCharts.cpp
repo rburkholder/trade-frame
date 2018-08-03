@@ -37,7 +37,6 @@
 //#include <wx/list.h>
 
 #include "PanelCharts.h"
-#include "TreeItemGroup.h"
 
 // 2016/10/16 todo:
 //   check serialization of instruments
@@ -630,22 +629,6 @@ void PanelCharts::SaveSeries( const std::string& sPrefix ) {
       InstrumentEntry& entry( vt.second );
       entry.m_pWatch->EmitValues();
     });
-}
-
-void PanelCharts::Save( boost::archive::text_oarchive& oa) {
-  //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
-  //oa & *p;
-  oa & m_splitter->GetSashPosition();
-  m_pTreeOps->Save<TreeItemRoot>( oa );
-}
-
-void PanelCharts::Load( boost::archive::text_iarchive& ia) {
-  //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
-  //ia & *p;
-  int pos;
-  ia & pos;
-  m_splitter->SetSashPosition( pos );
-  m_pTreeOps->Load<TreeItemRoot>( ia );
 }
 
 wxBitmap PanelCharts::GetBitmapResource( const wxString& name ) {

@@ -42,6 +42,7 @@
 #include <TFVuTrading/GridOptionChain.h>
 
 #include "TreeItem.h"
+#include "TreeItemGroup.h"
 #include "InstrumentActions.h"
 
 
@@ -55,6 +56,7 @@ namespace tf { // TradeFrame
 #define PANEL_CHARTS_POSITION wxDefaultPosition
 
 class PanelCharts: public wxPanel {
+  friend class boost::serialization::access;
 public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
@@ -100,9 +102,6 @@ public:
   void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );
   
   void SaveSeries( const std::string& sPrefix );
-  
-  void Save( boost::archive::text_oarchive& oa);
-  void Load( boost::archive::text_iarchive& ia);
   
 protected: 
   
@@ -278,8 +277,30 @@ private:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
+  
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
+    //oa & *p;
+    ar & m_splitter->GetSashPosition();
+    m_pTreeOps->Save<TreeItemRoot>( ar );
+  }
 
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //ia & *p;
+    int pos;
+    ar & pos;
+    m_splitter->SetSashPosition( pos );
+    m_pTreeOps->Load<TreeItemRoot>( ar );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
+
+
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelCharts, 1)

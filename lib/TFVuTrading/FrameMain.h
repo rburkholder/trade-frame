@@ -72,7 +72,6 @@ public:
     const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE, 
     long style = SYMBOL_FRAMEGENERIC_STYLE );
 
-
   int AddFileMenuItem( const wxString& );
   
   wxMenu* AddDynamicMenu( const std::string& root, const vpItems_t& vItems );

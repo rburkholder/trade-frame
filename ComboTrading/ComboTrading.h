@@ -285,6 +285,7 @@ private:
     ar & m_splitPanels->GetSashPosition();
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
+    ar & *m_pPanelCharts;
   }
 
   template<typename Archive>
@@ -307,12 +308,15 @@ private:
     m_splitPanels->SetSashPosition( x );
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
+    if ( 5 <= version ) {
+      ar & *m_pPanelCharts;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 4)
+BOOST_CLASS_VERSION(AppComboTrading, 5)
 DECLARE_APP(AppComboTrading)
 

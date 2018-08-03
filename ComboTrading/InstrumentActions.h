@@ -22,6 +22,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/signals2.hpp>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/treebase.h>
 #include <wx/string.h>
 

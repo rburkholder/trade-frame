@@ -1212,7 +1212,6 @@ void AppComboTrading::HandleSave( wxCommandEvent& event ) {
   std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  m_pPanelCharts->Save( oa );
   std::cout << "  done." << std::endl;
 }
 
@@ -1222,7 +1221,6 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
     std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
     boost::archive::text_iarchive ia(ifs);
     ia & * this;
-    m_pPanelCharts->Load( ia );
     std::cout << "  done." << std::endl;
   }
   catch(...) {
