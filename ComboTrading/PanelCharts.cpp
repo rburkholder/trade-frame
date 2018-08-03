@@ -142,7 +142,7 @@ void PanelCharts::CreateControls() {
   m_panelSplitterRightPanel = new wxPanel( m_splitter );
 
   m_splitter->SplitVertically( m_pTreeOps, m_panelSplitterRightPanel, 0 );
-  sizerMain->Add( m_splitter, 1, wxGROW|wxALL, 5 );
+  sizerMain->Add( m_splitter, 1, wxGROW|wxALL, 2 );
 
   // sizer for right side of m_splitter
   m_sizerRight = new wxBoxSizer( wxVERTICAL );
@@ -151,11 +151,9 @@ void PanelCharts::CreateControls() {
   // initialize the tree
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
-  // close doesn't seem to be hit with panels
-  //Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
   
-  // maybe use std::bind now
+  // maybe use std::bind now (sometimes std::bind doesn't work with boost aspects)
   namespace args = boost::phoenix::arg_names;
   
   m_connGetInstrumentActions = m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
@@ -600,15 +598,6 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
   return values;
 }
 
-void PanelCharts::OnClose( wxCloseEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  
-  event.Skip();  // auto followed by Destroy();
-}
-
 void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
   
   //m_pInstrumentActions.reset();
@@ -627,7 +616,6 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
 
     m_connChanging.disconnect();
 
-    //Unbind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );
     Unbind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
 
   }
