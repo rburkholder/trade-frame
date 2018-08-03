@@ -796,26 +796,22 @@ void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrumen
 
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   
-  //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollPM->Layout();
   
-  //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   std::cout 
     << "Adding Portfolio: " 
     << "T=" << pPortfolio->GetRow().ePortfolioType 
     << ",O=" << pPortfolio->GetRow().idOwner 
     << ",ID=" << pPortfolio->GetRow().idPortfolio
     << std::endl;
-  //this->m_pMPPOE->
-  m_pLastPPP->SetPortfolio( pPortfolio );
-  //m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );  // deprecated
-  //m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition1a ) );  // *** this needs to be fixed
+
   namespace ph = std::placeholders;
-  m_pLastPPP->m_fConstructPosition = std::bind( &AppComboTrading::ConstructEquityPosition1b, this, ph::_1, ph::_2, ph::_3 );
-  //m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppComboTrading::HandleConstructPortfolio ) );
+
+  m_pLastPPP->SetPortfolio( pPortfolio );
   m_pLastPPP->m_fConstructPortfolio = std::bind( &AppComboTrading::HandleConstructPortfolio, this, ph::_1, ph::_2, ph::_3 );
+  m_pLastPPP->m_fConstructPosition = std::bind( &AppComboTrading::ConstructEquityPosition1b, this, ph::_1, ph::_2, ph::_3 );  // something to be fixed here?
   m_pLastPPP->m_fSelectInstrument =
     [this]()->pInstrument_t {
       std::unique_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
@@ -823,8 +819,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
       namespace ph = std::placeholders;
       pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
       pBuild->fBuildInstrument = std::bind( &AppComboTrading::BuildInstrument, this, ph::_1 );
-      // TODO: turn signal into function
-      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) );
+      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) ); // TODO: turn signal into function
       return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" );
     };
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );

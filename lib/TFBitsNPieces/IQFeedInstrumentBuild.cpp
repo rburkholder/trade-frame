@@ -155,7 +155,7 @@ void IQFeedInstrumentBuild::HandleComposeIQFeedFullName( DialogPickSymbol::DataE
 void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
   //std::cout << "IQFeedInstrumentBuild::InstrumentUpdated ..." << std::endl;
   if ( 0 == m_pDialogPickSymbol ) {
-    std::cout << "IQFeedInstrumentBuild::InstrumentUpdated error:  not expecting instrument" << std::endl;
+    std::cout << "IQFeedInstrumentBuild::InstrumentUpdated warning:  no DialogPickSymbol to accept instrument" << std::endl;
   } 
   else {
     if ( pInstrument.get() == m_pDialogPickSymbolCreatedInstrument.get() ) {
@@ -171,7 +171,7 @@ void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
       
     }
     else {
-      std::cout << "IQFeedInstrumentBuild::InstrumentUpdated error:  not expected instrument" << std::endl;
+      std::cout << "IQFeedInstrumentBuild::InstrumentUpdated warning:  not expected instrument" << std::endl;
     }
   }
 }
