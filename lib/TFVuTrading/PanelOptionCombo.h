@@ -48,12 +48,12 @@ public:
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
   
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
-  typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
   typedef std::function<void(PanelOptionCombo&, const std::string&, const std::string&)> fConstructPortfolioGreek_t;
+  typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
   
-  fAddPositionGreek_t m_fAddPosition;
-  fConstructPositionGreek_t m_fConstructPositionGreek;
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
+  fConstructPositionGreek_t m_fConstructPositionGreek;
+  fAddPositionGreek_t m_fAddPosition;
 
   PanelOptionCombo(void);
   PanelOptionCombo( 
