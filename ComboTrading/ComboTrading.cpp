@@ -225,8 +225,6 @@ bool AppComboTrading::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppComboTrading::OnClose, this );  // start close of windows and controls
 
-  Bind( EVENT_IB_INSTRUMENT, &AppComboTrading::HandleIBInstrument, this );
-  
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
   
@@ -355,23 +353,29 @@ void AppComboTrading::BuildFrameCharts( void ) {
   psizer->Add(m_pPanelCharts, 1, wxGROW|wxALL, 2);
 
   namespace args = boost::phoenix::placeholders;
+  
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRetrieveOptionList.connect( boost::phoenix::bind( &AppComboTrading::ProvideOptionList, this, args::arg1, args::arg2 ) );
-  //signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
   
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
+  
   m_pPanelCharts->m_fSelectInstrument =
     [this](const ou::tf::Allowed::enumInstrument selector, const wxString& sUnderlying)->pInstrument_t {
-      std::unique_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
+      std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pPanelCharts ) );
+      
       namespace ph = std::placeholders;
       pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
-      pBuild->fBuildInstrument = std::bind( &AppComboTrading::BuildInstrument, this, ph::_1 );
-      // TODO: turn signal into function
-      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) );
+      
+      pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
+        BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
+          pBuild->InstrumentUpdated( pInstrument ); // this is the call back into the gui when contract id has been populated
+        });
+      };
       return pBuild->HandleNewInstrumentRequest( selector, sUnderlying );
     };
+    
   m_pPanelCharts->m_fBuildInstrumentFromIqfeed = 
     [this](const std::string& sName)->pInstrument_t {
         ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sName ) );
@@ -443,13 +447,17 @@ AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::strin
 //   map of instruments prior to contract
 //   map of instruments with contract
 //   map of instruments from instrument manager
-void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values ) {
+
+void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values, fInstrumentFromIB_t callback ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
-    signalInstrumentFromIB( values.pInstrument );
+    callback( values.pInstrument );
   }
   else {  // build
-    if ( 0 != m_listIQFeedSymbols.Size() ) {
+    if ( 0 == m_listIQFeedSymbols.Size() ) {
+      std::cout << "AppComboTrading::BuildInstrument: m_listIQFeedSymbols not loaded" << std::endl;
+    }
+    else {
       typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
       typedef list_t::trd_t trd_t;
       const trd_t& trd( m_listIQFeedSymbols.GetTrd( values.sIQF ) );
@@ -463,9 +471,9 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
           values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, values.day );  // for ib future/fo overrides not supplied by trd
           break;
         default:
-          throw std::runtime_error( "can't process the BuildInstrument default" );
+          throw std::runtime_error( "ppComboTrading::BuildInstrument: can't process the default" );
       }
-      GetContractFor( values.sIB, values.pInstrument );
+      GetContractFor( values.sIB, values.pInstrument, callback );
     }
   }
 }
@@ -715,21 +723,16 @@ void AppComboTrading::TestSymbols( void ) {
   }
 }
 
-void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument ) {
+void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument, fInstrumentFromIB_t callback ) {
   if ( m_bIBConnected ) {
-    //m_tws->RequestContractDetails( 
-    //  sBaseName, pInstrument,
-    //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
-    //m_tws->RequestContractDetails( 
-    //  sBaseName, pInstrument,
-    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);}, 
-    //  [this](void){HandleIBContractDetailsDone();}
-    //  );
-    namespace args = std::placeholders;
     m_tws->RequestContractDetails( 
       sBaseName, pInstrument,
-      std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
-      std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
+      [this, callback]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+        CallAfter([callback, pInstrument](){ // put into GUI thread
+          callback( pInstrument );
+        });
+      }, 
+      [](){}
       );
   }
   else {
@@ -741,26 +744,6 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
 // foption expire: 13:30 est
 // option expire:  16:00 est
 // holiday expire: 13:00 est 2015/11/27 - weekly option
-
-void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
-  // contract id should be in the instrument when we get here?
-  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
-  // this is in another thread, and should be handled in a thread safe manner.
-}
-
-void AppComboTrading::HandleIBContractDetailsDone( void ) {
-}
-
-// gui thread via HandleIBContractDetails
-void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
-  // what happens if there is an error, with no return of a contract?
-  // Errors will be caught in the submission phase, but need some notification/time-out if no contract received
-  // by stint of being here, instrument is new (iqfeed constructed then ib completed), and therefore registerable 
-  // comment the following temporarily while testing flow through
-  //ConstructEquityPosition1( event.GetInstrument() );
-//  LoadUpBundle( event.GetInstrument() );   // will need to queue this up as another event
-  signalInstrumentFromIB( event.GetInstrument() );
-}
 
 void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
@@ -814,13 +797,16 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   m_pLastPPP->m_fConstructPosition = std::bind( &AppComboTrading::ConstructEquityPosition1b, this, ph::_1, ph::_2, ph::_3 );  // something to be fixed here?
   m_pLastPPP->m_fSelectInstrument =
     [this]()->pInstrument_t {
-      std::unique_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
+      std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
-      namespace ph = std::placeholders;
+      
       pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
-      pBuild->fBuildInstrument = std::bind( &AppComboTrading::BuildInstrument, this, ph::_1 );
-      signalInstrumentFromIB.connect( std::bind( &ou::tf::IQFeedInstrumentBuild::InstrumentUpdated, pBuild.get(), ph::_1 ) ); // TODO: turn signal into function
-      return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" );
+      pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
+        BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
+          pBuild->InstrumentUpdated( pInstrument ); // this is the call back into the gui when contract id has been populated
+        });
+      };
+      return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" ); // the dialog pops up in this call
     };
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
 }
@@ -1165,12 +1151,15 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
     //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);}, 
     //  [this](void){HandleIBContractDetailsDone();}
     //  );
-    namespace args = std::placeholders;
-    m_tws->RequestContractDetails( 
-      contract,
-      std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
-      std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
-      );
+    
+    
+    // 2018/08/03 needs to be redone if it is to be used.
+    //namespace args = std::placeholders;
+    //m_tws->RequestContractDetails( 
+    //  contract,
+    //  std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
+    //  std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
+    //  );
   }
   else {
     std::cout << "AppComboTrading::HandlePanelSymbolText: IB Not Connected" << std::endl;

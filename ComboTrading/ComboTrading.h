@@ -17,6 +17,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -42,8 +43,6 @@
 #include <TFVuTrading/PanelPortfolioPosition.h>
 #include <TFVuTrading/GridIBPositionDetails.h>
 #include <TFVuTrading/GridIBAccountValues.h>
-
-#include <TFInteractiveBrokers/EventIBInstrument.h>
 
 #include "Process.h"
 #include "BundleTracking.h"
@@ -74,17 +73,13 @@ private:
   typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
   typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
-  //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  //typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
   typedef ou::tf::PanelPortfolioPosition::fAddPosition_t fAddPostion_t;
   
   typedef std::vector<BundleTracking> vBundleTracking_t;
   
-  typedef boost::signals2::signal<void (pInstrument_t)> signalInstrumentFromIB_t;
-  typedef signalInstrumentFromIB_t::slot_type slotInstrumentFromIB_t;
-  signalInstrumentFromIB_t signalInstrumentFromIB;
+  typedef std::function<void(pInstrument_t)> fInstrumentFromIB_t;
 
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
@@ -197,14 +192,14 @@ private:
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
-  void BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& );
+  void BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument&, fInstrumentFromIB_t );
   void RegisterInstrument( pInstrument_t );
   pInstrument_t LoadInstrument( const std::string& );
   
   void HandleSave( wxCommandEvent& event );
   void HandleLoad( wxCommandEvent& event );
 
-  void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument );
+  void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument, fInstrumentFromIB_t );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );
   
   void ConstructEquityPosition1a( const std::string& sName, pPortfolio_t, fAddPostion_t);  // step 1
@@ -234,9 +229,6 @@ private:
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
   void HandlePanelFocusPropogate( unsigned int ix );
 
-  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& pInstrument );
-  void HandleIBContractDetailsDone( void );
-
   void OnData1Connecting( int );
   void OnData1Connected( int );
   void OnData1Disconnecting( int );
@@ -259,8 +251,6 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
 
   void HandleGuiRefresh( wxTimerEvent& event );
-
-  void HandleIBInstrument( EventIBInstrument& event );
 
   void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
   void HandlePositionLoad( pPosition_t& pPosition );
