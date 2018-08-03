@@ -280,16 +280,13 @@ private:
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
-    //oa & *p;
     ar & m_splitter->GetSashPosition();
     m_pTreeOps->Save<TreeItemRoot>( ar );
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    //ia & *p;
-    int pos;
+    int pos;  // for SashPosition
     ar & pos;
     m_splitter->SetSashPosition( pos );
     m_pTreeOps->Load<TreeItemRoot>( ar );
@@ -297,8 +294,6 @@ private:
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
-
-
 
 } // namespace tf
 } // namespace ou
