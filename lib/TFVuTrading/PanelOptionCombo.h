@@ -14,6 +14,14 @@
 
 #pragma once
 
+/* reason for existence:
+ *   non-registered instruments as they come and go - actually, all will be registered 
+ *     -> need to validate in registry prior to creating another instrument
+ *   contract id is optional as data comes from IQFeed
+ *   no affect on database of positions - positions are transitory
+ *   ability to add and delete with destroying database integrity
+ */
+
 #include <memory>
 #include <functional>
 
