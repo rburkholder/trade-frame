@@ -25,6 +25,9 @@
 #include <memory>
 #include <functional>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/panel.h>
 
 #include <TFTrading/Instrument.h>
@@ -42,6 +45,7 @@ namespace tf { // TradeFrame
 class PanelOptionCombo_impl;  // Forward declaration
 
 class PanelOptionCombo: public wxPanel {
+  friend class boost::serialization::access;
   friend class PanelOptionCombo_impl;
 public:
   
@@ -55,13 +59,13 @@ public:
   
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
   
+  typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
-  typedef std::function<void(PanelOptionCombo&, const std::string&, const std::string&)> fConstructPortfolioGreek_t;
   typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
   
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
   fConstructPositionGreek_t m_fConstructPositionGreek;
-  fAddPositionGreek_t m_fAddPosition;
+  fAddPositionGreek_t m_fAddPositionGreek;  // does not appeared to be used
 
   PanelOptionCombo(void);
   PanelOptionCombo( 
@@ -107,7 +111,21 @@ private:
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pimpl.get();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pimpl.get();
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo, 1)

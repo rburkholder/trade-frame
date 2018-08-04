@@ -41,7 +41,8 @@ Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider
   Construction();
 }
 
-Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
+Position::Position( 
+  pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
@@ -51,8 +52,8 @@ Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider
   Construction();
 }
 
-Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
-  const TableRowDef& row ) 
+Position::Position( 
+  pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row ) 
 : m_row( row ),
   m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 

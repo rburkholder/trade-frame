@@ -32,6 +32,9 @@
 #include <boost/fusion/algorithm/transformation/filter.hpp>
 #include <boost/fusion/include/filter.hpp>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 #include <wx/grid.h>
@@ -116,8 +119,9 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
       m_pPositionGreek->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
       m_pPositionGreek->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-      m_pPositionGreek->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPositionGreek->OnQuote.Remove( MakeDelegate( this, &structPosition::HandleOnQuote ) );
       m_pPositionGreek->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      m_pPositionGreek->OnGreek.Remove( MakeDelegate( this, &structPosition::HandleOnGreek ) );
     }
     void UpdateGui( void ) {
       //m_pGrid->BeginBatch();
@@ -127,7 +131,7 @@ struct PanelOptionCombo_impl {
       //m_pGrid->EndBatch();
     }
     pPositionGreek_t GetPositionGreek( void ) { return m_pPositionGreek; }
-    void SetPrecision( double dbl ) {
+    void SetPrecision( double dbl ) {  // why a call with double, and not being used?
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
     }
   private:
@@ -142,8 +146,9 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
       m_pPositionGreek->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
       m_pPositionGreek->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-      m_pPositionGreek->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPositionGreek->OnQuote.Add( MakeDelegate( this, &structPosition::HandleOnQuote ) );
       m_pPositionGreek->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      m_pPositionGreek->OnGreek.Add( MakeDelegate( this, &structPosition::HandleOnGreek ) );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
 
       // initialize row of values.
@@ -222,7 +227,7 @@ struct PanelOptionCombo_impl {
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
-  vPortfolioValues_t m_vPortfolioValues;
+  vPortfolioValues_t m_vPortfolioValues;  // holds dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal
 
   //ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
   //ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
@@ -254,7 +259,25 @@ struct PanelOptionCombo_impl {
   
   void HandleWindowDestroy( wxWindowDestroyEvent& event );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //ar & m_splitter->GetSashPosition();
+    std::for_each( m_vPositions.begin(), m_vPositions.end(), [](vPositions_t::value_type& vt){
+      //vt.GetPositionGreek()->GetRow();
+    } );
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //int pos;  // for SashPosition
+    //ar & pos;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl, 1)

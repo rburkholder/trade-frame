@@ -68,6 +68,9 @@ private:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
+  
+  typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
+  typedef ou::tf::PositionGreek::pPositionGreek_t pPositionGreek_t;
 
   typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
   typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
@@ -93,17 +96,19 @@ private:
     //DelegateAddPosition_t function;
   } m_EquityPositionCallbackInfo;
 
-  struct structPortfolio {
-    ou::tf::PanelPortfolioPosition* pPPP;
-    structPortfolio( void ): pPPP( 0 ) {};
-    structPortfolio( ou::tf::PanelPortfolioPosition* pPPP_ ): pPPP( pPPP_ ) {}
+  template<typename T> 
+  struct structAutoNull {
+    T* pT;
+    structAutoNull(): pT( nullptr ) {}
+    structAutoNull( T* pT_ ): pT( pT_ ) {}
+    ~structAutoNull() { pT = nullptr; }
   };
-
-  typedef std::map<std::string,structPortfolio> mapPortfolios_t;
-
-  // maybe serialize these settings?
-  //bool m_bData1Connected;  // available in FrameWork01
-  //bool m_bExecConnected;  // available in FrameWork01
+  
+  typedef structAutoNull<ou::tf::PanelPortfolioPosition> structPortfolioTrading;
+  typedef structAutoNull<ou::tf::PanelOptionCombo> structPortfolioSandbox;
+  
+  typedef std::map<std::string,structPortfolioTrading> mapPortfoliosTrading_t;
+  typedef std::map<std::string,structPortfolioSandbox> mapPortfoliosSandbox_t;
 
   std::string m_sDbName;
   
@@ -150,7 +155,9 @@ private:
 
   ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
   pPortfolio_t m_pPortfolioMaster;
-  mapPortfolios_t m_mapPortfolios;
+  
+  mapPortfoliosTrading_t m_mapPortfoliosTrading;
+  mapPortfoliosSandbox_t m_mapPortfoliosSandbox;
 
   ou::tf::PanelPortfolioPosition* m_pLastPPP;  // helps getting new positions to correct window
 

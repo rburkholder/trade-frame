@@ -29,15 +29,17 @@ PositionGreek::PositionGreek( pOption_t pOption )
 : Position( pOption->GetInstrument(), pProvider_t(), pOption->GetProvider() ), // supply empty execution provider for now
   m_pOption( pOption )
 {
+  // NOTE:  may need to construct with a 'row'
+  Position::Set( pOption->GetInstrument()->GetInstrumentName() );
   Construction();
 }
 
 PositionGreek::~PositionGreek( ) {
-  m_pOption->OnGreek.Add( MakeDelegate( this, &PositionGreek::HandleGreek ) );
+  m_pOption->OnGreek.Remove( MakeDelegate( this, &PositionGreek::HandleGreek ) );
 }
 
 void PositionGreek::Construction() {
-  m_pOption->OnGreek.Remove( MakeDelegate( this, &PositionGreek::HandleGreek ) );
+  m_pOption->OnGreek.Add( MakeDelegate( this, &PositionGreek::HandleGreek ) );
 }
 
 void PositionGreek::HandleGreek( greek_t greek ) {

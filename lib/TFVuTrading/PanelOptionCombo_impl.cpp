@@ -388,7 +388,7 @@ void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) 
   }
 }
 
-// 
+// need the underlying to be provided somewhere
 void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
   if ( nullptr != m_ppp.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;

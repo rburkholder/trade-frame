@@ -52,7 +52,7 @@ public:
   typedef std::function<void(pInstrument_t,pPortfolio_t,fAddPosition_t)> fConstructPosition_t;
   typedef std::function<void(PanelPortfolioPosition&, const std::string&, const std::string&)> fConstructPortfolio_t;
   
-  fAddPosition_t m_fAddPosition;
+  fAddPosition_t m_fAddPosition;  // does not appeared to be used
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
 

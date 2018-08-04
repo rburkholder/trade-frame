@@ -521,7 +521,7 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
 
 void AppComboTrading::BuildFrameOptionCombo( void ) {
   
-  m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo", wxDefaultPosition, wxSize( 900, 500 ),  
+  m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo Sandbox", wxDefaultPosition, wxSize( 900, 500 ),  
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
@@ -544,13 +544,68 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   point.y += 200;
   m_pFOC->SetPosition( point );
   m_pFOC->Show();
-  
-  // might move this elsewhere, here as a test
-  auto* p = new ou::tf::PanelOptionCombo( m_scrollOC );
-  m_sizerScrollOC->Add( p, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
-  //m_sizerOC->Add( p, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+
+  auto* pPOC = new ou::tf::PanelOptionCombo( m_scrollOC );  // start with one empty portfolio
+  m_sizerScrollOC->Add( pPOC, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollOC->Layout();
-  
+
+  pPOC->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
+    if ( sPortfolioId.empty() ) {
+      std::cout << "portfolio id is required" << std::endl;
+    }
+    else {
+      mapPortfoliosSandbox_t::iterator iter = m_mapPortfoliosSandbox.find( sPortfolioId );
+      if ( m_mapPortfoliosSandbox.end() == iter ) {
+        pPortfolioGreek_t pPortfolioGreek( new ou::tf::PortfolioGreek(
+          sPortfolioId, ou::tf::PortfolioGreek::idAccountOwner_t( "none" ), idPortfolio_t( "self" ), 
+          ou::tf::Portfolio::EPortfolioType::Standard, "USD", sDescription 
+        ) );
+        poc.SetPortfolioGreek( pPortfolioGreek );
+        
+        m_mapPortfoliosSandbox.insert( mapPortfoliosSandbox_t::value_type( pPortfolioGreek->Id(), structPortfolioSandbox( &poc ) ) );
+      }
+      else {
+        std::cout << "portfolio id " << sPortfolioId << " already exists" << std::endl;
+      }
+    }
+  };
+  // 2018/08/03 TO FIX: will have issues with this, as it accepts options only.  at some point will want underlying for the delta of 1.
+  // also will want to connect this option up with the engine for updated greek calculations
+  // also will need the underlying for those calculations
+  pPOC->m_fConstructPositionGreek = [this](pInstrument_t pInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+    if ( im.Exists( pInstrument ) ) {
+      std::cout << "### verify the code at m_fConstructPositionGreek as instrument exists: " << pInstrument->GetInstrumentName() << " ###" << std::endl;
+    }
+    else {
+      im.Register( pInstrument );
+    }
+    
+    ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+    pPositionGreek_t pPositionGreek( new ou::tf::PositionGreek( pOption ) );
+    pPortfolioGreek->AddPosition( pInstrument->GetInstrumentName(), pPositionGreek );
+    if ( nullptr != f ) 
+      f( pPositionGreek );
+  };
+  pPOC->m_fSelectInstrument = [this]()->pInstrument_t {
+      namespace ph = std::placeholders;
+      std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
+      pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
+      pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 ); 
+      pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
+        BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
+          pBuild->InstrumentUpdated( pInstrument ); // this is the call back into the gui when contract id has been populated
+        });
+      };
+      return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" ); // the dialog pops up in this call
+    };
+  pPOC->m_fAddPositionGreek = [](pPositionGreek_t){
+    std::cout << "#### really used? ####" << std::endl;
+  };
+
+  assert( nullptr != pPOC->m_fConstructPortfolioGreek );
+  pPOC->m_fConstructPortfolioGreek( *pPOC, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
+
   m_pFOC->Layout();
 
 }
@@ -821,7 +876,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
       };
       return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" ); // the dialog pops up in this call
     };
-  m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
+  m_mapPortfoliosTrading.insert( mapPortfoliosTrading_t::value_type( pPortfolio->Id(), structPortfolioTrading( m_pLastPPP ) ) );
 }
 
 void AppComboTrading::HandlePositionLoad( pPosition_t& pPosition ) {
@@ -829,8 +884,8 @@ void AppComboTrading::HandlePositionLoad( pPosition_t& pPosition ) {
 }
 
 void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
-  for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
-    iter->second.pPPP->UpdateGui();
+  for ( mapPortfoliosTrading_t::iterator iter = m_mapPortfoliosTrading.begin(); m_mapPortfoliosTrading.end() != iter; ++iter ) {
+    iter->second.pT->UpdateGui();
   }
 
   if ( m_CalcIV.Invoke() ) {
@@ -999,7 +1054,7 @@ void AppComboTrading::ConstructEquityPosition2( pInstrument_t& pInstrument ) {
 void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& ppp, const std::string& sPortfolioId, const std::string& sDescription ) {
   // check if portfolio exists
   if ( sPortfolioId.empty() ) {
-    std::cout << "no portfolio id supplied " << std::endl;
+    std::cout << "no portfolio id supplied" << std::endl;
   }
   else {
     if ( ou::tf::PortfolioManager::Instance().PortfolioExists( sPortfolioId ) ) {

@@ -247,6 +247,7 @@ public:
 
   void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
+  void Set( const std::string& sName ) { m_row.sName = sName; }
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
