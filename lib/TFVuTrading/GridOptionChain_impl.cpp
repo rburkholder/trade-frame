@@ -290,7 +290,7 @@ bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropDataInstrument& dddi )
 }
 
 void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
-  std::cout << "Notebook Begin Drag: " << event.GetRow() << std::endl;
+  //std::cout << "Notebook Begin Drag: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
   

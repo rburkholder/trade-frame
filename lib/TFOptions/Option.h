@@ -33,6 +33,8 @@ public:
   typedef boost::shared_ptr<Option> pOption_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  
+  typedef std::function<void(const Greek&)> fCallbackWithGreek_t;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
@@ -64,8 +66,8 @@ public:
 
   ou::tf::Greeks* Greeks( void ) { return &m_greeks; };
 
-  void StartWatch( void );
-  bool StopWatch( void );
+  virtual bool StartWatch( void );
+  virtual bool StopWatch( void );
 
   virtual void EmitValues( void );
   

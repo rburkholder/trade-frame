@@ -203,7 +203,7 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQ
             }
           }
         }
-        else { // no option or foption
+        else { // no option or foption, so process options turned on in the chains lists
           if ( 0 != entry.m_mapSelectedChainOptions.size() ) {
             ou::tf::option::binomial::structInput input;
             input.S = entry.m_pWatch->LastQuote().Midpoint();
@@ -285,9 +285,13 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
       }
       else {
         if ( 2 < entry.m_pWatch.use_count() ) {
-          std::cout << "PanelCharts::HandleMenuItemDelete use_count:" << iterIdItem->second << "," << entry.m_pWatch.use_count() << std::endl;
+          std::cout << "PanelCharts::HandleMenuItemDelete use_count: not ready for removal:" << iterIdItem->second << "," << entry.m_pWatch.use_count() << std::endl;
         }
         else {
+          if ( entry.m_bAddedToEngine ) {
+            m_fCalcOptionGreek_Remove( boost::dynamic_pointer_cast<ou::tf::option::Option>( entry.m_pWatch ) ); // any error result?
+            entry.m_bAddedToEngine = false;
+          }
           entry.m_cntMenuDependents--;
           if ( 0 == entry.m_cntMenuDependents ) {
             m_mapInstrumentEntry.erase( iterIdInstrument );
@@ -307,7 +311,7 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   }
   else {
     
-    RemoveRightDetail();
+    RemoveRightDetail();  // remove old content to build new content
 
     m_ChartDataView.Clear();
     mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
@@ -330,39 +334,7 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
 }
 
 void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
-  
-  struct OptionList {
-    
-    typedef std::map<boost::gregorian::date,int> mapDate_t;
-    
-    OptionList(): cnt(0) {}
-    ~OptionList() {
-      if ( 0 == map.size() ) {
-        std::cout << "Empty Option List" << std::endl;
-      }
-      else {
-        std::for_each( map.begin(), map.end(), [](const mapDate_t::value_type& a){ 
-          std::cout << a.first << "," << a.second << std::endl; 
-        });
-        std::cout << cnt << std::endl;
-      }
-    }
-    
-    int cnt;
-    mapDate_t map;
-    void operator()( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
-      boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
-      mapDate_t::iterator iter = map.find( date );
-      if ( map.end() == iter ) {
-        map.insert( mapDate_t::value_type( date, 1 ) );
-      }
-      else {
-        iter->second++;
-      }
-      cnt++;
-    }
-  };
-  
+
   RemoveRightDetail();
   auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, _T( "a name" ) );
   ReplaceRightDetail( pNotebookOptionChains );
@@ -377,7 +349,7 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
       std::cout << "PanelCharts::HandleOptionChainList: no " << iterIdItem->second << std::endl;
     }
     else {
-      CallAfter([this,pNotebookOptionChains,iterIdInstrument]{ // ensure iter is not invalidated in the meantime
+      CallAfter([this,pNotebookOptionChains,iterIdInstrument](){ // ensure iterIdInstrument is not invalidated in the meantime
         InstrumentEntry& entry( iterIdInstrument->second );
         // obtain instrument name (future requires special handling)
         ou::tf::Instrument::pInstrument_t pInstrument = entry.m_pWatch->GetInstrument();
@@ -402,13 +374,6 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         }
         assert( 0 != sSymbol.length() );
 
-        // obtain the option list
-    //    OptionList list;
-    //    signalRetrieveOptionList( 
-    //      sSymbol, 
-    //      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
-    //      );
-
         pNotebookOptionChains->SetName( sSymbol );
 
         // populate tabs of notebook
@@ -425,9 +390,10 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
         pNotebookOptionChains->m_fOnRowClicked 
           = std::bind( &PanelCharts::HandleGridClick, this, iterIdInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
-        pNotebookOptionChains->m_fOnInstrumentRetrieve = [this,pInstrument](const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f){
-          if ( nullptr != m_fBuildOptionInstrument ) {
-            m_fBuildOptionInstrument( pInstrument, sIQFeedOptionName, date, strike, f);
+        pNotebookOptionChains->m_fOnInstrumentRetrieve 
+          = [this, pInstrument](const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f){
+              if ( nullptr != m_fBuildOptionInstrument ) {
+                m_fBuildOptionInstrument( pInstrument, sIQFeedOptionName, date, strike, f);
           }
         };
       });
@@ -442,7 +408,7 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 }
 
 void PanelCharts::HandleGridClick( 
-  idInstrument_t idInstrument,
+  idInstrument_t idInstrumentUnderlying,
   boost::gregorian::date date, double strike, bool bSelected, 
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
@@ -452,41 +418,45 @@ void PanelCharts::HandleGridClick(
     std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
   }
   else {
-    mapInstrumentEntry_t::iterator iterInstrument = m_mapInstrumentEntry.find( idInstrument );
-    if ( m_mapInstrumentEntry.end() == iterInstrument ) {
-      std::cout << "PanelCharts::HandleGridClick: " << idInstrument << " not found" << std::endl;
+    mapInstrumentEntry_t::iterator iterInstrumentUnderlying = m_mapInstrumentEntry.find( idInstrumentUnderlying );
+    if ( m_mapInstrumentEntry.end() == iterInstrumentUnderlying ) {
+      std::cout << "PanelCharts::HandleGridClick: " << idInstrumentUnderlying << " not found" << std::endl;
     }
     else {
-      InstrumentEntry& entry( iterInstrument->second );
+      InstrumentEntry& entryUnderlying( iterInstrumentUnderlying->second );
       std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
       std::for_each( vFuncs.begin(), vFuncs.end(),
-        [this, &entry, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* func) {
+        [this, &entryUnderlying, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* delegates) {
           
-          mapOption_t::iterator iterOption = entry.m_mapSelectedChainOptions.find( func->sSymbolName );
-          if ( entry.m_mapSelectedChainOptions.end() == iterOption ) {
-            pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( func->sSymbolName );
+          mapOption_t::iterator iterOption = entryUnderlying.m_mapSelectedChainOptions.find( delegates->sSymbolName );
+          if ( entryUnderlying.m_mapSelectedChainOptions.end() == iterOption ) {
+            pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( delegates->sSymbolName );
             assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
             ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
             iterOption 
-              = entry.m_mapSelectedChainOptions.insert( 
-                entry.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( func->sSymbolName, pOption ) );
+              = entryUnderlying.m_mapSelectedChainOptions.insert( 
+                entryUnderlying.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( delegates->sSymbolName, pOption ) );
           }
+          // TODO: do/should these be cleaned up on page changes?, or cleaned up upon tree removal?
           ou::tf::option::Option* pOption( iterOption->second.get() );
           assert( 0 != pOption );
-          assert( pOption->GetInstrument()->GetInstrumentName() == func->sSymbolName );
+          assert( pOption->GetInstrument()->GetInstrumentName() == delegates->sSymbolName );
           if ( bSelected != pOption->Watching() ) {
             if ( bSelected ) {
               assert( !pOption->Watching() );
-              pOption->OnQuote.Add( func->fQuote );
-              pOption->OnTrade.Add( func->fTrade );
-              pOption->OnGreek.Add( func->fGreek );
-              pOption->StartWatch();						}
+              pOption->OnQuote.Add( delegates->fQuote );
+              pOption->OnTrade.Add( delegates->fTrade );
+              pOption->OnGreek.Add( delegates->fGreek );
+              pOption->StartWatch(); // verify if start watch happens in the engine
+              m_fCalcOptionGreek_Add( iterOption->second, entryUnderlying.m_pWatch );
+            }
             else {
               assert( pOption->Watching() );
-              pOption->StopWatch();
-              pOption->OnQuote.Remove( func->fQuote );
-              pOption->OnTrade.Remove( func->fTrade );
-              pOption->OnGreek.Remove( func->fGreek );
+              m_fCalcOptionGreek_Remove( iterOption->second );
+              pOption->StopWatch(); // verify if stop watch happens in the engine
+              pOption->OnQuote.Remove( delegates->fQuote );
+              pOption->OnTrade.Remove( delegates->fTrade );
+              pOption->OnGreek.Remove( delegates->fGreek );
             }
           }
         });
@@ -529,13 +499,19 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
       pWatch_t pWatch;
       pWatch_t pWatchUnderlying;
       if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-        pWatch.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+        pOption_t pOption;
+        pOption.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+        //pWatch = boost::dynamic_pointer_cast<ou::tf::Watch>( pOption );
+        pWatch = pOption;
         mapInstrumentEntry_t::iterator iterUnderlying = m_mapInstrumentEntry.find( sUnderlying );
         if ( m_mapInstrumentEntry.end() == iterUnderlying ) {
           std::cout << "PanelCharts::ConstructInstrumentEntry: didn't find underlying (" << sUnderlying << ")" << std::endl;
         }
         else {
           pWatchUnderlying = iterUnderlying->second.m_pWatch;
+          //pOption_t pOption;
+          //pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+          m_fCalcOptionGreek_Add( pOption, pWatchUnderlying );
         }
       }
       else {

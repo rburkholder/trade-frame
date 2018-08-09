@@ -77,6 +77,9 @@ private:
   typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
+  typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PanelPortfolioPosition::fAddPosition_t fAddPostion_t;
   
@@ -116,31 +119,6 @@ private:
 
   wxTimer m_timerGuiRefresh;
   
-  struct CalcIV {
-    unsigned int m_nthInvoke;
-    unsigned int m_cntInvoke;
-    volatile bool m_bActive;
-    boost::thread* m_pthread;
-    CalcIV( unsigned int nInterval = 4 )
-            : m_nthInvoke( nInterval ), m_cntInvoke( nInterval ), 
-            m_bActive( false ), m_pthread( 0 ) {}
-    bool Invoke( void ) {
-      bool bInvoke( false );
-      if ( !m_bActive ) {
-        assert( 0 < m_cntInvoke );
-        --m_cntInvoke;
-        if ( 0 == m_cntInvoke ) {
-          m_cntInvoke = m_nthInvoke;
-          if ( 0 != m_pthread ) delete m_pthread;
-          bInvoke = m_bActive = true;
-          //m_pthread = new boost::thread( boost::bind( &AppComboTrading::CalcIV, this ) );
-          }
-      }
-      return bInvoke;
-    }
-  } m_CalcIV;
-  void CalcIV( void );
-
   double m_dblMaxPL;
   double m_dblMinPL;
   

@@ -41,42 +41,78 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-OptionEntry::OptionEntry( const OptionEntry&& rhs ) {
+OptionEntry::OptionEntry( OptionEntry&& rhs ) {
+  if ( rhs.m_bStartedWatch ) {
+    rhs.pUnderlying->OnQuote.Remove( MakeDelegate( &rhs, &OptionEntry::HandleUnderlyingQuote ) );
+  }
   cntInstances = rhs.cntInstances;
   pUnderlying = std::move( rhs.pUnderlying );
   pOption = std::move( rhs.pOption );
   fGreek = std::move( rhs.fGreek );
-//  m_dblLastUnderlyingQuote = rhs.m_dblLastUnderlyingQuote;
-//  m_dblLastOptionQuote = rhs.m_dblLastOptionQuote;
-  m_quoteLastUnderlying = rhs.m_quoteLastUnderlying;
-//  m_quoteLastOption = rhs.m_quoteLastOption;
-  m_bChanged = rhs.m_bChanged;
+  m_bStartedWatch = rhs.m_bStartedWatch;
+  rhs.m_bStartedWatch = false;
+  if ( m_bStartedWatch ) {
+    pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  }
+  //PrintState( "OptionEntry::OptionEntry(0)" );
 }
 
-OptionEntry::OptionEntry( pOption_t pOption_): pOption( pOption_ ) {}
+OptionEntry::OptionEntry( pOption_t pOption_): pOption( pOption_ ), m_bStartedWatch( false ), cntInstances( 0 ) {
+  std::cout << "here we are" << std::endl;
+  //PrintState( "OptionEntry::OptionEntry(1)" );
+}  // can't start with out an underlying
 
-OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fGreekResultCallback_t&& fGreek_ ):
+OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWithGreek_t&& fGreek_ ):
   pUnderlying( pUnderlying_ ), pOption( pOption_ ), fGreek( std::move( fGreek_ ) ), 
-  m_bChanged( false ),
-  cntInstances {} {
-    pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
-    pUnderlying->StartWatch();
-    //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
-    pOption->StartWatch();
+  m_bStartedWatch( false ),
+  cntInstances( 0 )
+{
+  pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  pUnderlying->StartWatch();
+  //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
+  pOption->StartWatch();
+  m_bStartedWatch = true;
+  //PrintState( "OptionEntry::OptionEntry(2)" );
+}
+  
+OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ ):
+  pUnderlying( pUnderlying_ ), pOption( pOption_ ), 
+  m_bStartedWatch( false ),
+  cntInstances( 0 )
+{
+  pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  pUnderlying->StartWatch();
+  //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
+  pOption->StartWatch();
+  m_bStartedWatch = true;
+  //PrintState( "OptionEntry::OptionEntry(3)" );
 }
   
 OptionEntry::~OptionEntry() {
-  pOption->StopWatch();
   //pOption->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
-  pUnderlying->StopWatch();
-  pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
+  //PrintState( "OptionEntry::~OptionEntry" );
+  if ( m_bStartedWatch ) {
+    pUnderlying->StopWatch();
+    pOption->StopWatch();
+    pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
+    m_bStartedWatch = false;
+  }
+}
+
+void OptionEntry::PrintState( const std::string id ) {
+  std::string sUnderlying;
+  std::string sOption;
+  if ( 0 < pUnderlying.use_count() ) {
+    sUnderlying = pUnderlying->GetInstrument()->GetInstrumentName();
+  }
+  if ( 0 < pOption.use_count() ) {
+    sOption = pOption->GetInstrument()->GetInstrumentName();
+  }
+  std::cout << id << ": U(" << sUnderlying << "),O(" << sOption << "), B(" << m_bStartedWatch << ")" << std::endl;
 }
 
 void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
-  if ( ! m_quoteLastUnderlying.SameBidAsk( quote_ ) ) {
-    m_quoteLastUnderlying = quote_;
-    m_bChanged = true;
-  }
+  m_quoteLastUnderlying = quote_;
 }
 
 //void OptionEntry::HandleOptionQuote(const ou::tf::Quote& quote_) { // should this be kept?
@@ -87,10 +123,7 @@ void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
 //}
 
 void OptionEntry::Calc( const fCalc_t& fCalc ) {
-  if ( m_bChanged ) {
-    fCalc( pOption, m_quoteLastUnderlying, fGreek );
-    m_bChanged = false;
-  }
+  fCalc( pOption, m_quoteLastUnderlying, fGreek );
 }
 
 // ====================
@@ -101,11 +134,11 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
   m_timerScan( m_srvc )
 {
   
-  for ( std::size_t ix = 0; ix < 1; ix++ ) {
+  for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change teh final value to add threads
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
     
     m_fCalc =
-      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreek){
+      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fGreek){
     };
   }
   
@@ -119,36 +152,56 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
 }
 
 Engine::~Engine( ) {
+  m_dequeOptionEntryOperation.clear();
+  m_mapOptionEntry.clear();
   m_srvcWork.reset();
   m_threads.join_all();
 }
 
-void Engine::Add( pWatch_t pUnderlying, pOption_t pOption, fGreekResultCallback_t&& fGreek ) {
-  if ( m_srvcWork.owns_work() ) {
+void Engine::Add( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
+//  if ( m_srvcWork.owns_work() ) {
     OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
-  }
+//  }
 }
 
-void Engine::Delete( pOption_t pOption ) {
-  if ( m_srvcWork.owns_work() ) {
+void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
+//  if ( m_srvcWork.owns_work() ) {
+    OptionEntry oe( pUnderlying, pOption );
+    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
+//  }
+}
+
+void Engine::Remove( pOption_t pOption ) {
+//  if ( m_srvcWork.owns_work() ) {
     OptionEntry oe( pOption );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
-  }
+//  }
 }
 
 void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
   if ( boost::asio::error::operation_aborted == ec ) {
+    std::cout << "Engine::HandleTimerScan error: " << ec.message() << ", not starting new cycle" << std::endl;
   }
   else {
     if ( m_srvcWork.owns_work() ) {
-      ScanOptionEntryQueue();
+      try {
+        ScanOptionEntryQueue();
+      }
+      catch ( std::runtime_error& e ) {
+        std::cout << "Engine::HandleTimerScan runtime: " << e.what() << std::endl;
+      }
+      catch (...) {
+        std::cout << "Engine::HandleTimerScan exception: unknown" << std::endl;
+      }
       
     // other ways:
       //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
       m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
+      //m_timerScan.expires_after( boost::asio::chrono::milliseconds(750) );
       m_timerScan.async_wait(
         boost::bind( 
           &Engine::HandleTimerScan, this, 
@@ -206,19 +259,33 @@ void Engine::ScanOptionEntryQueue() {
   //  3) use the values in a background thread for calculations via post to io_service
   std::for_each( m_mapOptionEntry.begin(), m_mapOptionEntry.end(), 
                 [this, dtUtcNow](mapOptionEntry_t::value_type& vt){
+                  //std::cout << "for each " << vt.second.GetUnderlying()->GetInstrument()->GetInstrumentName() << std::endl;
+                  //std::cout << "         " << vt.second.GetOption()->GetInstrument()->GetInstrumentName() << std::endl;
                   vt.second.Calc( 
-                    [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fGreekResultCallback_t& fGreekResultCallback ){
+                    [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fCallbackWithGreek ){
                       double midpointUnderlying( quoteUnderlying.Midpoint() );
-                      boost::asio::post( m_srvc, 
-                        [this, dtUtcNow, pOption, midpointUnderlying, fGreekResultCallback](){
-                          ou::tf::option::binomial::structInput input;
-                          input.S = midpointUnderlying;
-                          pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
-                          pOption->CalcGreeks( input, dtUtcNow, true );
-                          if ( nullptr != fGreekResultCallback ) {
-                            fGreekResultCallback( pOption->LastGreek() ); // need to create the method
-                          }
-                      });
+                      if ( 0.0 < midpointUnderlying ) {  // only start calculations once underlying has quotes
+                        // TODO: add flag to start calculation only after previous calculation is complete
+                        boost::asio::post( m_srvc, 
+                          [this, dtUtcNow, pOption, midpointUnderlying, fCallbackWithGreek](){
+                            try {
+                              //boost::timer::auto_cpu_timer t;
+                              ou::tf::option::binomial::structInput input;
+                              input.S = midpointUnderlying;
+                              pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
+                              pOption->CalcGreeks( input, dtUtcNow, true );
+                              if ( nullptr != fCallbackWithGreek ) {
+                                fCallbackWithGreek( pOption->LastGreek() ); // need to create the method
+                              }
+                            }
+                            catch ( std::runtime_error& e ) {
+                              std::cout << "Engine::ScanOptionEntryQueue runtime: " << e.what() << std::endl;
+                            }
+                            catch (...) {
+                              std::cout << "Engine::ScanOptionEntryQueue exception: unknown" << std::endl;
+                            }                            
+                        });
+                      }
                   });
                 });
 }

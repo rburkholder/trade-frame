@@ -87,7 +87,7 @@
  *  manually pick the symbols, 
  *  run a process for each and watch
  *  save at end of day
- *  wait for flag to exit.
+*  wait for flag to exit.
  * 
  * 20151113 most important thing:
  *  track atm for a series of instruments
@@ -425,6 +425,14 @@ void AppComboTrading::BuildFrameCharts( void ) {
           pInstrumentUnderlying );
       }
     };
+    
+  m_pPanelCharts->m_fCalcOptionGreek_Add = [this]( pOption_t pOption, pWatch_t pWatchUnderlying ){
+    m_pOptionEngine->Add( pOption, pWatchUnderlying );
+  };
+  
+  m_pPanelCharts->m_fCalcOptionGreek_Remove = [this](pOption_t pOption){
+    m_pOptionEngine->Remove( pOption );
+  };
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
@@ -886,27 +894,6 @@ void AppComboTrading::HandlePositionLoad( pPosition_t& pPosition ) {
 void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   for ( mapPortfoliosTrading_t::iterator iter = m_mapPortfoliosTrading.begin(); m_mapPortfoliosTrading.end() != iter; ++iter ) {
     iter->second.pT->UpdateGui();
-  }
-
-  if ( m_CalcIV.Invoke() ) {
-    m_CalcIV.m_pthread = new boost::thread( boost::bind( &AppComboTrading::CalcIV, this ) );
-  }  
-}
-
-// runs in thread, 
-// need to change this into thread pool to remove overhead of thread creation
-// then could move the struct m_CalcIV into the thread?
-void AppComboTrading::CalcIV( void ) {
-  //boost::timer::auto_cpu_timer t;
-  try {
-    m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
-    m_CalcIV.m_bActive = false;  // need to pair up m_bActive better so is more obvious on setting
-  }
-  catch ( std::runtime_error& e ) {
-    std::cout << "AppComboTrading::CalcIV runtime: " << e.what() << std::endl;
-  }
-  catch (...) {
-    std::cout << "AppComboTrading::CalcIV exception: unknown" << std::endl;
   }
 }
 

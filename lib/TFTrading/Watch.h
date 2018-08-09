@@ -93,7 +93,7 @@ public:
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeEnd;
 
-  virtual void StartWatch( void );
+  virtual bool StartWatch( void );
   virtual bool StopWatch( void );
 
   virtual void EmitValues( void ) const;

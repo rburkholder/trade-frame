@@ -61,6 +61,7 @@ public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
+  typedef ou::tf::option::Option::pOption_t pOption_t;
   
   PanelCharts( void );
   PanelCharts( wxWindow* parent, wxWindowID id = PANEL_CHARTS_IDNAME, 
@@ -93,6 +94,12 @@ public:
   
   typedef std::function<void(pInstrument_t, const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fBuildOptionInstrument_t;
   fBuildOptionInstrument_t m_fBuildOptionInstrument; // build registered option instrument with IQF and IB info.
+  
+  typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Add_t;
+  fCalcOptionGreek_Add_t m_fCalcOptionGreek_Add;
+  
+  typedef std::function<void(pOption_t)> fCalcOptionGreek_Remove_t;
+  fCalcOptionGreek_Remove_t m_fCalcOptionGreek_Remove;
   
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
@@ -127,10 +134,12 @@ private:
     typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
     WatchInfo( pWatch_t pWatch ): m_bActive( false ) { Set( pWatch ); }
     void Set( pWatch_t pWatch ) {
+      //std::cout << "WatchInfo::Set " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       if ( m_bActive ) {
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
       }
       else {
+        //std::cout << "WatchInfo::Set (activate) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
         m_bActive = true;
 	m_pWatch = pWatch;
         pInstrument_t pInstrument = m_pWatch->GetInstrument();
@@ -140,10 +149,13 @@ private:
         }
 	m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
 	m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
+        //std::cout << "WatchInfo::Set (before) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
 	m_pWatch->StartWatch();
+        //std::cout << "WatchInfo::Set (after) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       }
     }
     virtual ~WatchInfo( void ) {
+      //std::cout << "WatchInfo::~WatchInfo " << m_pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       if ( 0 == m_pWatch.use_count() ) {
 	std::cout << "WatchInfo use_count is 0, bad thing" << std::endl;
       }
@@ -184,7 +196,7 @@ private:
   
   // TODO: better .second to reset chain display when map is cleared
   //   chains shouldn't capture time series
-  typedef std::map<std::string,ou::tf::option::Option::pOption_t> mapOption_t; // iqfeed updates in the option chains
+  typedef std::map<std::string,pOption_t> mapOption_t; // iqfeed updates in the option chains
   
   typedef std::map<void*,ou::tf::Instrument::idInstrument_t> mapItemToInstrument_t;
   mapItemToInstrument_t m_mapItemToInstrument;  // translate menu item id to instrument [many::1]
@@ -192,6 +204,7 @@ private:
   // TODO: need to check move semantics to see if things get watched/unwatched
   struct InstrumentEntry {
     size_t m_cntMenuDependents;
+    bool m_bAddedToEngine;
     pWatch_t m_pWatch;  // primary watch entry
     pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items, when entry is option or foption
     pWatchInfo_t m_pWatchInfo;  // live chart view
@@ -199,8 +212,11 @@ private:
     // position list -- to be implemented
     // portfolio list -- to be implemented
     InstrumentEntry( pWatch_t m_pWatch_, pWatchInfo_t pWatchInfo_ )
-      : m_cntMenuDependents {}, m_pWatch( m_pWatch_ ), m_pWatchInfo( pWatchInfo_ ) {}
+      : m_cntMenuDependents {}, m_bAddedToEngine( false ), m_pWatch( m_pWatch_ ), m_pWatchInfo( pWatchInfo_ ) {}
     virtual ~InstrumentEntry() {
+      if ( m_bAddedToEngine ) {
+        std::cout << "~InstrumentEntry: " << m_pWatch->GetInstrument()->GetInstrumentName() << " hasn't been removed from Engine" << std::endl;
+      }
       m_mapSelectedChainOptions.clear();
       m_pWatchInfo.reset();
       m_pWatchUnderlying.reset();

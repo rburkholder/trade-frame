@@ -137,12 +137,14 @@ void Watch::EnableWatch( void ) {
   }
 }
 
-void Watch::StartWatch( void ) {
+bool Watch::StartWatch( void ) {
+  //std::cout << "Watch::StartWatch: "  << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   if ( 0 == m_cntWatching ) {
     m_bWatchingEnabled = true;
     EnableWatch();
   }
   ++m_cntWatching;
+  return ( 1 == m_cntWatching );
 }
 
 void Watch::DisableWatch( void ) {
@@ -163,6 +165,7 @@ void Watch::DisableWatch( void ) {
 }
 
 bool Watch::StopWatch( void ) {  // return true if actively stopped feed
+  //std::cout << "Watch::StopWatch: " << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   assert( 0 != m_cntWatching );
   --m_cntWatching;
   if ( 0 == m_cntWatching ) {
