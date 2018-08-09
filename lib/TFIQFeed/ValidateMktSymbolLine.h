@@ -66,7 +66,7 @@ public:
 
   size_t LinesProcessed( void ) const { return cntLinesTotal; };
   void InsertParsedStructure( trd_t& trd ) {};  // override by inheriting class
-  bool HandleUpdateHasOption( const std::string& ) {}; // override by inheriting class
+  virtual bool HandleUpdateHasOption( const std::string& ) { return false; }; // override by inheriting class
 protected:
 private:
 
@@ -82,7 +82,7 @@ private:
     structCountPerString( void ) : cnt( 0 ) {};
     bool operator<(const structCountPerString& rhs) { return (s < rhs.s); };
   };
-
+ 
   ou::KeyWordMatch<size_t> kwmExchanges;
   std::vector<structCountPerString> vSymbolsPerExchange;
   typedef std::map<std::string,std::string> mapUnderlying_t;  // option name, underlying name
