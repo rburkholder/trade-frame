@@ -34,6 +34,7 @@ PortfolioGreek::~PortfolioGreek( ) {
 
 PortfolioGreek::pPositionGreek_t PortfolioGreek::AddPosition( const std::string& sName, pPositionGreek_t pPositionGreek ) {
   Portfolio::AddPosition( sName, pPositionGreek );
+  return pPositionGreek;
 }
   
 void PortfolioGreek::AddSubPortfolio( pPortfolioGreek_t& pPortfolioGreek ) {
