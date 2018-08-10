@@ -33,6 +33,8 @@
 #include <TFTrading/Instrument.h>
 #include <TFTrading/PortfolioGreek.h>
 
+#include <TFBitsNPieces/GridColumnSizer.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -62,10 +64,12 @@ public:
   typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
   typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
+  typedef std::function<void(int,int,PanelOptionCombo&)> fColumnWidthChanged_t;
   
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
   fConstructPositionGreek_t m_fConstructPositionGreek;
   fAddPositionGreek_t m_fAddPositionGreek;  // does not appeared to be used
+  fColumnWidthChanged_t m_fColumnWidthChanged;
 
   PanelOptionCombo(void);
   PanelOptionCombo( 
@@ -88,6 +92,9 @@ public:
 
   void AddPositionGreek( pPositionGreek_t pPositionGreek );
 
+  void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
+  void SetColumnSizes( ou::tf::GridColumnSizer& );
+	
   void UpdateGui( void );
 
 protected:

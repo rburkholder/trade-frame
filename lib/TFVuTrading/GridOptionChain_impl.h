@@ -176,23 +176,10 @@ struct GridOptionChain_impl {
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    int cnt = m_details.GetCols();
-    ar & cnt;
-    for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_details.GetColumnWidth( ix );
-    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    int cnt;
-    ar & cnt;
-    assert( cnt == m_details.GetCols() ); 
-    int width;
-    for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & width;
-      m_details.SetColumnWidth( ix, width );
-    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

@@ -72,6 +72,14 @@ void GridOptionChain::CreateControls() {
   
 }
 
+void GridOptionChain::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
+  gcs.SaveColumnSizes( *this );
+}
+
+void GridOptionChain::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
+ gcs.SetColumnSizes( *this );
+}
+
 void GridOptionChain::TimerActivate() { m_pimpl->TimerActivate(); }
 void GridOptionChain::TimerDeactivate() { m_pimpl->TimerDeactivate(); }
 

@@ -65,7 +65,7 @@ void GridOptionChain_impl::CreateControls() {
   m_details.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
 
   m_details.EnableEditing( false );
-
+  
 }
 
 GridOptionChain_impl::~GridOptionChain_impl( void ) {

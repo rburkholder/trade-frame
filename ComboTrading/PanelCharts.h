@@ -19,8 +19,8 @@
 #include <map>
 #include <functional>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include <wx/treectrl.h>
 #include <wx/panel.h>
@@ -35,6 +35,7 @@
 #include <TFOptions/Option.h>
 
 #include <TFBitsNPieces/TreeOps.h>
+#include <TFBitsNPieces/GridColumnSizer.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <TFVuTrading/ModelChartHdf5.h>
@@ -91,25 +92,25 @@ public:
 
   std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
   std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
-  
+
   typedef std::function<void(pInstrument_t, const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fBuildOptionInstrument_t;
   fBuildOptionInstrument_t m_fBuildOptionInstrument; // build registered option instrument with IQF and IB info.
-  
+
   typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Add_t;
   fCalcOptionGreek_Add_t m_fCalcOptionGreek_Add;
-  
+
   typedef std::function<void(pOption_t)> fCalcOptionGreek_Remove_t;
   fCalcOptionGreek_Remove_t m_fCalcOptionGreek_Remove;
-  
+
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
-  
+
   // called from owner to perform regular updates
-  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );
-  
+  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );  // can this be removed now?
+
   void SaveSeries( const std::string& sPrefix );
-  
+
 protected: 
   
   void Init();
@@ -124,6 +125,8 @@ private:
   
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
+  
+  ou::tf::GridColumnSizer m_gcsGridOptionChain;
   
   // =======
   // purpose: populates m_chartData for display of indicators on the LiveChartPanel
@@ -298,6 +301,9 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & m_splitter->GetSashPosition();
     m_pTreeOps->Save<TreeItemRoot>( ar );
+    if ( 2 <= version ) {
+      ar & m_gcsGridOptionChain;
+    }
   }
 
   template<typename Archive>
@@ -306,6 +312,9 @@ private:
     ar & pos;
     m_splitter->SetSashPosition( pos );
     m_pTreeOps->Load<TreeItemRoot>( ar );
+    if ( 2 <= version ) {
+      ar & m_gcsGridOptionChain;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -314,4 +323,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelCharts, 1)
+BOOST_CLASS_VERSION(ou::tf::PanelCharts, 2)

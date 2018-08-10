@@ -71,6 +71,9 @@ struct PanelOptionCombo_impl {
   void AddPositionGreek( pPositionGreek_t pPositionGreek );
   void AddInstrumentToPosition( pInstrument_t pInstrument );
 
+  void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
+  void SetColumnSizes( ou::tf::GridColumnSizer& );
+	
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 15
@@ -243,6 +246,7 @@ struct PanelOptionCombo_impl {
 
   void OnRightClickGridLabel( wxGridEvent& event );
   void OnRightClickGridCell( wxGridEvent& event );
+  void OnGridColSize( wxGridSizeEvent& event );
   void OnPositionPopUpAddPosition( wxCommandEvent& event );
   void OnPositionPopUpAddOrder( wxCommandEvent& event );
   void OnPositionPopUpCancelOrders( wxCommandEvent& event );
@@ -261,7 +265,7 @@ struct PanelOptionCombo_impl {
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    //ar & m_splitter->GetSashPosition();
+
     std::for_each( m_vPositions.begin(), m_vPositions.end(), [](vPositions_t::value_type& vt){
       //vt.GetPositionGreek()->GetRow();
     } );
@@ -269,8 +273,6 @@ struct PanelOptionCombo_impl {
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    //int pos;  // for SashPosition
-    //ar & pos;
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

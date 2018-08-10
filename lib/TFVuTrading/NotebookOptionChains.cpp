@@ -43,6 +43,7 @@ NotebookOptionChains::~NotebookOptionChains() {
 
 void NotebookOptionChains::Init() {
   m_bBound = false;
+  m_pgcsGridOptionChain = nullptr;
 }
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -113,6 +114,9 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
     }
     else {
       iter->second.pWinOptionChain->TimerDeactivate();
+      if ( nullptr != m_pgcsGridOptionChain ) {
+        iter->second.pWinOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
+      }
       if ( nullptr != m_fOnPageChanging ) {
         m_fOnPageChanging( iter->first );
       }
@@ -126,13 +130,16 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
   int ixTab = event.GetSelection();
   //std::cout << "page changed: " << ixTab << std::endl;
   mapOptionExpiry_t::iterator iter 
-   = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
-     return ixTab == vt.second.ixTab;
-  });
+    = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+      return ixTab == vt.second.ixTab;
+      });
   if ( m_mapOptionExpiry.end() == iter ) {
     std::cout << "NotebookOptionChains::OnPageChanged: couldn't find tab index: " << ixTab << std::endl;
   }
   else {
+    if ( nullptr != m_pgcsGridOptionChain ) {
+      iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
+    }
     iter->second.pWinOptionChain->TimerActivate();
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
@@ -243,17 +250,6 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void NotebookOptionChains::Save( boost::archive::text_oarchive& oa) {
-  //oa & m_splitter->GetSashPosition();
-  //m_pTreeOps->Save<TreeItemRoot>( oa );
-}
-
-void NotebookOptionChains::Load( boost::archive::text_iarchive& ia) {
-  //int pos;
-  //ia & pos;
-  //m_splitter->SetSashPosition( pos );
-  //m_pTreeOps->Load<TreeItemRoot>( ia );
-}
 wxBitmap NotebookOptionChains::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;

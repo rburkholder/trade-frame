@@ -69,6 +69,9 @@ struct PanelPortfolioPosition_impl {
   void AddPosition( pPosition_t pPosition );
   void AddInstrumentToPosition( pInstrument_t pInstrument );
 
+  void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
+  void SetColumnSizes( ou::tf::GridColumnSizer& );
+	
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 12
@@ -230,6 +233,7 @@ struct PanelPortfolioPosition_impl {
 
   void OnRightClickGridLabel( wxGridEvent& event );
   void OnRightClickGridCell( wxGridEvent& event );
+  void OnGridColSize( wxGridSizeEvent& event );
   void OnPositionPopUpAddPosition( wxCommandEvent& event );
   void OnPositionPopUpAddOrder( wxCommandEvent& event );
   void OnPositionPopUpCancelOrders( wxCommandEvent& event );

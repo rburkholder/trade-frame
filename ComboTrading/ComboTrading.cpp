@@ -87,7 +87,7 @@
  *  manually pick the symbols, 
  *  run a process for each and watch
  *  save at end of day
-*  wait for flag to exit.
+ *  wait for flag to exit.
  * 
  * 20151113 most important thing:
  *  track atm for a series of instruments
@@ -610,6 +610,10 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   pPOC->m_fAddPositionGreek = [](pPositionGreek_t){
     std::cout << "#### really used? ####" << std::endl;
   };
+  pPOC->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelOptionCombo& poc){
+    poc.SaveColumnSizes( m_gcsPanelOptionCombo );
+    UpdateColumns_PanelOptionCombo();
+  };
 
   assert( nullptr != pPOC->m_fConstructPortfolioGreek );
   pPOC->m_fConstructPortfolioGreek( *pPOC, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
@@ -853,9 +857,28 @@ void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrumen
       
 }
 
+void AppComboTrading::UpdateColumns_PanelPortfolioPositions() {
+  std::for_each( m_mapPortfoliosTrading.begin(), m_mapPortfoliosTrading.end(), 
+                  [this](mapPortfoliosTrading_t::value_type& vt){
+                    vt.second.pT->SetColumnSizes( m_gcsPanelPortfolioPosition );
+                  });  
+}
+
+void AppComboTrading::UpdateColumns_PanelOptionCombo() {
+  std::for_each( m_mapPortfoliosSandbox.begin(), m_mapPortfoliosSandbox.end(), [this](mapPortfoliosSandbox_t::value_type& vt){
+    vt.second.pT->SetColumnSizes( m_gcsPanelOptionCombo );
+  } );
+}
+
+
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
+  m_pLastPPP->SetColumnSizes( m_gcsPanelPortfolioPosition );
+  m_pLastPPP->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelPortfolioPosition& ppp ){
+    ppp.SaveColumnSizes( m_gcsPanelPortfolioPosition );
+    UpdateColumns_PanelPortfolioPositions();
+  };
   m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollPM->Layout();
   

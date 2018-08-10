@@ -69,13 +69,14 @@ PanelCharts::~PanelCharts() {
 
 void PanelCharts::Init( void ) {
   
-  m_panelSplitterRightPanel = 0;
-  m_splitter = 0;
-  m_sizerRight = 0;
-  m_winRightDetail = 0;
-  
-  m_pTreeOps = 0;
+  m_panelSplitterRightPanel = nullptr;
+  m_splitter = nullptr;
+  m_sizerRight = nullptr;
+  m_winRightDetail = nullptr;
+
+  m_pTreeOps = nullptr;
   m_pInstrumentActions.reset( new InstrumentActions );
+
 }
 
 bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -184,6 +185,7 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   }
 }
 
+// can this now be removed?
 void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQFeed& libor ) {
   std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(), 
     [this,dtUtcNow,&libor](mapInstrumentEntry_t::value_type& vt){
@@ -337,6 +339,7 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
 
   RemoveRightDetail();
   auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT, _T( "a name" ) );
+  pNotebookOptionChains->SetGridOptionChain_ColumnSaver( &m_gcsGridOptionChain );
   ReplaceRightDetail( pNotebookOptionChains );
 
   mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );

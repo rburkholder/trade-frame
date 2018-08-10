@@ -28,6 +28,7 @@
 #include <OUCommon/Worker.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
+#include <TFBitsNPieces/GridColumnSizer.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 // may need to inherit and add more functionality to the class:
@@ -164,6 +165,9 @@ private:
   wxScrolledWindow* m_scrollPM;
   wxBoxSizer* m_sizerScrollPM;
 
+  ou::tf::GridColumnSizer m_gcsPanelPortfolioPosition;
+  ou::tf::GridColumnSizer m_gcsPanelOptionCombo;
+  
   ou::tf::DBOps m_db;
   std::string m_sWorkingDirectory;
   std::string m_sfnState;
@@ -247,6 +251,9 @@ private:
   void HandleMenuActionLoadSymbolSubset( void );
 
   void HandleConstructPortfolio( ou::tf::PanelPortfolioPosition&,const std::string&, const std::string& ); // portfolioid, description
+  
+  void UpdateColumns_PanelPortfolioPositions();
+  void UpdateColumns_PanelOptionCombo();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -261,6 +268,8 @@ private:
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
     ar & *m_pPanelCharts;
+    ar & m_gcsPanelPortfolioPosition;
+    ar & m_gcsPanelOptionCombo;
   }
 
   template<typename Archive>
@@ -286,12 +295,18 @@ private:
     if ( 5 <= version ) {
       ar & *m_pPanelCharts;
     }
+    if ( 6 <= version ) {
+      ar & m_gcsPanelPortfolioPosition;
+      UpdateColumns_PanelPortfolioPositions();
+      ar & m_gcsPanelOptionCombo;
+      UpdateColumns_PanelOptionCombo();
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 5)
+BOOST_CLASS_VERSION(AppComboTrading, 6)
 DECLARE_APP(AppComboTrading)
 

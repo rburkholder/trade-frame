@@ -23,6 +23,8 @@
 #include <TFTrading/Instrument.h>
 #include <TFTrading/Portfolio.h>
 
+#include <TFBitsNPieces/GridColumnSizer.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -51,10 +53,12 @@ public:
   typedef std::function<void(pPosition_t)> fAddPosition_t;
   typedef std::function<void(pInstrument_t,pPortfolio_t,fAddPosition_t)> fConstructPosition_t;
   typedef std::function<void(PanelPortfolioPosition&, const std::string&, const std::string&)> fConstructPortfolio_t;
+  typedef std::function<void(int,int,PanelPortfolioPosition&)> fColumnWidthChanged_t;
   
   fAddPosition_t m_fAddPosition;  // does not appeared to be used
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
+  fColumnWidthChanged_t m_fColumnWidthChanged;
 
   PanelPortfolioPosition(void);
   PanelPortfolioPosition( 
@@ -81,6 +85,9 @@ public:
 
   void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 
+  void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
+  void SetColumnSizes( ou::tf::GridColumnSizer& );
+	
   void UpdateGui( void );
 
 protected:

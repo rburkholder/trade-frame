@@ -134,7 +134,7 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
   m_timerScan( m_srvc )
 {
   
-  for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change teh final value to add threads
+  for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change the final value to add threads, and fix the TODO further down
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
     
     m_fCalc =
@@ -218,25 +218,26 @@ void Engine::ProcessOptionEntryOperationQueue() {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
     switch( oe.m_action ) {
       case Action::AddOption: {
-
-        mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
-        if ( m_mapOptionEntry.end() == iterOption ) {
-          iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type( oe.m_oe.OptionName(), std::move( oe.m_oe ) ) );
+          std::cout << "Engine::Add: " << oe.m_oe.OptionName() << std::endl;
+          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+          if ( m_mapOptionEntry.end() == iterOption ) {
+            iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type( oe.m_oe.OptionName(), std::move( oe.m_oe ) ) );
+          }
+          iterOption->second.Inc();
         }
-        iterOption->second.Inc();
-      }
         break;
       case Action::RemoveOption: {
-        mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
-        if ( m_mapOptionEntry.end() == iterOption ) {
-          throw std::runtime_error( "Engine::Delete: can't find option" + oe.m_oe.OptionName() );
-        }
+          std::cout << "Engine::Remove: " << oe.m_oe.OptionName() << std::endl;
+          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+          if ( m_mapOptionEntry.end() == iterOption ) {
+            throw std::runtime_error( "Engine::Delete: can't find option" + oe.m_oe.OptionName() );
+          }
 
-        OptionEntry::size_type cnt = iterOption->second.Dec();
-        if ( 0 == cnt ) {
-          m_mapOptionEntry.erase( iterOption );
+          OptionEntry::size_type cnt = iterOption->second.Dec();
+          if ( 0 == cnt ) {
+            m_mapOptionEntry.erase( iterOption );
+          }
         }
-      }
         break;
       case Action::Unknown:
         break;

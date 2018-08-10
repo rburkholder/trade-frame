@@ -61,6 +61,14 @@ void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {
   m_pimpl->AddPosition( pPosition );
 }
 
+void PanelPortfolioPosition::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
+  m_pimpl->SaveColumnSizes( gcs );
+}
+
+void PanelPortfolioPosition::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
+  m_pimpl->SetColumnSizes( gcs );
+}
+	
 void PanelPortfolioPosition::UpdateGui( void ) {
   m_pimpl->UpdateGui();
 }

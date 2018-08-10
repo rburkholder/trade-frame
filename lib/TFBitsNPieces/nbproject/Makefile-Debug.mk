@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/FrameWork01.o \
+	${OBJECTDIR}/GridColumnSizer.o \
 	${OBJECTDIR}/IQFeedInstrumentBuild.o \
 	${OBJECTDIR}/IQFeedSymbolListOps.o \
 	${OBJECTDIR}/InstrumentSelection.o \
@@ -76,6 +77,11 @@ ${OBJECTDIR}/FrameWork01.o: FrameWork01.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameWork01.o FrameWork01.cpp
+
+${OBJECTDIR}/GridColumnSizer.o: GridColumnSizer.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridColumnSizer.o GridColumnSizer.cpp
 
 ${OBJECTDIR}/IQFeedInstrumentBuild.o: IQFeedInstrumentBuild.cpp
 	${MKDIR} -p ${OBJECTDIR}

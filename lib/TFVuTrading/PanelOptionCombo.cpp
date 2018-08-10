@@ -61,6 +61,14 @@ void PanelOptionCombo::AddPositionGreek( pPositionGreek_t pPositionGreek ) {
   m_pimpl->AddPositionGreek( pPositionGreek );
 }
 
+void PanelOptionCombo::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
+  m_pimpl->SaveColumnSizes( gcs );
+}
+
+void PanelOptionCombo::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
+  m_pimpl->SetColumnSizes( gcs );
+}
+	
 void PanelOptionCombo::UpdateGui( void ) {
   m_pimpl->UpdateGui();
 }

@@ -161,6 +161,7 @@ void PanelPortfolioPosition_impl::CreateControls() {
   
   m_ppp.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_ppp.Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelPortfolioPosition_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
+  m_ppp.Bind( wxEVT_GRID_COL_SIZE,          &PanelPortfolioPosition_impl::OnGridColSize, this );
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddPosition, this, m_ppp.ID_MenuAddPosition, -1, 0 );
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddOrder, this, m_ppp.ID_MenuAddOrder, -1, 0 );
   m_ppp.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpCancelOrders, this, m_ppp.ID_MenuCancelOrders, -1, 0 );
@@ -196,6 +197,7 @@ void PanelPortfolioPosition_impl::HandleWindowDestroy( wxWindowDestroyEvent& eve
 
   m_ppp.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_ppp.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelPortfolioPosition_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
+  m_ppp.Unbind( wxEVT_GRID_COL_SIZE,          &PanelPortfolioPosition_impl::OnGridColSize, this );
   m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddPosition, this, m_ppp.ID_MenuAddPosition, -1, 0 );
   m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpAddOrder, this, m_ppp.ID_MenuAddOrder, -1, 0 );
   m_ppp.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelPortfolioPosition_impl::OnPositionPopUpCancelOrders, this, m_ppp.ID_MenuCancelOrders, -1, 0 );
@@ -233,6 +235,14 @@ void PanelPortfolioPosition_impl::SetPortfolio( pPortfolio_t pPortfolio ) {
   }
 }
 
+void PanelPortfolioPosition_impl::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
+  gcs.SaveColumnSizes( *m_gridPositions );
+}
+
+void PanelPortfolioPosition_impl::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
+  gcs.SetColumnSizes( *m_gridPositions );
+}
+	
 void PanelPortfolioPosition_impl::HandleOnUnRealizedPLUpdate( const Portfolio& ) {
 }
 
@@ -249,6 +259,12 @@ void PanelPortfolioPosition_impl::OnRightClickGridLabel( wxGridEvent& event ) {
 void PanelPortfolioPosition_impl::OnRightClickGridCell( wxGridEvent& event ) {
   m_nRowRightClick = event.GetRow();
   m_ppp.PopupMenu( m_menuGridCellPositionPopUp );
+}
+
+void PanelPortfolioPosition_impl::OnGridColSize( wxGridSizeEvent& event ) {
+  if ( nullptr != m_ppp.m_fColumnWidthChanged ) {
+    m_ppp.m_fColumnWidthChanged( event.GetRowOrCol(), m_gridPositions->GetColSize( event.GetRowOrCol() ), m_ppp );
+  }
 }
 
 //void PanelPortfolioPosition_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {

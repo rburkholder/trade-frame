@@ -24,9 +24,8 @@
 #include <map>
 #include <functional>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
 #include <boost/signals2.hpp>
 
 #include <wx/wx.h>
@@ -48,6 +47,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
 
 class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
+  friend class boost::serialization::access;
 public:
   
   NotebookOptionChains();
@@ -79,9 +79,8 @@ public:
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
   
-  void Save( boost::archive::text_oarchive& oa);
-  void Load( boost::archive::text_iarchive& ia);
-
+  void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* pgcs ) { m_pgcsGridOptionChain = pgcs; }
+  
 // really don't want these here, but necessary to deal with searchdynamiceventtable issues
   virtual void BindEvents();
   virtual void UnbindEvents();
@@ -124,6 +123,8 @@ private:
   
   std::string m_sName;  // should be underlying so can use to lookup in PanelCharts
   
+  ou::tf::GridColumnSizer* m_pgcsGridOptionChain;
+  
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
   
@@ -134,11 +135,25 @@ private:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
+  
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //ar & boost::serialization::base_object<const TreeItemResources>(*this);
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //ar & boost::serialization::base_object<TreeItemResources>(*this);
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::NotebookOptionChains, 1)
 
 #endif /* WINOPTIONCHAINS_H */
 
