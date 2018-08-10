@@ -148,6 +148,23 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
   event.Skip();
 }
 
+void NotebookOptionChains::SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* pgcs ) {
+  m_pgcsGridOptionChain = pgcs;
+  int ixTab = GetSelection();
+  mapOptionExpiry_t::iterator iter 
+    = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+      return ixTab == vt.second.ixTab;
+      });
+  if ( m_mapOptionExpiry.end() == iter ) {
+    std::cout << "NotebookOptionChains::SetGridOptionChain_ColumnSaver: couldn't find tab index: " << ixTab << std::endl;
+  }
+  else {
+    if ( nullptr != m_pgcsGridOptionChain ) {
+      iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
+    }
+  }
+}
+
 void NotebookOptionChains::SetName( const std::string& sName ) {
   wxNotebook::SetName( sName );
   m_sName = sName;

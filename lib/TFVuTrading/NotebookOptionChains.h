@@ -79,7 +79,7 @@ public:
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
   
-  void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* pgcs ) { m_pgcsGridOptionChain = pgcs; }
+  void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
   
 // really don't want these here, but necessary to deal with searchdynamiceventtable issues
   virtual void BindEvents();
