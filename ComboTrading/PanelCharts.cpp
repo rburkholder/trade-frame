@@ -185,44 +185,6 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   }
 }
 
-// can this now be removed?
-void PanelCharts::CalcIV( boost::posix_time::ptime dtUtcNow, ou::tf::LiborFromIQFeed& libor ) {
-  std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(), 
-    [this,dtUtcNow,&libor](mapInstrumentEntry_t::value_type& vt){
-      InstrumentEntry& entry( vt.second );
-      if ( entry.m_pWatch->Watching() ) {
-        if ( entry.m_pWatch->GetInstrument()->IsOption() || entry.m_pWatch->GetInstrument()->IsFuturesOption() ) {
-          if ( 0 != entry.m_pWatchUnderlying.use_count() ) {
-            if ( entry.m_pWatchUnderlying->Watching() ) {
-              ou::tf::option::binomial::structInput input;
-              ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( entry.m_pWatch.get() );
-              ou::tf::Quote quoteUnderlying = entry.m_pWatchUnderlying->LastQuote();
-              if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
-                input.S = quoteUnderlying.Midpoint();
-                pOption->CalcRate( input, dtUtcNow, libor );  // can this be moved out of the loop? -- no, depends upon expiry
-                pOption->CalcGreeks( input, dtUtcNow, true );
-              }
-            }
-          }
-        }
-        else { // no option or foption, so process options turned on in the chains lists
-          if ( 0 != entry.m_mapSelectedChainOptions.size() ) {
-            ou::tf::option::binomial::structInput input;
-            input.S = entry.m_pWatch->LastQuote().Midpoint();
-            std::for_each( entry.m_mapSelectedChainOptions.begin(), entry.m_mapSelectedChainOptions.end(), 
-              [this,dtUtcNow,&libor,&input](mapOption_t::value_type& vtOption) {
-                ou::tf::option::Option::pOption_t pOption( vtOption.second );
-                if ( pOption->Watching() ) {
-                  pOption->CalcRate( input, dtUtcNow, libor );
-                  pOption->CalcGreeks( input, dtUtcNow, true );
-                }
-              });
-          }
-        }
-      }
-  });
-}
-
 void PanelCharts::RemoveRightDetail() {
   auto winRightDetail = m_winRightDetail;
   if ( 0 != winRightDetail ) {

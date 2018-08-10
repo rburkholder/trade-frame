@@ -107,7 +107,7 @@ public:
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
 
   // called from owner to perform regular updates
-  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );  // can this be removed now?
+  //void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );  // can this be removed now?
 
   void SaveSeries( const std::string& sPrefix );
 
