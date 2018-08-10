@@ -224,7 +224,7 @@ struct PanelOptionCombo_impl {
     wxMenu* m_menuGridLabelPositionPopUp;
     wxMenu* m_menuGridCellPositionPopUp;
 
-  PanelOptionCombo& m_ppp; // passed in on construction 
+  PanelOptionCombo& m_poc; // passed in on construction 
 
   pPortfolioGreek_t m_pPortfolioGreek;
 
