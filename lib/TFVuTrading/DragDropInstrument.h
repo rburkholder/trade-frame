@@ -29,7 +29,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-class DragDropDataInstrument: public wxDataObject {
+class DragDropInstrument: public wxDataObject {
 public:
   
   typedef Instrument::pInstrument_t pInstrument_t;
@@ -43,11 +43,11 @@ public:
   typedef std::function<void(fOnInstrumentRetrieveComplete_t)> fOnInstrumentRetrieveInitiate_t;
   typedef fOnInstrumentRetrieveInitiate_t* fOnInstrumentRetrieveInitiate_ptr;
 
-  DragDropDataInstrument( );
-  explicit DragDropDataInstrument( const std::string& sIQFeedSymbolName );
-  explicit DragDropDataInstrument( pInstrument_t );
-  explicit DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t&& );
-  virtual ~DragDropDataInstrument( );
+  DragDropInstrument( );
+  explicit DragDropInstrument( const std::string& sIQFeedSymbolName );
+  explicit DragDropInstrument( pInstrument_t );
+  explicit DragDropInstrument( fOnInstrumentRetrieveInitiate_t&& );
+  virtual ~DragDropInstrument( );
   
   virtual void GetAllFormats (wxDataFormat *formats, Direction dir=Get) const;
   virtual bool GetDataHere (const wxDataFormat &format, void *buf) const;

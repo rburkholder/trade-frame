@@ -146,7 +146,7 @@ void PanelOptionCombo_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
   
-  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropDataInstrument( DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t() ) );
+  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnInstrumentRetrieveInitiate_t() ) );
   
   pddDataInstrumentTarget->m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 

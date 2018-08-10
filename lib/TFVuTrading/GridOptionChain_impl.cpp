@@ -262,7 +262,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   event.Skip( bSkip );
 }
 
-bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropDataInstrument& dddi ) {
+bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropInstrument& dddi ) {
 
 #if defined(__WXMSW__) 
       wxCursor cursor( wxCURSOR_HAND );
@@ -309,8 +309,8 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
     
     if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // call drag and drop
-      ou::tf::DragDropDataInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f );
+      ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f ); // iqfeed name and strike
       } );
       
       bSkip = StartDragDrop( dndCall );
@@ -318,8 +318,8 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
 
     if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
       // put drag and drop
-      ou::tf::DragDropDataInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f );
+      ou::tf::DragDropInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f ); // iqfeed name and strike
       } );
 
       bSkip = StartDragDrop( dndPut );    

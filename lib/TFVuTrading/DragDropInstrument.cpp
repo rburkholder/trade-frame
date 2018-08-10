@@ -24,40 +24,40 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-const char DragDropDataInstrument::szFormatIQFeedSymbolName[]           = "TradeFrameInstrumentIQFeedSymbolName";
+const char DragDropInstrument::szFormatIQFeedSymbolName[]           = "TradeFrameInstrumentIQFeedSymbolName";
 //const char DragDropDataInstrument::szFormatInteractiveBrokersContract[] = "TradeFrameInstrumentInteractiveBrokersContract";
-const char DragDropDataInstrument::szFormatInstrumentClass[]            = "TradeFrameInstrumentClass";
-const char DragDropDataInstrument::szFormatInstrumentFunction[]         = "TradeFrameInstrumentFunction";
+const char DragDropInstrument::szFormatInstrumentClass[]            = "TradeFrameInstrumentClass";
+const char DragDropInstrument::szFormatInstrumentFunction[]         = "TradeFrameInstrumentFunction";
 
-const wxDataFormat DragDropDataInstrument::DataFormatInstrumentIQFeedSymbolName( DragDropDataInstrument::szFormatIQFeedSymbolName );
+const wxDataFormat DragDropInstrument::DataFormatInstrumentIQFeedSymbolName( DragDropInstrument::szFormatIQFeedSymbolName );
 //const wxDataFormat DragDropDataInstrument::DataFormatInstrumentInteractiveBrokersContract( DragDropDataInstrument::szFormatInteractiveBrokersContract );
-const wxDataFormat DragDropDataInstrument::DataFormatInstrumentClass( DragDropDataInstrument::szFormatInstrumentClass );
-const wxDataFormat DragDropDataInstrument::DataFormatInstrumentFunction( DragDropDataInstrument::szFormatInstrumentFunction );
+const wxDataFormat DragDropInstrument::DataFormatInstrumentClass( DragDropInstrument::szFormatInstrumentClass );
+const wxDataFormat DragDropInstrument::DataFormatInstrumentFunction( DragDropInstrument::szFormatInstrumentFunction );
 
-DragDropDataInstrument::DragDropDataInstrument(const std::string& sIQFeedSymbolName )
+DragDropInstrument::DragDropInstrument(const std::string& sIQFeedSymbolName )
 : m_DataFormat( DataFormatInstrumentIQFeedSymbolName), m_sIQFeedSymbolName( sIQFeedSymbolName )
 {
 }
 
-DragDropDataInstrument::DragDropDataInstrument(pInstrument_t pInstrument )
+DragDropInstrument::DragDropInstrument(pInstrument_t pInstrument )
 : m_DataFormat( DataFormatInstrumentClass ), m_pInstrument( pInstrument )
 {
 }
 
-DragDropDataInstrument::DragDropDataInstrument( fOnInstrumentRetrieveInitiate_t&& fOnInstrumentRetrieveInitiate ) 
+DragDropInstrument::DragDropInstrument( fOnInstrumentRetrieveInitiate_t&& fOnInstrumentRetrieveInitiate ) 
 : m_DataFormat( DataFormatInstrumentFunction ), m_fOnInstrumentRetrieveInitiate( std::move( fOnInstrumentRetrieveInitiate ) )
 {
 }
 
-DragDropDataInstrument::DragDropDataInstrument( )
+DragDropInstrument::DragDropInstrument( )
 : m_DataFormat( wxDF_PRIVATE )
 {
 }
 
-DragDropDataInstrument::~DragDropDataInstrument( ) {
+DragDropInstrument::~DragDropInstrument( ) {
 }
 
-size_t DragDropDataInstrument::GetFormatCount(Direction dir) const {
+size_t DragDropInstrument::GetFormatCount(Direction dir) const {
   if ( Get == dir ) {
     return 1;
   }
@@ -66,7 +66,7 @@ size_t DragDropDataInstrument::GetFormatCount(Direction dir) const {
   }
 }
 
-void DragDropDataInstrument::GetAllFormats(wxDataFormat *formats, Direction dir) const {
+void DragDropInstrument::GetAllFormats(wxDataFormat *formats, Direction dir) const {
   // when messing with this, update GetFormatCount()
   if ( Get == dir ) {
 //    formats[ 0 ] = DataFormatInstrumentIQFeedSymbolName;
@@ -78,7 +78,7 @@ void DragDropDataInstrument::GetAllFormats(wxDataFormat *formats, Direction dir)
     assert( 0 );
 }
 
-bool DragDropDataInstrument::GetDataHere(const wxDataFormat &format, void *buf) const {
+bool DragDropInstrument::GetDataHere(const wxDataFormat &format, void *buf) const {
   bool bCopied( false );
   if ( DataFormatInstrumentIQFeedSymbolName == format ) {
     //std::cout << "GetDataHere SymbolName" << std::endl;
@@ -98,7 +98,7 @@ bool DragDropDataInstrument::GetDataHere(const wxDataFormat &format, void *buf) 
   return bCopied;
 }
 
-size_t DragDropDataInstrument::GetDataSize(const wxDataFormat &format) const {
+size_t DragDropInstrument::GetDataSize(const wxDataFormat &format) const {
   if ( DataFormatInstrumentIQFeedSymbolName == format ) {
     return m_sIQFeedSymbolName.size() + 1;
   }
@@ -111,7 +111,7 @@ size_t DragDropDataInstrument::GetDataSize(const wxDataFormat &format) const {
   return 0;
 }
 
-const std::string& DragDropDataInstrument::GetIQFeedSymbolName() const { 
+const std::string& DragDropInstrument::GetIQFeedSymbolName() const { 
 //  if ( DataFormatInstrumentIQFeedSymbolName == m_DataFormat ) {
     return m_sIQFeedSymbolName; 
 //  }
@@ -120,17 +120,17 @@ const std::string& DragDropDataInstrument::GetIQFeedSymbolName() const {
 //  }
 }
 
-DragDropDataInstrument::pInstrument_t DragDropDataInstrument::GetInstrument() {
+DragDropInstrument::pInstrument_t DragDropInstrument::GetInstrument() {
 //  if ( DataFormatInstrumentClass == m_DataFormat ) {
     return m_pInstrument;
 //  }
 }
 
-DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t& DragDropDataInstrument::GetInstrumentBuildInitiate() {
+DragDropInstrument::fOnInstrumentRetrieveInitiate_t& DragDropInstrument::GetInstrumentBuildInitiate() {
   return m_fOnInstrumentRetrieveInitiate;
 }
 
-wxDataFormat DragDropDataInstrument::GetPreferredFormat(Direction dir) const {
+wxDataFormat DragDropInstrument::GetPreferredFormat(Direction dir) const {
 //  if ( Get == dir ) {
     return DataFormatInstrumentFunction;
 //  }
@@ -141,7 +141,7 @@ wxDataFormat DragDropDataInstrument::GetPreferredFormat(Direction dir) const {
 
 // TODO: need to perform && std::move on reference so that lambda doesn't go out of scope
 // which is probably the problem for the segment fault earlier
-bool DragDropDataInstrument::SetData(const wxDataFormat &format, size_t len, const void *buf) {
+bool DragDropInstrument::SetData(const wxDataFormat &format, size_t len, const void *buf) {
   bool bCopied( false );
   if ( DataFormatInstrumentIQFeedSymbolName == format ) {
     m_DataFormat = format;
@@ -164,7 +164,7 @@ bool DragDropDataInstrument::SetData(const wxDataFormat &format, size_t len, con
   return bCopied;
 }
 
-bool DragDropDataInstrument::IsSupported(const wxDataFormat &format, Direction dir) const {
+bool DragDropInstrument::IsSupported(const wxDataFormat &format, Direction dir) const {
 //  if ( DataFormatInstrumentIQFeedSymbolName == format ) return true;
 //  if ( DataFormatInstrumentClass == format ) return true;
 //  if ( DataFormatInstrumentFunction == format ) return true;

@@ -169,7 +169,7 @@ struct GridOptionChain_impl {
   void OnMouseMotion( wxMouseEvent& event );
   void OnGridCellBeginDrag( wxGridEvent& event );
   
-  bool StartDragDrop( DragDropDataInstrument& );
+  bool StartDragDrop( DragDropInstrument& );
   
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );

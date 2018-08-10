@@ -146,7 +146,7 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
   
-  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropDataInstrument( DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t() ) );
+  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnInstrumentRetrieveInitiate_t() ) );
   
   pddDataInstrumentTarget->m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 

@@ -196,9 +196,9 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
         m_fOnRowClicked( date, strike, bSelected, funcsCall, funcsPut );
       }
     };
-    pDetails->m_fOnInstrumentRetrieveInitiate = [this,date]( const std::string& sIQFeedSymoblName, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
+    pDetails->m_fOnInstrumentRetrieveInitiate = [this,date]( const std::string& sIQFeedSymbolName, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
       if ( nullptr != m_fOnInstrumentRetrieve ) {
-        m_fOnInstrumentRetrieve(sIQFeedSymoblName, date, strike, f );
+        m_fOnInstrumentRetrieve(sIQFeedSymbolName, date, strike, f );
       }
     };
     

@@ -387,7 +387,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->m_fBuildOptionInstrument =
     // first lambda builds an instrument given IQFeed option name and parameters
     // can this use the code from m_fBuildInstrumentFromIqfeed above?
-    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::DragDropDataInstrument::fOnInstrumentRetrieveComplete_t f){
+    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::DragDropInstrument::fOnInstrumentRetrieveComplete_t f){
       ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) );
       std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pInstrumentUnderlying->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
       

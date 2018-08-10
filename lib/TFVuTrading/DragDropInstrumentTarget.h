@@ -34,7 +34,7 @@ namespace tf { // TradeFrame
 class DragDropInstrumentTarget: public wxDropTarget {
 public:
   
-  DragDropInstrumentTarget( DragDropDataInstrument *data=NULL );
+  DragDropInstrumentTarget( DragDropInstrument *data=NULL );
   virtual ~DragDropInstrumentTarget( );
   
   virtual bool GetData();
