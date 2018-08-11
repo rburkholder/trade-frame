@@ -33,8 +33,6 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include <TFVuTrading/DragDropInstrument.h>
-
 #include "GridOptionChain.h"
 
 namespace ou { // One Unified

@@ -72,8 +72,8 @@ public:
   typedef std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
   
-  typedef std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fOnInstrumentRetrieve_t;
-  fOnInstrumentRetrieve_t m_fOnInstrumentRetrieve;
+  typedef std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )> fOnOptionUnderlyingRetrieve_t;
+  fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
   
   typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
   fOnPageEvent_t m_fOnPageChanging; // about to depart page

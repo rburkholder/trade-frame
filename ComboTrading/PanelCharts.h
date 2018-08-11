@@ -92,8 +92,10 @@ public:
 
   std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
   std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
+  
+  typedef std::function<void(pInstrument_t)> fBuildOptionInstrumentComplete_t;
 
-  typedef std::function<void(pInstrument_t, const std::string&, boost::gregorian::date, double, GridOptionChain::fOnInstrumentRetrieveComplete_t )> fBuildOptionInstrument_t;
+  typedef std::function<void(pInstrument_t /* underlying */, const std::string& /* iqfeed option name */, boost::gregorian::date, double, fBuildOptionInstrumentComplete_t )> fBuildOptionInstrument_t;
   fBuildOptionInstrument_t m_fBuildOptionInstrument; // build registered option instrument with IQF and IB info.
 
   typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Add_t;

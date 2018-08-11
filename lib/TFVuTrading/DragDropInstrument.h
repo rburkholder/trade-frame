@@ -33,20 +33,29 @@ class DragDropInstrument: public wxDataObject {
 public:
   
   typedef Instrument::pInstrument_t pInstrument_t;
+  typedef pInstrument_t pOptionInstrument_t;
+  typedef pInstrument_t pUnderlyingInstrument_t;
   
-  static const wxDataFormat DataFormatInstrumentIQFeedSymbolName;
-//  static const wxDataFormat DataFormatInstrumentInteractiveBrokersContract;
-  static const wxDataFormat DataFormatInstrumentClass;
-  static const wxDataFormat DataFormatInstrumentFunction; 
+  static const wxDataFormat DataFormatIQFeedSymbolName;
+  static const wxDataFormat DataFormatClass;
+  static const wxDataFormat DataFormatFunction_Instrument;
+  static const wxDataFormat DataFormatFunction_OptionUnderlying;
  
   typedef std::function<void(pInstrument_t)> fOnInstrumentRetrieveComplete_t;
   typedef std::function<void(fOnInstrumentRetrieveComplete_t)> fOnInstrumentRetrieveInitiate_t;
   typedef fOnInstrumentRetrieveInitiate_t* fOnInstrumentRetrieveInitiate_ptr;
 
+  typedef std::function<void(pOptionInstrument_t, pUnderlyingInstrument_t)> fOnOptionUnderlyingRetrieveComplete_t;
+  typedef std::function<void(fOnOptionUnderlyingRetrieveComplete_t)> fOnOptionUnderlyingRetrieveInitiate_t;
+  typedef fOnOptionUnderlyingRetrieveInitiate_t* fOnOptionUnderlyingRetrieveInitiate_ptr;
+
   DragDropInstrument( );
+  explicit DragDropInstrument( const DragDropInstrument& ) = delete;
+  explicit DragDropInstrument( const DragDropInstrument&& ) = delete;
   explicit DragDropInstrument( const std::string& sIQFeedSymbolName );
   explicit DragDropInstrument( pInstrument_t );
   explicit DragDropInstrument( fOnInstrumentRetrieveInitiate_t&& );
+  explicit DragDropInstrument( fOnOptionUnderlyingRetrieveInitiate_t&& );
   virtual ~DragDropInstrument( );
   
   virtual void GetAllFormats (wxDataFormat *formats, Direction dir=Get) const;
@@ -59,19 +68,21 @@ public:
   
   const std::string& GetIQFeedSymbolName() const; // TODO: need to validate which Format flag was in use
   pInstrument_t GetInstrument();
-  fOnInstrumentRetrieveInitiate_t& GetInstrumentBuildInitiate();
+  fOnInstrumentRetrieveInitiate_t& GetInstrumentRetrieveInitiate();  // TODO: change to a move as the constructor  is a move
+  fOnOptionUnderlyingRetrieveInitiate_t& GetOptionUnderlyingRetrieveInitiate();  // TODO: change to a move as the constructor  is a move
   
 protected:
 private:
   static const char szFormatIQFeedSymbolName[];
-//  static const char szFormatInteractiveBrokersContract[];
-  static const char szFormatInstrumentClass[];
-  static const char szFormatInstrumentFunction[];
+  static const char szFormatClass[];
+  static const char szFormatFunction_Instrument[];
+  static const char szFormatFunction_OptionUnderlying[];
   
   wxDataFormat m_DataFormat;
   std::string m_sIQFeedSymbolName;
   pInstrument_t m_pInstrument;
   fOnInstrumentRetrieveInitiate_t m_fOnInstrumentRetrieveInitiate;
+  fOnOptionUnderlyingRetrieveInitiate_t m_fOnOptionUnderlyingRetrieveInitiate;
 };
 
 } // namespace tf

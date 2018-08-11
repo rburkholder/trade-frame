@@ -307,22 +307,23 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iterOptionValueRow );
     
-    if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
-      // call drag and drop
-      ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f ); // iqfeed name and strike
-      } );
+    if ( nullptr != m_details.m_fOnOptionUnderlyingRetrieveInitiate ) {
       
-      bSkip = StartDragDrop( dndCall );
-    }
+      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) { // call drag and drop
+        ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
+          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f ); // iqfeed name and strike
+        } );
 
-    if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) && ( nullptr != m_details.m_fOnInstrumentRetrieveInitiate ) ) {
-      // put drag and drop
-      ou::tf::DragDropInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-        m_details.m_fOnInstrumentRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f ); // iqfeed name and strike
-      } );
+        bSkip = StartDragDrop( dndCall );
+      }
 
-      bSkip = StartDragDrop( dndPut );    
+      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) { // put drag and drop
+        ou::tf::DragDropInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
+          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f ); // iqfeed name and strike
+        } );
+
+        bSkip = StartDragDrop( dndPut );    
+      }
     }
 
   }
@@ -339,15 +340,9 @@ void GridOptionChain_impl::StopWatch() {
 
         GridOptionChain::OptionUpdateFunctions funcCall;
         funcCall.sSymbolName = value.second.m_sCallName;
-//        funcCall.fQuote = nullptr;
-//        funcCall.fTrade = nullptr;
-//        funcCall.fGreek = nullptr;
 
         GridOptionChain::OptionUpdateFunctions funcPut;
         funcPut.sSymbolName = value.second.m_sPutName;
-//        funcPut.fQuote = nullptr;
-//        funcPut.fTrade = nullptr;
-//        funcPut.fGreek = nullptr;
 
         m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, funcCall, funcPut );
       }		

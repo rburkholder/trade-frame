@@ -19,6 +19,8 @@
 #include <wx/textctrl.h>
 #include <wx/menu.h>
 
+#include <TFVuTrading/DragDropInstrumentTarget.h>
+
 #include "PanelPortfolioPosition_impl.h"
 
 namespace ou { // One Unified
@@ -146,11 +148,11 @@ void PanelPortfolioPosition_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_ppp.ID_MenuClosePortfolio, "Close Portfolio" );
   
-  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnInstrumentRetrieveInitiate_t() ) );
+  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
   
-  pddDataInstrumentTarget->m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
+  pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
-    AddInstrumentToPosition( pInstrument );
+    AddInstrumentToPosition( pOptionInstrument );
   };
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
   //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){

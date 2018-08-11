@@ -186,24 +186,24 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
     auto* pPanel = new wxPanel( this, wxID_ANY );
     auto* pSizer = new wxBoxSizer(wxVERTICAL);
     pPanel->SetSizer( pSizer );
-    auto* pDetails = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
-    pSizer->Add( pDetails, 1, wxALL|wxEXPAND, 1 );
+    auto* pGridOptionChain = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
+    pSizer->Add( pGridOptionChain, 1, wxALL|wxEXPAND, 1 );
     
     // a control right click will signal through that strike should watch/unwatch
     // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
-    pDetails->m_fOnRowClicked = [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
+    pGridOptionChain->m_fOnRowClicked = [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
       if ( nullptr != m_fOnRowClicked) {
         m_fOnRowClicked( date, strike, bSelected, funcsCall, funcsPut );
       }
     };
-    pDetails->m_fOnInstrumentRetrieveInitiate = [this,date]( const std::string& sIQFeedSymbolName, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f ){
-      if ( nullptr != m_fOnInstrumentRetrieve ) {
-        m_fOnInstrumentRetrieve(sIQFeedSymbolName, date, strike, f );
+    pGridOptionChain->m_fOnOptionUnderlyingRetrieveInitiate = [this, date]( const std::string& sIQFeedOptionName, double strike, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
+      if ( nullptr != m_fOnOptionUnderlyingRetrieve ) {
+        m_fOnOptionUnderlyingRetrieve(sIQFeedOptionName, date, strike, f );
       }
     };
     
     iterExpiry = m_mapOptionExpiry.insert( 
-      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pDetails ) ) );
+      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
     
     struct Reindex {
       size_t ix;

@@ -387,30 +387,30 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->m_fBuildOptionInstrument =
     // first lambda builds an instrument given IQFeed option name and parameters
     // can this use the code from m_fBuildInstrumentFromIqfeed above?
-    [this](pInstrument_t pInstrumentUnderlying, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::DragDropInstrument::fOnInstrumentRetrieveComplete_t f){
-      ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) );
-      std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pInstrumentUnderlying->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
+    [this](pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::PanelCharts::fBuildOptionInstrumentComplete_t f){
+      ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) ); // TODO: check for errors
+      std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
       
       ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-      pInstrument_t pInstrumentOption;
-      if ( im.Exists( sGenericOptionName, pInstrumentOption ) ) {
+      pInstrument_t pOptionInstrument;
+      if ( im.Exists( sGenericOptionName, pOptionInstrument ) ) {
         if ( nullptr != f ) {
-          f( pInstrumentOption );
+          f( pOptionInstrument );
         }        
       }
       else {
-        pInstrumentOption = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() );
+        pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() );
         ou::tf::IBTWS::Contract contract;
-        contract.conId = pInstrumentUnderlying->GetContract();
+        contract.conId = pUnderlyingInstrument->GetContract();
         // this request uses contract id to obtain basic symbol of the underlying
         m_tws->RequestContractDetails(
           contract, 
-          [this,pInstrumentOption,f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+          [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
             // the resulting symbol can then be used to plug into the final option request to obtain
             //   the contract details for the option
             m_tws->RequestContractDetails( 
-              details.summary.symbol, pInstrumentOption,
-              [this,f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+              details.summary.symbol, pOptionInstrument,
+              [this, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
                 // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
                 //   as a fully defined, registered instrument
                 RegisterInstrument( pInstrument );
@@ -422,7 +422,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
               );    
           }, 
           nullptr, // request complete
-          pInstrumentUnderlying );
+          pUnderlyingInstrument );
       }
     };
     

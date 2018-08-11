@@ -46,12 +46,13 @@ bool DragDropInstrumentTarget::OnDrop(wxCoord x, wxCoord y) {  // first step of 
 }
  
 wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult defResult) { // second step of two
+  std::cout << "DragDropInstrumentTarget::OnData" << std::endl;
   bool bResult = GetData();
   //wxDataObject obj = wxDropTarget::GetDataObject();
   //DragDropDataInstrument* dddi = dynamic_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() );
-  DragDropInstrument* dddi = (DragDropInstrument*)wxDropTarget::GetDataObject();
+  DragDropInstrument* ddi = dynamic_cast<DragDropInstrument*>( wxDropTarget::GetDataObject() );
   //DragDropDataInstrument* dddi = wxDropTarget::GetDataObject();
-  if ( dddi->IsSupported( DragDropInstrument::DataFormatInstrumentClass ) ) {
+  if ( ddi->IsSupported( DragDropInstrument::DataFormatClass ) ) {
 //    if ( nullptr != m_fOnInstrument ) {
 //      DragDropDataInstrument::fOnInstrumentRetrieveInitiate_t 
  //       fOnInstrumentRetrieveInitiate( reinterpret_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() )->GetInstrumentBuildInitiate() );
@@ -60,15 +61,28 @@ wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult
       //m_fOnInstrument( reinterpret_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() )->GetInstrument() );
     //}
   }
-  if ( dddi->IsSupported( DragDropInstrument::DataFormatInstrumentFunction ) ) {
-      DragDropInstrument::fOnInstrumentRetrieveInitiate_t& fOnInstrumentRetrieveInitiate = dddi->GetInstrumentBuildInitiate();
+  if ( ddi->IsSupported( DragDropInstrument::DataFormatFunction_Instrument ) ) {
+      DragDropInstrument::fOnInstrumentRetrieveInitiate_t& fOnInstrumentRetrieveInitiate = ddi->GetInstrumentRetrieveInitiate();
       if ( nullptr != fOnInstrumentRetrieveInitiate ) {
         fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){
-          m_fOnInstrument(pInstrument);
+          if ( nullptr != m_fOnInstrumentRetrieveComplete ) {
+            m_fOnInstrumentRetrieveComplete(pInstrument);
+          }
+          
         });
       }
   }
-  if ( dddi->IsSupported( DragDropInstrument::DataFormatInstrumentIQFeedSymbolName) ) {
+  if ( ddi->IsSupported( DragDropInstrument::DataFormatFunction_OptionUnderlying ) ) {
+      DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t fOnOptionUnderlyingRetrieveInitiate = std::move( ddi->GetOptionUnderlyingRetrieveInitiate() );
+      if ( nullptr != fOnOptionUnderlyingRetrieveInitiate ) {
+        fOnOptionUnderlyingRetrieveInitiate([this](pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ){
+          if ( nullptr != m_fOnOptionUnderlyingRetrieveComplete ) {
+            m_fOnOptionUnderlyingRetrieveComplete( pOptionInstrument, pUnderlyingInstrument );
+          }
+        });
+      }
+  }
+  if ( ddi->IsSupported( DragDropInstrument::DataFormatIQFeedSymbolName) ) {
   }
   return defResult;
 }

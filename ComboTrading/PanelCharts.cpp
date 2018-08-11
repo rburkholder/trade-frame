@@ -309,25 +309,25 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
     std::cout << "PanelCharts::HandleOptionChainList: no menuitem" << std::endl;
   }
   else {
-    mapInstrumentEntry_t::iterator iterIdInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
-    if ( m_mapInstrumentEntry.end() == iterIdInstrument ) {
+    mapInstrumentEntry_t::iterator iterIdUnderlyingInstrument = m_mapInstrumentEntry.find( iterIdItem->second );
+    if ( m_mapInstrumentEntry.end() == iterIdUnderlyingInstrument ) {
       std::cout << "PanelCharts::HandleOptionChainList: no " << iterIdItem->second << std::endl;
     }
     else {
-      CallAfter([this,pNotebookOptionChains,iterIdInstrument](){ // ensure iterIdInstrument is not invalidated in the meantime
-        InstrumentEntry& entry( iterIdInstrument->second );
+      CallAfter([this, pNotebookOptionChains, iterIdUnderlyingInstrument](){ // ensure iterIdUnderlyingInstrument is not invalidated in the meantime
+        InstrumentEntry& entry( iterIdUnderlyingInstrument->second );
         // obtain instrument name (future requires special handling)
-        ou::tf::Instrument::pInstrument_t pInstrument = entry.m_pWatch->GetInstrument();
+        ou::tf::Instrument::pInstrument_t pUnderlyingInstrument = entry.m_pWatch->GetInstrument();
         std::string sSymbol;
-        switch ( pInstrument->GetInstrumentType() ) { 
+        switch ( pUnderlyingInstrument->GetInstrumentType() ) { 
           case ou::tf::InstrumentType::Stock:
-            sSymbol = pInstrument->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
+            sSymbol = pUnderlyingInstrument->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
             break;
           case ou::tf::InstrumentType::Future: {
             //why not the Provider name here as well?
             //   -- because it supplies something like QGCZ17, where we want only QGC for the seach
             //sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
-            std::string sTemp = pInstrument->GetInstrumentName();
+            std::string sTemp = pUnderlyingInstrument->GetInstrumentName();
             size_t pos = sTemp.find( '-' );
             assert( 0 != pos );
             sSymbol = sTemp.substr( 0, pos );
@@ -354,11 +354,15 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
         pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
         pNotebookOptionChains->m_fOnRowClicked 
-          = std::bind( &PanelCharts::HandleGridClick, this, iterIdInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
-        pNotebookOptionChains->m_fOnInstrumentRetrieve 
-          = [this, pInstrument](const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, GridOptionChain::fOnInstrumentRetrieveComplete_t f){
+          = std::bind( &PanelCharts::HandleGridClick, this, iterIdUnderlyingInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
+        pNotebookOptionChains->m_fOnOptionUnderlyingRetrieve 
+          = [this, pUnderlyingInstrument](const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f){
               if ( nullptr != m_fBuildOptionInstrument ) {
-                m_fBuildOptionInstrument( pInstrument, sIQFeedOptionName, date, strike, f);
+                m_fBuildOptionInstrument( pUnderlyingInstrument, sIQFeedOptionName, date, strike, [pUnderlyingInstrument, f](pInstrument_t pOptionInstrument){
+                  if ( nullptr != f ) {
+                    f( pOptionInstrument, pUnderlyingInstrument );
+                  }
+                });
           }
         };
       });

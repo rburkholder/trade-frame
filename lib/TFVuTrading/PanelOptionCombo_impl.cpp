@@ -19,6 +19,8 @@
 #include <wx/textctrl.h>
 #include <wx/menu.h>
 
+#include <TFVuTrading/DragDropInstrumentTarget.h>
+
 #include "PanelOptionCombo_impl.h"
 
 namespace ou { // One Unified
@@ -146,11 +148,15 @@ void PanelOptionCombo_impl::CreateControls() {
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
   
-  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnInstrumentRetrieveInitiate_t() ) );
-  
-  pddDataInstrumentTarget->m_fOnInstrument = [this]( pInstrument_t pInstrument ) { 
+  // watch out for the std::move operations?:  needed in some places?, not in others?
+  // create empty DragDropInstrument with correct type in order to receive the desired initiate call when dropped
+  // GridOptionChain_impl::OnGridCellBeginDrag creates  source DragDropInstrument
+  typedef DragDropInstrument::pOptionInstrument_t pOptionInstrument_t;
+  typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
+  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
+  pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) { 
     //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
-    AddInstrumentToPosition( pInstrument );
+    AddOptionUnderlyingToPosition( pOptionInstrument, pUnderlyingInstrument );
   };
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
   //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){
@@ -409,6 +415,17 @@ void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument )
   if ( nullptr != m_poc.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;
     m_poc.m_fConstructPositionGreek( pInstrument, m_pPortfolioGreek, 
+      std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
+  }
+  else {
+    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPositionGreek" << std::endl;
+  }
+}
+
+void PanelOptionCombo_impl::AddOptionUnderlyingToPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
+  if ( nullptr != m_poc.m_fConstructPositionGreek) {
+    namespace ph = std::placeholders;
+    m_poc.m_fConstructPositionGreek( pOption, m_pPortfolioGreek, 
       std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
   }
   else {

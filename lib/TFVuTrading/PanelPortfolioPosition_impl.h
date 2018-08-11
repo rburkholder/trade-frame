@@ -44,8 +44,6 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include <TFVuTrading/DragDropInstrumentTarget.h>
-
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
