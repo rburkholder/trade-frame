@@ -50,31 +50,35 @@ class PanelOptionCombo: public wxPanel {
   friend class boost::serialization::access;
   friend class PanelOptionCombo_impl;
 public:
-  
+
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PortfolioGreek::idPortfolio_t idPortfolio_t;
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
-  
+
   typedef ou::tf::PortfolioGreek::idPosition_t idPosition_t;
   typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
-  
+
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
-  
+
   typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
-  typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
-  typedef std::function<void(pInstrument_t, pInstrument_t, pPortfolioGreek_t, fAddPositionGreek_t)> fConstructPositionGreek_t;
-  typedef std::function<void(int,int,PanelOptionCombo&)> fColumnWidthChanged_t;
-  typedef std::function<void(pOption_t, pWatch_t)> fRegisterWithEngine_t;
-  typedef std::function<void(pOption_t)> fRemoveFromEngine_t;
-  
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
-  fConstructPositionGreek_t m_fConstructPositionGreek;
+
+  typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
   fAddPositionGreek_t m_fAddPositionGreek;  // does not appeared to be used
+
+  typedef std::function<void(pInstrument_t, pInstrument_t, pPortfolioGreek_t, fAddPositionGreek_t)> fConstructPositionGreek_t;
+  fConstructPositionGreek_t m_fConstructPositionGreek;
+
+  typedef std::function<void(int,int,PanelOptionCombo&)> fColumnWidthChanged_t;
   fColumnWidthChanged_t m_fColumnWidthChanged;
+
+  typedef std::function<void(pOption_t, pWatch_t)> fRegisterWithEngine_t;
   fRegisterWithEngine_t m_fRegisterWithEngine;
+
+  typedef std::function<void(pOption_t)> fRemoveFromEngine_t;
   fRemoveFromEngine_t m_fRemoveFromEngine;
 
   PanelOptionCombo(void);
