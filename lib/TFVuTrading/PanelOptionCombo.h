@@ -52,6 +52,8 @@ class PanelOptionCombo: public wxPanel {
 public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
+  typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PortfolioGreek::idPortfolio_t idPortfolio_t;
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
@@ -63,13 +65,17 @@ public:
   
   typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
-  typedef std::function<void(pInstrument_t,pPortfolioGreek_t,fAddPositionGreek_t)> fConstructPositionGreek_t;
+  typedef std::function<void(pInstrument_t, pInstrument_t, pPortfolioGreek_t, fAddPositionGreek_t)> fConstructPositionGreek_t;
   typedef std::function<void(int,int,PanelOptionCombo&)> fColumnWidthChanged_t;
+  typedef std::function<void(pOption_t, pWatch_t)> fRegisterWithEngine_t;
+  typedef std::function<void(pOption_t)> fRemoveFromEngine_t;
   
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
   fConstructPositionGreek_t m_fConstructPositionGreek;
   fAddPositionGreek_t m_fAddPositionGreek;  // does not appeared to be used
   fColumnWidthChanged_t m_fColumnWidthChanged;
+  fRegisterWithEngine_t m_fRegisterWithEngine;
+  fRemoveFromEngine_t m_fRemoveFromEngine;
 
   PanelOptionCombo(void);
   PanelOptionCombo( 

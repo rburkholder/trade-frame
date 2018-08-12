@@ -25,9 +25,9 @@ namespace tf { // TradeFrame
   
 // TODO: add additional constructors for use with inherited Position
 
-PositionGreek::PositionGreek( pOption_t pOption )
+PositionGreek::PositionGreek( pOption_t& pOption, pUnderlying_t& pUnderlying )
 : Position( pOption->GetInstrument(), pProvider_t(), pOption->GetProvider() ), // supply empty execution provider for now
-  m_pOption( pOption )
+  m_pOption( pOption ), m_pUnderlying( pUnderlying )
 {
   // NOTE:  may need to construct with a 'row'
   Position::Set( pOption->GetInstrument()->GetInstrumentName() );
@@ -43,6 +43,7 @@ void PositionGreek::Construction() {
 }
 
 void PositionGreek::HandleGreek( greek_t greek ) {
+  OnGreek( greek );
 }
 
 std::ostream& operator<<( std::ostream& os, const PositionGreek& position ) {

@@ -75,6 +75,10 @@ void Watch::Initialize( void ) {
   m_quotes.Reserve( 1024 );  // reduce startup allocations
   m_trades.Reserve( 1024 );  // reduce startup allocations
   AddEvents();
+  // TODO: check that instrument name, or alt instrument name matches provider type:
+  //    contract exists for IBTWS provider, IQFeedName exists for IQFeed provider
+  //   also needs to be validated in SetProvider
+  //  EnableWatch takes care of some of that, but doesn't confirm contract if using IBTWS as provider
 }
 
 void Watch::AddEvents( void ) {

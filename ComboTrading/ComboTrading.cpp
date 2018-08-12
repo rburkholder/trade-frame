@@ -130,6 +130,16 @@ bool AppComboTrading::OnInit() {
   m_pPanelCharts = nullptr;
   
   m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
+  m_pOptionEngine->m_fBuildWatch 
+    = [this](pInstrument_t pInstrument)->pWatch_t {
+        ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+        return pWatch;
+      };
+  m_pOptionEngine->m_fBuildOption 
+    = [this](pInstrument_t pInstrument)->pOption_t {
+        ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+        return pOption;
+      };
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -580,20 +590,33 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   // 2018/08/03 TO FIX: will have issues with this, as it accepts options only.  at some point will want underlying for the delta of 1.
   // also will want to connect this option up with the engine for updated greek calculations
   // also will need the underlying for those calculations
-  pPOC->m_fConstructPositionGreek = [this](pInstrument_t pInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
+  pPOC->m_fConstructPositionGreek 
+      = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
+        // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
+        // register with engine
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-    if ( im.Exists( pInstrument ) ) {
-      std::cout << "### verify the code at m_fConstructPositionGreek as instrument exists: " << pInstrument->GetInstrumentName() << " ###" << std::endl;
+    if ( im.Exists( pOptionInstrument ) ) {
+      // is typically built at the m_pPanelCharts->m_fBuildOptionInstrument point in time
+      //std::cout << "### verify the code at m_fConstructPositionGreek as instrument exists: " << pInstrument->GetInstrumentName() << " ###" << std::endl;
     }
     else {
-      im.Register( pInstrument );
+      std::cout << "AppComboTrading::BuildFrameOptionCombo: registering " << pOptionInstrument->GetInstrumentName() << ", should have been accomplished prior to this?" << std::endl;
+      im.Register( pOptionInstrument );
     }
     
-    ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
-    pPositionGreek_t pPositionGreek( new ou::tf::PositionGreek( pOption ) );
-    pPortfolioGreek->AddPosition( pInstrument->GetInstrumentName(), pPositionGreek );
+    pWatch_t pWatch;
+    m_pOptionEngine->Find( pUnderlyingInstrument, pWatch );
+    
+    pOption_t pOption;
+    m_pOptionEngine->Find( pOptionInstrument, pOption );
+    
+    pPositionGreek_t pPositionGreek( new ou::tf::PositionGreek( pOption, pWatch ) );
+    pPortfolioGreek->AddPosition( pOptionInstrument->GetInstrumentName(), pPositionGreek );
     if ( nullptr != f ) 
       f( pPositionGreek );
+    
+    // position needs to start the watch, needs both option and underlying
+    // then add to engine here?  who removes from engine?  does the panel manage the list
   };
   pPOC->m_fSelectInstrument = [this]()->pInstrument_t {
       namespace ph = std::placeholders;
@@ -617,6 +640,10 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
 
   assert( nullptr != pPOC->m_fConstructPortfolioGreek );
   pPOC->m_fConstructPortfolioGreek( *pPOC, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
+  
+  namespace ph = std::placeholders;
+  pPOC->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
+  pPOC->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1 );
 
   m_pFOC->Layout();
 

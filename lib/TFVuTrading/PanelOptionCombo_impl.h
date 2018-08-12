@@ -67,8 +67,8 @@ struct PanelOptionCombo_impl {
 
   void UpdateGui( void );
   void AddPositionGreek( pPositionGreek_t pPositionGreek );
-  void AddInstrumentToPosition( pInstrument_t pInstrument );
-  void AddOptionUnderlyingToPosition( pInstrument_t pOption_t, pInstrument_t pUnderlying_t );
+  //void AddInstrumentToPosition( pInstrument_t pInstrument );
+  void AddOptionUnderlyingPosition( pInstrument_t pOption_t, pInstrument_t pUnderlying_t );
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );

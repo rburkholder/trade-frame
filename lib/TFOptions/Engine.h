@@ -107,16 +107,26 @@ public:
   // prevents map iterators from being invalidated (check invalidation)
   // interleave add/delete  chronologically, so enum the operation.
   
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
   typedef OptionEntry::fCallbackWithGreek_t fCallbackWithGreek_t;
   
+  typedef std::function<pWatch_t(pInstrument_t)> fBuildWatch_t;  // constructed elsewhere as it needs provider
+  typedef std::function<pOption_t(pInstrument_t)> fBuildOption_t;  // constructed elsewhere as it needs provider
+  
   explicit Engine( const ou::tf::LiborFromIQFeed& );
   virtual ~Engine( );
   
-  void Add( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& ); // reference counted(will be a problem with multiple callback destinations, first one wins currently
+  void Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& ); // reference counted(will be a problem with multiple callback destinations, first one wins currently
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // this is better, the option already has a delegate for callback
   void Remove( pOption_t pOption ); // part of the reference counting, will change reference count on associated underlying and auto remove
+  
+  void Find( const pInstrument_t pInstrument, pWatch_t& pWatch );  // if Watch not found, construct one.  Then provide the watch.
+  void Find( const pInstrument_t pInstrument, pOption_t& pOption );  // if Option nout found, construct one.  Then provide the option.
+  
+  fBuildWatch_t m_fBuildWatch;
+  fBuildOption_t m_fBuildOption;
   
 private:
   
@@ -124,6 +134,8 @@ private:
   
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   
+  typedef std::map<idInstrument_t, pWatch_t> mapKnownWatches_t;
+  typedef std::map<idInstrument_t, pOption_t> mapKnownOptions_t;
   typedef std::map<idInstrument_t, OptionEntry> mapOptionEntry_t;
   
   //std::atomic<size_t> m_cntOptionEntryOperationQueueCount;
@@ -152,6 +164,8 @@ private:
   
   dequeOptionEntryOperation_t m_dequeOptionEntryOperation;
   
+  mapKnownWatches_t m_mapKnownWatches;
+  mapKnownOptions_t m_mapKnownOptions;
   mapOptionEntry_t m_mapOptionEntry;
   
   void HandleTimerScan( const boost::system::error_code &ec );

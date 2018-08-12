@@ -24,6 +24,7 @@
 #include <TFOptions/Option.h>
 
 #include "Position.h"
+#include "Watch.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -35,14 +36,18 @@ public:
   
   typedef boost::shared_ptr<PositionGreek> pPositionGreek_t;
   
+  typedef ou::tf::Watch::pWatch_t pUnderlying_t;;
   typedef ou::tf::option::Option::pOption_t pOption_t;
   
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
   
-  explicit PositionGreek( pOption_t );
+  explicit PositionGreek( pOption_t&, pUnderlying_t& );
   virtual ~PositionGreek( );
   
-  ou::Delegate<const ou::tf::Greek&> OnGreek; 
+  pOption_t GetOption() { return m_pOption; }
+  pUnderlying_t GetUnderlying() { return m_pUnderlying; }
+  
+  ou::Delegate<const ou::tf::Greek&> OnGreek; // need to fire this on option updates
   
 protected:
   
@@ -51,6 +56,7 @@ protected:
 private:
   
   pOption_t m_pOption;
+  pUnderlying_t m_pUnderlying;
   
   void Construction();
 

@@ -69,8 +69,10 @@ Option& Option::operator=( const Option& rhs ) {
 }
 
 void Option::Initialize( void ) {
+  assert( Watch::m_pInstrument->IsOption() || Watch::m_pInstrument->IsFuturesOption() );
   if ( 0 != m_pGreekProvider.get() ) 
     assert( m_pGreekProvider->ProvidesGreeks() );
+  m_greeks.Reserve( 1024 );  // reduce startup allocations
 }
 
 bool Option::StartWatch( void ) {

@@ -46,7 +46,7 @@ bool DragDropInstrumentTarget::OnDrop(wxCoord x, wxCoord y) {  // first step of 
 }
  
 wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult defResult) { // second step of two
-  std::cout << "DragDropInstrumentTarget::OnData" << std::endl;
+  //std::cout << "DragDropInstrumentTarget::OnData" << std::endl;
   bool bResult = GetData();
   //wxDataObject obj = wxDropTarget::GetDataObject();
   //DragDropDataInstrument* dddi = dynamic_cast<DragDropDataInstrument*>( wxDropTarget::GetDataObject() );
@@ -62,25 +62,26 @@ wxDragResult DragDropInstrumentTarget::OnData(wxCoord x, wxCoord y, wxDragResult
     //}
   }
   if ( ddi->IsSupported( DragDropInstrument::DataFormatFunction_Instrument ) ) {
-      DragDropInstrument::fOnInstrumentRetrieveInitiate_t& fOnInstrumentRetrieveInitiate = ddi->GetInstrumentRetrieveInitiate();
-      if ( nullptr != fOnInstrumentRetrieveInitiate ) {
-        fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){
-          if ( nullptr != m_fOnInstrumentRetrieveComplete ) {
-            m_fOnInstrumentRetrieveComplete(pInstrument);
-          }
-          
-        });
-      }
+    DragDropInstrument::fOnInstrumentRetrieveInitiate_t& fOnInstrumentRetrieveInitiate = ddi->GetInstrumentRetrieveInitiate();
+    if ( nullptr != fOnInstrumentRetrieveInitiate ) {
+      fOnInstrumentRetrieveInitiate([this](pInstrument_t pInstrument){
+        if ( nullptr != m_fOnInstrumentRetrieveComplete ) {
+          m_fOnInstrumentRetrieveComplete(pInstrument);
+        }
+
+      });
+    }
   }
   if ( ddi->IsSupported( DragDropInstrument::DataFormatFunction_OptionUnderlying ) ) {
-      DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t fOnOptionUnderlyingRetrieveInitiate = std::move( ddi->GetOptionUnderlyingRetrieveInitiate() );
-      if ( nullptr != fOnOptionUnderlyingRetrieveInitiate ) {
-        fOnOptionUnderlyingRetrieveInitiate([this](pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ){
-          if ( nullptr != m_fOnOptionUnderlyingRetrieveComplete ) {
-            m_fOnOptionUnderlyingRetrieveComplete( pOptionInstrument, pUnderlyingInstrument );
-          }
-        });
-      }
+    //std::cout << "DragDropInstrumentTarget::OnData, DragDropInstrument::DataFormatFunction_OptionUnderlying" << std::endl;
+    DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t fOnOptionUnderlyingRetrieveInitiate = std::move( ddi->GetOptionUnderlyingRetrieveInitiate() );
+    if ( nullptr != fOnOptionUnderlyingRetrieveInitiate ) {
+      fOnOptionUnderlyingRetrieveInitiate([this](pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ){
+        if ( nullptr != m_fOnOptionUnderlyingRetrieveComplete ) {
+          m_fOnOptionUnderlyingRetrieveComplete( pOptionInstrument, pUnderlyingInstrument );
+        }
+      });
+    }
   }
   if ( ddi->IsSupported( DragDropInstrument::DataFormatIQFeedSymbolName) ) {
   }

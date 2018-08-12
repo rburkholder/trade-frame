@@ -56,6 +56,12 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
 }
 
 PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
+  std::for_each( m_vPositions.begin(), m_vPositions.end(), [this]( vPositions_t::value_type& vt ){
+    if ( nullptr != m_poc.m_fRemoveFromEngine ) {
+      m_poc.m_fRemoveFromEngine( vt.GetPositionGreek()->GetOption() );
+    }
+  });
+  m_vPositions.clear();
 }
 
 void PanelOptionCombo_impl::CreateControls() {    
@@ -155,8 +161,8 @@ void PanelOptionCombo_impl::CreateControls() {
   typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
   DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
   pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) { 
-    //std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl; 
-    AddOptionUnderlyingToPosition( pOptionInstrument, pUnderlyingInstrument );
+    //std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl; 
+    AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
   };
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
   //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){
@@ -401,31 +407,31 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
 void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
   if ( nullptr != m_poc.m_fSelectInstrument ) {
     pInstrument_t pInstrument = m_poc.m_fSelectInstrument();
-    if ( 0 != pInstrument.use_count() ) {
-      AddInstrumentToPosition( pInstrument );
-    }
+    std::cout << "needs rework as an underlying needs to be present" << std::endl;
+//    if ( 0 != pInstrument.use_count() ) {
+//      AddInstrumentToPosition( pInstrument );
+//    }
   }
   else {
     std::cout << "PanelOptionCombo_impl::OnPositionPopUpAddPosition: no fSelectInstrument" << std::endl;
   }
 }
 
-// need the underlying to be provided somewhere
-void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
-  if ( nullptr != m_poc.m_fConstructPositionGreek) {
-    namespace ph = std::placeholders;
-    m_poc.m_fConstructPositionGreek( pInstrument, m_pPortfolioGreek, 
-      std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
-  }
-  else {
-    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPositionGreek" << std::endl;
-  }
-}
+//void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
+//  if ( nullptr != m_poc.m_fConstructPositionGreek) {
+//    namespace ph = std::placeholders;
+//    m_poc.m_fConstructPositionGreek( pInstrument, m_pPortfolioGreek, 
+//      std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
+//  }
+//  else {
+//    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPositionGreek" << std::endl;
+//  }
+//}
 
-void PanelOptionCombo_impl::AddOptionUnderlyingToPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
+void PanelOptionCombo_impl::AddOptionUnderlyingPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
   if ( nullptr != m_poc.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;
-    m_poc.m_fConstructPositionGreek( pOption, m_pPortfolioGreek, 
+    m_poc.m_fConstructPositionGreek( pOption, pUnderlying, m_pPortfolioGreek, 
       std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
   }
   else {
@@ -440,6 +446,9 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
   int row( m_vPositions.size() );
 
   m_vPositions.push_back( structPosition( pPositionGreek, *m_gridPositions, row ) );
+  if ( nullptr != m_poc.m_fRegisterWithEngine ) {
+    m_poc.m_fRegisterWithEngine( pPositionGreek->GetOption(), pPositionGreek->GetUnderlying() );
+  }
 
   UpdateGui();
 }

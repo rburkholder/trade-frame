@@ -152,13 +152,54 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
 }
 
 Engine::~Engine( ) {
-  m_dequeOptionEntryOperation.clear();
-  m_mapOptionEntry.clear();
+  
+  {
+    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    m_dequeOptionEntryOperation.clear();
+  }
+  
   m_srvcWork.reset();
   m_threads.join_all();
+  
+  m_mapOptionEntry.clear();
+  
+  m_mapKnownOptions.clear();
+  m_mapKnownWatches.clear();
 }
 
-void Engine::Add( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
+void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
+  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
+  if ( m_mapKnownWatches.end() == iter ) {
+    if ( nullptr != m_fBuildWatch ) {
+      pWatch = m_fBuildWatch( pInstrument );
+      m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
+    }
+    else {
+      throw std::runtime_error( "Engine::m_fBuildWatch is nullptr" );
+    }
+  }
+  else {
+    pWatch = iter->second;
+  }
+}
+
+void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
+  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
+  if ( m_mapKnownOptions.end() == iter ) {
+    if ( nullptr != m_fBuildOption ) {
+      pOption = m_fBuildOption( pInstrument );
+      m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
+    }
+    else {
+      throw std::runtime_error( "Engein::m_fBuildOption is nullptr" );
+    }
+  }
+  else {
+    pOption = iter->second;
+  }
+}
+
+void Engine::Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
 //  if ( m_srvcWork.owns_work() ) {
     OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
@@ -253,6 +294,8 @@ void Engine::ScanOptionEntryQueue() {
   
   // dtUtcNow needs to be passed by value
   boost::posix_time::ptime dtUtcNow = ou::TimeSource::GlobalInstance().External();
+  
+  // TODO:  process only those being watched
   
   // three step lambda call:
   //  1) lambda for each active mapOptionEntry
