@@ -7,6 +7,8 @@ C++ is used throughout for building high-capacity, low-latency trading applicati
 
 I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.
 
+A C++11 compiler is required to build the libraries and code.
+
 ## Building
 
 Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
