@@ -100,14 +100,14 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
 
   // add watch/unwatch menu item?
   
-  pMenu->Append( MIEmit, "Emit" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
-  
   pMenu->Append( MILiveChart, "Live Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
   
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
+  
+  pMenu->Append( MIEmit, "Emit" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
   
 //  pMenu->Append( MISaveData, "Save Data" );
 //  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
