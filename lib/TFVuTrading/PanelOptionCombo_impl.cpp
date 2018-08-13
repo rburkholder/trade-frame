@@ -428,6 +428,7 @@ void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) 
 //  }
 //}
 
+// TODO: will need to change to use various instances rather than just m_pPortfolioGreek
 void PanelOptionCombo_impl::AddOptionUnderlyingPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
   if ( nullptr != m_poc.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;

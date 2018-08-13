@@ -1,3 +1,11 @@
+2018/08/12
+
+See ./lib/TFVuTrading/PanelOptionCombo.cpp for a mechanism of using:
+* a template declaration in the header
+* the template instantiation in the compilation unit
+* use the trick of partail template instantatiation to work around link time issues
+* trick comes from: https://www.boost.org/doc/libs/1_67_0/libs/serialization/doc/pimpl.html
+
 2018/06/06
 
 phoenix adapting functions:

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 
 #define FUSION_MAX_VECTOR_SIZE 15
 
@@ -60,6 +61,7 @@ struct PanelOptionCombo_impl {
 //protected:
 //private:
   
+  typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
@@ -106,7 +108,7 @@ struct PanelOptionCombo_impl {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
 
-  class structPosition {
+  class structPosition { // ======================================== structPosition
   public:
     structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int row )
       : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_row( row ) {
@@ -132,7 +134,7 @@ struct PanelOptionCombo_impl {
       //m_pGrid->Thaw();
       //m_pGrid->EndBatch();
     }
-    pPositionGreek_t GetPositionGreek( void ) { return m_pPositionGreek; }
+    const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
     void SetPrecision( double dbl ) {  // why a call with double, and not being used?
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
     }
@@ -199,7 +201,18 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() );
       boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() );
     }
-  };  // structPosition
+    
+    template<typename Archive>
+    void save( Archive& ar, const unsigned int version ) const {
+    }
+
+    template<typename Archive>
+    void load( Archive& ar, const unsigned int version ) {
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+  };  // ======================================== structPosition
+  
 
   typedef std::vector<structPosition> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid
@@ -265,13 +278,43 @@ struct PanelOptionCombo_impl {
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
 
-    std::for_each( m_vPositions.begin(), m_vPositions.end(), [](vPositions_t::value_type& vt){
-      //vt.GetPositionGreek()->GetRow();
+    ar & m_vPositions.size();
+    std::for_each( m_vPositions.begin(), m_vPositions.end(), 
+      [&ar](const vPositions_t::value_type& vt){
+        const std::string sO( vt.GetPositionGreek()->GetOption()->GetInstrument()->GetInstrumentName() );
+        ar & sO;
+        const std::string sU( vt.GetPositionGreek()->GetUnderlying()->GetInstrument()->GetInstrumentName() );
+      ar & sU;
+      std::cout << "saved " << sO << "," << sU << std::endl;
     } );
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    
+    if ( 2 <= version ) {
+      vPositions_t::size_type cntPositions;
+      ar & cntPositions;
+      for ( vPositions_t::size_type cnt = 0; cnt < cntPositions; cnt++ ) {
+        idInstrument_t idOptionInstrument;
+        ar & idOptionInstrument;
+        pInstrument_t pOptionInstrument;
+        m_poc.m_fLookUpInstrument( idOptionInstrument, pOptionInstrument );
+        assert( nullptr != pOptionInstrument.get() );
+        
+        idInstrument_t idUnderlyingInstrument;
+        pInstrument_t pUnderlyingInstrument;
+        ar & idUnderlyingInstrument;
+        m_poc.m_fLookUpInstrument( idUnderlyingInstrument, pUnderlyingInstrument );
+        assert( nullptr != pUnderlyingInstrument.get() );
+        
+        std::cout << "retrieved " << idOptionInstrument << "," << idUnderlyingInstrument << std::endl;
+        
+        AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
+      }
+      
+    }
+    
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -281,4 +324,5 @@ struct PanelOptionCombo_impl {
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl, 1)
+BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl, 2)
+BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl::structPosition, 1)

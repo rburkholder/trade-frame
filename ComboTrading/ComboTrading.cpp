@@ -128,6 +128,7 @@ bool AppComboTrading::OnInit() {
   m_pFInteractiveBrokers = nullptr;
     
   m_pPanelCharts = nullptr;
+  m_pPanelOptionCombo = nullptr;
   
   m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
   m_pOptionEngine->m_fBuildWatch 
@@ -563,11 +564,11 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   m_pFOC->SetPosition( point );
   m_pFOC->Show();
 
-  auto* pPOC = new ou::tf::PanelOptionCombo( m_scrollOC );  // start with one empty portfolio
-  m_sizerScrollOC->Add( pPOC, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollOC );  // start with one empty portfolio
+  m_sizerScrollOC->Add( m_pPanelOptionCombo, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollOC->Layout();
 
-  pPOC->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
+  m_pPanelOptionCombo->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
     if ( sPortfolioId.empty() ) {
       std::cout << "portfolio id is required" << std::endl;
     }
@@ -590,7 +591,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   // 2018/08/03 TO FIX: will have issues with this, as it accepts options only.  at some point will want underlying for the delta of 1.
   // also will want to connect this option up with the engine for updated greek calculations
   // also will need the underlying for those calculations
-  pPOC->m_fConstructPositionGreek 
+  m_pPanelOptionCombo->m_fConstructPositionGreek 
       = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
         // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
         // register with engine
@@ -618,7 +619,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
     // position needs to start the watch, needs both option and underlying
     // then add to engine here?  who removes from engine?  does the panel manage the list
   };
-  pPOC->m_fSelectInstrument = [this]()->pInstrument_t {
+  m_pPanelOptionCombo->m_fSelectInstrument = [this]()->pInstrument_t {
       namespace ph = std::placeholders;
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
@@ -630,20 +631,30 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
       };
       return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" ); // the dialog pops up in this call
     };
-  pPOC->m_fAddPositionGreek = [](pPositionGreek_t){
-    std::cout << "#### really used? ####" << std::endl;
-  };
-  pPOC->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelOptionCombo& poc){
+  m_pPanelOptionCombo->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelOptionCombo& poc){
     poc.SaveColumnSizes( m_gcsPanelOptionCombo );
     UpdateColumns_PanelOptionCombo();
   };
 
-  assert( nullptr != pPOC->m_fConstructPortfolioGreek );
-  pPOC->m_fConstructPortfolioGreek( *pPOC, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
+  assert( nullptr != m_pPanelOptionCombo->m_fConstructPortfolioGreek );
+  m_pPanelOptionCombo->m_fConstructPortfolioGreek( *m_pPanelOptionCombo, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
   
   namespace ph = std::placeholders;
-  pPOC->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
-  pPOC->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1 );
+  m_pPanelOptionCombo->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
+  m_pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1 );
+  
+  m_pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+    if ( im.Exists( idInstrument, pInstrument ) ) {
+      // all is good, pInstrument is assigned
+    }
+    else {
+      std::string message( "pPOC->m_fLookUpInstrument can't find " );
+      message += idInstrument;
+      throw std::runtime_error( message );
+    }
+    return pInstrument;
+  };
 
   m_pFOC->Layout();
 
@@ -1309,7 +1320,7 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
     std::cout << "Loading Config ..." << std::endl;
     std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
     boost::archive::text_iarchive ia(ifs);
-    ia & * this;
+    ia & *this;
     std::cout << "  done." << std::endl;
   }
   catch(...) {

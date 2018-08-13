@@ -51,6 +51,7 @@ class PanelOptionCombo: public wxPanel {
   friend class PanelOptionCombo_impl;
 public:
 
+  typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
@@ -67,8 +68,6 @@ public:
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
 
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
-  fAddPositionGreek_t m_fAddPositionGreek;  // does not appeared to be used
-
   typedef std::function<void(pInstrument_t, pInstrument_t, pPortfolioGreek_t, fAddPositionGreek_t)> fConstructPositionGreek_t;
   fConstructPositionGreek_t m_fConstructPositionGreek;
 
@@ -80,6 +79,9 @@ public:
 
   typedef std::function<void(pOption_t)> fRemoveFromEngine_t;
   fRemoveFromEngine_t m_fRemoveFromEngine;
+  
+  typedef std::function<pInstrument_t(const idInstrument_t&,pInstrument_t&)> fLookUpInstrument_t;
+  fLookUpInstrument_t m_fLookUpInstrument;
 
   PanelOptionCombo(void);
   PanelOptionCombo( 
@@ -129,14 +131,10 @@ private:
   static bool ShowToolTips() { return true; };
 
   template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & *m_pimpl.get();
-  }
+  void save( Archive& ar, const unsigned int version ) const;
 
   template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & *m_pimpl.get();
-  }
+  void load( Archive& ar, const unsigned int version );
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 

@@ -14,6 +14,9 @@
 
 #include "stdafx.h"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "PanelOptionCombo.h"
 #include "PanelOptionCombo_impl.h"
 
@@ -82,6 +85,25 @@ wxIcon PanelOptionCombo::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
 }
+
+  template<typename Archive>
+  void PanelOptionCombo::save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pimpl.get();
+  }
+
+  template<typename Archive>
+  void PanelOptionCombo::load( Archive& ar, const unsigned int version ) {
+    ar & *m_pimpl.get();
+  }
+
+// https://www.boost.org/doc/libs/1_67_0/libs/serialization/doc/pimpl.html
+
+  template void PanelOptionCombo::save<boost::archive::text_iarchive>( boost::archive::text_iarchive& ar, const unsigned int version ) const;
+  template void PanelOptionCombo::save<boost::archive::text_oarchive>( boost::archive::text_oarchive& ar, const unsigned int version ) const;
+
+  template void PanelOptionCombo::load<boost::archive::text_iarchive>( boost::archive::text_iarchive& ar, const unsigned int version );
+  template void PanelOptionCombo::load<boost::archive::text_oarchive>( boost::archive::text_oarchive& ar, const unsigned int version );
+
 
 } // namespace tf
 } // namespace ou

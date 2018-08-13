@@ -77,6 +77,7 @@ private:
   typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
   typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
+  typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   
   typedef ou::tf::Watch::pWatch_t pWatch_t;
@@ -152,6 +153,7 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
+  ou::tf::PanelOptionCombo* m_pPanelOptionCombo;
   
   MPPOE_t* m_pMPPOE;
   PPPOE_t* m_pPPPOE;
@@ -268,6 +270,7 @@ private:
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
     ar & *m_pPanelCharts;
+    ar & *m_pPanelOptionCombo;
     ar & m_gcsPanelPortfolioPosition;
     ar & m_gcsPanelOptionCombo;
   }
@@ -295,6 +298,9 @@ private:
     if ( 5 <= version ) {
       ar & *m_pPanelCharts;
     }
+    if ( 7 <= version ) {
+      ar & *m_pPanelOptionCombo;
+    }
     if ( 6 <= version ) {
       ar & m_gcsPanelPortfolioPosition;
       UpdateColumns_PanelPortfolioPositions();
@@ -307,6 +313,6 @@ private:
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 6)
+BOOST_CLASS_VERSION(AppComboTrading, 7)
 DECLARE_APP(AppComboTrading)
 
