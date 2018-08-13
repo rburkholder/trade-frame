@@ -296,6 +296,7 @@ struct PanelOptionCombo_impl {
       vPositions_t::size_type cntPositions;
       ar & cntPositions;
       for ( vPositions_t::size_type cnt = 0; cnt < cntPositions; cnt++ ) {
+        
         idInstrument_t idOptionInstrument;
         ar & idOptionInstrument;
         pInstrument_t pOptionInstrument;
