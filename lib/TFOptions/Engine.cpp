@@ -42,74 +42,102 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 OptionEntry::OptionEntry( OptionEntry&& rhs ) {
-  if ( rhs.m_bStartedWatch ) {
-    rhs.pUnderlying->OnQuote.Remove( MakeDelegate( &rhs, &OptionEntry::HandleUnderlyingQuote ) );
+  if ( 0 < rhs.m_cntInstances ) {
+    rhs.m_pUnderlying->OnQuote.Remove( MakeDelegate( &rhs, &OptionEntry::HandleUnderlyingQuote ) );
   }
-  cntInstances = rhs.cntInstances;
-  pUnderlying = std::move( rhs.pUnderlying );
-  pOption = std::move( rhs.pOption );
-  fGreek = std::move( rhs.fGreek );
-  m_bStartedWatch = rhs.m_bStartedWatch;
-  rhs.m_bStartedWatch = false;
-  if ( m_bStartedWatch ) {
-    pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  m_cntInstances = rhs.m_cntInstances;
+  m_pOption = std::move( rhs.m_pOption );
+  m_pUnderlying = std::move( rhs.m_pUnderlying );
+  m_fGreek = std::move( rhs.m_fGreek );
+  //m_bStartedWatch = rhs.m_bStartedWatch;
+  //rhs.m_bStartedWatch = false;
+  rhs.m_cntInstances = 0; // can this be set, what happens on delete?  what happens when tied to m_bStartedWatch?
+  //if ( m_bStartedWatch ) {
+  if ( 0 < m_cntInstances ) {
+    m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
   }
   //PrintState( "OptionEntry::OptionEntry(0)" );
 }
 
-OptionEntry::OptionEntry( pOption_t pOption_): pOption( pOption_ ), m_bStartedWatch( false ), cntInstances( 0 ) {
-  std::cout << "here we are" << std::endl;
+//OptionEntry::OptionEntry( pOption_t pOption_): m_pOption( pOption_ ), /*m_bStartedWatch( false ),*/ m_cntInstances( 0 ) {
+//  std::cout << "*** should not be here, does nothing ***" << std::endl;
   //PrintState( "OptionEntry::OptionEntry(1)" );
-}  // can't start with out an underlying
+//}  // can't start with out an underlying
 
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWithGreek_t&& fGreek_ ):
-  pUnderlying( pUnderlying_ ), pOption( pOption_ ), fGreek( std::move( fGreek_ ) ), 
-  m_bStartedWatch( false ),
-  cntInstances( 0 )
+  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), m_fGreek( std::move( fGreek_ ) ), 
+  //m_bStartedWatch( false ),
+  m_cntInstances( 0 ) // handled by Inc, Dec
 {
-  pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
-  pUnderlying->StartWatch();
+  //m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  //m_pUnderlying->StartWatch();
   //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
-  pOption->StartWatch();
-  m_bStartedWatch = true;
+  //m_pOption->StartWatch();
+  //m_bStartedWatch = true;
   //PrintState( "OptionEntry::OptionEntry(2)" );
 }
   
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ ):
-  pUnderlying( pUnderlying_ ), pOption( pOption_ ), 
-  m_bStartedWatch( false ),
-  cntInstances( 0 )
+  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), 
+  //m_bStartedWatch( false ),
+  m_cntInstances( 0 )
 {
-  pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
-  pUnderlying->StartWatch();
+  //m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
+  //m_pUnderlying->StartWatch();
   //pOption->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
-  pOption->StartWatch();
-  m_bStartedWatch = true;
+  //m_pOption->StartWatch();
+  //m_bStartedWatch = true;
   //PrintState( "OptionEntry::OptionEntry(3)" );
 }
   
+// need to properly work with m_bStartedWatch and cntInstances
 OptionEntry::~OptionEntry() {
   //pOption->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
   //PrintState( "OptionEntry::~OptionEntry" );
-  if ( m_bStartedWatch ) {
-    pUnderlying->StopWatch();
-    pOption->StopWatch();
-    pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
-    m_bStartedWatch = false;
+  //if ( m_bStartedWatch ) {
+  
+  if ( 0 < m_cntInstances ) {
+    std::cout << "OptionEntry::~OptionEntry m_cntInstances was not zero: " << m_cntInstances << "," << m_pOption->GetInstrument()->GetInstrumentName() << std::endl;
+    m_cntInstances = 1;
+    Dec();
+    //m_pUnderlying->StopWatch();
+    //m_pOption->StopWatch();
+    //m_pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
+    //m_cntInstances = 0;
+    //m_bStartedWatch = false;
   }
 }
 
 void OptionEntry::PrintState( const std::string id ) {
   std::string sUnderlying;
   std::string sOption;
-  if ( 0 < pUnderlying.use_count() ) {
-    sUnderlying = pUnderlying->GetInstrument()->GetInstrumentName();
+  if ( 0 < m_pUnderlying.use_count() ) {
+    sUnderlying = m_pUnderlying->GetInstrument()->GetInstrumentName();
   }
-  if ( 0 < pOption.use_count() ) {
-    sOption = pOption->GetInstrument()->GetInstrumentName();
+  if ( 0 < m_pOption.use_count() ) {
+    sOption = m_pOption->GetInstrument()->GetInstrumentName();
   }
-  std::cout << id << ": U(" << sUnderlying << "),O(" << sOption << "), B(" << m_bStartedWatch << ")" << std::endl;
+  std::cout << id << ": U(" << sUnderlying << "),O(" << sOption /* << "), B(" << m_bStartedWatch */ << ")" << std::endl;
 }
+
+void OptionEntry::Inc() { 
+  if ( 0 == m_cntInstances ) {
+    m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
+    m_pUnderlying->StartWatch();
+    m_pOption->StartWatch();  }
+  m_cntInstances++; 
+}
+size_t OptionEntry::Dec() { 
+  assert( 0 < m_cntInstances );
+  m_cntInstances--; 
+  if ( 0 == m_cntInstances ) {
+    m_pUnderlying->StopWatch();
+    m_pOption->StopWatch();
+    m_pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
+  }
+  return m_cntInstances; 
+}
+
 
 void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
   m_quoteLastUnderlying = quote_;
@@ -123,7 +151,7 @@ void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
 //}
 
 void OptionEntry::Calc( const fCalc_t& fCalc ) {
-  fCalc( pOption, m_quoteLastUnderlying, fGreek );
+  fCalc( m_pOption, m_quoteLastUnderlying, m_fGreek );
 }
 
 // ====================
@@ -209,15 +237,17 @@ void Engine::Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_
 
 void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
+    assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
     OptionEntry oe( pUnderlying, pOption );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
 //  }
 }
 
-void Engine::Remove( pOption_t pOption ) {
+void Engine::Remove( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
-    OptionEntry oe( pOption );
+    assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
+    OptionEntry oe( pUnderlying, pOption );
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
 //  }
@@ -257,26 +287,36 @@ void Engine::ProcessOptionEntryOperationQueue() {
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   if ( !m_dequeOptionEntryOperation.empty() ) {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
+    std::string MapKey( oe.m_oe.UnderlyingName() + "_" + oe.m_oe.OptionName() );
+    
     switch( oe.m_action ) {
       case Action::AddOption: {
-          std::cout << "Engine::Add: " << oe.m_oe.OptionName() << std::endl;
-          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+          std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
+          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
-            iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type( oe.m_oe.OptionName(), std::move( oe.m_oe ) ) );
+            iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type(MapKey, std::move( oe.m_oe ) ) );
+            std::cout << "Engine::AddOption: " << MapKey << " added" << std::endl;
+          }
+          else {
+            std::cout << "Engine::AddOption: " << MapKey << " dropped" << std::endl;
           }
           iterOption->second.Inc();
         }
         break;
       case Action::RemoveOption: {
-          std::cout << "Engine::Remove: " << oe.m_oe.OptionName() << std::endl;
-          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( oe.m_oe.OptionName() );
+          std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
+          mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
-            throw std::runtime_error( "Engine::Delete: can't find option" + oe.m_oe.OptionName() );
+            throw std::runtime_error( "Engine::Delete: can't find option" + MapKey );
           }
 
           OptionEntry::size_type cnt = iterOption->second.Dec();
           if ( 0 == cnt ) {
             m_mapOptionEntry.erase( iterOption );
+            std::cout << "Engine::RemoveOption: " << MapKey << " erased" << std::endl;
+          }
+          else {
+            std::cout << "Engine::RemoveOption: " << MapKey << " count " << cnt << std::endl;
           }
         }
         break;

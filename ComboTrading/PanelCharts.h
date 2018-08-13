@@ -101,7 +101,7 @@ public:
   typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Add_t;
   fCalcOptionGreek_Add_t m_fCalcOptionGreek_Add;
 
-  typedef std::function<void(pOption_t)> fCalcOptionGreek_Remove_t;
+  typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Remove_t;
   fCalcOptionGreek_Remove_t m_fCalcOptionGreek_Remove;
 
   // providers may change, so what happens to providers already registered with an instrument?

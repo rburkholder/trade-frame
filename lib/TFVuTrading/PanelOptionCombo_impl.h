@@ -285,37 +285,34 @@ struct PanelOptionCombo_impl {
         ar & sO;
         const std::string sU( vt.GetPositionGreek()->GetUnderlying()->GetInstrument()->GetInstrumentName() );
       ar & sU;
-      std::cout << "saved " << sO << "," << sU << std::endl;
     } );
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    
+
     if ( 2 <= version ) {
       vPositions_t::size_type cntPositions;
       ar & cntPositions;
       for ( vPositions_t::size_type cnt = 0; cnt < cntPositions; cnt++ ) {
-        
+
         idInstrument_t idOptionInstrument;
         ar & idOptionInstrument;
         pInstrument_t pOptionInstrument;
         m_poc.m_fLookUpInstrument( idOptionInstrument, pOptionInstrument );
         assert( nullptr != pOptionInstrument.get() );
-        
+
         idInstrument_t idUnderlyingInstrument;
         pInstrument_t pUnderlyingInstrument;
         ar & idUnderlyingInstrument;
         m_poc.m_fLookUpInstrument( idUnderlyingInstrument, pUnderlyingInstrument );
         assert( nullptr != pUnderlyingInstrument.get() );
-        
-        std::cout << "retrieved " << idOptionInstrument << "," << idUnderlyingInstrument << std::endl;
-        
+
         AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
       }
-      
+
     }
-    
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

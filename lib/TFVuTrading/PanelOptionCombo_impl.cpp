@@ -58,7 +58,7 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
 PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [this]( vPositions_t::value_type& vt ){
     if ( nullptr != m_poc.m_fRemoveFromEngine ) {
-      m_poc.m_fRemoveFromEngine( vt.GetPositionGreek()->GetOption() );
+      m_poc.m_fRemoveFromEngine( vt.GetPositionGreek()->GetOption(), vt.GetPositionGreek()->GetUnderlying() );
     }
   });
   m_vPositions.clear();

@@ -46,6 +46,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// ================ OptionEntry =================
+
 class OptionEntry {
 public:
   typedef size_t size_type;
@@ -56,11 +58,11 @@ public:
   typedef std::function<void(pOption_t, const ou::tf::Quote&, fCallbackWithGreek_t&)> fCalc_t; // underlying quote
   
 private:
-  size_type cntInstances; 
-  bool m_bStartedWatch;
-  pWatch_t pUnderlying;
-  pOption_t pOption;
-  fCallbackWithGreek_t fGreek;
+  size_type m_cntInstances; // when pOption and pUnderlying are added in
+  //bool m_bStartedWatch; // needs to be based upon cntInstances
+  pOption_t m_pOption;
+  pWatch_t m_pUnderlying;
+  fCallbackWithGreek_t m_fGreek;
 
   ou::tf::Quote m_quoteLastUnderlying;
   //ou::tf::Quote m_quoteLastOption;  // is this actually needed?
@@ -69,8 +71,8 @@ private:
   
 public:
   
-  OptionEntry(): cntInstances( 0 ) {};
-  OptionEntry( pOption_t pOption);  // used for storing deletion aspect
+  OptionEntry(): m_cntInstances( 0 ) {};
+  //OptionEntry( pOption_t pOption);  // used for storing deletion aspect
   OptionEntry( const OptionEntry& rhs ) = delete;
   OptionEntry( OptionEntry&& rhs );
   
@@ -78,21 +80,24 @@ public:
   OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ );
   virtual ~OptionEntry();
   
-  const std::string& OptionName() { return pOption->GetInstrument()->GetInstrumentName(); }
+  const std::string& OptionName() { return m_pOption->GetInstrument()->GetInstrumentName(); }
+  const std::string& UnderlyingName() { return m_pUnderlying->GetInstrument()->GetInstrumentName(); }
   
-  void Inc() { cntInstances++; }
-  size_t Dec() { assert( 0 < cntInstances ); cntInstances--; return cntInstances; }
+  void Inc();
+  size_t Dec();
   
   void Calc( const fCalc_t& );  // supply underlying and option quotes
   
-  pWatch_t GetUnderlying() { return pUnderlying; }
-  pOption_t GetOption() { return pOption; }
+  pWatch_t GetUnderlying() { return m_pUnderlying; }
+  pOption_t GetOption() { return m_pOption; }
 private:
   
   void HandleUnderlyingQuote( const ou::tf::Quote& );
   void PrintState( const std::string id );
 
 };
+
+// ================ Engine =================
 
 class Engine {
 public:
@@ -120,7 +125,7 @@ public:
   
   void Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& ); // reference counted(will be a problem with multiple callback destinations, first one wins currently
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // this is better, the option already has a delegate for callback
-  void Remove( pOption_t pOption ); // part of the reference counting, will change reference count on associated underlying and auto remove
+  void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
   
   void Find( const pInstrument_t pInstrument, pWatch_t& pWatch );  // if Watch not found, construct one.  Then provide the watch.
   void Find( const pInstrument_t pInstrument, pOption_t& pOption );  // if Option nout found, construct one.  Then provide the option.

@@ -77,7 +77,7 @@ public:
   typedef std::function<void(pOption_t, pWatch_t)> fRegisterWithEngine_t;
   fRegisterWithEngine_t m_fRegisterWithEngine;
 
-  typedef std::function<void(pOption_t)> fRemoveFromEngine_t;
+  typedef std::function<void(pOption_t, pWatch_t)> fRemoveFromEngine_t;
   fRemoveFromEngine_t m_fRemoveFromEngine;
   
   typedef std::function<pInstrument_t(const idInstrument_t&,pInstrument_t&)> fLookUpInstrument_t;

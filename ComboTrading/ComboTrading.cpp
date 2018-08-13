@@ -441,8 +441,8 @@ void AppComboTrading::BuildFrameCharts( void ) {
     m_pOptionEngine->Add( pOption, pWatchUnderlying );
   };
   
-  m_pPanelCharts->m_fCalcOptionGreek_Remove = [this](pOption_t pOption){
-    m_pOptionEngine->Remove( pOption );
+  m_pPanelCharts->m_fCalcOptionGreek_Remove = [this]( pOption_t pOption, pWatch_t pWatchUnderlying ){
+    m_pOptionEngine->Remove( pOption, pWatchUnderlying );
   };
 
   m_pFCharts->SetAutoLayout( true );
@@ -465,6 +465,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 }
 
 AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::string& name ) {
+  std::cout << "AppComboTrading::LoadInstrument: " << name << std::endl;
   pInstrument_t p;
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( !im.Exists( name, p ) ) {  // the call will supply instrument if it exists
@@ -641,7 +642,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   
   namespace ph = std::placeholders;
   m_pPanelOptionCombo->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
-  m_pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1 );
+  m_pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 );
   
   m_pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
@@ -862,6 +863,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
 // holiday expire: 13:00 est 2015/11/27 - weekly option
 
 void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
+  std::cout << "AppComboTrading::RegisterInstrument: " << pInstrument->GetInstrumentName() << std::endl;
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( pInstrument ) ) {
     std::cout << "Info: Instrument already registered: " << pInstrument->GetInstrumentName() << std::endl;

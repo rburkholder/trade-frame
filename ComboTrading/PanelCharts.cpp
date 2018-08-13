@@ -253,7 +253,7 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
         }
         else {
           if ( entry.m_bAddedToEngine ) {
-            m_fCalcOptionGreek_Remove( boost::dynamic_pointer_cast<ou::tf::option::Option>( entry.m_pWatch ) ); // any error result?
+            m_fCalcOptionGreek_Remove( boost::dynamic_pointer_cast<ou::tf::option::Option>( entry.m_pWatch ), entry.m_pWatchUnderlying ); // any error result?
             entry.m_bAddedToEngine = false;
           }
           entry.m_cntMenuDependents--;
@@ -421,7 +421,7 @@ void PanelCharts::HandleGridClick(
             }
             else {
               assert( pOption->Watching() );
-              m_fCalcOptionGreek_Remove( iterOption->second );
+              m_fCalcOptionGreek_Remove( iterOption->second, entryUnderlying.m_pWatch );
               pOption->StopWatch(); // verify if stop watch happens in the engine
               pOption->OnQuote.Remove( delegates->fQuote );
               pOption->OnTrade.Remove( delegates->fTrade );
