@@ -953,9 +953,15 @@ void AppComboTrading::HandlePositionLoad( pPosition_t& pPosition ) {
 }
 
 void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
-  for ( mapPortfoliosTrading_t::iterator iter = m_mapPortfoliosTrading.begin(); m_mapPortfoliosTrading.end() != iter; ++iter ) {
-    iter->second.pT->UpdateGui();
-  }
+  std::for_each( m_mapPortfoliosTrading.begin(), m_mapPortfoliosTrading.end(),
+    [](mapPortfoliosTrading_t::value_type& vt){
+      vt.second.pT->UpdateGui();
+    });
+  std::for_each( m_mapPortfoliosSandbox.begin(), m_mapPortfoliosSandbox.end(),
+    [](mapPortfoliosSandbox_t::value_type& vt){
+      vt.second.pT->UpdateGui();
+    }
+    );
 }
 
 void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {
