@@ -41,7 +41,7 @@ public:
   
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
   
-  explicit PositionGreek( pOption_t&, pUnderlying_t& );
+  PositionGreek( pOption_t&, pUnderlying_t& );
   virtual ~PositionGreek( );
   
   pOption_t GetOption() { return m_pOption; }
