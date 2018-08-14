@@ -369,7 +369,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRetrieveOptionList.connect( boost::phoenix::bind( &AppComboTrading::ProvideOptionList, this, args::arg1, args::arg2 ) );
   
-  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
+  //m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
   
   m_pPanelCharts->m_fSelectInstrument =
     [this](const ou::tf::Allowed::enumInstrument selector, const wxString& sUnderlying)->pInstrument_t {
@@ -1363,7 +1363,7 @@ void AppComboTrading::OnClose( wxCloseEvent& event ) {
 
 // this probably isn't in the gui thread
 void AppComboTrading::OnData1Connecting( int status ) {
-  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
+  //m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 }
 
 // this probably isn't in the gui thread
@@ -1388,7 +1388,7 @@ void AppComboTrading::OnData1Disconnected( int status ) {
 
 // this probably isn't in the gui thread
 void AppComboTrading::OnExecConnecting( int status ) {
-  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
+  //m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 }
 
 // this probably isn't in the gui thread

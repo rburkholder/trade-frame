@@ -112,7 +112,7 @@ public:
 
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
-  void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
+  //void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
 
   // called from owner to perform regular updates
   //void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );  // can this be removed now?
@@ -242,9 +242,9 @@ private:
   typedef std::map<idInstrument_t, InstrumentEntry> mapInstrumentEntry_t;
   mapInstrumentEntry_t m_mapInstrumentEntry;
   
-  pProvider_t m_pData1Provider;
-  pProvider_t m_pData2Provider;
-  pProvider_t m_pExecutionProvider;
+  //pProvider_t m_pData1Provider;
+  //pProvider_t m_pData2Provider;
+  //pProvider_t m_pExecutionProvider;
   
   ou::tf::TreeItemResources m_baseResources;
   Resources m_resources;

@@ -168,22 +168,24 @@ void PanelCharts::CreateControls() {
   
 }
 
-void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
-  bool bChangedData1Provider( m_pData1Provider.get() != pData1Provider.get() );
-  m_pData1Provider = pData1Provider;
-  m_pData2Provider = pData2Provider;
-  m_pExecutionProvider = pExecutionProvider;
-  if ( bChangedData1Provider ) {
-    std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(),
-      [this](mapInstrumentEntry_t::value_type& vt){
-        vt.second.m_pWatchInfo.reset();  // clear out existing WatchInfo, as it depends upon provider type
-        vt.second.m_mapSelectedChainOptions.clear();  // clear out existing chains, as they depend upon provider type
-        vt.second.m_pWatch->SetProvider( m_pData1Provider ); // set new provider
-        vt.second.m_pWatchInfo.reset( new WatchInfo( vt.second.m_pWatch ) ); // build new WatchInfo
-      }
-      );
-  }
-}
+// this isn't going to work very well anymore.  many of the provider settings are now in the caller via function callbacks
+// in addition, other panels have provider issues as well.
+//void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
+//  bool bChangedData1Provider( m_pData1Provider.get() != pData1Provider.get() );
+//  m_pData1Provider = pData1Provider;
+//  m_pData2Provider = pData2Provider;
+//  m_pExecutionProvider = pExecutionProvider;
+//  if ( bChangedData1Provider ) {
+//    std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(),
+//      [this](mapInstrumentEntry_t::value_type& vt){
+//        vt.second.m_pWatchInfo.reset();  // clear out existing WatchInfo, as it depends upon provider type
+//        vt.second.m_mapSelectedChainOptions.clear();  // clear out existing chains, as they depend upon provider type
+//        vt.second.m_pWatch->SetProvider( m_pData1Provider ); // set new provider
+//        vt.second.m_pWatchInfo.reset( new WatchInfo( vt.second.m_pWatch ) ); // build new WatchInfo
+//      }
+//      );
+//  }
+//}
 
 void PanelCharts::RemoveRightDetail() {
   auto winRightDetail = m_winRightDetail;
@@ -383,10 +385,10 @@ void PanelCharts::HandleGridClick(
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
 {
   std::cout << "GridClick: " << date << "," << strike << "," << funcCall.sSymbolName << "," << funcPut.sSymbolName << std::endl;
-  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
-    std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
-  }
-  else {
+//  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
+//    std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
+//  }
+//  else {
     mapInstrumentEntry_t::iterator iterInstrumentUnderlying = m_mapInstrumentEntry.find( idInstrumentUnderlying );
     if ( m_mapInstrumentEntry.end() == iterInstrumentUnderlying ) {
       std::cout << "PanelCharts::HandleGridClick: " << idInstrumentUnderlying << " not found" << std::endl;
@@ -432,7 +434,7 @@ void PanelCharts::HandleGridClick(
           }
         });
     }
-  }
+//  }
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
