@@ -224,15 +224,15 @@ void ModelChartHdf5::DefineChartOptions( ou::ChartDataView* pChartDataView ) {
   m_ceImpVol.SetColour( ou::Colour::Black );
   m_ceDelta.SetColour( ou::Colour::Black );
   m_ceGamma.SetColour( ou::Colour::Black );
-  //m_ceTheta.SetColour( ou::Colour::Black );
-  //m_ceVega.SetColour( ou::Colour::Black );
-  //m_ceRho.SetColour( ou::Colour::Black );
+  m_ceTheta.SetColour( ou::Colour::Black );
+  m_ceVega.SetColour( ou::Colour::Black );
+  m_ceRho.SetColour( ou::Colour::Black );
   pChartDataView->Add( 3, &m_ceImpVol );
   pChartDataView->Add( 4, &m_ceDelta );
   pChartDataView->Add( 5, &m_ceGamma );
-  //pChartDataView->Add( 3, &m_ceTheta );
-  //pChartDataView->Add( 4, &m_ceVega );
-  //pChartDataView->Add( 5, &m_ceRho );
+  pChartDataView->Add( 6, &m_ceTheta );
+  pChartDataView->Add( 7, &m_ceVega );
+  pChartDataView->Add( 8, &m_ceRho );
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const Options& options ) {
@@ -245,17 +245,17 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
   m_ceImpVol.Clear();
   m_ceDelta.Clear();
   m_ceGamma.Clear();
-  //m_ceTheta.Clear();
-  //m_ceVega.Clear();
-  //m_ceRho.Clear();
+  m_ceTheta.Clear();
+  m_ceVega.Clear();
+  m_ceRho.Clear();
   for ( ou::tf::Greeks::const_iterator iter 
           = options.greeks.begin(); options.greeks.end() != iter; ++iter ) {
     m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
     m_ceDelta.Append( iter->DateTime(), iter->Delta() );
     m_ceGamma.Append( iter->DateTime(), iter->Gamma() );
-    //m_ceTheta.Append( iter->DateTime(), iter->Theta() );
-    //m_ceVega.Append( iter->DateTime(), iter->Vega() );
-    //m_ceRho.Append( iter->DateTime(), iter->Rho() );
+    m_ceTheta.Append( iter->DateTime(), iter->Theta() );
+    m_ceVega.Append( iter->DateTime(), iter->Vega() );
+    m_ceRho.Append( iter->DateTime(), iter->Rho() );
   }
 }
 

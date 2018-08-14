@@ -82,10 +82,7 @@ struct PanelOptionCombo_impl {
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
       (COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (COL_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (COL_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (COL_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (COL_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (COL_QuanPend , "Quan",       wxALIGN_RIGHT,  50, ModelCellInt ), \
       (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  70, ModelCellDouble ), \
       (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  70, ModelCellDouble ), \
       (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  70, ModelCellDouble ), \
@@ -96,6 +93,9 @@ struct PanelOptionCombo_impl {
       (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_Theta    , "Theta",      wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_Vega     , "Vega",       wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_Rho      , "Rho",        wxALIGN_RIGHT,  60, ModelCellDouble ), \
       ) \
     ) \
   /**/
@@ -158,9 +158,9 @@ struct PanelOptionCombo_impl {
       // initialize row of values.
       const Position::TableRowDef& row( m_pPositionGreek->GetRow() );
       boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
-      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
-      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
-      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
+//      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
+//      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
+//      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
       boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( row.dblConstructedValue );
       boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
       boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
@@ -169,9 +169,9 @@ struct PanelOptionCombo_impl {
 
     void HandleOnPositionChanged( const Position& position ) {
       boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionPending );
-      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSidePending ] );
-      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionActive );
-      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSideActive ] );
+//      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSidePending ] );
+//      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionActive );
+//      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSideActive ] );
       boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblConstructedValue );
     }
 
@@ -198,8 +198,11 @@ struct PanelOptionCombo_impl {
     
     void HandleOnGreek( const ou::tf::Greek& greek ) {
       boost::fusion::at_c<COL_ImpVol>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
-      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() );
-      boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() );
+      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() ); //Delta – Sensitivity to Underlying's Price
+      boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() ); //Gamma – Sensitivity to Delta
+      boost::fusion::at_c<COL_Theta>( m_vModelCells ).SetValue( greek.Theta() ); //Theta – Sensitivity to Time Decay
+      boost::fusion::at_c<COL_Vega>( m_vModelCells ).SetValue( greek.Vega() ); //Vega – Sensitivity to Underlying's Volatility
+      boost::fusion::at_c<COL_Rho>( m_vModelCells ).SetValue( greek.Rho() ); //Rho - Sensitivity to risk-free rate of interest
     }
     
     template<typename Archive>
