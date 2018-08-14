@@ -480,11 +480,14 @@ AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::strin
 //   map of instruments from instrument manager
 
 void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values, fInstrumentFromIB_t callback ) {
+  std::cout << "AppComboTrading::BuildInstrument: " << values.sKey << " "; 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
+    std::cout << "exists ..." << std::endl;
     callback( values.pInstrument );
   }
   else {  // build
+    std::cout << "build ..." << std::endl;
     if ( 0 == m_listIQFeedSymbols.Size() ) {
       std::cout << "AppComboTrading::BuildInstrument: m_listIQFeedSymbols not loaded" << std::endl;
     }
@@ -589,9 +592,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
       }
     }
   };
-  // 2018/08/03 TO FIX: will have issues with this, as it accepts options only.  at some point will want underlying for the delta of 1.
-  // also will want to connect this option up with the engine for updated greek calculations
-  // also will need the underlying for those calculations
+
   m_pPanelOptionCombo->m_fConstructPositionGreek 
       = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
         // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
@@ -606,11 +607,19 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
       im.Register( pOptionInstrument );
     }
     
+    assert( 0 != pUnderlyingInstrument.use_count() );
+    assert( 0 != pUnderlyingInstrument.get() );
     pWatch_t pWatch;
-    m_pOptionEngine->Find( pUnderlyingInstrument, pWatch );
+    m_pOptionEngine->Find( pUnderlyingInstrument, pWatch ); // construct watch from instrument
+    assert( 0 != pWatch.use_count() );
+    assert( 0 != pWatch.get() );
     
+    assert( 0 != pOptionInstrument.use_count() );
+    assert( 0 != pOptionInstrument.get() );
     pOption_t pOption;
-    m_pOptionEngine->Find( pOptionInstrument, pOption );
+    m_pOptionEngine->Find( pOptionInstrument, pOption );  // construct option from instrument
+    assert( 0 != pOption.use_count() );
+    assert( 0 != pOption.get() );
     
     pPositionGreek_t pPositionGreek( new ou::tf::PositionGreek( pOption, pWatch ) );
     pPortfolioGreek->AddPosition( pOptionInstrument->GetInstrumentName(), pPositionGreek );

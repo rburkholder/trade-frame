@@ -33,6 +33,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
   m_dblStrike( pInstrument->GetStrike() ),
   m_sSide( "-" )
 {
+  //std::cout << "Option::Option construction 1: " << pInstrument->GetInstrumentName() << std::endl;
   Initialize();
 }
 
@@ -41,6 +42,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider )
   m_dblStrike( pInstrument->GetStrike() ),
   m_sSide( "-" )
 {
+  //std::cout << "Option::Option construction 2: " << pInstrument->GetInstrumentName() << std::endl;
   Initialize();
 }
 
@@ -51,10 +53,12 @@ Option::Option( const Option& rhs ) :
   m_sSide( rhs.m_sSide ),
   m_pGreekProvider( rhs.m_pGreekProvider )
 {
+  //std::cout << "Option::Option construction 3: " << m_pInstrument->GetInstrumentName() << std::endl;
   Initialize();
 }
 
 Option::~Option( void ) {
+  //std::cout << "Option::~Option destruction: " << m_pInstrument->GetInstrumentName() << std::endl;
 //  StopWatch();  // issues here
 }
 

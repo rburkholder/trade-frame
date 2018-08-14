@@ -200,7 +200,8 @@ void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
   if ( m_mapKnownWatches.end() == iter ) {
     if ( nullptr != m_fBuildWatch ) {
       pWatch = m_fBuildWatch( pInstrument );
-      m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
+      assert( 0 != pWatch.get() );
+      //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
     }
     else {
       throw std::runtime_error( "Engine::m_fBuildWatch is nullptr" );
@@ -209,6 +210,7 @@ void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
   else {
     pWatch = iter->second;
   }
+  assert( 0 != pWatch.get() );
 }
 
 void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
@@ -216,15 +218,17 @@ void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
   if ( m_mapKnownOptions.end() == iter ) {
     if ( nullptr != m_fBuildOption ) {
       pOption = m_fBuildOption( pInstrument );
-      m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
+      assert( 0 != pOption.get() );
+      //m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
     }
     else {
-      throw std::runtime_error( "Engein::m_fBuildOption is nullptr" );
+      throw std::runtime_error( "Engine::m_fBuildOption is nullptr" );
     }
   }
   else {
     pOption = iter->second;
   }
+  assert( 0 != pOption.get() );
 }
 
 void Engine::Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
@@ -287,7 +291,9 @@ void Engine::ProcessOptionEntryOperationQueue() {
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   if ( !m_dequeOptionEntryOperation.empty() ) {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
-    std::string MapKey( oe.m_oe.UnderlyingName() + "_" + oe.m_oe.OptionName() );
+    const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
+    const std::string& sOption( oe.m_oe.OptionName() );
+    std::string MapKey( sUnderlying + "_" + sOption );
     
     switch( oe.m_action ) {
       case Action::AddOption: {
@@ -296,6 +302,14 @@ void Engine::ProcessOptionEntryOperationQueue() {
           if ( m_mapOptionEntry.end() == iterOption ) {
             iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type(MapKey, std::move( oe.m_oe ) ) );
             std::cout << "Engine::AddOption: " << MapKey << " added" << std::endl;
+            mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
+            if ( m_mapKnownWatches.end() == iterWatches ) {
+              m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
+            }
+            mapKnownOptions_t::iterator iterOptions = m_mapKnownOptions.find( sOption );
+            if ( m_mapKnownOptions.end() == iterOptions ) {
+              m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sOption, iterOption->second.GetOption() ) );
+            }
           }
           else {
             std::cout << "Engine::AddOption: " << MapKey << " dropped" << std::endl;
@@ -304,6 +318,8 @@ void Engine::ProcessOptionEntryOperationQueue() {
         }
         break;
       case Action::RemoveOption: {
+          // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?  
+          // if so, then maps require counters, or use the pOption_t use_count?
           std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
