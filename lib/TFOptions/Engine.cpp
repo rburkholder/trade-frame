@@ -196,12 +196,15 @@ Engine::~Engine( ) {
 }
 
 void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
+  //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+  //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
+  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownWatches.end() == iter ) {
     if ( nullptr != m_fBuildWatch ) {
       pWatch = m_fBuildWatch( pInstrument );
       assert( 0 != pWatch.get() );
-      //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
+      m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
     }
     else {
       throw std::runtime_error( "Engine::m_fBuildWatch is nullptr" );
@@ -214,12 +217,15 @@ void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
 }
 
 void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
+  //std::cout << "Engine::Find Option: " << pOption->GetInstrument()->GetInstrumentName() << std::endl;
+  //std::cout << "Engine::Find Option: " << pInstrument->GetInstrumentName() << std::endl;
+  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownOptions.end() == iter ) {
     if ( nullptr != m_fBuildOption ) {
       pOption = m_fBuildOption( pInstrument );
       assert( 0 != pOption.get() );
-      //m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
+      m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
     }
     else {
       throw std::runtime_error( "Engine::m_fBuildOption is nullptr" );
@@ -297,22 +303,27 @@ void Engine::ProcessOptionEntryOperationQueue() {
     
     switch( oe.m_action ) {
       case Action::AddOption: {
-          std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
+          //std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
+          
+          mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
+          if ( m_mapKnownWatches.end() == iterWatches ) {
+            //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
+            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known watch " );
+          }
+
+          mapKnownOptions_t::iterator iterOptions = m_mapKnownOptions.find( sOption );
+          if ( m_mapKnownOptions.end() == iterOptions ) {
+            //m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sOption, iterOption->second.GetOption() ) );
+            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known option " );
+          }
+
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
             iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type(MapKey, std::move( oe.m_oe ) ) );
-            std::cout << "Engine::AddOption: " << MapKey << " added" << std::endl;
-            mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
-            if ( m_mapKnownWatches.end() == iterWatches ) {
-              m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
-            }
-            mapKnownOptions_t::iterator iterOptions = m_mapKnownOptions.find( sOption );
-            if ( m_mapKnownOptions.end() == iterOptions ) {
-              m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sOption, iterOption->second.GetOption() ) );
-            }
+            //std::cout << "Engine::AddOption: " << MapKey << " added" << std::endl;
           }
           else {
-            std::cout << "Engine::AddOption: " << MapKey << " dropped" << std::endl;
+            //std::cout << "Engine::AddOption: " << MapKey << " dropped" << std::endl;
           }
           iterOption->second.Inc();
         }
@@ -329,10 +340,10 @@ void Engine::ProcessOptionEntryOperationQueue() {
           OptionEntry::size_type cnt = iterOption->second.Dec();
           if ( 0 == cnt ) {
             m_mapOptionEntry.erase( iterOption );
-            std::cout << "Engine::RemoveOption: " << MapKey << " erased" << std::endl;
+            //std::cout << "Engine::RemoveOption: " << MapKey << " erased" << std::endl;
           }
           else {
-            std::cout << "Engine::RemoveOption: " << MapKey << " count " << cnt << std::endl;
+            //std::cout << "Engine::RemoveOption: " << MapKey << " count " << cnt << std::endl;
           }
         }
         break;

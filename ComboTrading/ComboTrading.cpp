@@ -424,7 +424,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
               [this, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
                 // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
                 //   as a fully defined, registered instrument
-                RegisterInstrument( pInstrument );
+                RegisterInstrument( pInstrument );  // TODO: does the instrument need to be registered?  Is this the best place for this?
                 if ( nullptr != f ) {
                   f( pInstrument );
                 }
@@ -443,6 +443,12 @@ void AppComboTrading::BuildFrameCharts( void ) {
   
   m_pPanelCharts->m_fCalcOptionGreek_Remove = [this]( pOption_t pOption, pWatch_t pWatchUnderlying ){
     m_pOptionEngine->Remove( pOption, pWatchUnderlying );
+  };
+  m_pPanelCharts->m_fBuildOption = [this](pInstrument_t pInstrument, pOption_t& pOption){
+    m_pOptionEngine->Find( pInstrument, pOption );
+  };
+  m_pPanelCharts->m_fBuildWatch = [this](pInstrument_t pInstrument, pWatch_t& pWatch){
+    m_pOptionEngine->Find( pInstrument, pWatch );
   };
 
   m_pFCharts->SetAutoLayout( true );
@@ -465,7 +471,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 }
 
 AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::string& name ) {
-  std::cout << "AppComboTrading::LoadInstrument: " << name << std::endl;
+  //std::cout << "AppComboTrading::LoadInstrument: " << name << std::endl;
   pInstrument_t p;
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( !im.Exists( name, p ) ) {  // the call will supply instrument if it exists
@@ -872,16 +878,16 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
 // holiday expire: 13:00 est 2015/11/27 - weekly option
 
 void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
-  std::cout << "AppComboTrading::RegisterInstrument: " << pInstrument->GetInstrumentName() << std::endl;
+  //std::cout << "AppComboTrading::RegisterInstrument: " << pInstrument->GetInstrumentName() << std::endl;
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( pInstrument ) ) {
-    std::cout << "Info: Instrument already registered: " << pInstrument->GetInstrumentName() << std::endl;
+    //std::cout << "Info: Instrument already registered: " << pInstrument->GetInstrumentName() << std::endl;
     // now there are duplicate instruments.  replace inbound with the one registered?
   }
   else {
     assert( 0 != pInstrument->GetContract() );
     im.Register( pInstrument ); 
-    std::cout << "Info: Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
+    //std::cout << "Info: Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
   }
 }
 

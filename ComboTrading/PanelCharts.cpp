@@ -401,7 +401,9 @@ void PanelCharts::HandleGridClick(
           if ( entryUnderlying.m_mapSelectedChainOptions.end() == iterOption ) {
             pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( delegates->sSymbolName );
             assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
-            ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+            //ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+            ou::tf::option::Option::pOption_t pOption;
+            m_fBuildOption( pInstrument, pOption );
             iterOption 
               = entryUnderlying.m_mapSelectedChainOptions.insert( 
                 entryUnderlying.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( delegates->sSymbolName, pOption ) );
@@ -449,7 +451,7 @@ void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
   }
 }
 
-// constructs entry in m_mapInstrumentEntry
+// constructs entry in m_mapInstrumentEntry, pInstrument may be equity, future, option, futuresoption
 void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t pInstrument, const std::string& sUnderlying ) {
   
   mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
@@ -463,13 +465,15 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
       std::cout << "PanelCharts::ConstructInstrumentEntry: " << idInstrument << " exists." << std::endl;
     }
     else {
-      signalRegisterInstrument( pInstrument );
+      signalRegisterInstrument( pInstrument );  // not needed if signalLoadInstrument has been called, does the Dialog do a registration, maybe do the registration there based upon flag from here
       
-      pWatch_t pWatch;
-      pWatch_t pWatchUnderlying;
+      pWatch_t pWatch;  // for instrument
+      pWatch_t pWatchUnderlying; // set if pWatch turns out to be option
       if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+        // need to perform outside option build call
         pOption_t pOption;
-        pOption.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
+        m_fBuildOption( pInstrument, pOption );
+        //pOption.reset( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
         //pWatch = boost::dynamic_pointer_cast<ou::tf::Watch>( pOption );
         pWatch = pOption;
         mapInstrumentEntry_t::iterator iterUnderlying = m_mapInstrumentEntry.find( sUnderlying );
@@ -483,14 +487,14 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
           m_fCalcOptionGreek_Add( pOption, pWatchUnderlying );
         }
       }
-      else {
-        pWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+      else { // is equity or future
+        m_fBuildWatch( pInstrument, pWatch );
+        //pWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
       }
       
       pWatchInfo_t pWatchInfo( new WatchInfo( pWatch ) );
       iterInstrument 
-        = m_mapInstrumentEntry.insert( m_mapInstrumentEntry.begin(), 
-            mapInstrumentEntry_t::value_type( idInstrument, InstrumentEntry( pWatch, pWatchInfo ) ) );
+        = m_mapInstrumentEntry.insert( m_mapInstrumentEntry.begin(), mapInstrumentEntry_t::value_type( idInstrument, InstrumentEntry( pWatch, pWatchInfo ) ) );
       if ( 0 != pWatchUnderlying.use_count() ) 
         iterInstrument->second.m_pWatchUnderlying = pWatchUnderlying;
       

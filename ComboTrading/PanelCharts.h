@@ -103,6 +103,12 @@ public:
 
   typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Remove_t;
   fCalcOptionGreek_Remove_t m_fCalcOptionGreek_Remove;
+  
+  typedef std::function<void(pInstrument_t, pOption_t&)> fBuildOption_t;
+  fBuildOption_t m_fBuildOption;
+  
+  typedef std::function<void(pInstrument_t, pWatch_t&)> fBuildWatch_t;
+  fBuildWatch_t m_fBuildWatch;
 
   // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
