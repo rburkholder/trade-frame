@@ -111,14 +111,13 @@ void PanelOptionCombo_impl::CreateControls() {
     m_gridPortfolioStats->SetDefaultRowSize(25);
     m_gridPortfolioStats->SetColLabelSize(25);
     m_gridPortfolioStats->SetRowLabelSize(0);
-    m_gridPortfolioStats->CreateGrid(1, 16, wxGrid::wxGridSelectCells);
-    m_sizerPortfolioStats->Add(m_gridPortfolioStats, 0, wxALIGN_TOP|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    m_sizerPortfolioStats->Add(m_gridPortfolioStats, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
     wxBoxSizer* itemBoxSizer12 = new wxBoxSizer(wxHORIZONTAL);
     m_sizerMain->Add(itemBoxSizer12, 0, wxGROW|wxALL, 1);
 
     wxStaticLine* itemStaticLine1 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-    itemBoxSizer12->Add(itemStaticLine1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    itemBoxSizer12->Add(itemStaticLine1, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
     m_sizerGridPositions = new wxBoxSizer(wxHORIZONTAL);
     m_sizerMain->Add(m_sizerGridPositions, 1, wxGROW|wxALL, 1);
@@ -126,18 +125,21 @@ void PanelOptionCombo_impl::CreateControls() {
     m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(50);
     m_gridPositions->SetDefaultRowSize(22);
-    m_gridPositions->SetColLabelSize(25);
+    m_gridPositions->SetColLabelSize(0);
     m_gridPositions->SetRowLabelSize(0);
-    m_gridPositions->CreateGrid(1, 16, wxGrid::wxGridSelectCells);
     m_sizerGridPositions->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
+  m_gridPortfolioStats->CreateGrid(1, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
   m_gridPositions->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
-    //m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxALIGN_LEFT|wxALL|wxEXPAND, 2);
-    //m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
-    //m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
-
-  int ix( 0 );
+  //int ix( 0 );
+  //BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+    
+#undef GRID_EMIT_SetColSettings    
+#define GRID_EMIT_SetColSettings( z, n, VAR ) \
+  m_gridPortfolioStats->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_gridPortfolioStats->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
 
   m_menuGridLabelPositionPopUp = new wxMenu;
@@ -193,6 +195,7 @@ void PanelOptionCombo_impl::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) cons
 
 void PanelOptionCombo_impl::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
   gcs.SetColumnSizes( *m_gridPositions );
+  gcs.SetColumnSizes( *m_gridPortfolioStats );
 }
 	
 void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
