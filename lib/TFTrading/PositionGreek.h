@@ -49,6 +49,8 @@ public:
   
   ou::Delegate<const ou::tf::Greek&> OnGreek; // need to fire this on option updates
   
+  void PositionPendingDelta( int n );  // -1 or +1
+  
 protected:
   
   typedef SymbolBase::greek_t greek_t;
@@ -57,6 +59,8 @@ private:
   
   pOption_t m_pOption;
   pUnderlying_t m_pUnderlying;
+  
+  int m_nQuantity;  // number of contracts
   
   void Construction();
 

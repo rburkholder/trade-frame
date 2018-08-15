@@ -555,18 +555,18 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
         wxCAPTION|wxRESIZE_BORDER
     );
 
-  m_sizerOC = new wxBoxSizer(wxVERTICAL);
-  m_pFOC->SetSizer(m_sizerOC);
+  m_sizerFOC = new wxBoxSizer(wxVERTICAL);
+  m_pFOC->SetSizer(m_sizerFOC);
 
-  m_pFOC->SetAutoLayout( true );
+  //m_pFOC->SetAutoLayout( true );
 
   //m_scrollOC is used for holding the PanelPortfolioPosition instances
-  m_scrollOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
-  m_sizerOC->Add(m_scrollOC, 1, wxGROW|wxALL, 4);
-  m_scrollOC->SetScrollbars(1, 1, 0, 0);
+  m_scrollFOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
+  m_sizerFOC->Add(m_scrollFOC, 1, wxGROW|wxALL|wxEXPAND, 4);
+  m_scrollFOC->SetScrollbars(1, 1, 0, 0);
 
   m_sizerScrollOC = new wxBoxSizer(wxVERTICAL);
-  m_scrollOC->SetSizer( m_sizerScrollOC );
+  m_scrollFOC->SetSizer( m_sizerScrollOC );
 
   wxPoint point = m_pFOC->GetPosition();
   point.x += 700;
@@ -574,8 +574,8 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   m_pFOC->SetPosition( point );
   m_pFOC->Show();
 
-  m_pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollOC );  // start with one empty portfolio
-  m_sizerScrollOC->Add( m_pPanelOptionCombo, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
+  m_sizerScrollOC->Add( m_pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollOC->Layout();
 
   m_pPanelOptionCombo->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
@@ -934,7 +934,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
     ppp.SaveColumnSizes( m_gcsPanelPortfolioPosition );
     UpdateColumns_PanelPortfolioPositions();
   };
-  m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_sizerScrollPM->Add( m_pLastPPP, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollPM->Layout();
   
   std::cout 

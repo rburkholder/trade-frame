@@ -77,12 +77,13 @@ struct PanelOptionCombo_impl {
 	
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
-#define GRID_ARRAY_COL_COUNT 15
+#define GRID_ARRAY_COL_COUNT 16
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
       (COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (COL_QuanPend , "Quan",       wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (COL_Quan     , "Quan",       wxALIGN_RIGHT,  50, ModelCellInt ),    \
+      (COL_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
       (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  70, ModelCellDouble ), \
       (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  70, ModelCellDouble ), \
       (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  70, ModelCellDouble ), \
@@ -157,8 +158,8 @@ struct PanelOptionCombo_impl {
 
       // initialize row of values.
       const Position::TableRowDef& row( m_pPositionGreek->GetRow() );
-      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
-//      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
+      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( row.nPositionPending );
+      boost::fusion::at_c<COL_Side>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
 //      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
 //      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
       boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( row.dblConstructedValue );
@@ -168,8 +169,8 @@ struct PanelOptionCombo_impl {
     }
 
     void HandleOnPositionChanged( const Position& position ) {
-      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionPending );
-//      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSidePending ] );
+      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionPending );
+      boost::fusion::at_c<COL_Side>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSidePending ] );
 //      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().nPositionActive );
 //      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPositionGreek->GetRow().eOrderSideActive ] );
       boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().dblConstructedValue );
@@ -224,16 +225,18 @@ struct PanelOptionCombo_impl {
   int m_nRowRightClick;  // row on which right click occurred
 
     wxBoxSizer* m_sizerMain;
-    wxBoxSizer* m_sizerPortfolio;
-    wxStaticText* m_lblIdPortfolio;
+    wxBoxSizer* m_sizerHeader;
     wxStaticText* m_lblCurrency;
-    wxStaticText* m_lblDescription;
-    wxFlexGridSizer* m_gridPortfolioStats;
+    wxStaticText* m_lblIdPortfolio;
+    wxTextCtrl* m_txtDescription;
+    wxBoxSizer* m_sizerSummary;
     wxTextCtrl* m_txtUnRealizedPL;
     wxTextCtrl* m_txtCommission;
     wxTextCtrl* m_txtRealizedPL;
     wxTextCtrl* m_txtTotal;
-    wxTextCtrl* m_txtDescription;
+    wxBoxSizer* m_sizerPortfolioStats;
+    wxGrid* m_gridPortfolioStats;
+    wxBoxSizer* m_sizerGridPositions;
     wxGrid* m_gridPositions;
 
     wxMenu* m_menuGridLabelPositionPopUp;
@@ -259,6 +262,7 @@ struct PanelOptionCombo_impl {
   void CreateControls();
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
 
+  void OnMouseWheel( wxMouseEvent& event );
   void OnRightClickGridLabel( wxGridEvent& event );
   void OnRightClickGridCell( wxGridEvent& event );
   void OnGridColSize( wxGridSizeEvent& event );

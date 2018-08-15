@@ -121,7 +121,7 @@ private:
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
     ID_MenuAddPosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
-    ID_GridPositions
+    ID_GridPortfolioDetails, ID_GridPositions
   };
 
   std::unique_ptr<PanelOptionCombo_impl> m_pimpl;

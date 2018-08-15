@@ -183,12 +183,16 @@ void PanelPortfolioPosition::CreateControls()
     m_txtDescription = new wxTextCtrl( itemPanel1, ID_TxtDescription, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
     itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxLEFT|wxRIGHT, 1);
 
-    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );
+    wxBoxSizer* itemBoxSizer20 = new wxBoxSizer(wxHORIZONTAL);
+    m_sizerMain->Add(itemBoxSizer20, 0, wxGROW|wxALL, 5);
+
+    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(75);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
-    m_gridPositions->SetRowLabelSize(0);
-    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM|wxADJUST_MINSIZE, 2);
+    m_gridPositions->SetRowLabelSize(20);
+    m_gridPositions->CreateGrid(1, 5, wxGrid::wxGridSelectCells);
+    itemBoxSizer20->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM|wxADJUST_MINSIZE, 2);
 
 ////@end PanelPortfolioPosition content construction
 }

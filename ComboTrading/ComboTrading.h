@@ -174,8 +174,8 @@ private:
   std::string m_sWorkingDirectory;
   std::string m_sfnState;
   
-  wxBoxSizer* m_sizerOC;
-  wxScrolledWindow* m_scrollOC;
+  wxBoxSizer* m_sizerFOC;
+  wxScrolledWindow* m_scrollFOC;
   wxBoxSizer* m_sizerScrollOC;
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;

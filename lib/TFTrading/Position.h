@@ -269,9 +269,9 @@ protected:
   vOrders_t m_vClosedOrders;  // orders that have executed or have cancelled
   vOrders_t m_vAllOrders;  // keeps track of all orders in case we have to search both lists
 
-private:
-
   TableRowDef m_row;
+
+private:
 
   bool m_bInstrumentAssigned;
   bool m_bExecutionAccountAssigned;

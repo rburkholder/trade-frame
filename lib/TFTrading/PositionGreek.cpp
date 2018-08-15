@@ -27,7 +27,7 @@ namespace tf { // TradeFrame
 
 PositionGreek::PositionGreek( pOption_t& pOption, pUnderlying_t& pUnderlying )
 : Position( pOption->GetInstrument(), pProvider_t(), pOption->GetProvider() ), // supply empty execution provider for now
-  m_pOption( pOption ), m_pUnderlying( pUnderlying )
+  m_pOption( pOption ), m_pUnderlying( pUnderlying ), m_nQuantity( 0 )
 {
   // NOTE:  may need to construct with a 'row'
   Position::Set( pOption->GetInstrument()->GetInstrumentName() );
@@ -44,6 +44,41 @@ void PositionGreek::Construction() {
 
 void PositionGreek::HandleGreek( greek_t greek ) {
   OnGreek( greek );
+}
+
+void PositionGreek::PositionPendingDelta( int n ) {
+  switch ( m_row.eOrderSidePending ) {
+    case OrderSide::Unknown:
+      m_row.nPositionPending++;
+      if ( 1 == n ) {
+        m_row.eOrderSidePending = OrderSide::Buy;
+      }
+      if ( -1 == n ) {
+        m_row.eOrderSidePending = OrderSide::Sell;
+      }
+      break;
+    case OrderSide::Buy:
+      if ( 1 == n ) {
+        m_row.nPositionPending++;
+        //m_row.eOrderSidePending = OrderSide::Buy;
+      }
+      if ( -1 == n ) {
+        m_row.nPositionPending--;
+        if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
+      }
+      break;
+    case OrderSide::Sell:
+      if ( 1 == n ) {
+        m_row.nPositionPending--;
+        if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
+      }
+      if ( -1 == n ) {
+        m_row.nPositionPending++;
+        //m_row.eOrderSidePending = OrderSide::Sell;
+      }
+      break;
+  }
+  OnPositionChanged( *this );
 }
 
 std::ostream& operator<<( std::ostream& os, const PositionGreek& position ) {
