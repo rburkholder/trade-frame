@@ -84,44 +84,49 @@ void PanelOptionCombo_impl::CreateControls() {
     m_txtDescription = new wxTextCtrl( itemPanel1, m_poc.ID_TxtDescription, _("description"), wxDefaultPosition, wxSize(-1, 30), wxTE_MULTILINE|wxTE_READONLY );
     m_sizerHeader->Add(m_txtDescription, 1, wxALIGN_TOP|wxALL, 2);
 
+    m_sizerGridPositions = new wxBoxSizer(wxHORIZONTAL);
+    m_sizerMain->Add(m_sizerGridPositions, 0, wxGROW|wxALL, 1);
+
+    m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
+    m_gridPositions->SetDefaultColSize(50);
+    m_gridPositions->SetDefaultRowSize(22);
+    m_gridPositions->SetColLabelSize(22);
+    m_gridPositions->SetRowLabelSize(0);
+    m_sizerGridPositions->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+
+    wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxHORIZONTAL);
+    m_sizerMain->Add(itemBoxSizer4, 0, wxGROW|wxALL, 1);
+
+    wxStaticLine* itemStaticLine5 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    itemBoxSizer4->Add(itemStaticLine5, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+
     m_sizerPortfolioStats = new wxBoxSizer(wxHORIZONTAL);
     m_sizerMain->Add(m_sizerPortfolioStats, 0, wxGROW|wxALL, 1);
 
     m_gridPortfolioStats = new wxGrid( itemPanel1, m_poc.ID_GridPortfolioDetails, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE );
     m_gridPortfolioStats->SetDefaultColSize(50);
-    m_gridPortfolioStats->SetDefaultRowSize(25);
-    m_gridPortfolioStats->SetColLabelSize(25);
+    m_gridPortfolioStats->SetDefaultRowSize(22);
+    m_gridPortfolioStats->SetColLabelSize(0);
     m_gridPortfolioStats->SetRowLabelSize(0);
     m_sizerPortfolioStats->Add(m_gridPortfolioStats, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
-    wxBoxSizer* itemBoxSizer12 = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(itemBoxSizer12, 0, wxGROW|wxALL, 1);
-
-    wxStaticLine* itemStaticLine1 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-    itemBoxSizer12->Add(itemStaticLine1, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
-
-    m_sizerGridPositions = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerGridPositions, 1, wxGROW|wxALL, 1);
-
-    m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
-    m_gridPositions->SetDefaultColSize(50);
-    m_gridPositions->SetDefaultRowSize(22);
-    m_gridPositions->SetColLabelSize(0);
-    m_gridPositions->SetRowLabelSize(0);
-    m_sizerGridPositions->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
-
-  m_gridPortfolioStats->CreateGrid(1, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
   m_gridPositions->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+  m_gridPortfolioStats->CreateGrid(1, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
-  //int ix( 0 );
-  //BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
-    
-#undef GRID_EMIT_SetColSettings    
-#define GRID_EMIT_SetColSettings( z, n, VAR ) \
-  m_gridPortfolioStats->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_gridPortfolioStats->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
-  int ix = 0;
+  int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+    
+//#undef GRID_EMIT_SetColSettings
+//#define GRID_EMIT_SetColSettings( z, n, VAR ) \
+//  m_gridPortfolioStats->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+//  m_gridPortfolioStats->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+//  int ix = 0;
+//  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+    
+#define COL_ALIGNMENT_B( z, n, VAR ) \
+  m_gridPortfolioStats->SetCellAlignment( VAR, GRID_EXTRACT_COL_DETAILS(z, n, 0), GRID_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
+    
+  BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT_B,0)
 
   m_menuGridLabelPositionPopUp = new wxMenu;
   m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );

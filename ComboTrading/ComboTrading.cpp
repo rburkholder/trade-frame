@@ -533,7 +533,8 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   //m_scrollPM is used for holding the PanelPortfolioPosition instances
   m_scrollPM = new wxScrolledWindow( m_pFPP, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerPM->Add(m_scrollPM, 1, wxGROW|wxALL, 5);
-  m_scrollPM->SetScrollbars(1, 1, 0, 0);
+  //m_scrollPM->SetScrollbars(1, 1, 0, 0);
+  m_scrollPM->SetScrollRate(4, 4);
 
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
@@ -562,8 +563,9 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
 
   //m_scrollOC is used for holding the PanelPortfolioPosition instances
   m_scrollFOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
-  m_sizerFOC->Add(m_scrollFOC, 1, wxGROW|wxALL|wxEXPAND, 4);
-  m_scrollFOC->SetScrollbars(1, 1, 0, 0);
+  m_sizerFOC->Add(m_scrollFOC, 1, wxGROW|wxALL, 4);
+  //m_scrollFOC->SetScrollbars(5, 5, 10, 10);
+  m_scrollFOC->SetScrollRate(4, 4);
 
   m_sizerScrollOC = new wxBoxSizer(wxVERTICAL);
   m_scrollFOC->SetSizer( m_sizerScrollOC );
@@ -577,7 +579,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   m_pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
   m_sizerScrollOC->Add( m_pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollOC->Layout();
-
+  
   m_pPanelOptionCombo->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
     if ( sPortfolioId.empty() ) {
       std::cout << "portfolio id is required" << std::endl;
@@ -597,6 +599,8 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
         std::cout << "portfolio id " << sPortfolioId << " already exists" << std::endl;
       }
     }
+    //m_pFOC->Layout();
+    //m_sizerScrollOC->Layout();
   };
 
   m_pPanelOptionCombo->m_fConstructPositionGreek 
@@ -671,8 +675,6 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
     }
     return pInstrument;
   };
-
-  m_pFOC->Layout();
 
 }
 

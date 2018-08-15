@@ -316,8 +316,9 @@ struct PanelOptionCombo_impl {
         assert( nullptr != pUnderlyingInstrument.get() );
 
         AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
+        
       }
-
+      m_poc.Layout();
     }
 
   }
