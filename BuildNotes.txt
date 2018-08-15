@@ -1,3 +1,10 @@
+2018/08/15
+
+When adding DialogBlocks, a couple of packages may need to be installed:
+multiarch-support
+and from https://packages.debian.org/jessie/libpng12-0:
+https://packages.debian.org/jessie/amd64/libpng12-0/download
+
 2018/08/12
 
 See ./lib/TFVuTrading/PanelOptionCombo.cpp for a mechanism of using:
