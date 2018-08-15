@@ -14,6 +14,7 @@
 
 //#include "stdafx.h"
 
+#include <set>
 #include <functional>
 
 #include <wx/textctrl.h>
@@ -40,11 +41,6 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
     m_lblCurrency = NULL;
     m_lblIdPortfolio = NULL;
     m_txtDescription = NULL;
-    m_sizerSummary = NULL;
-    m_txtUnRealizedPL = NULL;
-    m_txtCommission = NULL;
-    m_txtRealizedPL = NULL;
-    m_txtTotal = NULL;
     m_sizerPortfolioStats = NULL;
     m_gridPortfolioStats = NULL;
     m_sizerGridPositions = NULL;
@@ -87,21 +83,6 @@ void PanelOptionCombo_impl::CreateControls() {
 
     m_txtDescription = new wxTextCtrl( itemPanel1, m_poc.ID_TxtDescription, _("description"), wxDefaultPosition, wxSize(-1, 30), wxTE_MULTILINE|wxTE_READONLY );
     m_sizerHeader->Add(m_txtDescription, 1, wxALIGN_TOP|wxALL, 2);
-
-    m_sizerSummary = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerSummary, 0, wxALIGN_LEFT|wxALL, 1);
-
-    m_txtUnRealizedPL = new wxTextCtrl( itemPanel1, m_poc.ID_TxtUnRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_sizerSummary->Add(m_txtUnRealizedPL, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 2);
-
-    m_txtCommission = new wxTextCtrl( itemPanel1, m_poc.ID_TxtCommission, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_sizerSummary->Add(m_txtCommission, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 2);
-
-    m_txtRealizedPL = new wxTextCtrl( itemPanel1, m_poc.ID_TxtRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_sizerSummary->Add(m_txtRealizedPL, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 2);
-
-    m_txtTotal = new wxTextCtrl( itemPanel1, m_poc.ID_TxtTotal, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_sizerSummary->Add(m_txtTotal, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxBOTTOM, 2);
 
     m_sizerPortfolioStats = new wxBoxSizer(wxHORIZONTAL);
     m_sizerMain->Add(m_sizerPortfolioStats, 0, wxGROW|wxALL, 1);
@@ -185,7 +166,8 @@ void PanelOptionCombo_impl::CreateControls() {
   
   m_poc.Bind( wxEVT_DESTROY, &PanelOptionCombo_impl::HandleWindowDestroy, this );
 
-  m_vPortfolioValues.resize( 4 );
+  m_vPortfolioModelCell.resize( GRID_ARRAY_COL_COUNT );
+  m_vPortfolioCalcs.resize( GRID_ARRAY_COL_COUNT );
 
 }
 
@@ -489,27 +471,64 @@ void PanelOptionCombo_impl::UpdateGui( void ) {
     iter->UpdateGui();
   }
 
-  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-  m_pPortfolioGreek->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+//  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
+//  m_pPortfolioGreek->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
 
-  m_vPortfolioValues[ 0 ].SetValue( dblUnRealized );
-  if ( m_vPortfolioValues[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioValues[ 0 ].GetText() );
+//  m_vPortfolioModelCell[ 0 ].SetValue( dblUnRealized );
+//  if ( m_vPortfolioModelCell[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioModelCell[ 0 ].GetText() );
 
-  m_vPortfolioValues[ 1 ].SetValue( dblRealized );
-  if ( m_vPortfolioValues[ 1 ].Changed() ) m_txtRealizedPL  ->SetValue( m_vPortfolioValues[ 1 ].GetText() );
+//  m_vPortfolioModelCell[ 1 ].SetValue( dblRealized );
+//  if ( m_vPortfolioModelCell[ 1 ].Changed() ) m_txtRealizedPL  ->SetValue( m_vPortfolioModelCell[ 1 ].GetText() );
 
-  m_vPortfolioValues[ 2 ].SetValue( dblCommissionsPaid );
-  if ( m_vPortfolioValues[ 2 ].Changed() ) m_txtCommission  ->SetValue( m_vPortfolioValues[ 2 ].GetText() );
+//  m_vPortfolioModelCell[ 2 ].SetValue( dblCommissionsPaid );
+//  if ( m_vPortfolioModelCell[ 2 ].Changed() ) m_txtCommission  ->SetValue( m_vPortfolioModelCell[ 2 ].GetText() );
 
-  m_vPortfolioValues[ 3 ].SetValue( dblTotal );
-  if ( m_vPortfolioValues[ 3 ].Changed() ) m_txtTotal       ->SetValue( m_vPortfolioValues[ 3 ].GetText() );
-  /*
-  m_pPanelPortfolioStats->SetStats( 
-    boost::lexical_cast<std::string>( m_dblMinPL ),
-    boost::lexical_cast<std::string>( dblCurrent ),
-    boost::lexical_cast<std::string>( m_dblMaxPL )
-    );
-    */
+//  m_vPortfolioModelCell[ 3 ].SetValue( dblTotal );
+//  if ( m_vPortfolioModelCell[ 3 ].Changed() ) m_txtTotal       ->SetValue( m_vPortfolioModelCell[ 3 ].GetText() );
+  
+  
+  std::for_each( m_vPortfolioCalcs.begin(), m_vPortfolioCalcs.end(), [](vPortfolioCalcs_t::value_type& vt){ vt = 0.0; } );
+  
+  // TODO: migrate to m_pPortfolioGreek?
+  std::for_each( m_vPositions.begin(), m_vPositions.end(), [this](const vPositions_t::value_type& vt){
+    const pPositionGreek_t pPositionGreek = vt.GetPositionGreek();
+    const pOption_t pOption = pPositionGreek->GetOption();
+    const ou::tf::PositionGreek::TableRowDef& row( pPositionGreek->GetRow() );
+    ou::tf::Quote quote( pOption->LastQuote() );
+    ou::tf::Greek greek( pOption->LastGreek() );
+    boost::uint32_t nPending( row.nPositionPending );
+    
+    m_vPortfolioCalcs[ COL_Quan ] += nPending;
+    switch ( row.eOrderSidePending ) {
+      case OrderSide::Buy:
+        m_vPortfolioCalcs[ COL_ConsVlu ] += nPending * quote.Ask();
+        m_vPortfolioCalcs[ COL_ImpVol ]  += nPending * greek.ImpliedVolatility();
+        m_vPortfolioCalcs[ COL_Delta ]   += nPending * greek.Delta();
+        m_vPortfolioCalcs[ COL_Gamma ]   += nPending * greek.Gamma();
+        m_vPortfolioCalcs[ COL_Theta ]   += nPending * greek.Theta();
+        m_vPortfolioCalcs[ COL_Vega ]    += nPending * greek.Vega();
+        m_vPortfolioCalcs[ COL_Rho ]     += nPending * greek.Rho();
+        break;
+      case OrderSide::Sell:
+        m_vPortfolioCalcs[ COL_ConsVlu ] -= nPending * quote.Bid();
+        m_vPortfolioCalcs[ COL_ImpVol ]  -= nPending * greek.ImpliedVolatility();
+        m_vPortfolioCalcs[ COL_Delta ]   -= nPending * greek.Delta();
+        m_vPortfolioCalcs[ COL_Gamma ]   -= nPending * greek.Gamma();
+        m_vPortfolioCalcs[ COL_Theta ]   -= nPending * greek.Theta();
+        m_vPortfolioCalcs[ COL_Vega ]    -= nPending * greek.Vega();
+        m_vPortfolioCalcs[ COL_Rho ]     -= nPending * greek.Rho();
+        break;
+    }
+  } );
+  
+  typedef std::set<int> setIndexes_t;
+  static const setIndexes_t setIndexes = { COL_Quan, COL_ConsVlu, COL_ImpVol, COL_Delta, COL_Gamma, COL_Theta, COL_Vega, COL_Rho };
+  
+  std::for_each( setIndexes.begin(), setIndexes.end(), [this](setIndexes_t::value_type ix){
+    m_vPortfolioModelCell[ ix ].SetValue( m_vPortfolioCalcs[ ix ] );
+    if ( m_vPortfolioModelCell[ ix ].Changed() ) m_gridPortfolioStats->SetCellValue( 0, ix, m_vPortfolioModelCell[ ix ].GetText() );
+  } );
+  
 }
 
 } // namespace tf

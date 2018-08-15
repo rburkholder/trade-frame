@@ -63,6 +63,8 @@ struct PanelOptionCombo_impl {
   
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
+  typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
   typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
@@ -229,11 +231,6 @@ struct PanelOptionCombo_impl {
     wxStaticText* m_lblCurrency;
     wxStaticText* m_lblIdPortfolio;
     wxTextCtrl* m_txtDescription;
-    wxBoxSizer* m_sizerSummary;
-    wxTextCtrl* m_txtUnRealizedPL;
-    wxTextCtrl* m_txtCommission;
-    wxTextCtrl* m_txtRealizedPL;
-    wxTextCtrl* m_txtTotal;
     wxBoxSizer* m_sizerPortfolioStats;
     wxGrid* m_gridPortfolioStats;
     wxBoxSizer* m_sizerGridPositions;
@@ -245,10 +242,13 @@ struct PanelOptionCombo_impl {
   PanelOptionCombo& m_poc; // passed in on construction 
 
   pPortfolioGreek_t m_pPortfolioGreek;
+  
+  typedef std::vector<double> vPortfolioCalcs_t;
+  vPortfolioCalcs_t m_vPortfolioCalcs;
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
-  vPortfolioValues_t m_vPortfolioValues;  // holds dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal
+  vPortfolioValues_t m_vPortfolioModelCell;  // holds dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal
 
   //ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
   //ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
