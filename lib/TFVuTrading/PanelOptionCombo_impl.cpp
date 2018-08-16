@@ -129,18 +129,18 @@ void PanelOptionCombo_impl::CreateControls() {
   BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT_B,0)
 
   m_menuGridLabelPositionPopUp = new wxMenu;
-  m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
-  m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
-  m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
+  //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
+  //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
 
   m_menuGridCellPositionPopUp = new wxMenu;
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuDeletePosition, "Delete Greek Position" );
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddOrder, "Add Order" );
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuCancelOrders, "Cancel Orders" );
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePosition, "Close Greek Position" );
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
-  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddOrder, "Add Order" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuCancelOrders, "Cancel Orders" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePosition, "Close Greek Position" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
   
   // watch out for the std::move operations?:  needed in some places?, not in others?
   // create empty DragDropInstrument with correct type in order to receive the desired initiate call when dropped
@@ -438,7 +438,7 @@ void PanelOptionCombo_impl::OnPositionPopUpDeletePosition( wxCommandEvent& event
   // renumber rows in structure
   int ix( 0 );
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [&ix](vPositions_t::value_type& vt){
-    vt->SetRow( ix );
+    vt->SetGridRow( ix );
     ix++;
   } );
   

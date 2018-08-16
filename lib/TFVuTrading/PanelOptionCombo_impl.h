@@ -114,11 +114,11 @@ struct PanelOptionCombo_impl {
   class structPosition { // ======================================== structPosition
   public:
     structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int row )
-      : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_row( row ) {
+      : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_rowGrid( row ) {
         Init();
     }
     structPosition( const structPosition& rhs )
-      : m_pPositionGreek( rhs.m_pPositionGreek ), m_grid( rhs.m_grid ), m_row( rhs.m_row ) {
+      : m_pPositionGreek( rhs.m_pPositionGreek ), m_grid( rhs.m_grid ), m_rowGrid( rhs.m_rowGrid ) {
       Init();
     }
     ~structPosition( void ) {
@@ -131,17 +131,17 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnGreek.Remove( MakeDelegate( this, &structPosition::HandleOnGreek ) );
     }
     void UpdateGui( void ) {
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_row ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_rowGrid ) );
     }
     const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
     void SetPrecision( double dbl ) {  // why a call with double, and not being used?
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( dbl ) );
     }
-    int GetRow() const { return m_row; }
-    void SetRow( int nRow ) { m_row = nRow; }
+    int GetGridRow() const { return m_rowGrid; }
+    void SetGridRow( int nRow ) { m_rowGrid = nRow; }
     
   private:
-    int m_row;
+    int m_rowGrid;
     wxGrid& m_grid;
     pPositionGreek_t m_pPositionGreek;
     vModelCells_t m_vModelCells;  // needs to be changed to unique_ptr so doesn't change, or use move semantics? (due to background thread processing)
@@ -155,7 +155,7 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnQuote.Add( MakeDelegate( this, &structPosition::HandleOnQuote ) );
       m_pPositionGreek->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
       m_pPositionGreek->OnGreek.Add( MakeDelegate( this, &structPosition::HandleOnGreek ) );
-      BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
+      BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_rowGrid)
 
       // initialize row of values.
       const Position::TableRowDef& row( m_pPositionGreek->GetRow() );
