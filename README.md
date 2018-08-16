@@ -9,6 +9,13 @@ I use NetBeans as an IDE for development.  As such, all build and project files 
 
 A C++11 compiler is required to build the libraries and code.
 
+## Example
+
+Picture from the ComboTrading project showing an instrument list, with a chart for one of the listed instruments.  Bid, ask, spread, and greeks are charted for the option.
+
+![Option Greeks Timeline](notes/pictures/qgc-20180925-c-1195_2018-08-16_12-55-40.png)
+
+
 ## Building
 
 Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
