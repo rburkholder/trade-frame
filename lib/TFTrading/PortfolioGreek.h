@@ -28,6 +28,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class PortfolioGreek: public Portfolio {
+  friend class boost::serialization::access;
 public:
   
   friend std::ostream& operator<<( std::ostream& os, const Portfolio& );

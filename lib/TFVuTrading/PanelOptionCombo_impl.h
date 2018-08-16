@@ -112,6 +112,7 @@ struct PanelOptionCombo_impl {
   > vModelCells_t;
 
   class structPosition { // ======================================== structPosition
+    friend class boost::serialization::access;
   public:
     structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int row )
       : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_rowGrid( row ) {
@@ -209,10 +210,12 @@ struct PanelOptionCombo_impl {
     
     template<typename Archive>
     void save( Archive& ar, const unsigned int version ) const {
+      ar & *m_pPositionGreek;
     }
 
     template<typename Archive>
     void load( Archive& ar, const unsigned int version ) {
+      ar & *m_pPositionGreek;
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -289,7 +292,8 @@ struct PanelOptionCombo_impl {
         const std::string sO( vt->GetPositionGreek()->GetOption()->GetInstrument()->GetInstrumentName() );
         ar & sO;
         const std::string sU( vt->GetPositionGreek()->GetUnderlying()->GetInstrument()->GetInstrumentName() );
-      ar & sU;
+        ar & sU;
+        ar & *vt;
     } );
   }
 
@@ -315,6 +319,11 @@ struct PanelOptionCombo_impl {
 
         AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
         
+        if ( 3 <= version ) {
+          ar & (*m_vPositions.back());  // assumes AddPositionGreek does a push back, and is still current
+        }
+        
+        
       }
       m_poc.Layout();
     }
@@ -328,5 +337,5 @@ struct PanelOptionCombo_impl {
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl, 2)
+BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl, 3)
 BOOST_CLASS_VERSION(ou::tf::PanelOptionCombo_impl::structPosition, 1)

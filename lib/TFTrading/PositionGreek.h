@@ -21,6 +21,9 @@
 #ifndef POSITIONGREEK_H
 #define POSITIONGREEK_H
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <TFOptions/Option.h>
 
 #include "Position.h"
@@ -30,6 +33,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class PositionGreek: public Position {
+  friend class boost::serialization::access;
 public:
   
   friend std::ostream& operator<<( std::ostream& os, const PositionGreek& );
@@ -66,6 +70,19 @@ private:
 
   void HandleGreek( greek_t );
   
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & boost::serialization::base_object<const Position>(*this);
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & boost::serialization::base_object<Position>(*this);
+    OnPositionChanged( *this );  // may need this in position.h as well.
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 std::ostream& operator<<( std::ostream& os, const PositionGreek& );
@@ -73,5 +90,7 @@ std::ostream& operator<<( std::ostream& os, const PositionGreek& );
 } // namespace tf
 } // namespace ou
 
+BOOST_CLASS_VERSION(ou::tf::PositionGreek, 1)
+  
 #endif /* POSITIONGREEK_H */
 

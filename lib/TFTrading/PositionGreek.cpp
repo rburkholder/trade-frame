@@ -35,11 +35,13 @@ PositionGreek::PositionGreek( pOption_t& pOption, pUnderlying_t& pUnderlying )
 }
 
 PositionGreek::~PositionGreek( ) {
+  //std::cout << "PositionGreek::Destruction: " << m_row.sName << std::endl;
   m_pOption->OnGreek.Remove( MakeDelegate( this, &PositionGreek::HandleGreek ) );
 }
 
 void PositionGreek::Construction() {
   m_pOption->OnGreek.Add( MakeDelegate( this, &PositionGreek::HandleGreek ) );
+  //std::cout << "PositionGreek::Construction: " << m_row.sName << std::endl;
 }
 
 void PositionGreek::HandleGreek( greek_t greek ) {

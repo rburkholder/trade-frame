@@ -1333,26 +1333,29 @@ void AppComboTrading::HandleSaveValues( void ) {
 }
 
 void AppComboTrading::HandleSave( wxCommandEvent& event ) {
-  std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
-  boost::archive::text_oarchive oa(ofs);
-  oa & *this;
-  std::cout << "  done." << std::endl;
+  CallAfter( [this](){ // do after main gui action, allows debugging
+    std::cout << "Saving Config ..." << std::endl;
+    std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
+    boost::archive::text_oarchive oa(ofs);
+    oa & *this;
+    std::cout << "  done." << std::endl;
+  });
 }
 
 void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
-  try {
-    std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
-    boost::archive::text_iarchive ia(ifs);
-    ia & *this;
-    std::cout << "  done." << std::endl;
-  }
-  catch(...) {
-    std::cout << "load exception" << std::endl;
-  }
+  CallAfter( [this](){ // do after main gui action, allows debugging 
+    try {
+      std::cout << "Loading Config ..." << std::endl;
+      std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
+      boost::archive::text_iarchive ia(ifs);
+      ia & *this;
+      std::cout << "  done." << std::endl;
+    }
+    catch(...) {
+      std::cout << "load exception" << std::endl;
+    }
+  });
 }
-
 
 void AppComboTrading::OnClose( wxCloseEvent& event ) {
   m_timerGuiRefresh.Stop();

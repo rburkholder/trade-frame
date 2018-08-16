@@ -19,6 +19,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <OUCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
@@ -43,6 +46,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class Position {
+  friend class boost::serialization::access;
 public:
 
   friend std::ostream& operator<<( std::ostream& os, const Position& );
@@ -294,9 +298,49 @@ private:
 
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //std::cout << "saving " << m_row.idPosition << "," << m_row.sName << "," << m_row.eOrderSidePending << "," << m_row.eOrderSidePending << std::endl;
+    ar & m_row.idPortfolio;
+    ar & m_row.idPosition;
+    ar & m_row.eOrderSidePending;
+    ar & m_row.nPositionPending;
+    ar & m_row.eOrderSideActive;
+    ar & m_row.nPositionActive;
+    ar & m_row.dblCommissionPaid;
+    ar & m_row.dblConstructedValue;
+    ar & m_row.dblRealizedPL;
+    ar & m_row.dblUnRealizedPL;
+    ar & m_row.sAlgorithm;
+    ar & m_row.sName;
+    ar & m_row.sNotes;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //std::cout << "loading " << m_row.idPosition << "," << m_row.sName << "," << m_row.eOrderSidePending << "," << m_row.eOrderSidePending << std::endl;
+    ar & m_row.idPortfolio;
+    ar & m_row.idPosition;
+    ar & m_row.eOrderSidePending;
+    ar & m_row.nPositionPending;
+    ar & m_row.eOrderSideActive;
+    ar & m_row.nPositionActive;
+    ar & m_row.dblCommissionPaid;
+    ar & m_row.dblConstructedValue;
+    ar & m_row.dblRealizedPL;
+    ar & m_row.dblUnRealizedPL;
+    ar & m_row.sAlgorithm;
+    ar & m_row.sName;
+    ar & m_row.sNotes;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 std::ostream& operator<<( std::ostream& os, const Position& );
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::Position, 1)
