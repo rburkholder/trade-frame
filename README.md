@@ -19,8 +19,9 @@ Picture from the ComboTrading project showing an instrument list, with a chart f
 ## Building
 
 Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
-I use the NVidia video card with the binary NVidia drivers (building wxWidgets needs this).
-Have about 10G free to build the project and related libraries and installs
+There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
+
+You'll need to Have about 10G free to build the project and related libraries and installs (from my libs-build repository).
 
 Debian Stretch netinst (daily snapshot usually works): 
 https://www.debian.org/devel/debian-installer/
