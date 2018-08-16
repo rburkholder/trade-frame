@@ -119,7 +119,7 @@ private:
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
     ID_TxtDescription,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
-    ID_MenuAddPosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
+    ID_MenuAddPosition, ID_MenuDeletePosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
     ID_GridPortfolioDetails, ID_GridPositions
   };

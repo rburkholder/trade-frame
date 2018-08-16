@@ -36,6 +36,10 @@ PortfolioGreek::pPositionGreek_t PortfolioGreek::AddPosition( const std::string&
   Portfolio::AddPosition( sName, pPositionGreek );
   return pPositionGreek;
 }
+
+void PortfolioGreek::DeletePosition( const std::string& sName, pPositionGreek_t ) {
+  Portfolio::DeletePosition( sName );
+}
   
 void PortfolioGreek::AddSubPortfolio( pPortfolioGreek_t& pPortfolioGreek ) {
   pPortfolio_t pPortfolio( boost::dynamic_pointer_cast<Portfolio>( pPortfolioGreek ) );

@@ -59,7 +59,7 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
 PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [this]( vPositions_t::value_type& vt ){
     if ( nullptr != m_poc.m_fRemoveFromEngine ) {
-      m_poc.m_fRemoveFromEngine( vt.GetPositionGreek()->GetOption(), vt.GetPositionGreek()->GetUnderlying() );
+      m_poc.m_fRemoveFromEngine( vt->GetPositionGreek()->GetOption(), vt->GetPositionGreek()->GetUnderlying() );
     }
   });
   m_vPositions.clear();
@@ -135,6 +135,7 @@ void PanelOptionCombo_impl::CreateControls() {
 
   m_menuGridCellPositionPopUp = new wxMenu;
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
+  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuDeletePosition, "Delete Greek Position" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddOrder, "Add Order" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuCancelOrders, "Cancel Orders" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePosition, "Close Greek Position" );
@@ -163,6 +164,7 @@ void PanelOptionCombo_impl::CreateControls() {
   m_poc.Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   m_poc.Bind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPosition, this, m_poc.ID_MenuAddPosition, -1, 0 );
+  m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpDeletePosition, this, m_poc.ID_MenuDeletePosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddOrder, this, m_poc.ID_MenuAddOrder, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpCancelOrders, this, m_poc.ID_MenuCancelOrders, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePosition, this, m_poc.ID_MenuClosePosition, -1, 0 );
@@ -210,6 +212,7 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   m_poc.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   m_poc.Unbind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPosition, this, m_poc.ID_MenuAddPosition, -1, 0 );
+  m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpDeletePosition, this, m_poc.ID_MenuDeletePosition, -1, 0 );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddOrder, this, m_poc.ID_MenuAddOrder, -1, 0 );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpCancelOrders, this, m_poc.ID_MenuCancelOrders, -1, 0 );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePosition, this, m_poc.ID_MenuClosePosition, -1, 0 );
@@ -262,7 +265,7 @@ void PanelOptionCombo_impl::OnMouseWheel( wxMouseEvent& event ) {
 //      << std::endl;
   
   if ( ( 1 == coords.GetCol() ) || ( 2 == coords.GetCol() ) ) {
-    m_vPositions[ coords.GetRow() ].GetPositionGreek()->PositionPendingDelta( 0 > rotation ? -1 : 1 );
+    m_vPositions[ coords.GetRow() ]->GetPositionGreek()->PositionPendingDelta( 0 > rotation ? -1 : 1 );
   }
   
   
@@ -294,21 +297,6 @@ void PanelOptionCombo_impl::OnGridColSize( wxGridSizeEvent& event ) {
   }
 }
 
-//void PanelOptionCombo_impl::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
-//  m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
-//  m_pdialogInstrumentSelect->SetDataExchange( 0 );
-//  if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
-//    std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
-//    std::string s( m_DialogInstrumentSelect_DataExchange.sSymbolName );
-//    if ( 0 != m_delegateConstructPosition ) {
-//      m_delegateConstructPosition( s, m_pPortfolio, MakeDelegate( this, &PanelOptionCombo_impl::AddPosition ) ); 
-//    }
-//  }
-//  m_pdialogInstrumentSelect->Destroy();
-//  m_pdialogInstrumentSelect = 0;
-//  m_bDialogActive = false;
-//}
-
 void PanelOptionCombo_impl::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
   std::cout << "add order" << std::endl;
   if ( !m_bDialogActive ) {
@@ -321,12 +309,12 @@ void PanelOptionCombo_impl::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpCancelOrders( wxCommandEvent& event ) {
-  m_vPositions[ m_nRowRightClick ].GetPositionGreek()->CancelOrders();
+  m_vPositions[ m_nRowRightClick ]->GetPositionGreek()->CancelOrders();
   std::cout << "cancel orders" << std::endl;
 }
 
 void PanelOptionCombo_impl::OnPositionPopUpClosePosition( wxCommandEvent& event ) {
-  m_vPositions[ m_nRowRightClick ].GetPositionGreek()->ClosePosition();
+  m_vPositions[ m_nRowRightClick ]->GetPositionGreek()->ClosePosition();
   std::cout << "close position"  << std::endl;
 }
 
@@ -366,7 +354,7 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
     // need to know for which position the order is meant
     ou::tf::OrderSide::enumOrderSide eOrderSide;
 //    ou::tf::OrderType::enumOrderType eOrderType;
-    pPositionGreek_t pPositionGreek( m_vPositions[ m_nRowRightClick ].GetPositionGreek() );
+    pPositionGreek_t pPositionGreek( m_vPositions[ m_nRowRightClick ]->GetPositionGreek() );
     bool bOk( true );
     bOk = m_nRowRightClick < m_vPositions.size();
     if ( bOk ) {
@@ -432,16 +420,29 @@ void PanelOptionCombo_impl::OnPositionPopUpAddPosition( wxCommandEvent& event ) 
   }
 }
 
-//void PanelOptionCombo_impl::AddInstrumentToPosition( pInstrument_t pInstrument ) {
-//  if ( nullptr != m_poc.m_fConstructPositionGreek) {
-//    namespace ph = std::placeholders;
-//    m_poc.m_fConstructPositionGreek( pInstrument, m_pPortfolioGreek, 
-//      std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
-//  }
-//  else {
-//    std::cout << "PanelOptionCombo_impl::AddInstrumentToPosition: no m_fConstructPositionGreek" << std::endl;
-//  }
-//}
+void PanelOptionCombo_impl::OnPositionPopUpDeletePosition( wxCommandEvent& event ) {
+  // the issue here is that there is a direct match between position and row in the grid
+  // so need to sync with the updategui event, which is queued, so will be processed in step
+  // => delete positiongreek, delete grid row, and renumber row numbers in structPosition
+  // delete structPosition for position
+  // then delete position from portfolio
+  pPositionGreek_t pPositionGreek = m_vPositions[ m_nRowRightClick ]->GetPositionGreek();
+  if ( nullptr != m_poc.m_fRemoveFromEngine ) {
+    m_poc.m_fRemoveFromEngine( pPositionGreek->GetOption(), pPositionGreek->GetUnderlying() );
+  }
+  m_pPortfolioGreek->DeletePosition( pPositionGreek->GetOption()->GetInstrument()->GetInstrumentName(), pPositionGreek );
+  // then delete position
+  // delete row from grid
+  m_vPositions.erase( m_vPositions.begin() + m_nRowRightClick );
+  m_gridPositions->DeleteRows( m_nRowRightClick, 1 );
+  // renumber rows in structure
+  int ix( 0 );
+  std::for_each( m_vPositions.begin(), m_vPositions.end(), [&ix](vPositions_t::value_type& vt){
+    vt->SetRow( ix );
+    ix++;
+  } );
+  
+}
 
 // TODO: will need to change to use various instances rather than just m_pPortfolioGreek
 void PanelOptionCombo_impl::AddOptionUnderlyingPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
@@ -461,7 +462,9 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
 
   int row( m_vPositions.size() );
 
-  m_vPositions.push_back( structPosition( pPositionGreek, *m_gridPositions, row ) );
+  pstructPositionGreek_t pstructPositionGreek;
+  pstructPositionGreek.reset( new structPosition( pPositionGreek, *m_gridPositions, row ) );
+  m_vPositions.push_back( std::move( pstructPositionGreek ) );
   if ( nullptr != m_poc.m_fRegisterWithEngine ) {
     m_poc.m_fRegisterWithEngine( pPositionGreek->GetOption(), pPositionGreek->GetUnderlying() );
   }
@@ -470,33 +473,16 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
 }
 
 void PanelOptionCombo_impl::UpdateGui( void ) {
-
-  for ( vPositions_t::iterator iter = m_vPositions.begin(); m_vPositions.end() != iter; ++iter ) {
-    // todo maybe use BeginBatch/EndBatch on grid?  Creates even more flicker.  Things are good for now.
-    iter->UpdateGui();
-  }
-
-//  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-//  m_pPortfolioGreek->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-
-//  m_vPortfolioModelCell[ 0 ].SetValue( dblUnRealized );
-//  if ( m_vPortfolioModelCell[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioModelCell[ 0 ].GetText() );
-
-//  m_vPortfolioModelCell[ 1 ].SetValue( dblRealized );
-//  if ( m_vPortfolioModelCell[ 1 ].Changed() ) m_txtRealizedPL  ->SetValue( m_vPortfolioModelCell[ 1 ].GetText() );
-
-//  m_vPortfolioModelCell[ 2 ].SetValue( dblCommissionsPaid );
-//  if ( m_vPortfolioModelCell[ 2 ].Changed() ) m_txtCommission  ->SetValue( m_vPortfolioModelCell[ 2 ].GetText() );
-
-//  m_vPortfolioModelCell[ 3 ].SetValue( dblTotal );
-//  if ( m_vPortfolioModelCell[ 3 ].Changed() ) m_txtTotal       ->SetValue( m_vPortfolioModelCell[ 3 ].GetText() );
   
-  
+  std::for_each( m_vPositions.begin(), m_vPositions.end(), [](vPositions_t::value_type& vt){
+    vt->UpdateGui();
+  } );
+
   std::for_each( m_vPortfolioCalcs.begin(), m_vPortfolioCalcs.end(), [](vPortfolioCalcs_t::value_type& vt){ vt = 0.0; } );
   
   // TODO: migrate to m_pPortfolioGreek?
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [this](const vPositions_t::value_type& vt){
-    const pPositionGreek_t pPositionGreek = vt.GetPositionGreek();
+    const pPositionGreek_t pPositionGreek = vt->GetPositionGreek();
     const pOption_t pOption = pPositionGreek->GetOption();
     const ou::tf::PositionGreek::TableRowDef& row( pPositionGreek->GetRow() );
     ou::tf::Quote quote( pOption->LastQuote() );

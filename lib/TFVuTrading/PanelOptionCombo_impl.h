@@ -131,21 +131,20 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnGreek.Remove( MakeDelegate( this, &structPosition::HandleOnGreek ) );
     }
     void UpdateGui( void ) {
-      //m_pGrid->BeginBatch();
-      //m_pGrid->Freeze();
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_row ) );
-      //m_pGrid->Thaw();
-      //m_pGrid->EndBatch();
     }
     const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
     void SetPrecision( double dbl ) {  // why a call with double, and not being used?
-      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
+      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( dbl ) );
     }
+    int GetRow() const { return m_row; }
+    void SetRow( int nRow ) { m_row = nRow; }
+    
   private:
     int m_row;
     wxGrid& m_grid;
     pPositionGreek_t m_pPositionGreek;
-    vModelCells_t m_vModelCells;
+    vModelCells_t m_vModelCells;  // needs to be changed to unique_ptr so doesn't change, or use move semantics? (due to background thread processing)
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       boost::fusion::at_c<COL_Pos>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().sName );
@@ -220,7 +219,8 @@ struct PanelOptionCombo_impl {
   };  // ======================================== structPosition
   
 
-  typedef std::vector<structPosition> vPositions_t;
+  typedef std::unique_ptr<structPosition> pstructPositionGreek_t;
+  typedef std::vector<pstructPositionGreek_t> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid
 
   bool m_bDialogActive;
@@ -250,9 +250,6 @@ struct PanelOptionCombo_impl {
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
   vPortfolioValues_t m_vPortfolioModelCell;  // holds dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal
 
-  //ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
-  //ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
-
   ou::tf::DialogSimpleOneLineOrder::DataExchange m_DialogSimpleOneLineOrder_DataExchange;
   ou::tf::DialogSimpleOneLineOrder* m_pdialogSimpleOneLineOrder;
 
@@ -267,6 +264,7 @@ struct PanelOptionCombo_impl {
   void OnRightClickGridCell( wxGridEvent& event );
   void OnGridColSize( wxGridSizeEvent& event );
   void OnPositionPopUpAddPosition( wxCommandEvent& event );
+  void OnPositionPopUpDeletePosition( wxCommandEvent& event );
   void OnPositionPopUpAddOrder( wxCommandEvent& event );
   void OnPositionPopUpCancelOrders( wxCommandEvent& event );
   void OnPositionPopUpClosePosition( wxCommandEvent& event );
@@ -288,9 +286,9 @@ struct PanelOptionCombo_impl {
     ar & m_vPositions.size();
     std::for_each( m_vPositions.begin(), m_vPositions.end(), 
       [&ar](const vPositions_t::value_type& vt){
-        const std::string sO( vt.GetPositionGreek()->GetOption()->GetInstrument()->GetInstrumentName() );
+        const std::string sO( vt->GetPositionGreek()->GetOption()->GetInstrument()->GetInstrumentName() );
         ar & sO;
-        const std::string sU( vt.GetPositionGreek()->GetUnderlying()->GetInstrument()->GetInstrumentName() );
+        const std::string sU( vt->GetPositionGreek()->GetUnderlying()->GetInstrument()->GetInstrumentName() );
       ar & sU;
     } );
   }

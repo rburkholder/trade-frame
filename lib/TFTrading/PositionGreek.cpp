@@ -88,6 +88,9 @@ std::ostream& operator<<( std::ostream& os, const PositionGreek& position ) {
     << ", ImpVol " << greek.ImpliedVolatility() 
     << ", Delta " << greek.Delta()
     << ", Gamma " << greek.Gamma()
+    << ", Theta " << greek.Theta()
+    << ", Vega " << greek.Vega()
+    << ", Rho " << greek.Rho()
     ;
   return os;
 }

@@ -45,6 +45,7 @@ public:
   virtual ~PortfolioGreek( );
   
   pPositionGreek_t AddPosition( const std::string& sName, pPositionGreek_t );
+  void DeletePosition( const std::string& sName, pPositionGreek_t ); // supply the position to test against the name or ptr value (ptr not used here)
   
   void AddSubPortfolio( pPortfolioGreek_t& );
   void RemoveSubPortfolio( const idPortfolio_t& idPortfolio );
