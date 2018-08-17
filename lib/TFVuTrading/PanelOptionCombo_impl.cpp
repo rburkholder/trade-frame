@@ -130,7 +130,7 @@ void PanelOptionCombo_impl::CreateControls() {
 
   m_menuGridLabelPositionPopUp = new wxMenu;
   //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPosition, "Add Greek Position" );
-  //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
   //m_menuGridLabelPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
 
   m_menuGridCellPositionPopUp = new wxMenu;
@@ -139,7 +139,7 @@ void PanelOptionCombo_impl::CreateControls() {
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddOrder, "Add Order" );
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuCancelOrders, "Cancel Orders" );
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePosition, "Close Greek Position" );
-  //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
+  m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
   
   // watch out for the std::move operations?:  needed in some places?, not in others?
@@ -337,10 +337,10 @@ void PanelOptionCombo_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataEx
   m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
   m_pdialogNewPortfolio->SetDataExchange( 0 );
   if ( m_DialogNewPortfolio_DataExchange.bOk ) {
-    if ( nullptr != m_poc.m_fConstructPortfolioGreek ) {
+    if ( nullptr != m_poc.m_fBootStrapNextPanelOptionCombo ) {
       std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
       std::string sDescription( m_DialogNewPortfolio_DataExchange.sDescription );
-      m_poc.m_fConstructPortfolioGreek( m_poc, sPortfolioId, sDescription );
+      m_poc.m_fBootStrapNextPanelOptionCombo( sPortfolioId, sDescription );
     }
   }
   m_pdialogNewPortfolio->Destroy();

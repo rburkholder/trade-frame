@@ -128,7 +128,7 @@ bool AppComboTrading::OnInit() {
   m_pFInteractiveBrokers = nullptr;
     
   m_pPanelCharts = nullptr;
-  m_pPanelOptionCombo = nullptr;
+  //m_pPanelOptionCombo = nullptr;
   
   m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
   m_pOptionEngine->m_fBuildWatch 
@@ -575,20 +575,28 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   point.y += 200;
   m_pFOC->SetPosition( point );
   m_pFOC->Show();
-
-  m_pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
-  m_sizerScrollOC->Add( m_pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
-  m_sizerScrollOC->Layout();
   
-  m_pPanelOptionCombo->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& sPortfolioId, const std::string& sDescription){
-    if ( sPortfolioId.empty() ) {
+  HandleNewPanelOptionCombo( idPortfolio_t( "sandbox" ), "experimenting with option combinations" );
+
+}
+
+AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription ) {
+  
+  pPanelOptionCombo_t pPanelOptionCombo;
+  pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
+  
+  pPanelOptionCombo->m_fBootStrapNextPanelOptionCombo = [this](const idPortfolio_t& idPortfolio_, const std::string& sDescription_){
+    HandleNewPanelOptionCombo( idPortfolio_, sDescription_ );
+  };
+  pPanelOptionCombo->m_fConstructPortfolioGreek = [this](ou::tf::PanelOptionCombo& poc, const idPortfolio_t& idPortfolio, const std::string& sDescription){
+    if ( idPortfolio.empty() ) {
       std::cout << "portfolio id is required" << std::endl;
     }
     else {
-      mapPortfoliosSandbox_t::iterator iter = m_mapPortfoliosSandbox.find( sPortfolioId );
+      mapPortfoliosSandbox_t::iterator iter = m_mapPortfoliosSandbox.find( idPortfolio );
       if ( m_mapPortfoliosSandbox.end() == iter ) {
         pPortfolioGreek_t pPortfolioGreek( new ou::tf::PortfolioGreek(
-          sPortfolioId, ou::tf::PortfolioGreek::idAccountOwner_t( "none" ), idPortfolio_t( "self" ), 
+          idPortfolio, ou::tf::PortfolioGreek::idAccountOwner_t( "none" ), idPortfolio_t( "self" ), 
           ou::tf::Portfolio::EPortfolioType::Standard, "USD", sDescription 
         ) );
         poc.SetPortfolioGreek( pPortfolioGreek );
@@ -596,14 +604,14 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
         m_mapPortfoliosSandbox.insert( mapPortfoliosSandbox_t::value_type( pPortfolioGreek->Id(), structPortfolioSandbox( &poc ) ) );
       }
       else {
-        std::cout << "portfolio id " << sPortfolioId << " already exists" << std::endl;
+        std::cout << "portfolio id " << idPortfolio << " already exists" << std::endl;
       }
     }
-    //m_pFOC->Layout();
+    m_pFOC->Layout();
     //m_sizerScrollOC->Layout();
   };
 
-  m_pPanelOptionCombo->m_fConstructPositionGreek 
+  pPanelOptionCombo->m_fConstructPositionGreek 
       = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
         // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
         // register with engine
@@ -639,7 +647,7 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
     // position needs to start the watch, needs both option and underlying
     // then add to engine here?  who removes from engine?  does the panel manage the list
   };
-  m_pPanelOptionCombo->m_fSelectInstrument = [this]()->pInstrument_t {
+  pPanelOptionCombo->m_fSelectInstrument = [this]()->pInstrument_t {
       namespace ph = std::placeholders;
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
@@ -651,19 +659,16 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
       };
       return pBuild->HandleNewInstrumentRequest( ou::tf::Allowed::All, "" ); // the dialog pops up in this call
     };
-  m_pPanelOptionCombo->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelOptionCombo& poc){
+  pPanelOptionCombo->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelOptionCombo& poc){
     poc.SaveColumnSizes( m_gcsPanelOptionCombo );
     UpdateColumns_PanelOptionCombo();
   };
 
-  assert( nullptr != m_pPanelOptionCombo->m_fConstructPortfolioGreek );
-  m_pPanelOptionCombo->m_fConstructPortfolioGreek( *m_pPanelOptionCombo, idPortfolio_t( "sandbox" ), std::string( "experimenting with option combinations" ) );
-  
   namespace ph = std::placeholders;
-  m_pPanelOptionCombo->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
-  m_pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 );
+  pPanelOptionCombo->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
+  pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 );
   
-  m_pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
+  pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
     if ( im.Exists( idInstrument, pInstrument ) ) {
       // all is good, pInstrument is assigned
@@ -676,6 +681,12 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
     return pInstrument;
   };
 
+  pPanelOptionCombo->m_fConstructPortfolioGreek( *pPanelOptionCombo, idPortfolio, sDescription );
+
+  m_sizerScrollOC->Add( pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  m_sizerScrollOC->Layout();
+  
+  return pPanelOptionCombo;
 }
 
 // 20151124 priority:  get the symbols tracking, draw charts, and watch volatility on futures and equities

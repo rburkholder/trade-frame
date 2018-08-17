@@ -153,7 +153,12 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
-  ou::tf::PanelOptionCombo* m_pPanelOptionCombo;
+  //ou::tf::PanelOptionCombo* m_pPanelOptionCombo;
+  
+  typedef ou::tf::PanelOptionCombo PanelOptionCombo;
+  typedef PanelOptionCombo* pPanelOptionCombo_t;
+  //typedef std::vector<PanelOptionCombo*> vPanelOptionCombo_t;
+  //vPanelOptionCombo_t m_vPanelOptionCombo;
   
   MPPOE_t* m_pMPPOE;
   PPPOE_t* m_pPPPOE;
@@ -251,6 +256,8 @@ private:
 //  void HandleMenuActionInitializeSymbolSet( void );
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
+  
+  pPanelOptionCombo_t HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription );
 
   void HandleConstructPortfolio( ou::tf::PanelPortfolioPosition&,const std::string&, const std::string& ); // portfolioid, description
   
@@ -270,11 +277,15 @@ private:
     ar & *m_pPanelIBAccountValues;
     ar & *m_pPanelIBPositionDetails;
     ar & *m_pPanelCharts;
-    ar & *m_pPanelOptionCombo;
+    ar & m_mapPortfoliosSandbox.size();
+    std::for_each( m_mapPortfoliosSandbox.begin(), m_mapPortfoliosSandbox.end(), [&ar](const mapPortfoliosSandbox_t::value_type& vt){
+      ar & vt.first;
+      ar & *vt.second.pT;
+    });
     ar & m_gcsPanelPortfolioPosition;
     ar & m_gcsPanelOptionCombo;
   }
-
+  
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
@@ -298,8 +309,27 @@ private:
     if ( 5 <= version ) {
       ar & *m_pPanelCharts;
     }
-    if ( 7 <= version ) {
-      ar & *m_pPanelOptionCombo;
+    if ( 8 <= version ) {
+      mapPortfoliosSandbox_t::size_type size;
+      ar & size;
+      assert( 1 <= size );  // ComboTrading creates at least one panel
+      ou::tf::PortfolioGreek::idPortfolio_t idPortfolio;
+      ar & idPortfolio;  // discard the first idPortfolio
+      ar & *m_mapPortfoliosSandbox.begin()->second.pT; // recreate the prebuilt entry
+      size--;  // account for the prebuilt entry
+      for ( mapPortfoliosSandbox_t::size_type ix = 0; ix < size; ix++ ) {
+        ar & idPortfolio;
+        pPanelOptionCombo_t pPanelOptionCombo;
+        pPanelOptionCombo = HandleNewPanelOptionCombo( idPortfolio, "" );
+        ar & *pPanelOptionCombo;
+      }
+    }
+    else {
+      if ( 7 <= version ) {
+        //pPanelOptionCombo_t pPanelOptionCombo;
+        //pPanelOptionCombo = HandleNewPanelOptionCombo( "sandbox", "pre-load" );
+        ar & *m_mapPortfoliosSandbox.begin()->second.pT; // should only be one entry;
+      }
     }
     if ( 6 <= version ) {
       ar & m_gcsPanelPortfolioPosition;
@@ -313,6 +343,6 @@ private:
     
 };
 
-BOOST_CLASS_VERSION(AppComboTrading, 7)
+BOOST_CLASS_VERSION(AppComboTrading, 8)
 DECLARE_APP(AppComboTrading)
 

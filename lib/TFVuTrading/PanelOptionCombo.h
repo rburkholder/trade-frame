@@ -66,6 +66,9 @@ public:
 
   typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
+  
+  typedef std::function<void(const idPortfolio_t&, const std::string&)> fBootStrapNextPanelOptionCombo_t;
+  fBootStrapNextPanelOptionCombo_t m_fBootStrapNextPanelOptionCombo;
 
   typedef std::function<void(pPositionGreek_t)> fAddPositionGreek_t;
   typedef std::function<void(pInstrument_t, pInstrument_t, pPortfolioGreek_t, fAddPositionGreek_t)> fConstructPositionGreek_t;
@@ -123,6 +126,8 @@ private:
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
     ID_GridPortfolioDetails, ID_GridPositions
   };
+  
+  bool m_bInitialized;  // needs idPortfolio and description prior to performing actions
 
   std::unique_ptr<PanelOptionCombo_impl> m_pimpl;
 

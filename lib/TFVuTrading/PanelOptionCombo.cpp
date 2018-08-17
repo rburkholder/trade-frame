@@ -37,6 +37,7 @@ PanelOptionCombo::~PanelOptionCombo(void) {
 }
 
 void PanelOptionCombo::Init() {
+  m_bInitialized = false;
   m_pimpl.reset( new PanelOptionCombo_impl( *this ) ); 
 }
 
