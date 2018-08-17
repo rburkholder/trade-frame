@@ -15,6 +15,7 @@ Picture from the ComboTrading project showing an instrument list, with a chart f
 
 ![Option Greeks Timeline](notes/pictures/qgc-20180925-c-1195_2018-08-16_12-55-40.png)
 
+More pictures under ![ComboTrading](ComboTrading)
 
 ## Building
 
