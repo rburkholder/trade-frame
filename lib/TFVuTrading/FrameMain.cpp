@@ -14,6 +14,8 @@
 
 // Generic frame for wx based applications
 
+#include <wx-3.0/wx/window.h>
+
 #include "stdafx.h"
 
 #include "FrameMain.h"
@@ -28,6 +30,7 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& caption, 
 }
 
 FrameMain::~FrameMain(void) {
+  std::cout << "FrameMain::~FrameMain" << this->GetName() << std::endl;
 }
 
 bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
