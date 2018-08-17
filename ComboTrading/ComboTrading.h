@@ -322,6 +322,8 @@ private:
         pPanelOptionCombo_t pPanelOptionCombo;
         pPanelOptionCombo = HandleNewPanelOptionCombo( idPortfolio, "" );
         ar & *pPanelOptionCombo;
+        //m_sizerScrollOC->FitInside( pPanelOptionCombo );
+        //m_sizerFOC->FitInside( m_scrollFOC );
       }
     }
     else {
@@ -337,6 +339,12 @@ private:
       ar & m_gcsPanelOptionCombo;
       UpdateColumns_PanelOptionCombo();
     }
+    
+    //m_sizerFOC->FitInside( m_scrollFOC );
+    //m_sizerScrollOC->FitInside( m_scrollFOC );
+    m_sizerScrollOC->Layout();
+    m_sizerFOC->Layout();
+    
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

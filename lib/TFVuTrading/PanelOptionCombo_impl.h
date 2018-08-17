@@ -234,10 +234,11 @@ struct PanelOptionCombo_impl {
     wxStaticText* m_lblCurrency;
     wxStaticText* m_lblIdPortfolio;
     wxTextCtrl* m_txtDescription;
-    wxBoxSizer* m_sizerPortfolioStats;
-    wxGrid* m_gridPortfolioStats;
-    wxBoxSizer* m_sizerGridPositions;
     wxGrid* m_gridPositions;
+    wxGrid* m_gridPortfolioStats;
+    
+    wxSizerItem* m_siPosition;
+    wxSizerItem* m_siPortfolioStats;
 
     wxMenu* m_menuGridLabelPositionPopUp;
     wxMenu* m_menuGridCellPositionPopUp;
@@ -325,7 +326,10 @@ struct PanelOptionCombo_impl {
         
         
       }
-      m_poc.Layout();
+      //m_poc.Layout();
+      //m_sizerMain->CalcMin();
+      //m_sizerMain->RecalcSizes();
+      m_sizerMain->Layout();
     }
 
   }

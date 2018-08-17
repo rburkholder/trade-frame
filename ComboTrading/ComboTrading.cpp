@@ -555,13 +555,13 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
+  
+  m_pFOC->SetAutoLayout( true );
 
   m_sizerFOC = new wxBoxSizer(wxVERTICAL);
   m_pFOC->SetSizer(m_sizerFOC);
 
-  //m_pFOC->SetAutoLayout( true );
-
-  //m_scrollOC is used for holding the PanelPortfolioPosition instances
+  //m_scrollOC is used for holding the pPanelOptionCombo instances
   m_scrollFOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerFOC->Add(m_scrollFOC, 1, wxGROW|wxALL, 4);
   //m_scrollFOC->SetScrollbars(5, 5, 10, 10);
@@ -577,6 +577,8 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   m_pFOC->Show();
   
   HandleNewPanelOptionCombo( idPortfolio_t( "sandbox" ), "experimenting with option combinations" );
+  
+  m_pFOC->Layout();
 
 }
 
@@ -683,11 +685,14 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
 
   pPanelOptionCombo->m_fConstructPortfolioGreek( *pPanelOptionCombo, idPortfolio, sDescription );
 
-  m_sizerScrollOC->Add( pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
+  //wxBoxSizer* pSizer = new wxBoxSizer(wxHORIZONTAL);
+  //m_sizerScrollOC->Add( pSizer, 1, wxGROW|wxALL, 1 );
+  //pSizer->Add( pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 1);
+  m_sizerScrollOC->Add( pPanelOptionCombo, 0, wxALL|wxGROW, 6 );
   m_sizerScrollOC->Layout();
   
   return pPanelOptionCombo;
-}
+} 
 
 // 20151124 priority:  get the symbols tracking, draw charts, and watch volatility on futures and equities
 // 20151128 use the code in start to obtain the symbol info for populating the portfolio/position info

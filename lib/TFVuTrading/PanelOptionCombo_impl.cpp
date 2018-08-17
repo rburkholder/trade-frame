@@ -41,10 +41,8 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
     m_lblCurrency = NULL;
     m_lblIdPortfolio = NULL;
     m_txtDescription = NULL;
-    m_sizerPortfolioStats = NULL;
-    m_gridPortfolioStats = NULL;
-    m_sizerGridPositions = NULL;
     m_gridPositions = NULL;
+    m_gridPortfolioStats = NULL;
 
     m_menuGridLabelPositionPopUp = NULL;
     m_menuGridCellPositionPopUp = NULL;
@@ -84,31 +82,24 @@ void PanelOptionCombo_impl::CreateControls() {
     m_txtDescription = new wxTextCtrl( itemPanel1, m_poc.ID_TxtDescription, _("description"), wxDefaultPosition, wxSize(-1, 30), wxTE_MULTILINE|wxTE_READONLY );
     m_sizerHeader->Add(m_txtDescription, 1, wxALIGN_TOP|wxALL, 2);
 
-    m_sizerGridPositions = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerGridPositions, 0, wxGROW|wxALL, 1);
-
-    m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
+    m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxSize(-1, 5*22 ), wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(50);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
-    m_sizerGridPositions->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    m_siPosition = m_sizerMain->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
-    wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(itemBoxSizer4, 0, wxGROW|wxALL, 1);
-
-    wxStaticLine* itemStaticLine5 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-    itemBoxSizer4->Add(itemStaticLine5, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
-
-    m_sizerPortfolioStats = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerPortfolioStats, 0, wxGROW|wxALL, 1);
-
-    m_gridPortfolioStats = new wxGrid( itemPanel1, m_poc.ID_GridPortfolioDetails, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE );
+    m_gridPortfolioStats = new wxGrid( itemPanel1, m_poc.ID_GridPortfolioDetails, wxDefaultPosition, wxSize(-1, 22), wxFULL_REPAINT_ON_RESIZE );
     m_gridPortfolioStats->SetDefaultColSize(50);
     m_gridPortfolioStats->SetDefaultRowSize(22);
     m_gridPortfolioStats->SetColLabelSize(0);
     m_gridPortfolioStats->SetRowLabelSize(0);
-    m_sizerPortfolioStats->Add(m_gridPortfolioStats, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    m_siPortfolioStats = m_sizerMain->Add(m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+
+    //wxPanel* itemPanel3 = new wxPanel( itemPanel1, m_poc.ID_PanelFiller, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    //itemPanel3->SetForegroundColour(wxColour(229, 229, 229));
+    //itemPanel3->SetBackgroundColour(wxColour(191, 191, 191));
+    //m_sizerMain->Add(itemPanel3, 1, wxGROW|wxALL, 2);
 
   m_gridPositions->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
   m_gridPortfolioStats->CreateGrid(1, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
@@ -250,6 +241,7 @@ void PanelOptionCombo_impl::SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek
 }
 
 void PanelOptionCombo_impl::OnMouseWheel( wxMouseEvent& event ) {
+  bool bSkip( true );
   int delta = event.GetWheelDelta();
   int rotation = event.GetWheelRotation(); // has positive, negative, use delta to normalize
   bool bShift = event.ShiftDown();
@@ -266,11 +258,12 @@ void PanelOptionCombo_impl::OnMouseWheel( wxMouseEvent& event ) {
   
   if ( ( 1 == coords.GetCol() ) || ( 2 == coords.GetCol() ) ) {
     m_vPositions[ coords.GetRow() ]->GetPositionGreek()->PositionPendingDelta( 0 > rotation ? -1 : 1 );
+    bSkip = false;
   }
   
   
   //DrawChart();
-  //event.Skip();
+  event.Skip( bSkip );
 }
 
 void PanelOptionCombo_impl::HandleOnUnRealizedPLUpdate( const Portfolio& ) {
@@ -435,6 +428,7 @@ void PanelOptionCombo_impl::OnPositionPopUpDeletePosition( wxCommandEvent& event
   // delete row from grid
   m_vPositions.erase( m_vPositions.begin() + m_nRowRightClick );
   m_gridPositions->DeleteRows( m_nRowRightClick, 1 );
+  m_gridPositions->SetSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
   // renumber rows in structure
   int ix( 0 );
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [&ix](vPositions_t::value_type& vt){
@@ -459,6 +453,37 @@ void PanelOptionCombo_impl::AddOptionUnderlyingPosition( pInstrument_t pOption, 
 void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) {
 
   m_gridPositions->AppendRows( 1 );
+  //m_gridPositions->SetMinSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_gridPositions->SetMinClientSize(  wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_gridPositions->SetSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_sizerGridPositions->SetItemMinSize(m_gridPositions, wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_sizerMain->SetItemMinSize(m_gridPositions, wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_sizerGridPositions->SetMinSize( -1,  ( 1 + m_gridPositions->GetRows() ) * 22 );
+  //m_sizerGridPositions->CalcMin();
+  //m_sizerGridPositions->RecalcSizes();
+  //m_sizerMain->RecalcSizes();
+  //m_sizerGridPositions->Layout();
+  //m_sizerMain->Layout();
+  
+  //int id = m_siPortfolioStats->GetId();
+  //m_sizerMain->Detach( m_gridPositions );
+  //m_sizerMain->Detach( m_gridPortfolioStats );
+  //m_gridPositions->SetMinSize( wxSize( -1, ( 1 + m_gridPositions->GetRows() ) * 25 ) );
+  //m_gridPositions->SetMinClientSize(  wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_gridPositions->SetSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_siPosition = m_sizerMain->Insert( id, m_gridPositions,0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1 );
+  //m_siPosition->AssignWindow( m_gridPositions );
+  //m_sizerMain->Add( m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1 );
+  //m_sizerMain->Add( m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1 );
+  //m_sizerMain->Layout();
+  
+  
+  //std::cout << "m_gridPositions->GetRows(): " << m_gridPositions->GetRows() 
+  //  << "," << m_sizerGridPositions->GetMinSize().GetY()
+  //  << "," << m_sizerGridPositions->GetSize().GetY()
+  //  << "," << m_sizerPortfolioDetails->GetMinSize().GetY()
+  //  << "," << m_sizerPortfolioDetails->GetSize().GetY()
+  //  << std::endl;
 
   int row( m_vPositions.size() );
 

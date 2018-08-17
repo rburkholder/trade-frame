@@ -124,7 +124,8 @@ private:
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
     ID_MenuAddPosition, ID_MenuDeletePosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
-    ID_GridPortfolioDetails, ID_GridPositions
+    ID_GridPortfolioDetails, ID_GridPositions,
+    ID_PanelFiller
   };
   
   bool m_bInitialized;  // needs idPortfolio and description prior to performing actions
