@@ -78,27 +78,27 @@ struct PanelOptionCombo_impl {
   void SetColumnSizes( ou::tf::GridColumnSizer& );
 	
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
-#define GRID_ARRAY_PARAM_COUNT 5
+#define GRID_ARRAY_PARAM_COUNT 6
 #define GRID_ARRAY_COL_COUNT 16
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
-      (COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (COL_Quan     , "Quan",       wxALIGN_RIGHT,  50, ModelCellInt ),    \
-      (COL_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  70, ModelCellDouble ), \
-      (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  70, ModelCellDouble ), \
-      (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  70, ModelCellDouble ), \
-      (COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_Theta    , "Theta",      wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_Vega     , "Vega",       wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_Rho      , "Rho",        wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString, 0 ), \
+      (COL_Quan     , "Quan",       wxALIGN_RIGHT,  50, ModelCellInt,    0 ), \
+      (COL_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString, 0 ), \
+      (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  70, ModelCellDouble, 2 ), \
+      (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  70, ModelCellDouble, 2 ), \
+      (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  70, ModelCellDouble, 2 ), \
+      (COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble, 2 ), \
+      (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble, 2 ), \
+      (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble, 2 ), \
+      (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble, 2 ), \
+      (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble, 4 ), \
+      (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble, 4 ), \
+      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
+      (COL_Theta    , "Theta",      wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
+      (COL_Vega     , "Vega",       wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
+      (COL_Rho      , "Rho",        wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
       ) \
     ) \
   /**/
@@ -135,8 +135,12 @@ struct PanelOptionCombo_impl {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_rowGrid ) );
     }
     const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
-    void SetPrecision( double dbl ) {  // why a call with double, and not being used?
-      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( dbl ) );
+    void SetPrecision() {  // why a call with double, and not being used?
+      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), [](CellInfo_t<ModelCellDouble>& ci){
+        static std::vector<unsigned int> vPrecision = { BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,5) };
+        ci.SetPrecision( vPrecision[ci.GetCol() ] );
+        ci.SetValue( 0.499999 );
+      } );
     }
     int GetGridRow() const { return m_rowGrid; }
     void SetGridRow( int nRow ) { m_rowGrid = nRow; }
@@ -168,6 +172,8 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
       boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
       boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
+      
+      SetPrecision();
     }
 
     void HandleOnPositionChanged( const Position& position ) {
@@ -225,6 +231,8 @@ struct PanelOptionCombo_impl {
   typedef std::unique_ptr<structPosition> pstructPositionGreek_t;
   typedef std::vector<pstructPositionGreek_t> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid
+  
+  typedef std::vector<unsigned int> vPrecision_t;
 
   bool m_bDialogActive;
   int m_nRowRightClick;  // row on which right click occurred
