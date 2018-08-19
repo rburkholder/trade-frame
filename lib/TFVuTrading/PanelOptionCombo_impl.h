@@ -139,7 +139,6 @@ struct PanelOptionCombo_impl {
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), [](CellInfo_t<ModelCellDouble>& ci){
         static std::vector<unsigned int> vPrecision = { BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,5) };
         ci.SetPrecision( vPrecision[ci.GetCol() ] );
-        ci.SetValue( 0.499999 );
       } );
     }
     int GetGridRow() const { return m_rowGrid; }
@@ -232,8 +231,6 @@ struct PanelOptionCombo_impl {
   typedef std::vector<pstructPositionGreek_t> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid
   
-  typedef std::vector<unsigned int> vPrecision_t;
-
   bool m_bDialogActive;
   int m_nRowRightClick;  // row on which right click occurred
 
