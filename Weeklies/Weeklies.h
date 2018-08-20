@@ -31,11 +31,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-//#include <TFVuTrading/PanelManualOrder.h>
 
-//#include <TFOptions/Bundle.h>
-
-//#include "DataStructures.h"
 #include <OUCommon/Worker.h>
 
 #include "SignalGenerator.h"

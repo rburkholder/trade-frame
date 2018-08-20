@@ -19,8 +19,6 @@
 #include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -36,12 +34,19 @@
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
-
 #include "Weeklies.h"
 
-IMPLEMENT_APP(AppWeeklies)
+/*
+ * NOTE:  SignalGenerator::ScanBars needs to be updated with begin/end dates for processing (200 daily bars required minimum)
+ * TODO:  update gui to select begin/end dates of scan
+ * 
+ * NOTE: spreadsheet is obtained from http://www.cboe.com/micro/weeklys/availableweeklys.aspx
+ * 
+ * Input:  x64/weeklysmf.xls
+ * Output: x64/debug/weeklies.xls
+ */
 
-size_t atm = 125;
+IMPLEMENT_APP(AppWeeklies)
 
 bool AppWeeklies::OnInit() {
 
