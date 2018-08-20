@@ -174,15 +174,24 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
       Confirm( "SPX & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
       ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxwXsp );
 
-      Confirm( "SPX Wednesday Weeklys (WW) Available Expirations:",  sheet->Cell( 5, 2 ) );
-      ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxWednesday );
+      Confirm( "XSP Wednesday Weeklys (W) Available Expirations:",  sheet->Cell( 5, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesXspWednesday );
 
-      Confirm( "VIX Weekly Options",                               sheet->Cell( 6, 2 ) );
+      Confirm( "SPX Monday & Wednesday Weeklys (M,W) Available Expirations:",  sheet->Cell( 6, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxMonWed );
+
+      Confirm( "Monday Equity/ETF/ETN Weeklys (M) Available Expirations:",  sheet->Cell( 7, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesEtfMonday );
+
+      Confirm( "Wednesday Equity/ETF/ETN Weeklys (W) Available Expirations:",  sheet->Cell( 8, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesEtfWedndesday );
+
+      Confirm( "VIX Weekly Options",                               sheet->Cell( 9, 2 ) );
       ExtractDates( sheet, 2, 3, expiries.vExpiriesVixWeeklies );
 
-      Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 7, 2 ) );
+      Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 10, 2 ) );
 
-      Confirm( "Ticker ",                                          sheet->Cell( 9, 0 ) );
+      Confirm( "Ticker ",                                          sheet->Cell( 12, 0 ) );  // adjust ixRow if this row changes
 
     }
     catch (...) {
@@ -194,7 +203,7 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
       expiries.vExpiriesStandardWeeklies = expiries.vExpiriesExpandedWeeklies;
     }
     
-    int ixRow( 10 );
+    int ixRow( 13 );  // based upon where Ticker ends
     int ixCol(  0 );
     
     bool bProcess( true );

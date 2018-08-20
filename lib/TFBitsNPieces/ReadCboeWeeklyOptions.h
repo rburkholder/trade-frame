@@ -33,7 +33,10 @@ namespace cboe {
       vOptionExpiryDates_t vExpiriesExpandedWeeklies;
       vOptionExpiryDates_t vExpiriesEndOfWeek;
       vOptionExpiryDates_t vExpiriesSpxwXsp;
-      vOptionExpiryDates_t vExpiriesSpxWednesday;
+      vOptionExpiryDates_t vExpiriesXspWednesday;
+      vOptionExpiryDates_t vExpiriesSpxMonWed;
+      vOptionExpiryDates_t vExpiriesEtfMonday;
+      vOptionExpiryDates_t vExpiriesEtfWedndesday;
       vOptionExpiryDates_t vExpiriesVixWeeklies;
     };
     
