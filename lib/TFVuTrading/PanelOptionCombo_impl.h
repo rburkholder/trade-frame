@@ -95,7 +95,7 @@ struct PanelOptionCombo_impl {
       (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble, 2 ), \
       (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble, 4 ), \
       (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble, 4 ), \
-      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
+      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  60, ModelCellDouble, 5 ), \
       (COL_Theta    , "Theta",      wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
       (COL_Vega     , "Vega",       wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
       (COL_Rho      , "Rho",        wxALIGN_RIGHT,  60, ModelCellDouble, 4 ), \
@@ -135,10 +135,11 @@ struct PanelOptionCombo_impl {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_rowGrid ) );
     }
     const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
-    void SetPrecision() {  // why a call with double, and not being used?
-      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), [](CellInfo_t<ModelCellDouble>& ci){
+    void SetPrecision() {
+      // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/algorithm/transformation/functions/filter.html  has a const in the expression, so forced to use const_cast
+      boost::fusion::for_each( boost::fusion::filter<CellInfo_t<ModelCellDouble> >( m_vModelCells ), [](const CellInfo_t<ModelCellDouble>& ci){
         static std::vector<unsigned int> vPrecision = { BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,5) };
-        ci.SetPrecision( vPrecision[ci.GetCol() ] );
+        const_cast<CellInfo_t<ModelCellDouble>&>( ci ).SetPrecision( vPrecision[ci.GetCol() ] );
       } );
     }
     int GetGridRow() const { return m_rowGrid; }

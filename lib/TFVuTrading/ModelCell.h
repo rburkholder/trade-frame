@@ -17,6 +17,7 @@
 
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 #include <boost/lexical_cast.hpp>
 
@@ -142,20 +143,23 @@ public:
   void InitializeValue( void ) { m_val = {}; }
 
   void SetPrecision( unsigned int n ) { 
-    ss.precision( n );
+    m_nPrecision = n;
   };
 protected:
 private:
   unsigned int m_nPrecision;
   std::stringstream ss;
   void Initialize() {
-    // speed vs space optimization
-    ss.precision( m_nPrecision );
-    ss.setf( std::ios::fixed, std:: ios::floatfield );
+    // speed vs space optimization?
+    //ss.precision( m_nPrecision );
+    //ss.setf( std::ios::fixed, std:: ios::floatfield );
   }
   void Val2String( void ) {
     std::stringstream().swap(ss);
-    ss << m_val;
+    // ss.setf( std::ios::fixed, std:: ios::floatfield );
+    //ss.precision( m_nPrecision );
+    ss << std::setprecision(m_nPrecision) << std::fixed << m_val;
+    //ss << m_val;
     m_sCellText = ss.str();
   }
 };

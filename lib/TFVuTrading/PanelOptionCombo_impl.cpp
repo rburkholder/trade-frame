@@ -166,6 +166,14 @@ void PanelOptionCombo_impl::CreateControls() {
 
   m_vPortfolioModelCell.resize( GRID_ARRAY_COL_COUNT );
   m_vPortfolioCalcs.resize( GRID_ARRAY_COL_COUNT );
+  
+  static std::vector<unsigned int> vPrecision = { BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,5) };
+  m_vPortfolioModelCell[COL_ImpVol].SetPrecision( vPrecision[ COL_ImpVol ] );
+  m_vPortfolioModelCell[COL_Delta].SetPrecision( vPrecision[ COL_Delta ] );
+  m_vPortfolioModelCell[COL_Gamma].SetPrecision( vPrecision[ COL_Gamma ] );
+  m_vPortfolioModelCell[COL_Theta].SetPrecision( vPrecision[ COL_Theta ] );
+  m_vPortfolioModelCell[COL_Vega].SetPrecision( vPrecision[ COL_Vega ] );
+  m_vPortfolioModelCell[COL_Rho].SetPrecision( vPrecision[ COL_Rho ] );
 
 }
 
