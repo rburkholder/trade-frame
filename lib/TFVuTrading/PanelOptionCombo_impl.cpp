@@ -63,7 +63,7 @@ PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
   m_vPositions.clear();
 }
 
-void PanelOptionCombo_impl::CreateControls() {    
+void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {    
 
     PanelOptionCombo* itemPanel1 = &m_poc;
 
@@ -71,7 +71,7 @@ void PanelOptionCombo_impl::CreateControls() {
     itemPanel1->SetSizer(m_sizerMain);
 
     m_sizerHeader = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerHeader, 0, wxGROW|wxALL, 1);
+    m_sizerMain->Add(m_sizerHeader, 1, wxGROW|wxALL, 1);
 
     m_lblCurrency = new wxStaticText( itemPanel1, m_poc.ID_LblCurrency, _("currency"), wxDefaultPosition, wxDefaultSize, 0 );
     m_sizerHeader->Add(m_lblCurrency, 0, wxALIGN_TOP|wxALL, 2);
@@ -82,19 +82,19 @@ void PanelOptionCombo_impl::CreateControls() {
     m_txtDescription = new wxTextCtrl( itemPanel1, m_poc.ID_TxtDescription, _("description"), wxDefaultPosition, wxSize(-1, 30), wxTE_MULTILINE|wxTE_READONLY );
     m_sizerHeader->Add(m_txtDescription, 1, wxALIGN_TOP|wxALL, 2);
 
-    m_gridPositions = new wxGrid( itemPanel1, m_poc.ID_GridPositions, wxDefaultPosition, wxSize(-1, 5*22 ), wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
+    m_gridPositions = new wxGrid( parent, m_poc.ID_GridPositions, wxDefaultPosition, wxSize(-1, -1 ), wxFULL_REPAINT_ON_RESIZE|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(50);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
-    m_siPosition = m_sizerMain->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    //m_siPosition = m_sizerMain->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
-    m_gridPortfolioStats = new wxGrid( itemPanel1, m_poc.ID_GridPortfolioDetails, wxDefaultPosition, wxSize(-1, 22), wxFULL_REPAINT_ON_RESIZE );
+    m_gridPortfolioStats = new wxGrid( parent, m_poc.ID_GridPortfolioDetails, wxDefaultPosition, wxSize(-1, 22), wxFULL_REPAINT_ON_RESIZE );
     m_gridPortfolioStats->SetDefaultColSize(50);
     m_gridPortfolioStats->SetDefaultRowSize(22);
     m_gridPortfolioStats->SetColLabelSize(0);
     m_gridPortfolioStats->SetRowLabelSize(0);
-    m_siPortfolioStats = m_sizerMain->Add(m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+    //m_siPortfolioStats = m_sizerMain->Add(m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
     //wxPanel* itemPanel3 = new wxPanel( itemPanel1, m_poc.ID_PanelFiller, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     //itemPanel3->SetForegroundColour(wxColour(229, 229, 229));
@@ -176,6 +176,18 @@ void PanelOptionCombo_impl::CreateControls() {
   m_vPortfolioModelCell[COL_Rho].SetPrecision( vPrecision[ COL_Rho ] );
 
 }
+
+void PanelOptionCombo_impl::AssignToSizer( wxBoxSizer* sizer ) {
+  sizer->Add( &m_poc, 0, wxALL|wxGROW, 6 );
+  //sizer->Add( m_sizerMain, 1, wxALL|wxGROW, 6 );
+  
+  //m_siPosition = m_sizerMain->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+  m_siPosition = sizer->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+
+  //m_siPortfolioStats = m_sizerMain->Add(m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+  m_siPortfolioStats = sizer->Add(m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
+}
+
 
 void PanelOptionCombo_impl::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
   gcs.SaveColumnSizes( *m_gridPositions );
@@ -436,7 +448,7 @@ void PanelOptionCombo_impl::OnPositionPopUpDeletePosition( wxCommandEvent& event
   // delete row from grid
   m_vPositions.erase( m_vPositions.begin() + m_nRowRightClick );
   m_gridPositions->DeleteRows( m_nRowRightClick, 1 );
-  m_gridPositions->SetSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
+  //m_gridPositions->SetSize( wxSize( -1, m_gridPositions->GetRows() * 22 ) );
   // renumber rows in structure
   int ix( 0 );
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [&ix](vPositions_t::value_type& vt){

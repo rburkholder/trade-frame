@@ -101,6 +101,8 @@ public:
     const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION, 
     const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
     long style =         PANEL_OPTIONCOMBO_STYLE );
+  
+  void AssignToSizer( wxBoxSizer* );
 
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
   pPortfolioGreek_t& GetPortfolioGreek( void );

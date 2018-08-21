@@ -45,12 +45,16 @@ bool PanelOptionCombo::Create( wxWindow* parent, wxWindowID id, const wxPoint& p
 
     wxPanel::Create( parent, id, pos, size, style );
 
-    m_pimpl->CreateControls();
+    m_pimpl->CreateControls( parent );
     if (GetSizer()) {
         GetSizer()->SetSizeHints(this);
     }
     Centre();
     return true;
+}
+
+void PanelOptionCombo::AssignToSizer( wxBoxSizer* sizer ) {
+  m_pimpl->AssignToSizer( sizer );
 }
 
 ou::tf::PortfolioGreek::pPortfolioGreek_t& PanelOptionCombo::GetPortfolioGreek( void ) { 

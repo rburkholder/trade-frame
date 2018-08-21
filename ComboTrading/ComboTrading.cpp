@@ -688,7 +688,8 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
   //wxBoxSizer* pSizer = new wxBoxSizer(wxHORIZONTAL);
   //m_sizerScrollOC->Add( pSizer, 1, wxGROW|wxALL, 1 );
   //pSizer->Add( pPanelOptionCombo, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 1);
-  m_sizerScrollOC->Add( pPanelOptionCombo, 0, wxALL|wxGROW, 6 );
+  //m_sizerScrollOC->Add( pPanelOptionCombo, 0, wxALL|wxGROW, 6 );
+  pPanelOptionCombo->AssignToSizer( m_sizerScrollOC );
   m_sizerScrollOC->Layout();
   
   return pPanelOptionCombo;

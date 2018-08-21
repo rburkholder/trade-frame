@@ -68,6 +68,8 @@ struct PanelOptionCombo_impl {
 
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
   typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
+  
+  void AssignToSizer( wxBoxSizer* );
 
   void UpdateGui( void );
   void AddPositionGreek( pPositionGreek_t pPositionGreek );
@@ -266,7 +268,7 @@ struct PanelOptionCombo_impl {
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
   
-  void CreateControls();
+  void CreateControls( wxWindow* parent );
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
 
   void OnMouseWheel( wxMouseEvent& event );
