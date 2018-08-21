@@ -47,7 +47,9 @@ void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
   m_psetSymbols = &selected;
 
   std::cout << "Running" << std::endl;
-
+  
+  std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
+  
   ou::tf::HDF5IterateGroups groups;
 
   groups.SetOnHandleObject( MakeDelegate( this, &SymbolSelection::ProcessGroupItem ) );
