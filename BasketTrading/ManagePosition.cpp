@@ -22,6 +22,10 @@
 
 #include "ManagePosition.h"
 
+// 2018/08/22 TODO:
+//  - include packet of info:  stop, description, ...
+//  - provide trade summary at end of trading day
+
 ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) 
   : ou::tf::DailyTradeTimeFrame<ManagePosition>(),
   m_sName( sName ),
@@ -125,6 +129,10 @@ void ManagePosition::HandleGoNeutral( void ) {
   m_pPosition->ClosePosition();
 }
 
+void ManagePosition::HandleAfterRH( const ou::tf::Quote& quote ) {
+  std::cout << "Close results: " << *m_pPosition << std::endl;
+}
+
 void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
   /*
   switch ( m_stateTrading ) {
@@ -181,6 +189,44 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
 
 // 2014/01/16 possible mechanism:  high volatility, low volatility, on rising enter, trade on ema slow/fast crossing
 
+// darvas entry and hold
+void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
+  // todo: calculate pivot. when pivot reached, put in stop.
+  if ( !m_bSetOpen ) {  // wait for opening trade
+    switch ( m_stateTrading ) {
+      case TSWaitForEntry:
+        if ( ( quote.Bid() > m_dblOpen ) && ( quote.Ask() > m_dblOpen ) ) {
+          std::cout 
+            << quote.DateTime() 
+            << ": Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() 
+            << "b(" << quote.Bid() << "),a(" << quote.Ask() << ")"
+            << ", stop at " << m_dblStop 
+            << std::endl;
+          m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+          m_stateTrading = TSMonitorLong;
+        }
+        break;
+      case TSMonitorLong:
+        if ( quote.Ask() < m_dblStop ) {
+          std::cout 
+            << quote.DateTime() 
+            << ": Stop " << m_pPosition->GetInstrument()->GetInstrumentName() 
+            << "b(" << quote.Bid() << "),a(" << quote.Ask() << ")"
+            << std::endl;
+          m_pPosition->CancelOrders();
+          m_pPosition->ClosePosition();
+          m_stateTrading = TSNoMore;
+        }
+        break;
+      case TSNoMore:
+        break;
+    }
+  }
+
+
+
+// works a losing in-efficient losing strategy
+/*
 void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
   // todo: calculate pivot. when pivot reached, put in stop.
   if ( !m_bSetOpen ) {  // wait for opening trade
@@ -241,6 +287,7 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
         break;
     }
   }
+ */
   /*
   // need parabolic stop, use trailing stop for now
   // also need over all risk management of 3% loss of total investment

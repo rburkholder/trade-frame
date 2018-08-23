@@ -74,6 +74,8 @@ private:
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleBar( const ou::tf::Bar& bar );
+  void HandleAfterRH( const ou::tf::Quote& quote );
+  void HandleAfterRH( const ou::tf::Bar& bar ) {};
 
   // one shot inherited states:
   void HandleBellHeard( void );
