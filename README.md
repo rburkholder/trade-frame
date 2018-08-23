@@ -73,6 +73,8 @@ make
 #make
 cd ../HedgedBollinger
 make
+cd ../BasketTrading
+make
 popd
 
 ```
@@ -106,6 +108,9 @@ popd
       * once the message 'Process Complete' shows, the download is complete
     * 'turn off' IQF
     * File -> Exit 
+* BasketTrading project:
+  * runs a Darvas selection process on daily bars retrieved by IQFeedGetHistory
+  * runs an automated buy/sell/stop process from market open to market close on a basket of instruments
 * more apps to be described here ...
 
 ## Background

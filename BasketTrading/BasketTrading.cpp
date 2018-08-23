@@ -13,7 +13,9 @@
  ************************************************************************/
 
 // CAV.cpp : Defines the entry point for the application.
-//
+
+// needs daily bars downloaded via IQFeedGetHistory
+// rebuild after changing date in Worker.cpp.
 
 #include "stdafx.h"
 
