@@ -20,7 +20,7 @@
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
-#include "Position.h"
+#include "ManagePosition.h"
 
 ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) 
   : ou::tf::DailyTradeTimeFrame<ManagePosition>(),

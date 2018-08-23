@@ -37,9 +37,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/BasketTrading.o \
 	${OBJECTDIR}/ManagePortfolio.o \
+	${OBJECTDIR}/ManagePosition.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
-	${OBJECTDIR}/Position.o \
 	${OBJECTDIR}/SymbolSelection.o \
 	${OBJECTDIR}/Worker.o \
 	${OBJECTDIR}/stdafx.o
@@ -115,6 +115,11 @@ ${OBJECTDIR}/ManagePortfolio.o: ManagePortfolio.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManagePortfolio.o ManagePortfolio.cpp
 
+${OBJECTDIR}/ManagePosition.o: ManagePosition.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManagePosition.o ManagePosition.cpp
+
 ${OBJECTDIR}/PanelBasketTradingMain.o: PanelBasketTradingMain.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -124,11 +129,6 @@ ${OBJECTDIR}/PanelPortfolioStats.o: PanelPortfolioStats.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioStats.o PanelPortfolioStats.cpp
-
-${OBJECTDIR}/Position.o: Position.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Position.o Position.cpp
 
 ${OBJECTDIR}/SymbolSelection.o: SymbolSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}

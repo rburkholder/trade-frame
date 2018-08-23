@@ -69,8 +69,6 @@ private:
   bool m_bSetOpen;
   double m_dblOpen;
 
-  double m_dblStop;
-
   pPosition_t m_pPosition;
 
   void HandleQuote( const ou::tf::Quote& quote );

@@ -24,7 +24,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
-#include "Position.h"
+#include "ManagePosition.h"
 
 class ManagePortfolio {
 public:

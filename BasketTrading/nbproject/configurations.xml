@@ -6,9 +6,9 @@
                    projectFiles="true">
       <itemPath>BasketTrading.h</itemPath>
       <itemPath>ManagePortfolio.h</itemPath>
+      <itemPath>ManagePosition.h</itemPath>
       <itemPath>PanelBasketTradingMain.h</itemPath>
       <itemPath>PanelPortfolioStats.h</itemPath>
-      <itemPath>Position.h</itemPath>
       <itemPath>Resource.h</itemPath>
       <itemPath>SymbolSelection.h</itemPath>
       <itemPath>Worker.h</itemPath>
@@ -24,9 +24,9 @@
                    projectFiles="true">
       <itemPath>BasketTrading.cpp</itemPath>
       <itemPath>ManagePortfolio.cpp</itemPath>
+      <itemPath>ManagePosition.cpp</itemPath>
       <itemPath>PanelBasketTradingMain.cpp</itemPath>
       <itemPath>PanelPortfolioStats.cpp</itemPath>
-      <itemPath>Position.cpp</itemPath>
       <itemPath>SymbolSelection.cpp</itemPath>
       <itemPath>Worker.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
@@ -314,6 +314,10 @@
       </item>
       <item path="ManagePortfolio.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="ManagePosition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManagePosition.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelBasketTradingMain.h" ex="false" tool="3" flavor2="0">
@@ -321,10 +325,6 @@
       <item path="PanelPortfolioStats.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Position.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Position.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Resource.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -371,6 +371,10 @@
       </item>
       <item path="ManagePortfolio.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="ManagePosition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManagePosition.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelBasketTradingMain.h" ex="false" tool="3" flavor2="0">
@@ -378,10 +382,6 @@
       <item path="PanelPortfolioStats.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Position.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Position.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Resource.h" ex="false" tool="3" flavor2="0">
       </item>
