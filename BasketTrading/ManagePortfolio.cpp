@@ -99,7 +99,7 @@ void ManagePortfolio::Stop( void ) {
   }
 }
 
-void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar ) {
+void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
   assert( m_mapPositions.end() == m_mapPositions.find( sName ) );
   m_mapPositions[ sName ] = new ManagePosition( sName, bar );
 }

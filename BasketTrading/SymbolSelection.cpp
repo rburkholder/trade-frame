@@ -128,8 +128,8 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
   }
 }
 
-void SymbolSelection::CheckForRange( const InstrumentInfo& ii, citer begin, citer end ) {
-  citer iter1( begin );
+void SymbolSelection::CheckForRange( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
+  citerBars iter1( begin );
   int cnt( 0 );
   int cntAbove( 0 );
   int cntBelow( 0 );
@@ -193,13 +193,13 @@ private:
 
 // taken from scanner
 
-void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citer begin, citer end ) {
+void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
   ou::tf::Bar::volume_t nAverageVolume = std::for_each( begin, end, AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
       //std::cout << sObject << " vol=" << volAverage << std::endl;
-  citer iter1, iter2;
+  citerBars iter1, iter2;
   iter2 = end;
   iter1 = iter2 - m_nMinPivotBars;
   iter2 = iter1;
@@ -269,7 +269,7 @@ public:
   ProcessDarvas( std::stringstream& ss, size_t ix );
   ~ProcessDarvas( void ) {};
   bool Calc( const ou::tf::Bar& );
-  void StopValue( void );  // should only be called once
+  double StopValue( void );  // should only be called once
 protected:
   // CRTP from CDarvas<CProcess>
   void ConservativeTrigger( void );
@@ -317,14 +317,15 @@ void ProcessDarvas::BreakOutAlert( size_t cnt ) {
   m_bTriggered = true;
 }
 
-void ProcessDarvas::StopValue( void ) {
+double ProcessDarvas::StopValue( void ) {
   m_ss << " stop(" << m_dblStop << ")";
+  return m_dblStop;
 }
 
-void SymbolSelection::CheckForDarvas( const InstrumentInfo& ii, citer begin, citer end ) {
+void SymbolSelection::CheckForDarvas( InstrumentInfo& ii, citerBars begin, citerBars end ) {
   size_t nTriggerWindow( 10 );
   ptime dtDayOfMax = std::for_each( begin, end, CalcMaxDate() );
-  citer iterLast( end - 1 );
+  citerBars iterLast( end - 1 );
   if ( dtDayOfMax >= m_dtDarvasTrigger ) {
     std::stringstream ss;
     ss << "Darvas max for " << ii.sName 
@@ -334,24 +335,24 @@ void SymbolSelection::CheckForDarvas( const InstrumentInfo& ii, citer begin, cit
 
     ProcessDarvas darvas( ss, nTriggerWindow );
     //size_t ix = end - nTriggerWindow;
-    citer iterTriggerBegin = end - nTriggerWindow;
+    citerBars iterTriggerBegin = end - nTriggerWindow;
     bool bTrigger;  // wait for trigger on final day
-    for ( citer iter = iterTriggerBegin; iter != end; ++iter ) {
+    for ( citerBars iter = iterTriggerBegin; iter != end; ++iter ) {
       bTrigger = darvas.Calc( *iter );  // final day only is needed
     }
 
     if ( bTrigger ) {
+      ii.dblStop = darvas.StopValue();
       m_psetSymbols->insert( ii );
-      darvas.StopValue();
       std::cout << ss.str() << std::endl;
     }
 
   }
 }
 
-void SymbolSelection::CheckFor10Percent( const InstrumentInfo& ii, citer begin, citer end ) {
+void SymbolSelection::CheckFor10Percent( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
-  citer iterLast( end - 1 );
+  citerBars iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
     mapRankingPos_t::iterator iterPos;
     mapRankingNeg_t::iterator iterNeg;
@@ -442,9 +443,9 @@ public:
   };
 };
 
-void SymbolSelection::CheckForVolatility( const InstrumentInfo& ii, citer begin, citer end ) {
+void SymbolSelection::CheckForVolatility( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
-  citer iterLast( end - 1 );
+  citerBars iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
     double dblAverageVolatility = std::for_each( begin, end, AverageVolatility() );
     mapRankingPos_t::iterator iterPos;

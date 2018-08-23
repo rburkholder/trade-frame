@@ -38,7 +38,7 @@ public:
   template<typename Function>
   void IterateInstrumentList( Function f ) {
     BOOST_FOREACH( const SymbolSelection::InstrumentInfo& ii, m_setInstrumentInfo ) {
-      f( ii.sName, ii.barLast );
+      f( ii.sName, ii.barLast, ii.dblStop );
     }
   }
 

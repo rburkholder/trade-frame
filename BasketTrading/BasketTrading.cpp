@@ -140,32 +140,32 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 void AppBasketTrading::HandleStartButton(void) {
-	CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
-		[this](){
-			if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
-				// code currently does not allow a restart of session
-				std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
-				//m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
-				// this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
-			}
-			else {
-				// need to change this later.... only start up once providers have been started
-				// worker will change depending upon provider type
-				// big worker when going live, hdf5 worker when simulating
-				std::cout << "Starting Symbol Evaluation ... " << std::endl;
-				// TODO: convert worker to something informative and use 
-				//   established wx based threading arrangements
-				m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
-			}
-		});
+  CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
+    [this](){
+      if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
+        // code currently does not allow a restart of session
+        std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
+        //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
+        // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
+      }
+      else {
+        // need to change this later.... only start up once providers have been started
+        // worker will change depending upon provider type
+        // big worker when going live, hdf5 worker when simulating
+        std::cout << "Starting Symbol Evaluation ... " << std::endl;
+        // TODO: convert worker to something informative and use 
+        //   established wx based threading arrangements
+        m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
+      }
+    });
 }
 
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
-	CallAfter( 
-		[this](){
-			std::cout << "Starting Symbol Test ... " << std::endl;
-			m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
-		});
+  CallAfter( 
+    [this](){
+      std::cout << "Starting Symbol Test ... " << std::endl;
+      m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
+    });
 }
 
 void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
@@ -173,10 +173,10 @@ void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
 }
 
 void AppBasketTrading::HandleStopButton(void) {
-	CallAfter( 
-		[this](){
-			m_ManagePortfolio.Stop();
-		});
+  CallAfter( 
+    [this](){
+      m_ManagePortfolio.Stop();
+    });
 }
 
 void AppBasketTrading::HandleExitPositionsButton(void) {
@@ -184,20 +184,20 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
 }
 
 void AppBasketTrading::HandleSaveButton(void) {
-	CallAfter(
-		[this](){
-			m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
-		});
-  
+  CallAfter(
+    [this](){
+      m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
+    });
 }
 
+// eliminate the event and use lamdas
 void AppBasketTrading::HandleWorkerCompletion0( void ) {  // called in worker thread, generate gui event to start processing in gui thread
   wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
 }
 
 void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) { // process in gui thread
   m_pWorker->IterateInstrumentList( 
-    boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2 ) );
+    boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
   m_pWorker->Join();
   delete m_pWorker;
   m_pWorker = 0;

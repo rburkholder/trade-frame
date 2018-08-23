@@ -22,13 +22,13 @@
 
 #include "Position.h"
 
-ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar ) 
+ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) 
   : ou::tf::DailyTradeTimeFrame<ManagePosition>(),
   m_sName( sName ),
   m_bToBeTraded( false ), m_barInfo( bar ), 
   m_dblFundsToTrade( 0 ), m_bfTrades( 60 ),
   m_bCountBars( false ), m_nRHBars( 0 ),
-  m_bSetOpen( false ), m_dblOpen( 0.0 ),
+  m_bSetOpen( false ), m_dblOpen( 0.0 ), m_dblStop( dblStop ),
   m_stateTrading( TSWaitForEntry ), m_nAttempts( 0 )
 {
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManagePosition::HandleBar ) );

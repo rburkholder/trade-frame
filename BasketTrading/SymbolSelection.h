@@ -30,8 +30,9 @@ public:
   struct InstrumentInfo {
     std::string sName;
     ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
+    double dblStop;  // calculated stop price, if any
     InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
-      : sName( sName_ ), barLast( bar ) {};
+      : sName( sName_ ), barLast( bar ), dblStop {} {};
     bool operator<( const InstrumentInfo& rhs ) { return sName < rhs.sName; };
   };
   struct InstrumentInfoCompare {
@@ -86,12 +87,12 @@ private:
   
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 
-  typedef ou::tf::Bars::const_iterator citer;
-  void CheckForDarvas( const InstrumentInfo& sSymbol, citer begin, citer end );
-  void CheckFor10Percent( const InstrumentInfo& sSymbol, citer begin, citer end );
-  void CheckForVolatility( const InstrumentInfo& sSymbol, citer begin, citer end );
-  void CheckForPivots( const InstrumentInfo& sSymbol, citer begin, citer end );
-  void CheckForRange( const InstrumentInfo& sSymbol, citer begin, citer end );
+  typedef ou::tf::Bars::const_iterator citerBars;
+  void CheckForDarvas( InstrumentInfo& sSymbol, citerBars begin, citerBars end );
+  void CheckFor10Percent( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
+  void CheckForVolatility( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
+  void CheckForPivots( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
+  void CheckForRange( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );
   void WrapUpVolatility( setInstrumentInfo_t& selected );

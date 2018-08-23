@@ -27,7 +27,7 @@ public:
 
   typedef ou::tf::Position::pPosition_t pPosition_t;
 
-  ManagePosition( const std::string& sName, const ou::tf::Bar& bar );
+  ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
   ~ManagePosition(void);
 
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
@@ -52,7 +52,7 @@ private:
 
   bool m_bCountBars;
   size_t m_nRHBars;
-
+  
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
   ou::tf::Bars m_bars;
@@ -68,6 +68,8 @@ private:
 
   bool m_bSetOpen;
   double m_dblOpen;
+
+  double m_dblStop;
 
   pPosition_t m_pPosition;
 

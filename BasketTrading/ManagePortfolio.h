@@ -36,7 +36,7 @@ public:
   ManagePortfolio( void );
   ~ManagePortfolio(void);
 
-  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar );
+  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
   void Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
   void Stop( void );
   void SaveSeries( const std::string& sPath );
