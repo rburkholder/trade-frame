@@ -79,6 +79,7 @@ Position::Position( void )
 }
 
 void Position::Construction( void ) {
+  assert( 0 != m_pDataProvider.use_count() );
   m_dblMultiplier = m_pInstrument->GetMultiplier();
   if ( m_pDataProvider->ProvidesQuotes() ) {
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Position::HandleQuote ) );
