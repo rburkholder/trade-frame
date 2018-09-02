@@ -783,7 +783,7 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
     }
     else {
       if ( !boost::regex_match( d.c_str(), what, rxTime ) ) {
-        //throw std::runtime_error( "no time range found" );
+        throw std::runtime_error( "no time range found" );
         // 2018/08/23: now looks like:
         //      20180823:0400-20180823:2000;20180824:0400-20180824:2000;20180825:CLOSED;20180826:CLOSED;...
       }
