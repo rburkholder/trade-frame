@@ -26,8 +26,8 @@
 
 #include <TFOptions/Option.h>
 
-#include "Position.h"
 #include "Watch.h"
+#include "Position.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
