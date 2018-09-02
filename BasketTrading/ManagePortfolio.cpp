@@ -86,7 +86,7 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
       }
       break;
     default:
-      std::cout << "cant' get symbols" << std::endl;
+      std::cout << "can't get symbols" << std::endl;
     }
   std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
 }
