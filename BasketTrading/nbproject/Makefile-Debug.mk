@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/BasketTrading.o \
 	${OBJECTDIR}/ManagePortfolio.o \
 	${OBJECTDIR}/ManagePosition.o \
+	${OBJECTDIR}/ManageStrategy.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
 	${OBJECTDIR}/SymbolSelection.o \
@@ -119,6 +120,11 @@ ${OBJECTDIR}/ManagePosition.o: ManagePosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManagePosition.o ManagePosition.cpp
+
+${OBJECTDIR}/ManageStrategy.o: ManageStrategy.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManageStrategy.o ManageStrategy.cpp
 
 ${OBJECTDIR}/PanelBasketTradingMain.o: PanelBasketTradingMain.cpp
 	${MKDIR} -p ${OBJECTDIR}

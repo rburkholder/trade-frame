@@ -7,6 +7,7 @@
       <itemPath>BasketTrading.h</itemPath>
       <itemPath>ManagePortfolio.h</itemPath>
       <itemPath>ManagePosition.h</itemPath>
+      <itemPath>ManageStrategy.h</itemPath>
       <itemPath>PanelBasketTradingMain.h</itemPath>
       <itemPath>PanelPortfolioStats.h</itemPath>
       <itemPath>Resource.h</itemPath>
@@ -25,6 +26,7 @@
       <itemPath>BasketTrading.cpp</itemPath>
       <itemPath>ManagePortfolio.cpp</itemPath>
       <itemPath>ManagePosition.cpp</itemPath>
+      <itemPath>ManageStrategy.cpp</itemPath>
       <itemPath>PanelBasketTradingMain.cpp</itemPath>
       <itemPath>PanelPortfolioStats.cpp</itemPath>
       <itemPath>SymbolSelection.cpp</itemPath>
@@ -318,6 +320,10 @@
       </item>
       <item path="ManagePosition.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="ManageStrategy.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManageStrategy.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelBasketTradingMain.h" ex="false" tool="3" flavor2="0">
@@ -374,6 +380,10 @@
       <item path="ManagePosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ManagePosition.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ManageStrategy.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ManageStrategy.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelBasketTradingMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
