@@ -31,6 +31,8 @@
 #include "Order.h"
 #include "Instrument.h"
 
+// 2018/08/26 TODO: convert (Instrument, DataProvider) to pWatch_t.
+
 // Multiple position records grouped together would be a multi-legged instrument, aka Combo
 //   -- not sure how to construct this yet
 //    -- a position consists of one or more legs, so a leg would be the atomic unit of composition
@@ -269,8 +271,8 @@ protected:
 
   typedef std::vector<pOrder_t> vOrders_t;
   typedef vOrders_t::iterator vOrders_iter_t;
-  vOrders_t m_vOpenOrders;  // active orders waiting to be executed or cancelled
-  vOrders_t m_vClosedOrders;  // orders that have executed or have cancelled
+  vOrders_t m_vOpenOrders;  // active orders waiting to be executed or canceled
+  vOrders_t m_vClosedOrders;  // orders that have executed or have canceled
   vOrders_t m_vAllOrders;  // keeps track of all orders in case we have to search both lists
 
   TableRowDef m_row;
