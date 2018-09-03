@@ -24,22 +24,25 @@
 
 #include <OUCommon/Delegate.h>
 
+
 #include "TradingEnumerations.h"
 #include "KeyTypes.h"
 
-#include "ProviderInterface.h"
-#include "Order.h"
 #include "Instrument.h"
-
-// 2018/08/26 TODO: convert (Instrument, DataProvider) to pWatch_t.
+#include "Watch.h"
+#include "Order.h"
+#include "ProviderInterface.h"
 
 // Multiple position records grouped together would be a multi-legged instrument, aka Combo
 //   -- not sure how to construct this yet
 //    -- a position consists of one or more legs, so a leg would be the atomic unit of composition
-// once a position with multiple legs is in a portfolio, should be able to sum up the legs to see if rebalancing or adjustments are required
+// once a position with multiple legs is in a portfolio, should be able to sum up the legs to see if re-balancing or adjustments are required
 // A Portfolio should be a collection of position records, whether individual positions, or Combos
 // check that orders for both sell side and buy side are not opened simultaneously
 // a position is provider dependent, ie, only one provider per position
+// therefore:  multi-legged constructions have one leg in each position.
+//    use multiple positions, and group into a portfolio to track the legs
+
 // Create Delegates so trade and market data updates propogate to combo and portfolio
 
 // todo:  there is nothing for setting a portfolio id
@@ -59,6 +62,8 @@ public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef Instrument::pInstrument_cref pInstrument_cref;
+  
+  typedef Watch::pWatch_t pWatch_t;
 
   typedef Order::idOrder_t idOrder_t;
   typedef Order::pOrder_t pOrder_t;
@@ -172,6 +177,7 @@ public:
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
+  Position( pWatch_t, pProvider_t pExecutionProvider );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
@@ -182,7 +188,7 @@ public:
   const std::string& Notes( void ) const { return m_row.sNotes; };
   void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
-  pInstrument_cref GetInstrument( void ) const { assert( 0 != m_pInstrument ); return m_pInstrument; };
+  pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
   double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
@@ -258,16 +264,15 @@ public:
   const TableRowDef& GetRow( void ) const { return m_row; };
 
   pProvider_t GetExecutionProvider( void ) { return m_pExecutionProvider; };
-  pProvider_t GetDataProvider( void ) { return m_pDataProvider; };
+  pProvider_t GetDataProvider( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetProvider(); };
 
 protected:
 
   typedef SymbolBase::quote_t quote_t;
   typedef SymbolBase::trade_t trade_t;
   pProvider_t m_pExecutionProvider;
-  pProvider_t m_pDataProvider;
 
-  pInstrument_t m_pInstrument;
+  pWatch_t m_pWatch;
 
   typedef std::vector<pOrder_t> vOrders_t;
   typedef vOrders_t::iterator vOrders_iter_t;
@@ -279,15 +284,14 @@ protected:
 
 private:
 
-  bool m_bInstrumentAssigned;
   bool m_bExecutionAccountAssigned;
   bool m_bDataAccountAssigned;
-  bool m_bConnectedToDataProvider;
+  bool m_bWatchConstructedLocally;
 
   double m_dblMultiplier;
 
+  void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
   void Construction( void );
-  void DisconnectFromDataProvider( int );
 
   void HandleExecution( const std::pair<const Order&, const Execution&>& );
   void HandleCommission( const Order& );

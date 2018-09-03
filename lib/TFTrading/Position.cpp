@@ -23,92 +23,113 @@ namespace tf { // TradeFrame
 Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
   const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
   const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
-: m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
-  m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
-  m_row( idPortfolio, sName, pInstrument->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm )
+: m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
+  m_dblMultiplier( 1 ), //m_bConnectedToDataProvider( false ),
+  m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_row( idPortfolio, sName, pInstrument->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm ),
+  m_bWatchConstructedLocally( false )
 {
+  ConstructWatch( pInstrument, pDataProvider );
   Construction();
 }
 
-Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
-: m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
-  m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
+Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider ) 
+: m_dblMultiplier( 1 ), 
+  m_pWatch( pWatch ),
+  m_bWatchConstructedLocally( false ),
+  m_pExecutionProvider( pExecutionProvider ),
+  m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false ) // TODO: will have to confirm operation of these flags
 {
+  assert( 0 != m_pWatch.use_count() );
+  assert( nullptr != m_pWatch.get() );  // this is probably a better check than use_count
+  assert( 0 != m_pWatch->GetInstrument().use_count() );
+  assert( 0 != m_pWatch->GetProvider().use_count() );
+}
+
+Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
+: m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
+  m_dblMultiplier( 1 ),
+  m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_bWatchConstructedLocally( false )
+{
+  ConstructWatch( pInstrument, pDataProvider );
   Construction();
 }
 
 Position::Position( 
   pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
-: m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
-  m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
+: m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
+  m_dblMultiplier( 1 ),
+  m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_bWatchConstructedLocally( false )
 {
   m_row.sNotes = sNotes;
+  ConstructWatch( pInstrument, pDataProvider );
   Construction();
 }
 
 Position::Position( 
   pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row ) 
 : m_row( row ),
-  m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
-  m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
+  m_pExecutionProvider( pExecutionProvider ),
+  m_dblMultiplier( 1 ), //m_bConnectedToDataProvider( false ),
+  m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_bWatchConstructedLocally( false )
 {
+  ConstructWatch( pInstrument, pDataProvider );
   Construction();
 }
 
 Position::Position( const TableRowDef& row ) 
 : m_row( row ),
-  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
+  m_dblMultiplier( 1 ),
+  m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false ),
+  m_bWatchConstructedLocally( false )
 {
-  // need flags to wait for execution, data, instrument variables to be set
 }
 
 Position::Position( void ) 
-: m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
-  m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
+: m_dblMultiplier( 1 ),
+  m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false ),
+  m_bWatchConstructedLocally( false )
 {
-  // need flags to wait for execution, data, instrument variables to be set
+}
+
+void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataProvider ) {
+  assert( nullptr == m_pWatch.get() );
+  assert( nullptr != pInstrument.get() );
+  assert( nullptr != pDataProvider.get() );
+  m_pWatch.reset( new Watch( pInstrument, pDataProvider ) );
+  m_bWatchConstructedLocally = true;
 }
 
 void Position::Construction( void ) {
-  assert( 0 != m_pDataProvider.use_count() );
-  m_dblMultiplier = m_pInstrument->GetMultiplier();
-  if ( m_pDataProvider->ProvidesQuotes() ) {
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Position::HandleQuote ) );
-  }
-  if ( m_pDataProvider->ProvidesTrades() ) {
-    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
-  }
-  m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
-  m_bConnectedToDataProvider = true;
+  assert( nullptr != m_pWatch.get() );
+  assert( nullptr != m_pWatch->GetProvider().get() );  // new validation, and could trip up some code
+  m_dblMultiplier = m_pWatch->GetInstrument()->GetMultiplier();
+  m_pWatch->OnQuote.Add( MakeDelegate( this, &Position::HandleQuote ) );
+  m_pWatch->OnTrade.Add( MakeDelegate( this, &Position::HandleTrade ) );
+  m_pWatch->StartWatch();
 }
 
 void Position::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
 
-  m_pInstrument = pInstrument;
-  m_bInstrumentAssigned = true;
-
   m_pExecutionProvider = pExecutionProvider;
-  m_bExecutionAccountAssigned = true;
+  m_bExecutionAccountAssigned = true;  // TODO: check use of these flags
+  
+  ConstructWatch( pInstrument, pDataProvider );
 
-  m_pDataProvider = pDataProvider;
-  m_bDataAccountAssigned = true;
+  m_bDataAccountAssigned = true;  // TODO: check use of these flags
 
   Construction();
 
 }
 
 Position::~Position(void) {
-  if ( m_bConnectedToDataProvider ) {
-    DisconnectFromDataProvider( 0 );
+  if ( nullptr != m_pWatch.get() ) {
+    m_pWatch->StopWatch();
+    m_pWatch->OnQuote.Remove( MakeDelegate( this, &Position::HandleQuote ) );
+    m_pWatch->OnTrade.Remove( MakeDelegate( this, &Position::HandleTrade ) );
   }
   for ( std::vector<pOrder_t>::iterator iter = m_vAllOrders.begin(); iter != m_vAllOrders.end(); ++iter ) {
     iter->get()->OnCommission.Remove( MakeDelegate( this, &Position::HandleCommission ) );
@@ -117,17 +138,6 @@ Position::~Position(void) {
   m_vOpenOrders.clear();
   m_vClosedOrders.clear();
   m_vAllOrders.clear();
-}
-
-void Position::DisconnectFromDataProvider( int ) {
-  m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
-  if ( m_pDataProvider->ProvidesQuotes() ) {
-    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Position::HandleQuote ) );
-  }
-  if ( m_pDataProvider->ProvidesTrades() ) {
-    m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
-  }
-  m_bConnectedToDataProvider = false;
 }
 
 void Position::HandleQuote( quote_t quote ) {
@@ -206,9 +216,10 @@ Order::pOrder_t Position::ConstructOrder( // market
 ) {
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
+  assert( nullptr != m_pWatch.get() );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   pOrder_t pOrder
-   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
   //PlaceOrder( pOrder );
   return pOrder;
 }
@@ -221,9 +232,10 @@ Order::pOrder_t Position::ConstructOrder( // limit or stop
 ) {
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
+  assert( nullptr != m_pWatch.get() );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   pOrder_t pOrder
-   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
   //PlaceOrder( pOrder );
   return pOrder;
 }
@@ -237,9 +249,10 @@ Order::pOrder_t Position::ConstructOrder( // limit and stop
 ) {
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
+  assert( nullptr != m_pWatch.get() );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
-   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
   //PlaceOrder( pOrder );
   return pOrder;
 }
@@ -483,7 +496,7 @@ void Position::HandleCommission( const Order& order ) {
 
 std::ostream& operator<<( std::ostream& os, const Position& position ) {
   os 
-    << "Position " << position.m_pInstrument->GetInstrumentName() << ": "
+    << "Position " << position.m_pWatch->GetInstrument()->GetInstrumentName() << ": "
     << "Active " << position.m_row.nPositionActive
     << ", unRPL " << position.m_row.dblUnRealizedPL 
     << ", RPL " << position.m_row.dblRealizedPL
