@@ -148,12 +148,12 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
   //    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl;
   //  });
   //}
-  m_poc.SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
+  m_gridPositions->SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
 
-  m_gridPositions->Bind( wxEVT_MOUSEWHEEL,             &PanelOptionCombo_impl::OnMouseWheel, this );
-  m_poc.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
-  m_poc.Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
-  m_poc.Bind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
+  m_gridPositions->Bind( wxEVT_MOUSEWHEEL,  &PanelOptionCombo_impl::OnMouseWheel, this );
+  m_gridPositions->Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
+  m_gridPositions->Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
+  m_gridPositions->Bind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPosition, this, m_poc.ID_MenuAddPosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpDeletePosition, this, m_poc.ID_MenuDeletePosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddOrder, this, m_poc.ID_MenuAddOrder, -1, 0 );
