@@ -44,6 +44,7 @@ Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider )
   assert( nullptr != m_pWatch.get() );  // this is probably a better check than use_count
   assert( 0 != m_pWatch->GetInstrument().use_count() );
   assert( 0 != m_pWatch->GetProvider().use_count() );
+  Construction();
 }
 
 Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 

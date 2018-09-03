@@ -24,10 +24,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
   
 // TODO: add additional constructors for use with inherited Position
-// TODO: make use of inherited m_pWatch
 
 PositionGreek::PositionGreek( pOption_t& pOption, pUnderlying_t& pUnderlying )
-: Position( pOption->GetInstrument(), pProvider_t(), pOption->GetProvider() ), // supply empty execution provider for now
+: Position( pOption, pProvider_t() ), // supply empty execution provider for now
   m_pOption( pOption ), m_pUnderlying( pUnderlying ), m_nQuantity( 0 )
 {
   // NOTE:  may need to construct with a 'row'
