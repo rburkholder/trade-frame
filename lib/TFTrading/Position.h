@@ -189,6 +189,7 @@ public:
   void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
   pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
+  pWatch_t GetWatch( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
   double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };

@@ -127,18 +127,22 @@ void Position::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvide
 }
 
 Position::~Position(void) {
+
   if ( nullptr != m_pWatch.get() ) {
     m_pWatch->StopWatch();
     m_pWatch->OnQuote.Remove( MakeDelegate( this, &Position::HandleQuote ) );
     m_pWatch->OnTrade.Remove( MakeDelegate( this, &Position::HandleTrade ) );
   }
+
   for ( std::vector<pOrder_t>::iterator iter = m_vAllOrders.begin(); iter != m_vAllOrders.end(); ++iter ) {
     iter->get()->OnCommission.Remove( MakeDelegate( this, &Position::HandleCommission ) );
     iter->get()->OnExecution.Remove( MakeDelegate( this, &Position::HandleExecution ) );
   }
+
   m_vOpenOrders.clear();
   m_vClosedOrders.clear();
   m_vAllOrders.clear();
+
 }
 
 void Position::HandleQuote( quote_t quote ) {
