@@ -37,7 +37,7 @@ public:
   void SaveSeries( const std::string& sPrefix );
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount );
   double GetPrevousClose( void ) const { return m_barInfo.Close(); };
-  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // why the reference on the return?
+  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get
 protected:
 private:
 
