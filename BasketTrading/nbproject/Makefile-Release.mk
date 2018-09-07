@@ -36,9 +36,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BasketTrading.o \
-	${OBJECTDIR}/ManagePortfolio.o \
 	${OBJECTDIR}/ManagePosition.o \
 	${OBJECTDIR}/ManageStrategy.o \
+	${OBJECTDIR}/MasterPortfolio.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
 	${OBJECTDIR}/SymbolSelection.o \
@@ -75,11 +75,6 @@ ${OBJECTDIR}/BasketTrading.o: BasketTrading.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BasketTrading.o BasketTrading.cpp
 
-${OBJECTDIR}/ManagePortfolio.o: ManagePortfolio.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManagePortfolio.o ManagePortfolio.cpp
-
 ${OBJECTDIR}/ManagePosition.o: ManagePosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -89,6 +84,11 @@ ${OBJECTDIR}/ManageStrategy.o: ManageStrategy.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ManageStrategy.o ManageStrategy.cpp
+
+${OBJECTDIR}/MasterPortfolio.o: MasterPortfolio.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MasterPortfolio.o MasterPortfolio.cpp
 
 ${OBJECTDIR}/PanelBasketTradingMain.o: PanelBasketTradingMain.cpp
 	${MKDIR} -p ${OBJECTDIR}

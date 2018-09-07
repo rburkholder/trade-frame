@@ -26,15 +26,15 @@
 
 #include "ManagePosition.h"
 
-class ManagePortfolio {
+class MasterPortfolio {
 public:
 
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
 
-  ManagePortfolio( void );
-  ~ManagePortfolio(void);
+  MasterPortfolio( void );
+  ~MasterPortfolio(void);
 
   void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
   void Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );

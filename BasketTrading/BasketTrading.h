@@ -36,7 +36,7 @@
 #include <TFVuTrading/PanelLogging.h>
 
 #include "Worker.h"
-#include "ManagePortfolio.h"
+#include "MasterPortfolio.h"
 #include "PanelBasketTradingMain.h"
 #include "PanelPortfolioStats.h"
 
@@ -61,7 +61,7 @@ private:
 
   ou::tf::DBOps m_db;
 
-  ManagePortfolio m_ManagePortfolio;
+  MasterPortfolio m_MasterPortfolio;
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
   pPortfolio_t m_pPortfolio;

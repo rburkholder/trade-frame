@@ -18,9 +18,9 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include "ManagePortfolio.h"
+#include "MasterPortfolio.h"
 
-ManagePortfolio::ManagePortfolio( void )
+MasterPortfolio::MasterPortfolio( void )
   : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 )
 {
 
@@ -33,13 +33,13 @@ ManagePortfolio::ManagePortfolio( void )
 
 }
 
-ManagePortfolio::~ManagePortfolio(void) {
+MasterPortfolio::~MasterPortfolio(void) {
   BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
     delete pair.second;
   }
 }
 
-void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
+void MasterPortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
 
   assert( 0 != m_mapPositions.size() );
 
@@ -80,7 +80,7 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
           contract.secType = "STK";
           contract.symbol = pair.first;
           // IB responds only when symbol is found, bad symbols will not illicit a response
-          m_pIB->RequestContractDetails( contract, MakeDelegate( this, &ManagePortfolio::HandleIBContractDetails ), MakeDelegate( this, &ManagePortfolio::HandleIBContractDetailsDone ) );
+          m_pIB->RequestContractDetails( contract, MakeDelegate( this, &MasterPortfolio::HandleIBContractDetails ), MakeDelegate( this, &MasterPortfolio::HandleIBContractDetailsDone ) );
         }
       }
       break;
@@ -90,7 +90,7 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
   std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
 }
 
-void ManagePortfolio::Stop( void ) {
+void MasterPortfolio::Stop( void ) {
   BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
     if ( pair.second->ToBeTraded() ) {
       pair.second->Stop();
@@ -98,12 +98,12 @@ void ManagePortfolio::Stop( void ) {
   }
 }
 
-void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
+void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
   assert( m_mapPositions.end() == m_mapPositions.find( sName ) );
   m_mapPositions[ sName ] = new ManagePosition( sName, bar, dblStop );
 }
 
-void ManagePortfolio::SaveSeries( const std::string& sPrefix ) {
+void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::cout << "Saving ... ";
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
   BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
@@ -113,7 +113,7 @@ void ManagePortfolio::SaveSeries( const std::string& sPrefix ) {
 }
 
 // comes in on a different thread, so no gui operations
-void ManagePortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
+void MasterPortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
   mapPositions_iter_t iter = m_mapPositions.find( pInstrument->GetInstrumentName() );
   assert( m_mapPositions.end() != iter );
   //pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
@@ -126,7 +126,7 @@ void ManagePortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDeta
 //  m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
 }
 
-void ManagePortfolio::HandleIBContractDetailsDone( void ) {
+void MasterPortfolio::HandleIBContractDetailsDone( void ) {
 //  StartWatch();
 }
 

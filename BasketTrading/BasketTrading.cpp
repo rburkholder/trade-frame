@@ -174,7 +174,7 @@ void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
 void AppBasketTrading::HandleStopButton(void) {
   CallAfter( 
     [this](){
-      m_ManagePortfolio.Stop();
+      m_MasterPortfolio.Stop();
     });
 }
 
@@ -185,7 +185,7 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
 void AppBasketTrading::HandleSaveButton(void) {
   CallAfter(
     [this](){
-      m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
+      m_MasterPortfolio.SaveSeries( "/app/BasketTrading/" );
     });
 }
 
@@ -194,11 +194,11 @@ void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thr
   //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
   CallAfter([this](){
     m_pWorker->IterateInstrumentList( 
-      boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+      boost::phoenix::bind( &MasterPortfolio::AddSymbol, &m_MasterPortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
     m_pWorker->Join();
     delete m_pWorker;
     m_pWorker = 0;
-    m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_MasterPortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
     m_timerGuiRefresh.Start( 250 );
   });
 }
