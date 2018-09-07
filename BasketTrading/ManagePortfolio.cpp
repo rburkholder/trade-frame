@@ -49,7 +49,6 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
   m_pData1 = pData1;
   m_pData2 = pData2;
 
-
   // first pass: to get rough idea of which can be traded given our funding level
   double dblAmountToTradePerInstrument = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / m_mapPositions.size();
 

@@ -32,8 +32,6 @@ using namespace boost::gregorian;
 
 #include "BasketTrading.h"
 
-wxDEFINE_EVENT( EVT_WorkerDone, WorkerDoneEvent );
-
 IMPLEMENT_APP(AppBasketTrading)
 
 bool AppBasketTrading::OnInit() {
@@ -101,7 +99,6 @@ bool AppBasketTrading::OnInit() {
 
   m_timerGuiRefresh.SetOwner( this );
 
-  Bind( EVT_WorkerDone, &AppBasketTrading::HandleWorkerCompletion1, this );
   Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
@@ -157,7 +154,7 @@ void AppBasketTrading::HandleStartButton(void) {
         std::cout << "Starting Symbol Evaluation ... " << std::endl;
         // TODO: convert worker to something informative and use 
         //   established wx based threading arrangements
-        m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
+        m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
       }
     });
 }
@@ -193,18 +190,17 @@ void AppBasketTrading::HandleSaveButton(void) {
 }
 
 // eliminate the event and use lamdas
-void AppBasketTrading::HandleWorkerCompletion0( void ) {  // called in worker thread, generate gui event to start processing in gui thread
-  wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
-}
-
-void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) { // process in gui thread
-  m_pWorker->IterateInstrumentList( 
-    boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
-  m_pWorker->Join();
-  delete m_pWorker;
-  m_pWorker = 0;
-  m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
-  m_timerGuiRefresh.Start( 250 );
+void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thread, generate gui event to start processing in gui thread
+  //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
+  CallAfter([this](){
+    m_pWorker->IterateInstrumentList( 
+      boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+    m_pWorker->Join();
+    delete m_pWorker;
+    m_pWorker = 0;
+    m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_timerGuiRefresh.Start( 250 );
+  });
 }
 
 void AppBasketTrading::OnData1Connected( int ) {

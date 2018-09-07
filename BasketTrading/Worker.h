@@ -14,11 +14,11 @@
 
 #pragma once
 
-#include <string>
 #include <set>
+#include <string>
+#include <algorithm>
 
 #include <boost/thread/thread.hpp>
-#include <boost/foreach.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -29,7 +29,7 @@ using namespace fastdelegate;
 class Worker {
 public:
 
-  typedef FastDelegate0<> OnCompletionHandler;
+  typedef FastDelegate0<> OnCompletionHandler;  // TODO: convert to std::function or lambda
   typedef SymbolSelection::setInstrumentInfo_t setInstrumentInfo_t;
 
   Worker( OnCompletionHandler f );
@@ -37,9 +37,10 @@ public:
 
   template<typename Function>
   void IterateInstrumentList( Function f ) {
-    BOOST_FOREACH( const SymbolSelection::InstrumentInfo& ii, m_setInstrumentInfo ) {
-      f( ii.sName, ii.barLast, ii.dblStop );
-    }
+    std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(), 
+                  [&f](const SymbolSelection::InstrumentInfo& ii){
+                    f( ii.sName, ii.barLast, ii.dblStop );
+                  } );
   }
 
   void Join( void ) { m_pThread->join(); };
