@@ -44,14 +44,13 @@ public:
   typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
   typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
   
-  typedef std::function<pOption_t(const pInstrument_t, const std::string& )> fConstructOption_t;
+  //typedef std::function<pOption_t(const pInstrument_t, const std::string& )> fConstructOption_t;
   typedef std::function<pPosition_t( const std::string& )> fConstructPositionUnderlying_t;
-  typedef std::function<pPosition_t( pOption_t)> fConstructPositionOption_t;
+  typedef std::function<pPosition_t( const pInstrument_t, const std::string& )> fConstructPositionOption_t; // string is iqfeed option name
   
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
     fGatherOptionDefinitions_t,
-    fConstructOption_t,
     fConstructPositionUnderlying_t, 
     fConstructPositionOption_t
     );
@@ -103,7 +102,7 @@ private:
   mapChains_t m_mapChains;
   
   //fGatherOptionDefinitions_t m_fGatherOptionDefinitions;  // load option symbols for given underlying
-  fConstructOption_t m_fConstructOption;
+  //fConstructOption_t m_fConstructOption;
   fConstructPositionUnderlying_t m_fConstructPositionUnderlying;
   fConstructPositionOption_t m_fConstructPositionOption;
   
@@ -112,7 +111,7 @@ private:
   
   const ou::tf::Bar& m_barPriorDaily;
   
-  pOption_t m_pOptionPut;
+  //pOption_t m_pOptionPut;
   
   pPosition_t m_pPositionUnderlying;
   pPosition_t m_PositionPut_Current; // current active put, depending upon roll-downs

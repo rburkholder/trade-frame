@@ -147,8 +147,40 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
   m_mapStrategy[ sName ] 
     = new ManageStrategy( 
         sName, bar,
+    // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
-        [this]( const pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName )->ManageStrategy::pOption_t{
+    // ManageStrategy::fConstructPositionUnderlying_t
+        [this](const std::string& sIQFeedEquityName)->ManageStrategy::pPosition_t{
+              const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
+              
+              pInstrument_t pEquityInstrument;
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+              
+              if ( im.Exists( sIQFeedEquityName, pEquityInstrument ) ) {
+                // pEquityInstrument has been populated
+              }
+              else {
+                pEquityInstrument = ou::tf::iqfeed::BuildInstrument( sIQFeedEquityName, trd );  // builds equity option, may not build futures option
+                if ( nullptr != m_pIB.get() ) {
+                    m_pIB->RequestContractDetails( 
+                      sIQFeedEquityName, pEquityInstrument,
+                      [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+                        // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
+                        //   as a fully defined, registered instrument
+                        assert( 0 != pInstrument->GetContract() );
+                        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() ); 
+                        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                      }, 
+                      nullptr  // request complete doesn't need a function
+                      );
+                }
+              }
+              
+              pPosition_t pPosition( new ou::tf::Position ( m_pOptionEngine->m_fBuildWatch( pEquityInstrument ), m_pExec ) );
+              return pPosition;
+          },
+    // ManageStrategy::fConstructPositionOption_t
+        [this]( const pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName )->ManageStrategy::pPosition_t{
               const trd_t& trd( m_fGetTableRowDef( sIQFeedOptionName ) ); // TODO: check for errors
               
               std::string sGenericOptionName 
@@ -177,12 +209,9 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
                 }
               }
               
-              return m_pOptionEngine->m_fBuildOption( pOptionInstrument );
-            },
-        [](const std::string&)->ManageStrategy::pPosition_t{
-          },
-        [](ManageStrategy::pOption_t)->ManageStrategy::pPosition_t{
-          }
+              pPosition_t pPosition( new ou::tf::Position ( m_pOptionEngine->m_fBuildOption( pOptionInstrument ), m_pExec ) );
+              return pPosition;
+            }
         );
 }
 

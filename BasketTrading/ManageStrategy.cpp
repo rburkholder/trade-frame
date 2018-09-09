@@ -32,7 +32,6 @@
 ManageStrategy::ManageStrategy( 
   const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
-  fConstructOption_t fConstructOption,
   fConstructPositionUnderlying_t fConstructPositionUnderlying,
   fConstructPositionOption_t fConstructPositionOption
   )
@@ -40,15 +39,13 @@ ManageStrategy::ManageStrategy(
   m_sUnderlying( sUnderlying ),
   m_nUnderlyingSharesToTrade {},
   m_barPriorDaily( barPriorDaily ), 
-  m_fConstructOption( fConstructOption ),
-  m_fConstructPositionUnderlying( fConstructPositionUnderlying ), m_fConstructPositionOption( fConstructPositionOption ), 
-  //m_fGatherOptionDefinitions( fGatherOptionDefinitions ), 
+  m_fConstructPositionUnderlying( fConstructPositionUnderlying ), 
+  m_fConstructPositionOption( fConstructPositionOption ), 
   m_stateTrading( TSInitializing )
 { 
-  assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPositionUnderlying );
-  assert( nullptr != m_fConstructPositionOption );
   assert( nullptr != fGatherOptionDefinitions );
+  assert( nullptr != m_fConstructPositionOption );
   
   m_pPositionUnderlying = m_fConstructPositionUnderlying( sUnderlying );
   assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
@@ -182,8 +179,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           else {
             OptionsAtStrike& oas( iterChain->second );
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
-            m_pOptionPut = m_fConstructOption( m_pPositionUnderlying->GetInstrument(), oas.sPut );
-            m_PositionPut_Current = m_fConstructPositionOption( m_pOptionPut );
+            m_PositionPut_Current = m_fConstructPositionOption( m_pPositionUnderlying->GetInstrument(), oas.sPut );
             m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade - 100 );
             m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 );
             m_stateTrading = TSMonitorLong;
