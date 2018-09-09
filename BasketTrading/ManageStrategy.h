@@ -37,25 +37,29 @@ class ManageStrategy: public ou::tf::DailyTradeTimeFrame<ManageStrategy> {
   friend ou::tf::DailyTradeTimeFrame<ManageStrategy>;
 public:
   
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
   
-  typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fSymbolDefinition_t;
-  typedef std::function<void( const std::string&, fSymbolDefinition_t )> fLoadSymbolDefinitions_t;
+  typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
+  typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
   
-  typedef std::function<pOption_t(const std::string& )> fConstructOption_t;
+  typedef std::function<pOption_t(const pInstrument_t, const std::string& )> fConstructOption_t;
   typedef std::function<pPosition_t( const std::string& )> fConstructPositionUnderlying_t;
   typedef std::function<pPosition_t( pOption_t)> fConstructPositionOption_t;
   
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
-    fConstructOption_t fConstructOption,
-    fConstructPositionUnderlying_t fConstructPositionUnderlying, fConstructPositionOption_t fConstructPositionOption, 
-    fLoadSymbolDefinitions_t fLoadSymbolDefinitions );
+    fGatherOptionDefinitions_t,
+    fConstructOption_t,
+    fConstructPositionUnderlying_t, 
+    fConstructPositionOption_t
+    );
   virtual ~ManageStrategy( );
   
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount );
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
+  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get
   void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
@@ -68,6 +72,7 @@ private:
   
   std::string m_sUnderlying;
   
+  bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
@@ -97,7 +102,7 @@ private:
   
   mapChains_t m_mapChains;
   
-  fLoadSymbolDefinitions_t m_fLoadOPtionSymbolDefinitions;  // load option symbols for given underlying
+  //fGatherOptionDefinitions_t m_fGatherOptionDefinitions;  // load option symbols for given underlying
   fConstructOption_t m_fConstructOption;
   fConstructPositionUnderlying_t m_fConstructPositionUnderlying;
   fConstructPositionOption_t m_fConstructPositionOption;

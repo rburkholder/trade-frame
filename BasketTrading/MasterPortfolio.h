@@ -14,17 +14,24 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
+#include <functional>
+
+//#include <TFIQFeed/InMemoryMktSymbolList.h>
+#include <TFIQFeed/MarketSymbol.h>
+
+#include <TFOptions/Engine.h>
 
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/PortfolioManager.h>
+#include <TFTrading/NoRiskInterestRateSeries.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
-#include "ManagePosition.h"
+#include "ManageStrategy.h"
 
 class MasterPortfolio {
 public:
@@ -32,12 +39,20 @@ public:
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
+  
+  typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
+  typedef std::function<const trd_t&(const std::string& sIQFeedSymbolName)> fGetTableRowDef_t;
+  typedef ManageStrategy::fOptionDefinition_t fOptionDefinition_t;
+  typedef ManageStrategy::fGatherOptionDefinitions_t fGatherOptionDefinitions_t;
+  typedef ManageStrategy::fConstructOption_t fConstructOption_t;
+  typedef ManageStrategy::fConstructPositionUnderlying_t fConstructPositionUnderlying_t;
+  typedef ManageStrategy::fConstructPositionOption_t fConstructPositionOption_t;
 
-  MasterPortfolio( void );
+  MasterPortfolio( fGatherOptionDefinitions_t, fGetTableRowDef_t );
   ~MasterPortfolio(void);
 
   void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
-  void Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
+  void Start( pPortfolio_t pMasterPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
   void Stop( void );
   void SaveSeries( const std::string& sPath );
 
@@ -64,12 +79,20 @@ private:
   pProviderIQFeed_t m_pIQ;
   pProviderSim_t n_pSim;
 
-  pPortfolio_t m_pPortfolio;
+  pPortfolio_t m_pMasterPortfolio;
+  
+  ou::tf::LiborFromIQFeed m_libor;
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  typedef std::map<std::string,ManagePosition*> mapPositions_t;
-  typedef std::pair<std::string,ManagePosition*> mapPositions_pair_t;
-  typedef mapPositions_t::iterator mapPositions_iter_t;
-  mapPositions_t m_mapPositions;
+  typedef std::map<std::string,ManageStrategy*> mapStrategy_t; // use a unique_ptr here?
+  mapStrategy_t m_mapStrategy;
+  
+  fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
+  fGetTableRowDef_t m_fGetTableRowDef;
+  //fConstructOption_t m_fConstructOption;
+  //fConstructPositionUnderlying_t m_fConstructPositionUnderlying;
+  //fConstructPositionOption_t m_fConstructPositionOption;
 
   void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );

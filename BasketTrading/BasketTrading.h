@@ -24,6 +24,7 @@
 //  yield more consistently positive results.  Could try for better money management as well.
 
 #include <string>
+#include <memory>
 
 #include <wx/timer.h>
 
@@ -34,6 +35,8 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+
+#include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 #include "Worker.h"
 #include "MasterPortfolio.h"
@@ -61,7 +64,7 @@ private:
 
   ou::tf::DBOps m_db;
 
-  MasterPortfolio m_MasterPortfolio;
+  std::unique_ptr<MasterPortfolio> m_pMasterPortfolio;
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
   pPortfolio_t m_pPortfolio;
@@ -73,6 +76,11 @@ private:
 
   double m_dblMaxPL;
   double m_dblMinPL;
+  
+  ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
+  ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
+  ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
+  ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -101,6 +109,9 @@ private:
 
   void HandleMenuActionTestSelection( void );
   void HandleMenuActionTestSelectionDone( void );
+  
+  void HandleMenuActionSaveSymbolSubset( void );
+  void HandleMenuActionLoadSymbolSubset( void );
 
 };
 

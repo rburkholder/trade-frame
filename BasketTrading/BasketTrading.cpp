@@ -20,8 +20,6 @@
 #include "stdafx.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -33,6 +31,8 @@ using namespace boost::gregorian;
 #include "BasketTrading.h"
 
 IMPLEMENT_APP(AppBasketTrading)
+
+const std::string sFileNameMarketSymbolSubset( "../basekettrading.ser" );
 
 bool AppBasketTrading::OnInit() {
 
@@ -106,16 +106,35 @@ bool AppBasketTrading::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
   m_db.Open( "BasketTrading.db" );
+  
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols ); 
+  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
+    CallAfter( [sStatus](){ 
+      std::cout << sStatus << std::endl; 
+    });
+  });  
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  vItems.push_back( new mi( "b1 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b2 Save Symbol Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "b3 Load Symbol Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedExitPositions( MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedStop( MakeDelegate( this, &AppBasketTrading::HandleStopButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedSave( MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) );
+  
+  m_pMasterPortfolio.reset( new MasterPortfolio( 
+    [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
+    },
+    [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
+      return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
+    }
+    ) );
 
   return 1;
 
@@ -174,7 +193,7 @@ void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
 void AppBasketTrading::HandleStopButton(void) {
   CallAfter( 
     [this](){
-      m_MasterPortfolio.Stop();
+      m_pMasterPortfolio->Stop();
     });
 }
 
@@ -185,20 +204,18 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
 void AppBasketTrading::HandleSaveButton(void) {
   CallAfter(
     [this](){
-      m_MasterPortfolio.SaveSeries( "/app/BasketTrading/" );
+      m_pMasterPortfolio->SaveSeries( "/app/BasketTrading/" );
     });
 }
 
-// eliminate the event and use lamdas
-void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thread, generate gui event to start processing in gui thread
-  //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
+void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thread, start processing in gui thread with CallAfter
   CallAfter([this](){
     m_pWorker->IterateInstrumentList( 
-      boost::phoenix::bind( &MasterPortfolio::AddSymbol, &m_MasterPortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+      boost::phoenix::bind( &MasterPortfolio::AddSymbol, m_pMasterPortfolio.get(), boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
     m_pWorker->Join();
     delete m_pWorker;
     m_pWorker = 0;
-    m_MasterPortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_pMasterPortfolio->Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
     m_timerGuiRefresh.Start( 250 );
   });
 }
@@ -283,3 +300,48 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
 
 }
+
+// maybe put this into background thread
+void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
+
+  m_vExchanges.clear();
+  m_vExchanges.insert( "NYSE" );
+  //m_vExchanges.push_back( "NYSE_AMEX" );
+  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
+  m_vExchanges.insert( "NASDAQ,NGSM" );
+  m_vExchanges.insert( "NASDAQ,NGM" );
+  //m_vExchanges.push_back( "NASDAQ,NMS" );
+  //m_vExchanges.push_back( "NASDAQ,SMCAP" );
+  //m_vExchanges.push_back( "NASDAQ,OTCBB" );
+  //m_vExchanges.push_back( "NASDAQ,OTC" );
+  m_vExchanges.insert( "OPRA" );
+  //m_vExchanges.insert( "COMEX" );
+  //m_vExchanges.insert( "COMEX,COMEX_GBX" );
+  //m_vExchanges.insert( "TSE" );
+  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
+
+  m_vClassifiers.clear();
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
+  //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Future );
+  //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::FOption );
+
+  std::cout << "Subsetting symbols ... " << std::endl;
+  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+  ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
+  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
+  std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
+
+  std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+  listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
+  std::cout << " ... done." << std::endl;
+
+}
+
+// TODO: set flag to only load once?  Otherwise, is the structure cleared first?
+void AppBasketTrading::HandleMenuActionLoadSymbolSubset( void ) {
+  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+  m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
+  std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
+}
+

@@ -31,27 +31,29 @@
 
 ManageStrategy::ManageStrategy( 
   const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
+  fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructOption_t fConstructOption,
-  fConstructPositionUnderlying_t fConstructPositionUnderlying, fConstructPositionOption_t fConstructPositionOption, 
-  fLoadSymbolDefinitions_t fLoadSymbolDefinitions )
+  fConstructPositionUnderlying_t fConstructPositionUnderlying,
+  fConstructPositionOption_t fConstructPositionOption
+  )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
   m_nUnderlyingSharesToTrade {},
   m_barPriorDaily( barPriorDaily ), 
   m_fConstructOption( fConstructOption ),
   m_fConstructPositionUnderlying( fConstructPositionUnderlying ), m_fConstructPositionOption( fConstructPositionOption ), 
-  m_fLoadOPtionSymbolDefinitions( fLoadSymbolDefinitions ), 
+  //m_fGatherOptionDefinitions( fGatherOptionDefinitions ), 
   m_stateTrading( TSInitializing )
 { 
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPositionUnderlying );
   assert( nullptr != m_fConstructPositionOption );
-  assert( nullptr != m_fLoadOPtionSymbolDefinitions );
+  assert( nullptr != fGatherOptionDefinitions );
   
   m_pPositionUnderlying = m_fConstructPositionUnderlying( sUnderlying );
   assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
   
-  m_fLoadOPtionSymbolDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
+  fGatherOptionDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
     assert( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc );
     boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );  // is nDay non-zero?
     
@@ -76,6 +78,8 @@ ManageStrategy::ManageStrategy(
         break;
     }
   });
+  
+  assert( 0 != m_mapChains.size() );
   
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
   
@@ -178,7 +182,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           else {
             OptionsAtStrike& oas( iterChain->second );
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
-            m_pOptionPut = m_fConstructOption( oas.sPut );
+            m_pOptionPut = m_fConstructOption( m_pPositionUnderlying->GetInstrument(), oas.sPut );
             m_PositionPut_Current = m_fConstructPositionOption( m_pOptionPut );
             m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade - 100 );
             m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 );

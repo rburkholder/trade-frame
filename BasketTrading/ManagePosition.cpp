@@ -26,9 +26,6 @@
 //  - include packet of info:  stop, description, ...
 //  - provide trade summary at end of trading day
 
-// need to trade option => pass in portfolio,instrument construction functions, will construct own underlying and option instruments.
-//    may become similar to ComboTrading, so roll everything into there?
-
 ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) 
   : ou::tf::DailyTradeTimeFrame<ManagePosition>(),
   m_sName( sName ),
