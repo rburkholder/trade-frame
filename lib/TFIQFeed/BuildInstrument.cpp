@@ -47,6 +47,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     pInstrument->SetSignificantDigits( 2 );  // not sure about this one
     break;
   case MarketSymbol::enumSymbolClassifier::Future:  // may need to pull out the prefix
+    assert( ( 0 != day ) || ( 0 != trd.nDay ) );
     pInstrument.reset( new ou::tf::Instrument( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, trd.nYear, trd.nMonth, 0 != day ? day : trd.nDay ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -55,6 +56,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     pInstrument->SetSignificantDigits( 2 );  // not sure about this one
     break;
   case MarketSymbol::enumSymbolClassifier::FOption:  // futures option doesn't require underlying?
+    assert( ( 0 != day ) || ( 0 != trd.nDay ) );
     pInstrument.reset( new ou::tf::Instrument( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, trd.nYear, trd.nMonth, 0 != day ? day : trd.nDay, trd.eOptionSide, trd.dblStrike ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
