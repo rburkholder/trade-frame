@@ -414,6 +414,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
         ou::tf::IBTWS::Contract contract;
         contract.conId = pUnderlyingInstrument->GetContract();
         // this request uses contract id to obtain basic symbol of the underlying
+        // TODO: 2018/09/08 this double lookup shouldn't be required, the underlying IB name should be already be stored as an alternate name
         m_tws->RequestContractDetails(
           contract, 
           [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
