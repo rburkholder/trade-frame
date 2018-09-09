@@ -32,7 +32,9 @@
 
 IMPLEMENT_APP(AppBasketTrading)
 
-const std::string sFileNameMarketSymbolSubset( "../basekettrading.ser" );
+namespace {  
+ const std::string sFileNameMarketSymbolSubset( "BasketTrading.ser" );
+}
 
 bool AppBasketTrading::OnInit() {
 
@@ -297,7 +299,7 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
 
   m_pPortfolio
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
+    m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Strategies" );
 
 }
 
