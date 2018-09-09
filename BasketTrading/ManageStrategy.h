@@ -30,6 +30,7 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Position.h>
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 class ManageStrategy: public ou::tf::DailyTradeTimeFrame<ManageStrategy> {
@@ -38,6 +39,7 @@ public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   
   typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
   typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
@@ -47,6 +49,7 @@ public:
   
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
+    pPortfolio_t,
     fGatherOptionDefinitions_t,
     fConstructPositionUnderlying_t, 
     fConstructPositionOption_t
@@ -108,7 +111,9 @@ private:
   
   pPosition_t m_pPositionUnderlying;
   pPosition_t m_PositionPut_Current; // current active put, depending upon roll-downs
-  pPosition_t m_pPositionPut_Previous;  // previous put if there was a roll-down
+  //pPosition_t m_pPositionPut_Previous;  // previous put if there was a roll-down
+  
+  pPortfolio_t m_pPortfolioStrategy;
   
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );

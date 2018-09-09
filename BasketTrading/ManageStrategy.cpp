@@ -31,6 +31,7 @@
 
 ManageStrategy::ManageStrategy( 
   const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
+  pPortfolio_t pPortfolioStrategy,
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructPositionUnderlying_t fConstructPositionUnderlying,
   fConstructPositionOption_t fConstructPositionOption
@@ -39,6 +40,7 @@ ManageStrategy::ManageStrategy(
   m_sUnderlying( sUnderlying ),
   m_nUnderlyingSharesToTrade {},
   m_barPriorDaily( barPriorDaily ), 
+  m_pPortfolioStrategy( pPortfolioStrategy ),
   m_fConstructPositionUnderlying( fConstructPositionUnderlying ), 
   m_fConstructPositionOption( fConstructPositionOption ), 
   m_stateTrading( TSInitializing )
@@ -49,6 +51,8 @@ ManageStrategy::ManageStrategy(
   
   m_pPositionUnderlying = m_fConstructPositionUnderlying( sUnderlying );
   assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
+  
+  m_pPortfolioStrategy->AddPosition( sUnderlying, m_pPositionUnderlying );
   
   fGatherOptionDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
     assert( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc );
@@ -88,7 +92,6 @@ ManageStrategy::~ManageStrategy( ) {
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
   m_nOptionContractsToTrade = ( (volume_t)( dblFunds / m_barPriorDaily.Close() ) )/ 100;
   m_nUnderlyingSharesToTrade = m_nOptionContractsToTrade * 100;  // round down to nearest 100
-  //return ( static_cast<ou::tf::DatedDatum::volume_t>( dblFunds / m_barInfo.Close() ) / 100 ) * 100;  // round down to nearest 100
   return m_nUnderlyingSharesToTrade;
 }
 
@@ -180,6 +183,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             OptionsAtStrike& oas( iterChain->second );
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
             m_PositionPut_Current = m_fConstructPositionOption( m_pPositionUnderlying->GetInstrument(), oas.sPut );
+            m_pPortfolioStrategy->AddPosition( m_PositionPut_Current->GetInstrument()->GetInstrumentName(), m_PositionPut_Current );
             m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade - 100 );
             m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 );
             m_stateTrading = TSMonitorLong;

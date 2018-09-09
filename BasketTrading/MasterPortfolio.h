@@ -47,11 +47,11 @@ public:
   typedef ManageStrategy::fConstructPositionUnderlying_t fConstructPositionUnderlying_t;
   typedef ManageStrategy::fConstructPositionOption_t fConstructPositionOption_t;
 
-  MasterPortfolio( fGatherOptionDefinitions_t, fGetTableRowDef_t );
+  MasterPortfolio( fGatherOptionDefinitions_t, fGetTableRowDef_t, pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);
 
   void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
-  void Start( pPortfolio_t pMasterPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
+  void Start( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
   void Stop( void );
   void SaveSeries( const std::string& sPath );
 

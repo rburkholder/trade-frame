@@ -26,7 +26,8 @@
 
 MasterPortfolio::MasterPortfolio( 
     fGatherOptionDefinitions_t fGatherOptionDefinitions,
-    fGetTableRowDef_t fGetTableRowDef
+    fGetTableRowDef_t fGetTableRowDef,
+    pPortfolio_t pMasterPortfolio
     )
   : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 ),
     m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
@@ -35,6 +36,8 @@ MasterPortfolio::MasterPortfolio(
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
   
+  m_pMasterPortfolio = pMasterPortfolio;
+
   std::stringstream ss;
   ss.str( "" );
   ss << ou::TimeSource::Instance().External();
@@ -60,9 +63,18 @@ MasterPortfolio::~MasterPortfolio(void) {
 
 void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
   assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
+  
+  pPortfolio_t pPortfolioStrategy;
+  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + sName );
+  ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "test" );
+  pPortfolioStrategy.reset( 
+    new ou::tf::Portfolio( idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case" )
+  );
+  m_pMasterPortfolio->AddSubPortfolio( pPortfolioStrategy );
+  
   pManageStrategy_t pManageStrategy;
   pManageStrategy.reset( new ManageStrategy( 
-        sName, bar,
+        sName, bar, pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructPositionUnderlying_t
@@ -133,11 +145,9 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
     m_mapStrategy[ sName ] = std::move( pManageStrategy );        
 }
 
-void MasterPortfolio::Start( pPortfolio_t pMasterPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
+void MasterPortfolio::Start( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
 
   assert( 0 != m_mapStrategy.size() );
-
-  m_pMasterPortfolio = pMasterPortfolio;
 
   m_pExec = pExec;
   m_pData1 = pData1;

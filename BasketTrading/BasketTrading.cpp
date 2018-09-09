@@ -135,7 +135,8 @@ bool AppBasketTrading::OnInit() {
     },
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
-    }
+    },
+    m_pPortfolio
     ) );
 
   return 1;
@@ -217,7 +218,7 @@ void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thr
     m_pWorker->Join();
     delete m_pWorker;
     m_pWorker = 0;
-    m_pMasterPortfolio->Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_pMasterPortfolio->Start( m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
     m_timerGuiRefresh.Start( 250 );
   });
 }
