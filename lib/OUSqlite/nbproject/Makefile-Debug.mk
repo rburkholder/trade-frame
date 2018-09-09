@@ -70,17 +70,17 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a: ${OBJECTFILES}
 ${OBJECTDIR}/Actions.o: Actions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Actions.o Actions.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Actions.o Actions.cpp
 
 ${OBJECTDIR}/ISqlite3.o: ISqlite3.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ISqlite3.o ISqlite3.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ISqlite3.o ISqlite3.cpp
 
 ${OBJECTDIR}/Session.o: Session.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Session.o Session.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Session.o Session.cpp
 
 ${OBJECTDIR}/sqlite3.o: sqlite3.c
 	${MKDIR} -p ${OBJECTDIR}

@@ -82,82 +82,82 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboustatistics.a: ${OBJECTFILES}
 ${OBJECTDIR}/ADF.o: ADF.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ADF.o ADF.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ADF.o ADF.cpp
 
 ${OBJECTDIR}/NewMat/bandmat.o: NewMat/bandmat.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/bandmat.o NewMat/bandmat.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/bandmat.o NewMat/bandmat.cpp
 
 ${OBJECTDIR}/NewMat/myexcept.o: NewMat/myexcept.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/myexcept.o NewMat/myexcept.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/myexcept.o NewMat/myexcept.cpp
 
 ${OBJECTDIR}/NewMat/newmat1.o: NewMat/newmat1.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat1.o NewMat/newmat1.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat1.o NewMat/newmat1.cpp
 
 ${OBJECTDIR}/NewMat/newmat2.o: NewMat/newmat2.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat2.o NewMat/newmat2.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat2.o NewMat/newmat2.cpp
 
 ${OBJECTDIR}/NewMat/newmat3.o: NewMat/newmat3.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat3.o NewMat/newmat3.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat3.o NewMat/newmat3.cpp
 
 ${OBJECTDIR}/NewMat/newmat4.o: NewMat/newmat4.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat4.o NewMat/newmat4.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat4.o NewMat/newmat4.cpp
 
 ${OBJECTDIR}/NewMat/newmat5.o: NewMat/newmat5.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat5.o NewMat/newmat5.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat5.o NewMat/newmat5.cpp
 
 ${OBJECTDIR}/NewMat/newmat6.o: NewMat/newmat6.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat6.o NewMat/newmat6.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat6.o NewMat/newmat6.cpp
 
 ${OBJECTDIR}/NewMat/newmat7.o: NewMat/newmat7.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat7.o NewMat/newmat7.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat7.o NewMat/newmat7.cpp
 
 ${OBJECTDIR}/NewMat/newmat8.o: NewMat/newmat8.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat8.o NewMat/newmat8.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat8.o NewMat/newmat8.cpp
 
 ${OBJECTDIR}/NewMat/newmat9.o: NewMat/newmat9.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat9.o NewMat/newmat9.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmat9.o NewMat/newmat9.cpp
 
 ${OBJECTDIR}/NewMat/newmatex.o: NewMat/newmatex.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatex.o NewMat/newmatex.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatex.o NewMat/newmatex.cpp
 
 ${OBJECTDIR}/NewMat/newmatnl.o: NewMat/newmatnl.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatnl.o NewMat/newmatnl.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatnl.o NewMat/newmatnl.cpp
 
 ${OBJECTDIR}/NewMat/newmatrm.o: NewMat/newmatrm.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatrm.o NewMat/newmatrm.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/newmatrm.o NewMat/newmatrm.cpp
 
 ${OBJECTDIR}/NewMat/submat.o: NewMat/submat.cpp
 	${MKDIR} -p ${OBJECTDIR}/NewMat
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/submat.o NewMat/submat.cpp
+	$(COMPILE.cc) -g -D_DEBUG -Duse_namespace -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NewMat/submat.o NewMat/submat.cpp
 
 # Subprojects
 .build-subprojects:

@@ -82,7 +82,7 @@
       <compileType>
         <ccTool>
           <architecture>2</architecture>
-          <standard>8</standard>
+          <standard>11</standard>
           <incDir>
             <pElem>../</pElem>
           </incDir>

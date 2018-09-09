@@ -68,12 +68,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a: ${OBJECTFILES}
 ${OBJECTDIR}/HDF5Attribute.o: HDF5Attribute.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HDF5Attribute.o HDF5Attribute.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HDF5Attribute.o HDF5Attribute.cpp
 
 ${OBJECTDIR}/HDF5DataManager.o: HDF5DataManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HDF5DataManager.o HDF5DataManager.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HDF5DataManager.o HDF5DataManager.cpp
 
 # Subprojects
 .build-subprojects:

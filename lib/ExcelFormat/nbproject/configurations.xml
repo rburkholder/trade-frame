@@ -42,7 +42,7 @@
       <compileType>
         <ccTool>
           <architecture>2</architecture>
-          <standard>8</standard>
+          <standard>11</standard>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
