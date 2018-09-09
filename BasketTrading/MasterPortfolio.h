@@ -18,9 +18,9 @@
 #include <string>
 #include <functional>
 
-//#include <TFIQFeed/InMemoryMktSymbolList.h>
 #include <TFIQFeed/MarketSymbol.h>
 
+#include <TFOptions/Option.h>
 #include <TFOptions/Engine.h>
 
 #include <TFTrading/ProviderManager.h>
@@ -58,6 +58,9 @@ public:
 protected:
 private:
 
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
+  typedef ou::tf::option::Option::pOption_t pOption_t;
+
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
   typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;  
@@ -83,15 +86,14 @@ private:
   ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
+  
+  typedef std::unique_ptr<ManageStrategy> pManageStrategy_t;
 
-  typedef std::map<std::string,ManageStrategy*> mapStrategy_t; // use a unique_ptr here?
+  typedef std::map<std::string,pManageStrategy_t> mapStrategy_t;
   mapStrategy_t m_mapStrategy;
   
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
-  //fConstructOption_t m_fConstructOption;
-  //fConstructPositionUnderlying_t m_fConstructPositionUnderlying;
-  //fConstructPositionOption_t m_fConstructPositionOption;
 
   void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );

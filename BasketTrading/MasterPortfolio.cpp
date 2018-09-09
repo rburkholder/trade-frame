@@ -18,8 +18,6 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include <TFOptions/Option.h>
-
 #include <TFIQFeed/BuildInstrument.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -35,16 +33,14 @@ MasterPortfolio::MasterPortfolio(
     m_fGetTableRowDef( std::move( fGetTableRowDef ) )
 {
   assert( nullptr != m_fOptionNamesByUnderlying );
+  assert( nullptr != m_fGetTableRowDef );
+  
   std::stringstream ss;
   ss.str( "" );
   ss << ou::TimeSource::Instance().External();
-  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
-  typedef ou::tf::option::Option::pOption_t pOption_t;
-
   m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
   m_pOptionEngine->m_fBuildWatch 
     = [this](pInstrument_t pInstrument)->pWatch_t {
@@ -59,7 +55,7 @@ MasterPortfolio::MasterPortfolio(
 }
 
 MasterPortfolio::~MasterPortfolio(void) {
-  std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(), [](mapStrategy_t::value_type& pair){ delete pair.second; } );
+  m_mapStrategy.clear();
 }
 
 void MasterPortfolio::Start( pPortfolio_t pMasterPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
@@ -121,7 +117,10 @@ void MasterPortfolio::Start( pPortfolio_t pMasterPortfolio, pProvider_t pExec, p
                         contract.secType = "STK";
                         contract.symbol = pair.first;
                         // IB responds only when symbol is found, bad symbols will not illicit a response
-                        m_pIB->RequestContractDetails( contract, MakeDelegate( this, &MasterPortfolio::HandleIBContractDetails ), MakeDelegate( this, &MasterPortfolio::HandleIBContractDetailsDone ) );
+                        m_pIB->RequestContractDetails( 
+                          contract, 
+                          MakeDelegate( this, &MasterPortfolio::HandleIBContractDetails ), MakeDelegate( this, &MasterPortfolio::HandleIBContractDetailsDone ) 
+                          );
                       }
                     } );
   }
@@ -144,8 +143,8 @@ void MasterPortfolio::Stop( void ) {
 
 void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
   assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
-  m_mapStrategy[ sName ] 
-    = new ManageStrategy( 
+  pManageStrategy_t pManageStrategy;
+  pManageStrategy.reset( new ManageStrategy( 
         sName, bar,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
@@ -212,7 +211,9 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
               pPosition_t pPosition( new ou::tf::Position ( m_pOptionEngine->m_fBuildOption( pOptionInstrument ), m_pExec ) );
               return pPosition;
             }
-        );
+        )
+      );
+    m_mapStrategy[ sName ] = std::move( pManageStrategy );        
 }
 
 void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
