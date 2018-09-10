@@ -172,20 +172,21 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           mapChain_t::reverse_iterator iterChain = std::find_if( mapChain.rbegin(), mapChain.rend(), 
             [mid, date](const mapChain_t::value_type& vt)->bool{
               return vt.first < mid;
-          });
+            });
           if ( mapChain.rend() == iterChain ) {
             std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << date << std::endl;
             m_stateTrading = TSNoMore;
           }  
           else {
-            OptionsAtStrike& oas( iterChain->second );
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
             // need to wait for contract info
             if ( 0 == m_pPositionUnderlying->GetInstrument()->GetContract() ) {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
+              m_stateTrading = TSNoMore;
             }
             else {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building put." << std::endl;
+              OptionsAtStrike& oas( iterChain->second );
               m_PositionPut_Current = m_fConstructPositionOption( m_pPortfolioStrategy->Id(), m_pPositionUnderlying->GetInstrument(), oas.sPut, 
                 [this](pPosition_t pPositionPut){
                   assert( nullptr != m_PositionPut_Current.get() );  // ensure we have local return prior to async return
@@ -211,20 +212,38 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::HandleCancel( void ) {
-  std::cout << m_sUnderlying << " cancel" << std::endl;
-  m_pPositionUnderlying->CancelOrders();
-  m_PositionPut_Current->CancelOrders();
+  switch ( m_stateTrading ) {
+    case TSNoMore:
+      break;
+    default:
+      std::cout << m_sUnderlying << " cancel" << std::endl;
+      if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->CancelOrders();
+      if ( nullptr != m_PositionPut_Current.get() ) m_PositionPut_Current->CancelOrders();
+      break;
+  }
 }
 
 void ManageStrategy::HandleGoNeutral( void ) {
-  std::cout << m_sUnderlying << " close" << std::endl;
-  m_pPositionUnderlying->ClosePosition();
-  m_PositionPut_Current->ClosePosition();
+  switch ( m_stateTrading ) {
+    case TSNoMore:
+      break;
+    default:
+      std::cout << m_sUnderlying << " close" << std::endl;
+      if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
+      if ( nullptr != m_PositionPut_Current.get() ) m_PositionPut_Current->ClosePosition();
+      break;
+  }
 }
 
 void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
-  std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-  std::cout << m_sUnderlying << " close results option put " << *m_PositionPut_Current << std::endl;
+  switch ( m_stateTrading ) {
+    case TSNoMore:
+      break;
+    default:
+      std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
+      std::cout << m_sUnderlying << " close results option put " << *m_PositionPut_Current << std::endl;
+      break;
+  }
   // need to set a state to do this once
 }
 
@@ -241,6 +260,10 @@ void ManageStrategy::HandleBarUnderlying( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
-  m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
-  m_PositionPut_Current->GetWatch()->SaveSeries( sPrefix );
+  if ( nullptr != m_pPositionUnderlying.get() ) {
+    m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
+  }
+  if ( nullptr != m_PositionPut_Current.get() ) {
+    m_PositionPut_Current->GetWatch()->SaveSeries( sPrefix );
+  }
 }
