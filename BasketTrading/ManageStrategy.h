@@ -44,8 +44,8 @@ public:
   typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
   typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
   
-  typedef std::function<pPosition_t( const std::string& )> fConstructPositionUnderlying_t;
-  typedef std::function<pPosition_t( const pInstrument_t, const std::string& )> fConstructPositionOption_t; // string is iqfeed option name
+  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, const std::string& )> fConstructPositionUnderlying_t;
+  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, const pInstrument_t, const std::string& )> fConstructPositionOption_t; // string is iqfeed option name
   
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 

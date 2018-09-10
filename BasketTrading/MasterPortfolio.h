@@ -95,8 +95,5 @@ private:
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
 
-  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument );
-  void HandleIBContractDetailsDone( void );
-
 };
 

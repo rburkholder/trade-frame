@@ -49,10 +49,8 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructPositionOption );
   
-  m_pPositionUnderlying = m_fConstructPositionUnderlying( sUnderlying );
+  m_pPositionUnderlying = m_fConstructPositionUnderlying( m_pPortfolioStrategy->Id(), sUnderlying );
   assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
-  
-  m_pPortfolioStrategy->AddPosition( sUnderlying, m_pPositionUnderlying );
   
   fGatherOptionDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
     assert( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc );
@@ -182,8 +180,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           else {
             OptionsAtStrike& oas( iterChain->second );
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
-            m_PositionPut_Current = m_fConstructPositionOption( m_pPositionUnderlying->GetInstrument(), oas.sPut );
-            m_pPortfolioStrategy->AddPosition( m_PositionPut_Current->GetInstrument()->GetInstrumentName(), m_PositionPut_Current );
+            m_PositionPut_Current = m_fConstructPositionOption( m_pPortfolioStrategy->Id(), m_pPositionUnderlying->GetInstrument(), oas.sPut );
             m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade - 100 );
             m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 );
             m_stateTrading = TSMonitorLong;

@@ -174,10 +174,13 @@ public:
     }
   };
 
-  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, // persisted Position (old style construction)
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
-  Position( pWatch_t, pProvider_t pExecutionProvider );
+  Position( pWatch_t, pProvider_t pExecutionProvider );  // in memory Position (new style construction)
+  Position( pWatch_t, pProvider_t pExecutionProvider,   // persisted Position (new style construction)
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
@@ -284,13 +287,13 @@ protected:
   TableRowDef m_row;
 
 private:
-
+  
   bool m_bExecutionAccountAssigned;
   bool m_bDataAccountAssigned;
   bool m_bWatchConstructedLocally;
 
   double m_dblMultiplier;
-
+  
   void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
   void Construction( void );
 

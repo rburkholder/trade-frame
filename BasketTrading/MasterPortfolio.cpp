@@ -64,13 +64,12 @@ MasterPortfolio::~MasterPortfolio(void) {
 void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
   assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
   
-  pPortfolio_t pPortfolioStrategy;
   ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + sName );
-  ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "test" );
-  pPortfolioStrategy.reset( 
-    new ou::tf::Portfolio( idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case" )
-  );
-  m_pMasterPortfolio->AddSubPortfolio( pPortfolioStrategy );
+  ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
+  pPortfolio_t pPortfolioStrategy 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+        idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case" 
+    );
   
   pManageStrategy_t pManageStrategy;
   pManageStrategy.reset( new ManageStrategy( 
@@ -78,7 +77,7 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructPositionUnderlying_t
-        [this](const std::string& sIQFeedEquityName)->ManageStrategy::pPosition_t{
+        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, const std::string& sIQFeedEquityName)->ManageStrategy::pPosition_t{
               const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
               
               pInstrument_t pEquityInstrument;
@@ -103,12 +102,18 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
                       );
                 }
               }
-              
-              pPosition_t pPosition( new ou::tf::Position ( m_pOptionEngine->m_fBuildWatch( pEquityInstrument ), m_pExec ) );
+
+              pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
+
+              // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
+              pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
+                idPortfolio, pEquityInstrument->GetInstrumentName(), "Basket", 
+                "ib01", "iq01", m_pExec, pWatch );
+  
               return pPosition;
           },
     // ManageStrategy::fConstructPositionOption_t
-        [this]( const pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName )->ManageStrategy::pPosition_t{
+        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, const pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName )->ManageStrategy::pPosition_t{
               const trd_t& trd( m_fGetTableRowDef( sIQFeedOptionName ) ); // TODO: check for errors
               
               std::string sGenericOptionName 
@@ -137,7 +142,13 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
                 }
               }
               
-              pPosition_t pPosition( new ou::tf::Position ( m_pOptionEngine->m_fBuildOption( pOptionInstrument ), m_pExec ) );
+              pOption_t pOption = m_pOptionEngine->m_fBuildOption( pOptionInstrument );
+              
+              // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
+              pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
+                  idPortfolio, pOptionInstrument->GetInstrumentName(), "Basket", 
+                  "ib01", "iq01", m_pExec, pOption );
+              
               return pPosition;
             }
         )
@@ -195,17 +206,9 @@ void MasterPortfolio::Start( pProvider_t pExec, pProvider_t pData1, pProvider_t 
 
                         pair.second->SetFundsToTrade( dblAmountToTradePerInstrument );
                         m_nSharesTrading += pair.second->CalcShareCount( dblAmountToTradePerInstrument );
+                        
+                        pair.second->Start();
 
-                        ou::tf::IBTWS::Contract contract;
-                        contract.currency = "USD";
-                        contract.exchange = "SMART";  
-                        contract.secType = "STK";
-                        contract.symbol = pair.first;
-                        // IB responds only when symbol is found, bad symbols will not illicit a response
-                        m_pIB->RequestContractDetails( 
-                          contract, 
-                          MakeDelegate( this, &MasterPortfolio::HandleIBContractDetails ), MakeDelegate( this, &MasterPortfolio::HandleIBContractDetailsDone ) 
-                          );
                       }
                     } );
   }
@@ -236,23 +239,4 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
                 } );
   std::cout << "done." << std::endl;
 }
-
-// comes in on a different thread, so no gui operations
-void MasterPortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
-  mapStrategy_t::iterator iter = m_mapStrategy.find( pInstrument->GetInstrumentName() );
-  assert( m_mapStrategy.end() != iter );
-  //pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
-  pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
-    m_pMasterPortfolio->Id(), pInstrument->GetInstrumentName(), "Basket", 
-    "ib01", "iq01", m_pExec, m_pData1, pInstrument );
-  //iter->second->SetPosition( pPosition );
-  iter->second->Start();
-//  m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
-//  m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
-}
-
-void MasterPortfolio::HandleIBContractDetailsDone( void ) {
-//  StartWatch();
-}
-
 

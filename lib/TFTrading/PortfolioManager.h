@@ -53,6 +53,7 @@ public:
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
   typedef Instrument::pInstrument_cref pInstrument_cref;
+  typedef Position::pWatch_t pWatch_t;
   typedef Position::pProvider_t pProvider_t;
 
   typedef std::pair<const Position&, const Execution&> execution_pair_t;
@@ -80,11 +81,18 @@ public:
   void UpdatePortfolio( const idPortfolio_t& idPortfolio );
   void DeletePortfolio( const idPortfolio_t& idPortfolio );
 
-  pPosition_t ConstructPosition( 
+  pPosition_t ConstructPosition( // old mechanism
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_cref pInstrument
+    );
+
+  pPosition_t ConstructPosition( // new mechanism
+    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const pProvider_t& pExecutionProvider, 
+    pWatch_t pWatch
     );
 
   pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName );
@@ -137,6 +145,13 @@ private:
   void UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting );
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
+
+  typedef std::function<pPosition_t()> fConstructPosition_t;
+
+  void ConstructPosition( // re-factored code
+    const idPortfolio_t& idPortfolio, const std::string& sName,
+    fConstructPosition_t
+  );
 
   void PortfolioCommon( pPortfolio_t& );
 

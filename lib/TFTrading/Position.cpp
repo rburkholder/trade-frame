@@ -47,6 +47,22 @@ Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider )
   Construction();
 }
 
+Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider,
+  const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+  const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
+: m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
+  m_dblMultiplier( 1 ), //m_bConnectedToDataProvider( false ),
+  m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_row( idPortfolio, sName, pWatch->GetInstrument()->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm ),
+  m_bWatchConstructedLocally( false )
+{
+  assert( 0 != m_pWatch.use_count() );
+  assert( nullptr != m_pWatch.get() );  // this is probably a better check than use_count
+  assert( 0 != m_pWatch->GetInstrument().use_count() );
+  assert( 0 != m_pWatch->GetProvider().use_count() );
+  Construction();
+}
+
 Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
   m_dblMultiplier( 1 ),

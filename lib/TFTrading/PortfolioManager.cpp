@@ -403,13 +403,43 @@ void PortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 // Position
 //
 
-PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( 
+PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechanism
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_cref pInstrument )
 {
   pPosition_t pPosition;
+
+  ConstructPosition( idPortfolio, sName, [&]()->pPosition_t{
+    pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+    return pPosition;
+  } );
+  
+  return pPosition;
+}
+
+PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechanism
+    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const pProvider_t& pExecutionProvider, 
+    pWatch_t pWatch )
+{
+  pPosition_t pPosition;
+  
+  ConstructPosition( idPortfolio, sName, [&]()->pPosition_t{
+    pPosition.reset( new Position( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+    return pPosition;
+  } );
+
+  return pPosition;
+}
+
+void PortfolioManager::ConstructPosition( // re-factored code
+    const idPortfolio_t& idPortfolio, const std::string& sName,
+    fConstructPosition_t fConstructPosition
+  )
+{
   // confirm portfolio exists
   GetPortfolio( idPortfolio );
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
@@ -426,7 +456,8 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
     throw std::runtime_error( "ConstructPosition:  sName already exists" );
   }
 
-  pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+  pPosition_t pPosition;
+  pPosition = fConstructPosition();
   
   if ( 0 == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
@@ -443,10 +474,8 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
 
   iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
 
-  //OnPositionAdded( idPosition );
   OnPositionAdded( pPosition );
 
-  return pPosition;
 }
 
 PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
