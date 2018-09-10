@@ -191,7 +191,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 [this](pPosition_t pPositionPut){
                   assert( nullptr != m_PositionPut_Current.get() );  // ensure we have local return prior to async return
                   m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade - 100 );
-                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 );
+                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
                 } );
             }
             m_stateTrading = TSMonitorLong;
