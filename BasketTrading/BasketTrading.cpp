@@ -130,6 +130,7 @@ bool AppBasketTrading::OnInit() {
   m_pPanelBasketTradingMain->SetOnButtonPressedSave( MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) );
   
   m_pMasterPortfolio.reset( new MasterPortfolio( 
+    m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
     },
@@ -218,7 +219,7 @@ void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thr
     m_pWorker->Join();
     delete m_pWorker;
     m_pWorker = 0;
-    m_pMasterPortfolio->Start( m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_pMasterPortfolio->Start();
     m_timerGuiRefresh.Start( 250 );
   });
 }

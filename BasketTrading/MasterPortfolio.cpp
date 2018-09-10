@@ -24,20 +24,37 @@
 
 #include "MasterPortfolio.h"
 
-MasterPortfolio::MasterPortfolio( 
+MasterPortfolio::MasterPortfolio(
+    pProvider_t pExec, pProvider_t pData1, pProvider_t pData2, 
     fGatherOptionDefinitions_t fGatherOptionDefinitions,
     fGetTableRowDef_t fGetTableRowDef,
     pPortfolio_t pMasterPortfolio
     )
   : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 ),
     m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
-    m_fGetTableRowDef( std::move( fGetTableRowDef ) )
+    m_fGetTableRowDef( std::move( fGetTableRowDef ) ),
+    m_pMasterPortfolio( pMasterPortfolio ),
+    m_pExec( pExec ),
+    m_pData1( pData1 ),
+    m_pData2( pData2 )
 {
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
   
-  m_pMasterPortfolio = pMasterPortfolio;
-
+  switch ( pExec->ID() ) {
+    case ou::tf::keytypes::EProviderIB:
+      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );
+      break;
+  }
+  
+  switch ( pData1->ID() ) {
+    case ou::tf::keytypes::EProviderIQF:
+      m_pIQ = boost::dynamic_pointer_cast<ou::tf::IQFeedProvider>( pData1 );
+      break;
+    default:
+      assert( 0 ); // need the iqfeed provider
+  }
+  
   std::stringstream ss;
   ss.str( "" );
   ss << ou::TimeSource::Instance().External();
@@ -156,28 +173,10 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
     m_mapStrategy[ sName ] = std::move( pManageStrategy );        
 }
 
-void MasterPortfolio::Start( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
+void MasterPortfolio::Start() {
 
   assert( 0 != m_mapStrategy.size() );
 
-  m_pExec = pExec;
-  m_pData1 = pData1;
-  m_pData2 = pData2;
-  
-  switch ( pExec->ID() ) {
-    case ou::tf::keytypes::EProviderIB:
-      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );
-      break;
-  }
-  
-  switch ( pData1->ID() ) {
-    case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = boost::dynamic_pointer_cast<ou::tf::IQFeedProvider>( pData1 );
-      break;
-    default:
-      assert( 0 ); // need the iqfeed provider
-  }
-  
   m_libor.SetWatchOn( m_pIQ );
 
   // first pass: to get rough idea of which can be traded given our funding level

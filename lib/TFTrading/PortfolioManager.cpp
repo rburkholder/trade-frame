@@ -411,7 +411,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
 {
   pPosition_t pPosition;
 
-  ConstructPosition( idPortfolio, sName, [&]()->pPosition_t{
+  ConstructPosition( idPortfolio, sName, [&,pInstrument,pExecutionProvider, pDataProvider]()->pPosition_t{
     pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
     return pPosition;
   } );
@@ -427,7 +427,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
 {
   pPosition_t pPosition;
   
-  ConstructPosition( idPortfolio, sName, [&]()->pPosition_t{
+  ConstructPosition( idPortfolio, sName, [&,pWatch,pExecutionProvider]()->pPosition_t{
     pPosition.reset( new Position( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
     return pPosition;
   } );

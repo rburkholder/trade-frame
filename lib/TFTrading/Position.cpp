@@ -52,6 +52,7 @@ Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider,
   const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
 : m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ), 
   m_dblMultiplier( 1 ), //m_bConnectedToDataProvider( false ),
+  m_pWatch( pWatch ),
   m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
   m_row( idPortfolio, sName, pWatch->GetInstrument()->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm ),
   m_bWatchConstructedLocally( false )
