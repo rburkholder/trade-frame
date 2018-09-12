@@ -25,6 +25,23 @@
 //  add live charting for portfolio, position, and instruments
 //  run implied atm volatility for underlying
 
+// 2018/09/11
+//   change ManagePortfolio:  
+//     watch opening price/quotes, include that in determination for which symbols to trade
+//     may also watch number of option quotes delivered to ensure liquidity
+//     then allocate the ToTrade from opening data rather than closing bars
+//   output option greeks, and individual portfolio state
+//   need a 'resume from over-night' as big moves can happen then, and can make the delta neutral profitable
+//   enumerate watching/non-watching entries in the option engine
+//   start the AtmIv at open and use to collect some of the above opening trade statistics
+//     which also gets the execution contract id in place prior to the trade
+//   delta should be >0.40 to enter
+//   use option with >7 days to expiry?
+//   add charts to watch AtmIv, options, underlying (steal from ComboTrading)
+//   add a roll-down maneouver to keep delta close to 1
+//   need option exit, and install a stop when in the profit zone, and put not longer necessary 
+//   
+
 #include <algorithm>
 
 #include "ManageStrategy.h"
