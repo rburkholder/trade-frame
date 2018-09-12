@@ -40,6 +40,8 @@
 //   add charts to watch AtmIv, options, underlying (steal from ComboTrading)
 //   add a roll-down maneouver to keep delta close to 1
 //   need option exit, and install a stop when in the profit zone, and put not longer necessary 
+//   need to get out of an option at $0.20, otherwise may not be a market
+//     add a stop?  (do not worry when doing multi-day trades)
 //   
 
 #include <algorithm>
@@ -207,11 +209,13 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               m_PositionPut_Current = m_fConstructPositionOption( m_pPortfolioStrategy->Id(), m_pPositionUnderlying->GetInstrument(), oas.sPut, 
                 [this](pPosition_t pPositionPut){
                   assert( nullptr != m_PositionPut_Current.get() );  // ensure we have local return prior to async return
+                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                   m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
                   m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
+                  m_stateTrading = TSMonitorLong;
                 } );
             }
-            m_stateTrading = TSMonitorLong;
+            m_stateTrading = TSNoMore;
           }
         }
       }
@@ -257,8 +261,8 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
     case TSNoMore:
       break;
     default:
-      std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      std::cout << m_sUnderlying << " close results option put " << *m_PositionPut_Current << std::endl;
+      if ( nullptr != m_pPositionUnderlying.get() ) std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
+      if ( nullptr != m_PositionPut_Current.get() ) std::cout << m_sUnderlying << " close results option put " << *m_PositionPut_Current << std::endl;
       break;
   }
   // need to set a state to do this once
