@@ -66,6 +66,18 @@
         </ccTool>
         <archiverTool>
         </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../TFTimeSeries"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../TFTimeSeries"
+                        BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                        CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+          </makeArtifact>
+        </requiredProjects>
       </compileType>
       <item path="AtmIv.cpp" ex="false" tool="1" flavor2="0">
       </item>
