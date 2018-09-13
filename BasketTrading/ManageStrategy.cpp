@@ -52,49 +52,72 @@ ManageStrategy::ManageStrategy(
   const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
   pPortfolio_t pPortfolioStrategy,
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
-  fConstructPositionUnderlying_t fConstructPositionUnderlying,
-  fConstructPositionOption_t fConstructPositionOption
+  fConstructWatch_t fConstructWatch,
+  fConstructOption_t ConstructOption,
+  fConstructPosition_t fConstructPosition
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
   m_nUnderlyingSharesToTrade {},
   m_barPriorDaily( barPriorDaily ), 
   m_pPortfolioStrategy( pPortfolioStrategy ),
-  m_fConstructPositionUnderlying( fConstructPositionUnderlying ), 
-  m_fConstructPositionOption( fConstructPositionOption ), 
+  m_fConstructWatch( fConstructWatch ), 
+  m_fConstructOption( ConstructOption ), 
+  m_fConstructPosition( fConstructPosition ), 
   m_stateTrading( TSInitializing )
 { 
-  assert( nullptr != m_fConstructPositionUnderlying );
   assert( nullptr != fGatherOptionDefinitions );
-  assert( nullptr != m_fConstructPositionOption );
+  assert( nullptr != m_fConstructWatch );
+  assert( nullptr != m_fConstructOption );
+  assert( nullptr != m_fConstructPosition );
   
-  m_pPositionUnderlying = m_fConstructPositionUnderlying( m_pPortfolioStrategy->Id(), sUnderlying, [](pPosition_t pPosition){} );
-  assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
+  m_fConstructWatch( sUnderlying, [this](pWatch_t pWatch){ 
+    m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
+    assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
+  } );
   
   fGatherOptionDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
+    
     assert( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc );
-    boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );  // is nDay non-zero?
+    boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
     
-    mapChains_t::iterator iterChains = m_mapChains.find( date );
-    if ( m_mapChains.end() == iterChains ) {
-      iterChains = m_mapChains.insert( m_mapChains.begin(), mapChains_t::value_type( date, mapChain_t() ) );
-    }
-    mapChain_t& mapChain( iterChains->second );
+    mapChains_t::iterator iterChains;
     
-    mapChain_t::iterator iterChain = mapChain.find( row.dblStrike );
-    if ( mapChain.end() == iterChain ) {
-      iterChain = mapChain.insert( mapChain.begin(), mapChain_t::value_type( row.dblStrike, OptionsAtStrike() ) );
+    {
+      ou::tf::option::IvAtm ivAtm(
+              m_pPositionUnderlying->GetWatch(), 
+            // IvAtm::fConstructOption_t
+              [](const std::string&)->pOption_t{ 
+                return nullptr; 
+              },
+            // IvAtm::fStartCalc_t
+              [](pOption_t,pWatch_t){
+              },
+            // IvAtm::fStopCalc_t
+              [](pOption_t,pWatch_t){
+              });
+
+      iterChains = m_mapChains.find( date );
+      if ( m_mapChains.end() == iterChains ) {
+        iterChains = m_mapChains.insert(
+          m_mapChains.begin(),
+          mapChains_t::value_type( date, std::move( ivAtm ) )
+          );
+      }
     }
-    OptionsAtStrike& oas( iterChain->second );
-    
-    switch ( row.eOptionSide ) {
-      case ou::tf::OptionSide::Call:
-        oas.sCall = row.sSymbol;
-        break;
-      case ou::tf::OptionSide::Put:
-        oas.sPut = row.sSymbol;
-        break;
-    }
+
+    {
+      ou::tf::option::IvAtm& ivAtm( iterChains->second );
+
+      switch ( row.eOptionSide ) {
+        case ou::tf::OptionSide::Call:
+          ivAtm.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
+          break;
+        case ou::tf::OptionSide::Put:
+          ivAtm.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
+          break;
+      }
+    }    
   });
   
   assert( 0 != m_mapChains.size() );
@@ -187,17 +210,10 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         }
         else {
           double mid = quote.Midpoint();
-          mapChain_t& mapChain( iterChains->second );
-          mapChain_t::reverse_iterator iterChain = std::find_if( mapChain.rbegin(), mapChain.rend(), 
-            [mid, date](const mapChain_t::value_type& vt)->bool{
-              return vt.first < mid;
-            });
-          if ( mapChain.rend() == iterChain ) {
-            std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << date << std::endl;
-            m_stateTrading = TSNoMore;
-          }  
-          else {
-            std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << iterChain->first << " put of " << date << std::endl;
+          double strike {};
+          try {
+            strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
+            std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << strike << " put of " << date << std::endl;
             // need to wait for contract info
             if ( 0 == m_pPositionUnderlying->GetInstrument()->GetContract() ) {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
@@ -205,20 +221,26 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             }
             else {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building put." << std::endl;
-              OptionsAtStrike& oas( iterChain->second );
-              m_PositionPut_Current = m_fConstructPositionOption( m_pPortfolioStrategy->Id(), m_pPositionUnderlying->GetInstrument(), oas.sPut, 
-                [this](pPosition_t pPositionPut){
-                  assert( nullptr != m_PositionPut_Current.get() );  // ensure we have local return prior to async return
+              
+              m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(), 
+                [this](pOption_t pOption){
+                  m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
                   std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                   m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
                   m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
                   m_stateTrading = TSMonitorLong;
                 } );
             }
+            m_stateTrading = TSWaitForContract;
+          }
+          catch ( std::runtime_error& e ) {
+            std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << date << std::endl;
             m_stateTrading = TSNoMore;
           }
         }
       }
+      break;
+    case TSWaitForContract:
       break;
     case TSMonitorLong:
       // TODO: monitor for delta changes, or being able to roll down to next strike

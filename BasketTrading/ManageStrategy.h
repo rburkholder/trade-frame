@@ -29,6 +29,9 @@
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 
+#include <TFOptions/IvAtm.h>
+#include <TFOptions/Option.h>
+
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
@@ -38,23 +41,30 @@ class ManageStrategy: public ou::tf::DailyTradeTimeFrame<ManageStrategy> {
 public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::option::Option::pWatch_t pWatch_t;
+  typedef ou::tf::option::Option::pOption_t pOption_t;
+  
   typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   
   typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
   typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
   
-  typedef std::function<void(pPosition_t)> fPosition_t;
+  typedef std::function<void(pWatch_t)> fConstructedWatch_t;
+  typedef std::function<void(pOption_t)> fConstructedOption_t;
   
-  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, const std::string&, fPosition_t )> fConstructPositionUnderlying_t;
-  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, const pInstrument_t, const std::string&, fPosition_t )> fConstructPositionOption_t; // string is iqfeed option name
+  typedef std::function<void(const std::string&, fConstructedWatch_t)> fConstructWatch_t;
+  typedef std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)> fConstructOption_t;  // source from IQFeed Symbol Name
+  
+  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )> fConstructPosition_t;
   
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
     pPortfolio_t,
     fGatherOptionDefinitions_t,
-    fConstructPositionUnderlying_t, 
-    fConstructPositionOption_t
+    fConstructWatch_t,
+    fConstructOption_t,
+    fConstructPosition_t
     );
   virtual ~ManageStrategy( );
   
@@ -69,7 +79,6 @@ protected:
 private:
   
   typedef ou::tf::DatedDatum::volume_t volume_t;
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   std::string m_sUnderlying;
   
@@ -87,24 +96,18 @@ private:
   ou::tf::BarFactory m_bfTrades;
 
   enum enumTradingState {
-    TSInitializing, TSWaitForFirstTrade, TSWaitForEntry, TSMonitorLong, TSMonitorShort, TSNoMore
+    TSInitializing, TSWaitForFirstTrade, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
   };
 
   enumTradingState m_stateTrading;
   
-  struct OptionsAtStrike {
-    std::string sCall;
-    std::string sPut;
-    OptionsAtStrike() {}
-    OptionsAtStrike( OptionsAtStrike&& rhs ) { sCall = std::move( rhs.sCall ), sPut = std::move( rhs.sPut ); }
-  };
-  typedef std::map<double, OptionsAtStrike> mapChain_t;
-  typedef std::map<boost::gregorian::date, mapChain_t> mapChains_t;
+  typedef std::map<boost::gregorian::date, ou::tf::option::IvAtm> mapChains_t;
   
   mapChains_t m_mapChains;
   
-  fConstructPositionUnderlying_t m_fConstructPositionUnderlying;
-  fConstructPositionOption_t m_fConstructPositionOption;
+  fConstructWatch_t m_fConstructWatch;
+  fConstructOption_t m_fConstructOption;
+  fConstructPosition_t m_fConstructPosition;
   
   volume_t m_nUnderlyingSharesToTrade;
   volume_t m_nOptionContractsToTrade;

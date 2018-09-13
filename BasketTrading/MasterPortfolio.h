@@ -44,8 +44,7 @@ public:
   typedef std::function<const trd_t&(const std::string& sIQFeedSymbolName)> fGetTableRowDef_t;
   typedef ManageStrategy::fOptionDefinition_t fOptionDefinition_t;
   typedef ManageStrategy::fGatherOptionDefinitions_t fGatherOptionDefinitions_t;
-  typedef ManageStrategy::fConstructPositionUnderlying_t fConstructPositionUnderlying_t;
-  typedef ManageStrategy::fConstructPositionOption_t fConstructPositionOption_t;
+  typedef ManageStrategy::fConstructPosition_t fConstructPositionUnderlying_t;
 
   MasterPortfolio( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2, fGatherOptionDefinitions_t, fGetTableRowDef_t, pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);

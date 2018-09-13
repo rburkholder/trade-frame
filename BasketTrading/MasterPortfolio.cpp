@@ -93,8 +93,9 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
         sName, bar, pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
-    // ManageStrategy::fConstructPositionUnderlying_t
-        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, const std::string& sIQFeedEquityName, ManageStrategy::fPosition_t fPosition)->ManageStrategy::pPosition_t{
+    // ManageStrategy::fConstructWatch_t
+        [this](const std::string& sIQFeedEquityName, ManageStrategy::fConstructedWatch_t fWatch){
+          
               const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
               
               bool bNeedContract( false );
@@ -103,6 +104,7 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
               
               if ( im.Exists( sIQFeedEquityName, pEquityInstrument ) ) {
                 // pEquityInstrument has been populated
+                assert( 0 != pEquityInstrument->GetContract() );
               }
               else {
                 pEquityInstrument = ou::tf::iqfeed::BuildInstrument( sIQFeedEquityName, trd );  // builds equity option, may not build futures option
@@ -112,31 +114,32 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
               pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
 
               // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
-              pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
-                idPortfolio, pEquityInstrument->GetInstrumentName(), "Basket", 
-                "ib01", "iq01", m_pExec, pWatch );
-              
               if ( bNeedContract ) {
-                if ( nullptr != m_pIB.get() ) {
+                if ( nullptr == m_pIB.get() ) {
+                  throw std::runtime_error( "MasterPortfolio::AddSymbol fConstructWatch_t: IB provider unavailable for contract");
+                }
+                else {
                     m_pIB->RequestContractDetails( 
                       sIQFeedEquityName, pEquityInstrument,
-                      [this,fPosition,pPosition](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+                      [this,pWatch,fWatch](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
                         // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
                         //   as a fully defined, registered instrument
                         assert( 0 != pInstrument->GetContract() );
                         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() ); 
                         im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                        fPosition( pPosition );
+                        fWatch( pWatch );
                       }, 
                       nullptr  // request complete doesn't need a function
                       );
                 }
               }
-  
-              return pPosition;
-          },
-    // ManageStrategy::fConstructPositionOption_t
-        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, const pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName, ManageStrategy::fPosition_t fPosition )->ManageStrategy::pPosition_t{
+              else {
+                fWatch( pWatch );
+              }
+        },
+    // ManageStrategy::fConstructOption_t
+        [this](const std::string& sIQFeedOptionName, const pInstrument_t pUnderlyingInstrument, ManageStrategy::fConstructedOption_t fOption){
+          
               const trd_t& trd( m_fGetTableRowDef( sIQFeedOptionName ) ); // TODO: check for errors
               
               std::string sGenericOptionName 
@@ -148,6 +151,7 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
               
               if ( im.Exists( sGenericOptionName, pOptionInstrument ) ) {
                 // pOptionInstrument has been populated
+                assert( 0 != pOptionInstrument->GetContract() );
               }
               else {
                 pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd );  // builds equity option, may not build futures option
@@ -156,30 +160,39 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
               
               pOption_t pOption = m_pOptionEngine->m_fBuildOption( pOptionInstrument );
               
-              // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
-              pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
-                  idPortfolio, pOptionInstrument->GetInstrumentName(), "Basket", 
-                  "ib01", "iq01", m_pExec, pOption );
-              
               if ( bNeedContract ) {
-                if ( nullptr != m_pIB.get() ) {
+                if ( nullptr == m_pIB.get() ) {
+                  throw std::runtime_error( "MasterPortfolio::AddSymbol fConstructOption_t: IB provider unavailable for contract");
+                }
+                else {
                     m_pIB->RequestContractDetails( 
                       pUnderlyingInstrument->GetInstrumentName(), pOptionInstrument,
-                      [this,fPosition,pPosition](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+                      [this,pOption,fOption](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
                         // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
                         //   as a fully defined, registered instrument
                         assert( 0 != pInstrument->GetContract() );
                         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() ); 
                         im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                        fPosition( pPosition );
+                        fOption( pOption );
                       }, 
                       nullptr  // request complete doesn't need a function
                       );
                 }
               }
+              else {
+                fOption( pOption );
+              }
+        },
+    // ManageStrategy::fConstructPosition_t
+        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, pWatch_t pWatch)->ManageStrategy::pPosition_t{
+          
+              // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
+              pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
+                idPortfolio, pWatch->GetInstrument()->GetInstrumentName(), "Basket", "ib01", "iq01", m_pExec, pWatch );
               
               return pPosition;
-            }
+          }
+
         )
       );
         

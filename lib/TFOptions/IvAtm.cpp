@@ -24,13 +24,13 @@
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
-#include "AtmIv.h"
+#include "IvAtm.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-AtmIv::AtmIv( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fStartCalc_t fStartCalc, fStopCalc_t fStopCalc ) 
+IvAtm::IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fStartCalc_t fStartCalc, fStopCalc_t fStopCalc ) 
 :
   m_pWatchUnderlying( pWatchUnderlying ),
   m_fConstructOption( std::move( fConstructOption ) ),
@@ -44,20 +44,128 @@ AtmIv::AtmIv( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fS
   assert( nullptr != m_fStopCalc );
 }
 
-AtmIv::~AtmIv( ) { }
+IvAtm::IvAtm( IvAtm&& rhs  )
+  : m_pWatchUnderlying( rhs.m_pWatchUnderlying ),
+    m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
+    m_fStartCalc( std::move( rhs.m_fStartCalc ) ),
+    m_fStopCalc( std::move( rhs.m_fStopCalc ) ) 
+{}
 
+IvAtm::~IvAtm( ) { }
+
+double IvAtm::Put_Itm( double value ) {
+  mapChain_t::iterator iter = std::upper_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](double value, mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Put_Itm not found" );
+  return iter->first;
+}
+
+double IvAtm::Put_ItmAtm( double value ) {
+  mapChain_t::iterator iter = std::lower_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](const mapChain_t::value_type& vt, double value)->bool{ return value < vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Put_ItmAtm not found" );
+  return iter->first;
+}
+
+double IvAtm::Put_Atm( double value ) {
+  mapChain_t::iterator iter = FindStrike( value );
+  return iter->first;
+}
+
+double IvAtm::Put_OtmAtm( double value ) {
+  mapChain_t::iterator iter = std::lower_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](const mapChain_t::value_type& vt, double value)->bool{ return value > vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Put_OtmAtm not found" );
+  return iter->first;
+}
+
+double IvAtm::Put_Otm( double value ) {
+  mapChain_t::iterator iter = std::upper_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](double value, const mapChain_t::value_type& vt)->bool{ return value > vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Put_Otm not found" );
+  return iter->first;
+}
+  
+double IvAtm::Call_Itm( double value ) {
+  mapChain_t::iterator iter = std::upper_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](double value, const mapChain_t::value_type& vt)->bool{ return value > vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_Itm not found" );
+  return iter->first;
+}
+
+double IvAtm::Call_ItmAtm( double value ) {
+  mapChain_t::iterator iter = std::lower_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](const mapChain_t::value_type& vt, double value)->bool{ return value > vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_ItmAtm not found" );
+  return iter->first;
+}
+
+double IvAtm::Call_Atm( double value ) {
+  mapChain_t::iterator iter = FindStrike( value );
+  return iter->first;
+}
+
+double IvAtm::Call_OtmAtm( double value ) {
+  mapChain_t::iterator iter = std::lower_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](const mapChain_t::value_type& vt, double value)->bool{ return value < vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_OtmAtm not found" );
+  return iter->first;
+}
+
+double IvAtm::Call_Otm( double value ) {
+  mapChain_t::iterator iter = std::upper_bound( 
+    m_mapChain.begin(), m_mapChain.end(), value, 
+    [](double value, const mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
+  if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_Otm not found" );
+  return iter->first;
+}
  
-AtmIv::mapChain_t::const_iterator AtmIv::FindStrike( const double strike ) const {
+void IvAtm::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
+  mapChain_t::iterator iter = FindStrike( dblStrike );
+  iter->second.sCall = sIQFeedSymbolName;
+}
+
+void IvAtm::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
+  mapChain_t::iterator iter = FindStrike( dblStrike );
+  iter->second.sPut = sIQFeedSymbolName;
+}
+
+const std::string IvAtm::GetIQFeedNameCall( double dblStrike ) {
+  mapChain_t::iterator iter = FindStrike( dblStrike );
+  return iter->second.sCall;
+}
+
+const std::string IvAtm::GetIQFeedNamePut( double dblStrike ) {
+  mapChain_t::iterator iter = FindStrike( dblStrike );
+  return iter->second.sPut;
+}
+  
+IvAtm::mapChain_t::const_iterator IvAtm::FindStrike( const double strike ) const {
   mapChain_t::const_iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
-    throw std::runtime_error( "AtmIv::FindStrike: can't find strike" );
+    throw std::runtime_error( "IvAtm::FindStrike: can't find strike" );
+  }
+  return iter;
+}
+
+IvAtm::mapChain_t::iterator IvAtm::FindStrike( const double strike ) {
+  mapChain_t::iterator iter = m_mapChain.find( strike );
+  if ( m_mapChain.end() == iter ) {
+    throw std::runtime_error( "IvAtm::FindStrike: can't find strike" );
   }
   return iter;
 }
 
 // lower_bound: key value eq or gt than query
 // upper_bound: key value gt than query
-AtmIv::tupleAdjacentStrikes_t AtmIv::FindAdjacentStrikes() const {
+IvAtm::tupleAdjacentStrikes_t IvAtm::FindAdjacentStrikes() const {
   
   tupleAdjacentStrikes_t strikes;
   auto& dblStrikeUpper( std::get<StrikeUpper>( strikes ) );
@@ -70,7 +178,7 @@ AtmIv::tupleAdjacentStrikes_t AtmIv::FindAdjacentStrikes() const {
 
   mapChain_t::const_iterator iter = m_mapChain.lower_bound( dblUnderlying ); 
   if ( m_mapChain.end() == iter ) {
-    throw std::runtime_error( "AtmIv::FindAdjacentStrikes: no upper strike available" );
+    throw std::runtime_error( "IvAtm::FindAdjacentStrikes: no upper strike available" );
   }
   dblStrikeUpper = iter->first;
   if ( dblUnderlying == dblStrikeUpper ) {
@@ -78,7 +186,7 @@ AtmIv::tupleAdjacentStrikes_t AtmIv::FindAdjacentStrikes() const {
   }
   else {
     if ( m_mapChain.begin() == iter ) {
-      throw std::runtime_error( "AtmIv::FindAdjacentStrikes: already at lower lower end of strikes" );
+      throw std::runtime_error( "IvAtm::FindAdjacentStrikes: already at lower lower end of strikes" );
     }
     --iter;
     dblStrikeLower = iter->first;
@@ -88,7 +196,7 @@ AtmIv::tupleAdjacentStrikes_t AtmIv::FindAdjacentStrikes() const {
 }
 
 // called by UpdateATMWatch
-void AtmIv::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consistent with caller
+void IvAtm::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consistent with caller
   // uses a 25% edge hysterisis level to force recalc of three containing options 
   //   ie when underlying is within 25% of upper strike or within 25% of lower strike
   // uses a 50% hysterisis level to select new set of three containing options
@@ -102,13 +210,13 @@ void AtmIv::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consist
   iterUpper = m_mapChain.lower_bound( dblUnderlying ); 
   
   if ( m_mapChain.end() == iterUpper ) {
-    std::cout << sUnderlying << ": AtmIv::RecalcATMWatch - no upper strike available" << std::endl; // stay in no watch state
+    std::cout << sUnderlying << ": IvAtm::RecalcATMWatch - no upper strike available" << std::endl; // stay in no watch state
     m_stateOptionWatch = EOWSNoWatch;
   }
   else {
     iterLower = iterUpper;
     if ( m_mapChain.begin() == iterLower ) {
-      std::cout << sUnderlying << ": AtmIv::RecalcATMWatch - no lower strike available" << std::endl;  // stay in no watch state
+      std::cout << sUnderlying << ": IvAtm::RecalcATMWatch - no lower strike available" << std::endl;  // stay in no watch state
       m_stateOptionWatch = EOWSNoWatch;
     }
     else {
@@ -118,7 +226,7 @@ void AtmIv::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consist
         m_iterUpper = iterUpper;
         ++m_iterUpper;
         if ( m_mapChain.end() == m_iterUpper ) {
-          std::cout << sUnderlying << ": AtmIv::RecalcATMWatch - no upper upper strike available" << std::endl;  // stay in no watch state
+          std::cout << sUnderlying << ": IvAtm::RecalcATMWatch - no upper upper strike available" << std::endl;  // stay in no watch state
           m_stateOptionWatch = EOWSNoWatch;
         }
         else {
@@ -130,7 +238,7 @@ void AtmIv::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consist
       else { // third strike is below
         m_iterLower = iterLower;
         if ( m_mapChain.begin() == m_iterLower ) {
-          std::cout << sUnderlying << ": AtmIv::RecalcATMWatch - no lower lower strike available" << std::endl;  // stay in no watch state
+          std::cout << sUnderlying << ": IvAtm::RecalcATMWatch - no lower lower strike available" << std::endl;  // stay in no watch state
           m_stateOptionWatch = EOWSNoWatch;
         }
         else {
@@ -151,7 +259,7 @@ void AtmIv::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consist
 
 // 2018/09/12 care is needed with UpdateATMWatch/CalcAtmIv combo, as no values may be available on that transition
 //   more complicated:  make transition when data is available
-void AtmIv::UpdateATMWatch( double dblUnderlying ) {
+void IvAtm::UpdateATMWatch( double dblUnderlying ) {
   
   EOptionWatchState stateBefore( m_stateOptionWatch );
   EOptionWatchState stateAfter;
@@ -194,7 +302,7 @@ void AtmIv::UpdateATMWatch( double dblUnderlying ) {
   }
 }
 
-void AtmIv::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
+void IvAtm::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
   
   double dblIvCall = 0.0;
   double dblIvPut = 0.0;
@@ -263,7 +371,7 @@ void AtmIv::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
 //}
 
 
-void AtmIv::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
+void IvAtm::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
 
   std::string sPathName;
 
@@ -316,7 +424,7 @@ void AtmIv::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix864
   
 }
 
-void AtmIv::SaveSeries( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
+void IvAtm::SaveSeries( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
   
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [&sPrefix](mapChain_t::value_type& vt){
     vt.second.SaveSeries( sPrefix );

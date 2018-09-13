@@ -34,7 +34,7 @@ namespace option { // options
   
 // will deprecate the code in Bundle
 
-class AtmIv {
+class IvAtm {
 public:
   
   typedef Option::pWatch_t pWatch_t;
@@ -46,8 +46,9 @@ public:
   typedef std::function<void(pOption_t,pWatch_t)> fStartCalc_t;
   typedef std::function<void(pOption_t,pWatch_t)> fStopCalc_t;
   
-  AtmIv( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
-  virtual ~AtmIv( );
+  IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
+  IvAtm( IvAtm&& rhs );
+  virtual ~IvAtm( );
   
   typedef std::function<void(const PriceIV&)> fOnPriceIV_t;
   
@@ -56,7 +57,23 @@ public:
   void EmitValues( void );
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
 
-  //ou::Delegate<const ou::tf::PriceIV&> OnIvAtmCalc;
+  void SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName );
+  void SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName );
+  
+  const std::string GetIQFeedNameCall( double dblStrike );
+  const std::string GetIQFeedNamePut( double dblStrike );
+  
+  double Put_Itm( double );
+  double Put_ItmAtm( double );
+  double Put_Atm( double );
+  double Put_OtmAtm( double );
+  double Put_Otm( double );
+  
+  double Call_Itm( double );
+  double Call_ItmAtm( double );
+  double Call_Atm( double );
+  double Call_OtmAtm( double );
+  double Call_Otm( double );
   
 protected:
 private:
@@ -125,6 +142,7 @@ private:
   double CurrentUnderlying() const { return m_pWatchUnderlying->LastQuote().Midpoint(); }
   
   mapChain_t::const_iterator FindStrike( const double strike ) const;
+  mapChain_t::iterator FindStrike( const double strike );
   tupleAdjacentStrikes_t FindAdjacentStrikes() const;
   void RecalcATMWatch( double dblUnderlying );
   void UpdateATMWatch( double dblUnderlying );
