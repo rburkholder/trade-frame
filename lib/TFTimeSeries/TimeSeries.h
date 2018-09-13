@@ -537,6 +537,20 @@ private:
 
 // PriceIVs
 
+class PriceIVs: public TimeSeries<PriceIV> {
+public:
+  typedef PriceIV datum_t;
+  PriceIVs( void ) {};
+  PriceIVs( size_type size ): TimeSeries<datum_t>( size ) {};
+  ~PriceIVs( void ) {};
+  PriceIVs* Subset( ptime time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVs* Subset( ptime time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
+protected:
+private:
+};
+
+// PriceIVExpirys
+
 class PriceIVExpirys: public TimeSeries<PriceIVExpiry> {
 public:
   typedef PriceIVExpiry datum_t;

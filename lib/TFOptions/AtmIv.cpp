@@ -18,6 +18,12 @@
  * Created on September 10, 2018, 10:43 PM
  */
 
+#include <algorithm>
+
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
 #include "AtmIv.h"
 
 namespace ou { // One Unified
@@ -188,16 +194,14 @@ void AtmIv::UpdateATMWatch( double dblUnderlying ) {
   }
 }
 
-AtmIv::tupleAtmIV_t AtmIv::CalcAtmIv( ptime dtNow ) {
+void AtmIv::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
   
-  tupleAtmIV_t iv;
-  auto& dblIvCall( std::get<ixIVCall>( iv ) );
-  auto& dblIvPut( std::get<ixIVPut>( iv ) );
-  
-  dblIvCall = 0.0;
-  dblIvPut = 0.0;
+  double dblIvCall = 0.0;
+  double dblIvPut = 0.0;
   
   double dblUnderlying = CurrentUnderlying();
+  
+  UpdateATMWatch( dblUnderlying );
 
   switch ( m_stateOptionWatch ) {
     case EOWSWatching:
@@ -231,17 +235,19 @@ AtmIv::tupleAtmIV_t AtmIv::CalcAtmIv( ptime dtNow ) {
           dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
         }
       }
-      //PriceIV atmIV( dtNow, dblUnderlying, dtExpiry, dblIvCall, dblIvPut);
-      //m_tsAtmIv.Append( atmIV );
+      PriceIV ivATM( dtNow, dblUnderlying, dblIvCall, dblIvPut);
+      m_tsIvAtm.Append( ivATM );
       //m_bfIVUnderlyingCall.Add( now, dblIvCall, 0 );
       //m_bfIVUnderlyingPut.Add( now, dblIvPut, 0 );
-      //OnAtmIvCalc( atmIV );
+      //OnIvAtmCalc( ivATM );
+      
+      if ( nullptr != fOnPriceIV ) fOnPriceIV( ivATM );
 
       //  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
       break;
   }
 
-return iv;
+//return iv;
   
 }
 
@@ -256,71 +262,68 @@ return iv;
 //  }
 //}
 
-/*
-void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
+
+void AtmIv::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
 
   std::string sPathName;
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
-  if ( 0 != m_tsAtmIv.Size() ) {
+  if ( 0 != m_tsIvAtm.Size() ) {
 
     std::stringstream ss;
     //ss.str( "" );
     // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/date_time_io.html
     //boost::posix_time::time_facet* pFacet( new boost::posix_time::time_facet( "%Y-%m-%d" ) );
-    boost::gregorian::date_facet* pFacet( new boost::gregorian::date_facet( "%Y-%m-%d" ) );
-    ss.imbue( std::locale( ss.getloc(), pFacet ) );
-    ss << m_dtExpiry.date();
+    //boost::gregorian::date_facet* pFacet( new boost::gregorian::date_facet( "%Y-%m-%d" ) );
+    //ss.imbue( std::locale( ss.getloc(), pFacet ) );
+    //ss << m_dtExpiry.date();
   
-    sPathName = sPrefix60sec + "/atmiv/" + ss.str();
+    sPathName = sPrefix + "/atmiv/";
     HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
-    wtsAtmIv.Write( sPathName, &m_tsAtmIv );
+    wtsAtmIv.Write( sPathName, &m_tsIvAtm );
     HDF5Attributes attrAtmIv( dm, sPathName );
     attrAtmIv.SetSignature( ou::tf::PriceIV::Signature() );
 
-    {
-      sPathName = sPrefix86400sec + "/" + ss.str() + "/call";
-      ou::tf::Bars bars( 1 );
-      bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
-      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
-      wtsBar.Write( sPathName, &bars );
-      HDF5Attributes attrBar( dm, sPathName );
-      try {
-        attrBar.SetSignature( ou::tf::Bar::Signature() );
-      }
-        catch (...) {  // may already exist
-      }
-    }
+//    {
+//      sPathName = sPrefix86400sec + "/" + ss.str() + "/call";
+//      ou::tf::Bars bars( 1 );
+//      bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
+//      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+//      wtsBar.Write( sPathName, &bars );
+//      HDF5Attributes attrBar( dm, sPathName );
+//      try {
+//        attrBar.SetSignature( ou::tf::Bar::Signature() );
+//      }
+//        catch (...) {  // may already exist
+//      }
+//    }
   
-    {
-      sPathName = sPrefix86400sec + "/" + ss.str() + "/put";
-      ou::tf::Bars bars( 1 );
-      bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
-      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
-      wtsBar.Write( sPathName, &bars );
-      HDF5Attributes attrBar( dm, sPathName );
-      try {
-        attrBar.SetSignature( ou::tf::Bar::Signature() );
-      }
-      catch (...) {  // may already exist
-      }
-    }
+//    {
+//      sPathName = sPrefix86400sec + "/" + ss.str() + "/put";
+//      ou::tf::Bars bars( 1 );
+//      bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
+//      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+//      wtsBar.Write( sPathName, &bars );
+//      HDF5Attributes attrBar( dm, sPathName );
+//      try {
+//        attrBar.SetSignature( ou::tf::Bar::Signature() );
+//      }
+//      catch (...) {  // may already exist
+//      }
+//    }
   }
   
 }
 
-void ExpiryBundle::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
-//  if ( 0 != m_pwatchUnderlying.get() ) {
-//    m_pwatchUnderlying->SaveSeries( sPrefix60sec );
-//  }
-  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-    iter->second.SaveSeries( sPrefix60sec );
-  }
-  SaveAtmIv( sPrefix60sec, sPrefix86400sec );
+void AtmIv::SaveSeries( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
+  
+  std::for_each( m_mapChain.begin(), m_mapChain.end(), [&sPrefix](mapChain_t::value_type& vt){
+    vt.second.SaveSeries( sPrefix );
+  } );
+  
+  SaveIvAtm( sPrefix, sPrefix86400sec );
 }
-*/
-
 
 } // namespace option
 } // namespace tf

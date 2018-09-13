@@ -307,8 +307,32 @@ private:
 // PriceIV
 // pg 458 Option Pricing Formulas suggests this structure can be used with 12.2.4 Implied Forward Volatility
 //
+class PriceIV: public Price {
+public:
+  PriceIV( void );
+  PriceIV( const ptime& dt );
+  PriceIV( const PriceIV& rhs );
+  PriceIV( const ptime& dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut );
+  ~PriceIV( void ) {};
 
-// factor out dtExpiry in next stage
+  double IVCall( void ) const { return m_dblIVCall; };
+  double IVPut( void ) const { return m_dblIVPut; };
+
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return Price::Signature() * 1000 + 412; };
+
+protected:
+private:
+  double m_dblIVCall;
+  double m_dblIVPut;
+};
+
+
+//
+// PriceIVExpiry
+// TODO: PriceIVExpiry inherits from PriceIV?
+//
+
 class PriceIVExpiry: public Price {
 public:
   PriceIVExpiry( void );

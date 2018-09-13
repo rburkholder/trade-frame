@@ -40,12 +40,24 @@ public:
   typedef Option::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
   
+  typedef ou::tf::PriceIV PriceIV;
+  
   typedef std::function<pOption_t(const std::string&)> fConstructOption_t; // construct pOption_t from IQFeed Symbol name, with or without IB contract
   typedef std::function<void(pOption_t,pWatch_t)> fStartCalc_t;
   typedef std::function<void(pOption_t,pWatch_t)> fStopCalc_t;
   
   AtmIv( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   virtual ~AtmIv( );
+  
+  typedef std::function<void(const PriceIV&)> fOnPriceIV_t;
+  
+  void CalcIvAtm( ptime dtNow, fOnPriceIV_t& );
+  
+  void EmitValues( void );
+  void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
+
+  //ou::Delegate<const ou::tf::PriceIV&> OnIvAtmCalc;
+  
 protected:
 private:
 
@@ -78,6 +90,10 @@ private:
       fStop( pPut, pUnderlying );
       bStarted = false;
     }
+    void SaveSeries( const std::string& sPrefix ) {
+      if ( nullptr != pCall.get() ) pCall->SaveSeries( sPrefix );
+      if ( nullptr != pPut.get() ) pPut->SaveSeries( sPrefix );
+    }
   };
   
   typedef std::map<double, OptionsAtStrike> mapChain_t;
@@ -104,9 +120,7 @@ private:
   static const size_t StrikeLower = 0;
   typedef std::tuple<double,double> tupleAdjacentStrikes_t;
   
-  static const size_t ixIVCall = 0;
-  static const size_t ixIVPut = 0;
-  typedef std::tuple<double,double> tupleAtmIV_t;
+  ou::tf::PriceIVs m_tsIvAtm;
   
   double CurrentUnderlying() const { return m_pWatchUnderlying->LastQuote().Midpoint(); }
   
@@ -114,8 +128,8 @@ private:
   tupleAdjacentStrikes_t FindAdjacentStrikes() const;
   void RecalcATMWatch( double dblUnderlying );
   void UpdateATMWatch( double dblUnderlying );
-  tupleAtmIV_t CalcAtmIv( ptime dtNow );
-  void EmitValues( void );
+  
+  void SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix86400sec );
 
 };
 
