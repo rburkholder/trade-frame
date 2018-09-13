@@ -4,12 +4,12 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>AtmIv.h</itemPath>
       <itemPath>Binomial.h</itemPath>
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
       <itemPath>Engine.h</itemPath>
       <itemPath>Formula.h</itemPath>
+      <itemPath>IvAtm.h</itemPath>
       <itemPath>Margin.h</itemPath>
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
@@ -22,12 +22,12 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>AtmIv.cpp</itemPath>
       <itemPath>Binomial.cpp</itemPath>
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
       <itemPath>Engine.cpp</itemPath>
       <itemPath>Formula.cpp</itemPath>
+      <itemPath>IvAtm.cpp</itemPath>
       <itemPath>Margin.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
@@ -79,10 +79,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="AtmIv.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="AtmIv.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
@@ -102,6 +98,10 @@
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Formula.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IvAtm.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IvAtm.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -147,10 +147,6 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="AtmIv.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="AtmIv.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
@@ -170,6 +166,10 @@
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Formula.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IvAtm.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IvAtm.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>

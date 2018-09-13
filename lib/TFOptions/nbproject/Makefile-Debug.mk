@@ -35,12 +35,12 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/AtmIv.o \
 	${OBJECTDIR}/Binomial.o \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
 	${OBJECTDIR}/Engine.o \
 	${OBJECTDIR}/Formula.o \
+	${OBJECTDIR}/IvAtm.o \
 	${OBJECTDIR}/Margin.o \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
@@ -73,11 +73,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a
 
-${OBJECTDIR}/AtmIv.o: AtmIv.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AtmIv.o AtmIv.cpp
-
 ${OBJECTDIR}/Binomial.o: Binomial.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -102,6 +97,11 @@ ${OBJECTDIR}/Formula.o: Formula.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Formula.o Formula.cpp
+
+${OBJECTDIR}/IvAtm.o: IvAtm.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IvAtm.o IvAtm.cpp
 
 ${OBJECTDIR}/Margin.o: Margin.cpp
 	${MKDIR} -p ${OBJECTDIR}
