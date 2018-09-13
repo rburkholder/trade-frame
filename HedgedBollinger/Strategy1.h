@@ -173,7 +173,7 @@ private:
   void HandleCommon( const ou::tf::Trade& trade );
   void HandleRHTrading( const ou::tf::Trade& trade ) {};
 
-  void HandleCalcIv( const ou::tf::PriceIV& );
+  void HandleCalcIv( const ou::tf::PriceIVExpiry& );
 
   void HandleOrderFilled( const ou::tf::Order& order );
 

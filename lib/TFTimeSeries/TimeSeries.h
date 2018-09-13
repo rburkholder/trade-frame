@@ -537,14 +537,14 @@ private:
 
 // PriceIVs
 
-class PriceIVs: public TimeSeries<PriceIV> {
+class PriceIVExpirys: public TimeSeries<PriceIVExpiry> {
 public:
-  typedef PriceIV datum_t;
-  PriceIVs( void ) {};
-  PriceIVs( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~PriceIVs( void ) {};
-  PriceIVs* Subset( ptime time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
-  PriceIVs* Subset( ptime time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
+  typedef PriceIVExpiry datum_t;
+  PriceIVExpirys( void ) {};
+  PriceIVExpirys( size_type size ): TimeSeries<datum_t>( size ) {};
+  ~PriceIVExpirys( void ) {};
+  PriceIVExpirys* Subset( ptime time ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVExpirys* Subset( ptime time, unsigned int n ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };

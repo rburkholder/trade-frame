@@ -60,10 +60,10 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
     ss << m_dtExpiry.date();
   
     sPathName = sPrefix60sec + "/atmiv/" + ss.str();
-    HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
+    HDF5WriteTimeSeries<ou::tf::PriceIVExpirys> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsAtmIv );
     HDF5Attributes attrAtmIv( dm, sPathName );
-    attrAtmIv.SetSignature( ou::tf::PriceIV::Signature() );
+    attrAtmIv.SetSignature( ou::tf::PriceIVExpiry::Signature() );
 
     {
       sPathName = sPrefix86400sec + "/" + ss.str() + "/call";
@@ -414,7 +414,7 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
       dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
     }
   }
-  PriceIV atmIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut);
+  PriceIVExpiry atmIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut);
   m_tsAtmIv.Append( atmIV );
   m_bfIVUnderlyingCall.Add( now, dblIvCall, 0 );
   m_bfIVUnderlyingPut.Add( now, dblIvPut, 0 );

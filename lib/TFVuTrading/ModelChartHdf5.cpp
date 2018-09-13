@@ -115,12 +115,12 @@ void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
   pChartDataView->Add( 1, &m_cePutIV );
 }
 
-void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVs& ivs ) {
+void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs ) {
   DefineChartPriceIVs( pChartDataView );
   m_ceTrade.Clear();
   m_ceCallIV.Clear();
   m_cePutIV.Clear();
-  for ( ou::tf::PriceIVs::const_iterator iter = ivs.begin(); ivs.end() != iter; ++iter ) {
+  for ( ou::tf::PriceIVExpirys::const_iterator iter = ivs.begin(); ivs.end() != iter; ++iter ) {
     m_ceTrade.Append( iter->DateTime(), iter->Value() );
     m_ceCallIV.Append( iter->DateTime(), iter->IVCall() );
     m_cePutIV.Append( iter->DateTime(), iter->IVPut() );

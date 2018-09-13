@@ -51,8 +51,8 @@ public:
   ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOn;
   ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOff;
 
-  typedef FastDelegate1<const ou::tf::PriceIV&> OnAtmIvCalc_t;
-  ou::Delegate<const ou::tf::PriceIV&> OnAtmIvCalc;
+  typedef FastDelegate1<const ou::tf::PriceIVExpiry&> OnAtmIvCalc_t;
+  ou::Delegate<const ou::tf::PriceIVExpiry&> OnAtmIvCalc;
 
 //  void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
@@ -97,7 +97,7 @@ private:
   double m_dblUpperTrigger;
   double m_dblLowerTrigger;
 
-  ou::tf::PriceIVs m_tsAtmIv;
+  ou::tf::PriceIVExpirys m_tsAtmIv;
   ou::tf::BarFactory m_bfIVUnderlyingCall;
   ou::tf::BarFactory m_bfIVUnderlyingPut;
 

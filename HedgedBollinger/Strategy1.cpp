@@ -608,7 +608,7 @@ void Strategy::HandleCommon( const ou::tf::Quote& quote ) {
 void Strategy::HandleCommon( const ou::tf::Trade& trade ) {
 }
 
-void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
+void Strategy::HandleCalcIv( const ou::tf::PriceIVExpiry& iv ) {
   mapAtmIv_t::iterator iter = m_mapAtmIv.find( iv.Expiry() );
   if ( m_mapAtmIv.end() == iter ) {
     BundleAtmIv bai;

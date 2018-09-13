@@ -319,27 +319,27 @@ H5::CompType* Price::DefineDataType( H5::CompType* pComp ) {
 // PriceIV
 //
 
-PriceIV::PriceIV( void ): Price(), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
+PriceIVExpiry::PriceIVExpiry( void ): Price(), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
 
-PriceIV::PriceIV(const ptime& dt): Price(dt), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
+PriceIVExpiry::PriceIVExpiry(const ptime& dt): Price(dt), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
 }
 
-PriceIV::PriceIV( const PriceIV& rhs ) 
+PriceIVExpiry::PriceIVExpiry( const PriceIVExpiry& rhs ) 
   : Price( rhs.m_dt, rhs.Value() ), m_dtExpiry( rhs.m_dtExpiry ), m_dblIVCall( rhs.m_dblIVCall ), m_dblIVPut( rhs.m_dblIVPut )
 {
 }
 
-PriceIV::PriceIV( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut )
+PriceIVExpiry::PriceIVExpiry( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut )
   : Price( dtSampled, dblPrice ), m_dtExpiry( dtExpiry ), m_dblIVCall( dblIVCall ), m_dblIVPut( dblIVPut )
 {
 }
 
-H5::CompType* PriceIV::DefineDataType( H5::CompType* pComp ) {
-  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( PriceIV ) );
+H5::CompType* PriceIVExpiry::DefineDataType( H5::CompType* pComp ) {
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( PriceIVExpiry ) );
   Price::DefineDataType( pComp ); // include inherited structures
-  pComp->insertMember( "Expiry", HOFFSET( PriceIV, m_dtExpiry ),  H5::PredType::NATIVE_LLONG );
-  pComp->insertMember( "CallIV",   HOFFSET( PriceIV, m_dblIVCall ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "PutIV",    HOFFSET( PriceIV, m_dblIVPut ),  H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Expiry", HOFFSET( PriceIVExpiry, m_dtExpiry ),  H5::PredType::NATIVE_LLONG );
+  pComp->insertMember( "CallIV",   HOFFSET( PriceIVExpiry, m_dblIVCall ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "PutIV",    HOFFSET( PriceIVExpiry, m_dblIVPut ),  H5::PredType::NATIVE_DOUBLE );
   return pComp;
 }
 

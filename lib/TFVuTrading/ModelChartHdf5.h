@@ -114,7 +114,7 @@ private:
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVs& ivs );
+  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const Equities& equities );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const Options& options );

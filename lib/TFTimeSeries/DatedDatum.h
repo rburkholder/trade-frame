@@ -308,13 +308,14 @@ private:
 // pg 458 Option Pricing Formulas suggests this structure can be used with 12.2.4 Implied Forward Volatility
 //
 
-class PriceIV: public Price {
+// factor out dtExpiry in next stage
+class PriceIVExpiry: public Price {
 public:
-  PriceIV( void );
-  PriceIV( const ptime& dt );
-  PriceIV( const PriceIV& rhs );
-  PriceIV( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut );
-  ~PriceIV( void ) {};
+  PriceIVExpiry( void );
+  PriceIVExpiry( const ptime& dt );
+  PriceIVExpiry( const PriceIVExpiry& rhs );
+  PriceIVExpiry( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut );
+  ~PriceIVExpiry( void ) {};
 
   double IVCall( void ) const { return m_dblIVCall; };
   double IVPut( void ) const { return m_dblIVPut; };

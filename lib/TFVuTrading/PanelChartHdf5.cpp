@@ -270,7 +270,7 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
       break;
     case CustomItemData::AtmIV:
-      m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm, m_pChartDataView, "Price IV", sPath );
+      m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm, m_pChartDataView, "Price IV", sPath );
       break;
     case CustomItemData::Greeks:
       m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
