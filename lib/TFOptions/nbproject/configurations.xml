@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>AtmIv.h</itemPath>
       <itemPath>Binomial.h</itemPath>
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
@@ -21,6 +22,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>AtmIv.cpp</itemPath>
       <itemPath>Binomial.cpp</itemPath>
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
@@ -65,6 +67,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="AtmIv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="AtmIv.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
@@ -129,6 +135,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="AtmIv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="AtmIv.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
