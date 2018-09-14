@@ -37,32 +37,35 @@ namespace option { // options
 class IvAtm {
 public:
   
+  typedef Option::pInstrument_t pInstrument_t;
   typedef Option::pWatch_t pWatch_t;
   typedef Option::pOption_t pOption_t;
-  
+
   typedef ou::tf::PriceIV PriceIV;
-  
-  typedef std::function<pOption_t(const std::string&)> fConstructOption_t; // construct pOption_t from IQFeed Symbol name, with or without IB contract
+
+  typedef std::function<void(pOption_t)> fConstructedOption_t;
+  typedef std::function<void(const std::string&,pInstrument_t,fConstructedOption_t)> fConstructOption_t; // construct pOption_t from IQFeed Symbol name, with or without IB contract
+
   typedef std::function<void(pOption_t,pWatch_t)> fStartCalc_t;
   typedef std::function<void(pOption_t,pWatch_t)> fStopCalc_t;
-  
+
   IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   IvAtm( IvAtm&& rhs );
   virtual ~IvAtm( );
-  
+
   typedef std::function<void(const PriceIV&)> fOnPriceIV_t;
-  
+
   void CalcIvAtm( ptime dtNow, fOnPriceIV_t& );
-  
+
   void EmitValues( void );
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
 
   void SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName );
   void SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName );
-  
+
   const std::string GetIQFeedNameCall( double dblStrike );
   const std::string GetIQFeedNamePut( double dblStrike );
-  
+
   double Put_Itm( double );
   double Put_ItmAtm( double );
   double Put_Atm( double );
@@ -93,12 +96,26 @@ private:
       pPut( std::move( rhs.pPut ) ),
       bStarted( rhs.bStarted )
     { }
-    void Start( fStartCalc_t& fStart, pWatch_t pUnderlying, fConstructOption_t& fConstruct ) {
+    
+    void Start( fStartCalc_t& fStart, pWatch_t pWatchUnderlying, fConstructOption_t& fConstruct ) {
       assert( !bStarted );
-      if ( nullptr == pCall.get() ) pCall = fConstruct( sCall );
-      fStart( pCall, pUnderlying );
-      if ( nullptr == pPut.get() ) pPut = fConstruct( sPut );
-      fStart( pPut, pUnderlying );
+      
+      pInstrument_t pInstrumentUnderlying = pWatchUnderlying->GetInstrument();
+      
+      if ( nullptr == pCall.get() ) {
+        fConstruct( sCall, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){ 
+          pCall = pOption; 
+          fStart( pCall, pWatchUnderlying );
+        } );
+      }
+      
+      if ( nullptr == pPut.get() ) {
+        fConstruct( sPut, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){ 
+          pPut = pOption;
+         fStart( pPut, pWatchUnderlying );
+        } );
+      }
+      
       bStarted = true;
     }
     void Stop( fStopCalc_t& fStop, pWatch_t pUnderlying ) {

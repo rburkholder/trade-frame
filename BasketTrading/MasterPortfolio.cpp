@@ -88,6 +88,8 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
         idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case" 
     );
   
+  namespace ph = std::placeholders;
+  
   pManageStrategy_t pManageStrategy;
   pManageStrategy.reset( new ManageStrategy( 
         sName, bar, pPortfolioStrategy,
@@ -191,8 +193,11 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
                 idPortfolio, pWatch->GetInstrument()->GetInstrumentName(), "Basket", "ib01", "iq01", m_pExec, pWatch );
               
               return pPosition;
-          }
-
+          },
+    // ManageStrategy::fStartCalc_t
+          std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ),
+    // ManageStrategy::m_fStopCalc
+          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 )
         )
       );
         

@@ -58,13 +58,18 @@ public:
   
   typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )> fConstructPosition_t;
   
+  typedef ou::tf::option::IvAtm::fStartCalc_t fStartCalc_t;
+  typedef ou::tf::option::IvAtm::fStopCalc_t fStopCalc_t;
+  
   ManageStrategy( 
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
     pPortfolio_t,
     fGatherOptionDefinitions_t,
     fConstructWatch_t,
     fConstructOption_t,
-    fConstructPosition_t
+    fConstructPosition_t,
+    fStartCalc_t,
+    fStopCalc_t
     );
   virtual ~ManageStrategy( );
   
@@ -108,6 +113,9 @@ private:
   fConstructWatch_t m_fConstructWatch;
   fConstructOption_t m_fConstructOption;
   fConstructPosition_t m_fConstructPosition;
+  
+  fStartCalc_t m_fStartCalc;
+  fStopCalc_t m_fStopCalc;
   
   volume_t m_nUnderlyingSharesToTrade;
   volume_t m_nOptionContractsToTrade;

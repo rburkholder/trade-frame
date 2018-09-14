@@ -54,7 +54,9 @@ ManageStrategy::ManageStrategy(
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch,
   fConstructOption_t ConstructOption,
-  fConstructPosition_t fConstructPosition
+  fConstructPosition_t fConstructPosition,
+  fStartCalc_t fStartCalc,
+  fStopCalc_t fStopCalc
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
@@ -64,12 +66,16 @@ ManageStrategy::ManageStrategy(
   m_fConstructWatch( fConstructWatch ), 
   m_fConstructOption( ConstructOption ), 
   m_fConstructPosition( fConstructPosition ), 
-  m_stateTrading( TSInitializing )
+  m_stateTrading( TSInitializing ),
+  m_fStartCalc( fStartCalc ),
+  m_fStopCalc( fStopCalc )
 { 
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
+  assert( nullptr != m_fStartCalc );
+  assert( nullptr != m_fStopCalc );
   
   m_fConstructWatch( sUnderlying, [this](pWatch_t pWatch){ 
     m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
@@ -84,18 +90,16 @@ ManageStrategy::ManageStrategy(
     mapChains_t::iterator iterChains;
     
     {
+      typedef ou::tf::option::IvAtm::fConstructedOption_t fConstructedOption_t;
       ou::tf::option::IvAtm ivAtm(
               m_pPositionUnderlying->GetWatch(), 
             // IvAtm::fConstructOption_t
-              [](const std::string&)->pOption_t{ 
-                return nullptr; 
-              },
+              m_fConstructOption,
             // IvAtm::fStartCalc_t
-              [](pOption_t,pWatch_t){
-              },
+              m_fStartCalc,
             // IvAtm::fStopCalc_t
-              [](pOption_t,pWatch_t){
-              });
+              m_fStopCalc
+              );
 
       iterChains = m_mapChains.find( date );
       if ( m_mapChains.end() == iterChains ) {
@@ -227,7 +231,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                   m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
                   std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                   m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
-                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 2 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
+                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
                   m_stateTrading = TSMonitorLong;
                 } );
             }
