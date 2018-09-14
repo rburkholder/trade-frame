@@ -77,56 +77,80 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fStartCalc );
   assert( nullptr != m_fStopCalc );
   
-  m_fConstructWatch( sUnderlying, [this](pWatch_t pWatch){ 
-    m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
-    assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
-  } );
+  std::cout << m_sUnderlying << " loading up ... " << std::endl;
   
-  fGatherOptionDefinitions( sUnderlying, [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
-    
-    assert( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc );
-    boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
-    
-    mapChains_t::iterator iterChains;
-    
-    {
-      typedef ou::tf::option::IvAtm::fConstructedOption_t fConstructedOption_t;
-      ou::tf::option::IvAtm ivAtm(
-              m_pPositionUnderlying->GetWatch(), 
-            // IvAtm::fConstructOption_t
-              m_fConstructOption,
-            // IvAtm::fStartCalc_t
-              m_fStartCalc,
-            // IvAtm::fStopCalc_t
-              m_fStopCalc
-              );
+  try {
+    m_fConstructWatch( sUnderlying, 
+      [this,fGatherOptionDefinitions](pWatch_t pWatch){
+        
+        std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
+        
+        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
+        assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
 
-      iterChains = m_mapChains.find( date );
-      if ( m_mapChains.end() == iterChains ) {
-        iterChains = m_mapChains.insert(
-          m_mapChains.begin(),
-          mapChains_t::value_type( date, std::move( ivAtm ) )
-          );
-      }
-    }
+        fGatherOptionDefinitions( 
+          m_pPositionUnderlying->GetInstrument()->GetInstrumentName(), 
+          [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
 
-    {
-      ou::tf::option::IvAtm& ivAtm( iterChains->second );
+            if ( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc ) {
+              boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
 
-      switch ( row.eOptionSide ) {
-        case ou::tf::OptionSide::Call:
-          ivAtm.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
-          break;
-        case ou::tf::OptionSide::Put:
-          ivAtm.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
-          break;
-      }
-    }    
-  });
-  
-  assert( 0 != m_mapChains.size() );
+              mapChains_t::iterator iterChains;
+
+              {
+                typedef ou::tf::option::IvAtm::fConstructedOption_t fConstructedOption_t;
+                ou::tf::option::IvAtm ivAtm(
+                        m_pPositionUnderlying->GetWatch(), 
+                      // IvAtm::fConstructOption_t
+                        m_fConstructOption,
+                      // IvAtm::fStartCalc_t
+                        m_fStartCalc,
+                      // IvAtm::fStopCalc_t
+                        m_fStopCalc
+                        );
+
+                iterChains = m_mapChains.find( date );
+                if ( m_mapChains.end() == iterChains ) {
+                  iterChains = m_mapChains.insert(
+                    m_mapChains.begin(),
+                    mapChains_t::value_type( date, std::move( ivAtm ) )
+                    );
+                }
+              }
+
+              {
+                ou::tf::option::IvAtm& ivAtm( iterChains->second );
+
+                try {
+                  switch ( row.eOptionSide ) {
+                    case ou::tf::OptionSide::Call:
+                      ivAtm.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
+                      break;
+                    case ou::tf::OptionSide::Put:
+                      ivAtm.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
+                      break;
+                  }
+                }
+                catch ( std::runtime_error& e ) {
+                  std::cout << "fGatherOptionDefinitions error" << std::endl;
+                }
+              }    
+            }
+        });
+
+        assert( 0 != m_mapChains.size() );
+        
+        std::cout << m_sUnderlying << " watch done." << std::endl;
+
+    } );
+  }
+  catch (...) {
+    std::cout << "something wrong" << std::endl;
+  }
   
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
+  
+  std::cout << m_sUnderlying << " loading done." << std::endl;
   
 }
 
@@ -141,29 +165,37 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
 
 void ManageStrategy::Start( void ) {
   
+  std::cout << m_sUnderlying << " starting up ... " << std::endl;
+  
   assert( TSInitializing == m_stateTrading );
   
-  pWatch_t pWatch;
-  pWatch = m_pPositionUnderlying->GetWatch();
-  pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-  pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
-  
-  if ( 0 == m_dblFundsToTrade ) {
-    std::cout << m_sUnderlying << " not started, no funds" << std::endl;
-    m_stateTrading = TSNoMore;
+  if ( nullptr == m_pPositionUnderlying.get() ) {
+    std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
   }
   else {
-    m_nSharesToTrade = CalcShareCount( m_dblFundsToTrade );
-    if ( 200 > m_nSharesToTrade ) {
-      std::cout << m_sUnderlying << " not started, need room for 200 shares" << std::endl;
+    pWatch_t pWatch;
+    pWatch = m_pPositionUnderlying->GetWatch();
+    pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+    pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
+
+    if ( 0 == m_dblFundsToTrade ) {
+      std::cout << m_sUnderlying << " not started, no funds" << std::endl;
       m_stateTrading = TSNoMore;
     }
     else {
-      // can start with what was supplied
-      std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
-      m_stateTrading = TSWaitForFirstTrade;
+      m_nSharesToTrade = CalcShareCount( m_dblFundsToTrade );
+      if ( 200 > m_nSharesToTrade ) {
+        std::cout << m_sUnderlying << " not started, need room for 200 shares" << std::endl;
+        m_stateTrading = TSNoMore;
+      }
+      else {
+        // can start with what was supplied
+        std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
+        m_stateTrading = TSWaitForFirstTrade;
+      }
     }
   }
+  
 }
 
 void ManageStrategy::Stop( void ) {

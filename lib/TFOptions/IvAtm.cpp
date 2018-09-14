@@ -128,12 +128,20 @@ double IvAtm::Call_Otm( double value ) {
 }
  
 void IvAtm::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
-  mapChain_t::iterator iter = FindStrike( dblStrike );
+  mapChain_t::iterator iter = m_mapChain.find( dblStrike );
+  if ( m_mapChain.end() == iter ) {
+    iter = m_mapChain.insert( m_mapChain.begin(), mapChain_t::value_type( dblStrike, OptionsAtStrike() ) );
+  }
+  assert( 0 == iter->second.sCall.size() );
   iter->second.sCall = sIQFeedSymbolName;
 }
 
 void IvAtm::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
-  mapChain_t::iterator iter = FindStrike( dblStrike );
+  mapChain_t::iterator iter = m_mapChain.find( dblStrike );
+  if ( m_mapChain.end() == iter ) {
+    iter = m_mapChain.insert( m_mapChain.begin(), mapChain_t::value_type( dblStrike, OptionsAtStrike() ) );
+  }
+  assert( 0 == iter->second.sPut.size() );
   iter->second.sPut = sIQFeedSymbolName;
 }
 
@@ -150,7 +158,7 @@ const std::string IvAtm::GetIQFeedNamePut( double dblStrike ) {
 IvAtm::mapChain_t::const_iterator IvAtm::FindStrike( const double strike ) const {
   mapChain_t::const_iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
-    throw std::runtime_error( "IvAtm::FindStrike: can't find strike" );
+    throw std::runtime_error( "IvAtm::FindStrike const: can't find strike" );
   }
   return iter;
 }

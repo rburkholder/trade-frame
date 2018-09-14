@@ -102,6 +102,7 @@ PanelBasketTradingMain::~PanelBasketTradingMain()
 void PanelBasketTradingMain::Init()
 {
 ////@begin PanelBasketTradingMain member initialisation
+    m_btnLoad = NULL;
     m_btnStart = NULL;
     m_btnExitPositions = NULL;
     m_btnStop = NULL;
@@ -125,29 +126,36 @@ void PanelBasketTradingMain::CreateControls()
     wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
-    m_btnStart = new wxButton( itemPanel1, ID_BtnStart, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer3->Add(m_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_btnLoad = new wxButton( itemPanel1, ID_BtnLoad, _("Load"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(m_btnLoad, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer5, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
-    m_btnExitPositions = new wxButton( itemPanel1, ID_BtnExitPositions, _("Exit Positions"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_btnExitPositions->Enable(false);
-    itemBoxSizer5->Add(m_btnExitPositions, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_btnStart = new wxButton( itemPanel1, ID_BtnStart, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnStart->Enable(false);
+    itemBoxSizer5->Add(m_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer7, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
-    m_btnStop = new wxButton( itemPanel1, ID_BtnStop, _("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_btnStop->Enable(false);
-    itemBoxSizer7->Add(m_btnStop, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_btnExitPositions = new wxButton( itemPanel1, ID_BtnExitPositions, _("Exit Positions"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnExitPositions->Enable(false);
+    itemBoxSizer7->Add(m_btnExitPositions, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer9, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
+    m_btnStop = new wxButton( itemPanel1, ID_BtnStop, _("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnStop->Enable(false);
+    itemBoxSizer9->Add(m_btnStop, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
+    wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer11, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
+
     m_btnSave = new wxButton( itemPanel1, ID_BtnSave, _("Save Series"), wxDefaultPosition, wxDefaultSize, 0 );
     m_btnSave->Enable(false);
-    itemBoxSizer9->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer11->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
 ////@end PanelBasketTradingMain content construction
 }

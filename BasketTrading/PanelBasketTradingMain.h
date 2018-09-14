@@ -42,41 +42,32 @@ public:
     const wxSize& size = SYMBOL_PANELBASKETTRADINGMAIN_SIZE, 
     long style = SYMBOL_PANELBASKETTRADINGMAIN_STYLE );
   ~PanelBasketTradingMain(void);
-
+  
   typedef FastDelegate0<> OnBtn_t;
-  void SetOnButtonPressedStart( OnBtn_t function ) {
-    m_OnBtnStart = function;
-  }
-  void SetOnButtonPressedExitPositions( OnBtn_t function ) {
-    m_OnBtnExitPositions = function;
-  }
-  void SetOnButtonPressedStop( OnBtn_t function ) {
-    m_OnBtnStop = function;
-  }
-  void SetOnButtonPressedSave( OnBtn_t function ) {
-    m_OnBtnSave = function;
-  }
+  OnBtn_t m_OnBtnLoad;
+  OnBtn_t m_OnBtnStart;
+  OnBtn_t m_OnBtnExitPositions;
+  OnBtn_t m_OnBtnStop;
+  OnBtn_t m_OnBtnSave;  
+
 protected:
 private:
 
   enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELBASKETTRADINGMAIN_IDNAME,
-    ID_BtnStart, ID_BtnExitPositions, ID_BtnStop, ID_BtnSave
+    ID_BtnLoad, ID_BtnStart, ID_BtnExitPositions, ID_BtnStop, ID_BtnSave
   };
 
-  wxButton* m_btnStart;
-  wxButton* m_btnExitPositions;
-  wxButton* m_btnStop;
-  wxButton* m_btnSave;
-
-  OnBtn_t m_OnBtnStart;
-  OnBtn_t m_OnBtnExitPositions;
-  OnBtn_t m_OnBtnStop;
-  OnBtn_t m_OnBtnSave;
+    wxButton* m_btnLoad;
+    wxButton* m_btnStart;
+    wxButton* m_btnExitPositions;
+    wxButton* m_btnStop;
+    wxButton* m_btnSave;
 
   void Init();
   void CreateControls();
   bool ShowToolTips( void ) { return true; };
 
+  void OnBtnLoad( wxCommandEvent& event );
   void OnBtnStart( wxCommandEvent& event );
   void OnBtnExitPositions( wxCommandEvent& event );
   void OnBtnStop( wxCommandEvent& event );

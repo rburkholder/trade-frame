@@ -33,6 +33,7 @@
 
 ////@begin control identifiers
 #define ID_PANELBASKETTRADINGMAIN 10066
+#define ID_BtnLoad 10000
 #define ID_BtnStart 10067
 #define ID_BtnExitPositions 10068
 #define ID_BtnStop 10069
@@ -88,6 +89,7 @@ public:
     static bool ShowToolTips();
 
 ////@begin PanelBasketTradingMain member variables
+    wxButton* m_btnLoad;
     wxButton* m_btnStart;
     wxButton* m_btnExitPositions;
     wxButton* m_btnStop;

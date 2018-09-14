@@ -93,6 +93,7 @@ private:
 //  void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int );
 
+  void HandleLoadButton( void );
   void HandleStartButton( void );
   void HandleExitPositionsButton( void );
   void HandleStopButton( void );

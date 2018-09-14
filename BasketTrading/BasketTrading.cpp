@@ -124,10 +124,11 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "b3 Load Symbol Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
-  m_pPanelBasketTradingMain->SetOnButtonPressedExitPositions( MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) );
-  m_pPanelBasketTradingMain->SetOnButtonPressedStop( MakeDelegate( this, &AppBasketTrading::HandleStopButton ) );
-  m_pPanelBasketTradingMain->SetOnButtonPressedSave( MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) );
+  m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
+  m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
+  m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
+  m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
+  m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
   
   m_pMasterPortfolio.reset( new MasterPortfolio( 
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
@@ -161,7 +162,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
-void AppBasketTrading::HandleStartButton(void) {
+void AppBasketTrading::HandleLoadButton() {
   CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
     [this](){
       if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
@@ -180,6 +181,14 @@ void AppBasketTrading::HandleStartButton(void) {
         m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
       }
     });
+}
+
+void AppBasketTrading::HandleStartButton(void) {
+  CallAfter( 
+    [this](){
+      m_pMasterPortfolio->Start();
+      m_timerGuiRefresh.Start( 250 );
+    } );
 }
 
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
@@ -219,8 +228,6 @@ void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thr
     m_pWorker->Join();
     delete m_pWorker;
     m_pWorker = 0;
-    m_pMasterPortfolio->Start();
-    m_timerGuiRefresh.Start( 250 );
   });
 }
 
