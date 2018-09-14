@@ -5,9 +5,9 @@
 This is an application I use for automated trading securities.  
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
-I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.
+I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.  Regular make files are available as a side effect.
 
-A C++11 compiler is required to build the libraries and code.
+A C++14 compiler is used to build the libraries and code.
 
 ## Example
 
