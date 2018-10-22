@@ -263,7 +263,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                   m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
                   std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                   m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
-                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) ); // attempt delta (at 0.5 ) * 2
+                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                   m_stateTrading = TSMonitorLong;
                 } );
             }
