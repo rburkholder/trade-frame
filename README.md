@@ -57,9 +57,9 @@ git clone https://github.com/rburkholder/trade-frame.git
 
 # pre-build some of the example apps
 pushd trade-frame
-cd ArmsIndex
-make
-cd ../IQFeedMarketSymbols
+#cd ArmsIndex  -- currently has a build error
+#make
+cd IQFeedMarketSymbols
 make
 cd ../IQFeedGetHistory
 make
