@@ -50,7 +50,9 @@ sh netbeans-8.2-cpp-linux-x64.sh
 
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
-libs-build/build.sh tradeframe
+cd libs-build
+./build.sh tradeframe
+cd ..
 
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
