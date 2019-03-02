@@ -55,7 +55,8 @@ libs-build/build.sh tradeframe
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
 
-# pre-build some of the example apps
+# pre-build some of the example apps 
+# (first example built will take a while as most support libraries are built as well)
 pushd trade-frame
 #cd ArmsIndex  -- currently has a build error
 #make
