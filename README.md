@@ -45,7 +45,7 @@ wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-l
 sh tws-stable-linux-x64.sh
 
 # netbeans ide and build env
-wget http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
+wget https://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
 sh netbeans-8.2-cpp-linux-x64.sh
 
 # initial library install
