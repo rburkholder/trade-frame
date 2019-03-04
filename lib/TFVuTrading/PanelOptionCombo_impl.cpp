@@ -30,7 +30,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
-: 
+:
   m_poc( poc )
 {
 
@@ -63,7 +63,7 @@ PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
   m_vPositions.clear();
 }
 
-void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {    
+void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
 
     PanelOptionCombo* itemPanel1 = &m_poc;
 
@@ -106,17 +106,17 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
 
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
-    
+
 //#undef GRID_EMIT_SetColSettings
 //#define GRID_EMIT_SetColSettings( z, n, VAR ) \
 //  m_gridPortfolioStats->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
 //  m_gridPortfolioStats->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
 //  int ix = 0;
 //  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
-    
+
 #define COL_ALIGNMENT_B( z, n, VAR ) \
   m_gridPortfolioStats->SetCellAlignment( VAR, GRID_EXTRACT_COL_DETAILS(z, n, 0), GRID_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
-    
+
   BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT_B,0)
 
   m_menuGridLabelPositionPopUp = new wxMenu;
@@ -132,15 +132,15 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePosition, "Close Greek Position" );
   m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuAddPortfolio, "Add Greek Portfolio" );
   //m_menuGridCellPositionPopUp->Append( m_poc.ID_MenuClosePortfolio, "Close Greek Portfolio" );
-  
+
   // watch out for the std::move operations?:  needed in some places?, not in others?
   // create empty DragDropInstrument with correct type in order to receive the desired initiate call when dropped
   // GridOptionChain_impl::OnGridCellBeginDrag creates  source DragDropInstrument
   typedef DragDropInstrument::pOptionInstrument_t pOptionInstrument_t;
   typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
   DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
-  pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) { 
-    //std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl; 
+  pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) {
+    std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl;
     AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
   };
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
@@ -161,12 +161,12 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePosition, this, m_poc.ID_MenuClosePosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPortfolio, this, m_poc.ID_MenuAddPortfolio, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePortfolio, this, m_poc.ID_MenuClosePortfolio, -1, 0 );
-  
+
   m_poc.Bind( wxEVT_DESTROY, &PanelOptionCombo_impl::HandleWindowDestroy, this );
 
   m_vPortfolioModelCell.resize( GRID_ARRAY_COL_COUNT );
   m_vPortfolioCalcs.resize( GRID_ARRAY_COL_COUNT );
-  
+
   static std::vector<unsigned int> vPrecision = { BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,5) };
   m_vPortfolioModelCell[COL_ImpVol].SetPrecision( vPrecision[ COL_ImpVol ] );
   m_vPortfolioModelCell[COL_Delta].SetPrecision( vPrecision[ COL_Delta ] );
@@ -180,7 +180,7 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
 void PanelOptionCombo_impl::AssignToSizer( wxBoxSizer* sizer ) {
   sizer->Add( &m_poc, 0, wxALL|wxGROW, 6 );
   //sizer->Add( m_sizerMain, 1, wxALL|wxGROW, 6 );
-  
+
   //m_siPosition = m_sizerMain->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
   m_siPosition = sizer->Add(m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
@@ -197,11 +197,11 @@ void PanelOptionCombo_impl::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
   gcs.SetColumnSizes( *m_gridPositions );
   gcs.SetColumnSizes( *m_gridPortfolioStats );
 }
-	
+
 void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
-  
+
   m_poc.SetDropTarget( nullptr );
-  
+
   if ( nullptr != m_menuGridLabelPositionPopUp ) {
     delete m_menuGridLabelPositionPopUp;
     m_menuGridLabelPositionPopUp = nullptr;
@@ -215,7 +215,7 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   //event.Skip();  // auto followed by Destroy();
 
   m_gridPositions->Unbind( wxEVT_MOUSEWHEEL,             &PanelOptionCombo_impl::OnMouseWheel, this );
@@ -229,7 +229,7 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePosition, this, m_poc.ID_MenuClosePosition, -1, 0 );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPortfolio, this, m_poc.ID_MenuAddPortfolio, -1, 0 );
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePortfolio, this, m_poc.ID_MenuClosePortfolio, -1, 0 );
-  
+
   m_poc.Unbind( wxEVT_DESTROY, &PanelOptionCombo_impl::HandleWindowDestroy, this );
 }
 
@@ -251,7 +251,7 @@ void PanelOptionCombo_impl::SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek
     m_gridPositions->Enable( false );
 //    m_sizerMain->Layout();
     //m_gridPositions->Destroy();
-    
+
 //  m_ppp.SetAutoLayout( true );
 //  m_ppp.Layout();
 //  wxSize size = m_ppp.GetSize();
@@ -269,19 +269,19 @@ void PanelOptionCombo_impl::OnMouseWheel( wxMouseEvent& event ) {
   bool bAlt = event.AltDown();
   wxPoint point( event.GetPosition() );
   wxGridCellCoords coords( m_gridPositions->XYToCell( point ) );
-//  std::cout 
-//      << "Wheel: " << delta << "," << rotation 
+//  std::cout
+//      << "Wheel: " << delta << "," << rotation
 //      << ",sca:" << bShift << bControl << bAlt
 //      << ",pos:" << point.x << "," << point.y
 //      << ",cell:" << coords.GetRow() << "," << coords.GetCol()
 //      << std::endl;
-  
+
   if ( ( 1 == coords.GetCol() ) || ( 2 == coords.GetCol() ) ) {
     m_vPositions[ coords.GetRow() ]->GetPositionGreek()->PositionPendingDelta( 0 > rotation ? -1 : 1 );
     bSkip = false;
   }
-  
-  
+
+
   //DrawChart();
   event.Skip( bSkip );
 }
@@ -455,14 +455,14 @@ void PanelOptionCombo_impl::OnPositionPopUpDeletePosition( wxCommandEvent& event
     vt->SetGridRow( ix );
     ix++;
   } );
-  
+
 }
 
 // TODO: will need to change to use various instances rather than just m_pPortfolioGreek
 void PanelOptionCombo_impl::AddOptionUnderlyingPosition( pInstrument_t pOption, pInstrument_t pUnderlying ) {
   if ( nullptr != m_poc.m_fConstructPositionGreek) {
     namespace ph = std::placeholders;
-    m_poc.m_fConstructPositionGreek( pOption, pUnderlying, m_pPortfolioGreek, 
+    m_poc.m_fConstructPositionGreek( pOption, pUnderlying, m_pPortfolioGreek,
       std::bind( &PanelOptionCombo_impl::AddPositionGreek, this, ph::_1 ) );
   }
   else {
@@ -484,7 +484,7 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
   //m_sizerMain->RecalcSizes();
   //m_sizerGridPositions->Layout();
   //m_sizerMain->Layout();
-  
+
   //int id = m_siPortfolioStats->GetId();
   //m_sizerMain->Detach( m_gridPositions );
   //m_sizerMain->Detach( m_gridPortfolioStats );
@@ -496,9 +496,9 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
   //m_sizerMain->Add( m_gridPositions, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1 );
   //m_sizerMain->Add( m_gridPortfolioStats, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 1 );
   //m_sizerMain->Layout();
-  
-  
-  //std::cout << "m_gridPositions->GetRows(): " << m_gridPositions->GetRows() 
+
+
+  //std::cout << "m_gridPositions->GetRows(): " << m_gridPositions->GetRows()
   //  << "," << m_sizerGridPositions->GetMinSize().GetY()
   //  << "," << m_sizerGridPositions->GetSize().GetY()
   //  << "," << m_sizerPortfolioDetails->GetMinSize().GetY()
@@ -518,13 +518,13 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
 }
 
 void PanelOptionCombo_impl::UpdateGui( void ) {
-  
+
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [](vPositions_t::value_type& vt){
     vt->UpdateGui();
   } );
 
   std::for_each( m_vPortfolioCalcs.begin(), m_vPortfolioCalcs.end(), [](vPortfolioCalcs_t::value_type& vt){ vt = 0.0; } );
-  
+
   // TODO: migrate to m_pPortfolioGreek?
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [this](const vPositions_t::value_type& vt){
     const pPositionGreek_t pPositionGreek = vt->GetPositionGreek();
@@ -533,7 +533,7 @@ void PanelOptionCombo_impl::UpdateGui( void ) {
     ou::tf::Quote quote( pOption->LastQuote() );
     ou::tf::Greek greek( pOption->LastGreek() );
     boost::uint32_t nPending( row.nPositionPending );
-    
+
     m_vPortfolioCalcs[ COL_Quan ] += nPending;
     switch ( row.eOrderSidePending ) {
       case OrderSide::Buy:
@@ -556,15 +556,15 @@ void PanelOptionCombo_impl::UpdateGui( void ) {
         break;
     }
   } );
-  
+
   typedef std::set<int> setIndexes_t;
   static const setIndexes_t setIndexes = { COL_Quan, COL_ConsVlu, COL_ImpVol, COL_Delta, COL_Gamma, COL_Theta, COL_Vega, COL_Rho };
-  
+
   std::for_each( setIndexes.begin(), setIndexes.end(), [this](setIndexes_t::value_type ix){
     m_vPortfolioModelCell[ ix ].SetValue( m_vPortfolioCalcs[ ix ] );
     if ( m_vPortfolioModelCell[ ix ].Changed() ) m_gridPortfolioStats->SetCellValue( 0, ix, m_vPortfolioModelCell[ ix ].GetText() );
   } );
-  
+
 }
 
 } // namespace tf
