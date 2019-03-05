@@ -46,15 +46,25 @@
 #include "ComboTrading.h"
 
 /*
- * 
+ * 2019/03/05
+ * Books of inspiration:
+ *
+ *  0470920157 No-Hype Options Trading: Myths, Realities, and Strategies That Really Work  == 2011 by Kerry W. Given
+ *    page 108 shows historical volatility chart as backdrop, edge could be used as entry for edges of back spreads
+ *
+ *  978-1-118-98058-3 Profiting from Weekly Options == 2015 by  Robert J. Seifert
+ *     pg 91 credit spread aka vertical spread
+ *     pg 98 2 to 1 backspread
+ *
+ *
  * 20160522 Issues:
  *   don't save without IB contract - should be good now, but validate
  *   need to watch implied volatility
- *   LiveChart: 
+ *   LiveChart:
  *     future with implied volatility curve (pull from HedgedBollinger
  *     futureoptions, options: track implied volatility
- *   
- * 
+ *
+ *
  * 20151109 To Do:
  *   based upon Day Trading Options by Jeff Augen
  *   read cboe file and sort symbols - done
@@ -65,35 +75,35 @@
  *   select combo and trade/watch the options watched from open (position/portfolio)
  *   track p/l over the day (portfolio)
  *   exit at day end, or some minimum profit level with trailing parabolic stop
- *   build up the volatility indicators mentioned in the boot 
- *   live chart for each symbol and associated combo 
+ *   build up the volatility indicators mentioned in the boot
+ *   live chart for each symbol and associated combo
  *   save the values at session end
- * 
+ *
  *  implied volatility surface: pg 84
  *  historical volatility calcs:  pg 91
  *  c-c, c-o, o-c hist. vol. calcs: pg 94
  *  calcs by weekday: pg 99
  *  strangles better than straddles: pg 108
- * 
+ *
  * then chapter 4 working with price spike charts
- * 
+ *
  * 20151112 - important steps:
  *  historical volatility
  *  track stocks at 20:00 'this all has a familiar ring to it'
  *  underlying and three strikes at atm.  trade them on opening
  *  track profit over day and exit same day or next day?
- *   es, gc, 
+ *   es, gc,
  *  hard code for now, build up infrastructure, and automate over time
- *  manually pick the symbols, 
+ *  manually pick the symbols,
  *  run a process for each and watch
  *  save at end of day
  *  wait for flag to exit.
- * 
+ *
  * 20151113 most important thing:
  *  track atm for a series of instruments
  *  keep a series of trades prepared
  *  show the intraday price spike charts
- *   
+ *
  */
 
 IMPLEMENT_APP(AppComboTrading)
@@ -101,7 +111,7 @@ IMPLEMENT_APP(AppComboTrading)
 const std::string sFileNameMarketSymbolSubset( "../combotrading.ser" );
 
 bool AppComboTrading::OnInit() {
-  
+
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Combo Trading" );
   wxApp::SetVendorName( "OneUnified" );
@@ -109,34 +119,34 @@ bool AppComboTrading::OnInit() {
 
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
-  
+
   m_pFPP = nullptr;
   m_pFOC = nullptr;
-  
+
   m_pFPPOE = nullptr;
   m_pMPPOE = nullptr;
   m_pPPPOE = nullptr;
   m_pCPPOE = nullptr;
-    
+
   m_sizerPM = nullptr;
   m_scrollPM = nullptr;
   m_sizerScrollPM = nullptr;
-  
+
   m_pLastPPP = nullptr;
-  
+
   m_pFCharts = nullptr;
   m_pFInteractiveBrokers = nullptr;
-    
+
   m_pPanelCharts = nullptr;
   //m_pPanelOptionCombo = nullptr;
-  
+
   m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
-  m_pOptionEngine->m_fBuildWatch 
+  m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
         ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
         return pWatch;
       };
-  m_pOptionEngine->m_fBuildOption 
+  m_pOptionEngine->m_fBuildOption
     = [this](pInstrument_t pInstrument)->pOption_t {
         ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
         return pOption;
@@ -188,7 +198,7 @@ bool AppComboTrading::OnInit() {
   m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
-  
+
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   psizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -201,16 +211,16 @@ bool AppComboTrading::OnInit() {
 
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
   m_idPortfolioMaster = "master";  // keeps name constant over multiple days
-  
+
   //m_bData1Connected = false;
   //m_bExecConnected = false;
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
-  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols ); 
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){ 
-      std::cout << sStatus << std::endl; 
+    CallAfter( [sStatus](){
+      std::cout << sStatus << std::endl;
     });
   });
 
@@ -222,7 +232,7 @@ bool AppComboTrading::OnInit() {
   vItemsSymbols.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSymbolSubset ) ) );
   vItemsSymbols.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionLoadSymbolSubset ) ) );
   wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Symbol List", vItemsSymbols );
-  
+
   FrameMain::vpItems_t vItemsActions;
   vItemsActions.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
@@ -238,7 +248,7 @@ bool AppComboTrading::OnInit() {
 
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
-  
+
   BuildFrameCharts();
   BuildFrameInteractiveBrokers();
   BuildFramePortfolioPosition();
@@ -275,31 +285,31 @@ bool AppComboTrading::OnInit() {
 
     m_sWorkingDirectory = "..";
     m_sfnState = "ComboTrading.state";
-    
+
     m_db.Open( m_sDbName );
   }
   catch(...) {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
-  
+
   return 1;
 }
 
 int AppComboTrading::OnExit() {
-    
+
   // called after destroying all application windows
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
   pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
-  
+
 //  DelinkFromPanelProviderControl();  generates stack errors
-  
+
   m_timerGuiRefresh.Stop();
-  
+
   m_db.OnRegisterTables.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
   m_db.OnRegisterRows.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
-  
+
   assert( m_db.IsOpen() );
   m_db.Close();
 
@@ -311,11 +321,11 @@ void AppComboTrading::ProvideOptionList( const std::string& sSymbol, ou::tf::Pan
 }
 
 void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
-  
+
   m_pFInteractiveBrokers = new FrameMain( m_pFrameMain, wxID_ANY, "Interactive Brokers", wxDefaultPosition, wxSize( 900, 500 ),
     wxCAPTION|wxRESIZE_BORDER
     );
-  
+
   FrameMain* itemFrame1 = m_pFInteractiveBrokers;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
@@ -350,35 +360,35 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
 }
 
 void AppComboTrading::BuildFrameCharts( void ) {
-  
-  m_pFCharts = new FrameMain( m_pFrameMain, wxID_ANY, "Instrument Management", wxDefaultPosition, wxSize( 900, 500 ),  
+
+  m_pFCharts = new FrameMain( m_pFrameMain, wxID_ANY, "Instrument Management", wxDefaultPosition, wxSize( 900, 500 ),
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
-  
+
   wxBoxSizer* psizer;
   psizer = new wxBoxSizer(wxVERTICAL);
   m_pFCharts->SetSizer( psizer );
-  
+
   m_pPanelCharts = new ou::tf::PanelCharts( m_pFCharts, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   psizer->Add(m_pPanelCharts, 1, wxGROW|wxALL, 2);
 
   namespace args = boost::phoenix::placeholders;
-  
+
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );  // use of this signal needs some cleaning
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRetrieveOptionList.connect( boost::phoenix::bind( &AppComboTrading::ProvideOptionList, this, args::arg1, args::arg2 ) );
-  
+
   //m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
-  
+
   m_pPanelCharts->m_fSelectInstrument =
     [this](const ou::tf::Allowed::enumInstrument selector, const wxString& sUnderlying)->pInstrument_t {
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pPanelCharts ) );
-      
+
       namespace ph = std::placeholders;
       pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
-      
+
       pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
         BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
           pBuild->InstrumentUpdated( pInstrument ); // this is the call back into the gui when contract id has been populated
@@ -386,14 +396,14 @@ void AppComboTrading::BuildFrameCharts( void ) {
       };
       return pBuild->HandleNewInstrumentRequest( selector, sUnderlying );
     };
-    
-  m_pPanelCharts->m_fBuildInstrumentFromIqfeed = 
+
+  m_pPanelCharts->m_fBuildInstrumentFromIqfeed =
     [this](const std::string& sName)->pInstrument_t {
         ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sName ) );
         return ou::tf::iqfeed::BuildInstrument( sName, trd );
     };
-    
-  // build the callback for when PanelCharts/GridOptionChain_impl needs to build a full instrument 
+
+  // build the callback for when PanelCharts/GridOptionChain_impl needs to build a full instrument
   // for result of drag and drop operations
   m_pPanelCharts->m_fBuildOptionInstrument =
     // first lambda builds an instrument given IQFeed option name and parameters
@@ -401,13 +411,13 @@ void AppComboTrading::BuildFrameCharts( void ) {
     [this](pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::PanelCharts::fBuildOptionInstrumentComplete_t f){
       ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) ); // TODO: check for errors
       std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
-      
+
       ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
       pInstrument_t pOptionInstrument;
       if ( im.Exists( sGenericOptionName, pOptionInstrument ) ) {
         if ( nullptr != f ) {
           f( pOptionInstrument );
-        }        
+        }
       }
       else {
         pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() );
@@ -416,32 +426,32 @@ void AppComboTrading::BuildFrameCharts( void ) {
         // this request uses contract id to obtain basic symbol of the underlying
         // TODO: 2018/09/08 this double lookup shouldn't be required, the underlying IB name should be already be stored as an alternate name
         m_tws->RequestContractDetails(
-          contract, 
+          contract,
           [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
             // the resulting symbol can then be used to plug into the final option request to obtain
             //   the contract details for the option
-            m_tws->RequestContractDetails( 
+            m_tws->RequestContractDetails(
               details.summary.symbol, pOptionInstrument,
               [this, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
-                // the contract details fill in the contract in the instrument, which can then be passed back to the caller 
+                // the contract details fill in the contract in the instrument, which can then be passed back to the caller
                 //   as a fully defined, registered instrument
                 RegisterInstrument( pInstrument );  // TODO: does the instrument need to be registered?  Is this the best place for this?
                 if ( nullptr != f ) {
                   f( pInstrument );
                 }
-              }, 
+              },
               nullptr  // request complete
-              );    
-          }, 
+              );
+          },
           nullptr, // request complete
           pUnderlyingInstrument );
       }
     };
-    
+
   m_pPanelCharts->m_fCalcOptionGreek_Add = [this]( pOption_t pOption, pWatch_t pWatchUnderlying ){
     m_pOptionEngine->Add( pOption, pWatchUnderlying );
   };
-  
+
   m_pPanelCharts->m_fCalcOptionGreek_Remove = [this]( pOption_t pOption, pWatch_t pWatchUnderlying ){
     m_pOptionEngine->Remove( pOption, pWatchUnderlying );
   };
@@ -459,16 +469,16 @@ void AppComboTrading::BuildFrameCharts( void ) {
   // prepended in reverse order
   ixItem = m_pFrameMain->AddFileMenuItem( _( "Load Config" ) );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleLoad, this, ixItem, -1 );
-  
+
   ixItem = m_pFrameMain->AddFileMenuItem( _( "Save Config" ) );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleSave, this, ixItem, -1 );
-  
+
   wxPoint point = m_pFCharts->GetPosition();
   point.x += 400;
   point.y += 200;
   m_pFCharts->SetPosition( point );
   m_pFCharts->Show();
-  
+
 }
 
 AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::string& name ) {
@@ -481,13 +491,13 @@ AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::strin
   return p;
 }
 
-// todo:  
+// todo:
 //   map of instruments prior to contract
 //   map of instruments with contract
 //   map of instruments from instrument manager
 
 void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values, fInstrumentFromIB_t callback ) {
-  std::cout << "AppComboTrading::BuildInstrument: " << values.sKey << " "; 
+  std::cout << "AppComboTrading::BuildInstrument: " << values.sKey << " ";
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
     std::cout << "exists ..." << std::endl;
@@ -507,7 +517,7 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
           values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd );
           break;
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
           values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, values.day );  // for ib future/fo overrides not supplied by trd
           break;
@@ -520,8 +530,8 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
 }
 
 void AppComboTrading::BuildFramePortfolioPosition( void ) {
-  
-  m_pFPP = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
+
+  m_pFPP = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
@@ -545,18 +555,18 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   point.y += 100;
   m_pFPP->SetPosition( point );
   m_pFPP->Show();
-  
+
   m_pFPP->Layout();
 
 }
 
 void AppComboTrading::BuildFrameOptionCombo( void ) {
-  
-  m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo Sandbox", wxDefaultPosition, wxSize( 900, 500 ),  
+
+  m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo Sandbox", wxDefaultPosition, wxSize( 900, 500 ),
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
-  
+
   m_pFOC->SetAutoLayout( true );
 
   m_sizerFOC = new wxBoxSizer(wxVERTICAL);
@@ -576,18 +586,18 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
   point.y += 200;
   m_pFOC->SetPosition( point );
   m_pFOC->Show();
-  
+
   HandleNewPanelOptionCombo( idPortfolio_t( "sandbox" ), "experimenting with option combinations" );
-  
+
   m_pFOC->Layout();
 
 }
 
 AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription ) {
-  
+
   pPanelOptionCombo_t pPanelOptionCombo;
   pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
-  
+
   pPanelOptionCombo->m_fBootStrapNextPanelOptionCombo = [this](const idPortfolio_t& idPortfolio_, const std::string& sDescription_){
     HandleNewPanelOptionCombo( idPortfolio_, sDescription_ );
   };
@@ -599,11 +609,11 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
       mapPortfoliosSandbox_t::iterator iter = m_mapPortfoliosSandbox.find( idPortfolio );
       if ( m_mapPortfoliosSandbox.end() == iter ) {
         pPortfolioGreek_t pPortfolioGreek( new ou::tf::PortfolioGreek(
-          idPortfolio, ou::tf::PortfolioGreek::idAccountOwner_t( "none" ), idPortfolio_t( "self" ), 
-          ou::tf::Portfolio::EPortfolioType::Standard, "USD", sDescription 
+          idPortfolio, ou::tf::PortfolioGreek::idAccountOwner_t( "none" ), idPortfolio_t( "self" ),
+          ou::tf::Portfolio::EPortfolioType::Standard, "USD", sDescription
         ) );
         poc.SetPortfolioGreek( pPortfolioGreek );
-        
+
         m_mapPortfoliosSandbox.insert( mapPortfoliosSandbox_t::value_type( pPortfolioGreek->Id(), structPortfolioSandbox( &poc ) ) );
       }
       else {
@@ -614,7 +624,7 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
     //m_sizerScrollOC->Layout();
   };
 
-  pPanelOptionCombo->m_fConstructPositionGreek 
+  pPanelOptionCombo->m_fConstructPositionGreek
       = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
         // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
         // register with engine
@@ -627,26 +637,26 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
       std::cout << "AppComboTrading::BuildFrameOptionCombo: registering " << pOptionInstrument->GetInstrumentName() << ", should have been accomplished prior to this?" << std::endl;
       im.Register( pOptionInstrument );
     }
-    
+
     assert( 0 != pUnderlyingInstrument.use_count() );
     assert( 0 != pUnderlyingInstrument.get() );
     pWatch_t pWatch;
     m_pOptionEngine->Find( pUnderlyingInstrument, pWatch ); // construct watch from instrument
     assert( 0 != pWatch.use_count() );
     assert( 0 != pWatch.get() );
-    
+
     assert( 0 != pOptionInstrument.use_count() );
     assert( 0 != pOptionInstrument.get() );
     pOption_t pOption;
     m_pOptionEngine->Find( pOptionInstrument, pOption );  // construct option from instrument
     assert( 0 != pOption.use_count() );
     assert( 0 != pOption.get() );
-    
+
     pPositionGreek_t pPositionGreek( new ou::tf::PositionGreek( pOption, pWatch ) );
     pPortfolioGreek->AddPosition( pOptionInstrument->GetInstrumentName(), pPositionGreek );
-    if ( nullptr != f ) 
+    if ( nullptr != f )
       f( pPositionGreek );
-    
+
     // position needs to start the watch, needs both option and underlying
     // then add to engine here?  who removes from engine?  does the panel manage the list
   };
@@ -654,7 +664,7 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
       namespace ph = std::placeholders;
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
-      pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 ); 
+      pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
       pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
         BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
           pBuild->InstrumentUpdated( pInstrument ); // this is the call back into the gui when contract id has been populated
@@ -670,7 +680,7 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
   namespace ph = std::placeholders;
   pPanelOptionCombo->m_fRegisterWithEngine = std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 );
   pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 );
-  
+
   pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
     if ( im.Exists( idInstrument, pInstrument ) ) {
@@ -692,9 +702,9 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
   //m_sizerScrollOC->Add( pPanelOptionCombo, 0, wxALL|wxGROW, 6 );
   pPanelOptionCombo->AssignToSizer( m_sizerScrollOC );
   m_sizerScrollOC->Layout();
-  
+
   return pPanelOptionCombo;
-} 
+}
 
 // 20151124 priority:  get the symbols tracking, draw charts, and watch volatility on futures and equities
 // 20151128 use the code in start to obtain the symbol info for populating the portfolio/position info
@@ -707,15 +717,15 @@ void AppComboTrading::TestSymbols( void ) {
   if ( true ) {
     try {
       // new stuff
-      
-      // the cycle being: 
+
+      // the cycle being:
       //  build the iqfeed instrument
       //  send it off to ib to get the contract
-      //  then get it into multi-expiry 
+      //  then get it into multi-expiry
       //  then start building the options
       // calculate expiry and flesh out bundle
       // but also may be working with portfolio/position situations
-      
+
       struct Symbol {
         std::string sName;
         std::string sIq;
@@ -724,13 +734,13 @@ void AppComboTrading::TestSymbols( void ) {
         Symbol( const std::string& sName_, const std::string& sIq_, const std::string& sIb_ ):
         sName( sName_ ), sIq( sIq_ ), sIb( sIb_ ) {};
       };
-      
+
       typedef std::vector<Symbol> vSymbol_t;
       vSymbol_t vSymbol;
-      
+
       // list of equities to monitor
       vSymbol.push_back( Symbol( "GLD" ) );
-      
+
       // create generic symbol: futures and equities, and possibly from weeklies
       struct Future {
         std::string sName;
@@ -738,35 +748,35 @@ void AppComboTrading::TestSymbols( void ) {
         boost::uint16_t nYear;
         boost::uint8_t nMonth;
         std::string sIbBaseName;
-        Future( 
-          const std::string& sName_, const std::string& sIqBaseName_, 
-          boost::uint16_t nYear_, boost::uint8_t nMonth_, 
+        Future(
+          const std::string& sName_, const std::string& sIqBaseName_,
+          boost::uint16_t nYear_, boost::uint8_t nMonth_,
           const std::string& sIbBaseName_ ):
-          sName( sName_ ), sIqBaseName( sIqBaseName_ ), 
-          nYear( nYear_ ), nMonth( nMonth_ ), 
-          sIbBaseName( sIbBaseName_ ) 
+          sName( sName_ ), sIqBaseName( sIqBaseName_ ),
+          nYear( nYear_ ), nMonth( nMonth_ ),
+          sIbBaseName( sIbBaseName_ )
         {}
       };
-      
+
       typedef std::vector<Future> vFuture_t;
       vFuture_t vFuture;
-      
+
       // list of futures to monitor
       vFuture.push_back( Future( "GC-2015-12", "QGC", 2015, 12, "GC" ) );
-      
+
       // build futures name and add to vSymbol
       // ie, create the iqfeed name for the future, then pass off the name for instrument building
       for ( vFuture_t::const_iterator iter = vFuture.begin(); vFuture.end() != iter; ++iter ) {
         std::string sName = ou::tf::iqfeed::BuildFuturesName( iter->sIqBaseName, iter->nYear, iter->nMonth );
         vSymbol.push_back( Symbol( iter->sName, sName, iter->sIbBaseName ) );
       }
-      
+
       // 20151122 build list of options to monitor as well
       // then can mix and match into positions and portfolios
       // which implies ...
       //   need some structures here to assign the code seeded/generated portfolio and position combinations
       // then can generify stuff and get into a separate compilation unit
-      
+
       struct Option {
         std::string sName;
         std::string sIqBaseName;
@@ -780,26 +790,26 @@ void AppComboTrading::TestSymbols( void ) {
           const std::string& sIqBaseName_, const std::string& sIbBaseName_,
           boost::uint16_t nYear_, boost::uint8_t nMonth_, boost::uint8_t nDay_, double dblStrike_ ):
             sName( sName_ ), side( side_ ),
-            sIqBaseName( sIqBaseName_ ), sIbBaseName( sIbBaseName_ ), 
+            sIqBaseName( sIqBaseName_ ), sIbBaseName( sIbBaseName_ ),
             nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike ) {}
       };
-      
+
       typedef std::vector<Option> vOption_t;
       vOption_t vOption;
-      
+
       vOption.push_back( Option( "GLD-P-2015-12-11-112.0", ou::tf::OptionSide::Call, "GLD", "GLD", 2015, 12, 11, 112.0 ) );
-      
+
       for ( vOption_t::const_iterator iter = vOption.begin(); vOption.end() != iter; ++iter ) {
-        std::string sName = 
+        std::string sName =
           ou::tf::iqfeed::BuildOptionName( iter->sIqBaseName, iter->nYear, iter->nMonth, iter->nDay, iter->dblStrike, iter->side );
         vSymbol.push_back( Symbol( iter->sName, sName, iter->sIbBaseName ) );
       }
-      
-      // 20151122 at this point, we have our own instrument names, the names to be used for 
+
+      // 20151122 at this point, we have our own instrument names, the names to be used for
       //   registering, so at this point, we can perform a retrieval, or build new ones.
       //   some may need some building, some may need retrieval
-      
-      // 2015/11/22 take this code and put into module as it will be re-used not only in startup 
+
+      // 2015/11/22 take this code and put into module as it will be re-used not only in startup
       //    but in other real time locations
 
       {
@@ -819,7 +829,7 @@ void AppComboTrading::TestSymbols( void ) {
             const trd_t& trd( list.GetTrd( u.sIq ) );
             switch ( trd.sc ) {
               case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
+              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
                 pInstrument = ou::tf::iqfeed::BuildInstrument( u.sName, trd );
                 // now hand it off to the IB for contract insertion
                 f( pInstrument );
@@ -859,15 +869,15 @@ void AppComboTrading::TestSymbols( void ) {
         };
 
         // 20151227 broke this with IB symbol changes
-//        std::for_each( vSymbol.begin(), vSymbol.end(), 
-//          GetInstrument( m_listIQFeedSymbols, 
+//        std::for_each( vSymbol.begin(), vSymbol.end(),
+//          GetInstrument( m_listIQFeedSymbols,
 //            boost::phoenix::bind( &AppComboTrading::GetContractFor, this, args::arg1 ),
 //            boost::phoenix::bind( &AppComboTrading::LoadUpBundle, this, args::arg1 )
 //            )
 //          );
 
       }
-      
+
     }
     catch (...) {
       std::cout << "problems with AppStickShift::Start" << std::endl;
@@ -877,13 +887,13 @@ void AppComboTrading::TestSymbols( void ) {
 
 void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument, fInstrumentFromIB_t callback ) {
   if ( m_bIBConnected ) {
-    m_tws->RequestContractDetails( 
+    m_tws->RequestContractDetails(
       sBaseName, pInstrument,
       [this, callback]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
         CallAfter([callback, pInstrument](){ // put into GUI thread
           callback( pInstrument );
         });
-      }, 
+      },
       [](){}
       );
   }
@@ -906,16 +916,16 @@ void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
   }
   else {
     assert( 0 != pInstrument->GetContract() );
-    im.Register( pInstrument ); 
+    im.Register( pInstrument );
     //std::cout << "Info: Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
   }
 }
 
 // this may need to steal code from ConstructEquityPosition0, and ConstructEquityPosition1
 void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument ) {
-  
+
   // 2015/11/22 need to fix this code up
-  
+
   BundleTracking::BundleDetails details( "GC", "QGC" );
   // need to figure out proper expiry time
   // also need to figure if more options can be watched in order to provide volatility surfaces
@@ -929,14 +939,14 @@ void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrumen
 
   m_vBundleTracking.push_back( BundleTracking( "GC" ) );  // can I do some sort of move semantics here?
   m_vBundleTracking.back().SetBundleParameters( details );
-      
+
 }
 
 void AppComboTrading::UpdateColumns_PanelPortfolioPositions() {
-  std::for_each( m_mapPortfoliosTrading.begin(), m_mapPortfoliosTrading.end(), 
+  std::for_each( m_mapPortfoliosTrading.begin(), m_mapPortfoliosTrading.end(),
                   [this](mapPortfoliosTrading_t::value_type& vt){
                     vt.second.pT->SetColumnSizes( m_gcsPanelPortfolioPosition );
-                  });  
+                  });
 }
 
 void AppComboTrading::UpdateColumns_PanelOptionCombo() {
@@ -947,7 +957,7 @@ void AppComboTrading::UpdateColumns_PanelOptionCombo() {
 
 
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
-  
+
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
   m_pLastPPP->SetColumnSizes( m_gcsPanelPortfolioPosition );
   m_pLastPPP->m_fColumnWidthChanged = [this](int nColumn, int width, ou::tf::PanelPortfolioPosition& ppp ){
@@ -956,11 +966,11 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   };
   m_sizerScrollPM->Add( m_pLastPPP, 1, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   m_sizerScrollPM->Layout();
-  
-  std::cout 
-    << "Adding Portfolio: " 
-    << "T=" << pPortfolio->GetRow().ePortfolioType 
-    << ",O=" << pPortfolio->GetRow().idOwner 
+
+  std::cout
+    << "Adding Portfolio: "
+    << "T=" << pPortfolio->GetRow().ePortfolioType
+    << ",O=" << pPortfolio->GetRow().idOwner
     << ",ID=" << pPortfolio->GetRow().idPortfolio
     << std::endl;
 
@@ -973,7 +983,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
     [this]()->pInstrument_t {
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pLastPPP ) );
-      
+
       pBuild->fLookupIQFeedDescription = std::bind( &AppComboTrading::LookupDescription, this, ph::_1, ph::_2 );
       pBuild->fBuildInstrument = [this,pBuild](ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values){
         BuildInstrument( values, [pBuild](pInstrument_t pInstrument){
@@ -1023,27 +1033,27 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.fAddPosition = function;
-  
+
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
-  
+
   // 20151025
   // can pull equity, future, option out of iqfeed marketsymbols file
-  // construct basic instrument based upon iqfeed info 
+  // construct basic instrument based upon iqfeed info
   // then redo the following to obtain the contract info from ib and add to the instrument
-  
-  // 20151026 
+
+  // 20151026
   // maybe get rid of the whole underlying instrument requirement in an option symbol (similar to fact that futures option doesn't have underlying tie in )
   // requires a bunch of rewrite, but probably worth it
   //  20151115: maybe not, it provides a mechanism for getting at underlying's alternate names
-  
-  // 20151115 
-  // need to build state builder to get contracts for a series of underlying symbols, then run through 
+
+  // 20151115
+  // need to build state builder to get contracts for a series of underlying symbols, then run through
   //  associated options, and obtain their ib contract numbers
   // and feed the results into the multiexpirybundle
   // then stuff into a library for re-use
-  
-  // 
+
+  //
 
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
   if ( im.Exists( sName, pInstrument ) ) {  // the call will supply instrument if it exists
@@ -1056,14 +1066,14 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
     bool bConstructed( false );
     try {
       const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sName ) );
-      
+
       switch ( trd.sc ) {
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
       //	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
       	  break;
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
         {
           ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
           if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) { // change called name to IfExistsSupplyInstrument
@@ -1095,7 +1105,7 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
     if ( bConstructed ) {
       std::cout << "Requesting IB: " << sName << std::endl;
       // 20151227 need to fix this as needs different name sent
-//      m_tws->RequestContractDetails( 
+//      m_tws->RequestContractDetails(
 //       	pInstrument,
 //	      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
     }
@@ -1106,16 +1116,16 @@ void AppComboTrading::ConstructEquityPosition1b( pInstrument_t pInstrument, pPor
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.fAddPosition = function;
-  
+
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  
+
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
   if ( im.Exists( pInstrument ) ) {
   }
   else {
     im.Register( pInstrument );
   }
-  
+
   ConstructEquityPosition2( pInstrument );
 }
 
@@ -1123,15 +1133,15 @@ void AppComboTrading::ConstructEquityPosition1b( pInstrument_t pInstrument, pPor
 void AppComboTrading::ConstructEquityPosition2( pInstrument_t& pInstrument ) {
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
   try {
-    pPosition_t pPosition( pm.ConstructPosition( 
+    pPosition_t pPosition( pm.ConstructPosition(
       m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
       pInstrument->GetInstrumentName(),
       "",
       this->m_pExecutionProvider->GetName(),
       this->m_pData1Provider->GetName(),
-      //"ib01", "iq01", 
+      //"ib01", "iq01",
       this->m_pExecutionProvider, this->m_pData1Provider,
-      pInstrument ) 
+      pInstrument )
       );
     if ( 0 != m_EquityPositionCallbackInfo.fAddPosition ) {
       m_EquityPositionCallbackInfo.fAddPosition( pPosition );
@@ -1152,7 +1162,7 @@ void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& 
       std::cout << "PortfolioId " << sPortfolioId << " already exists." << std::endl;
     }
     else {
-      ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+      ou::tf::PortfolioManager::Instance().ConstructPortfolio(
         sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
     }
   }
@@ -1215,7 +1225,7 @@ void AppComboTrading::HandleRegisterRows(  ou::db::Session& session ) {
 
 void AppComboTrading::HandlePopulateDatabase( void ) {
 
-  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
@@ -1233,7 +1243,7 @@ void AppComboTrading::HandlePopulateDatabase( void ) {
   std::string sNull;
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
       m_idPortfolioMaster, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "ComboTrading" );
 
   ou::tf::PortfolioManager::Instance().ConstructPortfolio(
@@ -1246,7 +1256,7 @@ void AppComboTrading::HandlePopulateDatabase( void ) {
 //    ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "Currency Monitor" );
 //  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
-    
+
 }
 
 void AppComboTrading::HandleLoadDatabase( void ) {
@@ -1264,13 +1274,13 @@ void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order
       mgr.Register( pInstrument );
     }
 //    if ( 0 == m_pPosition.get() ) {
-//      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
+//      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition(
 //        m_idPortfolioMaster, pInstrument->GetInstrumentName(), "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
 //    }
     ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
     ou::tf::OrderManager::pOrder_t pOrder;
     switch ( order.eOrderType ) {
-    case ou::tf::OrderType::Market: 
+    case ou::tf::OrderType::Market:
       //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
 //      m_pPosition->PlaceOrder( ou::tf::OrderType::Market, order.eOrderSide, order.nQuantity );
       break;
@@ -1302,21 +1312,21 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
     contract.symbol = sName;
     // IB responds only when symbol is found, bad symbols will not illicit a response
     //  m_pPanelManualOrder->SetInstrumentDescription( "" );
-    //m_tws->RequestContractDetails( 
-    //  contract, 
-    //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
-    //m_tws->RequestContractDetails( 
+    //m_tws->RequestContractDetails(
     //  contract,
-    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);}, 
+    //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+    //m_tws->RequestContractDetails(
+    //  contract,
+    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);},
     //  [this](void){HandleIBContractDetailsDone();}
     //  );
-    
-    
+
+
     // 2018/08/03 needs to be redone if it is to be used.
     //namespace args = std::placeholders;
-    //m_tws->RequestContractDetails( 
+    //m_tws->RequestContractDetails(
     //  contract,
-    //  std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ), 
+    //  std::bind( &AppComboTrading::HandleIBContractDetails, this, args::_1, args::_2 ),
     //  std::bind( &AppComboTrading::HandleIBContractDetailsDone, this )
     //  );
   }
@@ -1361,7 +1371,7 @@ void AppComboTrading::HandleSave( wxCommandEvent& event ) {
 }
 
 void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
-  CallAfter( [this](){ // do after main gui action, allows debugging 
+  CallAfter( [this](){ // do after main gui action, allows debugging
     try {
       std::cout << "Loading Config ..." << std::endl;
       std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
@@ -1380,7 +1390,7 @@ void AppComboTrading::OnClose( wxCloseEvent& event ) {
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -1449,7 +1459,7 @@ void AppComboTrading::HandleMenuActionEmitYieldCurve( void ) {
   std::cout << "FedRate: " << std::endl << m_fedrate;
 }
 
-void AppComboTrading::OnAssertFailure( 
+void AppComboTrading::OnAssertFailure(
   const wxChar* file, int line, const wxChar* function, const wxChar* condition, const wxChar* message ) {
   std::cout
     << "wxAssert: "
