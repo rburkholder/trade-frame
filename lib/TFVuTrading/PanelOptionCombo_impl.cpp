@@ -149,6 +149,7 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
   //  });
   //}
   m_gridPositions->SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
+  m_poc.SetDropTarget( pddDataInstrumentTarget );
 
   m_gridPositions->Bind( wxEVT_MOUSEWHEEL,  &PanelOptionCombo_impl::OnMouseWheel, this );
   m_gridPositions->Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
