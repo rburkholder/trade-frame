@@ -152,14 +152,20 @@ bool AppComboTrading::OnInit() {
         return pOption;
       };
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading", wxDefaultPosition, wxSize( 800, 1000 ) );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+  //m_pFrameMain->Bind( wxEVT_MOVE, [this](const wxMoveEvent& event){
+  //  wxPoint point = event.GetPosition();
+  //  std::cout << "FrameMain position: " << point.x << "," << point.y << std::endl;
+  //}, idFrameMain );
   //m_pFrameMain->Center();
-//  m_pFrameMain->Move( -2500, 50 );
-  m_pFrameMain->SetSize( 800, 1000 );
+  //m_pFrameMain->Move( 100, 500 );
+  //m_pFrameMain->SetSize( 800, 1000 );
   SetTopWindow( m_pFrameMain );
+  //wxPoint posFrameMain = m_pFrameMain->GetPosition();
+  //std::cout << "Frame Ppsition: " << posFrameMain.x << "," << posFrameMain.y << std::endl;
 
   wxBoxSizer* psizerMain;
   psizerMain = new wxBoxSizer(wxVERTICAL);
@@ -291,6 +297,9 @@ bool AppComboTrading::OnInit() {
   catch(...) {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
+
+  m_pFrameMain->Move( 100, 500 );
+  m_pFrameMain->Raise();
 
   return 1;
 }
