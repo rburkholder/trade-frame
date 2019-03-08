@@ -52,23 +52,23 @@ PanelCharts::PanelCharts( void ): wxPanel() {
   Init();
 }
 
-PanelCharts::PanelCharts( 
-  wxWindow* parent, wxWindowID id, 
-  const wxPoint& pos, 
-  const wxSize& size, 
+PanelCharts::PanelCharts(
+  wxWindow* parent, wxWindowID id,
+  const wxPoint& pos,
+  const wxSize& size,
   long style ): wxPanel()
 {
-  
+
   Init();
   Create(parent, id, pos, size, style);
-  
+
 }
 
 PanelCharts::~PanelCharts() {
 }
 
 void PanelCharts::Init( void ) {
-  
+
   m_panelSplitterRightPanel = nullptr;
   m_splitter = nullptr;
   m_sizerRight = nullptr;
@@ -104,7 +104,7 @@ bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, c
   m_scrollPM->SetSizer( m_sizerScrollPM );
 */
 
-void PanelCharts::CreateControls() {    
+void PanelCharts::CreateControls() {
 
   PanelCharts* itemPanel1 = this;
 
@@ -128,10 +128,10 @@ void PanelCharts::CreateControls() {
   //m_pTreeSymbols->AppendItem( idRoot, "futures" );
   //m_pTreeSymbols->AppendItem( idRoot, "foptions" );
   //m_pTreeSymbols->AppendItem( idRoot, "portfolios" );
-  
+
   m_pTreeOps = new ou::tf::TreeOps( m_splitter );
   m_pTreeOps->PopulateResources( m_baseResources );
-  
+
   wxTreeItemId item = m_pTreeOps->AddRoot( "Instruments" );  // can be renamed
   boost::shared_ptr<TreeItemRoot> p( new TreeItemRoot( item, m_baseResources, m_resources ) );
   m_pTreeOps->SetRoot( p );
@@ -152,12 +152,12 @@ void PanelCharts::CreateControls() {
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
   Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
-  
+
   // maybe use std::bind now (sometimes std::bind doesn't work with boost aspects)
   namespace args = boost::phoenix::arg_names;
-  
+
   m_connGetInstrumentActions = m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
-  
+
   m_connNewInstrument = m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2, args::arg3 ) );
   m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2, args::arg3 ) );
   m_connEmitValues = m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
@@ -165,7 +165,7 @@ void PanelCharts::CreateControls() {
   m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionChainList, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   m_connChanging = m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
-  
+
 }
 
 // this isn't going to work very well anymore.  many of the provider settings are now in the caller via function callbacks
@@ -190,14 +190,14 @@ void PanelCharts::CreateControls() {
 void PanelCharts::RemoveRightDetail() {
   auto winRightDetail = m_winRightDetail;
   if ( 0 != winRightDetail ) {
-    dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents(); 
+    dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents();
     // perform this afterwards as the DynamicEventTable seems to have problems
-    CallAfter([this,winRightDetail](){ 
+    CallAfter([this,winRightDetail](){
       assert( 0 != winRightDetail );
       m_sizerRight->Detach( winRightDetail );
       assert( winRightDetail->Destroy() );
     } );
-    m_winRightDetail = 0; 
+    m_winRightDetail = 0;
   }
 }
 
@@ -208,7 +208,7 @@ void PanelCharts::ReplaceRightDetail( wxWindow* pWindow ) {
     assert( 0 == m_winRightDetail );
     m_winRightDetail = pWindow;
     m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
-    m_sizerRight->Layout(); 
+    m_sizerRight->Layout();
   });
 }
 
@@ -270,13 +270,13 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
 }
 
 void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
-  
+
   mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
   if ( m_mapItemToInstrument.end() == iterIdItem ) {
     std::cout << "PanelCharts::HandleInstrumentLiveChart: no menuitem" << std::endl;
   }
   else {
-    
+
     RemoveRightDetail();  // remove old content to build new content
 
     m_ChartDataView.Clear();
@@ -321,7 +321,7 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         // obtain instrument name (future requires special handling)
         ou::tf::Instrument::pInstrument_t pUnderlyingInstrument = entry.m_pWatch->GetInstrument();
         std::string sSymbol;
-        switch ( pUnderlyingInstrument->GetInstrumentType() ) { 
+        switch ( pUnderlyingInstrument->GetInstrumentType() ) {
           case ou::tf::InstrumentType::Stock:
             sSymbol = pUnderlyingInstrument->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
             break;
@@ -355,9 +355,9 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
         namespace args = std::placeholders;
         pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
         pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
-        pNotebookOptionChains->m_fOnRowClicked 
+        pNotebookOptionChains->m_fOnRowClicked
           = std::bind( &PanelCharts::HandleGridClick, this, iterIdUnderlyingInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
-        pNotebookOptionChains->m_fOnOptionUnderlyingRetrieve 
+        pNotebookOptionChains->m_fOnOptionUnderlyingRetrieve
           = [this, pUnderlyingInstrument](const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f){
               if ( nullptr != m_fBuildOptionInstrument ) {
                 m_fBuildOptionInstrument( pUnderlyingInstrument, sIQFeedOptionName, date, strike, [pUnderlyingInstrument, f](pInstrument_t pOptionInstrument){
@@ -378,11 +378,11 @@ void PanelCharts::OnOptionChainPageChanging( boost::gregorian::date date ) {
 void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 }
 
-void PanelCharts::HandleGridClick( 
+void PanelCharts::HandleGridClick(
   idInstrument_t idInstrumentUnderlying,
-  boost::gregorian::date date, double strike, bool bSelected, 
+  boost::gregorian::date date, double strike, bool bSelected,
   const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
-  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut ) 
+  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut )
 {
   std::cout << "GridClick: " << date << "," << strike << "," << funcCall.sSymbolName << "," << funcPut.sSymbolName << std::endl;
 //  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
@@ -398,7 +398,7 @@ void PanelCharts::HandleGridClick(
       std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
       std::for_each( vFuncs.begin(), vFuncs.end(),
         [this, &entryUnderlying, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* delegates) {
-          
+
           mapOption_t::iterator iterOption = entryUnderlying.m_mapSelectedChainOptions.find( delegates->sSymbolName );
           if ( entryUnderlying.m_mapSelectedChainOptions.end() == iterOption ) {
             pInstrument_t pInstrument = m_fBuildInstrumentFromIqfeed( delegates->sSymbolName );
@@ -406,8 +406,8 @@ void PanelCharts::HandleGridClick(
             //ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
             ou::tf::option::Option::pOption_t pOption;
             m_fBuildOption( pInstrument, pOption );
-            iterOption 
-              = entryUnderlying.m_mapSelectedChainOptions.insert( 
+            iterOption
+              = entryUnderlying.m_mapSelectedChainOptions.insert(
                 entryUnderlying.m_mapSelectedChainOptions.begin(), mapOption_t::value_type( delegates->sSymbolName, pOption ) );
           }
           // TODO: do/should these be cleaned up on page changes?, or cleaned up upon tree removal?
@@ -455,7 +455,7 @@ void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
 
 // constructs entry in m_mapInstrumentEntry, pInstrument may be equity, future, option, futuresoption
 void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t pInstrument, const std::string& sUnderlying ) {
-  
+
   mapItemToInstrument_t::iterator iterIdItem = m_mapItemToInstrument.find( item.GetID() );
   if ( m_mapItemToInstrument.end() != iterIdItem ) {
     std::cout << "PanelCharts::ConstructInstrumentEntry menu item already exists" << std::endl;
@@ -468,7 +468,7 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
     }
     else {
       signalRegisterInstrument( pInstrument );  // not needed if signalLoadInstrument has been called, does the Dialog do a registration, maybe do the registration there based upon flag from here
-      
+
       pWatch_t pWatch;  // for instrument
       pWatch_t pWatchUnderlying; // set if pWatch turns out to be option
       if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
@@ -493,49 +493,49 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
         m_fBuildWatch( pInstrument, pWatch );
         //pWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
       }
-      
+
       pWatchInfo_t pWatchInfo( new WatchInfo( pWatch ) );
-      iterInstrument 
+      iterInstrument
         = m_mapInstrumentEntry.insert( m_mapInstrumentEntry.begin(), mapInstrumentEntry_t::value_type( idInstrument, InstrumentEntry( pWatch, pWatchInfo ) ) );
-      if ( 0 != pWatchUnderlying.use_count() ) 
+      if ( 0 != pWatchUnderlying.use_count() )
         iterInstrument->second.m_pWatchUnderlying = pWatchUnderlying;
-      
+
       m_mapItemToInstrument.insert( mapItemToInstrument_t::value_type( item.GetID(), idInstrument ) );
     }
   }
 }
 
 // called by anything more than the serialization in TreeItemInstrument?
-void PanelCharts::HandleLoadInstrument( 
-  const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying 
+void PanelCharts::HandleLoadInstrument(
+  const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying
 ) {
   // need to set values/locks somewhere
   ConstructInstrumentEntry( item, signalLoadInstrument( sName ), sUnderlying );
 }
 
 
-InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( 
-  const wxTreeItemId& item, 
+InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
+  const wxTreeItemId& item,
   const ou::tf::Allowed::enumInstrument selector,
   const wxString& wxsUnderlying // optional
 ) {
-  
-  // the item coming in represents the existing menu item 
+
+  // the item coming in represents the existing menu item
   //   which might be a group item, or an instrument item
 
   InstrumentActions::values_t values;
-  
+
   // TODO: turn this into a std::function call
   pInstrument_t pInstrument = m_fSelectInstrument( selector, wxsUnderlying );
-  
+
   if ( nullptr != pInstrument.get() ) {
-    
+
     const std::string sUnderlying( wxsUnderlying );
     ConstructInstrumentEntry( item, pInstrument, sUnderlying );
 
     Instrument::idInstrument_cref idInstrument( pInstrument->GetInstrumentName() );
     values.name_ = idInstrument;
-    
+
     // are these selector types propagated properly?
     //  ie, on load from file, are they set there?
     if ( pInstrument->IsStock() )         values.selector = ou::tf::Allowed::Options;
@@ -544,17 +544,17 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
     if ( pInstrument->IsFuturesOption() ) values.selector = ou::tf::Allowed::None;
 
   }
-  
+
   return values;
 }
 
 void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
-  
+
   //m_pInstrumentActions.reset();
-  
+
   int id1 = event.GetId();
   wxWindowID id2 = this->GetId();
-  
+
   if ( id1 == id2 ) { // ignores 'destroy' of any child window
     m_connGetInstrumentActions.disconnect();
 
@@ -569,8 +569,8 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
     Unbind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
 
   }
-  
-  event.Skip(); 
+
+  event.Skip();
 
 }
 
