@@ -219,7 +219,7 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   // event.CanVeto(); // if not a
   //event.Skip();  // auto followed by Destroy();
 
-  m_gridPositions->Unbind( wxEVT_MOUSEWHEEL,             &PanelOptionCombo_impl::OnMouseWheel, this );
+  m_gridPositions->Unbind( wxEVT_MOUSEWHEEL,  &PanelOptionCombo_impl::OnMouseWheel, this );
   m_poc.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_poc.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   m_poc.Unbind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
