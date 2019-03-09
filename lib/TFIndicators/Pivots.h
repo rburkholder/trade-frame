@@ -15,7 +15,6 @@
 #pragma once
 
 #include <string>
-#include <utility>
 
 #include <OUCommon/Colour.h>
 
@@ -33,7 +32,7 @@ public:
     std::string sName;
     ou::Colour::enumColour colour;
     structPivotInfo( void ) : colour( ou::Colour::Black ) {};
-    structPivotInfo( const std::string &sName_, ou::Colour::enumColour colour_ ) 
+    structPivotInfo( const std::string &sName_, ou::Colour::enumColour colour_ )
       : sName( sName_ ), colour( colour_ ) {};
   };
 
@@ -58,7 +57,7 @@ public:
     assert( ix >= R3 );
     assert( ix <= S3 );
     structPivotInfo pivot( m_sName + m_sPivotNames[ ix ], m_rPivotColours[ ix ] );
-    return pivot_t( m_rPivots[ ix ], pivot ); 
+    return pivot_t( m_rPivots[ ix ], pivot );
   }
   double GetPivotValue( enumPivots ix ) const {
     assert( ix >= R3 );
@@ -77,7 +76,7 @@ public:
   };
 
 protected:
-  
+
 private:
 
   std::string m_sName;
