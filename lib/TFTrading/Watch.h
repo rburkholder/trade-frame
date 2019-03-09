@@ -58,6 +58,7 @@ public:
     int nOpenInterest;
     int nTotalVolume;
     double dblOpen;
+    Summary_t(): nOpenInterest( 0 ), nTotalVolume( 0 ), dblOpen( 0.0 ) {}
   };
 
   Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );
@@ -70,7 +71,7 @@ public:
   bool operator<=( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <= rhs.m_pInstrument->GetInstrumentName(); };
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
-  
+
   void SetProvider( pProvider_t pDataProvider );
   pProvider_t GetProvider( void ) { return m_pDataProvider; };
 
@@ -88,7 +89,7 @@ public:
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
-  
+
   //typedef std::pair<size_t,size_t> stateTimeSeries_t;
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeEnd;
@@ -99,6 +100,7 @@ public:
   virtual void EmitValues( void ) const;
 
   virtual void SaveSeries( const std::string& sPrefix );
+  virtual void SaveSeries( const std::string& sPrefix, const std::string& sDaily );
 
 protected:
 
@@ -115,29 +117,30 @@ protected:
 
   pProvider_t m_pDataProvider;
 
-  std::stringstream m_ss;
-
   unsigned int m_cntWatching;
-  
+
 private:
 
   bool m_bWatchingEnabled;
   bool m_bWatching; // in/out of connected state
-  
 
   Fundamentals_t m_fundamentals;
   Summary_t m_summary;
-  
+
+  ou::tf::Trade::price_t m_PriceMax;
+  ou::tf::Trade::price_t m_PriceMin;
+  ou::tf::Trade::volume_t m_VolumeTotal;
+
   void Initialize( void );
-  
+
   void AddEvents( void );
   void RemoveEvents( void );
-  
+
   void HandleConnecting( int );
   void HandleConnected( int );
   void HandleDisconnecting( int );
   void HandleDisconnected( int );
-  
+
   void EnableWatch();
   void DisableWatch();
 
@@ -146,7 +149,7 @@ private:
 
   void HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol );
   void HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol );
-  
+
   void HandleTimeSeriesAllocation( Trades::size_type count );
 
   template<typename Archive>

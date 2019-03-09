@@ -574,12 +574,12 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
 
 }
 
-void PanelCharts::SaveSeries( const std::string& sPrefix ) {
+void PanelCharts::SaveSeries( const std::string& sPrefix, const std::string& sDaily ) {
   std::for_each( m_mapInstrumentEntry.begin(), m_mapInstrumentEntry.end(),
-    [&sPrefix](mapInstrumentEntry_t::value_type& vt) {
+    [&sPrefix,&sDaily](mapInstrumentEntry_t::value_type& vt) {
       InstrumentEntry& entry( vt.second );
       entry.m_pWatch->EmitValues();
-      entry.m_pWatch->SaveSeries( sPrefix );
+      entry.m_pWatch->SaveSeries( sPrefix, sDaily );
     });
 }
 

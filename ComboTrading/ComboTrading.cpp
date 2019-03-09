@@ -1358,8 +1358,9 @@ void AppComboTrading::HandleSaveValues( void ) {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
     //std::string sPrefix86400sec( "/app/ComboTrading/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
+    static const std::string sPrefix( "/app/ComboTrading" );
     std::string sPrefixSession( "/app/ComboTrading/" + m_sTSDataStreamStarted );
-    m_pPanelCharts->SaveSeries( sPrefixSession );
+    m_pPanelCharts->SaveSeries( sPrefixSession, sPrefix );
     m_libor.SaveSeries( sPrefixSession );
   }
   catch(...) {

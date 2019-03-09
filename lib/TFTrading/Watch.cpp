@@ -29,8 +29,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
-  m_pInstrument( pInstrument ), 
-  m_pDataProvider( pDataProvider ), 
+  m_pInstrument( pInstrument ),
+  m_pDataProvider( pDataProvider ),
+  m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
   m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
 {
   assert( 0 != pInstrument.get() );
@@ -41,7 +42,8 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
 Watch::Watch( const Watch& rhs ) :
   m_pInstrument( rhs.m_pInstrument ),
   m_pDataProvider( rhs.m_pDataProvider ),
-  m_quote( rhs.m_quote ), m_trade( rhs.m_trade ), 
+  m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal ),
+  m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
   m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
 {
   assert( 0 == rhs.m_cntWatching );
@@ -117,7 +119,7 @@ void Watch::HandleDisconnecting( int ) {
 
 // non gui thread
 void Watch::HandleDisconnected( int ) {
-  
+
 }
 
 void Watch::EnableWatch( void ) {
@@ -180,10 +182,10 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
 }
 
 void Watch::EmitValues( void ) const {
-  std::cout << m_pInstrument->GetInstrumentName() << ": " 
+  std::cout << m_pInstrument->GetInstrumentName() << ": "
     << "Cnt=" << m_quotes.Size() << "(q)," << m_trades.Size() << "(t)"
     << ",P=" << m_trade.Price()
-    << ",B=" << m_quote.Bid() 
+    << ",B=" << m_quote.Bid()
     << ",A=" << m_quote.Ask()
     << std::endl;
 }
@@ -195,7 +197,7 @@ void Watch::HandleQuote( const Quote& quote ) {
     //boost::mutex::scoped_lock lock(m_mutexLockAppend);
     m_quotes.Append( quote );
   }
-  
+
   //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
   //if ( 0 != m_OnQuote ) m_OnQuote( quote );
   OnQuote( quote );
@@ -203,6 +205,9 @@ void Watch::HandleQuote( const Quote& quote ) {
 
 void Watch::HandleTrade( const Trade& trade ) {
   m_trade = trade;
+  if ( trade.Price() > m_PriceMax ) m_PriceMax = trade.Price();
+  if ( trade.Price() < m_PriceMin ) m_PriceMin = trade.Price();
+  m_VolumeTotal += trade.Volume();
   //OnPossibleResizeBegin( stateTimeSeries_t( m_trades.Capacity(), m_trades.Size() ) );
   {
     //boost::mutex::scoped_lock lock(m_mutexLockAppend);
@@ -228,6 +233,9 @@ void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
 void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
   m_summary.nOpenInterest = symbol.m_nOpenInterest;
   m_summary.nTotalVolume = symbol.m_nTotalVolume;
+  if ( 0.0 == m_summary.dblOpen ) {
+    m_PriceMax = m_PriceMin = symbol.m_dblOpen;
+  }
   m_summary.dblOpen = symbol.m_dblOpen;
   m_quote = ou::tf::Quote( ou::TimeSource::Instance().External(), symbol.m_dblBid, 0, symbol.m_dblAsk, 0 );
   m_trade = ou::tf::Trade( ou::TimeSource::Instance().External(), symbol.m_dblTrade, 0 );
@@ -235,11 +243,11 @@ void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
 
 void Watch::SaveSeries( const std::string& sPrefix ) {
 
-  std::string sPathName;
-
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   try {
+
+    std::string sPathName;
 
     if ( 0 != m_quotes.Size() ) {
       sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
@@ -248,7 +256,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       HDF5Attributes attrQuotes( dm, sPathName );
       attrQuotes.SetSignature( ou::tf::Quote::Signature() );
       attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
-      attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
+      attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
       attrQuotes.SetProviderType( m_pDataProvider->ID() );
     }
 
@@ -265,11 +273,41 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
 
   }
   catch (...) {
-    std::cout << "Watch::SaveSeries error: " << sPrefix << std::endl;
+    std::cout << "Watch::SaveSeries1 error: " << sPrefix << std::endl;
   }
 
 }
 
+void Watch::SaveSeries( const std::string& sPrefix, const std::string& sDaily ) {
+
+  SaveSeries( sPrefix );
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  std::string sPathName;
+
+  try {
+
+    if ( 0 != m_VolumeTotal ) {
+      ou::tf::Bar bar( m_trade.DateTime(), m_summary.dblOpen, m_PriceMax, m_PriceMin, m_trade.Price(), m_VolumeTotal );
+      ou::tf::Bars bars;
+      bars.Append( bar );
+      sPathName = sDaily + "/daily/" + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::Bars> wtsBars( dm, true, true, 5, 256 );
+      wtsBars.Write( sPathName, &bars );
+      HDF5Attributes attrBars( dm, sPathName );
+      attrBars.SetSignature( ou::tf::Bar::Signature() );
+      attrBars.SetMultiplier( m_pInstrument->GetMultiplier() );
+      attrBars.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+      attrBars.SetProviderType( m_pDataProvider->ID() );
+    }
+
+  }
+  catch (...) {
+    std::cout << "Watch::SaveSeries2 error: " << sPrefix << std::endl;
+  }
+
+}
 
 } // namespace tf
 } // namespace ou

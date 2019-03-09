@@ -59,32 +59,32 @@ namespace tf { // TradeFrame
 class PanelCharts: public wxPanel {
   friend class boost::serialization::access;
 public:
-  
+
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
-  
+
   PanelCharts( void );
-  PanelCharts( wxWindow* parent, wxWindowID id = PANEL_CHARTS_IDNAME, 
-    const wxPoint& pos = PANEL_CHARTS_POSITION, 
-    const wxSize& size = PANEL_CHARTS_SIZE, 
+  PanelCharts( wxWindow* parent, wxWindowID id = PANEL_CHARTS_IDNAME,
+    const wxPoint& pos = PANEL_CHARTS_POSITION,
+    const wxSize& size = PANEL_CHARTS_SIZE,
     long style =         PANEL_CHARTS_STYLE );
   virtual ~PanelCharts();
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id =      PANEL_CHARTS_IDNAME, 
-    const wxPoint& pos = PANEL_CHARTS_POSITION, 
-    const wxSize& size = PANEL_CHARTS_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id =      PANEL_CHARTS_IDNAME,
+    const wxPoint& pos = PANEL_CHARTS_POSITION,
+    const wxSize& size = PANEL_CHARTS_SIZE,
     long style =         PANEL_CHARTS_STYLE );
-  
+
   typedef boost::signals2::signal<void(pInstrument_t)> signalRegisterInstrument_t;
   typedef signalRegisterInstrument_t::slot_type slotRegisterInstrument_t;
   signalRegisterInstrument_t signalRegisterInstrument;
-  
+
   typedef boost::signals2::signal<pInstrument_t(const std::string&), ou::tf::FirstOrDefault<pInstrument_t> > signalLoadInstrument_t;
   typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
   signalLoadInstrument_t signalLoadInstrument;
-  
+
   typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fSymbol_t;
   typedef boost::signals2::signal<void(const std::string&,fSymbol_t)> signalRetrieveOptionList_t;
   typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
@@ -92,7 +92,7 @@ public:
 
   std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
   std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
-  
+
   typedef std::function<void(pInstrument_t)> fBuildOptionInstrumentComplete_t;
 
   typedef std::function<void(pInstrument_t /* underlying */, const std::string& /* iqfeed option name */, boost::gregorian::date, double, fBuildOptionInstrumentComplete_t )> fBuildOptionInstrument_t;
@@ -103,10 +103,10 @@ public:
 
   typedef std::function<void(pOption_t, pWatch_t)> fCalcOptionGreek_Remove_t;
   fCalcOptionGreek_Remove_t m_fCalcOptionGreek_Remove;
-  
+
   typedef std::function<void(pInstrument_t, pOption_t&)> fBuildOption_t;
   fBuildOption_t m_fBuildOption;
-  
+
   typedef std::function<void(pInstrument_t, pWatch_t&)> fBuildWatch_t;
   fBuildWatch_t m_fBuildWatch;
 
@@ -117,25 +117,25 @@ public:
   // called from owner to perform regular updates
   //void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed& libor );  // can this be removed now?
 
-  void SaveSeries( const std::string& sPrefix );
+  void SaveSeries( const std::string& sPrefix, const std::string& sDaily );
 
-protected: 
-  
+protected:
+
   void Init();
   void CreateControls();
-  
+
 private:
-  
-  enum { 
-    ID_Null=wxID_HIGHEST, ID_PANEL_CHARTS, 
+
+  enum {
+    ID_Null=wxID_HIGHEST, ID_PANEL_CHARTS,
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
-  
+
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
-  
+
   ou::tf::GridColumnSizer m_gcsGridOptionChain;
-  
+
   // =======
   // purpose: populates m_chartData for display of indicators on the LiveChartPanel
   // maybe need to put a lock on the structure or the container for threaded greek calc?
@@ -143,7 +143,9 @@ private:
   struct WatchInfo {
   public:
     typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
-    WatchInfo( pWatch_t pWatch ): m_bActive( false ) { Set( pWatch ); }
+    WatchInfo( pWatch_t pWatch )
+    : m_bActive( false )
+    { Set( pWatch ); }
     void Set( pWatch_t pWatch ) {
       //std::cout << "WatchInfo::Set " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       if ( m_bActive ) {
@@ -200,18 +202,19 @@ private:
     bool m_bActive;
     pWatch_t m_pWatch;
     ou::tf::ModelChartHdf5 m_chartData;
+
   };
   // =======
-  
+
   typedef WatchInfo::pWatchInfo_t pWatchInfo_t;
-  
+
   // TODO: better .second to reset chain display when map is cleared
   //   chains shouldn't capture time series
   typedef std::map<std::string,pOption_t> mapOption_t; // iqfeed updates in the option chains
-  
+
   typedef std::map<void*,ou::tf::Instrument::idInstrument_t> mapItemToInstrument_t;
   mapItemToInstrument_t m_mapItemToInstrument;  // translate menu item id to instrument [many::1]
-  
+
   // TODO: need to check move semantics to see if things get watched/unwatched
   struct InstrumentEntry {
     size_t m_cntMenuDependents;
@@ -234,22 +237,22 @@ private:
       m_pWatch.reset();
     }
   };
-  
+
   // unique list of instrument/watches, for all listed instruments
   // instruments have been registered with instrument manager
   // used for saving series, and the underlying for option calcs
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef std::map<idInstrument_t, InstrumentEntry> mapInstrumentEntry_t;
   mapInstrumentEntry_t m_mapInstrumentEntry;
-  
+
   //pProvider_t m_pData1Provider;
   //pProvider_t m_pData2Provider;
   //pProvider_t m_pExecutionProvider;
-  
+
   ou::tf::TreeItemResources m_baseResources;
   Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
-  
+
   boost::signals2::connection m_connGetInstrumentActions;
   boost::signals2::connection m_connNewInstrument;
   boost::signals2::connection m_connLoadInstrument;
@@ -258,53 +261,53 @@ private:
   boost::signals2::connection m_connOptionList;
   boost::signals2::connection m_connDelete;
   boost::signals2::connection m_connChanging;
-  
+
   ou::ChartDataView m_ChartDataView;
-  
+
   wxWindow* m_winRightDetail;
-  
+
   wxPanel* m_panelSplitterRightPanel;
   wxSplitterWindow* m_splitter;
   wxBoxSizer* m_sizerRight;
-  
+
   void HandleTreeOpsChanging( wxTreeItemId id );
-  
-  InstrumentActions::values_t HandleNewInstrumentRequest( 
-    const wxTreeItemId& item, 
+
+  InstrumentActions::values_t HandleNewInstrumentRequest(
+    const wxTreeItemId& item,
     const ou::tf::Allowed::enumInstrument,
     const wxString& sUnderlying
   );
-  
+
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
   void ConstructInstrumentEntry( const wxTreeItemId& item, pInstrument_t, const std::string& sUnderlying );
-  
+
   void HandleInstrumentLiveChart( const wxTreeItemId& );
 
   void HandleEmitValues( const wxTreeItemId& );
   void HandleOptionChainList( const wxTreeItemId& );
-  
+
   void HandleMenuItemDelete( const wxTreeItemId& id );
-  
+
   void RemoveRightDetail();
   void ReplaceRightDetail( wxWindow* );
-  void HandleGridClick( 
+  void HandleGridClick(
     idInstrument_t,
     boost::gregorian::date date, double strike, bool bSelected,
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
     const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut );
-  
+
   void OnOptionChainPageChanging( boost::gregorian::date );
   void OnOptionChainPageChanged( boost::gregorian::date );
-  
+
   pInstrumentActions_t HandleGetInstrumentActions( const wxTreeItemId& );
 
   void OnClose( wxCloseEvent& event );
   void OnWindowDestroy( wxWindowDestroyEvent& );
-  
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & m_splitter->GetSashPosition();
