@@ -38,6 +38,7 @@ public:
   typedef unsigned long volume_t;
   typedef volume_t tradesize_t;
   typedef volume_t quotesize_t;
+  typedef boost::posix_time::ptime dt_t;
 
   typedef double price_t;
 
@@ -63,7 +64,7 @@ public:
   static boost::uint64_t Signature( void ) { return 9; };
 
 protected:
-  ptime m_dt;
+  dt_t m_dt;
 private:
 };
 
@@ -81,8 +82,8 @@ public:
   Quote( const ptime& dt );
   Quote( const Quote& quote );
   Quote( const ptime& dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
-  Quote( const std::string& dt, 
-    const std::string& bid, const std::string& bidsize, 
+  Quote( const std::string& dt,
+    const std::string& bid, const std::string& bidsize,
     const std::string& ask, const std::string& asksize );
   virtual ~Quote( void );
 
@@ -148,7 +149,7 @@ public:
   Bar( const ptime& dt );
   Bar( const Bar& bar );
   Bar( const ptime& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
-  Bar( const std::string& dt, const std::string& open, const std::string& high, 
+  Bar( const std::string& dt, const std::string& open, const std::string& high,
     const std::string& low, const std::string& close, const std::string& volume );
   ~Bar (void );
 
@@ -176,7 +177,7 @@ private:
   volume_t m_nVolume;
 };
 
-// 
+//
 // MarketDepth
 //
 
@@ -190,7 +191,7 @@ public:
   MarketDepth( const ptime& dt );
   MarketDepth( const MarketDepth& md );
   MarketDepth( const ptime& dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  MarketDepth( const std::string& dt, char chSide, const std::string& shares, 
+  MarketDepth( const std::string& dt, char chSide, const std::string& shares,
     const std::string& price, const std::string& mmid );
    ~MarketDepth(void);
 
@@ -198,7 +199,7 @@ public:
   price_t Price( void ) const { return m_dblPrice; };
   volume_t Volume( void ) const { return m_nShares; };
 
-  ESide m_eSide; 
+  ESide m_eSide;
   const char& MMIDStr( void ) const { return *m_uMMID.rch; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
