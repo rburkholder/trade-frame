@@ -55,6 +55,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_ceBars.AppendBar( *iter );
     m_ceVolume.Append( iter->DateTime(), iter->Volume() );
   }
+
 }
 
 void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
@@ -162,11 +163,11 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
-  
+
   //pChartDataView->Clear();
 
   // Quotes
-  
+
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
   //m_ceVolumeUpper.SetColour( ou::Colour::Red );
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
@@ -179,7 +180,7 @@ void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
   pChartDataView->Add( 2, &m_ceQuoteSpread );
 
   // Trades
-  
+
   m_ceTrade.SetColour( ou::Colour::Green );
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceTrade );
@@ -187,16 +188,16 @@ void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const Equities& equities ) {
-  
+
   DefineChartEquities( pChartDataView );
-  
+
   // Quotes
   m_ceQuoteUpper.Clear();
   //m_ceVolumeUpper.Clear();
   m_ceQuoteLower.Clear();
   //m_ceVolumeLower.Clear();
   m_ceQuoteSpread.Clear();
-  for ( ou::tf::Quotes::const_iterator iter 
+  for ( ou::tf::Quotes::const_iterator iter
           = equities.quotes.begin(); equities.quotes.end() != iter; ++iter ) {
     m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
     //m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
@@ -208,7 +209,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   // Trades
   m_ceTrade.Clear();
   m_ceVolume.Clear();
-  for ( ou::tf::Trades::const_iterator iter 
+  for ( ou::tf::Trades::const_iterator iter
           = equities.trades.begin(); equities.trades.end() != iter; ++iter ) {
     m_ceTrade.Append( iter->DateTime(), iter->Price() );
     m_ceVolume.Append( iter->DateTime(), iter->Volume() );
@@ -216,11 +217,11 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
 }
 
 void ModelChartHdf5::DefineChartOptions( ou::ChartDataView* pChartDataView ) {
-  
+
   //pChartDataView->Clear();
-  
+
   DefineChartEquities( pChartDataView );
-  
+
   m_ceImpVol.SetColour( ou::Colour::Black );
   m_ceDelta.SetColour( ou::Colour::Black );
   m_ceGamma.SetColour( ou::Colour::Black );
@@ -236,19 +237,19 @@ void ModelChartHdf5::DefineChartOptions( ou::ChartDataView* pChartDataView ) {
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const Options& options ) {
-  
+
   DefineChartOptions( pChartDataView );
-  
+
   Equities equities( options.quotes, options.trades );
   AddChartEntries( pChartDataView, equities );
-  
+
   m_ceImpVol.Clear();
   m_ceDelta.Clear();
   m_ceGamma.Clear();
   m_ceTheta.Clear();
   m_ceVega.Clear();
   m_ceRho.Clear();
-  for ( ou::tf::Greeks::const_iterator iter 
+  for ( ou::tf::Greeks::const_iterator iter
           = options.greeks.begin(); options.greeks.end() != iter; ++iter ) {
     m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
     m_ceDelta.Append( iter->DateTime(), iter->Delta() );
@@ -260,7 +261,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
 }
 
 void ModelChartHdf5::HandleQuote( const ou::tf::Quote& quote ) {
- 
+
   if ( !quote.IsValid() ) {
     std::cout << "InvalidQuote: " << quote.Ask() << "," << quote.Bid() << std::endl;
     return;
@@ -276,24 +277,24 @@ void ModelChartHdf5::HandleQuote( const ou::tf::Quote& quote ) {
 }
 
 void ModelChartHdf5::HandleTrade( const ou::tf::Trade& trade ) {
-  
+
   boost::posix_time::ptime dt( trade.DateTime() );
-  
+
   m_ceTrade.Append( dt, trade.Price() );
   m_ceVolume.Append( dt, trade.Volume() );
 }
 
 void ModelChartHdf5::HandleGreek( const ou::tf::Greek& greek ) {
-  
+
   boost::posix_time::ptime dt( greek.DateTime() );
-  
+
   m_ceImpVol.Append( dt, greek.ImpliedVolatility() );
   m_ceDelta.Append( dt, greek.Delta() );
   m_ceGamma.Append( dt, greek.Gamma() );
   m_ceTheta.Append( dt, greek.Theta() );
   m_ceVega.Append( dt, greek.Vega() );
   m_ceRho.Append( dt, greek.Rho() );
-  
+
 }
 
 
