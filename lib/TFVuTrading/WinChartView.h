@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   WinChartView.h
  * Author: raymond@burkholder.net
  *
@@ -19,7 +19,7 @@
  */
 
 // includes own gui refresh function
-// needs to be supplied with a ou::ChartDataView
+// usage note:  needs to be supplied with a ou::ChartDataView
 
 #pragma once
 
@@ -37,9 +37,6 @@
 
 #include <TFVuTrading/InterfaceBoundEvents.h>
 
-// replace this with CallAfter?
-#include "EventDrawChart.h"
-
 #define SYMBOL_WIN_CHARTINTERACTIVE_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_WIN_CHARTINTERACTIVE_TITLE _("Window Interactive Chart")
 #define SYMBOL_WIN_CHARTINTERACTIVE_IDNAME ID_WINDOW_CHARTINTERACTIVE
@@ -51,78 +48,80 @@ namespace tf { // TradeFrame
 
 class WinChartView: public wxWindow, public InterfaceBoundEvents {
 public:
-  
+
   WinChartView();
-  WinChartView( wxWindow* parent, wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME, 
-    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION, 
-    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE, 
+  WinChartView( wxWindow* parent, wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME,
+    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION,
+    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE,
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME, 
-    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION, 
-    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME,
+    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION,
+    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE,
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
   virtual ~WinChartView();
-  
+
   void SetChartDataView( ou::ChartDataView* m_pChartDataView );
-  ou::ChartDataView* GetChartDataView( void ) { return m_pChartDataView; }
+  ou::ChartDataView* GetChartDataView( void ) const { return m_pChartDataView; }
 
   // really don't want these here, but necessary to deal with searchdynamiceventtable issues
   virtual void BindEvents();
   virtual void UnbindEvents();
-  
+
 protected:
-  
+
   void Init();
   void CreateControls();
-  
-  void DrawChart( void );
-  
-private:
-  
-  typedef ou::tf::EventDrawChart::pwxBitmap_t pwxBitmap_t;
 
-  enum { 
+  void DrawChart( void );
+
+private:
+
+  typedef boost::shared_ptr<wxBitmap> pwxBitmap_t;
+
+  enum {
     ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
   };
-  
+
   boost::posix_time::time_duration m_tdViewPortWidth;
-  
+
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView*  m_pChartDataView;
-  
+
   wxTimer m_timerGuiRefresh;
   bool m_bInDrawChart;
-  
+
   pwxBitmap_t m_pChartBitmap;
-  
+
   bool m_bThreadDrawChartActive;
   boost::mutex m_mutexThreadDrawChart;
   boost::condition_variable m_cvThreadDrawChart;
   boost::thread* m_pThreadDrawChart;
-  
+
   bool m_bBound;
-  
+
   void ThreadDrawChart1( void );  // thread starts here
   void ThreadDrawChart2( const MemBlock& m );  // a callback here to perform bitmap
-  void HandleGuiDrawChart( EventDrawChart& event );
+  //void HandleGuiDrawChart( EventDrawChart& event );
   void StartThread( void );
   void StopThread( void );
+
+  void UpdateChartMaster();
 
   void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
-  
+
   void HandleMouse( wxMouseEvent& event );
   void HandleMouseEnter( wxMouseEvent& event );
   void HandleMouseLeave( wxMouseEvent& event );
   void HandleMouseWheel( wxMouseEvent& event );
-  
+
   void OnDestroy( wxWindowDestroyEvent& event );
-  
+
   void HandleGuiRefresh( wxTimerEvent& event );
-  
+
   void ManualDraw( void ); // code placeholder for now
 
 };

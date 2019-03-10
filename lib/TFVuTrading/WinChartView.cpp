@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   WinChartView.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on October 16, 2016, 5:53 PM
  */
 
@@ -35,30 +35,30 @@ WinChartView::WinChartView(): wxWindow() {
   Init();
 }
 
-WinChartView::WinChartView( 
-  wxWindow* parent, wxWindowID id, 
-  const wxPoint& pos, 
-  const wxSize& size, 
+WinChartView::WinChartView(
+  wxWindow* parent, wxWindowID id,
+  const wxPoint& pos,
+  const wxSize& size,
   long style )
 {
-  
-  Init(); // binds and variables needed before 
+
+  Init(); // binds and variables needed before
   Create(parent, id, pos, size, style);
-  
+
 }
 
 WinChartView::~WinChartView() {
-  
+
 }
 
 void WinChartView::Init( void ) {
-  
+
   m_bBound = false;
   m_bInDrawChart = false;
   m_bThreadDrawChartActive = false;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
-  
+
 }
 
 bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -73,7 +73,7 @@ bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
 }
 
 void WinChartView::BindEvents() {
-  
+
   if ( !m_bBound ) {
 
     Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
@@ -81,26 +81,24 @@ void WinChartView::BindEvents() {
 
     Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
     Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-    Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
     Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-
-    Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
 
     // this GuiRefresh initialization should come after all else
     m_timerGuiRefresh.SetOwner( this );
     Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
     m_timerGuiRefresh.Start( 250 );
-    
+
     m_bBound = true;
   }
-  
+
 }
 
-void WinChartView::CreateControls() {    
-  
+void WinChartView::CreateControls() {
+
   //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
-  
+
   BindEvents();
 
 }
@@ -117,16 +115,17 @@ void WinChartView::StopThread( void ) {
   m_pThreadDrawChart = 0;
 }
 
-// called from PanelCharts::HandleInstrumentLiveChart -> WinChartView::SetChartDataView
+// called from PanelChartHdf5::LoadDataAndGenerateChart
+// called from PanelCharts::HandleInstrumentLiveChart
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
-  if ( m_bThreadDrawChartActive ) 
+  if ( m_bThreadDrawChartActive )
     StopThread();
   m_pChartDataView = pChartDataView;
-  if ( nullptr != m_pChartDataView ) 
+  if ( nullptr != m_pChartDataView )
     StartThread();
 }
 
-void WinChartView::HandleMouse( wxMouseEvent& event ) { 
+void WinChartView::HandleMouse( wxMouseEvent& event ) {
   //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
   //if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
   //if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
@@ -145,8 +144,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   bool bShift = event.ShiftDown();
   bool bControl = event.ControlDown();
   bool bAlt = event.AltDown();
-  //std::cout 
-  //      << "Wheel: " << delta << "," << rotation << ",sca:" 
+  //std::cout
+  //      << "Wheel: " << delta << "," << rotation << ",sca:"
   //    << bShift << bControl << bAlt
   //    << std::endl;
 
@@ -159,7 +158,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     m_tdViewPortWidth *= 10;
     m_tdViewPortWidth /= 12;
   }
-  
+
   DrawChart();
   //event.Skip();
 }
@@ -183,8 +182,8 @@ void WinChartView::HandlePaint( wxPaintEvent& event ) {
 
 // placeholder for unused code
 void WinChartView::ManualDraw( void ) {
-  
-// ====  
+
+// ====
   if ( 0 != m_pChartDataView ) {
     try {
       //m_bPaintingChart = true;
@@ -201,7 +200,7 @@ void WinChartView::ManualDraw( void ) {
 }
 
 
-void WinChartView::HandleSize( wxSizeEvent& event ) { 
+void WinChartView::HandleSize( wxSizeEvent& event ) {
   // let the timer do the refresh instead?
   //this->RefreshRect( this->GetClientRect(), false );
   DrawChart();
@@ -232,7 +231,7 @@ void WinChartView::ThreadDrawChart1( void ) {
       // chart moves at 1s step - not sure if this is trader friendly though
       static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
       boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-      boost::posix_time::ptime dtEnd = now + td; 
+      boost::posix_time::ptime dtEnd = now + td;
 
       boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
@@ -242,35 +241,37 @@ void WinChartView::ThreadDrawChart1( void ) {
       m_pChartDataView->SetViewPort( dtBegin, dtEnd );
       m_pChartDataView->SetThreadSafe( true );
 
-      wxSize size = this->GetClientSize();  // may not be able to do this cross thread
-      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetChartDataView( m_pChartDataView );
-      // could use lambda instead here
-      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::ThreadDrawChart2 ) );  // this line could be factored out?
-      m_chartMaster.DrawChart( );
+      UpdateChartMaster();
     }
   }
 }
 
-// background thread to draw composed chart into memory, and send to gui thread 
+void WinChartView::UpdateChartMaster() {
+  wxSize size = this->GetClientSize();  // may not be able to do this cross thread
+  m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+  m_chartMaster.SetChartDataView( m_pChartDataView );
+  // could use lambda instead here
+  m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::ThreadDrawChart2 ) );  // this line could be factored out?
+  m_chartMaster.DrawChart( );
+}
+
+// background thread to draw composed chart into memory, and send to gui thread
 void WinChartView::ThreadDrawChart2( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );  // need this
   pwxBitmap_t p( new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
-  QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) ); // which will invoke HandleGuiDrawChart
-}
-
-// triggered by ThreadDrawChart2
-// event in gui thread to draw on display from memory, bit map remains for use in HandlePaint
-void WinChartView::HandleGuiDrawChart( EventDrawChart& event ) {
-  if ( 0 != m_pChartBitmap.use_count() ) m_pChartBitmap.reset();
-  m_pChartBitmap = event.GetBitmap();
-  wxClientDC dc( this );
-  dc.DrawBitmap( *m_pChartBitmap, 0, 0);
-  m_bInDrawChart = false;
+  //QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) ); // which will invoke HandleGuiDrawChart
+  CallAfter([this,p](){
+    if ( 0 != m_pChartBitmap.use_count() ) m_pChartBitmap.reset();
+    m_pChartBitmap = p;  //  bit map remains for use in HandlePaint
+    wxClientDC dc( this );
+    dc.DrawBitmap( *m_pChartBitmap, 0, 0);
+    m_bInDrawChart = false;
+  });
 }
 
 // this is superceded by ThreadDrawChart2/HandleGuiDrawChart when crossing threads
 // http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
+// placeholder from ManualDraw
 void WinChartView::HandleDrawChart( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );
   wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
@@ -279,12 +280,10 @@ void WinChartView::HandleDrawChart( const MemBlock& m ) {
 }
 
 void WinChartView::UnbindEvents( void ) {
-  
-  if ( m_bBound ) {
-    
-    SetChartDataView( nullptr );
 
-    assert( Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this ) );
+  if ( m_bBound ) {
+
+    SetChartDataView( nullptr );
 
     m_timerGuiRefresh.Stop();
     assert( Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() ) );
@@ -294,7 +293,7 @@ void WinChartView::UnbindEvents( void ) {
 
     assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this ) );
     assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this ) );
-    assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this ) );  
+    assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this ) );
     assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this ) );
 
     m_bBound = false;
@@ -303,11 +302,11 @@ void WinChartView::UnbindEvents( void ) {
 }
 
 void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
-  
+
   UnbindEvents();
-  
+
   assert( Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this ) );
-  
+
   event.Skip();  // auto followed by Destroy();
 }
 
