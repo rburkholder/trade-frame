@@ -24,14 +24,14 @@
 namespace ou { // One Unified
 namespace local {
 
-// ChartDataView contains the CChartEntries and related sub-chart 
-//   to be viewed in a master chart viewport 
+// ChartDataView contains the CChartEntries and related sub-chart
+//   to be viewed in a master chart viewport
 
 class ChartDataViewCarrier { // used by ChartViewPort objects to chart data
 public:
   //ChartDataViewCarrier( void );
   ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry );
-//  ChartDataViewCarrier( ChartDataViewCarrier& carrier );
+  ChartDataViewCarrier( const ChartDataViewCarrier& carrier );
   ~ChartDataViewCarrier( void );
   size_t GetLogicalChartId( void ) const { return m_nLogicalChart; };
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
@@ -61,14 +61,14 @@ public:
   virtual ~ChartDataView(void);
 
   void Add( size_t nChart, ChartEntryBase* pEntry );  // could try boost::fusion here?  some crtp stuff?
-  iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
-  iterator end( void ) { return m_vChartDataViewEntry.end(); };
+  iterator begin( void ) { return m_vChartDataViewCarrier.begin(); };
+  iterator end( void ) { return m_vChartDataViewCarrier.end(); };
   const std::string& GetStrategy( void ) const { return m_sStrategy; };
   const std::string& GetName( void ) const { return m_sName; };
   void Clear( void );  // remove stuff in order to reuse.
   size_t GetChartCount( void ) const{ return m_mapCntChartIndexes.size(); };
-  void SetChanged(void) { m_bChanged = true; };
-  bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
+  void SetChanged(void);
+  bool GetChanged(void);
 
   // should reprocess m_vChartDataViewEntry when these are called
   void SetThreadSafe( bool bThreadSafe );
@@ -89,19 +89,19 @@ private:
     size_t ixActualChartId;  // actual chart index
     size_t nCharts;  // number of charts at this index
     explicit structChartMapping( void ) : ixActualChartId( 0 ), nCharts( 0 ) {};
-    explicit structChartMapping( const structChartMapping& obj ) 
+    explicit structChartMapping( const structChartMapping& obj )
       : ixActualChartId( obj.ixActualChartId ), nCharts( obj.nCharts ) {};
-    structChartMapping& operator=( const structChartMapping &obj ) { 
-      ixActualChartId = obj.ixActualChartId; 
-      nCharts = obj.nCharts; 
-      return *this; 
+    structChartMapping& operator=( const structChartMapping &obj ) {
+      ixActualChartId = obj.ixActualChartId;
+      nCharts = obj.nCharts;
+      return *this;
     };
   };
 
   //typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
   typedef std::map<boost::uint64_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
 
-  typedef std::vector<local::ChartDataViewCarrier> vChartDataViewEntry_t;
+  typedef std::vector<local::ChartDataViewCarrier> vChartDataViewCarrier_t;
 
   bool m_bChanged;
   bool m_bThreadSafe;   // propagated into ChartEntries for value append operations across thread boundaries
@@ -113,7 +113,7 @@ private:
 
   mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
 
-  vChartDataViewEntry_t m_vChartDataViewEntry;
+  vChartDataViewCarrier_t m_vChartDataViewCarrier;
 
 };
 

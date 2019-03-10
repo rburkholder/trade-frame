@@ -22,8 +22,15 @@ namespace local {
 // CChartDataViewCarrier
 //
 
-ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry ) 
+ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry )
 : m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
+{
+}
+
+ChartDataViewCarrier::ChartDataViewCarrier( const ChartDataViewCarrier& rhs )
+: m_nLogicalChart( rhs.m_nLogicalChart ),
+  m_nActualChart( rhs.m_nActualChart ),
+  m_pChartEntry( rhs.m_pChartEntry )
 {
 }
 
@@ -35,12 +42,11 @@ ChartDataViewCarrier::~ChartDataViewCarrier() {
 
 } // local
 
-
-// 
+//
 // CChartDataView
 //
 
-ChartDataView::ChartDataView( void ) 
+ChartDataView::ChartDataView( void )
   : m_bChanged( false ), m_bThreadSafe( false ),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
     m_dtViewPortEnd( boost::posix_time::not_a_date_time )
@@ -49,12 +55,26 @@ ChartDataView::ChartDataView( void )
 
 ChartDataView::~ChartDataView( void ) {
 //  assert( m_bClosed );
-  m_vChartDataViewEntry.clear();
+  m_vChartDataViewCarrier.clear();
+  m_mapCntChartIndexes.clear();
 }
 
-void ChartDataView::SetThreadSafe( bool bThreadSafe ) { 
-  m_bThreadSafe = bThreadSafe; 
-  for ( vChartDataViewEntry_t::iterator iter = m_vChartDataViewEntry.begin(); m_vChartDataViewEntry.end() != iter; ++iter ) {
+void ChartDataView::SetChanged(void) {
+  m_bChanged = true;
+}
+
+bool ChartDataView::GetChanged(void) {
+  bool b = m_bChanged;
+  if ( b ) {
+    m_bChanged = false;
+  }
+  return b;
+}
+
+
+void ChartDataView::SetThreadSafe( bool bThreadSafe ) {
+  m_bThreadSafe = bThreadSafe;
+  for ( vChartDataViewCarrier_t::iterator iter = m_vChartDataViewCarrier.begin(); m_vChartDataViewCarrier.end() != iter; ++iter ) {
     iter->GetChartEntry()->SetThreadSafe( bThreadSafe );
   }
 }
@@ -62,10 +82,10 @@ void ChartDataView::SetThreadSafe( bool bThreadSafe ) {
 void ChartDataView::Add(size_t nChart, ChartEntryBase* pEntry ) {
   pEntry->SetThreadSafe( m_bThreadSafe );
   local::ChartDataViewCarrier carrier( nChart, pEntry );
-  m_vChartDataViewEntry.push_back( carrier );
+  m_vChartDataViewCarrier.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;
   iter1 = m_mapCntChartIndexes.find( nChart );
-  if ( m_mapCntChartIndexes.end() == iter1 ) { 
+  if ( m_mapCntChartIndexes.end() == iter1 ) {
     // need to add new mapping
     structChartMapping mapping;
     mapping.nCharts = 1;
@@ -76,22 +96,22 @@ void ChartDataView::Add(size_t nChart, ChartEntryBase* pEntry ) {
       iter3->second.ixActualChartId = ix++;
     }
     // need to update actualchartid's in all the carriers.
-    for ( vChartDataViewEntry_t::iterator iter2 = m_vChartDataViewEntry.begin();
-      m_vChartDataViewEntry.end() != iter2; ++iter2 ) {
+    for ( vChartDataViewCarrier_t::iterator iter2 = m_vChartDataViewCarrier.begin();
+      m_vChartDataViewCarrier.end() != iter2; ++iter2 ) {
         iter3 = m_mapCntChartIndexes.find( (*iter2).GetLogicalChartId() );
         (*iter2).SetActualChartId( iter3->second.ixActualChartId );
     }
   }
   else {
     ++(iter1->second.nCharts);
-    m_vChartDataViewEntry.back().SetActualChartId( iter1->second.ixActualChartId );
+    m_vChartDataViewCarrier.back().SetActualChartId( iter1->second.ixActualChartId );
   }
-  
+
 }
 
 void ChartDataView::Clear( void ) {
   m_mapCntChartIndexes.clear();
-  m_vChartDataViewEntry.clear();
+  m_vChartDataViewCarrier.clear();
 }
 
 //void ChartDataView::Close() {
@@ -104,7 +124,7 @@ void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_
   m_dtViewPortBegin = dtBegin;
   m_dtViewPortEnd = dtEnd;
   // need to change DataArrays in each entry
-  for ( vChartDataViewEntry_t::iterator iter = m_vChartDataViewEntry.begin(); m_vChartDataViewEntry.end() != iter; ++iter ) {
+  for ( vChartDataViewCarrier_t::iterator iter = m_vChartDataViewCarrier.begin(); m_vChartDataViewCarrier.end() != iter; ++iter ) {
     ChartEntryTime* p( dynamic_cast<ChartEntryTime*>( iter->GetChartEntry() ) );
     if ( 0 != p ) {
       p->SetViewPort( dtBegin, dtEnd );
