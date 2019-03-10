@@ -16,15 +16,6 @@
 
 #include <iostream>
 
-#include <math.h>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/lexical_cast.hpp>
-//#include <boost/filesystem.hpp>
-#include <boost/timer/timer.hpp>
-
-#include <boost/foreach.hpp>
-
 #include "Hdf5Chart.h"
 
 IMPLEMENT_APP(AppHdf5Chart)
@@ -109,7 +100,7 @@ bool AppHdf5Chart::OnInit() {
 //  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
 //    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
 //  }
-  
+
 //  std::string sDbName( "HedgedBollingerX.db" );
 //  if ( boost::filesystem::exists( sDbName ) ) {
 //    boost::filesystem::remove( sDbName );
@@ -134,6 +125,9 @@ bool AppHdf5Chart::OnInit() {
 }
 
 void AppHdf5Chart::HandleGuiRefresh( wxTimerEvent& event ) {
+
+  std::cout << "AppHdf5Chart::HandleGuiRefresh" << std::endl;
+
   //m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 
   // Process IV Calc once a minute
@@ -154,6 +148,7 @@ void AppHdf5Chart::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 int AppHdf5Chart::OnExit() {
+  std::cout << "AppHdf5Chart::OnExit" << std::endl;
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
@@ -168,12 +163,13 @@ int AppHdf5Chart::OnExit() {
 
 
 void AppHdf5Chart::OnClose( wxCloseEvent& event ) {
+  std::cout << "AppHdf5Chart::OnClose" << std::endl;
   // Exit Steps: #2 -> FrameMain::OnClose
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -223,7 +219,7 @@ void AppHdf5Chart::HandleRegisterRows(  ou::db::Session& session ) {
 
 void AppHdf5Chart::HandlePopulateDatabase( void ) {
 /*
-  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
@@ -239,11 +235,11 @@ void AppHdf5Chart::HandlePopulateDatabase( void ) {
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
   m_pPortfolioCurrencyUSD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 */
 }
