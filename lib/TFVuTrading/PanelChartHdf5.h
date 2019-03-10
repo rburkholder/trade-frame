@@ -16,11 +16,13 @@
 
 // Started 2013/10/06
 
+// used by Hdf5Chart
+
 #include <wx/treectrl.h>
 
-#include <OUCharting/ChartMaster.h>
-
 #include "ModelChartHdf5.h"
+
+#include "WinChartView.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -35,17 +37,17 @@ class PanelChartHdf5: public wxPanel {
 public:
 
   PanelChartHdf5(void);
-  PanelChartHdf5( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE, 
+  PanelChartHdf5(
+    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME,
+    const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION,
+    const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
   virtual ~PanelChartHdf5(void);
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME,
+    const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION,
+    const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
 
   wxBitmap GetBitmapResource( const wxString& name );
@@ -71,9 +73,8 @@ private:
 
   ou::tf::HDF5DataManager* m_pdm;
 
-  wxWindow* m_winChart;
-  ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
+  WinChartView* m_pWinChartView;
 
   ModelChartHdf5 m_ModelChartHdf5;
 
@@ -89,10 +90,6 @@ private:
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
-
-  void HandleDrawChart( const MemBlock& );
-  void HandlePaint( wxPaintEvent& event );
-  void HandleSize( wxSizeEvent& event );
 
   void HandleBuildTreePathParts( const std::string& sPath );
 

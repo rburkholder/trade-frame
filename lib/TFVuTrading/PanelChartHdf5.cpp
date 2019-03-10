@@ -19,32 +19,31 @@
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
-#include <wx/mstream.h>
-#include <wx/bitmap.h>
 #include <wx/splitter.h>
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "PanelChartHdf5.h"
 
+// TODO: make use of smart pointers
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelChartHdf5::PanelChartHdf5(void): m_pChartDataView( 0 ), m_winChart( 0 ), m_pdm( 0 ) {
+PanelChartHdf5::PanelChartHdf5(void): m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr ) {
   Init();
 }
 
 PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-  : m_pChartDataView( 0 ), m_winChart( 0 ), m_pdm( 0 ) {
+  : m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr ) {
   Init();
   Create(parent, id, pos, size, style);
 }
 
 PanelChartHdf5::~PanelChartHdf5(void) {
-  m_chartMaster.SetChartDataView( 0 );
-  if ( 0 != m_pChartDataView ) delete m_pChartDataView;
-  if ( 0 != m_winChart ) delete m_winChart;
-  if ( 0 != m_pdm ) delete m_pdm;
+  m_pWinChartView->SetChartDataView( nullptr );
+  if ( nullptr != m_pChartDataView ) delete m_pChartDataView;
+  if ( nullptr != m_pdm ) delete m_pdm;
 }
 
 void PanelChartHdf5::Init() {
@@ -62,7 +61,7 @@ bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos
   return true;
 }
 
-void PanelChartHdf5::CreateControls() {    
+void PanelChartHdf5::CreateControls() {
 
     PanelChartHdf5* itemPanel1 = this;
 
@@ -106,21 +105,18 @@ void PanelChartHdf5::CreateControls() {
 
   //m_bPaintingChart = false;
   //m_bReadyToDrawChart = false;
-  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
-  wxWindowID idChart = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &PanelChartHdf5::HandlePaint, this, idChart );
-  m_winChart->Bind( wxEVT_SIZE, &PanelChartHdf5::HandleSize, this, idChart );
+  m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+  sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 
   m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
 
-  m_sCurrentPath = "/";  
+  m_sCurrentPath = "/";
 
   namespace args = boost::phoenix::placeholders;
-  ou::tf::hdf5::IterateGroups ig( 
-    "/", 
-    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Group, this, args::arg1, args::arg2 ), 
-    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 ) 
+  ou::tf::hdf5::IterateGroups ig(
+    "/",
+    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Group, this, args::arg1, args::arg2 ),
+    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 )
     );
 
   Bind( wxEVT_CLOSE_WINDOW, &PanelChartHdf5::OnClose, this );  // start close of windows and controls
@@ -130,12 +126,12 @@ void PanelChartHdf5::CreateControls() {
 void PanelChartHdf5::OnClose( wxCloseEvent& event ) {
 
   delete m_pdm;
-  m_pdm = 0;
+  m_pdm = nullptr;
 
   // Exit Steps: #2 -> FrameMain::OnClose
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -143,7 +139,6 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData::Quotes;
   if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData::Trades;
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
-  //if ( "AtmIV" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
   m_sCurrentPath = s1;
@@ -179,6 +174,8 @@ void PanelChartHdf5::HandleBuildTreePathParts( const std::string& sPathPart ) {
 
 void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
+  std::cout << "PanelChartHdf5::HandleTreeEventItemActivated" << std::endl;
+
   wxTreeItemId id = event.GetItem();
 
   wxTreeItemId id2 = id;
@@ -208,52 +205,24 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
   }
 
   std::cout << sPath << std::endl;
-  
+
 }
 
 //void PanelChartHdf5::HandleMenuActionStartChart( void ) {
 //  m_bReadyToDrawChart = true;
 //  m_pChart = new ChartTest( m_pData1Provider );
 
-//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-//}
-
-void PanelChartHdf5::HandlePaint( wxPaintEvent& event ) {
-  if ( 0 != m_pChartDataView ) {
-    try {
-      //m_bPaintingChart = true;
-      wxSize size = m_winChart->GetClientSize();
-      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &PanelChartHdf5::HandleDrawChart ) );
-      m_chartMaster.DrawChart( );
-    }
-    catch (...) {
-    }
-  }
-  //m_bPaintingChart = false;
-}
-
-// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
-void PanelChartHdf5::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
-  wxPaintDC cdc( m_winChart );
-  cdc.DrawBitmap(bmp, 0, 0);
-}
-
-void PanelChartHdf5::HandleSize( wxSizeEvent& event ) { 
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-}
-
 void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
 
-  if ( 0 != m_pChartDataView ) {
-    m_chartMaster.SetChartDataView( 0 );
+  std::cout << "PanelChartHdf5::LoadDataAndGenerateChart: " << sPath << std::endl;
+
+  if ( nullptr != m_pChartDataView ) {
+    m_pWinChartView->SetChartDataView( nullptr );
     delete m_pChartDataView;
-    m_pChartDataView = 0;
+    m_pChartDataView = nullptr;
   }
   m_pChartDataView = new ou::ChartDataView;
-  m_chartMaster.SetChartDataView( m_pChartDataView );
+  m_pWinChartView->SetChartDataView( m_pChartDataView, false );
 
   if ( CustomItemData::NoDatum == edt ) {
     std::cout << "Can't do this chart type" << std::endl;
@@ -278,8 +247,6 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
     default:
       throw std::runtime_error("unknown CustomItemData");
     }
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-
   }
 }
 
