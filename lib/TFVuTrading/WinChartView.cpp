@@ -18,8 +18,6 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
-//#include <iostream>
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <wx/mstream.h>
@@ -59,6 +57,7 @@ void WinChartView::Init( void ) {
   m_bInDrawChart = false;
   m_bThreadDrawChartActive = false;
   m_pThreadDrawChart = nullptr;
+  m_pChartDataView = nullptr;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
 
@@ -122,18 +121,13 @@ void WinChartView::StopThread( void ) {
 // called from PanelCharts::HandleInstrumentLiveChart
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
   // TODO: need to sync with the gui refresh thread
-  //std::cout << "WinChartView::SetChartDataView entry" << std::endl;
   m_bReCalcViewPort = bReCalcViewPort;
   if ( m_bThreadDrawChartActive ) {
-    //std::cout << "WinChartView::SetChartDataView stopping" << std::endl;
     StopThread();
-    //std::cout << "WinChartView::SetChartDataView stopped" << std::endl;
   }
   m_pChartDataView = pChartDataView;
   if ( nullptr != m_pChartDataView ) {
-    //std::cout << "WinChartView::SetChartDataView starting" << std::endl;
     StartThread();
-    //std::cout << "WinChartView::SetChartDataView started" << std::endl;
   }
 }
 
@@ -197,7 +191,7 @@ void WinChartView::HandlePaint( wxPaintEvent& event ) {
 void WinChartView::ManualDraw( void ) {
 
 // ====
-  if ( 0 != m_pChartDataView ) {
+  if ( nullptr != m_pChartDataView ) {
     try {
       //m_bPaintingChart = true;
       wxSize size = this->GetClientSize();
@@ -237,6 +231,8 @@ void WinChartView::ThreadDrawChart( void ) {
   while ( m_bThreadDrawChartActive ) {
     m_cvThreadDrawChart.wait( lock );
 
+    assert( nullptr != m_pChartDataView );
+
     if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
       // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
       if ( m_bReCalcViewPort ) {
@@ -264,8 +260,8 @@ void WinChartView::ThreadDrawChart( void ) {
 
 void WinChartView::UpdateChartMaster() {
   wxSize size = this->GetClientSize();  // may not be able to do this cross thread
-  m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
   m_chartMaster.SetChartDataView( m_pChartDataView );
+  m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
   // could use lambda instead here
   m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::CallBackDrawChart ) );  // this line could be factored out?
   m_chartMaster.DrawChart( );
