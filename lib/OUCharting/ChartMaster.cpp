@@ -21,8 +21,8 @@
 
 namespace ou { // One Unified
 
-  ChartMaster::ChartMaster(void) 
-: m_pCdv( NULL),
+  ChartMaster::ChartMaster(void)
+: m_pCdv( nullptr),
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
   m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
   m_bCreated( false )
@@ -30,8 +30,8 @@ namespace ou { // One Unified
   Initialize();
 }
 
-ChartMaster::ChartMaster( unsigned int width, unsigned int height ) 
-: m_pCdv( NULL),
+ChartMaster::ChartMaster( unsigned int width, unsigned int height )
+: m_pCdv( nullptr),
   m_nChartWidth( width ), m_nChartHeight( height ),
   m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
   m_bCreated( false )
@@ -54,25 +54,25 @@ void ChartMaster::Initialize( void ) {
 void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   m_nChartWidth = width;
   m_nChartHeight = height;
-  if ( NULL != m_pCdv ) m_pCdv->SetChanged();
+  if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
 }
 
 void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
-  m_dblViewPortXBegin = 
-    ( boost::posix_time::not_a_date_time != dtBegin ) 
-    ? 
-    Chart::chartTime( 
+  m_dblViewPortXBegin =
+    ( boost::posix_time::not_a_date_time != dtBegin )
+    ?
+    Chart::chartTime(
       dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
       dtBegin.time_of_day().hours(), dtBegin.time_of_day().minutes(), dtBegin.time_of_day().seconds() )
-    : 
+    :
     0;
-  m_dblViewPortXEnd = 
-    ( boost::posix_time::not_a_date_time != dtEnd ) 
+  m_dblViewPortXEnd =
+    ( boost::posix_time::not_a_date_time != dtEnd )
     ?
-    Chart::chartTime( 
+    Chart::chartTime(
       dtEnd.date().year(), dtEnd.date().month(), dtEnd.date().day(),
       dtEnd.time_of_day().hours(), dtEnd.time_of_day().minutes(), dtEnd.time_of_day().seconds() )
-    : 
+    :
     0;
 }
 
@@ -88,12 +88,12 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
     structSubChart( void ) : xy( 0 ) {};
   };
 
-  if ( NULL != m_pCdv ) { // DataView has something to draw
+  if ( nullptr != m_pCdv ) { // DataView has something to draw
     //if ( m_pCdv->GetChanged() ) {
     if ( true ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
-      
+
       std::string sTitle( m_pCdv->GetStrategy() + " - " + m_pCdv->GetName() );
       multi.addTitle( sTitle.c_str() );
 
@@ -118,7 +118,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
           case 0:  // main chart
             pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
             pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight )->setGridColor(0xc0c0c0, 0xc0c0c0);
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
             pXY->setClipping();
             pXY->setXAxisOnTop( true );
             pXY->xAxis()->setWidth( 2 );
@@ -127,14 +127,14 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY->addLegend( x, xAxisHeight, true, 0, 9.0 );
             multi.addChart( 0, y, pXY );
             multi.setMainChart( pXY );
-            y += heightChart0; 
+            y += heightChart0;
             break;
           case 1: // volume chart
             pXY = new XYChart( m_nChartWidth, heightChart1 );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 )->setGridColor(0xc0c0c0, 0xc0c0c0);
             pXY->setClipping();
             //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
@@ -148,7 +148,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN )->setGridColor(0xc0c0c0, 0xc0c0c0);
             pXY->setClipping();
             //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
@@ -171,13 +171,13 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
         if ( iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes ) ) {
           // following assumes values are always > 0
           if( 0 == m_dblViewPortXBegin ) {
-            dblXBegin = ( 0 == dblXBegin ) 
-              ? Attributes.dblXMin 
+            dblXBegin = ( 0 == dblXBegin )
+              ? Attributes.dblXMin
               : std::min<double>( dblXBegin, Attributes.dblXMin );
           }
           if( 0 == m_dblViewPortXEnd ) {
-            dblXEnd   = ( 0 == dblXEnd   ) 
-              ? Attributes.dblXMax 
+            dblXEnd   = ( 0 == dblXEnd   )
+              ? Attributes.dblXMax
               : std::max<double>( dblXEnd,   Attributes.dblXMax );
           }
 //          if ( 610.0 < ( dblXEnd - dblXBegin ) ) {

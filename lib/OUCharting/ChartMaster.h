@@ -31,14 +31,14 @@ public:
   virtual ~ChartMaster(void);
   void SetChartDimensions( unsigned int width, unsigned int height);
   //void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
-  void SetChartDataView( ChartDataView* pcdv ) { m_pCdv = pcdv; if ( NULL != pcdv ) m_pCdv->SetChanged(); };
+  void SetChartDataView( ChartDataView* pcdv ) { m_pCdv = pcdv; if ( nullptr != pcdv ) m_pCdv->SetChanged(); };
   ChartDataView* GetChartDataView( void ) { return m_pCdv; };
 
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
-  bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
+  bool GetChartDataViewChanged( void ) { return ( nullptr == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
   void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
   bool isCreated( void ) const { return m_bCreated; };
 
