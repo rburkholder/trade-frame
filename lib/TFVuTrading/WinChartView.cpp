@@ -107,7 +107,7 @@ void WinChartView::CreateControls() {
 }
 
 void WinChartView::StartThread( void ) {
-  m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart1, this );
+  m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart, this );
 }
 
 void WinChartView::StopThread( void ) {
@@ -231,7 +231,7 @@ void WinChartView::DrawChart( void ) {
 }
 
 // could change this into a worker future/promise solution, or use asio to submit jobs or packages
-void WinChartView::ThreadDrawChart1( void ) {
+void WinChartView::ThreadDrawChart( void ) {
   m_bThreadDrawChartActive = true;
   boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
   while ( m_bThreadDrawChartActive ) {
@@ -267,12 +267,12 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
   m_chartMaster.SetChartDataView( m_pChartDataView );
   // could use lambda instead here
-  m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::ThreadDrawChart2 ) );  // this line could be factored out?
+  m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::CallBackDrawChart ) );  // this line could be factored out?
   m_chartMaster.DrawChart( );
 }
 
 // background thread to draw composed chart into memory, and send to gui thread
-void WinChartView::ThreadDrawChart2( const MemBlock& m ) {
+void WinChartView::CallBackDrawChart( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );  // need this
   pwxBitmap_t p( new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
   //QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) ); // which will invoke HandleGuiDrawChart

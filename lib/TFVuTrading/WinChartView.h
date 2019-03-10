@@ -62,7 +62,7 @@ public:
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
   virtual ~WinChartView();
 
-  void SetChartDataView( ou::ChartDataView* m_pChartDataView, bool bReCalcViewPort = true );
+  void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true );
   ou::ChartDataView* GetChartDataView( void ) const { return m_pChartDataView; }
 
   // really don't want these here, but necessary to deal with searchdynamiceventtable issues
@@ -102,8 +102,8 @@ private:
 
   bool m_bBound;
 
-  void ThreadDrawChart1( void );  // thread starts here
-  void ThreadDrawChart2( const MemBlock& m );  // a callback here to perform bitmap
+  void ThreadDrawChart( void );  // thread starts here
+  void CallBackDrawChart( const MemBlock& m );  // a callback here to perform bitmap
   //void HandleGuiDrawChart( EventDrawChart& event );
   void StartThread( void );
   void StopThread( void );
