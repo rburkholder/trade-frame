@@ -24,12 +24,12 @@ namespace ou { // One Unified
 // CChartEntryBars, volume portion of bar is in ChartEntryVolume.h
 //
 
-ChartEntryBars::ChartEntryBars(void) 
+ChartEntryBars::ChartEntryBars(void)
 : ChartEntryTime()
 {
 }
 
-//ChartEntryBars::ChartEntryBars(size_type nSize) 
+//ChartEntryBars::ChartEntryBars(size_type nSize)
 //: ChartEntryBaseWithTime(nSize)
 //{
 //}
@@ -81,14 +81,15 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
   //while ( m_lfBar.pop( bar ) ) {
 //    AppendBarPrivate( bar );
 //  }
-  
+
   ClearQueue();
 
   if ( 0 != ChartEntryTime::Size() ) {
     DoubleArray daXData = ChartEntryTime::GetDateTimes();
     // this should be replicated to the other Entry Types.
+
     if ( 0 != daXData.len ) {
-      CandleStickLayer *candle = pXY->addCandleStickLayer( 
+      CandleStickLayer *candle = pXY->addCandleStickLayer(
         this->GetHigh(),
         this->GetLow(),
         this->GetOpen(),
@@ -97,7 +98,7 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
         0x0000ff00, 0x00ff0000, 0xFFFF0001
         );
       //candle->setDataGap( 0 );
-    
+
       candle->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
       pAttributes->dblXMax = daXData[ daXData.len - 1 ];
@@ -109,11 +110,11 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
 
 void ChartEntryBars::Clear( void ) {
   ClearQueue();
-  ChartEntryTime::Clear();
   m_vOpen.clear();
   m_vHigh.clear();
   m_vLow.clear();
   m_vClose.clear();
+  ChartEntryTime::Clear();
 }
 
 } // namespace ou

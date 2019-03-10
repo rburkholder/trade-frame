@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   ChartEntryPrice.cpp
  * Author: rpb
- * 
+ *
  * Created on May 6, 2017, 7:03 PM
  */
 
@@ -37,6 +37,7 @@ void ChartEntryPrice::Reserve( size_type nSize ) {
 
 void ChartEntryPrice::Clear( void ) {
   m_vDouble.clear();
+  ChartEntryTime::Clear();
 }
 
 void ChartEntryPrice::Append( const ou::tf::Price& price) {
@@ -47,7 +48,7 @@ void ChartEntryPrice::Append( const boost::posix_time::ptime &dt, double price )
   Append( ou::tf::Price( dt, price ) );
 }
 
-void ChartEntryPrice::ClearQueue( void ) {  
+void ChartEntryPrice::ClearQueue( void ) {
   namespace args = boost::phoenix::placeholders;
   m_queue.Sync( boost::phoenix::bind( &ChartEntryPrice::Pop, this, args::arg1 ) );
 }

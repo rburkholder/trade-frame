@@ -13,13 +13,13 @@
 
 #pragma once
 
-// 
-// Tools are meant for drawing in world coordinates:  
+//
+// Tools are meant for drawing in world coordinates:
 //   at a price level, or at a price/time intersection
 //
 
-// inheriting classes need to be aware of how Size is calculated, as it 
-//   will be used by the charting application for determining if 
+// inheriting classes need to be aware of how Size is calculated, as it
+//   will be used by the charting application for determining if
 //   it will be calculating the DoubleArray parameter for the charting library
 
 #include <vector>
@@ -87,6 +87,8 @@ public:
 
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) { return false; }
 
+  virtual void Clear( void ) {}
+
 protected:
 
   size_t m_ixStart; // starting point into viewport
@@ -125,7 +127,7 @@ public:
 
   virtual void Clear( void );
   virtual void Reserve( size_type );
-  
+
   virtual void ClearQueue( void );
 
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
@@ -151,11 +153,11 @@ protected:
 //    }
     return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
   }
-  
+
   size_type Size( void ) const { return m_vDateTime.size(); }
 
 private:
-  
+
   ou::tf::Queue<boost::posix_time::ptime> m_queue;
 
   struct TimeDouble_t {

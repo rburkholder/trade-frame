@@ -35,14 +35,14 @@ ChartEntryBase::~ChartEntryBase() {
 // ChartEntryTime
 //
 
-ChartEntryTime::ChartEntryTime() : 
+ChartEntryTime::ChartEntryTime() :
   ChartEntryBase(),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
 }
 
 //ChartEntryTime::ChartEntryTime( size_type nSize )
-//: ChartEntryBase( nSize ), 
+//: ChartEntryBase( nSize ),
 //    m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 //{
 //  m_bufferedDateTime.Reserve( nSize );
@@ -50,7 +50,7 @@ ChartEntryTime::ChartEntryTime() :
 //  ChartEntryBase::Reserve( nSize );
 //}
 
-//ChartEntryBaseWithTime::ChartEntryBaseWithTime( const ChartEntryBaseWithTime& rhs ) : 
+//ChartEntryBaseWithTime::ChartEntryBaseWithTime( const ChartEntryBaseWithTime& rhs ) :
 //  ChartEntryBase( rhs ),
 //    m_dtViewPortBegin( rhs.m_dtViewPortBegin ), m_dtViewPortEnd( rhs.m_dtViewPortEnd ),
 //    m_vDateTime( rhs.m_vDateTime ), m_vChartTime( rhs.m_vChartTime )
@@ -74,11 +74,11 @@ void ChartEntryTime::Append(boost::posix_time::ptime dt) {
 // runs in thread of main
 void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
   m_vDateTime.push_back( dt );
-  
+
   // this is maybe done on the fly and not correct here.
   try {
-    m_vChartTime.push_back( 
-      Chart::chartTime( 
+    m_vChartTime.push_back(
+      Chart::chartTime(
         dt.date().year(), dt.date().month(), dt.date().day(),
         dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 
@@ -102,13 +102,13 @@ void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix
   // initialize viewport values
   m_ixStart = 0;
   m_nElements = 0;
-  
+
   // calculate new viewport values
   // todo: what happens when nothing is within the range, should have zero elements listed
-  
+
   // should this be here or not?
   //ClearQueue();  // should this be here?
-  
+
   if ( 0 != m_vDateTime.size() ) {
     vDateTime_t::const_iterator iterBegin( m_vDateTime.begin() );
     vDateTime_t::const_iterator iterEnd( m_vDateTime.end() );
@@ -128,14 +128,16 @@ void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix
 
 
 // there are out-of-order issues or loss-of-data issues if m_bUseThreadSafety is changed while something is in the Queue
-void ChartEntryTime::ClearQueue( void ) {  
+void ChartEntryTime::ClearQueue( void ) {
   namespace args = boost::phoenix::placeholders;
   m_queue.Sync( boost::phoenix::bind( &ChartEntryTime::AppendFg, this, args::arg1 ) );
 }
 
 void ChartEntryTime::Clear( void ) {
+  m_nElements = 0;
   m_vDateTime.clear();
   m_vChartTime.clear();
+  ChartEntryBase::Clear();
 }
 
 } // namespace ou

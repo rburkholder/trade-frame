@@ -20,7 +20,7 @@
 
 namespace ou { // One Unified
 
-ChartEntryMark::ChartEntryMark(void) 
+ChartEntryMark::ChartEntryMark(void)
 : ChartEntryBase()
 {
 }
@@ -54,12 +54,12 @@ void ChartEntryMark::Pop( const Mark_t& mark ) {
 }
 
 bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
-  
+
   bool bAdded( false );
-  
+
   namespace args = boost::phoenix::placeholders;
   m_queue.Sync( boost::phoenix::bind( &ChartEntryMark::Pop, this, args::arg1 ) );
-  
+
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {
@@ -74,6 +74,7 @@ bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
 }
 
 void ChartEntryMark::Clear( void ) {
+  ChartEntryBase::Clear();
   m_vPrice.clear();
   m_vColour.clear();
   m_vName.clear();
