@@ -51,6 +51,17 @@ void ChartMaster::Initialize( void ) {
   assert( b );
 }
 
+void ChartMaster::SetChartDataView( ChartDataView* pcdv ) {
+  m_pCdv = pcdv;
+  if ( nullptr != pcdv ) {
+    m_pCdv->SetChanged();
+  }
+};
+
+bool ChartMaster::GetChartDataViewChanged( void ) { // flag is reset during call
+  return ( nullptr == m_pCdv ) ? false : m_pCdv->GetChanged();
+}
+
 void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   m_nChartWidth = width;
   m_nChartHeight = height;
