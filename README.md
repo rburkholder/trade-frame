@@ -66,7 +66,7 @@ cd IQFeedMarketSymbols
 make
 cd ../IQFeedGetHistory
 make
-cd ../Hdf5Chart <-- builds but has a double link list issue
+cd ../Hdf5Chart
 make
 cd ../LiveChart
 make
