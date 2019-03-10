@@ -37,20 +37,20 @@ public:
 
   ModelChartHdf5( void );
   virtual ~ModelChartHdf5(void);
-  
+
   struct Equities {
     const ou::tf::Quotes& quotes;
     const ou::tf::Trades& trades;
     Equities( const ou::tf::Quotes& quotes_, const ou::tf::Trades& trades_ )
       : quotes( quotes_ ), trades( trades_ ) {}
   };
-  
+
   struct Options: public Equities {
     const ou::tf::Greeks& greeks;
     Options( const ou::tf::Quotes& quotes_, const ou::tf::Trades& trades_, const ou::tf::Greeks& greeks_ )
       : Equities( quotes_, trades_ ), greeks( greeks_ ) {}
   };
-  
+
   void DefineChartBars( ou::ChartDataView* pChartDataView );
   void DefineChartQuotes( ou::ChartDataView* pChartDataView );
   void DefineChartTrades( ou::ChartDataView* pChartDataView );
@@ -86,7 +86,7 @@ public:
     AddChartEntries( pChartDataView, series );
 
   }
-  
+
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleGreek( const ou::tf::Greek& greek );

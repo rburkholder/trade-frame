@@ -41,7 +41,6 @@ ModelChartHdf5::~ModelChartHdf5(void) {
 }
 
 void ModelChartHdf5::DefineChartBars( ou::ChartDataView* pChartDataView ) {
-  //pChartDataView->Clear();
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceBars );
   pChartDataView->Add( 1, &m_ceVolume );
@@ -59,7 +58,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
-  //pChartDataView->Clear();
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
   m_ceVolumeUpper.SetColour( ou::Colour::Red );
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
@@ -89,7 +87,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartTrades( ou::ChartDataView* pChartDataView ) {
-  //pChartDataView->Clear();
   m_ceTrade.SetColour( ou::Colour::Green );
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceTrade );
@@ -107,7 +104,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
-  //pChartDataView->Clear();
   m_ceTrade.SetColour( ou::Colour::Green );
   m_cePutIV.SetColour( ou::Colour::Red );
   m_ceCallIV.SetColour( ou::Colour::Blue );
@@ -129,7 +125,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartGreeks( ou::ChartDataView* pChartDataView ) {
-  //pChartDataView->Clear();
   m_ceImpVol.SetColour( ou::Colour::Black );
   m_ceDelta.SetColour( ou::Colour::Black );
   m_ceGamma.SetColour( ou::Colour::Black );
@@ -163,8 +158,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 }
 
 void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
-
-  //pChartDataView->Clear();
 
   // Quotes
 
@@ -217,8 +210,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
 }
 
 void ModelChartHdf5::DefineChartOptions( ou::ChartDataView* pChartDataView ) {
-
-  //pChartDataView->Clear();
 
   DefineChartEquities( pChartDataView );
 
