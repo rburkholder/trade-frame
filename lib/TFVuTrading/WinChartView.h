@@ -62,7 +62,7 @@ public:
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
   virtual ~WinChartView();
 
-  void SetChartDataView( ou::ChartDataView* m_pChartDataView );
+  void SetChartDataView( ou::ChartDataView* m_pChartDataView, bool bReCalcViewPort = true );
   ou::ChartDataView* GetChartDataView( void ) const { return m_pChartDataView; }
 
   // really don't want these here, but necessary to deal with searchdynamiceventtable issues
@@ -91,6 +91,7 @@ private:
 
   wxTimer m_timerGuiRefresh;
   bool m_bInDrawChart;
+  bool m_bReCalcViewPort;
 
   pwxBitmap_t m_pChartBitmap;
 

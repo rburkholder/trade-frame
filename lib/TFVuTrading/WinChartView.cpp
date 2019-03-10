@@ -18,6 +18,8 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
+//#include <iostream>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <wx/mstream.h>
@@ -56,6 +58,7 @@ void WinChartView::Init( void ) {
   m_bBound = false;
   m_bInDrawChart = false;
   m_bThreadDrawChartActive = false;
+  m_pThreadDrawChart = nullptr;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
 
@@ -112,18 +115,28 @@ void WinChartView::StopThread( void ) {
   m_cvThreadDrawChart.notify_one();
   m_pThreadDrawChart->join();
   delete m_pThreadDrawChart;
-  m_pThreadDrawChart = 0;
+  m_pThreadDrawChart = nullptr;
 }
 
 // called from PanelChartHdf5::LoadDataAndGenerateChart
 // called from PanelCharts::HandleInstrumentLiveChart
-void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
-  if ( m_bThreadDrawChartActive )
+void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
+  // TODO: need to sync with the gui refresh thread
+  //std::cout << "WinChartView::SetChartDataView entry" << std::endl;
+  m_bReCalcViewPort = bReCalcViewPort;
+  if ( m_bThreadDrawChartActive ) {
+    //std::cout << "WinChartView::SetChartDataView stopping" << std::endl;
     StopThread();
+    //std::cout << "WinChartView::SetChartDataView stopped" << std::endl;
+  }
   m_pChartDataView = pChartDataView;
-  if ( nullptr != m_pChartDataView )
+  if ( nullptr != m_pChartDataView ) {
+    //std::cout << "WinChartView::SetChartDataView starting" << std::endl;
     StartThread();
+    //std::cout << "WinChartView::SetChartDataView started" << std::endl;
+  }
 }
+
 
 void WinChartView::HandleMouse( wxMouseEvent& event ) {
   //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
@@ -226,20 +239,23 @@ void WinChartView::ThreadDrawChart1( void ) {
 
     if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
       // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-      boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+      if ( m_bReCalcViewPort ) {
+        boost::posix_time::ptime now = ou::TimeSource::Instance().External();
 
-      // chart moves at 1s step - not sure if this is trader friendly though
-      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-      boost::posix_time::ptime dtEnd = now + td;
+        // chart moves at 1s step - not sure if this is trader friendly though
+        static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+        boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+        boost::posix_time::ptime dtEnd = now + td;
 
-      boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+        boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-      std::stringstream ss;
-      ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+        std::stringstream ss;
+        ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
 
-      m_pChartDataView->SetViewPort( dtBegin, dtEnd );
-      m_pChartDataView->SetThreadSafe( true );
+        m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+      }
+
+      m_pChartDataView->SetThreadSafe( true );  // not sure what this is, does it belong in side the conditional?
 
       UpdateChartMaster();
     }
