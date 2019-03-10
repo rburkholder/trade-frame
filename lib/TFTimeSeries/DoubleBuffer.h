@@ -72,13 +72,13 @@ public:
   typedef typename vDatum_t::size_type size_type;
   DoubleBuffer( void );
   virtual ~DoubleBuffer() {}
-  
+
   void Append( const datum_t& ); // sync'd
   size_type Sync( void ); // uses lock
   void Reserve( size_type nSize ); // sync'd
   void Clear( void ); // sync'd
   size_type Size( void ); // sync'd
-  
+
   const datum_t* GetRef( void ) const;  // not sync'd
   const datum_t* operator[]( size_type ix ) const; // not sync'd
   const vDatum_t& GetVector( void ) const { return m_tsBatched; } // not sync'd
@@ -150,12 +150,12 @@ class Queue {
 public:
   Queue( void ) {}
   virtual ~Queue() {}
-  
+
   void Append( const datum_t& datum ) {
     boost::lock_guard<boost::mutex> guard(m_mutex);
     m_qDatum.push( datum );
   }
-  
+
   template<typename Function>
   void Sync( Function f ) {
     boost::lock_guard<boost::mutex> guard(m_mutex);
@@ -164,7 +164,7 @@ public:
       m_qDatum.pop();
     }
   }
-  
+
 protected:
 private:
   boost::mutex m_mutex;
