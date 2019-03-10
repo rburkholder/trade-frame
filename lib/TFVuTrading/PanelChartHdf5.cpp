@@ -174,8 +174,6 @@ void PanelChartHdf5::HandleBuildTreePathParts( const std::string& sPathPart ) {
 
 void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
-  std::cout << "PanelChartHdf5::HandleTreeEventItemActivated" << std::endl;
-
   wxTreeItemId id = event.GetItem();
 
   wxTreeItemId id2 = id;
@@ -214,15 +212,12 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
 void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
 
-  std::cout << "PanelChartHdf5::LoadDataAndGenerateChart: " << sPath << std::endl;
-
   if ( nullptr != m_pChartDataView ) {
     m_pWinChartView->SetChartDataView( nullptr );
     delete m_pChartDataView;
     m_pChartDataView = nullptr;
   }
   m_pChartDataView = new ou::ChartDataView;
-  m_pWinChartView->SetChartDataView( m_pChartDataView, false );
 
   if ( CustomItemData::NoDatum == edt ) {
     std::cout << "Can't do this chart type" << std::endl;
@@ -248,6 +243,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       throw std::runtime_error("unknown CustomItemData");
     }
   }
+
+  m_pWinChartView->SetChartDataView( m_pChartDataView, false );
 }
 
 wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {
