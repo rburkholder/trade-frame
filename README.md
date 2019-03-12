@@ -84,7 +84,7 @@ popd
 
 ## Starting Up
 
-* Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> IQWatchQuote (may need to start twice, and then watch a symbol)
+* Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> IQWatchQuote (may need to start twice, and then watch a symbol) [or from the command line: IQConnect.exe ... -autoconnect & ]
 * Start Interactive Brokers TWS and connect to a paper trading account 
 .* do not use an active account for testing
 .* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
