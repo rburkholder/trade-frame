@@ -175,3 +175,7 @@ The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/arch
 
 Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index.php?/categories/23-Trading
 
+## Testing
+
+* IQFeed testing: you can utilize the symbol TST$Y, this symbol sends a loop of data 24/7. (2019/03/12)
+* Interactive Brokers: use edemo/demouser as a signin - random data on many symbols 24/7.
