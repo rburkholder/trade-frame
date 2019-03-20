@@ -99,6 +99,7 @@ bool Confirm( const std::string& s, ExcelFormat::BasicExcelCell* cell ) {
   if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not confirmed 1" );
   std::string ss( cell->GetString() );
   if ( s != ss ) throw std::runtime_error( "not confirmed 2" );
+  return true;  // what should be returned?
 }
 
 void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vOptionExpiryDates_t& v ) {
