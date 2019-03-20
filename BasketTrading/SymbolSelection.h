@@ -35,10 +35,8 @@ public:
       : sName( sName_ ), barLast( bar ), dblStop {} {};
     bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
   };
-  struct InstrumentInfoCompare {
-    bool operator()( const InstrumentInfo& lhs, const InstrumentInfo& rhs ) const { return lhs.sName < rhs.sName; };
-  };
-  typedef std::set<InstrumentInfo, InstrumentInfoCompare> setInstrumentInfo_t;
+  
+  typedef std::set<InstrumentInfo> setInstrumentInfo_t;
 
   explicit SymbolSelection( ptime eod );
   ~SymbolSelection( void );
