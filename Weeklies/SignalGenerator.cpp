@@ -22,7 +22,7 @@
 
 #include "SignalGenerator.h"
 
-SignalGenerator::SignalGenerator(void) 
+SignalGenerator::SignalGenerator(void)
   : m_fmt_mgr( m_xls)
 {
 }
@@ -44,7 +44,7 @@ void SignalGenerator::Run( void ) {
   typedef ou::tf::cboe::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
 
   for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
-//    std::cout << 
+//    std::cout <<
 //	    iter->sSymbol
 //	    << "," << iter->bAdded
 //	    << "," << iter->bStandardWeekly
@@ -53,8 +53,8 @@ void SignalGenerator::Run( void ) {
 //	    << "," << iter->sProductType
 //	    << "," << iter->sDescription
 //	    << std::endl;
-	    
-//    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) { 
+
+//    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
       //ScanBars( iter->sSymbol );
       BarSummary bs;
       bs.sType = iter->sProductType;
@@ -65,17 +65,17 @@ void SignalGenerator::Run( void ) {
   if ( 0 != m_mapSymbol.size() ) {
     ScanBars();
   }
-  
+
   std::cout << "SignalGenerator Complete" << std::endl;
-  
+
 }
 
 void SignalGenerator::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
-  ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter( 
+  ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
     "/bar/86400",  // at least a year's worth of bars
-    ptime( date( 2017,  6,  1 ), time_duration( 0, 0, 0 ) ), //beginning time
-    ptime( date( 2018,  8, 18 ), time_duration( 0, 0, 0 ) ),  // ending time, midnight to capture the prior 24 hours
+    ptime( date( 2018,  3, 10 ), time_duration( 0, 0, 0 ) ), //beginning time
+    ptime( date( 2019,  3, 19 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
     200,
     boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &SignalGenerator::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
@@ -206,8 +206,8 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     std::cout << "<";
     cell->SetString( "<" );
   }
-  
-  std::cout << sObject 
+
+  std::cout << sObject
     << ": boll(" << lower << "," << upper
     << "),sma1(" << sma1
     << "),sma2(" << sma2
@@ -231,7 +231,7 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
   cell->SetDouble( sma3 );
-  
+
 }
 
 
