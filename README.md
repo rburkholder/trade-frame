@@ -78,6 +78,8 @@ cd ../HedgedBollinger
 make
 cd ../BasketTrading
 make
+cd ../Weeklies
+make
 popd
 
 ```
