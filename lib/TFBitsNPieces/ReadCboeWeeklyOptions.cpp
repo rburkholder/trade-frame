@@ -109,7 +109,7 @@ void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vO
   while ( bProcess ) {
     cell = sheet->Cell( row, col );
     switch ( cell->Type() ) {
-      case ExcelFormat::BasicExcelCell::INT: 
+      case ExcelFormat::BasicExcelCell::INT:
         v.push_back( ConvertDate( cell->GetInteger() ) );
         break;
       case ExcelFormat::BasicExcelCell::DOUBLE:
@@ -154,13 +154,13 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
     int cntRow = sheet->GetTotalRows();
     std::cout << "Columns: " << cntCol << ", Rows: " << cntRow << std::endl;
 
-    ExcelFormat::BasicExcelCell* cell; 
+    ExcelFormat::BasicExcelCell* cell;
 
     cell = sheet->Cell( 0, 0 );  // LIST OF AVAILABLE WEEKLY OPTIONS
     if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not found 1" );
-    
+
     try {
-    
+
       // doesn't have dates, maybe copy from expanded
       Confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
       ExtractDates( sheet, 1, 3, expiries.vExpiriesStandardWeeklies );
@@ -197,15 +197,15 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
     catch (...) {
       std::cout << "confirm issue" << std::endl;
     }
-    
-    
+
+
     if ( 0 == expiries.vExpiriesStandardWeeklies.size() ) {
       expiries.vExpiriesStandardWeeklies = expiries.vExpiriesExpandedWeeklies;
     }
-    
+
     int ixRow( 13 );  // based upon where Ticker ends
     int ixCol(  0 );
-    
+
     bool bProcess( true );
     while ( bProcess ) {
       UnderlyingInfo ui;
@@ -230,10 +230,10 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
               break;
             case 2: bProcess = AssignCellContent( cell, ui.sDescription );
               break;
-            case 3: 
+            case 3:
               bProcess = AssignCellContent( cell, ui.sProductType );
               break;
-            case 4: 
+            case 4:
               if ( ExcelFormat::BasicExcelCell::DOUBLE == cell->Type() ) {
                 ui.dateListed = ConvertDate( cell->GetDouble() );
               }
@@ -246,7 +246,13 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
                     ui.dateListed = ConvertDate( cell->GetInteger() );
                   }
                   else {
-                    bProcess = false;
+                    if ( ExcelFormat::BasicExcelCell::UNDEFINED == cell->Type() ) {
+                      // don't do anything, current spreadsheets have empty cell
+                    }
+                    else {
+                      bProcess = false;
+                    }
+
                   }
                 }
               }
@@ -302,20 +308,20 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
       if ( bProcess ) vui.push_back( ui );  // push only if successfully parsed.
       ++ixRow;
     }
-    
+
     std::cout << "Last Row: " << ixRow << std::endl;
   } // else
-    
+
   xls.Close();
 }
 
-} // namespace cboe  
+} // namespace cboe
 } // namespace tf
 } // namespace ou
 
 
 
-/*    
+/*
     for ( int iy = 0; iy < y; ++iy ) {
       for ( int ix = 0; ix < x; ++ix ) {
         cell = sheet->Cell( iy, ix );
