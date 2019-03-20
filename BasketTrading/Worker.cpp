@@ -33,13 +33,13 @@ Worker::Worker( OnCompletionHandler f ) {
 }
 
 Worker::~Worker(void) {
-  delete m_pThread; 
+  delete m_pThread;
 }
 
 void Worker::operator()( void ) {
 
   // last day of available data
-  SymbolSelection selector( ptime( date( 2018, 9, 13 ), time_duration( 0, 0, 0 ) ) );
+  SymbolSelection selector( ptime( date( 2019, 3, 19 ), time_duration( 0, 0, 0 ) ) );
   selector.Process( m_setInstrumentInfo );
 
   std::cout << "Symbol List: " << std::endl;
