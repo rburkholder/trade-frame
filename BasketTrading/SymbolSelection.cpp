@@ -47,9 +47,9 @@ void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
   m_psetSymbols = &selected;
 
   std::cout << "Running" << std::endl;
-  
+
   std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
-  
+
   ou::tf::HDF5IterateGroups groups;
 
   groups.SetOnHandleObject( MakeDelegate( this, &SymbolSelection::ProcessGroupItem ) );
@@ -101,7 +101,7 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> barRepository( m_dm, sObjectPath );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
   begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDateOfFirstBar );
-  end = lower_bound( begin, barRepository.end(), m_dtEnd ); 
+  end = lower_bound( begin, barRepository.end(), m_dtEnd );
   hsize_t cnt = end - begin;
   if ( m_nMinPivotBars <= cnt ) {
     ptime dttmp = (*(end-1)).DateTime();
@@ -111,9 +111,9 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
       barRepository.Read( begin, end, &bars );
       ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinPivotBars;
       ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
-      if ( ( 1000000 < volAverage ) 
+      if ( ( 1000000 < volAverage )
         && ( 15.0 <= bars.Last()->Close() )
-        && ( 90.0 >= bars.Last()->Close() ) 
+        && ( 90.0 >= bars.Last()->Close() )
         && ( m_dtLast.date() == bars.Last()->DateTime().date() )
         ) {
           InstrumentInfo ii( sObjectName, *bars.Last() );
@@ -161,7 +161,7 @@ void SymbolSelection::CheckForRange( const InstrumentInfo& ii, citerBars begin, 
   double dblRatioAboveBelow = 0.5 - ( avgAbove / ( avgAbove + avgBelow ) ); // minimize this
 
   //m_mapRangeRanking.insert( mapRangeRanking_t::value_type( diffCnt, ii ) );
-  std::cout 
+  std::cout
     << ii.sName << ","
     << diffCnt << ","
     << dblRatioAboveBelow << ","
@@ -240,10 +240,10 @@ void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citerBars begin,
     ++iter2;
   }
 
-  boost::uint32_t ttlR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
-  boost::uint32_t ttlR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
-  boost::uint32_t ttlOutside = ttlR1S1 + ttlR1PvS1;
-  boost::uint32_t rank = ( 100 * ( ( 100 * ttlOutside ) + ttlR1S1 ) ) + ttlR1PvS1;
+  boost::uint32_t sumR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
+  boost::uint32_t sumR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
+  boost::uint32_t sumOutside = sumR1S1 + sumR1PvS1;
+  boost::uint32_t rank = ( 100 * ( ( 100 * sumOutside ) + sumR1S1 ) ) + sumR1PvS1;
 
   m_mapPivotRanking.insert( mapPivotRanking_t::value_type( rank, ii ) );
 
@@ -259,7 +259,7 @@ void SymbolSelection::WrapUpPivots( setInstrumentInfo_t& selected ) {
   m_mapPivotRanking.clear();
 }
 
-// 
+//
 // ProcessDarvas
 //
 
@@ -288,7 +288,7 @@ private:
 
 };
 
-ProcessDarvas::ProcessDarvas( std::stringstream& ss, size_t ix ) 
+ProcessDarvas::ProcessDarvas( std::stringstream& ss, size_t ix )
 : ou::tf::Darvas<ProcessDarvas>(), m_ss( ss ),
   m_bTriggered( false ), m_dblStop( 0 ), m_ix( ix )
 {
@@ -297,8 +297,8 @@ ProcessDarvas::ProcessDarvas( std::stringstream& ss, size_t ix )
 bool ProcessDarvas::Calc( const ou::tf::Bar& bar ) {
   ou::tf::Darvas<ProcessDarvas>::Calc( bar );
   --m_ix;
-  bool b = m_bTriggered; 
-  m_bTriggered = false; 
+  bool b = m_bTriggered;
+  m_bTriggered = false;
   return b;
 }
 
@@ -328,8 +328,8 @@ void SymbolSelection::CheckForDarvas( InstrumentInfo& ii, citerBars begin, citer
   citerBars iterLast( end - 1 );
   if ( dtDayOfMax >= m_dtDarvasTrigger ) {
     std::stringstream ss;
-    ss << "Darvas max for " << ii.sName 
-      << " on " << dtDayOfMax 
+    ss << "Darvas max for " << ii.sName
+      << " on " << dtDayOfMax
       << ", close=" << iterLast->Close()
       << ", volume=" << iterLast->Volume();
 
@@ -407,11 +407,11 @@ void SymbolSelection::WrapUp10Percent( setInstrumentInfo_t& selected ) {
   m_mapMaxNegatives.clear();
 }
 
-class AverageVolatility {  
+class AverageVolatility {
   // volatility is a misnomer, in actual fact, looking for measure highest returns in period of time
   // therefore may want to maximize the mean, and minimize the standard deviation
-  // therefore normalize based upon pg  86 of Black Scholes and Beyond, 
-  // then choose the one with 
+  // therefore normalize based upon pg  86 of Black Scholes and Beyond,
+  // then choose the one with
 private:
   double m_dblSumReturns;
   size_t m_nNumberOfValues;
@@ -429,7 +429,7 @@ public:
     m_dblSumReturns += return_;
     ++m_nNumberOfValues;
   }
-  operator double() { 
+  operator double() {
     double mean = m_dblSumReturns / ( m_nNumberOfValues - 1 );
 //    double dblDiffsSquared = 0;
 //    double diff;
