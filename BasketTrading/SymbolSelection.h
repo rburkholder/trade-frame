@@ -33,10 +33,10 @@ public:
     double dblStop;  // calculated stop price, if any
     InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
       : sName( sName_ ), barLast( bar ), dblStop {} {};
-    bool operator<( const InstrumentInfo& rhs ) { return sName < rhs.sName; };
+    bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
   };
   struct InstrumentInfoCompare {
-    bool operator() ( const InstrumentInfo& lhs, const InstrumentInfo& rhs ) { return lhs.sName < rhs.sName; };
+    bool operator()( const InstrumentInfo& lhs, const InstrumentInfo& rhs ) const { return lhs.sName < rhs.sName; };
   };
   typedef std::set<InstrumentInfo, InstrumentInfoCompare> setInstrumentInfo_t;
 
@@ -84,7 +84,7 @@ private:
   mapRankingNeg_t m_mapMaxNegatives;
 
   mapRankingPos_t m_mapMaxVolatility;
-  
+
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 
   typedef ou::tf::Bars::const_iterator citerBars;
