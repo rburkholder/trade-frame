@@ -125,16 +125,22 @@ void SignalGenerator::ScanBars( void ) {
 
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "PV Above" );
+    cell->SetString( "> PV" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "X Down" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "PV Below" );
+    cell->SetString( "< R1 X Down" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "< PV" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "X Up" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "> S1 X Up" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "PV X" );
@@ -256,8 +262,10 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     << ",pivot("
     <<        pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV )
     << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_Down )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_BelowR1_X_Down )
     << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV )
     << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_Up )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_AboveS1_X_Up )
     << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV )
     << ")"
     ;
@@ -270,10 +278,16 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_Down ) );
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_BelowR1_X_Down ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV ) );
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
   cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_Up ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_AboveS1_X_Up ) );
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
   cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV ) );

@@ -32,8 +32,10 @@ public:
     AbovePV = 0,    // open above PV
     BelowPV,        // open below PV
     AbovePV_X_Down, // start above PV crossing downwards
+    AbovePV_BelowR1_X_Down,
     CrossPV,        // cross PV during session
     BelowPV_X_Up,   // start below PV crossing upwards
+    BelowPV_AboveS1_X_Up,
     Count
   };
 
@@ -47,11 +49,18 @@ private:
 
   using ts_size_t = ou::tf::Bars::size_type;
 
-  using rItemsOfInterest_t = std::array<unsigned char,(size_t)EItemsOfInterest::Count>;
+  struct ItemOfInterestRaw {
+    size_t nEncountered;
+    size_t nPopulation;
+    ItemOfInterestRaw(): nEncountered {}, nPopulation {} {}
+  };
+
+  using rItemsOfInterest_t = std::array<unsigned char,(size_t)EItemsOfInterest::Count>; // 0 or 1, maybe use boolean?
+  using rItemsOfInterestRaw_t = std::array<ItemOfInterestRaw, (size_t)EItemsOfInterest::Count>;
 
   std::vector<rItemsOfInterest_t> m_vrItemsOfInterest;
 
-  rItemsOfInterest_t m_rItemsOfInterestSum;
+  rItemsOfInterestRaw_t m_rItemsOfInterestSum;
 
   double m_dblHiLoRangeAvg;  // use as trailing stop?
   double m_dblHiLoRangeStdDev; // use to calculate range percentiles (indicates relative distance between pivot markers
