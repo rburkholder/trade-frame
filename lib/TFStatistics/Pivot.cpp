@@ -60,18 +60,17 @@ Pivot::Pivot( const ou::tf::Bars& bars )
 
           if ( bBtwnR1PV ) {
             m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVR1_X_Down ].nPopulation += 1;
-            m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVR1_X_Up ].nPopulation += 1;
             if ( bCrossPV ) {
                 rItemsOfInterest[    (size_t)EItemsOfInterest::BtwnPVR1_X_Down ] = 1;
               m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVR1_X_Down ].nEncountered += 1;
             }
+            m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVR1_X_Up ].nPopulation += 1;
             if ( bCrossR1 ) {
                 rItemsOfInterest[    (size_t)EItemsOfInterest::BtwnPVR1_X_Up ] = 1;
               m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVR1_X_Up ].nEncountered += 1;
             }
           }
         }
-
 
         m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BelowPV ].nPopulation += 1;
         if ( bBelowPV ) {
@@ -86,11 +85,11 @@ Pivot::Pivot( const ou::tf::Bars& bars )
 
           if ( bBtwnS1PV ) {
             m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVS1_X_Up ].nPopulation += 1;
-            m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVS1_X_Down ].nPopulation += 1;
             if ( bCrossPV ) {
                 rItemsOfInterest[    (size_t)EItemsOfInterest::BtwnPVS1_X_Up ] = 1;
               m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVS1_X_Up ].nEncountered += 1;
             }
+            m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVS1_X_Down ].nPopulation += 1;
             if ( bCrossS1 ) {
                 rItemsOfInterest[    (size_t)EItemsOfInterest::BtwnPVS1_X_Down ] = 1;
               m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::BtwnPVS1_X_Down ].nEncountered += 1;
