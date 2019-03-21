@@ -47,6 +47,7 @@ public:
 
   void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
   void CalcPivots( double Hi, double Lo, double Close );
+  void CalcPivots( const Bar& bar );
   void CalcHalfPivots();
 
   typedef std::pair<double, structPivotInfo> pivot_t;

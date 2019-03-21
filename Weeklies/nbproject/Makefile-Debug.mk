@@ -54,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lboost_system-mt -lboost_date_time-mt -lboost_filesystem-mt -lboost_serialization-mt -lboost_thread-mt -lboost_regex-mt
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lboost_system-mt -lboost_date_time-mt -lboost_filesystem-mt -lboost_serialization-mt -lboost_thread-mt -lboost_regex-mt
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -65,8 +65,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUCommon/dist/Debug/
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a
 
@@ -89,6 +87,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSqlite/dist/Debug/
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -114,7 +116,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Debug
-	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Debug
@@ -126,6 +127,8 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Debug
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug
+	cd ../lib/TFIndicators && ${MAKE} -j2 -f Makefile CONF=Debug
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -136,7 +139,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Debug clean
-	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Debug clean
@@ -148,6 +150,8 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Debug clean
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug clean
+	cd ../lib/TFIndicators && ${MAKE} -j2 -f Makefile CONF=Debug clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

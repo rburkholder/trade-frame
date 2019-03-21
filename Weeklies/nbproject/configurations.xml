@@ -98,18 +98,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFIndicators"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFIndicators"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFInteractiveBrokers"
                             CT="3"
                             CN="Debug"
@@ -239,6 +227,30 @@
                             BC="${MAKE}  -f ExcelFormat-Makefile.mk CONF=Debug"
                             CC="${MAKE}  -f ExcelFormat-Makefile.mk CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFStatistics"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFStatistics"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfstatistics.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIndicators"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFIndicators"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>

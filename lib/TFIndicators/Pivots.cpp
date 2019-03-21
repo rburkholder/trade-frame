@@ -21,15 +21,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string PivotSet::m_sPivotNames[ PivotSet::PivotCount ] 
+const std::string PivotSet::m_sPivotNames[ PivotSet::PivotCount ]
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
-const ou::Colour::enumColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ] 
-  = { ou::Colour::Tomato, ou::Colour::OrangeRed, ou::Colour::Orange, ou::Colour::RosyBrown, ou::Colour::Red, ou::Colour::Pink, 
-      ou::Colour::DarkRed, 
+const ou::Colour::enumColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ]
+  = { ou::Colour::Tomato, ou::Colour::OrangeRed, ou::Colour::Orange, ou::Colour::RosyBrown, ou::Colour::Red, ou::Colour::Pink,
+      ou::Colour::DarkRed,
       ou::Colour::BlueViolet, ou::Colour::Blue, ou::Colour::RoyalBlue, ou::Colour::Purple, ou::Colour::SkyBlue, ou::Colour::Violet };
 
-PivotSet::PivotSet(void) 
+PivotSet::PivotSet(void)
  {
    for ( unsigned short ix = 0; ix < PivotCount; ++ix ) {
      m_rPivots[ ix ] = 0;
@@ -86,6 +86,10 @@ void PivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, doubl
   CalcPivots( Hi, Lo, Close );
 }
 
+void PivotSet::CalcPivots( const Bar& bar ) {
+  CalcPivots( bar.High(), bar.Low(), bar.Close() );
+}
+
 void PivotSet::CalcPivots( double Hi, double Lo, double Close ) {
   double dif = Hi - Lo;
   m_rPivots[ PV ] = ( Hi + Lo + Close ) / 3;
@@ -113,74 +117,74 @@ void PivotSet::CalcHalfPivots() {
 
 /*
 http://www.earnforex.com/pivot_points_calculator.php
-The floor pivot points, presented in the first column of the calculation results table, 
-are the most basic and popular type of pivots used in Forex trading technical analysis. 
-The pivot point is interpreted as the primary support/resistance level - the point at 
-which the main trend will be born. First-third level resistance and support points 
-serve as additional indicators of possible trend reversal or continuation. The rules 
-to calculate floor pivot points are quite simple: 
+The floor pivot points, presented in the first column of the calculation results table,
+are the most basic and popular type of pivots used in Forex trading technical analysis.
+The pivot point is interpreted as the primary support/resistance level - the point at
+which the main trend will be born. First-third level resistance and support points
+serve as additional indicators of possible trend reversal or continuation. The rules
+to calculate floor pivot points are quite simple:
 
-Pivot (P) = (H + L + C) / 3 
+Pivot (P) = (H + L + C) / 3
 
-Resistance (R1) = (2 X P) - L 
+Resistance (R1) = (2 X P) - L
 
-R2 = P + H - L 
+R2 = P + H - L
 
-R3 = H + 2 X (P - L) 
+R3 = H + 2 X (P - L)
 
-Support (S1) = (2 X P) - H 
+Support (S1) = (2 X P) - H
 
-S2 = P - H + L 
+S2 = P - H + L
 
-S3 = L - 2 X (H - P) 
+S3 = L - 2 X (H - P)
 
-Other popular method of calculating a simple TA indicator which helps trader to forecast 
-future trend is Tom DeMark's pivot points. Which are not pivot points exactly, but predicted 
-low and high of the period. To calculate DeMark's pivot points follow these rules: 
+Other popular method of calculating a simple TA indicator which helps trader to forecast
+future trend is Tom DeMark's pivot points. Which are not pivot points exactly, but predicted
+low and high of the period. To calculate DeMark's pivot points follow these rules:
 
-If Close < Opencurrent Then X = H + 2 X L + C; 
+If Close < Opencurrent Then X = H + 2 X L + C;
 
-If Close > Opencurrent Then X = 2 X H + L + C; 
+If Close > Opencurrent Then X = 2 X H + L + C;
 
-If Close = Opencurrent Then X = H + L + 2 X C; 
+If Close = Opencurrent Then X = H + L + 2 X C;
 
-New High = X / 2 - L; New Low = X / 2 - H 
+New High = X / 2 - L; New Low = X / 2 - H
 
-Woodie's pivot points are similar to floor pivot points, but are calculated in a 
-somewhat different way, giving more weight to the Close price of the 
-previous period. Use the following rules to calculate Woodie's pivot points: 
+Woodie's pivot points are similar to floor pivot points, but are calculated in a
+somewhat different way, giving more weight to the Close price of the
+previous period. Use the following rules to calculate Woodie's pivot points:
 
-Pivot (P) = (H + L + 2 X C) / 4 
+Pivot (P) = (H + L + 2 X C) / 4
 
-Resistance (R1) = (2 X P) - L 
+Resistance (R1) = (2 X P) - L
 
-R2 = P + H - L 
+R2 = P + H - L
 
-Support (S1) = (2 X P) - H 
+Support (S1) = (2 X P) - H
 
-S2 = P - H + L 
+S2 = P - H + L
 
-Camarilla pivot points is a set of eight very probable levels 
-which resemble support and resistance values for a current trend. 
-The origin and the precise way to calculate these pivot points are unclear. 
-The most important is that these pivot points work for all traders and help in 
-setting the right stop-loss and take-profit orders. We use the following 
-rules to calculate Camarilla pivot points: 
+Camarilla pivot points is a set of eight very probable levels
+which resemble support and resistance values for a current trend.
+The origin and the precise way to calculate these pivot points are unclear.
+The most important is that these pivot points work for all traders and help in
+setting the right stop-loss and take-profit orders. We use the following
+rules to calculate Camarilla pivot points:
 
-R4 = (H - L) X 1.1 / 2 + C 
+R4 = (H - L) X 1.1 / 2 + C
 
-R3 = (H - L) X 1.1 / 4 + C 
+R3 = (H - L) X 1.1 / 4 + C
 
-R2 = (H - L) X 1.1 / 6 + C 
+R2 = (H - L) X 1.1 / 6 + C
 
-R1 = (H - L) X 1.1 / 12 + C 
+R1 = (H - L) X 1.1 / 12 + C
 
-S1 = C - (H - L) X 1.1 / 12 
+S1 = C - (H - L) X 1.1 / 12
 
-S2 = C - (H - L) X 1.1 / 6 
+S2 = C - (H - L) X 1.1 / 6
 
-S3 = C - (H - L) X 1.1 / 4 
+S3 = C - (H - L) X 1.1 / 4
 
-S4 = C - (H - L) X 1.1 / 2 
+S4 = C - (H - L) X 1.1 / 2
 */
 

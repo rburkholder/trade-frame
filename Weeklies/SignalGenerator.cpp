@@ -20,6 +20,8 @@
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
+#include <TFStatistics/Pivot.h>
+
 #include "SignalGenerator.h"
 
 SignalGenerator::SignalGenerator(void)
@@ -75,7 +77,7 @@ void SignalGenerator::ScanBars( void ) {
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
     "/bar/86400",  // at least a year's worth of bars
     ptime( date( 2018,  3, 10 ), time_duration( 0, 0, 0 ) ), //beginning time
-    ptime( date( 2019,  3, 19 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
+    ptime( date( 2019,  3, 20 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
     200,
     boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &SignalGenerator::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
@@ -120,6 +122,22 @@ void SignalGenerator::ScanBars( void ) {
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "SMA3" );
+
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "PV Above" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "X Down" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "PV Below" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "X Up" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "PV X" );
 
     filter.Run();
 
@@ -213,7 +231,7 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     << "),sma2(" << sma2
     << "),sma3(" << sma3
     << ")"
-    << std::endl;
+    ;
 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
@@ -231,6 +249,38 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
   cell->SetDouble( sma3 );
+
+  ou::tf::statistics::Pivot pivot( bars );
+
+  std::cout
+    << ",pivot("
+    <<        pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_Down )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_Up )
+    << "," << pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV )
+    << ")"
+    ;
+
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_Down ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_Up ) );
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
+  cell->SetDouble( pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV ) );
+
+  std::cout
+    << std::endl;
+
 
 }
 
