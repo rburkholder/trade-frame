@@ -205,6 +205,9 @@ void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citerBars begin,
   iter2 = iter1;
   ++iter2;
 
+  // TODO: REDO:  indications relative to pivot need to use next bar rather than current bar
+  //   make use of code in TFStatistics/Pivot as a start
+
   size_t nPVCrossings( 0 );
   size_t nUpAndR1Crossings( 0 );
   size_t nDnAndS1Crossings( 0 );
