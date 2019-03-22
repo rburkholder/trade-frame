@@ -39,7 +39,7 @@ Worker::~Worker(void) {
 void Worker::operator()( void ) {
 
   // last day of available data
-  SymbolSelection selector( ptime( date( 2019, 3, 19 ), time_duration( 0, 0, 0 ) ) );
+  SymbolSelection selector( ptime( date( 2019, 3, 21 ), time_duration( 23, 59, 59 ) ) );
   selector.Process( m_setInstrumentInfo );
 
   std::cout << "Symbol List: " << std::endl;
