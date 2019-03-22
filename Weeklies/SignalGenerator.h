@@ -42,6 +42,7 @@ private:
   struct BarSummary {
     std::string sType;
     ou::tf::Prices prices;
+    ou::tf::Price::volume_t emaVolume;
     ou::tf::TSSWStatsPrice pricesBollinger20;
     ou::tf::TSSWStatsPrice pricesSMA1;
     ou::tf::TSSWStatsPrice pricesSMA2;
@@ -50,14 +51,16 @@ private:
       : pricesBollinger20( prices, time_duration( 0, 0, 0 ), 20 ),
         pricesSMA1( prices, time_duration( 0, 0, 0 ), 10 ),
         pricesSMA2( prices, time_duration( 0, 0, 0 ), 25 ),
-        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 )
+        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 ),
+        emaVolume {}
     {}
     BarSummary( const BarSummary& rhs )  // ensures map has local assignments.
       : pricesBollinger20( prices, time_duration( 0, 0, 0 ), 20 ),
         pricesSMA1( prices, time_duration( 0, 0, 0 ), 10 ),
         pricesSMA2( prices, time_duration( 0, 0, 0 ), 25 ),
         pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 ),
-        sType( rhs.sType )
+        sType( rhs.sType ),
+        emaVolume {}
     { /* need to copy data over, but shouldn't be anything to copy */ }
   };
 

@@ -115,6 +115,9 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetString( "Price" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
+    cell->SetString( "Volume" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
     cell->SetString( "BolRange" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
@@ -186,16 +189,15 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   // process bars here
   for ( ou::tf::Bars::const_iterator iterBars = bars.begin(); bars.end() != iterBars; ++iterBars ) {
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
-    iter->second.prices.Append( price );
-//    iter->second.pricesBollinger20.Update();
-//    iter->second.pricesSMA1.Update();
-//    iter->second.pricesSMA2.Update();
-//    iter->second.pricesSMA3.Update();
+    iter->second.prices.Append( price ); // automatically updates indicators
+    iter->second.emaVolume = ( ( iter->second.emaVolume * 19.0 + iterBars->Volume() ) / 20.0 );  // 20 day exponential moving average
   }
-  //iter->second.pricesBollinger20.Update();
 
-  ExcelFormat::CellFormat fmtNum(m_fmt_mgr);
+  ExcelFormat::CellFormat fmtNum( m_fmt_mgr );
   fmtNum.set_format_string( XLS_FORMAT_DECIMAL );
+
+  ExcelFormat::CellFormat fmtInt( m_fmt_mgr );
+  fmtInt.set_format_string( XLS_FORMAT_INTEGER );
 
   ExcelFormat::CellFormat fmtCenterTxt(m_fmt_mgr);
   fmtCenterTxt.set_alignment( ExcelFormat::EXCEL_HALIGN_CENTRED );
@@ -204,16 +206,20 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   ExcelFormat::BasicExcelCell* cell;
   int ix( 0 );
 
-  cell = m_sheet->Cell( iy, ix++ );
+  cell = m_sheet->Cell( iy, ix++ ); // Type
   cell->SetString( iter->second.sType.c_str() );
 
-  cell = m_sheet->Cell( iy, ix++ );
+  cell = m_sheet->Cell( iy, ix++ ); // Symbol
   cell->SetString( sObject.c_str() );
 
-  double last = bars.Last()->Close();
+  double last = bars.Last()->Close(); // Price
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetDouble( last );
   cell->SetFormat( fmtNum );
+
+  cell = m_sheet->Cell( iy, ix++ ); // Volume
+  cell->SetInteger( iter->second.emaVolume );
+  cell->SetFormat( fmtInt );
 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtCenterTxt );
