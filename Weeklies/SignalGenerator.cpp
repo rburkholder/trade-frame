@@ -76,8 +76,8 @@ void SignalGenerator::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
     "/bar/86400",  // at least a year's worth of bars
-    ptime( date( 2018,  3, 10 ), time_duration( 0, 0, 0 ) ), //beginning time
-    ptime( date( 2019,  3, 20 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
+    ptime( date( 2018,  3, 20 ), time_duration( 0, 0, 0 ) ), //beginning time
+    ptime( date( 2019,  3, 21 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
     200,
     boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &SignalGenerator::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
