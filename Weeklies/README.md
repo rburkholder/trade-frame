@@ -18,6 +18,5 @@ symbol/instrument lists by market.
 spread with the second date being the date of the last day of the daily eod downloaded in the previous step.
 * Startp up the Weeklies app, and run menu: 'Actions' -> 'Run Scan'.  No need to Turn On IQF.  A bunch of symbols and numbers 
 should scroll by.
-* A file called ./x64/debug/weeklies.xls has been created which captures those numbers, and can be opened in any spreadsheet app.  
-A few elementary statistics and probability calculations are presented for each symbol in the list which could 
+* A file called ./x64/debug/weeklies.xls has been created which captures those numbers, and can be opened in any spreadsheet app.  A few elementary statistics and probability calculations are presented for each symbol in the list which could 
 be used for generating trade ideas.
