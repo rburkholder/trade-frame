@@ -1182,7 +1182,7 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
 
   m_vExchanges.clear();
   m_vExchanges.insert( "NYSE" );
-  //m_vExchanges.push_back( "NYSE_AMEX" );
+  m_vExchanges.insert( "NYSE_AMERICAN" );
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
