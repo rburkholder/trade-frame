@@ -32,7 +32,7 @@
 
 IMPLEMENT_APP(AppBasketTrading)
 
-namespace {  
+namespace {
  const std::string sFileNameMarketSymbolSubset( "BasketTrading.ser" );
 }
 
@@ -108,13 +108,13 @@ bool AppBasketTrading::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
   m_db.Open( "BasketTrading.db" );
-  
-  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols ); 
+
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){ 
-      std::cout << sStatus << std::endl; 
+    CallAfter( [sStatus](){
+      std::cout << sStatus << std::endl;
     });
-  });  
+  });
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
@@ -129,8 +129,8 @@ bool AppBasketTrading::OnInit() {
   m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
   m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
   m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
-  
-  m_pMasterPortfolio.reset( new MasterPortfolio( 
+
+  m_pMasterPortfolio.reset( new MasterPortfolio(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
@@ -155,7 +155,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
   m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
-  m_pPanelPortfolioStats->SetStats( 
+  m_pPanelPortfolioStats->SetStats(
     boost::lexical_cast<std::string>( m_dblMinPL ),
     boost::lexical_cast<std::string>( dblCurrent ),
     boost::lexical_cast<std::string>( m_dblMaxPL )
@@ -176,7 +176,7 @@ void AppBasketTrading::HandleLoadButton() {
         // worker will change depending upon provider type
         // big worker when going live, hdf5 worker when simulating
         std::cout << "Starting Symbol Evaluation ... " << std::endl;
-        // TODO: convert worker to something informative and use 
+        // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
         m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
       }
@@ -184,7 +184,7 @@ void AppBasketTrading::HandleLoadButton() {
 }
 
 void AppBasketTrading::HandleStartButton(void) {
-  CallAfter( 
+  CallAfter(
     [this](){
       m_pMasterPortfolio->Start();
       m_timerGuiRefresh.Start( 250 );
@@ -192,7 +192,7 @@ void AppBasketTrading::HandleStartButton(void) {
 }
 
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
-  CallAfter( 
+  CallAfter(
     [this](){
       std::cout << "Starting Symbol Test ... " << std::endl;
       m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
@@ -204,7 +204,7 @@ void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
 }
 
 void AppBasketTrading::HandleStopButton(void) {
-  CallAfter( 
+  CallAfter(
     [this](){
       m_pMasterPortfolio->Stop();
     });
@@ -223,7 +223,7 @@ void AppBasketTrading::HandleSaveButton(void) {
 
 void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thread, start processing in gui thread with CallAfter
   CallAfter([this](){
-    m_pWorker->IterateInstrumentList( 
+    m_pWorker->IterateInstrumentList(
       boost::phoenix::bind( &MasterPortfolio::AddSymbol, m_pMasterPortfolio.get(), boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
     m_pWorker->Join();
     delete m_pWorker;
@@ -258,7 +258,7 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -268,7 +268,7 @@ int AppBasketTrading::OnExit() {
   //m_timerGuiRefresh.Stop();
   if ( 0 != m_pWorker ) {
     delete m_pWorker;
-    m_pWorker = 0; 
+    m_pWorker = 0;
   }
   if ( m_db.IsOpen() ) m_db.Close();
 
@@ -283,7 +283,7 @@ void AppBasketTrading::HandleRegisterRows(  ou::db::Session& session ) {
 
 void AppBasketTrading::HandlePopulateDatabase( void ) {
 
-  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
@@ -299,15 +299,15 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
 
   m_pPortfolioCurrencyUSD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
 
   m_pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Strategies" );
 
 }
@@ -317,7 +317,7 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
 
   m_vExchanges.clear();
   m_vExchanges.insert( "NYSE" );
-  //m_vExchanges.push_back( "NYSE_AMEX" );
+  m_vExchanges.insert( "NYSE_AMERICAN" );
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
