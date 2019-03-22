@@ -31,7 +31,7 @@ SymbolSelection::SymbolSelection( ptime dtLast )
   : m_dtLast( dtLast ), m_dm( ou::tf::HDF5DataManager::RO ), m_nMinPivotBars( 20 )
 {
 
-  m_dtEnd = m_dtLast + date_duration( 1 );
+  m_dtEnd = m_dtLast + date_duration( 1 );  // TODO: might be able not do the additional day now.
   m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
   m_dt26WeeksAgo = m_dtLast - date_duration( 26 * 7 );
   m_dtDateOfFirstBar = m_dt26WeeksAgo;
