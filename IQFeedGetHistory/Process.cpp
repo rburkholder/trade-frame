@@ -33,9 +33,9 @@
 #pragma message( "** Note:  for msvc, compile in release mode, buffer checks make it slow in debug" )
 #endif
 
-Process::Process( 
+Process::Process(
   ou::tf::iqfeed::InMemoryMktSymbolList& list,
-  const std::string& sPrefixPath, 
+  const std::string& sPrefixPath,
 	size_t nDatums )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(),
 	m_list( list ),
@@ -44,7 +44,7 @@ Process::Process(
 //  m_cntBars( 0 ) // 2013/09/17
 {
   m_vExchanges.insert( "NYSE" );
-  //m_vExchanges.push_back( "NYSE_AMEX" );
+  m_vExchanges.insert( "NYSE_AMERICAN" );
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
@@ -60,7 +60,7 @@ Process::~Process(void) {
 void Process::Start( void ) {
 
   //ou::tf::iqfeed::InMemoryMktSymbolList list;
-  
+
   std::string sSymbols( "../symbols.ser" );
 /*
   if (false) {
@@ -77,7 +77,7 @@ void Process::Start( void ) {
   }
   std::cout << " done." << std::endl;
 */
-	
+
   typedef std::set<std::string> SymbolList_t;
   SymbolList_t setSelected;
 
@@ -111,7 +111,7 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
   // save the data
 
-  boost::mutex::scoped_lock lock( m_mutexProcessResults ); 
+  boost::mutex::scoped_lock lock( m_mutexProcessResults );
 
   assert( bars->sSymbol.length() > 0 );
 
@@ -128,7 +128,7 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
     wts.Write( sPath, &bars->bars );
   }
 
-  ReQueueBars( bars ); 
+  ReQueueBars( bars );
 
   std::cout << "." << std::endl;
 
@@ -136,7 +136,7 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
 void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
 
-  boost::mutex::scoped_lock lock( m_mutexProcessResults ); 
+  boost::mutex::scoped_lock lock( m_mutexProcessResults );
 
   assert( ticks->sSymbol.length() > 0 );
 
@@ -154,7 +154,7 @@ void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
     wtsq.Write( sPath, &ticks->quotes );
   }
 
-  ReQueueTicks( ticks ); 
+  ReQueueTicks( ticks );
 }
 
 void Process::OnCompletion( void ) {
