@@ -24,6 +24,9 @@
 
 // Started 2013/09/22
 
+namespace pt = boost::posix_time;
+namespace gregorian = boost::gregorian;
+
 class SignalGenerator {
 public:
   SignalGenerator(void);
@@ -61,7 +64,7 @@ private:
   typedef std::map<std::string,BarSummary> mapSymbol_t;
   mapSymbol_t m_mapSymbol;
 
-  void ScanBars( void );
+  void ScanBars( pt::ptime dtLast );
   bool HandleCallBackUseGroup( mapSymbol_t::iterator&, const std::string& sPath, const std::string& sGroup );
   bool HandleCallBackFilter( mapSymbol_t::iterator&, const std::string& sObject, ou::tf::Bars& bars );
   void HandleCallBackResults( mapSymbol_t::iterator&, const std::string& sObject, ou::tf::Bars& bars );

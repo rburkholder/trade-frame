@@ -24,6 +24,9 @@
 
 #include "SignalGenerator.h"
 
+namespace pt = boost::posix_time;
+namespace gregorian = boost::gregorian;
+
 SignalGenerator::SignalGenerator(void)
   : m_fmt_mgr( m_xls)
 {
@@ -37,6 +40,10 @@ void SignalGenerator::Run( void ) {
   ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
+  pt::ptime dtLast( gregorian::date( 2019,  3, 21 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+
+  std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
+
   try {
     ou::tf::cboe::ReadCboeWeeklyOptions( expiries, vui );
   }
@@ -44,6 +51,8 @@ void SignalGenerator::Run( void ) {
   }
 
   typedef ou::tf::cboe::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
+
+  std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
 
   for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
 //    std::cout <<
@@ -64,21 +73,24 @@ void SignalGenerator::Run( void ) {
 //    }
   }
 
+  std::cout << "SignalGenerator running eod and building output spreadsheet ..." << std::endl;
+
   if ( 0 != m_mapSymbol.size() ) {
-    ScanBars();
+    ScanBars( dtLast );
   }
 
   std::cout << "SignalGenerator Complete" << std::endl;
 
 }
 
-void SignalGenerator::ScanBars( void ) {
+void SignalGenerator::ScanBars( pt::ptime dtLast ) {
+
+  pt::ptime dtBegin( dtLast.date() - date_duration( 52 * 7 ), pt::time_duration( 0, 0, 0 ) ); // process ~year of bars
+
   namespace args = boost::phoenix::placeholders;
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
     "/bar/86400",  // at least a year's worth of bars
-    ptime( date( 2018,  3, 20 ), time_duration( 0, 0, 0 ) ), //beginning time
-    ptime( date( 2019,  3, 21 ), time_duration( 23, 59, 59 ) ),  // use date of last bar to retrieve
-    200,
+    dtBegin, dtLast, 200,
     boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &SignalGenerator::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &SignalGenerator::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
