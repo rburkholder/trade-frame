@@ -12,6 +12,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// NOTE:
+// 2019/03/23 Not In Use, retained for informational context
+
 #include "stdafx.h"
 
 #include <TFTimeSeries/TimeSeries.h>

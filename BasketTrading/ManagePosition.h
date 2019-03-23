@@ -14,6 +14,9 @@
 
 #pragma once
 
+// NOTE:
+// 2019/03/23 Not In Use, retained for informational context
+
 // AKA Strategy
 
 #include <TFTrading/DailyTradeTimeFrames.h>
