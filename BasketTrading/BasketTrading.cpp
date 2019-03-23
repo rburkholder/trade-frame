@@ -105,8 +105,10 @@ bool AppBasketTrading::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
 
-  // maybe set scenario with database and with in memory data structure
-  m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
+  // maybe set scenario with database and with in memory data structure?
+
+  m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
+
   m_db.Open( "BasketTrading.db" );
 
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
@@ -138,7 +140,7 @@ bool AppBasketTrading::OnInit() {
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
     },
-    m_pPortfolio
+    m_pPortfolioStrategyAggregate
     ) );
 
   return 1;
@@ -151,7 +153,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   double dblRealized;
   double dblCommissionsPaid;
   double dblCurrent;
-  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
+  m_pPortfolioStrategyAggregate->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
   //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
   m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
@@ -165,9 +167,9 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 void AppBasketTrading::HandleLoadButton() {
   CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
     [this](){
-      if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
+      if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created below, then load previously created portfolio
         // code currently does not allow a restart of session
-        std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
+        std::cout << "Cannot create new portfolio: " << m_sPortfolioStrategyAggregate << std::endl;
         //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
         // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
       }
@@ -300,15 +302,15 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
 
   m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
+    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of all Portfolios" );
 
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
+    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of all USD Portfolios" );
 
-  m_pPortfolio
+  m_pPortfolioStrategyAggregate
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Strategies" );
+    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of Instrument Instances" );
 
 }
 

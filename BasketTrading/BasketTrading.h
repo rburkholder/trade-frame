@@ -52,7 +52,7 @@ private:
 
   typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
 
-  std::string m_sDbPortfolioName;
+  std::string m_sPortfolioStrategyAggregate;
 
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
@@ -67,7 +67,7 @@ private:
   std::unique_ptr<MasterPortfolio> m_pMasterPortfolio;
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
-  pPortfolio_t m_pPortfolio;
+  pPortfolio_t m_pPortfolioStrategyAggregate;
 
   bool m_bData1Connected;
   bool m_bExecConnected;
