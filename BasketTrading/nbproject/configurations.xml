@@ -5,7 +5,6 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>BasketTrading.h</itemPath>
-      <itemPath>ManagePosition.h</itemPath>
       <itemPath>ManageStrategy.h</itemPath>
       <itemPath>MasterPortfolio.h</itemPath>
       <itemPath>PanelBasketTradingMain.h</itemPath>
@@ -24,7 +23,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>BasketTrading.cpp</itemPath>
-      <itemPath>ManagePosition.cpp</itemPath>
       <itemPath>ManageStrategy.cpp</itemPath>
       <itemPath>MasterPortfolio.cpp</itemPath>
       <itemPath>PanelBasketTradingMain.cpp</itemPath>
@@ -32,6 +30,10 @@
       <itemPath>SymbolSelection.cpp</itemPath>
       <itemPath>Worker.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="f1" displayName="Unused" projectFiles="true" kind="ROOT">
+      <itemPath>ManagePosition.cpp</itemPath>
+      <itemPath>ManagePosition.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
