@@ -31,24 +31,24 @@ using namespace fastdelegate;
 class PanelBasketTradingMain: public wxPanel {
 public:
   PanelBasketTradingMain(void);
-  PanelBasketTradingMain( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELBASKETTRADINGMAIN_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELBASKETTRADINGMAIN_POSITION, 
-    const wxSize& size = SYMBOL_PANELBASKETTRADINGMAIN_SIZE, 
+  PanelBasketTradingMain(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELBASKETTRADINGMAIN_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELBASKETTRADINGMAIN_POSITION,
+    const wxSize& size = SYMBOL_PANELBASKETTRADINGMAIN_SIZE,
     long style = SYMBOL_PANELBASKETTRADINGMAIN_STYLE );
-  bool Create( wxWindow* parent, wxWindowID id = SYMBOL_PANELBASKETTRADINGMAIN_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELBASKETTRADINGMAIN_POSITION, 
-    const wxSize& size = SYMBOL_PANELBASKETTRADINGMAIN_SIZE, 
+  bool Create( wxWindow* parent, wxWindowID id = SYMBOL_PANELBASKETTRADINGMAIN_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELBASKETTRADINGMAIN_POSITION,
+    const wxSize& size = SYMBOL_PANELBASKETTRADINGMAIN_SIZE,
     long style = SYMBOL_PANELBASKETTRADINGMAIN_STYLE );
   ~PanelBasketTradingMain(void);
-  
+
   typedef FastDelegate0<> OnBtn_t;
   OnBtn_t m_OnBtnLoad;
   OnBtn_t m_OnBtnStart;
   OnBtn_t m_OnBtnExitPositions;
   OnBtn_t m_OnBtnStop;
-  OnBtn_t m_OnBtnSave;  
+  OnBtn_t m_OnBtnSave;
 
 protected:
 private:

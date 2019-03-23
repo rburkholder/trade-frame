@@ -26,10 +26,10 @@
 //  - include packet of info:  stop, description, ...
 //  - provide trade summary at end of trading day
 
-ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) 
+ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar, double dblStop )
   : ou::tf::DailyTradeTimeFrame<ManagePosition>(),
   m_sName( sName ),
-  m_bToBeTraded( false ), m_barInfo( bar ), 
+  m_bToBeTraded( false ), m_barInfo( bar ),
   m_dblFundsToTrade( 0 ), m_bfTrades( 60 ),
   m_bCountBars( false ), m_nRHBars( 0 ),
   m_bSetOpen( false ), m_dblOpen( 0.0 ), m_dblStop( dblStop ),
@@ -75,7 +75,7 @@ void ManagePosition::HandleBar( const ou::tf::Bar& bar ) {
 }
 
 void ManagePosition::HandleTrade( const ou::tf::Trade& trade ) {
-  if ( m_bSetOpen ) { 
+  if ( m_bSetOpen ) {
     m_dblOpen = trade.Price();
     m_bSetOpen = false;
     std::cout << trade.DateTime() << ": Open " << m_pPosition->GetInstrument()->GetInstrumentName() << "@" << trade.Price() << std::endl;
@@ -142,15 +142,15 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
       ou::tf::Bars::const_reference bar2( m_bars.Ago( 1 ) );
       ou::tf::Bars::const_reference bar3( m_bars.Ago( 0 ) );
       if ( m_dblOpen < bar.Open() ) { // test for rising from open
-        if ( 
-//          ( bar1.Open() < bar2.Open() ) && 
-//          ( bar2.Open() < bar3.Open() ) && 
-          ( bar1.High() < bar2.High() ) && 
-          ( bar2.High() < bar3.High() ) && 
-          ( bar1.Low() < bar2.Low() ) && 
-          ( bar2.Low() < bar3.Low() ) && 
-          ( bar1.Close() < bar3.Close() ) 
-          ) { 
+        if (
+//          ( bar1.Open() < bar2.Open() ) &&
+//          ( bar2.Open() < bar3.Open() ) &&
+          ( bar1.High() < bar2.High() ) &&
+          ( bar2.High() < bar3.High() ) &&
+          ( bar1.Low() < bar2.Low() ) &&
+          ( bar2.Low() < bar3.Low() ) &&
+          ( bar1.Close() < bar3.Close() )
+          ) {
             // open a long position
             m_nAttempts++;
             m_dblStop = bar1.Low();
@@ -162,15 +162,15 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
       }
       else {
         if ( m_dblOpen > bar.Open() ) { // test for falling from open
-          if ( 
-//            ( bar1.Open() > bar2.Open() ) && 
-//            ( bar2.Open() > bar3.Open() ) && 
-            ( bar1.High() > bar2.High() ) && 
-            ( bar2.High() > bar3.High() ) && 
-            ( bar1.Low() > bar2.Low() ) && 
-            ( bar2.Low() > bar3.Low() ) && 
-            ( bar1.Close() > bar3.Close() ) 
-            ) { 
+          if (
+//            ( bar1.Open() > bar2.Open() ) &&
+//            ( bar2.Open() > bar3.Open() ) &&
+            ( bar1.High() > bar2.High() ) &&
+            ( bar2.High() > bar3.High() ) &&
+            ( bar1.Low() > bar2.Low() ) &&
+            ( bar2.Low() > bar3.Low() ) &&
+            ( bar1.Close() > bar3.Close() )
+            ) {
               // open a short position
               m_nAttempts++;
               m_dblStop = bar1.High();
@@ -196,11 +196,11 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
     switch ( m_stateTrading ) {
       case TSWaitForEntry:
         if ( ( quote.Bid() > m_dblOpen ) && ( quote.Ask() > m_dblOpen ) ) {
-          std::cout 
-            << quote.DateTime() 
-            << ": Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() 
+          std::cout
+            << quote.DateTime()
+            << ": Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName()
             << "b(" << quote.Bid() << "),a(" << quote.Ask() << ")"
-            << ", stop at " << m_dblStop 
+            << ", stop at " << m_dblStop
             << std::endl;
           m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
           m_stateTrading = TSMonitorLong;
@@ -208,9 +208,9 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
         break;
       case TSMonitorLong:
         if ( quote.Ask() < m_dblStop ) {
-          std::cout 
-            << quote.DateTime() 
-            << ": Stop " << m_pPosition->GetInstrument()->GetInstrumentName() 
+          std::cout
+            << quote.DateTime()
+            << ": Stop " << m_pPosition->GetInstrument()->GetInstrumentName()
             << "b(" << quote.Bid() << "),a(" << quote.Ask() << ")"
             << std::endl;
           m_pPosition->CancelOrders();

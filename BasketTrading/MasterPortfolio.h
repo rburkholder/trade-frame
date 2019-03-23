@@ -39,7 +39,7 @@ public:
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
-  
+
   typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
   typedef std::function<const trd_t&(const std::string& sIQFeedSymbolName)> fGetTableRowDef_t;
   typedef ManageStrategy::fOptionDefinition_t fOptionDefinition_t;
@@ -62,7 +62,7 @@ private:
 
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
   typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;  
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
 
@@ -81,16 +81,16 @@ private:
   pProviderSim_t n_pSim;
 
   pPortfolio_t m_pMasterPortfolio;
-  
+
   ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
-  
+
   typedef std::unique_ptr<ManageStrategy> pManageStrategy_t;
 
   typedef std::map<std::string,pManageStrategy_t> mapStrategy_t;
   mapStrategy_t m_mapStrategy;
-  
+
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
 

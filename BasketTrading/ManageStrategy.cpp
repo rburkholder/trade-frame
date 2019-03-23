@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   ManageStrategy.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on August 26, 2018, 6:46 PM
  */
 
@@ -26,7 +26,7 @@
 //  run implied atm volatility for underlying
 
 // 2018/09/11
-//   change ManagePortfolio:  
+//   change ManagePortfolio:
 //     watch opening price/quotes, include that in determination for which symbols to trade
 //     may also watch number of option quotes delivered to ensure liquidity
 //     then allocate the ToTrade from opening data rather than closing bars
@@ -39,17 +39,17 @@
 //   use option with >7 days to expiry?
 //   add charts to watch AtmIv, options, underlying (steal from ComboTrading)
 //   add a roll-down maneouver to keep delta close to 1
-//   need option exit, and install a stop when in the profit zone, and put not longer necessary 
+//   need option exit, and install a stop when in the profit zone, and put not longer necessary
 //   need to get out of an option at $0.20, otherwise may not be a market
 //     add a stop?  (do not worry when doing multi-day trades)
-//   
+//
 
 #include <algorithm>
 
 #include "ManageStrategy.h"
 
-ManageStrategy::ManageStrategy( 
-  const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily, 
+ManageStrategy::ManageStrategy(
+  const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
   pPortfolio_t pPortfolioStrategy,
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch,
@@ -61,35 +61,35 @@ ManageStrategy::ManageStrategy(
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
   m_nUnderlyingSharesToTrade {},
-  m_barPriorDaily( barPriorDaily ), 
+  m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
-  m_fConstructWatch( fConstructWatch ), 
-  m_fConstructOption( ConstructOption ), 
-  m_fConstructPosition( fConstructPosition ), 
+  m_fConstructWatch( fConstructWatch ),
+  m_fConstructOption( ConstructOption ),
+  m_fConstructPosition( fConstructPosition ),
   m_stateTrading( TSInitializing ),
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc )
-{ 
+{
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
   assert( nullptr != m_fStartCalc );
   assert( nullptr != m_fStopCalc );
-  
+
   std::cout << m_sUnderlying << " loading up ... " << std::endl;
-  
+
   try {
-    m_fConstructWatch( sUnderlying, 
+    m_fConstructWatch( sUnderlying,
       [this,fGatherOptionDefinitions](pWatch_t pWatch){
-        
+
         std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
-        
+
         m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
         assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
 
-        fGatherOptionDefinitions( 
-          m_pPositionUnderlying->GetInstrument()->GetInstrumentName(), 
+        fGatherOptionDefinitions(
+          m_pPositionUnderlying->GetInstrument()->GetInstrumentName(),
           [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
 
             if ( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc ) {
@@ -100,7 +100,7 @@ ManageStrategy::ManageStrategy(
               {
                 typedef ou::tf::option::IvAtm::fConstructedOption_t fConstructedOption_t;
                 ou::tf::option::IvAtm ivAtm(
-                        m_pPositionUnderlying->GetWatch(), 
+                        m_pPositionUnderlying->GetWatch(),
                       // IvAtm::fConstructOption_t
                         m_fConstructOption,
                       // IvAtm::fStartCalc_t
@@ -134,12 +134,12 @@ ManageStrategy::ManageStrategy(
                 catch ( std::runtime_error& e ) {
                   std::cout << "fGatherOptionDefinitions error" << std::endl;
                 }
-              }    
+              }
             }
         });
 
         assert( 0 != m_mapChains.size() );
-        
+
         std::cout << m_sUnderlying << " watch done." << std::endl;
 
     } );
@@ -147,14 +147,14 @@ ManageStrategy::ManageStrategy(
   catch (...) {
     std::cout << "something wrong" << std::endl;
   }
-  
+
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
-  
+
   std::cout << m_sUnderlying << " loading done." << std::endl;
-  
+
 }
 
-ManageStrategy::~ManageStrategy( ) { 
+ManageStrategy::~ManageStrategy( ) {
 }
 
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
@@ -164,11 +164,11 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
 }
 
 void ManageStrategy::Start( void ) {
-  
+
   std::cout << m_sUnderlying << " starting up ... " << std::endl;
-  
+
   assert( TSInitializing == m_stateTrading );
-  
+
   if ( nullptr == m_pPositionUnderlying.get() ) {
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
   }
@@ -195,7 +195,7 @@ void ManageStrategy::Start( void ) {
       }
     }
   }
-  
+
 }
 
 void ManageStrategy::Stop( void ) {
@@ -206,7 +206,7 @@ void ManageStrategy::Stop( void ) {
 }
 
 void ManageStrategy::HandleBellHeard( void ) {
-  
+
 }
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
@@ -233,10 +233,10 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   switch ( m_stateTrading ) {
-    case TSWaitForEntry: 
+    case TSWaitForEntry:
       {
         boost::gregorian::date date( quote.DateTime().date() );
-        mapChains_t::iterator iterChains = std::find_if( m_mapChains.begin(), m_mapChains.end(), 
+        mapChains_t::iterator iterChains = std::find_if( m_mapChains.begin(), m_mapChains.end(),
           [date](const mapChains_t::value_type& vt)->bool{
             return date < vt.first;  // TODO: at least one or two days difference?
         } );
@@ -257,8 +257,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             }
             else {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building put." << std::endl;
-              
-              m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(), 
+
+              m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
                 [this](pOption_t pOption){
                   m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
                   std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;

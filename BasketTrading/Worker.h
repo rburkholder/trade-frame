@@ -37,7 +37,7 @@ public:
 
   template<typename Function>
   void IterateInstrumentList( Function f ) {
-    std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(), 
+    std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
                   [&f](const SymbolSelection::InstrumentInfo& ii){
                     f( ii.sName, ii.barLast, ii.dblStop );
                   } );
@@ -50,10 +50,10 @@ protected:
 private:
 
   OnCompletionHandler m_OnCompletion;
-  
+
   setInstrumentInfo_t m_setInstrumentInfo;
 
   boost::thread* m_pThread;
-  
+
 };
 

@@ -8,7 +8,6 @@
  *                                                                      *
  * This software may not be used nor distributed without proper license *
  * agreement.                                                           *
-
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/

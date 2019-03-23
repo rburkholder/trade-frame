@@ -47,7 +47,7 @@ void PanelPortfolioStats::Init( void ) {
     m_txtPortfolioHigh = NULL;
 }
 
-void PanelPortfolioStats::CreateControls() {    
+void PanelPortfolioStats::CreateControls() {
     PanelPortfolioStats* itemPanel1 = this;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);

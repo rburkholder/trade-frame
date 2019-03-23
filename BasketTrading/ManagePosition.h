@@ -52,7 +52,7 @@ private:
 
   bool m_bCountBars;
   size_t m_nRHBars;
-  
+
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
   ou::tf::Bars m_bars;

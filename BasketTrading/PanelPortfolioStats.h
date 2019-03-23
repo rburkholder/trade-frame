@@ -31,15 +31,15 @@
 class PanelPortfolioStats: public wxPanel {
 public:
   PanelPortfolioStats(void);
-  PanelPortfolioStats( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELPORTFOLIOSTATS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELPORTFOLIOSTATS_POSITION, 
-    const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE, 
+  PanelPortfolioStats(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELPORTFOLIOSTATS_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELPORTFOLIOSTATS_POSITION,
+    const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE,
     long style = SYMBOL_PANELPORTFOLIOSTATS_STYLE );
-  bool Create( wxWindow* parent, wxWindowID id = SYMBOL_PANELPORTFOLIOSTATS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELPORTFOLIOSTATS_POSITION, 
-    const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE, 
+  bool Create( wxWindow* parent, wxWindowID id = SYMBOL_PANELPORTFOLIOSTATS_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELPORTFOLIOSTATS_POSITION,
+    const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE,
     long style = SYMBOL_PANELPORTFOLIOSTATS_STYLE );
   ~PanelPortfolioStats(void);
   void SetStats( const std::string& sMin, const std::string& sCurrent, const std::string& sMax );

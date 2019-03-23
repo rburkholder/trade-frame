@@ -48,8 +48,8 @@ void PanelBasketTradingMain::Init( void ) {
     m_btnSave = NULL;
 }
 
-void PanelBasketTradingMain::CreateControls() {   
-  
+void PanelBasketTradingMain::CreateControls() {
+
     PanelBasketTradingMain* itemPanel1 = this;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);

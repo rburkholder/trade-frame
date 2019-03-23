@@ -35,7 +35,7 @@ public:
       : sName( sName_ ), barLast( bar ), dblStop {} {};
     bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
   };
-  
+
   typedef std::set<InstrumentInfo> setInstrumentInfo_t;
 
   explicit SymbolSelection( ptime eod );
