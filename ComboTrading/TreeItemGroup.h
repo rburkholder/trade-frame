@@ -26,32 +26,32 @@ class TreeItemGroup;
 class TreeItemGroupCommon: public TreeItemResources {
   friend class boost::serialization::access;
 public:
-  
-  TreeItemGroupCommon( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
+
+  TreeItemGroupCommon( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
     TreeItemResources( id, baseResources, resources ) {}
   virtual ~TreeItemGroupCommon( void ) {}
-  
+
 protected:
-  
+
   enum IdTreeItemType {
     IdGroup = 201, IdInstrument, IdPortfolio, IdPosition
   };
-  
+
   enum {
     ID_Null = wxID_HIGHEST,
-    MIAddGroup, MIAddInstrument, MIAddPortfolio, MIAddPosition, 
+    MIAddGroup, MIAddInstrument, MIAddPortfolio, MIAddPosition,
     MIRename, MIDelete
   };
-  
+
   void BuildContextMenu( wxMenu* pMenu );
-  
+
 private:
   void HandleAddInstrument( wxCommandEvent& event );
   void HandleAddPortfolio( wxCommandEvent& event );
   void HandleAddPosition( wxCommandEvent& event );
   void HandleAddGroup( wxCommandEvent& event );
   void HandleRename( wxCommandEvent& event );
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar << boost::serialization::base_object<const TreeItemResources>(*this);
@@ -110,19 +110,19 @@ private:
 class TreeItemRoot: public TreeItemGroupCommon {
   friend class boost::serialization::access;
 public:
-  TreeItemRoot( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
+  TreeItemRoot( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
     TreeItemGroupCommon( id, baseResources, resources ) {}
   virtual ~TreeItemRoot( void ) {}
-  
+
   virtual void ShowContextMenu( void );
-  
+
 protected:
 private:
 //  enum {
 //    ID_Null = wxID_HIGHEST,
 //    MIAddGroup
 //  };
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const TreeItemGroupCommon>(*this);
@@ -142,15 +142,15 @@ private:
 class TreeItemGroup: public TreeItemGroupCommon {
   friend class boost::serialization::access;
 public:
-  TreeItemGroup( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
+  TreeItemGroup( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
     TreeItemGroupCommon( id, baseResources, resources ) {}
   virtual ~TreeItemGroup( void ) {}
-  
+
   virtual void ShowContextMenu( void );
-  
+
 protected:
 private:
-  
+
   void HandleDelete( wxCommandEvent& event );
 
   template<typename Archive>

@@ -69,7 +69,7 @@ private:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
-  
+
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
   typedef ou::tf::PositionGreek::pPositionGreek_t pPositionGreek_t;
 
@@ -79,14 +79,14 @@ private:
 
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  
+
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PanelPortfolioPosition::fAddPosition_t fAddPostion_t;
-  
+
   typedef std::vector<BundleTracking> vBundleTracking_t;
-  
+
   typedef std::function<void(pInstrument_t)> fInstrumentFromIB_t;
 
   struct structManualOrder {
@@ -101,41 +101,41 @@ private:
     //DelegateAddPosition_t function;
   } m_EquityPositionCallbackInfo;
 
-  template<typename T> 
+  template<typename T>
   struct structAutoNull {
     T* pT;
     structAutoNull(): pT( nullptr ) {}
     structAutoNull( T* pT_ ): pT( pT_ ) {}
     ~structAutoNull() { pT = nullptr; }
   };
-  
+
   typedef structAutoNull<ou::tf::PanelPortfolioPosition> structPortfolioTrading;
   typedef structAutoNull<ou::tf::PanelOptionCombo> structPortfolioSandbox;
-  
+
   typedef std::map<std::string,structPortfolioTrading> mapPortfoliosTrading_t;
   typedef std::map<std::string,structPortfolioSandbox> mapPortfoliosSandbox_t;
 
   std::string m_sDbName;
-  
+
   ou::action::Worker m_worker;
 
   wxTimer m_timerGuiRefresh;
-  
+
   double m_dblMaxPL;
   double m_dblMinPL;
-  
+
   ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
-  
+
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
-  
+
   Process m_process;  // single position
-  
+
   vBundleTracking_t m_vBundleTracking; // one per underlying and related options to track
 
   ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
   pPortfolio_t m_pPortfolioMaster;
-  
+
   mapPortfoliosTrading_t m_mapPortfoliosTrading;
   mapPortfoliosSandbox_t m_mapPortfoliosSandbox;
 
@@ -147,38 +147,38 @@ private:
   FrameMain* m_pFCharts;
   FrameMain* m_pFInteractiveBrokers;
   FrameMain* m_pFOC;
-  
+
   ou::tf::PanelCharts* m_pPanelCharts;
-  
+
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
   //ou::tf::PanelOptionCombo* m_pPanelOptionCombo;
-  
+
   typedef ou::tf::PanelOptionCombo PanelOptionCombo;
   typedef PanelOptionCombo* pPanelOptionCombo_t;
   //typedef std::vector<PanelOptionCombo*> vPanelOptionCombo_t;
   //vPanelOptionCombo_t m_vPanelOptionCombo;
-  
+
   MPPOE_t* m_pMPPOE;
   PPPOE_t* m_pPPPOE;
   CPPOE_t* m_pCPPOE;
-  
+
     wxSplitterWindow* m_splitPanels;
     ou::tf::GridIBAccountValues* m_pPanelIBAccountValues;
-    ou::tf::GridIBPositionDetails* m_pPanelIBPositionDetails;  
-    
+    ou::tf::GridIBPositionDetails* m_pPanelIBPositionDetails;
+
   wxBoxSizer* m_sizerPM;
   wxScrolledWindow* m_scrollPM;
   wxBoxSizer* m_sizerScrollPM;
 
   ou::tf::GridColumnSizer m_gcsPanelPortfolioPosition;
   ou::tf::GridColumnSizer m_gcsPanelOptionCombo;
-  
+
   ou::tf::DBOps m_db;
   std::string m_sWorkingDirectory;
   std::string m_sfnState;
-  
+
   wxBoxSizer* m_sizerFOC;
   wxScrolledWindow* m_scrollFOC;
   wxBoxSizer* m_sizerScrollOC;
@@ -191,13 +191,13 @@ private:
   void BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument&, fInstrumentFromIB_t );
   void RegisterInstrument( pInstrument_t );
   pInstrument_t LoadInstrument( const std::string& );
-  
+
   void HandleSave( wxCommandEvent& event );
   void HandleLoad( wxCommandEvent& event );
 
   void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument, fInstrumentFromIB_t );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );
-  
+
   void ConstructEquityPosition1a( const std::string& sName, pPortfolio_t, fAddPostion_t);  // step 1
   void ConstructEquityPosition1b( pInstrument_t, pPortfolio_t, fAddPostion_t);  // step 1
   void ConstructEquityPosition2( pInstrument_t& pInstrument ); // step 2
@@ -209,16 +209,16 @@ private:
   void OnClose( wxCloseEvent& event );
 
   void TestSymbols( void );
-  
+
   void HandleMenuActionEmitYieldCurve( void );
   void HandleMenuActionSaveSeries( void );
-  
+
   void HandleSaveValues( void );
-  
+
   void BuildFrameCharts( void );
   void BuildFramePortfolioPosition( void );
   void BuildFrameInteractiveBrokers( void );
-  
+
   void BuildFrameOptionCombo( void );
 
   void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
@@ -234,10 +234,10 @@ private:
   void OnExecConnected( int );
   void OnExecDisconnecting( int );
   void OnExecDisconnected( int );
-  
+
   void OnIQFeedConnected( int );
   void OnIQFeedDisconnecting( int );
-  
+
   void HandleSaveButton( void );
 
   void HandlePopulateDatabase( void );
@@ -250,17 +250,17 @@ private:
 
   void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
   void HandlePositionLoad( pPosition_t& pPosition );
-  
+
   void ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t );
 
 //  void HandleMenuActionInitializeSymbolSet( void );
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
-  
+
   pPanelOptionCombo_t HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription );
 
   void HandleConstructPortfolio( ou::tf::PanelPortfolioPosition&,const std::string&, const std::string& ); // portfolioid, description
-  
+
   void UpdateColumns_PanelPortfolioPositions();
   void UpdateColumns_PanelOptionCombo();
 
@@ -285,7 +285,7 @@ private:
     ar & m_gcsPanelPortfolioPosition;
     ar & m_gcsPanelOptionCombo;
   }
-  
+
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
@@ -339,16 +339,16 @@ private:
       ar & m_gcsPanelOptionCombo;
       UpdateColumns_PanelOptionCombo();
     }
-    
+
     //m_sizerFOC->FitInside( m_scrollFOC );
     //m_sizerScrollOC->FitInside( m_scrollFOC );
     m_sizerScrollOC->Layout();
     m_sizerFOC->Layout();
-    
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
-    
+
 };
 
 BOOST_CLASS_VERSION(AppComboTrading, 8)

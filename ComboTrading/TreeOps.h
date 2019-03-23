@@ -23,21 +23,21 @@
 class TreeOps: public ou::tf::TreeOps {
 public:
   TreeOps();
-  TreeOps( 
-          wxWindow* parent, 
-          wxWindowID id = SYMBOL_TREEOPS_IDNAME, 
-          const wxPoint& pos = SYMBOL_TREEOPS_POSITION, 
-          const wxSize& size = SYMBOL_TREEOPS_SIZE, 
+  TreeOps(
+          wxWindow* parent,
+          wxWindowID id = SYMBOL_TREEOPS_IDNAME,
+          const wxPoint& pos = SYMBOL_TREEOPS_POSITION,
+          const wxSize& size = SYMBOL_TREEOPS_SIZE,
           long style = SYMBOL_TREEOPS_STYLE );
 
-  bool Create( 
-    wxWindow* parent, 
-          wxWindowID id = SYMBOL_TREEOPS_IDNAME, 
-          const wxPoint& pos = SYMBOL_TREEOPS_POSITION, 
-          const wxSize& size = SYMBOL_TREEOPS_SIZE, 
+  bool Create(
+    wxWindow* parent,
+          wxWindowID id = SYMBOL_TREEOPS_IDNAME,
+          const wxPoint& pos = SYMBOL_TREEOPS_POSITION,
+          const wxSize& size = SYMBOL_TREEOPS_SIZE,
           long style = SYMBOL_TREEOPS_STYLE );
   virtual ~TreeOps();
-  
+
   void PopulateResources( Resources& resources );
 
   template<typename RootItemType>
@@ -50,8 +50,8 @@ public:
     ou::tf::TreeOps::Load<RootItemType>( ia );
   }
 
-  
-  
+
+
 protected:
 private:
 

@@ -25,8 +25,8 @@
 struct Resources {
 
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
-  
-  typedef boost::signals2::signal<pInstrumentActions_t (const wxTreeItemId&), 
+
+  typedef boost::signals2::signal<pInstrumentActions_t (const wxTreeItemId&),
                                      ou::tf::FirstOrDefault<pInstrumentActions_t> > signalGetInstrumentActions_t;
   typedef signalGetInstrumentActions_t::slot_type slotInstrumentActions_t;
   signalGetInstrumentActions_t signalGetInstrumentActions;
@@ -43,7 +43,7 @@ public:
 protected:
   Resources& m_resources;
 private:
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const ou::tf::TreeItemBase>(*this);

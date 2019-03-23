@@ -22,7 +22,7 @@ class Process {
 public:
   Process();
   virtual ~Process();
-  
+
   void LoadWeeklies( void );  // later, will need to pass in repository
 protected:
 private:

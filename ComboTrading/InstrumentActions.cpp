@@ -12,10 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   InstrumentActions.cpp
  * Author: rpb
- * 
+ *
  * Created on February 25, 2017, 7:57 PM
  */
 

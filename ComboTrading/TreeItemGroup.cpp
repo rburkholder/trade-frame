@@ -33,7 +33,7 @@ void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemBase::HandleRename, this, MIRename );
 }
 
-void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) { 
+void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( "Instrument", IdInstrument, m_resources );
   if ( p->NewInstrumentViaDialog( ou::tf::Allowed::Basic ) ) {
     // continue processing
@@ -54,17 +54,17 @@ void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) {
 //  }
 }
 
-void TreeItemGroupCommon::HandleAddPortfolio( wxCommandEvent& event ) { 
+void TreeItemGroupCommon::HandleAddPortfolio( wxCommandEvent& event ) {
   TreeItemPortfolio* p = AddTreeItem<TreeItemPortfolio>( "Portfolio", IdPortfolio, m_resources );
   p->Rename();
 }
 
-void TreeItemGroupCommon::HandleAddPosition( wxCommandEvent& event ) { 
+void TreeItemGroupCommon::HandleAddPosition( wxCommandEvent& event ) {
   TreeItemPosition* p = AddTreeItem<TreeItemPosition>( "Position", IdPosition, m_resources );
   p->Rename();
 }
 
-void TreeItemGroupCommon::HandleAddGroup( wxCommandEvent& event ) { 
+void TreeItemGroupCommon::HandleAddGroup( wxCommandEvent& event ) {
   TreeItemGroup* p = AddTreeItem<TreeItemGroup>( "Group", IdGroup, m_resources );
   p->Rename();
 }

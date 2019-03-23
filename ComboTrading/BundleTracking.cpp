@@ -25,5 +25,5 @@ BundleTracking::~BundleTracking() {
 }
 
 void BundleTracking::SetBundleParameters( const BundleDetails& bd ) {
-  
+
 }

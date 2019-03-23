@@ -14,7 +14,7 @@
 
 // started December 13, 2015, 8:16 PM
 
-// 20161003 
+// 20161003
 //  manual control of watch/unwatch in menu at some point
 //  set colour on menu item for watch/unwatch mode
 //  then start the watch chart
@@ -34,7 +34,7 @@ TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResourc
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
 }
-  
+
 TreeItemInstrument::~TreeItemInstrument( void ) {
   //std::cout << "TreeItemInstrument::~TreeItemInstrument" << std::endl;
 }
@@ -79,14 +79,14 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
     case ou::tf::Allowed::Options:
       pMenu->Append( MINewOption, "New Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
-      
+
       pMenu->Append( MIOptionList, "Option Chains" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
     case ou::tf::Allowed::FuturesOptions:
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
-      
+
       pMenu->Append( MIOptionList, "Option Chains" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
       break;
@@ -99,19 +99,19 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   }
 
   // add watch/unwatch menu item?
-  
+
   pMenu->Append( MILiveChart, "Live Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
-  
+
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
-  
+
   pMenu->Append( MIEmit, "Emit" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
-  
+
 //  pMenu->Append( MISaveData, "Save Data" );
 //  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
-  
+
   pMenu->Append( MIDelete, "Delete" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
 }
@@ -133,12 +133,12 @@ void TreeItemInstrument::ShowContextMenu( void ) {
  */
 
 // from tree menu popup
-void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) { 
+void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) {
   InstrumentViaDialog( ou::tf::Allowed::Options, "Option" );
 }
 
 // from tree menu popup
-void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) { 
+void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) {
   InstrumentViaDialog( ou::tf::Allowed::FuturesOptions, "FuturesOption" );
 }
 
@@ -160,23 +160,23 @@ void TreeItemInstrument::InstrumentViaDialog( ou::tf::Allowed::enumInstrument se
   }
 }
 
-// called by: 
+// called by:
 //   InstrumentViaDialog (above)
 //   TreeItemGroup::HandleAddInstrument
-bool TreeItemInstrument::NewInstrumentViaDialog( 
-  ou::tf::Allowed::enumInstrument selector, const wxString& wxsUnderlying 
+bool TreeItemInstrument::NewInstrumentViaDialog(
+  ou::tf::Allowed::enumInstrument selector, const wxString& wxsUnderlying
   ) {
   // IQF underlying name, and IB underlying name will need to be provided for naming options during lock
   // need to assume/assert that this is a new dialog?  or communicate it is a replacement?
   bool bInstrumentNameAssigned( false );
-  InstrumentActions::values_t values( 
+  InstrumentActions::values_t values(
     m_pInstrumentActions->signalNewInstrument( this->m_id, selector, wxsUnderlying ) );
   if ( "" == values.name_ ) {
     // caller takes care of the deletion
   }
   else {
     m_baseResources.signalSetItemText( m_id, values.name_ );
-    if ( !wxsUnderlying.empty() ) 
+    if ( !wxsUnderlying.empty() )
       m_sUnderlying = wxsUnderlying;
     m_InstrumentSelector = values.selector;
     bInstrumentNameAssigned = true;
