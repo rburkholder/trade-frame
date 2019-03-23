@@ -18,9 +18,9 @@
 // 2013/01/06:
 // Auto selects and trades a basket of equities, enters at market start, exits prior to end of regular trading hours
 // Once heding and option calculations are complete, can run auto hedging on basket and see if that works
-// Current trading rules are too variable, big gains on one day when in directional market, 
+// Current trading rules are too variable, big gains on one day when in directional market,
 //   big losses on another when market moves sideways
-// Data has been saved for both types of days, perhaps running GP routines on the data will 
+// Data has been saved for both types of days, perhaps running GP routines on the data will
 //  yield more consistently positive results.  Could try for better money management as well.
 
 #include <string>
@@ -76,7 +76,7 @@ private:
 
   double m_dblMaxPL;
   double m_dblMinPL;
-  
+
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
@@ -110,7 +110,7 @@ private:
 
   void HandleMenuActionTestSelection( void );
   void HandleMenuActionTestSelectionDone( void );
-  
+
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
 
