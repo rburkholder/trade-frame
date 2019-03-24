@@ -53,7 +53,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_system-mt -lboost_date_time-mt -lboost_filesystem-mt -lboost_serialization-mt -lboost_thread-mt -lboost_regex-mt
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_system-mt -lboost_date_time-mt -lboost_filesystem-mt -lboost_serialization-mt -lboost_thread-mt -lboost_regex-mt
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -72,6 +72,8 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/scanner: ../lib/TFSimulation/dist/Deb
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/scanner: ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/scanner: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/scanner: ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/scanner: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
 
@@ -108,6 +110,7 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug
 	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug
@@ -128,6 +131,7 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug clean
 	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug clean

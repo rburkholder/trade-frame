@@ -19,7 +19,8 @@
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
-#include <TFIndicators/Pivots.h>
+//#include <TFIndicators/Pivots.h>
+#include <TFStatistics/Pivot.h>
 
 #include "Scanner.h"
 
@@ -34,11 +35,12 @@ bool AppScanner::OnInit() {
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
-  //m_pFrameMain->Center();
 //  m_pFrameMain->Move( -2500, 50 );
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
+  m_pFrameMain->Center();
+  
   wxBoxSizer* m_sizerMain;
   m_sizerMain = new wxBoxSizer(wxVERTICAL);
   m_pFrameMain->SetSizer(m_sizerMain);
@@ -110,44 +112,15 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
       //std::cout << sObject << " vol=" << volAverage << std::endl;
-      ou::tf::Bars::const_iterator iter1, iter2;
-      iter2 = bars.end();
-      iter1 = iter2 - m_nMinBarCount;
-      iter2 = iter1;
-      ++iter2;
-      data.nPVCrossings = 0;
-      data.nUpAndR1Crossings = 0;
-      data.nDnAndS1Crossings = 0;
-      data.nPVAndR1Crossings = 0;
-      data.nPVAndS1Crossings = 0;
-      while ( bars.end() != iter2 ) {
-        ou::tf::PivotSet pivot( "pv", *iter1 );
-        double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
-        if ( ( pv <= iter2->High() ) && ( pv >= iter2->Low() ) ) {
-          ++(data.nPVCrossings);
-        }
 
-        if ( iter2->Open() < pv ) {
-          double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
-          if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(data.nPVAndR1Crossings);
-        }
-        if ( iter2->Open() > pv ) {
-          double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
-          if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(data.nPVAndS1Crossings);
-        }
+      ou::tf::statistics::Pivot pivot( bars );
 
-        if ( iter2->Open() > pv ) {
-          double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
-          if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(data.nUpAndR1Crossings);
-        }
-        if ( iter2->Open() < pv ) {
-          double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
-          if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(data.nDnAndS1Crossings);
-        }
+      data.nPVCrossings      = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV );
+      data.nUpAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
+      data.nDnAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Down );
+      data.nPVAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_R1 );
+      data.nPVAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_S1 );
 
-        ++iter1;
-        ++iter2;
-      }
       ++data.nPassedFilter;
       b = true;
   }
@@ -165,11 +138,7 @@ void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, o
     << data.nPVAndR1Crossings << ","
     << data.nPVCrossings << ","
     << data.nPVAndS1Crossings << ","
-    << data.nDnAndS1Crossings << ","
-    << data.nUpAndR1Crossings + data.nDnAndS1Crossings << ","
-    << data.nPVAndR1Crossings + data.nPVAndS1Crossings << ","
-    << data.nUpAndR1Crossings + data.nDnAndS1Crossings +
-       data.nPVAndR1Crossings + data.nPVAndS1Crossings
+    << data.nDnAndS1Crossings
     << std::endl;
 }
 

@@ -32,9 +32,11 @@ public:
     AbovePV = 0,    // open above PV
     BelowPV,        // open below PV
     AbovePV_X_Down, // start above PV crossing downwards
+    AbovePV_X_S1,
     BtwnPVR1_X_Down,
     BtwnPVR1_X_Up,
     CrossPV,        // cross PV during session
+    BelowPV_X_R1,
     BelowPV_X_Up,   // start below PV crossing upwards
     BtwnPVS1_X_Up,
     BtwnPVS1_X_Down,

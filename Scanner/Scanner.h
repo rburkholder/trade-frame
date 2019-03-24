@@ -51,12 +51,15 @@ private:
     ou::tf::Bar::volume_t nAverageVolume;
     size_t nEnteredFilter;
     size_t nPassedFilter;
-    size_t nPVCrossings;
-    size_t nUpAndR1Crossings;
-    size_t nPVAndR1Crossings;
-    size_t nPVAndS1Crossings;
-    size_t nDnAndS1Crossings;
-    s_t( void ): nAverageVolume( 0 ), nEnteredFilter( 0 ), nPassedFilter( 0 ), nPVCrossings( 0 ) {};
+    double nPVCrossings;
+    double nUpAndR1Crossings;
+    double nPVAndR1Crossings;
+    double nPVAndS1Crossings;
+    double nDnAndS1Crossings;
+    s_t( void ): nAverageVolume( 0 ), nEnteredFilter( 0 ), nPassedFilter( 0 ),
+                 nPVCrossings{},
+                 nUpAndR1Crossings {}, nPVAndR1Crossings {}, nPVAndS1Crossings {}, nDnAndS1Crossings {}
+    {};
   };
 
   void HandleMenuActionScan( void );

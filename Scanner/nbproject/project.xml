@@ -13,6 +13,7 @@
                 <make-dep-project>../lib/TFBitsNPieces</make-dep-project>
                 <make-dep-project>../lib/TFVuTrading</make-dep-project>
                 <make-dep-project>../lib/TFInteractiveBrokers</make-dep-project>
+                <make-dep-project>../lib/TFStatistics</make-dep-project>
                 <make-dep-project>../lib/TFHDF5TimeSeries</make-dep-project>
                 <make-dep-project>../lib/TFIQFeed</make-dep-project>
                 <make-dep-project>../lib/TFTrading</make-dep-project>
