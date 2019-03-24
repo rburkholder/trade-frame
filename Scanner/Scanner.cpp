@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// dates around line 194 need to be adjusted for an up to date run.
+
 #include "stdafx.h"
 
 #include <TFTimeSeries/TimeSeries.h>
@@ -78,7 +80,6 @@ bool AppScanner::OnInit() {
   }
 //  m_db.Open( sDbName );
 
-
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
   vItems.push_back( new mi( "Scan", MakeDelegate( this, &AppScanner::HandleMenuActionScan ) ) );
@@ -117,9 +118,9 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
   ++data.nEnteredFilter;
   data.nAverageVolume = std::for_each( bars.begin(), bars.end(), AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
-  if ( ( 1000000 < data.nAverageVolume ) 
+  if ( ( 1000000 < data.nAverageVolume )
     && ( 12.0 <= bars.Last()->Close() )
-    && ( 90.0 >= bars.Last()->Close() ) 
+    && ( 90.0 >= bars.Last()->Close() )
     && ( m_nMinBarCount <= bars.Size() )
     && ( m_dtLast.date() == bars.Last()->DateTime().date() )
     ) {
@@ -172,10 +173,10 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
 
 
 void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
-  std::cout 
-    << sObject << "," 
-    << data.nAverageVolume << "," 
-    << data.nEnteredFilter << "," 
+  std::cout
+    << sObject << ","
+    << data.nAverageVolume << ","
+    << data.nEnteredFilter << ","
     << data.nPassedFilter << ","
     << data.nUpAndR1Crossings << ","
     << data.nPVAndR1Crossings << ","
@@ -195,10 +196,10 @@ void AppScanner::ScanBars( void ) {
   m_dtBegin = ptime( date( 2015, 10,  1 ), time_duration( 0, 0, 0 ) );
   m_dtLast  = ptime( date( 2015, 11,  6 ), time_duration( 0, 0, 0 ) );
   m_dtEnd   = ptime( date( 2015, 11,  7 ), time_duration( 0, 0, 0 ) );  // make one day beyond m_dtLast
-  ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter( 
-    "/bar/86400", 
-    m_dtBegin, 
-    m_dtEnd, 
+  ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter(
+    "/bar/86400",
+    m_dtBegin,
+    m_dtEnd,
     20,
     boost::phoenix::bind( &AppScanner::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &AppScanner::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
@@ -237,7 +238,7 @@ void AppScanner::OnClose( wxCloseEvent& event ) {
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 

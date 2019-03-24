@@ -80,6 +80,8 @@ cd ../BasketTrading
 make
 cd ../Weeklies
 make
+cd ../Scanner
+make
 popd
 
 ```

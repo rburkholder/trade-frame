@@ -17,3 +17,6 @@ sed -i 's/gcc63-mt-x64-1_67/mt/g' HedgedBollinger/nbproject/configurations.xml
 sed -i 's/gcc63-mt-x64-1_67/mt/g' HedgedBollinger/nbproject/Makefile*
 sed -i 's/gcc63-mt-x64-1_67/mt/g' StickShift2/nbproject/Makefile*
 sed -i 's/gcc63-mt-x64-1_67/mt/g' StickShift2/nbproject/configurations.xml
+sed -i 's/gcc63-mt-x64-1_67/mt/g' Scanner/nbproject/configurations.xml
+sed -i 's/gcc63-mt-x64-1_67/mt/g' Scanner/nbproject/Makefile*
+
