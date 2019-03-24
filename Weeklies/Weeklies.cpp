@@ -39,9 +39,9 @@
 /*
  * NOTE:  SignalGenerator::ScanBars needs to be updated with begin/end dates for processing (200 daily bars required minimum)
  * TODO:  update gui to select begin/end dates of scan
- * 
+ *
  * NOTE: spreadsheet is obtained from http://www.cboe.com/micro/weeklys/availableweeklys.aspx
- * 
+ *
  * Input:  x64/weeklysmf.xls
  * Output: x64/debug/weeklies.xls
  */
@@ -120,7 +120,7 @@ bool AppWeeklies::OnInit() {
   //m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "phi";
 //  m_idPortfolio = "weeklies";  // makes it easy for swing trading
 
-  
+
   std::string sDbName( "weeklies.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
@@ -138,7 +138,10 @@ bool AppWeeklies::OnInit() {
 }
 
 void AppWeeklies::HandleMenuActionRunScan( void ) {
-  m_worker.Run( MakeDelegate( &m_sg, &SignalGenerator::Run ) );
+  CallAfter( [this](){
+    if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
+    m_worker = std::thread( &SignalGenerator::Run, std::ref( m_sg ) );
+  });
 }
 
 void AppWeeklies::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -150,7 +153,7 @@ void AppWeeklies::HandleGuiRefresh( wxTimerEvent& event ) {
   double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
   m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
-  m_pPanelPortfolioStats->SetStats( 
+  m_pPanelPortfolioStats->SetStats(
     boost::lexical_cast<std::string>( m_dblMinPL ),
     boost::lexical_cast<std::string>( dblCurrent ),
     boost::lexical_cast<std::string>( m_dblMaxPL )
@@ -174,11 +177,13 @@ int AppWeeklies::OnExit() {
 
 void AppWeeklies::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
+  if ( m_worker.joinable() )
+    m_worker.join();
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -229,7 +234,7 @@ void AppWeeklies::HandleRegisterRows(  ou::db::Session& session ) {
 void AppWeeklies::HandlePopulateDatabase( void ) {
 /*
 
-  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
@@ -245,11 +250,11 @@ void AppWeeklies::HandlePopulateDatabase( void ) {
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "phi" );
 
   m_pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     m_idPortfolio, "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "phi" );
 
 */

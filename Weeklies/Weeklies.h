@@ -18,7 +18,7 @@
 
 #include <wx/timer.h>
 
-#include <OUCommon/Worker.h>
+#include <thread>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -45,7 +45,7 @@ private:
 
   SignalGenerator m_sg;
 
-  ou::action::Worker m_worker;
+  std::thread m_worker;
 
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
@@ -65,7 +65,7 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
 
   void HandleGuiRefresh( wxTimerEvent& event );
-    
+
   void AutoStartCollection( void );
 
   void HandlePopulateDatabase( void );
