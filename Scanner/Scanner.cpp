@@ -19,7 +19,6 @@
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
-//#include <TFIndicators/Pivots.h>
 #include <TFStatistics/Pivot.h>
 
 #include "Scanner.h"
@@ -35,12 +34,11 @@ bool AppScanner::OnInit() {
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+  //m_pFrameMain->Center();
 //  m_pFrameMain->Move( -2500, 50 );
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
-  m_pFrameMain->Center();
-  
   wxBoxSizer* m_sizerMain;
   m_sizerMain = new wxBoxSizer(wxVERTICAL);
   m_pFrameMain->SetSizer(m_sizerMain);
