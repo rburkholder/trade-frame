@@ -16,9 +16,9 @@
 
 // Started 2013/09/18
 
-#include <TFBitsNPieces/FrameWork01.h>
+#include <thread>
 
-#include <OUCommon/Worker.h>
+#include <TFBitsNPieces/FrameWork01.h>
 
 //#include <TFTimeSeries/DatedDatum.h>
 
@@ -41,7 +41,7 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  ou::action::Worker m_worker;
+  std::thread m_worker;
 
   virtual bool OnInit();
   virtual int OnExit();

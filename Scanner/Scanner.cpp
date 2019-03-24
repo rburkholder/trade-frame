@@ -210,7 +210,9 @@ void AppScanner::ScanBars( void ) {
 }
 
 void AppScanner::HandleMenuActionScan( void ) {
-  m_worker.Run( MakeDelegate( this, &AppScanner::ScanBars ) );
+  CallAfter( [this](){
+    m_worker = std::thread( &AppScanner::ScanBars, this );
+  });
 }
 
 //void AppScanner::HandleHdf5Object( const std::string& sPath, const std::string& sObject ) {
@@ -227,6 +229,8 @@ int AppScanner::OnExit() {
 }
 
 void AppScanner::OnClose( wxCloseEvent& event ) {
+  if ( m_worker.joinable() )
+    m_worker.join();
   // Exit Steps: #2 -> FrameMain::OnClose
 //  m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
