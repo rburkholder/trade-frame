@@ -14,9 +14,6 @@
 
 #include "stdafx.h"
 
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind/bind_member_function.hpp>
-
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
@@ -87,13 +84,13 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
 
   pt::ptime dtBegin( dtLast.date() - gregorian::date_duration( 52 * 7 ), pt::time_duration( 0, 0, 0 ) ); // process ~year of bars
 
-  namespace args = boost::phoenix::placeholders;
+  namespace ph = std::placeholders;
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
     "/bar/86400",  // at least a year's worth of bars
     dtBegin, dtLast, 200,
-    boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
-    boost::phoenix::bind( &SignalGenerator::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
-    boost::phoenix::bind( &SignalGenerator::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
+    std::bind( &SignalGenerator::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
+    std::bind( &SignalGenerator::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
+    std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
     );
   try {
 
