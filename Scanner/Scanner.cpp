@@ -217,37 +217,3 @@ void AppScanner::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void AppScanner::OnData1Connected( int ) {
-  m_bData1Connected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
-}
-
-void AppScanner::OnData2Connected( int ) {
-  m_bData2Connected = true;
-//  AutoStartCollection();
-  if ( m_bData2Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
-}
-
-void AppScanner::OnExecConnected( int ) {
-  m_bExecConnected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
-}
-
-void AppScanner::OnData1Disconnected( int ) {
-  m_bData1Connected = false;
-}
-
-void AppScanner::OnData2Disconnected( int ) {
-  m_bData2Connected = false;
-}
-
-void AppScanner::OnExecDisconnected( int ) {
-  m_bExecConnected = false;
-}
-
