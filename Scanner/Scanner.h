@@ -47,13 +47,6 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void OnData1Connected( int );
-  void OnData2Connected( int );
-  void OnExecConnected( int );
-  void OnData1Disconnected( int );
-  void OnData2Disconnected( int );
-  void OnExecDisconnected( int );
-
   struct s_t {
     ou::tf::Bar::volume_t nAverageVolume;
     size_t nEnteredFilter;
@@ -74,6 +67,5 @@ private:
 
 };
 
-// Implements MyApp& wxGetApp()
 DECLARE_APP(AppScanner)
 
