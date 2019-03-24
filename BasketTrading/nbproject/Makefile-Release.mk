@@ -42,7 +42,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
 	${OBJECTDIR}/SymbolSelection.o \
-	${OBJECTDIR}/Worker.o \
 	${OBJECTDIR}/stdafx.o
 
 
@@ -104,11 +103,6 @@ ${OBJECTDIR}/SymbolSelection.o: SymbolSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SymbolSelection.o SymbolSelection.cpp
-
-${OBJECTDIR}/Worker.o: Worker.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Worker.o Worker.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}

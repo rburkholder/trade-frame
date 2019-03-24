@@ -11,7 +11,6 @@
       <itemPath>PanelPortfolioStats.h</itemPath>
       <itemPath>Resource.h</itemPath>
       <itemPath>SymbolSelection.h</itemPath>
-      <itemPath>Worker.h</itemPath>
       <itemPath>stdafx.h</itemPath>
       <itemPath>targetver.h</itemPath>
     </logicalFolder>
@@ -28,10 +27,9 @@
       <itemPath>PanelBasketTradingMain.cpp</itemPath>
       <itemPath>PanelPortfolioStats.cpp</itemPath>
       <itemPath>SymbolSelection.cpp</itemPath>
-      <itemPath>Worker.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
     </logicalFolder>
-    <logicalFolder name="f1" displayName="Unused" projectFiles="true" kind="ROOT">
+    <logicalFolder name="f1" displayName="Unused" projectFiles="true">
       <itemPath>ManagePosition.cpp</itemPath>
       <itemPath>ManagePosition.h</itemPath>
     </logicalFolder>
@@ -340,10 +338,6 @@
       </item>
       <item path="SymbolSelection.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Worker.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Worker.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="stdafx.h" ex="false" tool="3" flavor2="0">
@@ -400,10 +394,6 @@
       <item path="SymbolSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SymbolSelection.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Worker.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Worker.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
