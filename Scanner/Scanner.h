@@ -38,7 +38,6 @@ private:
 
   ou::tf::Bars::size_type m_nMinBarCount;
   ptime m_dtBegin;
-  ptime m_dtLast;
   ptime m_dtEnd;
 
   FrameMain* m_pFrameMain;

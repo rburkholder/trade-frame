@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// dates around line 194 need to be adjusted for an up to date run.
+// dates around line 30 need to be adjusted for date of last daily bar
 
 #include "stdafx.h"
 
@@ -26,6 +26,9 @@
 IMPLEMENT_APP(AppScanner)
 
 bool AppScanner::OnInit() {
+
+  m_dtEnd   = ptime( date( 2019, 3, 22 ), time_duration( 23, 59, 59 ) );
+  m_dtBegin  = m_dtEnd - days( 50 );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Scanner" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -117,12 +120,12 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
   bool b( false );
   ++data.nEnteredFilter;
   data.nAverageVolume = std::for_each( bars.begin(), bars.end(), AverageVolume() );
-//  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
+//  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtEnd << std::endl;
   if ( ( 1000000 < data.nAverageVolume )
     && ( 12.0 <= bars.Last()->Close() )
     && ( 90.0 >= bars.Last()->Close() )
     && ( m_nMinBarCount <= bars.Size() )
-    && ( m_dtLast.date() == bars.Last()->DateTime().date() )
+    && ( m_dtEnd.date() == bars.Last()->DateTime().date() )
     ) {
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
@@ -193,9 +196,6 @@ void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, o
 void AppScanner::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
   m_nMinBarCount = 20;  // tie this approx to the date range below
-  m_dtBegin = ptime( date( 2015, 10,  1 ), time_duration( 0, 0, 0 ) );
-  m_dtLast  = ptime( date( 2015, 11,  6 ), time_duration( 0, 0, 0 ) );
-  m_dtEnd   = ptime( date( 2015, 11,  7 ), time_duration( 0, 0, 0 ) );  // make one day beyond m_dtLast
   ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter(
     "/bar/86400",
     m_dtBegin,
