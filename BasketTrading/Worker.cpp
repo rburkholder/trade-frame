@@ -12,8 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// CAV.cpp : Defines the entry point for the application.
-//
+// Project: BasketTrading
 
 #include "stdafx.h"
 

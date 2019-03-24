@@ -17,11 +17,14 @@
 // Started 2012/10/15
 // 2013/01/06:
 // Auto selects and trades a basket of equities, enters at market start, exits prior to end of regular trading hours
-// Once heding and option calculations are complete, can run auto hedging on basket and see if that works
+// Once hedging and option calculations are complete, can run auto hedging on basket and see if that works
 // Current trading rules are too variable, big gains on one day when in directional market,
 //   big losses on another when market moves sideways
 // Data has been saved for both types of days, perhaps running GP routines on the data will
 //  yield more consistently positive results.  Could try for better money management as well.
+// 2019/03/24
+//   using pivots, then checking opening against pivot to see which direction to trade based
+//     upon probabilities. Use weeklies for symbol selection.
 
 #include <string>
 #include <memory>
@@ -38,7 +41,6 @@
 
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
-#include "Worker.h"
 #include "MasterPortfolio.h"
 #include "PanelBasketTradingMain.h"
 #include "PanelPortfolioStats.h"
@@ -52,6 +54,8 @@ private:
 
   typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
 
+  ptime m_dtLatestEod;
+
   std::string m_sPortfolioStrategyAggregate;
 
   FrameMain* m_pFrameMain;
@@ -59,8 +63,6 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
   PanelBasketTradingMain* m_pPanelBasketTradingMain;
   PanelPortfolioStats* m_pPanelPortfolioStats;
-
-  Worker* m_pWorker;
 
   ou::tf::DBOps m_db;
 
@@ -104,12 +106,9 @@ private:
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
 
-  void HandleWorkerCompletion( void ); // for direct execution by worker thread
-
   void HandleGuiRefresh( wxTimerEvent& event );
 
   void HandleMenuActionTestSelection( void );
-  void HandleMenuActionTestSelectionDone( void );
 
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );

@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Project: BasketTrading
+
 #include "stdafx.h"
 
 #include <iostream>

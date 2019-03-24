@@ -16,6 +16,7 @@
 
 #include <map>
 #include <string>
+#include <thread>
 #include <functional>
 
 #include <TFIQFeed/MarketSymbol.h>
@@ -31,6 +32,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
+#include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
 class MasterPortfolio {
@@ -46,10 +48,13 @@ public:
   typedef ManageStrategy::fGatherOptionDefinitions_t fGatherOptionDefinitions_t;
   typedef ManageStrategy::fConstructPosition_t fConstructPositionUnderlying_t;
 
-  MasterPortfolio( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2, fGatherOptionDefinitions_t, fGetTableRowDef_t, pPortfolio_t pMasterPortfolio );
+  MasterPortfolio(
+    pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
+    fGatherOptionDefinitions_t, fGetTableRowDef_t,
+    pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);
 
-  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
+  void Load( ptime dtLatestEod, bool bAddToList );
   void Start();
   void Stop( void );
   void SaveSeries( const std::string& sPath );
@@ -71,6 +76,8 @@ private:
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
+
+  std::thread m_worker;
 
   pProvider_t m_pExec;
   pProvider_t m_pData1;
@@ -94,5 +101,6 @@ private:
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
 
+  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
 };
 

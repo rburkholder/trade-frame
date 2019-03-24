@@ -38,6 +38,8 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
+  m_dtLatestEod = ptime( date( 2019, 3, 22 ), time_duration( 23, 59, 59 ) );
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
@@ -93,7 +95,6 @@ bool AppBasketTrading::OnInit() {
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
 
-  m_pWorker = 0;
   m_bData1Connected = false;
   m_bExecConnected = false;
 
@@ -143,7 +144,7 @@ bool AppBasketTrading::OnInit() {
     m_pPortfolioStrategyAggregate
     ) );
 
-  return 1;
+  return true;
 
 }
 
@@ -167,7 +168,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 void AppBasketTrading::HandleLoadButton() {
   CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
     [this](){
-      if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created below, then load previously created portfolio
+      if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
         // code currently does not allow a restart of session
         std::cout << "Cannot create new portfolio: " << m_sPortfolioStrategyAggregate << std::endl;
         //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
@@ -177,11 +178,20 @@ void AppBasketTrading::HandleLoadButton() {
         // need to change this later.... only start up once providers have been started
         // worker will change depending upon provider type
         // big worker when going live, hdf5 worker when simulating
-        std::cout << "Starting Symbol Evaluation ... " << std::endl;
+        std::cout << "Starting Symbol Load ... " << std::endl;
         // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
-        m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
+        //m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
+        m_pMasterPortfolio->Load( m_dtLatestEod, true );
       }
+    });
+}
+
+void AppBasketTrading::HandleMenuActionTestSelection( void ) {
+  CallAfter(
+    [this](){
+      std::cout << "Starting Symbol Test ... " << std::endl;
+      m_pMasterPortfolio->Load( m_dtLatestEod, false );
     });
 }
 
@@ -191,18 +201,6 @@ void AppBasketTrading::HandleStartButton(void) {
       m_pMasterPortfolio->Start();
       m_timerGuiRefresh.Start( 250 );
     } );
-}
-
-void AppBasketTrading::HandleMenuActionTestSelection( void ) {
-  CallAfter(
-    [this](){
-      std::cout << "Starting Symbol Test ... " << std::endl;
-      m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
-    });
-}
-
-void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
-  std::cout << "Selection Test Done" << std::endl;
 }
 
 void AppBasketTrading::HandleStopButton(void) {
@@ -221,16 +219,6 @@ void AppBasketTrading::HandleSaveButton(void) {
     [this](){
       m_pMasterPortfolio->SaveSeries( "/app/BasketTrading/" );
     });
-}
-
-void AppBasketTrading::HandleWorkerCompletion( void ) {  // called in worker thread, start processing in gui thread with CallAfter
-  CallAfter([this](){
-    m_pWorker->IterateInstrumentList(
-      boost::phoenix::bind( &MasterPortfolio::AddSymbol, m_pMasterPortfolio.get(), boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
-    m_pWorker->Join();
-    delete m_pWorker;
-    m_pWorker = 0;
-  });
 }
 
 void AppBasketTrading::OnData1Connected( int ) {
@@ -268,10 +256,6 @@ int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
-  if ( 0 != m_pWorker ) {
-    delete m_pWorker;
-    m_pWorker = 0;
-  }
   if ( m_db.IsOpen() ) m_db.Close();
 
   return 0;

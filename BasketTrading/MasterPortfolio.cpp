@@ -75,7 +75,43 @@ MasterPortfolio::MasterPortfolio(
 }
 
 MasterPortfolio::~MasterPortfolio(void) {
+  if ( m_worker.joinable() )
+    m_worker.join();
   m_mapStrategy.clear();
+}
+
+void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
+  if ( !m_mapStrategy.empty() ) {
+    std::cout << "Already have symbols." << std::endl;
+  }
+  else {
+    if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
+    m_worker = std::thread( [this,dtLatestEod,bAddToList](){
+
+      using setInstrumentInfo_t = SymbolSelection::setInstrumentInfo_t;
+      setInstrumentInfo_t m_setInstrumentInfo;
+
+      SymbolSelection selector( dtLatestEod );
+      selector.Process( m_setInstrumentInfo );
+
+
+      if ( bAddToList ) {
+        std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
+                      [this](const SymbolSelection::InstrumentInfo& ii){
+                        AddSymbol( ii.sName, ii.barLast, ii.dblStop );
+                      } );
+      }
+      else {
+        std::cout << "Symbol List: " << std::endl;
+        std::for_each(
+          m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
+          [this]( const setInstrumentInfo_t::value_type& item ) {
+            std::cout << item.sName << std::endl;
+          } );
+      }
+      std::cout << "Symbol List finished." << std::endl;
+    } );
+  }
 }
 
 void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
