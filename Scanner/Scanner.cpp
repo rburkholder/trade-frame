@@ -47,13 +47,6 @@ bool AppScanner::OnInit() {
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
-  // populate variable in FrameWork01
-  //m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  //m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  //m_pPanelProviderControl->Show( true );
-
-  //LinkToPanelProviderControl();
-
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -62,14 +55,6 @@ bool AppScanner::OnInit() {
   m_pPanelLogging->Show( true );
 
   m_pFrameMain->Show( true );
-
-//  m_bData1Connected = false;
-//  m_bData2Connected = false;
-//  m_bExecConnected = false;
-
-//  m_timerGuiRefresh.SetOwner( this );
-
-//  Bind( wxEVT_TIMER, &AppPhi::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppScanner::OnClose, this );  // start close of windows and controls
 
@@ -216,15 +201,8 @@ void AppScanner::HandleMenuActionScan( void ) {
   });
 }
 
-//void AppScanner::HandleHdf5Object( const std::string& sPath, const std::string& sObject ) {
-//  std::cout << sObject << std::endl;
-//}
-
 int AppScanner::OnExit() {
   // Exit Steps: #4
-//  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
-//  m_listIQFeedSymbols.Clear();
 
   return wxAppConsole::OnExit();
 }
@@ -233,8 +211,6 @@ void AppScanner::OnClose( wxCloseEvent& event ) {
   if ( m_worker.joinable() )
     m_worker.join();
   // Exit Steps: #2 -> FrameMain::OnClose
-//  m_timerGuiRefresh.Stop();
-  DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
@@ -243,9 +219,6 @@ void AppScanner::OnClose( wxCloseEvent& event ) {
 
 void AppScanner::OnData1Connected( int ) {
   m_bData1Connected = true;
-  //ou::tf::libor::SetWatchOn( m_pData1Provider );
-//  m_libor.SetWatchOn( m_pData1Provider );
-//  AutoStartCollection();
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
   }
