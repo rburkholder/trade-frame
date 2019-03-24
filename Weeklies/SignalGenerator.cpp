@@ -85,7 +85,7 @@ void SignalGenerator::Run( void ) {
 
 void SignalGenerator::ScanBars( pt::ptime dtLast ) {
 
-  pt::ptime dtBegin( dtLast.date() - date_duration( 52 * 7 ), pt::time_duration( 0, 0, 0 ) ); // process ~year of bars
+  pt::ptime dtBegin( dtLast.date() - gregorian::date_duration( 52 * 7 ), pt::time_duration( 0, 0, 0 ) ); // process ~year of bars
 
   namespace args = boost::phoenix::placeholders;
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(

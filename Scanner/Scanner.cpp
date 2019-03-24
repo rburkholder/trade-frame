@@ -194,16 +194,16 @@ void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, o
 }
 
 void AppScanner::ScanBars( void ) {
-  namespace args = boost::phoenix::placeholders;
+  namespace ph = std::placeholders;
   m_nMinBarCount = 20;  // tie this approx to the date range below
   ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter(
     "/bar/86400",
     m_dtBegin,
     m_dtEnd,
     20,
-    boost::phoenix::bind( &AppScanner::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
-    boost::phoenix::bind( &AppScanner::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
-    boost::phoenix::bind( &AppScanner::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
+    std::bind( &AppScanner::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
+    std::bind( &AppScanner::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
+    std::bind( &AppScanner::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
     );
   try {
     filter.Run();
