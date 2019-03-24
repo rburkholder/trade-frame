@@ -63,10 +63,6 @@ bool AppScanner::OnInit() {
 
   m_pFrameMain->Show( true );
 
-//  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppPhi::HandleRegisterTables ) );
-//  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppPhi::HandleRegisterRows ) );
-//  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppPhi::HandlePopulateDatabase ) );
-
 //  m_bData1Connected = false;
 //  m_bData2Connected = false;
 //  m_bExecConnected = false;
@@ -81,7 +77,6 @@ bool AppScanner::OnInit() {
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
   }
-//  m_db.Open( sDbName );
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
@@ -227,7 +222,6 @@ int AppScanner::OnExit() {
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
 //  m_listIQFeedSymbols.Clear();
-//  if ( m_db.IsOpen() ) m_db.Close();
 
   return wxAppConsole::OnExit();
 }

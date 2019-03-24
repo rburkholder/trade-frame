@@ -20,9 +20,7 @@
 
 #include <OUCommon/Worker.h>
 
-#include <TFTrading/DBOps.h>
-
-#include <TFTimeSeries/DatedDatum.h>
+//#include <TFTimeSeries/DatedDatum.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -42,7 +40,6 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
-  ou::tf::DBOps m_db;
 
   ou::action::Worker m_worker;
 
