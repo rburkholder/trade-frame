@@ -48,11 +48,11 @@ bool AppScanner::OnInit() {
   m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
   // populate variable in FrameWork01
-  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelProviderControl->Show( true );
+  //m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
+  //m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  //m_pPanelProviderControl->Show( true );
 
-  LinkToPanelProviderControl();
+  //LinkToPanelProviderControl();
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
