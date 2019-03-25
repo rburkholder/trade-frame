@@ -19,12 +19,11 @@
 #include <map>
 #include <set>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+//#include <boost/date_time/posix_time/posix_time.hpp>
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
 
-#include <TFTimeSeries/TimeSeries.h>
-#include <TFHDF5TimeSeries/HDF5DataManager.h>
+//#include <TFTimeSeries/TimeSeries.h>
 
 class SymbolSelection {
 public:
@@ -48,15 +47,11 @@ public:
 protected:
 private:
 
-  ou::tf::HDF5DataManager m_dm;
-
   ou::tf::Bars::size_type m_nMinPivotBars;
 
-  ptime m_dtLast;  // last available eod
-
   ptime m_dtDarvasTrigger;
+  ptime m_dtLast;  // last available eod
   // calculated:
-  ptime m_dtEnd;  // dtLast + 1
   ptime m_dtOneYearAgo;
   ptime m_dt26WeeksAgo;
   ptime m_dtDateOfFirstBar;
@@ -88,11 +83,11 @@ private:
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 
   typedef ou::tf::Bars::const_iterator citerBars;
-  void CheckForDarvas( InstrumentInfo& sSymbol, citerBars begin, citerBars end );
-  void CheckFor10Percent( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
-  void CheckForVolatility( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
-  void CheckForPivots( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
-  void CheckForRange( const InstrumentInfo& sSymbol, citerBars begin, citerBars end );
+  void CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo& );
+  void CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& );
+  void CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& );
+  void CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& );
+  void CheckForRange( citerBars begin, citerBars end, const InstrumentInfo& );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );
   void WrapUpVolatility( setInstrumentInfo_t& selected );

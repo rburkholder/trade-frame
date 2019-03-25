@@ -21,53 +21,27 @@
 #include <vector>
 #include <math.h>
 
-#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
-#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
+#include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFIndicators/Darvas.h>
-#include <TFIndicators/Pivots.h>
+
+#include <TFStatistics/Pivot.h>
 
 #include "SymbolSelection.h"
 
 SymbolSelection::SymbolSelection( ptime dtLast )
-  : m_dtLast( dtLast ), m_dm( ou::tf::HDF5DataManager::RO ), m_nMinPivotBars( 20 )
+  : m_dtLast( dtLast ), m_nMinPivotBars( 20 )
 {
+  namespace gregorian = boost::gregorian;
 
-  m_dtEnd = m_dtLast + date_duration( 1 );  // TODO: might be able not do the additional day now.
-  m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
-  m_dt26WeeksAgo = m_dtLast - date_duration( 26 * 7 );
+  m_dtOneYearAgo = m_dtLast - gregorian::date_duration( 52 * 7 );
+  m_dt26WeeksAgo = m_dtLast - gregorian::date_duration( 26 * 7 );
   m_dtDateOfFirstBar = m_dt26WeeksAgo;
-  m_dtDarvasTrigger = m_dtLast - date_duration( 8 );
+  m_dtDarvasTrigger = m_dtLast - gregorian::date_duration( 8 );
 
 }
 
 SymbolSelection::~SymbolSelection(void) {
-}
-
-void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
-
-  m_psetSymbols = &selected;
-
-  std::cout << "Running" << std::endl;
-
-  std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
-
-  ou::tf::HDF5IterateGroups groups;
-
-  groups.SetOnHandleObject( MakeDelegate( this, &SymbolSelection::ProcessGroupItem ) );
-  try {
-    int result = groups.Start( "/bar/86400/" );
-  }
-  catch (...) {
-    std::cout << "ouch" << std::endl;
-  }
-
-//  WrapUp10Percent(selected);
-//  WrapUpVolatility(selected);
-//  WrapUpPivots(selected);
-
-  std::cout << "History Scanned." << std::endl;
-
 }
 
 struct AverageVolume {
@@ -84,6 +58,77 @@ public:
   operator ou::tf::Bar::volume_t() { return m_nTotalVolume / m_nNumberOfValues; };
 };
 
+void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
+
+  m_psetSymbols = &selected;
+
+  std::cout << "Running" << std::endl;
+
+  // change his if a different mechanism is used in the filter
+  std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
+
+  struct data_t {
+    ou::tf::Bar::volume_t nAverageVolume;
+    size_t nEnteredFilter;
+    size_t nPassedFilter;
+    data_t()
+      : nAverageVolume {}, nEnteredFilter {}, nPassedFilter {}
+      {}
+  };
+
+  data_t dataSummary;
+
+  try {
+    ou::tf::InstrumentFilter<data_t,ou::tf::Bars> filter(
+      "/bar/86400/",
+      m_dtOneYearAgo, m_dtLast,
+      200,
+      [this]( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
+        return true;
+      },
+      [this]( data_t& data, const std::string& sObject, const ou::tf::Bars& bars )->bool{ // Filter
+        //  std::cout << sObjectName << std::endl;
+        bool bReturn( false );
+        if ( m_nMinPivotBars <= bars.Size() ) {
+            ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinPivotBars;
+            ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
+            if ( ( 1000000 < volAverage )
+              && ( 15.0 <= bars.last().Close() )
+              && ( 90.0 >= bars.last().Close() )
+              && ( m_dtLast.date() == bars.last().DateTime().date() )
+              ) {
+              bReturn = true;
+            }
+        }
+        return bReturn;
+      },
+      [this]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
+        InstrumentInfo ii( sObjectName, bars.last() );
+        if ( ( 120 < bars.Size() ) && ( bars.last().DateTime().date() == m_dtLast.date() ) ) {
+          CheckForDarvas( bars.begin(), bars.end(), ii );
+        }
+        //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
+        //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
+        //          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
+        //          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
+      }
+      );
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout << "SymbolSelection - InstrumentFilter - " << e.what() << std::endl;
+  }
+  catch (... ) {
+    std::cout << "SymbolSelection - Unknown Error - " << std::endl;
+  }
+
+//  WrapUp10Percent(selected);
+//  WrapUpVolatility(selected);
+//  WrapUpPivots(selected);
+
+  std::cout << "History Scanned." << std::endl;
+
+}
+
 class AveragePrice {
 private:
   double m_dblSumOfPrices;
@@ -99,38 +144,9 @@ public:
 };
 
 void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName ) {
-//  std::cout << sObjectName << std::endl;
-  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> barRepository( m_dm, sObjectPath );
-  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
-  begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDateOfFirstBar );
-  end = lower_bound( begin, barRepository.end(), m_dtEnd );
-  hsize_t cnt = end - begin;
-  if ( m_nMinPivotBars <= cnt ) {
-    ptime dttmp = (*(end-1)).DateTime();
-//    std::cout << sObjectName << m_dtLast << ", " << dttmp << std::endl;
-      ou::tf::Bars bars;
-      bars.Resize( cnt );
-      barRepository.Read( begin, end, &bars );
-      ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinPivotBars;
-      ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
-      if ( ( 1000000 < volAverage )
-        && ( 15.0 <= bars.Last()->Close() )
-        && ( 90.0 >= bars.Last()->Close() )
-        && ( m_dtLast.date() == bars.Last()->DateTime().date() )
-        ) {
-          InstrumentInfo ii( sObjectName, *bars.Last() );
-          if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
-            CheckForDarvas( ii, bars.begin(), bars.end() );
-          }
-//          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
-//          CheckForVolatility( ii, bars.end() - 20, bars.end() );
-//          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
-//          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
-      }
-  }
 }
 
-void SymbolSelection::CheckForRange( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
+void SymbolSelection::CheckForRange( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
   citerBars iter1( begin );
   int cnt( 0 );
   int cntAbove( 0 );
@@ -195,62 +211,24 @@ private:
 
 // taken from scanner
 
-void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
+void SymbolSelection::CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
   ou::tf::Bar::volume_t nAverageVolume = std::for_each( begin, end, AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
       //std::cout << sObject << " vol=" << volAverage << std::endl;
-  citerBars iter1, iter2;
-  iter2 = end;
-  iter1 = iter2 - m_nMinPivotBars;
-  iter2 = iter1;
-  ++iter2;
+  //iter1 = iter2 - m_nMinPivotBars;
 
   // TODO: REDO:  indications relative to pivot need to use next bar rather than current bar
   //   make use of code in TFStatistics/Pivot as a start
 
-  size_t nPVCrossings( 0 );
-  size_t nUpAndR1Crossings( 0 );
-  size_t nDnAndS1Crossings( 0 );
-  size_t nPVAndR1Crossings( 0 );
-  size_t nPVAndS1Crossings( 0 );
 
-  while ( end != iter2 ) {
-    ou::tf::PivotSet pivot( "pv", *iter1 );
-    double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
-    if ( ( pv <= iter2->High() ) && ( pv >= iter2->Low() ) ) {
-      ++(nPVCrossings);
-    }
+  //boost::uint32_t sumR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
+  //boost::uint32_t sumR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
+  //boost::uint32_t sumOutside = sumR1S1 + sumR1PvS1;
+  //boost::uint32_t rank = ( 100 * ( ( 100 * sumOutside ) + sumR1S1 ) ) + sumR1PvS1;
 
-    if ( iter2->Open() < pv ) {
-      double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
-      if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(nPVAndR1Crossings);
-    }
-    if ( iter2->Open() > pv ) {
-      double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
-      if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(nPVAndS1Crossings);
-    }
-
-    if ( iter2->Open() > pv ) {
-      double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
-      if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(nUpAndR1Crossings);
-    }
-    if ( iter2->Open() < pv ) {
-      double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
-      if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(nDnAndS1Crossings);
-    }
-
-    ++iter1;
-    ++iter2;
-  }
-
-  boost::uint32_t sumR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
-  boost::uint32_t sumR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
-  boost::uint32_t sumOutside = sumR1S1 + sumR1PvS1;
-  boost::uint32_t rank = ( 100 * ( ( 100 * sumOutside ) + sumR1S1 ) ) + sumR1PvS1;
-
-  m_mapPivotRanking.insert( mapPivotRanking_t::value_type( rank, ii ) );
+  //m_mapPivotRanking.insert( mapPivotRanking_t::value_type( rank, ii ) );
 
 }
 
@@ -327,7 +305,7 @@ double ProcessDarvas::StopValue( void ) {
   return m_dblStop;
 }
 
-void SymbolSelection::CheckForDarvas( InstrumentInfo& ii, citerBars begin, citerBars end ) {
+void SymbolSelection::CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo& ii ) {
   size_t nTriggerWindow( 10 );
   ptime dtDayOfMax = std::for_each( begin, end, CalcMaxDate() );
   citerBars iterLast( end - 1 );
@@ -355,7 +333,7 @@ void SymbolSelection::CheckForDarvas( InstrumentInfo& ii, citerBars begin, citer
   }
 }
 
-void SymbolSelection::CheckFor10Percent( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
+void SymbolSelection::CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
   citerBars iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
@@ -448,7 +426,7 @@ public:
   };
 };
 
-void SymbolSelection::CheckForVolatility( const InstrumentInfo& ii, citerBars begin, citerBars end ) {
+void SymbolSelection::CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
   citerBars iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
