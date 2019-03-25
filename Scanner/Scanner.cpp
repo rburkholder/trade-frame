@@ -28,7 +28,7 @@ IMPLEMENT_APP(AppScanner)
 bool AppScanner::OnInit() {
 
   m_dtEnd   = ptime( date( 2019, 3, 22 ), time_duration( 23, 59, 59 ) );
-  m_dtBegin  = m_dtEnd - days( 50 );
+  m_dtBegin = m_dtEnd - days( 50 );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Scanner" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
