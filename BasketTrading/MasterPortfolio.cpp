@@ -89,11 +89,14 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
     m_worker = std::thread( [this,dtLatestEod,bAddToList](){
 
       using setInstrumentInfo_t = SymbolSelection::setInstrumentInfo_t;
+      using InstrumentInfo_t = SymbolSelection::InstrumentInfo;
       setInstrumentInfo_t m_setInstrumentInfo;
 
-      SymbolSelection selector( dtLatestEod );
-      selector.Process( m_setInstrumentInfo );
-
+      SymbolSelection selector(
+        dtLatestEod,
+        [&m_setInstrumentInfo](const InstrumentInfo_t& ii) {
+          m_setInstrumentInfo.insert( ii );
+        } );
 
       if ( bAddToList ) {
         std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),

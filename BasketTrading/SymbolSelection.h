@@ -18,6 +18,7 @@
 
 #include <map>
 #include <set>
+#include <functional>
 
 //#include <boost/date_time/posix_time/posix_time.hpp>
 //using namespace boost::posix_time;
@@ -30,19 +31,21 @@ public:
 
   struct InstrumentInfo {
     std::string sName;
-    ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
+    const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
     double dblStop;  // calculated stop price, if any
     InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
       : sName( sName_ ), barLast( bar ), dblStop {} {};
     bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
   };
 
+  using fSelected_t = std::function<void(const InstrumentInfo&)>;
+
   typedef std::set<InstrumentInfo> setInstrumentInfo_t;
 
-  explicit SymbolSelection( ptime eod );
+  explicit SymbolSelection( const ptime eod, fSelected_t );
   ~SymbolSelection( void );
 
-  void Process( setInstrumentInfo_t& selected );
+  //void Process( setInstrumentInfo_t& selected );
 
 protected:
 private:
@@ -55,8 +58,6 @@ private:
   ptime m_dtOneYearAgo;
   ptime m_dt26WeeksAgo;
   ptime m_dtDateOfFirstBar;
-
-  setInstrumentInfo_t* m_psetSymbols;
 
   typedef std::multimap<boost::uint32_t,InstrumentInfo> mapPivotRanking_t;
   mapPivotRanking_t m_mapPivotRanking;
@@ -80,10 +81,8 @@ private:
 
   mapRankingPos_t m_mapMaxVolatility;
 
-  void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
-
   typedef ou::tf::Bars::const_iterator citerBars;
-  void CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo& );
+  void CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo&, fSelected_t& );
   void CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& );
