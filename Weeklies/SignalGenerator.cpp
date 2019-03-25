@@ -158,9 +158,10 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetString( "PV X" );
 
     namespace ph = std::placeholders;
+    mapSymbol_t::iterator iter;
     ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
       "/bar/86400",  // at least a year's worth of bars
-      dtBegin, dtLast, 200,
+      dtBegin, dtLast, 200, iter,
       std::bind( &SignalGenerator::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
       std::bind( &SignalGenerator::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
       std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )

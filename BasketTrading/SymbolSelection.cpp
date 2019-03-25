@@ -44,7 +44,7 @@ public:
 };
 
 SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
-  : m_dtLast( dtLast ), m_nMinPivotBars( 20 )
+  : m_dtLast( dtLast ), m_nMinBars( 20 )
 {
   namespace gregorian = boost::gregorian;
 
@@ -65,11 +65,13 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
       {}
   };
 
+  data_t data;
+
   try {
     ou::tf::InstrumentFilter<data_t,ou::tf::Bars> filter(
       "/bar/86400/",
       m_dtOneYearAgo, m_dtLast,
-      200,
+      200, data,
       [this]( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
         return true;
       },
@@ -77,8 +79,8 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
         //  std::cout << sObjectName << std::endl;
         data.nEnteredFilter++;
         bool bReturn( false );
-        if ( m_nMinPivotBars <= bars.Size() ) {
-            ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinPivotBars;
+        if ( m_nMinBars <= bars.Size() ) {
+            ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinBars;
             data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
             if ( ( 1000000 < data.nAverageVolume )
               && ( 15.0 <= bars.last().Close() )
@@ -103,6 +105,8 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
         //          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
       }
       );
+
+    std::cout << "Items Checked: " << data.nEnteredFilter << ", Items passed: " << data.nPassedFilter << std::endl;
   }
   catch ( std::runtime_error& e ) {
     std::cout << "SymbolSelection - InstrumentFilter - " << e.what() << std::endl;

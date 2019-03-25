@@ -33,8 +33,10 @@ public:
     std::string sName;
     const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
     double dblStop;  // calculated stop price, if any
+
     InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
-      : sName( sName_ ), barLast( bar ), dblStop {} {};
+      : sName( sName_ ), barLast( bar ), dblStop {}
+      {};
     bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
   };
 
@@ -50,7 +52,7 @@ public:
 protected:
 private:
 
-  ou::tf::Bars::size_type m_nMinPivotBars;
+  ou::tf::Bars::size_type m_nMinBars;
 
   ptime m_dtDarvasTrigger;
   ptime m_dtLast;  // last available eod

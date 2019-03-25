@@ -33,19 +33,23 @@ namespace tf { // TradeFrame
 template<typename S, typename TS> // S=shared data structure, TS=time series type to be used
 class InstrumentFilter {
 public:
+
   typedef std::function<bool (S&, const std::string&, const std::string&)> cbUseGroup_t;  // use a particular group in HDF5
   typedef std::function<bool (S&, const std::string&, const TS&)> cbFilter_t; // used for filtering on fields in the Time Series
   typedef std::function<void (S&, const std::string&, const TS&)> cbResult_t;  // send the chosen filtered results back
+
   InstrumentFilter(
     const std::string& sPath,
     pt::ptime dtBegin, pt::ptime dtEnd,
     typename TS::size_type,
+    S&,
     cbUseGroup_t, cbFilter_t, cbResult_t );
   ~InstrumentFilter( void ) {};
+
 protected:
 private:
   bool m_bSendThroughFilter;
-  S m_struct;
+  S& m_struct;
   typename TS::size_type m_nRequiredDays;
   std::string m_sRootPath;
 
@@ -64,12 +68,14 @@ private:
 
 template<typename S, typename TS>
 InstrumentFilter<S,TS>::InstrumentFilter(
-  const std::string& sPath, pt::ptime dtBegin, pt::ptime dtEnd, typename TS::size_type nRequiredDays,
+  const std::string& sPath, pt::ptime dtBegin, pt::ptime dtEnd,
+  typename TS::size_type nRequiredDays, S& struct_,
   cbUseGroup_t cbUseGroup, cbFilter_t cbFilter, cbResult_t cbResult )
   : m_cbUseGroup( cbUseGroup ), m_cbFilter( cbFilter ), m_cbResult( cbResult ),
     m_dtDate1( dtBegin ), m_dtDate2( dtEnd ),
+    m_struct( struct_ ),
     m_dm( ou::tf::HDF5DataManager::RO ),
-  m_bSendThroughFilter( false ), m_nRequiredDays( nRequiredDays ), m_sRootPath( sPath )
+    m_bSendThroughFilter( false ), m_nRequiredDays( nRequiredDays ), m_sRootPath( sPath )
 {
   if ( dtBegin >= dtEnd ) {
     throw std::runtime_error( "dtBegin >= dtEnd" );
