@@ -98,7 +98,7 @@ bool AppScanner::HandleCallBackUseGroup( s_t&, const std::string& sPath, const s
 bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
 
   bool b( false );
-  ++data.nEnteredFilter;
+  data.nEnteredFilter++;
   data.nAverageVolume = std::for_each( bars.begin(), bars.end(), AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtEnd << std::endl;
   if ( ( 1000000 < data.nAverageVolume )
@@ -107,19 +107,7 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
     && ( m_nMinBarCount <= bars.Size() )
     && ( m_dtEnd.date() == bars.Last()->DateTime().date() )
     ) {
-//      Info info( sObjectName, *bars.Last() );
-//      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
-      //std::cout << sObject << " vol=" << volAverage << std::endl;
-
-      ou::tf::statistics::Pivot pivot( bars );
-
-      data.nPVCrossings      = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV );
-      data.nUpAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
-      data.nDnAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Down );
-      data.nPVAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_R1 );
-      data.nPVAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_S1 );
-
-      ++data.nPassedFilter;
+      data.nPassedFilter++;
       b = true;
   }
   return b;
@@ -127,6 +115,19 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
 
 
 void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+
+//      Info info( sObjectName, *bars.Last() );
+//      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
+      //std::cout << sObject << " vol=" << volAverage << std::endl;
+
+  ou::tf::statistics::Pivot pivot( bars );
+
+  data.nPVCrossings      = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::CrossPV );
+  data.nUpAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
+  data.nDnAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Down );
+  data.nPVAndR1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BelowPV_X_R1 );
+  data.nPVAndS1Crossings = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::AbovePV_X_S1 );
+
   std::cout
     << sObject << ","
     << data.nAverageVolume << ","
