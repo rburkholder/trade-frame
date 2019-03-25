@@ -34,8 +34,8 @@ template<typename S, typename TS> // S=shared data structure, TS=time series typ
 class InstrumentFilter {
 public:
   typedef std::function<bool (S&, const std::string&, const std::string&)> cbUseGroup_t;  // use a particular group in HDF5
-  typedef std::function<bool (S&, const std::string&, TS&)> cbFilter_t; // used for filtering on fields in the Time Series
-  typedef std::function<void (S&, const std::string&, TS&)> cbResult_t;  // send the chosen filtered results back
+  typedef std::function<bool (S&, const std::string&, const TS&)> cbFilter_t; // used for filtering on fields in the Time Series
+  typedef std::function<void (S&, const std::string&, const TS&)> cbResult_t;  // send the chosen filtered results back
   InstrumentFilter(
     const std::string& sPath,
     pt::ptime dtBegin, pt::ptime dtEnd,
@@ -84,12 +84,12 @@ InstrumentFilter<S,TS>::InstrumentFilter(
 }
 
 template<typename S, typename TS>
-void InstrumentFilter<S,TS>::HandleGroup( const std::string& sPath, const std::string& sObject ) {
-  m_bSendThroughFilter = m_cbUseGroup( m_struct, sPath, sObject );
+void InstrumentFilter<S,TS>::HandleGroup( const std::string& sPath, const std::string& sObjectName ) {
+  m_bSendThroughFilter = m_cbUseGroup( m_struct, sPath, sObjectName );
 }
 
 template<typename S, typename TS>
-void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::string& sObject ) {
+void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::string& sObjectName ) {
   if ( m_bSendThroughFilter ) {
     typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t> tsRepository( m_dm, sPath );
     typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t>::iterator begin, end;
@@ -100,9 +100,9 @@ void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::
       TS timeseries;
       timeseries.Resize( cnt );
       tsRepository.Read( begin, end, &timeseries );
-      bool b = m_cbFilter( m_struct, sObject, timeseries );
+      bool b = m_cbFilter( m_struct, sObjectName, timeseries );
       if ( b ) {
-        m_cbResult( m_struct, sObject, timeseries );
+        m_cbResult( m_struct, sObjectName, timeseries );
       }
     }
   }

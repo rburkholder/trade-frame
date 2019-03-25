@@ -71,8 +71,8 @@ private:
 
   void ScanBars( pt::ptime dtLast );
   bool HandleCallBackUseGroup( mapSymbol_t::iterator&, const std::string& sPath, const std::string& sGroup );
-  bool HandleCallBackFilter( mapSymbol_t::iterator&, const std::string& sObject, ou::tf::Bars& bars );
-  void HandleCallBackResults( mapSymbol_t::iterator&, const std::string& sObject, ou::tf::Bars& bars );
+  bool HandleCallBackFilter( mapSymbol_t::iterator&, const std::string& sObject, const ou::tf::Bars& bars );
+  void HandleCallBackResults( mapSymbol_t::iterator&, const std::string& sObject, const ou::tf::Bars& bars );
 
 };
 

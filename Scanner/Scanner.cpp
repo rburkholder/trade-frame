@@ -95,17 +95,17 @@ bool AppScanner::HandleCallBackUseGroup( s_t&, const std::string& sPath, const s
   return true;
 }
 
-bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, const ou::tf::Bars& bars ) {
 
   bool b( false );
   data.nEnteredFilter++;
   data.nAverageVolume = std::for_each( bars.begin(), bars.end(), AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtEnd << std::endl;
   if ( ( 1000000 < data.nAverageVolume )
-    && ( 12.0 <= bars.Last()->Close() )
-    && ( 90.0 >= bars.Last()->Close() )
+    && ( 12.0 <= bars.last().Close() )
+    && ( 90.0 >= bars.last().Close() )
     && ( m_nMinBarCount <= bars.Size() )
-    && ( m_dtEnd.date() == bars.Last()->DateTime().date() )
+    && ( m_dtEnd.date() == bars.last().DateTime().date() )
     ) {
       data.nPassedFilter++;
       b = true;
@@ -114,7 +114,7 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
 }
 
 
-void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, const ou::tf::Bars& bars ) {
 
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );

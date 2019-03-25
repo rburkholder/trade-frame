@@ -63,8 +63,8 @@ private:
   void HandleMenuActionScan( void );
   void ScanBars( void );
   bool HandleCallBackUseGroup( s_t&, const std::string& sPath, const std::string& sGroup );
-  bool HandleCallBackFilter( s_t&, const std::string& sObject, ou::tf::Bars& bars );
-  void HandleCallBackResults( s_t&, const std::string& sObject, ou::tf::Bars& bars );
+  bool HandleCallBackFilter( s_t&, const std::string& sObject, const ou::tf::Bars& bars );
+  void HandleCallBackResults( s_t&, const std::string& sObject, const ou::tf::Bars& bars );
 
 };
 

@@ -178,12 +178,12 @@ bool SignalGenerator::HandleCallBackUseGroup( mapSymbol_t::iterator& iter, const
   return true;
 }
 
-bool SignalGenerator::HandleCallBackFilter( mapSymbol_t::iterator& iter, const std::string& sObject, ou::tf::Bars& bars ) {
+bool SignalGenerator::HandleCallBackFilter( mapSymbol_t::iterator& iter, const std::string& sObject, const ou::tf::Bars& bars ) {
   iter = m_mapSymbol.find( sObject );
   return m_mapSymbol.end() != iter;
 }
 
-void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const std::string& sObject, ou::tf::Bars& bars ) {
+void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const std::string& sObject, const ou::tf::Bars& bars ) {
   // process bars here
   for ( ou::tf::Bars::const_iterator iterBars = bars.begin(); bars.end() != iterBars; ++iterBars ) {
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
@@ -210,7 +210,7 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell = m_sheet->Cell( iy, ix++ ); // Symbol
   cell->SetString( sObject.c_str() );
 
-  double last = bars.Last()->Close(); // Price
+  double last = bars.last().Close(); // Price
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetDouble( last );
   cell->SetFormat( fmtNum );

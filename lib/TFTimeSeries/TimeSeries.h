@@ -29,17 +29,17 @@
 
 // 2012/04/01 use Intel Thread Building Blocks to use concurrent_vector?
 // not sure:  the time series here are typically just used for batch mode processing into and out of hdf5 files
-//   time series operators usually work with most current value, 
+//   time series operators usually work with most current value,
 //   not many, if any, algorithms scan the time series,
 //   there fore time series can be extended by back ground threads, so long as no access by other threads
 //   bottom line:  current implementation is not thread safe
 
 // 2017/02/11 has coarse level thread safety
 //  implemented thread lock call on allocate/deallocate.
-//  graphics calls will scan time series, so need some locking capability for preventing 
+//  graphics calls will scan time series, so need some locking capability for preventing
 //  allocates from appends in a background thread
 
-// 2017/02/26 locking was added as it was thought that there would be thread problems with 
+// 2017/02/26 locking was added as it was thought that there would be thread problems with
 //   background indicator analysis.  Instead, indicators use only their own time series
 //   with their own locking, so ... no locking should be needed here.
 //   Maybe enable the now commented out locking code with a define.
@@ -65,9 +65,9 @@ public:
     strict_lock(strict_lock const&) = delete;
     strict_lock& operator=(strict_lock const&) = delete;
 
-    ~strict_lock() { obj_.unlock(); } //  unlocks on destruction 
+    ~strict_lock() { obj_.unlock(); } //  unlocks on destruction
 
-    //bool owns_lock(mutex_type const* l) const noexcept // strict lockers specific function 
+    //bool owns_lock(mutex_type const* l) const noexcept // strict lockers specific function
     //{
     //  return l == &obj_;
     //}
@@ -91,17 +91,17 @@ private:
   boost::mutex m_mutex;
 };
 */
-template<typename T> 
-class TimeSeries: 
+template<typename T>
+class TimeSeries:
   public TimeSeriesBase
-//  ,public Lockable 
+//  ,public Lockable
 {
 public:
 
   typedef T datum_t;
-  
+
   typedef typename ou::allocator<T, heap<T> > allocator_t;
-  
+
   typedef typename std::vector<T, allocator_t> vTimeSeries_t;
 
   typedef typename vTimeSeries_t::size_type size_type;
@@ -110,7 +110,7 @@ public:
   typedef typename vTimeSeries_t::const_iterator const_iterator;
   typedef typename vTimeSeries_t::reference reference;
   typedef typename vTimeSeries_t::const_reference const_reference;
-  
+
   TimeSeries<T>( void );
   TimeSeries<T>( size_type nSize );
   TimeSeries<T>( const std::string& sName, size_type nSize = 0 );
@@ -123,12 +123,12 @@ public:
   void Append( const T& datum );
   void Insert( const ptime& time, const T& datum );  // time overrides datum.time?
   void Insert( const T& datum );
-  void Resize( size_type Size ) { m_vSeries.resize( Size );  }; 
+  void Resize( size_type Size ) { m_vSeries.resize( Size );  };
 
   void Sort( void ); // use when loaded from external data
   void Flip( void ) { reverse( m_vSeries.begin(), m_vSeries.end() ); };
 
-  // these three methods update m_vIterator, used mostly with MergeDatedDatumCarrier
+  // these three methods update m_vIterator, used mostly with MergeDatedDatumCarrier, (const can't be used)
   const T* First();
   const T* Next();
   const T* Last();
@@ -136,6 +136,7 @@ public:
   const_reference Ago( size_type ix );
   const_reference operator[]( size_type ix );
   const_reference At( size_type ix );
+  const_reference last() const { assert( 0 < m_vSeries.size() ); return m_vSeries.back(); };
 
   //const_reference At( const ptime& time );
   const_iterator AtOrAfter( const ptime& time ) const;
@@ -143,15 +144,15 @@ public:
 
   const_iterator begin() const { return m_vSeries.cbegin(); };
   const_iterator end() const { return m_vSeries.cend(); };
-  const_iterator at( size_type ix ) const { 
+  const_iterator at( size_type ix ) const {
     assert( ix < m_vSeries.size() );
-    return m_vSeries.cbegin() + ix; 
+    return m_vSeries.cbegin() + ix;
   };
 
   // allocate or deallocate about to happen, use for thread sync
-  //fastdelegate::FastDelegate1<size_type> TimeSeriesLock; 
+  //fastdelegate::FastDelegate1<size_type> TimeSeriesLock;
   //fastdelegate::FastDelegate0<void> TimeSeriesUnlock;
-  
+
   ou::Delegate<const T&> OnAppend;
 
   void SetName( const std::string& sName ) { m_sName = sName; };
@@ -164,7 +165,7 @@ public:
 
   // should this be locked?
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
-  
+
   size_type Capacity( void ) const { return m_vSeries.capacity(); }
 
   // TSVariance, TSMA uses this, sets to false
@@ -176,27 +177,27 @@ public:
     //strict_lock<TimeSeries<T> > guard(*this);
     return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
   }
-  
+
 protected:
 private:
 
   //boost::mutex m_mutex;
   //boost::unique_lock<boost::mutex> m_lock;
-  
+
   bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
   vTimeSeries_t m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
-  
+
 };
 
-template<typename T> 
+template<typename T>
 TimeSeries<T>::TimeSeries(void)
   : TimeSeries( "", 0 ) {
-  
+
 }
 
-template<typename T> 
+template<typename T>
 TimeSeries<T>::TimeSeries( size_type size )
   : TimeSeries( "", size ) {
 }
@@ -220,13 +221,13 @@ TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
   m_vIterator = m_vSeries.end();
 }
 
-template<typename T> 
+template<typename T>
 TimeSeries<T>::~TimeSeries(void) {
   //m_vSeries.get_allocator().lockRequest = 0;
   Clear();
 }
 
-template<typename T> 
+template<typename T>
 void TimeSeries<T>::Append(const T& datum) {
   //strict_lock<TimeSeries<T> > guard(*this);
   if ( m_bAppendToVector ) {
@@ -243,7 +244,7 @@ void TimeSeries<T>::Append(const T& datum) {
   OnAppend( datum );
 }
 
-template<typename T> 
+template<typename T>
 void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   T key( dt );
   std::pair<iterator, iterator> p;
@@ -257,7 +258,7 @@ void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   }
 }
 
-template<typename T> 
+template<typename T>
 void TimeSeries<T>::Insert( const T& datum ) {
   std::pair<iterator, iterator> p;
   //strict_lock<TimeSeries<T> > guard(*this);
@@ -270,14 +271,14 @@ void TimeSeries<T>::Insert( const T& datum ) {
   }
 }
 
-template<typename T> 
+template<typename T>
 void TimeSeries<T>::Clear( void ) {
   //strict_lock<TimeSeries<T> > guard(*this);
   m_vSeries.clear();
 }
 
 
-template<typename T> 
+template<typename T>
 const T* TimeSeries<T>::First() {
   //strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.begin();
@@ -289,7 +290,7 @@ const T* TimeSeries<T>::First() {
   }
 }
 
-template<typename T> 
+template<typename T>
 const T* TimeSeries<T>::Next() {
   //strict_lock<TimeSeries<T> > guard(*this);
   if ( m_vSeries.end() == m_vIterator ) {
@@ -306,7 +307,7 @@ const T* TimeSeries<T>::Next() {
   }
 }
 
-template<typename T> 
+template<typename T>
 const T* TimeSeries<T>::Last() {
   //strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.end();
@@ -319,7 +320,7 @@ const T* TimeSeries<T>::Last() {
   }
 }
 
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
   //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
@@ -328,14 +329,14 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
   return *iter;
 }
 
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_reference TimeSeries<T>::operator []( size_type ix ) {
   //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
 
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
   //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
@@ -343,7 +344,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
 }
 
 /*
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
@@ -359,7 +360,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
 }
 */
 
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
@@ -375,7 +376,7 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt
   return p.first;
 }
 
-template<typename T> 
+template<typename T>
 typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
@@ -387,13 +388,13 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) c
   return p.second;
 }
 
-template<typename T> 
+template<typename T>
 void TimeSeries<T>::Sort( void ) {
   //strict_lock<TimeSeries<T> > guard(*this);
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
 }
 
-template<typename T> 
+template<typename T>
 TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
   TimeSeries<T>* series = nullptr;
@@ -413,7 +414,7 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
   return series;
 }
 
-template<typename T> 
+template<typename T>
 TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n is max count
   T datum( dt );
   TimeSeries<T>* series = NULL;
@@ -435,19 +436,19 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n i
   return series;
 }
 
-template<typename T> 
+template<typename T>
 H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace* pSpace ) {
   if ( NULL == pSpace ) pSpace = new H5::DataSpace( H5S_SIMPLE );
   hsize_t curSize = m_vSeries.size();
-  hsize_t maxSize = H5S_UNLIMITED; 
+  hsize_t maxSize = H5S_UNLIMITED;
   if ( 0 != curSize ) {
-    pSpace->setExtentSimple( 1, &curSize, &maxSize ); 
+    pSpace->setExtentSimple( 1, &curSize, &maxSize );
   }
   else {
     //throw runtime_error( "TimeSeries<T>::DefineDataSpace series is empty" );
     std::cout << "TimeSeries<T>::DefineDataSpace series is empty" << std::endl;
   }
-  return pSpace; 
+  return pSpace;
 }
 
 // Bars
