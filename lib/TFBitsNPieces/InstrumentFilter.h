@@ -36,10 +36,12 @@ public:
   typedef std::function<bool (S&, const std::string&, const std::string&)> cbUseGroup_t;  // use a particular group in HDF5
   typedef std::function<bool (S&, const std::string&, TS&)> cbFilter_t; // used for filtering on fields in the Time Series
   typedef std::function<void (S&, const std::string&, TS&)> cbResult_t;  // send the chosen filtered results back
-  InstrumentFilter( const std::string& sPath, pt::ptime dtBegin, pt::ptime dtEnd, typename TS::size_type,
+  InstrumentFilter(
+    const std::string& sPath,
+    pt::ptime dtBegin, pt::ptime dtEnd,
+    typename TS::size_type,
     cbUseGroup_t, cbFilter_t, cbResult_t );
   ~InstrumentFilter( void ) {};
-  void Run( void );
 protected:
 private:
   bool m_bSendThroughFilter;
@@ -69,14 +71,10 @@ InstrumentFilter<S,TS>::InstrumentFilter(
     m_dm( ou::tf::HDF5DataManager::RO ),
   m_bSendThroughFilter( false ), m_nRequiredDays( nRequiredDays ), m_sRootPath( sPath )
 {
-
   if ( dtBegin >= dtEnd ) {
     throw std::runtime_error( "dtBegin >= dtEnd" );
   }
-}
 
-template<typename S, typename TS>
-void InstrumentFilter<S,TS>::Run( void ) {
   namespace ph = std::placeholders;
   ou::tf::hdf5::IterateGroups ig(
     m_sRootPath,
@@ -109,7 +107,6 @@ void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::
     }
   }
 }
-
 
 } // namespace tf
 } // namespace ou

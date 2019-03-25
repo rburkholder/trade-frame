@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Project:  Weeklies
+
 #pragma once
 
 #include <string>

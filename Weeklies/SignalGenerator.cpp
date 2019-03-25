@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Project:  Weeklies
+
 #include "stdafx.h"
 
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
@@ -84,14 +86,6 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
 
   pt::ptime dtBegin( dtLast.date() - gregorian::date_duration( 52 * 7 ), pt::time_duration( 0, 0, 0 ) ); // process ~year of bars
 
-  namespace ph = std::placeholders;
-  ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
-    "/bar/86400",  // at least a year's worth of bars
-    dtBegin, dtLast, 200,
-    std::bind( &SignalGenerator::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
-    std::bind( &SignalGenerator::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
-    std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
-    );
   try {
 
     m_xls.New( 1 );
@@ -163,7 +157,14 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetFormat( fmt );
     cell->SetString( "PV X" );
 
-    filter.Run();
+    namespace ph = std::placeholders;
+    ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter(
+      "/bar/86400",  // at least a year's worth of bars
+      dtBegin, dtLast, 200,
+      std::bind( &SignalGenerator::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
+      std::bind( &SignalGenerator::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
+      std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
+      );
 
     m_xls.SaveAs( "weeklies.xls" );
     m_xls.Close();  }
