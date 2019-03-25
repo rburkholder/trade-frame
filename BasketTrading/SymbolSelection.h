@@ -26,28 +26,34 @@
 
 //#include <TFTimeSeries/TimeSeries.h>
 
+struct InstrumentInfo {
+  const std::string sName;
+  const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
+
+  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
+    : sName( sName_ ), barLast( bar )
+    {};
+  bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
+};
+
+struct IIDarvas: InstrumentInfo {
+  double dblStop;  // calculated stop price, if any
+  IIDarvas( const std::string& sName_, const ou::tf::Bar& bar )
+    : InstrumentInfo( sName_, bar ), dblStop{}
+  {}
+};
+
 class SymbolSelection {
 public:
 
-  struct InstrumentInfo {
-    const std::string sName;
-    const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
-    double dblStop;  // calculated stop price, if any
+  using fSelectedDarvas_t = std::function<void(const IIDarvas&)>;
 
-    InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
-      : sName( sName_ ), barLast( bar ), dblStop {}
-      {};
-    bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
-  };
+  using setInstrumentInfo_t = std::set<InstrumentInfo>;
+  using setIIDarvas_t = std::set<IIDarvas>;
 
-  using fSelected_t = std::function<void(const InstrumentInfo&)>;
-
-  typedef std::set<InstrumentInfo> setInstrumentInfo_t;
-
-  explicit SymbolSelection( const ptime eod, fSelected_t );
+  SymbolSelection( const ptime dtLast );
+  SymbolSelection( const ptime dtLast, fSelectedDarvas_t );
   ~SymbolSelection( void );
-
-  //void Process( setInstrumentInfo_t& selected );
 
 protected:
 private:
@@ -83,8 +89,9 @@ private:
 
   mapRankingPos_t m_mapMaxVolatility;
 
-  typedef ou::tf::Bars::const_iterator citerBars;
-  void CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo&, fSelected_t& );
+  using citerBars = ou::tf::Bars::const_iterator;
+
+  void CheckForDarvas( citerBars begin, citerBars end, IIDarvas&, fSelectedDarvas_t& );
   void CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& );

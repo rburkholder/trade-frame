@@ -43,18 +43,8 @@ public:
   operator ou::tf::Bar::volume_t() { return m_nTotalVolume / m_nNumberOfValues; };
 };
 
-SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
-  : m_dtLast( dtLast ), m_nMinBars( 20 )
-{
-  namespace gregorian = boost::gregorian;
-
-  m_dtOneYearAgo = m_dtLast - gregorian::date_duration( 52 * 7 );
-  m_dt26WeeksAgo = m_dtLast - gregorian::date_duration( 26 * 7 );
-  m_dtDateOfFirstBar = m_dt26WeeksAgo;
-  m_dtDarvasTrigger = m_dtLast - gregorian::date_duration( 8 );
-
-  // change his if a different mechanism is used in the filter
-  std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
+template<typename Scenario, typename Function>
+void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
 
   struct data_t {
     ou::tf::Bar::volume_t nAverageVolume;
@@ -70,22 +60,22 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
   try {
     ou::tf::InstrumentFilter<data_t,ou::tf::Bars> filter(
       "/bar/86400/",
-      m_dtOneYearAgo, m_dtLast,
+      dtBegin, dtEnd,
       200, data,
-      [this]( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
+      []( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
         return true;
       },
-      [this]( data_t& data, const std::string& sObject, const ou::tf::Bars& bars )->bool{ // Filter
+      [nMinBars, dtEnd]( data_t& data, const std::string& sObject, const ou::tf::Bars& bars )->bool{ // Filter
         //  std::cout << sObjectName << std::endl;
         data.nEnteredFilter++;
         bool bReturn( false );
-        if ( m_nMinBars <= bars.Size() ) {
-            ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinBars;
+        if ( nMinBars <= bars.Size() ) {
+            ou::tf::Bars::const_iterator iterVolume = bars.end() - nMinBars;
             data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
             if ( ( 1000000 < data.nAverageVolume )
               && ( 20.0 <= bars.last().Close() )
               && ( 95.0 >= bars.last().Close() )
-              && ( m_dtLast.date() == bars.last().DateTime().date() )
+              && ( dtEnd.date() == bars.last().DateTime().date() )
               && ( 120 < bars.Size() )
               ) {
               data.nPassedFilter++;
@@ -94,10 +84,11 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
         }
         return bReturn;
       },
-      [this,&fSelected]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
+      [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
 
-        InstrumentInfo ii( sObjectName, bars.last() );
-        CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
+        Scenario ii( sObjectName, bars.last() );
+        //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
+        fCheck( bars.begin(), bars.end(), ii );
         //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
         //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
         //          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
@@ -113,6 +104,30 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
   catch (... ) {
     std::cout << "SymbolSelection - Unknown Error - " << std::endl;
   }
+}
+
+SymbolSelection::SymbolSelection( const ptime dtLast )
+  : m_dtLast( dtLast ), m_nMinBars( 20 )
+{
+  namespace gregorian = boost::gregorian;
+
+  m_dtOneYearAgo = m_dtLast - gregorian::date_duration( 52 * 7 );
+  m_dt26WeeksAgo = m_dtLast - gregorian::date_duration( 26 * 7 );
+  m_dtDateOfFirstBar = m_dt26WeeksAgo;
+  m_dtDarvasTrigger = m_dtLast - gregorian::date_duration( 8 );
+}
+
+SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedDarvas_t fSelected )
+: SymbolSelection( dtLast )
+{
+  // change his if a different mechanism is used in the filter
+  std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
+
+  namespace ph = std::placeholders;
+  Process<IIDarvas>(
+    m_dtOneYearAgo, m_dtLast, m_nMinBars,
+    std::bind( &SymbolSelection::CheckForDarvas, this, ph::_1, ph::_2, ph::_3, fSelected )
+  );
 
 //  WrapUp10Percent(selected);
 //  WrapUpVolatility(selected);
@@ -298,7 +313,7 @@ double ProcessDarvas::StopValue( void ) {
   return m_dblStop;
 }
 
-void SymbolSelection::CheckForDarvas( citerBars begin, citerBars end, InstrumentInfo& ii, fSelected_t& fSelected ) {
+void SymbolSelection::CheckForDarvas( citerBars begin, citerBars end, IIDarvas& ii, fSelectedDarvas_t& fSelected ) {
   size_t nTriggerWindow( 10 );
   ptime dtDayOfMax = std::for_each( begin, end, CalcMaxDate() );
   citerBars iterLast( end - 1 );

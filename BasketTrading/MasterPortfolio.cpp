@@ -88,8 +88,8 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
     if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
     m_worker = std::thread( [this,dtLatestEod,bAddToList](){
 
-      using setInstrumentInfo_t = SymbolSelection::setInstrumentInfo_t;
-      using InstrumentInfo_t = SymbolSelection::InstrumentInfo;
+      using setInstrumentInfo_t = SymbolSelection::setIIDarvas_t;
+      using InstrumentInfo_t = IIDarvas;
       setInstrumentInfo_t m_setInstrumentInfo;
 
       SymbolSelection selector(
@@ -100,7 +100,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
       if ( bAddToList ) {
         std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
-                      [this](const SymbolSelection::InstrumentInfo& ii){
+                      [this](const InstrumentInfo_t& ii){
                         AddSymbol( ii.sName, ii.barLast, ii.dblStop );
                       } );
       }
