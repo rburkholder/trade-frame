@@ -30,7 +30,7 @@ class SymbolSelection {
 public:
 
   struct InstrumentInfo {
-    std::string sName;
+    const std::string sName;
     const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
     double dblStop;  // calculated stop price, if any
 

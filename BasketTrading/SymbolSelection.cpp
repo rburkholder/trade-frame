@@ -83,9 +83,10 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
             ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinBars;
             data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
             if ( ( 1000000 < data.nAverageVolume )
-              && ( 15.0 <= bars.last().Close() )
-              && ( 90.0 >= bars.last().Close() )
+              && ( 20.0 <= bars.last().Close() )
+              && ( 95.0 >= bars.last().Close() )
               && ( m_dtLast.date() == bars.last().DateTime().date() )
+              && ( 120 < bars.Size() )
               ) {
               data.nPassedFilter++;
               bReturn = true;
@@ -96,9 +97,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelected_t fSelected )
       [this,&fSelected]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
 
         InstrumentInfo ii( sObjectName, bars.last() );
-        if ( ( 120 < bars.Size() ) && ( bars.last().DateTime().date() == m_dtLast.date() ) ) {
-          CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
-        }
+        CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
         //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
         //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
         //          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
