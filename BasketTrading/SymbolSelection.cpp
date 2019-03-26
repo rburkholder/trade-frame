@@ -18,10 +18,12 @@
 
 #include <iostream>
 #include <set>
+#include <map>
 #include <vector>
 #include <math.h>
 
 #include <TFBitsNPieces/InstrumentFilter.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
 
 #include <TFIndicators/Darvas.h>
 
@@ -61,7 +63,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
     ou::tf::InstrumentFilter<data_t,ou::tf::Bars> filter(
       "/bar/86400/",
       dtBegin, dtEnd,
-      200, data,
+      200, data, //  need to figure out where 200 comes from, and the relation to nMinBars
       []( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
         return true;
       },
@@ -88,7 +90,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
 
         Scenario ii( sObjectName, bars.last() );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
-        fCheck( bars.begin(), bars.end(), ii );
+        fCheck( bars, ii );
         //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
         //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
         //          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
@@ -104,6 +106,9 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
   catch (... ) {
     std::cout << "SymbolSelection - Unknown Error - " << std::endl;
   }
+
+  std::cout << "SymbolSelection - History Scanned." << std::endl;
+
 }
 
 SymbolSelection::SymbolSelection( const ptime dtLast )
@@ -114,26 +119,111 @@ SymbolSelection::SymbolSelection( const ptime dtLast )
   m_dtOneYearAgo = m_dtLast - gregorian::date_duration( 52 * 7 );
   m_dt26WeeksAgo = m_dtLast - gregorian::date_duration( 26 * 7 );
   m_dtDateOfFirstBar = m_dt26WeeksAgo;
-  m_dtDarvasTrigger = m_dtLast - gregorian::date_duration( 8 );
 }
 
 SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedDarvas_t fSelected )
 : SymbolSelection( dtLast )
 {
-  // change his if a different mechanism is used in the filter
   std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
+
+  m_dtDarvasTrigger = m_dtLast - gregorian::date_duration( 8 );
 
   namespace ph = std::placeholders;
   Process<IIDarvas>(
     m_dtOneYearAgo, m_dtLast, m_nMinBars,
-    std::bind( &SymbolSelection::CheckForDarvas, this, ph::_1, ph::_2, ph::_3, fSelected )
+    std::bind( &SymbolSelection::CheckForDarvas, this, ph::_1, ph::_2, fSelected )
   );
 
-//  WrapUp10Percent(selected);
-//  WrapUpVolatility(selected);
-//  WrapUpPivots(selected);
+}
 
-  std::cout << "History Scanned." << std::endl;
+// should just be returning candidates which pass the filter
+// purpose here is to provide the probabilities for the weeklies
+SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedPivot_t fSelected )
+: SymbolSelection( dtLast )
+{
+
+  using mapUnderlyingInfo_t = std::map<std::string,ou::tf::cboe::UnderlyingInfo>;
+
+  ou::tf::cboe::OptionExpiryDates_t expiries;
+  mapUnderlyingInfo_t mapUnderlyingInfo;
+
+  std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
+
+  bool bOk( true );
+  try {
+    ou::tf::cboe::ReadCboeWeeklyOptions(
+      expiries,
+      [&mapUnderlyingInfo](const ou::tf::cboe::UnderlyingInfo& ui){
+        mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ui.sSymbol );
+        if ( citer != mapUnderlyingInfo.end() ) {
+          throw std::runtime_error( "SymbolSelection Pivot Symbol duplicated: " + ui.sSymbol );
+        }
+        else {
+          std::string sSymbol( ui.sSymbol );
+          mapUnderlyingInfo.insert( mapUnderlyingInfo_t::value_type( sSymbol, std::move( ui ) ) );
+        }
+      } );
+  }
+  catch( std::runtime_error& e ) {
+    bOk = false;
+    std::cout << "SignalGenerator - ReadCboeWeeklyOptions error: " << e.what() << std::endl;
+  }
+  catch(...) {
+    bOk = false;
+    std::cout << "SignalGenerator - unknown error during ReadCboeWeeklyOptions" << std::endl;
+  }
+
+  if ( bOk ) {
+
+    using vUnderlyinginfo_citer_t = ou::tf::cboe::vUnderlyinginfo_t::const_iterator ;
+
+    std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
+
+//    for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
+  //    std::cout <<
+  //	    iter->sSymbol
+  //	    << "," << iter->bAdded
+  //	    << "," << iter->bStandardWeekly
+  //	    << "," << iter->bExpandedWeekly
+  //	    << "," << iter->bEOW
+  //	    << "," << iter->sProductType
+  //	    << "," << iter->sDescription
+  //	    << std::endl;
+
+  //    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
+        //ScanBars( iter->sSymbol );
+//        BarSummary bs;
+//        bs.sType = iter->sProductType;
+//        m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, bs ) );
+//  //    }
+//    }
+
+    std::cout << "SignalGenerator running eod and building output spreadsheet ..." << std::endl;
+
+    size_t nSelected {};
+
+    namespace ph = std::placeholders;
+    Process<IIPivot>(
+      m_dtOneYearAgo, m_dtLast, m_nMinBars,
+      //std::bind( &SymbolSelection::CheckForPivot, this, ph::_1, ph::_2, ph::_3, fSelected )
+      [&fSelected,&mapUnderlyingInfo,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
+        mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ii.sName );
+        if ( mapUnderlyingInfo.end() != citer ) {
+          const ou::tf::cboe::UnderlyingInfo& ui( citer->second );
+          ou::tf::statistics::Pivot pivot( bars );
+          pivot.Points( ii.dblR1, ii.dblPV, ii.dblS1 );
+          ii.dblProbabilityAboveAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
+          ii.dblProbabilityAboveAndDown = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Down );
+          ii.dblProbabilityBelowAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Up );
+          ii.dblProbabilityBelowAndDown = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Down );
+          nSelected++;
+          fSelected( ii );
+        }
+      }
+    );
+
+    std::cout << "SignalGenerator Complete, " << nSelected << " selected." << std::endl;
+  }
 
 }
 
@@ -219,7 +309,7 @@ private:
 
 // taken from scanner
 
-void SymbolSelection::CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
+void SymbolSelection::CheckForPivot( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
   ou::tf::Bar::volume_t nAverageVolume = std::for_each( begin, end, AverageVolume() );
 //  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
 //      Info info( sObjectName, *bars.Last() );
@@ -313,22 +403,22 @@ double ProcessDarvas::StopValue( void ) {
   return m_dblStop;
 }
 
-void SymbolSelection::CheckForDarvas( citerBars begin, citerBars end, IIDarvas& ii, fSelectedDarvas_t& fSelected ) {
+void SymbolSelection::CheckForDarvas( const ou::tf::Bars& bars, IIDarvas& ii, fSelectedDarvas_t& fSelected ) {
   size_t nTriggerWindow( 10 );
-  ptime dtDayOfMax = std::for_each( begin, end, CalcMaxDate() );
-  citerBars iterLast( end - 1 );
+  ptime dtDayOfMax = std::for_each( bars.begin(), bars.end(), CalcMaxDate() );
+  //citerBars iterLast( end - 1 );
   if ( dtDayOfMax >= m_dtDarvasTrigger ) {
     std::stringstream ss;
     ss << "Darvas max for " << ii.sName
       << " on " << dtDayOfMax
-      << ", close=" << iterLast->Close()
-      << ", volume=" << iterLast->Volume();
+      << ", close=" << bars.last().Close()
+      << ", volume=" << bars.last().Volume();
 
     ProcessDarvas darvas( ss, nTriggerWindow );
     //size_t ix = end - nTriggerWindow;
-    citerBars iterTriggerBegin = end - nTriggerWindow;
+    citerBars iterTriggerBegin = bars.end() - nTriggerWindow;
     bool bTrigger;  // wait for trigger on final day
-    for ( citerBars iter = iterTriggerBegin; iter != end; ++iter ) {
+    for ( citerBars iter = iterTriggerBegin; iter != bars.end(); ++iter ) {
       bTrigger = darvas.Calc( *iter );  // final day only is needed
     }
 
@@ -338,7 +428,6 @@ void SymbolSelection::CheckForDarvas( citerBars begin, citerBars end, IIDarvas& 
       fSelected( ii );
       std::cout << ss.str() << std::endl;
     }
-
   }
 }
 

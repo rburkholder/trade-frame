@@ -38,8 +38,24 @@ struct InstrumentInfo {
 
 struct IIDarvas: InstrumentInfo {
   double dblStop;  // calculated stop price, if any
-  IIDarvas( const std::string& sName_, const ou::tf::Bar& bar )
-    : InstrumentInfo( sName_, bar ), dblStop{}
+  IIDarvas( const std::string& sName, const ou::tf::Bar& bar )
+    : InstrumentInfo( sName, bar ), dblStop{}
+  {}
+};
+
+struct IIPivot: InstrumentInfo {
+  double dblR1;
+  double dblPV;
+  double dblS1;
+  double dblProbabilityAboveAndUp;
+  double dblProbabilityAboveAndDown;
+  double dblProbabilityBelowAndUp;
+  double dblProbabilityBelowAndDown;
+  IIPivot( const std::string& sName, const ou::tf::Bar& bar )
+    : InstrumentInfo( sName, bar ),
+      dblR1 {}, dblPV {}, dblS1 {},
+      dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
+      dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}
   {}
 };
 
@@ -47,12 +63,15 @@ class SymbolSelection {
 public:
 
   using fSelectedDarvas_t = std::function<void(const IIDarvas&)>;
+  using fSelectedPivot_t  = std::function<void(const IIPivot&)>;
 
   using setInstrumentInfo_t = std::set<InstrumentInfo>;
-  using setIIDarvas_t = std::set<IIDarvas>;
+  using setIIDarvas_t       = std::set<IIDarvas>;
+  using setIIPivot_t        = std::set<IIPivot>;
 
   SymbolSelection( const ptime dtLast );
   SymbolSelection( const ptime dtLast, fSelectedDarvas_t );
+  SymbolSelection( const ptime dtLast, fSelectedPivot_t );
   ~SymbolSelection( void );
 
 protected:
@@ -91,10 +110,10 @@ private:
 
   using citerBars = ou::tf::Bars::const_iterator;
 
-  void CheckForDarvas( citerBars begin, citerBars end, IIDarvas&, fSelectedDarvas_t& );
+  void CheckForDarvas( const ou::tf::Bars&, IIDarvas&, fSelectedDarvas_t& );
   void CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& );
-  void CheckForPivots( citerBars begin, citerBars end, const InstrumentInfo& );
+  void CheckForPivot( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForRange( citerBars begin, citerBars end, const InstrumentInfo& );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );

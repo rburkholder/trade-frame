@@ -86,33 +86,61 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
   else {
     if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
-    m_worker = std::thread( [this,dtLatestEod,bAddToList](){
+    m_worker = std::thread(
+      [this,dtLatestEod,bAddToList](){
+/*
+        using setInstrumentInfo_t = SymbolSelection::setIIDarvas_t;
+        using InstrumentInfo_t = IIDarvas;
+        setInstrumentInfo_t setInstrumentInfo;
 
-      using setInstrumentInfo_t = SymbolSelection::setIIDarvas_t;
-      using InstrumentInfo_t = IIDarvas;
-      setInstrumentInfo_t m_setInstrumentInfo;
-
-      SymbolSelection selector(
-        dtLatestEod,
-        [&m_setInstrumentInfo](const InstrumentInfo_t& ii) {
-          m_setInstrumentInfo.insert( ii );
-        } );
-
-      if ( bAddToList ) {
-        std::for_each( m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
-                      [this](const InstrumentInfo_t& ii){
-                        AddSymbol( ii.sName, ii.barLast, ii.dblStop );
-                      } );
-      }
-      else {
-        std::cout << "Symbol List: " << std::endl;
-        std::for_each(
-          m_setInstrumentInfo.begin(), m_setInstrumentInfo.end(),
-          [this]( const setInstrumentInfo_t::value_type& item ) {
-            std::cout << item.sName << std::endl;
+        SymbolSelection selector(
+          dtLatestEod,
+          [&setInstrumentInfo](const InstrumentInfo_t& ii) {
+            setInstrumentInfo.insert( ii );
           } );
-      }
-      std::cout << "Symbol List finished." << std::endl;
+
+        if ( bAddToList ) {
+          std::for_each( setInstrumentInfo.begin(), setInstrumentInfo.end(),
+                        [this](const InstrumentInfo_t& ii){
+                          AddSymbol( ii.sName, ii.barLast, ii.dblStop );
+                        } );
+        }
+        else {
+          std::cout << "Symbol List: " << std::endl;
+          std::for_each(
+            setInstrumentInfo.begin(), setInstrumentInfo.end(),
+            [this]( const setInstrumentInfo_t::value_type& item ) {
+              std::cout << item.sName << std::endl;
+            } );
+        }
+*/
+        using setInstrumentInfo_t = SymbolSelection::setIIPivot_t;
+        using InstrumentInfo_t = IIPivot;
+        setInstrumentInfo_t setInstrumentInfo;
+
+        SymbolSelection selector(
+          dtLatestEod,
+          [&setInstrumentInfo](const InstrumentInfo_t& ii) {
+            setInstrumentInfo.insert( ii );
+          } );
+
+        if ( bAddToList ) {
+          std::for_each( setInstrumentInfo.begin(), setInstrumentInfo.end(),
+                        [this](const InstrumentInfo_t& ii){
+                          AddSymbol( ii.sName, ii.barLast, 0.0 );
+                        } );
+        }
+        else {
+          std::cout << "Symbol List: " << std::endl;
+          std::for_each(
+            setInstrumentInfo.begin(), setInstrumentInfo.end(),
+            [this]( const setInstrumentInfo_t::value_type& item ) {
+              std::cout << item.sName << std::endl;
+            } );
+        }
+
+
+        std::cout << "Symbol List finished." << std::endl;
     } );
   }
 }
