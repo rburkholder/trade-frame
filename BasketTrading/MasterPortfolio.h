@@ -101,6 +101,6 @@ private:
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
 
-  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop );
+  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar );
 };
 

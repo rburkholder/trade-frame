@@ -12,6 +12,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// _148423314X 2017 Data Mining Algorithms in C++: Data Patterns and Algorithms for Modern Applications
+//    may have some interesting thoughts on data mining inter-day and intra-day data for relationships
+
 #include "stdafx.h"
 
 #include <algorithm>
@@ -120,7 +123,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           dtLatestEod,
           [this,bAddToList](const InstrumentInfo_t& ii) {
             if ( bAddToList ) {
-              AddSymbol( ii.sName, ii.barLast, 0.0 );
+              AddSymbol( ii.sName, ii.barLast );
             }
             else {
               std::cout << ii.sName << std::endl;
@@ -132,7 +135,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
+void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar ) {
 
   assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
 
