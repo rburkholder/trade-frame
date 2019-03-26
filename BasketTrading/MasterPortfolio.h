@@ -95,12 +95,25 @@ private:
 
   typedef std::unique_ptr<ManageStrategy> pManageStrategy_t;
 
-  typedef std::map<std::string,pManageStrategy_t> mapStrategy_t;
+  struct Strategy {
+    const IIPivot iip;
+    pManageStrategy_t pManageStrategy;
+    Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_ )
+      : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) )
+    {}
+//    const Strategy& operator=( const Strategy&& rhs) {
+//      iip = std::move( rhs.iip );
+//      pManageStrategy = std::move( rhs.pManageStrategy );
+//      return *this;
+//    }
+  };
+
+  typedef std::map<std::string,Strategy> mapStrategy_t;
   mapStrategy_t m_mapStrategy;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
 
-  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar );
+  void AddSymbol( const IIPivot& );
 };
 

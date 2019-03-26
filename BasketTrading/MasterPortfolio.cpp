@@ -117,16 +117,14 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             } );
         }
 */
-        using InstrumentInfo_t = IIPivot;
-
         SymbolSelection selector(
           dtLatestEod,
-          [this,bAddToList](const InstrumentInfo_t& ii) {
+          [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
-              AddSymbol( ii.sName, ii.barLast );
+              AddSymbol( iip );
             }
             else {
-              std::cout << ii.sName << std::endl;
+              std::cout << iip.sName << std::endl;
             }
           } );
 
@@ -135,11 +133,11 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar ) {
+void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
-  assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
+  assert( m_mapStrategy.end() == m_mapStrategy.find( iip.sName ) );
 
-  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + sName );
+  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + iip.sName );
   ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
   pPortfolio_t pPortfolioStrategy
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
@@ -150,7 +148,7 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
 
   pManageStrategy_t pManageStrategy;
   pManageStrategy.reset( new ManageStrategy(
-        sName, bar, pPortfolioStrategy,
+        iip.sName, iip.bar, pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructWatch_t
@@ -259,7 +257,12 @@ void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
         )
       );
 
-    m_mapStrategy[ sName ] = std::move( pManageStrategy );
+    //Strategy strategy;
+    //strategy.iip = iip;
+    //strategy.pManageStrategy = std::move( pManageStrategy );
+    Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
+    m_mapStrategy.insert( mapStrategy_t::value_type( iip.sName, std::move( strategy ) ) );
+    //m_mapStrategy[iip.sName ] = std::move( strategy ) );
 }
 
 void MasterPortfolio::Start() {
@@ -275,12 +278,13 @@ void MasterPortfolio::Start() {
 
   std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
                 [&cntToBeTraded, dblAmountToTradePerInstrument](mapStrategy_t::value_type& pair){
-                  if ( 200 <= pair.second->CalcShareCount( dblAmountToTradePerInstrument ) ) {
+                  Strategy& strategy( pair.second );
+                  if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
                     cntToBeTraded++;
-                    pair.second->ToBeTraded() = true;
+                    strategy.pManageStrategy->ToBeTraded() = true;
                   }
                   else {
-                    pair.second->ToBeTraded() = false;
+                    strategy.pManageStrategy->ToBeTraded() = false;
                   }
                 } );
 
@@ -290,12 +294,13 @@ void MasterPortfolio::Start() {
   if ( nullptr != m_pIB.get() ) {
       std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
                     [dblAmountToTradePerInstrument, this](mapStrategy_t::value_type& pair){
-                      if ( pair.second->ToBeTraded() ) {
+                      Strategy& strategy( pair.second );
+                      if ( strategy.pManageStrategy->ToBeTraded() ) {
 
-                        pair.second->SetFundsToTrade( dblAmountToTradePerInstrument );
-                        m_nSharesTrading += pair.second->CalcShareCount( dblAmountToTradePerInstrument );
+                        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+                        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
 
-                        pair.second->Start();
+                        strategy.pManageStrategy->Start();
 
                       }
                     } );
@@ -310,8 +315,9 @@ void MasterPortfolio::Start() {
 void MasterPortfolio::Stop( void ) {
   std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
                 [](mapStrategy_t::value_type& pair){
-                  if ( pair.second->ToBeTraded() ) {
-                    pair.second->Stop();
+                  Strategy& strategy( pair.second );
+                  if ( strategy.pManageStrategy->ToBeTraded() ) {
+                    strategy.pManageStrategy->Stop();
                   }
                 } );
   m_libor.SetWatchOff();
@@ -323,7 +329,8 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   m_libor.SaveSeries( sPath );
   std::for_each(m_mapStrategy.begin(), m_mapStrategy.end(),
                 [&sPath](mapStrategy_t::value_type& pair){
-                  pair.second->SaveSeries( sPath );
+                  Strategy& strategy( pair.second );
+                  strategy.pManageStrategy->SaveSeries( sPath );
                 } );
   std::cout << "done." << std::endl;
 }

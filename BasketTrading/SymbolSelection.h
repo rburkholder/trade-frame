@@ -1,4 +1,4 @@
-/************************************************************************
+/*** *********************************************************************
  * Copyright(c) 2012, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
@@ -24,15 +24,25 @@
 //using namespace boost::posix_time;
 //using namespace boost::gregorian;
 
-//#include <TFTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/TimeSeries.h>
 
 struct InstrumentInfo {
   const std::string sName;
-  const ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
+  const ou::tf::Bar bar; // last bar in series for closing/ pivot calcs
 
-  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
-    : sName( sName_ ), barLast( bar )
-    {};
+  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_ )
+    : sName( sName_ ), bar( bar_ )
+    {}
+  InstrumentInfo( const InstrumentInfo& rhs )
+    : sName( rhs.sName ), bar( rhs.bar )
+    {}
+  InstrumentInfo( const InstrumentInfo&& rhs )
+    : sName( std::move( rhs.sName ) ), bar( rhs.bar )
+    {}
+//  const InstrumentInfo& operator=( const InstrumentInfo&& rhs ) {
+//    sName = std::move( rhs.sName );
+//    bar = rhs.bar;
+//  }
   bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
 };
 
@@ -57,6 +67,33 @@ struct IIPivot: InstrumentInfo {
       dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
       dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}
   {}
+  IIPivot( const IIPivot& rhs )
+    : InstrumentInfo( rhs ),
+      dblR1( rhs.dblR1 ), dblPV( rhs.dblPV ), dblS1( rhs.dblS1 ),
+      dblProbabilityAboveAndUp( rhs.dblProbabilityAboveAndUp ),
+      dblProbabilityAboveAndDown( rhs.dblProbabilityAboveAndDown ),
+      dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
+      dblProbabilityBelowAndDown( rhs.dblProbabilityBelowAndDown )
+  {}
+  IIPivot( const IIPivot&& rhs )
+    : InstrumentInfo( std::move( rhs ) ),
+      dblR1( rhs.dblR1 ), dblPV( rhs.dblPV ), dblS1( rhs.dblS1 ),
+      dblProbabilityAboveAndUp( rhs.dblProbabilityAboveAndUp ),
+      dblProbabilityAboveAndDown( rhs.dblProbabilityAboveAndDown ),
+      dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
+      dblProbabilityBelowAndDown( rhs.dblProbabilityBelowAndDown )
+  {}
+//  const IIPivot& operator=( const IIPivot&& rhs ) {
+//    sName = std::move( rhs.sName);
+//    bar = rhs.bar;
+//      dblR1 = rhs.dblR1;
+//      dblPV = rhs.dblPV;
+//      dblS1 = rhs.dblS1,
+//      dblProbabilityAboveAndUp = rhs.dblProbabilityAboveAndUp;
+//      dblProbabilityAboveAndDown = rhs.dblProbabilityAboveAndDown;
+//      dblProbabilityBelowAndUp = rhs.dblProbabilityBelowAndUp;
+//      dblProbabilityBelowAndDown = rhs.dblProbabilityBelowAndDown;
+//  }
 };
 
 class SymbolSelection {
@@ -66,8 +103,6 @@ public:
   using fSelectedPivot_t  = std::function<void(const IIPivot&)>;
 
   using setInstrumentInfo_t = std::set<InstrumentInfo>;
-  //using setIIDarvas_t       = std::set<IIDarvas>;
-  //using setIIPivot_t        = std::set<IIPivot>;
 
   SymbolSelection( const ptime dtLast );
   SymbolSelection( const ptime dtLast, fSelectedDarvas_t );
