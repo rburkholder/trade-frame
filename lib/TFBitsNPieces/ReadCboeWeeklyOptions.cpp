@@ -143,7 +143,17 @@ void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vO
 
  */
 
+// provide legacy means of access
 void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vui ) {
+  ReadCboeWeeklyOptions(
+    expiries,
+    [&vui](const UnderlyingInfo& ui){
+      vui.push_back( std::move( ui ) );
+  } );
+}
+
+// newer means of access
+void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, fUnderlyingInfo_t fUnderlyingInfo ) {
   ExcelFormat::BasicExcel xls;
   if ( !xls.Load( "../weeklysmf.xls" ) ) {
     throw std::runtime_error( "file read issue" );
@@ -306,7 +316,10 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
           bProcess = false;
           break;
       }
-      if ( bProcess ) vui.push_back( ui );  // push only if successfully parsed.
+      if ( bProcess && !ui.sSymbol.empty() ) {
+        //std::cout << "fUnderlyingInfo: " << ui.sSymbol << std::endl;
+        fUnderlyingInfo( ui );  // push only if successfully parsed.
+      }
       ++ixRow;
     }
 

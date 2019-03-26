@@ -19,6 +19,7 @@
 // http://www.cboe.com/micro/weeklys/availableweeklys.aspx
 
 #include <vector>
+#include <functional>
 
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 
@@ -26,7 +27,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace cboe {
 
-    typedef std::vector<boost::gregorian::date> vOptionExpiryDates_t;
+    using vOptionExpiryDates_t = std::vector<boost::gregorian::date>;
 
     struct OptionExpiryDates_t {
       vOptionExpiryDates_t vExpiriesStandardWeeklies;
@@ -39,37 +40,37 @@ namespace cboe {
       vOptionExpiryDates_t vExpiriesEtfWedndesday;
       vOptionExpiryDates_t vExpiriesVixWeeklies;
     };
-    
+
     struct UnderlyingInfo {
       std::string sSymbol;
       bool bAdded;
       std::string sDescription;
       std::string sProductType;
-      //boost::gregorian::date dateInitialList;
       boost::gregorian::date dateListed;
       bool bStandardWeekly;
       bool bExpandedWeekly;
       bool bEOW;
-      UnderlyingInfo( void ):
-        bAdded(false), bStandardWeekly(false), bExpandedWeekly(false), bEOW(false)
-        {  };
-      bool operator<( const UnderlyingInfo& rhs ) {
+      UnderlyingInfo( void )
+        : bAdded(false), bStandardWeekly(false), bExpandedWeekly(false), bEOW(false)
+        {};
+      bool operator<( const UnderlyingInfo& rhs ) const {
 	return sSymbol < rhs.sSymbol;
       }
     };
-    typedef std::vector<UnderlyingInfo> vUnderlyinginfo_t;
 
-    //std::vector<UnderlyingInfo> vui;
+    using vUnderlyinginfo_t = std::vector<UnderlyingInfo>;
+    using fUnderlyingInfo_t = std::function<void(const UnderlyingInfo&)>;
 
+void ReadCboeWeeklyOptions( OptionExpiryDates_t&, fUnderlyingInfo_t );
 void ReadCboeWeeklyOptions( OptionExpiryDates_t&, vUnderlyinginfo_t& );
 
-} // namespace cboe  
+} // namespace cboe
 } // namespace tf
 } // namespace ou
 
 
 
-// file link location to automatically retrieve:  
+// file link location to automatically retrieve:
 // http://www.cboe.com/micro/weeklys/availableweeklys.aspx
 
 //      JAN 	FEB 	MAR 	APR 	MAY 	JUN 	JUL 	AUG 	SEP 	OCT 	NOV 	DEC
