@@ -20,7 +20,8 @@ namespace statistics {
 
 Pivot::Pivot( const ou::tf::Bars& bars )
 : m_dblHiLoRangeStdDev {},
-  m_dblHiLoRangeAvg {}
+  m_dblHiLoRangeAvg {},
+  m_dblR1 {}, m_dblPV {}, m_dblS1 {}
 {
   m_vrItemsOfInterest.reserve( bars.Size() );
 
@@ -32,20 +33,20 @@ Pivot::Pivot( const ou::tf::Bars& bars )
     [this,&ps,&nPivots,&dblHiLoRangeSum](const ou::tf::Bar& bar ){
 
       if ( 0 < nPivots ) { // current bar against previously calculated pivot set, skip first time through
-        rItemsOfInterest_t rItemsOfInterest = { 0, 0, 0, 0, 0, 0, 0 };
-        const double pv = ps.GetPivotValue( ou::tf::PivotSet::PV );
-        const double r1 = ps.GetPivotValue( ou::tf::PivotSet::R1 );
-        const double s1 = ps.GetPivotValue( ou::tf::PivotSet::S1 );
+        rItemsOfInterest_t rItemsOfInterest = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        m_dblR1 = ps.GetPivotValue( ou::tf::PivotSet::R1 );
+        m_dblPV = ps.GetPivotValue( ou::tf::PivotSet::PV );
+        m_dblS1 = ps.GetPivotValue( ou::tf::PivotSet::S1 );
 
-        bool bCrossR1 = ( bar.High() > r1 ) && ( bar.Low() < r1 );
-        bool bCrossPV = ( bar.High() > pv ) && ( bar.Low() < pv );
-        bool bCrossS1 = ( bar.High() > s1 ) && ( bar.Low() < s1 );
+        bool bCrossR1 = ( bar.High() > m_dblR1 ) && ( bar.Low() < m_dblR1 );
+        bool bCrossPV = ( bar.High() > m_dblPV ) && ( bar.Low() < m_dblPV );
+        bool bCrossS1 = ( bar.High() > m_dblS1 ) && ( bar.Low() < m_dblS1 );
 
-        bool bAbovePV = bar.Open() > pv;
-        bool bBelowPV = bar.Open() < pv;
+        bool bAbovePV = bar.Open() > m_dblPV;
+        bool bBelowPV = bar.Open() < m_dblPV;
 
-        bool bBtwnR1PV = bAbovePV && ( bar.Open() < r1 );
-        bool bBtwnS1PV = bBelowPV && ( bar.Open() > s1 );
+        bool bBtwnR1PV = bAbovePV && ( bar.Open() < m_dblR1 );
+        bool bBtwnS1PV = bBelowPV && ( bar.Open() > m_dblS1 );
 
         m_rItemsOfInterestSum[ (size_t)EItemsOfInterest::AbovePV ].nPopulation += 1;
         if ( bAbovePV ) {
@@ -139,6 +140,12 @@ Pivot::Pivot( const ou::tf::Bars& bars )
 }
 
 Pivot::~Pivot( ) { }
+
+void Pivot::Points( double& dblR1, double& dblPV, double& dblS1 ) {
+  dblR1 = m_dblR1;
+  dblPV = m_dblPV;
+  dblS1 = m_dblS1;
+}
 
 double Pivot::ItemOfInterest( EItemsOfInterest ioi ) const {
   const ItemOfInterestRaw& ioir( m_rItemsOfInterestSum[ (size_t)ioi ] );
