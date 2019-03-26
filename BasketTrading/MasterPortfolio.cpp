@@ -114,31 +114,18 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             } );
         }
 */
-        using setInstrumentInfo_t = SymbolSelection::setIIPivot_t;
         using InstrumentInfo_t = IIPivot;
-        setInstrumentInfo_t setInstrumentInfo;
 
         SymbolSelection selector(
           dtLatestEod,
-          [&setInstrumentInfo](const InstrumentInfo_t& ii) {
-            setInstrumentInfo.insert( ii );
+          [this,bAddToList](const InstrumentInfo_t& ii) {
+            if ( bAddToList ) {
+              AddSymbol( ii.sName, ii.barLast, 0.0 );
+            }
+            else {
+              std::cout << ii.sName << std::endl;
+            }
           } );
-
-        if ( bAddToList ) {
-          std::for_each( setInstrumentInfo.begin(), setInstrumentInfo.end(),
-                        [this](const InstrumentInfo_t& ii){
-                          AddSymbol( ii.sName, ii.barLast, 0.0 );
-                        } );
-        }
-        else {
-          std::cout << "Symbol List: " << std::endl;
-          std::for_each(
-            setInstrumentInfo.begin(), setInstrumentInfo.end(),
-            [this]( const setInstrumentInfo_t::value_type& item ) {
-              std::cout << item.sName << std::endl;
-            } );
-        }
-
 
         std::cout << "Symbol List finished." << std::endl;
     } );
@@ -146,6 +133,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 }
 
 void MasterPortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar, double dblStop ) {
+
   assert( m_mapStrategy.end() == m_mapStrategy.find( sName ) );
 
   ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + sName );
@@ -310,7 +298,7 @@ void MasterPortfolio::Start() {
                     } );
   }
   else {
-    std::cout << "can't get symbols" << std::endl;
+    std::cout << "IB provider not active, can't get IB symbols" << std::endl;
   }
 
   std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;

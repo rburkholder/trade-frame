@@ -66,8 +66,8 @@ public:
   using fSelectedPivot_t  = std::function<void(const IIPivot&)>;
 
   using setInstrumentInfo_t = std::set<InstrumentInfo>;
-  using setIIDarvas_t       = std::set<IIDarvas>;
-  using setIIPivot_t        = std::set<IIPivot>;
+  //using setIIDarvas_t       = std::set<IIDarvas>;
+  //using setIIPivot_t        = std::set<IIPivot>;
 
   SymbolSelection( const ptime dtLast );
   SymbolSelection( const ptime dtLast, fSelectedDarvas_t );
