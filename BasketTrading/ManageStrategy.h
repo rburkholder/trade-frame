@@ -40,26 +40,29 @@ class ManageStrategy: public ou::tf::DailyTradeTimeFrame<ManageStrategy> {
   friend ou::tf::DailyTradeTimeFrame<ManageStrategy>;
 public:
 
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::option::Option::pWatch_t pWatch_t;
-  typedef ou::tf::option::Option::pOption_t pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t      = ou::tf::option::Option::pWatch_t;
+  using pOption_t     = ou::tf::option::Option::pOption_t;
 
-  typedef ou::tf::Position::pPosition_t pPosition_t;
-  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  using pPosition_t  = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
-  typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fOptionDefinition_t;
-  typedef std::function<void(const std::string&, fOptionDefinition_t)> fGatherOptionDefinitions_t;
+  using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
+  using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t)>;
 
-  typedef std::function<void(pWatch_t)> fConstructedWatch_t;
-  typedef std::function<void(pOption_t)> fConstructedOption_t;
+  using fConstructedWatch_t  = std::function<void(pWatch_t)>;
+  using fConstructedOption_t = std::function<void(pOption_t)>;
 
-  typedef std::function<void(const std::string&, fConstructedWatch_t)> fConstructWatch_t;
-  typedef std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)> fConstructOption_t;  // source from IQFeed Symbol Name
+  using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t)>;
+  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
 
-  typedef std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )> fConstructPosition_t;
+  using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )>;
 
-  typedef ou::tf::option::IvAtm::fStartCalc_t fStartCalc_t;
-  typedef ou::tf::option::IvAtm::fStopCalc_t fStopCalc_t;
+  using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
+  using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
+
+  using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
+  using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
   ManageStrategy(
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
@@ -69,7 +72,9 @@ public:
     fConstructOption_t,
     fConstructPosition_t,
     fStartCalc_t,
-    fStopCalc_t
+    fStopCalc_t,
+    fFirstTrade_t,
+    fBar_t
     );
   virtual ~ManageStrategy( );
 
@@ -127,6 +132,9 @@ private:
   //pPosition_t m_pPositionPut_Previous;  // previous put if there was a roll-down
 
   pPortfolio_t m_pPortfolioStrategy;
+
+  fFirstTrade_t m_fFirstTrade;
+  fBar_t m_fBar;
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );

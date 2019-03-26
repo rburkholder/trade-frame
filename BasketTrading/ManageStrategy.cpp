@@ -56,7 +56,9 @@ ManageStrategy::ManageStrategy(
   fConstructOption_t ConstructOption,
   fConstructPosition_t fConstructPosition,
   fStartCalc_t fStartCalc,
-  fStopCalc_t fStopCalc
+  fStopCalc_t fStopCalc,
+  fFirstTrade_t fFirstTrade,
+  fBar_t fBar
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
@@ -68,7 +70,9 @@ ManageStrategy::ManageStrategy(
   m_fConstructPosition( fConstructPosition ),
   m_stateTrading( TSInitializing ),
   m_fStartCalc( fStartCalc ),
-  m_fStopCalc( fStopCalc )
+  m_fStopCalc( fStopCalc ),
+  m_fFirstTrade( fFirstTrade ),
+  m_fBar( fBar )
 {
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructWatch );
@@ -76,6 +80,8 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fConstructPosition );
   assert( nullptr != m_fStartCalc );
   assert( nullptr != m_fStopCalc );
+  assert( nullptr != m_fFirstTrade );
+  assert( nullptr != m_fBar );
 
   std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -173,8 +179,7 @@ void ManageStrategy::Start( void ) {
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
   }
   else {
-    pWatch_t pWatch;
-    pWatch = m_pPositionUnderlying->GetWatch();
+    pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
     pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
     pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
@@ -221,6 +226,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
     case TSWaitForFirstTrade:
       m_dblOpen = trade.Price();
       std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
+      m_fFirstTrade( *this, trade );
       m_stateTrading = TSWaitForEntry;
       break;
     case TSWaitForEntry:
@@ -336,6 +342,7 @@ void ManageStrategy::HandleBarUnderlying( const ou::tf::Bar& bar ) {
   //m_nRHBars++;
   // *** step in to state to test last three bars to see if trade should be entered
   TimeTick( bar );
+  m_fBar( *this, bar );
 }
 
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {

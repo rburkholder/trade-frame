@@ -253,7 +253,15 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     // ManageStrategy::fStartCalc_t
           std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ),
     // ManageStrategy::m_fStopCalc
-          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 )
+          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ),
+    // ManageStrategy::m_fFirstTrade
+          [](ManageStrategy& ms, const ou::tf::Trade& trade){
+            // calculate the starting parameters
+          },
+    // ManageStrategy::m_fBar (60 second)
+          [](ManageStrategy& ms, const ou::tf::Bar& bar){
+            // calculate sentiment
+          }
         )
       );
 
