@@ -23,7 +23,7 @@
 #include <limits>
 #include <string>
 
-#include <boost/regex.hpp> 
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
@@ -60,8 +60,8 @@ private:
 DecodeStatusWord dsw;
 
 
-IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
-  ProviderInterface<IBTWS,IBSymbol>(), 
+IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ):
+  ProviderInterface<IBTWS,IBSymbol>(),
   EWrapper(),
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
@@ -87,20 +87,20 @@ IBTWS::~IBTWS(void) {
 
 void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth ) {
   //std::string month( boost::lexical_cast<std::string,boost::uint16_t>( nMonth ) );
-  contract.expiry 
-    = boost::lexical_cast<std::string,boost::uint16_t>( nYear ) 
-    //+ ( ( 1 == month.size() ) ? "0" : "" ) 
+  contract.expiry
+    = boost::lexical_cast<std::string,boost::uint16_t>( nYear )
+    //+ ( ( 1 == month.size() ) ? "0" : "" )
     //+ month
     += ( ( 9 < nMonth ) ? "" : "0" ) + boost::lexical_cast<std::string>( nMonth );
-    ; 
+    ;
 }
 
 void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
   ContractExpiryField( contract, nYear, nMonth );
-  contract.expiry 
-    //+= boost::lexical_cast<std::string,boost::uint16_t>( nDay ) 
+  contract.expiry
+    //+= boost::lexical_cast<std::string,boost::uint16_t>( nDay )
     += ( ( 9 < nDay ) ? "" : "0" ) + boost::lexical_cast<std::string>( nDay );
-    ; 
+    ;
 }
 
 void IBTWS::Connect() {
@@ -167,16 +167,16 @@ void IBTWS::ProcessMessages( void ) {
 // ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
 
 // deprecated
-void IBTWS::RequestContractDetails( 
-                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
-                                   OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone 
+void IBTWS::RequestContractDetails(
+                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument,
+                                   OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone
 ) {
-  RequestContractDetails( sSymbolBaseName, pInstrument, 
+  RequestContractDetails( sSymbolBaseName, pInstrument,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
                            if ( 0 != fProcess ) {
                              fProcess( details, pInstrument );
                            }
-                         }, 
+                         },
                          [fDone](){
                            if ( 0 != fDone ) {
                              if ( 0 != fDone ) {
@@ -187,9 +187,9 @@ void IBTWS::RequestContractDetails(
 }
 
 // new and better
-void IBTWS::RequestContractDetails( 
-                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
-                                   fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone 
+void IBTWS::RequestContractDetails(
+                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument,
+                                   fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone
 ) {
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
@@ -229,12 +229,12 @@ void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsH
   // results supplied at contractDetails()
   //pInstrument_t pInstrument;  // just allocate, and pass as empty
   //RequestContractDetails( contract, fProcess, fDone, pInstrument );
-  RequestContractDetails( contract, 
+  RequestContractDetails( contract,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
                            if ( 0 != fProcess ) {
                              fProcess( details, pInstrument );
                            }
-                         }, 
+                         },
                          [fDone](){
                            if ( 0 != fDone ) {
                              if ( 0 != fDone ) {
@@ -253,14 +253,14 @@ void IBTWS::RequestContractDetails( const Contract& contract, fOnContractDetail_
 }
 
 // deprecated
-void IBTWS::RequestContractDetails( 
+void IBTWS::RequestContractDetails(
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
-  RequestContractDetails( contract, 
+  RequestContractDetails( contract,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
                            if ( 0 != fProcess ) {
                              fProcess( details, pInstrument );
                            }
-                         }, 
+                         },
                          [fDone](){
                            if ( 0 != fDone ) {
                              if ( 0 != fDone ) {
@@ -273,7 +273,7 @@ void IBTWS::RequestContractDetails(
 }
 
 // new and better
-void IBTWS::RequestContractDetails( 
+void IBTWS::RequestContractDetails(
   const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t pInstrument ) {
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
   // pInstrument can be empty, or can have an instrument
@@ -378,15 +378,15 @@ void IBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base clas
 }
 
 // indexed with InstrumentType::enumInstrumentTypes
-const char *IBTWS::szSecurityType[] = { 
+const char *IBTWS::szSecurityType[] = {
   "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
-const char *IBTWS::szOrderType[] = { 
+const char *IBTWS::szOrderType[] = {
   "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void IBTWS::PlaceOrder( pOrder_t pOrder ) {
 
-  ::Order twsorder; 
+  ::Order twsorder;
   twsorder.orderId = pOrder->GetOrderId();
 
   Contract contract;
@@ -448,7 +448,7 @@ void IBTWS::CancelOrder( pOrder_t pOrder ) {
 }
 
 void IBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
-  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
     IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
@@ -458,7 +458,7 @@ void IBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int c
 }
 
 void IBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
-  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
     IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
@@ -472,7 +472,7 @@ void IBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double 
 
   IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
   switch ( tickType ) {
-    case MODEL_OPTION: 
+    case MODEL_OPTION:
       pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
       break;
     case BID_OPTION_COMPUTATION:
@@ -491,11 +491,11 @@ void IBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
 }
 
 void IBTWS::tickString(TickerId tickerId, TickType tickType, const std::string& value) {
-  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
     IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
-    //std::cout << "tickString " << pSym->Name() << ", " 
+    //std::cout << "tickString " << pSym->Name() << ", "
     //  << TickTypeStrings[tickType] << ", " << value;
     //std::cout << std::endl;
     pSym->AcceptTickString( tickType, value );
@@ -516,33 +516,33 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
       << "WhatIf:  ordid=" << orderId << ", cont.sym=" << contract.symbol
       << ", state.commission=" << state.commission
       << " " << state.commissionCurrency
-      << ", state.equitywithloan=" << state.equityWithLoan 
+      << ", state.equitywithloan=" << state.equityWithLoan
       << ", state.initmarg=" << state.initMargin
       << ", state.maintmarg=" << state.maintMargin
       << ", state.maxcom=" << state.maxCommission
-      << ", state.mincom=" << state.minCommission 
+      << ", state.mincom=" << state.minCommission
       << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
   }
-  else { 
+  else {
     m_ss.str("");
-    m_ss 
-      << "OpenOrder: ordid=" << orderId 
-      << ", state.stat=" << state.status 
-      << ", cont.sym=" << contract.symbol 
-      << ", order.action=" << order.action 
+    m_ss
+      << "OpenOrder: ordid=" << orderId
+      << ", state.stat=" << state.status
+      << ", cont.sym=" << contract.symbol
+      << ", order.action=" << order.action
       << ", state.commission=" << state.commission
       << " " << state.commissionCurrency
-      //<< ", ord.id=" << order.orderId 
-      //<< ", ord.ref=" << order.orderRef 
-      //<< ", state.warning=" << state.warningText 
-      << std::endl; 
+      //<< ", ord.id=" << order.orderId
+      //<< ", ord.ref=" << order.orderRef
+      //<< ", state.warning=" << state.warningText
+      << std::endl;
 //    std::cout << m_ss.str();  // ****
     //OutputDebugString( m_ss.str().c_str() );
-    //if ( std::numeric_limits<double>::max(0) != state.commission ) 
-    if ( 1e308 > state.commission ) 
+    //if ( std::numeric_limits<double>::max(0) != state.commission )
+    if ( 1e308 > state.commission )
       // reports total commission for order rather than increment
-      OrderManager::Instance().ReportCommission( orderId, state.commission ); 
+      OrderManager::Instance().ReportCommission( orderId, state.commission );
     // use spirit to do this to make it faster with a trie, or use keyword match
     DecodeStatusWord::enumStatus status = dsw.Match( state.status );
     switch ( status ) {
@@ -575,21 +575,21 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
 
 void IBTWS::orderStatus( OrderId orderId, const std::string& status, int filled,
                          int remaining, double avgFillPrice, int permId, int parentId,
-                         double lastFillPrice, int clientId, const std::string& whyHeld) 
+                         double lastFillPrice, int clientId, const std::string& whyHeld)
 {
   if ( true ) {
     m_ss.str("");
     m_ss
-      << "OrderStatus: ordid=" << orderId 
-      << ", stat=" << status 
-      << ", fild=" << filled 
-      << ", rem=" << remaining 
-      << ", avgfillprc=" << avgFillPrice 
-      << ", permid=" << permId 
-      //<< ", parentid=" << parentId 
-      << ", lfp=" << lastFillPrice 
-      //<< ", clid=" << clientId 
-      //<< ", yh=" << whyHeld 
+      << "OrderStatus: ordid=" << orderId
+      << ", stat=" << status
+      << ", fild=" << filled
+      << ", rem=" << remaining
+      << ", avgfillprc=" << avgFillPrice
+      << ", permid=" << permId
+      //<< ", parentid=" << parentId
+      << ", lfp=" << lastFillPrice
+      //<< ", clid=" << clientId
+      //<< ", yh=" << whyHeld
       << std::endl;
     //std::cout << m_ss.str();  // ****
 //    OutputDebugString( m_ss.str().c_str() );
@@ -609,16 +609,16 @@ void IBTWS::orderStatus( OrderId orderId, const std::string& status, int filled,
 
 void IBTWS::execDetails( int reqId, const Contract& contract, const ::Execution& execution ) {
   m_ss.str("");
-  m_ss  
-    << "execDetails: " 
-    << "  sym=" << contract.localSymbol 
-//    << ", oid=" << orderId 
+  m_ss
+    << "execDetails: "
+    << "  sym=" << contract.localSymbol
+//    << ", oid=" << orderId
     << ", reqId=" << reqId
-    << ", ex.oid=" << execution.orderId 
-    << ", ex.pr=" << execution.price 
-    << ", ex.sh=" << execution.shares 
-    << ", ex.sd=" << execution.side 
-    << ", ex.ti=" << execution.time 
+    << ", ex.oid=" << execution.orderId
+    << ", ex.pr=" << execution.price
+    << ", ex.sh=" << execution.shares
+    << ", ex.sd=" << execution.side
+    << ", ex.ti=" << execution.time
     << ", ex.ex=" << execution.exchange
     //<< ", ex.liq=" << execution.liquidation
     << ", ex.pid=" << execution.permId
@@ -753,28 +753,32 @@ void IBTWS::verifyCompleted( bool b, const std::string& s ) {
 void IBTWS::marketDataType( TickerId id , int i ) {
 }
 
-void IBTWS::commissionReport( const CommissionReport& cr ) { 
+void IBTWS::commissionReport( const CommissionReport& cr ) {
   std::cout << "commissionReport " << cr.execId << ", " << cr.commission << ", " << cr.currency << ", " << cr.realizedPNL << std::endl;
 }
 
 // convert to boost::spirit?
 void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
-  static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
+  //static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
+  static const boost::regex rxRange( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);" );
   //static const boost::regex rxFields( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);([0-9]{4})([0-9]{2})([0-9]{2}):(.+)" );
-  static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})(?:,([0-9]{4})-([0-9]{4}))?" );
+  //static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})(?:,([0-9]{4})-([0-9]{4}))?" );
+  static const boost::regex rxTime( "([0-9]{2})([0-9]{2})-([0-9]{4})([0-9]{2})([0-9]{2}):([0-9]{2})([0-9]{2})" );
   dtOpen = dtClose = boost::posix_time::special_values::not_a_date_time;
-  boost::cmatch what; 
-  if ( !boost::regex_match( mh.c_str(), what, rxFields ) ) {
+  boost::cmatch what;
+  if ( !boost::regex_search( mh.c_str(), what, rxRange ) ) {
     std::runtime_error( "no proper market info found" );
   }
   else {
     // "20111015:CLOSED;20111017:1800-1715"
     // "20111015:CLOSED;20111017:0930-1600"
     // "20111119:CLOSED;20111120:0015-2355,0015-2355"
-    //std::string a( what[1].first, what[1].second );
-    //std::string b( what[2].first, what[2].second );
-    std::string c( what[3].first, what[3].second );
-    std::string d( what[4].first, what[4].second );
+        // 2018/08/23: now looks like:
+        //      20180823:0400-20180823:2000;20180824:0400-20180824:2000;20180825:CLOSED;20180826:CLOSED;...
+    std::string a( what[1].first, what[1].second ); // year
+    std::string b( what[2].first, what[2].second ); // month
+    std::string c( what[3].first, what[3].second ); // day
+    std::string d( what[4].first, what[4].second ); // after :
     //std::string e( what[5].first, what[5].second );
     //std::string f( what[6].first, what[6].second );
     //std::string g( what[7].first, what[7].second );
@@ -784,16 +788,20 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
     else {
       if ( !boost::regex_match( d.c_str(), what, rxTime ) ) {
         throw std::runtime_error( "no time range found" );
-        // 2018/08/23: now looks like:
-        //      20180823:0400-20180823:2000;20180824:0400-20180824:2000;20180825:CLOSED;20180826:CLOSED;...
       }
       else {
-        std::string i( what[1].first, what[1].second );
-        std::string j( what[2].first, what[2].second );
-        //std::string k( what[3].first, what[3].second );
-        //std::string l( what[4].first, what[4].second );
-        dtOpen = boost::posix_time::from_iso_string( c + "T" + i + "00" );
-        dtClose = boost::posix_time::from_iso_string( c + "T" + j + "00" );
+        std::string i( what[ 1].first, what[ 1].second ); // hour
+        std::string j( what[ 2].first, what[ 2].second ); // minute
+        std::string k( what[ 3].first, what[ 3].second ); // year
+        std::string l( what[ 4].first, what[ 4].second ); // month
+        std::string m( what[ 5].first, what[ 5].second ); // day
+        std::string n( what[ 6].first, what[ 6].second ); // hour
+        std::string o( what[ 7].first, what[ 7].second ); // minute
+        //std::string p( what[ 8].first, what[ 8].second );
+        //std::string q( what[ 9].first, what[ 9].second );
+        //std::string r( what[10].first, what[10].second );
+        dtOpen  = boost::posix_time::from_iso_string( a + b + c + "T" + i + j + "00" );
+        dtClose = boost::posix_time::from_iso_string( k + l + m + "T" + n + o + "00" );
       }
     }
   }
@@ -827,7 +835,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     << contractDetails.summary.conId << ", "
     << contractDetails.summary.strike << ", "
     << contractDetails.summary.right  << ", "
-    << contractDetails.summary.expiry 
+    << contractDetails.summary.expiry
     << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
 #endif
@@ -870,18 +878,22 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   if ( ( 0 == pInstrument.get() ) && ( m_mapContractToSymbol.end() != iterMap ) ) {
     pInstrument = iterMap->second->GetInstrument();
   }
-  
+
   BuildInstrumentFromContract( contractDetails.summary, pInstrument );  // creates new contract, or uses existing one
 
   pInstrument->SetMinTick( contractDetails.minTick );
 
   ptime dtOpen;
   ptime dtClose;
-  typedef boost::date_time::local_adjustor<ptime, -5, us_dst> tzEST_t;
-  typedef boost::date_time::local_adjustor<ptime, -4, us_dst> tzATL_t;
+  using tzEST_t = boost::date_time::local_adjustor<ptime, -5, us_dst>;
+  using tzATL_t = boost::date_time::local_adjustor<ptime, -4, us_dst>;
 
-  if ( "EST" != contractDetails.timeZoneId ) {
+  if ( ( "EST" != contractDetails.timeZoneId ) && ( "EST5EDT" != contractDetails.timeZoneId ) ) {
     std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
+  }
+  else {
+    // use for time zone conversion to UTC in the next part if not EST
+    // make another 'using' above for anything else found
   }
 
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
@@ -892,12 +904,12 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   else {
     try {
       DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
-      pInstrument->SetTimeTrading( 
-        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+      pInstrument->SetTimeTrading(
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ),
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) )
         // store the values in utc
-        tzEST_t::local_to_utc( dtOpen ), 
-        tzEST_t::local_to_utc( dtClose ) 
+        tzEST_t::local_to_utc( dtOpen ),
+        tzEST_t::local_to_utc( dtClose )
         );
     }
     catch ( std::runtime_error& e ) {
@@ -917,11 +929,11 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   else {
     try {
       DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
-      pInstrument->SetTimeLiquid( 
-        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+      pInstrument->SetTimeLiquid(
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ),
+        //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) )
         // store the values in utc
-        tzEST_t::local_to_utc( dtOpen ), 
+        tzEST_t::local_to_utc( dtOpen ),
         tzEST_t::local_to_utc( dtClose )
         );
     }
@@ -936,12 +948,12 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
 
-  if ( nullptr != handler ) 
+  if ( nullptr != handler )
     handler( contractDetails, pInstrument );
 
 }
 
-void IBTWS::contractDetailsEnd( int reqId ) {  
+void IBTWS::contractDetailsEnd( int reqId ) {
   // not called when no symbol available
   //OnContractDetailsDoneHandler_t handler = 0;
   fOnContractDetailDone_t handler = 0;
@@ -964,7 +976,7 @@ void IBTWS::contractDetailsEnd( int reqId ) {
 //      m_mapActiveRequestId.erase( iterRequest );
 //    }
   }
-  if ( nullptr != handler ) 
+  if ( nullptr != handler )
     handler();
 }
 
@@ -981,7 +993,7 @@ void IBTWS::nextValidId( OrderId orderId) {
   else {
     m_ss << "next order id (" << id << "), IB had (" << orderId << ")" << std::endl;
   }
-  
+
 //  OutputDebugString( m_ss.str().c_str() );
 }
 
@@ -1019,27 +1031,27 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
       break;
     }
   }
-  if ( !bFound ) 
+  if ( !bFound )
     throw std::out_of_range( "can't find instrument type" );
 
   if ( "" == sExchange ) sExchange = "SMART";
 
   // test if arriving instrument type matches expected instrument type
   if ( 0 != pInstrument.get() ) {
-    if ( pInstrument->GetInstrumentType() != it ) 
+    if ( pInstrument->GetInstrumentType() != it )
       throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Instrument types don't match" );
     pInstrument->SetExchangeName( sExchange );
   }
 
   mapSymbols_t::iterator iterSymbol;
-  
+
   switch ( it ) {
-    case InstrumentType::Stock: 
+    case InstrumentType::Stock:
       if ( 0 == pInstrument.get() ) {
 	      pInstrument = Instrument::pInstrument_t( new Instrument( sBaseName, it, sExchange ) );
       }
       else {
-	      if ( pInstrument->GetInstrumentName( Instrument::eidProvider_t::EProviderIB ) != sBaseName ) 
+	      if ( pInstrument->GetInstrumentName( Instrument::eidProvider_t::EProviderIB ) != sBaseName )
           throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Stock, underlying no match" );
       }
       break;
@@ -1048,8 +1060,8 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
       if ( 0 == pInstrument.get() ) {
-	      pInstrument = Instrument::pInstrument_t( new Instrument( 
-	        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
+	      pInstrument = Instrument::pInstrument_t( new Instrument(
+	        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(),
 	        os, contract.strike ) );
       }
       else {
@@ -1059,11 +1071,11 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
         if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
       }
       try {
-        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date( 
+        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date(
           boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
           boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
           boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
-          ) ); 
+          ) );
       }
       catch ( std::exception e ) {
         std::cout << "IB option contract expiry is funny: " << e.what() << " -- " << contract.localSymbol << std::endl;
@@ -1088,12 +1100,12 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
           break;
         }
       }
-      if ( !bFound ) 
+      if ( !bFound )
         throw std::out_of_range( "base currency lookup not found" );
 
       const char* szCounter = NULL;
       szCounter = strchr( sLocalSymbol.c_str(), '.' );
-      if ( NULL == szCounter ) 
+      if ( NULL == szCounter )
         throw std::out_of_range( "counter currency not in LocalSymbol" );
       ++szCounter;  // advance to character after '.'
 
@@ -1106,7 +1118,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
           break;
         }
       }
-      if ( !bFound ) 
+      if ( !bFound )
         throw std::out_of_range( "counter currency lookup not found" );
 
       //if ( "" == sExchange )  // won't match because already set above
@@ -1122,7 +1134,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
       pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange ) );
       break;
   }
-  if ( 0 == pInstrument ) 
+  if ( 0 == pInstrument )
     throw std::out_of_range( "unknown instrument type" );
   pInstrument->SetContract( contract.conId );
   //pInstrument->SetCurrency( );  // need to figure this out, use the currency calcs above
@@ -1205,7 +1217,7 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
 
   if ( false ) {
     m_ss.str("");
-    m_ss << "portfolio item " 
+    m_ss << "portfolio item "
       << contract.symbol
       << " " << contract.localSymbol
       << "  id=" << contract.conId  // long
@@ -1219,13 +1231,13 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
       << ", cost=" << averageCost // double
       << ", uPL=" << unrealizedPNL // double
       << ", rPL=" << realizedPNL // double
-      //<< ", " << accountName 
+      //<< ", " << accountName
       << std::endl;
     std::cout << m_ss.str();
 //    OutputDebugString( m_ss.str().c_str() );
   }
   if ( false ) {
-    std::cout 
+    std::cout
       <<        contract.symbol
       << "," << contract.localSymbol
 //      << "," << contract.strike // double
@@ -1242,10 +1254,10 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
       << "," << unrealizedPNL // double
       << "," << realizedPNL // double
       << "," << contract.currency
-      //<< ", " << accountName 
+      //<< ", " << accountName
       << std::endl;
   }
-  
+
   PositionDetail pd( contract.symbol, contract.localSymbol,
     contract.conId, contract.strike, contract.expiry, contract.multiplier,
     position, marketPrice, marketValue, averageCost,
@@ -1307,7 +1319,7 @@ void IBTWS::managedAccounts( const std::string& accountsList) {
 void IBTWS::receiveFA(faDataType pFaDataType, const std::string& cxml) {
 }
 
-void IBTWS::historicalData(TickerId reqId, const std::string& date, double open, double high, 
+void IBTWS::historicalData(TickerId reqId, const std::string& date, double open, double high,
                             double low, double close, int volume, int barCount, double WAP, int hasGaps) {
 }
 
@@ -1330,8 +1342,8 @@ void IBTWS::realtimeBar(TickerId reqId, long time, double open, double high, dou
 char *IBTWS::TickTypeStrings[] = {
   "BID_SIZE", "BID", "ASK", "ASK_SIZE", "LAST", "LAST_SIZE",
 				"HIGH", "LOW", "VOLUME", "CLOSE",
-				"BID_OPTION_COMPUTATION", 
-				"ASK_OPTION_COMPUTATION", 
+				"BID_OPTION_COMPUTATION",
+				"ASK_OPTION_COMPUTATION",
 				"LAST_OPTION_COMPUTATION",
 				"MODEL_OPTION",
 				"OPEN",
