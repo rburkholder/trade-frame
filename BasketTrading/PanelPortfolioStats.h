@@ -42,16 +42,22 @@ public:
     const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE,
     long style = SYMBOL_PANELPORTFOLIOSTATS_STYLE );
   ~PanelPortfolioStats(void);
-  void SetStats( const std::string& sMin, const std::string& sCurrent, const std::string& sMax );
+  void SetStats(
+    const std::string& sMin, const std::string& sCurrent, const std::string& sMax,
+    const std::string& sUp, const std::string& sDown
+  );
 protected:
 private:
   enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELPORTFOLIOSTATS_IDNAME,
-    ID_TxtPortfolioLow, ID_TxtPortfolioCurrent, ID_TxtPortfolioHigh
+    ID_TxtPortfolioLow, ID_TxtPortfolioCurrent, ID_TxtPortfolioHigh,
+    ID_TxtSentimentUp, ID_TxtSentimentDown
   };
 
     wxTextCtrl* m_txtPortfolioLow;
     wxTextCtrl* m_txtPortfolioCurrent;
     wxTextCtrl* m_txtPortfolioHigh;
+    wxTextCtrl* m_txtSentimentUp;
+    wxTextCtrl* m_txtSentimentDown;
 
   void Init();
   void CreateControls();

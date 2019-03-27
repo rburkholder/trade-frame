@@ -165,10 +165,15 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
   m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+  size_t nUp;
+  size_t nDown;
+  m_pMasterPortfolio->GetSentiment( nUp, nDown );
   m_pPanelPortfolioStats->SetStats(
     boost::lexical_cast<std::string>( m_dblMinPL ),
     boost::lexical_cast<std::string>( dblCurrent ),
-    boost::lexical_cast<std::string>( m_dblMaxPL )
+    boost::lexical_cast<std::string>( m_dblMaxPL ),
+    boost::lexical_cast<std::string>( nUp ),
+    boost::lexical_cast<std::string>( nDown )
     );
 }
 

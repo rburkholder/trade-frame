@@ -259,18 +259,26 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             // calculate the starting parameters
           },
     // ManageStrategy::m_fBar (60 second)
-          [](ManageStrategy& ms, const ou::tf::Bar& bar){
+          [this](ManageStrategy& ms, const ou::tf::Bar& bar){
             // calculate sentiment
+            if ( m_sentiment.dtCurrent.is_not_a_date_time() ) {
+              m_sentiment.dtCurrent = bar.DateTime();
+            }
+            if ( bar.DateTime() > m_sentiment.dtCurrent ) {
+              m_sentiment.Reset( bar.DateTime() );
+              if ( bar.Open() < bar.Close() ) m_sentiment.nUp++;
+              if ( bar.Open() > bar.Close() ) m_sentiment.nDown++;
+            }
           }
         )
       );
 
-    //Strategy strategy;
-    //strategy.iip = iip;
-    //strategy.pManageStrategy = std::move( pManageStrategy );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
     m_mapStrategy.insert( mapStrategy_t::value_type( iip.sName, std::move( strategy ) ) );
-    //m_mapStrategy[iip.sName ] = std::move( strategy ) );
+}
+
+void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
+  m_sentiment.Get( nUp, nDown );
 }
 
 void MasterPortfolio::Start() {

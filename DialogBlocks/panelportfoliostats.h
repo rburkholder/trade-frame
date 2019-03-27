@@ -36,6 +36,8 @@
 #define ID_TxtPortfolioLow 10072
 #define ID_TxtPortfolioCurrent 10073
 #define ID_TxtPortfolioHigh 10074
+#define ID_TxtSentimentUp 10000
+#define ID_TxtSentimentDown 10000
 #define SYMBOL_PANELPORTFOLIOSTATS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELPORTFOLIOSTATS_TITLE _("PanelPortfolioStats")
 #define SYMBOL_PANELPORTFOLIOSTATS_IDNAME ID_PANELPORTFOLIOSTATS
@@ -90,6 +92,8 @@ public:
     wxTextCtrl* m_txtPortfolioLow;
     wxTextCtrl* m_txtPortfolioCurrent;
     wxTextCtrl* m_txtPortfolioHigh;
+    wxTextCtrl* m_txtSentimentUp;
+    wxTextCtrl* m_txtSentimentDown;
 ////@end PanelPortfolioStats member variables
 };
 

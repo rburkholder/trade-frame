@@ -55,7 +55,9 @@ public:
   ~MasterPortfolio(void);
 
   void Load( ptime dtLatestEod, bool bAddToList );
+  void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
   void Start();
+
   void Stop( void );
   void SaveSeries( const std::string& sPath );
 
@@ -93,7 +95,31 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  typedef std::unique_ptr<ManageStrategy> pManageStrategy_t;
+  struct Sentiment {
+
+    size_t nUp;
+    size_t nDown;
+    ptime dtCurrent; // late arrivals don't count
+
+    Sentiment()
+      : nUp {}, nDown {}, dtCurrent( boost::date_time::special_values::not_a_date_time )
+     {}
+
+    void Reset( ptime dtNew ) { // will probably need a lock
+      nUp = 0;
+      nDown = 0;
+      dtCurrent = dtNew;
+    }
+
+    void Get( size_t& nUp_, size_t& nDown_ ) const { // will probably need a lock
+      nUp_ = nUp;
+      nDown_ = nDown;
+    }
+  };
+
+  Sentiment m_sentiment;
+
+  using pManageStrategy_t = std::unique_ptr<ManageStrategy>;
 
   struct Strategy {
     const IIPivot iip;

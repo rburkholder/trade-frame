@@ -105,6 +105,8 @@ void PanelPortfolioStats::Init()
     m_txtPortfolioLow = NULL;
     m_txtPortfolioCurrent = NULL;
     m_txtPortfolioHigh = NULL;
+    m_txtSentimentUp = NULL;
+    m_txtSentimentDown = NULL;
 ////@end PanelPortfolioStats member initialisation
 }
 
@@ -118,11 +120,11 @@ void PanelPortfolioStats::CreateControls()
 ////@begin PanelPortfolioStats content construction
     PanelPortfolioStats* itemPanel1 = this;
 
-    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(itemBoxSizer2);
 
     wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
     wxStaticText* itemStaticText4 = new wxStaticText( itemPanel1, wxID_STATIC, _("Portfolio Profit:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer3->Add(itemStaticText4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
@@ -153,6 +155,30 @@ void PanelPortfolioStats::CreateControls()
 
     m_txtPortfolioHigh = new wxTextCtrl( itemPanel1, ID_TxtPortfolioHigh, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer11->Add(m_txtPortfolioHigh, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
+    wxBoxSizer* itemBoxSizer14 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer14, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText15 = new wxStaticText( itemPanel1, wxID_STATIC, _("Sentiment:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer14->Add(itemStaticText15, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxBoxSizer* itemBoxSizer16 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer14->Add(itemBoxSizer16, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText17 = new wxStaticText( itemPanel1, wxID_STATIC, _("Up:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(itemStaticText17, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_txtSentimentUp = new wxTextCtrl( itemPanel1, ID_TxtSentimentUp, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(m_txtSentimentUp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
+    wxBoxSizer* itemBoxSizer19 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer14->Add(itemBoxSizer19, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText20 = new wxStaticText( itemPanel1, wxID_STATIC, _("Down"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer19->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_txtSentimentDown = new wxTextCtrl( itemPanel1, ID_TxtSentimentDown, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer19->Add(m_txtSentimentDown, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
 ////@end PanelPortfolioStats content construction
 }
