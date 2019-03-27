@@ -34,7 +34,7 @@
 // need to add transaction/commit/rollback capabilities
 
 // 2012/10/13
-// QueryFields has a problem.  Things have to be re-written so that a statement can be prepared 
+// QueryFields has a problem.  Things have to be re-written so that a statement can be prepared
 // independently of a supplied structure.  A new structure may be required on each execution of the statement.
 // Currently, the same physical structure needs to be re-used.  Structure is provided during statement construction,
 // not necessarily a good thing all the time.
@@ -91,10 +91,10 @@ public:
   void Ref( void ) { ++m_cntRef; };
   size_t UnRef( void ) { --m_cntRef; return m_cntRef; };
 
-  std::string& UpdateQueryText( void ) { 
+  std::string& UpdateQueryText( void ) {
 //    assert( EClauseQuery >= m_clause );
 //    m_clause = EClauseQuery;
-    return m_sQueryText; 
+    return m_sQueryText;
   };
 
   const std::string& QueryText( void ) { return m_sQueryText; };
@@ -111,7 +111,7 @@ private:
 // =====
 
 template<class F>  // used for returning structures to queriers
-class QueryFields: 
+class QueryFields:
   public QueryBase
 {
 public:
@@ -137,7 +137,7 @@ public:
     assert( QueryBase::EClauseWhere > QueryBase::m_clause );
     QueryBase::m_sQueryText += " WHERE " + sWhere;
     QueryBase::m_clause = QueryBase::EClauseWhere;
-    return *this; 
+    return *this;
   };
 
   Query& OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
@@ -161,28 +161,28 @@ public:
     return *this;
   }
 
-  operator QueryFields<F>() { 
+  operator QueryFields<F>() {
     return dynamic_cast<QueryFields<F> >( *this );
   }
 
   // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment), execute the bind and execute
   // may need to add an auto-reset before the bind:  therefore need m_bBound member variable
 /*
-  operator QueryFields<F>*() { 
+  operator QueryFields<F>*() {
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
       m_bExecuteOneTime = false;
     }
-    return dynamic_cast<QueryFields<F>* >( this ); 
+    return dynamic_cast<QueryFields<F>* >( this );
   }
 */
 /*
-  operator QueryFields<F>&() { 
+  operator QueryFields<F>&() {
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
       m_bExecuteOneTime = false;
     }
-    return dynamic_cast<QueryFields<F>&>( *this ); 
+    return dynamic_cast<QueryFields<F>&>( *this );
   }
 */
   operator typename QueryFields<F>::pQueryFields_t() { // this one is actually used
@@ -191,7 +191,7 @@ public:
       m_bExecuteOneTime = false;
     }
     typename QueryFields<F>::pQueryFields_t p( this );
-    return p; 
+    return p;
   }
 
   void SetExecuteOneTime( void ) { m_bExecuteOneTime = true; };
@@ -219,7 +219,7 @@ void intrusive_ptr_release( Q* pq ) {
 // =====
 
 template<class SS, class F, class S>  // SS statement state, F fields, S session
-class QueryState: 
+class QueryState:
   public Query<F>,
   public SS // statement state
 {
@@ -338,8 +338,8 @@ public:
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeCreateStatement( pQuery->UpdateQueryText() );
 
-    iter = m_mapTableDefs.insert( 
-      m_mapTableDefs.begin(), 
+    iter = m_mapTableDefs.insert(
+      m_mapTableDefs.begin(),
       mapTableDefs_pair_t( sTableName, pQuery) );
 
     m_vQuery.push_back( pQuery );
@@ -379,7 +379,7 @@ public:
     pQuery->UpdateQueryText() = sSqlQuery;
 
     pQuery->SetExecuteOneTime();
-    
+
     m_vQuery.push_back( pQuery );
 
     return *pQuery;
@@ -425,7 +425,7 @@ protected:
     typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
     query_t* pQuery = new query_t( *this, f );
-    
+
     Action action( GetTableName<F>() );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
@@ -441,7 +441,7 @@ protected:
 private:
 
   bool m_bOpened;
-  
+
   IDatabase m_db;
 
   typedef QueryBase::pQueryBase_t pQueryBase_t;
@@ -495,9 +495,11 @@ template<class IDatabase>
 void SessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
     m_mapTableDefs.clear();
-    for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
-      m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
-      iter->reset();
+    for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); iter++ ) {
+      if ( nullptr != iter->get() ) { // TODO: investigate why is zero
+        m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
+        iter->reset();
+      }
     }
     m_vQuery.clear();
     m_db.SessionClose();
