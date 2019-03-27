@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MasterPortfolio.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
+	${OBJECTDIR}/Sentiment.o \
 	${OBJECTDIR}/SymbolSelection.o \
 	${OBJECTDIR}/stdafx.o
 
@@ -136,6 +137,11 @@ ${OBJECTDIR}/PanelPortfolioStats.o: PanelPortfolioStats.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioStats.o PanelPortfolioStats.cpp
+
+${OBJECTDIR}/Sentiment.o: Sentiment.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sentiment.o Sentiment.cpp
 
 ${OBJECTDIR}/SymbolSelection.o: SymbolSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}

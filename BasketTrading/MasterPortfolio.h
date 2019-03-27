@@ -32,6 +32,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
+#include "Sentiment.h"
 #include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
@@ -94,35 +95,6 @@ private:
   ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
-
-  struct Sentiment {
-
-    size_t nUp;
-    size_t nDown;
-    ptime dtCurrent; // late arrivals don't count
-
-    Sentiment()
-      : nUp {}, nDown {}, dtCurrent( boost::date_time::special_values::not_a_date_time )
-     {}
-
-    void Reset( ptime dtNew ) { // will probably need a lock
-      nUp = 0;
-      nDown = 0;
-      dtCurrent = dtNew;
-    }
-
-    void Update( const ou::tf::Bar& bar ) {
-      if ( dtCurrent.is_not_a_date_time() ) dtCurrent = bar.DateTime();
-      if ( bar.DateTime() > dtCurrent ) Reset( bar.DateTime() );
-      if ( bar.Open() < bar.Close() ) nUp++;
-      if ( bar.Open() > bar.Close() ) nDown++;
-    }
-
-    void Get( size_t& nUp_, size_t& nDown_ ) const { // will probably need a lock
-      nUp_ = nUp;
-      nDown_ = nDown;
-    }
-  };
 
   Sentiment m_sentiment;
 
