@@ -83,13 +83,13 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
 
-  std::cout << m_sUnderlying << " loading up ... " << std::endl;
+  //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
   try {
     m_fConstructWatch( sUnderlying,
       [this,fGatherOptionDefinitions](pWatch_t pWatch){
 
-        std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
+        //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
         m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
         assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
@@ -146,7 +146,7 @@ ManageStrategy::ManageStrategy(
 
         assert( 0 != m_mapChains.size() );
 
-        std::cout << m_sUnderlying << " watch done." << std::endl;
+        //std::cout << m_sUnderlying << " watch done." << std::endl;
 
     } );
   }
@@ -156,7 +156,7 @@ ManageStrategy::ManageStrategy(
 
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
 
-  std::cout << m_sUnderlying << " loading done." << std::endl;
+  //std::cout << m_sUnderlying << " loading done." << std::endl;
 
 }
 
