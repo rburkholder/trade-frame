@@ -38,15 +38,22 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
-  m_dtLatestEod = ptime( date( 2019, 3, 25 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 3, 26 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
+  //m_pFrameMain->Bind(
+  //  wxEVT_SIZE,
+  //  [this](wxSizeEvent& event){
+  //    std::cout << "w=" << event.GetSize().GetWidth() << ",h=" << event.GetSize().GetHeight() << std::endl;
+  //    event.Skip();
+  //    },
+  //  idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
   //m_pFrameMain->Center();
-//  m_pFrameMain->Move( -2500, 50 );
-  m_pFrameMain->SetSize( 500, 600 );
+  m_pFrameMain->Move( 200, 100 );
+  m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
 
   wxBoxSizer* m_sizerMain;
@@ -249,14 +256,11 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
+  if ( m_db.IsOpen() ) m_db.Close();
   event.Skip();  // auto followed by Destroy();
 }
 
 int AppBasketTrading::OnExit() {
-
-//  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
-  if ( m_db.IsOpen() ) m_db.Close();
 
   return 0;
 }
@@ -323,22 +327,27 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
   //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Future );
   //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::FOption );
 
-  std::cout << "Subsetting symbols ... " << std::endl;
-  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-  ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
-  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
-  std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
+  CallAfter( [this](){
+    std::cout << "Subsetting symbols ... " << std::endl;
+    ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+    ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
+    m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
+    std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
 
-  std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-  listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
-  std::cout << " ... done." << std::endl;
+    std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+    listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
+    std::cout << " ... done." << std::endl;
+  });
 
 }
 
 // TODO: set flag to only load once?  Otherwise, is the structure cleared first?
 void AppBasketTrading::HandleMenuActionLoadSymbolSubset( void ) {
-  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
-  std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
+  CallAfter( [this](){
+    std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+    m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
+    std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
+  });
+
 }
 
