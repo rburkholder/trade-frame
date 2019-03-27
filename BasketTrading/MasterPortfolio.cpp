@@ -261,14 +261,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
             // calculate sentiment
-            if ( m_sentiment.dtCurrent.is_not_a_date_time() ) {
-              m_sentiment.dtCurrent = bar.DateTime();
-            }
-            if ( bar.DateTime() > m_sentiment.dtCurrent ) {
-              m_sentiment.Reset( bar.DateTime() );
-              if ( bar.Open() < bar.Close() ) m_sentiment.nUp++;
-              if ( bar.Open() > bar.Close() ) m_sentiment.nDown++;
-            }
+            m_sentiment.Update( bar );
           }
         )
       );

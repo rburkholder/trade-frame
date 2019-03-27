@@ -111,6 +111,13 @@ private:
       dtCurrent = dtNew;
     }
 
+    void Update( const ou::tf::Bar& bar ) {
+      if ( dtCurrent.is_not_a_date_time() ) dtCurrent = bar.DateTime();
+      if ( bar.DateTime() > dtCurrent ) Reset( bar.DateTime() );
+      if ( bar.Open() < bar.Close() ) nUp++;
+      if ( bar.Open() > bar.Close() ) nDown++;
+    }
+
     void Get( size_t& nUp_, size_t& nDown_ ) const { // will probably need a lock
       nUp_ = nUp;
       nDown_ = nDown;
