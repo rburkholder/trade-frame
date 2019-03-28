@@ -54,6 +54,11 @@ struct IIDarvas: InstrumentInfo {
 };
 
 struct IIPivot: InstrumentInfo {
+  enum class PState { PV, AbovePV, BelowPV, BtwnPVR1, BtwnPVS1 };
+  enum class Direction { Unknown, Up, Down };
+
+  using Pair = std::pair<double,Direction>;
+
   double dblR1;
   double dblPV;
   double dblS1;
@@ -83,6 +88,46 @@ struct IIPivot: InstrumentInfo {
       dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
       dblProbabilityBelowAndDown( rhs.dblProbabilityBelowAndDown )
   {}
+
+  Pair Test( double price ) const {
+    Pair pair;
+    pair.first = 0.0;
+    pair.second = Direction::Unknown;
+    PState state = PState::PV;
+    Direction direction = Direction::Unknown;
+    if ( dblPV < price ) {
+      state = PState::AbovePV;
+      if ( dblR1 > price ) {
+        state = PState::BtwnPVR1;
+        if ( dblProbabilityAboveAndUp >= dblProbabilityAboveAndDown ) {
+          pair.first = dblProbabilityAboveAndUp;
+          pair.second = Direction::Up;
+        }
+        else {
+          pair.first = dblProbabilityAboveAndDown;
+          pair.second = Direction::Down;
+        }
+      }
+    }
+    else {
+      if ( dblPV > price ) {
+        state = PState::BelowPV;
+        if ( dblS1 < price ) {
+          state = PState::BtwnPVS1;
+          if ( dblProbabilityBelowAndDown >= dblProbabilityBelowAndUp ) {
+            pair.first = dblProbabilityBelowAndDown;
+            pair.second = Direction::Down;
+          }
+          else {
+            pair.first = dblProbabilityBelowAndUp;
+            pair.second = Direction::Up;
+          }
+        }
+      }
+    }
+    return pair;
+  }
+
 //  const IIPivot& operator=( const IIPivot&& rhs ) {
 //    sName = std::move( rhs.sName);
 //    bar = rhs.bar;
