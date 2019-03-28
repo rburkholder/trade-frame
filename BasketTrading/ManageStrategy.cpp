@@ -86,13 +86,15 @@ ManageStrategy::ManageStrategy(
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
   try {
-    m_fConstructWatch( sUnderlying,
+
+    m_fConstructWatch( m_sUnderlying,
       [this,fGatherOptionDefinitions](pWatch_t pWatch){
 
         //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
         m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
-        assert( nullptr != m_pPositionUnderlying->GetWatch().get() );
+        assert( m_pPositionUnderlying );
+        assert( m_pPositionUnderlying->GetWatch() );
 
         fGatherOptionDefinitions(
           m_pPositionUnderlying->GetInstrument()->GetInstrumentName(),
@@ -104,7 +106,7 @@ ManageStrategy::ManageStrategy(
               mapChains_t::iterator iterChains;
 
               {
-                typedef ou::tf::option::IvAtm::fConstructedOption_t fConstructedOption_t;
+                using fConstructedOption_t = ou::tf::option::IvAtm::fConstructedOption_t;
                 ou::tf::option::IvAtm ivAtm(
                         m_pPositionUnderlying->GetWatch(),
                       // IvAtm::fConstructOption_t
@@ -148,19 +150,29 @@ ManageStrategy::ManageStrategy(
 
         //std::cout << m_sUnderlying << " watch done." << std::endl;
 
+        m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
+        //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
+        pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+        pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
     } );
+
   }
   catch (...) {
-    std::cout << "something wrong" << std::endl;
+    std::cout << "*** " << "something wrong with " << m_sUnderlying << " creation." << std::endl;
   }
-
-  m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
 
   //std::cout << m_sUnderlying << " loading done." << std::endl;
 
 }
 
 ManageStrategy::~ManageStrategy( ) {
+  if ( m_pPositionUnderlying ) {
+    pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
+    if ( pWatch ) {
+      pWatch->OnQuote.Remove( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+      pWatch->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
+    }
+  }
 }
 
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
@@ -176,12 +188,10 @@ void ManageStrategy::Start( void ) {
   assert( TSInitializing == m_stateTrading );
 
   if ( nullptr == m_pPositionUnderlying.get() ) {
+    // should be an unreachable test as this is tested in construction
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
   }
   else {
-    pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
-    pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-    pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
     if ( 0 == m_dblFundsToTrade ) {
       std::cout << m_sUnderlying << " not started, no funds" << std::endl;
@@ -204,10 +214,6 @@ void ManageStrategy::Start( void ) {
 }
 
 void ManageStrategy::Stop( void ) {
-  pWatch_t pWatch;
-  pWatch = m_pPositionUnderlying->GetWatch();
-  pWatch->OnQuote.Remove( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-  pWatch->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 }
 
 void ManageStrategy::HandleBellHeard( void ) {
@@ -222,18 +228,8 @@ void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 }
 
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
-  switch ( m_stateTrading ) {
-    case TSWaitForFirstTrade:
-      m_dblOpen = trade.Price();
-      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
-      m_fFirstTrade( *this, trade );
-      m_stateTrading = TSWaitForEntry;
-      break;
-    case TSWaitForEntry:
-    default:
-      break;
-  }
   m_trades.Append( trade );
+  TimeTick( trade );
   m_bfTrades.Add( trade );
 }
 
@@ -293,6 +289,20 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   }
 }
 
+void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
+  switch ( m_stateTrading ) {
+    case TSWaitForFirstTrade:
+      m_dblOpen = trade.Price();
+      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
+      m_fFirstTrade( *this, trade );
+      m_stateTrading = TSWaitForEntry;
+      break;
+    case TSWaitForEntry:
+    default:
+      break;
+  }
+}
+
 void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) {
 }
 
@@ -330,6 +340,9 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
       break;
   }
   // need to set a state to do this once
+}
+
+void ManageStrategy::HandleAfterRH( const ou::tf::Trade& trade ) {
 }
 
 void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {

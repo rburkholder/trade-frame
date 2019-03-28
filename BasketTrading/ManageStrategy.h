@@ -78,9 +78,11 @@ public:
     );
   virtual ~ManageStrategy( );
 
+  const std::string& GetUnderlying() const { return m_sUnderlying; }
+
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount );
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get
+  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
   void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
@@ -141,6 +143,7 @@ private:
   void HandleBarUnderlying( const ou::tf::Bar& bar );
 
   void HandleAfterRH( const ou::tf::Quote& quote );
+  void HandleAfterRH( const ou::tf::Trade& trade );
   void HandleAfterRH( const ou::tf::Bar& bar );
 
   // one shot inherited states:
@@ -150,6 +153,7 @@ private:
 
   // Datum based inherited states:
   void HandleRHTrading( const ou::tf::Quote& quote );
+  void HandleRHTrading( const ou::tf::Trade& trade );
   void HandleRHTrading( const ou::tf::Bar& bar );
 };
 
