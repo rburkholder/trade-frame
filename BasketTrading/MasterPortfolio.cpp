@@ -255,8 +255,11 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     // ManageStrategy::m_fStopCalc
           std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ),
     // ManageStrategy::m_fFirstTrade
-          [](ManageStrategy& ms, const ou::tf::Trade& trade){
+          [this](ManageStrategy& ms, const ou::tf::Trade& trade){
             // calculate the starting parameters
+            mapStrategy_t::iterator iter = m_mapStrategy.find( ms.GetUnderlying() );
+            assert( m_mapStrategy.end() != iter );
+            Strategy& strategy( iter->second );
           },
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
@@ -267,7 +270,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
       );
 
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
-    m_mapStrategy.insert( mapStrategy_t::value_type( iip.sName, std::move( strategy ) ) );
+    m_mapStrategy.insert( mapStrategy_t::value_type( strategy.iip.sName, std::move( strategy ) ) ); // lookup needs to come before move
 }
 
 void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
