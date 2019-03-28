@@ -35,8 +35,10 @@ void Sentiment::Reset( ptime dtNew ) { // will probably need a lock
 void Sentiment::Update( const ou::tf::Bar& bar ) {
   if ( dtCurrent.is_not_a_date_time() ) dtCurrent = bar.DateTime();
   if ( bar.DateTime() > dtCurrent ) Reset( bar.DateTime() );
-  if ( bar.Open() < bar.Close() ) nUp++;
-  if ( bar.Open() > bar.Close() ) nDown++;
+  if ( bar.DateTime() == dtCurrent ) { // excludes late (low liquidity) bars
+    if ( bar.Open() < bar.Close() ) nUp++;
+    if ( bar.Open() > bar.Close() ) nDown++;
+  }
 }
 
 void Sentiment::Get( size_t& nUp_, size_t& nDown_ ) const { // will probably need a lock
