@@ -108,8 +108,8 @@ bool AppBasketTrading::OnInit() {
   m_dblMinPL = m_dblMaxPL = 0.0;
 
   m_timerGuiRefresh.SetOwner( this );
-
   Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.StartOnce( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
 
@@ -157,17 +157,22 @@ bool AppBasketTrading::OnInit() {
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   // update portfolio results and tracker timeseries for portfolio value
-  double dblUnRealized;
-  double dblRealized;
-  double dblCommissionsPaid;
-  double dblCurrent;
-  m_pPortfolioStrategyAggregate->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
-  //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
-  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
-  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+  double dblUnRealized {};
+  double dblRealized {};
+  double dblCommissionsPaid {};
+  double dblCurrent {};
+
+  if ( m_pPortfolioStrategyAggregate ) {
+    m_pPortfolioStrategyAggregate->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
+    //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+    m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
+    m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+  }
+
   size_t nUp;
   size_t nDown;
   m_pMasterPortfolio->GetSentiment( nUp, nDown );
+
   m_pPanelPortfolioStats->SetStats(
     boost::lexical_cast<std::string>( m_dblMinPL ),
     boost::lexical_cast<std::string>( dblCurrent ),
@@ -211,7 +216,6 @@ void AppBasketTrading::HandleStartButton(void) {
   CallAfter(
     [this](){
       m_pMasterPortfolio->Start();
-      m_timerGuiRefresh.Start( 250 );
     } );
 }
 
@@ -332,8 +336,9 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
   //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Future );
   //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::FOption );
 
+  std::cout << "Subsetting symbols ... " << std::endl;
+
   CallAfter( [this](){
-    std::cout << "Subsetting symbols ... " << std::endl;
     ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
     ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
     m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
@@ -348,8 +353,8 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
 
 // TODO: set flag to only load once?  Otherwise, is the structure cleared first?
 void AppBasketTrading::HandleMenuActionLoadSymbolSubset( void ) {
+  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
   CallAfter( [this](){
-    std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
     m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
     std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
   });
