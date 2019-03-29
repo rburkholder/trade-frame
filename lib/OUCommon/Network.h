@@ -54,7 +54,7 @@ using boost::asio::ip::tcp;
 // http://www.codeproject.com/KB/wtl/WTLIntellisense.aspx
 // http://think-async.com/Asio/Recipes
 
-// use asio post messages to send commands 
+// use asio post messages to send commands
 // can we base stuff on Lock-Free Queues? http://www.ddj.com/hpc-high-performance-computing/208801974
 // input streams are cr/lf delimited
 // LOG received buffer length to see if we are actually using big buffers on reception
@@ -70,7 +70,7 @@ using boost::asio::ip::tcp;
 // provide an interator capability scan buffers with out the re-copy process, useful for the news parsing libraries
 
 // ownerT:  CRTP class
-// charT:  type of character processed 
+// charT:  type of character processed
 
 namespace ou {
 
@@ -120,7 +120,7 @@ public:
 
 protected:
 
-  // CRTP based dummy callbacks 
+  // CRTP based dummy callbacks
   void OnNetworkConnected(void) {};
   void OnNetworkDisconnected(void) {};
   void OnNetworkError( size_t ) {;};
@@ -134,7 +134,7 @@ private:
     NS_DISCONNECTED,
     NS_CONNECTING,
     NS_CONNECTED,
-    NS_DISCONNECTING, 
+    NS_DISCONNECTING,
     NS_CLOSING,
     NS_CLOSED
   } m_stateNetwork;
@@ -180,15 +180,15 @@ private:
 
 };
 
-// 
+//
 // Network Construction
 //
 
 template <typename ownerT, typename charT>
 Network<ownerT,charT>::Network( void )
-: 
+:
   m_stateNetwork( NS_INITIALIZING ),
-  m_psocket( NULL ), 
+  m_psocket( NULL ),
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
@@ -198,16 +198,16 @@ Network<ownerT,charT>::Network( void )
   CommonConstruction();
 }
 
-// 
+//
 // Network Construction
 //
 
 template <typename ownerT, typename charT>
 Network<ownerT,charT>::Network( const structConnection& connection )
-: 
+:
   m_Connection( connection ),
   m_stateNetwork( NS_INITIALIZING ),
-  m_psocket( NULL ), 
+  m_psocket( NULL ),
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
@@ -218,16 +218,16 @@ Network<ownerT,charT>::Network( const structConnection& connection )
   CommonConstruction();
 }
 
-// 
+//
 // Network Construction
 //
 
 template <typename ownerT, typename charT>
-Network<ownerT,charT>::Network( const ipaddress_t& sAddress, port_t nPort ) 
+Network<ownerT,charT>::Network( const ipaddress_t& sAddress, port_t nPort )
 :
   m_Connection( sAddress, nPort ),
   m_stateNetwork( NS_INITIALIZING ),
-  m_psocket( NULL ), 
+  m_psocket( NULL ),
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
@@ -245,7 +245,7 @@ template <typename ownerT, typename charT>
 void Network<ownerT,charT>::CommonConstruction( void ) {
   m_pline = m_reposLineBuffers.CheckOutL();  // have a receiving line ready
   m_pline->clear();
-  m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running 
+  m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running
   m_asioThread = boost::thread( boost::bind( &Network::AsioThread, this ) );
   m_stateNetwork = NS_DISCONNECTED;
 }
@@ -292,8 +292,8 @@ Network<ownerT,charT>::~Network(void) {
   DEBUGOUT( typeid( this ).name()
     << " " << m_cntBytesTransferred_input << " bytes in on "
     << m_cntAsyncReads << " reads with " << m_cntLinesProcessed << " lines out, "
-    << m_cntBytesTransferred_send << " bytes out on " 
-    << m_cntSends << " sends." 
+    << m_cntBytesTransferred_send << " bytes out on "
+    << m_cntSends << " sends."
     << std::endl
   )
 #endif
@@ -309,7 +309,7 @@ Network<ownerT,charT>::~Network(void) {
 template <typename ownerT, typename charT>
 void Network<ownerT,charT>::AsioThread( void ) {
 
-  m_io.run();  // handles async socket 
+  m_io.run();  // handles async socket
 
 #ifdef _DEBUG
   DEBUGOUT( "ASIO Thread Exit:  " << typeid( this ).name() << std::endl )
@@ -338,9 +338,9 @@ void Network<ownerT,charT>::Connect( void ) {
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
   m_psocket = new tcp::socket( m_io );
   tcp::endpoint endpoint( boost::asio::ip::address::from_string( m_Connection.sAddress ), m_Connection.nPort );
-  m_psocket->async_connect( 
-    endpoint, 
-    boost::bind<void>( &Network::OnConnectDone, this, boost::asio::placeholders::error ) 
+  m_psocket->async_connect(
+    endpoint,
+    boost::bind<void>( &Network::OnConnectDone, this, boost::asio::placeholders::error )
     );
   m_timer.expires_from_now( boost::posix_time::seconds( 2 ) );
   m_timer.async_wait( boost::bind<void>( &Network::OnTimeOut, this ) );
@@ -413,7 +413,7 @@ void Network<ownerT,charT>::Disconnect( void ) {
   }
 }
 
-// 
+//
 // OnDisconnnecting
 // an async call
 //
@@ -461,8 +461,8 @@ void Network<ownerT,charT>::AsyncRead( void ) {
 //  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
 //    pbuffer->reserve( NETWORK_INPUT_BUF_SIZE );
 //  }
-  m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
-    boost::bind( 
+  m_psocket->async_read_some( boost::asio::buffer( *pbuffer ),
+    boost::bind(
       &Network::OnReadDone, this,
       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
 }
@@ -500,7 +500,7 @@ void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, 
 //        OutputDebugString( "Network::ReadHandler: have a 0x00 character.\n" );
       }
       if ( 0x0a == ch ) {
-        // send the buffer off 
+        // send the buffer off
         if ( &Network<ownerT, charT>::OnNetworkLineBuffer != &ownerT::OnNetworkLineBuffer ) {
           static_cast<ownerT*>( this )->OnNetworkLineBuffer( m_pline );
         }
@@ -544,13 +544,13 @@ void Network<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) 
       (*pbuffer).push_back( ch );
     }
     if ( bNotifyOnDone ) {
-      boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
+      boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ),
         boost::bind( &Network::OnSendDone, this,
         boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer )
         );
     }
     else {
-      boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
+      boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ),
         boost::bind( &Network::OnSendDoneNoNotify, this,
         boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer )
         );
@@ -569,9 +569,9 @@ void Network<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) 
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnSendDoneCommon( 
-        const boost::system::error_code& error, 
-        std::size_t bytes_transferred, 
+void Network<ownerT,charT>::OnSendDoneCommon(
+        const boost::system::error_code& error,
+        std::size_t bytes_transferred,
         linebuffer_t* pbuffer
         ) {
 
@@ -600,9 +600,9 @@ void Network<ownerT,charT>::OnSendDoneCommon(
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnSendDone( 
-        const boost::system::error_code& error, 
-        std::size_t bytes_transferred, 
+void Network<ownerT,charT>::OnSendDone(
+        const boost::system::error_code& error,
+        std::size_t bytes_transferred,
         linebuffer_t* pbuffer
         ) {
   OnSendDoneCommon( error, bytes_transferred, pbuffer );
@@ -618,9 +618,9 @@ void Network<ownerT,charT>::OnSendDone(
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnSendDoneNoNotify( 
-        const boost::system::error_code& error, 
-        std::size_t bytes_transferred, 
+void Network<ownerT,charT>::OnSendDoneNoNotify(
+        const boost::system::error_code& error,
+        std::size_t bytes_transferred,
         linebuffer_t* pbuffer) {
   OnSendDoneCommon( error, bytes_transferred, pbuffer );
 }
