@@ -38,7 +38,7 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
-  m_dtLatestEod = ptime( date( 2019, 3, 26 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 3, 28 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -109,7 +109,7 @@ bool AppBasketTrading::OnInit() {
 
   m_timerGuiRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.StartOnce( 250 );
+  m_timerGuiRefresh.Start( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
 
