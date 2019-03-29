@@ -44,10 +44,15 @@ MasterPortfolio::MasterPortfolio(
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
 
+  assert( pExec );
+  assert( pData1 );
+
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
       m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );
       break;
+    default:
+      assert( 0 ); // need the IB provider, or at least some provider
   }
 
   switch ( pData1->ID() ) {
@@ -75,9 +80,13 @@ MasterPortfolio::MasterPortfolio(
         ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
         return pOption;
       };
+
+  m_libor.SetWatchOn( m_pIQ );
+
 }
 
 MasterPortfolio::~MasterPortfolio(void) {
+  m_libor.SetWatchOff();
   if ( m_worker.joinable() )
     m_worker.join();
   m_mapStrategy.clear();
@@ -260,6 +269,12 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             mapStrategy_t::iterator iter = m_mapStrategy.find( ms.GetUnderlying() );
             assert( m_mapStrategy.end() != iter );
             Strategy& strategy( iter->second );
+            strategy.priceOpen = trade.Price();
+            IIPivot::Pair pair = strategy.iip.Test( trade.Price() );
+            mapPivotProbability_t::iterator iterRanking
+              = m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
+            std::cout << "FirstTrade " << m_mapPivotProbability.size() << " - " << strategy.iip.sName << ": " << (int)pair.second << "," << pair.first << std::endl;
+            //if ( 100 < m_mapPivotProbability.size() )
           },
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
@@ -280,8 +295,6 @@ void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
 void MasterPortfolio::Start() {
 
   assert( 0 != m_mapStrategy.size() );
-
-  m_libor.SetWatchOn( m_pIQ );
 
   // first pass: to get rough idea of which can be traded given our funding level
   double dblAmountToTradePerInstrument = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / m_mapStrategy.size();
@@ -332,7 +345,6 @@ void MasterPortfolio::Stop( void ) {
                     strategy.pManageStrategy->Stop();
                   }
                 } );
-  m_libor.SetWatchOff();
 }
 
 void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {

@@ -103,8 +103,11 @@ private:
   struct Strategy {
     const IIPivot iip;
     pManageStrategy_t pManageStrategy;
+    ou::tf::Price::price_t priceOpen;
+    double dblBestProbability;
     Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_ )
-      : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) )
+      : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
+        priceOpen {}, dblBestProbability {}
     {}
 //    const Strategy& operator=( const Strategy&& rhs) {
 //      iip = std::move( rhs.iip );
@@ -112,6 +115,18 @@ private:
 //      return *this;
 //    }
   };
+
+  struct Ranking {
+    std::string sName; // for lookup in m_mapStrategy
+    IIPivot::Direction direction;
+    Ranking( const std::string& sName_, IIPivot::Direction direction_ )
+      : sName( sName_ ), direction( direction_ )
+    {}
+  };
+
+  bool bAllocationsComplete;
+  using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
+  mapPivotProbability_t m_mapPivotProbability;
 
   typedef std::map<std::string,Strategy> mapStrategy_t;
   mapStrategy_t m_mapStrategy;
