@@ -170,7 +170,7 @@ private:
   void OnSendDoneCommon( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDone( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDoneNoNotify( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
-  void OnReadDone( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* );
+  void OnReadDone( const boost::system::error_code& error, const std::size_t bytes_transferred, inputbuffer_t* );
   void AsyncRead( void );
 
   void AsioThread( void );
@@ -472,7 +472,9 @@ void Network<ownerT,charT>::AsyncRead( void ) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
+void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, const std::size_t bytes_transferred_, inputbuffer_t* pbuffer ) {
+
+  size_t bytes_transferred( bytes_transferred_ ); // need to keep original number for debugging
 
   if ( 0 == bytes_transferred ) {
     // probably infers that connection has been closed
