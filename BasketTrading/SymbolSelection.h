@@ -173,7 +173,7 @@ private:
   mapRangeRanking_t m_mapRangeRanking;
 
   struct MaxNegativesCompare {
-    bool operator() ( double dbl1, double dbl2 ) {
+    bool operator() ( double dbl1, double dbl2 ) const {
       return dbl2 < dbl1; // reverse form of operator so most negative at end of list
     }
   };
