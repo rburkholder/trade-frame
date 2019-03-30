@@ -279,28 +279,32 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                   m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
                 if ( 100 < m_mapPivotProbability.size() ) {
                   double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances
+                  size_t nToSelect( 33 );
                   std::for_each(
                     m_mapPivotProbability.rbegin(),
                     m_mapPivotProbability.rend(),
-                    [this,dblAmountToTradePerInstrument](mapPivotProbability_t::value_type& vt){
-                      Ranking& ranking( vt.second );
-
-                      Strategy& strategy( m_mapStrategy.find( ranking.sName )->second );
-                      if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
-                        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
-                        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-                        //strategy.pManageStrategy->Start();
-                        switch ( ranking.direction ) {
-                          case IIPivot::Direction::Up:
-                            strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
-                            break;
-                          case IIPivot::Direction::Down:
-                            strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
-                            break;
-                          case IIPivot::Direction::Unknown:
-                            assert( 0 );
-                            break;
+                    [this,&nToSelect,dblAmountToTradePerInstrument](mapPivotProbability_t::value_type& vt){
+                      if ( 0 < nToSelect ) {
+                        Ranking& ranking( vt.second );
+                        Strategy& strategy( m_mapStrategy.find( ranking.sName )->second );
+                        if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
+                          strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+                          m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+                          //strategy.pManageStrategy->Start();
+                          switch ( ranking.direction ) {
+                            case IIPivot::Direction::Up:
+                              strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
+                              break;
+                            case IIPivot::Direction::Down:
+                              strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
+                              break;
+                            case IIPivot::Direction::Unknown:
+                              assert( 0 );
+                              break;
+                          }
                         }
+                        std::cout << "Allocate " << strategy.iip.sName << ": ranking=" << strategy.dblBestProbability << " direction=" << (int)ranking.direction << std::endl;
+                        nToSelect--;
                       }
                     } );
                   std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
