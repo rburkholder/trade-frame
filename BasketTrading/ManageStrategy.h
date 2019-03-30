@@ -78,12 +78,14 @@ public:
     );
   virtual ~ManageStrategy( );
 
+  enum class ETradeDirection { None, Up, Down };
+
   const std::string& GetUnderlying() const { return m_sUnderlying; }
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount );
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
-  void Start( void );
+  //bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
+  void Start( ETradeDirection );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 
@@ -94,7 +96,9 @@ private:
 
   std::string m_sUnderlying;
 
-  bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
+  ETradeDirection m_eTradeDirection;
+
+  //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
@@ -108,7 +112,7 @@ private:
   ou::tf::BarFactory m_bfTrades;
 
   enum enumTradingState {
-    TSInitializing, TSWaitForFirstTrade, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
+    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
   };
 
   enumTradingState m_stateTrading;

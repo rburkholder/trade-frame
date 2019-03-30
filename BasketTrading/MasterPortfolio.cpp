@@ -39,7 +39,8 @@ MasterPortfolio::MasterPortfolio(
     m_pMasterPortfolio( pMasterPortfolio ),
     m_pExec( pExec ),
     m_pData1( pData1 ),
-    m_pData2( pData2 )
+    m_pData2( pData2 ),
+    m_eAllocate( EAllocate::Waiting )
 {
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
@@ -271,10 +272,47 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             Strategy& strategy( iter->second );
             strategy.priceOpen = trade.Price();
             IIPivot::Pair pair = strategy.iip.Test( trade.Price() );
-            mapPivotProbability_t::iterator iterRanking
-              = m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
             std::cout << "FirstTrade " << m_mapPivotProbability.size() << " - " << strategy.iip.sName << ": " << (int)pair.second << "," << pair.first << std::endl;
-            //if ( 100 < m_mapPivotProbability.size() )
+            switch ( m_eAllocate ) {
+              case EAllocate::Waiting:
+                //mapPivotProbability_t::iterator iterRanking =
+                  m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
+                if ( 100 < m_mapPivotProbability.size() ) {
+                  double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances
+                  std::for_each(
+                    m_mapPivotProbability.rbegin(),
+                    m_mapPivotProbability.rend(),
+                    [this,dblAmountToTradePerInstrument](mapPivotProbability_t::value_type& vt){
+                      Ranking& ranking( vt.second );
+
+                      Strategy& strategy( m_mapStrategy.find( ranking.sName )->second );
+                      if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
+                        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+                        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+                        //strategy.pManageStrategy->Start();
+                        switch ( ranking.direction ) {
+                          case IIPivot::Direction::Up:
+                            strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
+                            break;
+                          case IIPivot::Direction::Down:
+                            strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
+                            break;
+                          case IIPivot::Direction::Unknown:
+                            assert( 0 );
+                            break;
+                        }
+                      }
+                    } );
+                  std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
+                }
+                m_eAllocate = EAllocate::Done;
+                break;
+              case EAllocate::Process:
+                break;
+              case EAllocate::Done:
+                break;
+            }
+
           },
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
@@ -286,7 +324,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
     m_mapStrategy.insert( mapStrategy_t::value_type( strategy.iip.sName, std::move( strategy ) ) ); // lookup needs to come before move
-}
+} // AddSymbol
 
 void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
   m_sentiment.Get( nUp, nDown );
@@ -306,10 +344,10 @@ void MasterPortfolio::Start() {
                   Strategy& strategy( pair.second );
                   if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
                     cntToBeTraded++;
-                    strategy.pManageStrategy->ToBeTraded() = true;
+                    //strategy.pManageStrategy->ToBeTraded() = true;
                   }
                   else {
-                    strategy.pManageStrategy->ToBeTraded() = false;
+                    //strategy.pManageStrategy->ToBeTraded() = false;
                   }
                 } );
 
@@ -320,14 +358,14 @@ void MasterPortfolio::Start() {
       std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
                     [dblAmountToTradePerInstrument, this](mapStrategy_t::value_type& pair){
                       Strategy& strategy( pair.second );
-                      if ( strategy.pManageStrategy->ToBeTraded() ) {
+//                      if ( strategy.pManageStrategy->ToBeTraded() ) {
 
-                        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
-                        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+//                        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+//                        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
 
-                        strategy.pManageStrategy->Start();
+//                        strategy.pManageStrategy->Start();
 
-                      }
+//                      }
                     } );
   }
   else {
@@ -335,15 +373,15 @@ void MasterPortfolio::Start() {
   }
 
   std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
-}
+} // Start
 
 void MasterPortfolio::Stop( void ) {
   std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
                 [](mapStrategy_t::value_type& pair){
                   Strategy& strategy( pair.second );
-                  if ( strategy.pManageStrategy->ToBeTraded() ) {
-                    strategy.pManageStrategy->Stop();
-                  }
+//                  if ( strategy.pManageStrategy->ToBeTraded() ) {
+//                    strategy.pManageStrategy->Stop();
+//                  }
                 } );
 }
 

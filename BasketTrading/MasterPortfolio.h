@@ -124,7 +124,9 @@ private:
     {}
   };
 
-  bool bAllocationsComplete;
+  enum class EAllocate { Waiting, Process, Done };
+
+  EAllocate m_eAllocate;
   using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
   mapPivotProbability_t m_mapPivotProbability;
 

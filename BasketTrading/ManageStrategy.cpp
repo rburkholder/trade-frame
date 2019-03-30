@@ -72,7 +72,8 @@ ManageStrategy::ManageStrategy(
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc ),
   m_fFirstTrade( fFirstTrade ),
-  m_fBar( fBar )
+  m_fBar( fBar ),
+  m_eTradeDirection( ETradeDirection::None )
 {
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructWatch );
@@ -181,7 +182,9 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
   return m_nUnderlyingSharesToTrade;
 }
 
-void ManageStrategy::Start( void ) {
+void ManageStrategy::Start( ETradeDirection direction ) {
+
+  m_eTradeDirection = direction;
 
   std::cout << m_sUnderlying << " starting up ... " << std::endl;
 
@@ -206,7 +209,7 @@ void ManageStrategy::Start( void ) {
       else {
         // can start with what was supplied
         std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
-        m_stateTrading = TSWaitForFirstTrade;
+        m_stateTrading = TSWaitForEntry;
       }
     }
   }
@@ -264,9 +267,20 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 [this](pOption_t pOption){
                   m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
                   std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
-                  m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
-                  m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-                  m_stateTrading = TSMonitorLong;
+                  switch ( m_eTradeDirection ) {
+                    case ETradeDirection::Up:
+                      m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
+                      m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                      m_stateTrading = TSMonitorLong;
+                      break;
+                    case ETradeDirection::Down:
+                      m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade - 100 );
+                      m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                      m_stateTrading = TSMonitorLong;
+                      break;
+                    case ETradeDirection::None:
+                      break;
+                  }
                 } );
             }
             m_stateTrading = TSWaitForContract;
@@ -286,6 +300,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       //    on up trend: drop puts once in profit zone, and set trailing stop
       //    on down trend:  keep rolling down each strike or selling on delta change of 1, and revert to up-trend logic
       break;
+    case TSMonitorShort:
+      break;
   }
 }
 
@@ -295,8 +311,9 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       m_dblOpen = trade.Price();
       std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
-      m_stateTrading = TSWaitForEntry;
+      m_stateTrading = TSWaitForCalc;
       break;
+    case TSWaitForCalc:
     case TSWaitForEntry:
     default:
       break;
