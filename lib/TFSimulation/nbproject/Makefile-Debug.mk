@@ -70,22 +70,22 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a: ${OBJECTFILES}
 ${OBJECTDIR}/SimulateOrderExecution.o: SimulateOrderExecution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulateOrderExecution.o SimulateOrderExecution.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulateOrderExecution.o SimulateOrderExecution.cpp
 
 ${OBJECTDIR}/SimulationProvider.o: SimulationProvider.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulationProvider.o SimulationProvider.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulationProvider.o SimulationProvider.cpp
 
 ${OBJECTDIR}/SimulationSymbol.o: SimulationSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulationSymbol.o SimulationSymbol.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SimulationSymbol.o SimulationSymbol.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
 # Subprojects
 .build-subprojects:

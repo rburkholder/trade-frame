@@ -111,57 +111,57 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ${OBJECTFILES}
 ${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
 
 ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
 
 ${OBJECTDIR}/InstrumentActions.o: InstrumentActions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentActions.o InstrumentActions.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentActions.o InstrumentActions.cpp
 
 ${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
 
 ${OBJECTDIR}/Process.o: Process.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
 
 ${OBJECTDIR}/TreeItem.o: TreeItem.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
 
 ${OBJECTDIR}/TreeItemGroup.o: TreeItemGroup.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
 
 ${OBJECTDIR}/TreeItemInstrument.o: TreeItemInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
 
 ${OBJECTDIR}/TreeItemPortfolio.o: TreeItemPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
 
 ${OBJECTDIR}/TreeItemPosition.o: TreeItemPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
 
 ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
+	$(COMPILE.cc) -g -DBOOST_SPIRIT_USE_PHOENIX_V3 -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
 
 # Subprojects
 .build-subprojects:

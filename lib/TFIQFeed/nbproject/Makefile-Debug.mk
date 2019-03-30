@@ -83,87 +83,87 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed.a: ${OBJECTFILES}
 ${OBJECTDIR}/BuildInstrument.o: BuildInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildInstrument.o BuildInstrument.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildInstrument.o BuildInstrument.cpp
 
 ${OBJECTDIR}/BuildSymbolName.o: BuildSymbolName.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildSymbolName.o BuildSymbolName.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildSymbolName.o BuildSymbolName.cpp
 
 ${OBJECTDIR}/CurlGetMktSymbols.o: CurlGetMktSymbols.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurlGetMktSymbols.o CurlGetMktSymbols.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurlGetMktSymbols.o CurlGetMktSymbols.cpp
 
 ${OBJECTDIR}/IQFeed.o: IQFeed.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeed.o IQFeed.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeed.o IQFeed.cpp
 
 ${OBJECTDIR}/IQFeedMessages.o: IQFeedMessages.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedMessages.o IQFeedMessages.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedMessages.o IQFeedMessages.cpp
 
 ${OBJECTDIR}/IQFeedProvider.o: IQFeedProvider.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedProvider.o IQFeedProvider.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedProvider.o IQFeedProvider.cpp
 
 ${OBJECTDIR}/IQFeedSymbol.o: IQFeedSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedSymbol.o IQFeedSymbol.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedSymbol.o IQFeedSymbol.cpp
 
 ${OBJECTDIR}/InMemoryMktSymbolList.o: InMemoryMktSymbolList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InMemoryMktSymbolList.o InMemoryMktSymbolList.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InMemoryMktSymbolList.o InMemoryMktSymbolList.cpp
 
 ${OBJECTDIR}/LoadMktSymbols.o: LoadMktSymbols.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LoadMktSymbols.o LoadMktSymbols.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LoadMktSymbols.o LoadMktSymbols.cpp
 
 ${OBJECTDIR}/MarketSymbol.o: MarketSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketSymbol.o MarketSymbol.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketSymbol.o MarketSymbol.cpp
 
 ${OBJECTDIR}/MarketSymbols.o: MarketSymbols.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketSymbols.o MarketSymbols.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketSymbols.o MarketSymbols.cpp
 
 ${OBJECTDIR}/Option.o: Option.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Option.o Option.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Option.o Option.cpp
 
 ${OBJECTDIR}/OptionChainQuery.o: OptionChainQuery.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OptionChainQuery.o OptionChainQuery.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OptionChainQuery.o OptionChainQuery.cpp
 
 ${OBJECTDIR}/ParseMktSymbolDiskFile.o: ParseMktSymbolDiskFile.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ParseMktSymbolDiskFile.o ParseMktSymbolDiskFile.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ParseMktSymbolDiskFile.o ParseMktSymbolDiskFile.cpp
 
 ${OBJECTDIR}/ParseMktSymbolLine.o: ParseMktSymbolLine.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ParseMktSymbolLine.o ParseMktSymbolLine.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ParseMktSymbolLine.o ParseMktSymbolLine.cpp
 
 ${OBJECTDIR}/UnzipMktSymbols.o: UnzipMktSymbols.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/UnzipMktSymbols.o UnzipMktSymbols.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/UnzipMktSymbols.o UnzipMktSymbols.cpp
 
 ${OBJECTDIR}/ValidateMktSymbolLine.o: ValidateMktSymbolLine.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ValidateMktSymbolLine.o ValidateMktSymbolLine.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ValidateMktSymbolLine.o ValidateMktSymbolLine.cpp
 
 # Subprojects
 .build-subprojects:

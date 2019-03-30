@@ -76,52 +76,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a: ${OBJECTFILES}
 ${OBJECTDIR}/Binomial.o: Binomial.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Binomial.o Binomial.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Binomial.o Binomial.cpp
 
 ${OBJECTDIR}/Bundle.o: Bundle.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Bundle.o Bundle.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Bundle.o Bundle.cpp
 
 ${OBJECTDIR}/CalcExpiry.o: CalcExpiry.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CalcExpiry.o CalcExpiry.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CalcExpiry.o CalcExpiry.cpp
 
 ${OBJECTDIR}/Engine.o: Engine.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Engine.o Engine.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Engine.o Engine.cpp
 
 ${OBJECTDIR}/Formula.o: Formula.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Formula.o Formula.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Formula.o Formula.cpp
 
 ${OBJECTDIR}/IvAtm.o: IvAtm.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IvAtm.o IvAtm.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IvAtm.o IvAtm.cpp
 
 ${OBJECTDIR}/Margin.o: Margin.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Margin.o Margin.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Margin.o Margin.cpp
 
 ${OBJECTDIR}/Option.o: Option.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Option.o Option.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Option.o Option.cpp
 
 ${OBJECTDIR}/PopulateWithIBOptions.o: PopulateWithIBOptions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PopulateWithIBOptions.o PopulateWithIBOptions.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PopulateWithIBOptions.o PopulateWithIBOptions.cpp
 
 ${OBJECTDIR}/Strike.o: Strike.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Strike.o Strike.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Strike.o Strike.cpp
 
 # Subprojects
 .build-subprojects:

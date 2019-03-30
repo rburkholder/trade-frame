@@ -49,7 +49,7 @@
       <compileType>
         <ccTool>
           <architecture>2</architecture>
-          <standard>11</standard>
+          <standard>12</standard>
           <incDir>
             <pElem>../lib</pElem>
           </incDir>

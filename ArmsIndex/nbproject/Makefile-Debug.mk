@@ -98,32 +98,32 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/armsindex: ${OBJECTFILES}
 ${OBJECTDIR}/ArmsChart.o: ArmsChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsChart.o ArmsChart.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsChart.o ArmsChart.cpp
 
 ${OBJECTDIR}/ArmsIndex.o: ArmsIndex.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsIndex.o ArmsIndex.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsIndex.o ArmsIndex.cpp
 
 ${OBJECTDIR}/EventProviderConnected.o: EventProviderConnected.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventProviderConnected.o EventProviderConnected.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventProviderConnected.o EventProviderConnected.cpp
 
 ${OBJECTDIR}/IndicatorPackage.o: IndicatorPackage.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IndicatorPackage.o IndicatorPackage.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IndicatorPackage.o IndicatorPackage.cpp
 
 ${OBJECTDIR}/PanelArmsIndex.o: PanelArmsIndex.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelArmsIndex.o PanelArmsIndex.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelArmsIndex.o PanelArmsIndex.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
 # Subprojects
 .build-subprojects:

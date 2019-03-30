@@ -77,57 +77,57 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a: ${OBJECTFILES}
 ${OBJECTDIR}/ChartDVBasics.o: ChartDVBasics.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDVBasics.o ChartDVBasics.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDVBasics.o ChartDVBasics.cpp
 
 ${OBJECTDIR}/ChartDataView.o: ChartDataView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataView.o ChartDataView.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataView.o ChartDataView.cpp
 
 ${OBJECTDIR}/ChartEntryBars.o: ChartEntryBars.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBars.o ChartEntryBars.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBars.o ChartEntryBars.cpp
 
 ${OBJECTDIR}/ChartEntryBase.o: ChartEntryBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBase.o ChartEntryBase.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBase.o ChartEntryBase.cpp
 
 ${OBJECTDIR}/ChartEntryIndicator.o: ChartEntryIndicator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryIndicator.o ChartEntryIndicator.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryIndicator.o ChartEntryIndicator.cpp
 
 ${OBJECTDIR}/ChartEntryMark.o: ChartEntryMark.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
 
 ${OBJECTDIR}/ChartEntryPrice.o: ChartEntryPrice.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryPrice.o ChartEntryPrice.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryPrice.o ChartEntryPrice.cpp
 
 ${OBJECTDIR}/ChartEntrySegments.o: ChartEntrySegments.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntrySegments.o ChartEntrySegments.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntrySegments.o ChartEntrySegments.cpp
 
 ${OBJECTDIR}/ChartEntryShape.o: ChartEntryShape.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryShape.o ChartEntryShape.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryShape.o ChartEntryShape.cpp
 
 ${OBJECTDIR}/ChartEntryVolume.o: ChartEntryVolume.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryVolume.o ChartEntryVolume.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryVolume.o ChartEntryVolume.cpp
 
 ${OBJECTDIR}/ChartMaster.o: ChartMaster.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartMaster.o ChartMaster.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartMaster.o ChartMaster.cpp
 
 # Subprojects
 .build-subprojects:

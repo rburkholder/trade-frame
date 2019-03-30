@@ -67,7 +67,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfstatistics.a: ${OBJECTFILES}
 ${OBJECTDIR}/Pivot.o: Pivot.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivot.o Pivot.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivot.o Pivot.cpp
 
 # Subprojects
 .build-subprojects:

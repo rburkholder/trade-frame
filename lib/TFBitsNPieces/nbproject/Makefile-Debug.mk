@@ -76,52 +76,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfbitsnpieces.a: ${OBJECTFILES}
 ${OBJECTDIR}/FrameWork01.o: FrameWork01.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameWork01.o FrameWork01.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameWork01.o FrameWork01.cpp
 
 ${OBJECTDIR}/GridColumnSizer.o: GridColumnSizer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridColumnSizer.o GridColumnSizer.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridColumnSizer.o GridColumnSizer.cpp
 
 ${OBJECTDIR}/IQFeedInstrumentBuild.o: IQFeedInstrumentBuild.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedInstrumentBuild.o IQFeedInstrumentBuild.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedInstrumentBuild.o IQFeedInstrumentBuild.cpp
 
 ${OBJECTDIR}/IQFeedSymbolListOps.o: IQFeedSymbolListOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedSymbolListOps.o IQFeedSymbolListOps.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedSymbolListOps.o IQFeedSymbolListOps.cpp
 
 ${OBJECTDIR}/InstrumentSelection.o: InstrumentSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentSelection.o InstrumentSelection.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentSelection.o InstrumentSelection.cpp
 
 ${OBJECTDIR}/LiborFromIQFeed.o: LiborFromIQFeed.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LiborFromIQFeed.o LiborFromIQFeed.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LiborFromIQFeed.o LiborFromIQFeed.cpp
 
 ${OBJECTDIR}/ReadCboeWeeklyOptions.o: ReadCboeWeeklyOptions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCboeWeeklyOptions.o ReadCboeWeeklyOptions.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCboeWeeklyOptions.o ReadCboeWeeklyOptions.cpp
 
 ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
 
 ${OBJECTDIR}/TreeOpsItems.o: TreeOpsItems.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOpsItems.o TreeOpsItems.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOpsItems.o TreeOpsItems.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
 # Subprojects
 .build-subprojects:

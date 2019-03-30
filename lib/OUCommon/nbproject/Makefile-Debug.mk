@@ -78,62 +78,62 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucommon.a: ${OBJECTFILES}
 ${OBJECTDIR}/CharBuffer.o: CharBuffer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CharBuffer.o CharBuffer.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CharBuffer.o CharBuffer.cpp
 
 ${OBJECTDIR}/ConsoleStream.o: ConsoleStream.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConsoleStream.o ConsoleStream.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConsoleStream.o ConsoleStream.cpp
 
 ${OBJECTDIR}/CountryCode.o: CountryCode.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CountryCode.o CountryCode.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CountryCode.o CountryCode.cpp
 
 ${OBJECTDIR}/CurrencyCode.o: CurrencyCode.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurrencyCode.o CurrencyCode.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurrencyCode.o CurrencyCode.cpp
 
 ${OBJECTDIR}/ReadCodeListCommon.o: ReadCodeListCommon.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCodeListCommon.o ReadCodeListCommon.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCodeListCommon.o ReadCodeListCommon.cpp
 
 ${OBJECTDIR}/ReadNaicsToSicCodeList.o: ReadNaicsToSicCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadNaicsToSicCodeList.o ReadNaicsToSicCodeList.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadNaicsToSicCodeList.o ReadNaicsToSicCodeList.cpp
 
 ${OBJECTDIR}/ReadSicCodeList.o: ReadSicCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicCodeList.o ReadSicCodeList.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicCodeList.o ReadSicCodeList.cpp
 
 ${OBJECTDIR}/ReadSicToNaicsCodeList.o: ReadSicToNaicsCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicToNaicsCodeList.o ReadSicToNaicsCodeList.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicToNaicsCodeList.o ReadSicToNaicsCodeList.cpp
 
 ${OBJECTDIR}/Singleton.o: Singleton.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Singleton.o Singleton.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Singleton.o Singleton.cpp
 
 ${OBJECTDIR}/SmartVar.o: SmartVar.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SmartVar.o SmartVar.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SmartVar.o SmartVar.cpp
 
 ${OBJECTDIR}/TimeSource.o: TimeSource.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSource.o TimeSource.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSource.o TimeSource.cpp
 
 ${OBJECTDIR}/WuManber.o: WuManber.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WuManber.o WuManber.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WuManber.o WuManber.cpp
 
 # Subprojects
 .build-subprojects:

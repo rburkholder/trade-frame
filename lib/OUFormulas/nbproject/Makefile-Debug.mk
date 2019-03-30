@@ -67,7 +67,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a: ${OBJECTFILES}
 ${OBJECTDIR}/InterestRates.o: InterestRates.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InterestRates.o InterestRates.cpp
+	$(COMPILE.cc) -g -D_DEBUG -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InterestRates.o InterestRates.cpp
 
 # Subprojects
 .build-subprojects:
