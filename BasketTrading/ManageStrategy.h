@@ -82,7 +82,7 @@ public:
 
   const std::string& GetUnderlying() const { return m_sUnderlying; }
 
-  ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount );
+  ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
   //bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
   void Start( ETradeDirection );
@@ -127,9 +127,6 @@ private:
 
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
-
-  volume_t m_nUnderlyingSharesToTrade;
-  volume_t m_nOptionContractsToTrade;
 
   const ou::tf::Bar& m_barPriorDaily;
 

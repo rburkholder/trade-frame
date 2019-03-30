@@ -62,7 +62,6 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_sUnderlying( sUnderlying ),
-  m_nUnderlyingSharesToTrade {},
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
   m_fConstructWatch( fConstructWatch ),
@@ -176,10 +175,10 @@ ManageStrategy::~ManageStrategy( ) {
   }
 }
 
-ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) {
-  m_nOptionContractsToTrade = ( (volume_t)( dblFunds / m_barPriorDaily.Close() ) )/ 100;
-  m_nUnderlyingSharesToTrade = m_nOptionContractsToTrade * 100;  // round down to nearest 100
-  return m_nUnderlyingSharesToTrade;
+ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {
+  volume_t nOptionContractsToTrade = ( (volume_t)( dblFunds / m_barPriorDaily.Close() ) )/ 100;
+  volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
+  return nUnderlyingSharesToTrade;
 }
 
 void ManageStrategy::Start( ETradeDirection direction ) {
