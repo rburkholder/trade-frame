@@ -243,12 +243,12 @@
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-mt-x64</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
         </linkerTool>
@@ -491,12 +491,12 @@
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-gcc61-mt1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc61-mt1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc61-mt1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc61-mt1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc61-mt1_61</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc61-mt-x641_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc61-mt-x641_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc61-mt-x641_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc61-mt-x641_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc61-mt-x641_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc61-mt-x641_61</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>

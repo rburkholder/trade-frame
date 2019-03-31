@@ -230,12 +230,12 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-mt</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-mt-x64</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>sz</linkerLibLibItem>
