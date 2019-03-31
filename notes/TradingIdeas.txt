@@ -1,3 +1,48 @@
+2019/03/30
+
+A market system can be further differentiated by other factors, one of
+which is dependency. For example, say that in our moving average system
+we discern (through methods discussed in this text) that winning trades
+beget losing trades and vice versa. We would, therefore, break our moving
+average system on any given market into two distinct market systems. One
+of the market systems would take trades only after a loss (because of the
+nature of this dependency, this is a more advantageous system), the other
+market system only after a profit. 
+-- page xix Mathematics of Money Management
+
+Pyramiding (adding on contracts throughout the course of a trade) is
+viewed in a money management sense as separate, distinct market systems
+rather than as the original entry. 
+
+Each separate add-on should be treated as a
+separate market system. There is a big benefit in doing this. The benefit is
+that the techniques discussed in this book will yield the optimal quantities
+to have on for a given market system as a function of the level of equity in
+your account. 
+
+we must marry modern portfolio theory
+(which gives us optimal weights) with the notion of optimal quantity (optimal f) 
+to arrive at a truly optimal portfolio.
+
+In a nonleveraged situation, such as a portfolio of stocks that are not on
+margin, weighting and quantity are synonymous, but in a leveraged situa-
+tion, such as a portfolio of futures market systems, weighting and quantity
+are different indeed. In this book you will see an idea first roughly intro-
+duced in Portfolio Management Formulas, that optimal quantities are what
+we seek to know, and that this is a function of optimal weightings.
+
+ risk management is about decision-making
+strategies that seek to maximize the ratio of potential reward to potential
+risk within a given acceptable level of risk.
+
+ Ultimately, we have no control over whether the
+next trade will be profitable or not. Yet we do have control over the quantity
+we have on. Since one does not dominate the other, our resources are better
+spent concentrating on putting on the right quantity.
+
+
+
+
 2018/02/10
 
 http://www.wildml.com/2018/02/introduction-to-learning-to-trade-with-reinforcement-learning/
