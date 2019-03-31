@@ -45,8 +45,13 @@ wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-l
 sh tws-stable-linux-x64.sh
 
 # netbeans ide and build env
-wget https://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
-sh netbeans-8.2-cpp-linux-x64.sh
+# the following only offers up to c++14.  
+# wget https://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
+# sh netbeans-8.2-cpp-linux-x64.sh
+# as I wish to use some c++17 features such as string_view, c++17 is needed.
+#   netbeans 9 and 10 do not offer this, but there is a developer repository one can use:
+wget http://137.254.56.27/dev/nightly/2018-04-20_00-02-34/bundles/netbeans-trunk-nightly-201804200002-cpp-linux-x64.sh
+sh netbeans-trunk-nightly-201804200002-cpp-linux-x64.sh
 
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
