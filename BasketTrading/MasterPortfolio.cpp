@@ -265,7 +265,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     // ManageStrategy::m_fStopCalc
           std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ),
     // ManageStrategy::m_fFirstTrade
-          [this](ManageStrategy& ms, const ou::tf::Trade& trade){
+          [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters
             mapStrategy_t::iterator iter = m_mapStrategy.find( ms.GetUnderlying() );
             assert( m_mapStrategy.end() != iter );
@@ -277,8 +277,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
               case EAllocate::Waiting:
                 //mapPivotProbability_t::iterator iterRanking =
                   m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
-                if ( 100 < m_mapPivotProbability.size() ) {
-                  double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances
+                if ( 100 < m_mapPivotProbability.size() ) { // with population of 100, select 33 highest probable
+                  double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
                   size_t nToSelect( 33 );
                   std::for_each(
                     m_mapPivotProbability.rbegin(),
@@ -290,7 +290,6 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                         if ( 200 <= strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument ) ) {
                           strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
                           m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-                          //strategy.pManageStrategy->Start();
                           switch ( ranking.direction ) {
                             case IIPivot::Direction::Up:
                               strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
@@ -316,7 +315,6 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
               case EAllocate::Done:
                 break;
             }
-
           },
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
