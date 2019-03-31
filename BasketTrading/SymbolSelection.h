@@ -20,10 +20,6 @@
 #include <set>
 #include <functional>
 
-//#include <boost/date_time/posix_time/posix_time.hpp>
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
-
 #include <TFTimeSeries/TimeSeries.h>
 
 struct InstrumentInfo {
@@ -39,12 +35,10 @@ struct InstrumentInfo {
   InstrumentInfo( const InstrumentInfo&& rhs )
     : sName( std::move( rhs.sName ) ), bar( rhs.bar )
     {}
-//  const InstrumentInfo& operator=( const InstrumentInfo&& rhs ) {
-//    sName = std::move( rhs.sName );
-//    bar = rhs.bar;
-//  }
   bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
 };
+
+// ** IIDarvas
 
 struct IIDarvas: InstrumentInfo {
   double dblStop;  // calculated stop price, if any
@@ -52,6 +46,8 @@ struct IIDarvas: InstrumentInfo {
     : InstrumentInfo( sName, bar ), dblStop{}
   {}
 };
+
+// ** IIPivot
 
 struct IIPivot: InstrumentInfo {
   enum class PState { PV, AbovePV, BelowPV, BtwnPVR1, BtwnPVS1 };
@@ -128,18 +124,9 @@ struct IIPivot: InstrumentInfo {
     return pair;
   }
 
-//  const IIPivot& operator=( const IIPivot&& rhs ) {
-//    sName = std::move( rhs.sName);
-//    bar = rhs.bar;
-//      dblR1 = rhs.dblR1;
-//      dblPV = rhs.dblPV;
-//      dblS1 = rhs.dblS1,
-//      dblProbabilityAboveAndUp = rhs.dblProbabilityAboveAndUp;
-//      dblProbabilityAboveAndDown = rhs.dblProbabilityAboveAndDown;
-//      dblProbabilityBelowAndUp = rhs.dblProbabilityBelowAndUp;
-//      dblProbabilityBelowAndDown = rhs.dblProbabilityBelowAndDown;
-//  }
 };
+
+// ** SymbolSelection
 
 class SymbolSelection {
 public:
@@ -166,10 +153,10 @@ private:
   ptime m_dt26WeeksAgo;
   ptime m_dtDateOfFirstBar;
 
-  typedef std::multimap<boost::uint32_t,InstrumentInfo> mapPivotRanking_t;
+  using mapPivotRanking_t = std::multimap<boost::uint32_t,InstrumentInfo>;
   mapPivotRanking_t m_mapPivotRanking;
 
-  typedef std::multimap<int,InstrumentInfo> mapRangeRanking_t;
+  using mapRangeRanking_t = std::multimap<int,InstrumentInfo>;
   mapRangeRanking_t m_mapRangeRanking;
 
   struct MaxNegativesCompare {
@@ -178,9 +165,9 @@ private:
     }
   };
 
-  typedef std::multimap<double, InstrumentInfo> mapRankingPos_t;
-  typedef std::multimap<double, InstrumentInfo, MaxNegativesCompare> mapRankingNeg_t;
-  typedef std::pair<double,InstrumentInfo> pairRanking_t;
+  using mapRankingPos_t = std::multimap<double, InstrumentInfo>;
+  using mapRankingNeg_t = std::multimap<double, InstrumentInfo, MaxNegativesCompare>;
+  using pairRanking_t = std::pair<double,InstrumentInfo>;
 
   static const unsigned short m_nMaxInList = 10;  // maximum of 10 items in each list
   mapRankingPos_t m_mapMaxPositives;
