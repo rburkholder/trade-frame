@@ -252,7 +252,17 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           double mid = quote.Midpoint();
           double strike {};
           try {
-            strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
+            switch ( m_eTradeDirection ) {
+              case ETradeDirection::Up:
+                strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
+                break;
+              case ETradeDirection::Down:
+                strike = iterChains->second.Call_OtmAtm( mid );  // may raise an exception
+                break;
+              case ETradeDirection::None:
+                break;
+            }
+
             std::cout << m_sUnderlying << ", quote midpoint " << mid << " starts with " << strike << " put of " << date << std::endl;
             // need to wait for contract info
             if ( 0 == m_pPositionUnderlying->GetInstrument()->GetContract() ) {
@@ -260,27 +270,32 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               m_stateTrading = TSNoMore;
             }
             else {
-              std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building put." << std::endl;
-
-              m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
-                [this](pOption_t pOption){
-                  m_PositionPut_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
-                  switch ( m_eTradeDirection ) {
-                    case ETradeDirection::Up:
+              switch ( m_eTradeDirection ) {
+                case ETradeDirection::Up:
+                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective put." << std::endl;
+                  m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
+                    [this](pOption_t pOption){
+                      m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
+                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                       m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade - 100 );
-                      m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                      m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                       m_stateTrading = TSMonitorLong;
-                      break;
-                    case ETradeDirection::Down:
+                    } );
+                  break;
+                case ETradeDirection::Down:
+                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective call." << std::endl;
+                  m_fConstructOption( iterChains->second.GetIQFeedNameCall( strike), m_pPositionUnderlying->GetInstrument(),
+                    [this](pOption_t pOption){
+                      m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
+                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                       m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade - 100 );
-                      m_PositionPut_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                      m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                       m_stateTrading = TSMonitorLong;
-                      break;
-                    case ETradeDirection::None:
-                      break;
-                  }
-                } );
+                    } );
+                  break;
+                case ETradeDirection::None:
+                  break;
+              }
             }
             m_stateTrading = TSWaitForContract;
           }
@@ -289,6 +304,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             m_stateTrading = TSNoMore;
           }
         }
+        assert( TSWaitForEntry != m_stateTrading );
       }
       break;
     case TSWaitForContract:
@@ -329,7 +345,7 @@ void ManageStrategy::HandleCancel( void ) {
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->CancelOrders();
-      if ( nullptr != m_PositionPut_Current.get() ) m_PositionPut_Current->CancelOrders();
+      if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->CancelOrders();
       break;
   }
 }
@@ -341,7 +357,7 @@ void ManageStrategy::HandleGoNeutral( void ) {
     default:
       std::cout << m_sUnderlying << " close" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
-      if ( nullptr != m_PositionPut_Current.get() ) m_PositionPut_Current->ClosePosition();
+      if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->ClosePosition();
       break;
   }
 }
@@ -352,7 +368,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
       break;
     default:
       if ( nullptr != m_pPositionUnderlying.get() ) std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      if ( nullptr != m_PositionPut_Current.get() ) std::cout << m_sUnderlying << " close results option put " << *m_PositionPut_Current << std::endl;
+      if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option put " << *m_PositionOption_Current << std::endl;
       break;
   }
   // need to set a state to do this once
@@ -378,7 +394,7 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_pPositionUnderlying.get() ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   }
-  if ( nullptr != m_PositionPut_Current.get() ) {
-    m_PositionPut_Current->GetWatch()->SaveSeries( sPrefix );
+  if ( nullptr != m_PositionOption_Current.get() ) {
+    m_PositionOption_Current->GetWatch()->SaveSeries( sPrefix );
   }
 }

@@ -131,8 +131,8 @@ private:
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
-  pPosition_t m_PositionPut_Current; // current active put, depending upon roll-downs
-  //pPosition_t m_pPositionPut_Previous;  // previous put if there was a roll-down
+  pPosition_t m_PositionOption_Current; // current active put, depending upon roll-downs
+  //pPosition_t m_pPositionOption_Previous;  // previous put if there was a roll-down
 
   pPortfolio_t m_pPortfolioStrategy;
 
