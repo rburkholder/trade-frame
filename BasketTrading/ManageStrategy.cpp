@@ -322,7 +322,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrading ) {
-    case TSWaitForFirstTrade:
+//    case TSWaitForFirstTrade:
+    case TSInitializing:
       m_dblOpen = trade.Price();
       std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
