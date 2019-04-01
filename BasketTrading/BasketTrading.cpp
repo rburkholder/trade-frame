@@ -69,9 +69,9 @@ bool AppBasketTrading::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
-  m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelBasketTradingMain, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelBasketTradingMain->Show( true );
+  //m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
+  //m_sizerControls->Add( m_pPanelBasketTradingMain, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  //m_pPanelBasketTradingMain->Show( true );
 
   LinkToPanelProviderControl();
 /*
@@ -126,19 +126,25 @@ bool AppBasketTrading::OnInit() {
     });
   });
 
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   FrameMain::vpItems_t vItems;
-  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
   vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
-  vItems.push_back( new mi( "b1 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b2 Save Symbol Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "b3 Load Symbol Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
+  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
 
-  m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
-  m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
-  m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
-  m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
-  m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
+  vItems.clear();
+  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
+  vItems.push_back( new mi( "a2 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
+  vItems.push_back( new mi( "a3 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
+
+  //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
+  //m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
+  //m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
+  //m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
+  //m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
 
   m_pMasterPortfolio.reset( new MasterPortfolio(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,

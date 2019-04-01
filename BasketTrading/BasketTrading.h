@@ -42,7 +42,7 @@
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 #include "MasterPortfolio.h"
-#include "PanelBasketTradingMain.h"
+//#include "PanelBasketTradingMain.h"
 #include "PanelPortfolioStats.h"
 
 class AppBasketTrading:
@@ -61,7 +61,7 @@ private:
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-  PanelBasketTradingMain* m_pPanelBasketTradingMain;
+//  PanelBasketTradingMain* m_pPanelBasketTradingMain;
   PanelPortfolioStats* m_pPanelPortfolioStats;
 
   ou::tf::DBOps m_db;
