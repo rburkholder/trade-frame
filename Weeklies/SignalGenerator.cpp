@@ -39,7 +39,7 @@ void SignalGenerator::Run( void ) {
   ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
-  pt::ptime dtLast( gregorian::date( 2019,  3, 21 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2019,  3, 29 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
