@@ -290,7 +290,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                       std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                       m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade - 100 );
                       m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-                      m_stateTrading = TSMonitorLong;
+                      m_stateTrading = TSMonitorShort;
                     } );
                   break;
                 case ETradeDirection::None:
