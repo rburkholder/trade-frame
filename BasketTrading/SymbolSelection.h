@@ -16,6 +16,7 @@
 
 // Project: BasketTrading
 
+//#include <iostream>
 #include <map>
 #include <set>
 #include <functional>
@@ -83,7 +84,16 @@ struct IIPivot: InstrumentInfo {
       dblProbabilityAboveAndDown( rhs.dblProbabilityAboveAndDown ),
       dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
       dblProbabilityBelowAndDown( rhs.dblProbabilityBelowAndDown )
-  {}
+  {
+//    std::cout
+//      << "IIPivot&& "
+//      << dblPV
+//      << "," << dblProbabilityAboveAndUp
+//      << "," << dblProbabilityAboveAndDown
+//      << "," << dblProbabilityBelowAndUp
+//      << "," << dblProbabilityBelowAndDown
+//      << std::endl;
+  }
 
   Pair Test( double price ) const {
     Pair pair;
@@ -96,10 +106,12 @@ struct IIPivot: InstrumentInfo {
       if ( dblR1 > price ) {
         state = PState::BtwnPVR1;
         if ( dblProbabilityAboveAndUp >= dblProbabilityAboveAndDown ) {
+          //std::cout << "Test " << sName << ": dblProbabilityAboveAndUp " << dblProbabilityAboveAndUp << std::endl;
           pair.first = dblProbabilityAboveAndUp;
           pair.second = Direction::Up;
         }
         else {
+          //std::cout << "Test " << sName << ": dblProbabilityAboveAndDown " << dblProbabilityAboveAndDown << std::endl;
           pair.first = dblProbabilityAboveAndDown;
           pair.second = Direction::Down;
         }
@@ -111,10 +123,12 @@ struct IIPivot: InstrumentInfo {
         if ( dblS1 < price ) {
           state = PState::BtwnPVS1;
           if ( dblProbabilityBelowAndDown >= dblProbabilityBelowAndUp ) {
+            //std::cout << "Test " << sName << ": dblProbabilityBelowAndDown " << dblProbabilityBelowAndDown << std::endl;
             pair.first = dblProbabilityBelowAndDown;
             pair.second = Direction::Down;
           }
           else {
+            //std::cout << "Test " << sName << ": dblProbabilityBelowAndUp " << dblProbabilityBelowAndUp << std::endl;
             pair.first = dblProbabilityBelowAndUp;
             pair.second = Direction::Up;
           }
