@@ -115,7 +115,7 @@ bool AppComboTrading::OnInit() {
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Combo Trading" );
   wxApp::SetVendorName( "OneUnified" );
-  wxApp:SetVendorDisplayName( "One Unified" );
+  wxApp::SetVendorDisplayName( "One Unified" );
 
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
