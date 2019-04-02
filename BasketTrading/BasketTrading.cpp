@@ -105,12 +105,24 @@ bool AppBasketTrading::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
-
   m_bData1Connected = false;
   m_bExecConnected = false;
+
+  try {
+    if ( boost::filesystem::exists( m_sDbName ) ) {
+      boost::filesystem::remove( m_sDbName );
+    }
+
+    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
+    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
+    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
+    //m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
+
+    m_db.Open( m_sDbName );
+  }
+  catch(...) {
+    std::cout << "database fault on " << m_sDbName << std::endl;
+  }
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
@@ -123,12 +135,6 @@ bool AppBasketTrading::OnInit() {
   // maybe set scenario with database and with in memory data structure?
 
   m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
-
-  try {
-    if ( boost::filesystem::exists( m_sDbName ) ) {
-      boost::filesystem::remove( sDbName );
-    }
-  m_db.Open( m_sDbName );
 
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
