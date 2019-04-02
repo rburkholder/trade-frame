@@ -76,6 +76,8 @@ private:
 
   std::string m_sTSDataStreamStarted;
 
+  bool m_bStarted;
+
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
