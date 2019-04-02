@@ -284,6 +284,7 @@ void AppBasketTrading::OnExecDisconnected( int ) {
 }
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+  if ( m_worker.joinable() ) m_worker.join();
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
@@ -363,14 +364,18 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
   std::cout << "Subsetting symbols ... " << std::endl;
 
   CallAfter( [this](){
-    ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-    ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
-    m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
-    std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
+    if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
+    m_worker = std::thread(
+      [this](){
+        ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+        ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
+        m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
+        std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
 
-    std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-    listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
-    std::cout << " ... done." << std::endl;
+        std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+        listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
+        std::cout << " ... done." << std::endl;
+      });
   });
 
 }
@@ -379,9 +384,12 @@ void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
 void AppBasketTrading::HandleMenuActionLoadSymbolSubset( void ) {
   std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
   CallAfter( [this](){
-    m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
-    std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
+    if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
+    m_worker = std::thread(
+      [this](){
+        m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
+        std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
+      } );
   });
-
 }
 

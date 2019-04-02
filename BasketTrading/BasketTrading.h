@@ -26,6 +26,7 @@
 //   using pivots, then checking opening against pivot to see which direction to trade based
 //     upon probabilities. Use weeklies for symbol selection.
 
+#include <thread>
 #include <string>
 #include <memory>
 
@@ -56,7 +57,7 @@ private:
 
   ptime m_dtLatestEod;
 
-  std::string m_sPortfolioStrategyAggregate;
+  std::thread m_worker;
 
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
@@ -66,6 +67,8 @@ private:
 
   std::string m_sDbName;
   ou::tf::DBOps m_db;
+
+  std::string m_sPortfolioStrategyAggregate;
 
   std::unique_ptr<MasterPortfolio> m_pMasterPortfolio;
   pPortfolio_t m_pPortfolioMaster;
