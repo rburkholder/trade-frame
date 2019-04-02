@@ -101,11 +101,11 @@ public:
   ptime& TimeStamp( void ) { return m_dt; };
 
 protected:
-  ptime m_dt; 
+  ptime m_dt;
   // different markets have different hours so should get rid of these two declarations
   boost::posix_time::time_duration m_timeMarketOpen, m_timeMarketClose;
-  bool m_bMarketIsOpen;  
-  
+  bool m_bMarketIsOpen;
+
 private:
 };
 
@@ -129,28 +129,28 @@ public:
   const std::string& StoryId( void ) { return Field( NStoryId ); };
   const std::string& SymbolList( void ) { return Field( NSymbolList ); };
   const std::string& DateTime( void ) { return Field( NDateTime ); };
-  const std::string& Headline( void ) { 
+  const std::string& Headline( void ) {
     m_sHeadLine.assign( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second );
     return m_sHeadLine;
   };
 
-  fielddelimiter_t Distributor_iter( void ) { 
+  fielddelimiter_t Distributor_iter( void ) {
     BOOST_ASSERT( NDistributor <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDistributor ];
   }
-  fielddelimiter_t StoryId_iter( void ) { 
+  fielddelimiter_t StoryId_iter( void ) {
     BOOST_ASSERT( NStoryId <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NStoryId ];
   }
-  fielddelimiter_t SymbolList_iter( void ) { 
+  fielddelimiter_t SymbolList_iter( void ) {
     BOOST_ASSERT( NSymbolList <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NSymbolList ];
   }
-  fielddelimiter_t DateTime_iter( void ) { 
+  fielddelimiter_t DateTime_iter( void ) {
     BOOST_ASSERT( NDateTime <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDateTime ];
   }
-  fielddelimiter_t HeadLine_iter( void ) { 
+  fielddelimiter_t HeadLine_iter( void ) {
     BOOST_ASSERT( NHeadLine <= m_vFieldDelimiters.size() - 1 );
     fielddelimiter_t fd( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second ); // necessary to incorporate included commas, and field 0 has end of buffer marker
     return fd;
@@ -276,7 +276,7 @@ public:
     QPSettleDate = 62,
     _QPLastEntry
   };
-  
+
   typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::iterator_t iterator_t;
   typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
 
@@ -464,13 +464,13 @@ typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd
 // resize the vector to accept with out resizing so often?
 
 template <class T, class charT>
-IQFPricingMessage<T, charT>::IQFPricingMessage( void ) 
+IQFPricingMessage<T, charT>::IQFPricingMessage( void )
 : IQFBaseMessage<IQFPricingMessage<T> >()
 {
 }
 
 template <class T, class charT>
-IQFPricingMessage<T, charT>::IQFPricingMessage( iterator_t& current, iterator_t& end ) 
+IQFPricingMessage<T, charT>::IQFPricingMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFPricingMessage>( current, end )
 {
 }
@@ -481,7 +481,8 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 
 template <class T, class charT>
 ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) {
-    
+
+  // TODO: test that the delimiters are available (ie message was truncated)
   fielddelimiter_t date = this->m_vFieldDelimiters[ QPLastTradeDate ];
   fielddelimiter_t time = this->m_vFieldDelimiters[ QPLastTradeTime ];
 
