@@ -178,6 +178,7 @@ ManageStrategy::~ManageStrategy( ) {
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {
   volume_t nOptionContractsToTrade = ( (volume_t)( dblFunds / m_barPriorDaily.Close() ) )/ 100;
   volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
+  std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
   return nUnderlyingSharesToTrade;
 }
 
@@ -369,7 +370,8 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
       break;
     default:
       if ( nullptr != m_pPositionUnderlying.get() ) std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option put " << *m_PositionOption_Current << std::endl;
+      if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option " << *m_PositionOption_Current << std::endl;
+      m_stateTrading = TSNoMore;
       break;
   }
   // need to set a state to do this once
