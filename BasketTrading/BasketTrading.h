@@ -64,6 +64,7 @@ private:
 //  PanelBasketTradingMain* m_pPanelBasketTradingMain;
   PanelPortfolioStats* m_pPanelPortfolioStats;
 
+  std::string m_sDbName;
   ou::tf::DBOps m_db;
 
   std::unique_ptr<MasterPortfolio> m_pMasterPortfolio;

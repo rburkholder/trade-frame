@@ -38,7 +38,14 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
-  m_dtLatestEod = ptime( date( 2019, 3, 29 ), time_duration( 23, 59, 59 ) );
+  wxApp::OnInit();
+  wxApp::SetAppDisplayName( "Basket Trading" );
+  wxApp::SetVendorName( "One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2019 One Unified Net Limited" );
+
+  m_sDbName = "BasketTrading.db";
+
+  m_dtLatestEod = ptime( date( 2019, 4, 1 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -117,7 +124,11 @@ bool AppBasketTrading::OnInit() {
 
   m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
 
-  m_db.Open( "BasketTrading.db" );
+  try {
+    if ( boost::filesystem::exists( m_sDbName ) ) {
+      boost::filesystem::remove( sDbName );
+    }
+  m_db.Open( m_sDbName );
 
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
@@ -136,8 +147,9 @@ bool AppBasketTrading::OnInit() {
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
-  vItems.push_back( new mi( "a2 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
-  vItems.push_back( new mi( "a3 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
+  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
+  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
