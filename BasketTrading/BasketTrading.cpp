@@ -63,6 +63,27 @@ bool AppBasketTrading::OnInit() {
   m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
 
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  FrameMain::vpItems_t vItems;
+  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
+  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
+
+  vItems.clear();
+  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
+  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
+  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
+  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
+
+  //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
+  //m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
+  //m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
+  //m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
+  //m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
+
   wxBoxSizer* m_sizerMain;
   m_sizerMain = new wxBoxSizer(wxVERTICAL);
   m_pFrameMain->SetSizer(m_sizerMain);
@@ -108,6 +129,18 @@ bool AppBasketTrading::OnInit() {
   m_bData1Connected = false;
   m_bExecConnected = false;
 
+  m_dblMinPL = m_dblMaxPL = 0.0;
+
+  m_timerGuiRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 250 );
+
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
+
+  // maybe set scenario with database and with in memory data structure?
+
+  m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
+
   try {
     if ( boost::filesystem::exists( m_sDbName ) ) {
       boost::filesystem::remove( m_sDbName );
@@ -124,45 +157,12 @@ bool AppBasketTrading::OnInit() {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
 
-  m_dblMinPL = m_dblMaxPL = 0.0;
-
-  m_timerGuiRefresh.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start( 250 );
-
-  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
-
-  // maybe set scenario with database and with in memory data structure?
-
-  m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
-
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
     CallAfter( [sStatus](){
       std::cout << sStatus << std::endl;
     });
   });
-
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  FrameMain::vpItems_t vItems;
-  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
-  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
-
-  vItems.clear();
-  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
-  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
-  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
-  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
-  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
-
-  //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
-  //m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
-  //m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
-  //m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
-  //m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
 
   m_pMasterPortfolio.reset( new MasterPortfolio(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
