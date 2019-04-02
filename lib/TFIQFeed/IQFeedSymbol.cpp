@@ -74,7 +74,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
   else {
     chType = 'q';
   }
-
+// TODO: test that data file is available
   m_dtLastTrade = pMsg->LastTradeTime();
   switch ( chType ) {
     case 't':
