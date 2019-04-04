@@ -87,7 +87,6 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         return bReturn;
       },
       [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
-
         Scenario ii( sObjectName, bars.last() );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
         fCheck( bars, ii );

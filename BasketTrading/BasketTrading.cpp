@@ -45,7 +45,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 4, 1 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 4, 3 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -257,7 +257,12 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
 void AppBasketTrading::HandleSaveButton(void) {
   CallAfter(
     [this](){
-      m_pMasterPortfolio->SaveSeries( "/app/BasketTrading/" );
+      std::cout << "Saving ... ";
+      if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
+      m_worker = std::thread(
+        [this](){
+          m_pMasterPortfolio->SaveSeries( "/app/BasketTrading/" );
+        } );
     });
 }
 

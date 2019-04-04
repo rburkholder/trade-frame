@@ -331,12 +331,13 @@ void MasterPortfolio::Start() {
           Ranking& ranking( vt.second );
           Strategy& strategy( m_mapStrategy.find( ranking.sName )->second );
           ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-          std::cout << "Allocate " << strategy.iip.sName 
-                    << ": ranking=" << strategy.dblBestProbability
-                    << " direction=" << (int)ranking.direction
-                    << " volume=" << volume
-                    << std::endl;
-          if ( 200 <= volume ) {
+          std::cout 
+            << strategy.iip.sName
+            << " ranking=" << strategy.dblBestProbability
+            << " direction=" << (int)ranking.direction
+            << " volume=" << volume
+            << std::endl;
+          if ( 100 <= volume ) {
             strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
             m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
             switch ( ranking.direction ) {
@@ -370,7 +371,6 @@ void MasterPortfolio::Stop( void ) {
 }
 
 void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
-  std::cout << "Saving ... ";
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
   m_libor.SaveSeries( sPath );
   std::for_each(m_mapStrategy.begin(), m_mapStrategy.end(),
