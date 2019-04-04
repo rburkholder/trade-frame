@@ -302,12 +302,12 @@
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc8-mt-x64-1_69</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
@@ -629,12 +629,12 @@
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-mt-x64</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-mt-x64</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc8-mt-x64-1_69</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
