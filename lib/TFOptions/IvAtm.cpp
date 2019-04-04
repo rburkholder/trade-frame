@@ -53,6 +53,8 @@ IvAtm::IvAtm( IvAtm&& rhs  )
 
 IvAtm::~IvAtm( ) { }
 
+// NOTE: this calculations need to be validated for correctness
+
 double IvAtm::Put_Itm( double value ) {
   mapChain_t::iterator iter = std::upper_bound( 
     m_mapChain.begin(), m_mapChain.end(), value, 
@@ -111,8 +113,8 @@ double IvAtm::Call_Atm( double value ) {
   return iter->first;
 }
 
-double IvAtm::Call_OtmAtm( double value ) {
-  mapChain_t::iterator iter = std::lower_bound( 
+double IvAtm::Call_OtmAtm( double value ) { // NOTE returns lowest strike, not lowest strike nearest value
+  mapChain_t::iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value, 
     [](const mapChain_t::value_type& vt, double value)->bool{ return value < vt.first; } );
   if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_OtmAtm not found" );
