@@ -1,5 +1,7 @@
 2019/03/30
 
+_0471547387 2017 Mathematics of Money Management: Risk Analysis Techniques for Traders
+
 A market system can be further differentiated by other factors, one of
 which is dependency. For example, say that in our moving average system
 we discern (through methods discussed in this text) that winning trades
@@ -40,7 +42,26 @@ next trade will be profitable or not. Yet we do have control over the quantity
 we have on. Since one does not dominate the other, our resources are better
 spent concentrating on putting on the right quantity.
 
+ if dependency shows up in your trades, you haven't
+maximized your system. In other words, dependency, if found, should be
+exploited (by changing the rules of the system to take advantage of the
+dependency) until it no longer appears to exist. The first stage in money
+management is therefore to exploit, and hence remove, any dependency in
+trades. pg 14
 
+The Kelly criterion states that we should bet that fixed fraction of our
+stake (f) which maximizes the growth function G(f) page 27
+
+iterative calculation of f - page 32
+
+Along these same lines, reducing big winning trades can help your pro-
+gram if it reduces your SD more than it reduces your A. In many cases, this
+can be accomplished by incorporating options into your trading program - page 59
+
+ Such a position, a long position in the underlying and a long put, is
+the equivalent to simply being outright long the call. Hence, we are better
+off simply to be long the call, as it will result in considerably lower transac-
+tion costs7 than being both long the underlying and long the put option. - page 60
 
 
 2018/02/10
