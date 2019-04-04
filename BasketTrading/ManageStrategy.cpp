@@ -264,16 +264,16 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         }
         else {
           double mid = quote.Midpoint();
-          double strike {};
+          //double strike {};
           try {
             switch ( m_eTradeDirection ) {
               case ETradeDirection::Up:
-                strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
-                std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated put strike " << strike << std::endl;
+                //strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
+                //std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated put strike " << strike << std::endl;
                 break;
               case ETradeDirection::Down:
-                strike = iterChains->second.Call_OtmAtm( mid );  // may raise an exception
-                std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated call strike " << strike << std::endl;
+                //strike = iterChains->second.Call_OtmAtm( mid );  // may raise an exception
+                //std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated call strike " << strike << std::endl;
                 break;
               case ETradeDirection::None:
                 break;
@@ -287,23 +287,23 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             else {
               switch ( m_eTradeDirection ) {
                 case ETradeDirection::Up:
-                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective put." << std::endl;
+                  //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective put." << std::endl;
                   //m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
                   //  [this](pOption_t pOption){
                       //m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                       m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade );
+                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
                       //m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                       m_stateTrading = TSMonitorLong;
                     //} );
                   break;
                 case ETradeDirection::Down:
-                  std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective call." << std::endl;
+                  //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective call." << std::endl;
                   //m_fConstructOption( iterChains->second.GetIQFeedNameCall( strike), m_pPositionUnderlying->GetInstrument(),
                     //[this](pOption_t pOption){
                       //m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": placing orders." << std::endl;
                       m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade );
+                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
                       //m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                       m_stateTrading = TSMonitorShort;
                     //} );
