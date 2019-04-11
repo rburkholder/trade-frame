@@ -17,6 +17,9 @@
 // needs daily bars downloaded via IQFeedGetHistory
 // rebuild after changing date in Worker.cpp.
 
+// TODO:  graphical P/L loss summary
+//    VWAP used to build one minute bars, and use 1min, 2min, 3min bars to generate trend trade?
+
 #include "stdafx.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -45,7 +48,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 4, 5 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 4, 11 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -62,21 +65,6 @@ bool AppBasketTrading::OnInit() {
   m_pFrameMain->Move( 200, 100 );
   m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
-
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  FrameMain::vpItems_t vItems;
-  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
-  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
-
-  vItems.clear();
-  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
-  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
-  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
-  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
-  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
   //m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
@@ -157,13 +145,6 @@ bool AppBasketTrading::OnInit() {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
 
-  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
-  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){
-      std::cout << sStatus << std::endl;
-    });
-  });
-
   m_pMasterPortfolio.reset( new MasterPortfolio(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
@@ -174,6 +155,30 @@ bool AppBasketTrading::OnInit() {
     },
     m_pPortfolioStrategyAggregate
     ) );
+
+  // this needs to come before the menu
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
+  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
+    CallAfter( [sStatus](){
+      std::cout << sStatus << std::endl;
+    });
+  });
+
+  // build menu last
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  FrameMain::vpItems_t vItems;
+  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
+  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
+
+  vItems.clear();
+  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
+  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
+  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
+  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   return true;
 
