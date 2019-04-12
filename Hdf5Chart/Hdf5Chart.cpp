@@ -32,14 +32,14 @@ bool AppHdf5Chart::OnInit() {
   SetTopWindow( m_pFrameMain );
 
   // Sizer for FrameMain
-  wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(m_sizerMain);
+  wxBoxSizer* sizerMain;
+  sizerMain = new wxBoxSizer(wxVERTICAL);
+  m_pFrameMain->SetSizer(sizerMain);
 
   // Sizer for Controls
   wxBoxSizer* m_sizerControls;
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
+  sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
   //panelSplitterRight->SetSizer( m_sizerControls );
   //sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
@@ -55,7 +55,7 @@ bool AppHdf5Chart::OnInit() {
 //  m_pPanelLogging->Show( true );
 
   m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_pFrameMain, wxID_ANY );
-  m_sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 
 
 //  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
@@ -74,7 +74,7 @@ bool AppHdf5Chart::OnInit() {
 */
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+  sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pFrameMain->Show( true );
 
