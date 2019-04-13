@@ -56,8 +56,6 @@ bool AppIQFeedGetHistory::OnInit() {
 
   m_pFrameMain->Show( true );
 
-	typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-	
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
     CallAfter( [sStatus](){ 
@@ -77,6 +75,8 @@ bool AppIQFeedGetHistory::OnInit() {
     }
   });
 	
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
   FrameMain::vpItems_t vItemsLoadSymbols;
   vItemsLoadSymbols.push_back( new mi( "New Symbol List Remote", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListRemote ) ) );
   vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
