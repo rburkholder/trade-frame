@@ -82,7 +82,7 @@ bool AppHdf5Chart::OnInit() {
   m_bData2Connected = false;
   m_bExecConnected = false;
 
-  m_timerGuiRefresh.SetOwner( this );
+  //m_timerGuiRefresh.SetOwner( this );
 
   //Bind( wxEVT_TIMER, &AppLiveChart::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
@@ -165,7 +165,7 @@ int AppHdf5Chart::OnExit() {
 void AppHdf5Chart::OnClose( wxCloseEvent& event ) {
   std::cout << "AppHdf5Chart::OnClose" << std::endl;
   // Exit Steps: #2 -> FrameMain::OnClose
-  m_timerGuiRefresh.Stop();
+  //m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed

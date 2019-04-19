@@ -46,7 +46,7 @@ private:
 
   ou::tf::DBOps m_db;
 
-  wxTimer m_timerGuiRefresh;
+  //wxTimer m_timerGuiRefresh;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -57,7 +57,7 @@ private:
   void HandlePopulateDatabase( void );
 
   void HandleGuiRefresh( wxTimerEvent& event );
-    
+
   //void AutoStartCollection( void );
 
   void OnData1Connected( int );
