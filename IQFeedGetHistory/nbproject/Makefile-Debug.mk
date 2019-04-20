@@ -55,7 +55,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -69,15 +69,15 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFIQFeed/dis
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
-
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedgethistory: ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a
 
@@ -115,11 +115,11 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug
-	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug
-	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug
@@ -134,11 +134,11 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug clean
-	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug clean
-	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug clean

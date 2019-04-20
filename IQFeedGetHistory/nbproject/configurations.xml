@@ -112,18 +112,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFTrading"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFTrading"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFOptions"
                             CT="3"
                             CN="Debug"
@@ -148,15 +136,15 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+              <makeArtifact PL="../lib/TFTrading"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../lib/TFHDF5TimeSeries"
+                            WD="../lib/TFTrading"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -169,6 +157,18 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFHDF5TimeSeries"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
