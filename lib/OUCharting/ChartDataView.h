@@ -63,8 +63,8 @@ public:
   void Add( size_t nChart, ChartEntryBase* pEntry );  // could try boost::fusion here?  some crtp stuff?
   iterator begin( void ) { return m_vChartDataViewCarrier.begin(); };
   iterator end( void ) { return m_vChartDataViewCarrier.end(); };
-  const std::string& GetStrategy( void ) const { return m_sStrategy; };
   const std::string& GetName( void ) const { return m_sName; };
+  const std::string& GetDescription( void ) const { return m_sDescription; };
   void Clear( void );  // remove stuff in order to reuse.
   size_t GetChartCount( void ) const{ return m_mapCntChartIndexes.size(); };
   void SetChanged(void);
@@ -76,8 +76,8 @@ public:
 
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
-  void SetNames( const std::string& sStrategy, const std::string& sName ) {
-    m_sStrategy = sStrategy;
+  void SetNames( const std::string& sDescription, const std::string& sName ) {
+    m_sDescription = sDescription;
     m_sName = sName;
   }
 
@@ -105,8 +105,8 @@ private:
 
   bool m_bChanged;
   bool m_bThreadSafe;   // propagated into ChartEntries for value append operations across thread boundaries
-  std::string m_sStrategy;
   std::string m_sName;
+  std::string m_sDescription;
 
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;

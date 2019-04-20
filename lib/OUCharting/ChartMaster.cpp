@@ -105,7 +105,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
 
-      std::string sTitle( m_pCdv->GetStrategy() + " - " + m_pCdv->GetName() );
+      std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetDescription() );
       multi.addTitle( sTitle.c_str() );
 
       // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
