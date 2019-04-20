@@ -18,8 +18,10 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
+// Self contained Chart Viewer
+// Handles viewing the user sourced data supplied in ou::ChartDataView
+
 // includes own gui refresh function
-// usage note:  needs to be supplied with a ou::ChartDataView
 
 #pragma once
 
