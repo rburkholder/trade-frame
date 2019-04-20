@@ -73,8 +73,11 @@ ManageStrategy::ManageStrategy(
   m_fStopCalc( fStopCalc ),
   m_fFirstTrade( fFirstTrade ),
   m_fBar( fBar ),
-  m_eTradeDirection( ETradeDirection::None )
+  m_eTradeDirection( ETradeDirection::None ),
+  m_bfTrades6Sec( 6 )
 {
+  //std::cout << m_sUnderlying << " loading up ... " << std::endl;
+
   assert( nullptr != fGatherOptionDefinitions );
   assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
@@ -83,8 +86,23 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fStopCalc );
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
+  
+  m_cePvR1.SetColour( ou::Colour::Red );
+  m_cePv.SetColour( ou::Colour::Green );
+  m_cePvS1.SetColour( ou::Colour::Blue );
 
-  //std::cout << m_sUnderlying << " loading up ... " << std::endl;
+  m_dvChart.Add( 0, &m_cePrice );
+  m_dvChart.Add( 1, &m_ceVolume );
+  m_dvChart.Add( 2, &m_ceProfitLoss );
+  //m_dvChart.Add( 0, &m_cePvR1 );
+  //m_dvChart.Add( 0, &m_cePv );
+  //m_dvChart.Add( 0, &m_cePvS1 );
+  //m_dvChart.Add( 0, &m_ceEma1 );
+  //m_dvChart.Add( 0, &m_ceEma2 );
+  //m_dvChart.Add( 0, &m_ceEma3 );
+  //m_dvChart.Add( 0, &m_ceEma4 );
+
+  m_bfTrades6Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades6Sec ) );
 
   try {
 
@@ -414,4 +432,16 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_PositionOption_Current.get() ) {
     m_PositionOption_Current->GetWatch()->SaveSeries( sPrefix );
   }
+}
+
+void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
+  m_cePrice.AppendBar( bar );
+  m_ceVolume.Append( bar );
+  
+  double dblUnRealized;
+  double dblRealized;
+  double dblCommissionsPaid;
+  double dblTotal;
+  m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }

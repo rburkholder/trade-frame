@@ -33,6 +33,13 @@
 #include <TFOptions/Option.h>
 
 #include <TFTrading/Position.h>
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+#include <OUCharting/ChartEntryShape.h>
+#include <OUCharting/ChartEntryMark.h>
+
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
@@ -138,6 +145,23 @@ private:
 
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
+
+  ou::ChartDataView m_dvChart;
+
+  ou::tf::BarFactory m_bfTrades6Sec;
+
+  ou::ChartEntryBars m_cePrice;
+  ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryMark m_cePvR1;
+  ou::ChartEntryMark m_cePv;
+  ou::ChartEntryMark m_cePvS1;
+  ou::ChartEntryIndicator m_ceProfitLoss;
+  ou::ChartEntryIndicator m_ceEma1;
+  ou::ChartEntryIndicator m_ceEma2;
+  ou::ChartEntryIndicator m_ceEma3;
+  ou::ChartEntryIndicator m_ceEma4;
+
+  void HandleBarTrades6Sec( const ou::tf::Bar& bar );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
