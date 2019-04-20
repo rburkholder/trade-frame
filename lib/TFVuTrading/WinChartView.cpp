@@ -295,9 +295,10 @@ void WinChartView::UnbindEvents( void ) {
 
   if ( m_bBound ) {
 
+    m_timerGuiRefresh.Stop();
+
     SetChartDataView( nullptr );
 
-    m_timerGuiRefresh.Stop();
     assert( Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() ) );
 
     assert( Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this ) );
