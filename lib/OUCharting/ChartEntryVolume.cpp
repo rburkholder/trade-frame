@@ -42,6 +42,10 @@ void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume) {
   ChartEntryPrice::Append( dt, (double) volume );
 }
 
+void ChartEntryVolume::Append( const ou::tf::Bar& bar ) {
+  Append( bar.DateTime(), bar.Volume() );
+}
+
 bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   bool bAdded( false );
   ChartEntryPrice::ClearQueue();

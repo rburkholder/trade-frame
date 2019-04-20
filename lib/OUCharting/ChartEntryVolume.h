@@ -17,20 +17,21 @@
 
 namespace ou { // One Unified
 
-// volume is located here due to its association with ChartEntryBars, 
+// volume is located here due to its association with ChartEntryBars,
 //  which does not have volume as the volume portion is in another location in the chart set
 class ChartEntryVolume: public ChartEntryPrice {
 public:
-  
+
   typedef ChartEntryPrice::size_type size_type;
-  
+
   ChartEntryVolume(void);
   //ChartEntryVolume(size_type nSize);
   virtual ~ChartEntryVolume(void);
   virtual void Reserve( size_type );
   void Append( ptime dt, int volume );
+  void Append( const ou::tf::Bar& bar );
   virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  
+
 protected:
 private:
 };
