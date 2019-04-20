@@ -54,7 +54,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_ceBars.AppendBar( *iter );
     m_ceVolume.Append( iter->DateTime(), iter->Volume() );
   }
-
 }
 
 void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
