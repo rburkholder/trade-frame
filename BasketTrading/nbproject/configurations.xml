@@ -126,6 +126,42 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTrading"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTrading"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFStatistics"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFStatistics"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfstatistics.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIndicators"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFIndicators"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFVuTrading"
                             CT="3"
                             CN="Debug"
@@ -150,39 +186,15 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFTrading"
+              <makeArtifact PL="../lib/OUStatistics"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../lib/TFTrading"
+                            WD="../lib/OUStatistics"
                             BC="${MAKE} -j3 -f Makefile CONF=Debug"
                             CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFTimeSeries"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFTimeSeries"
-                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFStatistics"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFStatistics"
-                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfstatistics.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboustatistics.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -195,54 +207,6 @@
                             BC="${MAKE} -j3 -f Makefile CONF=Debug"
                             CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFIndicators"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFIndicators"
-                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFHDF5TimeSeries"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFHDF5TimeSeries"
-                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFTimeSeries"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFTimeSeries"
-                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/OUStatistics"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/OUStatistics"
-                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
-                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboustatistics.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -282,18 +246,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/ExcelFormat"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/ExcelFormat"
-                            BC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug"
-                            CC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/OUFormulas"
                             CT="3"
                             CN="Debug"
@@ -303,6 +255,42 @@
                             BC="${MAKE} -j3 -f Makefile CONF=Debug"
                             CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTimeSeries"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFHDF5TimeSeries"
+                            BC="${MAKE} -j3 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j3 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/ExcelFormat"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/ExcelFormat"
+                            BC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug"
+                            CC="${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>

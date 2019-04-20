@@ -60,7 +60,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a ../lib/OUCharting/dist/Debug/GNU-Linux/liboucharting.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Debug/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/OUCharting/dist/Debug/GNU-Linux/liboucharting.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUFormulas/dist/Debug/GNU-Linux/libouformulas.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -74,25 +74,19 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFInteractiveBr
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a
 
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a
+
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFStatistics/dist/Debug/GNU-Linux/libtfstatistics.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUCharting/dist/Debug/GNU-Linux/liboucharting.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a
 
@@ -100,9 +94,13 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUSQL/dist/Debu
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a
-
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/OUFormulas/dist/Debug/GNU-Linux/libouformulas.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/baskettrading: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -159,21 +157,20 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFIQFeed && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/TFInteractiveBrokers && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/TFSimulation && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/TFTrading && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug
+	cd ../lib/TFIndicators && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/TFVuTrading && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/TFOptions && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFTrading && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug
-	cd ../lib/OUCharting && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFIndicators && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/OUStatistics && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/OUCharting && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/OUSqlite && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/OUSQL && ${MAKE} -j3 -f Makefile CONF=Debug
 	cd ../lib/OUCommon && ${MAKE} -j3 -f Makefile CONF=Debug
-	cd ../lib/ExcelFormat && ${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug
 	cd ../lib/OUFormulas && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug
+	cd ../lib/ExcelFormat && ${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -185,21 +182,20 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/TFIQFeed && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/TFInteractiveBrokers && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/TFSimulation && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/TFTrading && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug clean
+	cd ../lib/TFIndicators && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/TFVuTrading && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/TFOptions && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFTrading && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFStatistics && ${MAKE} -j2 -f Makefile CONF=Debug clean
-	cd ../lib/OUCharting && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFIndicators && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/OUStatistics && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/OUCharting && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/OUSqlite && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/OUSQL && ${MAKE} -j3 -f Makefile CONF=Debug clean
 	cd ../lib/OUCommon && ${MAKE} -j3 -f Makefile CONF=Debug clean
-	cd ../lib/ExcelFormat && ${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug clean
 	cd ../lib/OUFormulas && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/TFTimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j3 -f Makefile CONF=Debug clean
+	cd ../lib/ExcelFormat && ${MAKE} -j3 -f ExcelFormat-Makefile.mk CONF=Debug clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl
