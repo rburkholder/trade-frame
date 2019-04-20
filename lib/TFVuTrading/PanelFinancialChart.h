@@ -13,9 +13,6 @@
 
 #pragma once
 
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -26,22 +23,21 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELFINANCIALCHART_POSITION wxDefaultPosition
 
 class PanelFinancialChart: public wxPanel {
-//  DECLARE_DYNAMIC_CLASS( PanelFinancialChart )
 public:
 
   PanelFinancialChart(void);
-  PanelFinancialChart( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION, 
-    const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE, 
+  PanelFinancialChart(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
+    const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
   ~PanelFinancialChart(void);
 
-  bool Create( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION, 
-    const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE, 
+  bool Create(
+    wxWindow* parent, wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
+    const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
   void Init();
   void CreateControls();

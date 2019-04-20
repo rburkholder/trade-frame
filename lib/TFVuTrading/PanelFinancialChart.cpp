@@ -15,8 +15,6 @@
 
 #include "PanelFinancialChart.h"
 
-//IMPLEMENT_DYNAMIC_CLASS( PanelFinancialChart, wxPanel )
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
