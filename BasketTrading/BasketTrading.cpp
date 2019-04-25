@@ -72,17 +72,23 @@ bool AppBasketTrading::OnInit() {
   //m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
   //m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
 
-  wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(m_sizerMain);
+  wxBoxSizer* sizerMain;
+  sizerMain = new wxBoxSizer(wxHORIZONTAL);
+  m_pFrameMain->SetSizer( sizerMain );
 
-  wxBoxSizer* m_sizerControls;
-  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+  wxBoxSizer* sizerLeft = new wxBoxSizer( wxVERTICAL );
+  sizerMain->Add( sizerLeft, 0,  wxEXPAND | wxALL, 2 );
+
+  wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
+  sizerMain->Add( sizerRight, 0,  wxEXPAND | wxALL, 2 );
+
+  wxBoxSizer* sizerControls;
+  sizerControls = new wxBoxSizer( wxHORIZONTAL );
+  sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   //m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
@@ -102,15 +108,18 @@ bool AppBasketTrading::OnInit() {
 */
   m_pPanelPortfolioStats = new PanelPortfolioStats( m_pFrameMain, wxID_ANY );
   //m_sizerMain->Add( m_pPanelPortfolioStats, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_sizerMain->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);
+  sizerLeft->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);
   m_pPanelPortfolioStats->Show( true );
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+  sizerLeft->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
   m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
   m_pPanelLogging->Show( true );
+
+  m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain, wxID_ANY );
+  sizerRight->Add( m_pPanelFinancialChart, 1, wxEXPAND | wxALL, 2 );
 
   m_pFrameMain->Show( true );
 

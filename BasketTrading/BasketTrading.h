@@ -39,6 +39,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/PanelFinancialChart.h>
 
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
@@ -64,6 +65,7 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 //  PanelBasketTradingMain* m_pPanelBasketTradingMain;
   PanelPortfolioStats* m_pPanelPortfolioStats;
+  ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   std::string m_sDbName;
   ou::tf::DBOps m_db;
