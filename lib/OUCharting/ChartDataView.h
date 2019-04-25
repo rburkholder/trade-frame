@@ -13,9 +13,10 @@
 
 #pragma once
 
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
+#include <memory>
 
 #include <OUCommon/Delegate.h>
 
@@ -53,8 +54,10 @@ private:
 class ChartDataView {
 public:
 
-  typedef std::vector<local::ChartDataViewCarrier>::const_iterator const_iterator;
-  typedef std::vector<local::ChartDataViewCarrier>::iterator iterator;
+  using const_iterator = std::vector<local::ChartDataViewCarrier>::const_iterator;
+  using       iterator = std::vector<local::ChartDataViewCarrier>::iterator;
+
+  using pChartDataView_t = std::shared_ptr<ChartDataView>;
 
   ChartDataView( void );
   //ChartDataView( const std::string &sStrategy, const std::string &sName );
@@ -99,9 +102,9 @@ private:
   };
 
   //typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
-  typedef std::map<boost::uint64_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
+  using mapCntChartIndexes_t = std::map<boost::uint64_t /* carrier nChart */, structChartMapping>;
 
-  typedef std::vector<local::ChartDataViewCarrier> vChartDataViewCarrier_t;
+  using vChartDataViewCarrier_t = std::vector<local::ChartDataViewCarrier>;
 
   bool m_bChanged;
   bool m_bThreadSafe;   // propagated into ChartEntries for value append operations across thread boundaries
