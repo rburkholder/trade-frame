@@ -71,6 +71,8 @@ public:
   using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
+  using pcdvStrategyData_t = ou::ChartDataView::pChartDataView_t;
+
   ManageStrategy(
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
     pPortfolio_t,
@@ -81,7 +83,8 @@ public:
     fStartCalc_t,
     fStopCalc_t,
     fFirstTrade_t,
-    fBar_t
+    fBar_t,
+    pcdvStrategyData_t
     );
   virtual ~ManageStrategy( );
 
@@ -146,7 +149,7 @@ private:
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
 
-  ou::ChartDataView m_dvChart;
+  pcdvStrategyData_t m_pcdvStrategyData;
 
   ou::tf::BarFactory m_bfTrades6Sec;
 

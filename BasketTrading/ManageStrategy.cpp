@@ -58,7 +58,8 @@ ManageStrategy::ManageStrategy(
   fStartCalc_t fStartCalc,
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
-  fBar_t fBar
+  fBar_t fBar,
+  pcdvStrategyData_t pcdvStrategyData
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
@@ -74,7 +75,8 @@ ManageStrategy::ManageStrategy(
   m_fFirstTrade( fFirstTrade ),
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
-  m_bfTrades6Sec( 6 )
+  m_bfTrades6Sec( 6 ),
+  m_pcdvStrategyData( pcdvStrategyData )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -86,14 +88,15 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fStopCalc );
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
+  assert( pcdvStrategyData );
   
   m_cePvR1.SetColour( ou::Colour::Red );
   m_cePv.SetColour( ou::Colour::Green );
   m_cePvS1.SetColour( ou::Colour::Blue );
 
-  m_dvChart.Add( 0, &m_cePrice );
-  m_dvChart.Add( 1, &m_ceVolume );
-  m_dvChart.Add( 2, &m_ceProfitLoss );
+  pcdvStrategyData->Add( 0, &m_cePrice );
+  pcdvStrategyData->Add( 1, &m_ceVolume );
+  pcdvStrategyData->Add( 2, &m_ceProfitLoss );
   //m_dvChart.Add( 0, &m_cePvR1 );
   //m_dvChart.Add( 0, &m_cePv );
   //m_dvChart.Add( 0, &m_cePvS1 );

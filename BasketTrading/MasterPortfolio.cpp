@@ -31,20 +31,23 @@ MasterPortfolio::MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGatherOptionDefinitions_t fGatherOptionDefinitions,
     fGetTableRowDef_t fGetTableRowDef,
+    fSupplyStrategyChart_t fSupplyStrategyChart,
     pPortfolio_t pMasterPortfolio
     )
-  : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 ),
+  : m_bStarted( false ),
+    m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 ),
     m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
     m_fGetTableRowDef( std::move( fGetTableRowDef ) ),
+    m_fSupplyStrategyChart( fSupplyStrategyChart ),
     m_pMasterPortfolio( pMasterPortfolio ),
     m_pExec( pExec ),
     m_pData1( pData1 ),
     m_pData2( pData2 ),
-    m_eAllocate( EAllocate::Waiting ),
-    m_bStarted( false )
+    m_eAllocate( EAllocate::Waiting )
 {
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
+  assert( nullptr != m_fSupplyStrategyChart );
 
   assert( pExec );
   assert( pData1 );
@@ -64,6 +67,13 @@ MasterPortfolio::MasterPortfolio(
     default:
       assert( 0 ); // need the iqfeed provider
   }
+
+  m_pChartDataView.reset( new ou::ChartDataView );
+  m_pChartDataView->Add( 0, &m_cePLCurrent );
+  m_pChartDataView->Add( 0, &m_cePLUnRealized );
+  m_pChartDataView->Add( 0, &m_cePLRealized );
+  m_pChartDataView->Add( 2, &m_ceCommissionPaid );
+  m_fSupplyStrategyChart( "Master P/L", m_pChartDataView );
 
   std::stringstream ss;
   ss.str( "" );
@@ -92,6 +102,15 @@ MasterPortfolio::~MasterPortfolio(void) {
   if ( m_worker.joinable() )
     m_worker.join();
   m_mapStrategy.clear();
+}
+
+void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid ) {
+  // TODO: use local instance of master portfolio
+  boost::posix_time::ptime dt( ou::TimeSource::Instance().External() );
+  m_cePLCurrent.Append( dt, dblPLCurrent );
+  m_cePLUnRealized.Append( dt, dblPLUnRealized );
+  m_cePLRealized.Append( dt, dblPLRealized );
+  m_ceCommissionPaid.Append( dt, dblCommissionPaid );
 }
 
 void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
@@ -161,6 +180,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
         idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
     );
+
+  pChartDataView_t pChartDataView( new ou::ChartDataView );
 
   namespace ph = std::placeholders;
 
@@ -299,13 +320,17 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
             // calculate sentiment
             m_sentiment.Update( bar );
-          }
+          },
+          pChartDataView
         )
       );
 
     std::string sName( iip.sName );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
     m_mapStrategy.insert( mapStrategy_t::value_type( sName, std::move( strategy ) ) ); // lookup needs to come before move
+
+    m_fSupplyStrategyChart( sName, pChartDataView );
+
 } // AddSymbol
 
 void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {

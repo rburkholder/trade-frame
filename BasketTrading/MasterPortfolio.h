@@ -19,6 +19,9 @@
 #include <thread>
 #include <functional>
 
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryIndicator.h>
+
 #include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Option.h>
@@ -39,25 +42,30 @@
 class MasterPortfolio {
 public:
 
-  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
+  using pPortfolio_t =  ou::tf::PortfolioManager::pPortfolio_t;
+  using pPosition_t = ou::tf::PortfolioManager::pPosition_t;
 
-  typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
-  typedef std::function<const trd_t&(const std::string& sIQFeedSymbolName)> fGetTableRowDef_t;
-  typedef ManageStrategy::fOptionDefinition_t fOptionDefinition_t;
-  typedef ManageStrategy::fGatherOptionDefinitions_t fGatherOptionDefinitions_t;
-  typedef ManageStrategy::fConstructPosition_t fConstructPositionUnderlying_t;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
+  using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
+  using fGetTableRowDef_t = std::function<const trd_t&(const std::string& sIQFeedSymbolName)>;
+  using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
+  using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
+  using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
+  using fSupplyStrategyChart_t = std::function<void(const std::string&,pChartDataView_t)>;
 
   MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGatherOptionDefinitions_t, fGetTableRowDef_t,
+    fGatherOptionDefinitions_t, fGetTableRowDef_t, fSupplyStrategyChart_t,
     pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);
 
   void Load( ptime dtLatestEod, bool bAddToList );
   void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
   void Start();
+
+  void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
 
   void Stop( void );
   void SaveSeries( const std::string& sPath );
@@ -100,6 +108,13 @@ private:
 
   Sentiment m_sentiment;
 
+  pChartDataView_t m_pChartDataView;
+
+  ou::ChartEntryIndicator m_cePLCurrent;
+  ou::ChartEntryIndicator m_cePLUnRealized;
+  ou::ChartEntryIndicator m_cePLRealized;
+  ou::ChartEntryIndicator m_ceCommissionPaid;
+
   using pManageStrategy_t = std::unique_ptr<ManageStrategy>;
 
   struct Strategy {
@@ -137,6 +152,7 @@ private:
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
+  fSupplyStrategyChart_t m_fSupplyStrategyChart;
 
   void AddSymbol( const IIPivot& );
 };

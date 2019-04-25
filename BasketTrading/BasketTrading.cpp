@@ -48,7 +48,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 4, 11 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 4, 24 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -80,11 +80,11 @@ bool AppBasketTrading::OnInit() {
   sizerMain->Add( sizerLeft, 0,  wxEXPAND | wxALL, 2 );
 
   wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
-  sizerMain->Add( sizerRight, 0,  wxEXPAND | wxALL, 2 );
+  sizerMain->Add( sizerRight, 1,  wxEXPAND | wxALL, 2 );
 
   wxBoxSizer* sizerControls;
   sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+  sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 2 );
 
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
@@ -154,6 +154,8 @@ bool AppBasketTrading::OnInit() {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
 
+  using pChartDataView_t = MasterPortfolio::pChartDataView_t;
+
   m_pMasterPortfolio.reset( new MasterPortfolio(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
@@ -161,6 +163,9 @@ bool AppBasketTrading::OnInit() {
     },
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
+    },
+    [this](const std::string& sName, pChartDataView_t pChartDataView){
+      m_pPanelFinancialChart->Append( sName, pChartDataView );
     },
     m_pPortfolioStrategyAggregate
     ) );
