@@ -13,11 +13,20 @@
 
 #pragma once
 
+// used by BasketTrading
+// similar to PanelChartHdf5 (which might be refactorable)
+
+#include <memory>
+
+#include <wx/treectrl.h>
+
+#include "WinChartView.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 #define SYMBOL_PANELFINANCIALCHART_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANELFINANCIALCHART_TITLE _("PanelFinancialChart")
+#define SYMBOL_PANELFINANCIALCHART_TITLE _("Panel Financial Chart")
 #define SYMBOL_PANELFINANCIALCHART_IDNAME ID_PANELFINANCIALCHART
 #define SYMBOL_PANELFINANCIALCHART_SIZE wxSize(400, 300)
 #define SYMBOL_PANELFINANCIALCHART_POSITION wxDefaultPosition
@@ -39,18 +48,36 @@ public:
     const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
-  void Init();
-  void CreateControls();
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
 protected:
-private:
+
   enum { ID_Null=wxID_HIGHEST, ID_PANELFINANCIALCHART, ID_CHART
   };
-  wxWindow* m_winChart;
+
+  class CustomItemData: public wxTreeItemData {
+  public:
+    enum EDataType { PL, Quotes, Trades, Bars, Greeks, AtmIV, NoData } m_eDataType;
+    std::shared_ptr<ou::ChartDataView> m_pChartDataView; // contains the various time series
+    CustomItemData( EDataType eDataType )
+    : m_eDataType( eDataType )
+    {}
+  };
+
+private:
+
+  wxTreeCtrl* m_pTree;
+  WinChartView* m_pWinChartView; // handles drawing the chart
+
+  void Init();
+  void CreateControls();
+
+  void HandleTreeEventItemActivated( wxTreeEvent& event );
+  void OnClose( wxCloseEvent& event );
+
 };
 
 } // namespace tf
