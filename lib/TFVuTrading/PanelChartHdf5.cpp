@@ -30,12 +30,17 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelChartHdf5::PanelChartHdf5(void): m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr ) {
+PanelChartHdf5::PanelChartHdf5(void)
+: wxPanel(),
+  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+{
   Init();
 }
 
 PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-  : m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr ) {
+: wxPanel(),
+  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+{
   Init();
   Create(parent, id, pos, size, style);
 }

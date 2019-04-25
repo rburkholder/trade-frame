@@ -18,6 +18,8 @@
 
 // used by Hdf5Chart
 
+// TODO: refactor to use PanelFinancialChart when complete?
+
 #include <wx/treectrl.h>
 
 #include "ModelChartHdf5.h"
@@ -50,9 +52,9 @@ public:
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
 
+  static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
 
 protected:
 
