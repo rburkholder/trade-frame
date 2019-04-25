@@ -119,6 +119,7 @@ void WinChartView::StopThread( void ) {
 
 // called from PanelChartHdf5::LoadDataAndGenerateChart
 // called from PanelCharts::HandleInstrumentLiveChart
+// called from PanelFinancialChart::HandleTreeEventitemActivated
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
   // TODO: need to sync with the gui refresh thread
   m_bReCalcViewPort = bReCalcViewPort;

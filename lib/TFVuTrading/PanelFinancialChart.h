@@ -34,6 +34,8 @@ namespace tf { // TradeFrame
 class PanelFinancialChart: public wxPanel {
 public:
 
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
   PanelFinancialChart(void);
   PanelFinancialChart(
     wxWindow* parent,
@@ -49,6 +51,9 @@ public:
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
 
+  // first item is set as root
+  void Append( const std::string& sName, pChartDataView_t );
+
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -60,10 +65,13 @@ protected:
 
   class CustomItemData: public wxTreeItemData {
   public:
-    enum EDataType { PL, Quotes, Trades, Bars, Greeks, AtmIV, NoData } m_eDataType;
-    std::shared_ptr<ou::ChartDataView> m_pChartDataView; // contains the various time series
-    CustomItemData( EDataType eDataType )
-    : m_eDataType( eDataType )
+    //enum EDataType { PL, Quotes, Trades, Bars, Greeks, AtmIV, NoData } m_eDataType;
+    pChartDataView_t m_pChartDataView; // contains the various time series
+    //CustomItemData( EDataType eDataType )
+    //: m_eDataType( eDataType )
+    //{}
+    CustomItemData( pChartDataView_t pChartDataView )
+    : m_pChartDataView( pChartDataView )
     {}
   };
 
