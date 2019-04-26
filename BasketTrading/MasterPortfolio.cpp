@@ -181,7 +181,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
         idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
     );
 
-  pChartDataView_t pChartDataView( new ou::ChartDataView );
+  pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
   namespace ph = std::placeholders;
 
