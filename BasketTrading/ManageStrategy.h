@@ -151,7 +151,7 @@ private:
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
-  ou::tf::BarFactory m_bfTrades6Sec;
+  ou::tf::BarFactory m_bfTrades1Sec;
 
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
@@ -164,7 +164,7 @@ private:
   ou::ChartEntryIndicator m_ceEma3;
   ou::ChartEntryIndicator m_ceEma4;
 
-  void HandleBarTrades6Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades1Sec( const ou::tf::Bar& bar );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );

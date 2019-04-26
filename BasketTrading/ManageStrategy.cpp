@@ -75,7 +75,7 @@ ManageStrategy::ManageStrategy(
   m_fFirstTrade( fFirstTrade ),
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
-  m_bfTrades6Sec( 6 ),
+  m_bfTrades1Sec( 1 ),
   m_pcdvStrategyData( pcdvStrategyData )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
@@ -105,7 +105,7 @@ ManageStrategy::ManageStrategy(
   //m_dvChart.Add( 0, &m_ceEma3 );
   //m_dvChart.Add( 0, &m_ceEma4 );
 
-  m_bfTrades6Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades6Sec ) );
+  m_bfTrades1Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades1Sec ) );
 
   try {
 
@@ -268,6 +268,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
   TimeTick( trade );
   m_bfTrades.Add( trade );
+  m_bfTrades1Sec.Add( trade );
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -437,7 +438,7 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   }
 }
 
-void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
+void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
   m_cePrice.AppendBar( bar );
   m_ceVolume.Append( bar );
   
