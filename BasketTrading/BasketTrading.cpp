@@ -48,7 +48,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 4, 24 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 4, 25 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -210,6 +210,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
     //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
     m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
     m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+    m_pMasterPortfolio->UpdateChart( dblCurrent, dblUnRealized, dblRealized, dblCommissionsPaid );
   }
 
   size_t nUp;
