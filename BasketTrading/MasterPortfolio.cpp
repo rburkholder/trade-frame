@@ -115,7 +115,7 @@ void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, 
 
 void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   if ( !m_mapStrategy.empty() ) {
-    std::cout << "Already have symbols." << std::endl;
+    std::cout << "MasterPortfolio: already loaded." << std::endl;
   }
   else {
     if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
@@ -340,7 +340,7 @@ void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
 void MasterPortfolio::Start() {
 
   if ( m_bStarted ) {
-    std::cout << "NOTE: already started." << std::endl;
+    std::cout << "MasterPortfolio: already started." << std::endl;
   }
   else {
     m_bStarted = true;
