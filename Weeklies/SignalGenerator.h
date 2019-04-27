@@ -51,16 +51,16 @@ private:
     ou::tf::TSSWStatsPrice pricesSMA3;
     BarSummary( void )
       : pricesBollinger20( prices, time_duration( 0, 0, 0 ), 20 ),
-        pricesSMA1( prices, time_duration( 0, 0, 0 ), 10 ),
-        pricesSMA2( prices, time_duration( 0, 0, 0 ), 25 ),
-        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 ),
+        pricesSMA1( prices, time_duration( 0, 0, 0 ),  8 ),
+        pricesSMA2( prices, time_duration( 0, 0, 0 ), 21 ),
+        pricesSMA3( prices, time_duration( 0, 0, 0 ), 55 ),
         emaVolume {}
     {}
     BarSummary( const BarSummary& rhs )  // ensures map has local assignments.
       : pricesBollinger20( prices, time_duration( 0, 0, 0 ), 20 ),
-        pricesSMA1( prices, time_duration( 0, 0, 0 ), 10 ),
-        pricesSMA2( prices, time_duration( 0, 0, 0 ), 25 ),
-        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 ),
+        pricesSMA1( prices, time_duration( 0, 0, 0 ),  8 ),
+        pricesSMA2( prices, time_duration( 0, 0, 0 ), 21 ),
+        pricesSMA3( prices, time_duration( 0, 0, 0 ), 55 ),
         sType( rhs.sType ),
         emaVolume {}
     { /* need to copy data over, but shouldn't be anything to copy */ }

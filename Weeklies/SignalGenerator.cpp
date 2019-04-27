@@ -39,7 +39,7 @@ void SignalGenerator::Run( void ) {
   ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
-  pt::ptime dtLast( gregorian::date( 2019,  3, 29 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2019,  4, 26 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
@@ -106,7 +106,7 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetString( "Price" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "Volume" );
+    cell->SetString( "Ema Vol" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "BolRange" );
@@ -115,19 +115,19 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetString( "SMA Sig" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "BolUpr" );
-    cell = m_sheet->Cell( 0, ix++ );
-    cell->SetFormat( fmt );
     cell->SetString( "BolLwr" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "SMA1" );
+    cell->SetString( "BolUpr" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "SMA2" );
+    cell->SetString( "SMA(8)" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "SMA3" );
+    cell->SetString( "SMA(21)" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "SMA(55)" );
 
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
@@ -216,7 +216,7 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell->SetDouble( last );
   cell->SetFormat( fmtNum );
 
-  cell = m_sheet->Cell( iy, ix++ ); // Volume
+  cell = m_sheet->Cell( iy, ix++ ); // Ema Volume
   cell->SetInteger( iter->second.emaVolume );
   cell->SetFormat( fmtInt );
 
@@ -264,10 +264,10 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
-  cell->SetDouble( upper );
+  cell->SetDouble( lower );
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
-  cell->SetDouble( lower );
+  cell->SetDouble( upper );
 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetFormat( fmtNum );
