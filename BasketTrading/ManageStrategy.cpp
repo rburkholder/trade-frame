@@ -90,16 +90,10 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fBar );
   assert( pcdvStrategyData );
   
-  m_cePvR1.SetColour( ou::Colour::Red );
-  m_cePv.SetColour( ou::Colour::Green );
-  m_cePvS1.SetColour( ou::Colour::Blue );
-
   pcdvStrategyData->Add( 0, &m_cePrice );
+  pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
   pcdvStrategyData->Add( 2, &m_ceProfitLoss );
-  //m_dvChart.Add( 0, &m_cePvR1 );
-  //m_dvChart.Add( 0, &m_cePv );
-  //m_dvChart.Add( 0, &m_cePvS1 );
   //m_dvChart.Add( 0, &m_ceEma1 );
   //m_dvChart.Add( 0, &m_ceEma2 );
   //m_dvChart.Add( 0, &m_ceEma3 );
@@ -195,6 +189,12 @@ ManageStrategy::~ManageStrategy( ) {
       pWatch->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
     }
   }
+}
+
+void ManageStrategy::SetPivots( double dblS1, double dblPV, double dblR1 ) {
+  m_cePivots.AddMark( dblR1, ou::Colour::Blue, "R1" );
+  m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
+  m_cePivots.AddMark( dblS1, ou::Colour::Red, "S1" );
 }
 
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {

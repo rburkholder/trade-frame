@@ -325,6 +325,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
         )
       );
 
+    pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );
+
     std::string sName( iip.sName );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
     m_mapStrategy.insert( mapStrategy_t::value_type( sName, std::move( strategy ) ) ); // lookup needs to come before move

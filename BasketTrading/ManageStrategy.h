@@ -95,6 +95,7 @@ public:
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
   //bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
+  void SetPivots( double dblS1, double dblPV, double dblR1 );
   void Start( ETradeDirection );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
@@ -155,9 +156,7 @@ private:
 
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
-  ou::ChartEntryMark m_cePvR1;
-  ou::ChartEntryMark m_cePv;
-  ou::ChartEntryMark m_cePvS1;
+  ou::ChartEntryMark m_cePivots;
   ou::ChartEntryIndicator m_ceProfitLoss;
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
