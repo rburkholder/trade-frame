@@ -61,9 +61,10 @@ void PanelFinancialChart::CreateControls() {
   itemPanel1->SetSizer( sizerMain );
 
   // splitter
+  static const int pxLeftPanelSize = 150;
   wxSplitterWindow* pSplitter = new wxSplitterWindow( this );
-  pSplitter->SetMinimumPaneSize(200);
-  pSplitter->SetSashGravity(0.2);
+  pSplitter->SetMinimumPaneSize( pxLeftPanelSize );
+  pSplitter->SetSashGravity( 0.0 );
 
   // tree
   //wxTreeCtrl* tree;
@@ -88,6 +89,7 @@ void PanelFinancialChart::CreateControls() {
 
   pSplitter->SplitVertically( m_pTree, m_pWinChartView, 0 );
   sizerMain->Add( pSplitter, 1, wxEXPAND|wxALL, 2);
+  pSplitter->SetSashPosition( pxLeftPanelSize );
 
   // sizer for right side of splitter
   //wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
