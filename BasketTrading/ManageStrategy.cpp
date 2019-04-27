@@ -76,6 +76,8 @@ ManageStrategy::ManageStrategy(
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
   m_bfTrades1Sec( 1 ),
+  m_bfTrades6Sec( 6 ),
+  m_bfTrades60Sec( 60 ),
   m_pcdvStrategyData( pcdvStrategyData )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
@@ -166,7 +168,7 @@ ManageStrategy::ManageStrategy(
 
         //std::cout << m_sUnderlying << " watch done." << std::endl;
 
-        m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarUnderlying ) );
+        m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
         //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
         pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
         pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
@@ -267,8 +269,9 @@ void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
   TimeTick( trade );
-  m_bfTrades.Add( trade );
   m_bfTrades1Sec.Add( trade );
+  m_bfTrades6Sec.Add( trade );
+  m_bfTrades60Sec.Add( trade );
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -373,7 +376,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   }
 }
 
-void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) {
+void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars
 }
 
 void ManageStrategy::HandleCancel( void ) {
@@ -421,14 +424,6 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {
   // need to set a state to do this once
 }
 
-void ManageStrategy::HandleBarUnderlying( const ou::tf::Bar& bar ) {
-  m_bars.Append( bar );
-  //m_nRHBars++;
-  // *** step in to state to test last three bars to see if trade should be entered
-  TimeTick( bar );
-  m_fBar( *this, bar );
-}
-
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_pPositionUnderlying.get() ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
@@ -439,13 +434,22 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
 }
 
 void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
+  //TimeTick( bar );
+}
+
+void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
   m_cePrice.AppendBar( bar );
   m_ceVolume.Append( bar );
-  
+
   double dblUnRealized;
   double dblRealized;
   double dblCommissionsPaid;
   double dblTotal;
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+}
+
+void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentiment event trigger for MasterPortfolio
+  //m_bars60s.Append( bar );
+  m_fBar( *this, bar );
 }

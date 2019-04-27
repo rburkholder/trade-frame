@@ -115,12 +115,10 @@ private:
 
   double m_dblOpen;
 
-  ou::tf::Bar m_barInfo;
+  //ou::tf::Bar m_barInfo;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
-  ou::tf::Bars m_bars;
-  ou::tf::BarFactory m_bfTrades;
 
   enum enumTradingState {
     TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
@@ -139,6 +137,9 @@ private:
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
 
+  fFirstTrade_t m_fFirstTrade;
+  fBar_t m_fBar;
+
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
@@ -147,12 +148,13 @@ private:
 
   pPortfolio_t m_pPortfolioStrategy;
 
-  fFirstTrade_t m_fFirstTrade;
-  fBar_t m_fBar;
-
   pcdvStrategyData_t m_pcdvStrategyData;
 
-  ou::tf::BarFactory m_bfTrades1Sec;
+  //ou::tf::Bars m_bars60s;
+
+  ou::tf::BarFactory m_bfTrades1Sec; // ema calcs
+  ou::tf::BarFactory m_bfTrades6Sec; // charting
+  ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
@@ -164,10 +166,11 @@ private:
   ou::ChartEntryIndicator m_ceEma4;
 
   void HandleBarTrades1Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades6Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades60Sec( const ou::tf::Bar& bar );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
-  void HandleBarUnderlying( const ou::tf::Bar& bar );
 
   void HandleAfterRH( const ou::tf::Quote& quote );
   void HandleAfterRH( const ou::tf::Trade& trade );
@@ -185,4 +188,3 @@ private:
 };
 
 #endif /* MANAGESTRATEGY_H */
-
