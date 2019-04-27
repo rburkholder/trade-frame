@@ -112,7 +112,6 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         fCheck( bars, ii );
         //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
         //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
-        //          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
         //          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
       }
       );
@@ -224,7 +223,6 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedPivot_t fSelected
     namespace ph = std::placeholders;
     Process<IIPivot>(
       m_dtOneYearAgo, m_dtLast, m_nMinBars,
-      //std::bind( &SymbolSelection::CheckForPivot, this, ph::_1, ph::_2, ph::_3, fSelected )
       [&fSelected,&mapUnderlyingInfo,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
         mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ii.sName );
         if ( mapUnderlyingInfo.end() != citer ) {
@@ -327,27 +325,6 @@ private:
 //
 
 // taken from scanner
-
-void SymbolSelection::CheckForPivot( citerBars begin, citerBars end, const InstrumentInfo& ii ) {
-  ou::tf::Bar::volume_t nAverageVolume = std::for_each( begin, end, AverageVolume() );
-//  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
-//      Info info( sObjectName, *bars.Last() );
-//      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
-      //std::cout << sObject << " vol=" << volAverage << std::endl;
-  //iter1 = iter2 - m_nMinPivotBars;
-
-  // TODO: REDO:  indications relative to pivot need to use next bar rather than current bar
-  //   make use of code in TFStatistics/Pivot as a start
-
-
-  //boost::uint32_t sumR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
-  //boost::uint32_t sumR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
-  //boost::uint32_t sumOutside = sumR1S1 + sumR1PvS1;
-  //boost::uint32_t rank = ( 100 * ( ( 100 * sumOutside ) + sumR1S1 ) ) + sumR1PvS1;
-
-  //m_mapPivotRanking.insert( mapPivotRanking_t::value_type( rank, ii ) );
-
-}
 
 void SymbolSelection::WrapUpPivots( setInstrumentInfo_t& selected ) {
   int cnt( 35 );  // select 35 symbols ( => < 3% weighting by symbol )

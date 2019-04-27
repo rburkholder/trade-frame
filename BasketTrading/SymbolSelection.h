@@ -194,7 +194,6 @@ private:
   void CheckForDarvas( const ou::tf::Bars&, IIDarvas&, fSelectedDarvas_t& );
   void CheckFor10Percent( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForVolatility( citerBars begin, citerBars end, const InstrumentInfo& );
-  void CheckForPivot( citerBars begin, citerBars end, const InstrumentInfo& );
   void CheckForRange( citerBars begin, citerBars end, const InstrumentInfo& );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );
