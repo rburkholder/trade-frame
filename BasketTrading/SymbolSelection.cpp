@@ -31,6 +31,12 @@
 
 #include "SymbolSelection.h"
 
+// typically, not cut and dried:
+// for $25 or less: strike intervals are 2.5
+// for $25 or more: strike interval is 5
+// for futures option, typicall 1 or 2
+// for $200 or more: strike intervals are 10
+
 struct AverageVolume {
 private:
   ou::tf::Bar::volume_t m_nTotalVolume;
@@ -43,6 +49,20 @@ public:
     ++m_nNumberOfValues;
   }
   operator ou::tf::Bar::volume_t() { return m_nTotalVolume / m_nNumberOfValues; };
+};
+
+struct VolumeEma {
+private:
+  double dblEmaVolume;
+protected:
+public:
+  VolumeEma() : dblEmaVolume {} {};
+  void operator() ( const ou::tf::Bar& bar ) {
+    static const double dblEmaFactor1( 2.0 / ( 21.0 + 1.0 ) ); // 21 days, could use standard 20 days
+    static const double dblEmaFactor2( 1.0 - dblEmaFactor1 );
+    dblEmaVolume = ( dblEmaFactor1 * dblEmaVolume ) + ( dblEmaFactor2 * (double)bar.Volume() );
+  }
+  operator ou::tf::Bar::volume_t() { return std::floor( dblEmaVolume ); };
 };
 
 template<typename Scenario, typename Function>
@@ -73,10 +93,10 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         bool bReturn( false );
         if ( nMinBars <= bars.Size() ) {
             ou::tf::Bars::const_iterator iterVolume = bars.end() - nMinBars;
-            data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
+            data.nAverageVolume = std::for_each( iterVolume, bars.end(), VolumeEma() );
             if ( ( 1000000 < data.nAverageVolume )
-              && ( 20.0 <= bars.last().Close() )
-              && ( 95.0 >= bars.last().Close() )
+              && ( 20.0 <=  bars.last().Close() )
+              && ( 125.0 >= bars.last().Close() )
               && ( dtEnd.date() == bars.last().DateTime().date() )
               && ( 120 < bars.Size() )
               ) {
