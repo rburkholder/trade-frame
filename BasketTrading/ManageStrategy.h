@@ -160,10 +160,44 @@ private:
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
   ou::ChartEntryIndicator m_ceProfitLoss;
-  ou::ChartEntryIndicator m_ceEma1;
-  ou::ChartEntryIndicator m_ceEma2;
-  ou::ChartEntryIndicator m_ceEma3;
-  ou::ChartEntryIndicator m_ceEma4;
+
+  struct EMA {
+    double dblCoef1;
+    double dblCoef2;
+    double dblEmaLatest;
+
+    ou::ChartEntryIndicator m_ceEma;
+    pcdvStrategyData_t pChartDataView;
+    EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_ )
+    : dblEmaLatest {}, pChartDataView( pChartDataView_ )
+    {
+      dblCoef1 = 2.0 / ( nIntervals + 1 );
+      dblCoef2 = 1.0 - dblCoef1;
+      pChartDataView->Add( 0, &m_ceEma );
+    }
+    EMA( const EMA& rhs )
+    : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
+      pChartDataView( rhs.pChartDataView )//, m_ceEma( std::move( rhs.m_ceEma ) )
+    {
+      pChartDataView->Add( 0, &m_ceEma ); // TODO: fix classes to handle a std::move
+    }
+    ~EMA() {
+      pChartDataView->Remove( 0, &m_ceEma ); // required when moving EMA into vector
+    }
+    double First( boost::posix_time::ptime dt, double value ) {
+      dblEmaLatest = value;
+      m_ceEma.Append( dt, dblEmaLatest );
+      return dblEmaLatest;
+    }
+    double Update( boost::posix_time::ptime dt, double value ) {
+      dblEmaLatest = ( dblCoef1 * dblEmaLatest ) + ( dblCoef2 * value );
+      m_ceEma.Append( dt, dblEmaLatest );
+      return dblEmaLatest;
+    }
+  };
+
+  using vEMA_t = std::vector<EMA>;
+  vEMA_t m_vEMA;
 
   void HandleBarTrades1Sec( const ou::tf::Bar& bar );
   void HandleBarTrades6Sec( const ou::tf::Bar& bar );

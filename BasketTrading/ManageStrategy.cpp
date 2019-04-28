@@ -96,12 +96,10 @@ ManageStrategy::ManageStrategy(
   pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
   pcdvStrategyData->Add( 2, &m_ceProfitLoss );
-  //m_dvChart.Add( 0, &m_ceEma1 );
-  //m_dvChart.Add( 0, &m_ceEma2 );
-  //m_dvChart.Add( 0, &m_ceEma3 );
-  //m_dvChart.Add( 0, &m_ceEma4 );
 
   m_bfTrades1Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades1Sec ) );
+  m_bfTrades6Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades6Sec ) );
+  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
 
   try {
 
@@ -168,7 +166,6 @@ ManageStrategy::ManageStrategy(
 
         //std::cout << m_sUnderlying << " watch done." << std::endl;
 
-        m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
         //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
         pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
         pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
@@ -434,7 +431,18 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
 }
 
 void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
-  //TimeTick( bar );
+  if ( 0 == m_vEMA.size() ) {
+    m_vEMA.push_back( EMA(  5, m_pcdvStrategyData ) );
+    m_vEMA.push_back( EMA( 13, m_pcdvStrategyData ) );
+    m_vEMA.push_back( EMA( 34, m_pcdvStrategyData ) );
+    m_vEMA.push_back( EMA( 89, m_pcdvStrategyData ) );
+    std::for_each( m_vEMA.begin(), m_vEMA.end(), [&bar]( EMA& ema ){ema.First(bar.DateTime(), bar.Close() ); } );
+  }
+  else {
+    std::for_each( m_vEMA.begin(), m_vEMA.end(), [&bar]( EMA& ema ){ema.Update(bar.DateTime(), bar.Close() ); } );
+  }
+  
+  TimeTick( bar );
 }
 
 void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
