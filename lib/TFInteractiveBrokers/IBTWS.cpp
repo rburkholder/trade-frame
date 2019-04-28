@@ -783,7 +783,10 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
     //std::string f( what[6].first, what[6].second );
     //std::string g( what[7].first, what[7].second );
     //std::string h( what[8].first, what[8].second );
-    if ( "CLOSED" == d ) {
+    if ( "CLOSED" == d ) { // set close to be same as open (midnight)
+      dtOpen  = boost::posix_time::from_iso_string( a + b + c + "T" + "00" + "00" + "00" );
+      //dtClose = boost::posix_time::from_iso_string( a + b + c + "T" + "00" + "00" + "00" );
+      dtClose = dtOpen;
     }
     else {
       if ( !boost::regex_match( d.c_str(), what, rxTime ) ) {
@@ -800,15 +803,20 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
         //std::string p( what[ 8].first, what[ 8].second );
         //std::string q( what[ 9].first, what[ 9].second );
         //std::string r( what[10].first, what[10].second );
-        dtOpen  = boost::posix_time::from_iso_string( a + b + c + "T" + i + j + "00" );
-        dtClose = boost::posix_time::from_iso_string( k + l + m + "T" + n + o + "00" );
+        try {
+          dtOpen  = boost::posix_time::from_iso_string( a + b + c + "T" + i + j + "00" );
+          dtClose = boost::posix_time::from_iso_string( k + l + m + "T" + n + o + "00" );
+          if ( dtOpen > dtClose ) { // is this still a valid operation with new IB duration format?
+            dtOpen -= boost::gregorian::date_duration( 1 );
+          }
+        }
+        catch (...) {
+          std::cout << "DecodeMarketHours error: " << i << "-" << j << "-" << k << "-" << l << "-" << m << "-" << n << "-" << o << std::endl;
+        }
       }
     }
   }
-  if ( dtOpen > dtClose ) {
-    dtOpen -= boost::gregorian::date_duration( 1 );
-  }
-  // adjust to previouis day
+  // adjust to previous day (may not be required with new IB format
   /*
   if ( 1 == dtClose.date().day_of_week() ) {  // monday should be friday close
     dtClose -= date_duration( 3 );
