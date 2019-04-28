@@ -186,10 +186,18 @@ bool SignalGenerator::HandleCallBackFilter( mapSymbol_t::iterator& iter, const s
 
 void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const std::string& sObject, const ou::tf::Bars& bars ) {
   // process bars here
+  bool bFoundFirst( false );
   for ( ou::tf::Bars::const_iterator iterBars = bars.begin(); bars.end() != iterBars; ++iterBars ) {
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
     iter->second.prices.Append( price ); // automatically updates indicators
-    iter->second.emaVolume = ( ( iter->second.emaVolume * 19.0 + iterBars->Volume() ) / 20.0 );  // 20 day exponential moving average
+    if ( bFoundFirst ) {
+      iter->second.emaVolume = ( ( iter->second.emaVolume * 19.0 + iterBars->Volume() ) / 20.0 );  // 20 day exponential moving average
+    }
+    else { // preseed a starting value
+      iter->second.emaVolume = iterBars->Volume();
+      bFoundFirst = true;
+    }
+    
   }
 
   ExcelFormat::CellFormat fmtNum( m_fmt_mgr );
