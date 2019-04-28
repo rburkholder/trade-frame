@@ -24,7 +24,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/phoenix/bind/bind_member_function.hpp>
+//#include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <TFTrading/InstrumentManager.h>
@@ -192,10 +192,14 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
   vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   return true;
+}
 
+void AppBasketTrading::HandleTestButton() {
+  CallAfter( std::bind( &MasterPortfolio::Test, m_pMasterPortfolio.get() ) );
 }
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {

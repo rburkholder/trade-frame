@@ -103,7 +103,10 @@ ManageStrategy::ManageStrategy(
 
   try {
 
-    m_fConstructWatch( m_sUnderlying,
+    //std::cout << "Construct Watch: " << m_sUnderlying << std::endl;
+
+    m_fConstructWatch(
+      m_sUnderlying,
       [this,fGatherOptionDefinitions](pWatch_t pWatch){
 
         //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
@@ -122,7 +125,6 @@ ManageStrategy::ManageStrategy(
               mapChains_t::iterator iterChains;
 
               {
-                using fConstructedOption_t = ou::tf::option::IvAtm::fConstructedOption_t;
                 ou::tf::option::IvAtm ivAtm(
                         m_pPositionUnderlying->GetWatch(),
                       // IvAtm::fConstructOption_t
@@ -144,6 +146,8 @@ ManageStrategy::ManageStrategy(
 
               {
                 ou::tf::option::IvAtm& ivAtm( iterChains->second );
+
+                //std::cout << "  option: " << row.sSymbol << std::endl;
 
                 try {
                   switch ( row.eOptionSide ) {
@@ -177,7 +181,30 @@ ManageStrategy::ManageStrategy(
   }
 
   //std::cout << m_sUnderlying << " loading done." << std::endl;
+}
 
+void ManageStrategy::Test() {
+  if ( 0 != m_mapChains.size() ) {
+    ou::tf::option::IvAtm& iv( m_mapChains.begin()->second );
+    double value( 121.5 );
+    iv.EmitValues();
+    try {
+      std::cout << "Put_Itm: "     << iv.Put_Itm( value ) << std::endl;
+      std::cout << "Put_ItmAtm: "  << iv.Put_ItmAtm( value ) << std::endl;
+      std::cout << "Put_Atm: "     << iv.Put_Atm( value ) << std::endl;
+      std::cout << "Put_OtmAtm: "  << iv.Put_OtmAtm( value ) << std::endl;
+      std::cout << "Put_Otm: "     << iv.Put_Otm( value ) << std::endl;
+
+      std::cout << "Call_Itm: "    << iv.Call_Itm( value ) << std::endl;
+      std::cout << "Call_ItmAtm: " << iv.Call_ItmAtm( value ) << std::endl;
+      std::cout << "Call_Atm: "    << iv.Call_Atm( value ) << std::endl;
+      std::cout << "Call_OtmAtm: " << iv.Call_OtmAtm( value ) << std::endl;
+      std::cout << "Call_Otm: "    << iv.Call_Otm( value ) << std::endl;
+    }
+    catch ( std::runtime_error& e ) {
+      std::cout << "runtime error: " << e.what() << std::endl;
+    }
+  }
 }
 
 ManageStrategy::~ManageStrategy( ) {

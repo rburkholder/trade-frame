@@ -100,6 +100,8 @@ public:
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 
+  void Test( void );
+
 protected:
 private:
 
@@ -126,8 +128,7 @@ private:
 
   enumTradingState m_stateTrading;
 
-  typedef std::map<boost::gregorian::date, ou::tf::option::IvAtm> mapChains_t;
-
+  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;
 
   fConstructWatch_t m_fConstructWatch;

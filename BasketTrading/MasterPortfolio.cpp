@@ -113,6 +113,10 @@ void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, 
   m_ceCommissionPaid.Append( dt, dblCommissionPaid );
 }
 
+void MasterPortfolio::Test() {
+  std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(), [](mapStrategy_t::value_type& vt){vt.second.pManageStrategy->Test();});
+}
+
 void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   if ( !m_mapStrategy.empty() ) {
     std::cout << "MasterPortfolio: already loaded." << std::endl;

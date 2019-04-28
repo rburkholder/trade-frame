@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   AtmIv.h
  * Author: raymond@burkholder.net
  *
@@ -31,29 +31,29 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
-  
+
 // will deprecate the code in Bundle
 
 class IvAtm {
 public:
-  
-  typedef Option::pInstrument_t pInstrument_t;
-  typedef Option::pWatch_t pWatch_t;
-  typedef Option::pOption_t pOption_t;
 
-  typedef ou::tf::PriceIV PriceIV;
+  using pInstrument_t = Option::pInstrument_t;
+  using pWatch_t = Option::pWatch_t;
+  using pOption_t = Option::pOption_t;
 
-  typedef std::function<void(pOption_t)> fConstructedOption_t;
-  typedef std::function<void(const std::string&,pInstrument_t,fConstructedOption_t)> fConstructOption_t; // construct pOption_t from IQFeed Symbol name, with or without IB contract
+  using PriceIV = ou::tf::PriceIV;
 
-  typedef std::function<void(pOption_t,pWatch_t)> fStartCalc_t;
-  typedef std::function<void(pOption_t,pWatch_t)> fStopCalc_t;
+  using fConstructedOption_t = std::function<void(pOption_t)>;
+  using fConstructOption_t = std::function<void(const std::string&,pInstrument_t,fConstructedOption_t)>; // construct pOption_t from IQFeed Symbol name, with or without IB contract
+
+  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>;
+  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>;
 
   IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   IvAtm( IvAtm&& rhs );
   virtual ~IvAtm( );
 
-  typedef std::function<void(const PriceIV&)> fOnPriceIV_t;
+  using fOnPriceIV_t = std::function<void(const PriceIV&)>;
 
   void CalcIvAtm( ptime dtNow, fOnPriceIV_t& );
 
@@ -71,13 +71,13 @@ public:
   double Put_Atm( double );
   double Put_OtmAtm( double );
   double Put_Otm( double );
-  
+
   double Call_Itm( double );
   double Call_ItmAtm( double );
   double Call_Atm( double );
   double Call_OtmAtm( double );
   double Call_Otm( double );
-  
+
 protected:
 private:
 
@@ -90,32 +90,32 @@ private:
     bool bStarted;
     OptionsAtStrike(): bStarted( false ) {}
     OptionsAtStrike( OptionsAtStrike&& rhs )
-    : sCall( std::move( rhs.sCall ) ), 
+    : sCall( std::move( rhs.sCall ) ),
       pCall( std::move( rhs.pCall ) ),
       sPut( std::move( rhs.sPut ) ),
       pPut( std::move( rhs.pPut ) ),
       bStarted( rhs.bStarted )
     { }
-    
+
     void Start( fStartCalc_t& fStart, pWatch_t pWatchUnderlying, fConstructOption_t& fConstruct ) {
       assert( !bStarted );
-      
+
       pInstrument_t pInstrumentUnderlying = pWatchUnderlying->GetInstrument();
-      
+
       if ( nullptr == pCall.get() ) {
-        fConstruct( sCall, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){ 
-          pCall = pOption; 
+        fConstruct( sCall, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){
+          pCall = pOption;
           fStart( pCall, pWatchUnderlying );
         } );
       }
-      
+
       if ( nullptr == pPut.get() ) {
-        fConstruct( sPut, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){ 
+        fConstruct( sPut, pInstrumentUnderlying, [this,pWatchUnderlying,fStart](pOption_t pOption){
           pPut = pOption;
          fStart( pPut, pWatchUnderlying );
         } );
       }
-      
+
       bStarted = true;
     }
     void Stop( fStopCalc_t& fStop, pWatch_t pUnderlying ) {
@@ -129,21 +129,21 @@ private:
       if ( nullptr != pPut.get() ) pPut->SaveSeries( sPrefix );
     }
   };
-  
-  typedef std::map<double, OptionsAtStrike> mapChain_t;
-  
+
+  using mapChain_t = std::map<double, OptionsAtStrike>;
+
   mapChain_t::iterator m_iterUpper;
   mapChain_t::iterator m_iterMid;
   mapChain_t::iterator m_iterLower;
-  
+
   mapChain_t m_mapChain;
-  
+
   double m_dblUpperTrigger;
   double m_dblLowerTrigger;
-  
+
   pWatch_t m_pWatchUnderlying;
   fConstructOption_t m_fConstructOption;
-  
+
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
 
@@ -152,18 +152,18 @@ private:
 
   static const size_t StrikeUpper = 1;
   static const size_t StrikeLower = 0;
-  typedef std::tuple<double,double> tupleAdjacentStrikes_t;
-  
+  using tupleAdjacentStrikes_t = std::tuple<double,double>;
+
   ou::tf::PriceIVs m_tsIvAtm;
-  
+
   double CurrentUnderlying() const { return m_pWatchUnderlying->LastQuote().Midpoint(); }
-  
+
   mapChain_t::const_iterator FindStrike( const double strike ) const;
   mapChain_t::iterator FindStrike( const double strike );
   tupleAdjacentStrikes_t FindAdjacentStrikes() const;
   void RecalcATMWatch( double dblUnderlying );
   void UpdateATMWatch( double dblUnderlying );
-  
+
   void SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix86400sec );
 
 };

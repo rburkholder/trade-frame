@@ -70,6 +70,8 @@ public:
   void Stop( void );
   void SaveSeries( const std::string& sPath );
 
+  void Test( void );
+
 protected:
 private:
 

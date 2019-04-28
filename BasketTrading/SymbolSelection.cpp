@@ -116,7 +116,9 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
       [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
         Scenario ii( sObjectName, bars.last() );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
-        fCheck( bars, ii );
+        //if ( "GLD" == sObjectName ) {
+          fCheck( bars, ii );
+        //}
         //          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
         //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
         //          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );

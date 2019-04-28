@@ -106,6 +106,7 @@ private:
   void HandleExitPositionsButton( void );
   void HandleStopButton( void );
   void HandleSaveButton( void );
+  void HandleTestButton( void );
 
   void HandlePopulateDatabase( void );
 
