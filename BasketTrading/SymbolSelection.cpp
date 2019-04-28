@@ -53,14 +53,21 @@ public:
 
 struct VolumeEma {
 private:
+  bool bFirstFound;
   double dblEmaVolume;
 protected:
 public:
-  VolumeEma() : dblEmaVolume {} {};
+  VolumeEma() : bFirstFound( false ), dblEmaVolume {} {};
   void operator() ( const ou::tf::Bar& bar ) {
     static const double dblEmaFactor1( 2.0 / ( 21.0 + 1.0 ) ); // 21 days, could use standard 20 days
     static const double dblEmaFactor2( 1.0 - dblEmaFactor1 );
-    dblEmaVolume = ( dblEmaFactor1 * dblEmaVolume ) + ( dblEmaFactor2 * (double)bar.Volume() );
+    if ( bFirstFound ) {
+      dblEmaVolume = ( dblEmaFactor1 * dblEmaVolume ) + ( dblEmaFactor2 * (double)bar.Volume() );
+    }
+    else {
+      dblEmaVolume = (double)bar.Volume();
+      bFirstFound = true;
+    }
   }
   operator ou::tf::Bar::volume_t() { return std::floor( dblEmaVolume ); };
 };
