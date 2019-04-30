@@ -42,6 +42,8 @@
 class MasterPortfolio {
 public:
 
+  enum class EStrategyChart { Root, Active, Info };
+
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pPortfolio_t =  ou::tf::PortfolioManager::pPortfolio_t;
   using pPosition_t = ou::tf::PortfolioManager::pPosition_t;
@@ -53,7 +55,7 @@ public:
   using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
   using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
-  using fSupplyStrategyChart_t = std::function<void(const std::string&,pChartDataView_t)>;
+  using fSupplyStrategyChart_t = std::function<void(EStrategyChart,const std::string&,pChartDataView_t)>;
 
   MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
@@ -124,9 +126,11 @@ private:
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
-    Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_ )
-      : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
-        priceOpen {}, dblBestProbability {}
+    pChartDataView_t pChartDataView;
+    Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
+    : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
+      pChartDataView( pChartDataView_ ),
+      priceOpen {}, dblBestProbability {}
     {}
 //    const Strategy& operator=( const Strategy&& rhs) {
 //      iip = std::move( rhs.iip );

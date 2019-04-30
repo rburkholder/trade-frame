@@ -69,6 +69,10 @@ void PanelFinancialChart::CreateControls() {
   // tree
   //wxTreeCtrl* tree;
   m_pTree = new wxTreeCtrl( pSplitter );
+  m_idRoot =   m_pTree->AddRoot( "to be updated", -1, -1, nullptr );
+  m_idActive = m_pTree->AppendItem( m_idRoot, "Active", -1, -1, nullptr );
+  m_idInfo =   m_pTree->AppendItem( m_idRoot, "Info", -1, -1, nullptr );
+  m_pTree->ExpandAll();
   //m_eLatestDatumType = CustomItemData::NoDatum;
   //wxTreeItemId idRoot = m_pTree->AddRoot( "Total P/L", -1, -1, new CustomItemData( CustomItemData::PL ) );
   m_pTree->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelFinancialChart::HandleTreeEventItemActivated, this, m_pTree->GetId() );
@@ -102,25 +106,40 @@ void PanelFinancialChart::CreateControls() {
   Bind( wxEVT_CLOSE_WINDOW, &PanelFinancialChart::OnClose, this );  // start close of windows and controls
 }
 
-void PanelFinancialChart::Append( const std::string& sName, ou::ChartDataView::pChartDataView_t pChartDataView ) {
+void PanelFinancialChart::UpdateRoot( const std::string& sName, ou::ChartDataView::pChartDataView_t pChartDataView ) {
   // NOTE: CustomItemData is automatically deleted during destruction of Item.
-  wxTreeItemId idRoot = m_pTree->GetRootItem();
-  if ( idRoot.IsOk() ) {
-    wxTreeItemId idCurrent = m_pTree->AppendItem( idRoot, sName, -1, -1, new CustomItemData( pChartDataView ) );
-  }
-  else {
-    idRoot = m_pTree->AddRoot( sName, -1, -1, new CustomItemData( pChartDataView ) );
-  }
+  m_pTree->SetItemText( m_idRoot, sName );
+  m_pTree->SetItemData( m_idRoot, new CustomItemData( pChartDataView ) );
+}
+
+void PanelFinancialChart::AppendActive( const std::string& sName, ou::ChartDataView::pChartDataView_t pChartDataView ) {
+  // NOTE: CustomItemData is automatically deleted during destruction of Item.
+  wxTreeItemId idCurrent = m_pTree->AppendItem( m_idActive, sName, -1, -1, new CustomItemData( pChartDataView ) );
+  m_pTree->SortChildren( m_idActive );
+}
+
+void PanelFinancialChart::AppendInfo( const std::string& sName, ou::ChartDataView::pChartDataView_t pChartDataView ) {
+  // NOTE: CustomItemData is automatically deleted during destruction of Item.
+  wxTreeItemId idCurrent = m_pTree->AppendItem( m_idInfo, sName, -1, -1, new CustomItemData( pChartDataView ) );
 }
 
 void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
-  wxTreeItemId id = event.GetItem();
-  CustomItemData* pdata = dynamic_cast<CustomItemData*>( m_pTree->GetItemData( id ) );
-  if ( pdata->m_pChartDataView ) {
-    m_pWinChartView->SetChartDataView( pdata->m_pChartDataView.get() );
+  //wxTreeItemId id = event.GetItem();
+  wxTreeItemData* pData = m_pTree->GetItemData( ( event.GetItem() ) );
+  if ( nullptr != pData ) {
+    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+    if ( pCustom->m_pChartDataView ) {
+      m_pWinChartView->SetChartDataView( pCustom->m_pChartDataView.get() );
+    }
+    else {
+      std::cout << "no chart data (1)" << std::endl;
+      m_pWinChartView->SetChartDataView( nullptr );
+
+    }
   }
   else {
-    std::cout << "no chart data" << std::endl;
+    std::cout << "no chart data (2)" << std::endl;
+    m_pWinChartView->SetChartDataView( nullptr );
   }
   event.Skip();
 }

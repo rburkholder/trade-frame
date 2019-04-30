@@ -91,6 +91,10 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
   assert( pcdvStrategyData );
+
+  m_cePrice.SetName( "Price" );
+  m_ceVolume.SetName( "Volume" );
+  m_ceProfitLoss.SetName( "Profit/Loss" );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
   pcdvStrategyData->Add( 0, &m_cePivots );
@@ -252,7 +256,6 @@ void ManageStrategy::Start( ETradeDirection direction ) {
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
   }
   else {
-
     if ( 0 == m_dblFundsToTrade ) {
       std::cout << m_sUnderlying << " not started, no funds" << std::endl;
       m_stateTrading = TSNoMore;

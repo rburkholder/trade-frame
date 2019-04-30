@@ -148,8 +148,19 @@ bool AppBasketTrading::OnInit() {
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
     },
-    [this](const std::string& sName, pChartDataView_t pChartDataView){
-      m_pPanelFinancialChart->Append( sName, pChartDataView );
+    [this](MasterPortfolio::EStrategyChart esc, const std::string& sName, pChartDataView_t pChartDataView){
+      switch ( esc ) {
+        case MasterPortfolio::EStrategyChart::Root:
+          m_pPanelFinancialChart->UpdateRoot( sName, pChartDataView );
+          break;
+        case MasterPortfolio::EStrategyChart::Active:
+          m_pPanelFinancialChart->AppendActive( sName, pChartDataView );
+          break;
+        case MasterPortfolio::EStrategyChart::Info:
+          m_pPanelFinancialChart->AppendInfo( sName, pChartDataView );
+          break;
+      }
+      
     },
     m_pPortfolioStrategyAggregate
     ) );
@@ -174,9 +185,9 @@ bool AppBasketTrading::OnInit() {
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
   vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
-  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) );
+  //vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
-  //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) );
+  //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   return true;

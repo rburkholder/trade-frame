@@ -51,8 +51,9 @@ public:
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
 
-  // first item is set as root
-  void Append( const std::string& sName, pChartDataView_t );
+  void UpdateRoot( const std::string& sName, pChartDataView_t );
+  void AppendActive( const std::string& sName, pChartDataView_t );
+  void AppendInfo( const std::string& sName, pChartDataView_t );
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
@@ -79,6 +80,10 @@ private:
 
   wxTreeCtrl* m_pTree;
   WinChartView* m_pWinChartView; // handles drawing the chart
+
+  wxTreeItemId m_idRoot;
+  wxTreeItemId m_idActive;
+  wxTreeItemId m_idInfo;
 
   void Init();
   void CreateControls();

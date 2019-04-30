@@ -167,11 +167,13 @@ private:
     double dblCoef1;
     double dblCoef2;
     double dblEmaLatest;
+    enum class State { falling, same, rising };
+    State state;
 
     ou::ChartEntryIndicator m_ceEma;
     pcdvStrategyData_t pChartDataView;
     EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_, ou::Colour::enumColour colour )
-    : dblEmaLatest {}, pChartDataView( pChartDataView_ )
+    : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same )
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );
       dblCoef2 = 1.0 - dblCoef1;
@@ -180,6 +182,7 @@ private:
     }
     EMA( const EMA& rhs )
     : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
+      state( rhs.state ),
       pChartDataView( rhs.pChartDataView )//, m_ceEma( std::move( rhs.m_ceEma ) )
     {
       pChartDataView->Add( 0, &m_ceEma ); // TODO: fix classes to handle a std::move
@@ -194,7 +197,14 @@ private:
       return dblEmaLatest;
     }
     double Update( boost::posix_time::ptime dt, double value ) {
+      double dblPrevious( dblEmaLatest );
       dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+      if ( dblEmaLatest == dblPrevious ) {
+        state = State::same;
+      }
+      else {
+        state = ( dblEmaLatest > dblPrevious ) ? State::rising : State::falling;
+      }
       m_ceEma.Append( dt, dblEmaLatest );
       return dblEmaLatest;
     }

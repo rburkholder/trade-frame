@@ -68,12 +68,22 @@ MasterPortfolio::MasterPortfolio(
       assert( 0 ); // need the iqfeed provider
   }
 
+  m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
+  m_cePLUnRealized.SetColour( ou::Colour::Lavender );
+  m_cePLRealized.SetColour( ou::Colour::MediumSlateBlue );
+  m_ceCommissionPaid.SetColour( ou::Colour::SteelBlue );
+
+  m_cePLCurrent.SetName( "P/L Current" );
+  m_cePLUnRealized.SetName( "P/L UnRealized" );
+  m_cePLRealized.SetName( "P/L Realized" );
+  m_ceCommissionPaid.SetName( "Commissions Paid" );
+
   m_pChartDataView.reset( new ou::ChartDataView );
   m_pChartDataView->Add( 0, &m_cePLCurrent );
   m_pChartDataView->Add( 0, &m_cePLUnRealized );
   m_pChartDataView->Add( 0, &m_cePLRealized );
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
-  m_fSupplyStrategyChart( "Master P/L", m_pChartDataView );
+  m_fSupplyStrategyChart( EStrategyChart::Root, "Master P/L", m_pChartDataView );
 
   std::stringstream ss;
   ss.str( "" );
@@ -332,10 +342,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );
 
     std::string sName( iip.sName );
-    Strategy strategy( std::move( iip ), std::move( pManageStrategy ) );
+    Strategy strategy( std::move( iip ), std::move( pManageStrategy ), pChartDataView );
     m_mapStrategy.insert( mapStrategy_t::value_type( sName, std::move( strategy ) ) ); // lookup needs to come before move
 
-    m_fSupplyStrategyChart( sName, pChartDataView );
+    m_fSupplyStrategyChart( EStrategyChart::Info, sName, pChartDataView );
 
 } // AddSymbol
 
@@ -382,11 +392,12 @@ void MasterPortfolio::Start() {
                 assert( 0 );
                 break;
             }
+            m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
+            nToSelect--;
           }
-          nToSelect--;
         }
       } );
-    std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
+    std::cout << "Total Shares to be traded: " << m_nSharesTrading << std::endl;
   }
 
 } // Start
