@@ -170,18 +170,20 @@ private:
 
     ou::ChartEntryIndicator m_ceEma;
     pcdvStrategyData_t pChartDataView;
-    EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_ )
+    EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_, ou::Colour::enumColour colour )
     : dblEmaLatest {}, pChartDataView( pChartDataView_ )
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );
       dblCoef2 = 1.0 - dblCoef1;
       pChartDataView->Add( 0, &m_ceEma );
+      m_ceEma.SetColour( colour );
     }
     EMA( const EMA& rhs )
     : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
       pChartDataView( rhs.pChartDataView )//, m_ceEma( std::move( rhs.m_ceEma ) )
     {
       pChartDataView->Add( 0, &m_ceEma ); // TODO: fix classes to handle a std::move
+      m_ceEma.SetColour( rhs.m_ceEma.GetColour() );
     }
     ~EMA() {
       pChartDataView->Remove( 0, &m_ceEma ); // required when moving EMA into vector

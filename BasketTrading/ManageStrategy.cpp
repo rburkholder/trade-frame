@@ -460,10 +460,10 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
 void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
-    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pcdvStrategyData ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pcdvStrategyData ) );
+    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::SpringGreen ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData, ou::Colour::SeaGreen ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pcdvStrategyData, ou::Colour::ForestGreen ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pcdvStrategyData, ou::Colour::DarkGreen ) );
     std::for_each(
       m_vEMA.begin(), m_vEMA.end(),
       [&bar]( pEMA_t& p ){
