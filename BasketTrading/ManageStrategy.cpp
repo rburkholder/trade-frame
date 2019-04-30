@@ -78,7 +78,13 @@ ManageStrategy::ManageStrategy(
   m_bfTrades1Sec( 1 ),
   m_bfTrades6Sec( 6 ),
   m_bfTrades60Sec( 60 ),
-  m_pcdvStrategyData( pcdvStrategyData )
+  m_pcdvStrategyData( pcdvStrategyData ),
+  m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
+  m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
+  m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
+  m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
+  m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
+  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -100,6 +106,13 @@ ManageStrategy::ManageStrategy(
   pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
   pcdvStrategyData->Add( 2, &m_ceProfitLoss );
+
+  pcdvStrategyData->Add( 0, &m_ceShortEntries );
+  pcdvStrategyData->Add( 0, &m_ceLongEntries );
+  pcdvStrategyData->Add( 0, &m_ceShortFills );
+  pcdvStrategyData->Add( 0, &m_ceLongFills );
+  pcdvStrategyData->Add( 0, &m_ceShortExits );
+  pcdvStrategyData->Add( 0, &m_ceLongExits );
 
   m_bfTrades1Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades1Sec ) );
   m_bfTrades6Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades6Sec ) );
@@ -405,6 +418,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       pEMA_t& pEMA( m_vEMA.back() );
       if ( trade.Price() < pEMA->dblEmaLatest ) {
         m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
         std::cout << m_sUnderlying << " closing long" << std::endl;
         m_stateTrading = TSWaitForEntry;
       }
@@ -414,6 +428,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       pEMA_t& pEMA( m_vEMA.back() );
       if ( trade.Price() > pEMA->dblEmaLatest ) {
         m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
         std::cout << m_sUnderlying << " closing short" << std::endl;
         m_stateTrading = TSWaitForEntry;
       }
@@ -454,11 +469,13 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
         if ( bAllRising ) {
           std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
           m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+          m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
           m_stateTrading = TSMonitorLong;
         }
         if ( bAllFalling ) {
           std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
           m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+          m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
           m_stateTrading = TSMonitorShort;
         }
       }

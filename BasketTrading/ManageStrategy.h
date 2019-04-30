@@ -164,6 +164,13 @@ private:
   ou::ChartEntryMark m_cePivots;
   ou::ChartEntryIndicator m_ceProfitLoss;
 
+  ou::ChartEntryShape m_ceShortEntries;
+  ou::ChartEntryShape m_ceLongEntries;
+  ou::ChartEntryShape m_ceShortFills;
+  ou::ChartEntryShape m_ceLongFills;
+  ou::ChartEntryShape m_ceShortExits;
+  ou::ChartEntryShape m_ceLongExits;
+
   struct EMA {
     double dblCoef1;
     double dblCoef2;
