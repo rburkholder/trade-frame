@@ -185,7 +185,7 @@ bool AppBasketTrading::OnInit() {
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
   vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
-  //vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
+  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
@@ -270,7 +270,7 @@ void AppBasketTrading::HandleStopButton(void) {
 }
 
 void AppBasketTrading::HandleExitPositionsButton(void) {
-  // to implement
+  m_pMasterPortfolio->Stop();
 }
 
 void AppBasketTrading::HandleSaveButton(void) {

@@ -76,11 +76,11 @@ template<typename Scenario, typename Function>
 void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
 
   struct data_t {
-    ou::tf::Bar::volume_t nAverageVolume;
+    ou::tf::Bar::volume_t volumeEma;
     size_t nEnteredFilter;
     size_t nPassedFilter;
     data_t()
-      : nAverageVolume {}, nEnteredFilter {}, nPassedFilter {}
+      : volumeEma {}, nEnteredFilter {}, nPassedFilter {}
       {}
   };
 
@@ -100,8 +100,8 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         bool bReturn( false );
         if ( nMinBars <= bars.Size() ) {
             ou::tf::Bars::const_iterator iterVolume = bars.end() - nMinBars;
-            data.nAverageVolume = std::for_each( iterVolume, bars.end(), VolumeEma() );
-            if ( ( 1000000 < data.nAverageVolume )
+            data.volumeEma = std::for_each( iterVolume, bars.end(), VolumeEma() );
+            if ( ( 1000000 < data.volumeEma )
               && ( 20.0 <=  bars.last().Close() )
               && ( 125.0 >= bars.last().Close() )
               && ( dtEnd.date() == bars.last().DateTime().date() )
@@ -114,7 +114,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         return bReturn;
       },
       [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
-        Scenario ii( sObjectName, bars.last() );
+        Scenario ii( sObjectName, bars.last(), data.volumeEma );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
         //if ( "GLD" == sObjectName ) {
           fCheck( bars, ii );

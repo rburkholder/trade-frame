@@ -147,14 +147,17 @@ private:
     {}
   };
 
-  enum class EAllocate { Waiting, Process, Done };
+  //enum class EAllocate { Waiting, Process, Done };
 
-  EAllocate m_eAllocate;
-  using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
-  mapPivotProbability_t m_mapPivotProbability;
+  //EAllocate m_eAllocate;
+  //using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
+  //mapPivotProbability_t m_mapPivotProbability;
 
-  typedef std::map<std::string,Strategy> mapStrategy_t;
+  using mapStrategy_t = std::map<std::string,Strategy>;
   mapStrategy_t m_mapStrategy;
+
+  using mapVolume_t = std::multimap<volume_t, std::string>; // string is name of instrument
+  mapVolume_t m_mapVolumeRanking;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;

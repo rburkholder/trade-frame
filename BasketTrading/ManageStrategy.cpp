@@ -243,9 +243,10 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
   return nUnderlyingSharesToTrade;
 }
 
-void ManageStrategy::Start( ETradeDirection direction ) {
+//void ManageStrategy::Start( ETradeDirection direction ) {
+void ManageStrategy::Start(  ) {
 
-  m_eTradeDirection = direction;
+  //m_eTradeDirection = direction;
 
   //std::cout << m_sUnderlying << " starting up ... " << std::endl;
 
@@ -273,7 +274,6 @@ void ManageStrategy::Start( ETradeDirection direction ) {
 //      }
     }
   }
-
 }
 
 void ManageStrategy::Stop( void ) {
@@ -304,6 +304,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
+      if ( false )
       {
         boost::gregorian::date date( quote.DateTime().date() );
         mapChains_t::iterator iterChains = std::find_if( m_mapChains.begin(), m_mapChains.end(),
@@ -397,13 +398,73 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       m_stateTrading = TSWaitForCalc;
       break;
     case TSWaitForCalc:
+      break;
     case TSWaitForEntry:
+      break;
+    case TSMonitorLong: {
+      pEMA_t& pEMA( m_vEMA.back() );
+      if ( trade.Price() < pEMA->dblEmaLatest ) {
+        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        std::cout << m_sUnderlying << " closing long" << std::endl;
+        m_stateTrading = TSWaitForEntry;
+      }
+      }
+      break;
+    case TSMonitorShort: {
+      pEMA_t& pEMA( m_vEMA.back() );
+      if ( trade.Price() > pEMA->dblEmaLatest ) {
+        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        std::cout << m_sUnderlying << " closing short" << std::endl;
+        m_stateTrading = TSWaitForEntry;
+      }
+      }
+      break;
     default:
       break;
   }
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars
+  switch ( m_stateTrading ) {
+    case TSWaitForEntry: {
+      bool bFirstFound( false );
+      double dblPrevious {};
+      bool bAllRising( true );
+      bool bAllFalling( true );
+      std::for_each(
+        m_vEMA.begin(), m_vEMA.end(),
+        [&,this]( pEMA_t& p ){
+          if ( bFirstFound ) {
+            double dblLatest = p->dblEmaLatest;
+            bAllRising  &= dblLatest > dblPrevious;
+            bAllFalling &= dblLatest < dblPrevious;
+            dblPrevious = dblLatest;
+          }
+          else {
+            dblPrevious = p->dblEmaLatest;
+            bFirstFound = true;
+          }
+          bAllRising  &= EMA::State::rising == p->state;
+          bAllFalling &= EMA::State::falling == p->state;
+      } );
+      if ( bAllRising && bAllFalling ) {
+        std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
+      }
+      else {
+        if ( bAllRising ) {
+          std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
+          m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+          m_stateTrading = TSMonitorLong;
+        }
+        if ( bAllFalling ) {
+          std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
+          m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+          m_stateTrading = TSMonitorShort;
+        }
+      }
+      }
+      break;
+  }
 }
 
 void ManageStrategy::HandleCancel( void ) {
@@ -423,7 +484,7 @@ void ManageStrategy::HandleGoNeutral( void ) {
     case TSNoMore:
       break;
     default:
-      std::cout << m_sUnderlying << " close" << std::endl;
+      std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
       if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->ClosePosition();
       break;

@@ -42,8 +42,8 @@ MasterPortfolio::MasterPortfolio(
     m_pMasterPortfolio( pMasterPortfolio ),
     m_pExec( pExec ),
     m_pData1( pData1 ),
-    m_pData2( pData2 ),
-    m_eAllocate( EAllocate::Waiting )
+    m_pData2( pData2 )//,
+    //m_eAllocate( EAllocate::Waiting )
 {
   assert( nullptr != m_fOptionNamesByUnderlying );
   assert( nullptr != m_fGetTableRowDef );
@@ -69,7 +69,7 @@ MasterPortfolio::MasterPortfolio(
   }
 
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
-  m_cePLUnRealized.SetColour( ou::Colour::Lavender );
+  m_cePLUnRealized.SetColour( ou::Colour::DarkCyan );
   m_cePLRealized.SetColour( ou::Colour::MediumSlateBlue );
   m_ceCommissionPaid.SetColour( ou::Colour::SteelBlue );
 
@@ -314,21 +314,21 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             assert( m_mapStrategy.end() != iter );
             Strategy& strategy( iter->second );
             strategy.priceOpen = trade.Price();
-            IIPivot::Pair pair = strategy.iip.Test( trade.Price() );
-            strategy.dblBestProbability = pair.first;
-            std::cout << "FirstTrade " << m_mapPivotProbability.size() << " - " << strategy.iip.sName << ": " << (int)pair.second << ", " << pair.first << std::endl;
-            if ( IIPivot::Direction::Unknown != pair.second ) {
-              switch ( m_eAllocate ) {
-                case EAllocate::Waiting:
-                  //mapPivotProbability_t::iterator iterRanking =
-                    m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
-                  break;
-                case EAllocate::Process:
-                  break;
-                case EAllocate::Done:
-                  break;
-              }
-            }
+            //IIPivot::Pair pair = strategy.iip.Test( trade.Price() );
+            //strategy.dblBestProbability = pair.first;
+            //std::cout << "FirstTrade " << m_mapPivotProbability.size() << " - " << strategy.iip.sName << ": " << (int)pair.second << ", " << pair.first << std::endl;
+            //if ( IIPivot::Direction::Unknown != pair.second ) {
+            //  switch ( m_eAllocate ) {
+            //    case EAllocate::Waiting:
+            //      //mapPivotProbability_t::iterator iterRanking =
+            //        m_mapPivotProbability.insert( mapPivotProbability_t::value_type( pair.first, Ranking( strategy.iip.sName, pair.second ) ) );
+            //      break;
+            //    case EAllocate::Process:
+            //      break;
+            //    case EAllocate::Done:
+            //      break;
+            //  }
+            //}
           },
     // ManageStrategy::m_fBar (60 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
@@ -340,6 +340,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
       );
 
     pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );
+
+    m_mapVolumeRanking.insert( mapVolume_t::value_type( iip.volumeEma, iip.sName ) );
 
     std::string sName( iip.sName );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ), pChartDataView );
@@ -360,39 +362,42 @@ void MasterPortfolio::Start() {
   }
   else {
     m_bStarted = true;
-    m_eAllocate = EAllocate::Done;
+    //m_eAllocate = EAllocate::Done;
     double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
     std::cout << "Starting allocations at " << dblAmountToTradePerInstrument << " per instrument." << std::endl;
     size_t nToSelect( 33 );
     std::for_each(
-      m_mapPivotProbability.rbegin(),
-      m_mapPivotProbability.rend(),
-      [this,&nToSelect,dblAmountToTradePerInstrument](mapPivotProbability_t::value_type& vt){
+      m_mapVolumeRanking.rbegin(),
+      m_mapVolumeRanking.rend(),
+      [this,&nToSelect,dblAmountToTradePerInstrument](mapVolume_t::value_type& vt){
         if ( 0 < nToSelect ) {
-          Ranking& ranking( vt.second );
-          Strategy& strategy( m_mapStrategy.find( ranking.sName )->second );
+          //Ranking& ranking( vt.second );
+          std::string sName( vt.second );
+          Strategy& strategy( m_mapStrategy.find( sName )->second );
           ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-          std::cout 
-            << strategy.iip.sName
-            << " ranking=" << strategy.dblBestProbability
-            << " direction=" << (int)ranking.direction
-            << " volume=" << volume
-            << std::endl;
           if ( 100 <= volume ) {
+            std::cout
+              << strategy.iip.sName
+              //<< " ranking=" << strategy.dblBestProbability
+              //<< " direction=" << (int)ranking.direction
+              << " to trade: " << volume
+              << std::endl;
             strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
             m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-            switch ( ranking.direction ) {
-              case IIPivot::Direction::Up:
-                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
-                break;
-              case IIPivot::Direction::Down:
-                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
-                break;
-              case IIPivot::Direction::Unknown:
-                assert( 0 );
-                break;
-            }
-            m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
+            strategy.pManageStrategy->Start();
+//            switch ( ranking.direction ) {
+//              case IIPivot::Direction::Up:
+//                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
+//                break;
+//              case IIPivot::Direction::Down:
+//                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
+//                break;
+//              case IIPivot::Direction::Unknown:
+//                assert( 0 );
+//                break;
+//            }
+            //m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
+            m_fSupplyStrategyChart( EStrategyChart::Active, sName, strategy.pChartDataView );
             nToSelect--;
           }
         }
@@ -407,7 +412,7 @@ void MasterPortfolio::Stop( void ) {
                 [](mapStrategy_t::value_type& pair){
                   Strategy& strategy( pair.second );
 //                  if ( strategy.pManageStrategy->ToBeTraded() ) {
-//                    strategy.pManageStrategy->Stop();
+                    strategy.pManageStrategy->Stop();
 //                  }
                 } );
 }

@@ -23,12 +23,18 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 
+using volume_t = ou::tf::DatedDatum::volume_t;
+
 struct InstrumentInfo {
   const std::string sName;
+  volume_t volumeEma;
   const ou::tf::Bar bar; // last bar in series for closing/ pivot calcs
 
+  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_, volume_t volumeEma_ )
+    : sName( sName_ ), bar( bar_ ), volumeEma( volumeEma_ )
+    {}
   InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_ )
-    : sName( sName_ ), bar( bar_ )
+    : sName( sName_ ), bar( bar_ ), volumeEma {}
     {}
   InstrumentInfo( const InstrumentInfo& rhs )
     : sName( rhs.sName ), bar( rhs.bar )
@@ -43,8 +49,8 @@ struct InstrumentInfo {
 
 struct IIDarvas: InstrumentInfo {
   double dblStop;  // calculated stop price, if any
-  IIDarvas( const std::string& sName, const ou::tf::Bar& bar )
-    : InstrumentInfo( sName, bar ), dblStop{}
+  IIDarvas( const std::string& sName, const ou::tf::Bar& bar, volume_t volumeEma_ )
+    : InstrumentInfo( sName, bar, volumeEma_ ), dblStop{}
   {}
 };
 
@@ -63,8 +69,8 @@ struct IIPivot: InstrumentInfo {
   double dblProbabilityAboveAndDown;
   double dblProbabilityBelowAndUp;
   double dblProbabilityBelowAndDown;
-  IIPivot( const std::string& sName, const ou::tf::Bar& bar )
-    : InstrumentInfo( sName, bar ),
+  IIPivot( const std::string& sName, const ou::tf::Bar& bar, volume_t volumeEma_ )
+    : InstrumentInfo( sName, bar, volumeEma_ ),
       dblR1 {}, dblPV {}, dblS1 {},
       dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
       dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}

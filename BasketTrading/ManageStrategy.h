@@ -97,7 +97,8 @@ public:
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
   //bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
   void SetPivots( double dblS1, double dblPV, double dblR1 );
-  void Start( ETradeDirection );
+  //void Start( ETradeDirection );
+  void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 
