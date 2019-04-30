@@ -194,7 +194,7 @@ private:
       return dblEmaLatest;
     }
     double Update( boost::posix_time::ptime dt, double value ) {
-      dblEmaLatest = ( dblCoef1 * dblEmaLatest ) + ( dblCoef2 * value );
+      dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
       m_ceEma.Append( dt, dblEmaLatest );
       return dblEmaLatest;
     }

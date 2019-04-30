@@ -197,7 +197,6 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
       iter->second.emaVolume = iterBars->Volume();
       bFoundFirst = true;
     }
-    
   }
 
   ExcelFormat::CellFormat fmtNum( m_fmt_mgr );

@@ -62,7 +62,7 @@ public:
     static const double dblEmaFactor1( 2.0 / ( 21.0 + 1.0 ) ); // 21 days, could use standard 20 days
     static const double dblEmaFactor2( 1.0 - dblEmaFactor1 );
     if ( bFirstFound ) {
-      dblEmaVolume = ( dblEmaFactor1 * dblEmaVolume ) + ( dblEmaFactor2 * (double)bar.Volume() );
+      dblEmaVolume = ( dblEmaFactor1 * (double)bar.Volume() ) + ( dblEmaFactor2 * dblEmaVolume );
     }
     else {
       dblEmaVolume = (double)bar.Volume();
