@@ -22,6 +22,7 @@
 #define MANAGESTRATEGY_H
 
 #include <string>
+#include <memory>
 #include <functional>
 
 #include <TFIQFeed/MarketSymbol.h>
@@ -197,7 +198,8 @@ private:
     }
   };
 
-  using vEMA_t = std::vector<EMA>;
+  using pEMA_t = std::shared_ptr<EMA>;
+  using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
 
   void HandleBarTrades1Sec( const ou::tf::Bar& bar );
