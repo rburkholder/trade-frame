@@ -24,7 +24,6 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-//#include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <TFTrading/InstrumentManager.h>
@@ -48,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 4, 26 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 4, 29 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -65,12 +64,6 @@ bool AppBasketTrading::OnInit() {
   m_pFrameMain->Move( 200, 100 );
   m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
-
-  //m_pPanelBasketTradingMain->m_OnBtnLoad = MakeDelegate( this, &AppBasketTrading::HandleLoadButton );
-  //m_pPanelBasketTradingMain->m_OnBtnStart = MakeDelegate( this, &AppBasketTrading::HandleStartButton );
-  //m_pPanelBasketTradingMain->m_OnBtnExitPositions = MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton );
-  //m_pPanelBasketTradingMain->m_OnBtnStop = MakeDelegate( this, &AppBasketTrading::HandleStopButton );
-  //m_pPanelBasketTradingMain->m_OnBtnSave = MakeDelegate( this, &AppBasketTrading::HandleSaveButton );
 
   wxBoxSizer* sizerMain;
   sizerMain = new wxBoxSizer(wxHORIZONTAL);
@@ -96,16 +89,7 @@ bool AppBasketTrading::OnInit() {
   //m_pPanelBasketTradingMain->Show( true );
 
   LinkToPanelProviderControl();
-/*
-  m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
-  m_pPanelOptionsParameters->Show( true );
-  m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
-  m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
-  m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
-  m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
-*/
+
   m_pPanelPortfolioStats = new PanelPortfolioStats( m_pFrameMain, wxID_ANY );
   //m_sizerMain->Add( m_pPanelPortfolioStats, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   sizerLeft->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);

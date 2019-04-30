@@ -44,7 +44,6 @@
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 #include "MasterPortfolio.h"
-//#include "PanelBasketTradingMain.h"
 #include "PanelPortfolioStats.h"
 
 class AppBasketTrading:
