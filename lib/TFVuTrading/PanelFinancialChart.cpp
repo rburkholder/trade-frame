@@ -125,7 +125,6 @@ void PanelFinancialChart::AppendInfo( const std::string& sName, ou::ChartDataVie
 }
 
 void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
-  //wxTreeItemId id = event.GetItem();
   wxTreeItemData* pData = m_pTree->GetItemData( ( event.GetItem() ) );
   if ( nullptr != pData ) {
     CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
@@ -135,7 +134,6 @@ void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
     else {
       std::cout << "no chart data (1)" << std::endl;
       m_pWinChartView->SetChartDataView( nullptr );
-
     }
   }
   else {
@@ -146,7 +144,13 @@ void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 }
 
 void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
-  std::cout << "tool tip requested" << std::endl;
+  wxTreeItemData* pData = m_pTree->GetItemData( ( event.GetItem() ) );
+  if ( nullptr != pData ) {
+    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+    if ( pCustom->m_pChartDataView ) {
+      event.SetToolTip( pCustom->m_pChartDataView->GetName() );
+    }
+  }
   event.Skip();
 }
 
