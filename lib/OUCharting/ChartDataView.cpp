@@ -56,7 +56,7 @@ ChartEntryCarrier::~ChartEntryCarrier() {
 //
 
 ChartDataView::ChartDataView( void )
-  : m_bChanged( false ), m_bThreadSafe( false ),
+  : m_bChanged( false ),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
     m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
@@ -79,14 +79,6 @@ bool ChartDataView::GetChanged(void) {
   return b;
 }
 
-
-void ChartDataView::SetThreadSafe( bool bThreadSafe ) {
-  m_bThreadSafe = bThreadSafe;
-  for ( vChartEntryCarrier_t::iterator iter = m_vChartEntryCarrier.begin(); m_vChartEntryCarrier.end() != iter; ++iter ) {
-    iter->GetChartEntry()->SetThreadSafe( bThreadSafe );
-  }
-}
-
 void ChartDataView::UpdateActualChartId() {
   size_t ix = 0; // set ixActualChartId's to monotonically increasing
   std::for_each(
@@ -105,8 +97,6 @@ void ChartDataView::UpdateActualChartId() {
 }
 
 void ChartDataView::Add( size_t nChart, ChartEntryBase* pEntry ) {
-  pEntry->SetThreadSafe( m_bThreadSafe );
-
   m_vChartEntryCarrier.push_back( std::move( local::ChartEntryCarrier( nChart, pEntry ) ) );
 
   mapCntChartIndexes_t::iterator iter1 = m_mapCntChartIndexes.find( nChart );
@@ -158,7 +148,7 @@ void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_
   // need to change DataArrays in each entry
   for ( vChartEntryCarrier_t::iterator iter = m_vChartEntryCarrier.begin(); m_vChartEntryCarrier.end() != iter; ++iter ) {
     ChartEntryTime* p( dynamic_cast<ChartEntryTime*>( iter->GetChartEntry() ) );
-    if ( 0 != p ) {
+    if ( nullptr != p ) {
       p->SetViewPort( dtBegin, dtEnd );
     }
   }

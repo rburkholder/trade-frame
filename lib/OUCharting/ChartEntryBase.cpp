@@ -25,7 +25,7 @@ namespace ou { // One Unified
 //
 
 ChartEntryBase::ChartEntryBase()
-: m_ixStart( 0 ), m_nElements( 0 ), m_eColour( ou::Colour::Black )/*, m_bUseThreadSafety( false )*/ {
+: m_ixStart( 0 ), m_nElements( 0 ), m_eColour( ou::Colour::Black ) {
 }
 
 ChartEntryBase::~ChartEntryBase() {

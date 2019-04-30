@@ -85,10 +85,6 @@ public:
   iterator begin( void ) { return m_vChartEntryCarrier.begin(); };
   iterator end( void ) { return m_vChartEntryCarrier.end(); };
 
-  // should reprocess m_vChartDataViewEntry when these are called
-  void SetThreadSafe( bool bThreadSafe );
-  bool GetThreadSafe( void ) const  { return m_bThreadSafe; }
-
 protected:
 
 private:
@@ -108,7 +104,6 @@ private:
   };
 
   bool m_bChanged;
-  bool m_bThreadSafe;   // propagated into ChartEntries for value append operations across thread boundaries
   std::string m_sName;
   std::string m_sDescription;
 

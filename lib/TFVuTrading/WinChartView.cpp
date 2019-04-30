@@ -252,8 +252,6 @@ void WinChartView::ThreadDrawChart( void ) {
         m_pChartDataView->SetViewPort( dtBegin, dtEnd );
       }
 
-      m_pChartDataView->SetThreadSafe( true );  // not sure what this is, does it belong in side the conditional?
-
       UpdateChartMaster();
     }
   }

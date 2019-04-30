@@ -24,8 +24,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
-#include <boost/shared_ptr.hpp>
 //#include <boost/lockfree/spsc_queue.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -51,7 +51,7 @@ namespace ou { // One Unified
 class ChartEntryBase {  // maintains chart information for a set of prices
 public:
 
-  typedef boost::shared_ptr<ChartEntryBase> pChartEntryBase_t;
+  using pChartEntryBase_t = std::shared_ptr<ChartEntryBase>;
   //typedef std::vector<double> vdouble_t;
   //typedef vdouble_t::size_type size_type;
   //typedef ou::tf::DoubleBuffer<double> bufferedPrice_t;
@@ -75,12 +75,6 @@ public:
   void SetName( const std::string& name ) { m_sName = name; };
   const std::string& GetName( void ) const { return m_sName; };
 
-  // now threadsafe by default
-  void SetThreadSafe( bool bThreadSafe ) { m_bUseThreadSafety = bThreadSafe; };
-  bool GetThreadSafe( void ) const  { return m_bUseThreadSafety; }
-
-  //void Append( double price );
-  //size_type Size( void ) { return m_bufferedPrice.Size(); } // an expensive call with sync/mutex
   //void Sync( void ); // should call other registered distribution functions
   //void Clear( void );  // should call other registered distribution functions
   //void Reserve( size_type ); // should call other registered distribution functions
@@ -97,16 +91,8 @@ protected:
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
 
-  bool m_bUseThreadSafety;
+  //bool m_bUseThreadSafety;
   //static const unsigned int lockfreesize = 4096;
-
-  //vdouble_t m_vPrice;  // full vector of raw prices
-  //bufferedPrice_t m_bufferedPrice;
-
-  //DoubleArray GetPrices( void ) const {  // prices which are visible in viewport
-    //return DoubleArray( &m_vPrice[ m_ixStart ], m_nElements );
-  //  return DoubleArray( m_bufferedPrice[ m_ixStart ], m_nElements );
-  //}
 
 private:
 };
@@ -116,8 +102,8 @@ private:
 class ChartEntryTime : public ChartEntryBase { // maintains chart information for a set of price@datetime points
 public:
 
-  typedef std::vector<boost::posix_time::ptime> vDateTime_t;
-  typedef vDateTime_t::size_type size_type;
+  using vDateTime_t = std::vector<boost::posix_time::ptime>;
+  using size_type   =  vDateTime_t::size_type;
 
   ChartEntryTime( void );
   //ChartEntryTime( size_type nSize );
@@ -133,8 +119,6 @@ public:
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
 
 protected:
-
-  typedef std::vector<double> vChartTime_t;
 
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;
@@ -158,14 +142,16 @@ protected:
 
 private:
 
+  using vChartTime_t = std::vector<double> ;
+
   ou::tf::Queue<boost::posix_time::ptime> m_queue;
 
-  struct TimeDouble_t {
-    boost::posix_time::ptime m_dt;
-    double m_price;
-    TimeDouble_t( void ): m_price( 0.0 ) {};
-    TimeDouble_t( boost::posix_time::ptime dt, double price ): m_dt( dt ), m_price( price ) {};
-  };
+//  struct TimeDouble_t {
+//    boost::posix_time::ptime m_dt;
+//    double m_price;
+//    TimeDouble_t( void ): m_price( 0.0 ) {};
+//    TimeDouble_t( boost::posix_time::ptime dt, double price ): m_dt( dt ), m_price( price ) {};
+//  };
 
   //bufferedDateTime_t m_bufferedDateTime;
   vDateTime_t m_vDateTime;
