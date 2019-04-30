@@ -89,6 +89,7 @@ private:
   void CreateControls();
 
   void HandleTreeEventItemActivated( wxTreeEvent& event );
+  void HandleTreeEventItemGetToolTip( wxTreeEvent& event );
   void OnClose( wxCloseEvent& event );
 
 };

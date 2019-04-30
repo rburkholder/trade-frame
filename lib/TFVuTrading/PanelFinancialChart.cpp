@@ -76,6 +76,7 @@ void PanelFinancialChart::CreateControls() {
   //m_eLatestDatumType = CustomItemData::NoDatum;
   //wxTreeItemId idRoot = m_pTree->AddRoot( "Total P/L", -1, -1, new CustomItemData( CustomItemData::PL ) );
   m_pTree->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelFinancialChart::HandleTreeEventItemActivated, this, m_pTree->GetId() );
+  m_pTree->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelFinancialChart::HandleTreeEventItemGetToolTip, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   //m_pTree->Bind( wxEVT_TREE_DELETE_ITEM, &PanelFinancialChart::HandleTreeEventItemDeleted, this, m_pTree->GetId() );
   //m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
 //  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
@@ -141,6 +142,11 @@ void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
     std::cout << "no chart data (2)" << std::endl;
     m_pWinChartView->SetChartDataView( nullptr );
   }
+  event.Skip();
+}
+
+void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
+  std::cout << "tool tip requested" << std::endl;
   event.Skip();
 }
 
