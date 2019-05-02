@@ -341,7 +341,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
     pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );
 
-    m_mapVolumeRanking.insert( mapVolume_t::value_type( iip.volumeEma, iip.sName ) );
+    m_mapVolatility.insert( mapVolatility_t::value_type( iip.dblDailyHistoricalVolatility, iip.sName ) );
 
     std::string sName( iip.sName );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ), pChartDataView );
@@ -361,16 +361,16 @@ void MasterPortfolio::Start() {
     std::cout << "MasterPortfolio: already started." << std::endl;
   }
   else {
-    std::cout << "m_mapVolumeRanking has " << m_mapVolumeRanking.size() << " entries." << std::endl;
+    std::cout << "m_mapVolatility has " << m_mapVolatility.size() << " entries." << std::endl;
     m_bStarted = true;
     //m_eAllocate = EAllocate::Done;
     double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
     std::cout << "Starting allocations at " << dblAmountToTradePerInstrument << " per instrument." << std::endl;
     size_t nToSelect( 33 );
     std::for_each(
-      m_mapVolumeRanking.rbegin(),
-      m_mapVolumeRanking.rend(),
-      [this,&nToSelect,dblAmountToTradePerInstrument](mapVolume_t::value_type& vt){
+      m_mapVolatility.rbegin(),
+      m_mapVolatility.rend(),
+      [this,&nToSelect,dblAmountToTradePerInstrument](mapVolatility_t::value_type& vt){
         if ( 0 < nToSelect ) {
           //Ranking& ranking( vt.second );
           std::string sName( vt.second );

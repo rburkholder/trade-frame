@@ -16,11 +16,12 @@
 
 #include "stdafx.h"
 
-#include <iostream>
+#include <cmath>
 #include <set>
 #include <map>
-#include <vector>
 #include <math.h>
+#include <vector>
+#include <iostream>
 
 #include <TFBitsNPieces/InstrumentFilter.h>
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
@@ -28,6 +29,7 @@
 #include <TFIndicators/Darvas.h>
 
 #include <TFStatistics/Pivot.h>
+#include <TFStatistics/HistoricalVolatility.h>
 
 #include "SymbolSelection.h"
 
@@ -102,8 +104,8 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
             ou::tf::Bars::const_iterator iterVolume = bars.end() - nMinBars;
             data.volumeEma = std::for_each( iterVolume, bars.end(), VolumeEma() );
             if ( ( 1000000 < data.volumeEma )
-              && ( 20.0 <=  bars.last().Close() )
-              && ( 125.0 >= bars.last().Close() )
+              && ( 25.0 <=  bars.last().Close() )
+              && ( 135.0 >= bars.last().Close() )
               && ( dtEnd.date() == bars.last().DateTime().date() )
               && ( 120 < bars.Size() )
               ) {
@@ -114,7 +116,9 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         return bReturn;
       },
       [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
-        Scenario ii( sObjectName, bars.last(), data.volumeEma );
+        ou::HistoricalVolatility hv;
+        std::for_each( bars.at( bars.Size() - 20 ), bars.end(), hv );
+        Scenario ii( sObjectName, bars.last(), data.volumeEma, hv.Result() );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
         //if ( "GLD" == sObjectName ) {
           fCheck( bars, ii );

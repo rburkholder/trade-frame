@@ -156,8 +156,11 @@ private:
   using mapStrategy_t = std::map<std::string,Strategy>;
   mapStrategy_t m_mapStrategy;
 
-  using mapVolume_t = std::multimap<volume_t, std::string>; // string is name of instrument
-  mapVolume_t m_mapVolumeRanking;
+  //using mapVolume_t = std::multimap<volume_t, std::string>; // string is name of instrument
+  //mapVolume_t m_mapVolumeRanking;
+
+  using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
+  mapVolatility_t m_mapVolatility;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;

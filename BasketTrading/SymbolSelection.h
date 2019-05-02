@@ -28,19 +28,26 @@ using volume_t = ou::tf::DatedDatum::volume_t;
 struct InstrumentInfo {
   const std::string sName;
   volume_t volumeEma;
+  double dblDailyHistoricalVolatility;
+
   const ou::tf::Bar bar; // last bar in series for closing/ pivot calcs
 
-  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_, volume_t volumeEma_ )
-    : sName( sName_ ), bar( bar_ ), volumeEma( volumeEma_ )
+  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_,
+    volume_t volumeEma_, double dblDailyHistoricalVolatility_
+    )
+    : sName( sName_ ), bar( bar_ ), volumeEma( volumeEma_ ),
+      dblDailyHistoricalVolatility( dblDailyHistoricalVolatility_ )
     {}
   InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_ )
-    : sName( sName_ ), bar( bar_ ), volumeEma {}
+    : sName( sName_ ), bar( bar_ ), volumeEma {}, dblDailyHistoricalVolatility {}
     {}
   InstrumentInfo( const InstrumentInfo& rhs )
-    : sName( rhs.sName ), bar( rhs.bar )
+    : sName( rhs.sName ), bar( rhs.bar ), volumeEma( rhs.volumeEma ),
+      dblDailyHistoricalVolatility( rhs.dblDailyHistoricalVolatility )
     {}
   InstrumentInfo( const InstrumentInfo&& rhs )
-    : sName( std::move( rhs.sName ) ), bar( rhs.bar )
+    : sName( std::move( rhs.sName ) ), bar( rhs.bar ),
+    volumeEma( rhs.volumeEma ), dblDailyHistoricalVolatility( rhs.dblDailyHistoricalVolatility )
     {}
   bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
 };
@@ -49,8 +56,9 @@ struct InstrumentInfo {
 
 struct IIDarvas: InstrumentInfo {
   double dblStop;  // calculated stop price, if any
-  IIDarvas( const std::string& sName, const ou::tf::Bar& bar, volume_t volumeEma_ )
-    : InstrumentInfo( sName, bar, volumeEma_ ), dblStop{}
+  IIDarvas( const std::string& sName, const ou::tf::Bar& bar,
+    volume_t volumeEma_, double dblDailyHistoricalVolatility )
+    : InstrumentInfo( sName, bar, volumeEma_, dblDailyHistoricalVolatility ), dblStop{}
   {}
 };
 
@@ -69,8 +77,11 @@ struct IIPivot: InstrumentInfo {
   double dblProbabilityAboveAndDown;
   double dblProbabilityBelowAndUp;
   double dblProbabilityBelowAndDown;
-  IIPivot( const std::string& sName, const ou::tf::Bar& bar, volume_t volumeEma_ )
-    : InstrumentInfo( sName, bar, volumeEma_ ),
+  IIPivot(
+      const std::string& sName, const ou::tf::Bar& bar,
+      volume_t volumeEma_, double dblDailyHistoricalVolatility_
+    )
+    : InstrumentInfo( sName, bar, volumeEma_, dblDailyHistoricalVolatility_ ),
       dblR1 {}, dblPV {}, dblS1 {},
       dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
       dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}
