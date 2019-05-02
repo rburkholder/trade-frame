@@ -203,9 +203,6 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     }
   }
 
-  ou::HistoricalVolatility hv;
-  std::for_each( bars.at( bars.Size() - 20 ), bars.end(), std::ref( hv ) );
-
   ExcelFormat::CellFormat fmtNum( m_fmt_mgr );
   fmtNum.set_format_string( XLS_FORMAT_DECIMAL );
 
@@ -230,8 +227,9 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   cell->SetDouble( last );
   cell->SetFormat( fmtNum );
 
+  double hv = std::for_each( bars.at( bars.Size() - 20 ), bars.end(), ou::HistoricalVolatility() );
   cell = m_sheet->Cell( iy, ix++ ); // Daily Hist Vol
-  cell->SetDouble( 100.0 * hv.Result() );
+  cell->SetDouble( 100.0 * hv );
   cell->SetFormat( fmtNum );
 
   cell = m_sheet->Cell( iy, ix++ ); // Ema Volume

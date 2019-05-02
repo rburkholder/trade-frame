@@ -116,9 +116,9 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
         return bReturn;
       },
       [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
-        ou::HistoricalVolatility hv;
-        std::for_each( bars.at( bars.Size() - 20 ), bars.end(), hv );
-        Scenario ii( sObjectName, bars.last(), data.volumeEma, hv.Result() );
+         
+        double hv = std::for_each( bars.at( bars.Size() - 20 ), bars.end(), ou::HistoricalVolatility() );
+        Scenario ii( sObjectName, bars.last(), data.volumeEma, hv );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
         //if ( "GLD" == sObjectName ) {
           fCheck( bars, ii );

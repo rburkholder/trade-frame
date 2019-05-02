@@ -34,7 +34,7 @@ class HistoricalVolatility { // may need to normalize to yearly historical volat
 public:
   HistoricalVolatility();
   void operator()( const ou::tf::Bar& bar );
-  double Result();
+  operator double();
 protected:
 private:
   bool bFirstFound;

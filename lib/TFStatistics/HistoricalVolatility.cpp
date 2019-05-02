@@ -42,7 +42,7 @@ void HistoricalVolatility::operator()( const ou::tf::Bar& bar ) {
   nPrices++;
 }
 
-double HistoricalVolatility::Result() {
+ HistoricalVolatility::operator double() {
   double dblSums {};
   double dblAverage = dblSumNatLogReturns / nPrices;
   std::for_each(
