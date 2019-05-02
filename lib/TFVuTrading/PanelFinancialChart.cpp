@@ -15,8 +15,6 @@
 
 #include <wx/splitter.h>
 
-
-
 #include "PanelFinancialChart.h"
 
 namespace ou { // One Unified
