@@ -20,6 +20,7 @@
 #include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFStatistics/Pivot.h>
+#include <TFStatistics/HistoricalVolatility.h>
 
 #include "SignalGenerator.h"
 
@@ -39,7 +40,7 @@ void SignalGenerator::Run( void ) {
   ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
-  pt::ptime dtLast( gregorian::date( 2019,  4, 26 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2019,  5, 1 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
@@ -106,7 +107,10 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
     cell->SetString( "Price" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
-    cell->SetString( "Ema Vol" );
+    cell->SetString( "DlyHistVol" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "EmaVolm" );
     cell = m_sheet->Cell( 0, ix++ );
     cell->SetFormat( fmt );
     cell->SetString( "BolRange" );
@@ -199,6 +203,9 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     }
   }
 
+  ou::HistoricalVolatility hv;
+  std::for_each( bars.at( bars.Size() - 20 ), bars.end(), std::ref( hv ) );
+
   ExcelFormat::CellFormat fmtNum( m_fmt_mgr );
   fmtNum.set_format_string( XLS_FORMAT_DECIMAL );
 
@@ -221,6 +228,10 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   double last = bars.last().Close(); // Price
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetDouble( last );
+  cell->SetFormat( fmtNum );
+
+  cell = m_sheet->Cell( iy, ix++ ); // Daily Hist Vol
+  cell->SetDouble( 100.0 * hv.Result() );
   cell->SetFormat( fmtNum );
 
   cell = m_sheet->Cell( iy, ix++ ); // Ema Volume
@@ -333,9 +344,4 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   std::cout
     << std::endl;
 
-
 }
-
-
-
-
