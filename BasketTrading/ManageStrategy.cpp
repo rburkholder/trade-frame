@@ -244,15 +244,15 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
   volume_t nOptionContractsToTrade {};
   if ( 0.0 != m_dblOpen ) {
     nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_dblOpen ) )/ 100;
-    //std::cout << m_sUnderlying << " funds on open: " << dblFunds << ", " << m_dblOpen << ", " << nOptionContractsToTrade << std::endl;
+    std::cout << m_sUnderlying << " funds on open: " << dblFunds << ", " << m_dblOpen << ", " << nOptionContractsToTrade << std::endl;
   }
   else {
     nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_barPriorDaily.Close() ) )/ 100;
-    //std::cout << m_sUnderlying << " funds on bar close: " << dblFunds << ", " << m_barPriorDaily.Close() << ", " << nOptionContractsToTrade << std::endl;
+    std::cout << m_sUnderlying << " funds on bar close: " << dblFunds << ", " << m_barPriorDaily.Close() << ", " << nOptionContractsToTrade << std::endl;
   }
   
   volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
-  //std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
+  std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
   return nUnderlyingSharesToTrade;
 }
 
@@ -451,16 +451,16 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
         [&,this]( pEMA_t& p ){
           if ( bFirstFound ) {
             double dblLatest = p->dblEmaLatest;
-            bAllRising  &= dblLatest > dblPrevious;
-            bAllFalling &= dblLatest < dblPrevious;
+            bAllRising  &= dblLatest < dblPrevious;
+            bAllFalling &= dblLatest > dblPrevious;
             dblPrevious = dblLatest;
           }
           else {
             dblPrevious = p->dblEmaLatest;
             bFirstFound = true;
           }
-          bAllRising  &= EMA::State::rising == p->state;
-          bAllFalling &= EMA::State::falling == p->state;
+//          bAllRising  &= EMA::State::rising == p->state;
+//          bAllFalling &= EMA::State::falling == p->state;
       } );
       if ( bAllRising && bAllFalling ) {
         std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;

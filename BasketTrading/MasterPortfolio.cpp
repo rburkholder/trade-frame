@@ -361,6 +361,7 @@ void MasterPortfolio::Start() {
     std::cout << "MasterPortfolio: already started." << std::endl;
   }
   else {
+    std::cout << "m_mapVolumeRanking has " << m_mapVolumeRanking.size() << " entries." << std::endl;
     m_bStarted = true;
     //m_eAllocate = EAllocate::Done;
     double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
