@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>HistoricalVolatility.h</itemPath>
       <itemPath>Pivot.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -13,6 +14,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>HistoricalVolatility.cpp</itemPath>
       <itemPath>Pivot.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -49,6 +51,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="HistoricalVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="HistoricalVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Pivot.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Pivot.h" ex="false" tool="3" flavor2="0">
@@ -76,6 +82,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="HistoricalVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="HistoricalVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Pivot.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Pivot.h" ex="false" tool="3" flavor2="0">
