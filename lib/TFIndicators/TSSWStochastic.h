@@ -22,7 +22,11 @@ namespace tf { // TradeFrame
 
 // 14,3,1 is standard  14 periods, 3 slow average, 1 fast average
 
-class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, Quote> {
+class TSSWStochastic:
+  public RunningMinMax<TSSWStochastic,double>,
+  public TimeSeriesSlidingWindow<TSSWStochastic, Quote>
+{
+  friend RunningMinMax<TSSWStochastic,double>;
   friend TimeSeriesSlidingWindow<TSSWStochastic, Quote>;
 public:
   TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
@@ -35,8 +39,6 @@ protected:
   void Expire( const Quote& quote );
   void PostUpdate( void );
 private:
-  RunningMinMax m_minmax;
-
   double m_lastAdd;
   double m_lastExpire;
   double m_k;
