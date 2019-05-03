@@ -446,7 +446,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
       double dblPrevious {};
       bool bAllRising( true );
       bool bAllFalling( true );
-      std::for_each(
+      std::for_each(  // calculate relative ema
         m_vEMA.begin(), m_vEMA.end(),
         [&,this]( pEMA_t& p ){
           if ( bFirstFound ) {

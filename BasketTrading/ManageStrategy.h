@@ -89,8 +89,6 @@ public:
     );
   virtual ~ManageStrategy( );
 
-  enum class ETradeDirection { None, Up, Down };
-
   const std::string& GetUnderlying() const { return m_sUnderlying; }
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
@@ -107,7 +105,17 @@ public:
 protected:
 private:
 
-  typedef ou::tf::DatedDatum::volume_t volume_t;
+  enum ETradingState {
+    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
+  };
+
+  enum class ETradeDirection { None, Up, Down };
+
+  enum class Ema {
+    EmaUnstable, EmaUp, EmaDown
+  };
+
+  using volume_t = ou::tf::DatedDatum::volume_t;
 
   std::string m_sUnderlying;
 
@@ -124,11 +132,8 @@ private:
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
-  enum enumTradingState {
-    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
-  };
 
-  enumTradingState m_stateTrading;
+  ETradingState m_stateTrading;
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;
