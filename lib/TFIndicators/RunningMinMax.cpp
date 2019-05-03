@@ -40,9 +40,9 @@ RunningMinMax::~RunningMinMax(void) {
 
 void RunningMinMax::Add(double val) {
 
-  map_t::iterator iter = m_mapPointStats.find( val );
+  mapPointStats_t::iterator iter = m_mapPointStats.find( val );
   if ( m_mapPointStats.end() == iter ) {
-    m_mapPointStats.insert( m_mapPointStats_pair_t( val, 1 ) );
+    m_mapPointStats.insert( mapPointStats_t::value_type( val, 1 ) );
     m_dblMin = m_mapPointStats.begin()->first;
     m_dblMax = m_mapPointStats.rbegin()->first;
 
@@ -54,7 +54,7 @@ void RunningMinMax::Add(double val) {
 
 void RunningMinMax::Remove(double val) {
   
-  map_t::iterator iter = m_mapPointStats.find( val );
+  mapPointStats_t::iterator iter = m_mapPointStats.find( val );
   if ( (m_mapPointStats.end() == iter) ) {
     int i = 1;  // shouldn't land here, a bug if we do
   }

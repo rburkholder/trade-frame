@@ -35,12 +35,13 @@ public:
   void Reset( void );
 
 protected:
-  typedef std::map<double,unsigned int> map_t;
-  map_t m_mapPointStats;
-  typedef std::pair<double, unsigned int> m_mapPointStats_pair_t;
 private:
+
   double m_dblMax;
   double m_dblMin;
+
+  using mapPointStats_t = std::map<double,unsigned int>;
+  mapPointStats_t m_mapPointStats;
 };
 
 } // namespace tf
