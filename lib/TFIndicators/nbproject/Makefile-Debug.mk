@@ -48,6 +48,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/TSMA.o \
 	${OBJECTDIR}/TSNorm.o \
 	${OBJECTDIR}/TSReturns.o \
+	${OBJECTDIR}/TSSWDonchianChannel.o \
 	${OBJECTDIR}/TSSWEfficiencyRatio.o \
 	${OBJECTDIR}/TSSWRateOfChange.o \
 	${OBJECTDIR}/TSSWRealizedVolatility.o \
@@ -151,6 +152,11 @@ ${OBJECTDIR}/TSReturns.o: TSReturns.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSReturns.o TSReturns.cpp
+
+${OBJECTDIR}/TSSWDonchianChannel.o: TSSWDonchianChannel.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWDonchianChannel.o TSSWDonchianChannel.cpp
 
 ${OBJECTDIR}/TSSWEfficiencyRatio.o: TSSWEfficiencyRatio.cpp
 	${MKDIR} -p ${OBJECTDIR}

@@ -36,10 +36,9 @@ public:
 
   void Reset();
 
+protected:
   void UpdateMax( const value_t& ) {} // CRTP callback
   void UpdateMin( const value_t& ) {} // CRTP callback
-
-protected:
 private:
 
   using mapPointStats_t = std::map<value_t,unsigned int>;

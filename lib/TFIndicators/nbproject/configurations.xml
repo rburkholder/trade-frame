@@ -18,6 +18,7 @@
       <itemPath>TSMA.h</itemPath>
       <itemPath>TSNorm.h</itemPath>
       <itemPath>TSReturns.h</itemPath>
+      <itemPath>TSSWDonchianChannel.h</itemPath>
       <itemPath>TSSWEfficiencyRatio.h</itemPath>
       <itemPath>TSSWRateOfChange.h</itemPath>
       <itemPath>TSSWRealizedVolatility.h</itemPath>
@@ -52,6 +53,7 @@
       <itemPath>TSMA.cpp</itemPath>
       <itemPath>TSNorm.cpp</itemPath>
       <itemPath>TSReturns.cpp</itemPath>
+      <itemPath>TSSWDonchianChannel.cpp</itemPath>
       <itemPath>TSSWEfficiencyRatio.cpp</itemPath>
       <itemPath>TSSWRateOfChange.cpp</itemPath>
       <itemPath>TSSWRealizedVolatility.cpp</itemPath>
@@ -151,6 +153,10 @@
       <item path="TSReturns.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="TSReturns.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWDonchianChannel.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWDonchianChannel.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="TSSWEfficiencyRatio.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -281,6 +287,10 @@
       <item path="TSReturns.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="TSReturns.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWDonchianChannel.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWDonchianChannel.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="TSSWEfficiencyRatio.cpp" ex="false" tool="1" flavor2="0">
       </item>
