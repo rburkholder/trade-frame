@@ -59,7 +59,7 @@ ManageStrategy::ManageStrategy(
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
   fBar_t fBar,
-  pcdvStrategyData_t pcdvStrategyData
+  pcdvStrategyData_t pcdvStrategyData  
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
@@ -78,6 +78,7 @@ ManageStrategy::ManageStrategy(
   m_bfTrades1Sec( 1 ),
   m_bfTrades6Sec( 6 ),
   m_bfTrades60Sec( 60 ),
+  m_stateEma( EmaState::EmaUnstable ),
   m_pcdvStrategyData( pcdvStrategyData ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
@@ -462,21 +463,52 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 //          bAllRising  &= EMA::State::rising == p->state;
 //          bAllFalling &= EMA::State::falling == p->state;
       } );
-      if ( bAllRising && bAllFalling ) {
+      static const size_t nConfirmationIntervalsPreload( 13 );
+      if ( bAllRising && bAllFalling ) { // special message for questionable result
         std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
+        m_stateEma = EmaState::EmaUnstable;
+        m_nConfirmationIntervals = nConfirmationIntervalsPreload;
       }
       else {
-        if ( bAllRising ) {
-          std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
-          m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
-          m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
-          m_stateTrading = TSMonitorLong;
+        if ( !bAllRising && !bAllFalling ) {
+          m_stateEma = EmaState::EmaUnstable;
+          m_nConfirmationIntervals = nConfirmationIntervalsPreload;
         }
-        if ( bAllFalling ) {
-          std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
-          m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
-          m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
-          m_stateTrading = TSMonitorShort;
+        else {
+          if ( bAllRising ) {
+            if ( EmaState::EmaUp == m_stateEma ) {
+              m_nConfirmationIntervals--;
+              if ( 0 == m_nConfirmationIntervals ) {
+                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
+                m_pPositionUnderlying->CancelOrders();
+                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+                m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
+                m_stateTrading = TSMonitorLong;
+                m_stateEma = EmaState::EmaUnstable;
+              }
+            }
+            else {
+              m_stateEma = EmaState::EmaUp;
+              m_nConfirmationIntervals = nConfirmationIntervalsPreload;
+            }
+          }
+          if ( bAllFalling ) {
+            if ( EmaState::EmaDown == m_stateEma ) {
+              m_nConfirmationIntervals--;
+              if ( 0 == m_nConfirmationIntervals ) {
+                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
+                m_pPositionUnderlying->CancelOrders();
+                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+                m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
+                m_stateTrading = TSMonitorShort;
+                m_stateEma = EmaState::EmaUnstable;
+              }
+            }
+            else {
+              m_stateEma = EmaState::EmaDown;
+              m_nConfirmationIntervals = nConfirmationIntervalsPreload;
+            }
+          }
         }
       }
       }

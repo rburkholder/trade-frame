@@ -111,7 +111,7 @@ private:
 
   enum class ETradeDirection { None, Up, Down };
 
-  enum class Ema {
+  enum class EmaState {
     EmaUnstable, EmaUp, EmaDown
   };
 
@@ -120,6 +120,9 @@ private:
   std::string m_sUnderlying;
 
   ETradeDirection m_eTradeDirection;
+
+  EmaState m_stateEma;
+  size_t m_nConfirmationIntervals;
 
   //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
