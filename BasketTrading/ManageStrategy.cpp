@@ -44,6 +44,8 @@
 //     add a stop?  (do not worry when doing multi-day trades)
 //
 
+// 2019/05/03 adjust trading for first hour and last hour of trading day?
+
 #include <algorithm>
 
 #include "ManageStrategy.h"
@@ -98,6 +100,10 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
   assert( pcdvStrategyData );
+
+  m_rBarDirection[ 0 ] = EBarDirection::None;
+  m_rBarDirection[ 1 ] = EBarDirection::None;
+  m_rBarDirection[ 2 ] = EBarDirection::None;
 
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
@@ -463,7 +469,14 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 //          bAllRising  &= EMA::State::rising == p->state;
 //          bAllFalling &= EMA::State::falling == p->state;
       } );
-      static const size_t nConfirmationIntervalsPreload( 13 );
+      // need three consecutive bars in the trending direction
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 0 ] );
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 1 ] );
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 2 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 0 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 1 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
+      static const size_t nConfirmationIntervalsPreload( 21 );
       if ( bAllRising && bAllFalling ) { // special message for questionable result
         std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
         m_stateEma = EmaState::EmaUnstable;
@@ -608,6 +621,8 @@ void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentiment event trigger for MasterPortfolio
-  //m_bars60s.Append( bar );
+  m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
+  m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];
+  m_rBarDirection[ 2 ] = ( bar.Open() == bar.Close() ) ? EBarDirection::None : ( ( bar.Open() < bar.Close() ) ? EBarDirection::Up : EBarDirection::Down );
   m_fBar( *this, bar );
 }

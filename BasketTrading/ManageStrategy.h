@@ -115,6 +115,8 @@ private:
     EmaUnstable, EmaUp, EmaDown
   };
 
+  enum class EBarDirection { None, Up, Down };
+
   using volume_t = ou::tf::DatedDatum::volume_t;
 
   std::string m_sUnderlying;
@@ -123,6 +125,8 @@ private:
 
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
+
+  EBarDirection m_rBarDirection[ 3 ];
 
   //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
