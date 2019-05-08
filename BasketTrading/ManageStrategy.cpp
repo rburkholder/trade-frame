@@ -80,6 +80,7 @@ ManageStrategy::ManageStrategy(
   m_bfTrades1Sec( 1 ),
   m_bfTrades6Sec( 6 ),
   m_bfTrades60Sec( 60 ),
+  m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
   m_pcdvStrategyData( pcdvStrategyData ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
@@ -105,14 +106,20 @@ ManageStrategy::ManageStrategy(
   m_rBarDirection[ 1 ] = EBarDirection::None;
   m_rBarDirection[ 2 ] = EBarDirection::None;
 
+  pcdvStrategyData->SetNames( "Charts", m_sUnderlying );
+
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
   m_ceProfitLoss.SetName( "Profit/Loss" );
+  m_ceUpReturn.SetName( "Up Return" );
+  m_ceDnReturn.SetName( "Dn Return" );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
   pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
   pcdvStrategyData->Add( 2, &m_ceProfitLoss );
+  pcdvStrategyData->Add( 4, &m_ceUpReturn );
+  pcdvStrategyData->Add( 4, &m_ceDnReturn );
 
   pcdvStrategyData->Add( 0, &m_ceShortEntries );
   pcdvStrategyData->Add( 0, &m_ceLongEntries );
@@ -308,17 +315,21 @@ void ManageStrategy::HandleBellHeard( void ) {
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( quote.IsValid() ) {
+    m_QuoteLatest = quote;
     m_quotes.Append( quote );
     TimeTick( quote );
   }
 }
 
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
+  if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
+  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn++;
+  m_TradeLatest = trade;
   m_trades.Append( trade );
-  TimeTick( trade );
   m_bfTrades1Sec.Add( trade );
   m_bfTrades6Sec.Add( trade );
   m_bfTrades60Sec.Add( trade );
+  TimeTick( trade );
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -587,9 +598,13 @@ void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
     m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::SpringGreen ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData, ou::Colour::SeaGreen ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pcdvStrategyData, ou::Colour::ForestGreen ) );
-    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pcdvStrategyData, ou::Colour::DarkGreen ) );
+    m_vEMA.back().get()->SetName( "Ema 5s" );
+    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData, ou::Colour::MediumTurquoise ) );
+    m_vEMA.back().get()->SetName( "Ema 13s" );
+    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pcdvStrategyData, ou::Colour::DarkOrchid ) );
+    m_vEMA.back().get()->SetName( "Ema 34s" );
+    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pcdvStrategyData, ou::Colour::DarkMagenta ) );
+    m_vEMA.back().get()->SetName( "Ema 89s" );
     std::for_each(
       m_vEMA.begin(), m_vEMA.end(),
       [&bar]( pEMA_t& p ){
@@ -603,10 +618,6 @@ void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
         p->Update( bar.DateTime(), bar.Close() );
       } );
   }
-
-
-
-
   
   TimeTick( bar );
    
@@ -622,6 +633,12 @@ void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
   double dblTotal;
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+
+  m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
+  m_cntUpReturn = 0;
+
+  m_ceDnReturn.Append( bar.DateTime(), -m_cntDnReturn );
+  m_cntDnReturn = 0;
 }
 
 void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentiment event trigger for MasterPortfolio

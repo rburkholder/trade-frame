@@ -83,6 +83,7 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->Add( 0, &m_cePLUnRealized );
   m_pChartDataView->Add( 0, &m_cePLRealized );
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
+  m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
   m_fSupplyStrategyChart( EStrategyChart::Root, "Master P/L", m_pChartDataView );
 
   std::stringstream ss;
@@ -330,10 +331,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             //  }
             //}
           },
-    // ManageStrategy::m_fBar (60 second)
+    // ManageStrategy::m_fBar (6 second)
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
             // calculate sentiment
-            m_sentiment.Update( bar );
+            //m_sentiment.Update( bar );
           },
           pChartDataView
         )
@@ -351,9 +352,9 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
 } // AddSymbol
 
-void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
-  m_sentiment.Get( nUp, nDown );
-}
+//void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
+//  m_sentiment.Get( nUp, nDown );
+//}
 
 void MasterPortfolio::Start() {
 

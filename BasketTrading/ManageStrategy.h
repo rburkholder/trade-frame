@@ -138,9 +138,14 @@ private:
 
   //ou::tf::Bar m_barInfo;
 
+  ou::tf::Trade m_TradeLatest;
+  ou::tf::Quote m_QuoteLatest;
+
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
+  size_t m_cntUpReturn;
+  size_t m_cntDnReturn;
 
   ETradingState m_stateTrading;
 
@@ -177,6 +182,9 @@ private:
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
   ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::ChartEntryIndicator m_ceUpReturn;
+  ou::ChartEntryIndicator m_ceDnReturn;
 
   ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongEntries;
@@ -226,6 +234,9 @@ private:
     }
     ~EMA() {
       pChartDataView->Remove( 0, &m_ceEma ); // required when moving EMA into vector
+    }
+    void SetName( const std::string& sName ) {
+      m_ceEma.SetName( sName );
     }
     double First( boost::posix_time::ptime dt, double value ) {
       dblEmaLatest = value;

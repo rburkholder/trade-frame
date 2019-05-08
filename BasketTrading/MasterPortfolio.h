@@ -35,7 +35,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
-#include "Sentiment.h"
+//#include "Sentiment.h"
 #include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
@@ -64,7 +64,7 @@ public:
   ~MasterPortfolio(void);
 
   void Load( ptime dtLatestEod, bool bAddToList );
-  void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
+  //void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
   void Start();
 
   void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
@@ -110,7 +110,7 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  Sentiment m_sentiment;
+  //Sentiment m_sentiment;
 
   pChartDataView_t m_pChartDataView;
 

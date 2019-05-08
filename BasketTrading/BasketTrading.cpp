@@ -47,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 1 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 8 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -214,7 +214,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 
   size_t nUp;
   size_t nDown;
-  m_pMasterPortfolio->GetSentiment( nUp, nDown );
+  //m_pMasterPortfolio->GetSentiment( nUp, nDown );
 
   m_pPanelPortfolioStats->SetStats(
     boost::lexical_cast<std::string>( m_dblMinPL ),
