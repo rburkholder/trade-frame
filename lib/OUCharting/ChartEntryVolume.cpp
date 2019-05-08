@@ -60,6 +60,7 @@ bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
 
       DataSet *pds = bl->getDataSet(0);
       pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
+      pds->setDataName( GetName().c_str() );
 
       bAdded = true;
     }

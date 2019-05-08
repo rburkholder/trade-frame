@@ -102,6 +102,12 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
       candle->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
       pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      int count = candle->getDataSetCount();
+      if ( 0 < count ) {
+        DataSet* pds = candle->getDataSet(0);
+        //pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
+        pds->setDataName( GetName().c_str() );
+      }
       bAdded = true;
     }
   }
