@@ -174,8 +174,8 @@ private:
 
   //ou::tf::Bars m_bars60s;
 
-  ou::tf::BarFactory m_bfTrades1Sec; // ema calcs
-  ou::tf::BarFactory m_bfTrades6Sec; // charting
+  ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
+  ou::tf::BarFactory m_bfTrades06Sec; // charting
   ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
   ou::ChartEntryBars m_cePrice;
@@ -273,8 +273,8 @@ private:
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
 
-  void HandleBarTrades1Sec( const ou::tf::Bar& bar );
-  void HandleBarTrades6Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades01Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades06Sec( const ou::tf::Bar& bar );
   void HandleBarTrades60Sec( const ou::tf::Bar& bar );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );

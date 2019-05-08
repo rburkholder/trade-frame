@@ -77,8 +77,8 @@ ManageStrategy::ManageStrategy(
   m_fFirstTrade( fFirstTrade ),
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
-  m_bfTrades1Sec( 1 ),
-  m_bfTrades6Sec( 6 ),
+  m_bfTrades01Sec( 1 ),
+  m_bfTrades06Sec( 6 ),
   m_bfTrades60Sec( 60 ),
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
@@ -128,8 +128,8 @@ ManageStrategy::ManageStrategy(
   pcdvStrategyData->Add( 0, &m_ceShortExits );
   pcdvStrategyData->Add( 0, &m_ceLongExits );
 
-  m_bfTrades1Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades1Sec ) );
-  m_bfTrades6Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades6Sec ) );
+  m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
+  m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
   m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
 
   try {
@@ -326,8 +326,8 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn++;
   m_TradeLatest = trade;
   m_trades.Append( trade );
-  m_bfTrades1Sec.Add( trade );
-  m_bfTrades6Sec.Add( trade );
+  m_bfTrades01Sec.Add( trade );
+  m_bfTrades06Sec.Add( trade );
   m_bfTrades60Sec.Add( trade );
   TimeTick( trade );
 }
@@ -594,7 +594,7 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   }
 }
 
-void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
+void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
     m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::SpringGreen ) );
@@ -623,7 +623,7 @@ void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
    
 }
 
-void ManageStrategy::HandleBarTrades6Sec( const ou::tf::Bar& bar ) {
+void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   m_cePrice.AppendBar( bar );
   m_ceVolume.Append( bar );
 
