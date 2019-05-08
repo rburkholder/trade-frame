@@ -79,7 +79,7 @@ ManageStrategy::ManageStrategy(
   m_eTradeDirection( ETradeDirection::None ),
   m_bfTrades01Sec( 1 ),
   m_bfTrades06Sec( 6 ),
-  m_bfTrades60Sec( 60 ),
+//  m_bfTrades60Sec( 60 ),
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
   m_pcdvStrategyData( pcdvStrategyData ),
@@ -102,9 +102,9 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fBar );
   assert( pcdvStrategyData );
 
-  m_rBarDirection[ 0 ] = EBarDirection::None;
-  m_rBarDirection[ 1 ] = EBarDirection::None;
-  m_rBarDirection[ 2 ] = EBarDirection::None;
+  //m_rBarDirection[ 0 ] = EBarDirection::None;
+  //m_rBarDirection[ 1 ] = EBarDirection::None;
+  //m_rBarDirection[ 2 ] = EBarDirection::None;
 
   pcdvStrategyData->SetNames( "Charts", m_sUnderlying );
 
@@ -130,7 +130,7 @@ ManageStrategy::ManageStrategy(
 
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
-  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
+//  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
 
   try {
 
@@ -328,7 +328,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
-  m_bfTrades60Sec.Add( trade );
+//  m_bfTrades60Sec.Add( trade );
   TimeTick( trade );
 }
 
@@ -481,12 +481,12 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 //          bAllFalling &= EMA::State::falling == p->state;
       } );
       // need three consecutive bars in the trending direction
-      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 0 ] );
-      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 1 ] );
-      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 2 ] );
-      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 0 ] );
-      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 1 ] );
-      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
+//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 0 ] );
+//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 1 ] );
+//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 2 ] );
+//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 0 ] );
+//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 1 ] );
+//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
       static const size_t nConfirmationIntervalsPreload( 21 );
       if ( bAllRising && bAllFalling ) { // special message for questionable result
         std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
@@ -547,7 +547,7 @@ void ManageStrategy::HandleCancel( void ) {
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->CancelOrders();
-      if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->CancelOrders();
+      //if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->CancelOrders();
       break;
   }
 }
@@ -559,7 +559,7 @@ void ManageStrategy::HandleGoNeutral( void ) {
     default:
       std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
-      if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->ClosePosition();
+      //if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->ClosePosition();
       break;
   }
 }
@@ -570,7 +570,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
       break;
     default:
       if ( nullptr != m_pPositionUnderlying.get() ) std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option " << *m_PositionOption_Current << std::endl;
+      //if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option " << *m_PositionOption_Current << std::endl;
       m_stateTrading = TSNoMore;
       break;
   }
@@ -589,9 +589,9 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_pPositionUnderlying.get() ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   }
-  if ( nullptr != m_PositionOption_Current.get() ) {
-    m_PositionOption_Current->GetWatch()->SaveSeries( sPrefix );
-  }
+  //if ( nullptr != m_PositionOption_Current.get() ) {
+  //  m_PositionOption_Current->GetWatch()->SaveSeries( sPrefix );
+  //}
 }
 
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
@@ -627,6 +627,11 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   m_cePrice.AppendBar( bar );
   m_ceVolume.Append( bar );
 
+  // was in 60 second, but was supposed to be here
+  //m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
+  //m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];
+  //m_rBarDirection[ 2 ] = ( bar.Open() == bar.Close() ) ? EBarDirection::None : ( ( bar.Open() < bar.Close() ) ? EBarDirection::Up : EBarDirection::Down );
+
   double dblUnRealized;
   double dblRealized;
   double dblCommissionsPaid;
@@ -641,9 +646,7 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   m_cntDnReturn = 0;
 }
 
+// unused without m_bfTrades60Sec
 void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentiment event trigger for MasterPortfolio
-  m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
-  m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];
-  m_rBarDirection[ 2 ] = ( bar.Open() == bar.Close() ) ? EBarDirection::None : ( ( bar.Open() < bar.Close() ) ? EBarDirection::Up : EBarDirection::Down );
-  m_fBar( *this, bar );
+  //m_fBar( *this, bar );
 }

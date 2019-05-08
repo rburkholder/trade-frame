@@ -128,7 +128,7 @@ private:
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
 
-  EBarDirection m_rBarDirection[ 3 ];
+  //EBarDirection m_rBarDirection[ 3 ];
 
   //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
@@ -165,18 +165,20 @@ private:
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
-  pPosition_t m_PositionOption_Current; // current active put, depending upon roll-downs
+  //pPosition_t m_PositionOption_Current; // current active put, depending upon roll-downs
   //pPosition_t m_pPositionOption_Previous;  // previous put if there was a roll-down
 
   pPortfolio_t m_pPortfolioStrategy;
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
-  //ou::tf::Bars m_bars60s;
+  struct Chain {
+
+  };
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
   ou::tf::BarFactory m_bfTrades06Sec; // charting
-  ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
+  //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
