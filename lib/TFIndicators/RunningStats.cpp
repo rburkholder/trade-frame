@@ -18,6 +18,11 @@
 
 #include "RunningStats.h"
 
+// TODO: incorporate:
+// https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
+// http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
+// implemented in BasketTrading::ManageStrategy - to be refactored
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -46,7 +51,8 @@ void RunningStats::Reset( void ) {
     = rr = r 
     = sd /*= bbUpper = bbLower */
     = nX = nY 
-    = SumXX = SumX = SumXY = SumY = SumYY = 0;
+    = SumXX = SumX = SumXY = SumY = SumYY
+    = 0;
 }
 
 void RunningStats::Add(double x, double y) {

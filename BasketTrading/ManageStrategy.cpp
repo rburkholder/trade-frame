@@ -603,6 +603,10 @@ void ManageStrategy::HandleBarTrades1Sec( const ou::tf::Bar& bar ) {
         p->Update( bar.DateTime(), bar.Close() );
       } );
   }
+
+
+
+
   
   TimeTick( bar );
    

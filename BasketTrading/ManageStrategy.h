@@ -44,7 +44,9 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-class ManageStrategy: public ou::tf::DailyTradeTimeFrame<ManageStrategy> {
+class ManageStrategy:
+  public ou::tf::DailyTradeTimeFrame<ManageStrategy>
+{
   friend ou::tf::DailyTradeTimeFrame<ManageStrategy>;
 public:
 
@@ -183,22 +185,36 @@ private:
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
 
+  // https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
+  // http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
   struct EMA {
-    double dblCoef1;
-    double dblCoef2;
+    double dblCoef1; // smaller - used on arriving value
+    double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
     double dblEmaLatest;
+    double dblSD;
+    double dblSn;
     enum class State { falling, same, rising };
     State state;
 
+    ou::ChartEntryIndicator m_ceUpperBollinger;
     ou::ChartEntryIndicator m_ceEma;
+    ou::ChartEntryIndicator m_ceLowerBollinger;
+    ou::ChartEntryIndicator m_ceSD;
     pcdvStrategyData_t pChartDataView;
     EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_, ou::Colour::enumColour colour )
-    : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same )
+    : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same ), dblSD {}, dblSn {}
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );
       dblCoef2 = 1.0 - dblCoef1;
+      pChartDataView->Add( 0, &m_ceUpperBollinger );
       pChartDataView->Add( 0, &m_ceEma );
+      pChartDataView->Add( 0, &m_ceLowerBollinger );
+      pChartDataView->Add( 0, &m_ceUpperBollinger );
+      pChartDataView->Add( 3, &m_ceSD );
+      m_ceUpperBollinger.SetColour( colour );
       m_ceEma.SetColour( colour );
+      m_ceLowerBollinger.SetColour( colour );
+      m_ceSD.SetColour( colour );
     }
     EMA( const EMA& rhs )
     : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
@@ -213,19 +229,31 @@ private:
     }
     double First( boost::posix_time::ptime dt, double value ) {
       dblEmaLatest = value;
+      m_ceUpperBollinger.Append( dt, 0.0 );
       m_ceEma.Append( dt, dblEmaLatest );
+      m_ceLowerBollinger.Append( dt, 0.0 );
+      m_ceSD.Append( dt, 0.0 );
       return dblEmaLatest;
     }
     double Update( boost::posix_time::ptime dt, double value ) {
       double dblPrevious( dblEmaLatest );
       dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+      double diff = ( value - dblPrevious );
+      dblSn = dblCoef2 * ( dblSn + dblCoef1 * diff * diff );
+      // std dev is sqrt( dblSn ) ie, Sn is variance
       if ( dblEmaLatest == dblPrevious ) {
         state = State::same;
       }
       else {
         state = ( dblEmaLatest > dblPrevious ) ? State::rising : State::falling;
       }
+      dblSD = std::sqrt( dblSn ); // calc std dev
+      double range = 2.0 * dblSD; // calc constant * std dev
+      m_ceUpperBollinger.Append( dt, dblEmaLatest + range );
       m_ceEma.Append( dt, dblEmaLatest );
+      m_ceLowerBollinger.Append( dt, dblEmaLatest - range );
+      m_ceSD.Append( dt, range );
+
       return dblEmaLatest;
     }
   };
