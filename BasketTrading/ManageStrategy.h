@@ -108,7 +108,9 @@ protected:
 private:
 
   enum ETradingState {
-    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry, TSWaitForContract, TSMonitorLong, TSMonitorShort, TSNoMore
+    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry,
+    TSWaitForContract, TSMonitorLong, TSMonitorShort, TSMonitorStraddle,
+    TSNoMore
   };
 
   enum class ETradeDirection { None, Up, Down };
@@ -151,6 +153,7 @@ private:
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;
+  mapChains_t::iterator m_iterChainExpiryInUse;
 
   fConstructWatch_t m_fConstructWatch;
   fConstructOption_t m_fConstructOption;
@@ -167,6 +170,8 @@ private:
   pPosition_t m_pPositionUnderlying;
   //pPosition_t m_PositionOption_Current; // current active put, depending upon roll-downs
   //pPosition_t m_pPositionOption_Previous;  // previous put if there was a roll-down
+  pPosition_t m_pPositionCall;
+  pPosition_t m_pPositionPut;
 
   pPortfolio_t m_pPortfolioStrategy;
 

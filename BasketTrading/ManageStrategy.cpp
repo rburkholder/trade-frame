@@ -288,7 +288,6 @@ void ManageStrategy::Stop( void ) {
 }
 
 void ManageStrategy::HandleBellHeard( void ) {
-
 }
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
@@ -302,82 +301,77 @@ void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
   if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn++;
-  m_TradeLatest = trade;
   m_trades.Append( trade );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
 //  m_bfTrades60Sec.Add( trade );
   TimeTick( trade );
+  m_TradeLatest = trade; // allow previous one to be used till last moment
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
-      if ( false )
-      {
-        boost::gregorian::date date( quote.DateTime().date() );
-        mapChains_t::iterator iterChains = std::find_if( m_mapChains.begin(), m_mapChains.end(),
-          [date](const mapChains_t::value_type& vt)->bool{
-            return date < vt.first;  // TODO: at least one or two days difference?
-        } );
-        if ( m_mapChains.end() == iterChains ) {
-          std::cout << m_sUnderlying << " found no chain for " << date << std::endl;
-          m_stateTrading = TSNoMore;
-        }
-        else {
+      if ( true ) {
+        if ( true ) {
           double mid = quote.Midpoint();
-          //double strike {};
           try {
-            switch ( m_eTradeDirection ) {
-              case ETradeDirection::Up:
+            //switch ( m_eTradeDirection ) {
+            //  case ETradeDirection::Up:
                 //strike = iterChains->second.Put_OtmAtm( mid );  // may raise an exception
                 //std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated put strike " << strike << std::endl;
-                break;
-              case ETradeDirection::Down:
+            //    break;
+            //  case ETradeDirection::Down:
                 //strike = iterChains->second.Call_OtmAtm( mid );  // may raise an exception
                 //std::cout << m_sUnderlying << " quote midpoint " << mid << " calculated call strike " << strike << std::endl;
-                break;
-              case ETradeDirection::None:
-                break;
-            }
-            
-            // need to wait for contract info
-            if ( 0 == m_pPositionUnderlying->GetInstrument()->GetContract() ) {
-              std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
+            //    break;
+            //  case ETradeDirection::None:
+            //    break;
+            //}
+
+            double strikePut = m_iterChainExpiryInUse->second.Put_Atm( mid );  // may raise an exception (on or nearest strike)
+            double strikeCall = m_iterChainExpiryInUse->second.Call_Atm( mid );  // may raise an exception (on or nearest strike)
+
+            // todo:  several steps 1) build watch variables, confirm spreads are small,
+            //           enter as basket trade with limit at mid, every six seconds adust limit price by 0.01 until executed
+
+            if ( strikePut != strikeCall ) {
+              std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
               m_stateTrading = TSNoMore;
             }
             else {
-              switch ( m_eTradeDirection ) {
-                case ETradeDirection::Up:
-                  //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective put." << std::endl;
-                  //m_fConstructOption( iterChains->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
-                  //  [this](pOption_t pOption){
-                      //m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                      m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade );
-                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
-                      //m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-                      m_stateTrading = TSMonitorLong;
-                    //} );
-                  break;
-                case ETradeDirection::Down:
-                  //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << ": building protective call." << std::endl;
-                  //m_fConstructOption( iterChains->second.GetIQFeedNameCall( strike), m_pPositionUnderlying->GetInstrument(),
-                    //[this](pOption_t pOption){
-                      //m_PositionOption_Current = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                      m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade );
-                      std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
-                      //m_PositionOption_Current->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-                      m_stateTrading = TSMonitorShort;
-                    //} );
-                  break;
-                case ETradeDirection::None:
-                  break;
+              double strike = strikePut;
+              // need to wait for contract info
+              if ( 0 == m_pPositionUnderlying->GetInstrument()->GetContract() ) {
+                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
+                m_stateTrading = TSNoMore;
               }
-            }
-            m_stateTrading = TSWaitForContract;
+              else {
+                std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strike << std::endl;
+                m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
+                  [this](pOption_t pOption){
+                    m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
+                    //m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade );
+                    //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
+                    //m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                    m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+                    m_stateTrading = TSMonitorStraddle;
+                  } );
+                m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strike), m_pPositionUnderlying->GetInstrument(),
+                  [this](pOption_t pOption){
+                    m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
+                    //m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade );
+                    //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
+                    //m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
+                    m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+                    m_stateTrading = TSMonitorStraddle;
+                  } );
+              } // else
+              m_stateTrading = TSWaitForContract;
+            } // else
           }
           catch ( std::runtime_error& e ) {
-            std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << date << std::endl;
+            std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << quote.DateTime().date() << std::endl;
             m_stateTrading = TSNoMore;
           }
         }
@@ -385,6 +379,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       break;
     case TSWaitForContract:
+
       break;
     case TSMonitorLong:
       // TODO: monitor for delta changes, or being able to roll down to next strike
@@ -400,34 +395,50 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrading ) {
 //    case TSWaitForFirstTrade:
-    case TSInitializing:
+    case TSInitializing: {
       m_dblOpen = trade.Price();
       std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
-      m_stateTrading = TSWaitForCalc;
+
+      boost::gregorian::date date( trade.DateTime().date() );
+      m_iterChainExpiryInUse = std::find_if( m_mapChains.begin(), m_mapChains.end(),
+        [date](const mapChains_t::value_type& vt)->bool{
+          return date < vt.first;  // first chain where trading date less than expiry date TODO: at least one or two days difference?
+      } );
+
+      if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
+        std::cout << m_sUnderlying << " found no chain for " << date << ", trading disabled" << std::endl;
+        m_stateTrading = TSNoMore;
+      }
+      else {
+        m_stateTrading = TSWaitForCalc;
+      }
+      }
       break;
     case TSWaitForCalc:
       break;
     case TSWaitForEntry:
       break;
+    case TSMonitorStraddle:
+      break;
     case TSMonitorLong: {
-      pEMA_t& pEMA( m_vEMA.back() );
-      if ( trade.Price() < pEMA->dblEmaLatest ) {
-        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-        std::cout << m_sUnderlying << " closing long" << std::endl;
-        m_stateTrading = TSWaitForEntry;
-      }
+//      pEMA_t& pEMA( m_vEMA.back() );
+//      if ( trade.Price() < pEMA->dblEmaLatest ) {
+//        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+//        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+//        std::cout << m_sUnderlying << " closing long" << std::endl;
+//        m_stateTrading = TSWaitForEntry;
+//      }
       }
       break;
     case TSMonitorShort: {
-      pEMA_t& pEMA( m_vEMA.back() );
-      if ( trade.Price() > pEMA->dblEmaLatest ) {
-        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-        std::cout << m_sUnderlying << " closing short" << std::endl;
-        m_stateTrading = TSWaitForEntry;
-      }
+//      pEMA_t& pEMA( m_vEMA.back() );
+//      if ( trade.Price() > pEMA->dblEmaLatest ) {
+//        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+//        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+//        std::cout << m_sUnderlying << " closing short" << std::endl;
+//        m_stateTrading = TSWaitForEntry;
+//      }
       }
       break;
     default:
@@ -437,7 +448,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars
   switch ( m_stateTrading ) {
-    case TSWaitForEntry: {
+    case TSWaitForEntry: if ( false ) {
       bool bFirstFound( false );
       double dblPrevious {};
       bool bAllRising( true );
@@ -525,7 +536,8 @@ void ManageStrategy::HandleCancel( void ) {
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->CancelOrders();
-      //if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->CancelOrders();
+      if ( nullptr != m_pPositionCall.get() ) m_pPositionCall->CancelOrders();
+      if ( nullptr != m_pPositionPut.get() ) m_pPositionPut->CancelOrders();
       break;
   }
 }
@@ -537,7 +549,8 @@ void ManageStrategy::HandleGoNeutral( void ) {
     default:
       std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
-      //if ( nullptr != m_PositionOption_Current.get() ) m_PositionOption_Current->ClosePosition();
+      if ( nullptr != m_pPositionCall.get() ) m_pPositionCall->ClosePosition();
+      if ( nullptr != m_pPositionPut.get() ) m_pPositionPut->ClosePosition();
       break;
   }
 }
@@ -567,9 +580,12 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_pPositionUnderlying.get() ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   }
-  //if ( nullptr != m_PositionOption_Current.get() ) {
-  //  m_PositionOption_Current->GetWatch()->SaveSeries( sPrefix );
-  //}
+  if ( nullptr != m_pPositionCall.get() ) {
+    m_pPositionCall->GetWatch()->SaveSeries( sPrefix );
+  }
+  if ( nullptr != m_pPositionPut.get() ) {
+    m_pPositionPut->GetWatch()->SaveSeries( sPrefix );
+  }
 }
 
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
