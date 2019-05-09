@@ -57,6 +57,8 @@ public:
   using pPosition_t  = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using pOrder_t = ou::tf::Position::pOrder_t;
+
   using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
   using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t)>;
 
@@ -146,8 +148,8 @@ private:
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
-  size_t m_cntUpReturn;
-  size_t m_cntDnReturn;
+  double m_cntUpReturn;
+  double m_cntDnReturn;
 
   ETradingState m_stateTrading;
 
@@ -177,8 +179,35 @@ private:
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
-  struct Chain {
-
+  struct OrderManager { // update limit order
+    pOption_t m_pOption; // active option
+    pPosition_t m_pPosition; // active option position
+    pOrder_t m_pOrder; // active order
+    double m_dblMidDiff;  // increment in 0.01 from mid to get order executed
+    OrderManager(): m_dblMidDiff {} {}
+    /*
+     * For orders, opening, as well as closing
+     * find atm strike
+     * create option at strike
+     * verify that quotes are within designated spread
+     * create position
+     * create order from position, submit as limit at midpoint
+     * periodically, if order still executing,
+     *   cancel order,
+     *   increment middiff
+     *   create new limit order with new mid + middiff
+     * => need call,put spreads to be < 0.10
+     * => adjacent strikes need to be within 0.51
+     * => a roll up or down needs to retain some profit after commission and spread
+     * => roll once directional momentum on underlying has changed
+     * => check open interest
+     * => needs to be multi-day affair to reduce entry/exit spreads/commissions
+     * => need end of week calendar roll, preferably when already about to roll on a strike
+     *       start wed/thurs on the calendar rolls
+     * => autonomously monitor entries, seek confirmation from money manager prior to entry
+     */
+    void Start( pPosition_t pPositionUnderlying ) {}
+    void Update( double price ) {} // periodic (~6s) re-evaluate order, find new atm if necessary
   };
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs

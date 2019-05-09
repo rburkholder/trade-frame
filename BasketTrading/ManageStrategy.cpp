@@ -116,6 +116,8 @@ ManageStrategy::ManageStrategy(
   m_ceProfitLossCall.SetName( "P/L Call" );
   m_ceProfitLossPut.SetName( "P/L Put" );
 
+  m_ceUpReturn.SetColour( ou::Colour::Red );
+  m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::DarkBlue );
   m_ceProfitLossCall.SetColour( ou::Colour::DarkGreen );
   m_ceProfitLossPut.SetColour( ou::Colour::DarkSalmon );
@@ -310,7 +312,7 @@ void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
-  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn++;
+  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
   m_trades.Append( trade );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
@@ -381,7 +383,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             } // else
           }
           catch ( std::runtime_error& e ) {
-            std::cout << m_sUnderlying << "found no strike for mid-point " << mid << " on " << quote.DateTime().date() << std::endl;
+            std::cout << m_sUnderlying << " found no strike for mid-point " << mid << " on " << quote.DateTime().date() << std::endl;
             m_stateTrading = TSNoMore;
           }
         }
@@ -545,9 +547,9 @@ void ManageStrategy::HandleCancel( void ) {
       break;
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
-      if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->CancelOrders();
-      if ( nullptr != m_pPositionCall.get() ) m_pPositionCall->CancelOrders();
-      if ( nullptr != m_pPositionPut.get() ) m_pPositionPut->CancelOrders();
+      if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
+      if ( m_pPositionCall ) m_pPositionCall->CancelOrders();
+      if ( m_pPositionPut ) m_pPositionPut->CancelOrders();
       break;
   }
 }
@@ -558,9 +560,9 @@ void ManageStrategy::HandleGoNeutral( void ) {
       break;
     default:
       std::cout << m_sUnderlying << " go neutral" << std::endl;
-      if ( nullptr != m_pPositionUnderlying.get() ) m_pPositionUnderlying->ClosePosition();
-      if ( nullptr != m_pPositionCall.get() ) m_pPositionCall->ClosePosition();
-      if ( nullptr != m_pPositionPut.get() ) m_pPositionPut->ClosePosition();
+      if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
+      if ( m_pPositionCall ) m_pPositionCall->ClosePosition();
+      if ( m_pPositionPut ) m_pPositionPut->ClosePosition();
       break;
   }
 }
@@ -644,16 +646,20 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
 
-  m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLossCall.Append( bar.DateTime(), dblTotal );
+  if ( m_pPositionCall ) {
+    m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+    m_ceProfitLossCall.Append( bar.DateTime(), dblTotal );
+  }
 
-  m_pPositionPut->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
+  if ( m_pPositionPut ) {
+    m_pPositionPut->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+    m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
+  }
 
   m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
   m_cntUpReturn = 0;
 
-  m_ceDnReturn.Append( bar.DateTime(), -m_cntDnReturn );
+  m_ceDnReturn.Append( bar.DateTime(), m_cntDnReturn );
   m_cntDnReturn = 0;
 }
 
