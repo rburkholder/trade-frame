@@ -104,8 +104,8 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
             ou::tf::Bars::const_iterator iterVolume = bars.end() - nMinBars;
             data.volumeEma = std::for_each( iterVolume, bars.end(), VolumeEma() );
             if ( ( 1000000 < data.volumeEma )
-              && ( 25.0 <=  bars.last().Close() )
-              && ( 135.0 >= bars.last().Close() )
+              && ( 30.0 <=  bars.last().Close() )
+              && ( 300.0 >= bars.last().Close() ) // spy has low spread on options
               && ( dtEnd.date() == bars.last().DateTime().date() )
               && ( 120 < bars.Size() )
               ) {
