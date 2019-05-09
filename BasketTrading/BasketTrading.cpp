@@ -212,8 +212,8 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
     m_pMasterPortfolio->UpdateChart( dblCurrent, dblUnRealized, dblRealized, dblCommissionsPaid );
   }
 
-  size_t nUp;
-  size_t nDown;
+  size_t nUp {};
+  size_t nDown {};
   //m_pMasterPortfolio->GetSentiment( nUp, nDown );
 
   m_pPanelPortfolioStats->SetStats(
