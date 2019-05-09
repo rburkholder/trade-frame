@@ -138,14 +138,16 @@ ManageStrategy::ManageStrategy(
 
     m_fConstructWatch(
       m_sUnderlying,
-      [this,fGatherOptionDefinitions](pWatch_t pWatch){
+      [this,fGatherOptionDefinitions](pWatch_t pWatchUnderlying){
 
         //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
-        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatch );
+        // create a position with the watch
+        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying );
         assert( m_pPositionUnderlying );
         assert( m_pPositionUnderlying->GetWatch() );
 
+        // collect option chains for the underlying
         fGatherOptionDefinitions(
           m_pPositionUnderlying->GetInstrument()->GetInstrumentName(),
           [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
@@ -166,8 +168,8 @@ ManageStrategy::ManageStrategy(
                         m_fStopCalc
                         );
 
-                iterChains = m_mapChains.find( date );
-                if ( m_mapChains.end() == iterChains ) {
+                iterChains = m_mapChains.find( date ); // see if expiry date exists
+                if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
                   iterChains = m_mapChains.insert(
                     m_mapChains.begin(),
                     mapChains_t::value_type( date, std::move( ivAtm ) )
@@ -191,7 +193,7 @@ ManageStrategy::ManageStrategy(
                   }
                 }
                 catch ( std::runtime_error& e ) {
-                  std::cout << "fGatherOptionDefinitions error" << std::endl;
+                  std::cout << "ManageStrategy::fGatherOptionDefinitions error" << std::endl;
                 }
               }
             }
@@ -202,9 +204,9 @@ ManageStrategy::ManageStrategy(
         //std::cout << m_sUnderlying << " watch done." << std::endl;
 
         //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
-        pWatch->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-        pWatch->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
-    } );
+        pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+        pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
+    } ); // m_fConstructWatch
 
   }
   catch (...) {
