@@ -216,30 +216,6 @@ ManageStrategy::ManageStrategy(
   //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
-void ManageStrategy::Test() {
-  if ( 0 != m_mapChains.size() ) {
-    ou::tf::option::IvAtm& iv( m_mapChains.begin()->second );
-    double value( 121.5 );
-    iv.EmitValues();
-    try {
-      std::cout << "Put_Itm: "     << iv.Put_Itm( value ) << std::endl;
-      std::cout << "Put_ItmAtm: "  << iv.Put_ItmAtm( value ) << std::endl;
-      std::cout << "Put_Atm: "     << iv.Put_Atm( value ) << std::endl;
-      std::cout << "Put_OtmAtm: "  << iv.Put_OtmAtm( value ) << std::endl;
-      std::cout << "Put_Otm: "     << iv.Put_Otm( value ) << std::endl;
-
-      std::cout << "Call_Itm: "    << iv.Call_Itm( value ) << std::endl;
-      std::cout << "Call_ItmAtm: " << iv.Call_ItmAtm( value ) << std::endl;
-      std::cout << "Call_Atm: "    << iv.Call_Atm( value ) << std::endl;
-      std::cout << "Call_OtmAtm: " << iv.Call_OtmAtm( value ) << std::endl;
-      std::cout << "Call_Otm: "    << iv.Call_Otm( value ) << std::endl;
-    }
-    catch ( std::runtime_error& e ) {
-      std::cout << "runtime error: " << e.what() << std::endl;
-    }
-  }
-}
-
 ManageStrategy::~ManageStrategy( ) {
   if ( m_pPositionUnderlying ) {
     pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
@@ -652,3 +628,28 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentiment event trigger for MasterPortfolio
   //m_fBar( *this, bar );
 }
+
+void ManageStrategy::Test() {
+  if ( 0 != m_mapChains.size() ) {
+    ou::tf::option::IvAtm& iv( m_mapChains.begin()->second );
+    double value( 121.5 );
+    iv.EmitValues();
+    try {
+      std::cout << "Put_Itm: "     << iv.Put_Itm( value ) << std::endl;
+      std::cout << "Put_ItmAtm: "  << iv.Put_ItmAtm( value ) << std::endl;
+      std::cout << "Put_Atm: "     << iv.Put_Atm( value ) << std::endl;
+      std::cout << "Put_OtmAtm: "  << iv.Put_OtmAtm( value ) << std::endl;
+      std::cout << "Put_Otm: "     << iv.Put_Otm( value ) << std::endl;
+
+      std::cout << "Call_Itm: "    << iv.Call_Itm( value ) << std::endl;
+      std::cout << "Call_ItmAtm: " << iv.Call_ItmAtm( value ) << std::endl;
+      std::cout << "Call_Atm: "    << iv.Call_Atm( value ) << std::endl;
+      std::cout << "Call_OtmAtm: " << iv.Call_OtmAtm( value ) << std::endl;
+      std::cout << "Call_Otm: "    << iv.Call_Otm( value ) << std::endl;
+    }
+    catch ( std::runtime_error& e ) {
+      std::cout << "runtime error: " << e.what() << std::endl;
+    }
+  }
+}
+
