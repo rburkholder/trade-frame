@@ -32,6 +32,7 @@ namespace option { // options
 
 IvAtm::IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fStartCalc_t fStartCalc, fStopCalc_t fStopCalc )
 :
+  m_stateOptionWatch( EOptionWatchState::EOWSNoWatch ),
   m_pWatchUnderlying( pWatchUnderlying ),
   //m_fConstructOption( std::move( fConstructOption ) ),
   //m_fStartCalc( std::move( fStartCalc ) ),
@@ -50,6 +51,7 @@ IvAtm::IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fS
 
 IvAtm::IvAtm( IvAtm&& rhs  )
 :
+  m_stateOptionWatch( rhs.m_stateOptionWatch ),
   m_pWatchUnderlying( rhs.m_pWatchUnderlying ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fStartCalc( std::move( rhs.m_fStartCalc ) ),
