@@ -110,14 +110,24 @@ ManageStrategy::ManageStrategy(
 
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
-  m_ceProfitLoss.SetName( "Profit/Loss" );
   m_ceUpReturn.SetName( "Up Return" );
   m_ceDnReturn.SetName( "Dn Return" );
+  m_ceProfitLossPortfolio.SetName( "P/L Portfolio" );
+  m_ceProfitLossCall.SetName( "P/L Call" );
+  m_ceProfitLossPut.SetName( "P/L Put" );
+
+  m_ceProfitLossPortfolio.SetColour( ou::Colour::DarkBlue );
+  m_ceProfitLossCall.SetColour( ou::Colour::DarkGreen );
+  m_ceProfitLossPut.SetColour( ou::Colour::DarkSalmon );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
   pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
-  pcdvStrategyData->Add( 2, &m_ceProfitLoss );
+
+  pcdvStrategyData->Add( 2, &m_ceProfitLossPortfolio );
+  pcdvStrategyData->Add( 2, &m_ceProfitLossCall );
+  pcdvStrategyData->Add( 2, &m_ceProfitLossPut );
+
   pcdvStrategyData->Add( 4, &m_ceUpReturn );
   pcdvStrategyData->Add( 4, &m_ceDnReturn );
 
@@ -630,8 +640,15 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   double dblRealized;
   double dblCommissionsPaid;
   double dblTotal;
+  
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+  m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
+
+  m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_ceProfitLossCall.Append( bar.DateTime(), dblTotal );
+
+  m_pPositionPut->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
 
   m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
   m_cntUpReturn = 0;

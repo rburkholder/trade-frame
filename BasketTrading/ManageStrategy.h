@@ -188,7 +188,10 @@ private:
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
-  ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::ChartEntryIndicator m_ceProfitLossPortfolio;
+  ou::ChartEntryIndicator m_ceProfitLossCall;
+  ou::ChartEntryIndicator m_ceProfitLossPut;
 
   ou::ChartEntryIndicator m_ceUpReturn;
   ou::ChartEntryIndicator m_ceDnReturn;

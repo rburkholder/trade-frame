@@ -24,7 +24,6 @@
 
 #include <OUCommon/Delegate.h>
 
-
 #include "TradingEnumerations.h"
 #include "KeyTypes.h"
 
@@ -62,7 +61,7 @@ public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef Instrument::pInstrument_cref pInstrument_cref;
-  
+
   typedef Watch::pWatch_t pWatch_t;
 
   typedef Order::idOrder_t idOrder_t;
@@ -85,7 +84,7 @@ public:
   struct TableRowDefNoKey {
     template<class A>
     void Fields( A& a ) {
-      
+
       ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "name", sName );
       ou::db::Field( a, "notes", sNotes );
@@ -113,7 +112,7 @@ public:
   // all pending orders must be on the same side
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market
-    OrderSide::enumOrderSide eOrderSidePending;  
+    OrderSide::enumOrderSide eOrderSidePending;
     boost::uint32_t nPositionPending; // indicates whether we are in a long or short position
     OrderSide::enumOrderSide eOrderSideActive;
     boost::uint32_t nPositionActive;
@@ -125,23 +124,23 @@ public:
     double dblCommissionPaid; // contains total commissions
 
     // account and instrument objects need to be manually asssigned in a second step
-    TableRowDefNoKey( void ) 
-      : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
-      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), 
+    TableRowDefNoKey( void )
+      : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ),
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
-    TableRowDefNoKey( const TableRowDefNoKey& row ) 
-      : idPortfolio( row.idPortfolio ), sName( row.sName ), sNotes( row.sNotes ), 
+    TableRowDefNoKey( const TableRowDefNoKey& row )
+      : idPortfolio( row.idPortfolio ), sName( row.sName ), sNotes( row.sNotes ),
       idExecutionAccount( row.idExecutionAccount ), idDataAccount( row.idDataAccount ), idInstrument( row.idInstrument ),
-      sAlgorithm( row.sAlgorithm ), eOrderSidePending( row.eOrderSidePending ), nPositionPending( row.nPositionPending ), 
-      eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ), 
-      dblConstructedValue( row.dblConstructedValue ), 
+      sAlgorithm( row.sAlgorithm ), eOrderSidePending( row.eOrderSidePending ), nPositionPending( row.nPositionPending ),
+      eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ),
+      dblConstructedValue( row.dblConstructedValue ),
       dblUnRealizedPL( row.dblUnRealizedPL ), dblRealizedPL( row.dblRealizedPL ), dblCommissionPaid( row.dblCommissionPaid ) {};
     TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
-      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ )
       : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), sAlgorithm( sAlgorithm_ ),
       idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
-      eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
-      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), 
+      eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ),
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
 
   };
@@ -156,8 +155,8 @@ public:
 
     TableRowDef( void ) : idPosition( 0 ), TableRowDefNoKey() {};
     TableRowDef( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
-      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
-      : idPosition( 0 ), 
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ )
+      : idPosition( 0 ),
         TableRowDefNoKey( idPortfolio_, sName_, idInstrument_, idExecutionAccount_, idDataAccount_, sAlgorithm_ ) {};
   };
 
@@ -175,11 +174,11 @@ public:
   };
 
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, // persisted Position (old style construction)
-    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
   Position( pWatch_t, pProvider_t pExecutionProvider );  // in memory Position (new style construction)
   Position( pWatch_t, pProvider_t pExecutionProvider,   // persisted Position (new style construction)
-    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
@@ -193,9 +192,15 @@ public:
 
   pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
   pWatch_t GetWatch( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
+
   double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
+  void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid, double& dblTotal ) const {
+    dblTotal  = ( dblUnRealized = m_row.dblUnRealizedPL );
+    dblTotal += ( dblRealized = m_row.dblRealizedPL );
+    dblTotal -= ( dblCommissionsPaid = m_row.dblCommissionPaid );
+  }
 
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
@@ -216,7 +221,7 @@ public:
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
-    double dblPrice1,  
+    double dblPrice1,
     double dblPrice2
     );
 
@@ -235,7 +240,7 @@ public:
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
-    double dblPrice1,  
+    double dblPrice1,
     double dblPrice2
     );
 
@@ -245,7 +250,7 @@ public:
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
-  ou::Delegate<const ou::tf::Trade&> OnTrade; 
+  ou::Delegate<const ou::tf::Trade&> OnTrade;
   ou::Delegate<const ou::tf::Quote&> OnQuote;
   ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL
 
@@ -287,13 +292,13 @@ protected:
   TableRowDef m_row;
 
 private:
-  
+
   bool m_bExecutionAccountAssigned;
   bool m_bDataAccountAssigned;
   bool m_bWatchConstructedLocally;
 
   double m_dblMultiplier;
-  
+
   void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
   void Construction( void );
 
