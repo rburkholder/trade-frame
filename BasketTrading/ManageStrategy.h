@@ -132,7 +132,7 @@ private:
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
 
-  //EBarDirection m_rBarDirection[ 3 ];
+  EBarDirection m_rBarDirection[ 3 ];
 
   //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
@@ -196,7 +196,7 @@ private:
      *   cancel order,
      *   increment middiff
      *   create new limit order with new mid + middiff
-     * => need call,put spreads to be < 0.10
+     * => need call,put spreads to be < 0.10 && >= 0.01 (for a 6s interval)
      * => adjacent strikes need to be within 0.51
      * => a roll up or down needs to retain some profit after commission and spread
      * => roll once directional momentum on underlying has changed
@@ -205,6 +205,8 @@ private:
      * => need end of week calendar roll, preferably when already about to roll on a strike
      *       start wed/thurs on the calendar rolls
      * => autonomously monitor entries, seek confirmation from money manager prior to entry
+     * => allow daily and long term portfolios (allows another attempt at the ema strategy)
+     * => to reduce symbol count, load up call first to examine spread, then load up put for verification
      */
     void Start( pPosition_t pPositionUnderlying ) {}
     void Update( double price ) {} // periodic (~6s) re-evaluate order, find new atm if necessary

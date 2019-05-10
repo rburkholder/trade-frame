@@ -324,7 +324,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
-      if ( true ) {
+      if ( false ) {
         if ( true ) {
           double mid = quote.Midpoint();
           try {
@@ -363,8 +363,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strike), m_pPositionUnderlying->GetInstrument(),
                   [this](pOption_t pOption){
                     m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                    //m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,         m_nSharesToTrade );
-                    //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
                     //m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                     m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
                     m_stateTrading = TSMonitorStraddle;
@@ -372,8 +370,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strike), m_pPositionUnderlying->GetInstrument(),
                   [this](pOption_t pOption){
                     m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), pOption );
-                    //m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell,         m_nSharesToTrade );
-                    //std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << quote.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
                     //m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
                     m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
                     m_stateTrading = TSMonitorStraddle;
@@ -434,23 +430,23 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
     case TSMonitorStraddle:
       break;
     case TSMonitorLong: {
-//      pEMA_t& pEMA( m_vEMA.back() );
-//      if ( trade.Price() < pEMA->dblEmaLatest ) {
-//        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-//        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-//        std::cout << m_sUnderlying << " closing long" << std::endl;
-//        m_stateTrading = TSWaitForEntry;
-//      }
+      pEMA_t& pEMA( m_vEMA.back() );
+      if ( trade.Price() < pEMA->dblEmaLatest ) {
+        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+        std::cout << m_sUnderlying << " closing long" << std::endl;
+        m_stateTrading = TSWaitForEntry;
+      }
       }
       break;
     case TSMonitorShort: {
-//      pEMA_t& pEMA( m_vEMA.back() );
-//      if ( trade.Price() > pEMA->dblEmaLatest ) {
-//        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-//        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-//        std::cout << m_sUnderlying << " closing short" << std::endl;
-//        m_stateTrading = TSWaitForEntry;
-//      }
+      pEMA_t& pEMA( m_vEMA.back() );
+      if ( trade.Price() > pEMA->dblEmaLatest ) {
+        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+        std::cout << m_sUnderlying << " closing short" << std::endl;
+        m_stateTrading = TSWaitForEntry;
+      }
       }
       break;
     default:
@@ -460,7 +456,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars
   switch ( m_stateTrading ) {
-    case TSWaitForEntry: if ( false ) {
+    case TSWaitForEntry: if ( true ) {
       bool bFirstFound( false );
       double dblPrevious {};
       bool bAllRising( true );
@@ -482,12 +478,12 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 //          bAllFalling &= EMA::State::falling == p->state;
       } );
       // need three consecutive bars in the trending direction
-//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 0 ] );
-//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 1 ] );
-//      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 2 ] );
-//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 0 ] );
-//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 1 ] );
-//      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 0 ] );
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 1 ] );
+      bAllRising &= ( EBarDirection::Up == m_rBarDirection[ 2 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 0 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 1 ] );
+      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
       static const size_t nConfirmationIntervalsPreload( 21 );
       if ( bAllRising && bAllFalling ) { // special message for questionable result
         std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
@@ -572,8 +568,8 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
     case TSNoMore:
       break;
     default:
-      if ( nullptr != m_pPositionUnderlying.get() ) std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      //if ( nullptr != m_PositionOption_Current.get() ) std::cout << m_sUnderlying << " close results option " << *m_PositionOption_Current << std::endl;
+      if ( nullptr != m_pPositionUnderlying )
+        std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
       m_stateTrading = TSNoMore;
       break;
   }
@@ -603,7 +599,7 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
-    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::SpringGreen ) );
+    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::DarkOrange ) );
     m_vEMA.back().get()->SetName( "Ema 5s" );
     m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData, ou::Colour::MediumTurquoise ) );
     m_vEMA.back().get()->SetName( "Ema 13s" );
@@ -630,13 +626,13 @@ void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
+
   m_cePrice.AppendBar( bar );
   m_ceVolume.Append( bar );
 
-  // was in 60 second, but was supposed to be here
-  //m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
-  //m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];
-  //m_rBarDirection[ 2 ] = ( bar.Open() == bar.Close() ) ? EBarDirection::None : ( ( bar.Open() < bar.Close() ) ? EBarDirection::Up : EBarDirection::Down );
+  m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
+  m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];
+  m_rBarDirection[ 2 ] = ( bar.Open() == bar.Close() ) ? EBarDirection::None : ( ( bar.Open() < bar.Close() ) ? EBarDirection::Up : EBarDirection::Down );
 
   double dblUnRealized;
   double dblRealized;
