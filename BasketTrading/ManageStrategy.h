@@ -97,9 +97,7 @@ public:
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  //bool& ToBeTraded( void ) { return m_bToBeTraded; };  // remote set/get - TODO: fix this?
   void SetPivots( double dblS1, double dblPV, double dblR1 );
-  //void Start( ETradeDirection );
   void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
@@ -144,8 +142,6 @@ private:
 
   double m_dblOpen;
 
-  //ou::tf::Bar m_barInfo;
-
   ou::tf::Trade m_TradeLatest;
   ou::tf::Quote m_QuoteLatest;
 
@@ -174,8 +170,6 @@ private:
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
-  //pPosition_t m_PositionOption_Current; // current active put, depending upon roll-downs
-  //pPosition_t m_pPositionOption_Previous;  // previous put if there was a roll-down
   pPosition_t m_pPositionCall;
   pPosition_t m_pPositionPut;
 
@@ -244,16 +238,16 @@ private:
   class MonitorOrder {
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
-    bool PlaceOrder( pPosition_t& pPosition, pOrder_t& pOrder ) {
+    bool PlaceOrder( pPosition_t& pPosition ) {
       bool bOk( false );
+      m_pPosition = pPosition;
+      double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
+      double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+      pOrder_t pOrder = pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalizedPrice );
       if ( !m_pOrder ) {
         m_CountDownToAdjustment = 7;
         m_dblOffset = 0.0;
-        m_pPosition = pPosition;
         m_pOrder = pOrder;
-        double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-        double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-        m_pOrder->SetPrice1( dblNormalizedPrice );
         pPosition->PlaceOrder( pOrder );
         bOk = true;
       }
@@ -308,6 +302,12 @@ private:
   // strikes above and below the entry strike
   double m_strikeUpper;
   double m_strikeLower;
+
+  class Strike {
+  public:
+
+  private:
+  };
 
   struct OrderManager { // update limit order
     pOption_t m_pOption; // active option

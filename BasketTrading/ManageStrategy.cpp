@@ -465,16 +465,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
             m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidatePut.GetOption() );
             m_candidatePut.Clear();
-            pOrder = m_pPositionPut->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, 0.0 ); // Price1 will be changed
-            if ( !m_monitorPutOrder.PlaceOrder( m_pPositionPut, pOrder ) ) {
+            if ( !m_monitorPutOrder.PlaceOrder( m_pPositionPut ) ) {
               std::cout << m_sUnderlying << ": put not placed, order already outstanding?" << std::endl;
             }
             //m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
 
             m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidateCall.GetOption() );
             m_candidateCall.Clear();
-            pOrder = m_pPositionCall->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, 0.0 ); // Price1 will be changed
-            if ( !m_monitorCallOrder.PlaceOrder( m_pPositionCall, pOrder ) ) {
+            if ( !m_monitorCallOrder.PlaceOrder( m_pPositionCall ) ) {
               std::cout << m_sUnderlying << ": call not placed, order already outstanding?" << std::endl;
             }
             //m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
@@ -500,12 +498,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           // need to set state, so cancel/close are not repeatedly called on a closed position
           if ( mid > m_strikeUpper ) {
             m_pPositionCall->CancelOrders();
-            m_pPositionCall->ClosePosition();
+            m_pPositionCall->ClosePosition(); // TODO: perform step-wise limit order
           }
           if ( mid < m_strikeLower ) {
             m_pPositionPut->CancelOrders();
-            m_pPositionPut->ClosePosition();
-
+            m_pPositionPut->ClosePosition(); // TODO: perform step-wise limit order
           }
           break;
       }
