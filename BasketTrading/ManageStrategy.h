@@ -178,36 +178,32 @@ private:
   pcdvStrategyData_t m_pcdvStrategyData;
 
   // TODO: convert to generic watch, and put into library
-  class OptionCandidate {
-  private:
-    void CheckSpread( const ou::tf::Quote& quote ) {
-      m_quote = quote;
-    }
+  class SpreadCandidate {
   public:
-    OptionCandidate(): m_nConsecutiveSpreadOk {} {}
+    SpreadCandidate(): m_nConsecutiveSpreadOk {} {}
     void Clear() {
-      if ( m_pOption ) {
-        m_pOption->StopWatch();
-        m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionCandidate::CheckSpread ) );
-        m_pOption.reset();
+      if ( m_pWatch ) {
+        m_pWatch->StopWatch();
+        m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::CheckSpread ) );
+        m_pWatch.reset();
         m_nConsecutiveSpreadOk = 0;
       }
     }
-    void SetOption( pOption_t& pOption ) {
+    void SetOption( pOption_t& pWatch ) {
       Clear();
-      m_pOption = pOption;
-      if ( m_pOption ) {
-        m_pOption->OnQuote.Add( MakeDelegate( this, &OptionCandidate::CheckSpread ) );
-        m_pOption->StartWatch();
+      m_pWatch = pWatch;
+      if ( m_pWatch ) {
+        m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::CheckSpread ) );
+        m_pWatch->StartWatch();
       }
     }
-    pOption_t& GetOption() { return m_pOption; }
-    ~OptionCandidate() {
+    pWatch_t& GetWatch() { return m_pWatch; }
+    ~SpreadCandidate() {
       Clear();
     }
     bool SpreadValidated( size_t nDuration ) {
       bool bOk( false );
-      if ( m_pOption ) {
+      if ( m_pWatch ) {
         if ( m_quote.IsValid() ) {
           double spread( m_quote.Spread() );
           if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
@@ -221,18 +217,21 @@ private:
       }
       return bOk;
     }
-    double CurrentStrike() const {
-      assert( m_pOption );
-      return m_pOption->GetStrike();
-    }
+//    double CurrentStrike() const {
+//      assert( m_pOption );
+//      return m_pWatch->GetStrike();
+//    }
   private:
     ou::tf::Quote m_quote;
     size_t m_nConsecutiveSpreadOk;
-    pOption_t m_pOption;
+    pWatch_t m_pWatch;
+    void CheckSpread( const ou::tf::Quote& quote ) {
+      m_quote = quote;
+    }
   };
 
-  OptionCandidate m_candidateCall;
-  OptionCandidate m_candidatePut;
+  SpreadCandidate m_candidateCall;
+  SpreadCandidate m_candidatePut;
 
   // convert to generic class and put into library
   class MonitorOrder {
@@ -302,12 +301,6 @@ private:
   // strikes above and below the entry strike
   double m_strikeUpper;
   double m_strikeLower;
-
-  class Strike {
-  public:
-
-  private:
-  };
 
   struct OrderManager { // update limit order
     pOption_t m_pOption; // active option

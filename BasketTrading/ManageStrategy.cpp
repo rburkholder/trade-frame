@@ -463,14 +463,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( m_candidateCall.SpreadValidated( 3 ) && m_candidatePut.SpreadValidated( 3 ) ) {
             pOrder_t pOrder;
 
-            m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidatePut.GetOption() );
+            m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidatePut.GetWatch() );
             m_candidatePut.Clear();
             if ( !m_monitorPutOrder.PlaceOrder( m_pPositionPut ) ) {
               std::cout << m_sUnderlying << ": put not placed, order already outstanding?" << std::endl;
             }
             //m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
 
-            m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidateCall.GetOption() );
+            m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidateCall.GetWatch() );
             m_candidateCall.Clear();
             if ( !m_monitorCallOrder.PlaceOrder( m_pPositionCall ) ) {
               std::cout << m_sUnderlying << ": call not placed, order already outstanding?" << std::endl;
