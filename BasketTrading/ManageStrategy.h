@@ -114,6 +114,9 @@ private:
     TSWaitForContract, TSMonitorLong, TSMonitorShort, TSMonitorStraddle,
     TSNoMore
   };
+  enum class EOptionState {
+    Initial, ValidatingSpread, MonitorPositionEntry, MonitorPositionExit
+  };
 
   enum class ETradeDirection { None, Up, Down };
 
@@ -128,11 +131,12 @@ private:
   std::string m_sUnderlying;
 
   ETradeDirection m_eTradeDirection;
+  EOptionState m_eOptionState;
 
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
 
-  EBarDirection m_rBarDirection[ 3 ];
+  //EBarDirection m_rBarDirection[ 3 ];
 
   //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
   double m_dblFundsToTrade;
@@ -179,6 +183,132 @@ private:
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
+  // TODO: convert to generic watch, and put into library
+  class OptionCandidate {
+  private:
+    void CheckSpread( const ou::tf::Quote& quote ) {
+      m_quote = quote;
+    }
+  public:
+    OptionCandidate(): m_nConsecutiveSpreadOk {} {}
+    void Clear() {
+      if ( m_pOption ) {
+        m_pOption->StopWatch();
+        m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionCandidate::CheckSpread ) );
+        m_pOption.reset();
+        m_nConsecutiveSpreadOk = 0;
+      }
+    }
+    void SetOption( pOption_t& pOption ) {
+      Clear();
+      m_pOption = pOption;
+      if ( m_pOption ) {
+        m_pOption->OnQuote.Add( MakeDelegate( this, &OptionCandidate::CheckSpread ) );
+        m_pOption->StartWatch();
+      }
+    }
+    pOption_t& GetOption() { return m_pOption; }
+    ~OptionCandidate() {
+      Clear();
+    }
+    bool SpreadValidated( size_t nDuration ) {
+      bool bOk( false );
+      if ( m_pOption ) {
+        if ( m_quote.IsValid() ) {
+          double spread( m_quote.Spread() );
+          if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
+            m_nConsecutiveSpreadOk++;
+          }
+          else {
+            m_nConsecutiveSpreadOk = 0;
+          }
+        }
+        bOk = ( nDuration <= m_nConsecutiveSpreadOk );
+      }
+      return bOk;
+    }
+    double CurrentStrike() const {
+      assert( m_pOption );
+      return m_pOption->GetStrike();
+    }
+  private:
+    ou::tf::Quote m_quote;
+    size_t m_nConsecutiveSpreadOk;
+    pOption_t m_pOption;
+  };
+
+  OptionCandidate m_candidateCall;
+  OptionCandidate m_candidatePut;
+
+  // convert to generic class and put into library
+  class MonitorOrder {
+  public:
+    MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
+    bool PlaceOrder( pPosition_t& pPosition, pOrder_t& pOrder ) {
+      bool bOk( false );
+      if ( !m_pOrder ) {
+        m_CountDownToAdjustment = 7;
+        m_dblOffset = 0.0;
+        m_pPosition = pPosition;
+        m_pOrder = pOrder;
+        double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
+        double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+        m_pOrder->SetPrice1( dblNormalizedPrice );
+        pPosition->PlaceOrder( pOrder );
+        bOk = true;
+      }
+      return bOk;
+    }
+    void Clear() {
+      m_pOrder.reset();
+      m_pPosition.reset();
+    }
+    bool UpdateOrder() { // true when order has been filled
+      bool bFilled( false );
+      if ( m_pOrder ) {
+        if ( 0 != m_pOrder->GetQuanRemaining() ) {
+          assert( 0 < m_CountDownToAdjustment );
+          m_CountDownToAdjustment--;
+          if ( 0 == m_CountDownToAdjustment ) {
+            m_dblOffset += 0.01;
+            double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
+            double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+            switch ( m_pOrder->GetOrderSide() ) {
+              case ou::tf::OrderSide::Buy:
+                m_pOrder->SetPrice1( dblNormalizedPrice + m_dblOffset );
+                break;
+              case ou::tf::OrderSide::Sell:
+                m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
+                break;
+            }
+            m_pPosition->UpdateOrder( m_pOrder );
+            m_CountDownToAdjustment = 7;
+          }
+        }
+        else {
+          Clear();
+          bFilled = true;
+        }
+      }
+      else {
+        bFilled = true; // fake a clear, as no order exists, maybe generate an exception
+      }
+      return bFilled;
+    }
+  private:
+    size_t m_CountDownToAdjustment;
+    double m_dblOffset;
+    pPosition_t m_pPosition;
+    pOrder_t m_pOrder;
+  };
+
+  MonitorOrder m_monitorCallOrder;
+  MonitorOrder m_monitorPutOrder;
+
+  // strikes above and below the entry strike
+  double m_strikeUpper;
+  double m_strikeLower;
+
   struct OrderManager { // update limit order
     pOption_t m_pOption; // active option
     pPosition_t m_pPosition; // active option position
@@ -187,17 +317,15 @@ private:
     OrderManager(): m_dblMidDiff {} {}
     /*
      * For orders, opening, as well as closing
-     * find atm strike
-     * create option at strike
-     * verify that quotes are within designated spread
-     * create position
-     * create order from position, submit as limit at midpoint
+     * find atm strike (done)
+     * create option at strike (done)
+     * verify that quotes are within designated spread (done)
+     * create position (done)
+     * create order from position, submit as limit at midpoint (done)
      * periodically, if order still executing,
-     *   cancel order,
-     *   increment middiff
-     *   create new limit order with new mid + middiff
-     * => need call,put spreads to be < 0.10 && >= 0.01 (for a 6s interval)
-     * => adjacent strikes need to be within 0.51
+     *   update middiff, +/- based upon buy or sell (done)
+     * => need call,put spreads to be < 0.10 && >= 0.01 (for a 6s interval)  (done)
+     * => adjacent strikes need to be within 0.51 (done)
      * => a roll up or down needs to retain some profit after commission and spread
      * => roll once directional momentum on underlying has changed
      * => check open interest
@@ -206,7 +334,7 @@ private:
      *       start wed/thurs on the calendar rolls
      * => autonomously monitor entries, seek confirmation from money manager prior to entry
      * => allow daily and long term portfolios (allows another attempt at the ema strategy)
-     * => to reduce symbol count, load up call first to examine spread, then load up put for verification
+     * => to reduce symbol count, load up call first to examine spread, then load up put for verification?
      */
     void Start( pPosition_t pPositionUnderlying ) {}
     void Update( double price ) {} // periodic (~6s) re-evaluate order, find new atm if necessary
@@ -334,6 +462,9 @@ private:
   void HandleRHTrading( const ou::tf::Quote& quote );
   void HandleRHTrading( const ou::tf::Trade& trade );
   void HandleRHTrading( const ou::tf::Bar& bar );
+
+  void RHEquity( const ou::tf::Bar& bar );
+  void RHOption( const ou::tf::Bar& bar );
 };
 
 #endif /* MANAGESTRATEGY_H */
