@@ -292,7 +292,7 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
   m_row.nPositionPending += pOrder->GetQuantity();
   m_vAllOrders.push_back( pOrder );
   m_vOpenOrders.push_back( pOrder );
-  pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) ); 
+  pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) );
   pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
   OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
@@ -300,12 +300,33 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
   OnPositionChanged( *this );
 }
 
+void Position::UpdateOrder( pOrder_t pOrder ) {
+
+  //if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
+
+  //m_row.nPositionPending += pOrder->GetQuantity();
+  //m_vAllOrders.push_back( pOrder );
+  //m_vOpenOrders.push_back( pOrder ); // TODO: check to see if still an Open Order?
+  //pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) );
+  //pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
+  //pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
+  OrderManager::LocalCommonInstance().UpdateOrder( &(*m_pExecutionProvider), pOrder );
+
+  //OnPositionChanged( *this );  // TODO: should this be invoked?
+}
+
 void Position::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
   // todo:  on power up, need to relink these active orders back in with the position
-  for ( std::vector<pOrder_t>::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
-    CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
-  }
+  // or only use DAY orders
+  //for ( std::vector<pOrder_t>::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
+  //  CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
+  //}
+  std::for_each(
+    m_vOpenOrders.begin(), m_vOpenOrders.end(), // need to be aware of multi-thread invalidating interator?
+    [this](pOrder_t& pOrder){
+      CancelOrder( pOrder );
+    });
   //m_OpenOrders.clear();
 }
 
@@ -340,7 +361,11 @@ void Position::HandleCancellation( const Order& order ) {
 }
 
 void Position::CancelOrder( vOrders_iter_t iter ) {
-  OrderManager::LocalCommonInstance().CancelOrder( iter->get()->GetOrderId() );
+  CancelOrder( *iter );
+}
+
+void Position::CancelOrder( pOrder_t& pOrder ) {
+  OrderManager::LocalCommonInstance().CancelOrder( pOrder->GetOrderId() );
 }
 
 void Position::ClosePosition( OrderType::enumOrderType eOrderType ) {

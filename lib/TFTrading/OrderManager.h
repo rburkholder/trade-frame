@@ -57,24 +57,25 @@ public:
   OrderManager(void);
   ~OrderManager(void);
   pOrder_t ConstructOrder( // market order
-    Instrument::pInstrument_cref instrument, 
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
-    boost::uint32_t nOrderQuantity, 
+    Instrument::pInstrument_cref instrument,
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    boost::uint32_t nOrderQuantity,
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit or stop
-    Instrument::pInstrument_cref instrument, 
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
-    boost::uint32_t nOrderQuantity, double dblPrice1,  
+    Instrument::pInstrument_cref instrument,
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    boost::uint32_t nOrderQuantity, double dblPrice1,
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit and stop
-    Instrument::pInstrument_cref instrument, 
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    Instrument::pInstrument_cref instrument,
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition = 0
     );
   void PlaceOrder( ProviderInterfaceBase* pProvider, Order::pOrder_t pOrder );
+  void UpdateOrder( ProviderInterfaceBase* pProvider, Order::pOrder_t pOrder );
   void CancelOrder( idOrder_t nOrderId );
   void ReportCancellation( idOrder_t nOrderId );  // feedback from provider
   void ReportExecution( idOrder_t orderId, const Execution& exec );  // feedback from provider
@@ -122,7 +123,7 @@ protected:
 private:
 
   //CAutoIncKey m_orderIds;  // may need to worry about multi-threading at some point in time
-  // ToDo:  migrate away from this later on, may need to deal with multiple programs interacting with same 
+  // ToDo:  migrate away from this later on, may need to deal with multiple programs interacting with same
   //  database table, and will need to auto-key from the order table instead.
 
   struct AutoIncKey {

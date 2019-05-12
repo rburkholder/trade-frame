@@ -109,7 +109,7 @@ void OrderManager::ConstructOrder( pOrder_t& pOrder ) {
 }
 
 namespace OrderManagerQueries {
-  struct UpdateAtPlaceOrder {
+  struct UpdateAtPlaceOrder1 {
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "orderstatus", eOrderStatus );
@@ -119,7 +119,7 @@ namespace OrderManagerQueries {
     Order::idOrder_t idOrder;
     ptime dtOrderSubmitted;
     OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateAtPlaceOrder( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_ )
+    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_ )
       : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ) {};
   };
 }
@@ -134,10 +134,10 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
       pOrder->SetSendingToProvider();
       pProvider->PlaceOrder( pOrder );
       if ( 0 != m_pSession ) {
-        OrderManagerQueries::UpdateAtPlaceOrder 
+        OrderManagerQueries::UpdateAtPlaceOrder1
           update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted );
-        ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder>::pQueryFields_t pQuery
-          = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder>( // todo:  cache this query
+        ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder1>( // todo:  cache this query
             "update orders set orderstatus=?, datetimesubmitted=?", update ).Where( "orderid=?" );
       }
     }
@@ -147,6 +147,48 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
   }
   catch (...) {
     std::cout << "OrderManager::PlaceOrder:  Major Problems" << std::endl;
+  }
+}
+
+namespace OrderManagerQueries {
+  struct UpdateAtPlaceOrder2 {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "price1", dblPrice1 );
+      ou::db::Field( a, "price2", dblPrice2 );
+      ou::db::Field( a, "orderid", idOrder );
+    }
+    Order::idOrder_t idOrder;
+    double dblPrice1;
+    double dblPrice2;
+    UpdateAtPlaceOrder2( Order::idOrder_t id, double dblPrice1_, double dblPrice2_ )
+      : idOrder( id ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ) {};
+  };
+}
+
+void OrderManager::UpdateOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder) {
+
+  try {
+    iterOrders_t iter;
+    if ( LocateOrder( pOrder->GetOrderId(), iter ) ) {
+      assert( NULL != pProvider );
+      iter->second.pProvider = pProvider;
+      pOrder->SetSendingToProvider();
+      pProvider->PlaceOrder( pOrder );  // for Interactive Brokers, can 'place' again to update, given same order number
+      if ( 0 != m_pSession ) {
+        OrderManagerQueries::UpdateAtPlaceOrder2
+          update( pOrder->GetOrderId(), pOrder->GetRow().dblPrice1, pOrder->GetRow().dblPrice2 );
+        ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder2>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder2>( // todo:  cache this query
+            "update orders set price1=?, price2=?", update ).Where( "orderid=?" );
+      }
+    }
+    else {
+      std::cout << "OrderManager::UpdateOrder:  OrderId Not Found" << std::endl;
+    }
+  }
+  catch (...) {
+    std::cout << "OrderManager::UpdateOrder:  Major Problems" << std::endl;
   }
 }
 

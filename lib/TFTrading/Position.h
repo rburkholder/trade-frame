@@ -245,6 +245,7 @@ public:
     );
 
   void PlaceOrder( pOrder_t pOrder );
+  void UpdateOrder( pOrder_t pOrder );
 
   void CancelOrder( idOrder_t idOrder );
   void CancelOrders( void );
@@ -307,6 +308,7 @@ private:
   void HandleCancellation( const Order& );
 
   void CancelOrder( vOrders_iter_t iter );
+  void CancelOrder( pOrder_t& pOrder );
 
   void HandleQuote( quote_t );
   void HandleTrade( trade_t );
