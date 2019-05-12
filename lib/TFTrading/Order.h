@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// should provider be included?  No, this allows an order routing process to select an 
+// should provider be included?  No, this allows an order routing process to select an
 //   an appropriate provider based upon other criteria
 // the provider will be associated later for Execution evaluation
 
@@ -94,15 +94,15 @@ public:
     ptime dtOrderClosed;
 
     TableRowDef( void ) // default constructor
-      : idOrder( 0 ), idPosition( 0 ), 
-        eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ), 
-        dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ), 
+      : idOrder( 0 ), idPosition( 0 ),
+        eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ),
+        dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( 0 ), nQuantityRemaining( 0 ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0.0 ), dblCommission( 0.0 ) {};
     TableRowDef( // market order
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ),
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
@@ -110,7 +110,7 @@ public:
     TableRowDef( // limit or stop
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ),
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
@@ -118,17 +118,17 @@ public:
     TableRowDef( // limit and stop
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ),
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // complete row provided
-      idOrder_t idOrder_, idPosition_t idPosition_, idInstrument_t idInstrument_, std::string sDescription_, 
-      OrderStatus::enumOrderStatus eOrderStatus_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_, 
+      idOrder_t idOrder_, idPosition_t idPosition_, idInstrument_t idInstrument_, std::string sDescription_,
+      OrderStatus::enumOrderStatus eOrderStatus_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       double dblPrice1_, double dblPrice2_, double dblSignalPrice_,
-      boost::uint32_t nOrderQuantity_, boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, 
-      double dblAverageFillPrice_, double dblCommission_, 
+      boost::uint32_t nOrderQuantity_, boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_,
+      double dblAverageFillPrice_, double dblCommission_,
       ptime dtOrderCreated_, ptime dtOrderSubmitted_, ptime dtOrderClosed_ )
       : idOrder( idOrder_ ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), sDescription( sDescription_ ),
         eOrderStatus( eOrderStatus_ ), eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ),
@@ -148,29 +148,29 @@ public:
     }
   };
 
-  Order(  // market 
-    Instrument::pInstrument_cref instrument, 
+  Order(  // market
+    Instrument::pInstrument_cref instrument,
     OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
+    OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
   Order(  // limit or stop
-    Instrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument,
     OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
+    OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
-    double dblPrice1,  
+    double dblPrice1,
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
   Order(  // limit and stop
-    Instrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument,
     OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
+    OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
-    double dblPrice1,  
+    double dblPrice1,
     double dblPrice2,
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
@@ -189,18 +189,20 @@ public:
     }
     m_pInstrument = pInstrument;
   }
-  Instrument::pInstrument_t GetInstrument( void ) const { 
+  Instrument::pInstrument_t GetInstrument( void ) const {
     if ( NULL == m_pInstrument.get() ) {
       throw std::runtime_error( "Order::GetInstrument:  no instrument defined" );
     }
-    return m_pInstrument; 
+    return m_pInstrument;
   };
   const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_row.eOrderSide ]; };
   boost::uint32_t GetQuantity( void ) const { return m_row.nOrderQuantity; };
   OrderType::enumOrderType GetOrderType( void ) const { return m_row.eOrderType; };
   OrderSide::enumOrderSide GetOrderSide( void ) const { return m_row.eOrderSide; };
   double GetPrice1( void ) const { return m_row.dblPrice1; };  // need to validate this on creation
+  void SetPrice1( double dblPrice ) { m_row.dblPrice1 = dblPrice; } // prepares for UpdatePrice
   double GetPrice2( void ) const { return m_row.dblPrice2; };
+  void SetPrice2( double dblPrice ) { m_row.dblPrice2 = dblPrice; } // prepares for UpdatePrice
   double GetAverageFillPrice( void ) const { return m_row.dblAverageFillPrice; };
   idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
   boost::uint32_t GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
@@ -216,13 +218,13 @@ public:
   double GetSignalPrice( void ) const { return m_row.dblSignalPrice; };
   void SetDescription( const std::string& sDescription ) { m_row.sDescription = sDescription; }
   const std::string& GetDescription( void ) const { return m_row.sDescription; }
-  const ptime &GetDateTimeOrderSubmitted( void ) const { 
+  const ptime &GetDateTimeOrderSubmitted( void ) const {
     assert( not_a_date_time != m_row.dtOrderSubmitted ); // is this a valid test?
-    return m_row.dtOrderSubmitted; 
+    return m_row.dtOrderSubmitted;
   };
-  const ptime &GetDateTimeOrderFilled( void ) const { 
+  const ptime &GetDateTimeOrderFilled( void ) const {
     assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
-    return m_row.dtOrderClosed; 
+    return m_row.dtOrderClosed;
   };
   double GetIncrementalCommission( void ) const { return m_dblIncrementalCommission; };
   void MarkAsCancelled( void );  // called from OrderManager
