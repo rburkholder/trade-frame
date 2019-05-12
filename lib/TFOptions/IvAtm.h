@@ -32,6 +32,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// TODO: refactor into two classes:
+//   1) mostly static lookups
+//   2) dynamic strike following
+
 // will deprecate the code in Bundle
 
 class IvAtm {
@@ -77,6 +81,10 @@ public:
   double Call_Atm( double );
   double Call_OtmAtm( double );
   double Call_Otm( double );
+
+  // returns 0, 1, 2 strikes found
+  // needs exact match on strikeSource
+  int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper );
 
 protected:
 private:

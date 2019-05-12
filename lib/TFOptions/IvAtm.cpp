@@ -215,6 +215,27 @@ double IvAtm::Call_Otm( double value ) { // price < strike
   if ( m_mapChain.end() == iter ) throw std::runtime_error( "Call_Otm not found" );
   return iter->first;
 }
+
+int IvAtm::AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) {
+  strikeLower = strikeUpper = 0.0;
+  int nReturn {};
+  mapChain_t::const_iterator iterSource = m_mapChain.find( strikeSource );
+  if ( m_mapChain.end() != iterSource ) {
+    mapChain_t::const_iterator iterLower = iterSource;
+    if ( m_mapChain.begin() != iterLower ) {
+      iterLower--;
+      strikeLower = iterLower->first;
+      nReturn++;
+    }
+    mapChain_t::const_iterator iterUpper = iterSource;
+    iterUpper++;
+    if ( m_mapChain.end() != iterUpper ) {
+      strikeUpper = iterUpper->first;
+      nReturn++;
+    }
+  }
+  return nReturn;
+}
  
 void IvAtm::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
   mapChain_t::iterator iter = m_mapChain.find( dblStrike );
