@@ -455,11 +455,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                             assert( m_mapStrike.end() != result.first );
                             m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
                               [iterStrike=result.first](pOption_t pOptionCall){
-                                iterStrike->second.SetOptionCall( pOptionCall );
+                                Strike& strike( iterStrike->second );
+                                strike.SetOptionCall( pOptionCall );
                               } );
                             m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
                               [iterStrike=result.first](pOption_t pOptionPut){
-                                iterStrike->second.SetOptionPut( pOptionPut );
+                                Strike& strike( iterStrike->second );
+                                strike.SetOptionPut( pOptionPut );
                               } );
                             m_eOptionState = EOptionState::ValidatingSpread;
                           }
@@ -485,35 +487,18 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 strike.SetPositionCall( pPositionCall );
                 pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
                 strike.SetPositionPut( pPositionPut );
-                strike.CandidateClear(); // comes after the use of the GetOption... commands
                 strike.OrderLongStraddle();
-                m_eOptionState = EOptionState::MonitorPositionEntry;
-              }
-            }
-            );
-          break;
-        case EOptionState::MonitorPositionEntry:
-          //if ( m_monitorCallOrder.UpdateOrder() && m_monitorPutOrder.UpdateOrder() ) {
-          // TOOD: migrate the states in ot class Strike
-          std::for_each(
-            m_mapStrike.begin(), m_mapStrike.end(),
-            [this,mid](mapStrike_t::value_type& entry){
-              Strike& strike( entry.second );
-              strike.Tick( mid );
-              if ( !strike.OrdersInProcess() ) {
-                std::cout << m_sUnderlying << ": transitioning to MonitorStraddle" << std::endl;
-                m_eOptionState = EOptionState::MonitorPositionExit;
+                m_eOptionState = EOptionState::MonitorPosition;
                 m_stateTrading = ETradingState::TSMonitorStraddle;
               }
             }
             );
-          //}
           break;
       }
       break;
     case ETradingState::TSMonitorStraddle:
       switch ( m_eOptionState ) {
-        case EOptionState::MonitorPositionExit:
+        case EOptionState::MonitorPosition:
           // strike watch on underlying will generate exit orders for options
           // > upper strike, < lower strike
           // need to set state, so cancel/close are not repeatedly called on a closed position

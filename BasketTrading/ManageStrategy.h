@@ -113,7 +113,7 @@ private:
     TSNoMore
   };
   enum class EOptionState {
-    Initial1, Initial2, ValidatingSpread, MonitorPositionEntry, MonitorPositionExit
+    Initial1, Initial2, ValidatingSpread, MonitorPosition
   };
 
   enum class ETradeDirection { None, Up, Down };
@@ -367,14 +367,15 @@ private:
     {}
     void SetOption( pOption_t pOption ) { m_candidate.SetWatch( pOption ); }
     pOption_t GetOption() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_candidate.GetWatch() ); }
+    bool ValidateSpread( size_t nDuration ) {
+      return m_candidate.ValidateSpread( nDuration );
+    }
     void SetPosition( pPosition_t pPosition ) {
+      m_candidate.Clear(); // implies candidate is finished and no longer required
       m_pPosition = pPosition;
       m_monitor.SetPosition( pPosition );
     }
     pPosition_t GetPosition() { return m_pPosition; }
-    bool ValidateSpread( size_t nDuration ) {
-      return m_candidate.ValidateSpread( nDuration );
-    }
     void Tick() {
       if ( m_pPosition ) {
         if ( m_pPosition->OrdersPending() ) {
@@ -382,9 +383,9 @@ private:
         }
       }
     }
-    void CandidateClear() {
-      m_candidate.Clear();
-    }
+    //void CandidateClear() {
+    //  m_candidate.Clear();
+    //}
     void OrderLong() {
       m_monitor.PlaceOrder( ou::tf::OrderSide::Buy );
     }
@@ -423,28 +424,59 @@ private:
       m_legCall( std::move( rhs.m_legCall ) ),
       m_legPut( std::move( rhs.m_legPut ) )
     {}
-    void SetOptionCall( pOption_t pCall ) { m_legCall.SetOption( pCall ); }
+
+    void SetOptionCall( pOption_t pCall ) {
+      m_legCall.SetOption( pCall );
+      m_state = State::Validating;
+    }
     pOption_t GetOptionCall() { return m_legCall.GetOption(); }
-    void SetOptionPut( pOption_t pPut ) { m_legPut.SetOption( pPut ); }
+    void SetOptionPut( pOption_t pPut ) {
+      m_legPut.SetOption( pPut );
+      m_state = State::Validating;
+    }
     pOption_t GetOptionPut() { return m_legPut.GetOption(); }
-    void SetPositionCall( pPosition_t pCall ) { m_legCall.SetPosition( pCall ); }
-    pPosition_t GetPositionCall() { return m_legCall.GetPosition(); }
-    void SetPositionPut( pPosition_t pPut ) { m_legPut.SetPosition( pPut ); }
-    pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
     bool ValidateSpread( size_t nDuration ) {
-      return ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+      bool bResult( false );
+      if ( State::Validating == m_state ) { // SetOptionCall, SetOptionPut required before hand
+        bResult = ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+      }
+      return bResult;
     }
-    void CandidateClear() {
-      m_legCall.CandidateClear();
-      m_legPut.CandidateClear();
+
+    void SetPositionCall( pPosition_t pCall ) {
+      m_legCall.SetPosition( pCall );
+      m_state = State::Positions;
     }
+    pPosition_t GetPositionCall() { return m_legCall.GetPosition(); }
+    void SetPositionPut( pPosition_t pPut ) {
+      m_legPut.SetPosition( pPut );
+      m_state = State::Positions;
+    }
+    pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
+
     void Tick( double dblPriceUnderlying ) {
-      m_legCall.Tick();
-      m_legPut.Tick();
+      //if ( !strike.OrdersInProcess() ) {
+      switch ( m_state ) {
+        case State::Executing:
+          m_legCall.Tick();
+          m_legPut.Tick();
+          if ( !OrdersInProcess() ) {
+            m_state = State::Watching;
+          }
+          break;
+        case State::Watching:
+          Update( true, dblPriceUnderlying );
+          break;
+      }
     }
     void OrderLongStraddle() {
-      m_legCall.OrderLong();
-      m_legPut.OrderLong();
+      switch ( m_state ) {
+        case State::Positions: // doesn't confirm both put/call are available
+        case State::Watching:
+          m_legCall.OrderLong();
+          m_legPut.OrderLong();
+          break;
+      }
     }
     // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
     //void OrderShortStraddle() {
@@ -459,6 +491,19 @@ private:
       m_legCall.ClosePosition();
       m_legPut.ClosePosition();
     }
+    bool OrdersInProcess() const { return m_legCall.OrderInProcess() || m_legPut.OrderInProcess(); }
+    void SaveSeries( const std::string& sPrefix ) {
+
+    }
+  private:
+    enum class State { Initializing, Validating, Positions, Executing, Watching };
+    State m_state;
+    double m_dblStrikeUpper;
+    double m_dblStrikeAtm;
+    double m_dblStrikeLower;
+    Leg m_legCall;
+    Leg m_legPut;
+
     bool Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
       bool bClosed( false );
       if ( dblPrice > m_dblStrikeUpper ) {
@@ -473,18 +518,6 @@ private:
       }
       return bClosed;
     }
-    bool OrdersInProcess() const { return m_legCall.OrderInProcess() || m_legPut.OrderInProcess(); }
-    void SaveSeries( const std::string& sPrefix ) {
-
-    }
-  private:
-    enum class State { Initializing, Validating, Entering, Watching, Exiting };
-    State m_state;
-    double m_dblStrikeUpper;
-    double m_dblStrikeAtm;
-    double m_dblStrikeLower;
-    Leg m_legCall;
-    Leg m_legPut;
   };
 
   using mapStrike_t = std::map<double,Strike>;
