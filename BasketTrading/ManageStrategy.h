@@ -170,8 +170,6 @@ private:
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
-  pPosition_t m_pPositionCall;
-  pPosition_t m_pPositionPut;
 
   pPortfolio_t m_pPortfolioStrategy;
 
@@ -181,27 +179,36 @@ private:
   class SpreadCandidate {
   public:
     SpreadCandidate(): m_nConsecutiveSpreadOk {} {}
-    void Clear() {
-      if ( m_pWatch ) {
-        m_pWatch->StopWatch();
-        m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::CheckSpread ) );
-        m_pWatch.reset();
-        m_nConsecutiveSpreadOk = 0;
-      }
-    }
-    void SetOption( pOption_t& pWatch ) {
-      Clear();
-      m_pWatch = pWatch;
-      if ( m_pWatch ) {
-        m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::CheckSpread ) );
-        m_pWatch->StartWatch();
-      }
-    }
-    pWatch_t& GetWatch() { return m_pWatch; }
+    SpreadCandidate( const SpreadCandidate&& rhs )
+    : m_quote( rhs.m_quote ), m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
+      m_pWatch( std::move( rhs.m_pWatch ) )
+    {}
+//    SpreadCandidate( pWatch_t pWatch )
+//    : m_nConsecutiveSpreadOk {}
+//    {
+//      SetWatch( pWatch );
+//    }
     ~SpreadCandidate() {
       Clear();
     }
-    bool SpreadValidated( size_t nDuration ) {
+    void Clear() {
+      if ( m_pWatch ) {
+        m_pWatch->StopWatch();
+        m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
+        m_pWatch.reset();
+      }
+    }
+    void SetWatch( pWatch_t pWatch ) {
+      Clear();
+      m_pWatch = pWatch;
+      if ( m_pWatch ) {
+        m_nConsecutiveSpreadOk = 0;
+        m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
+        m_pWatch->StartWatch();
+      }
+    }
+    pWatch_t GetWatch() { return m_pWatch; }
+    bool ValidateSpread( size_t nDuration ) {
       bool bOk( false );
       if ( m_pWatch ) {
         if ( m_quote.IsValid() ) {
@@ -217,45 +224,56 @@ private:
       }
       return bOk;
     }
-//    double CurrentStrike() const {
-//      assert( m_pOption );
-//      return m_pWatch->GetStrike();
-//    }
   private:
     ou::tf::Quote m_quote;
     size_t m_nConsecutiveSpreadOk;
     pWatch_t m_pWatch;
-    void CheckSpread( const ou::tf::Quote& quote ) {
+    void UpdateQuote( const ou::tf::Quote& quote ) {
       m_quote = quote;
     }
   };
-
-  SpreadCandidate m_candidateCall;
-  SpreadCandidate m_candidatePut;
 
   // convert to generic class and put into library
   class MonitorOrder {
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
-    bool PlaceOrder( pPosition_t& pPosition ) {
-      bool bOk( false );
+    MonitorOrder( pPosition_t& pPosition )
+    : m_CountDownToAdjustment {}, m_dblOffset {},
+      m_pPosition( pPosition )
+    {}
+    MonitorOrder( const MonitorOrder&& rhs )
+    : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
+      m_dblOffset( rhs.m_dblOffset ),
+      m_pPosition( std::move( rhs.m_pPosition ) ),
+      m_pOrder( std::move( rhs.m_pOrder ) )
+    {}
+    void SetPosition( pPosition_t pPosition ) {
       m_pPosition = pPosition;
+    }
+    bool PlaceOrder(ou::tf::OrderSide::enumOrderSide side ) {
+      bool bOk( false );
       double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
       double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-      pOrder_t pOrder = pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalizedPrice );
+      pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, 1, dblNormalizedPrice );
       if ( !m_pOrder ) {
         m_CountDownToAdjustment = 7;
         m_dblOffset = 0.0;
         m_pOrder = pOrder;
-        pPosition->PlaceOrder( pOrder );
+        m_pPosition->PlaceOrder( pOrder );
         bOk = true;
       }
       return bOk;
     }
-    void Clear() {
-      m_pOrder.reset();
-      m_pPosition.reset();
-    }
+//    bool PlaceOrder( pPosition_t& pPosition ) {
+//      bool bOk( false );
+//      m_pPosition = pPosition;
+//      PlaceOrder();
+//      return bOk;
+//    }
+    //void Clear() {
+    //  m_pOrder.reset();
+    //  m_pPosition.reset();
+    //}
     bool UpdateOrder() { // true when order has been filled
       bool bFilled( false );
       if ( m_pOrder ) {
@@ -279,7 +297,7 @@ private:
           }
         }
         else {
-          Clear();
+          //Clear();
           bFilled = true;
         }
       }
@@ -288,6 +306,9 @@ private:
       }
       return bFilled;
     }
+    void OrderCancel() {
+      m_pPosition->CancelOrders();
+    }
   private:
     size_t m_CountDownToAdjustment;
     double m_dblOffset;
@@ -295,12 +316,124 @@ private:
     pOrder_t m_pOrder;
   };
 
-  MonitorOrder m_monitorCallOrder;
-  MonitorOrder m_monitorPutOrder;
+  class Leg {
+  public:
+    Leg() {}
+    Leg( pPosition_t pPosition )
+    : m_pPosition( pPosition )//,
+      //m_candidate( pPosition->GetWatch() )//,
+      //m_monitor( pPosition )
+    {
+      m_ceProfitLoss.SetName( "P/L" ); // TODO: need to add 'Call' or "Put' as well as strike price
+      m_ceProfitLoss.SetColour( ou::Colour::DarkGreen ); // TODO: need different colour for each leg  ou::Colour::DarkSalmon
+    }
+    Leg( const Leg&& rhs )
+    : m_pPosition( std::move( rhs.m_pPosition ) ),
+      m_candidate( std::move( rhs.m_candidate ) ),
+      m_monitor( std::move( rhs.m_monitor ) )
+    {}
+    void SetOption( pOption_t pOption ) { m_candidate.SetWatch( pOption ); }
+    pOption_t GetOption() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_candidate.GetWatch() ); }
+    void SetPosition( pPosition_t pPosition ) {
+      m_pPosition = pPosition;
+      m_monitor.SetPosition( pPosition );
+    }
+    pPosition_t GetPosition() { return m_pPosition; }
+    bool ValidateSpread( size_t nDuration ) {
+      return m_candidate.ValidateSpread( nDuration );
+    }
+    void CandidateClear() {
+      m_candidate.Clear();
+    }
+    void OrderLong() {
+      m_monitor.PlaceOrder( ou::tf::OrderSide::Buy );
+    }
+    void OrderShort() {
+      m_monitor.PlaceOrder( ou::tf::OrderSide::Sell );
+    }
+    void CancelOrders() {
+      m_monitor.OrderCancel();
+    }
+    void ClosePosition() {
+    }
+  private:
+    pPosition_t m_pPosition;
+    SpreadCandidate m_candidate;
+    MonitorOrder m_monitor;
+    ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
+  };
 
-  // strikes above and below the entry strike
-  double m_strikeUpper;
-  double m_strikeLower;
+  class Strike {
+  public:
+    Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
+    : m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
+    {}
+    Strike( const Strike&& rhs )
+    : m_dblStrikeUpper( rhs.m_dblStrikeUpper ),
+      m_dblStrikeAtm( rhs.m_dblStrikeUpper ),
+      m_dblStrikeLower( rhs.m_dblStrikeLower ),
+      m_legCall( std::move( rhs.m_legCall ) ),
+      m_legPut( std::move( rhs.m_legPut ) )
+    {}
+    void SetOptionCall( pOption_t pCall ) { m_legCall.SetOption( pCall ); }
+    pOption_t GetOptionCall() { return m_legCall.GetOption(); }
+    void SetOptionPut( pOption_t pPut ) { m_legPut.SetOption( pPut ); }
+    pOption_t GetOptionPut() { return m_legPut.GetOption(); }
+    void SetPositionCall( pPosition_t pCall ) { m_legCall.SetPosition( pCall ); }
+    pPosition_t GetPositionCall() { return m_legCall.GetPosition(); }
+    void SetPositionPut( pPosition_t pPut ) { m_legPut.SetPosition( pPut ); }
+    pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
+    bool ValidateSpread( size_t nDuration ) {
+      return ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+    }
+    void CandidateClear() {
+      m_legCall.CandidateClear();
+      m_legPut.CandidateClear();
+    }
+    void OrderLongStraddle() {
+      m_legCall.OrderLong();
+      m_legPut.OrderLong();
+    }
+    // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
+    //void OrderShortStraddle() {
+    //  m_legCall.OrderShort();
+    //  m_legPut.OrderShort();
+    //}
+    void CancelOrders() {
+      m_legCall.CancelOrders();
+      m_legPut.CancelOrders();
+    }
+    void ClosePosition() {
+      m_legCall.ClosePosition();
+      m_legPut.ClosePosition();
+    }
+    bool Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
+      bool bClosed( false );
+      if ( dblPrice > m_dblStrikeUpper ) {
+        m_legCall.CancelOrders();
+        m_legCall.ClosePosition(); // TODO: perform step-wise limit order
+        bClosed = true;
+      }
+      if ( dblPrice < m_dblStrikeLower ) {
+        m_legPut.CancelOrders();
+        m_legPut.ClosePosition(); // TODO: perform step-wise limit order
+        bClosed = true;
+      }
+      return bClosed;
+    }
+    void SaveSeries( const std::string& sPrefix ) {
+
+    }
+  private:
+    double m_dblStrikeUpper;
+    double m_dblStrikeAtm;
+    double m_dblStrikeLower;
+    Leg m_legCall;
+    Leg m_legPut;
+  };
+
+  using mapStrike_t = std::map<double,Strike>;
+  mapStrike_t m_mapStrike;
 
   struct OrderManager { // update limit order
     pOption_t m_pOption; // active option
@@ -342,8 +475,8 @@ private:
   ou::ChartEntryMark m_cePivots;
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
-  ou::ChartEntryIndicator m_ceProfitLossCall;
-  ou::ChartEntryIndicator m_ceProfitLossPut;
+  //ou::ChartEntryIndicator m_ceProfitLossCall;
+  //ou::ChartEntryIndicator m_ceProfitLossPut;
 
   ou::ChartEntryIndicator m_ceUpReturn;
   ou::ChartEntryIndicator m_ceDnReturn;

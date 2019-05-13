@@ -79,7 +79,6 @@ ManageStrategy::ManageStrategy(
   m_eTradeDirection( ETradeDirection::None ),
   m_bfTrades01Sec( 1 ),
   m_bfTrades06Sec( 6 ),
-  m_strikeLower {}, m_strikeUpper {},
 //  m_bfTrades60Sec( 60 ),
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
@@ -115,22 +114,16 @@ ManageStrategy::ManageStrategy(
   m_ceUpReturn.SetName( "Up Return" );
   m_ceDnReturn.SetName( "Dn Return" );
   m_ceProfitLossPortfolio.SetName( "P/L Portfolio" );
-  m_ceProfitLossCall.SetName( "P/L Call" );
-  m_ceProfitLossPut.SetName( "P/L Put" );
 
   m_ceUpReturn.SetColour( ou::Colour::Red );
   m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::DarkBlue );
-  m_ceProfitLossCall.SetColour( ou::Colour::DarkGreen );
-  m_ceProfitLossPut.SetColour( ou::Colour::DarkSalmon );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
   pcdvStrategyData->Add( 0, &m_cePivots );
   pcdvStrategyData->Add( 1, &m_ceVolume );
 
   pcdvStrategyData->Add( 2, &m_ceProfitLossPortfolio );
-  pcdvStrategyData->Add( 2, &m_ceProfitLossCall );
-  pcdvStrategyData->Add( 2, &m_ceProfitLossPut );
 
   pcdvStrategyData->Add( 4, &m_ceUpReturn );
   pcdvStrategyData->Add( 4, &m_ceDnReturn );
@@ -407,6 +400,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
       switch ( m_eOptionState ) {
         case EOptionState::Initial:
           {
+            // TOOD:  need to factor out this repetitive stuff
             pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
             if ( 0 == pInstrumentUnderlying->GetContract() ) {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
@@ -434,22 +428,35 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 else { // get down to business
                   double strikeAtm = strikePut;
                   double diff = strikeAtm - mid;
-                  if ( 0.0 > diff ) diff = -diff;
+                  if ( 0.0 > diff ) diff = -diff;  // aka absolute value
                   if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
-                    int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, m_strikeLower, m_strikeUpper );
+                    double strikeUpper {};
+                    double strikeLower {};
+                    int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
                     if ( 2 == nStrikes ) {
-                      if ( ( dblMaxStrikeDistance > ( strikeAtm - m_strikeLower) ) && ( dblMaxStrikeDistance > ( m_strikeUpper - strikeAtm ) ) ) {
+                      if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
                         // build option and obtain contract number
                         std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strikeAtm << std::endl;
-                        m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
-                          [this](pOption_t pOptionPut){
-                            m_candidatePut.SetOption( pOptionPut );
-                          } );
-                        m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
-                          [this](pOption_t pOptionCall){
-                            m_candidateCall.SetOption( pOptionCall );
-                          } );
-                        m_eOptionState = EOptionState::ValidatingSpread;
+                        mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
+                        if ( m_mapStrike.end() != iterStrike ) {
+                          // not sure what to do, as the strike exists.
+                        }
+                        else {
+                          m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+                          m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
+                            [this,strikeAtm](pOption_t pOptionCall){
+                              mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
+                              assert( m_mapStrike.end() != iterStrike );
+                              iterStrike->second.SetOptionCall( pOptionCall );
+                            } );
+                          m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
+                            [this,strikeAtm](pOption_t pOptionPut){
+                              mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
+                              assert( m_mapStrike.end() != iterStrike );
+                              iterStrike->second.SetOptionPut( pOptionPut );
+                            } );
+                          m_eOptionState = EOptionState::ValidatingSpread;
+                        }
                       }
                     }
                   }
@@ -460,33 +467,28 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           } // case
           break;
         case EOptionState::ValidatingSpread:
-          if ( m_candidateCall.SpreadValidated( 3 ) && m_candidatePut.SpreadValidated( 3 ) ) {
-            pOrder_t pOrder;
-
-            m_pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidatePut.GetWatch() );
-            m_candidatePut.Clear();
-            if ( !m_monitorPutOrder.PlaceOrder( m_pPositionPut ) ) {
-              std::cout << m_sUnderlying << ": put not placed, order already outstanding?" << std::endl;
+          // should this be for_each, or just a 'current' strike?
+          std::for_each(
+            m_mapStrike.begin(), m_mapStrike.end(),
+            [this](mapStrike_t::value_type& entry){
+              if ( entry.second.ValidateSpread( 3 ) ) {
+                pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), entry.second.GetOptionCall() );
+                entry.second.SetPositionCall( pPositionCall );
+                pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), entry.second.GetOptionPut() );
+                entry.second.SetPositionPut( pPositionPut );
+                entry.second.CandidateClear();
+                entry.second.OrderLongStraddle();
+                m_eOptionState = EOptionState::MonitorPositionEntry;
+              }
             }
-            //m_pPositionPut->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-
-            m_pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), m_candidateCall.GetWatch() );
-            m_candidateCall.Clear();
-            if ( !m_monitorCallOrder.PlaceOrder( m_pPositionCall ) ) {
-              std::cout << m_sUnderlying << ": call not placed, order already outstanding?" << std::endl;
-            }
-            //m_pPositionCall->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy,  1 * ( ( m_nSharesToTrade - 100 ) / 100 ) );
-
-            m_eOptionState = EOptionState::MonitorPositionEntry;
-          }
+            );
           break;
         case EOptionState::MonitorPositionEntry:
-          if ( m_monitorCallOrder.UpdateOrder() && m_monitorPutOrder.UpdateOrder() ) {
-            m_monitorCallOrder.Clear();
-            m_monitorPutOrder.Clear();
+          //if ( m_monitorCallOrder.UpdateOrder() && m_monitorPutOrder.UpdateOrder() ) {
+          // TOOD: migrate the states in ot class Strike
             m_eOptionState = EOptionState::MonitorPositionExit;
             m_stateTrading = ETradingState::TSMonitorStraddle;
-          }
+          //}
           break;
       }
       break;
@@ -496,14 +498,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           // strike watch on underlying will generate exit orders for options
           // > upper strike, < lower strike
           // need to set state, so cancel/close are not repeatedly called on a closed position
-          if ( mid > m_strikeUpper ) {
-            m_pPositionCall->CancelOrders();
-            m_pPositionCall->ClosePosition(); // TODO: perform step-wise limit order
-          }
-          if ( mid < m_strikeLower ) {
-            m_pPositionPut->CancelOrders();
-            m_pPositionPut->ClosePosition(); // TODO: perform step-wise limit order
-          }
+          std:;for_each(
+            m_mapStrike.begin(), m_mapStrike.end(),
+            [this,mid](mapStrike_t::value_type& entry){
+              entry.second.Update( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
+            });
           break;
       }
       break;
@@ -601,8 +600,12 @@ void ManageStrategy::HandleCancel( void ) {
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
       if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
-      if ( m_pPositionCall ) m_pPositionCall->CancelOrders();
-      if ( m_pPositionPut ) m_pPositionPut->CancelOrders();
+      std::for_each(
+        m_mapStrike.begin(), m_mapStrike.end(),
+        [this](mapStrike_t::value_type& entry){
+          entry.second.CancelOrders();
+        }
+        );
       break;
   }
 }
@@ -614,8 +617,12 @@ void ManageStrategy::HandleGoNeutral( void ) {
     default:
       std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
-      if ( m_pPositionCall ) m_pPositionCall->ClosePosition();
-      if ( m_pPositionPut ) m_pPositionPut->ClosePosition();
+      std::for_each(
+        m_mapStrike.begin(), m_mapStrike.end(),
+        [this](mapStrike_t::value_type& entry){
+          entry.second.ClosePosition();
+        }
+        );
       break;
   }
 }
@@ -645,12 +652,12 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   if ( nullptr != m_pPositionUnderlying.get() ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   }
-  if ( nullptr != m_pPositionCall.get() ) {
-    m_pPositionCall->GetWatch()->SaveSeries( sPrefix );
-  }
-  if ( nullptr != m_pPositionPut.get() ) {
-    m_pPositionPut->GetWatch()->SaveSeries( sPrefix );
-  }
+  std::for_each(
+    m_mapStrike.begin(), m_mapStrike.end(),
+    [this,&sPrefix](mapStrike_t::value_type& entry){
+      entry.second.SaveSeries( sPrefix );
+    }
+    );
 }
 
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
@@ -699,15 +706,15 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
 
-  if ( m_pPositionCall ) {
-    m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-    m_ceProfitLossCall.Append( bar.DateTime(), dblTotal );
-  }
+//  if ( m_pPositionCall ) {
+//    m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+//    m_ceProfitLossCall.Append( bar.DateTime(), dblTotal );
+//  }
 
-  if ( m_pPositionPut ) {
-    m_pPositionPut->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-    m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
-  }
+//  if ( m_pPositionPut ) {
+//    m_pPositionPut->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+//    m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
+//  }
 
   m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
   m_cntUpReturn = 0;
