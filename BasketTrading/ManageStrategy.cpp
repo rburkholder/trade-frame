@@ -82,7 +82,7 @@ ManageStrategy::ManageStrategy(
 //  m_bfTrades60Sec( 60 ),
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
-  m_eOptionState( EOptionState::Initial ),
+  m_eOptionState( EOptionState::Initial1 ),
   m_pcdvStrategyData( pcdvStrategyData ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
@@ -398,18 +398,19 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
       switch ( m_eOptionState ) {
-        case EOptionState::Initial:
+        case EOptionState::Initial1:
           {
-            // TOOD:  need to factor out this repetitive stuff
+            // TODO: will need to re-run this as other strikes are encountered
+            // TOOD:  need to factor out this repetitive stuff? or too small to worry about
+            //   maybe keep the underlying instrument as a class variable
             pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
             if ( 0 == pInstrumentUnderlying->GetContract() ) {
               std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
               m_stateTrading = TSNoMore;
             }
             else {
-              static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
-              double strikePut {};
               double strikeCall {};
+              double strikePut {};
               bool bAtmFound( false );
               try {
                 strikePut = m_iterChainExpiryInUse->second.Put_Atm( mid );  // may raise an exception (on or nearest strike)
@@ -417,17 +418,22 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 bAtmFound = true;
               }
               catch ( std::runtime_error& e ) {
-                std::cout << m_sUnderlying << " found no strike for mid-point " << mid << " on " << m_QuoteLatest.DateTime().date() << std::endl;
-                m_stateTrading = TSNoMore;
+                if ( m_mapStrike.empty() ) {
+                  std::cout << m_sUnderlying << " found no strike for mid-point " << mid << " on " << m_QuoteLatest.DateTime().date() << std::endl;
+                  m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+                }
               }
               if ( bAtmFound ) {
                 if ( strikePut != strikeCall ) {
-                  std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
-                  m_stateTrading = TSNoMore;
+                  if ( m_mapStrike.empty() ) {
+                    std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
+                    m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+                  }
                 }
                 else { // get down to business
-                  double strikeAtm = strikePut;
-                  double diff = strikeAtm - mid;
+                  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
+                  double strikeAtm = strikePut; // arbitrary choice as Put is same as Call
+                  double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
                   if ( 0.0 > diff ) diff = -diff;  // aka absolute value
                   if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
                     double strikeUpper {};
@@ -439,23 +445,24 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                         std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strikeAtm << std::endl;
                         mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
                         if ( m_mapStrike.end() != iterStrike ) {
-                          // not sure what to do, as the strike exists.
+                          // re-use strike with new orders, since this is probably another arrival at the strike
+                          // should have an alert on crossing, in order to signal a new order
                         }
                         else {
-                          m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
-                          m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
-                            [this,strikeAtm](pOption_t pOptionCall){
-                              mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
-                              assert( m_mapStrike.end() != iterStrike );
-                              iterStrike->second.SetOptionCall( pOptionCall );
-                            } );
-                          m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
-                            [this,strikeAtm](pOption_t pOptionPut){
-                              mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
-                              assert( m_mapStrike.end() != iterStrike );
-                              iterStrike->second.SetOptionPut( pOptionPut );
-                            } );
-                          m_eOptionState = EOptionState::ValidatingSpread;
+                          std::pair<mapStrike_t::iterator,bool> result;
+                          result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+                          if ( result.second ) {
+                            assert( m_mapStrike.end() != result.first );
+                            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
+                              [iterStrike=result.first](pOption_t pOptionCall){
+                                iterStrike->second.SetOptionCall( pOptionCall );
+                              } );
+                            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
+                              [iterStrike=result.first](pOption_t pOptionPut){
+                                iterStrike->second.SetOptionPut( pOptionPut );
+                              } );
+                            m_eOptionState = EOptionState::ValidatingSpread;
+                          }
                         }
                       }
                     }
@@ -471,13 +478,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           std::for_each(
             m_mapStrike.begin(), m_mapStrike.end(),
             [this](mapStrike_t::value_type& entry){
-              if ( entry.second.ValidateSpread( 3 ) ) {
-                pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), entry.second.GetOptionCall() );
-                entry.second.SetPositionCall( pPositionCall );
-                pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), entry.second.GetOptionPut() );
-                entry.second.SetPositionPut( pPositionPut );
-                entry.second.CandidateClear();
-                entry.second.OrderLongStraddle();
+              Strike& strike( entry.second );
+              if ( strike.ValidateSpread( 3 ) ) {
+                pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
+                strike.SetPositionCall( pPositionCall );
+                pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
+                strike.SetPositionPut( pPositionPut );
+                strike.CandidateClear(); // comes after the use of the GetOption... commands
+                strike.OrderLongStraddle();
                 m_eOptionState = EOptionState::MonitorPositionEntry;
               }
             }

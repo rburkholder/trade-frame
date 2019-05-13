@@ -113,7 +113,7 @@ private:
     TSNoMore
   };
   enum class EOptionState {
-    Initial, ValidatingSpread, MonitorPositionEntry, MonitorPositionExit
+    Initial1, Initial2, ValidatingSpread, MonitorPositionEntry, MonitorPositionExit
   };
 
   enum class ETradeDirection { None, Up, Down };
@@ -179,6 +179,7 @@ private:
   class SpreadCandidate {
   public:
     SpreadCandidate(): m_nConsecutiveSpreadOk {} {}
+    SpreadCandidate( const SpreadCandidate& rhs ) = delete;
     SpreadCandidate( const SpreadCandidate&& rhs )
     : m_quote( rhs.m_quote ), m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
       m_pWatch( std::move( rhs.m_pWatch ) )
@@ -241,6 +242,7 @@ private:
     : m_CountDownToAdjustment {}, m_dblOffset {},
       m_pPosition( pPosition )
     {}
+    MonitorOrder( const MonitorOrder& rhs ) = delete;
     MonitorOrder( const MonitorOrder&& rhs )
     : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
       m_dblOffset( rhs.m_dblOffset ),
@@ -306,7 +308,7 @@ private:
       }
       return bFilled;
     }
-    void OrderCancel() {
+    void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
       m_pPosition->CancelOrders();
     }
   private:
@@ -327,6 +329,7 @@ private:
       m_ceProfitLoss.SetName( "P/L" ); // TODO: need to add 'Call' or "Put' as well as strike price
       m_ceProfitLoss.SetColour( ou::Colour::DarkGreen ); // TODO: need different colour for each leg  ou::Colour::DarkSalmon
     }
+    Leg( const Leg& rhs ) = delete;
     Leg( const Leg&& rhs )
     : m_pPosition( std::move( rhs.m_pPosition ) ),
       m_candidate( std::move( rhs.m_candidate ) ),
@@ -363,13 +366,18 @@ private:
     ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
   };
 
+  // TODO: reload from database
   class Strike {
   public:
     Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
-    : m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
+    : m_state( State::Initializing ),
+      m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
     {}
+    Strike( const Strike& rhs ) = delete;
+    Strike& operator=( const Strike& rhs ) = delete;
     Strike( const Strike&& rhs )
-    : m_dblStrikeUpper( rhs.m_dblStrikeUpper ),
+    : m_state( rhs.m_state ),
+      m_dblStrikeUpper( rhs.m_dblStrikeUpper ),
       m_dblStrikeAtm( rhs.m_dblStrikeUpper ),
       m_dblStrikeLower( rhs.m_dblStrikeLower ),
       m_legCall( std::move( rhs.m_legCall ) ),
@@ -425,6 +433,8 @@ private:
 
     }
   private:
+    enum class State { Initializing, Validating, Entering, Watching, Exiting };
+    State m_state;
     double m_dblStrikeUpper;
     double m_dblStrikeAtm;
     double m_dblStrikeLower;
