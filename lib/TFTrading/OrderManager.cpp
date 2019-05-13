@@ -173,7 +173,7 @@ void OrderManager::UpdateOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder
     if ( LocateOrder( pOrder->GetOrderId(), iter ) ) {
       assert( NULL != pProvider );
       iter->second.pProvider = pProvider;
-      pOrder->SetSendingToProvider();
+      //pOrder->SetSendingToProvider();  // will generate assertion error
       pProvider->PlaceOrder( pOrder );  // for Interactive Brokers, can 'place' again to update, given same order number
       if ( 0 != m_pSession ) {
         OrderManagerQueries::UpdateAtPlaceOrder2
