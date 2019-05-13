@@ -187,7 +187,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedPivot_t fSelected
       [&mapUnderlyingInfo](const ou::tf::cboe::UnderlyingInfo& ui){
         mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ui.sSymbol );
         if ( citer != mapUnderlyingInfo.end() ) {
-          throw std::runtime_error( "SymbolSelection Pivot Symbol duplicated: " + ui.sSymbol );
+          std::cout << "SymbolSelection Pivot Symbol duplicated: " << ui.sSymbol << std::endl;
         }
         else {
           std::string sSymbol( ui.sSymbol );
