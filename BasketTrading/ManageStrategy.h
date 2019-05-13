@@ -175,6 +175,8 @@ private:
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
+  // ==========================
+
   // TODO: convert to generic watch, and put into library
   class SpreadCandidate {
   public:
@@ -234,7 +236,9 @@ private:
     }
   };
 
-  // convert to generic class and put into library
+  // ==========================
+
+// convert to generic class and put into library
   class MonitorOrder {
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
@@ -252,17 +256,22 @@ private:
     void SetPosition( pPosition_t pPosition ) {
       m_pPosition = pPosition;
     }
+    // can only work on one order at a time
     bool PlaceOrder(ou::tf::OrderSide::enumOrderSide side ) {
       bool bOk( false );
-      double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-      double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-      pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, 1, dblNormalizedPrice );
       if ( !m_pOrder ) {
-        m_CountDownToAdjustment = 7;
-        m_dblOffset = 0.0;
-        m_pOrder = pOrder;
-        m_pPosition->PlaceOrder( pOrder );
-        bOk = true;
+        double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
+        double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, 1, dblNormalizedPrice );
+        if ( m_pOrder ) {
+          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
+          m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
+          m_CountDownToAdjustment = 7;
+          m_dblOffset = 0.0;
+          m_pPosition->PlaceOrder( m_pOrder );
+          std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
+          bOk = true;
+        }
       }
       return bOk;
     }
@@ -276,9 +285,27 @@ private:
     //  m_pOrder.reset();
     //  m_pPosition.reset();
     //}
+    void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
+      if ( m_pPosition ) {
+        m_pPosition->CancelOrders();
+      }
+    }
+    void Tick() {
+      if ( m_pOrder ) {
+        bool bResult = UpdateOrder();
+      }
+    }
+    bool OrderInProcess() const { return ( nullptr != m_pOrder.get() ); }
+  private:
+
+    size_t m_CountDownToAdjustment;
+    double m_dblOffset;
+    pPosition_t m_pPosition;
+    pOrder_t m_pOrder;
+
     bool UpdateOrder() { // true when order has been filled
       bool bFilled( false );
-      if ( m_pOrder ) {
+      if ( m_pOrder ) { // TODO: lock threads on m_pOrder update on Filled or Canceled
         if ( 0 != m_pOrder->GetQuanRemaining() ) {
           assert( 0 < m_CountDownToAdjustment );
           m_CountDownToAdjustment--;
@@ -294,12 +321,13 @@ private:
                 m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
                 break;
             }
+            std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": update order by " << m_dblOffset << " on " << dblNormalizedPrice << std::endl;
             m_pPosition->UpdateOrder( m_pOrder );
             m_CountDownToAdjustment = 7;
           }
         }
         else {
-          //Clear();
+          m_pOrder.reset(); // assumes OrderFilledOrCancelled already run
           bFilled = true;
         }
       }
@@ -308,15 +336,17 @@ private:
       }
       return bFilled;
     }
-    void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
-      m_pPosition->CancelOrders();
+
+    void OrderFilledOrCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+      if ( m_pOrder ) { // TODO: test shouldn't be necessary
+        m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
+        m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
+      }
+      // m_pOrder.reset(); // perform in UpdateOrder
     }
-  private:
-    size_t m_CountDownToAdjustment;
-    double m_dblOffset;
-    pPosition_t m_pPosition;
-    pOrder_t m_pOrder;
   };
+
+  // ==========================
 
   class Leg {
   public:
@@ -345,6 +375,13 @@ private:
     bool ValidateSpread( size_t nDuration ) {
       return m_candidate.ValidateSpread( nDuration );
     }
+    void Tick() {
+      if ( m_pPosition ) {
+        if ( m_pPosition->OrdersPending() ) {
+          m_monitor.Tick();
+        }
+      }
+    }
     void CandidateClear() {
       m_candidate.Clear();
     }
@@ -359,12 +396,15 @@ private:
     }
     void ClosePosition() {
     }
+    bool OrderInProcess() const { return m_monitor.OrderInProcess(); }
   private:
     pPosition_t m_pPosition;
     SpreadCandidate m_candidate;
     MonitorOrder m_monitor;
     ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
   };
+
+  // ==========================
 
   // TODO: reload from database
   class Strike {
@@ -398,6 +438,10 @@ private:
       m_legCall.CandidateClear();
       m_legPut.CandidateClear();
     }
+    void Tick( double dblPriceUnderlying ) {
+      m_legCall.Tick();
+      m_legPut.Tick();
+    }
     void OrderLongStraddle() {
       m_legCall.OrderLong();
       m_legPut.OrderLong();
@@ -429,6 +473,7 @@ private:
       }
       return bClosed;
     }
+    bool OrdersInProcess() const { return m_legCall.OrderInProcess() || m_legPut.OrderInProcess(); }
     void SaveSeries( const std::string& sPrefix ) {
 
     }

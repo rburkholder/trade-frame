@@ -480,6 +480,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             [this](mapStrike_t::value_type& entry){
               Strike& strike( entry.second );
               if ( strike.ValidateSpread( 3 ) ) {
+                std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                 pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
                 strike.SetPositionCall( pPositionCall );
                 pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
@@ -494,8 +495,18 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         case EOptionState::MonitorPositionEntry:
           //if ( m_monitorCallOrder.UpdateOrder() && m_monitorPutOrder.UpdateOrder() ) {
           // TOOD: migrate the states in ot class Strike
-            m_eOptionState = EOptionState::MonitorPositionExit;
-            m_stateTrading = ETradingState::TSMonitorStraddle;
+          std::for_each(
+            m_mapStrike.begin(), m_mapStrike.end(),
+            [this,mid](mapStrike_t::value_type& entry){
+              Strike& strike( entry.second );
+              strike.Tick( mid );
+              if ( !strike.OrdersInProcess() ) {
+                std::cout << m_sUnderlying << ": transitioning to MonitorStraddle" << std::endl;
+                m_eOptionState = EOptionState::MonitorPositionExit;
+                m_stateTrading = ETradingState::TSMonitorStraddle;
+              }
+            }
+            );
           //}
           break;
       }
@@ -509,7 +520,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           std:;for_each(
             m_mapStrike.begin(), m_mapStrike.end(),
             [this,mid](mapStrike_t::value_type& entry){
-              entry.second.Update( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
+              Strike& strike( entry.second );
+              strike.Tick( mid );
+              //strike.Update( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
             });
           break;
       }
