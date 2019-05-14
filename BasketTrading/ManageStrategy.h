@@ -244,108 +244,140 @@ private:
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
     MonitorOrder( pPosition_t& pPosition )
-    : m_CountDownToAdjustment {}, m_dblOffset {},
+    : m_CountDownToAdjustment {}, m_dblOffset {}, m_state( State::NoPosition ),
       m_pPosition( pPosition )
     {}
     MonitorOrder( const MonitorOrder& rhs ) = delete;
     MonitorOrder( const MonitorOrder&& rhs )
     : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
+      m_state( rhs.m_state ),
       m_dblOffset( rhs.m_dblOffset ),
       m_pPosition( std::move( rhs.m_pPosition ) ),
       m_pOrder( std::move( rhs.m_pOrder ) )
     {}
     void SetPosition( pPosition_t pPosition ) {
       m_pPosition = pPosition;
+      m_state = State::NoOrder;
     }
     // can only work on one order at a time
     bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::enumOrderSide side ) {
       bool bOk( false );
-      if ( !m_pOrder ) {
-        double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-        double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
-        if ( m_pOrder ) {
-          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
-          m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
-          m_CountDownToAdjustment = 7;
-          m_dblOffset = 0.0;
-          m_pPosition->PlaceOrder( m_pOrder );
-          std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
-          bOk = true;
-        }
+      switch ( m_state ) {
+        case State::NoOrder:
+        case State::Cancelled:  // can overwrite?
+        case State::Filled:     // can overwrite?
+          {
+            double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
+            double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+            m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
+            if ( m_pOrder ) {
+              m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+              m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+              m_CountDownToAdjustment = 7;
+              m_dblOffset = 0.0;
+              m_state = State::Active;
+              m_pPosition->PlaceOrder( m_pOrder );
+              std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
+              bOk = true;
+            }
+          }
+          break;
+        case State::NoPosition:
+        case State::Active:
+          break;
       }
       return bOk;
     }
-//    bool PlaceOrder( pPosition_t& pPosition ) {
-//      bool bOk( false );
-//      m_pPosition = pPosition;
-//      PlaceOrder();
-//      return bOk;
-//    }
-    //void Clear() {
-    //  m_pOrder.reset();
-    //  m_pPosition.reset();
-    //}
     void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
-      if ( m_pPosition ) {
-        if ( m_pOrder ) {
+      switch ( m_state ) {
+        case State::Active:
           m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
-        }
+          break;
+        case State::NoPosition:
+        case State::NoOrder:
+        case State::Cancelled:
+        case State::Filled:
+          break;
       }
     }
+
     void Tick() {
-      if ( m_pOrder ) {
-        bool bResult = UpdateOrder();
+      switch ( m_state ) {
+        case State::Active:
+          UpdateOrder();
+          break;
+        case State::Cancelled:
+        case State::Filled:
+          m_pOrder.reset();
+          m_state = State::NoOrder;
+          break;
+        case State::NoPosition:
+        case State::NoOrder:
+          break;
       }
     }
-    bool OrderInProcess() const { return ( nullptr != m_pOrder.get() ); }
+
+    bool OrderInProcess() const { return ( State::Active == m_state ); }
+
   private:
 
+    enum class State { NoPosition, NoOrder, Active, Filled, Cancelled };
+    State m_state;
     size_t m_CountDownToAdjustment;
     double m_dblOffset;
     pPosition_t m_pPosition;
     pOrder_t m_pOrder;
 
-    bool UpdateOrder() { // true when order has been filled
-      bool bFilled( false );
-      if ( m_pOrder ) { // TODO: lock threads on m_pOrder update on Filled or Canceled
-        if ( 0 != m_pOrder->GetQuanRemaining() ) {
-          assert( 0 < m_CountDownToAdjustment );
-          m_CountDownToAdjustment--;
-          if ( 0 == m_CountDownToAdjustment ) {
-            m_dblOffset += 0.01;
-            double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-            double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-            switch ( m_pOrder->GetOrderSide() ) {
-              case ou::tf::OrderSide::Buy:
-                m_pOrder->SetPrice1( dblNormalizedPrice + m_dblOffset );
-                break;
-              case ou::tf::OrderSide::Sell:
-                m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
-                break;
-            }
-            std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": update order by " << m_dblOffset << " on " << dblNormalizedPrice << std::endl;
-            m_pPosition->UpdateOrder( m_pOrder );
-            m_CountDownToAdjustment = 7;
-          }
-        }
-        else {
-          m_pOrder.reset(); // assumes OrderFilledOrCancelled already run
-          bFilled = true;
-        }
+    void UpdateOrder() { // true when order has been filled
+      if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
+        // TODO: generate message? error on filled, but may be present on cancel
       }
       else {
-        bFilled = true; // fake a clear, as no order exists, maybe generate an exception
+        assert( 0 < m_CountDownToAdjustment );
+        m_CountDownToAdjustment--;
+        if ( 0 == m_CountDownToAdjustment ) {
+          m_dblOffset += 0.01; // TODO: may need to put a cap on size of offset
+          const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
+          double mid = quote.Midpoint();
+          double spread = quote.Spread();
+          double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+          switch ( m_pOrder->GetOrderSide() ) {
+            case ou::tf::OrderSide::Buy:
+              m_pOrder->SetPrice1( dblNormalizedPrice + m_dblOffset );
+              break;
+            case ou::tf::OrderSide::Sell:
+              m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
+              break;
+          }
+          std::cout
+            << m_pPosition->GetInstrument()->GetInstrumentName()
+            << ": update order by " << m_dblOffset
+            << " on " << dblNormalizedPrice
+            << " spread " << spread
+            << std::endl;
+          m_pPosition->UpdateOrder( m_pOrder );
+          m_CountDownToAdjustment = 7;
+        }
       }
-      return bFilled;
     }
 
-    void OrderFilledOrCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
-      if ( m_pOrder ) { // TODO: test shouldn't be necessary
-        m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
-        m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
+    void OrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+      switch ( m_state ) {
+        case State::Active:
+          m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+          m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+          m_state = State::Cancelled;
+          break;
       }
-      // m_pOrder.reset(); // perform in UpdateOrder
+    }
+    void OrderFilled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+      switch ( m_state ) {
+        case State::Active:
+          m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+          m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+          m_state = State::Filled;
+          break;
+      }
     }
   };
 
@@ -468,7 +500,7 @@ private:
           }
           break;
         case State::Watching:
-          Update( true, dblPriceUnderlying );
+          Update( bInTrend, dblPriceUnderlying );
           break;
       }
     }
