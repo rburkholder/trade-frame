@@ -117,7 +117,7 @@ void Order::SetSendingToProvider() {
 }
 
 OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) { 
-  // need to worry about fill after cancel, has multiple states:  cancelling, fill during cancel, cancelled
+  // need to worry about fill after cancel, has multiple states:  canceling, fill during cancel, canceled
   assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
   if ( 0 == m_row.nQuantityRemaining ) {
