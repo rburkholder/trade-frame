@@ -481,7 +481,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             m_mapStrike.begin(), m_mapStrike.end(),
             [this](mapStrike_t::value_type& entry){
               Strike& strike( entry.second );
-              if ( strike.ValidateSpread( 3 ) ) {
+              if ( strike.ValidateSpread( 7 ) ) {
                 std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                 pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
                 strike.SetPositionCall( pPositionCall );

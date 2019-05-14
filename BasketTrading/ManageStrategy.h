@@ -416,9 +416,7 @@ private:
     }
     pPosition_t GetPosition() { return m_pPosition; }
     void Tick() {
-      if ( m_pPosition ) {
-        m_monitor.Tick();
-      }
+      m_monitor.Tick();
     }
     void OrderLong( boost::uint32_t nOrderQuantity ) {
       m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
@@ -430,22 +428,24 @@ private:
       m_monitor.CancelOrder();
     }
     void ClosePosition() {
-      const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
-      if ( m_monitor.IsOrderActive() ) {
-        std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
-      }
-      else {
-        if ( 0 != row.nPositionPending ) {
-          std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
+      if ( m_pPosition ) {
+        const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
+        if ( m_monitor.IsOrderActive() ) {
+          std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
         }
-        if ( 0 != row.nPositionActive ) {
-          switch ( row.eOrderSideActive ) {
-            case ou::tf::OrderSide::Buy:
-              m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
-              break;
-            case ou::tf::OrderSide::Sell:
-              m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
-              break;
+        else {
+          if ( 0 != row.nPositionPending ) {
+            std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
+          }
+          if ( 0 != row.nPositionActive ) {
+            switch ( row.eOrderSideActive ) {
+              case ou::tf::OrderSide::Buy:
+                m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
+                break;
+              case ou::tf::OrderSide::Sell:
+                m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
+                break;
+            }
           }
         }
       }
@@ -516,11 +516,10 @@ private:
     pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
 
     void Tick( bool bInTrend, double dblPriceUnderlying ) { // TODO: make use of bInTrend to trigger exit latch
-      //if ( !strike.OrdersInProcess() ) {
-      switch ( m_state ) {
+      m_legCall.Tick();
+      m_legPut.Tick();
+      switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
         case State::Executing:
-          m_legCall.Tick();
-          m_legPut.Tick();
           if ( !AreOrdersActive() ) {
             m_state = State::Watching;
           }
@@ -531,7 +530,7 @@ private:
       }
     }
 
-    void OrderLongStraddle() {
+    void OrderLongStraddle() { // if volatility drops, then losses occur on premium
       switch ( m_state ) {
         case State::Positions: // doesn't confirm both put/call are available
         case State::Watching:
@@ -576,14 +575,14 @@ private:
     void Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
       if ( !m_bUpperClosed ) {
         if ( dblPrice > m_dblStrikeUpper ) {
-          m_legCall.ClosePosition();
-          m_bUpperClosed = true;
+//          m_legCall.ClosePosition(); // closing too early
+//          m_bUpperClosed = true;
         }
       }
       if ( !m_bLowerClosed ) {
         if ( dblPrice < m_dblStrikeLower ) {
-          m_legPut.ClosePosition();
-          m_bLowerClosed = true;
+//          m_legPut.ClosePosition(); // closing too early
+//          m_bLowerClosed = true;
         }
       }
     }
