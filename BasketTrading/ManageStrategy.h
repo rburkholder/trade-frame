@@ -288,7 +288,7 @@ private:
       }
       return bOk;
     }
-    void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
+    void CancelOrder() {  // TODO: need to fix this, and take the Order out of UpdateOrder
       switch ( m_state ) {
         case State::Active:
           m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
@@ -317,7 +317,7 @@ private:
       }
     }
 
-    bool OrderInProcess() const { return ( State::Active == m_state ); }
+    bool IsOrderActive() const { return ( State::Active == m_state ); }
 
   private:
 
@@ -428,11 +428,11 @@ private:
       m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
     }
     void CancelOrder() {
-      m_monitor.OrderCancel();
+      m_monitor.CancelOrder();
     }
     void ClosePosition() {
     }
-    bool OrderInProcess() const { return m_monitor.OrderInProcess(); }
+    bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
   private:
     pPosition_t m_pPosition;
     SpreadCandidate m_candidate;
@@ -495,7 +495,7 @@ private:
         case State::Executing:
           m_legCall.Tick();
           m_legPut.Tick();
-          if ( !OrdersInProcess() ) {
+          if ( !AreOrdersActive() ) {
             m_state = State::Watching;
           }
           break;
@@ -527,9 +527,8 @@ private:
       m_legCall.ClosePosition();
       m_legPut.ClosePosition();
     }
-    bool OrdersInProcess() const { return m_legCall.OrderInProcess() || m_legPut.OrderInProcess(); }
+    bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
     void SaveSeries( const std::string& sPrefix ) {
-
     }
   private:
     enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled };
