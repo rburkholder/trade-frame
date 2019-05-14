@@ -240,6 +240,7 @@ private:
 
 // convert to generic class and put into library
 // devoted to one Order at a time
+// NOTE: will require a tick between close/cancel and new order
   class MonitorOrder {
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
@@ -282,8 +283,10 @@ private:
             }
           }
           break;
-        case State::NoPosition:
         case State::Active:
+          std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": active, cannot place order" << std::endl;
+          break;
+        case State::NoPosition:
           break;
       }
       return bOk;
@@ -293,10 +296,10 @@ private:
         case State::Active:
           m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
           break;
-        case State::NoPosition:
         case State::NoOrder:
         case State::Cancelled:
         case State::Filled:
+        case State::NoPosition:
           break;
       }
     }
@@ -311,8 +314,8 @@ private:
           m_pOrder.reset();
           m_state = State::NoOrder;
           break;
-        case State::NoPosition:
         case State::NoOrder:
+        case State::NoPosition:
           break;
       }
     }
@@ -385,21 +388,22 @@ private:
 
   class Leg {
   public:
-    Leg() {}
-    Leg( pPosition_t pPosition )
-    : m_pPosition( pPosition )//,
-      //m_candidate( pPosition->GetWatch() )//,
-      //m_monitor( pPosition )
+    Leg() {
+      Init();
+    }
+    Leg( pPosition_t pPosition ) // implies candidate will not be used
     {
-      m_ceProfitLoss.SetName( "P/L" ); // TODO: need to add 'Call' or "Put' as well as strike price
-      m_ceProfitLoss.SetColour( ou::Colour::DarkGreen ); // TODO: need different colour for each leg  ou::Colour::DarkSalmon
+      Init();
+      SetPosition( pPosition );
     }
     Leg( const Leg& rhs ) = delete;
     Leg( const Leg&& rhs )
     : m_pPosition( std::move( rhs.m_pPosition ) ),
       m_candidate( std::move( rhs.m_candidate ) ),
       m_monitor( std::move( rhs.m_monitor ) )
-    {}
+    {
+      Init();
+    }
     void SetOption( pOption_t pOption ) { m_candidate.SetWatch( pOption ); }
     pOption_t GetOption() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_candidate.GetWatch() ); }
     bool ValidateSpread( size_t nDuration ) {
@@ -413,14 +417,9 @@ private:
     pPosition_t GetPosition() { return m_pPosition; }
     void Tick() {
       if ( m_pPosition ) {
-        if ( m_pPosition->OrdersPending() ) {
-          m_monitor.Tick();
-        }
+        m_monitor.Tick();
       }
     }
-    //void CandidateClear() {
-    //  m_candidate.Clear();
-    //}
     void OrderLong( boost::uint32_t nOrderQuantity ) {
       m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
     }
@@ -431,6 +430,25 @@ private:
       m_monitor.CancelOrder();
     }
     void ClosePosition() {
+      const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
+      if ( m_monitor.IsOrderActive() ) {
+        std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
+      }
+      else {
+        if ( 0 != row.nPositionPending ) {
+          std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
+        }
+        if ( 0 != row.nPositionActive ) {
+          switch ( row.eOrderSideActive ) {
+            case ou::tf::OrderSide::Buy:
+              m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
+              break;
+            case ou::tf::OrderSide::Sell:
+              m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
+              break;
+          }
+        }
+      }
     }
     bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
   private:
@@ -438,6 +456,11 @@ private:
     SpreadCandidate m_candidate;
     MonitorOrder m_monitor;
     ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
+
+    void Init() {
+      m_ceProfitLoss.SetName( "P/L" ); // TODO: need to add 'Call' or "Put' as well as strike price
+      m_ceProfitLoss.SetColour( ou::Colour::DarkGreen ); // TODO: need different colour for each leg  ou::Colour::DarkSalmon
+    }
   };
 
   // ==========================
