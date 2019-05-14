@@ -506,8 +506,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             m_mapStrike.begin(), m_mapStrike.end(),
             [this,mid](mapStrike_t::value_type& entry){
               Strike& strike( entry.second );
-              strike.Tick( mid );
-              //strike.Update( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
+              strike.Tick( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
             });
           break;
       }

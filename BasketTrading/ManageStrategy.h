@@ -239,6 +239,7 @@ private:
   // ==========================
 
 // convert to generic class and put into library
+// devoted to one Order at a time
   class MonitorOrder {
   public:
     MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
@@ -257,12 +258,12 @@ private:
       m_pPosition = pPosition;
     }
     // can only work on one order at a time
-    bool PlaceOrder(ou::tf::OrderSide::enumOrderSide side ) {
+    bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::enumOrderSide side ) {
       bool bOk( false );
       if ( !m_pOrder ) {
         double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
         double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, 1, dblNormalizedPrice );
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
         if ( m_pOrder ) {
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderFilledOrCancelled ) );
@@ -287,7 +288,9 @@ private:
     //}
     void OrderCancel() {  // TODO: need to fix this, and take the Order out of UpdateOrder
       if ( m_pPosition ) {
-        m_pPosition->CancelOrders();
+        if ( m_pOrder ) {
+          m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
+        }
       }
     }
     void Tick() {
@@ -386,13 +389,13 @@ private:
     //void CandidateClear() {
     //  m_candidate.Clear();
     //}
-    void OrderLong() {
-      m_monitor.PlaceOrder( ou::tf::OrderSide::Buy );
+    void OrderLong( boost::uint32_t nOrderQuantity ) {
+      m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
     }
-    void OrderShort() {
-      m_monitor.PlaceOrder( ou::tf::OrderSide::Sell );
+    void OrderShort( boost::uint32_t nOrderQuantity ) {
+      m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
     }
-    void CancelOrders() {
+    void CancelOrder() {
       m_monitor.OrderCancel();
     }
     void ClosePosition() {
@@ -454,7 +457,7 @@ private:
     }
     pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
 
-    void Tick( double dblPriceUnderlying ) {
+    void Tick( bool bInTrend, double dblPriceUnderlying ) { // TODO: make use of bInTrend to trigger exit latch
       //if ( !strike.OrdersInProcess() ) {
       switch ( m_state ) {
         case State::Executing:
@@ -473,8 +476,9 @@ private:
       switch ( m_state ) {
         case State::Positions: // doesn't confirm both put/call are available
         case State::Watching:
-          m_legCall.OrderLong();
-          m_legPut.OrderLong();
+          m_legCall.OrderLong( 1 );
+          m_legPut.OrderLong( 1 );
+          m_state = State::Executing;
           break;
       }
     }
@@ -484,8 +488,8 @@ private:
     //  m_legPut.OrderShort();
     //}
     void CancelOrders() {
-      m_legCall.CancelOrders();
-      m_legPut.CancelOrders();
+      m_legCall.CancelOrder();
+      m_legPut.CancelOrder();
     }
     void ClosePosition() {
       m_legCall.ClosePosition();
@@ -496,7 +500,7 @@ private:
 
     }
   private:
-    enum class State { Initializing, Validating, Positions, Executing, Watching };
+    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled };
     State m_state;
     double m_dblStrikeUpper;
     double m_dblStrikeAtm;
@@ -507,12 +511,12 @@ private:
     bool Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
       bool bClosed( false );
       if ( dblPrice > m_dblStrikeUpper ) {
-        m_legCall.CancelOrders();
+        m_legCall.CancelOrder();
         m_legCall.ClosePosition(); // TODO: perform step-wise limit order
         bClosed = true;
       }
       if ( dblPrice < m_dblStrikeLower ) {
-        m_legPut.CancelOrders();
+        m_legPut.CancelOrder();
         m_legPut.ClosePosition(); // TODO: perform step-wise limit order
         bClosed = true;
       }
