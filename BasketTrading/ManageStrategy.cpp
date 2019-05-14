@@ -625,7 +625,7 @@ void ManageStrategy::HandleGoNeutral( void ) {
       std::for_each(
         m_mapStrike.begin(), m_mapStrike.end(),
         [this](mapStrike_t::value_type& entry){
-          entry.second.ClosePosition();
+          entry.second.ClosePositions();
         }
         );
       break;

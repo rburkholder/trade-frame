@@ -466,10 +466,12 @@ private:
   // ==========================
 
   // TODO: reload from database
+  // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
   class Strike {
   public:
     Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
     : m_state( State::Initializing ),
+      m_bUpperClosed( false ), m_bLowerClosed( false ),
       m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
     {}
     Strike( const Strike& rhs ) = delete;
@@ -493,6 +495,7 @@ private:
       m_state = State::Validating;
     }
     pOption_t GetOptionPut() { return m_legPut.GetOption(); }
+
     bool ValidateSpread( size_t nDuration ) {
       bool bResult( false );
       if ( State::Validating == m_state ) { // SetOptionCall, SetOptionPut required before hand
@@ -527,6 +530,7 @@ private:
           break;
       }
     }
+
     void OrderLongStraddle() {
       switch ( m_state ) {
         case State::Positions: // doesn't confirm both put/call are available
@@ -534,22 +538,26 @@ private:
           m_legCall.OrderLong( 1 );
           m_legPut.OrderLong( 1 );
           m_state = State::Executing;
+          m_bUpperClosed = false;
+          m_bLowerClosed = false;
           break;
       }
     }
-    // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
-    //void OrderShortStraddle() {
-    //  m_legCall.OrderShort();
-    //  m_legPut.OrderShort();
-    //}
     void CancelOrders() {
       m_legCall.CancelOrder();
       m_legPut.CancelOrder();
     }
-    void ClosePosition() {
-      m_legCall.ClosePosition();
-      m_legPut.ClosePosition();
+    void ClosePositions() {
+      if ( !m_bUpperClosed ) {
+        m_legCall.ClosePosition();
+        m_bUpperClosed = true;
+      }
+      if ( !m_bLowerClosed ) {
+        m_legPut.ClosePosition();
+        m_bLowerClosed = true;
+      }
     }
+
     bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
     void SaveSeries( const std::string& sPrefix ) {
     }
@@ -562,19 +570,22 @@ private:
     Leg m_legCall;
     Leg m_legPut;
 
-    bool Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
-      bool bClosed( false );
-      if ( dblPrice > m_dblStrikeUpper ) {
-        m_legCall.CancelOrder();
-        m_legCall.ClosePosition(); // TODO: perform step-wise limit order
-        bClosed = true;
+    bool m_bUpperClosed;
+    bool m_bLowerClosed;
+
+    void Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
+      if ( !m_bUpperClosed ) {
+        if ( dblPrice > m_dblStrikeUpper ) {
+          m_legCall.ClosePosition();
+          m_bUpperClosed = true;
+        }
       }
-      if ( dblPrice < m_dblStrikeLower ) {
-        m_legPut.CancelOrder();
-        m_legPut.ClosePosition(); // TODO: perform step-wise limit order
-        bClosed = true;
+      if ( !m_bLowerClosed ) {
+        if ( dblPrice < m_dblStrikeLower ) {
+          m_legPut.ClosePosition();
+          m_bLowerClosed = true;
+        }
       }
-      return bClosed;
     }
   };
 
