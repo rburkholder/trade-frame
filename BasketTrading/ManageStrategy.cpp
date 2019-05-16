@@ -82,7 +82,7 @@ ManageStrategy::ManageStrategy(
 //  m_bfTrades60Sec( 60 ),
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
-  m_eOptionState( EOptionState::Initial1 ),
+  //m_eOptionState( EOptionState::Initial1 ),
   m_pcdvStrategyData( pcdvStrategyData ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
@@ -149,6 +149,8 @@ ManageStrategy::ManageStrategy(
 
         //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
+        assert( 0 != pWatchUnderlying->GetInstrument()->GetContract() );
+
         // create a position with the watch
         m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying );
         assert( m_pPositionUnderlying );
@@ -213,6 +215,12 @@ ManageStrategy::ManageStrategy(
         //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
         pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
         pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
+
+            pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
+            if ( 0 == pInstrumentUnderlying->GetContract() ) {
+              std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
+              m_stateTrading = TSNoMore;
+            }
     } ); // m_fConstructWatch
 
   }
@@ -282,7 +290,8 @@ void ManageStrategy::Start(  ) {
 //      else {
         // can start with what was supplied
         std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
-        m_stateTrading = TSWaitForEntry;
+        //m_stateTrading = TSWaitForEntry;
+        m_stateTrading = TSOptionEvaluation;
 //      }
     }
   }
@@ -360,6 +369,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       break;
     case TSWaitForEntry:
       break;
+    case TSOptionEvaluation:
+      break;
     case TSMonitorStraddle:
       break;
     case TSMonitorLong: {
@@ -393,123 +404,121 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   RHOption( bar );
 }
 
+double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch around this call
+  double strikeCall {};
+  double strikePut {};
+  strikePut = m_iterChainExpiryInUse->second.Put_Atm( mid );  // may raise an exception (on or nearest strike)
+  strikeCall = m_iterChainExpiryInUse->second.Call_Atm( mid );  // may raise an exception (on or nearest strike)
+  if ( strikePut != strikeCall ) {
+    std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
+    throw std::runtime_error( "strikePut != strikeCall" );
+  }
+  return strikePut;
+}
+
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars
+
   double mid = m_QuoteLatest.Midpoint();
+
+  bool bAtmFound( false );
+  double strikeAtm {};
+
+  try {
+    strikeAtm = CurrentAtmStrike( mid );
+    bAtmFound = true;
+  }
+  catch ( std::runtime_error& e ) {
+    if ( m_mapStrike.empty() ) {
+      std::cout << m_sUnderlying << " found no strike for mid-point " << mid
+                                 << " on " << m_QuoteLatest.DateTime().date()
+                                 << " [" << e.what() << "]"
+                                 << std::endl;
+      m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+    }
+  }
+
+  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
+
   switch ( m_stateTrading ) {
-    case TSWaitForEntry:
-      switch ( m_eOptionState ) {
-        case EOptionState::Initial1:
-          {
-            // TODO: will need to re-run this as other strikes are encountered
-            // TOOD:  need to factor out this repetitive stuff? or too small to worry about
-            //   maybe keep the underlying instrument as a class variable
-            pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
-            if ( 0 == pInstrumentUnderlying->GetContract() ) {
-              std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
-              m_stateTrading = TSNoMore;
-            }
-            else {
-              double strikeCall {};
-              double strikePut {};
-              bool bAtmFound( false );
-              try {
-                strikePut = m_iterChainExpiryInUse->second.Put_Atm( mid );  // may raise an exception (on or nearest strike)
-                strikeCall = m_iterChainExpiryInUse->second.Call_Atm( mid );  // may raise an exception (on or nearest strike)
-                bAtmFound = true;
-              }
-              catch ( std::runtime_error& e ) {
-                if ( m_mapStrike.empty() ) {
-                  std::cout << m_sUnderlying << " found no strike for mid-point " << mid << " on " << m_QuoteLatest.DateTime().date() << std::endl;
-                  m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
-                }
-              }
-              if ( bAtmFound ) {
-                if ( strikePut != strikeCall ) {
-                  if ( m_mapStrike.empty() ) {
-                    std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
-                    m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+    case TSOptionEvaluation: // TODO: need to adjust state machine to arrive here
+      {
+        if ( bAtmFound ) {
+          mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
+          if ( m_mapStrike.end() == iterStrike ) {
+            double strikeUpper {};
+            double strikeLower {};
+            int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
+            // TODO: move this into Strike as a static call?
+            if ( 2 == nStrikes ) {
+              double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
+              if ( 0.0 > diff ) diff = -diff;  // aka absolute value
+              if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
+                if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
+                  std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strikeAtm << std::endl;
+                  std::pair<mapStrike_t::iterator,bool> result;
+                  result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+                  if ( result.second ) {
+                    assert( m_mapStrike.end() != result.first );
+                    pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
+                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
+                      [iterStrike=result.first](pOption_t pOptionCall){
+                        Strike& strike( iterStrike->second );
+                        strike.SetOptionCall( pOptionCall );
+                      } );
+                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
+                      [iterStrike=result.first](pOption_t pOptionPut){
+                        Strike& strike( iterStrike->second );
+                        strike.SetOptionPut( pOptionPut );
+                      } );
+                    // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
                   }
                 }
-                else { // get down to business
-                  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
-                  double strikeAtm = strikePut; // arbitrary choice as Put is same as Call
-                  double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
-                  if ( 0.0 > diff ) diff = -diff;  // aka absolute value
-                  if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
-                    double strikeUpper {};
-                    double strikeLower {};
-                    int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
-                    if ( 2 == nStrikes ) {
-                      if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
-                        // build option and obtain contract number
-                        std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strikeAtm << std::endl;
-                        mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
-                        if ( m_mapStrike.end() != iterStrike ) {
-                          // re-use strike with new orders, since this is probably another arrival at the strike
-                          // should have an alert on crossing, in order to signal a new order
-                        }
-                        else {
-                          std::pair<mapStrike_t::iterator,bool> result;
-                          result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
-                          if ( result.second ) {
-                            assert( m_mapStrike.end() != result.first );
-                            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
-                              [iterStrike=result.first](pOption_t pOptionCall){
-                                Strike& strike( iterStrike->second );
-                                strike.SetOptionCall( pOptionCall );
-                              } );
-                            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
-                              [iterStrike=result.first](pOption_t pOptionPut){
-                                Strike& strike( iterStrike->second );
-                                strike.SetOptionPut( pOptionPut );
-                              } );
-                            m_eOptionState = EOptionState::ValidatingSpread;
-                          }
-                        }
-                      }
-                    }
-                  }
-                } // else strike check
-              } // end atmFound
-            } // else pInstrumentUnderlying
-            //assert( TSWaitForEntry != m_stateTrading );
-          } // case
-          break;
-        case EOptionState::ValidatingSpread:
-          // should this be for_each, or just a 'current' strike?
-          std::for_each(
-            m_mapStrike.begin(), m_mapStrike.end(),
-            [this](mapStrike_t::value_type& entry){
-              Strike& strike( entry.second );
-              if ( strike.ValidateSpread( 7 ) ) {
-                std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
-                strike.SetPositionCall( pPositionCall );
-                pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
-                strike.SetPositionPut( pPositionPut );
-                strike.OrderLongStraddle();
-                m_eOptionState = EOptionState::MonitorPosition;
-                m_stateTrading = ETradingState::TSMonitorStraddle;
               }
             }
-            );
-          break;
+          }
+        }
       }
+
+      std::for_each(
+        m_mapStrike.begin(), m_mapStrike.end(),
+        [this,strikeAtm,mid](mapStrike_t::value_type& entry){
+          Strike& strike( entry.second );
+          switch ( strike.m_state ) {
+            case Strike::State::Initializing:
+              // effectively the code when inserting a new strike above
+              break;
+            case Strike::State::Validating:
+              // TODO: also need to wait for options to have contracts?
+              if ( strikeAtm == entry.first ) { // should prevent most late entries
+                if ( strike.ValidateSpread( 7 ) ) {
+                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                  pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
+                  strike.SetPositionCall( pPositionCall );
+                  pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
+                  strike.SetPositionPut( pPositionPut );
+                  strike.OrderLongStraddle();
+                  //m_eOptionState = EOptionState::MonitorPosition;
+                  //m_stateTrading = ETradingState::TSMonitorStraddle;
+                  //strike.m_state = Strike::State::Executing;
+                }
+              }
+              break;
+            case Strike::State::Positions:
+              strike.Tick( true, mid );
+              break;
+            case Strike::State::Executing:
+              strike.Tick( true, mid );
+              break;
+            case Strike::State::Watching:
+              strike.Tick( true, mid );
+              break;
+            case Strike::State::Canceled:
+              break;
+          }
+        }
+      );
       break;
-    case ETradingState::TSMonitorStraddle:
-      switch ( m_eOptionState ) {
-        case EOptionState::MonitorPosition:
-          // strike watch on underlying will generate exit orders for options
-          // > upper strike, < lower strike
-          // need to set state, so cancel/close are not repeatedly called on a closed position
-          std:;for_each(
-            m_mapStrike.begin(), m_mapStrike.end(),
-            [this,mid](mapStrike_t::value_type& entry){
-              Strike& strike( entry.second );
-              strike.Tick( true, mid ); // TODO: need more finesse, set false if moving average boundaries are broken
-            });
-          break;
-      }
+    case TSWaitForEntry:
       break;
     default:
       break;

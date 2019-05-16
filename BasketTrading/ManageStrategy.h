@@ -109,12 +109,13 @@ private:
 
   enum ETradingState {
     TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry,
-    TSWaitForContract, TSMonitorLong, TSMonitorShort, TSMonitorStraddle,
+    TSWaitForContract, TSMonitorLong, TSMonitorShort,
+    TSOptionEvaluation, TSMonitorStraddle,
     TSNoMore
   };
-  enum class EOptionState {
-    Initial1, Initial2, ValidatingSpread, MonitorPosition
-  };
+  //enum class EOptionState {
+  //  Initial1, Initial2, ValidatingSpread, MonitorPosition
+  //};
 
   enum class ETradeDirection { None, Up, Down };
 
@@ -129,7 +130,7 @@ private:
   std::string m_sUnderlying;
 
   ETradeDirection m_eTradeDirection;
-  EOptionState m_eOptionState;
+  //EOptionState m_eOptionState; // incorporated into Strike
 
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
@@ -419,13 +420,21 @@ private:
       m_monitor.Tick();
     }
     void OrderLong( boost::uint32_t nOrderQuantity ) {
-      m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
+      if ( m_pPosition ) {
+        m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
+      }
+
     }
     void OrderShort( boost::uint32_t nOrderQuantity ) {
-      m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
+      if ( m_pPosition ) {
+        m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
+      }
+
     }
     void CancelOrder() {
-      m_monitor.CancelOrder();
+      if ( m_pPosition ) {
+        m_monitor.CancelOrder();
+      }
     }
     void ClosePosition() {
       if ( m_pPosition ) {
@@ -469,6 +478,9 @@ private:
   // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
   class Strike {
   public:
+    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled };
+    State m_state;
+
     Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
     : m_state( State::Initializing ),
       m_bUpperClosed( false ), m_bLowerClosed( false ),
@@ -498,8 +510,10 @@ private:
 
     bool ValidateSpread( size_t nDuration ) {
       bool bResult( false );
-      if ( State::Validating == m_state ) { // SetOptionCall, SetOptionPut required before hand
-        bResult = ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+      switch ( m_state ) {
+        case State::Validating:
+          bResult = ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+          break;
       }
       return bResult;
     }
@@ -561,8 +575,6 @@ private:
     void SaveSeries( const std::string& sPrefix ) {
     }
   private:
-    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled };
-    State m_state;
     double m_dblStrikeUpper;
     double m_dblStrikeAtm;
     double m_dblStrikeLower;
@@ -574,13 +586,13 @@ private:
 
     void Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
       if ( !m_bUpperClosed ) {
-        if ( dblPrice > m_dblStrikeUpper ) {
+        if ( dblPrice >= m_dblStrikeUpper ) {
 //          m_legCall.ClosePosition(); // closing too early
 //          m_bUpperClosed = true;
         }
       }
       if ( !m_bLowerClosed ) {
-        if ( dblPrice < m_dblStrikeLower ) {
+        if ( dblPrice <= m_dblStrikeLower ) {
 //          m_legPut.ClosePosition(); // closing too early
 //          m_bLowerClosed = true;
         }
@@ -723,6 +735,8 @@ private:
   using pEMA_t = std::shared_ptr<EMA>;
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
+
+  double CurrentAtmStrike( double mid );
 
   void HandleBarTrades01Sec( const ou::tf::Bar& bar );
   void HandleBarTrades06Sec( const ou::tf::Bar& bar );
