@@ -108,14 +108,17 @@ protected:
 private:
 
   enum ETradingState {
-    TSInitializing, TSWaitForFirstTrade, TSWaitForCalc, TSWaitForEntry,
-    TSWaitForContract, TSMonitorLong, TSMonitorShort,
-    TSOptionEvaluation, TSMonitorStraddle,
+    TSInitializing, // set for duration of class initialization
+    TSWaitForFirstTrade,  // wait for first trade during Regular Trading Hours
+    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
+    TSWaitForEntry, // start of equity trading
+    TSOptionEvaluation, // start of option trading
+    TSMonitorStraddle,
+    TSMonitorLong, TSMonitorShort,
     TSNoMore
   };
-  //enum class EOptionState {
-  //  Initial1, Initial2, ValidatingSpread, MonitorPosition
-  //};
+
+  ETradingState m_stateTrading;
 
   enum class ETradeDirection { None, Up, Down };
 
@@ -125,10 +128,6 @@ private:
 
   enum class EBarDirection { None, Up, Down };
 
-  using volume_t = ou::tf::DatedDatum::volume_t;
-
-  std::string m_sUnderlying;
-
   ETradeDirection m_eTradeDirection;
   //EOptionState m_eOptionState; // incorporated into Strike
 
@@ -137,7 +136,10 @@ private:
 
   //EBarDirection m_rBarDirection[ 3 ];
 
-  //bool m_bToBeTraded; // may not be used, other than as a flag for remote state manipulation
+  using volume_t = ou::tf::DatedDatum::volume_t;
+
+  std::string m_sUnderlying;
+
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
@@ -151,8 +153,6 @@ private:
 
   double m_cntUpReturn;
   double m_cntDnReturn;
-
-  ETradingState m_stateTrading;
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;

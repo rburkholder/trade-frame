@@ -65,6 +65,7 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
+  m_nSharesToTrade {}, m_dblFundsToTrade {},
   m_sUnderlying( sUnderlying ),
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
@@ -228,6 +229,8 @@ ManageStrategy::ManageStrategy(
     std::cout << "*** " << "something wrong with " << m_sUnderlying << " creation." << std::endl;
   }
 
+ m_stateTrading = TSWaitForFirstTrade;
+
   //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
@@ -273,11 +276,11 @@ void ManageStrategy::Start(  ) {
   //assert( TSWaitForCalc == m_stateTrading );
 
   if ( nullptr == m_pPositionUnderlying.get() ) {
-    // should be an unreachable test as this is tested in construction
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
+    m_stateTrading = TSNoMore;
   }
   else {
-    if ( 0 == m_dblFundsToTrade ) {
+    if ( 0.0 == m_dblFundsToTrade ) {
       std::cout << m_sUnderlying << " not started, no funds" << std::endl;
       m_stateTrading = TSNoMore;
     }
@@ -290,9 +293,14 @@ void ManageStrategy::Start(  ) {
 //      else {
         // can start with what was supplied
         std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
-        //m_stateTrading = TSWaitForEntry;
-        m_stateTrading = TSOptionEvaluation;
-//      }
+
+        switch ( m_stateTrading ) {
+          case TSWaitForFirstTrade: // can't do anything yet
+            break;
+          case TSWaitForFundsAllocation:
+            m_stateTrading = TSOptionEvaluation; // first trade available, and funds available, so start with options
+            break;
+        }
     }
   }
 }
@@ -329,8 +337,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
       break;
-    case TSWaitForContract:
-      break;
     case TSMonitorLong:
       // TODO: monitor for delta changes, or being able to roll down to next strike
       // TODO: for over night, roll on one or two days.
@@ -344,8 +350,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrading ) {
-//    case TSWaitForFirstTrade:
-    case TSInitializing: {
+    case TSWaitForFirstTrade: {
       m_dblOpen = trade.Price();
       std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
@@ -361,11 +366,16 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
         m_stateTrading = TSNoMore;
       }
       else {
-        m_stateTrading = TSWaitForCalc;
+        if ( 0 != m_nSharesToTrade ) {
+          m_stateTrading = TSOptionEvaluation; // ready to trade
+        }
+        else {
+          m_stateTrading = TSWaitForFundsAllocation; // need an allocation first
+        }
       }
       }
       break;
-    case TSWaitForCalc:
+    case TSWaitForFundsAllocation: // Start() needs to be called
       break;
     case TSWaitForEntry:
       break;
@@ -418,30 +428,30 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
 
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars
 
-  double mid = m_QuoteLatest.Midpoint();
-
-  bool bAtmFound( false );
-  double strikeAtm {};
-
-  try {
-    strikeAtm = CurrentAtmStrike( mid );
-    bAtmFound = true;
-  }
-  catch ( std::runtime_error& e ) {
-    if ( m_mapStrike.empty() ) {
-      std::cout << m_sUnderlying << " found no strike for mid-point " << mid
-                                 << " on " << m_QuoteLatest.DateTime().date()
-                                 << " [" << e.what() << "]"
-                                 << std::endl;
-      m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
-    }
-  }
-
   static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation: // TODO: need to adjust state machine to arrive here
       {
+        double mid = m_QuoteLatest.Midpoint();
+
+        bool bAtmFound( false );
+        double strikeAtm {};
+
+        try {
+          strikeAtm = CurrentAtmStrike( mid );
+          bAtmFound = true;
+        }
+        catch ( std::runtime_error& e ) {
+          if ( m_mapStrike.empty() ) {
+            std::cout << m_sUnderlying << " found no strike for mid-point " << mid
+                                       << " on " << m_QuoteLatest.DateTime().date()
+                                       << " [" << e.what() << "]"
+                                       << std::endl;
+            m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+          }
+        }
+
         if ( bAtmFound ) {
           mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
           if ( m_mapStrike.end() == iterStrike ) {
@@ -477,46 +487,48 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             }
           }
         }
+        
+        std::for_each(
+          m_mapStrike.begin(), m_mapStrike.end(),
+          [this,strikeAtm,mid](mapStrike_t::value_type& entry){
+            Strike& strike( entry.second );
+            switch ( strike.m_state ) {
+              case Strike::State::Initializing:
+                // effectively the code when inserting a new strike above
+                break;
+              case Strike::State::Validating:
+                // TODO: also need to wait for options to have contracts?
+                if ( strikeAtm == entry.first ) { // should prevent most late entries
+                  if ( strike.ValidateSpread( 7 ) ) {
+                    std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                    pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
+                    strike.SetPositionCall( pPositionCall );
+                    pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
+                    strike.SetPositionPut( pPositionPut );
+                    strike.OrderLongStraddle();
+                    //m_eOptionState = EOptionState::MonitorPosition;
+                    //m_stateTrading = ETradingState::TSMonitorStraddle;
+                    //strike.m_state = Strike::State::Executing;
+                  }
+                }
+                break;
+              case Strike::State::Positions:
+                strike.Tick( true, mid );
+                break;
+              case Strike::State::Executing:
+                strike.Tick( true, mid );
+                break;
+              case Strike::State::Watching:
+                strike.Tick( true, mid );
+                break;
+              case Strike::State::Canceled:
+                strike.Tick( true, mid );
+                break;
+            }
+          }
+        );
       }
 
-      std::for_each(
-        m_mapStrike.begin(), m_mapStrike.end(),
-        [this,strikeAtm,mid](mapStrike_t::value_type& entry){
-          Strike& strike( entry.second );
-          switch ( strike.m_state ) {
-            case Strike::State::Initializing:
-              // effectively the code when inserting a new strike above
-              break;
-            case Strike::State::Validating:
-              // TODO: also need to wait for options to have contracts?
-              if ( strikeAtm == entry.first ) { // should prevent most late entries
-                if ( strike.ValidateSpread( 7 ) ) {
-                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                  pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
-                  strike.SetPositionCall( pPositionCall );
-                  pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
-                  strike.SetPositionPut( pPositionPut );
-                  strike.OrderLongStraddle();
-                  //m_eOptionState = EOptionState::MonitorPosition;
-                  //m_stateTrading = ETradingState::TSMonitorStraddle;
-                  //strike.m_state = Strike::State::Executing;
-                }
-              }
-              break;
-            case Strike::State::Positions:
-              strike.Tick( true, mid );
-              break;
-            case Strike::State::Executing:
-              strike.Tick( true, mid );
-              break;
-            case Strike::State::Watching:
-              strike.Tick( true, mid );
-              break;
-            case Strike::State::Canceled:
-              break;
-          }
-        }
-      );
       break;
     case TSWaitForEntry:
       break;
