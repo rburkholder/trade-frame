@@ -50,12 +50,28 @@
 
 #include "ManageStrategy.h"
 
+namespace {
+  ou::Colour::enumColour rColour[] = {
+    ou::Colour::Fuchsia,
+    ou::Colour::DarkCyan,
+    ou::Colour::MediumSlateBlue,
+    ou::Colour::SteelBlue,
+    ou::Colour::DarkOrange,
+    ou::Colour::MediumTurquoise,
+    ou::Colour::DarkOrchid,
+    ou::Colour::DarkMagenta,
+    ou::Colour::DeepPink,
+    ou::Colour::MediumPurple,
+    ou::Colour::MediumBlue
+  };
+}
+
 ManageStrategy::ManageStrategy(
   const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
   pPortfolio_t pPortfolioStrategy,
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch,
-  fConstructOption_t ConstructOption,
+  fConstructOption_t fConstructOption,
   fConstructPosition_t fConstructPosition,
   fStartCalc_t fStartCalc,
   fStopCalc_t fStopCalc,
@@ -70,7 +86,7 @@ ManageStrategy::ManageStrategy(
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
   m_fConstructWatch( fConstructWatch ),
-  m_fConstructOption( ConstructOption ),
+  m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
   m_stateTrading( TSInitializing ),
   m_fStartCalc( fStartCalc ),
@@ -85,6 +101,7 @@ ManageStrategy::ManageStrategy(
   m_stateEma( EmaState::EmaUnstable ),
   //m_eOptionState( EOptionState::Initial1 ),
   m_pcdvStrategyData( pcdvStrategyData ),
+  m_ixColour {},
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -448,7 +465,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                                        << " on " << m_QuoteLatest.DateTime().date()
                                        << " [" << e.what() << "]"
                                        << std::endl;
-            m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+            //m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
           }
         }
 
@@ -468,19 +485,24 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   std::pair<mapStrike_t::iterator,bool> result;
                   result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
                   if ( result.second ) {
+                    Strike& strike( result.first->second );
+                    if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                      std::cout << "WARNING: strategy running out of colours." << std::endl;
+                    }
                     assert( m_mapStrike.end() != result.first );
                     pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
-                      [iterStrike=result.first](pOption_t pOptionCall){
+                      [this,iterStrike=result.first](pOption_t pOptionCall){
                         Strike& strike( iterStrike->second );
-                        strike.SetOptionCall( pOptionCall );
+                        strike.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
                       } );
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
-                      [iterStrike=result.first](pOption_t pOptionPut){
+                      [this,iterStrike=result.first](pOption_t pOptionPut){
                         Strike& strike( iterStrike->second );
-                        strike.SetOptionPut( pOptionPut );
+                        strike.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
+                    strike.AddChartData( m_pcdvStrategyData );
                   }
                 }
               }
@@ -528,7 +550,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         );
       }
-
       break;
     case TSWaitForEntry:
       break;

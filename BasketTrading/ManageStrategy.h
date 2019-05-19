@@ -176,6 +176,8 @@ private:
 
   pcdvStrategyData_t m_pcdvStrategyData;
 
+  size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
+
   // ==========================
 
   // TODO: convert to generic watch, and put into library
@@ -460,6 +462,16 @@ private:
       }
     }
     bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
+
+    void SaveSeries( const std::string& sPrefix ) {
+    }
+
+    void SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
+
+    void AddChartData( pcdvStrategyData_t pChartData ) {
+      pChartData->Add( 2, &m_ceProfitLoss );
+    }
+
   private:
     pPosition_t m_pPosition;
     SpreadCandidate m_candidate;
@@ -467,8 +479,7 @@ private:
     ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
 
     void Init() {
-      m_ceProfitLoss.SetName( "P/L" ); // TODO: need to add 'Call' or "Put' as well as strike price
-      m_ceProfitLoss.SetColour( ou::Colour::DarkGreen ); // TODO: need different colour for each leg  ou::Colour::DarkSalmon
+      m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
     }
   };
 
@@ -497,13 +508,15 @@ private:
       m_legPut( std::move( rhs.m_legPut ) )
     {}
 
-    void SetOptionCall( pOption_t pCall ) {
+    void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour ) {
       m_legCall.SetOption( pCall );
+      m_legCall.SetColour( colour );
       m_state = State::Validating;
     }
     pOption_t GetOptionCall() { return m_legCall.GetOption(); }
-    void SetOptionPut( pOption_t pPut ) {
+    void SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour ) {
       m_legPut.SetOption( pPut );
+      m_legPut.SetColour( colour );
       m_state = State::Validating;
     }
     pOption_t GetOptionPut() { return m_legPut.GetOption(); }
@@ -574,6 +587,11 @@ private:
     bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
     void SaveSeries( const std::string& sPrefix ) {
     }
+    void AddChartData( pcdvStrategyData_t pChartData ) {
+      m_legCall.AddChartData( pChartData );
+      m_legPut.AddChartData( pChartData );
+    }
+
   private:
     double m_dblStrikeUpper;
     double m_dblStrikeAtm;
