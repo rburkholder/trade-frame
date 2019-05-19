@@ -464,6 +464,7 @@ private:
     bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
 
     void SaveSeries( const std::string& sPrefix ) {
+      m_pPosition->GetWatch()->SaveSeries( sPrefix );
     }
 
     void SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
@@ -586,6 +587,8 @@ private:
 
     bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
     void SaveSeries( const std::string& sPrefix ) {
+      m_legCall.SaveSeries( sPrefix );
+      m_legPut.SaveSeries( sPrefix );
     }
     void AddChartData( pChartDataView_t pChartData ) {
       m_legCall.AddChartData( pChartData );
