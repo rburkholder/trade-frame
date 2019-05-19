@@ -76,7 +76,7 @@ public:
   using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
-  using pcdvStrategyData_t = ou::ChartDataView::pChartDataView_t;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   ManageStrategy(
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
@@ -89,7 +89,7 @@ public:
     fStopCalc_t,
     fFirstTrade_t,
     fBar_t,
-    pcdvStrategyData_t
+    pChartDataView_t
     );
   virtual ~ManageStrategy( );
 
@@ -174,7 +174,7 @@ private:
 
   pPortfolio_t m_pPortfolioStrategy;
 
-  pcdvStrategyData_t m_pcdvStrategyData;
+  pChartDataView_t m_pChartDataView;
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
@@ -468,7 +468,7 @@ private:
 
     void SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
 
-    void AddChartData( pcdvStrategyData_t pChartData ) {
+    void AddChartData( pChartDataView_t pChartData ) {
       pChartData->Add( 2, &m_ceProfitLoss );
     }
 
@@ -587,7 +587,7 @@ private:
     bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
     void SaveSeries( const std::string& sPrefix ) {
     }
-    void AddChartData( pcdvStrategyData_t pChartData ) {
+    void AddChartData( pChartDataView_t pChartData ) {
       m_legCall.AddChartData( pChartData );
       m_legPut.AddChartData( pChartData );
     }
@@ -689,8 +689,8 @@ private:
     ou::ChartEntryIndicator m_ceEma;
     //ou::ChartEntryIndicator m_ceLowerBollinger;
     //ou::ChartEntryIndicator m_ceSD;
-    pcdvStrategyData_t pChartDataView;
-    EMA( unsigned int nIntervals, pcdvStrategyData_t pChartDataView_, ou::Colour::enumColour colour )
+    pChartDataView_t pChartDataView;
+    EMA( unsigned int nIntervals, pChartDataView_t pChartDataView_, ou::Colour::enumColour colour )
     : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same )//, dblSD {}, dblSn {}
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );

@@ -77,7 +77,7 @@ ManageStrategy::ManageStrategy(
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
   fBar_t fBar,
-  pcdvStrategyData_t pcdvStrategyData  
+  pChartDataView_t pcdvStrategyData  
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
@@ -100,7 +100,7 @@ ManageStrategy::ManageStrategy(
   m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
   //m_eOptionState( EOptionState::Initial1 ),
-  m_pcdvStrategyData( pcdvStrategyData ),
+  m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
@@ -502,7 +502,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                         strike.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
-                    strike.AddChartData( m_pcdvStrategyData );
+                    strike.AddChartData( m_pChartDataView );
                   }
                 }
               }
@@ -710,13 +710,13 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
-    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pcdvStrategyData, ou::Colour::DarkOrange ) );
+    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pChartDataView, ou::Colour::DarkOrange ) );
     m_vEMA.back().get()->SetName( "Ema 5s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pcdvStrategyData, ou::Colour::MediumTurquoise ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pChartDataView, ou::Colour::MediumTurquoise ) );
     m_vEMA.back().get()->SetName( "Ema 13s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pcdvStrategyData, ou::Colour::DarkOrchid ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pChartDataView, ou::Colour::DarkOrchid ) );
     m_vEMA.back().get()->SetName( "Ema 34s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pcdvStrategyData, ou::Colour::DarkMagenta ) );
+    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pChartDataView, ou::Colour::DarkMagenta ) );
     m_vEMA.back().get()->SetName( "Ema 89s" );
     std::for_each(
       m_vEMA.begin(), m_vEMA.end(),
