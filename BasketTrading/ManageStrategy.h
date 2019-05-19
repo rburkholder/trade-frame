@@ -449,6 +449,7 @@ private:
             std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
           }
           if ( 0 != row.nPositionActive ) {
+            std::cout << row.sName << ": closing position" << std::endl;
             switch ( row.eOrderSideActive ) {
               case ou::tf::OrderSide::Buy:
                 m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
@@ -633,8 +634,6 @@ private:
   ou::ChartEntryMark m_cePivots;
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
-  //ou::ChartEntryIndicator m_ceProfitLossCall;
-  //ou::ChartEntryIndicator m_ceProfitLossPut;
 
   ou::ChartEntryIndicator m_ceUpReturn;
   ou::ChartEntryIndicator m_ceDnReturn;
@@ -743,6 +742,10 @@ private:
   void HandleBellHeard( void );
   void HandleCancel( void );
   void HandleGoNeutral( void );
+
+  void HandleGoingNeutral( const ou::tf::Bar& bar );
+  void HandleGoingNeutral( const ou::tf::Quote& quote ) {};
+  void HandleGoingNeutral( const ou::tf::Trade& trade ) {};
 
   // Datum based inherited states:
   void HandleRHTrading( const ou::tf::Quote& quote );

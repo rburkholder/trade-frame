@@ -661,6 +661,7 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
   }
 }
 
+// 4 minutes prior to close
 void ManageStrategy::HandleCancel( void ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
@@ -678,6 +679,7 @@ void ManageStrategy::HandleCancel( void ) {
   }
 }
 
+// 3 minutes, 45 seconds prior to close
 void ManageStrategy::HandleGoNeutral( void ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
@@ -693,6 +695,10 @@ void ManageStrategy::HandleGoNeutral( void ) {
         );
       break;
   }
+}
+
+void ManageStrategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
+  RHOption( bar );
 }
 
 void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
