@@ -188,7 +188,10 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::GoNeutral;
       static_cast<T*>(this)->HandleGoNeutral();  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
-      static_cast<T*>(this)->HandleGoingNeutral( dd );
+//      if ( &DailyTradeTimeFrame<T>::HandleGoingNeutral<DD> != &T::HandleGoingNeutral ) { // need to figure out comparison to bar|quote|trade|etc (DD)
+        static_cast<T*>(this)->HandleGoingNeutral( dd );
+//      }
+
     }
     else {
       static_cast<T*>(this)->HandleCancelling( dd );
