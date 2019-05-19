@@ -624,37 +624,6 @@ private:
   using mapStrike_t = std::map<double,Strike>;
   mapStrike_t m_mapStrike;
 
-  struct OrderManager { // update limit order
-    pOption_t m_pOption; // active option
-    pPosition_t m_pPosition; // active option position
-    pOrder_t m_pOrder; // active order
-    double m_dblMidDiff;  // increment in 0.01 from mid to get order executed
-    OrderManager(): m_dblMidDiff {} {}
-    /*
-     * For orders, opening, as well as closing
-     * find atm strike (done)
-     * create option at strike (done)
-     * verify that quotes are within designated spread (done)
-     * create position (done)
-     * create order from position, submit as limit at midpoint (done)
-     * periodically, if order still executing,
-     *   update middiff, +/- based upon buy or sell (done)
-     * => need call,put spreads to be < 0.10 && >= 0.01 (for a 6s interval)  (done)
-     * => adjacent strikes need to be within 0.51 (done)
-     * => a roll up or down needs to retain some profit after commission and spread
-     * => roll once directional momentum on underlying has changed
-     * => check open interest
-     * => needs to be multi-day affair to reduce entry/exit spreads/commissions
-     * => need end of week calendar roll, preferably when already about to roll on a strike
-     *       start wed/thurs on the calendar rolls
-     * => autonomously monitor entries, seek confirmation from money manager prior to entry
-     * => allow daily and long term portfolios (allows another attempt at the ema strategy)
-     * => to reduce symbol count, load up call first to examine spread, then load up put for verification?
-     */
-    void Start( pPosition_t pPositionUnderlying ) {}
-    void Update( double price ) {} // periodic (~6s) re-evaluate order, find new atm if necessary
-  };
-
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
   ou::tf::BarFactory m_bfTrades06Sec; // charting
   //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis

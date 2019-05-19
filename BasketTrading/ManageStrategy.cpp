@@ -43,8 +43,29 @@
 //   need to get out of an option at $0.20, otherwise may not be a market
 //     add a stop?  (do not worry when doing multi-day trades)
 //
-
 // 2019/05/03 adjust trading for first hour and last hour of trading day?
+
+    /* 2019/05/06
+     * For orders, opening, as well as closing
+     * find atm strike (done)
+     * create option at strike (done)
+     * verify that quotes are within designated spread (done)
+     * create position (done)
+     * create order from position, submit as limit at midpoint (done)
+     * periodically, if order still executing,
+     *   update middiff, +/- based upon buy or sell (done)
+     * => need call,put spreads to be < 0.10 && >= 0.01 (for a 6s interval)  (done)
+     * => adjacent strikes need to be within 0.51 (done)
+     * => a roll up or down needs to retain some profit after commission and spread
+     * => roll once directional momentum on underlying has changed
+     * => check open interest
+     * => needs to be multi-day affair to reduce entry/exit spreads/commissions
+     * => need end of week calendar roll, preferably when already about to roll on a strike
+     *       start wed/thurs on the calendar rolls
+     * => autonomously monitor entries, seek confirmation from money manager prior to entry
+     * => allow daily and long term portfolios (allows another attempt at the ema strategy)
+     * => to reduce symbol count, load up call first to examine spread, then load up put for verification?
+     */
 
 #include <algorithm>
 
@@ -77,7 +98,7 @@ ManageStrategy::ManageStrategy(
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
   fBar_t fBar,
-  pChartDataView_t pcdvStrategyData  
+  pChartDataView_t pcdvStrategyData
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
