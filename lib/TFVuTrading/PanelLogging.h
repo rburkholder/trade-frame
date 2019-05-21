@@ -47,17 +47,17 @@ class PanelLogging: public wxPanel {
 public:
 
   PanelLogging(void);
-  PanelLogging( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANELLOGGING_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION, 
-    const wxSize& size = SYMBOL_PANELLOGGING_SIZE, 
+  PanelLogging(
+    wxWindow* parent, wxWindowID id = SYMBOL_PANELLOGGING_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION,
+    const wxSize& size = SYMBOL_PANELLOGGING_SIZE,
     long style = SYMBOL_PANELLOGGING_STYLE );
   ~PanelLogging(void);
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELLOGGING_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION, 
-    const wxSize& size = SYMBOL_PANELLOGGING_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELLOGGING_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION,
+    const wxSize& size = SYMBOL_PANELLOGGING_SIZE,
     long style = SYMBOL_PANELLOGGING_STYLE );
   void Init();
   void CreateControls();
@@ -68,7 +68,7 @@ public:
 
 protected:
 private:
-  
+
   enum { ID_Null=wxID_HIGHEST, ID_PANELLOGGING, ID_TEXTLOGGING };
   wxTextCtrl* m_txtLogging;
   std::streambuf* m_pOldStreamBuf;
@@ -76,6 +76,7 @@ private:
 
   void HandleConsoleLine0( csb_t::Buf* pBuf );
   void HandleConsoleLine1( ConsoleStringEvent& event );
+  void OnClose( wxCloseEvent& event );
 };
 
 } // namespace tf

@@ -30,15 +30,11 @@ PanelLogging::PanelLogging( wxWindow* parent, wxWindowID id, const wxPoint& pos,
 }
 
 PanelLogging::~PanelLogging(void) {
-  if ( 0 != m_pOldStreamBuf ) {
-    std::cout.rdbuf(m_pOldStreamBuf);
-    m_pOldStreamBuf = 0;
-  }
 }
 
 void PanelLogging::Init() {
-  m_txtLogging = 0;
-  m_pOldStreamBuf = 0;
+  m_txtLogging = nullptr;
+  m_pOldStreamBuf = nullptr;
 }
 
 bool PanelLogging::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -67,11 +63,11 @@ void PanelLogging::CreateControls() {
     m_pOldStreamBuf = std::cout.rdbuf();
     //std::cout.rdbuf(m_txtLogging);
     std::cout.rdbuf( &m_csb );
+    Bind( wxEVT_CLOSE_WINDOW, &PanelLogging::OnClose, this );
 
     Bind( EVT_ConsoleString, &PanelLogging::HandleConsoleLine1, this );
     m_csb.SetOnEmitString( MakeDelegate( this, &PanelLogging::HandleConsoleLine0 ) );
 }
-
 
 wxBitmap PanelLogging::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
@@ -92,6 +88,13 @@ void PanelLogging::HandleConsoleLine1( ConsoleStringEvent& event ) {
   //m_txtLogging->SetValue( s );
   m_txtLogging->AppendText( s );
   m_csb.ReturnBuffer( event.GetBuf() );
+}
+
+void PanelLogging::OnClose( wxCloseEvent& event ) {
+  if ( nullptr != m_pOldStreamBuf ) {
+    std::cout.rdbuf( m_pOldStreamBuf );
+    m_pOldStreamBuf = nullptr;
+  }
 }
 
 } // namespace tf
