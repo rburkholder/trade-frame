@@ -355,6 +355,7 @@ private:
               m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
               break;
           }
+          // TODO: need to cancel both legs if spread is not < 0.10
           std::cout
             << m_pPosition->GetInstrument()->GetInstrumentName()
             << ": update order by " << m_dblOffset
@@ -416,10 +417,15 @@ private:
       m_candidate.Clear(); // implies candidate is finished and no longer required
       m_pPosition = pPosition;
       m_monitor.SetPosition( pPosition );
+      m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
     }
     pPosition_t GetPosition() { return m_pPosition; }
-    void Tick() {
+    void Tick( ptime dt ) {
       m_monitor.Tick();
+      if ( m_pPosition ) {
+        double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
+        m_ceProfitLoss.Append( dt, dblPL );
+      }
     }
     void OrderLong( boost::uint32_t nOrderQuantity ) {
       if ( m_pPosition ) {
@@ -465,7 +471,9 @@ private:
     bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
 
     void SaveSeries( const std::string& sPrefix ) {
-      m_pPosition->GetWatch()->SaveSeries( sPrefix );
+      if ( m_pPosition ) {
+        m_pPosition->GetWatch()->SaveSeries( sPrefix );
+      }
     }
 
     void SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
@@ -481,7 +489,7 @@ private:
     ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
 
     void Init() {
-      m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
+
     }
   };
 
@@ -544,9 +552,9 @@ private:
     }
     pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
 
-    void Tick( bool bInTrend, double dblPriceUnderlying ) { // TODO: make use of bInTrend to trigger exit latch
-      m_legCall.Tick();
-      m_legPut.Tick();
+    void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
+      m_legCall.Tick( dt );
+      m_legPut.Tick( dt );
       switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
         case State::Executing:
           if ( !AreOrdersActive() ) {

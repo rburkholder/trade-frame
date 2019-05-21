@@ -533,7 +533,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         
         std::for_each(
           m_mapStrike.begin(), m_mapStrike.end(),
-          [this,strikeAtm,mid](mapStrike_t::value_type& entry){
+          [this,strikeAtm,mid,&bar](mapStrike_t::value_type& entry){
             Strike& strike( entry.second );
             switch ( strike.m_state ) {
               case Strike::State::Initializing:
@@ -556,16 +556,16 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 }
                 break;
               case Strike::State::Positions:
-                strike.Tick( true, mid );
+                strike.Tick( true, mid, bar.DateTime() );
                 break;
               case Strike::State::Executing:
-                strike.Tick( true, mid );
+                strike.Tick( true, mid, bar.DateTime() );
                 break;
               case Strike::State::Watching:
-                strike.Tick( true, mid );
+                strike.Tick( true, mid, bar.DateTime() );
                 break;
               case Strike::State::Canceled:
-                strike.Tick( true, mid );
+                strike.Tick( true, mid, bar.DateTime() );
                 break;
             }
           }
@@ -706,8 +706,8 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
     case TSNoMore:
       break;
     default:
-      if ( nullptr != m_pPositionUnderlying )
-        std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
+//      if ( nullptr != m_pPositionUnderlying )  // no meaning in an option only context
+//        std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
       m_stateTrading = TSNoMore;
       break;
   }
