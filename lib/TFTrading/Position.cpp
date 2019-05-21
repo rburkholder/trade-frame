@@ -473,7 +473,7 @@ void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::e
 // before entry to this method, sanity check:  side on execution is same as side on order
 void Position::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
 
-  // should be able to calculate profit/loss & position cost as exections are encountered
+  // should be able to calculate profit/loss & position cost as executions are encountered
   // should be able to calculate position cost basis as position is updated (with and without commissions)
   // will need market feed in order to calculate profit/loss  -- handled in the OnQuote method
 
