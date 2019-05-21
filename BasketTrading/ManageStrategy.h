@@ -344,8 +344,8 @@ private:
         if ( 0 == m_CountDownToAdjustment ) {
           m_dblOffset += 0.01; // TODO: may need to put a cap on size of offset
           const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-          double mid = quote.Midpoint();
           double spread = quote.Spread();
+          double mid = quote.Midpoint();
           double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
           switch ( m_pOrder->GetOrderSide() ) {
             case ou::tf::OrderSide::Buy:

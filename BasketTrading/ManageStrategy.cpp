@@ -542,7 +542,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               case Strike::State::Validating:
                 // TODO: also need to wait for options to have contracts?
                 if ( strikeAtm == entry.first ) { // should prevent most late entries
-                  if ( strike.ValidateSpread( 7 ) ) {
+                  if ( strike.ValidateSpread( 11 ) ) {
                     std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                     pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
                     strike.SetPositionCall( pPositionCall );
