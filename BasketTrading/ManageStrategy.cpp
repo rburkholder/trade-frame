@@ -396,7 +396,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       boost::gregorian::date date( trade.DateTime().date() );
       m_iterChainExpiryInUse = std::find_if( m_mapChains.begin(), m_mapChains.end(),
         [date](const mapChains_t::value_type& vt)->bool{
-          return date < vt.first;  // first chain where trading date less than expiry date TODO: at least one or two days difference?
+          return boost::gregorian::days( 1 ) < ( vt.first - date );  // first chain where trading date less than expiry date
       } );
 
       if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
@@ -708,7 +708,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
     default:
 //      if ( nullptr != m_pPositionUnderlying )  // no meaning in an option only context
 //        std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      m_stateTrading = TSNoMore;
+      //m_stateTrading = TSNoMore;
       break;
   }
   // TODO: need to set a state to do this once, rather than the TSNoMore kludge?
