@@ -123,6 +123,7 @@ ManageStrategy::ManageStrategy(
   //m_eOptionState( EOptionState::Initial1 ),
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
+  m_nCombos {},
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -469,7 +470,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation: // TODO: need to adjust state machine to arrive here
-      {
+      if ( 0 == m_nCombos ) {
         double mid = m_QuoteLatest.Midpoint();
 
         bool bAtmFound( false );
@@ -535,6 +536,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
                     strike.AddChartData( m_pChartDataView );
+                    m_nCombos++;
                   }
                 }
               }

@@ -143,6 +143,8 @@ private:
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
+  size_t m_nCombos;
+
   double m_dblOpen;
 
   ou::tf::Trade m_TradeLatest;
