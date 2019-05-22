@@ -701,12 +701,12 @@ void ManageStrategy::HandleGoNeutral( void ) {
     case TSNoMore:
       break;
     default:
-      std::cout << m_sUnderlying << " go neutral" << std::endl;
+//      std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
       std::for_each(
         m_mapStrike.begin(), m_mapStrike.end(),
         [this](mapStrike_t::value_type& entry){
-          entry.second.ClosePositions();
+//          entry.second.ClosePositions();  // maintain positions over night
         }
         );
       break;
