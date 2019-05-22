@@ -346,7 +346,6 @@ void ManageStrategy::Start(  ) {
 void ManageStrategy::Stop( void ) {
   HandleCancel();
   HandleGoNeutral();
-  HandleAfterRH( m_quotes.last() ); // TODO: won't reflect closed orders properly
 }
 
 void ManageStrategy::HandleBellHeard( void ) {
@@ -567,6 +566,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               case Strike::State::Canceled:
                 strike.Tick( true, mid, bar.DateTime() );
                 break;
+              case Strike::State::Closing:
+                strike.Tick( true, mid, bar.DateTime() );
+                break;
             }
           }
         );
@@ -708,7 +710,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {
     default:
 //      if ( nullptr != m_pPositionUnderlying )  // no meaning in an option only context
 //        std::cout << m_sUnderlying << " close results underlying " << *m_pPositionUnderlying << std::endl;
-      //m_stateTrading = TSNoMore;
+      m_stateTrading = TSNoMore;
       break;
   }
   // TODO: need to set a state to do this once, rather than the TSNoMore kludge?

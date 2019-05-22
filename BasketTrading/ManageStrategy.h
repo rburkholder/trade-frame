@@ -499,7 +499,7 @@ private:
   // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
   class Strike {
   public:
-    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled };
+    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
     State m_state;
 
     Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
@@ -582,6 +582,7 @@ private:
     void CancelOrders() {
       m_legCall.CancelOrder();
       m_legPut.CancelOrder();
+      m_state = State::Canceled;
     }
     void ClosePositions() {
       if ( !m_bUpperClosed ) {
@@ -592,6 +593,7 @@ private:
         m_legPut.ClosePosition();
         m_bLowerClosed = true;
       }
+      m_state = State::Closing;
     }
 
     bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
