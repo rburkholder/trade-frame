@@ -470,7 +470,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation: // TODO: need to adjust state machine to arrive here
-      if ( 0 == m_nCombos ) {
+      {
         double mid = m_QuoteLatest.Midpoint();
 
         bool bAtmFound( false );
@@ -494,7 +494,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         }
 
-        if ( bAtmFound ) {
+        if ( bAtmFound && ( 0 == m_nCombos) ) {
           mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
           if ( m_mapStrike.end() == iterStrike ) {
             double strikeUpper {};
