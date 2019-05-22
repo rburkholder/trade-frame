@@ -473,10 +473,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         double mid = m_QuoteLatest.Midpoint();
 
         bool bAtmFound( false );
+        double strikeOtmCall {};
         double strikeAtm {};
+        double strikeOtmPut {};
 
         try {
+          strikeOtmCall = m_iterChainExpiryInUse->second.Call_Otm( mid );
           strikeAtm = CurrentAtmStrike( mid );
+          strikeOtmPut = m_iterChainExpiryInUse->second.Put_Otm( mid );
           bAtmFound = true;
         }
         catch ( std::runtime_error& e ) {
@@ -497,11 +501,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
             // TODO: move this into Strike as a static call?
             if ( 2 == nStrikes ) {
-              double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
+              //double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
+              double diff = strikeOtmCall - strikeOtmPut; // check that strikes are max 0.50 apart
               if ( 0.0 > diff ) diff = -diff;  // aka absolute value
               if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
                 if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
-                  std::cout << m_sUnderlying << ": constructing options for straddle -> quote=" << mid << ",strike=" << strikeAtm << std::endl;
+                  std::cout
+                    << m_sUnderlying
+                    << ": constructing options for strangle -> quote=" << mid
+                    << ",otm call=" << strikeOtmCall
+                    << ",otm put=" << strikeOtmPut
+                    << std::endl;
                   std::pair<mapStrike_t::iterator,bool> result;
                   result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
                   if ( result.second ) {
@@ -511,13 +521,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     }
                     assert( m_mapStrike.end() != result.first );
                     pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
-                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
+                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionCall){
                         Strike& strike( iterStrike->second );
                         std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
                         strike.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
                       } );
-                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
+                    m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionPut){
                         Strike& strike( iterStrike->second );
                         std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
