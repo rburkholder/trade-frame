@@ -108,7 +108,10 @@ private:
   void HandleTestButton( void );
 
   void HandlePopulateDatabase( void );
+  void HandleLoadDatabase( void );
 
+  void HandleDbOnLoad( ou::db::Session& session );
+  void HandleDbOnPopulate( ou::db::Session& session );
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
 

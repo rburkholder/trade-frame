@@ -47,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 10 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 21 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -123,14 +123,17 @@ bool AppBasketTrading::OnInit() {
   m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
 
   try {
-    if ( boost::filesystem::exists( m_sDbName ) ) {
-      boost::filesystem::remove( m_sDbName );
-    }
+    // try for day to day continuity
+    //if ( boost::filesystem::exists( m_sDbName ) ) {
+    //  boost::filesystem::remove( m_sDbName );
+    //}
 
+    m_db.OnLoad.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnLoad ) );
+    m_db.OnPopulate.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnPopulate ) );
     m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
     m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
     m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
-    //m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
+    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandleLoadDatabase ) );
 
     m_db.Open( m_sDbName );
   }
@@ -140,14 +143,17 @@ bool AppBasketTrading::OnInit() {
 
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
-  m_pMasterPortfolio.reset( new MasterPortfolio(
+  m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
+    // obtain option chains for underlying:
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
     },
+    // obtain obtain instrument details given instrument name:
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
     },
+    // add items to menu (TODO: add underlying daily, add combo, add leg for combo, add menu events for each
     [this](MasterPortfolio::EStrategyChart esc, const std::string& sName, pChartDataView_t pChartDataView){
       switch ( esc ) {
         case MasterPortfolio::EStrategyChart::Root:
@@ -160,10 +166,11 @@ bool AppBasketTrading::OnInit() {
           m_pPanelFinancialChart->AppendInfo( sName, pChartDataView );
           break;
       }
-      
+
     },
+    // pass in the aggregation portfolio
     m_pPortfolioStrategyAggregate
-    ) );
+    );
 
   // this needs to come before the menu
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
@@ -228,23 +235,27 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 void AppBasketTrading::HandleLoadButton() {
   CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
     [this](){
-      if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
+      //if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
+      //if ( m_pPortfolioStrategyAggregate ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
         // code currently does not allow a restart of session
-        std::cout << "Cannot create new portfolio: " << m_sPortfolioStrategyAggregate << std::endl;
+        //std::cout << "Cannot create new portfolio: " << m_sPortfolioStrategyAggregate << std::endl;
         //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
         // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
-      }
-      else {
+        // 2019/05/22: in process of fixing this
+      //}
+      //else {
         // need to change this later.... only start up once providers have been started
         // worker will change depending upon provider type
         // big worker when going live, hdf5 worker when simulating
-        std::cout << "Starting Symbol Load ... " << std::endl;
+        //std::cout << "Starting Symbol Load ... " << std::endl;
         // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
         //m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
-        m_pMasterPortfolio->Load( m_dtLatestEod, true );
-      }
-    });
+        //m_pMasterPortfolio->Load( m_dtLatestEod, true );
+      //}
+      std::cout << "AppBasketTrading::HandleLoadButton: need database and then start MasterPortfolio" << std::endl;
+    }
+    );
 }
 
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
@@ -323,13 +334,25 @@ int AppBasketTrading::OnExit() {
   return 0;
 }
 
+void AppBasketTrading::HandleDbOnLoad(  ou::db::Session& session ) {
+  std::cout << "AppBasketTrading::HandleDbOnLoad placeholder" << std::endl;
+}
+
+void AppBasketTrading::HandleDbOnPopulate(  ou::db::Session& session ) {
+  std::cout << "AppBasketTrading::HandleDbOnPopulate placeholder" << std::endl;
+}
+
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
+  std::cout << "AppBasketTrading::HandleRegisterTables placeholder" << std::endl;
 }
 
 void AppBasketTrading::HandleRegisterRows(  ou::db::Session& session ) {
+  std::cout << "AppBasketTrading::HandleRegisterRows placeholder" << std::endl;
 }
 
 void AppBasketTrading::HandlePopulateDatabase( void ) {
+
+  std::cout << "AppBasketTrading::HandlePopulateDatabase" << std::endl;
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
@@ -358,6 +381,10 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of Instrument Instances" );
 
+}
+
+void AppBasketTrading::HandleLoadDatabase( void ) {
+  std::cout << "AppBasketTrading::HandleLoadDatabase placeholder" << std::endl;
 }
 
 // maybe put this into background thread
