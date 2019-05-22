@@ -118,7 +118,7 @@ ManageStrategy::ManageStrategy(
   m_bfTrades01Sec( 1 ),
   m_bfTrades06Sec( 6 ),
 //  m_bfTrades60Sec( 60 ),
-  m_cntUpReturn {}, m_cntDnReturn {},
+//  m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
   //m_eOptionState( EOptionState::Initial1 ),
   m_pChartDataView( pcdvStrategyData ),
@@ -151,12 +151,12 @@ ManageStrategy::ManageStrategy(
 
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
-  m_ceUpReturn.SetName( "Up Return" );
-  m_ceDnReturn.SetName( "Dn Return" );
+  //m_ceUpReturn.SetName( "Up Return" );
+  //m_ceDnReturn.SetName( "Dn Return" );
   m_ceProfitLossPortfolio.SetName( "P/L Portfolio" );
 
-  m_ceUpReturn.SetColour( ou::Colour::Red );
-  m_ceDnReturn.SetColour( ou::Colour::Blue );
+  //m_ceUpReturn.SetColour( ou::Colour::Red );
+  //m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::DarkBlue );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
@@ -165,8 +165,8 @@ ManageStrategy::ManageStrategy(
 
   pcdvStrategyData->Add( 2, &m_ceProfitLossPortfolio );
 
-  pcdvStrategyData->Add( 4, &m_ceUpReturn );
-  pcdvStrategyData->Add( 4, &m_ceDnReturn );
+  //pcdvStrategyData->Add( 4, &m_ceUpReturn );
+  //pcdvStrategyData->Add( 4, &m_ceDnReturn );
 
   pcdvStrategyData->Add( 0, &m_ceShortEntries );
   pcdvStrategyData->Add( 0, &m_ceLongEntries );
@@ -361,8 +361,8 @@ void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 }
 
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
-  if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
-  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
+//  if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
+//  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
   m_trades.Append( trade );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
@@ -806,11 +806,11 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 //    m_ceProfitLossPut.Append( bar.DateTime(), dblTotal );
 //  }
 
-  m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
-  m_cntUpReturn = 0;
+//  m_ceUpReturn.Append( bar.DateTime(), m_cntUpReturn );
+//  m_cntUpReturn = 0;
 
-  m_ceDnReturn.Append( bar.DateTime(), m_cntDnReturn );
-  m_cntDnReturn = 0;
+//  m_ceDnReturn.Append( bar.DateTime(), m_cntDnReturn );
+//  m_cntDnReturn = 0;
 }
 
 // unused without m_bfTrades60Sec

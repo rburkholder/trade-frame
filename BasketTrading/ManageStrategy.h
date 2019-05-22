@@ -153,8 +153,8 @@ private:
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
-  double m_cntUpReturn;
-  double m_cntDnReturn;
+//  double m_cntUpReturn;
+//  double m_cntDnReturn;
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;
@@ -647,8 +647,8 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
 
-  ou::ChartEntryIndicator m_ceUpReturn;
-  ou::ChartEntryIndicator m_ceDnReturn;
+  //ou::ChartEntryIndicator m_ceUpReturn;
+  //ou::ChartEntryIndicator m_ceDnReturn;
 
   ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongEntries;
