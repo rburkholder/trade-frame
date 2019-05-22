@@ -514,11 +514,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeAtm), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionCall){
                         Strike& strike( iterStrike->second );
+                        std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
                         strike.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
                       } );
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeAtm), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionPut){
                         Strike& strike( iterStrike->second );
+                        std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
                         strike.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
