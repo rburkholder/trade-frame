@@ -248,16 +248,24 @@ private:
 // NOTE: will require a tick between close/cancel and new order
   class MonitorOrder {
   public:
-    MonitorOrder(): m_CountDownToAdjustment {}, m_dblOffset {} {}
+    MonitorOrder():
+      m_nAdjustmentPeriods( 2 ),
+      m_CountDownToAdjustment {}
+      //m_dblOffset {}
+      {}
     MonitorOrder( pPosition_t& pPosition )
-    : m_CountDownToAdjustment {}, m_dblOffset {}, m_state( State::NoPosition ),
+    : m_nAdjustmentPeriods( 2 ),
+      m_CountDownToAdjustment {},
+      //m_dblOffset {},
+      m_state( State::NoPosition ),
       m_pPosition( pPosition )
     {}
     MonitorOrder( const MonitorOrder& rhs ) = delete;
     MonitorOrder( const MonitorOrder&& rhs )
-    : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
+    : m_nAdjustmentPeriods( rhs.m_nAdjustmentPeriods ),
+      m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
       m_state( rhs.m_state ),
-      m_dblOffset( rhs.m_dblOffset ),
+      //m_dblOffset( rhs.m_dblOffset ),
       m_pPosition( std::move( rhs.m_pPosition ) ),
       m_pOrder( std::move( rhs.m_pOrder ) )
     {}
@@ -279,8 +287,8 @@ private:
             if ( m_pOrder ) {
               m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
               m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-              m_CountDownToAdjustment = 7;
-              m_dblOffset = 0.0;
+              m_CountDownToAdjustment = m_nAdjustmentPeriods;
+              //m_dblOffset = 0.0;
               m_state = State::Active;
               m_pPosition->PlaceOrder( m_pOrder );
               std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
@@ -331,8 +339,9 @@ private:
 
     enum class State { NoPosition, NoOrder, Active, Filled, Cancelled };
     State m_state;
+    const size_t m_nAdjustmentPeriods;
     size_t m_CountDownToAdjustment;
-    double m_dblOffset;
+    //double m_dblOffset;
     pPosition_t m_pPosition;
     pOrder_t m_pOrder;
 
@@ -344,28 +353,29 @@ private:
         assert( 0 < m_CountDownToAdjustment );
         m_CountDownToAdjustment--;
         if ( 0 == m_CountDownToAdjustment ) {
-          m_dblOffset += 0.01; // TODO: may need to put a cap on size of offset
+          //m_dblOffset += 0.01; // TODO: may need to put a cap on size of offset
           const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
           double spread = quote.Spread();
-          double mid = quote.Midpoint();
-          double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+          //double mid = quote.Midpoint();
+          //double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+
           switch ( m_pOrder->GetOrderSide() ) {
             case ou::tf::OrderSide::Buy:
-              m_pOrder->SetPrice1( dblNormalizedPrice + m_dblOffset );
+              m_pOrder->SetPrice1( m_pOrder->GetPrice1() + 0.01 );
               break;
             case ou::tf::OrderSide::Sell:
-              m_pOrder->SetPrice1( dblNormalizedPrice - m_dblOffset );
+              m_pOrder->SetPrice1( m_pOrder->GetPrice1() - 0.01 );
               break;
           }
           // TODO: need to cancel both legs if spread is not < 0.10
           std::cout
             << m_pPosition->GetInstrument()->GetInstrumentName()
-            << ": update order by " << m_dblOffset
-            << " on " << dblNormalizedPrice
+            << ": update order to " << m_pOrder->GetPrice1()
+            //<< " on " << dblNormalizedPrice
             << " spread " << spread
             << std::endl;
           m_pPosition->UpdateOrder( m_pOrder );
-          m_CountDownToAdjustment = 7;
+          m_CountDownToAdjustment = m_nAdjustmentPeriods;
         }
       }
     }
