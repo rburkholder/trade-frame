@@ -92,7 +92,7 @@ MasterPortfolio::MasterPortfolio(
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
-  m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_libor );
   m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
         ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
@@ -115,6 +115,7 @@ MasterPortfolio::~MasterPortfolio(void) {
   m_mapStrategy.clear();
 }
 
+// auto load portfolio from database
 void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   std::cout
     << "load portfolio: " << "Adding Portfolio: "
@@ -131,6 +132,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   m_curStrategyArtifacts = pair.first;
 }
 
+// auto load position from database
 void MasterPortfolio::Add( pPosition_t pPosition ) {
   std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
   assert( m_mapStrategyArtifacts.end() != m_curStrategyArtifacts );
@@ -215,19 +217,27 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   assert( m_mapStrategy.end() == m_mapStrategy.find( iip.sName ) );
 
+  pPortfolio_t pPortfolioStrategy;
   ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + iip.sName );
-  ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
-  pPortfolio_t pPortfolioStrategy
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-        idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
-    );
+
+  mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( idPortfolio );
+  if ( m_mapStrategyArtifacts.end() == iter ) { // create new portfolio
+    ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
+    pPortfolioStrategy
+      = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+          idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
+      );
+  }
+  else { // use existing portfolio
+    pPortfolioStrategy = iter->second.m_pPortfolio;
+  }
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy;
-  pManageStrategy.reset( new ManageStrategy(
+  pManageStrategy = std::make_unique<ManageStrategy>(
         iip.sName, iip.bar, pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
@@ -363,7 +373,6 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             //m_sentiment.Update( bar );
           },
           pChartDataView
-        )
       );
 
     pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );

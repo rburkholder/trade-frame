@@ -164,9 +164,10 @@ private:
     {}
   };
 
-  using mapStrategyArtifacts_t = std::map<std::string,StrategyArtifacts>;
+  using mapStrategyArtifacts_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyArtifacts>;
+  using mapStrategyArtifacts_iter = mapStrategyArtifacts_t::iterator;
   mapStrategyArtifacts_t m_mapStrategyArtifacts;
-  mapStrategyArtifacts_t::iterator m_curStrategyArtifacts;  // positions go to 'current' portfolio
+  mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
   //enum class EAllocate { Waiting, Process, Done };
 
