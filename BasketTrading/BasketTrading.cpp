@@ -180,6 +180,8 @@ bool AppBasketTrading::OnInit() {
 
 void AppBasketTrading::BuildMasterPortfolio() {
 
+  std::cout << "BuildMasterPortfolio ..." << std::endl;
+
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
@@ -210,6 +212,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
     // pass in the aggregation portfolio
     m_pPortfolioStrategyAggregate
     );
+  std::cout << "  done." << std::endl;
 }
 
 void AppBasketTrading::HandleTestButton() {
@@ -406,12 +409,6 @@ void AppBasketTrading::HandleDbOnLoad(  ou::db::Session& session ) {
 }
 
 void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
-  std::cout 
-    << "load portfolio: " << "Adding Portfolio: "
-    << "T=" << pPortfolio->GetRow().ePortfolioType
-    << ",O=" << pPortfolio->GetRow().idOwner
-    << ",ID=" << pPortfolio->GetRow().idPortfolio
-    << std::endl;
   switch ( pPortfolio->GetRow().ePortfolioType ) {
     case ou::tf::Portfolio::EPortfolioType::Basket:
       m_pPortfolioStrategyAggregate = pPortfolio;
@@ -420,12 +417,14 @@ void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
     case ou::tf::Portfolio::EPortfolioType::Standard:
       break;
     case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
+      assert( m_pMasterPortfolio );
+      m_pMasterPortfolio->Add( pPortfolio );
       break;
   }
 }
 
 void AppBasketTrading::HandlePositionLoad( pPosition_t& pPosition ) {
-  std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
+  m_pMasterPortfolio->Add( pPosition );
 }
 
 // maybe put this into background thread

@@ -115,6 +115,32 @@ MasterPortfolio::~MasterPortfolio(void) {
   m_mapStrategy.clear();
 }
 
+void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
+  std::cout
+    << "load portfolio: " << "Adding Portfolio: "
+    << "T=" << pPortfolio->GetRow().ePortfolioType
+    << ",O=" << pPortfolio->GetRow().idOwner
+    << ",ID=" << pPortfolio->GetRow().idPortfolio
+    << std::endl;
+
+  mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->Id() );
+  assert( m_mapStrategyArtifacts.end() == iter );
+  std::pair<mapStrategyArtifacts_t::iterator,bool> pair
+    = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) )  ) );
+  assert( pair.second );
+  m_curStrategyArtifacts = pair.first;
+}
+
+void MasterPortfolio::Add( pPosition_t pPosition ) {
+  std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
+  assert( m_mapStrategyArtifacts.end() != m_curStrategyArtifacts );
+  StrategyArtifacts& artifacts( m_curStrategyArtifacts->second );
+  assert( pPosition->GetRow().idPortfolio == artifacts.m_pPortfolio->Id() );
+  std::pair<mapPosition_t::iterator,bool> pair
+    = artifacts.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
+  assert( pair.second );
+}
+
 void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid ) {
   // TODO: use local instance of master portfolio
   boost::posix_time::ptime dt( ou::TimeSource::Instance().External() );

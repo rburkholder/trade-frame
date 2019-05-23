@@ -63,6 +63,9 @@ public:
     pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);
 
+  void Add( pPortfolio_t ); // from database load
+  void Add( pPosition_t );  // from database load
+
   void Load( ptime dtLatestEod, bool bAddToList );
   //void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
   void Start();
@@ -146,6 +149,24 @@ private:
       : sName( sName_ ), direction( direction_ )
     {}
   };
+
+  // cache of portfolios and positions for use when building strategy instances
+  using mapPosition_t = std::map<std::string,pPosition_t>;
+  struct StrategyArtifacts {
+    // stuff during database load goes here temporarily
+    pPortfolio_t m_pPortfolio;  // portfolio for the strategy
+    mapPosition_t m_mapPosition; // positions associated with portfolio
+    StrategyArtifacts( pPortfolio_t pPortfolio )
+    : m_pPortfolio( pPortfolio ) {}
+    StrategyArtifacts( const StrategyArtifacts&& rhs )
+    : m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
+        m_mapPosition( std::move( rhs.m_mapPosition ) )
+    {}
+  };
+
+  using mapStrategyArtifacts_t = std::map<std::string,StrategyArtifacts>;
+  mapStrategyArtifacts_t m_mapStrategyArtifacts;
+  mapStrategyArtifacts_t::iterator m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
   //enum class EAllocate { Waiting, Process, Done };
 
