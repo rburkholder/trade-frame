@@ -53,7 +53,8 @@ public:
 protected:
 private:
 
-  typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
+  using pPortfolio_t = ou::tf::PortfolioManager::pPortfolio_t;
+  using pPosition_t  = ou::tf::PortfolioManager::pPosition_t;
 
   ptime m_dtLatestEod;
 
@@ -100,6 +101,8 @@ private:
 //  void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int );
 
+  void BuildMasterPortfolio();
+
   void HandleLoadButton( void );
   void HandleStartButton( void );
   void HandleExitPositionsButton( void );
@@ -109,6 +112,9 @@ private:
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );
+
+  void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
+  void HandlePositionLoad( pPosition_t& pPosition );
 
   void HandleDbOnLoad( ou::db::Session& session );
   void HandleDbOnPopulate( ou::db::Session& session );

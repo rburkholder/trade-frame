@@ -47,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 21 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 22 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -120,7 +120,20 @@ bool AppBasketTrading::OnInit() {
 
   // maybe set scenario with database and with in memory data structure?
 
+  // this needs to come before the menu, before master portfolio
+  // TODO: there might be a circular issue with master portfolio
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
+  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
+    CallAfter( [sStatus](){
+      std::cout << sStatus << std::endl;
+    });
+  });
+
   m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppBasketTrading::HandlePortfolioLoad ) );
+  pm.OnPositionLoaded.Add( MakeDelegate( this, &AppBasketTrading::HandlePositionLoad ) );
 
   try {
     // try for day to day continuity
@@ -140,6 +153,32 @@ bool AppBasketTrading::OnInit() {
   catch(...) {
     std::cout << "database fault on " << m_sDbName << std::endl;
   }
+
+  if ( !m_pMasterPortfolio ) {
+    BuildMasterPortfolio();
+  }
+
+  // build menu last
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  FrameMain::vpItems_t vItems;
+  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
+  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
+
+  vItems.clear();
+  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
+  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
+  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
+  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
+  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
+
+  return true;
+}
+
+void AppBasketTrading::BuildMasterPortfolio() {
 
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
@@ -171,33 +210,6 @@ bool AppBasketTrading::OnInit() {
     // pass in the aggregation portfolio
     m_pPortfolioStrategyAggregate
     );
-
-  // this needs to come before the menu
-  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
-  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){
-      std::cout << sStatus << std::endl;
-    });
-  });
-
-  // build menu last
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  FrameMain::vpItems_t vItems;
-  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
-  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
-
-  vItems.clear();
-  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
-  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
-  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
-  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
-  //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
-  m_pFrameMain->AddDynamicMenu( "Trade", vItems );
-
-  return true;
 }
 
 void AppBasketTrading::HandleTestButton() {
@@ -334,20 +346,14 @@ int AppBasketTrading::OnExit() {
   return 0;
 }
 
-void AppBasketTrading::HandleDbOnLoad(  ou::db::Session& session ) {
-  std::cout << "AppBasketTrading::HandleDbOnLoad placeholder" << std::endl;
-}
-
-void AppBasketTrading::HandleDbOnPopulate(  ou::db::Session& session ) {
-  std::cout << "AppBasketTrading::HandleDbOnPopulate placeholder" << std::endl;
-}
-
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
-  std::cout << "AppBasketTrading::HandleRegisterTables placeholder" << std::endl;
+  // called when db created
+  //std::cout << "AppBasketTrading::HandleRegisterTables placeholder" << std::endl;
 }
 
 void AppBasketTrading::HandleRegisterRows(  ou::db::Session& session ) {
-  std::cout << "AppBasketTrading::HandleRegisterRows placeholder" << std::endl;
+  // called when db created and when exists
+  //std::cout << "AppBasketTrading::HandleRegisterRows placeholder" << std::endl;
 }
 
 void AppBasketTrading::HandlePopulateDatabase( void ) {
@@ -378,13 +384,48 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of all USD Portfolios" );
 
   m_pPortfolioStrategyAggregate
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of Instrument Instances" );
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(  // TODO: change from MultiLeggedPosition to Basket
+    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of Instrument Instances" );
 
 }
 
+void AppBasketTrading::HandleDbOnPopulate(  ou::db::Session& session ) {
+  // called when db created, after HandlePopulateDatabase
+  //std::cout << "AppBasketTrading::HandleDbOnPopulate placeholder" << std::endl;
+}
+
 void AppBasketTrading::HandleLoadDatabase( void ) {
-  std::cout << "AppBasketTrading::HandleLoadDatabase placeholder" << std::endl;
+  std::cout << "AppBasketTrading::HandleLoadDatabase ..." << std::endl;
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.LoadActivePortfolios();
+}
+
+void AppBasketTrading::HandleDbOnLoad(  ou::db::Session& session ) {
+  // called when db exists, after HandleLoadDatabase
+   //std::cout << "AppBasketTrading::HandleDbOnLoad placeholder" << std::endl;
+}
+
+void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
+  std::cout 
+    << "load portfolio: " << "Adding Portfolio: "
+    << "T=" << pPortfolio->GetRow().ePortfolioType
+    << ",O=" << pPortfolio->GetRow().idOwner
+    << ",ID=" << pPortfolio->GetRow().idPortfolio
+    << std::endl;
+  switch ( pPortfolio->GetRow().ePortfolioType ) {
+    case ou::tf::Portfolio::EPortfolioType::Basket:
+      m_pPortfolioStrategyAggregate = pPortfolio;
+      BuildMasterPortfolio();
+      break;
+    case ou::tf::Portfolio::EPortfolioType::Standard:
+      break;
+    case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
+      break;
+  }
+}
+
+void AppBasketTrading::HandlePositionLoad( pPosition_t& pPosition ) {
+  std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
 }
 
 // maybe put this into background thread
