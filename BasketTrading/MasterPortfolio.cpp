@@ -193,7 +193,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
   ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
   pPortfolio_t pPortfolioStrategy
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-        idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
+        idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
     );
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
