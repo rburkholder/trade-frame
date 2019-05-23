@@ -44,6 +44,14 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+// 2019/05/23 Trading Day
+//   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
+//   strangles were profitable on the basket elements
+//   profitable legs could be exited
+//   TODO: watch ATM IV to see if profitable legs should be rolled-up/down or just exited
+//      and new strikes entered when IV returns closer to noral
+//      or sell premium(short the same leg?)
+
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
 {
@@ -101,6 +109,8 @@ public:
   void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
+
+  void Add( pPosition_t ); // add pre-existing position
 
   void Test( void );
 
@@ -616,6 +626,17 @@ private:
     void AddChartData( pChartDataView_t pChartData ) {
       m_legCall.AddChartData( pChartData );
       m_legPut.AddChartData( pChartData );
+    }
+
+    void SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut ) {
+      m_legCall.SetColour( colourCall );
+      m_legPut.SetColour( colourPut );
+    }
+    void SetColourCall( ou::Colour::enumColour colour ) {
+      m_legCall.SetColour( colour );
+    }
+    void SetColourPut( ou::Colour::enumColour colour ) {
+      m_legPut.SetColour( colour );
     }
 
   private:

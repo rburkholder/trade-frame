@@ -152,15 +152,20 @@ private:
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
+  using mapPosition_iter = mapPosition_t::iterator;
   struct StrategyArtifacts {
     // stuff during database load goes here temporarily
+    bool m_bAccessed;
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
     mapPosition_t m_mapPosition; // positions associated with portfolio
     StrategyArtifacts( pPortfolio_t pPortfolio )
-    : m_pPortfolio( pPortfolio ) {}
+    : m_bAccessed( false ),
+      m_pPortfolio( pPortfolio )
+    {}
     StrategyArtifacts( const StrategyArtifacts&& rhs )
-    : m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
-        m_mapPosition( std::move( rhs.m_mapPosition ) )
+    : m_bAccessed( rhs.m_bAccessed ),
+      m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
+      m_mapPosition( std::move( rhs.m_mapPosition ) )
     {}
   };
 

@@ -266,9 +266,9 @@ void AppBasketTrading::HandleLoadButton() {
         // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
         //m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
-        //m_pMasterPortfolio->Load( m_dtLatestEod, true );
+        m_pMasterPortfolio->Load( m_dtLatestEod, true );
       //}
-      std::cout << "AppBasketTrading::HandleLoadButton: need database and then start MasterPortfolio" << std::endl;
+      //std::cout << "AppBasketTrading::HandleLoadButton: need database and then start MasterPortfolio" << std::endl;
     }
     );
 }

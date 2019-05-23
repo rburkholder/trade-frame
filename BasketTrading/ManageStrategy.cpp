@@ -183,12 +183,14 @@ ManageStrategy::ManageStrategy(
 
     //std::cout << "Construct Watch: " << m_sUnderlying << std::endl;
 
-    m_fConstructWatch(
+    m_fConstructWatch( // underlying construction only
       m_sUnderlying,
       [this,fGatherOptionDefinitions](pWatch_t pWatchUnderlying){
 
-        //std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
+        std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
+        assert( m_pPortfolioStrategy );
+        assert( pWatchUnderlying );
         assert( 0 != pWatchUnderlying->GetInstrument()->GetContract() );
 
         // create a position with the watch
@@ -303,6 +305,53 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
   volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
   std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
   return nUnderlyingSharesToTrade;
+}
+
+void ManageStrategy::Add( pPosition_t pPosition ) {
+  pInstrument_t pInstrument = pPosition->GetInstrument();
+  switch ( pInstrument->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Stock:
+      // fill in some other time, as underlying isn't traded here
+      break;
+    case ou::tf::InstrumentType::Option: {
+      double strikeAtm = pInstrument->GetStrike();
+      mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
+      if ( m_mapStrike.end() == iterStrike ) {
+        double strikeUpper {};
+        double strikeLower {};
+
+        boost::gregorian::date date( pInstrument->GetExpiry() );
+        mapChains_t::iterator iterChainExpiry
+          = std::find_if(
+            m_mapChains.begin(), m_mapChains.end(),
+            [date](const mapChains_t::value_type& vt)->bool{
+              return vt.first == date;
+              } );
+
+        assert( m_mapChains.end() != iterChainExpiry );
+        int nStrikes = iterChainExpiry->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
+        assert ( 2 == nStrikes );
+        std::pair<mapStrike_t::iterator,bool> result;
+        result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+        assert( result.second );
+        assert( m_mapStrike.end() != result.first );
+        iterStrike = result.first;
+      }
+
+      Strike& strike( iterStrike->second );
+      switch( pInstrument->GetOptionSide() ) {
+        case ou::tf::OptionSide::Call:
+          strike.SetPositionCall( pPosition );
+          strike.SetColourCall( rColour[ m_ixColour++ ] );
+          break;
+        case ou::tf::OptionSide::Put:
+          strike.SetPositionPut( pPosition );
+          strike.SetColourPut( rColour[ m_ixColour++ ] );
+          break;
+      }
+      }
+      break;
+  }
 }
 
 //void ManageStrategy::Start( ETradeDirection direction ) {
@@ -516,11 +565,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   std::pair<mapStrike_t::iterator,bool> result;
                   result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
                   if ( result.second ) {
+                    assert( m_mapStrike.end() != result.first );
                     Strike& strike( result.first->second );
                     if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                       std::cout << "WARNING: strategy running out of colours." << std::endl;
                     }
-                    assert( m_mapStrike.end() != result.first );
                     pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionCall){
