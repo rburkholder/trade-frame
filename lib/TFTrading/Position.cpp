@@ -13,6 +13,8 @@
 
 #include "stdafx.h"
 
+#include <TFOptions/Option.h>
+
 #include "OrderManager.h"
 
 #include "Position.h"
@@ -114,10 +116,25 @@ Position::Position( void )
 }
 
 void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataProvider ) {
+  using pOption_t = ou::tf::option::Option::pOption_t;
   assert( nullptr == m_pWatch.get() );
   assert( nullptr != pInstrument.get() );
   assert( nullptr != pDataProvider.get() );
-  m_pWatch.reset( new Watch( pInstrument, pDataProvider ) );
+  switch ( pInstrument->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Option:
+    case ou::tf::InstrumentType::FuturesOption:
+      {
+        pOption_t pOption = boost::make_shared<ou::tf::option::Option>( pInstrument, pDataProvider );
+        m_pWatch = std::move( pOption );
+      }
+      break;
+    default:
+      {
+        pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, pDataProvider );
+        m_pWatch = std::move( pWatch );
+      }
+      break;
+  }
   m_bWatchConstructedLocally = true;
 }
 
