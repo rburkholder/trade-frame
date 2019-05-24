@@ -451,6 +451,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
           pManageStrategy->Add( vt.second );
         }
       );
+      artifacts.m_bAccessed = true;
+    }
 
     std::string sName( iip.sName );
     Strategy strategy( std::move( iip ), std::move( pManageStrategy ), pChartDataView );
@@ -459,8 +461,6 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     assert( result.second );
 
     m_fSupplyStrategyChart( EStrategyChart::Info, sName, pChartDataView );
-
-    }
 
 } // AddSymbol
 
