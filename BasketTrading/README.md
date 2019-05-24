@@ -2,8 +2,8 @@
 
 ## Introduction
 
-This is an environment for running an algorithm over a collection of instruments.  Positions are opened at the beginning
-of the trading day/session, and closed by the end of the session, if not already stopped out.
+This is an environment for running an algorithm over a collection of instruments.  Positions
+are maintained day to day.
 
 * BasketTrading - main file for gui and starting the process
 * PanelBasketTradingMain - GUI container for buttons, BasketTrading assigns the event handlers
@@ -11,3 +11,5 @@ of the trading day/session, and closed by the end of the session, if not already
 * MasterPortfolio - Maintains instances of ManageStrategy
 * ManageStrategy - Instance created for each primary instrument chosen
 * SymbolSelection - Determines instruments to be traded by MasterPortfolio
+
+Currently designed to run straddles on weekly options.
