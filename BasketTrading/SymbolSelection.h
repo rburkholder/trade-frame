@@ -16,7 +16,6 @@
 
 // Project: BasketTrading
 
-//#include <iostream>
 #include <map>
 #include <set>
 #include <functional>
@@ -24,6 +23,7 @@
 #include <TFTimeSeries/TimeSeries.h>
 
 using volume_t = ou::tf::DatedDatum::volume_t;
+using setSymbols_t = std::set<std::string>;
 
 struct InstrumentInfo {
   const std::string sName;
@@ -168,8 +168,8 @@ public:
   using setInstrumentInfo_t = std::set<InstrumentInfo>;
 
   SymbolSelection( const ptime dtLast );
-  SymbolSelection( const ptime dtLast, fSelectedDarvas_t );
-  SymbolSelection( const ptime dtLast, fSelectedPivot_t );
+  SymbolSelection( const ptime dtLast, const setSymbols_t&, fSelectedDarvas_t );
+  SymbolSelection( const ptime dtLast, const setSymbols_t&, fSelectedPivot_t );
   ~SymbolSelection( void );
 
 protected:

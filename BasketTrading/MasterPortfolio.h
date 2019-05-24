@@ -142,13 +142,16 @@ private:
 //    }
   };
 
-  struct Ranking {
-    std::string sName; // for lookup in m_mapStrategy
-    IIPivot::Direction direction;
-    Ranking( const std::string& sName_, IIPivot::Direction direction_ )
-      : sName( sName_ ), direction( direction_ )
-    {}
-  };
+  using mapStrategy_t = std::map<std::string,Strategy>;
+  mapStrategy_t m_mapStrategy;
+
+  //struct Ranking {
+  //  std::string sName; // for lookup in m_mapStrategy
+  //  IIPivot::Direction direction;
+  //  Ranking( const std::string& sName_, IIPivot::Direction direction_ )
+  //    : sName( sName_ ), direction( direction_ )
+  //  {}
+  //};
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
@@ -174,14 +177,14 @@ private:
   mapStrategyArtifacts_t m_mapStrategyArtifacts;
   mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
+  setSymbols_t m_setSymbols;
+
+
   //enum class EAllocate { Waiting, Process, Done };
 
   //EAllocate m_eAllocate;
   //using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
   //mapPivotProbability_t m_mapPivotProbability;
-
-  using mapStrategy_t = std::map<std::string,Strategy>;
-  mapStrategy_t m_mapStrategy;
 
   //using mapVolume_t = std::multimap<volume_t, std::string>; // string is name of instrument
   //mapVolume_t m_mapVolumeRanking;

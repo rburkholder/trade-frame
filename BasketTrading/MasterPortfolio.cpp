@@ -17,6 +17,7 @@
 
 #include "stdafx.h"
 
+#include <set>
 #include <algorithm>
 
 #include <OUCommon/TimeSource.h>
@@ -193,8 +194,37 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             } );
         }
 */
+
+        std::for_each( // ensure overnight positions are represented in the new day
+          m_mapStrategyArtifacts.begin(), m_mapStrategyArtifacts.end(),
+          [this](mapStrategyArtifacts_t::value_type& vt){
+            StrategyArtifacts& artifact( vt.second );
+            if ( !artifact.m_bAccessed ) {
+
+              std::string id( vt.first );
+              static const std::string basket( "Basket_" );
+              std::string temp( id.substr( 0, basket.size() ) );
+              assert( temp == basket );
+              std::string symbol( id.substr( basket.size() ) );
+              //std::cout << vt.first << " (" << symbol << ") being examined :";
+              bool bPositionActive( false );
+              std::for_each(
+                artifact.m_mapPosition.begin(), artifact.m_mapPosition.end(),
+                [&bPositionActive](mapPosition_t::value_type& vt){
+                  bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
+                }
+              );
+              if ( bPositionActive ) {
+                //std::cout << vt.first << " has position";
+                m_setSymbols.insert( symbol );
+              }
+              //std::cout << std::endl;
+            }
+          }
+        );
+
         SymbolSelection selector(
-          dtLatestEod,
+          dtLatestEod, m_setSymbols,
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
               AddSymbol( iip );
@@ -211,8 +241,22 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             }
           } );
 
+        std::for_each(
+          m_setSymbols.begin(), m_setSymbols.end(),
+          [this](const setSymbols_t::value_type& vt){
+            mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( vt );
+            if ( m_mapStrategy.end() == iterStrategy ) {
+            }
+            else {
+              //m_fSupplyStrategyChart( EStrategyChart::Active, symbol, strategy.pChartDataView );
+              //std::cout << vt << " has strategy" << std::endl;
+            }
+          }
+        );
+
         std::cout << "Symbol List finished." << std::endl;
     } );
+
   }
 }
 
@@ -480,39 +524,61 @@ void MasterPortfolio::Start() {
     double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
     std::cout << "Starting allocations at " << dblAmountToTradePerInstrument << " per instrument." << std::endl;
     size_t nToSelect( 33 );
+
     std::for_each(
-      m_mapVolatility.rbegin(),
-      m_mapVolatility.rend(),
+      m_setSymbols.begin(), m_setSymbols.end(),
+      [this,&nToSelect,dblAmountToTradePerInstrument](const setSymbols_t::value_type& vt){
+        Strategy& strategy( m_mapStrategy.find( vt )->second );
+        ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+        std::cout
+          << strategy.iip.sName
+          //<< " ranking=" << strategy.dblBestProbability
+          //<< " direction=" << (int)ranking.direction
+          << " to trade: " << volume
+          << std::endl;
+        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+        strategy.pManageStrategy->Start();
+        m_fSupplyStrategyChart( EStrategyChart::Active, vt, strategy.pChartDataView );
+        if ( 0 < nToSelect ) nToSelect--;
+      }
+    );
+
+    std::for_each(
+      m_mapVolatility.rbegin(), m_mapVolatility.rend(),
       [this,&nToSelect,dblAmountToTradePerInstrument](mapVolatility_t::value_type& vt){
         if ( 0 < nToSelect ) {
           //Ranking& ranking( vt.second );
           std::string sName( vt.second );
-          Strategy& strategy( m_mapStrategy.find( sName )->second );
-          ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-          if ( 100 <= volume ) {
-            std::cout
-              << strategy.iip.sName
-              //<< " ranking=" << strategy.dblBestProbability
-              //<< " direction=" << (int)ranking.direction
-              << " to trade: " << volume
-              << std::endl;
-            strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
-            m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-            strategy.pManageStrategy->Start();
-//            switch ( ranking.direction ) {
-//              case IIPivot::Direction::Up:
-//                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
-//                break;
-//              case IIPivot::Direction::Down:
-//                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
-//                break;
-//              case IIPivot::Direction::Unknown:
-//                assert( 0 );
-//                break;
-//            }
-            //m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
-            m_fSupplyStrategyChart( EStrategyChart::Active, sName, strategy.pChartDataView );
-            nToSelect--;
+          setSymbols_t::const_iterator iterSymbols = m_setSymbols.find( sName );
+          if ( m_setSymbols.end() == iterSymbols ) {
+            Strategy& strategy( m_mapStrategy.find( sName )->second );
+            ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+            if ( 100 <= volume ) {
+              std::cout
+                << strategy.iip.sName
+                //<< " ranking=" << strategy.dblBestProbability
+                //<< " direction=" << (int)ranking.direction
+                << " to trade: " << volume
+                << std::endl;
+              strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
+              m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
+              strategy.pManageStrategy->Start();
+  //            switch ( ranking.direction ) {
+  //              case IIPivot::Direction::Up:
+  //                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
+  //                break;
+  //              case IIPivot::Direction::Down:
+  //                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
+  //                break;
+  //              case IIPivot::Direction::Unknown:
+  //                assert( 0 );
+  //                break;
+  //            }
+              //m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
+              m_fSupplyStrategyChart( EStrategyChart::Active, sName, strategy.pChartDataView );
+              nToSelect--;
+            }
           }
         }
       } );

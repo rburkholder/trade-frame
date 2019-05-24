@@ -75,7 +75,7 @@ public:
 };
 
 template<typename Scenario, typename Function>
-void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
+void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, const setSymbols_t& setSymbols, Function fCheck ) {
 
   struct data_t {
     ou::tf::Bar::volume_t volumeEma;
@@ -96,7 +96,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
       []( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
         return true;
       },
-      [nMinBars, dtEnd]( data_t& data, const std::string& sObject, const ou::tf::Bars& bars )->bool{ // Filter
+      [nMinBars, dtEnd, &setSymbols]( data_t& data, const std::string& sObject, const ou::tf::Bars& bars )->bool{ // Filter
         //  std::cout << sObjectName << std::endl;
         data.nEnteredFilter++;
         bool bReturn( false );
@@ -112,6 +112,12 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, Function fCheck ) {
               data.nPassedFilter++;
               bReturn = true;
             }
+        }
+        if ( !bReturn ) {
+          setSymbols_t::const_iterator iterSymbol = setSymbols.find( sObject );
+          if ( setSymbols.end() != iterSymbol ) {
+            bReturn = true;
+          }
         }
         return bReturn;
       },
@@ -152,7 +158,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast )
   m_dtDateOfFirstBar = m_dt26WeeksAgo;
 }
 
-SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedDarvas_t fSelected )
+SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSymbols, fSelectedDarvas_t fSelected )
 : SymbolSelection( dtLast )
 {
   std::cout << "Darvas: AT=Aggressive Trigger, CT=Conservative Trigger, BO=Break Out Alert, stop=recommended stop" << std::endl;
@@ -161,7 +167,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedDarvas_t fSelecte
 
   namespace ph = std::placeholders;
   Process<IIDarvas>(
-    m_dtOneYearAgo, m_dtLast, m_nMinBars,
+    m_dtOneYearAgo, m_dtLast, m_nMinBars, setSymbols,
     std::bind( &SymbolSelection::CheckForDarvas, this, ph::_1, ph::_2, fSelected )
   );
 
@@ -169,7 +175,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedDarvas_t fSelecte
 
 // should just be returning candidates which pass the filter
 // purpose here is to provide the probabilities for the weeklies
-SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedPivot_t fSelected )
+SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSymbols, fSelectedPivot_t fSelected )
 : SymbolSelection( dtLast )
 {
 
@@ -235,7 +241,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, fSelectedPivot_t fSelected
 
     namespace ph = std::placeholders;
     Process<IIPivot>(
-      m_dtOneYearAgo, m_dtLast, m_nMinBars,
+      m_dtOneYearAgo, m_dtLast, m_nMinBars, setSymbols,
       [&fSelected,&mapUnderlyingInfo,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
         mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ii.sName );
         if ( mapUnderlyingInfo.end() != citer ) {
