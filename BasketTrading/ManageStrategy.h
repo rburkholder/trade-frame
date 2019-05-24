@@ -153,7 +153,7 @@ private:
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
-  size_t m_nCombos;
+  size_t m_nLegs;
 
   double m_dblOpen;
 

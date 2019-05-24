@@ -123,7 +123,7 @@ ManageStrategy::ManageStrategy(
   //m_eOptionState( EOptionState::Initial1 ),
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
-  m_nCombos {},
+  m_nLegs {},
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -343,10 +343,12 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
         case ou::tf::OptionSide::Call:
           strike.SetPositionCall( pPosition );
           strike.SetColourCall( rColour[ m_ixColour++ ] );
+          m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
           strike.SetPositionPut( pPosition );
           strike.SetColourPut( rColour[ m_ixColour++ ] );
+          m_nLegs++;
           break;
       }
       }
@@ -528,22 +530,29 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         double strikeOtmPut {};
 
         try {
-          strikeOtmCall = m_iterChainExpiryInUse->second.Call_Otm( mid );
-          strikeAtm = CurrentAtmStrike( mid );
-          strikeOtmPut = m_iterChainExpiryInUse->second.Put_Otm( mid );
-          bAtmFound = true;
+          if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
+            std::cout << m_sUnderlying << " has no m_iterChainExpiryInUse" << std::endl;
+            m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
+          }
+          else {
+            strikeOtmCall = m_iterChainExpiryInUse->second.Call_Otm( mid );
+            strikeAtm = CurrentAtmStrike( mid );
+            strikeOtmPut = m_iterChainExpiryInUse->second.Put_Otm( mid );
+            bAtmFound = true;
+          }
         }
         catch ( std::runtime_error& e ) {
           if ( m_mapStrike.empty() ) {
             std::cout << m_sUnderlying << " found no strike for mid-point " << mid
-                                       << " on " << m_QuoteLatest.DateTime().date()
+                                       << " expiry " << m_iterChainExpiryInUse->first
+                                       << " for quote " << m_QuoteLatest.DateTime().date()
                                        << " [" << e.what() << "]"
                                        << std::endl;
-            //m_stateTrading = TSNoMore;  // TODO: may need to adjust if there are other strikes in action
+            m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
         }
 
-        if ( bAtmFound && ( 0 == m_nCombos) ) {
+        if ( bAtmFound && ( 0 == m_nLegs) ) {
           mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
           if ( m_mapStrike.end() == iterStrike ) {
             double strikeUpper {};
@@ -576,16 +585,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                         Strike& strike( iterStrike->second );
                         std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
                         strike.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
+                        m_nLegs++;
                       } );
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionPut){
                         Strike& strike( iterStrike->second );
                         std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
                         strike.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
+                        m_nLegs++;
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
                     strike.AddChartData( m_pChartDataView );
-                    m_nCombos++;
                   }
                 }
               }
