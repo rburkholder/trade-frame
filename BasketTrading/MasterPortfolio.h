@@ -77,6 +77,9 @@ public:
 
   void Test( void );
 
+  void TakeProfits();
+  void CloseExpiryItm( boost::gregorian::date );
+
 protected:
 private:
 

@@ -47,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 22 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 23 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -172,6 +172,8 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
   vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  vItems.push_back( new mi( "a5 Take Profits", MakeDelegate( this, &AppBasketTrading::HandleTakeProfits ) ) );
+  vItems.push_back( new mi( "a6 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
@@ -217,6 +219,14 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
 void AppBasketTrading::HandleTestButton() {
   CallAfter( std::bind( &MasterPortfolio::Test, m_pMasterPortfolio.get() ) );
+}
+
+void AppBasketTrading::HandleTakeProfits() {
+  CallAfter( std::bind( &MasterPortfolio::TakeProfits, m_pMasterPortfolio.get() ) );
+}
+
+void AppBasketTrading::HandleCloseExpiryItm() {
+  CallAfter( std::bind( &MasterPortfolio::CloseExpiryItm, m_pMasterPortfolio.get(), boost::gregorian::day_clock::local_day() ) );
 }
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {

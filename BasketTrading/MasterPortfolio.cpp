@@ -588,23 +588,42 @@ void MasterPortfolio::Start() {
 } // Start
 
 void MasterPortfolio::Stop( void ) {
-  std::for_each( m_mapStrategy.begin(), m_mapStrategy.end(),
-                [](mapStrategy_t::value_type& pair){
-                  Strategy& strategy( pair.second );
-//                  if ( strategy.pManageStrategy->ToBeTraded() ) {
-                    strategy.pManageStrategy->Stop();
-//                  }
-                } );
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->Stop();
+    } );
 }
 
 void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
   m_libor.SaveSeries( sPath );
-  std::for_each(m_mapStrategy.begin(), m_mapStrategy.end(),
-                [&sPath](mapStrategy_t::value_type& pair){
-                  Strategy& strategy( pair.second );
-                  strategy.pManageStrategy->SaveSeries( sPath );
-                } );
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [&sPath](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+      strategy.pManageStrategy->SaveSeries( sPath );
+    } );
   std::cout << "done." << std::endl;
 }
 
+void MasterPortfolio::TakeProfits( void ) {
+  double dblNet {};
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [&dblNet](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        dblNet += strategy.pManageStrategy->TakeProfits();
+    } );
+  std::cout << "Portfolio net: " << dblNet << std::endl;
+}
+
+void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [&date](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->CloseExpiryItm( date );
+    } );
+}

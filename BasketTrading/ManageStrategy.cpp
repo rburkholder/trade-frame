@@ -342,11 +342,13 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       switch( pInstrument->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
           strike.SetPositionCall( pPosition );
+          std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
           strike.SetColourCall( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
           strike.SetPositionPut( pPosition );
+          std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
           strike.SetColourPut( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
@@ -397,7 +399,12 @@ void ManageStrategy::Start(  ) {
 
 void ManageStrategy::Stop( void ) {
   HandleCancel();
-  HandleGoNeutral();
+  std::for_each(
+    m_mapStrike.begin(), m_mapStrike.end(),
+    [this](mapStrike_t::value_type& entry){
+      entry.second.ClosePositions();  // maintain positions over night
+    }
+    );
 }
 
 void ManageStrategy::HandleBellHeard( void ) {
@@ -441,7 +448,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrading ) {
     case TSWaitForFirstTrade: {
       m_dblOpen = trade.Price();
-      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
+//      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
 
       boost::gregorian::date date( trade.DateTime().date() );
@@ -901,3 +908,31 @@ void ManageStrategy::Test() {
   }
 }
 
+double ManageStrategy::TakeProfits() {
+  double dblNet {};
+  if ( 0 < m_mapStrike.size() ) {
+    std::cout << "TakeProfits " << this->m_sUnderlying << std::endl;
+    std::for_each(
+      m_mapStrike.begin(), m_mapStrike.end(),
+      [this,&dblNet](mapStrike_t::value_type& vt){
+        Strike& strike( vt.second );
+        dblNet += strike.GetNet();
+      }
+    );
+    std::cout << "  net: " << dblNet << std::endl;
+  }
+  return dblNet;
+}
+
+void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
+  std::for_each(
+    m_mapStrike.begin(), m_mapStrike.end(),
+    [this,&date](mapStrike_t::value_type& vt){
+      Strike& strike( vt.second );
+      double price( m_TradeLatest.Price() );
+      if ( 0.0 != price ) {
+        strike.CloseExpiryItm( date, price );
+      }
+    }
+  );
+}

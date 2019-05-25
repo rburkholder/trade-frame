@@ -109,6 +109,8 @@ private:
   void HandleStopButton( void );
   void HandleSaveButton( void );
   void HandleTestButton( void );
+  void HandleTakeProfits( void );
+  void HandleCloseExpiryItm( void );
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );

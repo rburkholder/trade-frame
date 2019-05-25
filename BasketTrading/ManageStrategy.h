@@ -114,6 +114,9 @@ public:
 
   void Test( void );
 
+  double TakeProfits();
+  void CloseExpiryItm( boost::gregorian::date );
+
 protected:
 private:
 
@@ -430,11 +433,13 @@ private:
     {
       Init();
     }
+
     void SetOption( pOption_t pOption ) { m_candidate.SetWatch( pOption ); }
     pOption_t GetOption() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_candidate.GetWatch() ); }
     bool ValidateSpread( size_t nDuration ) {
       return m_candidate.ValidateSpread( nDuration );
     }
+
     void SetPosition( pPosition_t pPosition ) {
       m_candidate.Clear(); // implies candidate is finished and no longer required
       m_pPosition = pPosition;
@@ -442,6 +447,7 @@ private:
       m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
     }
     pPosition_t GetPosition() { return m_pPosition; }
+
     void Tick( ptime dt ) {
       m_monitor.Tick();
       if ( m_pPosition ) {
@@ -449,6 +455,7 @@ private:
         m_ceProfitLoss.Append( dt, dblPL );
       }
     }
+
     void OrderLong( boost::uint32_t nOrderQuantity ) {
       if ( m_pPosition ) {
         m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
@@ -517,7 +524,6 @@ private:
 
   // ==========================
 
-  // TODO: reload from database
   // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
   class Strike {
   public:
@@ -637,6 +643,74 @@ private:
     }
     void SetColourPut( ou::Colour::enumColour colour ) {
       m_legPut.SetColour( colour );
+    }
+
+    double GetNet() {
+      double dblNet {};
+      pPosition_t pPositionCall = m_legCall.GetPosition();
+      if ( pPositionCall ) {
+        double dblCallValue = pPositionCall->GetUnRealizedPL();
+        std::cout
+          << "leg call: "
+          << pPositionCall->GetInstrument()->GetInstrumentName()
+          << "=" << dblCallValue;
+        dblNet += dblCallValue;
+        if ( 0.0 == dblCallValue ) {
+          const ou::tf::Quote& quote( pPositionCall->GetWatch()->LastQuote() );
+          std::cout
+            << ", quote: a" << quote.Ask()
+            << ", b" << quote.Bid()
+            ;
+        }
+        std::cout << std::endl;
+      }
+      pPosition_t pPositionPut = m_legPut.GetPosition();
+      if ( pPositionPut ) {
+        double dblPutValue = pPositionPut->GetUnRealizedPL();
+        std::cout
+          << "leg put: "
+          << pPositionPut->GetInstrument()->GetInstrumentName()
+          << "=" << dblPutValue;
+        dblNet += dblPutValue;
+        if ( 0.0 == dblPutValue ) {
+          const ou::tf::Quote& quote( pPositionPut->GetWatch()->LastQuote() );
+          std::cout
+            << ", quote: a" << quote.Ask()
+            << ", b" << quote.Bid()
+            ;
+        }
+        std::cout << std::endl;
+      }
+//      double dblNetValue = dblCallValue + dblPutValue;
+//      if ( ( 0.0 != dblCallValue ) && ( 0.0 != dblPutValue ) ) {
+//        std::cout
+//          << "net value=" << dblNetValue
+//          << " "
+//          << pPositionCall->GetInstrument()->GetInstrumentName() << ":" << dblCallValue
+//          << " - "
+//          << pPositionPut->GetInstrument()->GetInstrumentName() << ":" << dblPutValue
+//          << std::endl;
+//      }
+      return dblNet;
+    }
+
+    void CloseExpiryItm( const boost::gregorian::date date, double price ) {
+      if ( price >= m_dblStrikeAtm ) {
+        pPosition_t pPosition = m_legCall.GetPosition();
+        if ( pPosition ) {
+          if ( date == pPosition->GetInstrument()->GetExpiry() ) {
+            m_legCall.ClosePosition();
+          }
+        }
+      }
+      if ( price <= m_dblStrikeAtm ) {
+        pPosition_t pPosition = m_legPut.GetPosition();
+        if ( pPosition ) {
+          if ( date == pPosition->GetInstrument()->GetExpiry() ) {
+            m_legPut.ClosePosition();
+          }
+        }
+      }
     }
 
   private:
