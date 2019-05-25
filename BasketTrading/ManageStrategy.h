@@ -198,10 +198,11 @@ private:
   // TODO: convert to generic watch, and put into library
   class SpreadCandidate {
   public:
-    SpreadCandidate(): m_nConsecutiveSpreadOk {} {}
+    SpreadCandidate(): m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {} {}
     SpreadCandidate( const SpreadCandidate& rhs ) = delete;
     SpreadCandidate( const SpreadCandidate&& rhs )
-    : m_quote( rhs.m_quote ), m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
+    : m_quote( rhs.m_quote ), m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
+      m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
       m_pWatch( std::move( rhs.m_pWatch ) )
     {}
 //    SpreadCandidate( pWatch_t pWatch )
@@ -232,14 +233,13 @@ private:
     bool ValidateSpread( size_t nDuration ) {
       bool bOk( false );
       if ( m_pWatch ) {
-        if ( m_quote.IsValid() ) {
-          double spread( m_quote.Spread() );
-          if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
-            m_nConsecutiveSpreadOk++;
-          }
-          else {
-            m_nConsecutiveSpreadOk = 0;
-          }
+        if ( m_nUnDesired < m_nDesired ) {
+          // TODO: may want to enforce some sort of ratio
+          //   will need some statistics on what a good number might be
+          m_nConsecutiveSpreadOk++;
+        }
+        else {
+          m_nConsecutiveSpreadOk = 0;
         }
         bOk = ( nDuration <= m_nConsecutiveSpreadOk );
       }
@@ -247,10 +247,19 @@ private:
     }
   private:
     ou::tf::Quote m_quote;
+    size_t m_nDesired;
+    size_t m_nUnDesired;
     size_t m_nConsecutiveSpreadOk;
     pWatch_t m_pWatch;
     void UpdateQuote( const ou::tf::Quote& quote ) {
       m_quote = quote;
+      double spread( m_quote.Spread() );
+      if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
+        m_nDesired++;
+      }
+      else {
+        m_nUnDesired++;
+      }
     }
   };
 
