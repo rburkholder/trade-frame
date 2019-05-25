@@ -264,12 +264,10 @@ private:
     MonitorOrder():
       m_nAdjustmentPeriods( 2 ),
       m_CountDownToAdjustment {}
-      //m_dblOffset {}
       {}
     MonitorOrder( pPosition_t& pPosition )
     : m_nAdjustmentPeriods( 2 ),
       m_CountDownToAdjustment {},
-      //m_dblOffset {},
       m_state( State::NoPosition ),
       m_pPosition( pPosition )
     {}
@@ -278,7 +276,6 @@ private:
     : m_nAdjustmentPeriods( rhs.m_nAdjustmentPeriods ),
       m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
       m_state( rhs.m_state ),
-      //m_dblOffset( rhs.m_dblOffset ),
       m_pPosition( std::move( rhs.m_pPosition ) ),
       m_pOrder( std::move( rhs.m_pOrder ) )
     {}
@@ -301,7 +298,6 @@ private:
               m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
               m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
               m_CountDownToAdjustment = m_nAdjustmentPeriods;
-              //m_dblOffset = 0.0;
               m_state = State::Active;
               m_pPosition->PlaceOrder( m_pOrder );
               std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
@@ -354,7 +350,6 @@ private:
     State m_state;
     const size_t m_nAdjustmentPeriods;
     size_t m_CountDownToAdjustment;
-    //double m_dblOffset;
     pPosition_t m_pPosition;
     pOrder_t m_pOrder;
 
@@ -365,30 +360,37 @@ private:
       else {
         assert( 0 < m_CountDownToAdjustment );
         m_CountDownToAdjustment--;
+        bool bUpdateOrder( false );
         if ( 0 == m_CountDownToAdjustment ) {
-          //m_dblOffset += 0.01; // TODO: may need to put a cap on size of offset
-          const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-          double spread = quote.Spread();
-          //double mid = quote.Midpoint();
-          //double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
-
           switch ( m_pOrder->GetOrderSide() ) {
             case ou::tf::OrderSide::Buy:
+              // TODO: maximum number of increments? aka don't chase too far?
               m_pOrder->SetPrice1( m_pOrder->GetPrice1() + 0.01 );
+              bUpdateOrder = true;
               break;
             case ou::tf::OrderSide::Sell:
-              m_pOrder->SetPrice1( m_pOrder->GetPrice1() - 0.01 );
+              if ( 0.03 < m_pOrder->GetPrice1() ) {
+                m_pOrder->SetPrice1( m_pOrder->GetPrice1() - 0.01 );
+                bUpdateOrder = true;
+              }
+              else {
+                m_CountDownToAdjustment = m_nAdjustmentPeriods;
+              }
               break;
           }
           // TODO: need to cancel both legs if spread is not < 0.10
-          std::cout
-            << m_pPosition->GetInstrument()->GetInstrumentName()
-            << ": update order to " << m_pOrder->GetPrice1()
-            //<< " on " << dblNormalizedPrice
-            << " spread " << spread
-            << std::endl;
-          m_pPosition->UpdateOrder( m_pOrder );
-          m_CountDownToAdjustment = m_nAdjustmentPeriods;
+          if ( bUpdateOrder ) {
+            const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
+            double spread = quote.Spread();
+            std::cout
+              << m_pPosition->GetInstrument()->GetInstrumentName()
+              << ": update order to " << m_pOrder->GetPrice1()
+              //<< " on " << dblNormalizedPrice
+              << " spread " << spread
+              << std::endl;
+            m_pPosition->UpdateOrder( m_pOrder );
+            m_CountDownToAdjustment = m_nAdjustmentPeriods;
+          }
         }
       }
     }
