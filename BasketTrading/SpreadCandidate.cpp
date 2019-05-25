@@ -12,11 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    SpreadCandidate.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
- * 
  * Created on May 25, 2019, 1:25 PM
  */
 
