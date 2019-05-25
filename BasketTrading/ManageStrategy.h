@@ -224,7 +224,7 @@ private:
       Clear();
       m_pWatch = pWatch;
       if ( m_pWatch ) {
-        m_nConsecutiveSpreadOk = 0;
+        m_nDesired = m_nUnDesired = m_nConsecutiveSpreadOk = 0;
         m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
         m_pWatch->StartWatch();
       }
