@@ -12,10 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
- * File:   MonitorOrder.cpp
+/*
+ * File:    MonitorOrder.cpp
  * Author:  raymond@burkholder.net
- * Project: BasketTrading
+ * Project: TFTrading
  * Created on May 25, 2019, 1:44 PM
  */
 
