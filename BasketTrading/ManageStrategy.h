@@ -163,8 +163,8 @@ private:
   ou::tf::Trade m_TradeLatest;
   ou::tf::Quote m_QuoteLatest;
 
-  ou::tf::Quotes m_quotes;
-  ou::tf::Trades m_trades;
+//  ou::tf::Quotes m_quotes; // not in use at the moment
+//  ou::tf::Trades m_trades; // not in use at the moment
 
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
@@ -744,6 +744,8 @@ private:
   using mapStrike_t = std::map<double,Strike>;
   mapStrike_t m_mapStrike;
 
+  ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
+
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
   ou::tf::BarFactory m_bfTrades06Sec; // charting
   //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
@@ -845,6 +847,8 @@ private:
   vEMA_t m_vEMA;
 
   double CurrentAtmStrike( double mid );
+
+  void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 
   void HandleBarTrades01Sec( const ou::tf::Bar& bar );
   void HandleBarTrades06Sec( const ou::tf::Bar& bar );

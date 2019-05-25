@@ -115,6 +115,7 @@ ManageStrategy::ManageStrategy(
   m_fFirstTrade( fFirstTrade ),
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
+  m_bfQuotes01Sec( 1 ),
   m_bfTrades01Sec( 1 ),
   m_bfTrades06Sec( 6 ),
 //  m_bfTrades60Sec( 60 ),
@@ -175,6 +176,7 @@ ManageStrategy::ManageStrategy(
   pcdvStrategyData->Add( 0, &m_ceShortExits );
   pcdvStrategyData->Add( 0, &m_ceLongExits );
 
+  m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
 //  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
@@ -411,17 +413,18 @@ void ManageStrategy::HandleBellHeard( void ) {
 }
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
-  if ( quote.IsValid() ) {
+//  if ( quote.IsValid() ) {
     m_QuoteLatest = quote;
-    m_quotes.Append( quote );
+    m_bfQuotes01Sec.Add( quote.DateTime(), quote.Spread(), 1 );
+//    m_quotes.Append( quote );
     TimeTick( quote );
-  }
+//  }
 }
 
 void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 //  if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
 //  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
-  m_trades.Append( trade );
+//  m_trades.Append( trade );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
 //  m_bfTrades60Sec.Add( trade );
@@ -504,7 +507,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   }
 }
 
-void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars
+void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars, currently composite of quote spreads
   // this is one tick behind, so could use m_TradeLatest for latest close-of-last/open-of-next
   //RHEquity( bar );
   RHOption( bar );
@@ -522,7 +525,7 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
   return strikePut;
 }
 
-void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars
+void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
   static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
 
@@ -816,6 +819,10 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
     );
 }
 
+void ManageStrategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
+  TimeTick( bar );
+}
+
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
   
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
@@ -841,7 +848,7 @@ void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
       } );
   }
   
-  TimeTick( bar );
+  //TimeTick( bar );  // using quotes as time tick
    
 }
 
