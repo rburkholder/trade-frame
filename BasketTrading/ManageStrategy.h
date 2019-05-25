@@ -160,8 +160,8 @@ private:
 
   double m_dblOpen;
 
-  ou::tf::Trade m_TradeLatest;
-  ou::tf::Quote m_QuoteLatest;
+  ou::tf::Trade m_TradeUnderlyingLatest;
+  ou::tf::Quote m_QuoteUnderlyingLatest;
 
 //  ou::tf::Quotes m_quotes; // not in use at the moment
 //  ou::tf::Trades m_trades; // not in use at the moment

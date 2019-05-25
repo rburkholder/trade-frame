@@ -414,7 +414,7 @@ void ManageStrategy::HandleBellHeard( void ) {
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
 //  if ( quote.IsValid() ) {
-    m_QuoteLatest = quote;
+    m_QuoteUnderlyingLatest = quote;
     m_bfQuotes01Sec.Add( quote.DateTime(), quote.Spread(), 1 );
 //    m_quotes.Append( quote );
     TimeTick( quote );
@@ -429,7 +429,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   m_bfTrades06Sec.Add( trade );
 //  m_bfTrades60Sec.Add( trade );
   TimeTick( trade );
-  m_TradeLatest = trade; // allow previous one to be used till last moment
+  m_TradeUnderlyingLatest = trade; // allow previous one to be used till last moment
 }
 
 void ManageStrategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -532,7 +532,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation: // TODO: need to adjust state machine to arrive here
       {
-        double mid = m_QuoteLatest.Midpoint();
+        double mid = m_QuoteUnderlyingLatest.Midpoint();
 
         bool bAtmFound( false );
         double strikeOtmCall {};
@@ -555,7 +555,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( m_mapStrike.empty() ) {
             std::cout << m_sUnderlying << " found no strike for mid-point " << mid
                                        << " expiry " << m_iterChainExpiryInUse->first
-                                       << " for quote " << m_QuoteLatest.DateTime().date()
+                                       << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
                                        << " [" << e.what() << "]"
                                        << std::endl;
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
@@ -936,7 +936,7 @@ void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
     m_mapStrike.begin(), m_mapStrike.end(),
     [this,&date](mapStrike_t::value_type& vt){
       Strike& strike( vt.second );
-      double price( m_TradeLatest.Price() );
+      double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
         strike.CloseExpiryItm( date, price );
       }
