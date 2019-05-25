@@ -857,14 +857,13 @@ private:
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
 
-  void HandleAfterRH( const ou::tf::Quote& quote );
-  void HandleAfterRH( const ou::tf::Trade& trade );
-  void HandleAfterRH( const ou::tf::Bar& bar );
-
   // one shot inherited states:
   void HandleBellHeard( void );
   void HandleCancel( void );
   void HandleGoNeutral( void );
+
+  void RHEquity( const ou::tf::Bar& bar );
+  void RHOption( const ou::tf::Bar& bar );
 
   void HandleGoingNeutral( const ou::tf::Bar& bar );
   void HandleGoingNeutral( const ou::tf::Quote& quote ) {};
@@ -875,8 +874,10 @@ private:
   void HandleRHTrading( const ou::tf::Trade& trade );
   void HandleRHTrading( const ou::tf::Bar& bar );
 
-  void RHEquity( const ou::tf::Bar& bar );
-  void RHOption( const ou::tf::Bar& bar );
+  void HandleAfterRH( const ou::tf::Quote& quote );
+  void HandleAfterRH( const ou::tf::Trade& trade );
+  void HandleAfterRH( const ou::tf::Bar& bar );
+
 };
 
 #endif /* MANAGESTRATEGY_H */
