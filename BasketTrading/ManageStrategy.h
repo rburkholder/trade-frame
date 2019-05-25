@@ -44,6 +44,8 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include "SpreadCandidate.h"
+
 // 2019/05/23 Trading Day
 //   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
 //   strangles were profitable on the basket elements
@@ -194,74 +196,6 @@ private:
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
   // ==========================
-
-  // TODO: convert to generic watch, and put into library
-  class SpreadCandidate {
-  public:
-    SpreadCandidate(): m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {} {}
-    SpreadCandidate( const SpreadCandidate& rhs ) = delete;
-    SpreadCandidate( const SpreadCandidate&& rhs )
-    : m_quote( rhs.m_quote ), m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
-      m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
-      m_pWatch( std::move( rhs.m_pWatch ) )
-    {}
-//    SpreadCandidate( pWatch_t pWatch )
-//    : m_nConsecutiveSpreadOk {}
-//    {
-//      SetWatch( pWatch );
-//    }
-    ~SpreadCandidate() {
-      Clear();
-    }
-    void Clear() {
-      if ( m_pWatch ) {
-        m_pWatch->StopWatch();
-        m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
-        m_pWatch.reset();
-      }
-    }
-    void SetWatch( pWatch_t pWatch ) {
-      Clear();
-      m_pWatch = pWatch;
-      if ( m_pWatch ) {
-        m_nDesired = m_nUnDesired = m_nConsecutiveSpreadOk = 0;
-        m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
-        m_pWatch->StartWatch();
-      }
-    }
-    pWatch_t GetWatch() { return m_pWatch; }
-    bool ValidateSpread( size_t nDuration ) {
-      bool bOk( false );
-      if ( m_pWatch ) {
-        if ( m_nUnDesired < m_nDesired ) {
-          // TODO: may want to enforce some sort of ratio
-          //   will need some statistics on what a good number might be
-          m_nConsecutiveSpreadOk++;
-        }
-        else {
-          m_nConsecutiveSpreadOk = 0;
-        }
-        bOk = ( nDuration <= m_nConsecutiveSpreadOk );
-      }
-      return bOk;
-    }
-  private:
-    ou::tf::Quote m_quote;
-    size_t m_nDesired;
-    size_t m_nUnDesired;
-    size_t m_nConsecutiveSpreadOk;
-    pWatch_t m_pWatch;
-    void UpdateQuote( const ou::tf::Quote& quote ) {
-      m_quote = quote;
-      double spread( m_quote.Spread() );
-      if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
-        m_nDesired++;
-      }
-      else {
-        m_nUnDesired++;
-      }
-    }
-  };
 
   // ==========================
 
