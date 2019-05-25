@@ -76,6 +76,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
   }
 // TODO: test that data file is available
   m_dtLastTrade = pMsg->LastTradeTime();
+  m_nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
   switch ( chType ) {
     case 't':
     case 'T':
@@ -95,7 +96,6 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
         m_bNewOpen = true; 
         std::cout << "IQF new open: " << GetId() << "=" << m_dblOpen << std::endl;
       };
-      m_nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
       // fall through to processing bid / ask
     case 'q':
