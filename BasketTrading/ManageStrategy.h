@@ -33,7 +33,6 @@
 #include <TFOptions/IvAtm.h>
 #include <TFOptions/Option.h>
 
-#include <TFTrading/Position.h>
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryVolume.h>
@@ -42,8 +41,11 @@
 #include <OUCharting/ChartEntryMark.h>
 
 #include <TFTrading/Portfolio.h>
+#include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 #include <TFTrading/MonitorOrder.h>
+
+#include <TFBitsNPieces/Leg.h>
 
 #include "SpreadCandidate.h"
 
@@ -196,117 +198,6 @@ private:
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
-  // ==========================
-
-
-  // ==========================
-
-  class Leg {
-  public:
-    Leg() {
-      Init();
-    }
-    Leg( pPosition_t pPosition ) // implies candidate will not be used
-    {
-      Init();
-      SetPosition( pPosition );
-    }
-    Leg( const Leg& rhs ) = delete;
-    Leg( const Leg&& rhs )
-    : m_pPosition( std::move( rhs.m_pPosition ) ),
-      m_candidate( std::move( rhs.m_candidate ) ),
-      m_monitor( std::move( rhs.m_monitor ) )
-    {
-      Init();
-    }
-
-    void SetOption( pOption_t pOption ) { m_candidate.SetWatch( pOption ); }
-    pOption_t GetOption() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_candidate.GetWatch() ); }
-    bool ValidateSpread( size_t nDuration ) {
-      return m_candidate.ValidateSpread( nDuration );
-    }
-
-    void SetPosition( pPosition_t pPosition ) {
-      m_candidate.Clear(); // implies candidate is finished and no longer required
-      m_pPosition = pPosition;
-      m_monitor.SetPosition( pPosition );
-      m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
-    }
-    pPosition_t GetPosition() { return m_pPosition; }
-
-    void Tick( ptime dt ) {
-      m_monitor.Tick();
-      if ( m_pPosition ) {
-        double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
-        m_ceProfitLoss.Append( dt, dblPL );
-      }
-    }
-
-    void OrderLong( boost::uint32_t nOrderQuantity ) {
-      if ( m_pPosition ) {
-        m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
-      }
-
-    }
-    void OrderShort( boost::uint32_t nOrderQuantity ) {
-      if ( m_pPosition ) {
-        m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
-      }
-
-    }
-    void CancelOrder() {
-      if ( m_pPosition ) {
-        m_monitor.CancelOrder();
-      }
-    }
-    void ClosePosition() {
-      if ( m_pPosition ) {
-        const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
-        if ( m_monitor.IsOrderActive() ) {
-          std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
-        }
-        else {
-          if ( 0 != row.nPositionPending ) {
-            std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
-          }
-          if ( 0 != row.nPositionActive ) {
-            std::cout << row.sName << ": closing position" << std::endl;
-            switch ( row.eOrderSideActive ) {
-              case ou::tf::OrderSide::Buy:
-                m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
-                break;
-              case ou::tf::OrderSide::Sell:
-                m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
-                break;
-            }
-          }
-        }
-      }
-    }
-    bool IsOrderActive() const { return m_monitor.IsOrderActive(); }
-
-    void SaveSeries( const std::string& sPrefix ) {
-      if ( m_pPosition ) {
-        m_pPosition->GetWatch()->SaveSeries( sPrefix );
-      }
-    }
-
-    void SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
-
-    void AddChartData( pChartDataView_t pChartData ) {
-      pChartData->Add( 2, &m_ceProfitLoss );
-    }
-
-  private:
-    pPosition_t m_pPosition;
-    SpreadCandidate m_candidate;
-    ou::tf::MonitorOrder m_monitor;
-    ou::ChartEntryIndicator m_ceProfitLoss; // TODO: add to chart
-
-    void Init() {
-
-    }
-  };
 
   // ==========================
 
@@ -333,34 +224,36 @@ private:
     {}
 
     void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour ) {
-      m_legCall.SetOption( pCall );
+      m_scCall.SetWatch( pCall );
       m_legCall.SetColour( colour );
       m_state = State::Validating;
     }
-    pOption_t GetOptionCall() { return m_legCall.GetOption(); }
+    pOption_t GetOptionCall() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() ); }
     void SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour ) {
-      m_legPut.SetOption( pPut );
+      m_scPut.SetWatch( pPut );
       m_legPut.SetColour( colour );
       m_state = State::Validating;
     }
-    pOption_t GetOptionPut() { return m_legPut.GetOption(); }
+    pOption_t GetOptionPut() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scPut.GetWatch() ); }
 
     bool ValidateSpread( size_t nDuration ) {
       bool bResult( false );
       switch ( m_state ) {
         case State::Validating:
-          bResult = ( m_legCall.ValidateSpread( nDuration ) && m_legPut.ValidateSpread( nDuration ) );
+          bResult = ( m_scCall.ValidateSpread( nDuration ) && m_scPut.ValidateSpread( nDuration ) );
           break;
       }
       return bResult;
     }
 
     void SetPositionCall( pPosition_t pCall ) {
+      m_scCall.Clear();
       m_legCall.SetPosition( pCall );
       m_state = State::Positions;
     }
     pPosition_t GetPositionCall() { return m_legCall.GetPosition(); }
     void SetPositionPut( pPosition_t pPut ) {
+      m_scPut.Clear();
       m_legPut.SetPosition( pPut );
       m_state = State::Positions;
     }
@@ -503,8 +396,12 @@ private:
     double m_dblStrikeUpper;
     double m_dblStrikeAtm;
     double m_dblStrikeLower;
-    Leg m_legCall;
-    Leg m_legPut;
+
+    SpreadCandidate m_scCall;
+    SpreadCandidate m_scPut;
+
+    ou::tf::Leg m_legCall;
+    ou::tf::Leg m_legPut;
 
     bool m_bUpperClosed;
     bool m_bLowerClosed;
