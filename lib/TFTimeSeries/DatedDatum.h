@@ -92,7 +92,9 @@ public:
   bidsize_t BidSize( void ) const { return m_nBidSize; };
   asksize_t AskSize( void ) const { return m_nAskSize; };
 
-  bool IsValid( void ) const { return ( ( 0 != m_dblBid ) && ( 0 != m_dblAsk ) && ( 0 != m_nBidSize ) && ( 0 != m_nAskSize ) ); };
+
+
+  bool IsValid() const;
   bool SameBidAsk( const Quote& rhs ) const { return ( m_dblBid == rhs.m_dblBid ) && ( m_dblAsk == rhs.m_dblAsk ) ; }
   bool CrossedQuote( void ) const { return ( m_dblBid >= m_dblAsk ); };
   price_t Midpoint( void ) const { return ( m_dblBid + m_dblAsk ) / 2.0; };

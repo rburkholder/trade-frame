@@ -91,6 +91,15 @@ DatedDatum( dt ) {
 Quote::~Quote(void) {
 }
 
+//bool IsValid( void ) const { return ( ( 0 != m_dblBid ) && ( 0 != m_dblAsk ) && ( 0 != m_nBidSize ) && ( 0 != m_nAskSize ) ); };
+bool Quote::IsValid() const {
+  bool bOk( true);
+  //bOk &= ( ( 0 == m_nBidSize ) && ( 0.0 == m_dblBid ) ); // NOTE: some options are zero bid
+  //bOk &= ( ( 0 != m_nAskSize ) && ( 0.0 != m_dblAsk ) );
+  // TODO: what other tests?
+  return bOk;
+};
+
 H5::CompType* Quote::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( Quote ) );
   DatedDatum::DefineDataType( pComp );
