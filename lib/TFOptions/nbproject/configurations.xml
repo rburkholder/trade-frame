@@ -10,9 +10,12 @@
       <itemPath>Engine.h</itemPath>
       <itemPath>Formula.h</itemPath>
       <itemPath>IvAtm.h</itemPath>
+      <itemPath>Leg.h</itemPath>
       <itemPath>Margin.h</itemPath>
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
+      <itemPath>SpreadCandidate.h</itemPath>
+      <itemPath>Straddle.h</itemPath>
       <itemPath>Strike.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -28,9 +31,12 @@
       <itemPath>Engine.cpp</itemPath>
       <itemPath>Formula.cpp</itemPath>
       <itemPath>IvAtm.cpp</itemPath>
+      <itemPath>Leg.cpp</itemPath>
       <itemPath>Margin.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
+      <itemPath>SpreadCandidate.cpp</itemPath>
+      <itemPath>Straddle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -103,6 +109,10 @@
       </item>
       <item path="IvAtm.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Leg.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Margin.h" ex="false" tool="3" flavor2="0">
@@ -114,6 +124,14 @@
       <item path="PopulateWithIBOptions.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PopulateWithIBOptions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -171,6 +189,10 @@
       </item>
       <item path="IvAtm.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Leg.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Margin.h" ex="false" tool="3" flavor2="0">
@@ -182,6 +204,14 @@
       <item path="PopulateWithIBOptions.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PopulateWithIBOptions.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>

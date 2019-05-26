@@ -12,7 +12,6 @@
       <itemPath>IQFeedSymbolListOps.h</itemPath>
       <itemPath>InstrumentFilter.h</itemPath>
       <itemPath>InstrumentSelection.h</itemPath>
-      <itemPath>Leg.h</itemPath>
       <itemPath>LiborFromIQFeed.h</itemPath>
       <itemPath>ReadCboeWeeklyOptions.h</itemPath>
       <itemPath>TreeOps.h</itemPath>
@@ -31,7 +30,6 @@
       <itemPath>IQFeedInstrumentBuild.cpp</itemPath>
       <itemPath>IQFeedSymbolListOps.cpp</itemPath>
       <itemPath>InstrumentSelection.cpp</itemPath>
-      <itemPath>Leg.cpp</itemPath>
       <itemPath>LiborFromIQFeed.cpp</itemPath>
       <itemPath>ReadCboeWeeklyOptions.cpp</itemPath>
       <itemPath>TreeOps.cpp</itemPath>
@@ -99,10 +97,6 @@
       <item path="InstrumentSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="InstrumentSelection.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Leg.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LiborFromIQFeed.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -181,10 +175,6 @@
       <item path="InstrumentSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="InstrumentSelection.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Leg.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LiborFromIQFeed.cpp" ex="false" tool="1" flavor2="0">
       </item>

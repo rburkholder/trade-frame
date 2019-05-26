@@ -30,7 +30,6 @@
 
 #include <TFOptions/Option.h>
 
-
 namespace ou {
 namespace tf {
 

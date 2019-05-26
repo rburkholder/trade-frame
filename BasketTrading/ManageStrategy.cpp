@@ -317,8 +317,8 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       break;
     case ou::tf::InstrumentType::Option: {
       double strikeAtm = pInstrument->GetStrike();
-      mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
-      if ( m_mapStrike.end() == iterStrike ) {
+      mapCombo_t::iterator iterStrike = m_mapCombo.find( strikeAtm );
+      if ( m_mapCombo.end() == iterStrike ) {
         double strikeUpper {};
         double strikeLower {};
 
@@ -333,25 +333,25 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
         assert( m_mapChains.end() != iterChainExpiry );
         int nStrikes = iterChainExpiry->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
         assert ( 2 == nStrikes );
-        std::pair<mapStrike_t::iterator,bool> result;
-        result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+        std::pair<mapCombo_t::iterator,bool> result;
+        result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) );
         assert( result.second );
-        assert( m_mapStrike.end() != result.first );
+        assert( m_mapCombo.end() != result.first );
         iterStrike = result.first;
       }
 
-      Strike& strike( iterStrike->second );
+      Straddle& straddle( iterStrike->second );
       switch( pInstrument->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
-          strike.SetPositionCall( pPosition );
+          straddle.SetPositionCall( pPosition );
           std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strike.SetColourCall( rColour[ m_ixColour++ ] );
+          straddle.SetColourCall( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
-          strike.SetPositionPut( pPosition );
+          straddle.SetPositionPut( pPosition );
           std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strike.SetColourPut( rColour[ m_ixColour++ ] );
+          straddle.SetColourPut( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
       }
@@ -402,8 +402,8 @@ void ManageStrategy::Start(  ) {
 void ManageStrategy::Stop( void ) {
   HandleCancel();
   std::for_each(
-    m_mapStrike.begin(), m_mapStrike.end(),
-    [this](mapStrike_t::value_type& entry){
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this](mapCombo_t::value_type& entry){
       entry.second.ClosePositions();  // maintain positions over night
     }
     );
@@ -552,7 +552,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         }
         catch ( std::runtime_error& e ) {
-          if ( m_mapStrike.empty() ) {
+          if ( m_mapCombo.empty() ) {
             std::cout << m_sUnderlying << " found no strike for mid-point " << mid
                                        << " expiry " << m_iterChainExpiryInUse->first
                                        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
@@ -563,8 +563,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         }
 
         if ( bAtmFound && ( 0 == m_nLegs) ) {
-          mapStrike_t::iterator iterStrike = m_mapStrike.find( strikeAtm );
-          if ( m_mapStrike.end() == iterStrike ) {
+          mapCombo_t::iterator iterStrike = m_mapCombo.find( strikeAtm );
+          if ( m_mapCombo.end() == iterStrike ) {
             double strikeUpper {};
             double strikeLower {};
             int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
@@ -581,31 +581,31 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     << ",otm call=" << strikeOtmCall
                     << ",otm put=" << strikeOtmPut
                     << std::endl;
-                  std::pair<mapStrike_t::iterator,bool> result;
-                  result = m_mapStrike.insert( mapStrike_t::value_type( strikeAtm, Strike( strikeLower, strikeAtm, strikeUpper ) ) );
+                  std::pair<mapCombo_t::iterator,bool> result;
+                  result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) );
                   if ( result.second ) {
-                    assert( m_mapStrike.end() != result.first );
-                    Strike& strike( result.first->second );
+                    assert( m_mapCombo.end() != result.first );
+                    Straddle& straddle( result.first->second );
                     if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                       std::cout << "WARNING: strategy running out of colours." << std::endl;
                     }
                     pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionCall){
-                        Strike& strike( iterStrike->second );
+                        Straddle& straddle( iterStrike->second );
                         std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
-                        strike.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
+                        straddle.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
                         m_nLegs++;
                       } );
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
                       [this,iterStrike=result.first](pOption_t pOptionPut){
-                        Strike& strike( iterStrike->second );
+                        Straddle& straddle( iterStrike->second );
                         std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
-                        strike.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
+                        straddle.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
                         m_nLegs++;
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
-                    strike.AddChartData( m_pChartDataView );
+                    straddle.AddChartData( m_pChartDataView );
                   }
                 }
               }
@@ -614,43 +614,43 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         }
         
         std::for_each(
-          m_mapStrike.begin(), m_mapStrike.end(),
-          [this,strikeAtm,mid,&bar](mapStrike_t::value_type& entry){
-            Strike& strike( entry.second );
-            switch ( strike.m_state ) {
-              case Strike::State::Initializing:
+          m_mapCombo.begin(), m_mapCombo.end(),
+          [this,strikeAtm,mid,&bar](mapCombo_t::value_type& entry){
+            Straddle& straddle( entry.second );
+            switch ( straddle.m_state ) {
+              case Straddle::State::Initializing:
                 // effectively the code when inserting a new strike above
                 break;
-              case Strike::State::Validating:
+              case Straddle::State::Validating:
                 // TODO: also need to wait for options to have contracts?
                 if ( strikeAtm == entry.first ) { // should prevent most late entries
-                  if ( strike.ValidateSpread( 11 ) ) {
+                  if ( straddle.ValidateSpread( 11 ) ) {
                     std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                    pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionCall() );
-                    strike.SetPositionCall( pPositionCall );
-                    pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strike.GetOptionPut() );
-                    strike.SetPositionPut( pPositionPut );
-                    strike.OrderLongStraddle();
+                    pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), straddle.GetOptionCall() );
+                    straddle.SetPositionCall( pPositionCall );
+                    pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), straddle.GetOptionPut() );
+                    straddle.SetPositionPut( pPositionPut );
+                    straddle.OrderLongStraddle();
                     //m_eOptionState = EOptionState::MonitorPosition;
                     //m_stateTrading = ETradingState::TSMonitorStraddle;
                     //strike.m_state = Strike::State::Executing;
                   }
                 }
                 break;
-              case Strike::State::Positions:
-                strike.Tick( true, mid, bar.DateTime() );
+              case Straddle::State::Positions:
+                straddle.Tick( true, mid, bar.DateTime() );
                 break;
-              case Strike::State::Executing:
-                strike.Tick( true, mid, bar.DateTime() );
+              case Straddle::State::Executing:
+                straddle.Tick( true, mid, bar.DateTime() );
                 break;
-              case Strike::State::Watching:
-                strike.Tick( true, mid, bar.DateTime() );
+              case Straddle::State::Watching:
+                straddle.Tick( true, mid, bar.DateTime() );
                 break;
-              case Strike::State::Canceled:
-                strike.Tick( true, mid, bar.DateTime() );
+              case Straddle::State::Canceled:
+                straddle.Tick( true, mid, bar.DateTime() );
                 break;
-              case Strike::State::Closing:
-                strike.Tick( true, mid, bar.DateTime() );
+              case Straddle::State::Closing:
+                straddle.Tick( true, mid, bar.DateTime() );
                 break;
             }
           }
@@ -755,8 +755,8 @@ void ManageStrategy::HandleCancel( void ) {
       std::cout << m_sUnderlying << " cancel" << std::endl;
       if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
       std::for_each(
-        m_mapStrike.begin(), m_mapStrike.end(),
-        [this](mapStrike_t::value_type& entry){
+        m_mapCombo.begin(), m_mapCombo.end(),
+        [this](mapCombo_t::value_type& entry){
           entry.second.CancelOrders();
         }
         );
@@ -773,8 +773,8 @@ void ManageStrategy::HandleGoNeutral( void ) {
 //      std::cout << m_sUnderlying << " go neutral" << std::endl;
       if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
       std::for_each(
-        m_mapStrike.begin(), m_mapStrike.end(),
-        [this](mapStrike_t::value_type& entry){
+        m_mapCombo.begin(), m_mapCombo.end(),
+        [this](mapCombo_t::value_type& entry){
 //          entry.second.ClosePositions();  // maintain positions over night
         }
         );
@@ -812,8 +812,8 @@ void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
     m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   }
   std::for_each(
-    m_mapStrike.begin(), m_mapStrike.end(),
-    [this,&sPrefix](mapStrike_t::value_type& entry){
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this,&sPrefix](mapCombo_t::value_type& entry){
       entry.second.SaveSeries( sPrefix );
     }
     );
@@ -917,13 +917,13 @@ void ManageStrategy::Test() {
 
 double ManageStrategy::TakeProfits() {
   double dblNet {};
-  if ( 0 < m_mapStrike.size() ) {
+  if ( 0 < m_mapCombo.size() ) {
     std::cout << "TakeProfits " << this->m_sUnderlying << std::endl;
     std::for_each(
-      m_mapStrike.begin(), m_mapStrike.end(),
-      [this,&dblNet](mapStrike_t::value_type& vt){
-        Strike& strike( vt.second );
-        dblNet += strike.GetNet();
+      m_mapCombo.begin(), m_mapCombo.end(),
+      [this,&dblNet](mapCombo_t::value_type& vt){
+        Straddle& straddle( vt.second );
+        dblNet += straddle.GetNet();
       }
     );
     std::cout << "  net: " << dblNet << std::endl;
@@ -933,12 +933,12 @@ double ManageStrategy::TakeProfits() {
 
 void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
   std::for_each(
-    m_mapStrike.begin(), m_mapStrike.end(),
-    [this,&date](mapStrike_t::value_type& vt){
-      Strike& strike( vt.second );
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this,&date](mapCombo_t::value_type& vt){
+      Straddle& straddle( vt.second );
       double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
-        strike.CloseExpiryItm( date, price );
+        straddle.CloseExpiryItm( date, price );
       }
     }
   );

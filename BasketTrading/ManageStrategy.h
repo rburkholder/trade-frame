@@ -32,6 +32,7 @@
 
 #include <TFOptions/IvAtm.h>
 #include <TFOptions/Option.h>
+#include <TFOptions/Straddle.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
@@ -43,11 +44,7 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
-#include <TFTrading/MonitorOrder.h>
 
-#include <TFBitsNPieces/Leg.h>
-
-#include "SpreadCandidate.h"
 
 // 2019/05/23 Trading Day
 //   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
@@ -147,7 +144,6 @@ private:
   enum class EBarDirection { None, Up, Down };
 
   ETradeDirection m_eTradeDirection;
-  //EOptionState m_eOptionState; // incorporated into Strike
 
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
@@ -198,232 +194,10 @@ private:
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
+  using Straddle = ou::tf::option::Straddle;
 
-  // ==========================
-
-  // TODO: add logic for management of other spreads (bull put), (bear call), (ratio back spread) ...
-  class Strike {
-  public:
-    enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
-    State m_state;
-
-    Strike( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
-    : m_state( State::Initializing ),
-      m_bUpperClosed( false ), m_bLowerClosed( false ),
-      m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
-    {}
-    Strike( const Strike& rhs ) = delete;
-    Strike& operator=( const Strike& rhs ) = delete;
-    Strike( const Strike&& rhs )
-    : m_state( rhs.m_state ),
-      m_dblStrikeUpper( rhs.m_dblStrikeUpper ),
-      m_dblStrikeAtm( rhs.m_dblStrikeUpper ),
-      m_dblStrikeLower( rhs.m_dblStrikeLower ),
-      m_legCall( std::move( rhs.m_legCall ) ),
-      m_legPut( std::move( rhs.m_legPut ) )
-    {}
-
-    void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour ) {
-      m_scCall.SetWatch( pCall );
-      m_legCall.SetColour( colour );
-      m_state = State::Validating;
-    }
-    pOption_t GetOptionCall() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() ); }
-    void SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour ) {
-      m_scPut.SetWatch( pPut );
-      m_legPut.SetColour( colour );
-      m_state = State::Validating;
-    }
-    pOption_t GetOptionPut() { return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scPut.GetWatch() ); }
-
-    bool ValidateSpread( size_t nDuration ) {
-      bool bResult( false );
-      switch ( m_state ) {
-        case State::Validating:
-          bResult = ( m_scCall.ValidateSpread( nDuration ) && m_scPut.ValidateSpread( nDuration ) );
-          break;
-      }
-      return bResult;
-    }
-
-    void SetPositionCall( pPosition_t pCall ) {
-      m_scCall.Clear();
-      m_legCall.SetPosition( pCall );
-      m_state = State::Positions;
-    }
-    pPosition_t GetPositionCall() { return m_legCall.GetPosition(); }
-    void SetPositionPut( pPosition_t pPut ) {
-      m_scPut.Clear();
-      m_legPut.SetPosition( pPut );
-      m_state = State::Positions;
-    }
-    pPosition_t GetPositionPut() { return m_legPut.GetPosition(); }
-
-    void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
-      m_legCall.Tick( dt );
-      m_legPut.Tick( dt );
-      switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
-        case State::Executing:
-          if ( !AreOrdersActive() ) {
-            m_state = State::Watching;
-          }
-          break;
-        case State::Watching:
-          Update( bInTrend, dblPriceUnderlying );
-          break;
-      }
-    }
-
-    void OrderLongStraddle() { // if volatility drops, then losses occur on premium
-      switch ( m_state ) {
-        case State::Positions: // doesn't confirm both put/call are available
-        case State::Watching:
-          m_legCall.OrderLong( 1 );
-          m_legPut.OrderLong( 1 );
-          m_state = State::Executing;
-          m_bUpperClosed = false;
-          m_bLowerClosed = false;
-          break;
-      }
-    }
-    void CancelOrders() {
-      m_legCall.CancelOrder();
-      m_legPut.CancelOrder();
-      m_state = State::Canceled;
-    }
-    void ClosePositions() {
-      if ( !m_bUpperClosed ) {
-        m_legCall.ClosePosition();
-        m_bUpperClosed = true;
-      }
-      if ( !m_bLowerClosed ) {
-        m_legPut.ClosePosition();
-        m_bLowerClosed = true;
-      }
-      m_state = State::Closing;
-    }
-
-    bool AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
-    void SaveSeries( const std::string& sPrefix ) {
-      m_legCall.SaveSeries( sPrefix );
-      m_legPut.SaveSeries( sPrefix );
-    }
-    void AddChartData( pChartDataView_t pChartData ) {
-      m_legCall.AddChartData( pChartData );
-      m_legPut.AddChartData( pChartData );
-    }
-
-    void SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut ) {
-      m_legCall.SetColour( colourCall );
-      m_legPut.SetColour( colourPut );
-    }
-    void SetColourCall( ou::Colour::enumColour colour ) {
-      m_legCall.SetColour( colour );
-    }
-    void SetColourPut( ou::Colour::enumColour colour ) {
-      m_legPut.SetColour( colour );
-    }
-
-    double GetNet() {
-      double dblNet {};
-      pPosition_t pPositionCall = m_legCall.GetPosition();
-      if ( pPositionCall ) {
-        double dblCallValue = pPositionCall->GetUnRealizedPL();
-        std::cout
-          << "leg call: "
-          << pPositionCall->GetInstrument()->GetInstrumentName()
-          << "=" << dblCallValue;
-        dblNet += dblCallValue;
-        if ( 0.0 == dblCallValue ) {
-          const ou::tf::Quote& quote( pPositionCall->GetWatch()->LastQuote() );
-          std::cout
-            << ", quote: a" << quote.Ask()
-            << ", b" << quote.Bid()
-            ;
-        }
-        std::cout << std::endl;
-      }
-      pPosition_t pPositionPut = m_legPut.GetPosition();
-      if ( pPositionPut ) {
-        double dblPutValue = pPositionPut->GetUnRealizedPL();
-        std::cout
-          << "leg put: "
-          << pPositionPut->GetInstrument()->GetInstrumentName()
-          << "=" << dblPutValue;
-        dblNet += dblPutValue;
-        if ( 0.0 == dblPutValue ) {
-          const ou::tf::Quote& quote( pPositionPut->GetWatch()->LastQuote() );
-          std::cout
-            << ", quote: a" << quote.Ask()
-            << ", b" << quote.Bid()
-            ;
-        }
-        std::cout << std::endl;
-      }
-//      double dblNetValue = dblCallValue + dblPutValue;
-//      if ( ( 0.0 != dblCallValue ) && ( 0.0 != dblPutValue ) ) {
-//        std::cout
-//          << "net value=" << dblNetValue
-//          << " "
-//          << pPositionCall->GetInstrument()->GetInstrumentName() << ":" << dblCallValue
-//          << " - "
-//          << pPositionPut->GetInstrument()->GetInstrumentName() << ":" << dblPutValue
-//          << std::endl;
-//      }
-      return dblNet;
-    }
-
-    void CloseExpiryItm( const boost::gregorian::date date, double price ) {
-      if ( price >= m_dblStrikeAtm ) {
-        pPosition_t pPosition = m_legCall.GetPosition();
-        if ( pPosition ) {
-          if ( date == pPosition->GetInstrument()->GetExpiry() ) {
-            m_legCall.ClosePosition();
-          }
-        }
-      }
-      if ( price <= m_dblStrikeAtm ) {
-        pPosition_t pPosition = m_legPut.GetPosition();
-        if ( pPosition ) {
-          if ( date == pPosition->GetInstrument()->GetExpiry() ) {
-            m_legPut.ClosePosition();
-          }
-        }
-      }
-    }
-
-  private:
-    double m_dblStrikeUpper;
-    double m_dblStrikeAtm;
-    double m_dblStrikeLower;
-
-    SpreadCandidate m_scCall;
-    SpreadCandidate m_scPut;
-
-    ou::tf::Leg m_legCall;
-    ou::tf::Leg m_legPut;
-
-    bool m_bUpperClosed;
-    bool m_bLowerClosed;
-
-    void Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
-      if ( !m_bUpperClosed ) {
-        if ( dblPrice >= m_dblStrikeUpper ) {
-//          m_legCall.ClosePosition(); // closing too early
-//          m_bUpperClosed = true;
-        }
-      }
-      if ( !m_bLowerClosed ) {
-        if ( dblPrice <= m_dblStrikeLower ) {
-//          m_legPut.ClosePosition(); // closing too early
-//          m_bLowerClosed = true;
-        }
-      }
-    }
-  };
-
-  using mapStrike_t = std::map<double,Strike>;
-  mapStrike_t m_mapStrike;
+  using mapCombo_t = std::map<double,Straddle>;
+  mapCombo_t m_mapCombo;
 
   ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
 

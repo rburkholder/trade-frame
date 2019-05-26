@@ -40,7 +40,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/IQFeedInstrumentBuild.o \
 	${OBJECTDIR}/IQFeedSymbolListOps.o \
 	${OBJECTDIR}/InstrumentSelection.o \
-	${OBJECTDIR}/Leg.o \
 	${OBJECTDIR}/LiborFromIQFeed.o \
 	${OBJECTDIR}/ReadCboeWeeklyOptions.o \
 	${OBJECTDIR}/TreeOps.o \
@@ -98,11 +97,6 @@ ${OBJECTDIR}/InstrumentSelection.o: InstrumentSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentSelection.o InstrumentSelection.cpp
-
-${OBJECTDIR}/Leg.o: Leg.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Leg.o Leg.cpp
 
 ${OBJECTDIR}/LiborFromIQFeed.o: LiborFromIQFeed.cpp
 	${MKDIR} -p ${OBJECTDIR}
