@@ -13,14 +13,14 @@
  ************************************************************************/
 
 /*
- * File:    Straddle.h
+ * File:    Strangle.h
  * Author:  raymond@burkholder.net
  * Project: TFOptions
  * Created on May 25, 2019, 10:56 PM
  */
 
-#ifndef STRADDLE_H
-#define STRADDLE_H
+#ifndef STRANGLE_H
+#define STRANGLE_H
 
 #include <OUCharting/ChartDataView.h>
 
@@ -35,7 +35,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class Straddle {
+class Strangle {
 public:
 
   using pOption_t = Option::pOption_t;
@@ -45,10 +45,10 @@ public:
   enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
-  Straddle();
-  Straddle( const Straddle& rhs ) = delete;
-  Straddle& operator=( const Straddle& rhs ) = delete;
-  Straddle( const Straddle&& rhs );
+  Strangle();
+  Strangle( const Strangle& rhs ) = delete;
+  Strangle& operator=( const Strangle& rhs ) = delete;
+  Strangle( const Strangle&& rhs );
 
   void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour );
   pOption_t GetOptionCall();
@@ -64,7 +64,7 @@ public:
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  void OrderLongStraddle();
+  void OrderLongStrangle();
   void CancelOrders();
   void ClosePositions();
 
@@ -99,4 +99,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-#endif /* STRADDLE_H */
+#endif /* STRANGLE_H */

@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /* 
- * File:    Straddle.cpp
+ * File:    Strangle.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
  * Created on May 25, 2019, 10:56 PM
@@ -25,38 +25,38 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Straddle::Straddle()
+Strangle::Strangle()
 : m_state( State::Initializing ),
   m_bUpperClosed( false ), m_bLowerClosed( false )
 {}
 
-Straddle::Straddle( const Straddle&& rhs )
+Strangle::Strangle( const Strangle&& rhs )
 : m_state( rhs.m_state ),
   m_legCall( std::move( rhs.m_legCall ) ),
   m_legPut( std::move( rhs.m_legPut ) )
 {}
 
-void Straddle::SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour ) {
+void Strangle::SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour ) {
   m_scCall.SetWatch( pCall );
   m_legCall.SetColour( colour );
   m_state = State::Validating;
 }
 
-Straddle::pOption_t Straddle::GetOptionCall() {
+Strangle::pOption_t Strangle::GetOptionCall() {
   return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
 }
 
-void Straddle::SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour ) {
+void Strangle::SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour ) {
   m_scPut.SetWatch( pPut );
   m_legPut.SetColour( colour );
   m_state = State::Validating;
 }
 
-Straddle::pOption_t Straddle::GetOptionPut() { 
+Strangle::pOption_t Strangle::GetOptionPut() {
   return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scPut.GetWatch() );
 }
 
-bool Straddle::ValidateSpread( size_t nDuration ) {
+bool Strangle::ValidateSpread( size_t nDuration ) {
   bool bResult( false );
   switch ( m_state ) {
     case State::Validating:
@@ -66,26 +66,26 @@ bool Straddle::ValidateSpread( size_t nDuration ) {
   return bResult;
 }
 
-void Straddle::SetPositionCall( pPosition_t pCall ) {
+void Strangle::SetPositionCall( pPosition_t pCall ) {
   m_scCall.Clear();
   m_legCall.SetPosition( pCall );
   m_state = State::Positions;
 }
-Straddle::pPosition_t Straddle::GetPositionCall() { 
+Strangle::pPosition_t Strangle::GetPositionCall() {
   return m_legCall.GetPosition();
 }
 
-void Straddle::SetPositionPut( pPosition_t pPut ) {
+void Strangle::SetPositionPut( pPosition_t pPut ) {
   m_scPut.Clear();
   m_legPut.SetPosition( pPut );
   m_state = State::Positions;
 }
 
-Straddle::pPosition_t Straddle::GetPositionPut() {
+Strangle::pPosition_t Strangle::GetPositionPut() {
   return m_legPut.GetPosition();
 }
 
-void Straddle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
+void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
   m_legCall.Tick( dt );
   m_legPut.Tick( dt );
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
@@ -100,7 +100,7 @@ void Straddle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // T
   }
 }
 
-void Straddle::OrderLongStraddle() { // if volatility drops, then losses occur on premium
+void Strangle::OrderLongStrangle() { // if volatility drops, then losses occur on premium
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
@@ -112,13 +112,13 @@ void Straddle::OrderLongStraddle() { // if volatility drops, then losses occur o
       break;
   }
 }
-void Straddle::CancelOrders() {
+void Strangle::CancelOrders() {
   m_legCall.CancelOrder();
   m_legPut.CancelOrder();
   m_state = State::Canceled;
 }
 
-void Straddle::ClosePositions() {
+void Strangle::ClosePositions() {
   if ( !m_bUpperClosed ) {
     m_legCall.ClosePosition();
     m_bUpperClosed = true;
@@ -130,32 +130,32 @@ void Straddle::ClosePositions() {
   m_state = State::Closing;
 }
 
-bool Straddle::AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
+bool Strangle::AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
 
-void Straddle::SaveSeries( const std::string& sPrefix ) {
+void Strangle::SaveSeries( const std::string& sPrefix ) {
   m_legCall.SaveSeries( sPrefix );
   m_legPut.SaveSeries( sPrefix );
 }
 
-void Straddle::AddChartData( pChartDataView_t pChartData ) {
+void Strangle::AddChartData( pChartDataView_t pChartData ) {
   m_legCall.AddChartData( pChartData );
   m_legPut.AddChartData( pChartData );
 }
 
-void Straddle::SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut ) {
+void Strangle::SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut ) {
   m_legCall.SetColour( colourCall );
   m_legPut.SetColour( colourPut );
 }
 
-void Straddle::SetColourCall( ou::Colour::enumColour colour ) {
+void Strangle::SetColourCall( ou::Colour::enumColour colour ) {
   m_legCall.SetColour( colour );
 }
 
-void Straddle::SetColourPut( ou::Colour::enumColour colour ) {
+void Strangle::SetColourPut( ou::Colour::enumColour colour ) {
   m_legPut.SetColour( colour );
 }
 
-double Straddle::GetNet() {
+double Strangle::GetNet() {
   double dblNet {};
   pPosition_t pPositionCall = m_legCall.GetPosition();
   if ( pPositionCall ) {
@@ -207,12 +207,12 @@ double Straddle::GetNet() {
 // prevent exercise or assignment at expiry
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
-void Straddle::CloseExpiryItm( const boost::gregorian::date date, double price ) {
+void Strangle::CloseExpiryItm( const boost::gregorian::date date, double price ) {
   m_legCall.CloseExpiryItm( date, price );
   m_legPut.CloseExpiryItm( date, price );
 }
 
-void Straddle::Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
+void Strangle::Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
 }
 
 } // namespace option

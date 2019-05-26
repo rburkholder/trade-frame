@@ -128,7 +128,7 @@ private:
     TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
     TSWaitForEntry, // start of equity trading
     TSOptionEvaluation, // start of option trading
-    TSMonitorStraddle,
+    TSMonitorStrangle,
     TSMonitorLong, TSMonitorShort,
     TSNoMore
   };
@@ -194,9 +194,9 @@ private:
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
-  using Straddle = ou::tf::option::Straddle;
+  using Strangle = ou::tf::option::Strangle;
 
-  using mapCombo_t = std::map<double,Straddle>;
+  using mapCombo_t = std::map<double,Strangle>;
   mapCombo_t m_mapCombo;
 
   ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
