@@ -25,17 +25,15 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Straddle::Straddle( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper )
+Straddle::Straddle( double dblStrikeAtm )
 : m_state( State::Initializing ),
   m_bUpperClosed( false ), m_bLowerClosed( false ),
-  m_dblStrikeLower( dblStrikeLower ), m_dblStrikeAtm( dblStrikeAtm ), m_dblStrikeUpper( dblStrikeUpper )
+  m_dblStrikeAtm( dblStrikeAtm )
 {}
 
 Straddle::Straddle( const Straddle&& rhs )
 : m_state( rhs.m_state ),
-  m_dblStrikeUpper( rhs.m_dblStrikeUpper ),
-  m_dblStrikeAtm( rhs.m_dblStrikeUpper ),
-  m_dblStrikeLower( rhs.m_dblStrikeLower ),
+  m_dblStrikeAtm( rhs.m_dblStrikeAtm ),
   m_legCall( std::move( rhs.m_legCall ) ),
   m_legPut( std::move( rhs.m_legPut ) )
 {}
@@ -208,6 +206,9 @@ double Straddle::GetNet() {
   return dblNet;
 }
 
+// prevent exercise or assignment at expiry
+// however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
+// so ... the logic needs changing, re-arranging
 void Straddle::CloseExpiryItm( const boost::gregorian::date date, double price ) {
   if ( price >= m_dblStrikeAtm ) {
     pPosition_t pPosition = m_legCall.GetPosition();
@@ -228,18 +229,6 @@ void Straddle::CloseExpiryItm( const boost::gregorian::date date, double price )
 }
 
 void Straddle::Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
-  if ( !m_bUpperClosed ) {
-    if ( dblPrice >= m_dblStrikeUpper ) {
-//          m_legCall.ClosePosition(); // closing too early
-//          m_bUpperClosed = true;
-    }
-  }
-  if ( !m_bLowerClosed ) {
-    if ( dblPrice <= m_dblStrikeLower ) {
-//          m_legPut.ClosePosition(); // closing too early
-//          m_bLowerClosed = true;
-    }
-  }
 }
 
 } // namespace option

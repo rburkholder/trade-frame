@@ -334,7 +334,8 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
         int nStrikes = iterChainExpiry->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
         assert ( 2 == nStrikes );
         std::pair<mapCombo_t::iterator,bool> result;
-        result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) );
+        //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) ); // need to remove unnecessary relationships
+        result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeAtm ) ) );
         assert( result.second );
         assert( m_mapCombo.end() != result.first );
         iterStrike = result.first;
@@ -582,7 +583,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     << ",otm put=" << strikeOtmPut
                     << std::endl;
                   std::pair<mapCombo_t::iterator,bool> result;
-                  result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) );
+                  //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeLower, strikeAtm, strikeUpper ) ) );
+                  result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Straddle( strikeAtm ) ) );
                   if ( result.second ) {
                     assert( m_mapCombo.end() != result.first );
                     Straddle& straddle( result.first->second );

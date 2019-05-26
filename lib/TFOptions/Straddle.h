@@ -45,7 +45,7 @@ public:
   enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
-  Straddle( double dblStrikeLower, double dblStrikeAtm, double dblStrikeUpper );
+  Straddle( double dblStrikeAtm );
   Straddle( const Straddle& rhs ) = delete;
   Straddle& operator=( const Straddle& rhs ) = delete;
   Straddle( const Straddle&& rhs );
@@ -81,9 +81,7 @@ public:
   void CloseExpiryItm( const boost::gregorian::date date, double price );
 
 private:
-  double m_dblStrikeUpper;
   double m_dblStrikeAtm;
-  double m_dblStrikeLower;
 
   SpreadCandidate m_scCall;
   SpreadCandidate m_scPut;
