@@ -25,15 +25,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Straddle::Straddle( double dblStrikeAtm )
+Straddle::Straddle()
 : m_state( State::Initializing ),
-  m_bUpperClosed( false ), m_bLowerClosed( false ),
-  m_dblStrikeAtm( dblStrikeAtm )
+  m_bUpperClosed( false ), m_bLowerClosed( false )
 {}
 
 Straddle::Straddle( const Straddle&& rhs )
 : m_state( rhs.m_state ),
-  m_dblStrikeAtm( rhs.m_dblStrikeAtm ),
   m_legCall( std::move( rhs.m_legCall ) ),
   m_legPut( std::move( rhs.m_legPut ) )
 {}

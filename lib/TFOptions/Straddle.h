@@ -45,7 +45,7 @@ public:
   enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
-  Straddle( double dblStrikeAtm );
+  Straddle();
   Straddle( const Straddle& rhs ) = delete;
   Straddle& operator=( const Straddle& rhs ) = delete;
   Straddle( const Straddle&& rhs );
