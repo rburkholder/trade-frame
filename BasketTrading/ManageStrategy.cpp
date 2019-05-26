@@ -263,11 +263,11 @@ ManageStrategy::ManageStrategy(
         pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
         pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
-            pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
-            if ( 0 == pInstrumentUnderlying->GetContract() ) {
-              std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
-              m_stateTrading = TSNoMore;
-            }
+        pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
+        if ( 0 == pInstrumentUnderlying->GetContract() ) {
+          std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " has no contract" << std::endl;
+          m_stateTrading = TSNoMore;
+        }
     } ); // m_fConstructWatch
 
   }
@@ -319,42 +319,32 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       // fill in some other time, as underlying isn't traded here
       break;
     case ou::tf::InstrumentType::Option: {
-      double strikeAtm = pInstrument->GetStrike();
-      mapCombo_t::iterator iterStrike = m_mapCombo.find( strikeAtm );
-      if ( m_mapCombo.end() == iterStrike ) {
-        double strikeUpper {};
-        double strikeLower {};
 
-        boost::gregorian::date date( pInstrument->GetExpiry() );
-        mapChains_t::iterator iterChainExpiry
-          = std::find_if(
-            m_mapChains.begin(), m_mapChains.end(),
-            [date](const mapChains_t::value_type& vt)->bool{
-              return vt.first == date;
-              } );
+      idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
-        assert( m_mapChains.end() != iterChainExpiry );
-        int nStrikes = iterChainExpiry->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
-        assert ( 2 == nStrikes );
-        std::pair<mapCombo_t::iterator,bool> result;
-        //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) ); // need to remove unnecessary relationships
-        result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle() ) );
+      mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
+
+      if ( m_mapCombo.end() == mapCombo_iter ) {
+        // need to construct Combo with first leg
+        Strangle strangle;
+        strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+        std::pair<mapCombo_t::iterator, bool> result;
+        result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, std::move( strangle ) ) );
         assert( result.second );
-        assert( m_mapCombo.end() != result.first );
-        iterStrike = result.first;
+        mapCombo_iter = result.first;
       }
 
-      Strangle& strangle( iterStrike->second );
-      switch( pInstrument->GetOptionSide() ) {
+      Strangle& strangle( mapCombo_iter->second );
+      switch ( pInstrument->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
-          strangle.SetPositionCall( pPosition );
           std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+          strangle.SetPositionCall( pPosition );
           strangle.SetColourCall( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
-          strangle.SetPositionPut( pPosition );
           std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+          strangle.SetPositionPut( pPosition );
           strangle.SetColourPut( rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
@@ -364,10 +354,7 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
   }
 }
 
-//void ManageStrategy::Start( ETradeDirection direction ) {
 void ManageStrategy::Start(  ) {
-
-  //m_eTradeDirection = direction;
 
   //std::cout << m_sUnderlying << " starting up ... " << std::endl;
 
@@ -540,7 +527,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         bool bAtmFound( false );
         double strikeOtmCall {};
-        double strikeAtm {};
+//        double strikeAtm {};
         double strikeOtmPut {};
 
         try {
@@ -550,7 +537,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
           else {
             strikeOtmCall = m_iterChainExpiryInUse->second.Call_Otm( mid );
-            strikeAtm = CurrentAtmStrike( mid );
+//            strikeAtm = CurrentAtmStrike( mid );
             strikeOtmPut = m_iterChainExpiryInUse->second.Put_Otm( mid );
             bAtmFound = true;
           }
@@ -566,19 +553,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         }
 
+        idPortfolio_t idPortfolio;
+
         if ( bAtmFound && ( 0 == m_nLegs) ) {
-          mapCombo_t::iterator iterStrike = m_mapCombo.find( strikeAtm );
-          if ( m_mapCombo.end() == iterStrike ) {
-            double strikeUpper {};
-            double strikeLower {};
-            int nStrikes = m_iterChainExpiryInUse->second.AdjacentStrikes( strikeAtm, strikeLower, strikeUpper );
-            // TODO: move this into Strike as a static call?
-            if ( 2 == nStrikes ) {
-              //double diff = strikeAtm - mid; // check that strikes are max 0.50 apart
+          idPortfolio = "combo-strangle-" + boost::lexical_cast<std::string>( strikeOtmCall ) + "-" + boost::lexical_cast<std::string>( strikeOtmPut );
+          mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
+          if ( m_mapCombo.end() == mapCombo_iter ) {
               double diff = strikeOtmCall - strikeOtmPut; // check that strikes are max 0.50 apart
               if ( 0.0 > diff ) diff = -diff;  // aka absolute value
               if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
-                if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
+                //if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
+                if ( ( dblMaxStrikeDistance > ( strikeOtmCall - strikeOtmPut ) ) ) {
                   std::cout
                     << m_sUnderlying
                     << ": constructing options for strangle -> quote=" << mid
@@ -587,8 +572,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     << std::endl;
                   std::pair<mapCombo_t::iterator,bool> result;
                   //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
-                  result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle() ) );
-                  if ( result.second ) {
+                  result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
+                  assert( result.second );
                     assert( m_mapCombo.end() != result.first );
                     Strangle& strangle( result.first->second );
                     if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
@@ -596,31 +581,32 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     }
                     pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
-                      [this,iterStrike=result.first](pOption_t pOptionCall){
-                        Strangle& strangle( iterStrike->second );
+                      [this,mapCombo_iter=result.first](pOption_t pOptionCall){
+                        Strangle& strangle( mapCombo_iter->second );
                         std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
                         strangle.SetOptionCall( pOptionCall, rColour[ m_ixColour++ ] );
                         m_nLegs++;
                       } );
                     m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
-                      [this,iterStrike=result.first](pOption_t pOptionPut){
-                        Strangle& strangle( iterStrike->second );
+                      [this,mapCombo_iter=result.first](pOption_t pOptionPut){
+                        Strangle& strangle( mapCombo_iter->second );
                         std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
                         strangle.SetOptionPut( pOptionPut, rColour[ m_ixColour++ ] );
                         m_nLegs++;
                       } );
                     // iterStrike->second.m_state = Strike::State::Validating; // Strike sets this
                     strangle.AddChartData( m_pChartDataView );
-                  }
                 }
               }
-            }
+
           }
         }
+
+        // TODO: need to eliminate non-performing strangles if price has moved during validation
         
         std::for_each(
           m_mapCombo.begin(), m_mapCombo.end(),
-          [this,strikeAtm,mid,&bar](mapCombo_t::value_type& entry){
+          [this,&idPortfolio,mid,&bar](mapCombo_t::value_type& entry){
             Strangle& strangle( entry.second );
             switch ( strangle.m_state ) {
               case Strangle::State::Initializing:
@@ -628,12 +614,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 break;
               case Strangle::State::Validating:
                 // TODO: also need to wait for options to have contracts?
-                if ( strikeAtm == entry.first ) { // should prevent most late entries
+                if ( idPortfolio == entry.first ) { // should prevent most late entries
                   if ( strangle.ValidateSpread( 11 ) ) {
                     std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                    pPosition_t pPositionCall = m_fConstructPosition( m_pPortfolioStrategy->Id(), strangle.GetOptionCall() );
+                    strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+                    pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, strangle.GetOptionCall() );
                     strangle.SetPositionCall( pPositionCall );
-                    pPosition_t pPositionPut = m_fConstructPosition( m_pPortfolioStrategy->Id(), strangle.GetOptionPut() );
+                    pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, strangle.GetOptionPut() );
                     strangle.SetPositionPut( pPositionPut );
                     strangle.OrderLongStrangle();
                     //m_eOptionState = EOptionState::MonitorPosition;

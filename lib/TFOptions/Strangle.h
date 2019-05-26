@@ -24,6 +24,7 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
 #include "Option.h"
@@ -40,6 +41,7 @@ public:
 
   using pOption_t = Option::pOption_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
@@ -50,12 +52,15 @@ public:
   Strangle& operator=( const Strangle& rhs ) = delete;
   Strangle( const Strangle&& rhs );
 
+  // TODO: need to refactor and put OptionCandidates and ValidateSpread in separate class
   void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour );
   pOption_t GetOptionCall();
   void SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour );
   pOption_t GetOptionPut();
 
   bool ValidateSpread( size_t nDuration );
+
+  void SetPortfolio( pPortfolio_t );
 
   void SetPositionCall( pPosition_t pCall );
   pPosition_t GetPositionCall();
@@ -85,6 +90,8 @@ private:
 
   SpreadCandidate m_scCall;
   SpreadCandidate m_scPut;
+
+  pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
   ou::tf::Leg m_legCall;
   ou::tf::Leg m_legPut;

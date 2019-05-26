@@ -32,6 +32,7 @@ Strangle::Strangle()
 
 Strangle::Strangle( const Strangle&& rhs )
 : m_state( rhs.m_state ),
+  m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_legCall( std::move( rhs.m_legCall ) ),
   m_legPut( std::move( rhs.m_legPut ) )
 {}
@@ -66,8 +67,15 @@ bool Strangle::ValidateSpread( size_t nDuration ) {
   return bResult;
 }
 
+void Strangle::SetPortfolio( pPortfolio_t pPortfolio ) {
+  //m_legCall.Clear()? or assert is empty?
+  //m_legPut.Clear()? or assert is empty?
+  m_pPortfolio = pPortfolio;
+}
+
 void Strangle::SetPositionCall( pPosition_t pCall ) {
   m_scCall.Clear();
+  assert( m_pPortfolio->Id() == pCall->GetRow().idPortfolio );
   m_legCall.SetPosition( pCall );
   m_state = State::Positions;
 }
@@ -77,6 +85,7 @@ Strangle::pPosition_t Strangle::GetPositionCall() {
 
 void Strangle::SetPositionPut( pPosition_t pPut ) {
   m_scPut.Clear();
+  assert( m_pPortfolio->Id() == pPut->GetRow().idPortfolio );
   m_legPut.SetPosition( pPut );
   m_state = State::Positions;
 }

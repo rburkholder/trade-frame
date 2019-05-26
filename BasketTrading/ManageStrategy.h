@@ -82,7 +82,7 @@ public:
 
   using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )>;
 
-  using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, pPortfolio_t)>; // id of new, pPortfolio of master
+  using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t)>; // id of new, id of ManageStrategy portfolio
 
   using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
   using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
@@ -202,7 +202,7 @@ private:
 
   using Strangle = ou::tf::option::Strangle;
 
-  using mapCombo_t = std::map<double,Strangle>;
+  using mapCombo_t = std::map<std::string,Strangle>;
   mapCombo_t m_mapCombo;
 
   ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
