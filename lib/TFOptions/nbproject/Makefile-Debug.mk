@@ -46,7 +46,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
 	${OBJECTDIR}/SpreadCandidate.o \
-	${OBJECTDIR}/Straddle.o \
+	${OBJECTDIR}/Strangle.o \
 	${OBJECTDIR}/Strike.o
 
 
@@ -131,10 +131,10 @@ ${OBJECTDIR}/SpreadCandidate.o: SpreadCandidate.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadCandidate.o SpreadCandidate.cpp
 
-${OBJECTDIR}/Straddle.o: Straddle.cpp
+${OBJECTDIR}/Strangle.o: Strangle.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Straddle.o Straddle.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Strangle.o Strangle.cpp
 
 ${OBJECTDIR}/Strike.o: Strike.cpp
 	${MKDIR} -p ${OBJECTDIR}

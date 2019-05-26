@@ -19,7 +19,7 @@
  * Created on May 25, 2019, 10:56 PM
  */
 
-#include "Straddle.h"
+#include "Strangle.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

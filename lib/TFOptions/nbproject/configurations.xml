@@ -15,7 +15,7 @@
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
       <itemPath>SpreadCandidate.h</itemPath>
-      <itemPath>Straddle.h</itemPath>
+      <itemPath>Strangle.h</itemPath>
       <itemPath>Strike.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -36,7 +36,7 @@
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
       <itemPath>SpreadCandidate.cpp</itemPath>
-      <itemPath>Straddle.cpp</itemPath>
+      <itemPath>Strangle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -129,9 +129,9 @@
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
+      <item path="Strangle.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -209,9 +209,9 @@
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
+      <item path="Strangle.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>

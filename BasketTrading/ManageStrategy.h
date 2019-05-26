@@ -32,7 +32,7 @@
 
 #include <TFOptions/IvAtm.h>
 #include <TFOptions/Option.h>
-#include <TFOptions/Straddle.h>
+#include <TFOptions/Strangle.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
