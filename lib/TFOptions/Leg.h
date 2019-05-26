@@ -62,6 +62,9 @@ public:
 
   void AddChartData( pChartDataView_t pChartData );
 
+  void CloseExpiryItm( const boost::gregorian::date date, const double price );
+  void CloseExpiryOtm( const boost::gregorian::date date, const double price );
+
 private:
   pPosition_t m_pPosition;
   ou::tf::MonitorOrder m_monitor;

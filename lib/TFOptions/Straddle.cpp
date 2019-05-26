@@ -210,22 +210,8 @@ double Straddle::GetNet() {
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
 void Straddle::CloseExpiryItm( const boost::gregorian::date date, double price ) {
-  if ( price >= m_dblStrikeAtm ) {
-    pPosition_t pPosition = m_legCall.GetPosition();
-    if ( pPosition ) {
-      if ( date == pPosition->GetInstrument()->GetExpiry() ) {
-        m_legCall.ClosePosition();
-      }
-    }
-  }
-  if ( price <= m_dblStrikeAtm ) {
-    pPosition_t pPosition = m_legPut.GetPosition();
-    if ( pPosition ) {
-      if ( date == pPosition->GetInstrument()->GetExpiry() ) {
-        m_legPut.ClosePosition();
-      }
-    }
-  }
+  m_legCall.CloseExpiryItm( date, price );
+  m_legPut.CloseExpiryItm( date, price );
 }
 
 void Straddle::Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying

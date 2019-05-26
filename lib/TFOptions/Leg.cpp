@@ -112,6 +112,51 @@ void Leg::AddChartData( pChartDataView_t pChartData ) {
   pChartData->Add( 2, &m_ceProfitLoss );
 }
 
+void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price ) {
+  using pInstrument_t = Position::pInstrument_t;
+  if ( m_pPosition ) {
+    pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+    pInstrument_t pInstrument = pOption->GetInstrument();
+    if ( date == pInstrument->GetExpiry() ) {
+      const double strike = pInstrument->GetStrike();
+      switch ( pInstrument->GetOptionSide() ) {
+        case OptionSide::Call:
+          if ( price >= strike ) {
+            ClosePosition();
+          }
+          break;
+        case OptionSide::Put:
+          if ( price <= strike ) {
+            ClosePosition();
+          }
+          break;
+      }
+    }
+  }
+}
+
+void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
+  using pInstrument_t = Position::pInstrument_t;
+  if ( m_pPosition ) {
+    pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+    pInstrument_t pInstrument = pOption->GetInstrument();
+    if ( date == pInstrument->GetExpiry() ) {
+      const double strike = pInstrument->GetStrike();
+      switch ( pInstrument->GetOptionSide() ) {
+        case OptionSide::Call:
+          if ( price < strike ) {
+            ClosePosition();
+          }
+          break;
+        case OptionSide::Put:
+          if ( price > strike ) {
+            ClosePosition();
+          }
+          break;
+      }
+    }
+  }
+}
 
 void Leg::Init() {
 }
