@@ -47,6 +47,7 @@ public:
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pPortfolio_t =  ou::tf::PortfolioManager::pPortfolio_t;
   using pPosition_t = ou::tf::PortfolioManager::pPosition_t;
+  using idPortfolio_t = ou::tf::PortfolioManager::idPortfolio_t;
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 

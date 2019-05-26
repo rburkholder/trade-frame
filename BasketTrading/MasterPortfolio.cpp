@@ -125,6 +125,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
     << ",ID=" << pPortfolio->GetRow().idPortfolio
     << std::endl;
 
+  // will have a mixture of 'standard' and 'multilegged'
   mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->Id() );
   assert( m_mapStrategyArtifacts.end() == iter );
   std::pair<mapStrategyArtifacts_t::iterator,bool> pair
@@ -265,14 +266,14 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
   assert( m_mapStrategy.end() == m_mapStrategy.find( iip.sName ) );
 
   pPortfolio_t pPortfolioStrategy;
-  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Basket_" + iip.sName );
+  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Strategy_" + iip.sName );
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolio );
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // create new portfolio
     ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
     pPortfolioStrategy
       = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-          idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket Case"
+          idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Strategy Basket"
       );
   }
   else { // use existing portfolio
@@ -447,6 +448,15 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
               }
 
               return pPosition;
+          },
+    // ManageStrategy::fConstructPortfolio_t
+          [this]( const idPortfolio_t& idPortfolio, pPortfolio_t pPortfolioMaster )->pPortfolio_t {
+            ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
+            pPortfolio_t pPortfolio
+              = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+                  idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
+              );
+            return pPortfolio;
           },
     // ManageStrategy::fStartCalc_t
           std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ),

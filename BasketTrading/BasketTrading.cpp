@@ -425,6 +425,8 @@ void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
       BuildMasterPortfolio();
       break;
     case ou::tf::Portfolio::EPortfolioType::Standard:
+      assert( m_pMasterPortfolio );
+      m_pMasterPortfolio->Add( pPortfolio );
       break;
     case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
       assert( m_pMasterPortfolio );

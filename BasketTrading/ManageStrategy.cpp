@@ -94,6 +94,7 @@ ManageStrategy::ManageStrategy(
   fConstructWatch_t fConstructWatch,
   fConstructOption_t fConstructOption,
   fConstructPosition_t fConstructPosition,
+  fConstructPortfolio_t fConstructPortfolio,
   fStartCalc_t fStartCalc,
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
@@ -109,6 +110,7 @@ ManageStrategy::ManageStrategy(
   m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
+  m_fConstructPortfolio( fConstructPortfolio ),
   m_stateTrading( TSInitializing ),
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc ),
@@ -138,6 +140,7 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
+  assert( nullptr != m_fConstructPortfolio );
   assert( nullptr != m_fStartCalc );
   assert( nullptr != m_fStopCalc );
   assert( nullptr != m_fFirstTrade );

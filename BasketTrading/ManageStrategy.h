@@ -67,6 +67,8 @@ public:
   using pPosition_t  = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using idPortfolio_t = ou::tf::Portfolio::idPortfolio_t;
+
   using pOrder_t = ou::tf::Position::pOrder_t;
 
   using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
@@ -79,6 +81,8 @@ public:
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
 
   using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )>;
+
+  using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, pPortfolio_t)>; // id of new, pPortfolio of master
 
   using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
   using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
@@ -95,6 +99,7 @@ public:
     fConstructWatch_t,
     fConstructOption_t,
     fConstructPosition_t,
+    fConstructPortfolio_t,
     fStartCalc_t,
     fStopCalc_t,
     fFirstTrade_t,
@@ -177,6 +182,7 @@ private:
   fConstructWatch_t m_fConstructWatch;
   fConstructOption_t m_fConstructOption;
   fConstructPosition_t m_fConstructPosition;
+  fConstructPortfolio_t m_fConstructPortfolio;
 
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
