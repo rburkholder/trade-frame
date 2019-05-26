@@ -451,11 +451,22 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
           },
     // ManageStrategy::fConstructPortfolio_t
           [this]( const idPortfolio_t& idPortfolio, pPortfolio_t pPortfolioMaster )->pPortfolio_t {
-            ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
-            pPortfolio_t pPortfolio
-              = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-                  idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
-              );
+            pPortfolio_t pPortfolio;
+            bool bUseExistingPortfolio( true );
+            mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( idPortfolio );
+            if ( m_mapStrategyArtifacts.end() == iter ) {
+              bUseExistingPortfolio = false;
+            }
+            if ( bUseExistingPortfolio ) {
+              pPortfolio = iter->second.m_pPortfolio;
+            }
+            else {
+              ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
+              pPortfolio
+                = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+                    idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
+                );
+            }
             return pPortfolio;
           },
     // ManageStrategy::fStartCalc_t
