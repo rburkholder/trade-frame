@@ -940,7 +940,33 @@ void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
       Strangle& strangle( vt.second );
       double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
-        strangle.CloseExpiryItm( date, price );
+        strangle.CloseExpiryItm( price, date );
+      }
+    }
+  );
+}
+
+void ManageStrategy::CloseFarItm() {
+  std::for_each(
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this](mapCombo_t::value_type& vt){
+      Strangle& strangle( vt.second );
+      double price( m_TradeUnderlyingLatest.Price() );
+      if ( 0.0 != price ) {
+        strangle.CloseFarItm( price );
+      }
+    }
+  );
+}
+
+void ManageStrategy::CloseForProfits() {
+  std::for_each(
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this](mapCombo_t::value_type& vt){
+      Strangle& strangle( vt.second );
+      double price( m_TradeUnderlyingLatest.Price() );
+      if ( 0.0 != price ) {
+        strangle.CloseForProfits( price );
       }
     }
   );

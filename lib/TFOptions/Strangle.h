@@ -73,7 +73,9 @@ public:
 
   double GetNet();
 
-  void CloseExpiryItm( const boost::gregorian::date date, double price );
+  void CloseExpiryItm( double price, const boost::gregorian::date date );
+  void CloseFarItm( double price );
+  void CloseForProfits( double price );
 
 private:
   double m_dblStrikeAtm;

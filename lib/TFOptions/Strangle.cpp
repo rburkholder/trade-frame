@@ -186,12 +186,27 @@ double Strangle::GetNet() {
 // prevent exercise or assignment at expiry
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
-void Strangle::CloseExpiryItm( const boost::gregorian::date date, double price ) {
+void Strangle::CloseExpiryItm( double price, const boost::gregorian::date date ) {
   m_legCall.CloseExpiryItm( date, price );
   m_legPut.CloseExpiryItm( date, price );
 }
 
-void Strangle::Update( bool bTrending, double dblPrice ) { // TODO: incorporate trending underlying
+void Strangle::Update( bool bTrending, double dblPrice ) {
+  // TODO: incorporate trending underlying
+}
+
+void Strangle::CloseFarItm( double price ) {
+  pPosition_t pPositionCall = m_legCall.GetPosition();
+  pPosition_t pPositionPut  = m_legPut.GetPosition();
+  if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
+    double dblProfitCall = pPositionCall->GetUnRealizedPL();
+    double dblProfitPut  = pPositionPut->GetUnRealizedPL();
+    // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuuing here
+  }
+}
+
+void Strangle::CloseForProfits( double price ) {
+
 }
 
 } // namespace option

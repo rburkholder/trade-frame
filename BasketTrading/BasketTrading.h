@@ -111,6 +111,8 @@ private:
   void HandleTestButton( void );
   void HandleTakeProfits( void );
   void HandleCloseExpiryItm( void );
+  void HandleCloseFarItm( void );
+  void HandleCloseForProfits( void );
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );

@@ -47,7 +47,7 @@ bool AppBasketTrading::OnInit() {
 
   m_sDbName = "BasketTrading.db";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 23 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 24 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -174,6 +174,8 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
   vItems.push_back( new mi( "a5 Take Profits", MakeDelegate( this, &AppBasketTrading::HandleTakeProfits ) ) );
   vItems.push_back( new mi( "a6 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
+  vItems.push_back( new mi( "a7 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
+  vItems.push_back( new mi( "a8 Close for profits", MakeDelegate( this, &AppBasketTrading::HandleCloseForProfits ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
@@ -227,6 +229,14 @@ void AppBasketTrading::HandleTakeProfits() {
 
 void AppBasketTrading::HandleCloseExpiryItm() {
   CallAfter( std::bind( &MasterPortfolio::CloseExpiryItm, m_pMasterPortfolio.get(), boost::gregorian::day_clock::local_day() ) );
+}
+
+void AppBasketTrading::HandleCloseFarItm() {
+  CallAfter( std::bind( &MasterPortfolio::CloseFarItm, m_pMasterPortfolio.get() ) );
+}
+
+void AppBasketTrading::HandleCloseForProfits() {
+  CallAfter( std::bind( &MasterPortfolio::CloseForProfits, m_pMasterPortfolio.get() ) );
 }
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {

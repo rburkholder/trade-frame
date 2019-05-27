@@ -648,3 +648,22 @@ void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
         strategy.pManageStrategy->CloseExpiryItm( date );
     } );
 }
+
+void MasterPortfolio::CloseFarItm() {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->CloseFarItm();
+    } );
+}
+
+void MasterPortfolio::CloseForProfits() {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->CloseForProfits();
+    } );
+}
+

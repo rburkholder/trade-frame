@@ -80,6 +80,8 @@ public:
 
   void TakeProfits();
   void CloseExpiryItm( boost::gregorian::date );
+  void CloseFarItm();
+  void CloseForProfits();
 
 protected:
 private:
