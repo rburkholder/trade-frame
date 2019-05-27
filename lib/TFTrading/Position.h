@@ -202,6 +202,8 @@ public:
     dblTotal -= ( dblCommissionsPaid = m_row.dblCommissionPaid );
   }
 
+  bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
+
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
   bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
