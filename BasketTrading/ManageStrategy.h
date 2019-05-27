@@ -202,6 +202,8 @@ private:
 
   using Strangle = ou::tf::option::Strangle;
 
+  Strangle m_strangleValidating;
+
   using mapCombo_t = std::map<std::string,Strangle>;
   mapCombo_t m_mapCombo;
 

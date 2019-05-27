@@ -53,18 +53,19 @@ public:
   Strangle( const Strangle&& rhs );
 
   // TODO: need to refactor and put OptionCandidates and ValidateSpread in separate class
-  void SetOptionCall( pOption_t pCall, ou::Colour::enumColour colour );
+  void SetOptionCall( pOption_t pCall );
   pOption_t GetOptionCall();
-  void SetOptionPut( pOption_t pPut, ou::Colour::enumColour colour );
+  void SetOptionPut( pOption_t pPut );
   pOption_t GetOptionPut();
 
   bool ValidateSpread( size_t nDuration );
+  void ResetOptions();
 
   void SetPortfolio( pPortfolio_t );
 
-  void SetPositionCall( pPosition_t pCall );
+  void SetPositionCall( pPosition_t pCall, ou::Colour::enumColour colour );
   pPosition_t GetPositionCall();
-  void SetPositionPut( pPosition_t pPut );
+  void SetPositionPut( pPosition_t pPut, ou::Colour::enumColour colour );
   pPosition_t GetPositionPut();
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
