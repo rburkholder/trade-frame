@@ -37,40 +37,6 @@ Strangle::Strangle( const Strangle&& rhs )
   m_legPut( std::move( rhs.m_legPut ) )
 {}
 
-void Strangle::SetOptionCall( pOption_t pCall ) {
-  m_scCall.SetWatch( pCall );
-  m_state = State::Validating;
-}
-
-Strangle::pOption_t Strangle::GetOptionCall() {
-  return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
-}
-
-void Strangle::SetOptionPut( pOption_t pPut ) {
-  m_scPut.SetWatch( pPut );
-  m_state = State::Validating;
-}
-
-Strangle::pOption_t Strangle::GetOptionPut() {
-  return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scPut.GetWatch() );
-}
-
-bool Strangle::ValidateSpread( size_t nDuration ) {
-  bool bResult( false );
-  switch ( m_state ) {
-    case State::Validating:
-      bResult = ( m_scCall.ValidateSpread( nDuration ) && m_scPut.ValidateSpread( nDuration ) );
-      break;
-  }
-  return bResult;
-}
-
-void Strangle::ResetOptions() {
-  m_state = State::Initializing;
-  m_scCall.Clear();
-  m_scPut.Clear();
-}
-
 void Strangle::SetPortfolio( pPortfolio_t pPortfolio ) {
   //m_legCall.Clear()? or assert is empty?
   //m_legPut.Clear()? or assert is empty?
@@ -78,7 +44,6 @@ void Strangle::SetPortfolio( pPortfolio_t pPortfolio ) {
 }
 
 void Strangle::SetPositionCall( pPosition_t pCall, ou::Colour::enumColour colour ) {
-  m_scCall.Clear();
   assert( m_pPortfolio->Id() == pCall->GetRow().idPortfolio );
   m_legCall.SetColour( colour );
   m_legCall.SetPosition( pCall );
@@ -89,7 +54,6 @@ Strangle::pPosition_t Strangle::GetPositionCall() {
 }
 
 void Strangle::SetPositionPut( pPosition_t pPut, ou::Colour::enumColour colour ) {
-  m_scPut.Clear();
   assert( m_pPortfolio->Id() == pPut->GetRow().idPortfolio );
   m_legPut.SetColour( colour );
   m_legPut.SetPosition( pPut );

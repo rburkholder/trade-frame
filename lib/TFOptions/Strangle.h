@@ -30,8 +30,6 @@
 #include "Option.h"
 #include "Leg.h"
 
-#include "SpreadCandidate.h"
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
@@ -44,22 +42,13 @@ public:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  enum class State { Initializing, Validating, Positions, Executing, Watching, Canceled, Closing };
+  enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
   Strangle();
   Strangle( const Strangle& rhs ) = delete;
   Strangle& operator=( const Strangle& rhs ) = delete;
   Strangle( const Strangle&& rhs );
-
-  // TODO: need to refactor and put OptionCandidates and ValidateSpread in separate class
-  void SetOptionCall( pOption_t pCall );
-  pOption_t GetOptionCall();
-  void SetOptionPut( pOption_t pPut );
-  pOption_t GetOptionPut();
-
-  bool ValidateSpread( size_t nDuration );
-  void ResetOptions();
 
   void SetPortfolio( pPortfolio_t );
 
@@ -88,9 +77,6 @@ public:
 
 private:
   double m_dblStrikeAtm;
-
-  SpreadCandidate m_scCall;
-  SpreadCandidate m_scPut;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 

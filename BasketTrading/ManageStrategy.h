@@ -32,6 +32,7 @@
 
 #include <TFOptions/IvAtm.h>
 #include <TFOptions/Option.h>
+#include <TFOptions/SpreadValidation.h>
 #include <TFOptions/Strangle.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -200,9 +201,9 @@ private:
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
-  using Strangle = ou::tf::option::Strangle;
+  ou::tf::SpreadValidation m_SpreadValidation;
 
-  Strangle m_strangleValidating;
+  using Strangle = ou::tf::option::Strangle;
 
   using mapCombo_t = std::map<std::string,Strangle>;
   mapCombo_t m_mapCombo;

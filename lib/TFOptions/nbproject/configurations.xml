@@ -15,6 +15,7 @@
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
       <itemPath>SpreadCandidate.h</itemPath>
+      <itemPath>SpreadValidation.h</itemPath>
       <itemPath>Strangle.h</itemPath>
       <itemPath>Strike.h</itemPath>
     </logicalFolder>
@@ -36,6 +37,7 @@
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
       <itemPath>SpreadCandidate.cpp</itemPath>
+      <itemPath>SpreadValidation.cpp</itemPath>
       <itemPath>Strangle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
     </logicalFolder>
@@ -129,6 +131,10 @@
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strangle.h" ex="false" tool="3" flavor2="0">
@@ -208,6 +214,10 @@
       <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>

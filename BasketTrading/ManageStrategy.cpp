@@ -132,7 +132,8 @@ ManageStrategy::ManageStrategy(
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
-  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
+  m_SpreadValidation( 2 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -555,13 +556,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         if ( bStrikesFound ) {
           bool bBuildOptions( false );
-          if ( !m_strangleValidating.GetOptionCall() || !m_strangleValidating.GetOptionPut() ) {
+          if ( !m_SpreadValidation.IsActive() ) {
             bBuildOptions = true;
           }
           else {
-            if ( ( strikeOtmCall != m_strangleValidating.GetOptionCall()->GetStrike() ) 
-              || ( strikeOtmPut  != m_strangleValidating.GetOptionPut()->GetStrike() ) ) {
-              m_strangleValidating.ResetOptions();
+            if ( ( strikeOtmCall != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 0 ) )->GetStrike() )
+              || ( strikeOtmPut  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) )->GetStrike() )
+            ) {
+              m_SpreadValidation.ResetOptions();
               bBuildOptions = true;
             }
           }
@@ -585,12 +587,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
                   [this](pOption_t pOptionCall){
                     std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
-                    m_strangleValidating.SetOptionCall( pOptionCall );
+                    m_SpreadValidation.SetOption( 0, pOptionCall );
                   } );
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
                   [this](pOption_t pOptionPut){
                     std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
-                    m_strangleValidating.SetOptionPut( pOptionPut );
+                    m_SpreadValidation.SetOption( 1, pOptionPut );
                   } );
               }
             }
@@ -598,39 +600,35 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         }
 
         if ( m_mapCombo.empty() ) { // temporary until determine how to properly add additional entries
-          switch ( m_strangleValidating.m_state ) {
-            case Strangle::State::Initializing:
-              break;
-            case Strangle::State::Validating:
-              if ( m_strangleValidating.ValidateSpread( 11 ) ) {
-                idPortfolio_t idPortfolio;
-                idPortfolio = "combo-strangle-" + boost::lexical_cast<std::string>( strikeOtmCall ) + "-" + boost::lexical_cast<std::string>( strikeOtmPut );
-                mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
-                if ( m_mapCombo.end() == mapCombo_iter ) {
-                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                  std::pair<mapCombo_t::iterator,bool> result;
-                  //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
-                  result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
-                  assert( result.second );
-                  assert( m_mapCombo.end() != result.first );
-                  Strangle& strangle( result.first->second );
-                  if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
-                    std::cout << "WARNING: strategy running out of colours." << std::endl;
-                  }
-                  strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-                  pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_strangleValidating.GetOptionCall() );
-                  strangle.SetPositionCall( pPositionCall, rColour[ m_ixColour++ ] );
-                  pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_strangleValidating.GetOptionPut() );
-                  strangle.SetPositionPut( pPositionPut, rColour[ m_ixColour++ ] );
-                  m_strangleValidating.ResetOptions();
-                  strangle.OrderLongStrangle();
-                  //m_eOptionState = EOptionState::MonitorPosition;
-                  //m_stateTrading = ETradingState::TSMonitorStrangle;
-                  //strike.m_state = Strike::State::Executing;
-                  strangle.AddChartData( m_pChartDataView );
+          if ( m_SpreadValidation.IsActive() ) {
+            if ( m_SpreadValidation.Validate( 11 ) ) {
+              idPortfolio_t idPortfolio;
+              idPortfolio = "combo-strangle-" + boost::lexical_cast<std::string>( strikeOtmCall ) + "-" + boost::lexical_cast<std::string>( strikeOtmPut );
+              mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
+              if ( m_mapCombo.end() == mapCombo_iter ) {
+                std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                std::pair<mapCombo_t::iterator,bool> result;
+                //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
+                result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
+                assert( result.second );
+                assert( m_mapCombo.end() != result.first );
+                Strangle& strangle( result.first->second );
+                if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                  std::cout << "WARNING: strategy running out of colours." << std::endl;
                 }
+                strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+                pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 0 ) );
+                strangle.SetPositionCall( pPositionCall, rColour[ m_ixColour++ ] );
+                pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 1 ) );
+                strangle.SetPositionPut( pPositionPut, rColour[ m_ixColour++ ] );
+                m_SpreadValidation.ResetOptions();
+                strangle.OrderLongStrangle();
+                //m_eOptionState = EOptionState::MonitorPosition;
+                //m_stateTrading = ETradingState::TSMonitorStrangle;
+                //strike.m_state = Strike::State::Executing;
+                strangle.AddChartData( m_pChartDataView );
               }
-              break;
+            }
           }
         }
 
@@ -640,12 +638,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             Strangle& strangle( entry.second );
             switch ( strangle.m_state ) {
               case Strangle::State::Initializing:
-                break;
-              case Strangle::State::Validating:
-                //if ( idPortfolio == entry.first ) { // should prevent most late entries
-                //  if ( strangle.ValidateSpread( 11 ) ) {
-                //  }
-                //}
                 break;
               case Strangle::State::Positions:
                 strangle.Tick( true, mid, bar.DateTime() );

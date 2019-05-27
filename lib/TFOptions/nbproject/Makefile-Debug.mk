@@ -46,6 +46,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
 	${OBJECTDIR}/SpreadCandidate.o \
+	${OBJECTDIR}/SpreadValidation.o \
 	${OBJECTDIR}/Strangle.o \
 	${OBJECTDIR}/Strike.o
 
@@ -130,6 +131,11 @@ ${OBJECTDIR}/SpreadCandidate.o: SpreadCandidate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadCandidate.o SpreadCandidate.cpp
+
+${OBJECTDIR}/SpreadValidation.o: SpreadValidation.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadValidation.o SpreadValidation.cpp
 
 ${OBJECTDIR}/Strangle.o: Strangle.cpp
 	${MKDIR} -p ${OBJECTDIR}
