@@ -559,7 +559,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( !m_SpreadValidation.IsActive() ) {
             bBuildOptions = true;
           }
-          else {
+          else {  // TODO: need some hysterisis on this calculation
             if ( ( strikeOtmCall != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 0 ) )->GetStrike() )
               || ( strikeOtmPut  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) )->GetStrike() )
             ) {
@@ -586,12 +586,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
                   [this](pOption_t pOptionCall){
-                    std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl;
+                    //std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl; // too early
                     m_SpreadValidation.SetOption( 0, pOptionCall );
                   } );
                 m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
                   [this](pOption_t pOptionPut){
-                    std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl;
+                    //std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl; // tool early
                     m_SpreadValidation.SetOption( 1, pOptionPut );
                   } );
               }
