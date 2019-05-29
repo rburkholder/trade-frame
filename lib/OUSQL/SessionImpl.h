@@ -226,15 +226,15 @@ class QueryState:
 //  friend S;  // ** g++ does not like this, need to provide specific function?
 public:
 
-  typedef boost::intrusive_ptr<QueryState<SS, F, S> > pQueryState_t;
+  using pQueryState_t = boost::intrusive_ptr<QueryState<SS, F, S> >;
 
   QueryState( S& session, F& f ): Query<F>( f ), m_session( session ) {};
-  ~QueryState( void ) {};
+  virtual ~QueryState( void ) {};
 
 protected:
 
   void ProcessInQueryState( void ) {
-    if ( QueryBase::HasFields() ) {
+    if ( QueryBase::HasFields() ) {  // who calls this, there fore had to virtual the destructor
       m_session.Bind( *this );
     }
     m_session.Execute( *this );
@@ -422,7 +422,7 @@ protected:
   template<class F, class Action>  // do reset, auto bind when doing execute
   QueryState<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
 
-    typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
+    using query_t = QueryState<typename IDatabase::structStatementState, F, session_t>;
 
     query_t* pQuery = new query_t( *this, f );
 
