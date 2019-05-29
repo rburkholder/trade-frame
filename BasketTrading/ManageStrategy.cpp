@@ -603,7 +603,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( m_SpreadValidation.IsActive() ) {
             if ( m_SpreadValidation.Validate( 11 ) ) {
               idPortfolio_t idPortfolio;
-              idPortfolio = "combo-strangle-" + boost::lexical_cast<std::string>( strikeOtmCall ) + "-" + boost::lexical_cast<std::string>( strikeOtmPut );
+              idPortfolio
+                = "strangle-"
+                + m_sUnderlying
+                + "-"
+                + boost::lexical_cast<std::string>( strikeOtmCall )
+                + "-"
+                + boost::lexical_cast<std::string>( strikeOtmPut );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
                 std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
