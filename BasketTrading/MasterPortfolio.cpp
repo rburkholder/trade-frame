@@ -130,12 +130,32 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
     << std::endl;
 
   // will have a mixture of 'standard' and 'multilegged'
-  mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->Id() );
-  assert( m_mapStrategyArtifacts.end() == iter );
+  mapStrategyArtifacts_t::iterator iterArtifacts = m_mapStrategyArtifacts.find( pPortfolio->Id() );
+  assert( m_mapStrategyArtifacts.end() == iterArtifacts );
   std::pair<mapStrategyArtifacts_t::iterator,bool> pair
-    = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) )  ) );
+    = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) ) ) );
   assert( pair.second );
   m_curStrategyArtifacts = pair.first;
+
+  switch ( pPortfolio->GetRow().ePortfolioType ) {
+    case ou::tf::Portfolio::EPortfolioType::Basket:
+      // no need to do anything with the basket
+      break;
+    case ou::tf::Portfolio::EPortfolioType::Standard:
+      // this is the strategy level portfolio
+      break;
+    case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
+      // this is the combo level portfolio of positions, needs to be associated with owner
+      //    which allows it to be submitted to ManageStrategy
+      {
+        mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
+        assert( m_mapStrategyArtifacts.end() != iter );
+        std::pair<mapPortfolio_iter,bool> pair2
+          = iter->second.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
+        assert( pair2.second );
+      }
+      break;
+  } // switch
 }
 
 // auto loading position from database
@@ -287,9 +307,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
-  Strategy strategy( std::move( iip ), pChartDataView );
   std::pair<mapStrategy_t::iterator, bool> result
-    = m_mapStrategy.insert( mapStrategy_t::value_type( sUnderlying, std::move( strategy ) ) ); // lookup needs to come before move
+    = m_mapStrategy.insert( mapStrategy_t::value_type( sUnderlying, std::move( Strategy( std::move( iip ), pChartDataView ) ) ) ); // lookup needs to come before move
   assert( result.second );
 
   mapStrategy_t::iterator iterStrategy( result.first );
@@ -519,9 +538,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
           pChartDataView
       );
 
-  iterStrategy->second.Set( std::move( pManageStrategy ) );
+  Strategy& strategy( iterStrategy->second );
+  strategy.Set( std::move( pManageStrategy ) );
 
-  iterStrategy->second.pManageStrategy->SetPivots( iip_.dblS1, iip_.dblPV, iip_.dblR1 );
+  strategy.pManageStrategy->SetPivots( iip_.dblS1, iip_.dblPV, iip_.dblR1 );
 
   m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -529,8 +549,22 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
     std::for_each(
       artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
-      [this,iterStrategy](mapPosition_t::value_type& vt){
-        iterStrategy->second.pManageStrategy->Add( vt.second );
+      [this,&strategy](mapPosition_t::value_type& vt){
+        strategy.pManageStrategy->Add( vt.second );
+      }
+    );
+    std::for_each(
+      artifacts.m_mapPortfolio.begin(), artifacts.m_mapPortfolio.end(),
+      [this,&strategy](mapPortfolio_t::value_type& vt){
+        mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( vt.first );
+        assert( m_mapStrategyArtifacts.end() != iter );
+        StrategyArtifacts& artifacts( iter->second );
+        std::for_each(
+          artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
+          [this,&strategy](mapPosition_t::value_type& vt){
+            strategy.pManageStrategy->Add( vt.second );
+          }
+        );
       }
     );
     artifacts.m_bAccessed = true;

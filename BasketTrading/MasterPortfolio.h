@@ -168,10 +168,13 @@ private:
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
   using mapPosition_iter = mapPosition_t::iterator;
+  using mapPortfolio_t = std::map<std::string,pPortfolio_t>;
+  using mapPortfolio_iter = mapPortfolio_t::iterator;
   struct StrategyArtifacts {
     // stuff during database load goes here temporarily
     bool m_bAccessed;
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
+    mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup
     mapPosition_t m_mapPosition; // positions associated with portfolio
     StrategyArtifacts( pPortfolio_t pPortfolio )
     : m_bAccessed( false ),

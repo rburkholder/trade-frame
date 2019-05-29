@@ -319,7 +319,9 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
   pInstrument_t pInstrument = pPosition->GetInstrument();
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Stock:
-      // fill in some other time, as underlying isn't traded here
+      assert( m_pPositionUnderlying );
+      assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
+      assert( pPosition.get() == m_pPositionUnderlying.get() );
       break;
     case ou::tf::InstrumentType::Option: {
 
@@ -363,7 +365,7 @@ void ManageStrategy::Start(  ) {
 
   //assert( TSWaitForCalc == m_stateTrading );
 
-  if ( nullptr == m_pPositionUnderlying.get() ) {
+  if ( !m_pPositionUnderlying ) {
     std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
     m_stateTrading = TSNoMore;
   }
