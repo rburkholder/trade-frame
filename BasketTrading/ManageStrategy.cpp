@@ -282,6 +282,8 @@ ManageStrategy::ManageStrategy(
 }
 
 ManageStrategy::~ManageStrategy( ) {
+  m_mapCombo.clear();
+  m_vEMA.clear();
   if ( m_pPositionUnderlying ) {
     pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
     if ( pWatch ) {
