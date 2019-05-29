@@ -266,10 +266,12 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
 void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
-  assert( m_mapStrategy.end() == m_mapStrategy.find( iip.sName ) );
+  std::string sUnderlying( iip.sName );
+
+  assert( m_mapStrategy.end() == m_mapStrategy.find( sUnderlying ) );
 
   pPortfolio_t pPortfolioStrategy;
-  ou::tf::Portfolio::idPortfolio_t idPortfolio( sPortfolioPrefix + iip.sName );
+  ou::tf::Portfolio::idPortfolio_t idPortfolio( sPortfolioPrefix + sUnderlying );
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolio );
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // create new portfolio
@@ -285,11 +287,19 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
+  Strategy strategy( std::move( iip ), pChartDataView );
+  std::pair<mapStrategy_t::iterator, bool> result
+    = m_mapStrategy.insert( mapStrategy_t::value_type( sUnderlying, std::move( strategy ) ) ); // lookup needs to come before move
+  assert( result.second );
+
+  mapStrategy_t::iterator iterStrategy( result.first );
+  const IIPivot& iip_( iterStrategy->second.iip );
+
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy;
   pManageStrategy = std::make_unique<ManageStrategy>(
-        iip.sName, iip.bar, pPortfolioStrategy,
+        sUnderlying, iip_.bar, pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructWatch_t - underlying construction only
@@ -509,28 +519,24 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
           pChartDataView
       );
 
-    pManageStrategy->SetPivots( iip.dblS1, iip.dblPV, iip.dblR1 );
+  iterStrategy->second.Set( std::move( pManageStrategy ) );
 
-    m_mapVolatility.insert( mapVolatility_t::value_type( iip.dblDailyHistoricalVolatility, iip.sName ) );
+  iterStrategy->second.pManageStrategy->SetPivots( iip_.dblS1, iip_.dblPV, iip_.dblR1 );
 
-    if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) {
-      StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
-      std::for_each(
-        artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
-        [this,&pManageStrategy](mapPosition_t::value_type& vt){
-          pManageStrategy->Add( vt.second );
-        }
-      );
-      artifacts.m_bAccessed = true;
-    }
+  m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
-    std::string sName( iip.sName );
-    Strategy strategy( std::move( iip ), std::move( pManageStrategy ), pChartDataView );
-    std::pair<mapStrategy_t::iterator, bool> result
-      = m_mapStrategy.insert( mapStrategy_t::value_type( sName, std::move( strategy ) ) ); // lookup needs to come before move
-    assert( result.second );
+  if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) {
+    StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
+    std::for_each(
+      artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
+      [this,iterStrategy](mapPosition_t::value_type& vt){
+        iterStrategy->second.pManageStrategy->Add( vt.second );
+      }
+    );
+    artifacts.m_bAccessed = true;
+  }
 
-    m_fSupplyStrategyChart( EStrategyChart::Info, sName, pChartDataView );
+  m_fSupplyStrategyChart( EStrategyChart::Info, sUnderlying, pChartDataView );
 
 } // AddSymbol
 

@@ -141,6 +141,12 @@ private:
       pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
+    Strategy( const IIPivot&& iip_, pChartDataView_t& pChartDataView_ )
+    : iip( std::move( iip_ ) ),
+      pChartDataView( pChartDataView_ ),
+      priceOpen {}, dblBestProbability {}
+    {}
+    void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }
 //    const Strategy& operator=( const Strategy&& rhs) {
 //      iip = std::move( rhs.iip );
 //      pManageStrategy = std::move( rhs.pManageStrategy );
