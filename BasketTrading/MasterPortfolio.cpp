@@ -28,6 +28,10 @@
 
 #include "MasterPortfolio.h"
 
+namespace {
+  static const std::string sPortfolioPrefix( "strategy-" );
+}
+
 MasterPortfolio::MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGatherOptionDefinitions_t fGatherOptionDefinitions,
@@ -201,25 +205,24 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           [this](mapStrategyArtifacts_t::value_type& vt){
             StrategyArtifacts& artifact( vt.second );
             if ( !artifact.m_bAccessed ) {
-
-              std::string id( vt.first );
-              static const std::string basket( "Basket_" );
-              std::string temp( id.substr( 0, basket.size() ) );
-              assert( temp == basket );
-              std::string symbol( id.substr( basket.size() ) );
-              //std::cout << vt.first << " (" << symbol << ") being examined :";
-              bool bPositionActive( false );
-              std::for_each(
-                artifact.m_mapPosition.begin(), artifact.m_mapPosition.end(),
-                [&bPositionActive](mapPosition_t::value_type& vt){
-                  bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
+              std::string idPortfolio( vt.first );
+              std::string sTemp( idPortfolio.substr( 0, sPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
+              if ( sTemp == sPortfolioPrefix ) {
+                std::string symbol( idPortfolio.substr( sPortfolioPrefix.size() ) );
+                std::cout << vt.first << " (" << symbol << ") being examined :";
+                bool bPositionActive( false );
+                std::for_each(
+                  artifact.m_mapPosition.begin(), artifact.m_mapPosition.end(),
+                  [&bPositionActive](mapPosition_t::value_type& vt){
+                    bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
+                  }
+                );
+                if ( bPositionActive ) {
+                  std::cout << vt.first << " has position";
+                  m_setSymbols.insert( symbol );
                 }
-              );
-              if ( bPositionActive ) {
-                //std::cout << vt.first << " has position";
-                m_setSymbols.insert( symbol );
+                std::cout << std::endl;
               }
-              //std::cout << std::endl;
             }
           }
         );
@@ -266,7 +269,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
   assert( m_mapStrategy.end() == m_mapStrategy.find( iip.sName ) );
 
   pPortfolio_t pPortfolioStrategy;
-  ou::tf::Portfolio::idPortfolio_t idPortfolio( "Strategy_" + iip.sName );
+  ou::tf::Portfolio::idPortfolio_t idPortfolio( sPortfolioPrefix + iip.sName );
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolio );
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // create new portfolio
@@ -440,7 +443,9 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
               if ( bUseExistingPosition ) {
                 pPosition = iterPosition->second;
-                assert( pWatch == pPosition->GetWatch() );
+                if ( pWatch != pPosition->GetWatch() ) {
+                  std::cout << "** duplicate watch for " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+                }
               }
               else {
                 pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition(
