@@ -108,11 +108,14 @@ private:
   void HandleExitPositionsButton( void );
   void HandleStopButton( void );
   void HandleSaveButton( void );
+  void HandleEmitInfo( void );
   void HandleTestButton( void );
+
   void HandleTakeProfits( void );
   void HandleCloseExpiryItm( void );
   void HandleCloseFarItm( void );
   void HandleCloseForProfits( void );
+  void HandleAddStrangle( void );
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );

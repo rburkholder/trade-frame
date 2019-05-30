@@ -76,6 +76,7 @@ public:
   void CloseExpiryItm( double price, const boost::gregorian::date date );
   void CloseFarItm( double price );
   void CloseForProfits( double price );
+  void TakeProfits( double price );
 
 private:
   double m_dblStrikeAtm;

@@ -928,7 +928,7 @@ void ManageStrategy::Test() {
   }
 }
 
-double ManageStrategy::TakeProfits() {
+double ManageStrategy::EmitInfo() {
   double dblNet {};
   if ( 0 < m_mapCombo.size() ) {
     std::cout << "TakeProfits " << this->m_sUnderlying << std::endl;
@@ -978,6 +978,33 @@ void ManageStrategy::CloseForProfits() {
       double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
         strangle.CloseForProfits( price );
+      }
+    }
+  );
+}
+
+void ManageStrategy::AddStrangle() {
+//  std::for_each(
+//    m_mapCombo.begin(), m_mapCombo.end(),
+//    [this](mapCombo_t::value_type& vt){
+//      Strangle& strangle( vt.second );
+      //double price( m_TradeUnderlyingLatest.Price() );
+      //if ( 0.0 != price ) {
+        //strangle.AddStrangle( price );
+      //}
+      std::cout << m_sUnderlying << ": AddStrangle - to be implemented" << std::endl;
+//    }
+//  );
+}
+
+void ManageStrategy::TakeProfits() {
+  std::for_each(
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this](mapCombo_t::value_type& vt){
+      Strangle& strangle( vt.second );
+      double price( m_TradeUnderlyingLatest.Price() );
+      if ( 0.0 != price ) {
+        strangle.TakeProfits( price );
       }
     }
   );

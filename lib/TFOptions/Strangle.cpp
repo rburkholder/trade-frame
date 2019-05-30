@@ -134,6 +134,10 @@ void Strangle::SetColourPut( ou::Colour::enumColour colour ) {
   m_legPut.SetColour( colour );
 }
 
+void Strangle::Update( bool bTrending, double dblPrice ) {
+  // TODO: incorporate trending underlying
+}
+
 double Strangle::GetNet() {
   double dblNet {};
   pPosition_t pPositionCall = m_legCall.GetPosition();
@@ -191,10 +195,6 @@ void Strangle::CloseExpiryItm( double price, const boost::gregorian::date date )
   m_legPut.CloseExpiryItm( date, price );
 }
 
-void Strangle::Update( bool bTrending, double dblPrice ) {
-  // TODO: incorporate trending underlying
-}
-
 void Strangle::CloseFarItm( double price ) {
   pPosition_t pPositionCall = m_legCall.GetPosition();
   pPosition_t pPositionPut  = m_legPut.GetPosition();
@@ -206,7 +206,9 @@ void Strangle::CloseFarItm( double price ) {
 }
 
 void Strangle::CloseForProfits( double price ) {
+}
 
+void Strangle::TakeProfits( double price ) {
 }
 
 } // namespace option

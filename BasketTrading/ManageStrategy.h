@@ -122,10 +122,13 @@ public:
 
   void Test( void );
 
-  double TakeProfits();
+  void TakeProfits();
   void CloseExpiryItm( boost::gregorian::date );
   void CloseFarItm(); // if one leg is far otm, close the far itm leg (far otm < 0.10, profit > 0.20?
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
+
+  double EmitInfo();
+  void AddStrangle();
 
 protected:
 private:

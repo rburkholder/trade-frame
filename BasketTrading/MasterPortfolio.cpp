@@ -679,13 +679,13 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::cout << "done." << std::endl;
 }
 
-void MasterPortfolio::TakeProfits( void ) {
+void MasterPortfolio::EmitInfo( void ) {
   double dblNet {};
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
     [&dblNet](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
-        dblNet += strategy.pManageStrategy->TakeProfits();
+        dblNet += strategy.pManageStrategy->EmitInfo();
     } );
   std::cout << "Portfolio net: " << dblNet << std::endl;
 }
@@ -714,6 +714,24 @@ void MasterPortfolio::CloseForProfits() {
     [](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
         strategy.pManageStrategy->CloseForProfits();
+    } );
+}
+
+void MasterPortfolio::AddStrangle() {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->AddStrangle();
+    } );
+}
+
+void MasterPortfolio::TakeProfits() {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->TakeProfits();
     } );
 }
 

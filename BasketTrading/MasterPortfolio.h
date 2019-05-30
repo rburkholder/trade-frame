@@ -82,6 +82,8 @@ public:
   void CloseExpiryItm( boost::gregorian::date );
   void CloseFarItm();
   void CloseForProfits();
+  void AddStrangle();
+  void EmitInfo();
 
 protected:
 private:
