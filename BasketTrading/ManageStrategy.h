@@ -170,8 +170,6 @@ private:
   double m_dblFundsToTrade;
   volume_t m_nSharesToTrade;
 
-  size_t m_nLegs;
-
   bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
   bool m_bAllowComboAdd; // allows state machine to open new combo
 

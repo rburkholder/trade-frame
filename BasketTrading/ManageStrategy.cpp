@@ -127,7 +127,6 @@ ManageStrategy::ManageStrategy(
   //m_eOptionState( EOptionState::Initial1 ),
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
-  m_nLegs {},
   m_bClosedItmLeg( false ), m_bAllowComboAdd( false ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
@@ -347,13 +346,11 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
           std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
           strangle.SetPositionCall( pPosition );
           strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
-          m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
           std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
           strangle.SetPositionPut( pPosition );
           strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
-          m_nLegs++;
           break;
       }
       }
