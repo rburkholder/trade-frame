@@ -37,6 +37,7 @@ namespace option { // options
 class Strangle {
 public:
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pOption_t = Option::pOption_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
@@ -74,6 +75,7 @@ public:
   void CloseExpiryItm( double price, const boost::gregorian::date date );
   void CloseFarItm( double price );
   void CloseForProfits( double price );
+  bool CloseItmLeg( double price );
   void TakeProfits( double price );
 
 private:

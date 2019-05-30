@@ -191,8 +191,37 @@ void Strangle::CloseFarItm( double price ) {
   if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
     double dblProfitCall = pPositionCall->GetUnRealizedPL();
     double dblProfitPut  = pPositionPut->GetUnRealizedPL();
-    // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuuing here
+    // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuing here
   }
+}
+
+bool Strangle::CloseItmLeg( double price ) {
+  bool bClosed( false );
+  {
+    pPosition_t pPositionCall = m_legCall.GetPosition();
+    if ( pPositionCall->IsActive() ) {
+      pInstrument_t pInstrument = pPositionCall->GetInstrument();
+      if ( price > pInstrument->GetStrike() ) {
+        if ( 0.05 < pPositionCall->GetUnRealizedPL() ) {
+          m_legCall.ClosePosition();
+          bClosed = true;
+        }
+      }
+    }
+  }
+  {
+    pPosition_t pPositionPut  = m_legPut.GetPosition();
+    if ( pPositionPut->IsActive() ) {
+      pInstrument_t pInstrument = pPositionPut->GetInstrument();
+      if ( price < pInstrument->GetStrike() ) {
+        if ( 0.05 < pPositionPut->GetUnRealizedPL() ) {
+          m_legPut.ClosePosition();
+          bClosed = true;
+        }
+      }
+    }
+  }
+  return bClosed;
 }
 
 void Strangle::CloseForProfits( double price ) {

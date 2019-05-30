@@ -126,9 +126,11 @@ public:
   void CloseExpiryItm( boost::gregorian::date );
   void CloseFarItm(); // if one leg is far otm, close the far itm leg (far otm < 0.10, profit > 0.20?
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
+  void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
+
+  void AddStrangle();
 
   double EmitInfo();
-  void AddStrangle();
 
 protected:
 private:
@@ -169,6 +171,8 @@ private:
   volume_t m_nSharesToTrade;
 
   size_t m_nLegs;
+
+  bool m_bClosedItmLeg; // allows state machine to open new combo
 
   double m_dblOpen;
 

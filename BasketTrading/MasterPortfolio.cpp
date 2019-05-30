@@ -717,6 +717,15 @@ void MasterPortfolio::CloseForProfits() {
     } );
 }
 
+void MasterPortfolio::CloseItmLeg() {
+  std::for_each(
+    m_mapStrategy.begin(), m_mapStrategy.end(),
+    [](mapStrategy_t::value_type& pair){
+      Strategy& strategy( pair.second );
+        strategy.pManageStrategy->CloseItmLeg();
+    } );
+}
+
 void MasterPortfolio::AddStrangle() {
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),

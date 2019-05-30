@@ -115,6 +115,7 @@ private:
   void HandleCloseExpiryItm( void );
   void HandleCloseFarItm( void );
   void HandleCloseForProfits( void );
+  void HandleCloseItmLeg( void );
   void HandleAddStrangle( void );
 
   void HandlePopulateDatabase( void );

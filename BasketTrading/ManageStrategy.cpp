@@ -127,6 +127,7 @@ ManageStrategy::ManageStrategy(
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
   m_nLegs {},
+  m_bClosedItmLeg( false ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -979,6 +980,19 @@ void ManageStrategy::CloseForProfits() {
       double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
         strangle.CloseForProfits( price );
+      }
+    }
+  );
+}
+
+void ManageStrategy::CloseItmLeg() {
+  std::for_each(
+    m_mapCombo.begin(), m_mapCombo.end(),
+    [this](mapCombo_t::value_type& vt){
+      Strangle& strangle( vt.second );
+      double price( m_TradeUnderlyingLatest.Price() );
+      if ( 0.0 != price ) {
+        m_bClosedItmLeg = strangle.CloseItmLeg( price );
       }
     }
   );

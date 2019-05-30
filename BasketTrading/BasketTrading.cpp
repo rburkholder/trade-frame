@@ -181,7 +181,8 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a2 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
   vItems.push_back( new mi( "a3 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
   vItems.push_back( new mi( "a4 Close leg for profits", MakeDelegate( this, &AppBasketTrading::HandleCloseForProfits ) ) );
-  vItems.push_back( new mi( "a5 Add strangle", MakeDelegate( this, &AppBasketTrading::HandleAddStrangle ) ) );
+  vItems.push_back( new mi( "a5 Close ITM leg", MakeDelegate( this, &AppBasketTrading::HandleCloseItmLeg ) ) );
+  vItems.push_back( new mi( "a6 Add strangle", MakeDelegate( this, &AppBasketTrading::HandleAddStrangle ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   return true;
@@ -242,6 +243,10 @@ void AppBasketTrading::HandleCloseFarItm() {
 
 void AppBasketTrading::HandleCloseForProfits() {
   CallAfter( std::bind( &MasterPortfolio::CloseForProfits, m_pMasterPortfolio.get() ) );
+}
+
+void AppBasketTrading::HandleCloseItmLeg() {
+  CallAfter( std::bind( &MasterPortfolio::CloseItmLeg, m_pMasterPortfolio.get() ) );
 }
 
 void AppBasketTrading::HandleAddStrangle() {
