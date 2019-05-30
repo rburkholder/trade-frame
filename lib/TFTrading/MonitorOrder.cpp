@@ -61,6 +61,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
         double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
         if ( m_pOrder ) {
+          m_pOrder->SetSignalPrice( dblNormalizedPrice );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
           m_CountDownToAdjustment = m_nAdjustmentPeriods;

@@ -114,13 +114,15 @@ namespace OrderManagerQueries {
     void Fields( A& a ) {
       ou::db::Field( a, "orderstatus", eOrderStatus );
       ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
+      ou::db::Field( a, "signalprice", dblSignalPrice );
       ou::db::Field( a, "orderid", idOrder );
     }
     Order::idOrder_t idOrder;
-    ptime dtOrderSubmitted;
     OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_ )
-      : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ) {};
+    ptime dtOrderSubmitted;
+    double dblSignalPrice;
+    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_ )
+      : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ), dblSignalPrice( dblSignalPrice_ ) {};
   };
 }
 
@@ -135,10 +137,10 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
       pProvider->PlaceOrder( pOrder );
       if ( 0 != m_pSession ) {
         OrderManagerQueries::UpdateAtPlaceOrder1
-          update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted );
+          update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder1>( // todo:  cache this query
-            "update orders set orderstatus=?, datetimesubmitted=?", update ).Where( "orderid=?" );
+            "update orders set orderstatus=?, datetimesubmitted=?, signalprice=?", update ).Where( "orderid=?" );
       }
     }
     else {
