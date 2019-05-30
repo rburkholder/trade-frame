@@ -30,6 +30,9 @@
 #include <string>
 #include <memory>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/timer.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -48,6 +51,7 @@
 
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
+    friend class boost::serialization::access;
     friend ou::tf::FrameWork01<AppBasketTrading>;
 public:
 protected:
@@ -68,6 +72,7 @@ private:
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   std::string m_sDbName;
+  std::string m_sStateFileName;
   ou::tf::DBOps m_db;
 
   std::string m_sPortfolioStrategyAggregate;
@@ -138,8 +143,25 @@ private:
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
 
+  void SaveState();
+  void LoadState();
+
+    template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+    //ar & m_splitPanels->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+    //m_splitPanels->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
-// Implements MyApp& wxGetApp()
+BOOST_CLASS_VERSION(AppBasketTrading, 1)
 DECLARE_APP(AppBasketTrading)
 

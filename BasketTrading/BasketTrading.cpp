@@ -46,6 +46,7 @@ bool AppBasketTrading::OnInit() {
   wxApp::SetVendorDisplayName( "(c) 2019 One Unified Net Limited" );
 
   m_sDbName = "BasketTrading.db";
+  m_sStateFileName = "BasketTrading.state";
 
   m_dtLatestEod = ptime( date( 2019, 5, 29 ), time_duration( 23, 59, 59 ) );
 
@@ -185,6 +186,12 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a6 Add strangle - allowed", MakeDelegate( this, &AppBasketTrading::HandleAddStrangleAllowed ) ) );
   vItems.push_back( new mi( "a7 Add strangle - forced", MakeDelegate( this, &AppBasketTrading::HandleAddStrangleForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
+
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
 
   return true;
 }
@@ -376,6 +383,27 @@ void AppBasketTrading::OnExecDisconnected( int ) {
   m_bExecConnected = false;
 }
 
+void AppBasketTrading::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( m_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppBasketTrading::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( m_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
+}
+
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
   if ( m_worker.joinable() ) m_worker.join();
   m_timerGuiRefresh.Stop();
@@ -383,6 +411,9 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
+
+  SaveState();
+
   if ( m_db.IsOpen() ) m_db.Close();
   event.Skip();  // auto followed by Destroy();
 }
