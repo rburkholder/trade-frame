@@ -47,7 +47,8 @@ public:
   typedef const idInstrument_t& idInstrument_cref;
   typedef boost::shared_ptr<Instrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
-  
+
+  static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );
   static std::string BuildGenericOptionName( const std::string& sUnderlying, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike );
   static std::string BuildGenericFutureName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day );
 
@@ -86,7 +87,7 @@ public:
     double dblStrike;
     boost::int32_t nIBContract; // used with CIBTWS
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
-    double dblMinTick; 
+    double dblMinTick;
     boost::uint8_t nSignificantDigits;
 
 //  m_eUnderlyingStatus = EUnderlyingNotSettable;
@@ -97,68 +98,68 @@ public:
 
     TableRowDef( void ) // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
     TableRowDef( // equity / generic creation
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_ )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( eType < InstrumentType::_Count );
         assert( eType > InstrumentType::Unknown );
-        assert( 0 < idInstrument.size() );  
+        assert( 0 < idInstrument.size() );
     };
     TableRowDef( // future
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ = 0 )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( 0.0 ), 
+      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( eType == InstrumentType::Future  );
-        assert( 0 < idInstrument.size() );   
+        assert( 0 < idInstrument.size() );
     };
     TableRowDef( // option/futuresoption with yymm
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-//      idInstrument_t idUnderlying_, 
-      boost::uint16_t nYear_, boost::uint16_t nMonth_, 
+//      idInstrument_t idUnderlying_,
+      boost::uint16_t nYear_, boost::uint16_t nMonth_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ), 
+      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ),
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
-        assert( 0 < idInstrument.size() );   
+        assert( 0 < idInstrument.size() );
 //        assert( 0 < idUnderlying.size() );
     };
     TableRowDef( // option/futuresoption with yymmdd
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-//      idInstrument_t idUnderlying_, 
+//      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ), 
+      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ),
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
-        assert( 0 < idInstrument.size() ); 
+        assert( 0 < idInstrument.size() );
 //        assert( 0 < idUnderlying.size() );
     };
     TableRowDef( // currency
       const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
       InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
       Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
-//        idUnderlying( idCounterInstrument_ ), 
-	eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
-        eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
+//        idUnderlying( idCounterInstrument_ ),
+	eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ),
+        eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
         nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.00005 ), nSignificantDigits( 5 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
@@ -180,32 +181,32 @@ public:
 //  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
   Instrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
-    const idExchange_t& sExchangeName 
+    const idExchange_t& sExchangeName
      );
   Instrument(   // future
-    idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
+    idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day = 0 );
   Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together
-    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
+    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ); 
+    OptionSide::enumOptionSide side,
+    double strike );
   Instrument(   // option with yymmdd
-    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
+    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ); 
+    OptionSide::enumOptionSide side,
+    double strike );
   Instrument(  // currency
-    const idInstrument_t& idInstrument, 
+    const idInstrument_t& idInstrument,
 //    const idInstrument_t& idCounterInstrument,
     InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
-    
+
   virtual ~Instrument(void);
 
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
@@ -237,10 +238,10 @@ public:
   bool IsOption( void )        const { return ( InstrumentType::Option == m_row.eType ); };
   bool IsFuture( void )        const { return ( InstrumentType::Future == m_row.eType ); };
   bool IsFuturesOption( void ) const { return ( InstrumentType::FuturesOption == m_row.eType ); };
-  
+
   void SetExchangeName( const std::string& sExchangeName ) { m_row.idExchange = sExchangeName; }
   const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
-  
+
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_row.eCurrency = eCurrency; };
   const char *GetCurrencyName( void ) const { return Currency::Name[ m_row.eCurrency ]; };
 
@@ -258,7 +259,7 @@ public:
   void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday
   boost::gregorian::date GetCommonCalcExpiry( void ) const { return m_dateCommonCalc; };
   std::string GetCommonCalcExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); }
-  
+
   void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };  // for Interactive Brokers contract identification
   boost::int32_t GetContract( void ) const { return m_row.nIBContract; };
 

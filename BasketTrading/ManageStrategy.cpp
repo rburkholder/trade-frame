@@ -68,7 +68,6 @@
      */
 
 #include <algorithm>
-#include <sstream>
 
 #include "ManageStrategy.h"
 
@@ -610,13 +609,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( m_SpreadValidation.IsActive() ) {
             if ( m_SpreadValidation.Validate( 11 ) ) {
               idPortfolio_t idPortfolio;
-              std::stringstream ss;
-              ss << m_iterChainExpiryInUse->first;
+              boost::gregorian::date date( m_iterChainExpiryInUse->first );
               idPortfolio
                 = "strangle-"
                 + m_sUnderlying
                 + "-"
-                + ss.str()
+                + ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )
                 + "-"
                 + boost::lexical_cast<std::string>( strikeOtmCall )
                 + "-"
