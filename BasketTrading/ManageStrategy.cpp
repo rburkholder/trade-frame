@@ -994,7 +994,7 @@ void ManageStrategy::CloseItmLeg() {
       Strangle& strangle( vt.second );
       double price( m_TradeUnderlyingLatest.Price() );
       if ( 0.0 != price ) {
-        m_bClosedItmLeg = strangle.CloseItmLeg( price );
+        m_bClosedItmLeg |= strangle.CloseItmLeg( price );
       }
     }
   );
