@@ -73,7 +73,7 @@
 
 namespace {
   ou::Colour::enumColour rColour[] = {
-    ou::Colour::Fuchsia,
+    ou::Colour::DarkBlue,
     ou::Colour::DarkCyan,
     ou::Colour::MediumSlateBlue,
     ou::Colour::SteelBlue,
@@ -162,7 +162,7 @@ ManageStrategy::ManageStrategy(
 
   //m_ceUpReturn.SetColour( ou::Colour::Red );
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
-  m_ceProfitLossPortfolio.SetColour( ou::Colour::DarkBlue );
+  m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
   
   pcdvStrategyData->Add( 0, &m_cePrice );
   pcdvStrategyData->Add( 0, &m_cePivots );
