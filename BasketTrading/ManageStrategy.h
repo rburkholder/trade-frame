@@ -128,7 +128,7 @@ public:
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
-  void AddStrangle();
+  void AddStrangle( bool bForced );
 
   double EmitInfo();
 
@@ -172,7 +172,8 @@ private:
 
   size_t m_nLegs;
 
-  bool m_bClosedItmLeg; // allows state machine to open new combo
+  bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
+  bool m_bAllowComboAdd; // allows state machine to open new combo
 
   double m_dblOpen;
 

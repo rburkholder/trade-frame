@@ -83,7 +83,7 @@ public:
   void CloseFarItm();
   void CloseForProfits();
   void CloseItmLeg();
-  void AddStrangle();
+  void AddStrangle( bool bForced );
   void EmitInfo();
 
 protected:

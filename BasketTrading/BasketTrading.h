@@ -116,7 +116,9 @@ private:
   void HandleCloseFarItm( void );
   void HandleCloseForProfits( void );
   void HandleCloseItmLeg( void );
-  void HandleAddStrangle( void );
+
+  void HandleAddStrangleAllowed( void );
+  void HandleAddStrangleForced( void );
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );

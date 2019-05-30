@@ -68,6 +68,7 @@
      */
 
 #include <algorithm>
+#include <sstream>
 
 #include "ManageStrategy.h"
 
@@ -127,7 +128,7 @@ ManageStrategy::ManageStrategy(
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
   m_nLegs {},
-  m_bClosedItmLeg( false ),
+  m_bClosedItmLeg( false ), m_bAllowComboAdd( false ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -531,6 +532,10 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
     case TSOptionEvaluation:
       {
 
+        if ( m_mapCombo.empty() ) {
+          m_bAllowComboAdd = true;
+        }
+
         // keep potential options warmed up
         double mid = m_QuoteUnderlyingLatest.Midpoint();
 
@@ -574,8 +579,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             }
           }
 
-          if ( !m_mapCombo.empty() ) bBuildOptions = false; // temporary until multiple combos allowed
-          // TODO: additional combos will probably be manually triggered
+          if ( !m_bAllowComboAdd ) bBuildOptions = false;  // always allow options to be validating? -> enable when tracking atm greeks
 
           if ( bBuildOptions ) {
             double diff = strikeOtmCall - strikeOtmPut; // check that strikes are max 0.50 apart
@@ -605,13 +609,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         }
 
-        if ( m_mapCombo.empty() ) { // temporary until determine how to properly add additional entries
+        if ( m_bAllowComboAdd ) {
           if ( m_SpreadValidation.IsActive() ) {
             if ( m_SpreadValidation.Validate( 11 ) ) {
               idPortfolio_t idPortfolio;
+              std::stringstream ss;
+              ss << m_iterChainExpiryInUse->first;
               idPortfolio
                 = "strangle-"
                 + m_sUnderlying
+                + "-"
+                + ss.str()
                 + "-"
                 + boost::lexical_cast<std::string>( strikeOtmCall )
                 + "-"
@@ -637,10 +645,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
                 m_SpreadValidation.ResetOptions();
                 strangle.OrderLongStrangle();
-                //m_eOptionState = EOptionState::MonitorPosition;
-                //m_stateTrading = ETradingState::TSMonitorStrangle;
-                //strike.m_state = Strike::State::Executing;
+                m_bAllowComboAdd = false;
               }
+              // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
             }
           }
         }
@@ -998,18 +1005,14 @@ void ManageStrategy::CloseItmLeg() {
   );
 }
 
-void ManageStrategy::AddStrangle() {
-//  std::for_each(
-//    m_mapCombo.begin(), m_mapCombo.end(),
-//    [this](mapCombo_t::value_type& vt){
-//      Strangle& strangle( vt.second );
-      //double price( m_TradeUnderlyingLatest.Price() );
-      //if ( 0.0 != price ) {
-        //strangle.AddStrangle( price );
-      //}
-      std::cout << m_sUnderlying << ": AddStrangle - to be implemented" << std::endl;
-//    }
-//  );
+void ManageStrategy::AddStrangle( bool bForced ) {
+  if ( bForced ) {
+    m_bAllowComboAdd = true;
+  }
+  else {
+    m_bAllowComboAdd = m_bClosedItmLeg;
+  }
+  m_bClosedItmLeg = false;
 }
 
 void ManageStrategy::TakeProfits() {

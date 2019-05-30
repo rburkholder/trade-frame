@@ -726,13 +726,11 @@ void MasterPortfolio::CloseItmLeg() {
     } );
 }
 
-void MasterPortfolio::AddStrangle() {
-  std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->AddStrangle();
-    } );
+void MasterPortfolio::AddStrangle( bool bForced ) {
+  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+    Strategy& strategy( vt.second );
+    strategy.pManageStrategy->AddStrangle( bForced );
+  }
 }
 
 void MasterPortfolio::TakeProfits() {

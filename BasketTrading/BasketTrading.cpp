@@ -182,7 +182,8 @@ bool AppBasketTrading::OnInit() {
   vItems.push_back( new mi( "a3 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
   vItems.push_back( new mi( "a4 Close leg for profits", MakeDelegate( this, &AppBasketTrading::HandleCloseForProfits ) ) );
   vItems.push_back( new mi( "a5 Close ITM leg", MakeDelegate( this, &AppBasketTrading::HandleCloseItmLeg ) ) );
-  vItems.push_back( new mi( "a6 Add strangle", MakeDelegate( this, &AppBasketTrading::HandleAddStrangle ) ) );
+  vItems.push_back( new mi( "a6 Add strangle - allowed", MakeDelegate( this, &AppBasketTrading::HandleAddStrangleAllowed ) ) );
+  vItems.push_back( new mi( "a7 Add strangle - forced", MakeDelegate( this, &AppBasketTrading::HandleAddStrangleForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   return true;
@@ -249,8 +250,12 @@ void AppBasketTrading::HandleCloseItmLeg() {
   CallAfter( std::bind( &MasterPortfolio::CloseItmLeg, m_pMasterPortfolio.get() ) );
 }
 
-void AppBasketTrading::HandleAddStrangle() {
-  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get() ) );
+void AppBasketTrading::HandleAddStrangleAllowed() {
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), false ) );
+}
+
+void AppBasketTrading::HandleAddStrangleForced() {
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), true ) );
 }
 
 void AppBasketTrading::HandleEmitInfo() {
