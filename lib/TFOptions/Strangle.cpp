@@ -43,9 +43,8 @@ void Strangle::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-void Strangle::SetPositionCall( pPosition_t pCall, ou::Colour::enumColour colour ) {
+void Strangle::SetPositionCall( pPosition_t pCall ) {
   assert( m_pPortfolio->Id() == pCall->GetRow().idPortfolio );
-  m_legCall.SetColour( colour );
   m_legCall.SetPosition( pCall );
   m_state = State::Positions;
 }
@@ -53,9 +52,8 @@ Strangle::pPosition_t Strangle::GetPositionCall() {
   return m_legCall.GetPosition();
 }
 
-void Strangle::SetPositionPut( pPosition_t pPut, ou::Colour::enumColour colour ) {
+void Strangle::SetPositionPut( pPosition_t pPut ) {
   assert( m_pPortfolio->Id() == pPut->GetRow().idPortfolio );
-  m_legPut.SetColour( colour );
   m_legPut.SetPosition( pPut );
   m_state = State::Positions;
 }
@@ -116,22 +114,14 @@ void Strangle::SaveSeries( const std::string& sPrefix ) {
   m_legPut.SaveSeries( sPrefix );
 }
 
-void Strangle::AddChartData( pChartDataView_t pChartData ) {
-  m_legCall.AddChartData( pChartData );
-  m_legPut.AddChartData( pChartData );
-}
-
-void Strangle::SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut ) {
-  m_legCall.SetColour( colourCall );
-  m_legPut.SetColour( colourPut );
-}
-
-void Strangle::SetColourCall( ou::Colour::enumColour colour ) {
+void Strangle::AddChartDataCall( pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
   m_legCall.SetColour( colour );
+  m_legCall.AddChartData( pChartData );
 }
 
-void Strangle::SetColourPut( ou::Colour::enumColour colour ) {
+void Strangle::AddChartDataPut( pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
   m_legPut.SetColour( colour );
+  m_legPut.AddChartData( pChartData );
 }
 
 void Strangle::Update( bool bTrending, double dblPrice ) {

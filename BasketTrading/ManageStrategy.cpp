@@ -343,14 +343,14 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       switch ( pInstrument->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
           std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strangle.SetPositionCall( pPosition, rColour[ m_ixColour++ ] );
-          strangle.SetColourCall( rColour[ m_ixColour++ ] );
+          strangle.SetPositionCall( pPosition );
+          strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
         case ou::tf::OptionSide::Put:
           std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strangle.SetPositionPut( pPosition, rColour[ m_ixColour++ ] );
-          strangle.SetColourPut( rColour[ m_ixColour++ ] );
+          strangle.SetPositionPut( pPosition );
+          strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
           m_nLegs++;
           break;
       }
@@ -629,15 +629,16 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 }
                 strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
                 pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 0 ) );
-                strangle.SetPositionCall( pPositionCall, rColour[ m_ixColour++ ] );
+                strangle.SetPositionCall( pPositionCall );
+                strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
                 pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 1 ) );
-                strangle.SetPositionPut( pPositionPut, rColour[ m_ixColour++ ] );
+                strangle.SetPositionPut( pPositionPut );
+                strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
                 m_SpreadValidation.ResetOptions();
                 strangle.OrderLongStrangle();
                 //m_eOptionState = EOptionState::MonitorPosition;
                 //m_stateTrading = ETradingState::TSMonitorStrangle;
                 //strike.m_state = Strike::State::Executing;
-                strangle.AddChartData( m_pChartDataView );
               }
             }
           }

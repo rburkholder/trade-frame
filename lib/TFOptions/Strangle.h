@@ -52,9 +52,9 @@ public:
 
   void SetPortfolio( pPortfolio_t );
 
-  void SetPositionCall( pPosition_t pCall, ou::Colour::enumColour colour );
+  void SetPositionCall( pPosition_t pCall );
   pPosition_t GetPositionCall();
-  void SetPositionPut( pPosition_t pPut, ou::Colour::enumColour colour );
+  void SetPositionPut( pPosition_t pPut );
   pPosition_t GetPositionPut();
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
@@ -65,11 +65,9 @@ public:
 
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
-  void AddChartData( pChartDataView_t pChartData );
 
-  void SetColours( ou::Colour::enumColour colourCall, ou::Colour::enumColour colourPut );
-  void SetColourCall( ou::Colour::enumColour colour );
-  void SetColourPut( ou::Colour::enumColour colour );
+  void AddChartDataCall( pChartDataView_t pChartData, ou::Colour::enumColour colour );
+  void AddChartDataPut( pChartDataView_t pChartData, ou::Colour::enumColour colour );
 
   double GetNet();
 
