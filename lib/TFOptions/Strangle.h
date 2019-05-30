@@ -70,7 +70,7 @@ public:
   void AddChartDataCall( pChartDataView_t pChartData, ou::Colour::enumColour colour );
   void AddChartDataPut( pChartDataView_t pChartData, ou::Colour::enumColour colour );
 
-  double GetNet();
+  double GetNet( double price );
 
   void CloseExpiryItm( double price, const boost::gregorian::date date );
   void CloseFarItm( double price );

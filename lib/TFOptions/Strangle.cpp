@@ -128,7 +128,7 @@ void Strangle::Update( bool bTrending, double dblPrice ) {
   // TODO: incorporate trending underlying
 }
 
-double Strangle::GetNet() {
+double Strangle::GetNet( double price ) {
   double dblNet {};
   pPosition_t pPositionCall = m_legCall.GetPosition();
   if ( pPositionCall ) {
@@ -138,6 +138,12 @@ double Strangle::GetNet() {
       << pPositionCall->GetInstrument()->GetInstrumentName()
       << "=" << dblCallValue;
     dblNet += dblCallValue;
+    if ( price > pPositionCall->GetInstrument()->GetStrike() ) {
+      std::cout << "(ITM)";
+    }
+    if ( price < pPositionCall->GetInstrument()->GetStrike() ) {
+      std::cout << "(otm)";
+    }
     if ( 0.0 == dblCallValue ) {
       const ou::tf::Quote& quote( pPositionCall->GetWatch()->LastQuote() );
       std::cout
@@ -155,6 +161,12 @@ double Strangle::GetNet() {
       << pPositionPut->GetInstrument()->GetInstrumentName()
       << "=" << dblPutValue;
     dblNet += dblPutValue;
+    if ( price < pPositionPut->GetInstrument()->GetStrike() ) {
+      std::cout << "(ITM)";
+    }
+    if ( price > pPositionPut->GetInstrument()->GetStrike() ) {
+      std::cout << "(otm)";
+    }
     if ( 0.0 == dblPutValue ) {
       const ou::tf::Quote& quote( pPositionPut->GetWatch()->LastQuote() );
       std::cout

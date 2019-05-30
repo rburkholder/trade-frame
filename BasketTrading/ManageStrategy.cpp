@@ -934,16 +934,14 @@ void ManageStrategy::Test() {
 
 double ManageStrategy::EmitInfo() {
   double dblNet {};
+  double price( m_TradeUnderlyingLatest.Price() );
   if ( 0 < m_mapCombo.size() ) {
-    std::cout << "TakeProfits " << this->m_sUnderlying << std::endl;
-    std::for_each(
-      m_mapCombo.begin(), m_mapCombo.end(),
-      [this,&dblNet](mapCombo_t::value_type& vt){
-        Strangle& strangle( vt.second );
-        dblNet += strangle.GetNet();
-      }
-    );
-    std::cout << "  net: " << dblNet << std::endl;
+    std::cout << "TakeProfits " << m_sUnderlying << std::endl;
+    for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+      Strangle& strangle( vt.second );
+      dblNet += strangle.GetNet( price );
+    }
+    std::cout << m_sUnderlying << " net: " << dblNet << std::endl;
   }
   return dblNet;
 }
