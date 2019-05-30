@@ -523,7 +523,8 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
 
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
-  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
+//  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
+  static const double dblMaxStrikeDistance( 1.01 );  // testing with SPY
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation:

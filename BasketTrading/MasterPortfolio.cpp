@@ -251,7 +251,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           dtLatestEod, m_setSymbols,
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
-              AddSymbol( iip );
+              if ( "SPY" == iip.sName ) { // limit for testing
+                AddSymbol( iip );
+              }
             }
             else {
               std::cout
@@ -587,9 +589,10 @@ void MasterPortfolio::Start() {
     std::cout << "m_mapVolatility has " << m_mapVolatility.size() << " entries." << std::endl;
     m_bStarted = true;
     //m_eAllocate = EAllocate::Done;
-    double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
+//    double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
+    double dblAmountToTradePerInstrument = /* 3% */ 0.20 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ fake for SPY
     std::cout << "Starting allocations at " << dblAmountToTradePerInstrument << " per instrument." << std::endl;
-    size_t nToSelect( 33 );
+    size_t nToSelect( 1 );
 
     std::for_each(
       m_setSymbols.begin(), m_setSymbols.end(),
@@ -601,6 +604,7 @@ void MasterPortfolio::Start() {
           //<< " ranking=" << strategy.dblBestProbability
           //<< " direction=" << (int)ranking.direction
           << " to trade: " << volume
+          << " (from previous)"
           << std::endl;
         strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
         m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
@@ -626,6 +630,7 @@ void MasterPortfolio::Start() {
                 //<< " ranking=" << strategy.dblBestProbability
                 //<< " direction=" << (int)ranking.direction
                 << " to trade: " << volume
+                << " (new start)"
                 << std::endl;
               strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
               m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
