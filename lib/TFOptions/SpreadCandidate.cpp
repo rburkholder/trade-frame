@@ -72,7 +72,7 @@ SpreadCandidate::pWatch_t SpreadCandidate::GetWatch() { return m_pWatch; }
 bool SpreadCandidate::ValidateSpread( size_t nDuration ) {
   bool bOk( false );
   if ( m_pWatch ) {
-    if ( m_nUnDesired < m_nDesired ) {
+    if ( ( 5 * m_nUnDesired ) < ( m_nUnDesired + m_nDesired ) ) { // undesired is < 20% of total
       // TODO: may want to enforce some sort of ratio
       //   will need some statistics on what a good number might be
       m_nConsecutiveSpreadOk++;
