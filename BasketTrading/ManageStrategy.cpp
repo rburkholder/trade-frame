@@ -947,55 +947,33 @@ double ManageStrategy::EmitInfo() {
 }
 
 void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
-  std::for_each(
-    m_mapCombo.begin(), m_mapCombo.end(),
-    [this,&date](mapCombo_t::value_type& vt){
-      Strangle& strangle( vt.second );
-      double price( m_TradeUnderlyingLatest.Price() );
-      if ( 0.0 != price ) {
-        strangle.CloseExpiryItm( price, date );
-      }
+  double price( m_TradeUnderlyingLatest.Price() );
+  for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+    Strangle& strangle( vt.second );
+    if ( 0.0 != price ) {
+      strangle.CloseExpiryItm( price, date );
     }
-  );
+  }
 }
 
 void ManageStrategy::CloseFarItm() {
-  std::for_each(
-    m_mapCombo.begin(), m_mapCombo.end(),
-    [this](mapCombo_t::value_type& vt){
-      Strangle& strangle( vt.second );
-      double price( m_TradeUnderlyingLatest.Price() );
-      if ( 0.0 != price ) {
-        strangle.CloseFarItm( price );
-      }
+  double price( m_TradeUnderlyingLatest.Price() );
+  for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+    Strangle& strangle( vt.second );
+    if ( 0.0 != price ) {
+      strangle.CloseFarItm( price );
     }
-  );
-}
-
-void ManageStrategy::CloseForProfits() {
-  std::for_each(
-    m_mapCombo.begin(), m_mapCombo.end(),
-    [this](mapCombo_t::value_type& vt){
-      Strangle& strangle( vt.second );
-      double price( m_TradeUnderlyingLatest.Price() );
-      if ( 0.0 != price ) {
-        strangle.CloseForProfits( price );
-      }
-    }
-  );
+  }
 }
 
 void ManageStrategy::CloseItmLeg() {
-  std::for_each(
-    m_mapCombo.begin(), m_mapCombo.end(),
-    [this](mapCombo_t::value_type& vt){
-      Strangle& strangle( vt.second );
-      double price( m_TradeUnderlyingLatest.Price() );
-      if ( 0.0 != price ) {
-        m_bClosedItmLeg |= strangle.CloseItmLeg( price );
-      }
+  double price( m_TradeUnderlyingLatest.Price() );
+  for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+    Strangle& strangle( vt.second );
+    if ( 0.0 != price ) {
+      m_bClosedItmLeg |= strangle.CloseItmLeg( price );
     }
-  );
+  }
 }
 
 void ManageStrategy::AddStrangle( bool bForced ) {
@@ -1008,15 +986,22 @@ void ManageStrategy::AddStrangle( bool bForced ) {
   m_bClosedItmLeg = false;
 }
 
-void ManageStrategy::TakeProfits() {
-  std::for_each(
-    m_mapCombo.begin(), m_mapCombo.end(),
-    [this](mapCombo_t::value_type& vt){
-      Strangle& strangle( vt.second );
-      double price( m_TradeUnderlyingLatest.Price() );
-      if ( 0.0 != price ) {
-        strangle.TakeProfits( price );
-      }
+void ManageStrategy::CloseForProfits() {
+  double price( m_TradeUnderlyingLatest.Price() );
+  for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+    Strangle& strangle( vt.second );
+    if ( 0.0 != price ) {
+      strangle.CloseForProfits( price );
     }
-  );
+  }
+}
+
+void ManageStrategy::TakeProfits() { // keep for something else
+  double price( m_TradeUnderlyingLatest.Price() );
+  for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+    Strangle& strangle( vt.second );
+    if ( 0.0 != price ) {
+      strangle.TakeProfits( price );
+    }
+  }
 }
