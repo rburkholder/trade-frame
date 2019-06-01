@@ -214,7 +214,7 @@ bool Strangle::CloseItmLeg( double price ) {
     if ( pPositionCall->IsActive() ) {
       pInstrument_t pInstrument = pPositionCall->GetInstrument();
       if ( price > pInstrument->GetStrike() ) {
-        if ( 0.05 < pPositionCall->GetUnRealizedPL() ) {
+        if ( 5.00 < pPositionCall->GetUnRealizedPL() ) {
           m_legCall.ClosePosition();
           bClosed = true;
         }
