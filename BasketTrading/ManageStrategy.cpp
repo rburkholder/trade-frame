@@ -936,7 +936,7 @@ double ManageStrategy::EmitInfo() {
   double dblNet {};
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0 < m_mapCombo.size() ) {
-    std::cout << "TakeProfits " << m_sUnderlying << std::endl;
+    std::cout << m_sUnderlying << "Info: " << m_sUnderlying << std::endl;
     for ( mapCombo_t::value_type& vt: m_mapCombo ) {
       Strangle& strangle( vt.second );
       dblNet += strangle.GetNet( price );
@@ -996,7 +996,7 @@ void ManageStrategy::CloseForProfits() {
   }
 }
 
-void ManageStrategy::TakeProfits() { // keep for something else
+void ManageStrategy::TakeProfits() {
   double price( m_TradeUnderlyingLatest.Price() );
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     Strangle& strangle( vt.second );
