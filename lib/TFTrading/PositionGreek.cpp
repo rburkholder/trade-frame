@@ -83,6 +83,7 @@ void PositionGreek::PositionPendingDelta( int n ) {
   OnPositionChanged( *this );
 }
 
+// TODO: multiply by multiplier and position size
 std::ostream& operator<<( std::ostream& os, const PositionGreek& position ) {
   const ou::tf::Greek& greek( position.m_pOption->LastGreek() );
   os 
