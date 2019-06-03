@@ -48,7 +48,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 29 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 5, 31 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -62,12 +62,11 @@ bool AppBasketTrading::OnInit() {
   //  idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
   //m_pFrameMain->Center();
-  m_pFrameMain->Move( 200, 100 );
-  m_pFrameMain->SetSize( 1400, 800 );
+  //m_pFrameMain->Move( 200, 100 );
+  //m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
 
-  wxBoxSizer* sizerMain;
-  sizerMain = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizerMain = new wxBoxSizer(wxHORIZONTAL);
   m_pFrameMain->SetSizer( sizerMain );
 
   wxBoxSizer* sizerLeft = new wxBoxSizer( wxVERTICAL );
@@ -96,11 +95,11 @@ bool AppBasketTrading::OnInit() {
   sizerLeft->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);
   m_pPanelPortfolioStats->Show( true );
 
-  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  sizerLeft->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+  wxBoxSizer* m_sizerLogger = new wxBoxSizer( wxHORIZONTAL );
+  sizerLeft->Add( m_sizerLogger, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerLogger->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
   m_pPanelLogging->Show( true );
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain, wxID_ANY );
