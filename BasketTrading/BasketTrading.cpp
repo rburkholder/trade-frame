@@ -42,7 +42,6 @@ bool AppBasketTrading::OnInit() {
 
   m_rbBuy = nullptr;
   m_rbSell = nullptr;
-  m_OrderSide = ou::tf::OrderSide::Unknown;
 
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Basket Trading" );
@@ -117,11 +116,11 @@ bool AppBasketTrading::OnInit() {
   wxBoxSizer* sizerBuySell = new wxBoxSizer( wxVERTICAL );
   sizerBottom->Add( sizerBuySell );
 
-  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy" );
+  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy", wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
   sizerBuySell->Add( m_rbBuy );
   m_rbBuy->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
 
-  m_rbSell = new wxRadioButton( m_pFrameMain, wxID_ANY, "Sell" );
+  m_rbSell = new wxRadioButton( m_pFrameMain, wxID_ANY, "Sell", wxDefaultPosition, wxDefaultSize, 0 );
   sizerBuySell->Add( m_rbSell );
   m_rbSell->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
 
@@ -256,12 +255,12 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
 void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
   std::cout << "button buy" << std::endl;
-  m_OrderSide = ou::tf::OrderSide::Buy;
+  CallAfter( std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Buy ) );
 }
 
 void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
   std::cout << "button sell" << std::endl;
-  m_OrderSide = ou::tf::OrderSide::Sell;
+  CallAfter( std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Sell ) );
 }
 
 void AppBasketTrading::HandleButtonTest() {
@@ -289,11 +288,11 @@ void AppBasketTrading::HandleCloseItmLeg() {
 }
 
 void AppBasketTrading::HandleAddStrangleAllowed() {
-  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), false, m_OrderSide ) );
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), false ) );
 }
 
 void AppBasketTrading::HandleAddStrangleForced() {
-  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), true, m_OrderSide ) );
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), true ) );
 }
 
 void AppBasketTrading::HandleEmitInfo() {

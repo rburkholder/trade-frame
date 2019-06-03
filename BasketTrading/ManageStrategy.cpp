@@ -134,7 +134,7 @@ ManageStrategy::ManageStrategy(
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_SpreadValidation( 2 ),
-  m_OrderSide( ou::tf::OrderSide::Buy ),
+  m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
   m_daysToExpiry( 1 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
@@ -641,7 +641,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 strangle.SetPositionPut( pPositionPut );
                 strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
                 m_SpreadValidation.ResetOptions();
-                strangle.PlaceOrder( m_OrderSide );
+                strangle.PlaceOrder( m_DefaultOrderSide );
                 m_bAllowComboAdd = false;
               }
               // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
@@ -978,8 +978,7 @@ void ManageStrategy::CloseItmLeg() {
   }
 }
 
-void ManageStrategy::AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide side ) {
-  m_OrderSide = side;
+void ManageStrategy::AddStrangle( bool bForced ) {
   if ( bForced ) {
     m_bAllowComboAdd = true;
   }

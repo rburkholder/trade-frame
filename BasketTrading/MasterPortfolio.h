@@ -78,12 +78,14 @@ public:
 
   void Test( void );
 
+  void SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide );
+
   void TakeProfits();
   void CloseExpiryItm( boost::gregorian::date );
   void CloseFarItm();
   void CloseForProfits();
   void CloseItmLeg();
-  void AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide );
+  void AddStrangle( bool bForced );
   void EmitInfo();
 
 protected:
@@ -107,6 +109,8 @@ private:
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
 
   std::thread m_worker;
+
+  ou::tf::OrderSide::enumOrderSide m_DefaultOrderSide;
 
   pProvider_t m_pExec;
   pProvider_t m_pData1;

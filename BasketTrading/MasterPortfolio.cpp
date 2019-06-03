@@ -73,6 +73,8 @@ MasterPortfolio::MasterPortfolio(
       assert( 0 ); // need the iqfeed provider
   }
 
+  m_DefaultOrderSide = ou::tf::OrderSide::Buy;
+
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
   m_cePLUnRealized.SetColour( ou::Colour::DarkCyan );
   m_cePLRealized.SetColour( ou::Colour::MediumSlateBlue );
@@ -543,6 +545,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
   strategy.Set( std::move( pManageStrategy ) );
 
   strategy.pManageStrategy->SetPivots( iip_.dblS1, iip_.dblPV, iip_.dblR1 );
+  strategy.pManageStrategy->SetDefaultOrderSide( m_DefaultOrderSide );
 
   m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -725,10 +728,10 @@ void MasterPortfolio::CloseItmLeg() {
     } );
 }
 
-void MasterPortfolio::AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide side ) {
+void MasterPortfolio::AddStrangle( bool bForced ) {
   for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
     Strategy& strategy( vt.second );
-    strategy.pManageStrategy->AddStrangle( bForced, side );
+    strategy.pManageStrategy->AddStrangle( bForced );
   }
 }
 
@@ -741,3 +744,10 @@ void MasterPortfolio::TakeProfits() {
     } );
 }
 
+void MasterPortfolio::SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side ) {
+  m_DefaultOrderSide = side;
+  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+    Strategy& strategy( vt.second );
+    strategy.pManageStrategy->SetDefaultOrderSide( side );
+  }
+}

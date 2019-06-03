@@ -90,8 +90,6 @@ private:
   wxRadioButton* m_rbBuy;
   wxRadioButton* m_rbSell;
 
-  ou::tf::OrderSide::enumOrderSide m_OrderSide;
-
   double m_dblMaxPL;
   double m_dblMinPL;
 
