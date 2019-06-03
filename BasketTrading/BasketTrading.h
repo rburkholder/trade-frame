@@ -113,13 +113,13 @@ private:
 
   void BuildMasterPortfolio();
 
-  void HandleLoadButton( void );
-  void HandleStartButton( void );
+  void HandleButtonLoad( void );
+  void HandleButtonStart( void );
   void HandleExitPositionsButton( void );
-  void HandleStopButton( void );
-  void HandleSaveButton( void );
+  void HandleButtonStop( void );
+  void HandleButtonSave( void );
   void HandleEmitInfo( void );
-  void HandleTestButton( void );
+  void HandleButtonTest( void );
 
   void HandleTakeProfits( void );
   void HandleCloseExpiryItm( void );

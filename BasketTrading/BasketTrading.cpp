@@ -190,10 +190,10 @@ bool AppBasketTrading::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
 
   vItems.clear();
-  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleLoadButton ) ) );
-  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleStartButton ) ) );
+  vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleButtonLoad ) ) );
+  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
   vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
-  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) ) );
+  vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleButtonSave ) ) );
   vItems.push_back( new mi( "a5 Emit Info", MakeDelegate( this, &AppBasketTrading::HandleEmitInfo ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Manage", vItems );
@@ -264,7 +264,7 @@ void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
   m_OrderSide = ou::tf::OrderSide::Sell;
 }
 
-void AppBasketTrading::HandleTestButton() {
+void AppBasketTrading::HandleButtonTest() {
   CallAfter( std::bind( &MasterPortfolio::Test, m_pMasterPortfolio.get() ) );
 }
 
@@ -328,7 +328,7 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
-void AppBasketTrading::HandleLoadButton() {
+void AppBasketTrading::HandleButtonLoad() {
   CallAfter( // eliminates debug session lock up when gui/menu is not yet finished
     [this](){
       //if ( 0 == m_pPortfolioStrategyAggregate.get() ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
@@ -362,14 +362,14 @@ void AppBasketTrading::HandleMenuActionTestSelection( void ) {
     });
 }
 
-void AppBasketTrading::HandleStartButton(void) {
+void AppBasketTrading::HandleButtonStart(void) {
   CallAfter(
     [this](){
       m_pMasterPortfolio->Start();
     } );
 }
 
-void AppBasketTrading::HandleStopButton(void) {
+void AppBasketTrading::HandleButtonStop(void) {
   CallAfter(
     [this](){
       m_pMasterPortfolio->Stop();
@@ -380,7 +380,7 @@ void AppBasketTrading::HandleExitPositionsButton(void) {
   m_pMasterPortfolio->Stop();
 }
 
-void AppBasketTrading::HandleSaveButton(void) {
+void AppBasketTrading::HandleButtonSave(void) {
   CallAfter(
     [this](){
       std::cout << "Saving ... ";
