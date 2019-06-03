@@ -251,9 +251,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           dtLatestEod, m_setSymbols,
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
-              if ( "SPY" == iip.sName ) { // limit for testing
+//              if ( "SPY" == iip.sName ) { // limit for testing
                 AddSymbol( iip );
-              }
+//              }
             }
             else {
               std::cout
@@ -414,7 +414,6 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
                 std::string sGenericOptionName
                   = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), trd.eOptionSide, trd.nYear, trd.nMonth, trd.nDay, trd.dblStrike );
-
                 bool bNeedContract( false );
                 pInstrument_t pOptionInstrument;
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
@@ -589,10 +588,10 @@ void MasterPortfolio::Start() {
     std::cout << "m_mapVolatility has " << m_mapVolatility.size() << " entries." << std::endl;
     m_bStarted = true;
     //m_eAllocate = EAllocate::Done;
-//    double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
-    double dblAmountToTradePerInstrument = /* 3% */ 0.20 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ fake for SPY
+    double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
+//    double dblAmountToTradePerInstrument = /* 3% */ 0.20 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ fake for SPY
     std::cout << "Starting allocations at " << dblAmountToTradePerInstrument << " per instrument." << std::endl;
-    size_t nToSelect( 1 );
+    size_t nToSelect( 33 );
 
     std::for_each(
       m_setSymbols.begin(), m_setSymbols.end(),
