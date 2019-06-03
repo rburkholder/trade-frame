@@ -87,6 +87,11 @@ private:
 
   wxTimer m_timerGuiRefresh;
 
+  wxRadioButton* m_rbBuy;
+  wxRadioButton* m_rbSell;
+
+  ou::tf::OrderSide::enumOrderSide m_OrderSide;
+
   double m_dblMaxPL;
   double m_dblMinPL;
 
@@ -142,6 +147,9 @@ private:
 
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
+
+  void HandleButtonSetBuy( wxCommandEvent& event );
+  void HandleButtonSetSell( wxCommandEvent& event );
 
   void SaveState();
   void LoadState();

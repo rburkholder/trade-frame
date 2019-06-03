@@ -60,7 +60,7 @@ public:
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  void OrderLongStrangle();
+  void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
   void CancelOrders();
   void ClosePositions();
 

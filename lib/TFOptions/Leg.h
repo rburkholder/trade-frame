@@ -50,8 +50,7 @@ public:
 
   void Tick( ptime dt );
 
-  void OrderLong( boost::uint32_t nOrderQuantity );
-  void OrderShort( boost::uint32_t nOrderQuantity );
+  void PlaceOrder( ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
   void CancelOrder();
   void ClosePosition();
   bool IsOrderActive() const;

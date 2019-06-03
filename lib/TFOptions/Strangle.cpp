@@ -77,18 +77,19 @@ void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // T
   }
 }
 
-void Strangle::OrderLongStrangle() { // if volatility drops, then losses occur on premium
+void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) { // if volatility drops, then losses occur on premium
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      m_legCall.OrderLong( 1 );
-      m_legPut.OrderLong( 1 );
+      m_legCall.PlaceOrder( side, 1 );
+      m_legPut.PlaceOrder( side, 1 );
       m_state = State::Executing;
       m_bUpperClosed = false;
       m_bLowerClosed = false;
       break;
   }
 }
+
 void Strangle::CancelOrders() {
   m_legCall.CancelOrder();
   m_legPut.CancelOrder();

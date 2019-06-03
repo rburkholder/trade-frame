@@ -57,23 +57,18 @@ void Leg::Tick( ptime dt ) {
   }
 }
 
-void Leg::OrderLong( boost::uint32_t nOrderQuantity ) {
+void Leg::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity ) {
   if ( m_pPosition ) {
-    m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Buy );
+    m_monitor.PlaceOrder( nOrderQuantity, side );
   }
-
 }
-void Leg::OrderShort( boost::uint32_t nOrderQuantity ) {
-  if ( m_pPosition ) {
-    m_monitor.PlaceOrder( nOrderQuantity, ou::tf::OrderSide::Sell );
-  }
 
-}
 void Leg::CancelOrder() {
   if ( m_pPosition ) {
     m_monitor.CancelOrder();
   }
 }
+
 void Leg::ClosePosition() {
   if ( m_pPosition ) {
     const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );

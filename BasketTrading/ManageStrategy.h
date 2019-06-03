@@ -128,7 +128,7 @@ public:
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
-  void AddStrangle( bool bForced );
+  void AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide );
 
   double EmitInfo();
 
@@ -160,6 +160,8 @@ private:
 
   EmaState m_stateEma;
   size_t m_nConfirmationIntervals;
+
+  ou::tf::OrderSide::enumOrderSide m_OrderSide;
 
   //EBarDirection m_rBarDirection[ 3 ];
 

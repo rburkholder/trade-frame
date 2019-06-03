@@ -726,10 +726,10 @@ void MasterPortfolio::CloseItmLeg() {
     } );
 }
 
-void MasterPortfolio::AddStrangle( bool bForced ) {
+void MasterPortfolio::AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide side ) {
   for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
     Strategy& strategy( vt.second );
-    strategy.pManageStrategy->AddStrangle( bForced );
+    strategy.pManageStrategy->AddStrangle( bForced, side );
   }
 }
 

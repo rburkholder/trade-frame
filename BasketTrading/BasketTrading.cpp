@@ -40,6 +40,10 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
+  m_rbBuy = nullptr;
+  m_rbSell = nullptr;
+  m_OrderSide = ou::tf::OrderSide::Unknown;
+
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Basket Trading" );
   wxApp::SetVendorName( "One Unified Net Limited" );
@@ -109,6 +113,19 @@ bool AppBasketTrading::OnInit() {
 
   wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
   sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
+
+  wxBoxSizer* sizerBuySell = new wxBoxSizer( wxVERTICAL );
+  sizerBottom->Add( sizerBuySell );
+
+  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy" );
+  sizerBuySell->Add( m_rbBuy );
+  m_rbBuy->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
+
+  m_rbSell = new wxRadioButton( m_pFrameMain, wxID_ANY, "Sell" );
+  sizerBuySell->Add( m_rbSell );
+  m_rbSell->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
+
+  m_rbBuy->SetValue( true );
 
   m_pFrameMain->Show( true );
 
@@ -237,6 +254,16 @@ void AppBasketTrading::BuildMasterPortfolio() {
   std::cout << "  done." << std::endl;
 }
 
+void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
+  std::cout << "button buy" << std::endl;
+  m_OrderSide = ou::tf::OrderSide::Buy;
+}
+
+void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
+  std::cout << "button sell" << std::endl;
+  m_OrderSide = ou::tf::OrderSide::Sell;
+}
+
 void AppBasketTrading::HandleTestButton() {
   CallAfter( std::bind( &MasterPortfolio::Test, m_pMasterPortfolio.get() ) );
 }
@@ -262,11 +289,11 @@ void AppBasketTrading::HandleCloseItmLeg() {
 }
 
 void AppBasketTrading::HandleAddStrangleAllowed() {
-  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), false ) );
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), false, m_OrderSide ) );
 }
 
 void AppBasketTrading::HandleAddStrangleForced() {
-  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), true ) );
+  CallAfter( std::bind( &MasterPortfolio::AddStrangle, m_pMasterPortfolio.get(), true, m_OrderSide ) );
 }
 
 void AppBasketTrading::HandleEmitInfo() {
@@ -409,6 +436,9 @@ void AppBasketTrading::LoadState() {
 }
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+  m_rbBuy->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
+  m_rbSell->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
+
   if ( m_worker.joinable() ) m_worker.join();
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();

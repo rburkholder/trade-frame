@@ -83,7 +83,7 @@ public:
   void CloseFarItm();
   void CloseForProfits();
   void CloseItmLeg();
-  void AddStrangle( bool bForced );
+  void AddStrangle( bool bForced, ou::tf::OrderSide::enumOrderSide );
   void EmitInfo();
 
 protected:
