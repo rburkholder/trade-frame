@@ -131,7 +131,7 @@ void InstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentNa
 
 void InstrumentManager::Assign( pInstrument_cref pInstrument ) {
   if ( m_map.end() != m_map.find( pInstrument->GetInstrumentName() ) ) {
-    throw std::runtime_error( "InstrumentManager::Assign instrument already exists" );
+    throw std::runtime_error( "InstrumentManager::Assign instrument already exists: " + pInstrument->GetInstrumentName() );
   }
   else {
     m_map.insert( pair_t( pInstrument->GetInstrumentName(), pInstrument ) );
@@ -152,7 +152,7 @@ InstrumentManager::pInstrument_t InstrumentManager::Get( idInstrument_cref idNam
       bFound = LoadInstrument( idName, pInstrument );
     }
     if ( !bFound ) {
-      throw std::runtime_error( "InstrumentManager::Get can't find idInstrument" );
+      throw std::runtime_error( "InstrumentManager::Get can't find idInstrument: " + pInstrument->GetInstrumentName() );
     }
   }
   return pInstrument;

@@ -443,7 +443,9 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                           //   as a fully defined, registered instrument
                           assert( 0 != pInstrument->GetContract() );
                           ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-                          im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                          if ( !im.Exists( pInstrument ) ) {
+                            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                          }
                           fOption( pOption );
                         },
                         nullptr  // request complete doesn't need a function

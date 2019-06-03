@@ -955,9 +955,16 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   if ( m_mapContractToSymbol.end() == iterMap ) {  // create new symbol from contract
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
-
-  if ( nullptr != handler )
-    handler( contractDetails, pInstrument );
+  try {
+    if ( nullptr != handler )
+      handler( contractDetails, pInstrument );
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout << "IBTWS::contractDetails exception: " << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cout << "IBTWS::contractDetails unknown error when delegating contractDetails" << std::endl;
+  }
 
 }
 
