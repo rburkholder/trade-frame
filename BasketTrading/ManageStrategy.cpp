@@ -134,7 +134,8 @@ ManageStrategy::ManageStrategy(
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_SpreadValidation( 2 ),
-  m_OrderSide( ou::tf::OrderSide::Buy )
+  m_OrderSide( ou::tf::OrderSide::Buy ),
+  m_daysToExpiry( 1 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -451,8 +452,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
       boost::gregorian::date date( trade.DateTime().date() );
       m_iterChainExpiryInUse = std::find_if( m_mapChains.begin(), m_mapChains.end(),
-        [date](const mapChains_t::value_type& vt)->bool{
-          return boost::gregorian::days( 6 ) < ( vt.first - date );  // first chain where trading date less than expiry date
+        [this,date](const mapChains_t::value_type& vt)->bool{
+          return m_daysToExpiry < ( vt.first - date );  // first chain where trading date less than expiry date
       } );
 
       if ( m_mapChains.end() == m_iterChainExpiryInUse ) {

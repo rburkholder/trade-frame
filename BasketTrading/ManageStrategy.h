@@ -165,6 +165,8 @@ private:
 
   //EBarDirection m_rBarDirection[ 3 ];
 
+  boost::gregorian::days m_daysToExpiry;
+
   using volume_t = ou::tf::DatedDatum::volume_t;
 
   std::string m_sUnderlying;
