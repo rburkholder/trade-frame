@@ -66,17 +66,19 @@ bool AppBasketTrading::OnInit() {
   //m_pFrameMain->SetSize( 1400, 800 );
   SetTopWindow( m_pFrameMain );
 
-  wxBoxSizer* sizerMain = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizerMain = new wxBoxSizer( wxVERTICAL );
   m_pFrameMain->SetSizer( sizerMain );
 
+  wxBoxSizer* sizerMiddle = new wxBoxSizer( wxHORIZONTAL );
+  sizerMain->Add( sizerMiddle, 1, wxEXPAND | wxALL, 2 );
+
   wxBoxSizer* sizerLeft = new wxBoxSizer( wxVERTICAL );
-  sizerMain->Add( sizerLeft, 0,  wxEXPAND | wxALL, 2 );
+  sizerMiddle->Add( sizerLeft, 0, wxEXPAND | wxALL, 2 );
 
   wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
-  sizerMain->Add( sizerRight, 1,  wxEXPAND | wxALL, 2 );
+  sizerMiddle->Add( sizerRight, 1, wxEXPAND | wxALL, 2 );
 
-  wxBoxSizer* sizerControls;
-  sizerControls = new wxBoxSizer( wxHORIZONTAL );
+  wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
   sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 2 );
 
   // populate variable in FrameWork01
@@ -104,6 +106,9 @@ bool AppBasketTrading::OnInit() {
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain, wxID_ANY );
   sizerRight->Add( m_pPanelFinancialChart, 1, wxEXPAND | wxALL, 2 );
+
+  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
+  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
   m_pFrameMain->Show( true );
 
