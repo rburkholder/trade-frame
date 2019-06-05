@@ -135,7 +135,7 @@ ManageStrategy::ManageStrategy(
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_SpreadValidation( 2 ),
   m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
-  m_daysToExpiry( 1 )
+  m_daysToExpiry( 6 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
