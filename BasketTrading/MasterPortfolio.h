@@ -69,7 +69,7 @@ public:
 
   void Load( ptime dtLatestEod, bool bAddToList );
   //void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
-  void Start();
+  //void Start();
 
   void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
 
@@ -94,6 +94,8 @@ private:
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
 
+  typedef ou::tf::Order::pOrder_t pOrder_t;
+
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
   typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
@@ -104,8 +106,6 @@ private:
 
   bool m_bStarted;
 
-  double m_dblPortfolioCashToTrade;
-  double m_dblPortfolioMargin;
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
 
   std::thread m_worker;
@@ -142,15 +142,16 @@ private:
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
+    bool m_bChartActivated;
     pChartDataView_t pChartDataView;
     Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
     : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
-      pChartDataView( pChartDataView_ ),
+      m_bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
     Strategy( const IIPivot&& iip_, pChartDataView_t& pChartDataView_ )
     : iip( std::move( iip_ ) ),
-      pChartDataView( pChartDataView_ ),
+      m_bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }
@@ -161,7 +162,7 @@ private:
 //    }
   };
 
-  using mapStrategy_t = std::map<std::string,Strategy>;
+  using mapStrategy_t = std::map<std::string,Strategy>; // first insertion uses
   mapStrategy_t m_mapStrategy;
 
   //struct Ranking {

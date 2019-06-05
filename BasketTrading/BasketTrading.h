@@ -112,7 +112,7 @@ private:
   void BuildMasterPortfolio();
 
   void HandleButtonLoad( void );
-  void HandleButtonStart( void );
+//  void HandleButtonStart( void );
   void HandleExitPositionsButton( void );
   void HandleButtonStop( void );
   void HandleButtonSave( void );

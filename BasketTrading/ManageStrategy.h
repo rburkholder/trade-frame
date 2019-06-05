@@ -85,6 +85,10 @@ public:
 
   using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t)>; // id of new, id of ManageStrategy portfolio
 
+  using fAuthorizeSimple_t     = std::function<bool(const std::string&)>;
+  using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
+  using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
+
   using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
   using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
 
@@ -104,17 +108,20 @@ public:
     fStartCalc_t,
     fStopCalc_t,
     fFirstTrade_t,
+    fAuthorizeUnderlying_t,
+    fAuthorizeOption_t,
+    fAuthorizeSimple_t,
     fBar_t,
     pChartDataView_t
     );
   virtual ~ManageStrategy( );
 
   const std::string& GetUnderlying() const { return m_sUnderlying; }
+  pPortfolio_t GetPortfolio() { return m_pPortfolioStrategy; }
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
-  void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
+  //void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
   void SetPivots( double dblS1, double dblPV, double dblR1 );
-  void Start( void );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 
@@ -140,7 +147,7 @@ private:
   enum ETradingState {
     TSInitializing, // set for duration of class initialization
     TSWaitForFirstTrade,  // wait for first trade during Regular Trading Hours
-    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
+//    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
     TSWaitForEntry, // start of equity trading
     TSOptionEvaluation, // start of option trading
     TSMonitorStrangle,
@@ -173,9 +180,6 @@ private:
 
   std::string m_sUnderlying;
 
-  double m_dblFundsToTrade;
-  volume_t m_nSharesToTrade;
-
   bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
   bool m_bAllowComboAdd; // allows state machine to open new combo
 
@@ -201,6 +205,10 @@ private:
 
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
+
+  fAuthorizeSimple_t m_fAuthorizeSimple;
+  fAuthorizeUnderlying_t m_fAuthorizeUnderlying;
+  fAuthorizeOption_t m_fAuthorizeOption;
 
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;

@@ -98,12 +98,14 @@ ManageStrategy::ManageStrategy(
   fStartCalc_t fStartCalc,
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
+  fAuthorizeUnderlying_t fAuthorizeUnderlying,
+  fAuthorizeOption_t fAuthorizeOption,
+  fAuthorizeSimple_t fAuthorizeSimple,
   fBar_t fBar,
   pChartDataView_t pcdvStrategyData
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
-  m_nSharesToTrade {}, m_dblFundsToTrade {},
   m_sUnderlying( sUnderlying ),
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
@@ -115,6 +117,9 @@ ManageStrategy::ManageStrategy(
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc ),
   m_fFirstTrade( fFirstTrade ),
+  m_fAuthorizeUnderlying( fAuthorizeUnderlying ),
+  m_fAuthorizeOption( fAuthorizeOption ),
+  m_fAuthorizeSimple( fAuthorizeSimple ),
   m_fBar( fBar ),
   m_eTradeDirection( ETradeDirection::None ),
   m_bfQuotes01Sec( 1 ),
@@ -359,42 +364,6 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
   }
 }
 
-void ManageStrategy::Start(  ) {
-
-  //std::cout << m_sUnderlying << " starting up ... " << std::endl;
-
-  //assert( TSWaitForCalc == m_stateTrading );
-
-  if ( !m_pPositionUnderlying ) {
-    std::cout << m_sUnderlying << " doesn't have a position ***" << std::endl;
-    m_stateTrading = TSNoMore;
-  }
-  else {
-    if ( 0.0 == m_dblFundsToTrade ) {
-      std::cout << m_sUnderlying << " not started, no funds" << std::endl;
-      m_stateTrading = TSNoMore;
-    }
-    else {
-      m_nSharesToTrade = CalcShareCount( m_dblFundsToTrade );
-//      if ( 200 > m_nSharesToTrade ) {
-//        std::cout << m_sUnderlying << " not started, need room for 200 shares" << std::endl;
-//        m_stateTrading = TSNoMore;
-//      }
-//      else {
-        // can start with what was supplied
-        std::cout << m_sUnderlying << " starting with $" << m_dblFundsToTrade << " for " << m_nSharesToTrade << " shares" << std::endl;
-
-        switch ( m_stateTrading ) {
-          case TSWaitForFirstTrade: // can't do anything yet
-            break;
-          case TSWaitForFundsAllocation:
-            m_stateTrading = TSOptionEvaluation; // first trade available, and funds available, so start with options
-            break;
-        }
-    }
-  }
-}
-
 void ManageStrategy::Stop( void ) {
   HandleCancel();
   std::for_each(
@@ -461,17 +430,17 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
         m_stateTrading = TSNoMore;
       }
       else {
-        if ( 0 != m_nSharesToTrade ) {
+//        if ( 0 != m_nSharesToTrade ) {
           m_stateTrading = TSOptionEvaluation; // ready to trade
-        }
-        else {
-          m_stateTrading = TSWaitForFundsAllocation; // need an allocation first
-        }
+//        }
+//        else {
+//          m_stateTrading = TSWaitForFundsAllocation; // need an allocation first
+//        }
       }
       }
       break;
-    case TSWaitForFundsAllocation: // Start() needs to be called
-      break;
+//    case TSWaitForFundsAllocation: // Start() needs to be called
+//      break;
     case TSWaitForEntry:
       break;
     case TSOptionEvaluation:
@@ -623,25 +592,30 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 + boost::lexical_cast<std::string>( strikeOtmPut );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
-                std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                std::pair<mapCombo_t::iterator,bool> result;
-                //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
-                result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
-                assert( result.second );
-                assert( m_mapCombo.end() != result.first );
-                Strangle& strangle( result.first->second );
-                if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
-                  std::cout << "WARNING: strategy running out of colours." << std::endl;
+                if ( m_fAuthorizeSimple( m_sUnderlying ) ) {
+                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                  std::pair<mapCombo_t::iterator,bool> result;
+                  //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
+                  result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
+                  assert( result.second );
+                  assert( m_mapCombo.end() != result.first );
+                  Strangle& strangle( result.first->second );
+                  if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                    std::cout << "WARNING: strategy running out of colours." << std::endl;
+                  }
+                  strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+                  pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 0 ) );
+                  strangle.SetPositionCall( pPositionCall );
+                  strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
+                  pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 1 ) );
+                  strangle.SetPositionPut( pPositionPut );
+                  strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
+                  m_SpreadValidation.ResetOptions();
+                  strangle.PlaceOrder( m_DefaultOrderSide );
                 }
-                strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-                pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 0 ) );
-                strangle.SetPositionCall( pPositionCall );
-                strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
-                pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 1 ) );
-                strangle.SetPositionPut( pPositionPut );
-                strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
-                m_SpreadValidation.ResetOptions();
-                strangle.PlaceOrder( m_DefaultOrderSide );
+                else {
+                  // ?
+                }
                 m_bAllowComboAdd = false;
               }
               // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
@@ -729,9 +703,9 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
             if ( EmaState::EmaUp == m_stateEma ) {
               m_nConfirmationIntervals--;
               if ( 0 == m_nConfirmationIntervals ) {
-                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
+//                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
                 m_pPositionUnderlying->CancelOrders();
-                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+//                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
                 m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
                 m_stateTrading = TSMonitorLong;
                 m_stateEma = EmaState::EmaUnstable;
@@ -746,9 +720,9 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
             if ( EmaState::EmaDown == m_stateEma ) {
               m_nConfirmationIntervals--;
               if ( 0 == m_nConfirmationIntervals ) {
-                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
+//                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
                 m_pPositionUnderlying->CancelOrders();
-                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+//                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
                 m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
                 m_stateTrading = TSMonitorShort;
                 m_stateEma = EmaState::EmaUnstable;

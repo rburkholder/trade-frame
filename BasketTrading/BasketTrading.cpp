@@ -51,7 +51,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 5, 31 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 6, 4 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -190,7 +190,7 @@ bool AppBasketTrading::OnInit() {
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleButtonLoad ) ) );
-  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
+//  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
   vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleButtonSave ) ) );
   vItems.push_back( new mi( "a5 Emit Info", MakeDelegate( this, &AppBasketTrading::HandleEmitInfo ) ) );
@@ -361,12 +361,12 @@ void AppBasketTrading::HandleMenuActionTestSelection( void ) {
     });
 }
 
-void AppBasketTrading::HandleButtonStart(void) {
-  CallAfter(
-    [this](){
-      m_pMasterPortfolio->Start();
-    } );
-}
+//void AppBasketTrading::HandleButtonStart(void) {
+//  CallAfter(
+//    [this](){
+//      m_pMasterPortfolio->Start();
+//    } );
+//}
 
 void AppBasketTrading::HandleButtonStop(void) {
   CallAfter(

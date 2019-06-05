@@ -19,12 +19,13 @@
 
 // class T:  target class
 
-// Manager base class for 
+// Manager base class for
 //  AccountManager,
 //  PortfolioManager
-//  OrderManager, 
-//  InstrumentManager, 
-//  ProviderManager, 
+//  OrderManager,
+//  InstrumentManager,
+//  ProviderManager,
+//  MoneyManager
 
 #include <OUCommon/Singleton.h>
 
@@ -35,7 +36,7 @@ namespace ou {
 namespace db { // Database
 
 // T: CRTP base
-template<class T> 
+template<class T>
 class ManagerBase: public ou::Singleton<T> {
 public:
 
@@ -98,7 +99,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, con
 template<class T>
 template<class K, class Q> // K:key, Q:query
 void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
-     
+
   if ( 0 != m_pSession ) {
     Q q( key );
     typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
@@ -109,7 +110,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
 template<class T>
 template<class K, class M, class Q> // K:key, M:map, Q:query
 void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhere ) {
-     
+
   typename M::const_iterator iter = map.find( key );
   if ( map.end() == iter ) {
     std::string s(  typeid(T).name() );

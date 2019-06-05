@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/ManagePosition.o \
 	${OBJECTDIR}/ManageStrategy.o \
 	${OBJECTDIR}/MasterPortfolio.o \
+	${OBJECTDIR}/MoneyManager.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
 	${OBJECTDIR}/Sentiment.o \
@@ -89,6 +90,11 @@ ${OBJECTDIR}/MasterPortfolio.o: MasterPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MasterPortfolio.o MasterPortfolio.cpp
+
+${OBJECTDIR}/MoneyManager.o: MoneyManager.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MoneyManager.o MoneyManager.cpp
 
 ${OBJECTDIR}/PanelBasketTradingMain.o: PanelBasketTradingMain.cpp
 	${MKDIR} -p ${OBJECTDIR}
