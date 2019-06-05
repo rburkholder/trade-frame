@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <assert.h> 
+#include <assert.h>
 
 #include <TFTrading/Instrument.h>
 
@@ -31,9 +31,9 @@ namespace margin { // options
 
 typedef ou::tf::Instrument::pInstrument_cref pInstrument_cref;
 
-struct MarginRequirement { 
-  double margin; 
-  MarginRequirement( void ): margin( 0 ) {};
+struct MarginRequirement {
+  double margin;
+  MarginRequirement( void ): margin {} {};
 };
 struct RegT: MarginRequirement {};
 //struct RegTInitialOrMaintenance: RegT {};
