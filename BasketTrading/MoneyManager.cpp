@@ -27,10 +27,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace {
-  size_t nMaxToAuthorize( 33 );
-  double dblPortfolioCashToTrade( 100000.0 );
-  double dblPortfolioMargin( 0.25 );
-  double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( dblPortfolioCashToTrade / dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
+  const size_t nMaxToAuthorize( 15 );
+  const double dblPortfolioCashToTrade( 100000.0 );
+  const double dblPortfolioMargin( 0.25 );
+  const double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( dblPortfolioCashToTrade / dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
 //    double dblAmountToTradePerInstrument = /* 3% */ 0.20 * ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ); // ~ fake for SPY
 }
 
@@ -86,7 +86,7 @@ bool MoneyManager::Authorize( const std::string& sUnderlying ) {
     return false;
   }
   if ( m_nAuthorized < nMaxToAuthorize ) {
-    nMaxToAuthorize++;
+    m_nAuthorized++;
     m_setAuthorized.insert( sUnderlying );
     return true;
   }
