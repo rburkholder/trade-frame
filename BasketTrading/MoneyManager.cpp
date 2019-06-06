@@ -79,19 +79,23 @@ bool MoneyManager::Authorize( const std::string& sUnderlying ) {
   iterator iter;
   iter = m_setAuthorized.find( sUnderlying ); // TOOD: could use portfolio, but would limit number of underlying
   if ( m_setAuthorized.end() != iter ) {
+    //std::cout << "MoneyManager::Authorize: existing authorized " << sUnderlying << ", " << m_nAuthorized << std::endl;
     return true;
   }
   iter = m_setRejected.find( sUnderlying );
   if ( m_setRejected.end() != iter ) {
+    //std::cout << "MoneyManager::Authorize: existing rejected " << sUnderlying << ", " << m_nAuthorized << std::endl;
     return false;
   }
   if ( m_nAuthorized < nMaxToAuthorize ) {
     m_nAuthorized++;
     m_setAuthorized.insert( sUnderlying );
+    std::cout << "MoneyManager::Authorize: authorizing " << sUnderlying << ", " << m_nAuthorized << std::endl;
     return true;
   }
   else {
     m_setRejected.insert( sUnderlying );
+    std::cout << "MoneyManager::Authorize: rejecting " << sUnderlying << ", " << m_nAuthorized << std::endl;
     return false;
   }
   assert( false );  // should not arrive here
