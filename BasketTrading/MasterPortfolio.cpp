@@ -30,7 +30,7 @@
 #include "MasterPortfolio.h"
 
 namespace {
-  static const std::string sPortfolioPrefix( "strategy-" );
+  const std::string sPortfolioPrefix( "strategy-" );
 }
 
 MasterPortfolio::MasterPortfolio(
