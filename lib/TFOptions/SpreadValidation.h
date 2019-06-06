@@ -39,6 +39,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   SpreadValidation( size_t nLegs );
+  ~SpreadValidation();
 
   void SetOption( size_t ixLeg, pWatch_t pCall );
   pWatch_t GetOption( size_t ixLeg );

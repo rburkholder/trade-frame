@@ -28,6 +28,10 @@ SpreadValidation::SpreadValidation( size_t nLegs ) {
   m_vSpreadCandidate.resize( nLegs );
 }
 
+SpreadValidation::~SpreadValidation() {
+  m_vSpreadCandidate.clear();
+}
+
 void SpreadValidation::SetOption( size_t ixLeg, pWatch_t pCall ) {
   m_vSpreadCandidate[ ixLeg ].SetWatch( pCall );
 }
