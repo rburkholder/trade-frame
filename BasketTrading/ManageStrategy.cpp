@@ -289,6 +289,7 @@ ManageStrategy::ManageStrategy(
 }
 
 ManageStrategy::~ManageStrategy( ) {
+  m_SpreadValidation.ResetOptions();
   m_mapCombo.clear();
   m_vEMA.clear();
   if ( m_pPositionUnderlying ) {
@@ -361,7 +362,7 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       }
 
       if ( pPosition->IsActive() ) {
-        fAuthorizeSimple_t( m_sUnderlying ); // update count
+        m_fAuthorizeSimple( m_sUnderlying, true ); // update count
       }
 
       }
@@ -597,7 +598,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 + boost::lexical_cast<std::string>( strikeOtmPut );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
-                if ( m_fAuthorizeSimple( m_sUnderlying ) ) {
+                if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
                   std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                   std::pair<mapCombo_t::iterator,bool> result;
                   //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );

@@ -85,7 +85,7 @@ public:
 
   using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t)>; // id of new, id of ManageStrategy portfolio
 
-  using fAuthorizeSimple_t     = std::function<bool(const std::string&)>;
+  using fAuthorizeSimple_t     = std::function<bool(const std::string&,bool)>; // underlying, has active positions
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
   using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
 

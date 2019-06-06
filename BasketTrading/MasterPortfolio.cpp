@@ -572,10 +572,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             return bAuthorized;
           },
     // ManageStrategy::m_fAuthorizeSimple
-          [this,&strategy]( const std::string& sName )->bool{
+          [this,&strategy]( const std::string& sName, bool bExists )->bool{
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
-            if ( bAuthorized ) {
+            if ( bAuthorized || bExists ) {
               if ( !strategy.m_bChartActivated ) {
                 m_fSupplyStrategyChart( EStrategyChart::Active, strategy.iip.sName, strategy.pChartDataView );
                 strategy.m_bChartActivated = true;
