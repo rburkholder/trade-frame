@@ -337,7 +337,7 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
 
       if ( m_mapCombo.end() == mapCombo_iter ) {
-        // need to construct Combo with first leg
+        // need to construct empty combo when first leg presented
         Strangle strangle;
         strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
         std::pair<mapCombo_t::iterator, bool> result;
@@ -359,6 +359,11 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
           strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
           break;
       }
+
+      if ( pPosition->IsActive() ) {
+        fAuthorizeSimple_t( m_sUnderlying ); // update count
+      }
+
       }
       break;
   }
