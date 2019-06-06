@@ -498,8 +498,9 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
 
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
-  static const double dblMaxStrikeDistance( 0.51 );  // not 0.50 to prevent rounding problems.
-//  static const double dblMaxStrikeDistance( 1.01 );  // testing with SPY
+  static const double dblTwentyPercent( 0.20 * 0.50 ); // 20 percent of 0.50 strike spread
+  static const double dblMaxStrikeDelta( 0.51 );  // not 0.50 to prevent rounding problems.
+  static const double dblMaxStrangleDelta( 1.01 ); // not 1.00 to prevent rounding problems
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation:
@@ -510,7 +511,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         }
 
         // keep potential options warmed up
-        double mid = m_QuoteUnderlyingLatest.Midpoint();
+        const double mid = m_QuoteUnderlyingLatest.Midpoint();
 
         bool bStrikesFound( false );
         double strikeOtmCall {};
@@ -522,9 +523,26 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
           else {
-            strikeOtmCall = m_iterChainExpiryInUse->second.Call_Otm( mid );
-            strikeOtmPut = m_iterChainExpiryInUse->second.Put_Otm( mid );
-            bStrikesFound = true;
+            ou::tf::option::IvAtm& atm( m_iterChainExpiryInUse->second );
+            strikeOtmCall = atm.Call_Otm( mid );
+            if ( dblTwentyPercent > ( strikeOtmCall - mid ) ) {
+              strikeOtmCall = atm.Call_Otm( strikeOtmCall ); // choose a further out strike
+            }
+            strikeOtmPut = atm.Put_Otm( mid );
+            if ( dblTwentyPercent > ( mid - strikeOtmPut ) ) {
+              strikeOtmPut = atm.Put_Otm( strikeOtmPut );
+            }
+            assert( strikeOtmCall > strikeOtmPut );
+            const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
+            if ( dblMaxStrangleDelta > dblStrikeDelta ) {
+              const double dblExclusionRange = 0.30 * dblStrikeDelta;  // enter in middle 20% only
+              if (
+                ( mid < ( strikeOtmCall - dblExclusionRange ) ) &&
+                ( mid > ( strikeOtmPut  + dblExclusionRange ) )
+                ) {
+                bStrikesFound = true;
+              }
+            }
           }
         }
         catch ( std::runtime_error& e ) {
@@ -555,30 +573,23 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( !m_bAllowComboAdd ) bBuildOptions = false;  // always allow options to be validating? -> enable when tracking atm greeks
 
           if ( bBuildOptions ) {
-            double diff = strikeOtmCall - strikeOtmPut; // check that strikes are max 0.50 apart
-            if ( 0.0 > diff ) diff = -diff;  // aka absolute value
-            if ( dblMaxStrikeDistance > diff ) { // confirming: diff(mid,strike)<0.51
-              //if ( ( dblMaxStrikeDistance > ( strikeAtm - strikeLower) ) && ( dblMaxStrikeDistance > ( strikeUpper - strikeAtm ) ) ) {
-              if ( ( dblMaxStrikeDistance > ( strikeOtmCall - strikeOtmPut ) ) ) {
-                std::cout
-                  << m_sUnderlying
-                  << ": constructing options for strangle -> quote=" << mid
-                  << ",otm call=" << strikeOtmCall
-                  << ",otm put=" << strikeOtmPut
-                  << std::endl;
-                pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
-                m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
-                  [this](pOption_t pOptionCall){
-                    //std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl; // too early
-                    m_SpreadValidation.SetOption( 0, pOptionCall );
-                  } );
-                m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
-                  [this](pOption_t pOptionPut){
-                    //std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl; // tool early
-                    m_SpreadValidation.SetOption( 1, pOptionPut );
-                  } );
-              }
-            }
+            std::cout
+              << m_sUnderlying
+              << ": constructing options for strangle -> quote=" << mid
+              << ",otm call=" << strikeOtmCall
+              << ",otm put=" << strikeOtmPut
+              << std::endl;
+            pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
+            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
+              [this](pOption_t pOptionCall){
+                //std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl; // too early
+                m_SpreadValidation.SetOption( 0, pOptionCall );
+              } );
+            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
+              [this](pOption_t pOptionPut){
+                //std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl; // tool early
+                m_SpreadValidation.SetOption( 1, pOptionPut );
+              } );
           }
         }
 
@@ -627,7 +638,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
             }
           }
-        }
+        } // m_bAllowedComboAdd
 
         std::for_each(
           m_mapCombo.begin(), m_mapCombo.end(),
