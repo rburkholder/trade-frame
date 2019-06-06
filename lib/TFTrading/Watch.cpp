@@ -127,7 +127,7 @@ void Watch::EnableWatch( void ) {
     m_bWatching = true;
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+//    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     // these two message types come second so that the symbol gets registered in previous statements
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
@@ -158,7 +158,7 @@ void Watch::DisableWatch( void ) {
     m_bWatching = false;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+//    std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
