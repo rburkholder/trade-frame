@@ -27,7 +27,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace {
-  const size_t nMaxToAuthorize( 15 );
+  const size_t nMaxToAuthorize( 25 );
   const double dblPortfolioCashToTrade( 100000.0 );
   const double dblPortfolioMargin( 0.25 );
   const double dblAmountToTradePerInstrument = /* 3% */ 0.03 * ( dblPortfolioCashToTrade / dblPortfolioMargin ); // ~ 33 instances at 3% is ~100% investment
