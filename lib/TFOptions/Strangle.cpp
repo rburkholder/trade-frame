@@ -26,45 +26,45 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 Strangle::Strangle()
-: m_state( State::Initializing ),
-  m_bUpperClosed( false ), m_bLowerClosed( false )
-{}
+: m_state( State::Initializing )
+{
+  m_vLeg.reserve( 16 ); // required for leg.AddChartData
+}
 
-Strangle::Strangle( const Strangle&& rhs )
+Strangle::Strangle( Strangle&& rhs )
 : m_state( rhs.m_state ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
-  m_legCall( std::move( rhs.m_legCall ) ),
-  m_legPut( std::move( rhs.m_legPut ) )
-{}
+  m_vLeg( std::move( m_vLeg ) )
+{
+  m_vLeg.reserve( 16 ); // required for leg.AddChartData
+}
 
 void Strangle::SetPortfolio( pPortfolio_t pPortfolio ) {
-  //m_legCall.Clear()? or assert is empty?
-  //m_legPut.Clear()? or assert is empty?
+  assert( m_vLeg.empty() );
   m_pPortfolio = pPortfolio;
 }
 
-void Strangle::SetPositionCall( pPosition_t pCall ) {
-  assert( m_pPortfolio->Id() == pCall->GetRow().idPortfolio );
-  m_legCall.SetPosition( pCall );
-  m_state = State::Positions;
-}
-Strangle::pPosition_t Strangle::GetPositionCall() {
-  return m_legCall.GetPosition();
-}
-
-void Strangle::SetPositionPut( pPosition_t pPut ) {
-  assert( m_pPortfolio->Id() == pPut->GetRow().idPortfolio );
-  m_legPut.SetPosition( pPut );
+// TODO:  need to accept existing positions, need to create own new positions
+void Strangle::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
+  assert( m_vLeg.size() < m_vLeg.capacity() );
+  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+  Leg leg( pPosition );
+  m_vLeg.emplace_back( std::move( leg ) );
+  m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
+  m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
   m_state = State::Positions;
 }
 
-Strangle::pPosition_t Strangle::GetPositionPut() {
-  return m_legPut.GetPosition();
-}
+//void Strangle::AddChartData(  ) {
+//  size_t ix {};
+//  for ( Leg& leg: m_vLeg ) {
+//  }
+//}
 
 void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
-  m_legCall.Tick( dt );
-  m_legPut.Tick( dt );
+  for ( Leg& leg: m_vLeg ) {
+    leg.Tick( dt );
+  }
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
     case State::Executing:
       if ( !AreOrdersActive() ) {
@@ -77,52 +77,49 @@ void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // T
   }
 }
 
-void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) { // if volatility drops, then losses occur on premium
+// TODO: need to fix this if other legs present.  Need to limit to the active legs.
+//   maybe vector of inactive legs
+// NOTE: if volatility drops, then losses occur on premium
+void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) { 
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      m_legCall.PlaceOrder( side, 1 );
-      m_legPut.PlaceOrder( side, 1 );
+      for ( Leg& leg: m_vLeg ) {
+        leg.PlaceOrder( side, 1 );
+      }
       m_state = State::Executing;
-      m_bUpperClosed = false;
-      m_bLowerClosed = false;
       break;
   }
 }
 
 void Strangle::CancelOrders() {
-  m_legCall.CancelOrder();
-  m_legPut.CancelOrder();
+  for ( Leg& leg: m_vLeg ) {
+    leg.CancelOrder();
+  }
   m_state = State::Canceled;
 }
 
 void Strangle::ClosePositions() {
-  if ( !m_bUpperClosed ) {
-    m_legCall.ClosePosition();
-    m_bUpperClosed = true;
-  }
-  if ( !m_bLowerClosed ) {
-    m_legPut.ClosePosition();
-    m_bLowerClosed = true;
+  for ( Leg& leg: m_vLeg ) {
+    if ( leg.IsActive() ) {
+      leg.ClosePosition();
+    }
   }
   m_state = State::Closing;
 }
 
-bool Strangle::AreOrdersActive() const { return m_legCall.IsOrderActive() || m_legPut.IsOrderActive(); }
+bool Strangle::AreOrdersActive() const { // TODO: is an external call still necessary?
+  bool bOrdersActive( false );
+  for ( const Leg& leg: m_vLeg ) {
+    bOrdersActive |= leg.IsOrderActive();
+  }
+  return bOrdersActive;
+}
 
 void Strangle::SaveSeries( const std::string& sPrefix ) {
-  m_legCall.SaveSeries( sPrefix );
-  m_legPut.SaveSeries( sPrefix );
-}
-
-void Strangle::AddChartDataCall( pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
-  m_legCall.SetColour( colour );
-  m_legCall.AddChartData( pChartData );
-}
-
-void Strangle::AddChartDataPut( pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
-  m_legPut.SetColour( colour );
-  m_legPut.AddChartData( pChartData );
+  for ( Leg& leg: m_vLeg ) {
+    leg.SaveSeries( sPrefix );
+  }
 }
 
 void Strangle::Update( bool bTrending, double dblPrice ) {
@@ -131,62 +128,9 @@ void Strangle::Update( bool bTrending, double dblPrice ) {
 
 double Strangle::GetNet( double price ) {
   double dblNet {};
-  pPosition_t pPositionCall = m_legCall.GetPosition();
-  if ( pPositionCall ) {
-    double dblCallValue = pPositionCall->GetUnRealizedPL();
-    std::cout
-      << "  leg call: "
-      << pPositionCall->GetInstrument()->GetInstrumentName()
-      << "=" << dblCallValue;
-    dblNet += dblCallValue;
-    if ( price > pPositionCall->GetInstrument()->GetStrike() ) {
-      std::cout << "(ITM)";
-    }
-    if ( price < pPositionCall->GetInstrument()->GetStrike() ) {
-      std::cout << "(otm)";
-    }
-    if ( 0.0 == dblCallValue ) {
-      const ou::tf::Quote& quote( pPositionCall->GetWatch()->LastQuote() );
-      std::cout
-        << ", quote: a" << quote.Ask()
-        << ", b" << quote.Bid()
-        ;
-    }
-    std::cout << std::endl;
+  for ( Leg& leg: m_vLeg ) {
+    dblNet += leg.GetNet( price );
   }
-  pPosition_t pPositionPut = m_legPut.GetPosition();
-  if ( pPositionPut ) {
-    double dblPutValue = pPositionPut->GetUnRealizedPL();
-    std::cout
-      << "  leg put: "
-      << pPositionPut->GetInstrument()->GetInstrumentName()
-      << "=" << dblPutValue;
-    dblNet += dblPutValue;
-    if ( price < pPositionPut->GetInstrument()->GetStrike() ) {
-      std::cout << "(ITM)";
-    }
-    if ( price > pPositionPut->GetInstrument()->GetStrike() ) {
-      std::cout << "(otm)";
-    }
-    if ( 0.0 == dblPutValue ) {
-      const ou::tf::Quote& quote( pPositionPut->GetWatch()->LastQuote() );
-      std::cout
-        << ", quote: a" << quote.Ask()
-        << ", b" << quote.Bid()
-        ;
-    }
-    std::cout << std::endl;
-  }
-//      double dblNetValue = dblCallValue + dblPutValue;
-//      if ( ( 0.0 != dblCallValue ) && ( 0.0 != dblPutValue ) ) {
-//        std::cout
-//          << "net value=" << dblNetValue
-//          << " "
-//          << pPositionCall->GetInstrument()->GetInstrumentName() << ":" << dblCallValue
-//          << " - "
-//          << pPositionPut->GetInstrument()->GetInstrumentName() << ":" << dblPutValue
-//          << std::endl;
-//      }
   return dblNet;
 }
 
@@ -194,45 +138,25 @@ double Strangle::GetNet( double price ) {
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
 void Strangle::CloseExpiryItm( double price, const boost::gregorian::date date ) {
-  m_legCall.CloseExpiryItm( date, price );
-  m_legPut.CloseExpiryItm( date, price );
+  for ( Leg& leg: m_vLeg ) {
+    leg.CloseExpiryItm( date, price );
+  }
 }
 
 void Strangle::CloseFarItm( double price ) {
-  pPosition_t pPositionCall = m_legCall.GetPosition();
-  pPosition_t pPositionPut  = m_legPut.GetPosition();
-  if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
-    double dblProfitCall = pPositionCall->GetUnRealizedPL();
-    double dblProfitPut  = pPositionPut->GetUnRealizedPL();
+//  pPosition_t pPositionCall = m_legCall.GetPosition();
+//  pPosition_t pPositionPut  = m_legPut.GetPosition();
+//  if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
+//    double dblProfitCall = pPositionCall->GetUnRealizedPL();
+//    double dblProfitPut  = pPositionPut->GetUnRealizedPL();
     // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuing here
-  }
+//  }
 }
 
 bool Strangle::CloseItmLeg( double price ) {
   bool bClosed( false );
-  {
-    pPosition_t pPositionCall = m_legCall.GetPosition();
-    if ( pPositionCall->IsActive() ) {
-      pInstrument_t pInstrument = pPositionCall->GetInstrument();
-      if ( price > pInstrument->GetStrike() ) {
-        if ( ( 100 * pPositionCall->GetActiveSize() * 0.05 ) < pPositionCall->GetUnRealizedPL() ) {
-          m_legCall.ClosePosition();
-          bClosed = true;
-        }
-      }
-    }
-  }
-  {
-    pPosition_t pPositionPut  = m_legPut.GetPosition();
-    if ( pPositionPut->IsActive() ) {
-      pInstrument_t pInstrument = pPositionPut->GetInstrument();
-      if ( price < pInstrument->GetStrike() ) {
-        if ( ( 100 * pPositionPut->GetActiveSize() * 0.05 ) < pPositionPut->GetUnRealizedPL() ) {
-          m_legPut.ClosePosition();
-          bClosed = true;
-        }
-      }
-    }
+  for ( Leg& leg: m_vLeg ) {
+    bClosed |= leg.CloseItm( price );
   }
   return bClosed;
 }

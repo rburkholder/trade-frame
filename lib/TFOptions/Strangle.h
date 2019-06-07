@@ -22,6 +22,9 @@
 #ifndef STRANGLE_H
 #define STRANGLE_H
 
+#include <vector>
+#include <functional>
+
 #include <OUCharting/ChartDataView.h>
 
 #include <TFTrading/Portfolio.h>
@@ -43,21 +46,21 @@ public:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
+  //using fColour_t = std::function<ou::Colour::enumColour(size_t)>;
+
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
   Strangle();
   Strangle( const Strangle& rhs ) = delete;
   Strangle& operator=( const Strangle& rhs ) = delete;
-  Strangle( const Strangle&& rhs );
+  Strangle( Strangle&& rhs );
 
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  void SetPositionCall( pPosition_t pCall );
-  pPosition_t GetPositionCall();
-  void SetPositionPut( pPosition_t pPut );
-  pPosition_t GetPositionPut();
+  void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  //void AddChartData( pChartDataView_t pChartData, fColour_t&& );
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
@@ -67,9 +70,6 @@ public:
 
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
-
-  void AddChartDataCall( pChartDataView_t pChartData, ou::Colour::enumColour colour );
-  void AddChartDataPut( pChartDataView_t pChartData, ou::Colour::enumColour colour );
 
   double GetNet( double price );
 
@@ -83,11 +83,10 @@ private:
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
-  ou::tf::Leg m_legCall;
-  ou::tf::Leg m_legPut;
+  enum IX { ixCall, ixPut };
 
-  bool m_bUpperClosed;
-  bool m_bLowerClosed;
+  using vLeg_t = std::vector<ou::tf::Leg>;
+  vLeg_t m_vLeg;
 
   void Update( bool bTrending, double dblPrice );
 };

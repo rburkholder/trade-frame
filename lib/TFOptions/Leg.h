@@ -43,6 +43,7 @@ public:
   Leg();
   Leg( pPosition_t pPosition );
   Leg( const Leg& rhs ) = delete;
+  Leg& operator=( const Leg& rhs ) = delete;
   Leg( const Leg&& rhs );
 
   void SetPosition( pPosition_t pPosition );
@@ -53,6 +54,7 @@ public:
   void PlaceOrder( ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
   void CancelOrder();
   void ClosePosition();
+  bool IsActive() const;
   bool IsOrderActive() const;
 
   void SaveSeries( const std::string& sPrefix );
@@ -61,8 +63,11 @@ public:
 
   void AddChartData( pChartDataView_t pChartData );
 
+  bool CloseItm( const double price );
   void CloseExpiryItm( const boost::gregorian::date date, const double price );
   void CloseExpiryOtm( const boost::gregorian::date date, const double price );
+
+  double GetNet( double price );
 
 private:
   bool m_bOption;

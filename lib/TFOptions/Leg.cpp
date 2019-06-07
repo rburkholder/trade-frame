@@ -40,7 +40,7 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 Leg::Leg( const Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
   m_monitor( std::move( rhs.m_monitor ) ),
-  m_bOption( rhs.m_bOption )
+  m_bOption( std::move( rhs.m_bOption ) )
 {
   Init();
 }
@@ -122,6 +122,15 @@ void Leg::ClosePosition() {
     }
   }
 }
+
+bool Leg::IsActive() const {
+  bool bIsActive( false );
+  if ( m_pPosition ) {
+    bIsActive = m_pPosition->IsActive();
+  }
+  return bIsActive;
+}
+
 bool Leg::IsOrderActive() const { return m_monitor.IsOrderActive(); }
 
 void Leg::SaveSeries( const std::string& sPrefix ) {
@@ -151,6 +160,37 @@ void Leg::AddChartData( pChartDataView_t pChartData ) {
   pChartData->Add( 4, &m_ceGamma );
   pChartData->Add( 5, &m_ceVega );
   pChartData->Add( 6, &m_ceTheta );
+}
+
+bool Leg::CloseItm( const double price ) {
+  bool bClosed( false );
+  if ( m_pPosition ) {
+    if ( m_bOption ) {
+      if ( m_pPosition->IsActive() ) {
+        using pInstrument_t = Position::pInstrument_t;
+        pInstrument_t pInstrument = m_pPosition->GetInstrument();
+        switch ( pInstrument->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            if ( price > pInstrument->GetStrike() ) {
+              if ( ( 100 * m_pPosition->GetActiveSize() * 0.05 ) < m_pPosition->GetUnRealizedPL() ) {
+                ClosePosition();
+                bClosed = true;
+              }
+            }
+            break;
+          case ou::tf::OptionSide::Put:
+            if ( price < pInstrument->GetStrike() ) {
+              if ( ( 100 * m_pPosition->GetActiveSize() * 0.05 ) < m_pPosition->GetUnRealizedPL() ) {
+                ClosePosition();
+                bClosed = true;
+              }
+            }
+            break;
+        }
+      }
+    }
+  }
+  return bClosed;
 }
 
 void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price ) {
@@ -197,6 +237,47 @@ void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
       }
     }
   }
+}
+
+double Leg::GetNet( double price ) {
+  double dblValue {};
+  if ( m_pPosition ) {
+    dblValue = m_pPosition->GetUnRealizedPL();
+    std::cout
+      << "  leg: "
+      << m_pPosition->GetInstrument()->GetInstrumentName()
+      << "=" << dblValue;
+    if ( m_bOption ) {
+      pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+      switch ( pOption->GetInstrument()->GetOptionSide() ) {
+        case ou::tf::OptionSide::Call:
+          if ( price > m_pPosition->GetInstrument()->GetStrike() ) {
+            std::cout << "(ITM)";
+          }
+          if ( price < m_pPosition->GetInstrument()->GetStrike() ) {
+            std::cout << "(otm)";
+          }
+          break;
+        case ou::tf::OptionSide::Put:
+          if ( price < m_pPosition->GetInstrument()->GetStrike() ) {
+            std::cout << "(ITM)";
+          }
+          if ( price > m_pPosition->GetInstrument()->GetStrike() ) {
+            std::cout << "(otm)";
+          }
+          break;
+      }
+    }
+    if ( 0.0 == dblValue ) {
+      const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
+      std::cout
+        << ", quote: a" << quote.Ask()
+        << ", b" << quote.Bid()
+        ;
+    }
+    std::cout << std::endl;
+  }
+  return dblValue;
 }
 
 void Leg::Init() {

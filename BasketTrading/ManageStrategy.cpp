@@ -340,7 +340,12 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       assert( m_pPositionUnderlying );
       assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
       assert( pPosition.get() == m_pPositionUnderlying.get() );
-      m_fRegisterWatch( pWatch );
+      try {
+        m_fRegisterWatch( pWatch );
+      }
+      catch( std::runtime_error& e ) {
+        std::cout << e.what() << std::endl;
+      }
       break;
     case ou::tf::InstrumentType::Option:
       if ( pPosition->IsActive() ) {
@@ -378,13 +383,11 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
         switch ( pInstrument->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
             std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-            strangle.SetPositionCall( pPosition );
-            strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
+            strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
             break;
           case ou::tf::OptionSide::Put:
             std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-            strangle.SetPositionPut( pPosition );
-            strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
+            strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
             break;
         }
 
@@ -662,8 +665,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                   }
                   pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
-                  strangle.SetPositionCall( pPositionCall );
-                  strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
+                  strangle.AddPosition( pPositionCall, m_pChartDataView, rColour[ m_ixColour++ ] );
 
                   pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) );
                   sOptionName = pOption->GetInstrument()->GetInstrumentName();
@@ -674,8 +676,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                   }
                   pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
-                  strangle.SetPositionPut( pPositionPut );
-                  strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
+                  strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
 
                   m_SpreadValidation.ResetOptions();
                   strangle.PlaceOrder( m_DefaultOrderSide );
