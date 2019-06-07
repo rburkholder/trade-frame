@@ -49,7 +49,7 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   m_pPosition = pPosition;
   m_monitor.SetPosition( pPosition );
 
-  m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
+  m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
 
   ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
@@ -58,13 +58,13 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   if ( pOption ) {
     m_bOption = true;
     m_ceDelta.Clear();
-    m_ceDelta.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Delta" );
+    m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceGamma.Clear();
-    m_ceGamma.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Gamma" );
+    m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceVega.Clear();
-    m_ceVega.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Vega" );
+    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceTheta.Clear();
-    m_ceTheta.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Theta" );
+    m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
   }
 }
 
