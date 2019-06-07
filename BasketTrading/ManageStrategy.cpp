@@ -271,7 +271,8 @@ ManageStrategy::ManageStrategy(
 
         //std::cout << m_sUnderlying << " watch done." << std::endl;
 
-        //pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
+        m_fRegisterWatch( pWatchUnderlying );
+
         pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
         pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
@@ -387,9 +388,9 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
             break;
         }
 
-        if ( pPosition->IsActive() ) {
+//        if ( pPosition->IsActive() ) {
           m_fAuthorizeSimple( m_sUnderlying, true ); // update count
-        }
+//        }
       }
       break;
   }
@@ -453,7 +454,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       boost::gregorian::date date( trade.DateTime().date() );
       m_iterChainExpiryInUse = std::find_if( m_mapChains.begin(), m_mapChains.end(),
         [this,date](const mapChains_t::value_type& vt)->bool{
-          return m_daysToExpiry < ( vt.first - date );  // first chain where trading date less than expiry date
+          return m_daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
       } );
 
       if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
@@ -627,11 +628,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 = "strangle-"
                 + m_sUnderlying
                 + "-"
-                + ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )
-                + "-"
-                + boost::lexical_cast<std::string>( strikeOtmCall )
-                + "-"
-                + boost::lexical_cast<std::string>( strikeOtmPut );
+                + ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() ) // date stamp when first initiated
+//                comment out to allow legs to change with dates, track profit over time
+//                + "-"
+//                + boost::lexical_cast<std::string>( strikeOtmCall )
+//                + "-"
+//                + boost::lexical_cast<std::string>( strikeOtmPut )
+                ;
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
@@ -655,6 +658,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   iterOption = m_mapOption.find( sOptionName );
                   if ( m_mapOption.end() == iterOption ) {
                     m_mapOption[ sOptionName ] = pOption;
+                    m_fRegisterOption( pOption );
                     m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                   }
                   pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
@@ -666,6 +670,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   iterOption = m_mapOption.find( sOptionName );
                   if ( m_mapOption.end() == iterOption ) {
                     m_mapOption[ sOptionName ] = pOption;
+                    m_fRegisterOption( pOption );
                     m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                   }
                   pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
