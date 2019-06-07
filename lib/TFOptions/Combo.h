@@ -13,51 +13,74 @@
  ************************************************************************/
 
 /*
- * File:    Strangle.h
+ * File:    Combo.h
  * Author:  raymond@burkholder.net
  * Project: TFOptions
- * Created on May 25, 2019, 10:56 PM
+ * Created on June 7, 2019, 5:08 PM
  */
 
-#ifndef STRANGLE_H
-#define STRANGLE_H
-
-#include <vector>
-#include <functional>
-
-#include <OUCharting/ChartDataView.h>
+#ifndef COMBO_H
+#define COMBO_H
 
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
-#include "Combo.h"
-#include "Option.h"
+#include "Leg.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class Strangle: public Combo {
+class Combo {
 public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  Strangle();
-  Strangle( const Strangle& rhs ) = delete;
-  Strangle& operator=( const Strangle& rhs ) = delete;
-  Strangle( Strangle&& rhs );
+  enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
+  State m_state;
+
+  Combo( );
+  Combo( const Combo& rhs ) = delete;
+  Combo& operator=( const Combo& rhs ) = delete;
+  Combo( Combo&& rhs );
+  virtual ~Combo( );
+
+  void SetPortfolio( pPortfolio_t );
+  pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
   virtual void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
+  void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  void CloseFarItm( double price );
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
+
+  double GetNet( double price );
+
+  void CloseForProfits( double price );
+  void TakeProfits( double price );
+  bool CloseItmLeg( double price );
+  void CloseExpiryItm( double price, const boost::gregorian::date date );
+
+
+  void CancelOrders();
+  void ClosePositions();
+
+  bool AreOrdersActive() const;
+  void SaveSeries( const std::string& sPrefix );
+
+
+protected:
+
+  pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
+
+  using vLeg_t = std::vector<ou::tf::Leg>;
+  vLeg_t m_vLeg;
 
 private:
 
-  enum IX { ixCall, ixPut };
+  void Update( bool bTrending, double dblPrice );
 
 };
 
@@ -65,4 +88,5 @@ private:
 } // namespace tf
 } // namespace ou
 
-#endif /* STRANGLE_H */
+#endif /* COMBO_H */
+
