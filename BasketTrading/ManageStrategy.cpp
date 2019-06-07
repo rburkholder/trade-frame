@@ -341,56 +341,55 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
       assert( pPosition.get() == m_pPositionUnderlying.get() );
       m_fRegisterWatch( pWatch );
       break;
-    case ou::tf::InstrumentType::Option: {
-
-      idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
-
-      mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
-
-      if ( m_mapCombo.end() == mapCombo_iter ) {
-        // need to construct empty combo when first leg presented
-        Strangle strangle;
-        strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-        std::pair<mapCombo_t::iterator, bool> result;
-        result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, std::move( strangle ) ) );
-        assert( result.second );
-        mapCombo_iter = result.first;
-      }
-
-      pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-
-      try {
-        m_fRegisterOption( pOption );
-      }
-      catch( std::runtime_error& e ) {
-        std::cout << e.what() << std::endl;
-      }
-
-      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-      if ( m_mapOption.end() == iterOption ) {
-        m_mapOption[ sOptionName ] = pOption;
-        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-      }
-
-      Strangle& strangle( mapCombo_iter->second );
-      switch ( pInstrument->GetOptionSide() ) {
-        case ou::tf::OptionSide::Call:
-          std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strangle.SetPositionCall( pPosition );
-          strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
-          break;
-        case ou::tf::OptionSide::Put:
-          std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-          strangle.SetPositionPut( pPosition );
-          strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
-          break;
-      }
-
+    case ou::tf::InstrumentType::Option:
       if ( pPosition->IsActive() ) {
-        m_fAuthorizeSimple( m_sUnderlying, true ); // update count
-      }
+        idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
+        mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
+
+        if ( m_mapCombo.end() == mapCombo_iter ) {
+          // need to construct empty combo when first leg presented
+          Strangle strangle;
+          strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+          std::pair<mapCombo_t::iterator, bool> result;
+          result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, std::move( strangle ) ) );
+          assert( result.second );
+          mapCombo_iter = result.first;
+        }
+
+        pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+        const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+
+        try {
+          m_fRegisterOption( pOption );
+        }
+        catch( std::runtime_error& e ) {
+          std::cout << e.what() << std::endl;
+        }
+
+        mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+        if ( m_mapOption.end() == iterOption ) {
+          m_mapOption[ sOptionName ] = pOption;
+          m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+        }
+
+        Strangle& strangle( mapCombo_iter->second );
+        switch ( pInstrument->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+            strangle.SetPositionCall( pPosition );
+            strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
+            break;
+          case ou::tf::OptionSide::Put:
+            std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+            strangle.SetPositionPut( pPosition );
+            strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
+            break;
+        }
+
+        if ( pPosition->IsActive() ) {
+          m_fAuthorizeSimple( m_sUnderlying, true ); // update count
+        }
       }
       break;
   }

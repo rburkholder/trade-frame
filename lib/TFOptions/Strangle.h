@@ -52,6 +52,7 @@ public:
   Strangle( const Strangle&& rhs );
 
   void SetPortfolio( pPortfolio_t );
+  pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
   void SetPositionCall( pPosition_t pCall );
   pPosition_t GetPositionCall();
