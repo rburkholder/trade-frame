@@ -24,21 +24,22 @@
 namespace ou {
 namespace tf {
 
-MonitorOrder::MonitorOrder():
-  m_nAdjustmentPeriods( 2 ),
-  m_CountDownToAdjustment {}
+namespace {
+  const size_t nAdjustmentPeriods( 3 );
+}
+
+MonitorOrder::MonitorOrder()
+: m_CountDownToAdjustment {}
   {}
 
 MonitorOrder::MonitorOrder( pPosition_t& pPosition )
-: m_nAdjustmentPeriods( 2 ),
-  m_CountDownToAdjustment {},
+: m_CountDownToAdjustment {},
   m_state( State::NoPosition ),
   m_pPosition( pPosition )
 {}
 
 MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
-: m_nAdjustmentPeriods( rhs.m_nAdjustmentPeriods ),
-  m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
+: m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
   m_state( rhs.m_state ),
   m_pPosition( std::move( rhs.m_pPosition ) ),
   m_pOrder( std::move( rhs.m_pOrder ) )
@@ -64,7 +65,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_pOrder->SetSignalPrice( dblNormalizedPrice );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-          m_CountDownToAdjustment = m_nAdjustmentPeriods;
+          m_CountDownToAdjustment = nAdjustmentPeriods;
           m_state = State::Active;
           m_pPosition->PlaceOrder( m_pOrder );
           std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
@@ -133,7 +134,7 @@ void MonitorOrder::UpdateOrder() { // true when order has been filled
             bUpdateOrder = true;
           }
           else {
-            m_CountDownToAdjustment = m_nAdjustmentPeriods;
+            m_CountDownToAdjustment = nAdjustmentPeriods;
           }
           break;
       }
@@ -148,7 +149,7 @@ void MonitorOrder::UpdateOrder() { // true when order has been filled
           << " spread " << spread
           << std::endl;
         m_pPosition->UpdateOrder( m_pOrder );
-        m_CountDownToAdjustment = m_nAdjustmentPeriods;
+        m_CountDownToAdjustment = nAdjustmentPeriods;
       }
     }
   }

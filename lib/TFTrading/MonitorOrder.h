@@ -56,7 +56,6 @@ private:
 
   enum class State { NoPosition, NoOrder, Active, Filled, Cancelled };
   State m_state;
-  const size_t m_nAdjustmentPeriods;
   size_t m_CountDownToAdjustment;
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;
