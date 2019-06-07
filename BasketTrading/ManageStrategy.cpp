@@ -978,6 +978,7 @@ double ManageStrategy::EmitInfo() {
     std::cout << "Info " << m_sUnderlying << std::endl;
     for ( mapCombo_t::value_type& vt: m_mapCombo ) {
       Strangle& strangle( vt.second );
+      std::cout << "  portfolio: " << strangle.GetPortfolio()->Id() << std::endl;
       dblNet += strangle.GetNet( price );
     }
     std::cout << "  net: " << dblNet << std::endl;
