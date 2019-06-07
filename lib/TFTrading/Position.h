@@ -193,6 +193,8 @@ public:
   pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
   pWatch_t GetWatch( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
 
+  size_t GetActiveSize() const { return m_row.nPositionActive; }
+
   double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };

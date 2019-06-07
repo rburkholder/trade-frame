@@ -215,7 +215,7 @@ bool Strangle::CloseItmLeg( double price ) {
     if ( pPositionCall->IsActive() ) {
       pInstrument_t pInstrument = pPositionCall->GetInstrument();
       if ( price > pInstrument->GetStrike() ) {
-        if ( 5.00 < pPositionCall->GetUnRealizedPL() ) {
+        if ( ( 100 * pPositionCall->GetActiveSize() * 0.05 ) < pPositionCall->GetUnRealizedPL() ) {
           m_legCall.ClosePosition();
           bClosed = true;
         }
@@ -227,7 +227,7 @@ bool Strangle::CloseItmLeg( double price ) {
     if ( pPositionPut->IsActive() ) {
       pInstrument_t pInstrument = pPositionPut->GetInstrument();
       if ( price < pInstrument->GetStrike() ) {
-        if ( 0.05 < pPositionPut->GetUnRealizedPL() ) {
+        if ( ( 100 * pPositionPut->GetActiveSize() * 0.05 ) < pPositionPut->GetUnRealizedPL() ) {
           m_legPut.ClosePosition();
           bClosed = true;
         }
