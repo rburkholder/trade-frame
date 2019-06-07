@@ -80,7 +80,6 @@ public:
   void TakeProfits( double price );
 
 private:
-  double m_dblStrikeAtm;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
