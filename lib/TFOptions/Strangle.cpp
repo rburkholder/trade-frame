@@ -135,7 +135,7 @@ double Strangle::GetNet( double price ) {
   if ( pPositionCall ) {
     double dblCallValue = pPositionCall->GetUnRealizedPL();
     std::cout
-      << "leg call: "
+      << "  leg call: "
       << pPositionCall->GetInstrument()->GetInstrumentName()
       << "=" << dblCallValue;
     dblNet += dblCallValue;
@@ -158,7 +158,7 @@ double Strangle::GetNet( double price ) {
   if ( pPositionPut ) {
     double dblPutValue = pPositionPut->GetUnRealizedPL();
     std::cout
-      << "leg put: "
+      << "  leg put: "
       << pPositionPut->GetInstrument()->GetInstrumentName()
       << "=" << dblPutValue;
     dblNet += dblPutValue;

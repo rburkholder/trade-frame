@@ -601,7 +601,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( bBuildOptions ) {
             std::cout
               << m_sUnderlying
-              << ": constructing options for strangle -> quote=" << mid
+              << ": strangle -> quote=" << mid
               << ",otm call=" << strikeOtmCall
               << ",otm put=" << strikeOtmPut
               << std::endl;
@@ -975,12 +975,12 @@ double ManageStrategy::EmitInfo() {
   double dblNet {};
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0 < m_mapCombo.size() ) {
-    std::cout << m_sUnderlying << "Info: " << m_sUnderlying << std::endl;
+    std::cout << "Info " << m_sUnderlying << std::endl;
     for ( mapCombo_t::value_type& vt: m_mapCombo ) {
       Strangle& strangle( vt.second );
       dblNet += strangle.GetNet( price );
     }
-    std::cout << m_sUnderlying << " net: " << dblNet << std::endl;
+    std::cout << "  net: " << dblNet << std::endl;
   }
   return dblNet;
 }
