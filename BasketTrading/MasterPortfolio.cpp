@@ -133,7 +133,7 @@ MasterPortfolio::~MasterPortfolio(void) {
 // auto loading portfolio from database
 void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   std::cout
-    << "load portfolio: " << "Adding Portfolio: "
+    << "Add Portfolio: "
     << "T=" << pPortfolio->GetRow().ePortfolioType
     << ",O=" << pPortfolio->GetRow().idOwner
     << ",ID=" << pPortfolio->GetRow().idPortfolio
