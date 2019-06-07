@@ -24,11 +24,14 @@
 namespace ou {
 namespace tf {
 
-Leg::Leg() {
+Leg::Leg()
+: m_bOption( false )
+{
   Init();
 }
 
 Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
+: m_bOption( false )
 {
   Init();
   SetPosition( pPosition );
@@ -36,7 +39,8 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 
 Leg::Leg( const Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
-  m_monitor( std::move( rhs.m_monitor ) )
+  m_monitor( std::move( rhs.m_monitor ) ),
+  m_bOption( rhs.m_bOption )
 {
   Init();
 }
@@ -44,7 +48,24 @@ Leg::Leg( const Leg&& rhs )
 void Leg::SetPosition( pPosition_t pPosition ) {
   m_pPosition = pPosition;
   m_monitor.SetPosition( pPosition );
+
   m_ceProfitLoss.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " P/L" );
+
+  ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
+  ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+
+  m_bOption = false;
+  if ( pOption ) {
+    m_bOption = true;
+    m_ceDelta.Clear();
+    m_ceDelta.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Delta" );
+    m_ceGamma.Clear();
+    m_ceGamma.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Gamma" );
+    m_ceVega.Clear();
+    m_ceVega.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Vega" );
+    m_ceTheta.Clear();
+    m_ceTheta.SetName( m_pPosition->GetInstrument()->GetInstrumentName() + " Theta" );
+  }
 }
 
 Leg::pPosition_t Leg::GetPosition() { return m_pPosition; }
@@ -54,6 +75,14 @@ void Leg::Tick( ptime dt ) {
   if ( m_pPosition ) {
     double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
     m_ceProfitLoss.Append( dt, dblPL );
+    if ( m_bOption ) {
+      ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
+      ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      m_ceDelta.Append( dt, pOption->Delta() );
+      m_ceGamma.Append( dt, pOption->Gamma() );
+      m_ceVega.Append( dt, pOption->Vega() );
+      m_ceTheta.Append( dt, pOption->Theta() );
+    }
   }
 }
 
@@ -97,14 +126,31 @@ bool Leg::IsOrderActive() const { return m_monitor.IsOrderActive(); }
 
 void Leg::SaveSeries( const std::string& sPrefix ) {
   if ( m_pPosition ) {
-    m_pPosition->GetWatch()->SaveSeries( sPrefix );
+    if ( m_bOption ) {
+      ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
+      ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      pOption->SaveSeries( sPrefix );
+    }
+    else {
+      m_pPosition->GetWatch()->SaveSeries( sPrefix );
+    }
   }
 }
 
-void Leg::SetColour( ou::Colour::enumColour colour ) { m_ceProfitLoss.SetColour( colour ); }
+void Leg::SetColour( ou::Colour::enumColour colour ) {
+  m_ceProfitLoss.SetColour( colour );
+  m_ceDelta.SetColour( colour );
+  m_ceGamma.SetColour( colour );
+  m_ceVega.SetColour( colour );
+  m_ceTheta.SetColour( colour );
+}
 
 void Leg::AddChartData( pChartDataView_t pChartData ) {
   pChartData->Add( 2, &m_ceProfitLoss );
+  pChartData->Add( 3, &m_ceDelta );
+  pChartData->Add( 4, &m_ceGamma );
+  pChartData->Add( 5, &m_ceVega );
+  pChartData->Add( 6, &m_ceTheta );
 }
 
 void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price ) {

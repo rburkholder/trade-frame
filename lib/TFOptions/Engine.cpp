@@ -180,7 +180,13 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
 }
 
 Engine::~Engine( ) {
-  
+
+  // TODO: perform a deque of all operations?
+
+  if ( !m_dequeOptionEntryOperation.empty() ) {
+    std::cout << "Engine::~Engine: operations still remaining in the queue" << std::endl;
+  }
+
   {
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.clear();
@@ -195,6 +201,39 @@ Engine::~Engine( ) {
   m_mapKnownWatches.clear();
 }
 
+void Engine::RegisterWatch( const pWatch_t& pWatch ) {
+  assert( pWatch );
+  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
+  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
+  if ( m_mapKnownWatches.end() == iter ) {
+    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
+  }
+  else {
+    throw std::runtime_error( "Engine::Register( pWatch_t ): already exists - " + sInstrumentName );
+  }
+}
+
+void Engine::RegisterOption( const pOption_t& pOption) {
+  assert( pOption );
+  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  const std::string& sInstrumentName( pOption->GetInstrument()->GetInstrumentName() );
+  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
+  if ( m_mapKnownOptions.end() == iter ) {
+    m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sInstrumentName, pOption ) );
+  }
+  else {
+    throw std::runtime_error( "Engine::Register( pOption_t ): already exists - " + sInstrumentName );
+  }
+}
+
+// if used, then need to perform a lookup on the underlying first to prevent duplicated effort
+//void Engine::Register( pOption_t& pOption, pWatch_t& pWatch) {
+//  Register( pWatch );
+//  Register( pOption );
+//}
+
+// needs to be used to load up underlying watch
 void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
   //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
@@ -213,9 +252,10 @@ void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
   else {
     pWatch = iter->second;
   }
-  assert( 0 != pWatch.get() );
+  assert( pWatch );
 }
 
+// needs to be used to load up options
 void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
   //std::cout << "Engine::Find Option: " << pOption->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Option: " << pInstrument->GetInstrumentName() << std::endl;
@@ -308,13 +348,13 @@ void Engine::ProcessOptionEntryOperationQueue() {
           mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
           if ( m_mapKnownWatches.end() == iterWatches ) {
             //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
-            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known watch " );
+            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known watch: " + sUnderlying );
           }
 
           mapKnownOptions_t::iterator iterOptions = m_mapKnownOptions.find( sOption );
           if ( m_mapKnownOptions.end() == iterOptions ) {
             //m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sOption, iterOption->second.GetOption() ) );
-            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known option " );
+            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known option " + sOption );
           }
 
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );

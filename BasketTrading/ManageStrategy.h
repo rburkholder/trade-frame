@@ -89,6 +89,8 @@ public:
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
   using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
 
+  using fRegisterWatch_t = std::function<void(pWatch_t&)>;
+  using fRegisterOption_t = std::function<void(pOption_t&)>;
   using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
   using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
 
@@ -105,6 +107,8 @@ public:
     fConstructOption_t,
     fConstructPosition_t,
     fConstructPortfolio_t,
+    fRegisterWatch_t,
+    fRegisterOption_t,
     fStartCalc_t,
     fStopCalc_t,
     fFirstTrade_t,
@@ -203,6 +207,8 @@ private:
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
 
+  fRegisterWatch_t m_fRegisterWatch;
+  fRegisterOption_t m_fRegisterOption;
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
 
@@ -230,6 +236,9 @@ private:
   using mapCombo_t = std::map<std::string,Strangle>;
   mapCombo_t m_mapCombo;
 
+  using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
+  mapOption_t m_mapOption;
+
   ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
@@ -241,6 +250,11 @@ private:
   ou::ChartEntryMark m_cePivots;
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
+
+  ou::ChartEntryIndicator m_ceDiffDelta;
+  ou::ChartEntryIndicator m_ceDiffGamma;
+  ou::ChartEntryIndicator m_ceDiffVega;
+  ou::ChartEntryIndicator m_ceDiffTheta;
 
   //ou::ChartEntryIndicator m_ceUpReturn;
   //ou::ChartEntryIndicator m_ceDnReturn;

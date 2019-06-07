@@ -65,9 +65,15 @@ public:
   void CloseExpiryOtm( const boost::gregorian::date date, const double price );
 
 private:
+  bool m_bOption;
   pPosition_t m_pPosition;
   ou::tf::MonitorOrder m_monitor;
   ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::ChartEntryIndicator m_ceDelta;
+  ou::ChartEntryIndicator m_ceGamma;
+  ou::ChartEntryIndicator m_ceVega;
+  ou::ChartEntryIndicator m_ceTheta;
 
   void Init();
 };

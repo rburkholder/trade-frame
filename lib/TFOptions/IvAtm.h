@@ -50,8 +50,8 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t = std::function<void(const std::string&,pInstrument_t,fConstructedOption_t)>; // construct pOption_t from IQFeed Symbol name, with or without IB contract
 
-  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>;
-  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>;
+  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
+  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
   IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   IvAtm( IvAtm&& rhs );

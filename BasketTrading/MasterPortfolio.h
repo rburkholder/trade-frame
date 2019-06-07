@@ -162,7 +162,7 @@ private:
 //    }
   };
 
-  using mapStrategy_t = std::map<std::string,Strategy>; // first insertion uses
+  using mapStrategy_t = std::map<ou::tf::Portfolio::idPortfolio_t,Strategy>;
   mapStrategy_t m_mapStrategy;
 
   //struct Ranking {
@@ -201,7 +201,6 @@ private:
   mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
   setSymbols_t m_setSymbols;
-
 
   //enum class EAllocate { Waiting, Process, Done };
 

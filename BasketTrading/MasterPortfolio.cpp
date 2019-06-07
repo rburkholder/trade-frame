@@ -103,12 +103,16 @@ MasterPortfolio::MasterPortfolio(
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_libor );
   m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
-        ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
+      // fix: need to look up and retrieve the pre-constructed watch
+        //ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
+        pWatch_t pWatch;  // will cause a fault, should not need to be used
         return pWatch;
       };
   m_pOptionEngine->m_fBuildOption
     = [this](pInstrument_t pInstrument)->pOption_t {
-        ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
+      // fix: need to lookup and retrieve the pre-constructed option
+        //ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
+        pOption_t pOption; // will cause a fault, should not need to be used
         return pOption;
       };
 
@@ -117,12 +121,13 @@ MasterPortfolio::MasterPortfolio(
 }
 
 MasterPortfolio::~MasterPortfolio(void) {
-  m_libor.SetWatchOff();
   if ( m_worker.joinable() )
     m_worker.join();
   m_mapVolatility.clear();
   m_mapStrategyArtifacts.clear();
   m_mapStrategy.clear();
+  m_libor.SetWatchOff();
+  m_pOptionEngine.release();
 }
 
 // auto loading portfolio from database
@@ -346,8 +351,9 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                 }
               }
 
-              if ( bUseExistingWatch ) {
+              if ( bUseExistingWatch ) { // pull watch out of existing position
                 pWatch_t pWatch = iterPosition->second->GetWatch();
+
                 fWatch( pWatch );
               }
               else {  // build instrument, obtain IB contract, register instrument
@@ -366,7 +372,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                   bNeedContract = true;
                 }
 
-                pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
+                //pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
+                //pWatch_t pWatch;
+                //m_pOptionEngine->Find( pEquityInstrument, pWatch );
+                pWatch_t pWatch( new ou::tf::Watch( pEquityInstrument, m_pData1 ) );
 
                 // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
                 if ( bNeedContract ) {
@@ -433,7 +442,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                   bNeedContract = true;
                 }
 
-                pOption_t pOption = m_pOptionEngine->m_fBuildOption( pOptionInstrument );
+                //pOption_t pOption = m_pOptionEngine->m_fBuildOption( pOptionInstrument );
+                pOption_t pOption( new ou::tf::option::Option( pOptionInstrument, m_pData1 ) );
+                //pOption_t pOption;
+                //m_pOptionEngine->Find( pOptionInstrument, pOption );
 
                 if ( bNeedContract ) {
                   if ( nullptr == m_pIB.get() ) {
@@ -512,10 +524,14 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             }
             return pPortfolio;
           },
+    // ManageStrategy::fRegisterWatch_t
+          std::bind( &ou::tf::option::Engine::RegisterWatch, m_pOptionEngine.get(), ph::_1 ),
+    // ManageStrategy::fRegisterOption_t
+          std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
     // ManageStrategy::fStartCalc_t
-          std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ),
+          std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ), // option, underlying
     // ManageStrategy::m_fStopCalc
-          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ),
+          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ), // option, underlying
     // ManageStrategy::m_fFirstTrade
           [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters

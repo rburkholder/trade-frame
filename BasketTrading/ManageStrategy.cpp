@@ -95,6 +95,8 @@ ManageStrategy::ManageStrategy(
   fConstructOption_t fConstructOption,
   fConstructPosition_t fConstructPosition,
   fConstructPortfolio_t fConstructPortfolio,
+  fRegisterWatch_t fRegisterWatch,
+  fRegisterOption_t fRegisterOption,
   fStartCalc_t fStartCalc,
   fStopCalc_t fStopCalc,
   fFirstTrade_t fFirstTrade,
@@ -114,6 +116,8 @@ ManageStrategy::ManageStrategy(
   m_fConstructPosition( fConstructPosition ),
   m_fConstructPortfolio( fConstructPortfolio ),
   m_stateTrading( TSInitializing ),
+  m_fRegisterWatch( fRegisterWatch ),
+  m_fRegisterOption( fRegisterOption ),
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc ),
   m_fFirstTrade( fFirstTrade ),
@@ -291,6 +295,10 @@ ManageStrategy::ManageStrategy(
 ManageStrategy::~ManageStrategy( ) {
   m_SpreadValidation.ResetOptions();
   m_mapCombo.clear();
+  for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
+    m_fStopCalc( vt.second, m_pPositionUnderlying->GetWatch() );
+  }
+  m_mapOption.clear();
   m_vEMA.clear();
   if ( m_pPositionUnderlying ) {
     pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
@@ -325,11 +333,13 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
 
 void ManageStrategy::Add( pPosition_t pPosition ) {
   pInstrument_t pInstrument = pPosition->GetInstrument();
+  pWatch_t pWatch = pPosition->GetWatch();
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Stock:
       assert( m_pPositionUnderlying );
       assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
       assert( pPosition.get() == m_pPositionUnderlying.get() );
+      m_fRegisterWatch( pWatch );
       break;
     case ou::tf::InstrumentType::Option: {
 
@@ -345,6 +355,22 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
         result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, std::move( strangle ) ) );
         assert( result.second );
         mapCombo_iter = result.first;
+      }
+
+      pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+
+      try {
+        m_fRegisterOption( pOption );
+      }
+      catch( std::runtime_error& e ) {
+        std::cout << e.what() << std::endl;
+      }
+
+      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+      if ( m_mapOption.end() == iterOption ) {
+        m_mapOption[ sOptionName ] = pOption;
+        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
       }
 
       Strangle& strangle( mapCombo_iter->second );
@@ -621,12 +647,32 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     std::cout << "WARNING: strategy running out of colours." << std::endl;
                   }
                   strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-                  pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 0 ) );
+                  pOption_t pOption;
+                  mapOption_t::iterator iterOption;
+                  std::string sOptionName;
+
+                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 0 ) );
+                  sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                  iterOption = m_mapOption.find( sOptionName );
+                  if ( m_mapOption.end() == iterOption ) {
+                    m_mapOption[ sOptionName ] = pOption;
+                    m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                  }
+                  pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
                   strangle.SetPositionCall( pPositionCall );
                   strangle.AddChartDataCall( m_pChartDataView, rColour[ m_ixColour++ ] );
-                  pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, m_SpreadValidation.GetOption( 1 ) );
+
+                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) );
+                  sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                  iterOption = m_mapOption.find( sOptionName );
+                  if ( m_mapOption.end() == iterOption ) {
+                    m_mapOption[ sOptionName ] = pOption;
+                    m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                  }
+                  pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
                   strangle.SetPositionPut( pPositionPut );
                   strangle.AddChartDataPut( m_pChartDataView, rColour[ m_ixColour++ ] );
+
                   m_SpreadValidation.ResetOptions();
                   strangle.PlaceOrder( m_DefaultOrderSide );
                 }
