@@ -32,7 +32,6 @@
 
 #include <TFOptions/IvAtm.h>
 #include <TFOptions/Option.h>
-//#include <TFOptions/SpreadValidation.h>
 #include <TFOptions/Strangle.h>
 
 #include <OUCharting/ChartDataView.h>
