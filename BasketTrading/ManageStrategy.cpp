@@ -129,6 +129,7 @@ ManageStrategy::ManageStrategy(
   m_bfQuotes01Sec( 1 ),
   m_bfTrades01Sec( 1 ),
   m_bfTrades06Sec( 6 ),
+  m_bfTicks06sec( 6 ),
 //  m_bfTrades60Sec( 60 ),
 //  m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
@@ -174,25 +175,28 @@ ManageStrategy::ManageStrategy(
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
   
-  pcdvStrategyData->Add( 0, &m_cePrice );
-  pcdvStrategyData->Add( 0, &m_cePivots );
-  pcdvStrategyData->Add( 1, &m_ceVolume );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_cePrice );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_cePivots );
+  pcdvStrategyData->Add( EChartSlot::Volume, &m_ceVolume );
 
-  pcdvStrategyData->Add( 2, &m_ceProfitLossPortfolio );
+  pcdvStrategyData->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
+
+  pcdvStrategyData->Add( EChartSlot::Tick, &m_ceTickCount );
 
   //pcdvStrategyData->Add( 4, &m_ceUpReturn );
   //pcdvStrategyData->Add( 4, &m_ceDnReturn );
 
-  pcdvStrategyData->Add( 0, &m_ceShortEntries );
-  pcdvStrategyData->Add( 0, &m_ceLongEntries );
-  pcdvStrategyData->Add( 0, &m_ceShortFills );
-  pcdvStrategyData->Add( 0, &m_ceLongFills );
-  pcdvStrategyData->Add( 0, &m_ceShortExits );
-  pcdvStrategyData->Add( 0, &m_ceLongExits );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortEntries );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongEntries );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortFills );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongFills );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortExits );
+  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongExits );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
+  m_bfTicks06sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTicks06Sec ) );
 //  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
 
   try {
@@ -428,6 +432,7 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 //  if ( trade.Price() > m_TradeLatest.Price() ) m_cntUpReturn++;
 //  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
 //  m_trades.Append( trade );
+  m_bfTicks06sec.Add( trade.DateTime(), 0, 1 );
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
 //  m_bfTrades60Sec.Add( trade );
@@ -895,6 +900,10 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 
 //  m_ceDnReturn.Append( bar.DateTime(), m_cntDnReturn );
 //  m_cntDnReturn = 0;
+}
+
+void ManageStrategy::HandleBarTicks06Sec( const ou::tf::Bar& bar ) {
+  m_ceTickCount.Append( bar.DateTime(), bar.Volume() );
 }
 
 // unused without m_bfTrades60Sec

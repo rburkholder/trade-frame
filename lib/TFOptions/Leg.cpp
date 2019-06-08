@@ -156,10 +156,10 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
 
 void Leg::AddChartData( pChartDataView_t pChartData ) {
   pChartData->Add( 2, &m_ceProfitLoss );
-  pChartData->Add( 3, &m_ceDelta );
-  pChartData->Add( 4, &m_ceGamma );
-  pChartData->Add( 5, &m_ceVega );
-  pChartData->Add( 6, &m_ceTheta );
+  pChartData->Add( 11, &m_ceDelta );
+  pChartData->Add( 12, &m_ceGamma );
+  pChartData->Add( 13, &m_ceVega );
+  pChartData->Add( 14, &m_ceTheta );
 }
 
 bool Leg::CloseItm( const double price ) {

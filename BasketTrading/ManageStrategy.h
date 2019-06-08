@@ -160,6 +160,10 @@ private:
     TSNoMore
   };
 
+  enum EChartSlot {
+    Price, Volume, PL, Tick
+  };
+
   ETradingState m_stateTrading;
 
   enum class ETradeDirection { None, Up, Down };
@@ -240,15 +244,19 @@ private:
   using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
   mapOption_t m_mapOption;
 
-  ou::tf::BarFactory m_bfQuotes01Sec; // need Order Monitoring ticks more frequently
+  ou::tf::BarFactory m_bfQuotes01Sec; // provides more frequent ticks for Order Monitoring
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
   ou::tf::BarFactory m_bfTrades06Sec; // charting
   //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
+  ou::tf::BarFactory m_bfTicks06sec; // monitors liquidity, use to determine a minimum count for entry
+
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
+
+  ou::ChartEntryVolume m_ceTickCount;
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
 
@@ -354,6 +362,7 @@ private:
   void HandleBarTrades01Sec( const ou::tf::Bar& bar );
   void HandleBarTrades06Sec( const ou::tf::Bar& bar );
   void HandleBarTrades60Sec( const ou::tf::Bar& bar );
+  void HandleBarTicks06Sec( const ou::tf::Bar& bar );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
