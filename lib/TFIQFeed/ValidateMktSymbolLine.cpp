@@ -102,6 +102,8 @@ void ValidateMktSymbolLine::PostProcess( void ) {
 
 void ValidateMktSymbolLine::Summary( void ) {
 
+  std::cout << "== Market Symbol Type and Count ==" << std::endl;
+
   struct processSymbols {
     void operator()( const std::string& s, ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc ) {
       std::cout << s << "=" << v[ sc ] << std::endl;
@@ -124,6 +126,8 @@ void ValidateMktSymbolLine::Summary( void ) {
   std::cout << "cntSIC             =" << cntSIC << std::endl;
   std::cout << "cntNAICS           =" << cntNAICS << std::endl;
   std::cout << std::endl;
+
+  std::cout << "== Market Names and Count ==" << std::endl;
 
   std::sort( vSymbolsPerExchange.begin(), vSymbolsPerExchange.end() );
   for ( size_t ix = 0; ix < vSymbolsPerExchange.size(); ++ix ) {
