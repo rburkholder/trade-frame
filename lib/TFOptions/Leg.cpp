@@ -172,6 +172,33 @@ bool Leg::CloseItm( const double price ) {
         switch ( pInstrument->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
             if ( price > pInstrument->GetStrike() ) {
+              ClosePosition();
+              bClosed = true;
+            }
+            break;
+          case ou::tf::OptionSide::Put:
+            if ( price < pInstrument->GetStrike() ) {
+              ClosePosition();
+              bClosed = true;
+            }
+            break;
+        }
+      }
+    }
+  }
+  return bClosed;
+}
+
+bool Leg::CloseItmForProfit( const double price ) {
+  bool bClosed( false );
+  if ( m_pPosition ) {
+    if ( m_bOption ) {
+      if ( m_pPosition->IsActive() ) {
+        using pInstrument_t = Position::pInstrument_t;
+        pInstrument_t pInstrument = m_pPosition->GetInstrument();
+        switch ( pInstrument->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            if ( price > pInstrument->GetStrike() ) {
               if ( ( 100 * m_pPosition->GetActiveSize() * 0.05 ) < m_pPosition->GetUnRealizedPL() ) {
                 ClosePosition();
                 bClosed = true;

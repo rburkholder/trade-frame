@@ -310,6 +310,8 @@ ManageStrategy::~ManageStrategy( ) {
 }
 
 void ManageStrategy::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
+  // TFIndicators/Pivots.h has R3, S3 plus colour assignments
+  m_pivotCrossing.Set( dblR2, dblR1, dblPV, dblS1, dblS2 );
   m_cePivots.AddMark( dblR2, ou::Colour::Blue, "R2" );
   m_cePivots.AddMark( dblR1, ou::Colour::Blue, "R1" );
   m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
@@ -653,6 +655,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             }
           }
         );
+
+        bool bClosed( false );
+        PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
+        if ( PivotCrossing::ECrossing::none != crossing ) {
+          for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+            bClosed |= vt.second.CloseItmLegForProfit( mid );
+          }
+        }
+        if ( bClosed ) {
+          // open another strangle or add leg to existing strangle
+        }
       }
       break;
     case TSWaitForEntry:

@@ -10,6 +10,7 @@
       <itemPath>MoneyManager.h</itemPath>
       <itemPath>PanelBasketTradingMain.h</itemPath>
       <itemPath>PanelPortfolioStats.h</itemPath>
+      <itemPath>PivotCrossing.h</itemPath>
       <itemPath>Resource.h</itemPath>
       <itemPath>Sentiment.h</itemPath>
       <itemPath>SymbolSelection.h</itemPath>
@@ -29,6 +30,7 @@
       <itemPath>MoneyManager.cpp</itemPath>
       <itemPath>PanelBasketTradingMain.cpp</itemPath>
       <itemPath>PanelPortfolioStats.cpp</itemPath>
+      <itemPath>PivotCrossing.cpp</itemPath>
       <itemPath>Sentiment.cpp</itemPath>
       <itemPath>SymbolSelection.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
@@ -341,6 +343,10 @@
       </item>
       <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PivotCrossing.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PivotCrossing.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Resource.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Sentiment.cpp" ex="false" tool="1" flavor2="0">
@@ -405,6 +411,10 @@
       <item path="PanelPortfolioStats.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelPortfolioStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PivotCrossing.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PivotCrossing.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Resource.h" ex="false" tool="3" flavor2="0">
       </item>

@@ -64,6 +64,7 @@ public:
   void AddChartData( pChartDataView_t pChartData );
 
   bool CloseItm( const double price );
+  bool CloseItmForProfit( const double price );
   void CloseExpiryItm( const boost::gregorian::date date, const double price );
   void CloseExpiryOtm( const boost::gregorian::date date, const double price );
 

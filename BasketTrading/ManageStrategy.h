@@ -45,6 +45,8 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include "PivotCrossing.h"
+
 
 // 2019/05/23 Trading Day
 //   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
@@ -221,8 +223,9 @@ private:
   const ou::tf::Bar& m_barPriorDaily;
 
   pPosition_t m_pPositionUnderlying;
-
   pPortfolio_t m_pPortfolioStrategy;
+
+  PivotCrossing m_pivotCrossing;
 
   pChartDataView_t m_pChartDataView;
 

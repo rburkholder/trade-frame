@@ -42,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MoneyManager.o \
 	${OBJECTDIR}/PanelBasketTradingMain.o \
 	${OBJECTDIR}/PanelPortfolioStats.o \
+	${OBJECTDIR}/PivotCrossing.o \
 	${OBJECTDIR}/Sentiment.o \
 	${OBJECTDIR}/SymbolSelection.o \
 	${OBJECTDIR}/stdafx.o
@@ -141,6 +142,11 @@ ${OBJECTDIR}/PanelPortfolioStats.o: PanelPortfolioStats.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioStats.o PanelPortfolioStats.cpp
+
+${OBJECTDIR}/PivotCrossing.o: PivotCrossing.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PivotCrossing.o PivotCrossing.cpp
 
 ${OBJECTDIR}/Sentiment.o: Sentiment.cpp
 	${MKDIR} -p ${OBJECTDIR}

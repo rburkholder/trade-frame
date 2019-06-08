@@ -94,6 +94,14 @@ bool Combo::CloseItmLeg( double price ) {
   return bClosed;
 }
 
+bool Combo::CloseItmLegForProfit( double price ) {
+  bool bClosed( false );
+  for ( Leg& leg: m_vLeg ) {
+    bClosed |= leg.CloseItmForProfit( price );
+  }
+  return bClosed;
+}
+
 void Combo::CloseForProfits( double price ) {
 }
 

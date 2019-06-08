@@ -96,9 +96,10 @@ public:
 
   void CloseForProfits( double price );
   void TakeProfits( double price );
-  bool CloseItmLeg( double price );
   void CloseExpiryItm( double price, const boost::gregorian::date date );
   void CloseFarItm( double price );
+  bool CloseItmLeg( double price );
+  bool CloseItmLegForProfit( double price );
 
   void CancelOrders();
   void ClosePositions();
