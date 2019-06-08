@@ -309,7 +309,7 @@ ManageStrategy::~ManageStrategy( ) {
   }
 }
 
-void ManageStrategy::SetPivots( double dblS2, double dblS1, double dblPV, double dblR1, double dblR2 ) {
+void ManageStrategy::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
   m_cePivots.AddMark( dblR2, ou::Colour::Blue, "R2" );
   m_cePivots.AddMark( dblR1, ou::Colour::Blue, "R1" );
   m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
