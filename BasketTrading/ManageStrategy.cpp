@@ -369,7 +369,7 @@ void ManageStrategy::Add( pPosition_t pPosition ) {
           m_fRegisterOption( pOption );
         }
         catch( std::runtime_error& e ) {
-          std::cout << e.what() << std::endl;
+          std::cout << "ManageStrategy::Add: " << e.what() << std::endl;
         }
 
         mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
@@ -573,6 +573,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
+
                   std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                   std::pair<mapCombo_t::iterator,bool> result;
                   //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
@@ -584,6 +585,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     std::cout << "WARNING: strategy running out of colours." << std::endl;
                   }
                   strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+
                   pOption_t pOption;
                   mapOption_t::iterator iterOption;
                   std::string sOptionName;
