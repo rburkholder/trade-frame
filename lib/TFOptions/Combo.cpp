@@ -55,6 +55,7 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
   m_vLeg.emplace_back( std::move( leg ) );
   m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
   m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
+  m_state = State::Positions;
 }
 
 void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
@@ -102,6 +103,16 @@ void Combo::CloseExpiryItm( double price, const boost::gregorian::date date ) {
   for ( Leg& leg: m_vLeg ) {
     leg.CloseExpiryItm( date, price );
   }
+}
+
+void Combo::CloseFarItm( double price ) {
+//  pPosition_t pPositionCall = m_legCall.GetPosition();
+//  pPosition_t pPositionPut  = m_legPut.GetPosition();
+//  if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
+//    double dblProfitCall = pPositionCall->GetUnRealizedPL();
+//    double dblProfitPut  = pPositionPut->GetUnRealizedPL();
+    // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuing here
+//  }
 }
 
 void Combo::CancelOrders() {

@@ -22,6 +22,10 @@
 #ifndef COMBO_H
 #define COMBO_H
 
+#include <vector>
+
+#include <OUCharting/ChartDataView.h>
+
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
@@ -50,7 +54,7 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  virtual void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
   void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
@@ -62,7 +66,7 @@ public:
   void TakeProfits( double price );
   bool CloseItmLeg( double price );
   void CloseExpiryItm( double price, const boost::gregorian::date date );
-
+  void CloseFarItm( double price );
 
   void CancelOrders();
   void ClosePositions();

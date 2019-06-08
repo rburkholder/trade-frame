@@ -38,18 +38,6 @@ Strangle::Strangle( Strangle&& rhs )
 {
 }
 
-// TODO:  need to accept existing positions, need to create own new positions
-void Strangle::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
-  Combo::AddPosition( pPosition, pChartData, colour );
-  m_state = State::Positions;
-}
-
-//void Strangle::AddChartData(  ) {
-//  size_t ix {};
-//  for ( Leg& leg: m_vLeg ) {
-//  }
-//}
-
 // TODO: need to fix this if other legs present.  Need to limit to the active legs.
 //   maybe vector of inactive legs
 // NOTE: if volatility drops, then losses occur on premium
@@ -63,16 +51,6 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
       m_state = State::Executing;
       break;
   }
-}
-
-void Strangle::CloseFarItm( double price ) {
-//  pPosition_t pPositionCall = m_legCall.GetPosition();
-//  pPosition_t pPositionPut  = m_legPut.GetPosition();
-//  if ( pPositionCall->IsActive() && pPositionPut->IsActive() ) {
-//    double dblProfitCall = pPositionCall->GetUnRealizedPL();
-//    double dblProfitPut  = pPositionPut->GetUnRealizedPL();
-    // TOOD: finish analysis via TakeProfits - which fixes a quote issue - before continuing here
-//  }
 }
 
 } // namespace option
