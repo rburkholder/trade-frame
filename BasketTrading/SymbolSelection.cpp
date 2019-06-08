@@ -247,7 +247,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
         if ( mapUnderlyingInfo.end() != citer ) {
           const ou::tf::cboe::UnderlyingInfo& ui( citer->second );
           ou::tf::statistics::Pivot pivot( bars );
-          pivot.Points( ii.dblR1, ii.dblPV, ii.dblS1 );
+          pivot.Points( ii.dblR2, ii.dblR1, ii.dblPV, ii.dblS1, ii.dblS2 );
           ii.dblProbabilityAboveAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
           ii.dblProbabilityAboveAndDown = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Down );
           ii.dblProbabilityBelowAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVS1_X_Up );

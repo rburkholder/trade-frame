@@ -309,10 +309,12 @@ ManageStrategy::~ManageStrategy( ) {
   }
 }
 
-void ManageStrategy::SetPivots( double dblS1, double dblPV, double dblR1 ) {
+void ManageStrategy::SetPivots( double dblS2, double dblS1, double dblPV, double dblR1, double dblR2 ) {
+  m_cePivots.AddMark( dblR2, ou::Colour::Blue, "R2" );
   m_cePivots.AddMark( dblR1, ou::Colour::Blue, "R1" );
   m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
   m_cePivots.AddMark( dblS1, ou::Colour::Red, "S1" );
+  m_cePivots.AddMark( dblS2, ou::Colour::Red, "S2" );
 }
 
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {

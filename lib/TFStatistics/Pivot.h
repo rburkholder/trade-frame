@@ -46,7 +46,7 @@ public:
   Pivot( const ou::tf::Bars& );
   virtual ~Pivot( );
 
-  void Points( double& dblR1, double& dblPV, double& dblS1 );
+  void Points( double& dblR2, double& dblR1, double& dblPV, double& dblS1, double& dblS2 );
 
   double ItemOfInterest( EItemsOfInterest ) const;  // normalized [0.0 .. 1.0]
 
@@ -64,9 +64,11 @@ private:
   using rItemsOfInterest_t = std::array<unsigned char,(size_t)EItemsOfInterest::Count>; // 0 or 1, maybe use boolean?
   using rItemsOfInterestRaw_t = std::array<ItemOfInterestRaw, (size_t)EItemsOfInterest::Count>;
 
+  double m_dblR2;
   double m_dblR1;
   double m_dblPV;
   double m_dblS1;
+  double m_dblS2;
 
   std::vector<rItemsOfInterest_t> m_vrItemsOfInterest;
 

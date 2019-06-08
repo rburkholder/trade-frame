@@ -609,7 +609,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   strategy.Set( std::move( pManageStrategy ) );
 
-  strategy.pManageStrategy->SetPivots( iip_.dblS1, iip_.dblPV, iip_.dblR1 );
+  strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
   strategy.pManageStrategy->SetDefaultOrderSide( m_DefaultOrderSide );
 
   m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );

@@ -124,7 +124,7 @@ public:
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   //void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  void SetPivots( double dblS1, double dblPV, double dblR1 );
+  void SetPivots( double dblS2, double dblS1, double dblPV, double dblR1, double dblR2 );
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 

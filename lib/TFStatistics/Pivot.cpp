@@ -21,7 +21,7 @@ namespace statistics {
 Pivot::Pivot( const ou::tf::Bars& bars )
 : m_dblHiLoRangeStdDev {},
   m_dblHiLoRangeAvg {},
-  m_dblR1 {}, m_dblPV {}, m_dblS1 {}
+  m_dblR2 {}, m_dblR1 {}, m_dblPV {}, m_dblS1 {}, m_dblS2 {}
 {
   m_vrItemsOfInterest.reserve( bars.Size() );
 
@@ -34,9 +34,11 @@ Pivot::Pivot( const ou::tf::Bars& bars )
 
       if ( 0 < nPivots ) { // current bar against previously calculated pivot set, skip first time through
         rItemsOfInterest_t rItemsOfInterest = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        m_dblR2 = ps.GetPivotValue( ou::tf::PivotSet::R2 );
         m_dblR1 = ps.GetPivotValue( ou::tf::PivotSet::R1 );
         m_dblPV = ps.GetPivotValue( ou::tf::PivotSet::PV );
         m_dblS1 = ps.GetPivotValue( ou::tf::PivotSet::S1 );
+        m_dblS2 = ps.GetPivotValue( ou::tf::PivotSet::S2 );
 
         bool bCrossR1 = ( bar.High() > m_dblR1 ) && ( bar.Low() < m_dblR1 );
         bool bCrossPV = ( bar.High() > m_dblPV ) && ( bar.Low() < m_dblPV );
@@ -141,10 +143,12 @@ Pivot::Pivot( const ou::tf::Bars& bars )
 
 Pivot::~Pivot( ) { }
 
-void Pivot::Points( double& dblR1, double& dblPV, double& dblS1 ) {
+void Pivot::Points( double& dblR2, double& dblR1, double& dblPV, double& dblS1, double& dblS2 ) {
+  dblR2 = m_dblR2;
   dblR1 = m_dblR1;
   dblPV = m_dblPV;
   dblS1 = m_dblS1;
+  dblS2 = m_dblS2;
 }
 
 double Pivot::ItemOfInterest( EItemsOfInterest ioi ) const {

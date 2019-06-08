@@ -70,9 +70,11 @@ struct IIPivot: InstrumentInfo {
 
   using Pair = std::pair<double,Direction>;
 
+  double dblR2;
   double dblR1;
   double dblPV;
   double dblS1;
+  double dblS2;
   double dblProbabilityAboveAndUp;
   double dblProbabilityAboveAndDown;
   double dblProbabilityBelowAndUp;
@@ -82,13 +84,15 @@ struct IIPivot: InstrumentInfo {
       volume_t volumeEma_, double dblDailyHistoricalVolatility_
     )
     : InstrumentInfo( sName, bar, volumeEma_, dblDailyHistoricalVolatility_ ),
-      dblR1 {}, dblPV {}, dblS1 {},
+      dblR2 {}, dblR1 {}, dblPV {}, dblS1 {}, dblS2 {},
       dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
       dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}
   {}
   IIPivot( const IIPivot& rhs )
     : InstrumentInfo( rhs ),
-      dblR1( rhs.dblR1 ), dblPV( rhs.dblPV ), dblS1( rhs.dblS1 ),
+      dblR2( rhs.dblR2 ), dblR1( rhs.dblR1 ),
+      dblPV( rhs.dblPV ),
+      dblS1( rhs.dblS1 ), dblS2( rhs.dblS2 ),
       dblProbabilityAboveAndUp( rhs.dblProbabilityAboveAndUp ),
       dblProbabilityAboveAndDown( rhs.dblProbabilityAboveAndDown ),
       dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
@@ -96,7 +100,9 @@ struct IIPivot: InstrumentInfo {
   {}
   IIPivot( const IIPivot&& rhs )
     : InstrumentInfo( std::move( rhs ) ),
-      dblR1( rhs.dblR1 ), dblPV( rhs.dblPV ), dblS1( rhs.dblS1 ),
+      dblR2( rhs.dblR2 ), dblR1( rhs.dblR1 ),
+      dblPV( rhs.dblPV ),
+      dblS1( rhs.dblS1 ), dblS2( rhs.dblS2 ),
       dblProbabilityAboveAndUp( rhs.dblProbabilityAboveAndUp ),
       dblProbabilityAboveAndDown( rhs.dblProbabilityAboveAndDown ),
       dblProbabilityBelowAndUp( rhs.dblProbabilityBelowAndUp ),
