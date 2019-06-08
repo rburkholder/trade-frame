@@ -29,14 +29,46 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
+#include "IvAtm.h"
+#include "SpreadValidation.h"
+
 #include "Leg.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+struct ConstructionTools {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
+  using fConstructedOption_t = std::function<void(pOption_t)>;
+  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
+
+  boost::gregorian::date m_dateExpiry;
+  IvAtm& m_chains;
+  pWatch_t m_pWatchUnderlying;
+  fConstructOption_t& m_fConstructOption;
+
+  ConstructionTools(
+    boost::gregorian::date dateExpiry,
+    IvAtm& chains,
+    pWatch_t pWatchUnderlying,
+    fConstructOption_t& fConstructOption
+    )
+  : m_dateExpiry( dateExpiry ), m_chains( chains ),
+    m_pWatchUnderlying( pWatchUnderlying ),
+    m_fConstructOption( fConstructOption )
+  {}
+};
+
+
 class Combo {
 public:
+
+  using idPortfolio_t = ou::tf::Portfolio::idPortfolio_t;
 
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
@@ -56,7 +88,7 @@ public:
 
   void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
-  void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
 
@@ -74,8 +106,13 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
-
 protected:
+
+  static const double m_dblTwentyPercent;
+  static const double m_dblMaxStrikeDelta;
+  static const double m_dblMaxStrangleDelta;
+
+  SpreadValidation m_SpreadValidation;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 

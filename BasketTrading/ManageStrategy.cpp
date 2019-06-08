@@ -142,7 +142,6 @@ ManageStrategy::ManageStrategy(
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_SpreadValidation( 2 ),
   m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
   m_daysToExpiry( 6 )
 {
@@ -294,7 +293,7 @@ ManageStrategy::ManageStrategy(
 }
 
 ManageStrategy::~ManageStrategy( ) {
-  m_SpreadValidation.ResetOptions();
+  
   m_mapCombo.clear();
   for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
     m_fStopCalc( vt.second, m_pPositionUnderlying->GetWatch() );
@@ -535,96 +534,29 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
     case TSOptionEvaluation:
       {
 
+        const double mid = m_QuoteUnderlyingLatest.Midpoint();
+
         if ( m_mapCombo.empty() ) {
           m_bAllowComboAdd = true;
         }
 
-        // keep potential options warmed up
-        const double mid = m_QuoteUnderlyingLatest.Midpoint();
+        if ( m_bAllowComboAdd ) {
 
-        bool bStrikesFound( false );
-        double strikeOtmCall {};
-        double strikeOtmPut {};
-
-        try {
           if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
             std::cout << m_sUnderlying << " has no m_iterChainExpiryInUse" << std::endl;
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
           else {
-            ou::tf::option::IvAtm& atm( m_iterChainExpiryInUse->second );
-            strikeOtmCall = atm.Call_Otm( mid );
-            if ( dblTwentyPercent > ( strikeOtmCall - mid ) ) {
-              strikeOtmCall = atm.Call_Otm( strikeOtmCall ); // choose a further out strike
-            }
-            strikeOtmPut = atm.Put_Otm( mid );
-            if ( dblTwentyPercent > ( mid - strikeOtmPut ) ) {
-              strikeOtmPut = atm.Put_Otm( strikeOtmPut );
-            }
-            assert( strikeOtmCall > strikeOtmPut );
-            const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
-            if ( dblMaxStrangleDelta > dblStrikeDelta ) {
-              const double dblExclusionRange = 0.30 * dblStrikeDelta;  // enter in middle 20% only
-              if (
-                ( mid < ( strikeOtmCall - dblExclusionRange ) ) &&
-                ( mid > ( strikeOtmPut  + dblExclusionRange ) )
-                ) {
-                bStrikesFound = true;
-              }
-            }
-          }
-        }
-        catch ( std::runtime_error& e ) {
-          if ( m_mapCombo.empty() ) {
-            std::cout << m_sUnderlying << " found no strike for mid-point " << mid
-                                       << " expiry " << m_iterChainExpiryInUse->first
-                                       << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
-                                       << " [" << e.what() << "]"
-                                       << std::endl;
-            m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
-          }
-        }
 
-        if ( bStrikesFound ) {
-          bool bBuildOptions( false );
-          if ( !m_SpreadValidation.IsActive() ) {
-            bBuildOptions = true;
-          }
-          else {  // TODO: need some hysterisis on this calculation
-            if ( ( strikeOtmCall != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 0 ) )->GetStrike() )
-              || ( strikeOtmPut  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) )->GetStrike() )
-            ) {
-              m_SpreadValidation.ResetOptions();
-              bBuildOptions = true;
-            }
-          }
+            ou::tf::option::ConstructionTools tools(
+              m_iterChainExpiryInUse->first, // expiry
+              m_iterChainExpiryInUse->second,  // IvAtm
+              m_pPositionUnderlying->GetWatch(),
+              m_fConstructOption
+              );
 
-          if ( !m_bAllowComboAdd ) bBuildOptions = false;  // always allow options to be validating? -> enable when tracking atm greeks
+            if ( m_strangleEvaluation.ValidateSpread( tools, mid, 11 ) ) { // 11 periods
 
-          if ( bBuildOptions ) {
-            std::cout
-              << m_sUnderlying
-              << ": strangle -> quote=" << mid
-              << ",otm call=" << strikeOtmCall
-              << ",otm put=" << strikeOtmPut
-              << std::endl;
-            pInstrument_t pInstrumentUnderlying = m_pPositionUnderlying->GetInstrument();
-            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNameCall( strikeOtmCall), pInstrumentUnderlying,
-              [this](pOption_t pOptionCall){
-                //std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl; // too early
-                m_SpreadValidation.SetOption( 0, pOptionCall );
-              } );
-            m_fConstructOption( m_iterChainExpiryInUse->second.GetIQFeedNamePut( strikeOtmPut), pInstrumentUnderlying,
-              [this](pOption_t pOptionPut){
-                //std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl; // tool early
-                m_SpreadValidation.SetOption( 1, pOptionPut );
-              } );
-          }
-        }
-
-        if ( m_bAllowComboAdd ) {
-          if ( m_SpreadValidation.IsActive() ) {
-            if ( m_SpreadValidation.Validate( 11 ) ) {
               idPortfolio_t idPortfolio;
               boost::gregorian::date date( m_iterChainExpiryInUse->first );
               idPortfolio
@@ -656,7 +588,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   mapOption_t::iterator iterOption;
                   std::string sOptionName;
 
-                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 0 ) );
+                  Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
+
+                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
                   sOptionName = pOption->GetInstrument()->GetInstrumentName();
                   iterOption = m_mapOption.find( sOptionName );
                   if ( m_mapOption.end() == iterOption ) {
@@ -667,7 +601,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
                   strangle.AddPosition( pPositionCall, m_pChartDataView, rColour[ m_ixColour++ ] );
 
-                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetOption( 1 ) );
+                  pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.second );
                   sOptionName = pOption->GetInstrument()->GetInstrumentName();
                   iterOption = m_mapOption.find( sOptionName );
                   if ( m_mapOption.end() == iterOption ) {
@@ -678,7 +612,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
                   strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
 
-                  m_SpreadValidation.ResetOptions();
                   strangle.PlaceOrder( m_DefaultOrderSide );
                 }
                 else {

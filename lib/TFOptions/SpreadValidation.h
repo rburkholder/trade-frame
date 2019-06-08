@@ -38,11 +38,16 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
+  SpreadValidation();
   SpreadValidation( size_t nLegs );
+  SpreadValidation( const SpreadValidation& rhs ) = delete;
+  SpreadValidation( SpreadValidation&& rhs );
   ~SpreadValidation();
 
-  void SetOption( size_t ixLeg, pWatch_t pCall );
-  pWatch_t GetOption( size_t ixLeg );
+  void SetLegCount( size_t nLegs );
+
+  void SetWatch( size_t ixLeg, pWatch_t pWatch );
+  pWatch_t GetWatch( size_t ixLeg );
 
   bool IsActive();
   bool Validate( size_t nDuration );
@@ -50,8 +55,10 @@ public:
 
 protected:
 private:
+
   using vSpreadCandidate_t = std::vector<SpreadCandidate>;
   vSpreadCandidate_t m_vSpreadCandidate;
+
 };
 
 } // namespace tf

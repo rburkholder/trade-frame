@@ -24,19 +24,33 @@
 namespace ou {
 namespace tf {
 
+SpreadValidation::SpreadValidation() {
+}
+
 SpreadValidation::SpreadValidation( size_t nLegs ) {
   m_vSpreadCandidate.resize( nLegs );
+}
+
+SpreadValidation::SpreadValidation( SpreadValidation&& rhs )
+: m_vSpreadCandidate( std::move( rhs.m_vSpreadCandidate ) )
+{
 }
 
 SpreadValidation::~SpreadValidation() {
   m_vSpreadCandidate.clear();
 }
 
-void SpreadValidation::SetOption( size_t ixLeg, pWatch_t pCall ) {
+void SpreadValidation::SetLegCount( size_t nLegs ) {
+  if ( 0 == m_vSpreadCandidate.size() ) {
+    m_vSpreadCandidate.resize( nLegs );
+  }
+}
+
+void SpreadValidation::SetWatch( size_t ixLeg, pWatch_t pCall ) {
   m_vSpreadCandidate[ ixLeg ].SetWatch( pCall );
 }
 
-SpreadValidation::pWatch_t SpreadValidation::GetOption( size_t ixLeg ) {
+SpreadValidation::pWatch_t SpreadValidation::GetWatch( size_t ixLeg ) {
   //return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
   return m_vSpreadCandidate[ ixLeg ].GetWatch();
 }

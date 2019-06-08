@@ -25,6 +25,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+const double Combo::m_dblTwentyPercent( 0.20 * 0.50 ); // 20 percent of 0.50 strike spread
+const double Combo::m_dblMaxStrikeDelta( 0.51 );       // not 0.50 to prevent rounding problems.
+const double Combo::m_dblMaxStrangleDelta( 1.01 );     // not 1.00 to prevent rounding problems
+
 Combo::Combo( )
 : m_state( State::Initializing )
 { 

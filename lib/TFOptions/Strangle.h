@@ -35,10 +35,20 @@ public:
   Strangle( const Strangle& rhs ) = delete;
   Strangle& operator=( const Strangle& rhs ) = delete;
   Strangle( Strangle&& rhs );
+  virtual ~Strangle();
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
+  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pOptionPair_t = std::pair<pOption_t,pOption_t>;
+  bool ValidateSpread( ConstructionTools&, double price, size_t nDuration );
+  pOptionPair_t ValidatedOptions();
+
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
 
 private:
+
+  void Init();
 
 };
 
