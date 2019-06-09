@@ -533,11 +533,40 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
   return strikePut;
 }
 
-void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
+// turn into a template if needed for other combo types
+void ManageStrategy::BuildPosition( Strangle& strangle, const idPortfolio_t& idPortfolio, ou::tf::OptionSide::enumOptionSide side, double price ) {
 
-  static const double dblTwentyPercent( 0.20 * 0.50 ); // 20 percent of 0.50 strike spread
-  static const double dblMaxStrikeDelta( 0.51 );  // not 0.50 to prevent rounding problems.
-  static const double dblMaxStrangleDelta( 1.01 ); // not 1.00 to prevent rounding problems
+  ou::tf::option::IvAtm& atm( m_iterChainExpiryInUse->second );
+
+  std::string sName;
+
+  switch ( side ) { // should this be here or in the caller?
+    case ou::tf::OptionSide::Call:
+      sName = atm.GetIQFeedNameCall( atm.Call_Otm( price ) );
+      break;
+    case ou::tf::OptionSide::Put:
+      sName = atm.GetIQFeedNamePut( atm.Put_Otm( price ) );
+      break;
+  }
+
+  m_fConstructOption(
+    sName,
+    m_pPositionUnderlying->GetWatch()->GetInstrument(),
+    [this,&strangle,&idPortfolio]( pOption_t pOption ){
+      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+      if ( m_mapOption.end() == iterOption ) {
+        m_mapOption[ sOptionName ] = pOption;
+        m_fRegisterOption( pOption );
+        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+      }
+      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
+      strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+    });
+
+}
+
+void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation:
@@ -566,7 +595,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
             if ( m_strangleEvaluation.ValidateSpread( tools, mid, 11 ) ) { // 11 periods
 
-              idPortfolio_t idPortfolio;
+              idPortfolio_t idPortfolio; // also name of combo (strangle)
               boost::gregorian::date date( m_iterChainExpiryInUse->first );
               idPortfolio
                 = "strangle-"
@@ -575,9 +604,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 + ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() ) // date stamp when first initiated
 //                comment out to allow legs to change with dates, track profit over time
 //                + "-"
-//                + boost::lexical_cast<std::string>( strikeOtmCall )
+//                + boost::lexical_cast<std::string>( strikeOtmCall ) // no longer available with refactoring
 //                + "-"
-//                + boost::lexical_cast<std::string>( strikeOtmPut )
+//                + boost::lexical_cast<std::string>( strikeOtmPut ) // no longer available with refactoring
                 ;
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
@@ -631,6 +660,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_bAllowComboAdd = false;
               }
               // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
+              // TODO: create a trailing stop based upon entry net loss?
             }
           }
         } // m_bAllowedComboAdd
@@ -661,16 +691,23 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         );
 
-        bool bClosed( false );
+        //bool bClosed( false );
         PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
         if ( PivotCrossing::ECrossing::none != crossing ) {
           for ( mapCombo_t::value_type& vt: m_mapCombo ) {
-            bClosed |= vt.second.CloseItmLegForProfit( mid );
+            //bClosed |= vt.second.CloseItmLegForProfit( mid );
+            namespace ph = std::placeholders;
+            vt.second.CloseItmLegForProfit(
+              mid,
+              std::bind( &ManageStrategy::BuildPosition, this, ph::_1, ph::_2, ph::_3, ph::_4 )
+              );
           }
         }
-        if ( bClosed ) {
-          // open another strangle or add leg to existing strangle
-        }
+//        if ( bClosed ) { // handled above
+          // choice:
+          //   a) for now: open another otm leg in the same direction
+          //   b) if sufficient total profit, open a new strangle
+//        }
       }
       break;
     case TSWaitForEntry:

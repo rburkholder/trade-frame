@@ -355,6 +355,8 @@ private:
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
 
+  void BuildPosition( Strangle&, const idPortfolio_t&, ou::tf::OptionSide::enumOptionSide, double price );
+
   double CurrentAtmStrike( double mid );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );

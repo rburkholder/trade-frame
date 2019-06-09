@@ -165,6 +165,15 @@ Strangle::pOptionPair_t Strangle::ValidatedOptions() {
   return pair;
 }
 
+void Strangle::CloseItmLegForProfit( double price, fBuildLeg_t&& f ) {
+  for ( Leg& leg: m_vLeg ) {
+    if ( leg.CloseItmForProfit( price ) ) {
+      EOptionSide side = leg.GetPosition()->GetInstrument()->GetOptionSide(); // assumes an option
+      f( *this, m_pPortfolio->Id(), side, price );
+    }
+  }
+}
+
 void Strangle::Init() {
 }
 
