@@ -142,7 +142,7 @@ void Position::Construction( void ) {
   assert( nullptr != m_pWatch.get() );
   assert( nullptr != m_pWatch->GetProvider().get() );  // new validation, and could trip up some code
   m_dblMultiplier = m_pWatch->GetInstrument()->GetMultiplier();
-  HandleQuote( m_pWatch->LastQuote() ); // ensure we have at least one quote (some options don't quote on very otm)
+//  HandleQuote( m_pWatch->LastQuote() ); // ensure we have at least one quote (some options don't quote on very otm) -- watch not yet activated
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Position::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Position::HandleTrade ) );
   m_pWatch->StartWatch();
@@ -182,7 +182,9 @@ Position::~Position(void) {
 
 void Position::HandleQuote( const quote_t quote ) {
 
-  if ( ( 0 == quote.Ask() ) && ( 0 == quote.Bid() ) ) return; // some very otm options will have a 0 bid
+  if ( ( 0 == quote.Bid() ) && ( 0 == quote.Ask() ) ) {
+    return; // some very otm options will have a 0 bid
+  }
 
   OnQuote( quote );
 
