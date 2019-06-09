@@ -27,6 +27,10 @@
 namespace pt = boost::posix_time;
 namespace gregorian = boost::gregorian;
 
+namespace {
+const std::string sSpreadSheetName( "weeklies.xls" );
+}
+
 SignalGenerator::SignalGenerator(void)
   : m_fmt_mgr( m_xls)
 {
@@ -73,7 +77,7 @@ void SignalGenerator::Run( void ) {
 //    }
   }
 
-  std::cout << "SignalGenerator running eod and building output spreadsheet ..." << std::endl;
+  std::cout << "SignalGenerator running eod and building output spreadsheet (" << sSpreadSheetName << ") ..." << std::endl;
 
   if ( 0 != m_mapSymbol.size() ) {
     ScanBars( dtLast );
@@ -171,7 +175,7 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
       std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
       );
 
-    m_xls.SaveAs( "weeklies.xls" );
+    m_xls.SaveAs( sSpreadSheetName.c_str() );
     m_xls.Close();  }
 
   catch( ... ) {
