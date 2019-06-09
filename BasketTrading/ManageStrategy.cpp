@@ -937,9 +937,13 @@ void ManageStrategy::Test() {
 
 double ManageStrategy::EmitInfo() {
   double dblNet {};
-  double price( m_TradeUnderlyingLatest.Price() );
+  double price( m_pPositionUnderlying->GetWatch()->LastTrade().Price() );
   if ( 0 < m_mapCombo.size() ) {
-    std::cout << "Info " << m_sUnderlying << std::endl;
+    std::cout 
+      << "Info "
+      << m_sUnderlying
+      << "@" << price
+      << std::endl;
     for ( mapCombo_t::value_type& vt: m_mapCombo ) {
       Strangle& strangle( vt.second );
       std::cout << "  portfolio: " << strangle.GetPortfolio()->Id() << std::endl;

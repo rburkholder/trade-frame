@@ -273,7 +273,10 @@ double Leg::GetNet( double price ) {
     std::cout
       << "  leg: "
       << m_pPosition->GetInstrument()->GetInstrumentName()
-      << "=" << dblValue;
+      << "=>"
+      << m_pPosition->GetActiveSize()
+      << "@"
+      << dblValue;
     if ( m_bOption ) {
       pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
       switch ( pOption->GetInstrument()->GetOptionSide() ) {
@@ -298,8 +301,8 @@ double Leg::GetNet( double price ) {
     if ( 0.0 == dblValue ) {
       const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
       std::cout
-        << ", quote: a" << quote.Ask()
-        << ", b" << quote.Bid()
+        << ",b" << quote.Bid()
+        << ",a" << quote.Ask()
         ;
     }
     std::cout << std::endl;
