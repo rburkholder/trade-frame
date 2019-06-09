@@ -134,6 +134,13 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
 void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage *pMsg ) {
   DecodePricingMessage<IQFSummaryMessage>( pMsg );
   OnSummaryMessage( *this );
+
+  if ( m_bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
+    ptime dt( ou::TimeSource::Instance().External() );
+    Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    Symbol::m_OnQuote( quote );
+  }
+
 }
 
 void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
@@ -151,7 +158,7 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
     ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade
     if ( m_bNewQuote ) {
-      Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+      const Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
       Symbol::m_OnQuote( quote );
     }
     if ( m_bNewTrade ) {
