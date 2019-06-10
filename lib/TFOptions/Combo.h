@@ -74,6 +74,15 @@ public:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
+  using EColour = ou::Colour::enumColour;
+  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
+  using EOrderSide = ou::tf::OrderSide::enumOrderSide;
+
+  using fBuildPositionCallBack_t
+    = std::function<void(pPosition_t,pChartDataView_t,EColour)>;
+  using fBuildLeg_t
+    = std::function<void(const idPortfolio_t&, EOptionSide, double, fBuildPositionCallBack_t&&)>;
+
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 

@@ -95,10 +95,14 @@ public:
   using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
   using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
 
+
+
   using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
+  using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;;
 
   ManageStrategy(
     const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
@@ -355,7 +359,10 @@ private:
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
 
-  void BuildPosition( Strangle&, const idPortfolio_t&, ou::tf::OptionSide::enumOptionSide, double price );
+  void BuildPosition(
+    const idPortfolio_t&, ou::tf::OptionSide::enumOptionSide, double price,
+    fBuildPositionCallBack_t&&
+  );
 
   double CurrentAtmStrike( double mid );
 

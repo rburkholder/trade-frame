@@ -166,11 +166,15 @@ Strangle::pOptionPair_t Strangle::ValidatedOptions() {
   return pair;
 }
 
-void Strangle::CloseItmLegForProfit( double price, fBuildLeg_t&& f ) {
+void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& f ) {
   for ( Leg& leg: m_vLeg ) {
     if ( leg.CloseItmForProfit( price ) ) {
       EOptionSide side = leg.GetPosition()->GetInstrument()->GetOptionSide(); // assumes an option
-      f( *this, m_pPortfolio->Id(), side, price );
+      f( m_pPortfolio->Id(), side, price,
+        [this,&leg,defaultOrderSide](pPosition_t pPosition, pChartDataView_t pChartDataView, EColour colour ){
+          AddPosition( pPosition, pChartDataView, colour );
+          leg.PlaceOrder( defaultOrderSide, 1 );
+        } );
     }
   }
 }

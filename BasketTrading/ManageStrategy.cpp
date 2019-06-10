@@ -534,7 +534,10 @@ double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch aroun
 }
 
 // turn into a template if needed for other combo types
-void ManageStrategy::BuildPosition( Strangle& strangle, const idPortfolio_t& idPortfolio, ou::tf::OptionSide::enumOptionSide side, double price ) {
+void ManageStrategy::BuildPosition(
+  const idPortfolio_t& idPortfolio, ou::tf::OptionSide::enumOptionSide side, double price,
+  fBuildPositionCallBack_t&& fBuildPositionCallBack
+) {
 
   ou::tf::option::IvAtm& atm( m_iterChainExpiryInUse->second );
 
@@ -552,7 +555,7 @@ void ManageStrategy::BuildPosition( Strangle& strangle, const idPortfolio_t& idP
   m_fConstructOption(
     sName,
     m_pPositionUnderlying->GetWatch()->GetInstrument(),
-    [this,&strangle,&idPortfolio]( pOption_t pOption ){
+    [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
       const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
       mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
       if ( m_mapOption.end() == iterOption ) {
@@ -561,7 +564,7 @@ void ManageStrategy::BuildPosition( Strangle& strangle, const idPortfolio_t& idP
         m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
       }
       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
-      strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+      f( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
     });
 
 }
@@ -706,7 +709,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             namespace ph = std::placeholders;
             vt.second.CloseItmLegForProfit(
               mid,
-              std::bind( &ManageStrategy::BuildPosition, this, ph::_1, ph::_2, ph::_3, ph::_4 )
+              m_DefaultOrderSide, // for new entry
+              std::bind( &ManageStrategy::BuildPosition, this, ph::_1, ph::_2, ph::_3, std::move( ph::_4 ) )
               );
             // implement trailing stop or parabolic SAR
             // how wide to set the stop?  double the average jitter in price?

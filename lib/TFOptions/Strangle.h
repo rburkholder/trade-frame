@@ -47,11 +47,7 @@ public:
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
 
-  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
-  using fBuildLeg_t
-    = std::function<void(Strangle&, const idPortfolio_t&, EOptionSide, double)>;
-
-  void CloseItmLegForProfit( double price, fBuildLeg_t&& );
+  void CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& );
 
 private:
 
