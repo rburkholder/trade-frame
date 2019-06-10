@@ -82,9 +82,9 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t)>;
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
 
-  using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t, pWatch_t )>;
+  using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t&, pWatch_t )>;
 
-  using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t)>; // id of new, id of ManageStrategy portfolio
+  using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t&)>; // id of new, id of ManageStrategy portfolio
 
   using fAuthorizeSimple_t     = std::function<bool(const std::string&,bool)>; // underlying, has active positions
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;

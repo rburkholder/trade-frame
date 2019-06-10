@@ -476,7 +476,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
               }
         },
     // ManageStrategy::fConstructPosition_t
-        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t idPortfolio, pWatch_t pWatch)->ManageStrategy::pPosition_t{
+        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t& idPortfolio, pWatch_t pWatch)->ManageStrategy::pPosition_t{
               pPosition_t pPosition;
               bool bUseExistingPosition( true );
               mapPosition_t::iterator iterPosition;
