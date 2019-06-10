@@ -173,7 +173,9 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
   assert( m_mapStrategyArtifacts.end() != m_curStrategyArtifacts );
   StrategyArtifacts& artifacts( m_curStrategyArtifacts->second );
-  assert( pPosition->GetRow().idPortfolio == artifacts.m_pPortfolio->Id() );
+  if ( pPosition->GetRow().idPortfolio != artifacts.m_pPortfolio->Id() ) {
+    assert( false );
+  }
   std::pair<mapPosition_t::iterator,bool> pair
     = artifacts.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
   assert( pair.second );
