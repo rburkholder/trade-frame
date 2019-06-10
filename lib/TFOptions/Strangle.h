@@ -43,6 +43,7 @@ public:
   using pOptionPair_t = std::pair<pOption_t,pOption_t>;
   bool ValidateSpread( ConstructionTools&, double price, size_t nDuration );
   pOptionPair_t ValidatedOptions();
+  void ClearValidation();
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
 

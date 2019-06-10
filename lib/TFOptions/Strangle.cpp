@@ -175,6 +175,10 @@ void Strangle::CloseItmLegForProfit( double price, fBuildLeg_t&& f ) {
   }
 }
 
+void Strangle::ClearValidation() {
+  m_SpreadValidation.ResetOptions();
+}
+
 void Strangle::Init() {
 }
 
