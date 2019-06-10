@@ -123,57 +123,69 @@ MasterPortfolio::MasterPortfolio(
 MasterPortfolio::~MasterPortfolio(void) {
   if ( m_worker.joinable() )
     m_worker.join();
+  //TODO: need to wait for m_pOptionEngine to finish
   m_mapVolatility.clear();
   m_mapStrategyArtifacts.clear();
   m_mapStrategy.clear();
-  m_libor.SetWatchOff();
   m_pOptionEngine.release();
+  m_libor.SetWatchOff();
 }
 
 // auto loading portfolio from database
 void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
-  std::cout
-    << "Add Portfolio: "
-    << "T=" << pPortfolio->GetRow().ePortfolioType
-    << ",O=" << pPortfolio->GetRow().idOwner
-    << ",ID=" << pPortfolio->GetRow().idPortfolio
-    << std::endl;
 
   // will have a mixture of 'standard' and 'multilegged'
   mapStrategyArtifacts_t::iterator iterArtifacts = m_mapStrategyArtifacts.find( pPortfolio->Id() );
-  assert( m_mapStrategyArtifacts.end() == iterArtifacts );
-  std::pair<mapStrategyArtifacts_t::iterator,bool> pair
-    = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) ) ) );
-  assert( pair.second );
-  m_curStrategyArtifacts = pair.first;
+  if ( m_mapStrategyArtifacts.end() == iterArtifacts ) {
 
-  switch ( pPortfolio->GetRow().ePortfolioType ) {
-    case ou::tf::Portfolio::EPortfolioType::Basket:
-      // no need to do anything with the basket
-      break;
-    case ou::tf::Portfolio::EPortfolioType::Standard:
-      // this is the strategy level portfolio
-      break;
-    case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
-      // this is the combo level portfolio of positions, needs to be associated with owner
-      //    which allows it to be submitted to ManageStrategy
-      {
-        mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
-        assert( m_mapStrategyArtifacts.end() != iter );
-        std::pair<mapPortfolio_iter,bool> pair2
-          = iter->second.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
-        assert( pair2.second );
-      }
-      break;
-  } // switch
+    std::cout
+      << "Add Portfolio: "
+      << "T=" << pPortfolio->GetRow().ePortfolioType
+      << ",O=" << pPortfolio->GetRow().idOwner
+      << ",ID=" << pPortfolio->GetRow().idPortfolio
+      << std::endl;
+    
+    std::pair<mapStrategyArtifacts_t::iterator,bool> pair
+      = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) ) ) );
+    assert( pair.second );
+    //m_curStrategyArtifacts = pair.first;
+
+    switch ( pPortfolio->GetRow().ePortfolioType ) {
+      case ou::tf::Portfolio::EPortfolioType::Basket:
+        // no need to do anything with the basket
+        break;
+      case ou::tf::Portfolio::EPortfolioType::Standard:
+        // this is the strategy level portfolio
+        break;
+      case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
+        // this is the combo level portfolio of positions, needs to be associated with owner
+        //    which allows it to be submitted to ManageStrategy
+        {
+          mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
+          assert( m_mapStrategyArtifacts.end() != iter );
+          std::pair<mapPortfolio_iter,bool> pair2
+            = iter->second.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
+          assert( pair2.second );
+        }
+        break;
+    } // switch
+  }
 }
 
-// auto loading position from database
+// auto loading position from database, and from runtime creations
 void MasterPortfolio::Add( pPosition_t pPosition ) {
   std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
-  assert( m_mapStrategyArtifacts.end() != m_curStrategyArtifacts );
-  StrategyArtifacts& artifacts( m_curStrategyArtifacts->second );
+
+  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->GetRow().idPortfolio );  // need to preload the iterator for random adds
+  if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
+    assert( false );
+  }
+
+  StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
   if ( pPosition->GetRow().idPortfolio != artifacts.m_pPortfolio->Id() ) {
+    std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
+    std::string idPortfolio1( pPosition->GetRow().idPortfolio );
+    std::string idPortfolio2( artifacts.m_pPortfolio->Id() );
     assert( false );
   }
   std::pair<mapPosition_t::iterator,bool> pair
@@ -264,8 +276,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
 //              if ( "SPY" == iip.sName ) { // limit for testing
+              if ( "NEM" != iip.sName ) { // NEM has a non-standard strike price: 35.12, etc
                 AddSymbol( iip );
-//              }
+              }
             }
             else {
               std::cout

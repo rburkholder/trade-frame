@@ -198,7 +198,7 @@ private:
   using mapStrategyArtifacts_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyArtifacts>;
   using mapStrategyArtifacts_iter = mapStrategyArtifacts_t::iterator;
   mapStrategyArtifacts_t m_mapStrategyArtifacts;
-  mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
+  //mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
   setSymbols_t m_setSymbols;
 
