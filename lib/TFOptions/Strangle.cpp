@@ -77,18 +77,18 @@ bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nD
   try {
     strikeOtmCall = tools.m_chains.Call_Otm( price );
     assert( 0.0 <= ( strikeOtmCall - price ) );
-    if ( m_dblTwentyPercent > ( strikeOtmCall - price ) ) {
+    if ( ( 0.20 * 0.50 ) > ( strikeOtmCall - price ) ) { // within edge of range
       strikeOtmCall = tools.m_chains.Call_Otm( strikeOtmCall ); // choose a further out strike
     }
     strikeOtmPut = tools.m_chains.Put_Otm( price );
     assert( 0.0 <= ( price - strikeOtmPut ) );
-    if ( m_dblTwentyPercent > ( price - strikeOtmPut ) ) {
-      strikeOtmPut = tools.m_chains.Put_Otm( strikeOtmPut );
+    if ( ( 0.20 * 0.50 ) > ( price - strikeOtmPut ) ) { // within edge of range
+      strikeOtmPut = tools.m_chains.Put_Otm( strikeOtmPut ); // choose a further out strike
     }
     assert( strikeOtmCall > strikeOtmPut );
     const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
     if ( m_dblMaxStrangleDelta > dblStrikeDelta ) {
-      const double dblExclusionRange = 0.30 * dblStrikeDelta;  // enter in middle 20% only
+      const double dblExclusionRange = 0.5 * ( ( 1.0 - 0.20 ) * dblStrikeDelta );  // enter in middle 20% only
       if (
         ( price < ( strikeOtmCall - dblExclusionRange ) ) &&
         ( price > ( strikeOtmPut  + dblExclusionRange ) )
@@ -105,6 +105,7 @@ bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nD
 //        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
       << " [" << e.what() << "]"
       << std::endl;
+    throw e;
   }
 
   bool bBuildOptions( false );
