@@ -45,6 +45,7 @@
 #include <TFVuTrading/PanelFinancialChart.h>
 
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
+#include <wx-3.0/wx/gtk/radiobut.h>
 
 #include "MasterPortfolio.h"
 #include "PanelPortfolioStats.h"
@@ -89,6 +90,8 @@ private:
 
   wxRadioButton* m_rbBuy;
   wxRadioButton* m_rbSell;
+  enum EBuySell { Buy, Sell };
+  EBuySell m_enumBuySell;
 
   double m_dblMaxPL;
   double m_dblMinPL;
@@ -155,12 +158,26 @@ private:
     template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & m_enumBuySell;
     //ar & m_splitPanels->GetSashPosition();
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 == version ) {
+      ar & m_enumBuySell;
+      switch ( m_enumBuySell ) {
+        case EBuySell::Buy:
+          m_rbBuy->SetValue( true );
+          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
+          break;
+        case EBuySell::Sell:
+          m_rbSell->SetValue( true );
+          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Sell );
+          break;
+      }
+    }
     //m_splitPanels->SetSashPosition( x );
   }
 
@@ -168,6 +185,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 1)
+BOOST_CLASS_VERSION(AppBasketTrading, 2)
 DECLARE_APP(AppBasketTrading)
 

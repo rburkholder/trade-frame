@@ -51,7 +51,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 6, 7 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 6, 10 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -125,6 +125,7 @@ bool AppBasketTrading::OnInit() {
   m_rbSell->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
 
   m_rbBuy->SetValue( true );
+  m_enumBuySell = EBuySell::Buy;
 
   m_pFrameMain->Show( true );
 
@@ -255,12 +256,18 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
 void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
   std::cout << "button buy" << std::endl;
-  CallAfter( std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Buy ) );
+  CallAfter( [this](){
+    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Buy );
+    m_enumBuySell = EBuySell::Buy;
+  } );
 }
 
 void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
   std::cout << "button sell" << std::endl;
-  CallAfter( std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Sell ) );
+  CallAfter( [this](){
+    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Sell );
+    m_enumBuySell = EBuySell::Sell;
+  } );
 }
 
 void AppBasketTrading::HandleButtonTest() {
