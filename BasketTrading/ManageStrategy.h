@@ -254,7 +254,7 @@ private:
   ou::tf::BarFactory m_bfTrades06Sec; // charting
   //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
-  ou::tf::BarFactory m_bfTicks06sec; // monitors liquidity, use to determine a minimum count for entry
+  //ou::tf::BarFactory m_bfTicks06sec; // monitors liquidity, use to determine a minimum count for entry
 
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
