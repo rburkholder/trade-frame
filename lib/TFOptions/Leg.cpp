@@ -49,8 +49,6 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   m_pPosition = pPosition;
   m_monitor.SetPosition( pPosition );
 
-  m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-
   ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
@@ -58,13 +56,9 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   if ( pOption ) {
     m_bOption = true;
     m_ceDelta.Clear();
-    m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceGamma.Clear();
-    m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceVega.Clear();
-    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceTheta.Clear();
-    m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
   }
 }
 
@@ -155,11 +149,19 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
 }
 
 void Leg::AddChartData( pChartDataView_t pChartData ) {
+  m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
   pChartData->Add( 2, &m_ceProfitLoss );
-  pChartData->Add( 11, &m_ceDelta );
-  pChartData->Add( 12, &m_ceGamma );
-  pChartData->Add( 13, &m_ceVega );
-  pChartData->Add( 14, &m_ceTheta );
+
+  if ( m_bOption ) {
+    m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 11, &m_ceDelta );
+    m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 12, &m_ceGamma );
+    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 13, &m_ceVega );
+    m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 14, &m_ceTheta );
+  }
 }
 
 bool Leg::CloseItm( const double price ) {
