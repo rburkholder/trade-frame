@@ -204,6 +204,7 @@ public:
     dblTotal -= ( dblCommissionsPaid = m_row.dblCommissionPaid );
   }
 
+  idPosition_t Id() const { return m_row.idPosition; }
   bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
 
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
