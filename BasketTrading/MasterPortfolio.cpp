@@ -500,6 +500,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
               else {
                 pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition(
                   idPortfolio, pWatch->GetInstrument()->GetInstrumentName(), "Basket", "ib01", "iq01", m_pExec, pWatch );
+                Add( pPosition );  // update the archive
               }
 
               return pPosition;
@@ -521,6 +522,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                 = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
                     idPortfolioNew, idAccountOwner, idPortfolioMaster, ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
                 );
+              Add( pPortfolio );  // update the archive
             }
             return pPortfolio;
           },
