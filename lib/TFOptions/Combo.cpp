@@ -52,13 +52,24 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
 
 // TODO:  need to accept existing positions, need to create own new positions
 void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
-  assert( m_vLeg.size() < m_vLeg.capacity() );
-  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
-  Leg leg( pPosition );
-  m_vLeg.emplace_back( std::move( leg ) );
-  m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-  m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
-  m_state = State::Positions;
+  bool bLegFound( false );
+  for ( Leg& leg: m_vLeg ) {
+    if ( pPosition->GetInstrument()->GetInstrumentName() == leg.GetPosition()->GetInstrument()->GetInstrumentName() ) {
+      bLegFound = true;
+      break;
+    }
+  }
+  if ( !bLegFound ) {
+    assert( m_vLeg.size() < m_vLeg.capacity() );
+    assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+    Leg leg( pPosition );
+    m_vLeg.emplace_back( std::move( leg ) );
+    m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
+    m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
+  }
+  if ( State::Initializing == m_state ) {
+    m_state = State::Positions;
+  }
 }
 
 void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
