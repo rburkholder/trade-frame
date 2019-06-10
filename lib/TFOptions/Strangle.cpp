@@ -166,14 +166,20 @@ Strangle::pOptionPair_t Strangle::ValidatedOptions() {
   return pair;
 }
 
+// applicable when running a long strangle strategy
 void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& f ) {
   for ( Leg& leg: m_vLeg ) {
     if ( leg.CloseItmForProfit( price ) ) {
       EOptionSide side = leg.GetPosition()->GetInstrument()->GetOptionSide(); // assumes an option
       f( m_pPortfolio->Id(), side, price,
-        [this,&leg,defaultOrderSide](pPosition_t pPosition, pChartDataView_t pChartDataView, EColour colour ){
+        [this,defaultOrderSide](pPosition_t pPosition, pChartDataView_t pChartDataView, EColour colour ){
           AddPosition( pPosition, pChartDataView, colour );
-          leg.PlaceOrder( defaultOrderSide, 1 );
+          for ( Leg& leg: m_vLeg ) {
+            if ( leg.GetPosition()->Id() == pPosition->Id() ) {
+              leg.PlaceOrder( defaultOrderSide, 1 );
+              break;
+            }
+          }
         } );
     }
   }
