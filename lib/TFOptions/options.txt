@@ -1,0 +1,1107 @@
+__Profiting.from.Weekly.Options.How.to.Earn.Consistent.Income.Trading.Weekly.Option.Serials.pdf
+
+page 76
+
+The 103 call and the 104
+put have intrinsic value, but they also have the same amount of air as the 104 call
+and 103 put. In either case, as we move up and down they will become all air and
+the ATM straddle will be the sum of the 104 call and put plus the sum of the 103
+call and put divided by two. This formula will work for any ATM that is currently
+between strikes!
+
+page 77
+
+The ATM straddle will be the sum of the two out-of-the-money
+options + the sum of two in-the-money options ÷ 2. This formula will
+work for any ATM that is currently between strikes!
+
+page 88
+
+To figure the premium in any strike, subtract the intrinsic value from
+the current price and it will give you the premium left in the strike.
+Both the put and call will have the exact premium, plus or minus the
+bid–offer spread.
+
+page 89
+
+Days until Expiration is a composite of the most likely premium levels on any
+given day for the final 14 days of the 50 most liquid stocks that are priced over $50.
+I believe that this table is the only one to be printed, and it will give you the highest
+probability of premium levels on any given day. As you can see, even on expiration
+Friday of May2 14 AAPL 590 call will still be worth 2.90 (50 percent of the straddle)
+if it is at the money.
+
+This provides a more realistic indication of risk at expiry.  
+
+[do this for the weeklies as a reference]
+
+page 91
+
+credit spread, aka vertical spread - selling an option closest to the at-the-money (ATM) strike price
+and buying one that is further away.   The reward
+is limited to the difference between the strikes initiated minus the
+premium collected.
+
+Call Credit Spread (Bear Vertical)
+Put Credit Spread(Bull Vertical)
+
+page 94
+
+It is called the 60/40 because the deltas that are used are the 60 delta option and the 40 delta
+option. Usually, this is going to be the ATM +1/−1 but it could vary slightly. A
+good rule of thumb is to never use more than the ATM +2/−2, regardless of market
+conditions -  this spread is more aggressive in
+nature because it is only used when you want to press your advantage -  if you
+have done a good job in projecting the price action, it is a much bigger winner -  if the underlying price
+stays where the spread is initiated, it will no longer be a winner; it will be a scratch,
+because we are buying as much premium as we are selling
+
+Using our conversion and reversal formula you should know that the premium
+(air) at any strike in the same serial is always equal +/− the bid offer spread - Using our conversion and reversal formula, you should know that the premium
+(air) at any strike in the same serial is always equal. 
+
+Call Credit 60/40 Spread (Bear Vertical)
+
+
+page 96
+
+Risk Reversal (Synthetic Long Stock) - purchasing a call and selling a put simultaneously at the
+same strike -  limit our risk to the downside: buy an out-of-the-money put
+
+buy more intrinsic value so as not to finance a great amount of premium - 
+buy the ATM −4 call and sell the ATM −4 put, buy the ATM −5 put for protection.
+
+page 97
+
+Risk Conversion (Synthetic Short Stock)
+
+put risk reversal, known as a conversion. It is called a conversion because we are taking the options and
+‘‘converting the stock to a short position.’’
+
+executed by purchasing a put and selling a call simultaneously at the same strike. This creates a synthetic underlining sale of 100 shares of stock, limit our risk to the downside with buying an out-of-the-money call.   buy more intrinsic value so as not to finance a great
+amount of premium - buy the ATM +4 put and sell the ATM +4 call, buy the ATM +5 call for protection
+
+page 98
+Call Backspread (1 by 2 for Even)
+
+has unlimited reward and limited risk, but has many of the benefits of the 60/40 credit spread in
+that the risk is limited to strike prices. The major difference between the two trades
+is that it has unlimited reward.
+
+ traders shy away from this type of trade because they fear the risk of
+getting pinned at the 600 strike on expiration. This is a valid concern; however,
+earlier in the chapter I talked about estimating the premium in the model at any
+point in time prior to expiration. Table ‘‘Days until Expiration’’ shows that the
+AAPL ATM straddle on the morning of the Friday expiration should be trading at
+approximately 3.80, and that means if we are trading at the 600 strike that morning,
+the call should be trading around 1.90.
+
+Put Backspread (1 × 2 for Even)
+
+  In most cases, no matter what strikes you use,
+the risk will be close to the value of the strike spread.
+
+You should have noticed
+by now that no matter what strikes we use to do the 1 × 2, as long as they are
+touching, such as ATM −1−2 or ATM +3 +4, if our short strike is at the money,
+we should still be at or near a breakeven position on expiration Friday. The key to
+this trade is managing the risk on Friday. Of course, if it is a big winner; all that is
+necessary is to take off the spread and sell the ITM money before the close.
+
+page 108
+
+risk/reward
+
+the risk/reward in a credit spread, this trade would
+risk $2.80 to make $2.20; it has better than a 2/3 risk/reward ratio and will be
+a key number to initiate trades.
+
+page 111
+
+Backspread (1 × 2 for Even)
+
+the problem with trading such a high-priced stock is the spread
+that must be employed, because the premium in each strike is so large that you
+can’t use touching strikes. The 1 × 2 is not conducive to this type of environment. Although
+theoretically it is exactly the same as trading smaller stocks, the big dollar risk doesn’t
+make this trade practical unless you have a large amount of risk capital. The bigger
+the strike risk, the less you want to use this strategy.
+
+page 112
+
+Weekly credit spread, 60/40 credit spread - will fit with any stock as long as you can maintain
+a 2/3 risk/reward ratio... use the ATM +1/−1 or the
+60/40. It is a Vega-neutral spread, and it employs the 60 delta and 40 delta
+options.
+
+Risk reversal synthetic long or short - 
+Once you move to the higher-priced stocks, you must go to the synthetic in
+order to overcome the premium. Although the option model works the same
+for higher-priced and lower-priced stocks, the dollar risk comes into play, and
+since our goal is to minimize the dollar risk and maximize our leverage, you
+must use the risk reversal on high-priced stocks.
+
+backspread (1 × 2 for even) - works very well in modestly priced stocks where you can use
+touching strikes. As you move further away from the ATM, the chances are
+less that you have to cash this trade. In higher-priced stocks, the strike risk
+becomes too large, and I suggest that you abandon this type of trade.
+
+page 118
+
+ Sellers of credit spreads
+have limited risk and limited reward. However, they win three ways if the price
+stays where the spread is sold, if the price goes in their predicted direction, or if
+the price moves against them by less than the credit received.
+
+page 128
+
+the price
+of the liquid asset will rotate around the mean price roughly +/−65 percent of the
+time, or approximately one standard deviation on either side of the mean, and I call
+this congestion.
+
+page 130
+
+The mean is the middle of the congestion phase and the double tops and
+bottoms are +/−1σ on the left and right of the mean. The reason that the markets
+remain in congestion is that the uncertainty about the direction of the current price
+causes the strong hands and weak hands to constantly change dominance until one
+of them overwhelms the other and the market breaks out. 
+
+represented by +/−2σ, although the time that the market is in congestion is much longer. 
+The distribution of price occurs after we ‘‘break out to the trend,’’ and this is also consistent 
+with what happens when the strong hands are able to force the weak hands out of the market.
+
+If the new strong hands begin to run over their
+opponents, the market will go +/−3σ and the blowoff will occur.
+
+
+ It can go from one congestion pattern to another without a trend. It can go
+from one blowoff to another without going into congestion or a trend. Or it can go
+through the normal cycle, which is congestion, breakout to the trend, and then the
+final blowoff.
+
+When I am trading and the market is moving around, I am constantly thinking
+about the distribution curve. As we roll from one strike to another and the premium
+levels change, I think of the ‘‘Days until Expiration’’ table in the back of the book to
+anticipate what will occur if the market goes into congestion at any time. Congestion
+is always the toughest phase to trade. I am a reactionary trader, but once I take a
+trade, I become a predictive trader, and, as such, I need the market to respond in
+the direction that I have chosen.
+
+Going back to your distribution model should give you some
+comfort; if the market is in congestion, you can see where the next opportunity
+should appear. If it is trending, it will help you to continue with the trend. Finally,
+when you are in a blowoff situation and the greed is overwhelming you, it will give
+you the confidence to take the winner off and look to reverse at a time when many of
+your opponents are making the classic mistake of selling a blowoff bottom or buying
+a blowoff top.
+
+page 133
+
+use two time frames for managing trade
+
+Generally, the first trade I make in a congestion pattern is a loser. I am not able to
+see the support and resistance levels that are forming until a double top or bottom is
+hit and the strong and weak hands change ownership. 
+
+page 137
+
+Another reason not to use
+the parity options is because your risk will mimic the underlying. Even though you
+still have limited risk, if you buy an option near parity and get a big move against
+you, it will lose almost as many deltas as the underlying stock, giving you a nasty
+black eye.
+
+Buying an outright call at a double bottom gives you a nice shot at a winner.
+First, you have support that is close by, and if necessary you might even add to
+this trade at support. Second, there is some volatility, and with the price angle
+accelerating it has a good chance to advance to the mean +1σ very quickly. When
+the shortest technical time frame you are observing gives a buy signal,
+initiate the trade
+
+. Your only adjustment would
+be to ‘‘roll up or roll back.’’ I never roll up until the new ATM is at least
+four strikes above my current long call. I like to roll up to limit my intratrade
+risk. I am willing to pay the premium to make sure that in case of a sudden move
+against me, I don’t mimic the underlying asset tick for tick on the way down.
+
+ if the bottom below is violated by a certain small
+percentage or my shortest indicator tells me to take my loss, I am out of the trade.
+I know that there will probably be some price action around the low of the current
+move. I anticipate that, and so I always allow a few ticks below that low to stop
+me out. Sometimes it works; other times I end up selling the low of the move.
+The important thing is that you make the same trade each time; nothing works all
+of the time. I will stay in the trade until I reach the other side of congestion, and I
+will look to reverse and get short if the double top holds and my shortest technical
+signal gives me a reversal signal. If the market takes out the double top, I will
+stay with the trade, as it could turn into a monster winner if the new trend is to
+the upside.
+
+page 138
+
+Buying an outright put is the exact mirror image of the outright call. The only
+difference is that it is initiated at the double top.
+
+The strong hands, which
+have been the longs, cannot push it past +1σ and the short hands, which have been
+on the defensive, take control.
+
+As long as the trade goes in your favor, let the trade run. Your only adjustment
+would be to ‘‘roll down’’ or ‘‘roll back.’’ I never roll down until the new
+ATM is at least four strikes lower than my current long put. I roll down
+to limit my intratrade risk. 
+
+page 139
+
+A double bottom is a great spot to sell a bullish credit spread. You have support
+right below, at the nominal double bottom, and you have plenty of price room to
+the previous high; the market has some velocity to the upside. Check to see if you
+can get the 2/3 ratio that we want when we sell a credit spread. 
+
+page 140
+
+ If you are more aggressive, you could consider
+the 60/40 spread and see if you can do it ‘‘Vega neutral.’’ That means that you are
+collecting a credit equal to or greater than the debit in terms of air, not nominal
+price. If the spread expires here, it will be a scratch or near it. Unlike the ATM
+−1 put spread, we do not make money if the price doesn’t change; the best we
+can do is scratch the trade. The 60/40 gives us more upside if we are correct; it is
+more aggressive, because we can only make money if we have correctly predicted
+the direction of price
+
+If the market rallies after you initiate the bullish credit spread you must still manage
+your winner. You can do nothing and allow the spread to expire worthless, or if you
+are more aggressive you can roll it up. Similar to the outright buy of a call, I never
+do anything until the price advances to at least ATM +4 from my short leg of
+the credit spread. Sell the ATM +4 +3. If you are aggressive, you can let the
+old spread stay on the books, as you are now a very big favorite to cash the trade. If
+you are conservative and are concerned about a sudden reversal of fortunes, you can
+buy back the short leg of the original spread. I prefer to leave the long leg on, as it
+is probably near to being a teenie and could turn into a lottery ticket. Never sell
+the long leg and hold the short leg, as you will create an unlimited risk
+situation. As long as the market goes in your favor, continue to roll the spreads up
+for maximum possible gain.
+
+On Friday, I roll back the bullish credit spread by first selling the new ATM/ATM
+−1 in the next weekly or the 60/40. I only buy back my existing spread if it is in
+danger of going out as a loser. If it is beyond the expected range, I will leave it
+in place. Even if the market starts to move against me that late in the week, I can
+always take the expiring spread off. Many times it will be so far out of the money
+that even adverse price movement will not affect the trade.
+
+page 141
+
+I said I don’t try to scalp around trades, but I do take a defensive posture by selling
+another credit spread on the other side of the market. That will turn the original
+position into an iron condor. I don’t use iron condors to initiate a spread, because
+you must pay double commissions and double the bid–offer spread, but I will use
+them to try and scratch a losing trade.
+
+page 143
+
+manage winners is pretty simple: As long as the market continues to break
+I let it run until the trade runs into support. If the support doesn’t hold I will roll the
+spread down and continue to do that until I have a losing trade.
+
+risk reversal is the first aggressive spread trade that you can make. Your risk in
+this trade will be the same as an outright buy from a price perspective; however,
+by using the premium in the put you will diminish the premium risk. The trade
+will be initiated when the shortest technical time frame that you are observing turns
+positive. I like to use the ATM−1 for this trade because it has less air to be offset
+by the put. Margin is always a consideration, and to offset the margin problem I buy
+the outright call first and then I sell the put spread.
+
+The trade is aggressive, and if the underlying
+stock begins to break, initially we will lose money tick for tick. However, your risk
+is limited to the price of the call plus the loss in the put spread.
+
+page 144
+
+Rolling Up a Synthetic Long
+I will roll up if the ATM moves more than two strikes to the upside. I sell a vertical
+call spread, replacing my old ATM −2 with a new ATM −2. I don’t need
+to replace the put spread because it is a winner, and I use it as a means to finance my
+new call premium. If you want to reduce the premium risk to zero, you can sell the
+new ATM −2 −4 put spread, but you don’t have to. If you don’t mind having a little
+more intratrade risk you don’t have to roll up. I roll up to reduce my intratrade risk,
+as my protection from the put spread is now closer to my long risk reversal. I roll
+up to guard against a wild opening to the downside. I want my protection closer to
+my long. When I roll up, I already have booked a $5 winner and I am now long with
+a premium risk of about $4. I believe that not rolling up when the ATM goes two
+strikes in your favor is a mistake; however, many very successful traders might argue
+the point, as you are probably going to give up some liquidity by paying the extra
+commissions and breakage. If the trade continues to go in your favor, you give up a
+little bit of premium, but if the market gaps against you, it will still be the winner.
+
+Rolling Back a Synthetic Long
+On Friday, I roll back the risk reversal by first selling the horizontal call spread. In
+this trade, you must sell your long call and buy the next weekly serial ATM −2 call.
+After the roll is in place, I sell the ATM −2 −4 put spread. Unless the trade is going
+badly and my expiring ATM −2 −4 put spread is in danger of going in the money, I
+let it expire worthless. If it is close, you will have to monitor it. My rule is, when in
+doubt, cover and go on to the next trade.
+
+Managing Risk in a Synthetic Long
+As with all limited-risk trades, I can get out if the bottom below is violated by a
+certain small percentage or my shortest indicator tells me to take my loss. I am out
+of the trade. This trade is managed similar to owning a call outright. There will
+probably be some price action around the low of the current move; I always allow a
+few ticks below that low to stop me out. Exactly what measure you use is up to you,
+as long as you limit your risk. The important thing is that you make the same trade
+each time. I will hold the trade until I reach the other side of congestion, and I will
+look to reverse and get short if the double top holds. If it doesn’t hold, I will allow
+my long to run, as we may be having a breakout to the trend on the upside and I
+have a great head start.
+
+page 145
+
+Risk Reversal (Synthetic Short)
+The synthetic short is actually called a risk conversion because you convert the long
+stock into a short stock position. I will use the term risk reversal for both the
+long and short positions, as the mechanics of execution are exactly the
+same. The synthetic short is a mirror image of the long trade. The difference is that
+since you are initiating a short position, you must think in reverse. You will now
+buy the ATM +2 put and sell the ATM +2 +4 call spread. The rest of the trade is
+managed exactly the same as the synthetic long.
+
+The biggest edge using the short risk reversal is that it allows you
+to short the stock, with no FINRA restrictions. When you hear about large
+hedge funds shorting stock, it is almost always through the options. If they are wrong,
+their risk is limited, and if they are correct, they get the stock through exercise.
+Additionally, they are not subject to the short-selling margin. Unlike a synthetic
+long, they have reward limited to the stock going to zero, so technically it is not an
+unlimited reward/limited risk trade.
+
+page 146
+
+Bullish Backspread (1 × 2 for Even)
+The final trade that I do is the backspread. When the shortest time frame that I am
+observing gives me a buy signal, I initiate the trade. This spread can be tricky and
+needs to have the right amount of air in the balloon or my strikes may be too wide
+to use it properly. During periods of very high volatility, I don’t use this
+trade; I use the risk reversal or an outright buy. 
+
+The risk is somewhat mitigated by the fact that even
+with as little as 1 hour left until expiration, the ATM +2 call should still have at
+least $1.00 of premium left in it, and the real risk is more like 0.50 to 0.75. You
+will have time to take corrective action. The main danger of this spread is
+that the market goes in the direction you predicted but it will move too
+slowly and will threaten to stall near your long strike.
+
+page 147
+
+NOTE: If the spread goes in your favor you want to roll it up when your short strike is more
+than two strikes in the money. The first step to rolling up a 1 × 2 is to sell your
+extra-long call. This turns the original spread into a long put spread with
+no risk. If you remember, earlier I talked about this phenomenon where a short
+call spread becomes a long put spread when price rolls through the short strike. In
+the 1 x 2 you want to lock in your winner, and this will do. The next step is to sell
+the new ATM or ATM +1 strike and buy two of the next higher strike
+ATM +1 (2) or ATM +2 (2).
+
+page 148
+
+I don’t adjust this trade until either of these occurs:
+a) The long side of our trade (2) becomes at least the ATM +1 strike.
+b) The market arrives at the long strike on expiration Friday.
+
+In the first scenario, (a), the trade is a winner, and now we want to take advantage
+of that. In order to get the full benefit, I will roll it up when the (2) long legs become
+the ATM +1. At that point in time, I will be short a call spread and long one extra
+call. The short call spread will now act as a long put spread if the market breaks back
+toward the original ATM. You may be wondering how a short call spread
+turns into a long put spread. It is because the spread reverses as you go
+through the strike price of the long option.
+
+When I roll up, I sell one of the long calls
+and let the other one act as the long leg of the short spread.
+
+If the market arrives at the long strike (2) on Friday, the short leg will be near
+or at parity, and if the market expires on the long strike, the spread will lose the
+maximum amount on the trade. 
+
+As a general rule, if you don’t split
+strikes you will find that the trade will be near breakeven or a small
+loser because of the air left in the long strike (2).
+
+ If you have split strikes,
+you have a much bigger problem because the short leg will be at parity and will now
+have at least two strikes’ worth of intrinsic value. That is why I don’t do split strikes
+1 × 2; it can be very dangerous if you don’t get the move that you need.
+
+page 149
+
+ Bearish Backspread (1 × 2 for Even)
+
+ I initiate
+the trade when the shortest time frame that I am observing gives me a
+sell signal. Because volatility is generally higher during breaking markets, I don’t
+get a chance to use this trade as much as the bullish 1 × 2. In a break from the top
+of congestion, the volatility hasn’t generally reached a level that would preclude this
+trade; however, in bear markets it will be very tough to execute this trade and I
+almost exclusively use the risk reversal or credit spreads.
+
+Buying options outright and the 1 × 2 can be very hard to execute because of
+the huge amount of air in the balloon. Again, when you have a lot of air in the
+balloon to implement this trade effectively you must ‘‘split the strikes,’’ which
+means that they will no longer touch. If you sell the ATM you must buy the ATM
+−2 in order to execute this trade for even or a small debit, because the premium
+is very evenly distributed (more uncertainty, more premium). If the trade goes
+against you, meaning that it breaks slowly, it must break past two strikes in order to
+break even.
+
+Rolling Down the Bearish Backspread (1 × 2 for Even)
+Rolling this spread down is the mirror image of rolling the bullish backspread up.
+You want to roll it down when your short strike is more than two strikes in the
+money. The first step to rolling down a 1 × 2 is to sell your extra long put. This
+turns the original spread into a long call spread with no risk. The next
+step is to sell the new ATM or ATM −1 strike and buy two of the next
+lower strike ATM −1 (2) or ATM −2 (2).
+
+Rolling Back the Bearish Backspread (1 × 2 for Even)
+Rolling back the 1 × 2 on Friday will depend on where the trade is in relation to the
+initial position. If the trade is in my favor (the market is below my longest strike),
+I roll back the 1 × 2 by first selling the extra put, creating a credit spread in the
+original trade. If it is at a loss (the market is below my short strike but above the long
+strike), I cover the initial trade. I then sell the ATM −1 put spread and buy the ATM
+−1, −2 (2) put in the next expiring serial. Unless the trade is going badly and my
+expiring ATM −1 −2 put spread is in danger of going in the money, I let it expire
+worthless. If it is close, you will have to monitor it. My rule is, when in doubt, cover
+and go on to the next trade.
+
+page 150
+
+Managing Risk in a Bearish Backspread (1 × 2 for Even)
+Managing the risk in the bearish 1 × 2 is the same as it is in the bullish 1 × 2. It has
+virtually no downside if the market rallies above our short strike. The biggest risk
+is that we are correct in predicting the break, but the rate at which the market is
+breaking will place us at our long strike at expiration.
+On the winning side, I adjust when:
+The short side of my trade (2) becomes at least the ATM −1 strike. I will roll
+down by selling the extra-long put and turning the original spread into a long call
+spread. This is the exact same trade that I did when I rolled the bullish backspread
+up. I then buy the 1 × 2 backspread. If the profit hits on Friday, I close out my
+original trade and roll back to the next weekly serial. I will continue to do this roll
+until my shortest technical indicator turns bullish.
+If the trade is a loser, meaning the market is breaking but it is nearing our long
+strike, I know that if I haven’t split strikes there should still be enough premium in
+my long strike to mitigate much of my risk. The biggest risk will always be on Friday
+if the market arrives at the long strike (2). You will have to make a decision—either
+take the loss and roll back to the next serial or manage the trade during the day. I
+stay with the trade until about midday; if it is still a problem, then I cover and take
+my loss or perhaps a scratch. I will then roll it back to the next weekly serial, and it
+will be managed as a new trade; I will let it run until I get a bullish signal.
+
+This chapter married the market theory with trading in congestion. Most of your
+trades will be done in the congestion phase of the market, as it represents the biggest
+portion of price distribution (+1/−1σ). In addition to recognizing the correct phase
+of the market, you must be able to decide the proper trade to use.
+
+As a rule, you can always use credit spreads, as they represent the greatest chance
+to turn a profit. You can win even if the price goes slightly against you. They have
+limited risk, and also limited reward. Personally, when I am trading credit spreads I
+like the 60/40 trade, as I am willing to scratch if price doesn’t go my way, but I like
+the bigger punch that they offer.
+
+The risk reversal has greater risk than the outright buy, but the fact that the
+premium risk is greatly offset makes this my number one directional trade. It allows
+unlimited reward with limited risk and can be initiated no matter how much air is in
+the balloon.
+The 1 × 2 also has unlimited reward, but if the premium levels don’t allow you to
+do touching strikes, the risk of the market slowing down near expiration increases,
+and it can cause problems. I like this trade in low-volatility environments, but many
+of my students like this trade in any environment. I suggest if you can’t get this trade
+in touching strikes that you use one of the three alternatives.
+
+page 155
+
+the double top or double bottom will fail to hold +/−1σ and the trending phase of the market will begin.
+Trending markets
+are different, and when they begin, the style that is used to trade will also change.
+The trades themselves will not change, but when and how to use them will change.
+
+Usually, the first trade in the trend will be a very nice winner. This is because
+you should be either long or short from the other side of the market’s double top or
+bottom. 
+
+page 156
+
+ I like volatility to be rising, as opposed to declining. Buying a call outright in this type of market is tough, as
+the VIX is almost always declining in a low-volatility bullish market. I don’t suggest
+buying outright calls with this type of price action. 
+
+page 157
+
+If you are trading multiple shares or contracts, you should lock in profit by
+selling part of your inventory. As a rule of thumb, when I am long multiple
+positions I recommend selling 50 percent when my shortest time frame
+turns negative.
+
+ If you find that it is a problem to
+trade in a trending market using two time frames, don’t do it; stay in the
+trade until your longest time frame gives the sell signal.
+
+You should still roll this trade up whether or not you are using one of two time
+frames. That is the great advantage of trading options; you can always roll up to limit
+your intratrade risk without giving back a lot of profit potential. I never roll up
+until the new ATM is at least four strikes above my current long call. I
+like to roll up to limit my intratrade risk. I am willing to pay the premium to make
+sure that in case of a sudden move against me I don’t mimic the underlying asset tick
+for tick on the way down. 
+
+page 158
+
+ Generally, bear markets will be characterized by fear,
+and that translates into higher volatility. Buying an outright put is similar to buying
+a call but has one major difference: The VIX should be rising and not falling.
+
+Buying puts in a rising volatility market is much different than buying calls in a
+falling volatility market. In many rapidly declining markets, you can make money
+even if you are slightly wrong because the amount of air going in to the balloon can
+make the put inflate even if the price of the underlying asset rallies slightly. When
+the shortest technical time frame you are observing gives a sell signal,
+initiate the trade buying a put.
+
+page 160
+
+Selling credit spreads in a trending market is slightly different from selling in
+congestion. You won’t have a double bottom or top to set up your trade. The market
+will be in a rotation about its mean but now the mean will have a positive slope. You
+still need to get the proper risk/reward ratio, which for an ATM vertical is 2/3.
+We are willing to risk $3 for every possible $2 we can make.
+
+If you are more aggressive you could consider the 60/40 spread and see if you
+can do it ‘‘Vega neutral.’’ That means that you are collecting a credit equal to or
+greater than the debit in terms of air, not nominal price. If the spread expires
+here, it will be a scratch trade or very close one way or the other. Unlike the ATM
+−1 put spread, we do not make money if the price doesn’t change; the best we
+can do is scratch the trade. The 60/40 gives us more upside if we are correct; it is
+more aggressive, because we can only make money if we have correctly predicted
+the direction of price. The option chain shows that if I sell the ATM +1 put and
+buy the ATM −1 put, I am doing the 60/40 delta trade. I can sell the 595 put for
+approximately 3.85 and buy the 590 put for approximately 1.44.
+Both puts have approximately 1.44 of air and so the trade is right in line. If the
+market expires exactly at this price, I will lose 1.44 of air in my long put and the
+short put will gain the amount of premium that I lost, so I scratch the trade. The
+amount of premium doesn’t have to match to the penny; it needs to be close. If it is
+10c or so off against you, still do the trade if your technical analysis is bullish. Our
+risk in this trade is slightly bigger, but so is our reward. If we are correct in the
+prediction of the price movement, we rate to make as much as 2.40 in this trade,
+more than double the straight credit spread.
+
+page 161
+
+Managing the Risk in a Bullish Credit Spread
+You should expect to cash a higher percentage of your bullish credit spreads than
+you do in congestion. 
+
+Managing the Risk in a Bullish Credit Spread
+You should expect to cash a higher percentage of your bullish credit spreads than
+you do in congestion. Therefore, I don’t use the iron condor as an initial defense.
+In this case, if the bullish credit spread goes against me by more than one strike and
+my longest-term indicator is still bullish, I will sell another put spread at the lower
+strike. Initiate the trade if the underlying asset price moves to ATM −2.
+Sell the ATM −2 −3 put spread. This will double the size of the strike risk
+but will also double the size of the profit potential. If you are trading
+60/40 spreads, make the same rolldown.
+If the underlying market continues to break, you can add spreads as long as your
+longest time frame remains in a bullish mode. The original put spreads you sold
+will become debit call spreads. I have covered this several times before, and you
+should understand this principle by now. If you are confused, please go back to the
+section on pricing the markets. If the market continues to break and your technical
+indicators give you a sell signal, you can take a defensive posture by turning your
+credit spreads into an iron condor. Initiate the corrective trade by selling the
+ +1 call spread X − 1 times. The first bullish put spread should be trading
+near parity and has very little risk left in it, so there is no reason to use call spreads
+to cover that risk. That is the reason that you sell the call spread one time less than
+the bullish put spreads that you used to initiate the trade.
+
+page 163
+
+Managing the Risk in a Bearish Credit Spread
+I manage the risk in the bearish credit spread in the same manner as the bullish
+vertical. I don’t try to constantly scalp the losers, as I find that unproductive. Instead
+I will turn the spread into an iron condor by selling a bullish credit spread.
+If I get a reversal signal, I don’t buy back the bearish credit spread I am short. I
+sell another credit spread on the other side of the market. So if I am short an ATM
++1 call spread, I then try to ‘‘iron condor’’ it off by selling an ATM −1 put credit
+spread. One of the two spreads must go out worthless. If you are lucky, both of
+them will. I only buy back my original spread if it is a scratch or a winner. I don’t
+want to open myself up to a constant whipsawing by trying to buy them back and
+reselling them again.
+Which type of bearish credit spread you take is entirely up to you. It
+is a function of how much risk you can handle emotionally if things go
+wrong. There is no right or wrong trade; it is the degree of risk you can
+handle. I am an aggressive trader, so I like the 60/40, even though it has
+more risk. I believe that the higher reward is worth it.
+
+Risk Reversal (Synthetic Long)
+The risk reversal in a trending market is ideal. You don’t have to worry about
+whether volatility is advancing or declining because you are selling almost as much
+premium as you are buying. Your risk in this trade will be slightly greater from a
+price perspective than an outright call buy, but the virtual elimination of the
+premium risk makes me lean toward this trade for aggressive directional
+trades. The trade will be initiated when the shortest technical time frame
+that you are observing turns positive. In a trending market, I like to use the
+ATM −1. You will have no liquidity problems for this trade, as the ATM −1 option
+is usually the second most liquid. Since this trade requires three legs, you can do
+all three at once, as most platforms will allow you to use a three-legged spread. I
+don’t do that, as I believe that you are giving up a big edge to the market makers. I
+suggest two ways to initiate this spread. First, buy the call outright and then sell the
+put spread. Second, sell the put spread first and then buy the outright call
+
+Rolling Up a Synthetic Long; Locking in Profits
+I will roll up if the ATM moves more than two strikes to the upside. I sell a vertical
+call spread, replacing my old ATM −2 with a new ATM −2. I don’t have
+to replace the put spread because it will offer some protection against a catastrophic
+gap opening, but rolling up locks is more profit.
+
+page 164
+
+Managing Risk in a Synthetic Long
+Personally, I use my shortest time frame to exit the trade. Most likely, the major
+trend will be bullish so I will be neutral the market. I exit by selling my long
+call; I let the put spread in place, as it can help me in two ways. First, if the rally
+continues and I took profit near the bottom of the short-term break, it will provide
+me with extra profit. Second, if the exit was good and the market breaks before I get
+my next buy signal, I don’t need to do the three legs again. I simply rebuy the call. If
+my major trend turns bearish, I cover the put spread and either reduce my profit in
+the overall trade or increase it slightly if the break is very minor.
+
+Rolling Down a Synthetic Short; Taking Short-Term Profits
+As long as all of my technical indicators remain bearish, I will roll down my synthetic
+short if the ATM moves more than two strikes to the downside. I sell a vertical
+put spread, replacing my old ATM +2 with a new ATM +2. You can sell the
+ATM +2 +4 call spread to remove all premium risk, or you can let the old spread
+remain intact. You don’t have to roll down if you are willing to take the intratrade
+risk, and I know many successful traders who never roll down.
+Rolling Back a Synthetic Short
+Rolling back a synthetic short is the same operation as rolling back a synthetic long.
+Friday, I roll back the risk reversal by first selling the horizontal put spread. In this
+trade, you must sell your long put and buy the next weekly serial ATM +2 put.
+After the roll is in place, I sell the next week ATM −2 −4 put spread. Unless the
+trade is going badly and my expiring ATM −2 −4 put spread is in danger of going in
+the money, I let it expire worthless. If it is close, you will have to monitor it. If you
+are unable to monitor it during the day, it is best to cover and go to the next trade.
+Managing Risk in a Synthetic Short
+When I get a buy signal in my shortest time frame, I exit by selling my long put.
+This trade is the mirror of the long risk reversal. I let the call spread in place to help
+me. If I have taken profit near a short-term top or the market remains close to my
+buy, it can be used to finance my reentry with a new put if I get a new short-term
+sell signal.
+The biggest edge using risk reversals becomes obvious when you consider margin.
+Instead of paying a Reg T amount of 50 percent, you end up buying the stock for
+about 3 to 5 percent of the face value, with all of the profit potential and none of the
+major risk of owning shares.
+
+The Bullish Backspread (1 × 2 for Even)
+This trade works very well in a trending market. I prefer to use it in a downtrend,
+as the price action is generally better. Generally in a breaking market volatility
+is rising, and since you are long two options for every one that you are short,
+you benefit greatly if air is coming into the balloon. On the other hand, if the
+165
+TRADINGINATRENDINGPHASEOFTHEMARKET
+166
+T
+EKRAMEHTFOESAHPGNIDNERTANIGNIDARTmarket suddenly reverses and goes higher, your risk is limited to the debit you
+paid. If volatility is already very high—say in the upper 20 percent of
+historical volatility—I don’t recommend using this trade. You will have
+to split strikes, and that can take away much of the edge that you get by using the
+backspread. When the shortest time frame you are observing gives a buy
+signal, initiate the trade by selling the ATM or ATM +1 strike and buy
+two of the next higher strike ATM +1 (2) or ATM +2 (2).
+Rolling Up the Bullish Backspread (1 × 2 for Even); Taking Profit
+If the spread goes in your favor, you want to roll it up when your short strike is more
+than two strikes in the money. The first step to rolling up a 1 × 2 is to sell your extra
+long call. This turns the original spread into a long put spread with no
+risk. The next step is to sell the new ATM or ATM +1 strike and buy two
+of the next higher strike ATM +1 (2) or ATM +2 (2). You don’t have to roll
+up if you don’t want to, but it is recommended to manage your intraday risk.
+Rolling Back the Bullish Backspread (1 × 2 for Even)
+Rolling back the 1 × 2 on Friday will depend where the trade is in relation to where
+you initiated it. If the trade is in your favor (the market is above your long strike),
+I roll back the 1 × 2 by first selling the extra call, creating a credit spread in the
+original trade. If you don’t have the ability to monitor the residual call spread, close
+the entire trade. If it is at a loss (the market is below your long strike but above the
+short strike), I cover the initial trade. Next you must go to the next week ATM +1
++2 call and initiate the new trade.
+Managing Risk in a Bullish Backspread (1 × 2 for Even)
+Managing the risk in the bullish 1 × 2 is different in a trending market. It has the
+same downside in that, if the market reverses, its risk is limited to the initial debit
+or credit. However, if the trade is going your way and you get a short-term sell
+signal, it is important that you take the entire spread off. What you will find is the
+unpleasant side effect of the trade ‘‘racing’’ to the downside. If you didn’t roll
+up, you will be naked a near parity call and also short a near parity
+put spread. Your long call spread will have rolled over into a short put
+spread. Some inexperienced traders learn this lesson the hard way, and it is an
+eye-opener. Backspreads are fantastic when the market is in a big trend, but if it
+suddenly turns choppy, you will need to cover quickly.
+The Bearish Backspread (1 × 2 for Even)
+The bearish backspread in a selloff is usually very favorable because volatility is
+inevitably on the rise. Theoretically, the trade doesn’t have unlimited reward
+because the asset can only go to zero, but for all practical purposes, it is the exact
+same trade. Initiate the trade when the shortest time frame that you are
+observing gives a sell signal. If the volatility is in the upper 20 percent
+of the historical average, don’t use this trade. Because volatility is generally
+higher during breaking markets, I don’t get a chance to use this trade as much as the
+bullish 1 × 2. To implement this trade effectively, you must ‘‘split the strikes,’’
+which means that they will no longer touch when you have a lot of air in the balloon.
+If you sell the ATM, you must buy the ATM −2 in order to execute this trade
+for even or a small debit, because the premium is very evenly distributed (more
+uncertainty, more premium). If the trade goes against you, meaning that its price
+retreats slowly, it must break past two strikes in order to break even.
+The main danger of the bearish 1 × 2 spread is that the market breaks but it
+will move too slowly and will threaten to stall near your long strike. If the market
+remains above the ATM −1 strike, all of the options would go out worthless and
+you have very little risk. To initiate this trade, sell the ATM or ATM −1 strike and
+buy two of the next lower strike ATM −1 (2) or ATM −2 (2).
+Rolling Down the Bearish Backspread (1 × 2 for Even); Taking
+Profit
+Rolling this spread down is the mirror image of rolling the bullish backspread up.
+You want to roll it down when your short strike is more than two strikes in the
+money. The first step to rolling down a 1 × 2 is to sell your extra long put. This
+turns the original spread into a long call spread with no risk. The next
+step is to sell the new ATM or ATM −1 strike and buy two of the next
+lower strike ATM −1 (2) or ATM −2 (2).
+Managing Risk in a Bearish Backspread (1 × 2 for Even)
+Managing the risk in the bearish 1 × 2 is different in a trending market. It has the
+same downside in that, if the market reverses, its risk is limited to the initial debit
+or credit. However, exactly like the call spread, if the trade is going your way and
+you get a short-term buy signal, you should close the entire spread. It is better to
+take this trade off too early than to let it ‘‘blow back’’ in your face. Sometimes you
+will take the trade off at the top tick, and that is part of trading, but in the long run,
+a big reversal in this trade is very disheartening. If the major trend continues lower,
+when your short-term signal gets short again, initiate the spread again.
+
+page 173
+
+rade the final is initiated, stage of almost the market, all the the information blowoff, about and it the
+ is current market is in place. Initially we broke out above or below the congestion
+at +/− 1σ and moved through the trend at +/− 2,3σ; the market has arrived at
++/− 3σ and only a small amount of data is not contained under the distribution
+curve. One of the reasons that I like volatile stocks is that they have blowoffs more
+frequently.
+
+When the market is at extremes, many traders heed the old expression that it is
+impossible to catch a falling knife. You will learn that not only is it possible—it is
+one of the best trades that you can make! Some professional traders do nothing but
+scan the markets to find this type of trade. The key is to know how to initiate it and
+how to manage it.
+
+page 176
+
+Buying a call outright in a blowoff is extremely difficult. The premium levels are
+simply too high. Remember from earlier in the book you learned that the premium
+levels in each strike are the same. The market makers put them in line through
+conversions and reversals. It is a riskless trade for them and it keeps the premium
+equally distributed among the strikes in the option chain. So if a market is blowing
+off to the bottom, you can be confident that the shorts will be covering at any price.
+As they buy back their short puts, it inflates the balloon in proportion to the price
+they are paying to cover, and consequently that premium will overflow into the calls.
+Even with a few days to go in a blowoff, the premium levels will be dangerously
+high, and it will be very tough to make money. For this reason, buying a call is not
+the correct play. Never buy calls in a blowoff; there are many other trades
+that are superior.
+
+ Never buy puts in a blowoff; there is a huge downside to this trade
+and very little upside.
+
+page 177
+
+Sell a Bullish 60/40 Credit Spread
+Selling credit spreads in a blowoff is different than trading in congestion or trending
+markets. The reason is that the premium levels rate is extremely high, the air in the
+balloon is going to make the ATM and ATM +/−1 nearly the same. This is logical
+as well as mathematically correct. The market will still gyrate around its mean, but
+with so much uncertainty, the strikes near the ATM will all have similar amounts
+of premium. Consequently, it will be hard to get the correct 2/3 risk ratio that we
+looked for in our other trades. If you want to make the ATM your short strike, you
+will probably need to go to the ATM −2 or −3 for your long strike. This creates
+more risk and not much extra reward because the market will be flying around at the
+blowoff bottom. For that reason, you shouldn’t initiate this trade. In this
+environment, the 60/40 bullish credit spread is a much better choice.
+The strikes will most likely be the ATM +2 /−2, but this increased spread gives
+you real punch for your money. The blowoff is the most directional trade that you
+will make, and you want a trade that will give you the best chance to catch a big
+winner. The 60/40 trade is initiated when the shortest time frame you are
+observing gives a bullish technical indicator.
+The key to all blowoff trades is to allow the market to tell you that it is ready to
+stop breaking or rallying. The way that is done is to let your shortest time frame roll
+over and then make the trade. You are not trying to catch the knife; you are trying
+to get onboard for what figures to be a nice rally or break.
+Rolling Up a Bullish 60/40 Credit Spread; Taking Short-Term
+Profit
+If the market rallies after you initiate the bullish credit spread, you must still manage
+your winner. The price action in this environment should be very quick. Many times
+it will cover as much ground up and down in a day as the congestion phase of the
+market did in a week. Rolling up is much more important in a blowoff market.
+Unlike before, where it was a suggestion, here it is a rule. You don’t want to give
+up big profits if the market suddenly reverses and heads back to the bottom or top.
+
+When the market advances to at least ATM +4 from my short leg of the
+credit spread, sell the new ATM 60/40 put spread. If the longest time frame
+that you are trading is now giving a reversal signal, you can let the old spread stay
+on the books, as you are now a very big favorite to cash that trade also. If you are
+conservative and are concerned about a sudden reversal of fortunes, you can buy
+back the original spread.
+
+page 178
+
+Managing the Risk in a Bullish 60/40 Credit Spread
+Managing the risk in a 60/40 spread in a blowoff depends on how aggressive you
+are. It will be harder to turn this spread into an iron condor because the strikes
+are spread wider due to the increased premium levels. If the spread is a loser when
+the shortest time frame turns negative, you can’t average down if the longest time
+frame hasn’t turned to bullish. If the longest time frame is still bearish, I will take my
+loser and look for a new entry position if the shortest time frame again goes bullish.
+If I get a reversal in my shortest time frame and my longest time frame has turned
+positive, I will average down by selling another 60/40 spread at the better price.
+Initiate the trade if the underlying asset price moves to ATM −2. Sell
+the ATM +2/−2 60/40 put spread. This will double the size of the strike
+risk but will also double the size of the profit potential. If the underlying
+market continues to break, you can add spreads as long as your longest time frame
+remains in a bullish mode. The original 60/40 put spreads you sold will become
+debit call spreads. If the longest-term technical indicator reverses and gives you a
+bearish signal, cover the spreads and take a loss, looking for a new entry point if the
+shortest signal turns bullish.
+
+[NOTE practicing the 60/40 during normal cycles will preapare for using it in blowoffs]
+
+Sell a Bearish Credit 60/40 Spread
+The bearish credit spread will take place if the market is in a blowoff to the upside.
+The conditions will be slightly different than a downside blowoff. In this case, the
+strong hands are the bulls and the shorts are throwing in the towel. You should expect
+high volatilities but, generally speaking, they will not be as high as a breaking market.
+Most likely, it will still be very difficult to get the proper 2/3 risk/reward ratio, so
+go directly to your 60/40 spread. In this case, we are not trying to catch the falling
+knife; we are watching a rocket ship reach its zenith and waiting for gravity to take
+over. The 60/40 bearish credit trade is initiated when the shortest time
+frame you are observing gives a short technical indicator. Sell the ATM
+−2/+2 call spread.
+
+page 179
+
+Rolling Down a Bearish 60/40 Credit Spread; Taking Short-Term
+Profit
+The price action in the upside blowoff phase should be very quick. Rolling down in
+this spread is a rule. You don’t want to give up big profits if the market suddenly
+reverses and heads back up to new highs. When the market breaks to at least
+ATM −4 from my long leg of the credit spread, sell the new ATM 60/40
+call spread. If the longest time frame that you are trading is now giving a bearish
+signal, you can let the old spread stay on the books, as you are now a very big favorite
+to cash that trade also. If you are conservative and are concerned about a sudden
+reversal of fortunes, you can buy back the original spread.
+
+Rolling Back a 60/40 Bearish Credit Spread
+On Friday, I roll back the bearish 60/40 spread in the next weekly. I only buy back
+my existing spread if it is in danger of going out as a loser. If it is beyond the expected
+range, I will leave it in place. Even if the market starts to move against me that late
+in the week, I can always take the expiring spread off. Many times, it will be so far
+out of the money that even adverse price movement will not affect the trade.
+
+Managing the Risk in a Bearish 60/40 Credit Spread
+Managing the risk in a bearish 60/40 spread in a blowoff is the mirror image of
+managing the bullish 60/40. You will probably have the same problem with split
+strikes because of the higher levels of volatility. If the spread is a loser when the
+shortest time frame turns positive, you can’t average up as you would in a trending
+market, because the longest time frame will not have turned negative. In this case,
+I will take my loser and look for a new entry position if the shortest time frame
+again goes bearish. If I get a reversal in my shortest time frame and my longest time
+frame has turned positive, I will average up by selling another 60/40 spread at the
+better price. Initiate the trade if the underlying asset price moves to ATM
++2. Sell the ATM −2 /+2 60/40 call spread. This will double the size of
+the strike risk but will also double the size of the profit potential. If the
+underlying market continues to rally, you can add spreads as long as your longest
+time frame remains in a bearish frame. The original 60/40 call spreads you sold will
+become debit put spreads. If the longest-term technical indicator reverses and gives
+you a bullish signal, cover the spreads and take your loss, looking for a new entry
+point if my shortest signal turns negative.
+In a blowoff market environment, don’t trade the traditional ATM +/−1. Look
+directly to the 60/40 spread.
+
+page 180 
+
+Risk Reversal (Synthetic Long)
+The risk reversal in a blowoff market is a bread-and-butter trade. It is almost
+impossible to make a directional trade buying outright options when the volatility
+levels get to extremes, so using a risk reversal is the ideal trade. You have very little
+premium risk in the trade and you get the full punch from the price movement if
+you are correct. If you are wrong and the market gaps against your position, the risk
+is still limited to the strike risk in the corresponding call/put spread. The trade
+will be initiated when the shortest technical time frame that you are
+observing turns positive. The only variation in this trade will be that you must
+increase the strike risk in the short put spread to accommodate the extremes of
+premium. If you are using the ATM−1,−2 call/put, you probably will need to buy
+the ATM −5, −6 put to complete the trade. This does increase your downside risk
+but it is worth it to keep any premium to a minimum in case the market suddenly
+stalls and the short sellers take the air out of the balloon.
+Rolling Up a Synthetic Long; Locking in Profits
+I will roll up if the ATM moves more than two strikes to the upside. I sell a vertical
+call spread, replacing my old ATM −1,−2 with a new ATM −1,−2. I
+don’t have to replace the put spread because it will offer some protection against
+a catastrophic gap opening, but rolling up locks in more profit. I believe that not
+rolling up when the ATM goes two strikes in your favor is a mistake. I don’t make it
+a rule, as it is in the 60/40 credit spread, but I believe in cutting intratrade risk as
+much as possible.
+
+Rolling Back a Synthetic Long
+On Friday, I roll back the risk reversal by first selling the horizontal call spread. In
+this trade you must sell your long call and buy the next weekly serial ATM −1−2
+call. After the roll is in place I sell the ATM−5 −6 put spread. Unless the trade is
+going badly and my expiring ATM−5 −6 put spread is in danger of going in the
+money, I let it expire worthless.
+Managing Risk in a Synthetic Long
+This trade is managed similar to the trending market trade. If I get a sell signal in my
+shortest time frame that I am trading and the longest trend is still negative, I exit the
+trade by selling the call and buying back my put spread. If the long-term trend has
+changed, I exit my call and leave the put spread in place. Most likely I am locking in
+profit. If the short-term signal becomes bullish again, I replace the original call with
+the ATM −1,−2 and recycle the trade. If the major trend turns bearish before I get
+a signal to reenter, I buy back my put spread and look for a new entry point.
+
+
+page 181
+
+Risk Reversal (Synthetic Short)
+The risk reversal at the blowoff top will be treated very similar to the blowoff
+bottom. Since we are initiating it from the short side of the market, the OTM calls
+should not be blown up as much as the puts in the blowoff low. The premium risk
+will be somewhat mitigated, and you can probably sell the ATM +2, 4, or 5 call
+spread. The trade will be initiated when the shortest technical time frame
+that you are observing turns negative. If you are using the ATM +1,+ 2
+put/call, you probably will need to buy the ATM +2,+4 call to complete the trade.
+The upside risk is cut down considerably if are able to buy a call closer to your short.
+Rolling Down a Synthetic Short; Locking in Profits
+I will roll down if the ATM moves more than two strikes to the downside. I sell
+a vertical put spread, replacing my old ATM +1,+2 with a new ATM
++1,+2. I don’t have to replace the call spread because it will offer some protection
+against a catastrophic gap opening, but rolling down locks in more profit. I believe
+that not rolling down when the ATM goes two strikes in your favor is a mistake.
+I don’t make it a rule, as it is in the 60/40 credit spread, but I believe in cutting
+intratrade risk as much as possible.
+Rolling Back a Synthetic Short
+On Friday, I roll back the risk reversal by first selling the horizontal put spread. In
+this trade, you must sell your long put and then buy the next weekly serial ATM
++1+2 put. After the roll is in place, I sell the ATM +1,+2 +4 −5 call spread.
+Unless the trade is going badly and my expiring ATM +1, +2 +4 −5 call spread is
+in danger of going in the money, I let it expire worthless.
+Managing Risk in a Synthetic Short
+This trade is managed similar to a bearish trade in a trending market. If I get a buy
+signal in the shortest time frame that I am trading and the longest trend is still bullish
+I exit the trade by selling the put and buying back my call spread. If the long-term
+trend has changed I exit my put and leave the call spread in place. If the short term
+signal becomes bearish again I replace the original put with the ATM +1,+2 and
+recycle the trade. If the major trend turns bullish before I get a signal to reenter, I
+buy back my call spread and look for a new entry point.
+
+Risk reversals are the only way to go when you want to get short a runaway
+market and want an unlimited reward, limited risk trade. No FINRA problems, no
+Reg T problems, and you will get the full benefit if you are correct as to the next
+move in price. If you are wrong, your risk is limited.
+
+page 182
+
+The backspread works very well in many market and premium environments, but
+at blowoff levels you can get quite a bit of heartburn using it. You have a number
+of issues to deal with in the blowoff environment that weren’t a problem when the
+market was in congestion and when it is trending.
+You are buying two options and selling one, so you are long Vegas. Being long
+premium when the balloon is full of air is not a good idea. Earlier in the chapter,
+you observed what can happen if you buy premium in a contracting phase of the
+option market; you get hammered. Even if the market moves substantially when
+the fear or greed starts to be accounted for, sellers that had the capital to survive
+the combination of negative price movement and the escalating premium will be
+waiting, and they will be selling it with both hands. In addition, the traders that were
+long air during the explosion are going to want to take profit, and they also know
+that the current premium levels probably will not support the underlying asset’s
+price movement. They will join their former adversaries and become sellers in the
+new market.
+The second problem is an extension of the first one. In order to do the trade
+anywhere near Vega neutral, you are going to need to split your strikes quite a
+bit, and this can create an ugly problem near expiration. Unlike the low premium
+environments where the tight strikes prices offset almost all of the expiration risk
+in a high-Vega environment, they do the opposite; they create a huge risk. As an
+example, if you had to split your strikes by 3 or 4 to get a proper Vega fit, and the
+market decides to pin on expiration at your long strike, there is no defense for this
+type of price movement. Your short strike will now be near parity, and even though
+your long strike will contain two options with some air in them, the trade will blow
+up on you.
+The third problem will be if the market remains close to your short strike on
+expiration. It will be the ATM and the trend will rotate around that mean, most
+likely +/−1σ. Your two long options will be too far away from your short to help,
+and you will be tortured by the short strike until the last few minutes. Of course,
+if you are dead right about price, then the trade works very well, but if you are
+correct in predicting the price movement, the risk reversal works much better. You
+are buying two options in that trade and selling one, so you are long an extra option.
+However, much of the Vega risk is alleviated because you buy and sell the same
+amount of Vega in your two ATM +1/−1 options. You will own much less Vega in
+the out-of-the-money put/call and so a complete collapse of premium will not hurt
+you nearly as much. On the other hand, if you are wrong about price, you don’t
+have any pin risk, only the market risk, as in all trades.
+In a blowoff market, don’t use 1 × 2 backspreads unless you can get touching
+strikes. Employ either credit spreads or risk reversals.
+
+page 189
+
+When establishing a portfolio the three factors concerning liquidity
+are: the bid–offer spread, the expected range of the stock, and the size
+of the underlying security.
+
+page 190
+
+When we price a portfolio, in addition to liquidity you need to factor in volatility.
+If you are choosing between two stocks with similar dollar prices, the more
+volatile stock is the one you want in your portfolio.
+
+When you have at least five stocks from different
+groups in place, you are ready to begin trading.
+
+e. If you are
+trading at the maximum portfolio size of $100,000+ you should be observing at
+least 50 stocks that fit the criteria of liquidity and volatility at all times. Even if
+you are trading at the minimum size of $1,000, you need at least 10 stocks in your
+observation list
+
+page 192
+
+Dollar balance the portfolio by trading based upon EV ratios.  (Expiry Volatility) I believe.
+
+page 199
+
+If you trade with a method
+that has a higher percentage of wins, you will be able to withstand losing streaks
+much better. In general, go with the method that gives you the highest percentage
+of winning trades.
+
+page 200
+
+As a rule, you should never risk more than 3 to 4
+percent of your capital in any trade
+
+ Theoretically,
+you could have as many as 30 different trades in action and still be within the risk
+parameters described in this chapter. Managing that many trades would be extremely
+difficult and it is not recommended, but if you can manage that many, it would be
+workable. In practice, if you are trading in the shorter time frames (swing trades),
+5 to 10 simultaneous trades would probably be the most that you could manage.
+
+page 203
+
+Always concentrate on the stocks with the highest EV; those stocks will be the
+most liquid, and the more liquidity, the better the chance that you will be able
+to overcome the bid–offer spread and commissions. Remember, you don’t get a
+commission discount because the price of the stock is lower. As the EV declines,
+it means that the commission dollars that you are spending increase in relation to
+the potential profit, even if you are trading a position that has limited risk and
+unlimited reward.
+
+
+
+
+
+
+
+
+
+
