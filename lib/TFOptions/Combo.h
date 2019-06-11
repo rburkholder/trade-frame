@@ -116,6 +116,8 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
+  void ClearValidation();
+
 protected:
 
   static const double m_dblTwentyPercent;

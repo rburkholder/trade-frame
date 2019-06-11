@@ -43,6 +43,11 @@ Combo::Combo( Combo&& rhs )
 }
 
 Combo::~Combo( ) {
+  m_SpreadValidation.ResetOptions();
+}
+
+void Combo::ClearValidation() {
+  m_SpreadValidation.ResetOptions();
 }
 
 void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {

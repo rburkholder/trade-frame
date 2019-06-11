@@ -39,7 +39,6 @@ Strangle::Strangle( Strangle&& rhs )
 }
 
 Strangle::~Strangle() {
-  m_SpreadValidation.ResetOptions();
 }
 
 void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
@@ -183,10 +182,6 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
         } );
     }
   }
-}
-
-void Strangle::ClearValidation() {
-  m_SpreadValidation.ResetOptions();
 }
 
 void Strangle::Init() {
