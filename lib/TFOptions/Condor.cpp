@@ -1,0 +1,524 @@
+/************************************************************************
+ * Copyright(c) 2019, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
+
+/* 
+ * File:    Condor.cpp
+ * Author:  raymond@burkholder.net
+ * Project: TFOptions
+ * Created on June 10, 2019, 6:24 PM
+ */
+
+#include "Condor.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace option { // options
+
+using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+using pOption_t = Option::pOption_t;
+
+Condor::Condor()
+: Combo()
+{
+}
+
+Condor::Condor( Condor&& rhs )
+: Combo( std::move( rhs ) )
+{
+}
+
+Condor::~Condor() {
+  m_SpreadValidation.ResetOptions();
+}
+
+void Condor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
+  Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
+//  if ( m_vLeg.empty() ) {
+//    ChooseStrikes( dblPriceUnderlying );
+//  }
+}
+
+
+} // namespace option
+} // namespace tf
+} // namespace ou
+
+/*
+ *
+ * PROFITING
+WITH
+IRON
+CONDOR
+OPTIONS
+STRATEGIES
+ FROM THE
+FRONTLINE FOR TRADING IN
+UP OR DOWN MARKETS
+Michael Hanania Benklifa.
+
+ *
+ * First Printing January 2011
+ * ISBN-10: 0-13-708551-6
+
+ * foreword:  the trade is somewhat asymmetrical
+because volatility falls in a rising market but rises in a
+falling market. Adjustments on the call side should,
+therefore, be handled differently than adjustments on
+the put side.
+
+ * page 36
+ *  The way to calculate
+the projected stock volatility for one day is to take the
+IV and divide by the square root of 256, which is the
+number of trading days in a year. Since the square root
+of 256 is 16, the rule of thumb is to divide the implied
+volatility number by 16, and that will give you a 1 stan-
+dard deviation move for one day. So if your implied
+volatility is 32%, divide 32% by 16 and you get 2%.
+Therefore, in one day there is a 68% chance the stock
+will make a 2% move. If you want to know how much
+the price could move on a different time scale, the for-
+mula is IV divided by 16 times the square root of the
+number of days in question.
+ *
+ *  goal with con-
+dors is to sell far out-of-the-money options.
+ *
+ * Liquidity also affects the bid-ask spread.
+You want to trade condors on underlying stocks that
+experience a large volume of shares traded each day, and
+high open interest, so pricing stays reasonable without
+huge spreads between the bid and the ask.
+
+ * need to check the open interest during the spread validation phase
+ *
+ * The sophisticated investor knows the Beta of his
+portfolio. Beta is the relationship of the stock or portfo-
+lio to the overall market or S&P 500. A Beta of 1 means
+if the market moves up or down 1%, then the stock
+should correspondingly move up or down 1%.
+ *
+ *  So if you hold many
+stocks in your portfolio, the entire holding has its own
+net collective Beta.
+
+ * You could hedge your entire portfolio based on its
+Beta by buying the right number of puts on the S&P
+500. You would be wise to always know the Beta of
+your portfolio with this hedging solution in mind. It
+explains why your portfolio may be outperforming or
+underperforming the market.
+
+ *
+ *  Implied
+volatility is the market prediction of future movement
+derived from the option’s price, and statistical volatility
+is a measure of past movement. Comparing these two
+types of volatility, what was predicted versus what actu-
+ally happened, is useful for deciding what underlying
+stocks to trade.
+
+ *
+ * It is reasonable at this stage to confirm that in fact
+IV is historically higher than SV. After establishing that
+this is the norm, you can move forward and feel com-
+fortable selling options on the underlying stock. The
+past is no prologue for the future, but what you’re look-
+ing for is a probability in your favor so that you are
+confident enough to commit to trading in the index.
+
+ *
+ * page 55 onwards have more charts and figures
+ *  Since you have
+ruled out stocks, you are interested only in which indexes
+are the most likely to report the necessary skew.
+ *
+ * page 62 A perfect condor strategy is one in which the trader
+knows exactly how many days away from expiration he
+should put in his trade, exactly which strikes to sell in
+his vertical spreads, and the correct amount of credit he
+wants for the trade.
+ *
+ * The immediate enemy of Theta is volatility or
+Vega.
+ *
+ *  If the value of the con-
+dor goes up because of volatility, it can become more
+expensive to “buy” back the condor you sold.
+ *
+ *  Your goal may be to keep only one-third
+of the initial credit and then buy to close the condor. Use
+this “keep one third as profit” as your objective to evaluate the three approaches.
+
+ * The only thing they have in common is
+that the Deltas of the options sold are approximately 10.
+
+ *
+ * eg: With a
+Theta of 1.4, it would take about 30 days for the con-
+dor to deteriorate
+ *
+ *  page 65 A 1%
+increase in volatility would eat up 11 days of time
+decay.
+ *
+ * At what point does the Vega-to-Theta ratio become
+too large? Your goal is to capture relatively small prof-
+its and give up the rest, hopefully in a 2- to 4-week
+period. Sometimes this is just as possible with a longer-
+term option trade as a shorter-term trade. If Theta or
+Vega were your only concerns, you could just sell con-
+dors as close as possible to expiration. Although this
+strategy is doable, it is not recommended.
+
+ *
+ *  A drop in volatility translates to a
+quick profit.
+ *
+ * page 66 If you spot an unusual spike in volatility on a particular
+day, it might be a great time to sell a condor.
+ *
+ *  In this scenario,
+you could potentially sell a condor on a volatility spike
+and even buy to close the same day and make a nice
+profit. On the other hand, just because volatility jumps,
+it doesn’t necessarily mean that volatility will go back
+down immediately. Very frequently a jump in volatility
+is also a precursor to a few more large moves in volatil-
+ity. Either way, it’s a chance you take. Usually, the odds
+are in your favor if the market panics and overreacts.
+ *
+ *  For exam-
+ple, many traders jump back in the market the day after
+expiration.
+ *
+ * ” If the market is trending, make sure that your con-
+dor has room to accommodate both the trend and a
+sudden reversal.
+ *
+ * . The other
+danger is when the market rebounds up too quickly.
+This is called Gamma risk and that can overcome both
+Theta and Vega.
+
+ *
+ * One of the most popular statistical indicators is
+Bollinger Bands. The bands illustrate a 2 standard devi-
+ation move up or down, based on a 20-day moving
+average of price. Price has a 95% statistical chance of
+remaining within the range. Bollinger Bands can be use-
+ful in a sideways market when the bands are above and
+below the price range. But when the price trends sharply
+up or down, the bands can be to the left and right of the
+price, which is not helpful when you’re trying to iden-
+tify a range. Prices that break out of the bands tend to
+find their way back. This is not true every time because
+Bollinger Bands are a lagging indicator, and if there is a
+dramatic shift in market sentiment price can travel a
+long time along the upper or lower band.
+
+ *
+So big volatility spikes through the
+Bollinger Bands can be viewed as temporary aberrations
+and will revert to the mean. Pure volatility traders seek
+these spikes to sell options and buy to close when
+volatility drops.
+
+ *
+ * At-the-money call option volatility is the usual reference
+point when referring to a stock’s or index’s implied volatility
+
+ *
+ * Bollinger bands ona volatiltiy chart - sell at the edges
+ *
+ *
+ *
+ * Support and resistance lines are very useful but not
+specifically as support and resistance. They are useful if
+you consider them as magnets. Markets tend to move
+quickly to test previous highs and lows. The underlying
+reason is probably due to the volume of stop and buy
+orders at round numbers or previous highs or lows.
+
+ * f you buy a stock, you have a 50/50 chance
+that the stock price will move up. Delta for the at-the-
+money call and put is approximately 50%. Because of
+this, option traders think of Delta in terms of percent-
+age probabilities as a rule of thumb.
+ *
+ *
+ * beauty of Delta is that the market tells you
+specifically what it thinks are the probabilities of a spe-
+cific price being reached on expiration day.
+ *
+ *  Delta gives you the market’s
+best guess at a specific point in time.
+
+ *
+ * Starting with price, you want your condor to have
+short strikes as far out as possible. You may focus on
+the Delta 10 of both the put and call short strikes. A
+Delta 10 says that a $1 move affects the price by only
+10 cents per $1 market move.
+ *
+ *
+ *  Keeping
+one-third or one-quarter of the credit is much easier
+than waiting long enough to capture half of the credit.
+The object is to make money and get out of the position
+as soon as possible.
+
+ *
+ * A good strategy, therefore, is to enter a trade is to
+wait for a jump in implied volatility
+ *
+ * The goal here is to make a
+volatility trade. If it fails, the volatility trade can revert
+to a time-decay trade.
+ *
+ *  third approach is to measure the standard devi-
+ation in the change in the price  and decide to sell only if the change is greater
+than 2 standard deviations.
+
+ *
+ *  Gains made from drops
+in volatility like this almost always outpace losses from
+the quick move in price. That advantage can evaporate
+if you wait too long and the price continues to rise; then
+you become a victim of Gamma.
+
+ *
+ * 1.Get a minimum of $3 credit or greater for the trade,
+which is 12% return on margin.
+ * 2. Deltas should be 10 or less if possible but never
+greater than 12.
+ * 3.Expiration day must be no closer than 49 days.
+ * 6. Get in on a day when the volatility is spiking up
+(that is, a down day).
+
+ *
+ * Uptrending markets are the scariest and most diffi-
+cult to trade. There is always the fear that the day after
+you enter the trade the market will take a sharp down-
+turn and volatility will work strongly against you, so
+you may hesitate to put in the trade. This trepidation is
+why it is best to wait until a down move in the market
+if possible. You want drops in volatility to work for you
+to hedge against rapid up moves, or Gamma, in the
+market.
+
+ *
+ * So why not stay through expiration? One reason is
+Gamma. Think of Gamma as a slide, and the steeper the
+slider, the quicker you lose money. Gamma can turn the
+trade against you very quickly.
+
+ *
+ * The first consideration is profit. After you decide
+how much profit you are shooting for, you can make a
+hard and fast rule to exit with that profit. In fact, the
+best thing you can do is place a limit order to buy to
+close the condor at a specific price that is good until
+cancelled (GTC) immediately after you open the condor.
+If you make the decision in advance, you prevent your-
+self from staying in the trade too long.
+
+ *
+ * The second consideration is time left until expira-
+tion. Buy to close the condor approximately a month
+before expiration, as a general standard. T
+ *
+ * The third consideration is knowing where you are on
+the P&L curve. Are you at break-even? Or at midpoint?
+Take your profits when the position moves from break-
+even into the profit zone. Don’t hesitate. Price can move
+into a profitable position and then move back out
+sharply.
+ *
+ * . You can
+never go broke taking a profit.
+
+ *
+ * edge, is buying to close condors right before the long
+weekend when the Theta decay is discounted from the
+price of the options. Prices will start to decline after
+about midday on Fridays or the day prior to the holi-
+days and will be likely to drop quickly in the final few
+minutes of the trading day, in particular the 15 minutes
+after 4 PM. On the other hand, the time decay over long
+weekends is a good reason to try to sell condors at least
+two to three days before the holidays and before the
+long weekend starts lowering option prices.
+
+ *
+ * You may look for an opportunity to buy to close your
+condor within 2 to 4 weeks after selling it and at least a
+month before expiration.
+ *
+ * When prices are falling quickly, buying to close puts
+is like catching a falling knife. It can be done, but it is
+going to hurt. The best time to adjust the put spread is
+when the market rallies. Even in a down market you can
+have huge intraday rallies. Use these rallies as opportu-
+nities to make your adjustments.
+
+ *
+ * . Intraday moves can have tremendous effects on the
+price of options, and you have to be ready to take advan-
+tage of these situations in fast-moving markets. In this
+kind of market, you should have a limit order in place to
+get out at break-even or at an acceptable loss just in case
+you get lucky. At this point, even for a small loss it would
+be worth getting out of this trade and waiting for the
+market to calm down before putting in another one.
+
+ *
+ * A quick review of some adjustment rules:
+• It is easier to adjust in a down market because you
+get more for rolling down the call credit spreads.
+
+ * It is harder to adjust in an up market because you
+don’t get much for rolling up the put credit spread
+and you bring the position closer to your downside
+risk.
+Trade the math: Don’t let Deltas go over 25 to 30.
+When possible, adjust when the market is moving in
+the opposite direction intraday. Adjust the puts
+when the market rallies or adjust the calls when the
+market dips.
+Trade only what is in front of you and not what you
+or anybody else thinks the market will do.
+If you must speculate, assume the worst-case, not
+the best-case, scenario.
+If you must adjust, consider getting out at break-
+even at the first chance available.
+• You can always put in a new trade with better
+strikes.
+
+ * Buying to close half or a third of a condor can derive
+from different motivations. One motivation is to mini-
+mize loss. So instead of taking a loss on the entire posi-
+tion, you take off part of the trade at a loss and keep
+trading the rest of the condor with less money at risk.
+Another reason to buy to close part of the condor is to
+capture a quick small profit with the intention of grab-
+bing a larger profit by remaining in the rest of the con-
+dor for a longer period for perhaps greater profits. Of
+course, you’ll be exposing yourself to further market
+risk. But have a specific target in mind regarding time to
+remain in the trade, the level of loss you are able to take
+with the rest of the condor, and how much more gain
+you are looking to capture as a trigger for closing the
+trade.
+
+ * A third strategy is buying to close all or part of one side
+of the condor. When you’re making an adjustment, the
+technique is to buy to close one spread and sell a more
+expensive spread. When making an adjustment, you
+want to buy to close the spread when it is worth less than what you sold it for originally so that you can cap-
+ture a profit from that trade. There are three reasons a
+spread will lose value: decreasing volatility, time decay,
+and a change in market direction. When the market
+moves quickly in one direction, the chances are that the
+diminished value of the spread in the other direction
+will become an opportunity to buy to close and then to
+sell a different strike. If the reason the spread loses value
+is because of decreased volatility or time decay, it might
+be an opportunity to buy to close all or some of that
+side of the condor. Volatility could always rise on one
+hand, and on the other hand there might not be a lot left
+for time value to fall any further to diminish the value
+of that spread.
+Buying to close one side of a condor makes sense
+only in two scenarios. The first scenario is when you
+have a strong conviction that the market will reverse
+direction so that the value of the condor falls enough to
+create profits. If correct, you will be able to buy to close
+the spread at pennies on the dollar and then sell the
+other spread at a higher price when the reversal occurs.
+Although this works, don’t wait too long to close the
+remaining spread. If after a few days you have still not
+bought to close the remaining spread, if you were
+wrong in your timing, you still have the other side to
+hedge.
+
+ *
+
+ * page 153 day trading condors on volatility
+ * However, there are a few very important exceptions
+in which there is certainty regarding the rise and fall of
+volatility. One exception occurs around earnings
+announcements. This is one of those events written in
+stone, and you can count on it four times a year. Hand
+in hand with this certainty is the increase in implied
+volatility the day before earnings are announced.
+Everyone wants to take advantage of this certainty. The
+universal question is, how?
+
+ *
+ * One way to increase the odds in your favor is to
+trade the higher volatility. Remember that higher
+volatility does not mean that the volatility number
+before the earnings announcement is wrong. There is no
+claim here that the prices are somehow overinflated. All
+you know with near certainty is that volatility will be
+lower the next day. The greater the drop in volatility,
+the more the drop favors the seller who sold at a high
+volatility, especially if the higher volatility was
+unfounded by reports of an uninteresting earnings
+announcement.
+
+ *
+ * page 156 with diagram The other way to increase the odds of success is to
+trade the lower Delta. Compare the straddle to a condor
+by using an example from Apple. With Apple at $250,
+the at-the-money call and put for September 2010 each
+cost $8 for a total cost of $16 ($1,600). An Apple
+Condor with Deltas at 10 or lower has a range between
+230 and 280. Whereas the straddle sellers and buyers
+are debating whether the price could move $16, the
+condor seller needs the price to move more than $30 in
+either direction to lose any money. Looking at the
+example shown in Figure 4.1, you can see that the strad-
+dle depicted here would earn the buyer 80% returns
+(with the seller obviously suffering equivalent losses) if
+the price moved $30 in either direction, but the condor
+seller would still break even.
+
+ *  When sell-
+ing condors for time decay, keep an eye on implied
+volatility versus historical volatility. If the implied is
+greater than the historical, the trade favors the seller,
+using past behavior as an indication of future fluctua-
+tions. This skew looks into the future instead of the past.
+
+ *
+ *  A stock
+with a high price will have many different strike prices.
+But it is not just the number of strikes that is significant.
+You have to look at the Deltas and see how much they
+jump from one strike to the next. The Delta should vary
+by a few points from strike to strike. You don’t want to
+see a Delta of 30 on one strike and 10 on the next. That
+kind of range doesn’t give you a lot of choices. If the
+jump is too large, the stock is not useful. You want to
+see high open interest and volume in the options. The
+window of profitability might be very small and you
+want to be able to trade quickly and without losing too
+much on the bid-ask spread.
+
+ *
+ * 
+ *
+ */

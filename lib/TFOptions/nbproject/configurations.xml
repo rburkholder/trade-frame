@@ -8,6 +8,7 @@
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
       <itemPath>Combo.h</itemPath>
+      <itemPath>Condor.h</itemPath>
       <itemPath>Engine.h</itemPath>
       <itemPath>Formula.h</itemPath>
       <itemPath>IvAtm.h</itemPath>
@@ -23,6 +24,7 @@
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>combo.txt</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -31,6 +33,7 @@
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
       <itemPath>Combo.cpp</itemPath>
+      <itemPath>Condor.cpp</itemPath>
       <itemPath>Engine.cpp</itemPath>
       <itemPath>Formula.cpp</itemPath>
       <itemPath>IvAtm.cpp</itemPath>
@@ -105,6 +108,10 @@
       </item>
       <item path="Combo.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Condor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Condor.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Engine.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Engine.h" ex="false" tool="3" flavor2="0">
@@ -148,6 +155,8 @@
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="combo.txt" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="3">
@@ -193,6 +202,10 @@
       </item>
       <item path="Combo.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Condor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Condor.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Engine.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Engine.h" ex="false" tool="3" flavor2="0">
@@ -236,6 +249,8 @@
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="combo.txt" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
 	${OBJECTDIR}/Combo.o \
+	${OBJECTDIR}/Condor.o \
 	${OBJECTDIR}/Engine.o \
 	${OBJECTDIR}/Formula.o \
 	${OBJECTDIR}/IvAtm.o \
@@ -97,6 +98,11 @@ ${OBJECTDIR}/Combo.o: Combo.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Combo.o Combo.cpp
+
+${OBJECTDIR}/Condor.o: Condor.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Condor.o Condor.cpp
 
 ${OBJECTDIR}/Engine.o: Engine.cpp
 	${MKDIR} -p ${OBJECTDIR}
