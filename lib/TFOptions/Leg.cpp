@@ -305,13 +305,13 @@ double Leg::GetNet( double price ) {
           break;
       }
     }
-    if ( 0.0 == dblValue ) {
+//    if ( 0.0 == dblValue ) {
       const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
       std::cout
         << ",b" << quote.Bid()
         << ",a" << quote.Ask()
         ;
-    }
+//    }
     std::cout << std::endl;
   }
   return dblValue;
