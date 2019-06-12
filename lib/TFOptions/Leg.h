@@ -76,6 +76,7 @@ private:
   ou::tf::MonitorOrder m_monitor;
   ou::ChartEntryIndicator m_ceProfitLoss;
 
+  ou::ChartEntryIndicator m_ceImpliedVolatility;
   ou::ChartEntryIndicator m_ceDelta;
   ou::ChartEntryIndicator m_ceGamma;
   ou::ChartEntryIndicator m_ceVega;

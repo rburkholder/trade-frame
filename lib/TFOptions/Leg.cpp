@@ -55,6 +55,7 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   m_bOption = false;
   if ( pOption ) {
     m_bOption = true;
+    m_ceImpliedVolatility.Clear();
     m_ceDelta.Clear();
     m_ceGamma.Clear();
     m_ceVega.Clear();
@@ -72,6 +73,7 @@ void Leg::Tick( ptime dt ) {
     if ( m_bOption ) {
       ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
       ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      m_ceImpliedVolatility.Append( dt, pOption->Delta() );
       m_ceDelta.Append( dt, pOption->Delta() );
       m_ceGamma.Append( dt, pOption->Gamma() );
       m_ceVega.Append( dt, pOption->Vega() );
@@ -142,6 +144,7 @@ void Leg::SaveSeries( const std::string& sPrefix ) {
 
 void Leg::SetColour( ou::Colour::enumColour colour ) {
   m_ceProfitLoss.SetColour( colour );
+  m_ceImpliedVolatility.SetColour( colour );
   m_ceDelta.SetColour( colour );
   m_ceGamma.SetColour( colour );
   m_ceVega.SetColour( colour );
@@ -153,14 +156,16 @@ void Leg::AddChartData( pChartDataView_t pChartData ) {
   pChartData->Add( 2, &m_ceProfitLoss );
 
   if ( m_bOption ) {
+    m_ceImpliedVolatility.SetName( "IV: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 11, &m_ceImpliedVolatility );
     m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 11, &m_ceDelta );
+    pChartData->Add( 12, &m_ceDelta );
     m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 12, &m_ceGamma );
+    pChartData->Add( 13, &m_ceGamma );
     m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 13, &m_ceVega );
+    pChartData->Add( 14, &m_ceVega );
     m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 14, &m_ceTheta );
+    pChartData->Add( 15, &m_ceTheta );
   }
 }
 
