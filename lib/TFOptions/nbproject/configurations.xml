@@ -25,6 +25,7 @@
                    displayName="Resource Files"
                    projectFiles="true">
       <itemPath>combo.txt</itemPath>
+      <itemPath>options.txt</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -158,6 +159,8 @@
       </item>
       <item path="combo.txt" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="options.txt" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="3">
       <toolsSet>
@@ -251,6 +254,8 @@
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="combo.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="options.txt" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
