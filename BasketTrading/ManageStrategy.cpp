@@ -67,6 +67,9 @@
      * => to reduce symbol count, load up call first to examine spread, then load up put for verification?
      */
 
+// 2019/06/11 add zig-zag - based on historical 2sd range / 10?
+// 2019/06/11 use 2sd historical range for determining edges of spreads and 1 by 2 back spreads
+
 #include <algorithm>
 
 #include "ManageStrategy.h"

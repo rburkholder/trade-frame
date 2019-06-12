@@ -264,10 +264,10 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLossPortfolio;
 
-  ou::ChartEntryIndicator m_ceDiffDelta;
-  ou::ChartEntryIndicator m_ceDiffGamma;
-  ou::ChartEntryIndicator m_ceDiffVega;
-  ou::ChartEntryIndicator m_ceDiffTheta;
+//  ou::ChartEntryIndicator m_ceDiffDelta;
+//  ou::ChartEntryIndicator m_ceDiffGamma;
+//  ou::ChartEntryIndicator m_ceDiffVega;
+//  ou::ChartEntryIndicator m_ceDiffTheta;
 
   //ou::ChartEntryIndicator m_ceUpReturn;
   //ou::ChartEntryIndicator m_ceDnReturn;
