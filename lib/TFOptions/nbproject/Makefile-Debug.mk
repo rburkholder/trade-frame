@@ -50,7 +50,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/SpreadCandidate.o \
 	${OBJECTDIR}/SpreadValidation.o \
 	${OBJECTDIR}/Strangle.o \
-	${OBJECTDIR}/Strike.o
+	${OBJECTDIR}/Strike.o \
+	${OBJECTDIR}/VerticalSpread.o
 
 
 # C Compiler Flags
@@ -158,6 +159,11 @@ ${OBJECTDIR}/Strike.o: Strike.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Strike.o Strike.cpp
+
+${OBJECTDIR}/VerticalSpread.o: VerticalSpread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VerticalSpread.o VerticalSpread.cpp
 
 # Subprojects
 .build-subprojects:

@@ -20,6 +20,7 @@
       <itemPath>SpreadValidation.h</itemPath>
       <itemPath>Strangle.h</itemPath>
       <itemPath>Strike.h</itemPath>
+      <itemPath>VerticalSpread.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -46,6 +47,7 @@
       <itemPath>SpreadValidation.cpp</itemPath>
       <itemPath>Strangle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
+      <itemPath>VerticalSpread.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -157,6 +159,10 @@
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="VerticalSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="VerticalSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="combo.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="options.txt" ex="false" tool="3" flavor2="0">
@@ -252,6 +258,10 @@
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="VerticalSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="VerticalSpread.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="combo.txt" ex="false" tool="3" flavor2="0">
       </item>

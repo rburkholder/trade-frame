@@ -13,14 +13,14 @@
  ************************************************************************/
 
 /*
- * File:    Condor.h
+ * File:    VerticalSpread.h
  * Author:  raymond@burkholder.net
  * Project: TFOptions
- * Created on June 10, 2019, 6:24 PM
+ * Created on June 11, 2019, 8:03 PM
  */
 
-#ifndef CONDOR_H
-#define CONDOR_H
+#ifndef VERTICALSPREAD_H
+#define VERTICALSPREAD_H
 
 #include "Combo.h"
 
@@ -28,13 +28,14 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class Condor: public Combo {
+class VerticalSpread: public Combo {
 public:
-  Condor();
-  Condor( const Condor& rhs ) = delete;
-  Condor& operator=( const Condor& rhs ) = delete;
-  Condor( Condor&& rhs );
-  virtual ~Condor();
+
+  VerticalSpread();
+  VerticalSpread( const VerticalSpread& rhs ) = delete;
+  VerticalSpread& operator=( const VerticalSpread& rhs ) = delete;
+  VerticalSpread( VerticalSpread&& rhs );
+  virtual ~VerticalSpread();
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
@@ -43,38 +44,39 @@ public:
 //  bool ValidateSpread( ConstructionTools&, double price, size_t nDuration );
 //  pOptionPair_t ValidatedOptions();
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long condor, or short condor
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long vertical, or short vertical
 
+protected:
+private:
+
+};
+
+class ShortVerticalSpread: public VerticalSpread {
+public:
+  ShortVerticalSpread();
+  ShortVerticalSpread( const ShortVerticalSpread& rhs ) = delete;
+  ShortVerticalSpread& operator=( const ShortVerticalSpread& rhs ) = delete;
+  ShortVerticalSpread( ShortVerticalSpread&& rhs );
+  virtual ~ShortVerticalSpread();
+
+  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+
+  virtual void PlaceOrder();  // place short vertical spread
 protected:
 private:
 };
 
-class ShortCondor: public Condor {
+class LongVerticalSpread: public VerticalSpread {
 public:
-  ShortCondor();
-  ShortCondor( const ShortCondor& rhs ) = delete;
-  ShortCondor& operator=( const ShortCondor& rhs ) = delete;
-  ShortCondor( ShortCondor&& rhs );
-  virtual ~ShortCondor();
+  LongVerticalSpread();
+  LongVerticalSpread( const VerticalSpread& rhs ) = delete;
+  LongVerticalSpread& operator=( const LongVerticalSpread& rhs ) = delete;
+  LongVerticalSpread( LongVerticalSpread&& rhs );
+  virtual ~LongVerticalSpread();
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder();  // place short condor
-protected:
-private:
-};
-
-class LongCondor: public Condor {
-public:
-  LongCondor();
-  LongCondor( const LongCondor& rhs ) = delete;
-  LongCondor& operator=( const LongCondor& rhs ) = delete;
-  LongCondor( LongCondor&& rhs );
-  virtual ~LongCondor();
-
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
-
-  virtual void PlaceOrder();  // place long condor
+  virtual void PlaceOrder();  // place long vertical spread
 protected:
 private:
 };
@@ -83,8 +85,5 @@ private:
 } // namespace tf
 } // namespace ou
 
-#endif /* CONDOR_H */
-
-
-
+#endif /* VERTICALSPREAD_H */
 

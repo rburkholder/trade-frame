@@ -13,35 +13,31 @@
  ************************************************************************/
 
 /* 
- * File:    Condor.cpp
+ * File:    VerticalSpread.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
- * Created on June 10, 2019, 6:24 PM
+ * Created on June 11, 2019, 8:03 PM
  */
 
-#include "Condor.h"
+#include "VerticalSpread.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-using pOption_t = Option::pOption_t;
-
-Condor::Condor()
+VerticalSpread::VerticalSpread( )
 : Combo()
 {
 }
 
-Condor::Condor( Condor&& rhs )
+VerticalSpread::VerticalSpread( VerticalSpread&& rhs )
 : Combo( std::move( rhs ) )
 {
 }
 
-Condor::~Condor() {
-}
+VerticalSpread::~VerticalSpread( ) { }
 
-void Condor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
+void VerticalSpread::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
 //  if ( m_vLeg.empty() ) {
 //    ChooseStrikes( dblPriceUnderlying );
@@ -50,20 +46,20 @@ void Condor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
 
 // ==========
 
-ShortCondor::ShortCondor( )
-: Condor()
+ShortVerticalSpread::ShortVerticalSpread( )
+: VerticalSpread()
 {
 }
 
-ShortCondor::ShortCondor( ShortCondor&& rhs )
-: Condor( std::move( rhs ) )
+ShortVerticalSpread::ShortVerticalSpread( ShortVerticalSpread&& rhs )
+: VerticalSpread( std::move( rhs ) )
 {
 }
 
-ShortCondor::~ShortCondor( ) { }
+ShortVerticalSpread::~ShortVerticalSpread( ) { }
 
-void ShortCondor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
-  Condor::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
+void ShortVerticalSpread::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
+  VerticalSpread::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
 //  if ( m_vLeg.empty() ) {
 //    ChooseStrikes( dblPriceUnderlying );
 //  }
@@ -71,26 +67,24 @@ void ShortCondor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
 
 // ==========
 
-LongCondor::LongCondor( )
-: Condor()
+LongVerticalSpread::LongVerticalSpread( )
+: VerticalSpread()
 {
 }
 
-LongCondor::LongCondor( LongCondor&& rhs )
-: Condor( std::move( rhs ) )
+LongVerticalSpread::LongVerticalSpread( LongVerticalSpread&& rhs )
+: VerticalSpread( std::move( rhs ) )
 {
 }
 
-LongCondor::~LongCondor( ) { }
+LongVerticalSpread::~LongVerticalSpread( ) { }
 
-void LongCondor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
-  Condor::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
+void LongVerticalSpread::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
+  VerticalSpread::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
 //  if ( m_vLeg.empty() ) {
 //    ChooseStrikes( dblPriceUnderlying );
 //  }
 }
-
-
 
 } // namespace option
 } // namespace tf
