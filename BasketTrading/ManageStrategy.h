@@ -62,6 +62,7 @@
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
 {
+  friend class boost::serialization::access;
   friend ou::tf::DailyTradeTimeFrame<ManageStrategy>;
 public:
 
@@ -411,6 +412,6 @@ private:
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
 
-BOOST_CLASS_VERSION(MasterPortfolio, 1)
+BOOST_CLASS_VERSION(ManageStrategy, 1)
 
 #endif /* MANAGESTRATEGY_H */
