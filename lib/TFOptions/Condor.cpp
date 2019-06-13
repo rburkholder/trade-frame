@@ -21,6 +21,10 @@
 
 #include "Condor.h"
 
+// TODO: use VerticalSpread x 2?
+//    need to use a vertical spread: bear call, enter for credit
+//    need to use a vertical spread: bull put,  enter for credit
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
