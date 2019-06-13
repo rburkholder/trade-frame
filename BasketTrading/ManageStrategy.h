@@ -25,6 +25,9 @@
 #include <memory>
 #include <functional>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <TFIQFeed/MarketSymbol.h>
 
 #include <TFTimeSeries/TimeSeries.h>
@@ -397,6 +400,17 @@ private:
   void HandleAfterRH( const ou::tf::Trade& trade );
   void HandleAfterRH( const ou::tf::Bar& bar );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
+
+BOOST_CLASS_VERSION(MasterPortfolio, 1)
 
 #endif /* MANAGESTRATEGY_H */
