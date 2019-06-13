@@ -63,6 +63,12 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
   }
 }
 
+// TODO: functional, three/four sections:
+//   choose option type, and strike price
+//   check if different from existing trackers
+//   construct options, and place into tracker
+//   retrieve options after validation, and reset validator
+
 bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nDuration ) {
 
   double strikeOtmCall {};
@@ -113,7 +119,7 @@ bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nD
     if ( !m_SpreadValidation.IsActive() ) {
       bBuildOptions = true;
     }
-    else {  // TODO: need some hysterisis on this calculation
+    else {
       if ( ( strikeOtmCall != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) )->GetStrike() )
         || ( strikeOtmPut  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )->GetStrike() )
       ) {
@@ -135,14 +141,12 @@ bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nD
       tools.m_chains.GetIQFeedNameCall( strikeOtmCall),
       pInstrumentUnderlying,
       [this]( pOption_t pOptionCall ){
-        //std::cout << pOptionCall->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionCall->Summary().nOpenInterest << std::endl; // too early
         m_SpreadValidation.SetWatch( 0, pOptionCall );
       } );
     tools.m_fConstructOption( 
       tools.m_chains.GetIQFeedNamePut( strikeOtmPut),
       pInstrumentUnderlying,
       [this]( pOption_t pOptionPut ){
-        //std::cout << pOptionPut->GetInstrument()->GetInstrumentName() << " open interest: " << pOptionPut->Summary().nOpenInterest << std::endl; // tool early
         m_SpreadValidation.SetWatch( 1, pOptionPut );
       } );
   } // bBuildOptions
