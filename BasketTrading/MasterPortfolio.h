@@ -19,6 +19,9 @@
 #include <thread>
 #include <functional>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
@@ -40,6 +43,7 @@
 #include "ManageStrategy.h"
 
 class MasterPortfolio {
+  friend class boost::serialization::access;
 public:
 
   enum class EStrategyChart { Root, Active, Info };
@@ -219,5 +223,16 @@ private:
   fSupplyStrategyChart_t m_fSupplyStrategyChart;
 
   void AddSymbol( const IIPivot& );
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
 
+BOOST_CLASS_VERSION(MasterPortfolio, 1)
