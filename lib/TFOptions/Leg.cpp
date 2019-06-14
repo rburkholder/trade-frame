@@ -58,8 +58,8 @@ void Leg::SetPosition( pPosition_t pPosition ) {
     m_ceImpliedVolatility.Clear();
     m_ceDelta.Clear();
     m_ceGamma.Clear();
-    m_ceVega.Clear();
     m_ceTheta.Clear();
+    m_ceVega.Clear();
   }
 }
 
@@ -73,11 +73,11 @@ void Leg::Tick( ptime dt ) {
     if ( m_bOption ) {
       ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
       ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-      m_ceImpliedVolatility.Append( dt, pOption->Delta() );
+      m_ceImpliedVolatility.Append( dt, pOption->ImpliedVolatility() );
       m_ceDelta.Append( dt, pOption->Delta() );
       m_ceGamma.Append( dt, pOption->Gamma() );
-      m_ceVega.Append( dt, pOption->Vega() );
       m_ceTheta.Append( dt, pOption->Theta() );
+      m_ceVega.Append( dt, pOption->Vega() );
     }
   }
 }
@@ -147,8 +147,8 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
   m_ceImpliedVolatility.SetColour( colour );
   m_ceDelta.SetColour( colour );
   m_ceGamma.SetColour( colour );
-  m_ceVega.SetColour( colour );
   m_ceTheta.SetColour( colour );
+  m_ceVega.SetColour( colour );
 }
 
 void Leg::AddChartData( pChartDataView_t pChartData ) {
@@ -162,10 +162,10 @@ void Leg::AddChartData( pChartDataView_t pChartData ) {
     pChartData->Add( 12, &m_ceDelta );
     m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     pChartData->Add( 13, &m_ceGamma );
-    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 14, &m_ceVega );
     m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 15, &m_ceTheta );
+    pChartData->Add( 14, &m_ceTheta );
+    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 15, &m_ceVega );
   }
 }
 
@@ -312,9 +312,25 @@ double Leg::GetNet( double price ) {
         << ",a" << quote.Ask()
         ;
 //    }
-    std::cout << std::endl;
+//    std::cout << std::endl;
   }
   return dblValue;
+}
+
+double Leg::ConstructedValue() const {
+  double value {};
+  if ( m_pPosition ) {
+    const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
+    value = row.nPositionActive * row.dblConstructedValue / m_pPosition->GetInstrument()->GetMultiplier();
+    switch ( row.eOrderSideActive ) {
+      case ou::tf::OrderSide::Buy:
+        break;
+      case ou::tf::OrderSide::Sell:
+        value = -value; // turns the value positive, TODO use the negative at some point
+        break;
+    }
+  }
+  return value;
 }
 
 void Leg::Init() {

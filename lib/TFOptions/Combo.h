@@ -101,7 +101,7 @@ public:
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
 
-  double GetNet( double price );
+  virtual double GetNet( double price );
 
   void CloseForProfits( double price );
   void TakeProfits( double price );

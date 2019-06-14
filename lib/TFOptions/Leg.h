@@ -69,6 +69,7 @@ public:
   void CloseExpiryOtm( const boost::gregorian::date date, const double price );
 
   double GetNet( double price );
+  double ConstructedValue() const;
 
 private:
   bool m_bOption;

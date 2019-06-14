@@ -48,6 +48,8 @@ public:
 
   void CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& );
 
+  virtual double GetNet( double price );
+
 private:
 
   void Init();

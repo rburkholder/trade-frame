@@ -188,6 +188,68 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
   }
 }
 
+double Strangle::GetNet( double price ) {
+  double dblNet {};
+  double dblConstructedValue {};
+  double strikeUpper {};
+  double strikeLower {};
+  double multiplier {};
+  for ( Leg& leg: m_vLeg ) {
+    dblNet += leg.GetNet( price );
+    double dblLegConstructedValue = leg.ConstructedValue();
+    std::cout << ",constructed@" << dblLegConstructedValue;
+    dblConstructedValue += dblLegConstructedValue;
+    std::cout << std::endl;
+    double strike = leg.GetPosition()->GetInstrument()->GetStrike();
+    multiplier = leg.GetPosition()->GetInstrument()->GetRow().nMultiplier;
+    if ( 0.0 == strikeUpper ) {
+      strikeUpper = strikeLower = strike;
+    }
+    else {
+      if ( strike > strikeUpper ) strikeUpper = strike;
+      else {
+        if ( strike < strikeLower ) strikeLower = strike;
+        else std::cout << "don't know what happened" << std::endl;
+      }
+    }
+  }
+
+  //double adjustment = dblConstructedValue / multiplier;
+  double adjustment = dblConstructedValue;
+  double lower = strikeLower - adjustment;
+  double upper = strikeUpper + adjustment;
+  double profit = adjustment;
+  double profitTotal {};
+
+  std::string status;
+  if ( ( price > strikeLower ) && ( price < strikeUpper ) ) {
+    status = "expires";
+  }
+  else {
+    if ( ( price > lower ) && ( price < upper ) ) {
+      status = "profit";
+      if ( price <= strikeLower ) profit = price - lower;
+      if ( price >= strikeUpper ) profit = upper - price;
+    }
+    else {
+      status = "loss";
+      if ( price <= lower ) profit = price - lower;
+      if ( price >= upper ) profit = upper - price;
+    }
+  }
+
+  profitTotal += profit;
+
+  std::cout
+    << "  constructed: " << adjustment
+    << ",lowerBE: " << lower
+    << ",upperBE: " << upper
+    << "=>" << status
+    << "@" << profit
+    << std::endl;
+  return profitTotal;
+}
+
 void Strangle::Init() {
 }
 

@@ -95,9 +95,15 @@ void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO
 
 double Combo::GetNet( double price ) {
   double dblNet {};
+  double dblConstructedValue {};
   for ( Leg& leg: m_vLeg ) {
     dblNet += leg.GetNet( price );
+    double dblLegConstructedValue = leg.ConstructedValue();
+    std::cout << ",constructed@" << dblLegConstructedValue;
+    dblConstructedValue += dblLegConstructedValue;
+    std::cout << std::endl;
   }
+  std::cout << "  combo constructed: " << dblConstructedValue << std::endl;
   return dblNet;
 }
 
