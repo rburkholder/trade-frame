@@ -79,24 +79,24 @@ public:
   void SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName );
   void SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName );
 
-  const std::string GetIQFeedNameCall( double dblStrike );
-  const std::string GetIQFeedNamePut( double dblStrike );
+  const std::string GetIQFeedNameCall( double dblStrike ) const;
+  const std::string GetIQFeedNamePut( double dblStrike ) const;
 
-  double Put_Itm( double );
-  double Put_ItmAtm( double );
-  double Put_Atm( double );
-  double Put_OtmAtm( double );
-  double Put_Otm( double );
+  double Put_Itm( double ) const ;
+  double Put_ItmAtm( double ) const;
+  double Put_Atm( double ) const;
+  double Put_OtmAtm( double ) const;
+  double Put_Otm( double ) const;
 
-  double Call_Itm( double );
-  double Call_ItmAtm( double );
-  double Call_Atm( double );
-  double Call_OtmAtm( double );
-  double Call_Otm( double );
+  double Call_Itm( double ) const;
+  double Call_ItmAtm( double ) const;
+  double Call_Atm( double ) const;
+  double Call_OtmAtm( double ) const;
+  double Call_Otm( double ) const;
 
   // returns 0, 1, 2 strikes found
   // needs exact match on strikeSource
-  int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper );
+  int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
 
 protected:
 private:

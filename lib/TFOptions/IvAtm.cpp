@@ -62,25 +62,25 @@ IvAtm::~IvAtm() {}
 
 // NOTE: this calculations need to be validated for correctness
 
-double IvAtm::Put_Itm( double value ) { // price < strike
-  mapChain_t::iterator iter = std::upper_bound(
+double IvAtm::Put_Itm( double value ) const { // price < strike
+  mapChain_t::const_iterator iter = std::upper_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
-    [](double value, mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
+    [](double value, const mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Put_Itm not found" );
   return iter->first;
 }
 
-double IvAtm::Put_ItmAtm( double value ) { // price <= strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Put_ItmAtm( double value ) const { // price <= strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Put_ItmAtm not found" );
   return iter->first;
 }
 
-double IvAtm::Put_Atm( double value ) { // closest strike (use itm vs otm)
+double IvAtm::Put_Atm( double value ) const { // closest strike (use itm vs otm)
   double atm {};
-  mapChain_t::iterator iter1 = std::lower_bound(
+  mapChain_t::const_iterator iter1 = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Put_Atm not found" );
@@ -92,7 +92,7 @@ double IvAtm::Put_Atm( double value ) { // closest strike (use itm vs otm)
       atm = value;
     }
     else {
-      mapChain_t::iterator iter2 = iter1;
+      mapChain_t::const_iterator iter2 = iter1;
       iter2--;
       if ( ( iter1->first - value ) < ( value - iter2->first ) ) {
         atm = iter1->first;
@@ -106,8 +106,8 @@ double IvAtm::Put_Atm( double value ) { // closest strike (use itm vs otm)
   return atm;
 }
 
-double IvAtm::Put_OtmAtm( double value ) { // price >= strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Put_OtmAtm( double value ) const { // price >= strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Put_OtmAtm not found" );
@@ -125,8 +125,8 @@ double IvAtm::Put_OtmAtm( double value ) { // price >= strike
   return iter->first;
 }
 
-double IvAtm::Put_Otm( double value ) { // price > strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Put_Otm( double value ) const { // price > strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Put_Otm not found" );
@@ -139,8 +139,8 @@ double IvAtm::Put_Otm( double value ) { // price > strike
   return iter->first;
 }
   
-double IvAtm::Call_Itm( double value ) { // price > strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Call_Itm( double value ) const { // price > strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Call_Itm not found" );
@@ -153,8 +153,8 @@ double IvAtm::Call_Itm( double value ) { // price > strike
   return iter->first;
 }
 
-double IvAtm::Call_ItmAtm( double value ) { // price >= strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Call_ItmAtm( double value ) const { // price >= strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Call_ItmAtm not found" );
@@ -172,9 +172,9 @@ double IvAtm::Call_ItmAtm( double value ) { // price >= strike
   return iter->first;
 }
 
-double IvAtm::Call_Atm( double value ) { // closest strike (use itm vs otm)
+double IvAtm::Call_Atm( double value ) const { // closest strike (use itm vs otm)
   double atm {};
-  mapChain_t::iterator iter1 = std::lower_bound(
+  mapChain_t::const_iterator iter1 = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Call_Atm not found" );
@@ -186,7 +186,7 @@ double IvAtm::Call_Atm( double value ) { // closest strike (use itm vs otm)
       atm = value;
     }
     else {
-      mapChain_t::iterator iter2 = iter1;
+      mapChain_t::const_iterator iter2 = iter1;
       iter2--;
       if ( ( iter1->first - value ) < ( value - iter2->first ) ) {
         atm = iter1->first;
@@ -200,23 +200,23 @@ double IvAtm::Call_Atm( double value ) { // closest strike (use itm vs otm)
   return atm;
 }
 
-double IvAtm::Call_OtmAtm( double value ) { // price <= strike
-  mapChain_t::iterator iter = std::lower_bound(
+double IvAtm::Call_OtmAtm( double value ) const { // price <= strike
+  mapChain_t::const_iterator iter = std::lower_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](const mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Call_OtmAtm not found" );
   return iter->first;
 }
 
-double IvAtm::Call_Otm( double value ) { // price < strike
-  mapChain_t::iterator iter = std::upper_bound(
+double IvAtm::Call_Otm( double value ) const { // price < strike
+  mapChain_t::const_iterator iter = std::upper_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
     [](double value, const mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Call_Otm not found" );
   return iter->first;
 }
 
-int IvAtm::AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) {
+int IvAtm::AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const {
   strikeLower = strikeUpper = 0.0;
   int nReturn {};
   mapChain_t::const_iterator iterSource = m_mapChain.find( strikeSource );
@@ -255,16 +255,17 @@ void IvAtm::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbol
   iter->second.sPut = sIQFeedSymbolName;
 }
 
-const std::string IvAtm::GetIQFeedNameCall( double dblStrike ) {
-  mapChain_t::iterator iter = FindStrike( dblStrike );
+const std::string IvAtm::GetIQFeedNameCall( double dblStrike ) const {
+  mapChain_t::const_iterator iter = FindStrike( dblStrike );
   return iter->second.sCall;
 }
 
-const std::string IvAtm::GetIQFeedNamePut( double dblStrike ) {
-  mapChain_t::iterator iter = FindStrike( dblStrike );
+const std::string IvAtm::GetIQFeedNamePut( double dblStrike ) const {
+  mapChain_t::const_iterator iter = FindStrike( dblStrike );
   return iter->second.sPut;
 }
-  
+
+// const iterator
 IvAtm::mapChain_t::const_iterator IvAtm::FindStrike( const double strike ) const {
   mapChain_t::const_iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
@@ -273,6 +274,7 @@ IvAtm::mapChain_t::const_iterator IvAtm::FindStrike( const double strike ) const
   return iter;
 }
 
+// regular iterator
 IvAtm::mapChain_t::iterator IvAtm::FindStrike( const double strike ) {
   mapChain_t::iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
