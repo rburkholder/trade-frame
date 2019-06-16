@@ -32,11 +32,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-// TODO: refactor into two classes:
+// TODO: re-factor into two classes:
 //   1) mostly static lookups
 //   2) dynamic strike following
+// TODO: also, re-factor the strike classifiers
 
-// will deprecate the code in Bundle
+// this code is deprecating some code in Bundle
+
 
 class IvAtm {
 public:
@@ -52,6 +54,16 @@ public:
 
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
+
+  struct exception_strike_not_found: public std::runtime_error {
+    exception_strike_not_found( const char* ch ): std::runtime_error( ch ) {}
+  };
+  struct exception_at_start_of_chain: public exception_strike_not_found {
+    exception_at_start_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
+  };
+  struct exception_at_end_of_chain: public exception_strike_not_found {
+    exception_at_end_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
+  };
 
   IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   IvAtm( IvAtm&& rhs );
