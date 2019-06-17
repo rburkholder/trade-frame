@@ -4,7 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>BearCallSpread.h</itemPath>
       <itemPath>Binomial.h</itemPath>
+      <itemPath>BullPutSpread.h</itemPath>
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
       <itemPath>Combo.h</itemPath>
@@ -31,7 +33,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>BearCallSpread.cpp</itemPath>
       <itemPath>Binomial.cpp</itemPath>
+      <itemPath>BullPutSpread.cpp</itemPath>
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
       <itemPath>Combo.cpp</itemPath>
@@ -95,9 +99,17 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="BearCallSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BearCallSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="BullPutSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BullPutSpread.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Bundle.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -195,9 +207,17 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="BearCallSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BearCallSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Binomial.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Binomial.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="BullPutSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BullPutSpread.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Bundle.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -35,7 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/BearCallSpread.o \
 	${OBJECTDIR}/Binomial.o \
+	${OBJECTDIR}/BullPutSpread.o \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
 	${OBJECTDIR}/Combo.o \
@@ -80,10 +82,20 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a
 
+${OBJECTDIR}/BearCallSpread.o: BearCallSpread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BearCallSpread.o BearCallSpread.cpp
+
 ${OBJECTDIR}/Binomial.o: Binomial.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Binomial.o Binomial.cpp
+
+${OBJECTDIR}/BullPutSpread.o: BullPutSpread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BullPutSpread.o BullPutSpread.cpp
 
 ${OBJECTDIR}/Bundle.o: Bundle.cpp
 	${MKDIR} -p ${OBJECTDIR}
