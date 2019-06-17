@@ -600,7 +600,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               );
 
             try {
-              if ( m_strangleEvaluation.ValidateSpread( tools, mid, 11 ) ) { // 11 periods
+              if ( m_strangleEvaluation.ValidateSpread( tools, Strangle::m_legDefLong, mid, 11 ) ) { // 11 periods
 
                 idPortfolio_t idPortfolio; // also name of combo (strangle)
                 boost::gregorian::date date( m_iterChainExpiryInUse->first );

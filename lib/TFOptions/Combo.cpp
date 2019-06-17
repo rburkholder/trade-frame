@@ -182,6 +182,115 @@ void Combo::Update( bool bTrending, double dblPrice ) {
   // TODO: incorporate trending underlying
 }
 
+bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, double price, size_t nDuration ) {
+
+  m_SpreadValidation.SetLegCount( 2 );
+  const std::string& sUnderlying( tools.m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+
+  double bStrikesFound( false );
+  strike_pair_t pairStrikes;
+
+  try {
+    pairStrikes = ChooseStrikes( tools.m_chains, price ); // virtual up call
+    bStrikesFound = true; // can set as no exception was thrown
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout
+      << sUnderlying
+      << " found no strike for mid-point " << price
+      << " expiry " << tools.m_dateExpiry
+//        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
+      << " [" << e.what() << "]"
+      << std::endl;
+    throw e;
+  }
+
+  bool bBuildOptions( false );
+
+  if ( bStrikesFound ) {
+    if ( !m_SpreadValidation.IsActive() ) {
+      bBuildOptions = true;
+    }
+    else {
+      if ( ( pairStrikes.first   != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) )->GetStrike() )
+        || ( pairStrikes.second  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )->GetStrike() )
+      ) {
+        m_SpreadValidation.ResetOptions();
+        bBuildOptions = true;
+      }
+    }
+  }
+
+  if ( bBuildOptions ) {
+    std::cout
+      << sUnderlying
+      << ": combo -> quote=" << price
+      << ",strike 1=" << pairStrikes.first
+      << ",strike 2=" << pairStrikes.second
+      << std::endl;
+
+    pInstrument_t pInstrumentUnderlying = tools.m_pWatchUnderlying->GetInstrument();
+    std::string sIQFeedName;
+
+    // ==
+
+    switch ( legs.first.type ) {
+      case EOptionSide::Call:
+        sIQFeedName = tools.m_chains.GetIQFeedNameCall( pairStrikes.first);
+        break;
+      case EOptionSide::Put:
+        sIQFeedName = tools.m_chains.GetIQFeedNamePut( pairStrikes.first);
+        break;
+    }
+
+    tools.m_fConstructOption(
+      sIQFeedName,
+      pInstrumentUnderlying,
+      [this]( pOption_t pOption ){
+        m_SpreadValidation.SetWatch( 0, pOption );
+      } );
+
+    // ==
+
+    switch ( legs.second.type ) {
+      case EOptionSide::Call:
+        sIQFeedName = tools.m_chains.GetIQFeedNameCall( pairStrikes.second );
+        break;
+      case EOptionSide::Put:
+        sIQFeedName = tools.m_chains.GetIQFeedNamePut( pairStrikes.second );
+        break;
+    }
+
+    tools.m_fConstructOption(
+      sIQFeedName,
+      pInstrumentUnderlying,
+      [this]( pOption_t pOption ){
+        m_SpreadValidation.SetWatch( 1, pOption );
+      } );
+  } // bBuildOptions
+
+    // ==
+
+  bool bValidated( false );
+  if ( m_SpreadValidation.IsActive() ) {
+    bValidated = m_SpreadValidation.Validate( nDuration );
+  }
+
+  return bValidated;
+}
+
+Combo::pOptionPair_t Combo::ValidatedOptions() {
+  assert( m_SpreadValidation.IsActive() );
+  pOptionPair_t pair(
+    boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) ),
+    boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )
+    );
+  m_SpreadValidation.ResetOptions();
+  return pair;
+}
+
+
+
 } // namespace option
 } // namespace tf
 } // namespace ou

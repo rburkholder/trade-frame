@@ -70,6 +70,7 @@ public:
 
   using idPortfolio_t = ou::tf::Portfolio::idPortfolio_t;
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -85,6 +86,22 @@ public:
 
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
+
+  using strike_pair_t = std::pair<double,double>; // higher, lower
+
+  struct LegDef {
+    EOptionSide type;
+    EOrderSide side;
+    uint32_t quantity;
+    LegDef( EOptionSide type_, EOrderSide side_, uint32_t quantity_ )
+      : type( type_ ), side( side_ ), quantity( quantity_ ) {}
+  };
+
+  using leg_pair_t = std::pair<LegDef,LegDef>; // higher, lower
+
+  struct exception_strike_range_exceeded: public std::runtime_error {
+    exception_strike_range_exceeded( const char* ch ): std::runtime_error( ch ) {}
+  };
 
   Combo( );
   Combo( const Combo& rhs ) = delete;
@@ -116,6 +133,12 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
+  virtual strike_pair_t ChooseStrikes( const IvAtm& chains, double price ) const = 0; // throw IvAtm exceptions
+
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pOptionPair_t = std::pair<pOption_t,pOption_t>;
+  bool ValidateSpread( ConstructionTools&, const leg_pair_t& legs, double price, size_t nDuration );
+  pOptionPair_t ValidatedOptions();
   void ClearValidation();
 
 protected:

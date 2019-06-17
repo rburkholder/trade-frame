@@ -69,123 +69,66 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 //   construct options, and place into tracker
 //   retrieve options after validation, and reset validator
 
-bool Strangle::ValidateSpread( ConstructionTools& tools, double price, size_t nDuration ) {
+// TODO: should be able to construct so leg1 + leg2 credit > 1.00
+
+Strangle::strike_pair_t Strangle::ChooseStrikes( const IvAtm& chains, double price ) const {
 
   double strikeOtmCall {};
   double strikeOtmPut {};
 
-  m_SpreadValidation.SetLegCount( 2 );
-  const std::string& sUnderlying( tools.m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
-
-  double bStrikesFound( false );
-
-  try {
-    strikeOtmCall = tools.m_chains.Call_Otm( price );
-    assert( 0.0 <= ( strikeOtmCall - price ) );
-    if ( ( 0.20 * 0.50 ) > ( strikeOtmCall - price ) ) { // within edge of range
-      strikeOtmCall = tools.m_chains.Call_Otm( strikeOtmCall ); // choose a further out strike
+  strikeOtmCall = chains.Call_Otm( price );
+  assert( 0.0 <= ( strikeOtmCall - price ) );
+  if ( ( 0.20 * 0.50 ) > ( strikeOtmCall - price ) ) { // within edge of range
+    strikeOtmCall = chains.Call_Otm( strikeOtmCall ); // choose a further out strike
+  }
+  strikeOtmPut = chains.Put_Otm( price );
+  assert( 0.0 <= ( price - strikeOtmPut ) );
+  if ( ( 0.20 * 0.50 ) > ( price - strikeOtmPut ) ) { // within edge of range
+    strikeOtmPut = chains.Put_Otm( strikeOtmPut ); // choose a further out strike
+  }
+  assert( strikeOtmCall > strikeOtmPut );
+  const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
+  if ( m_dblMaxStrangleDelta > dblStrikeDelta ) {
+    const double dblExclusionRange = 0.5 * ( ( 1.0 - 0.20 ) * dblStrikeDelta );  // enter in middle 20% only
+    if (
+      ( price < ( strikeOtmCall - dblExclusionRange ) ) &&
+      ( price > ( strikeOtmPut  + dblExclusionRange ) )
+    ) {
     }
-    strikeOtmPut = tools.m_chains.Put_Otm( price );
-    assert( 0.0 <= ( price - strikeOtmPut ) );
-    if ( ( 0.20 * 0.50 ) > ( price - strikeOtmPut ) ) { // within edge of range
-      strikeOtmPut = tools.m_chains.Put_Otm( strikeOtmPut ); // choose a further out strike
-    }
-    assert( strikeOtmCall > strikeOtmPut );
-    const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
-    if ( m_dblMaxStrangleDelta > dblStrikeDelta ) {
-      const double dblExclusionRange = 0.5 * ( ( 1.0 - 0.20 ) * dblStrikeDelta );  // enter in middle 20% only
-      if (
-        ( price < ( strikeOtmCall - dblExclusionRange ) ) &&
-        ( price > ( strikeOtmPut  + dblExclusionRange ) )
-      ) {
-        bStrikesFound = true;
-      }
+    else{
+      throw exception_strike_range_exceeded( "strangle" );
     }
   }
-  catch ( std::runtime_error& e ) {
-    std::cout
-      << sUnderlying
-      << " found no strike for mid-point " << price
-      << " expiry " << tools.m_dateExpiry
-//        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
-      << " [" << e.what() << "]"
-      << std::endl;
-    throw e;
-  }
-
-  bool bBuildOptions( false );
-
-  if ( bStrikesFound ) {
-    if ( !m_SpreadValidation.IsActive() ) {
-      bBuildOptions = true;
-    }
-    else {
-      if ( ( strikeOtmCall != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) )->GetStrike() )
-        || ( strikeOtmPut  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )->GetStrike() )
-      ) {
-        m_SpreadValidation.ResetOptions();
-        bBuildOptions = true;
-      }
-    }
-  }
-
-  if ( bBuildOptions ) {
-    std::cout
-      << sUnderlying
-      << ": strangle -> quote=" << price
-      << ",otm call=" << strikeOtmCall
-      << ",otm put=" << strikeOtmPut
-      << std::endl;
-    pInstrument_t pInstrumentUnderlying = tools.m_pWatchUnderlying->GetInstrument();
-    tools.m_fConstructOption( 
-      tools.m_chains.GetIQFeedNameCall( strikeOtmCall),
-      pInstrumentUnderlying,
-      [this]( pOption_t pOptionCall ){
-        m_SpreadValidation.SetWatch( 0, pOptionCall );
-      } );
-    tools.m_fConstructOption( 
-      tools.m_chains.GetIQFeedNamePut( strikeOtmPut),
-      pInstrumentUnderlying,
-      [this]( pOption_t pOptionPut ){
-        m_SpreadValidation.SetWatch( 1, pOptionPut );
-      } );
-  } // bBuildOptions
-
-  bool bValidated( false );
-  if ( m_SpreadValidation.IsActive() ) {
-    bValidated = m_SpreadValidation.Validate( nDuration );
-  }
-
-  return bValidated;
+  return strike_pair_t( strikeOtmCall, strikeOtmPut );
 }
 
-Strangle::pOptionPair_t Strangle::ValidatedOptions() {
-  assert( m_SpreadValidation.IsActive() );
-  pOptionPair_t pair(
-    boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) ),
-    boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )
-    );
-  m_SpreadValidation.ResetOptions();
-  return pair;
-}
+const Combo::leg_pair_t Strangle::m_legDefLong(
+  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy, 1 ), // upper
+  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy, 1 )  // lower
+);
 
-// applicable when running a long strangle strategy
+const Combo::leg_pair_t Strangle::m_legDefShort(
+  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
+  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Sell, 1 )  // lower
+);
+
+// applicable when running a long strangle strategy, has negative dblPrice1 in OrderManager on short strangle
 void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& f ) {
-  for ( Leg& leg: m_vLeg ) {
-    if ( leg.CloseItmForProfit( price ) ) {
-      EOptionSide side = leg.GetPosition()->GetInstrument()->GetOptionSide(); // assumes an option
-      f( m_pPortfolio->Id(), side, price,
-        [this,defaultOrderSide](pPosition_t pPosition, pChartDataView_t pChartDataView, EColour colour ){
-          AddPosition( pPosition, pChartDataView, colour );
-          for ( Leg& leg: m_vLeg ) {
-            if ( leg.GetPosition()->Id() == pPosition->Id() ) {
-              leg.PlaceOrder( defaultOrderSide, 1 );
-              break;
-            }
-          }
-        } );
-    }
-  }
+//  for ( Leg& leg: m_vLeg ) {
+//    if ( leg.CloseItmForProfit( price ) ) {
+//      EOptionSide side = leg.GetPosition()->GetInstrument()->GetOptionSide(); // assumes an option
+//      f( m_pPortfolio->Id(), side, price,
+//        [this,defaultOrderSide](pPosition_t pPosition, pChartDataView_t pChartDataView, EColour colour ){
+//          AddPosition( pPosition, pChartDataView, colour );
+//          for ( Leg& leg: m_vLeg ) {
+//            if ( leg.GetPosition()->Id() == pPosition->Id() ) {
+//              leg.PlaceOrder( defaultOrderSide, 1 ); // dblPrice1 is coming out negative
+//              break;
+//            }
+//          }
+//        } );
+//    }
+//  }
 }
 
 double Strangle::GetNet( double price ) {
