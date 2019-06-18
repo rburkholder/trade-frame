@@ -114,7 +114,7 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, co
 }
 
 
-void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, const ou::tf::Bars& bars ) {
+void AppScanner::HandleCallBackResults( s_t& data, const std::string& sPath, const std::string& sObject, const ou::tf::Bars& bars ) {
 
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
@@ -151,7 +151,7 @@ void AppScanner::ScanBars( void ) {
       m_dtBegin, m_dtEnd, 20, s,
       std::bind( &AppScanner::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
       std::bind( &AppScanner::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
-      std::bind( &AppScanner::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
+      std::bind( &AppScanner::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3, ph::_4 )
       );
   }
   catch( ... ) {

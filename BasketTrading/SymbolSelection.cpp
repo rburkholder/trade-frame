@@ -121,7 +121,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, const setSymbols_t& s
         }
         return bReturn;
       },
-      [&fCheck]( data_t& data, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
+      [&fCheck]( data_t& data, const std::string& sPath, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
          
         double hv = std::for_each( bars.at( bars.Size() - 20 ), bars.end(), ou::HistoricalVolatility() );
         Scenario ii( sObjectName, bars.last(), data.volumeEma, hv );

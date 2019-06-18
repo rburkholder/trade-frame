@@ -34,9 +34,9 @@ template<typename S, typename TS> // S=shared data structure, TS=time series typ
 class InstrumentFilter {
 public:
 
-  typedef std::function<bool (S&, const std::string&, const std::string&)> cbUseGroup_t;  // use a particular group in HDF5
-  typedef std::function<bool (S&, const std::string&, const TS&)> cbFilter_t; // used for filtering on fields in the Time Series
-  typedef std::function<void (S&, const std::string&, const TS&)> cbResult_t;  // send the chosen filtered results back
+  using cbUseGroup_t = std::function<bool (S&, const std::string&, const std::string&)>;  // use a particular group in HDF5
+  using cbFilter_t   = std::function<bool (S&, const std::string&, const TS&)>; // used for filtering on fields in the Time Series
+  using cbResult_t   = std::function<void (S&, const std::string&, const std::string&, const TS&)>;  // send the chosen filtered results back: structure, path, name, timeseries
 
   InstrumentFilter(
     const std::string& sPath,
@@ -100,7 +100,7 @@ void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::
     typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t> tsRepository( m_dm, sPath );
     typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t>::iterator begin, end;
     begin = std::lower_bound( tsRepository.begin(), tsRepository.end(), m_dtDate1 );
-    end = lower_bound( begin, tsRepository.end(), m_dtDate2 );
+    end   = std::lower_bound( begin, tsRepository.end(), m_dtDate2 );
     hsize_t cnt = end - begin;
     if ( m_nRequiredDays <= cnt ) {
       TS timeseries;
@@ -108,7 +108,7 @@ void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::
       tsRepository.Read( begin, end, &timeseries );
       bool b = m_cbFilter( m_struct, sObjectName, timeseries );
       if ( b ) {
-        m_cbResult( m_struct, sObjectName, timeseries );
+        m_cbResult( m_struct, sPath, sObjectName, timeseries );
       }
     }
   }

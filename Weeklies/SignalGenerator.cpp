@@ -44,7 +44,7 @@ void SignalGenerator::Run( void ) {
   ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
-  pt::ptime dtLast( gregorian::date( 2019, 6, 7 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2019, 6, 17 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
@@ -172,7 +172,7 @@ void SignalGenerator::ScanBars( pt::ptime dtLast ) {
       dtBegin, dtLast, 200, iter,
       std::bind( &SignalGenerator::HandleCallBackUseGroup, this, ph::_1, ph::_2, ph::_3 ),
       std::bind( &SignalGenerator::HandleCallBackFilter,   this, ph::_1, ph::_2, ph::_3 ),
-      std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3 )
+      std::bind( &SignalGenerator::HandleCallBackResults,  this, ph::_1, ph::_2, ph::_3, ph::_4 )
       );
 
     m_xls.SaveAs( sSpreadSheetName.c_str() );
@@ -192,7 +192,7 @@ bool SignalGenerator::HandleCallBackFilter( mapSymbol_t::iterator& iter, const s
   return m_mapSymbol.end() != iter;
 }
 
-void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const std::string& sObject, const ou::tf::Bars& bars ) {
+void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const std::string& sPath, const std::string& sObject, const ou::tf::Bars& bars ) {
   // process bars here
   bool bFoundFirst( false );
   for ( ou::tf::Bars::const_iterator iterBars = bars.begin(); bars.end() != iterBars; ++iterBars ) {
