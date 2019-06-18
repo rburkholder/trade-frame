@@ -60,8 +60,6 @@ IvAtm::IvAtm( IvAtm&& rhs  )
 
 IvAtm::~IvAtm() {}
 
-// NOTE: this calculations need to be validated for correctness
-
 double IvAtm::Put_Itm( double value ) const { // price < strike
   mapChain_t::const_iterator iter = std::upper_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
