@@ -72,6 +72,9 @@
 
 #include <algorithm>
 
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
+
 #include "ManageStrategy.h"
 
 namespace {
@@ -1068,4 +1071,22 @@ void ManageStrategy::TakeProfits() {
       strangle.TakeProfits( price );
     }
   }
+}
+
+void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
+
+  //void ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath )
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> tsRepository( dm, sPath );
+  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
+  begin = tsRepository.begin();
+  end = tsRepository.end();
+  hsize_t cnt = end - begin;
+  m_barsDaily.Clear();
+  m_barsDaily.Resize( cnt );
+  tsRepository.Read( begin, end, &m_barsDaily );
+
+//    AddChartEntries( pChartDataView, series );
+
 }

@@ -252,6 +252,8 @@ private:
   using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
   mapOption_t m_mapOption;
 
+  ou::tf::Bars m_barsDaily;
+
   ou::tf::BarFactory m_bfQuotes01Sec; // provides more frequent ticks for Order Monitoring
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
@@ -400,6 +402,8 @@ private:
   void HandleAfterRH( const ou::tf::Quote& quote );
   void HandleAfterRH( const ou::tf::Trade& trade );
   void HandleAfterRH( const ou::tf::Bar& bar );
+
+  void ReadDailyBars( const std::string& sPath );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
