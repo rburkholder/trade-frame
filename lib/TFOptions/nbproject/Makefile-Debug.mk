@@ -47,6 +47,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/IvAtm.o \
 	${OBJECTDIR}/Leg.o \
 	${OBJECTDIR}/Margin.o \
+	${OBJECTDIR}/NoRiskInterestRateSeries.o \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
 	${OBJECTDIR}/SpreadCandidate.o \
@@ -141,6 +142,11 @@ ${OBJECTDIR}/Margin.o: Margin.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Margin.o Margin.cpp
+
+${OBJECTDIR}/NoRiskInterestRateSeries.o: NoRiskInterestRateSeries.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NoRiskInterestRateSeries.o NoRiskInterestRateSeries.cpp
 
 ${OBJECTDIR}/Option.o: Option.cpp
 	${MKDIR} -p ${OBJECTDIR}

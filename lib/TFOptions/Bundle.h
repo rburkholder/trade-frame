@@ -22,13 +22,13 @@
 #include <OUCommon/Delegate.h>
 
 #include <TFTrading/PortfolioManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIQFeed/MarketSymbol.h>
 
+#include "NoRiskInterestRateSeries.h"
 #include "Binomial.h"
 #include "Strike.h"
 
@@ -60,7 +60,7 @@ public:
 
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider );
-  
+
   Call* GetCall( double dblStrike );
   Put* GetPut( double dblStrike );
 
@@ -75,7 +75,7 @@ public:
   void SetWatchOff( double dblStrike, bool bForce = false ); // forces watchable off when true
 
   void StartWatch( void ); // watch underlying plus all watchable options
-  void StopWatch( void ); 
+  void StopWatch( void );
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
   void EmitValues( void );
@@ -110,7 +110,7 @@ private:
   mapStrikes_iter_t FindStrike( double strike );
   mapStrikes_iter_t FindStrikeAuto( double strike ); // Auto insert new strike
 
-  void RecalcATMWatch( double dblValue );  
+  void RecalcATMWatch( double dblValue );
   void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
 
   void SaveAtmIv( const std::string& sPrefix, const std::string& sPrefix86400Min );
@@ -176,7 +176,7 @@ public:
   void CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor );
   void SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec );
   void AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
-  
+
   void AddOnStrikeWatchOn( ExpiryBundle::OnStrikeWatch_t );
   void RemoveOnStrikeWatchOn( ExpiryBundle::OnStrikeWatch_t );
   void AddOnStrikeWatchOff( ExpiryBundle::OnStrikeWatch_t );
@@ -214,7 +214,7 @@ struct PopulateMultiExpiryBundle {
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  PopulateMultiExpiryBundle( 
+  PopulateMultiExpiryBundle(
     ou::tf::option::MultiExpiryBundle& bundle, pProvider_t pDataProvider_, pProvider_t pGreekProvider_ )
     : meb( bundle ), pDataProvider( pDataProvider_ ), pGreekProvider( pGreekProvider_ )
   {}
@@ -224,7 +224,7 @@ struct PopulateMultiExpiryBundle {
     assert( ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc )
          || ( ou::tf::iqfeed::MarketSymbol::FOption == trd.sc )
       );
-    
+
     // to trade, when is the IB contract number acquired?
     // and when does the symbol get registered, so it can be traded?
 
@@ -239,19 +239,19 @@ struct PopulateMultiExpiryBundle {
       ss << trd.sUnderlying << " " << dateTrdExpiry << " " << side << " " << trd.dblStrike;
       switch ( trd.sc ) {
       case ou::tf::iqfeed::MarketSymbol::IEOption:
-        pInstrument.reset( 
-          new ou::tf::Instrument( 
-            ss.str(), ou::tf::InstrumentType::Option, "SMART", 
-            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
-//            meb.GetWatchUnderlying()->GetInstrument(), 
+        pInstrument.reset(
+          new ou::tf::Instrument(
+            ss.str(), ou::tf::InstrumentType::Option, "SMART",
+            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(),
+//            meb.GetWatchUnderlying()->GetInstrument(),
 	    trd.eOptionSide, trd.dblStrike ) );
         break;
       case ou::tf::iqfeed::MarketSymbol::FOption:
-        pInstrument.reset( 
-          new ou::tf::Instrument( 
-            ss.str(), ou::tf::InstrumentType::FuturesOption, "SMART", 
-            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
-//            meb.GetWatchUnderlying()->GetInstrument(), 
+        pInstrument.reset(
+          new ou::tf::Instrument(
+            ss.str(), ou::tf::InstrumentType::FuturesOption, "SMART",
+            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(),
+//            meb.GetWatchUnderlying()->GetInstrument(),
 	    trd.eOptionSide, trd.dblStrike ) );
         break;
       }

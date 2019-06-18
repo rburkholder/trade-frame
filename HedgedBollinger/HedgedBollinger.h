@@ -28,9 +28,9 @@
 
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
 
 #include <TFOptions/Bundle.h>
+#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFIQFeed/LoadMktSymbols.h>
 
@@ -67,7 +67,7 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
-  
+
   ou::ChartMaster m_chart;
   ou::tf::WinChartView* m_pWinChartView;
 
@@ -84,7 +84,7 @@ private:
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
-  
+
   static const unsigned int m_nthIVCalc;
   unsigned int m_cntIVCalc;  // calc IV every nth gui refresh
   volatile bool m_bIVCalcActive;
@@ -110,7 +110,7 @@ private:
   void HandleGuiRefresh( wxTimerEvent& event );
 
   void UpdateTree( ou::tf::option::Option*, bool bWatching );
-    
+
   //void AutoStartCollection( void );
 
   void OnData1Connected( int );

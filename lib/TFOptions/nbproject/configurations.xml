@@ -16,6 +16,7 @@
       <itemPath>IvAtm.h</itemPath>
       <itemPath>Leg.h</itemPath>
       <itemPath>Margin.h</itemPath>
+      <itemPath>NoRiskInterestRateSeries.h</itemPath>
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
       <itemPath>SpreadCandidate.h</itemPath>
@@ -45,6 +46,7 @@
       <itemPath>IvAtm.cpp</itemPath>
       <itemPath>Leg.cpp</itemPath>
       <itemPath>Margin.cpp</itemPath>
+      <itemPath>NoRiskInterestRateSeries.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
       <itemPath>SpreadCandidate.cpp</itemPath>
@@ -146,6 +148,10 @@
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Margin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NoRiskInterestRateSeries.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Option.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -254,6 +260,10 @@
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Margin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NoRiskInterestRateSeries.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Option.cpp" ex="false" tool="1" flavor2="0">
       </item>

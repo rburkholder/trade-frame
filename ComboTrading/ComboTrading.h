@@ -34,9 +34,9 @@
 // may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
 
 #include <TFOptions/Engine.h>
+#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>

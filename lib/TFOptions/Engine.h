@@ -40,7 +40,8 @@
 #include <TFOptions/Option.h>
 
 #include <TFTrading/ProviderManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
+
+#include "NoRiskInterestRateSeries.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

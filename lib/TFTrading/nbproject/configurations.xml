@@ -24,7 +24,6 @@
       <itemPath>KeyTypes.h</itemPath>
       <itemPath>Managers.h</itemPath>
       <itemPath>MonitorOrder.h</itemPath>
-      <itemPath>NoRiskInterestRateSeries.h</itemPath>
       <itemPath>Order.h</itemPath>
       <itemPath>OrderManager.h</itemPath>
       <itemPath>OrdersOutstanding.h</itemPath>
@@ -70,7 +69,6 @@
       <itemPath>KeyTypes.cpp</itemPath>
       <itemPath>Managers.cpp</itemPath>
       <itemPath>MonitorOrder.cpp</itemPath>
-      <itemPath>NoRiskInterestRateSeries.cpp</itemPath>
       <itemPath>Order.cpp</itemPath>
       <itemPath>OrderManager.cpp</itemPath>
       <itemPath>OrdersOutstanding.cpp</itemPath>
@@ -200,10 +198,6 @@
       <item path="MonitorOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="MonitorOrder.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="NoRiskInterestRateSeries.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Order.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -376,10 +370,6 @@
       <item path="MonitorOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="MonitorOrder.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="NoRiskInterestRateSeries.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Order.cpp" ex="false" tool="1" flavor2="0">
       </item>

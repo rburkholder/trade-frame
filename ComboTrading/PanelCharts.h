@@ -29,10 +29,10 @@
 #include <wx/notebook.h>
 
 #include <TFTrading/ProviderManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Option.h>
+#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFBitsNPieces/GridColumnSizer.h>

@@ -15,12 +15,12 @@
 #pragma once
 
 // 2012/02/05 http://seekingalpha.com/article/274736-option-expiration-for-metals-lots-of-puts-on-slv-more-calls-on-gld
-// 2012/03/31 be aware that some options do not expire on friday.  Some like, next week, 
+// 2012/03/31 be aware that some options do not expire on friday.  Some like, next week,
 //            expire on thursday due to good friday being a holiday
 
-#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
 
+#include "NoRiskInterestRateSeries.h"
 #include "Binomial.h"
 
 namespace ou { // One Unified
@@ -33,7 +33,7 @@ public:
   typedef boost::shared_ptr<Option> pOption_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  
+
   typedef std::function<void(const Greek&)> fCallbackWithGreek_t;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
@@ -47,9 +47,9 @@ public:
   bool virtual operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double GetStrike( void ) const { return m_dblStrike; };
-  
+
   static void CalcRate( // basic libor calcs
-    ou::tf::option::binomial::structInput& input, 
+    ou::tf::option::binomial::structInput& input,
     const ou::tf::LiborFromIQFeed& libor,
     boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry );
   // calls static CalcRate with specific expiry info
@@ -70,7 +70,7 @@ public:
   virtual bool StopWatch( void );
 
   virtual void EmitValues( void );
-  
+
   // TODO: needs spinlock
   inline const Greek& LastGreek( void ) const { return m_greek; };
 

@@ -55,7 +55,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/KeyTypes.o \
 	${OBJECTDIR}/Managers.o \
 	${OBJECTDIR}/MonitorOrder.o \
-	${OBJECTDIR}/NoRiskInterestRateSeries.o \
 	${OBJECTDIR}/Order.o \
 	${OBJECTDIR}/OrderManager.o \
 	${OBJECTDIR}/OrdersOutstanding.o \
@@ -198,11 +197,6 @@ ${OBJECTDIR}/MonitorOrder.o: MonitorOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MonitorOrder.o MonitorOrder.cpp
-
-${OBJECTDIR}/NoRiskInterestRateSeries.o: NoRiskInterestRateSeries.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NoRiskInterestRateSeries.o NoRiskInterestRateSeries.cpp
 
 ${OBJECTDIR}/Order.o: Order.cpp
 	${MKDIR} -p ${OBJECTDIR}
