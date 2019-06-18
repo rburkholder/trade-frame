@@ -27,27 +27,35 @@ using setSymbols_t = std::set<std::string>;
 
 struct InstrumentInfo {
   const std::string sName;
+  const std::string sPath;
   volume_t volumeEma;
   double dblDailyHistoricalVolatility;
 
   const ou::tf::Bar bar; // last bar in series for closing/ pivot calcs
 
-  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_,
+  InstrumentInfo(
+    const std::string& sName_, const std::string& sPath_,
+    const ou::tf::Bar& bar_,
     volume_t volumeEma_, double dblDailyHistoricalVolatility_
     )
-    : sName( sName_ ), bar( bar_ ), volumeEma( volumeEma_ ),
+    : sName( sName_ ), sPath( sPath_ ),
+      bar( bar_ ), volumeEma( volumeEma_ ),
       dblDailyHistoricalVolatility( dblDailyHistoricalVolatility_ )
     {}
-  InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar_ )
-    : sName( sName_ ), bar( bar_ ), volumeEma {}, dblDailyHistoricalVolatility {}
+  InstrumentInfo( const std::string& sName_, const std::string& sPath_, const ou::tf::Bar& bar_ )
+    : sName( sName_ ), sPath( sPath_ ),
+      bar( bar_ ), volumeEma {}, dblDailyHistoricalVolatility {}
     {}
   InstrumentInfo( const InstrumentInfo& rhs )
-    : sName( rhs.sName ), bar( rhs.bar ), volumeEma( rhs.volumeEma ),
+    : sName( rhs.sName ), sPath( rhs.sPath ),
+      bar( rhs.bar ), volumeEma( rhs.volumeEma ),
       dblDailyHistoricalVolatility( rhs.dblDailyHistoricalVolatility )
     {}
   InstrumentInfo( const InstrumentInfo&& rhs )
-    : sName( std::move( rhs.sName ) ), bar( rhs.bar ),
-    volumeEma( rhs.volumeEma ), dblDailyHistoricalVolatility( rhs.dblDailyHistoricalVolatility )
+    : sName( std::move( rhs.sName ) ), sPath( std::move( rhs.sPath ) ),
+      bar( rhs.bar ),
+      volumeEma( rhs.volumeEma ),
+      dblDailyHistoricalVolatility( rhs.dblDailyHistoricalVolatility )
     {}
   bool operator<( const InstrumentInfo& rhs ) const { return sName < rhs.sName; };
 };
@@ -56,9 +64,9 @@ struct InstrumentInfo {
 
 struct IIDarvas: InstrumentInfo {
   double dblStop;  // calculated stop price, if any
-  IIDarvas( const std::string& sName, const ou::tf::Bar& bar,
+  IIDarvas( const std::string& sName, const std::string& sPath, const ou::tf::Bar& bar,
     volume_t volumeEma_, double dblDailyHistoricalVolatility )
-    : InstrumentInfo( sName, bar, volumeEma_, dblDailyHistoricalVolatility ), dblStop{}
+    : InstrumentInfo( sName, sPath, bar, volumeEma_, dblDailyHistoricalVolatility ), dblStop{}
   {}
 };
 
@@ -80,10 +88,11 @@ struct IIPivot: InstrumentInfo {
   double dblProbabilityBelowAndUp;
   double dblProbabilityBelowAndDown;
   IIPivot(
-      const std::string& sName, const ou::tf::Bar& bar,
+      const std::string& sName, const std::string& sPath,
+      const ou::tf::Bar& bar,
       volume_t volumeEma_, double dblDailyHistoricalVolatility_
     )
-    : InstrumentInfo( sName, bar, volumeEma_, dblDailyHistoricalVolatility_ ),
+    : InstrumentInfo( sName, sPath, bar, volumeEma_, dblDailyHistoricalVolatility_ ),
       dblR2 {}, dblR1 {}, dblPV {}, dblS1 {}, dblS2 {},
       dblProbabilityAboveAndUp {}, dblProbabilityAboveAndDown {},
       dblProbabilityBelowAndUp {}, dblProbabilityBelowAndDown {}
