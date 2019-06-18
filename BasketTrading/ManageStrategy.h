@@ -109,7 +109,9 @@ public:
   using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;;
 
   ManageStrategy(
-    const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
+    const std::string& sUnderlying,
+    const std::string& sDailyBarPath,
+    const ou::tf::Bar& barPriorDaily,
     pPortfolio_t,
     fGatherOptionDefinitions_t,
     fConstructWatch_t,
@@ -196,6 +198,7 @@ private:
   using volume_t = ou::tf::DatedDatum::volume_t;
 
   std::string m_sUnderlying;
+  std::string m_sDailyBarPath;
 
   bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
   bool m_bAllowComboAdd; // allows state machine to open new combo

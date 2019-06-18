@@ -346,7 +346,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   pManageStrategy_t pManageStrategy;
   pManageStrategy = std::make_unique<ManageStrategy>(
-        sUnderlying, iip_.bar, pPortfolioStrategy,
+        sUnderlying,
+        iip.sPath,
+        iip_.bar,
+        pPortfolioStrategy,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructWatch_t - underlying construction only

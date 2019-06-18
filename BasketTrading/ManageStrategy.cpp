@@ -94,7 +94,9 @@ namespace {
 }
 
 ManageStrategy::ManageStrategy(
-  const std::string& sUnderlying, const ou::tf::Bar& barPriorDaily,
+  const std::string& sUnderlying,
+  const std::string& sDailyBarPath,
+  const ou::tf::Bar& barPriorDaily,
   pPortfolio_t pPortfolioStrategy,
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch,
@@ -115,6 +117,7 @@ ManageStrategy::ManageStrategy(
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
   m_sUnderlying( sUnderlying ),
+  m_sDailyBarPath( sDailyBarPath ),
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
   m_fConstructWatch( fConstructWatch ),
@@ -204,6 +207,8 @@ ManageStrategy::ManageStrategy(
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
   //m_bfTicks06sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTicks06Sec ) );
 //  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
+
+  ReadDailyBars( m_sDailyBarPath );
 
   try {
 
@@ -1082,8 +1087,8 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
   begin = tsRepository.begin();
   end = tsRepository.end();
-  hsize_t cnt = end - begin;
   m_barsDaily.Clear();
+  hsize_t cnt = end - begin;
   m_barsDaily.Resize( cnt );
   tsRepository.Read( begin, end, &m_barsDaily );
 
