@@ -155,7 +155,7 @@ private:
   void SaveState();
   void LoadState();
 
-    template<typename Archive>
+  template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & m_enumBuySell;
