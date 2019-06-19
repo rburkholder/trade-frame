@@ -89,8 +89,9 @@ private:
   wxTimer m_timerGuiRefresh;
 
   wxRadioButton* m_rbBuy;
+  wxRadioButton* m_rbNeutral;
   wxRadioButton* m_rbSell;
-  enum EBuySell { Buy, Sell };
+  enum EBuySell { Neutral, Buy, Sell };
   EBuySell m_enumBuySell;
 
   double m_dblMaxPL;
@@ -150,6 +151,7 @@ private:
   void HandleMenuActionLoadSymbolSubset( void );
 
   void HandleButtonSetBuy( wxCommandEvent& event );
+  void HandleButtonSetNeutral( wxCommandEvent& event );
   void HandleButtonSetSell( wxCommandEvent& event );
 
   void SaveState();
@@ -171,6 +173,10 @@ private:
         case EBuySell::Buy:
           m_rbBuy->SetValue( true );
           m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
+          break;
+        case EBuySell::Neutral:
+          m_rbNeutral->SetValue( true );
+          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Unknown );
           break;
         case EBuySell::Sell:
           m_rbSell->SetValue( true );

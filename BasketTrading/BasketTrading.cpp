@@ -29,6 +29,7 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
+#include <wx-3.0/wx/event.h>
 
 #include "BasketTrading.h"
 
@@ -41,6 +42,7 @@ namespace {
 bool AppBasketTrading::OnInit() {
 
   m_rbBuy = nullptr;
+  m_rbNeutral = nullptr;
   m_rbSell = nullptr;
 
   wxApp::OnInit();
@@ -51,7 +53,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 6, 10 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 6, 18 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -110,22 +112,26 @@ bool AppBasketTrading::OnInit() {
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain, wxID_ANY );
   sizerRight->Add( m_pPanelFinancialChart, 1, wxEXPAND | wxALL, 2 );
 
-  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
-  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
+//  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
+//  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
-  wxBoxSizer* sizerBuySell = new wxBoxSizer( wxVERTICAL );
-  sizerBottom->Add( sizerBuySell );
+  wxBoxSizer* sizerBuySell = new wxBoxSizer( wxHORIZONTAL );
+  sizerLeft->Add( sizerBuySell );
 
-  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy", wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy", wxDefaultPosition, wxDefaultSize, wxRB_GROUP ); // wxRB_GROUP indicates start of group
   sizerBuySell->Add( m_rbBuy );
   m_rbBuy->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
+
+  m_rbNeutral = new wxRadioButton( m_pFrameMain, wxID_ANY, "Neutral", wxDefaultPosition, wxDefaultSize );
+  sizerBuySell->Add( m_rbNeutral );
+  m_rbNeutral->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetNeutral, this );
 
   m_rbSell = new wxRadioButton( m_pFrameMain, wxID_ANY, "Sell", wxDefaultPosition, wxDefaultSize, 0 );
   sizerBuySell->Add( m_rbSell );
   m_rbSell->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
 
-  m_rbBuy->SetValue( true );
-  m_enumBuySell = EBuySell::Buy;
+  m_rbNeutral->SetValue( true );
+  m_enumBuySell = EBuySell::Neutral;
 
   m_pFrameMain->Show( true );
 
@@ -259,6 +265,14 @@ void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
   CallAfter( [this](){
     std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Buy );
     m_enumBuySell = EBuySell::Buy;
+  } );
+}
+
+void AppBasketTrading::HandleButtonSetNeutral( wxCommandEvent& event ) {
+  std::cout << "button neutral" << std::endl;
+  CallAfter( [this](){
+    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Unknown );
+    m_enumBuySell = EBuySell::Neutral;
   } );
 }
 
@@ -443,6 +457,7 @@ void AppBasketTrading::LoadState() {
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
   m_rbBuy->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
+  m_rbNeutral->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetNeutral, this );
   m_rbSell->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
 
   if ( m_worker.joinable() ) m_worker.join();

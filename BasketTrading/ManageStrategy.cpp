@@ -627,48 +627,49 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
                 if ( m_mapCombo.end() == mapCombo_iter ) {
                   if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
+                    if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) {
+                      std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                      std::pair<mapCombo_t::iterator,bool> result;
+                      //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
+                      result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
+                      assert( result.second );
+                      assert( m_mapCombo.end() != result.first );
+                      Strangle& strangle( result.first->second );
+                      if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                        std::cout << "WARNING: strategy running out of colours." << std::endl;
+                      }
+                      strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
 
-                    std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                    std::pair<mapCombo_t::iterator,bool> result;
-                    //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
-                    result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, Strangle() ) );
-                    assert( result.second );
-                    assert( m_mapCombo.end() != result.first );
-                    Strangle& strangle( result.first->second );
-                    if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
-                      std::cout << "WARNING: strategy running out of colours." << std::endl;
+                      pOption_t pOption;
+                      mapOption_t::iterator iterOption;
+                      std::string sOptionName;
+
+                      Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
+
+                      pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
+                      sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                      iterOption = m_mapOption.find( sOptionName );
+                      if ( m_mapOption.end() == iterOption ) {
+                        m_mapOption[ sOptionName ] = pOption;
+                        m_fRegisterOption( pOption );
+                        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                      }
+                      pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
+                      strangle.AddPosition( pPositionCall, m_pChartDataView, rColour[ m_ixColour++ ] );
+
+                      pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.second );
+                      sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                      iterOption = m_mapOption.find( sOptionName );
+                      if ( m_mapOption.end() == iterOption ) {
+                        m_mapOption[ sOptionName ] = pOption;
+                        m_fRegisterOption( pOption );
+                        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                      }
+                      pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
+                      strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
+
+                      strangle.PlaceOrder( m_DefaultOrderSide );
                     }
-                    strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-
-                    pOption_t pOption;
-                    mapOption_t::iterator iterOption;
-                    std::string sOptionName;
-
-                    Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
-
-                    pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
-                    sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                    iterOption = m_mapOption.find( sOptionName );
-                    if ( m_mapOption.end() == iterOption ) {
-                      m_mapOption[ sOptionName ] = pOption;
-                      m_fRegisterOption( pOption );
-                      m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                    }
-                    pPosition_t pPositionCall = m_fConstructPosition( idPortfolio, pOption );
-                    strangle.AddPosition( pPositionCall, m_pChartDataView, rColour[ m_ixColour++ ] );
-
-                    pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.second );
-                    sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                    iterOption = m_mapOption.find( sOptionName );
-                    if ( m_mapOption.end() == iterOption ) {
-                      m_mapOption[ sOptionName ] = pOption;
-                      m_fRegisterOption( pOption );
-                      m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                    }
-                    pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
-                    strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
-
-                    strangle.PlaceOrder( m_DefaultOrderSide );
                   }
                   else {
                     // ?
