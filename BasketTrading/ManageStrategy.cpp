@@ -328,11 +328,11 @@ ManageStrategy::~ManageStrategy( ) {
 void ManageStrategy::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
   // TFIndicators/Pivots.h has R3, S3 plus colour assignments
   m_pivotCrossing.Set( dblR2, dblR1, dblPV, dblS1, dblS2 );
-  m_cePivots.AddMark( dblR2, ou::Colour::Blue, "R2" );
-  m_cePivots.AddMark( dblR1, ou::Colour::Blue, "R1" );
+  m_cePivots.AddMark( dblR2, ou::Colour::Red, "R2" );
+  m_cePivots.AddMark( dblR1, ou::Colour::Red, "R1" );
   m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
-  m_cePivots.AddMark( dblS1, ou::Colour::Red, "S1" );
-  m_cePivots.AddMark( dblS2, ou::Colour::Red, "S2" );
+  m_cePivots.AddMark( dblS1, ou::Colour::Blue, "S1" );
+  m_cePivots.AddMark( dblS2, ou::Colour::Blue, "S2" );
 }
 
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {
@@ -1089,14 +1089,24 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   begin = tsRepository.begin();
   end = tsRepository.end();
   m_barsDaily.Clear();
-  hsize_t cnt = end - begin;
+  const hsize_t cnt = end - begin;
   m_barsDaily.Resize( cnt );
   tsRepository.Read( begin, end, &m_barsDaily );
 
+  size_t cntMarking = cnt;
   for ( ou::tf::Bars::const_iterator iterBars = m_barsDaily.begin(); m_barsDaily.end() != iterBars; ++iterBars ) {
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
     m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
+    if ( 50 >= cntMarking ) { // only last 50 bars show attractors
+      m_cePivots.AddMark( iterBars->High(), ou::Colour::LightSalmon, "High" );
+      m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
+    }
+    cntMarking--;
   }
+
+  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBUpper(), ou::Colour::Purple,     "BollUp" );
+  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.MeanY(),   ou::Colour::Salmon,     "BollMn" );
+  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBLower(), ou::Colour::PowderBlue, "BollLo" );
 
   //m_pricesDailyCloseBollinger20.
 
