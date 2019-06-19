@@ -7,7 +7,7 @@ C++ is used throughout for building high-capacity, low-latency trading applicati
 
 I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.  Regular make files are available as a side effect.
 
-A C++14 compiler is used to build the libraries and code.
+A C++17 compiler is used to build the libraries and code.
 
 ## Example
 
