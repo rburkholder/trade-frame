@@ -153,7 +153,8 @@ ManageStrategy::ManageStrategy(
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
-  m_daysToExpiry( 6 )
+  m_daysToExpiry( 6 ),
+  m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -1091,6 +1092,13 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   hsize_t cnt = end - begin;
   m_barsDaily.Resize( cnt );
   tsRepository.Read( begin, end, &m_barsDaily );
+
+  for ( ou::tf::Bars::const_iterator iterBars = m_barsDaily.begin(); m_barsDaily.end() != iterBars; ++iterBars ) {
+    ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
+    m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
+  }
+
+  //m_pricesDailyCloseBollinger20.
 
 //    AddChartEntries( pChartDataView, series );
 

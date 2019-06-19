@@ -30,6 +30,8 @@
 
 #include <TFIQFeed/MarketSymbol.h>
 
+#include <TFIndicators/TSSWStats.h>
+
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 
@@ -256,6 +258,8 @@ private:
   mapOption_t m_mapOption;
 
   ou::tf::Bars m_barsDaily;
+  ou::tf::Prices m_pricesDailyClose;
+  ou::tf::TSSWStatsPrice m_pricesDailyCloseBollinger20;
 
   ou::tf::BarFactory m_bfQuotes01Sec; // provides more frequent ticks for Order Monitoring
 
