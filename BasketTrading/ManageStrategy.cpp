@@ -1099,12 +1099,13 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   //m_cePivots.Clear(); // need to separate out differently (marks for daily bars only)
 
   bool bLoopStarted( false );
-  size_t nPassedUpper {};
-  size_t nPassedLower {};
   bool bPassedUpper( false );
   bool bPassedLower( false );
 
+  m_nPassedUpper = m_nPassedLower = 0;
+  m_ixSdMax = m_ixSdMin = 0;
   size_t cntMarking = cnt;
+
   for ( ou::tf::Bars::const_iterator iterBars = m_barsDaily.begin(); m_barsDaily.end() != iterBars; ++iterBars ) {
 
     if ( bLoopStarted ) { // calculations use previous day's bollinger
@@ -1118,23 +1119,23 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
       if ( bPassedUpper || bPassedLower ) {
         if ( bPassedUpper && bPassedLower ) {
-          nPassedUpper++;
-          nPassedLower++;
+          m_nPassedUpper++;
+          m_nPassedLower++;
         }
         else {
           if ( bPassedUpper ) {
-            nPassedUpper++;
-            nPassedLower = 0;
+            m_nPassedUpper++;
+            m_nPassedLower = 0;
           }
           if ( bPassedLower ) {
-            nPassedUpper = 0;
-            nPassedLower++;
+            m_nPassedUpper = 0;
+            m_nPassedLower++;
           }
         }
       }
       else {
-        nPassedUpper = 0;
-        nPassedLower = 0;
+        m_nPassedUpper = 0;
+        m_nPassedLower = 0;
       }
     }
     else {
@@ -1143,9 +1144,23 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
     m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
-    if ( 50 >= cntMarking ) { // only last 50 bars show attractors
+    if ( 55 >= cntMarking ) { // only last 50 bars show attractors
       m_cePivots.AddMark( iterBars->High(), ou::Colour::LightSalmon, "High" );
       m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
+
+      const double sd = m_pricesDailyCloseBollinger20.SD();
+      if ( sd > m_dblBollingerSDMax ) {
+        m_dblBollingerSDMax = sd;
+        m_ixSdMax = cntMarking;
+      }
+      if ( sd < m_dblBollingerSDMin ) {
+        m_dblBollingerSDMin = sd;
+        m_ixSdMin = cntMarking;
+      }
+    }
+    else {
+      m_dblBollingerSDMax = m_dblBollingerSDMin = m_pricesDailyCloseBollinger20.SD();
+      m_ixSdMax = m_ixSdMin = cntMarking;
     }
     cntMarking--;
   } // end for
@@ -1154,8 +1169,16 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   m_cePivots.AddMark( m_pricesDailyCloseBollinger20.MeanY(),   ou::Colour::Salmon,     "BollMn" );
   m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBLower(), ou::Colour::PowderBlue, "BollLo" );
 
-  if ( 1 == nPassedUpper ) std::cout << this->m_sUnderlying << ": first touch on upper bollinger" << std::endl;
-  if ( 1 == nPassedLower ) std::cout << this->m_sUnderlying << ": first touch on lower bollinger" << std::endl;
+  std::cout
+    << m_sUnderlying
+    << " sd min=" << m_dblBollingerSDMin << "@" << m_ixSdMin
+    << ",cur= " << m_pricesDailyCloseBollinger20.SD()
+    << ",max=" << m_dblBollingerSDMax << "@" << m_ixSdMax;
+  if ( 1 == m_nPassedUpper ) std::cout << " - first touch on upper bollinger";
+  if ( 1 == m_nPassedLower ) std::cout << " - first touch on lower bollinger";
+  std::cout << std::endl;
+
+  // trigger: if cross a bollinger band today, with m_nPassedxx 0, then a successful trigger for entry
 
 //    AddChartEntries( pChartDataView, series );
 

@@ -216,6 +216,13 @@ private:
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
 
+  size_t m_nPassedUpper;
+  size_t m_nPassedLower;
+  size_t m_ixSdMax;
+  double m_dblBollingerSDMax;
+  size_t m_ixSdMin;
+  double m_dblBollingerSDMin;
+
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
   mapChains_t m_mapChains;
   mapChains_t::iterator m_iterChainExpiryInUse;
