@@ -9,6 +9,7 @@
       <itemPath>BullPutSpread.h</itemPath>
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
+      <itemPath>CallBackSpread.h</itemPath>
       <itemPath>Combo.h</itemPath>
       <itemPath>Condor.h</itemPath>
       <itemPath>Engine.h</itemPath>
@@ -19,10 +20,14 @@
       <itemPath>NoRiskInterestRateSeries.h</itemPath>
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
+      <itemPath>PutBackSpread.h</itemPath>
       <itemPath>SpreadCandidate.h</itemPath>
       <itemPath>SpreadValidation.h</itemPath>
+      <itemPath>Straddle.h</itemPath>
       <itemPath>Strangle.h</itemPath>
       <itemPath>Strike.h</itemPath>
+      <itemPath>SyntheticLong.h</itemPath>
+      <itemPath>SyntheticShort.h</itemPath>
       <itemPath>VerticalSpread.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -39,6 +44,7 @@
       <itemPath>BullPutSpread.cpp</itemPath>
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
+      <itemPath>CallBackSpread.cpp</itemPath>
       <itemPath>Combo.cpp</itemPath>
       <itemPath>Condor.cpp</itemPath>
       <itemPath>Engine.cpp</itemPath>
@@ -49,10 +55,14 @@
       <itemPath>NoRiskInterestRateSeries.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
+      <itemPath>PutBackSpread.cpp</itemPath>
       <itemPath>SpreadCandidate.cpp</itemPath>
       <itemPath>SpreadValidation.cpp</itemPath>
+      <itemPath>Straddle.cpp</itemPath>
       <itemPath>Strangle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
+      <itemPath>SyntheticLong.cpp</itemPath>
+      <itemPath>SyntheticShort.cpp</itemPath>
       <itemPath>VerticalSpread.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -121,6 +131,10 @@
       </item>
       <item path="CalcExpiry.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="CallBackSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CallBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Combo.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Combo.h" ex="false" tool="3" flavor2="0">
@@ -161,6 +175,10 @@
       </item>
       <item path="PopulateWithIBOptions.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PutBackSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PutBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
@@ -169,6 +187,10 @@
       </item>
       <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strangle.h" ex="false" tool="3" flavor2="0">
@@ -176,6 +198,14 @@
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SyntheticLong.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SyntheticLong.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SyntheticShort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SyntheticShort.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="VerticalSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -233,6 +263,10 @@
       </item>
       <item path="CalcExpiry.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="CallBackSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CallBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Combo.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Combo.h" ex="false" tool="3" flavor2="0">
@@ -273,6 +307,10 @@
       </item>
       <item path="PopulateWithIBOptions.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PutBackSpread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PutBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
@@ -281,6 +319,10 @@
       </item>
       <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Straddle.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Strangle.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strangle.h" ex="false" tool="3" flavor2="0">
@@ -288,6 +330,14 @@
       <item path="Strike.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Strike.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SyntheticLong.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SyntheticLong.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SyntheticShort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SyntheticShort.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="VerticalSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>

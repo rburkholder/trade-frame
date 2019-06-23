@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/BullPutSpread.o \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
+	${OBJECTDIR}/CallBackSpread.o \
 	${OBJECTDIR}/Combo.o \
 	${OBJECTDIR}/Condor.o \
 	${OBJECTDIR}/Engine.o \
@@ -50,10 +51,14 @@ OBJECTFILES= \
 	${OBJECTDIR}/NoRiskInterestRateSeries.o \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
+	${OBJECTDIR}/PutBackSpread.o \
 	${OBJECTDIR}/SpreadCandidate.o \
 	${OBJECTDIR}/SpreadValidation.o \
+	${OBJECTDIR}/Straddle.o \
 	${OBJECTDIR}/Strangle.o \
 	${OBJECTDIR}/Strike.o \
+	${OBJECTDIR}/SyntheticLong.o \
+	${OBJECTDIR}/SyntheticShort.o \
 	${OBJECTDIR}/VerticalSpread.o
 
 
@@ -108,6 +113,11 @@ ${OBJECTDIR}/CalcExpiry.o: CalcExpiry.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CalcExpiry.o CalcExpiry.cpp
 
+${OBJECTDIR}/CallBackSpread.o: CallBackSpread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CallBackSpread.o CallBackSpread.cpp
+
 ${OBJECTDIR}/Combo.o: Combo.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -158,6 +168,11 @@ ${OBJECTDIR}/PopulateWithIBOptions.o: PopulateWithIBOptions.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PopulateWithIBOptions.o PopulateWithIBOptions.cpp
 
+${OBJECTDIR}/PutBackSpread.o: PutBackSpread.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PutBackSpread.o PutBackSpread.cpp
+
 ${OBJECTDIR}/SpreadCandidate.o: SpreadCandidate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -168,6 +183,11 @@ ${OBJECTDIR}/SpreadValidation.o: SpreadValidation.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadValidation.o SpreadValidation.cpp
 
+${OBJECTDIR}/Straddle.o: Straddle.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Straddle.o Straddle.cpp
+
 ${OBJECTDIR}/Strangle.o: Strangle.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -177,6 +197,16 @@ ${OBJECTDIR}/Strike.o: Strike.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Strike.o Strike.cpp
+
+${OBJECTDIR}/SyntheticLong.o: SyntheticLong.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SyntheticLong.o SyntheticLong.cpp
+
+${OBJECTDIR}/SyntheticShort.o: SyntheticShort.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SyntheticShort.o SyntheticShort.cpp
 
 ${OBJECTDIR}/VerticalSpread.o: VerticalSpread.cpp
 	${MKDIR} -p ${OBJECTDIR}
