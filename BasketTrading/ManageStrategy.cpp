@@ -1094,8 +1094,53 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   m_barsDaily.Resize( cnt );
   tsRepository.Read( begin, end, &m_barsDaily );
 
+  m_pricesDailyClose.Clear();
+  m_pricesDailyCloseBollinger20.Reset();
+  //m_cePivots.Clear(); // need to separate out differently (marks for daily bars only)
+
+  bool bLoopStarted( false );
+  size_t nPassedUpper {};
+  size_t nPassedLower {};
+  bool bPassedUpper( false );
+  bool bPassedLower( false );
+
   size_t cntMarking = cnt;
   for ( ou::tf::Bars::const_iterator iterBars = m_barsDaily.begin(); m_barsDaily.end() != iterBars; ++iterBars ) {
+
+    if ( bLoopStarted ) { // calculations use previous day's bollinger
+      bPassedUpper = bPassedLower = false;
+      if ( iterBars->High() >= m_pricesDailyCloseBollinger20.BBUpper() ) {
+        bPassedUpper = true;
+      }
+      if ( iterBars->Low() <= m_pricesDailyCloseBollinger20.BBLower() ) {
+        bPassedLower = true;
+      }
+
+      if ( bPassedUpper || bPassedLower ) {
+        if ( bPassedUpper && bPassedLower ) {
+          nPassedUpper++;
+          nPassedLower++;
+        }
+        else {
+          if ( bPassedUpper ) {
+            nPassedUpper++;
+            nPassedLower = 0;
+          }
+          if ( bPassedLower ) {
+            nPassedUpper = 0;
+            nPassedLower++;
+          }
+        }
+      }
+      else {
+        nPassedUpper = 0;
+        nPassedLower = 0;
+      }
+    }
+    else {
+      bLoopStarted = true;
+    }
+
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
     m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
     if ( 50 >= cntMarking ) { // only last 50 bars show attractors
@@ -1103,13 +1148,14 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
       m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
     }
     cntMarking--;
-  }
+  } // end for
 
   m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBUpper(), ou::Colour::Purple,     "BollUp" );
   m_cePivots.AddMark( m_pricesDailyCloseBollinger20.MeanY(),   ou::Colour::Salmon,     "BollMn" );
   m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBLower(), ou::Colour::PowderBlue, "BollLo" );
 
-  //m_pricesDailyCloseBollinger20.
+  if ( 1 == nPassedUpper ) std::cout << this->m_sUnderlying << ": first touch on upper bollinger" << std::endl;
+  if ( 1 == nPassedLower ) std::cout << this->m_sUnderlying << ": first touch on lower bollinger" << std::endl;
 
 //    AddChartEntries( pChartDataView, series );
 
