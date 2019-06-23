@@ -717,21 +717,21 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         //bool bClosed( false );
         PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
         // TODO: need to cross upwards for calls, cross downwards for puts (for long strangle)
-        if ( PivotCrossing::ECrossing::none != crossing ) {
-          for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+//        if ( PivotCrossing::ECrossing::none != crossing ) {
+//          for ( mapCombo_t::value_type& vt: m_mapCombo ) {
             //bClosed |= vt.second.CloseItmLegForProfit( mid );
-            namespace ph = std::placeholders;
-            vt.second.CloseItmLegForProfit(
-              mid,
-              m_DefaultOrderSide, // for new entry
-              std::bind( &ManageStrategy::BuildPosition, this, ph::_1, ph::_2, ph::_3, std::move( ph::_4 ) )
-              );
+//            namespace ph = std::placeholders;
+//            vt.second.CloseItmLegForProfit(
+//              mid,
+//              m_DefaultOrderSide, // for new entry
+//              std::bind( &ManageStrategy::BuildPosition, this, ph::_1, ph::_2, ph::_3, std::move( ph::_4 ) )
+//              );
             // implement trailing stop or parabolic SAR
             // how wide to set the stop?  double the average jitter in price?
             // maybe the roll should be to sell the next otm.  depends on how fast moving
             // use the crossing for the trigger for the trailing stop
-          }
-        }
+//          }
+//        }
 //        if ( bClosed ) { // handled above
           // choice:
           //   a) for now: open another otm leg in the same direction
