@@ -43,8 +43,8 @@ public:
   using leg_pair_t = Combo::leg_pair_t;
   using strike_pair_t = Combo::strike_pair_t;
 
-  using pOption_t = ou::tf::option::Option::pOption_t;
-  using pOptionPair_t = std::pair<pOption_t,pOption_t>; // higher lower
+  //using pOption_t = ou::tf::option::Option::pOption_t;
+  //using pOptionPair_t = std::pair<pOption_t,pOption_t>; // higher lower
 
 //  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
