@@ -13,6 +13,9 @@
       <itemPath>PivotCrossing.h</itemPath>
       <itemPath>Resource.h</itemPath>
       <itemPath>Sentiment.h</itemPath>
+      <itemPath>StrategyBase.h</itemPath>
+      <itemPath>StrategyCondor.h</itemPath>
+      <itemPath>StrategyStrangle.h</itemPath>
       <itemPath>SymbolSelection.h</itemPath>
       <itemPath>stdafx.h</itemPath>
       <itemPath>targetver.h</itemPath>
@@ -32,6 +35,9 @@
       <itemPath>PanelPortfolioStats.cpp</itemPath>
       <itemPath>PivotCrossing.cpp</itemPath>
       <itemPath>Sentiment.cpp</itemPath>
+      <itemPath>StrategyBase.cpp</itemPath>
+      <itemPath>StrategyCondor.cpp</itemPath>
+      <itemPath>StrategyStrangle.cpp</itemPath>
       <itemPath>SymbolSelection.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
     </logicalFolder>
@@ -353,6 +359,18 @@
       </item>
       <item path="Sentiment.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="StrategyBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StrategyCondor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyCondor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StrategyStrangle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyStrangle.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SymbolSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SymbolSelection.h" ex="false" tool="3" flavor2="0">
@@ -421,6 +439,18 @@
       <item path="Sentiment.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Sentiment.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StrategyBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StrategyCondor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyCondor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StrategyStrangle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StrategyStrangle.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="SymbolSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>

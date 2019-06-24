@@ -44,6 +44,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/PanelPortfolioStats.o \
 	${OBJECTDIR}/PivotCrossing.o \
 	${OBJECTDIR}/Sentiment.o \
+	${OBJECTDIR}/StrategyBase.o \
+	${OBJECTDIR}/StrategyCondor.o \
+	${OBJECTDIR}/StrategyStrangle.o \
 	${OBJECTDIR}/SymbolSelection.o \
 	${OBJECTDIR}/stdafx.o
 
@@ -152,6 +155,21 @@ ${OBJECTDIR}/Sentiment.o: Sentiment.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sentiment.o Sentiment.cpp
+
+${OBJECTDIR}/StrategyBase.o: StrategyBase.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StrategyBase.o StrategyBase.cpp
+
+${OBJECTDIR}/StrategyCondor.o: StrategyCondor.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StrategyCondor.o StrategyCondor.cpp
+
+${OBJECTDIR}/StrategyStrangle.o: StrategyStrangle.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StrategyStrangle.o StrategyStrangle.cpp
 
 ${OBJECTDIR}/SymbolSelection.o: SymbolSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}
