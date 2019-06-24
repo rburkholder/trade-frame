@@ -191,7 +191,7 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
   strike_pair_t pairStrikes;
 
   try {
-    pairStrikes = ChooseStrikes( tools.m_chains, price ); // virtual up call
+    pairStrikes = ChooseStrikes( tools.m_chain, price ); // virtual up call
     bStrikesFound = true; // can set as no exception was thrown
   }
   catch ( std::runtime_error& e ) {
@@ -236,10 +236,10 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
 
     switch ( legs.first.type ) {
       case EOptionSide::Call:
-        sIQFeedName = tools.m_chains.GetIQFeedNameCall( pairStrikes.first);
+        sIQFeedName = tools.m_chain.GetIQFeedNameCall( pairStrikes.first);
         break;
       case EOptionSide::Put:
-        sIQFeedName = tools.m_chains.GetIQFeedNamePut( pairStrikes.first);
+        sIQFeedName = tools.m_chain.GetIQFeedNamePut( pairStrikes.first);
         break;
     }
 
@@ -254,10 +254,10 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
 
     switch ( legs.second.type ) {
       case EOptionSide::Call:
-        sIQFeedName = tools.m_chains.GetIQFeedNameCall( pairStrikes.second );
+        sIQFeedName = tools.m_chain.GetIQFeedNameCall( pairStrikes.second );
         break;
       case EOptionSide::Put:
-        sIQFeedName = tools.m_chains.GetIQFeedNamePut( pairStrikes.second );
+        sIQFeedName = tools.m_chain.GetIQFeedNamePut( pairStrikes.second );
         break;
     }
 

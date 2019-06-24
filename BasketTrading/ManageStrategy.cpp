@@ -241,37 +241,29 @@ ManageStrategy::ManageStrategy(
               mapChains_t::iterator iterChains;
 
               {
-                ou::tf::option::IvAtm ivAtm(
-                        m_pPositionUnderlying->GetWatch(),
-                      // IvAtm::fConstructOption_t
-                        m_fConstructOption,
-                      // IvAtm::fStartCalc_t
-                        m_fStartCalc,
-                      // IvAtm::fStopCalc_t
-                        m_fStopCalc
-                        );
+                ou::tf::option::Chain chain;
 
                 iterChains = m_mapChains.find( date ); // see if expiry date exists
                 if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
                   iterChains = m_mapChains.insert(
                     m_mapChains.begin(),
-                    mapChains_t::value_type( date, std::move( ivAtm ) )
+                    mapChains_t::value_type( date, std::move( chain ) )
                     );
                 }
               }
 
               {
-                ou::tf::option::IvAtm& ivAtm( iterChains->second );
+                ou::tf::option::Chain& chain( iterChains->second );
 
                 //std::cout << "  option: " << row.sSymbol << std::endl;
 
                 try {
                   switch ( row.eOptionSide ) {
                     case ou::tf::OptionSide::Call:
-                      ivAtm.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
+                      chain.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
                       break;
                     case ou::tf::OptionSide::Put:
-                      ivAtm.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
+                      chain.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
                       break;
                   }
                 }
@@ -551,16 +543,16 @@ void ManageStrategy::BuildPosition(
   fBuildPositionCallBack_t&& fBuildPositionCallBack
 ) {
 
-  ou::tf::option::IvAtm& atm( m_iterChainExpiryInUse->second );
+  ou::tf::option::Chain& chain( m_iterChainExpiryInUse->second );
 
   std::string sName;
 
   switch ( side ) { // should this be here or in the caller?
     case ou::tf::OptionSide::Call:
-      sName = atm.GetIQFeedNameCall( atm.Call_Otm( price ) );
+      sName = chain.GetIQFeedNameCall( chain.Call_Otm( price ) );
       break;
     case ou::tf::OptionSide::Put:
-      sName = atm.GetIQFeedNamePut( atm.Put_Otm( price ) );
+      sName = chain.GetIQFeedNamePut( chain.Put_Otm( price ) );
       break;
   }
 
@@ -581,6 +573,12 @@ void ManageStrategy::BuildPosition(
 
 }
 
+/*
+ * TODO:
+ *   split out each option strategy
+ *   add additional states
+ *
+ */
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
   switch ( m_stateTrading ) {
@@ -603,7 +601,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
             ou::tf::option::ConstructionTools tools(
               m_iterChainExpiryInUse->first, // expiry
-              m_iterChainExpiryInUse->second,  // IvAtm
+              m_iterChainExpiryInUse->second,  // Chain
               m_pPositionUnderlying->GetWatch(),
               m_fConstructOption
               );
@@ -744,6 +742,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
     default:
       break;
   }
+}
+
+void ManageStrategy::StrategyCondor( const ou::tf::Bar& bar ) {
+
+}
+
+void ManageStrategy::StrategyStrangle( const ou::tf::Bar& bar ) {
+
 }
 
 void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
@@ -979,21 +985,21 @@ void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentime
 
 void ManageStrategy::Test() {
   if ( 0 != m_mapChains.size() ) {
-    ou::tf::option::IvAtm& iv( m_mapChains.begin()->second );
+    ou::tf::option::Chain& chain( m_mapChains.begin()->second );
     double value( 121.5 );
-    iv.EmitValues();
+    chain.EmitValues();
     try {
-      std::cout << "Put_Itm: "     << iv.Put_Itm( value ) << std::endl;
-      std::cout << "Put_ItmAtm: "  << iv.Put_ItmAtm( value ) << std::endl;
-      std::cout << "Put_Atm: "     << iv.Put_Atm( value ) << std::endl;
-      std::cout << "Put_OtmAtm: "  << iv.Put_OtmAtm( value ) << std::endl;
-      std::cout << "Put_Otm: "     << iv.Put_Otm( value ) << std::endl;
+      std::cout << "Put_Itm: "     << chain.Put_Itm( value ) << std::endl;
+      std::cout << "Put_ItmAtm: "  << chain.Put_ItmAtm( value ) << std::endl;
+      std::cout << "Put_Atm: "     << chain.Put_Atm( value ) << std::endl;
+      std::cout << "Put_OtmAtm: "  << chain.Put_OtmAtm( value ) << std::endl;
+      std::cout << "Put_Otm: "     << chain.Put_Otm( value ) << std::endl;
 
-      std::cout << "Call_Itm: "    << iv.Call_Itm( value ) << std::endl;
-      std::cout << "Call_ItmAtm: " << iv.Call_ItmAtm( value ) << std::endl;
-      std::cout << "Call_Atm: "    << iv.Call_Atm( value ) << std::endl;
-      std::cout << "Call_OtmAtm: " << iv.Call_OtmAtm( value ) << std::endl;
-      std::cout << "Call_Otm: "    << iv.Call_Otm( value ) << std::endl;
+      std::cout << "Call_Itm: "    << chain.Call_Itm( value ) << std::endl;
+      std::cout << "Call_ItmAtm: " << chain.Call_ItmAtm( value ) << std::endl;
+      std::cout << "Call_Atm: "    << chain.Call_Atm( value ) << std::endl;
+      std::cout << "Call_OtmAtm: " << chain.Call_OtmAtm( value ) << std::endl;
+      std::cout << "Call_Otm: "    << chain.Call_Otm( value ) << std::endl;
     }
     catch ( std::runtime_error& e ) {
       std::cout << "runtime error: " << e.what() << std::endl;
@@ -1179,6 +1185,17 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
   std::cout << std::endl;
 
   // trigger: if cross a bollinger band today, with m_nPassedxx 0, then a successful trigger for entry
+  //          and ixSDmxx is not 1, then probably best time for backspread on near band as volatility has range to increase.
+  //          and a normal spread on far band
+  //          (within 6 days of expiry, allows some time for movement)
+  // trigger: if crosses bollinger mean, then run a bull-put and bear-call
+  //          (within min of 1 day of expiry to catch last day, or weekend theta decay)
+  // trigger: darvas, initiate synthetic with protective option
+  //          (synthetic 13 days, protective 4 days)
+  // trigger:  sell strangle on high volatility, and exit on normal volatility
+  //           will need database to indicate historical implied volatility
+  //           will need to run options all the time in order to monitor implied volatility
+  //           (1 day to expiry to reduce duration risk)
 
 //    AddChartEntries( pChartDataView, series );
 

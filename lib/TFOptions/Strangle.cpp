@@ -71,20 +71,20 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-Strangle::strike_pair_t Strangle::ChooseStrikes( const IvAtm& chains, double price ) const {
+Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double price ) const {
 
   double strikeOtmCall {};
   double strikeOtmPut {};
 
-  strikeOtmCall = chains.Call_Otm( price );
+  strikeOtmCall = chain.Call_Otm( price );
   assert( 0.0 <= ( strikeOtmCall - price ) );
   if ( ( 0.20 * 0.50 ) > ( strikeOtmCall - price ) ) { // within edge of range
-    strikeOtmCall = chains.Call_Otm( strikeOtmCall ); // choose a further out strike
+    strikeOtmCall = chain.Call_Otm( strikeOtmCall ); // choose a further out strike
   }
-  strikeOtmPut = chains.Put_Otm( price );
+  strikeOtmPut = chain.Put_Otm( price );
   assert( 0.0 <= ( price - strikeOtmPut ) );
   if ( ( 0.20 * 0.50 ) > ( price - strikeOtmPut ) ) { // within edge of range
-    strikeOtmPut = chains.Put_Otm( strikeOtmPut ); // choose a further out strike
+    strikeOtmPut = chain.Put_Otm( strikeOtmPut ); // choose a further out strike
   }
   assert( strikeOtmCall > strikeOtmPut );
   const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;

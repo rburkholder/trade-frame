@@ -29,7 +29,7 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
-#include "IvAtm.h"
+#include "Chain.h"
 #include "SpreadValidation.h"
 
 #include "Leg.h"
@@ -48,17 +48,17 @@ struct ConstructionTools {
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
 
   boost::gregorian::date m_dateExpiry;
-  IvAtm& m_chains;
+  Chain& m_chain;
   pWatch_t m_pWatchUnderlying;
   fConstructOption_t& m_fConstructOption;
 
   ConstructionTools(
     boost::gregorian::date dateExpiry,
-    IvAtm& chains,
+    Chain& chain,
     pWatch_t pWatchUnderlying,
     fConstructOption_t& fConstructOption
     )
-  : m_dateExpiry( dateExpiry ), m_chains( chains ),
+  : m_dateExpiry( dateExpiry ), m_chain( chain ),
     m_pWatchUnderlying( pWatchUnderlying ),
     m_fConstructOption( fConstructOption )
   {}
@@ -133,7 +133,7 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
-  virtual strike_pair_t ChooseStrikes( const IvAtm& chains, double price ) const = 0; // throw IvAtm exceptions
+  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const = 0; // throw Chain exceptions
 
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pOptionPair_t = std::pair<pOption_t,pOption_t>;

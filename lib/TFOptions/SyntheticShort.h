@@ -46,7 +46,7 @@ public:
 
 //  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual strike_pair_t ChooseStrikes( const IvAtm& chains, double price ); // put, call: throw IvAtm exceptions
+  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ); // put, call: throw Chain exceptions
 
   static const leg_pair_t m_legDefLong;
   static const leg_pair_t m_legDefShort;

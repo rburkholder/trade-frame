@@ -10,6 +10,7 @@
       <itemPath>Bundle.h</itemPath>
       <itemPath>CalcExpiry.h</itemPath>
       <itemPath>CallBackSpread.h</itemPath>
+      <itemPath>Chain.h</itemPath>
       <itemPath>Combo.h</itemPath>
       <itemPath>Condor.h</itemPath>
       <itemPath>Engine.h</itemPath>
@@ -45,6 +46,7 @@
       <itemPath>Bundle.cpp</itemPath>
       <itemPath>CalcExpiry.cpp</itemPath>
       <itemPath>CallBackSpread.cpp</itemPath>
+      <itemPath>Chain.cpp</itemPath>
       <itemPath>Combo.cpp</itemPath>
       <itemPath>Condor.cpp</itemPath>
       <itemPath>Engine.cpp</itemPath>
@@ -134,6 +136,10 @@
       <item path="CallBackSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="CallBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Chain.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Chain.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Combo.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -266,6 +272,10 @@
       <item path="CallBackSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="CallBackSpread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Chain.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Chain.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Combo.cpp" ex="false" tool="1" flavor2="0">
       </item>

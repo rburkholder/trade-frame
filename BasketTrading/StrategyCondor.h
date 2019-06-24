@@ -22,6 +22,8 @@
 #ifndef STRATEGYCONDOR_H
 #define STRATEGYCONDOR_H
 
+#include <TFOptions/Condor.h>
+
 #include "StrategyBase.h"
 
 class StrategyCondor: public StrategyBase {
@@ -29,6 +31,7 @@ public:
   StrategyCondor( );
   StrategyCondor( const StrategyCondor&& orig );
   virtual ~StrategyCondor( );
+protected:
 private:
 
 };

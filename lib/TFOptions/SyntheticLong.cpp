@@ -48,12 +48,12 @@ SyntheticLong::SyntheticLong( SyntheticLong&& rhs )
 
 SyntheticLong::~SyntheticLong( ) { }
 
-SyntheticLong::strike_pair_t SyntheticLong::ChooseStrikes( const IvAtm& chains, double price ) {
+SyntheticLong::strike_pair_t SyntheticLong::ChooseStrikes( const Chain& chain, double price ) {
 
   double strikeItmCall {};
   double strikePut {};
 
-  strikeItmCall = chains.Call_Itm( price );
+  strikeItmCall = chain.Call_Itm( price );
   strikePut = strikeItmCall;
 
   return strike_pair_t( strikeItmCall, strikePut );

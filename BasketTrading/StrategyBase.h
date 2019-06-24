@@ -29,6 +29,7 @@ public:
   StrategyBase( );
   StrategyBase( const StrategyBase&& orig );
   virtual ~StrategyBase( );
+protected:
 private:
 
 };

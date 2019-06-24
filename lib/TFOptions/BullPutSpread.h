@@ -22,7 +22,7 @@
 #ifndef BULLPUTSPREAD_H
 #define BULLPUTSPREAD_H
 
-#include "IvAtm.h"
+//#include "Chain.h"
 
 #include "Combo.h"
 
@@ -48,7 +48,7 @@ public:
 
 //  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual strike_pair_t ChooseStrikes( const IvAtm& chains, double price ); // throw IvAtm exceptions
+  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ); // throw Chain exceptions
 
   static const leg_pair_t m_legDefLong;
   static const leg_pair_t m_legDefShort;

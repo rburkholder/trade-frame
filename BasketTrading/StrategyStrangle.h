@@ -22,6 +22,8 @@
 #ifndef STRATEGYSTRANGLE_H
 #define STRATEGYSTRANGLE_H
 
+#include <TFOptions/Strangle.h>
+
 #include "StrategyBase.h"
 
 class StrategyStrangle: public StrategyBase {
@@ -29,6 +31,7 @@ public:
   StrategyStrangle( );
   StrategyStrangle( const StrategyStrangle&& orig );
   virtual ~StrategyStrangle( );
+protected:
 private:
 
 };

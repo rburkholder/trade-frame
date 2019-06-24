@@ -48,7 +48,7 @@ PutBackSpread::PutBackSpread( PutBackSpread&& rhs )
 
 PutBackSpread::~PutBackSpread( ) { }
 
-PutBackSpread::strike_pair_t PutBackSpread::ChooseStrikes( const IvAtm& chains, double price ) {
+PutBackSpread::strike_pair_t PutBackSpread::ChooseStrikes( const Chain& chain, double price ) {
 
   double strikeOtmCallHigher {};
   double strikeOtmCallLower {};

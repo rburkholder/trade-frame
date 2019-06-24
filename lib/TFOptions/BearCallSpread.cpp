@@ -48,16 +48,16 @@ BearCall::BearCall( BearCall&& rhs )
 
 BearCall::~BearCall( ) { }
 
-BearCall::strike_pair_t BearCall::ChooseStrikes( const IvAtm& chains, double price ) {
+BearCall::strike_pair_t BearCall::ChooseStrikes( const Chain& chain, double price ) {
 
   double strikeOtmCallHigher {};
   double strikeOtmCallLower {};
 
-  strikeOtmCallLower = chains.Call_Otm( price );
+  strikeOtmCallLower = chain.Call_Otm( price );
   double diffLower = strikeOtmCallLower - price;
   assert( 0.0 <= ( diffLower ) );
 
-  strikeOtmCallHigher = chains.Put_Otm( strikeOtmCallLower );
+  strikeOtmCallHigher = chain.Put_Otm( strikeOtmCallLower );
 
   assert( strikeOtmCallHigher > strikeOtmCallLower );
 

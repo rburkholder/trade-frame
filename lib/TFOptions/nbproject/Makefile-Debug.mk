@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Bundle.o \
 	${OBJECTDIR}/CalcExpiry.o \
 	${OBJECTDIR}/CallBackSpread.o \
+	${OBJECTDIR}/Chain.o \
 	${OBJECTDIR}/Combo.o \
 	${OBJECTDIR}/Condor.o \
 	${OBJECTDIR}/Engine.o \
@@ -117,6 +118,11 @@ ${OBJECTDIR}/CallBackSpread.o: CallBackSpread.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CallBackSpread.o CallBackSpread.cpp
+
+${OBJECTDIR}/Chain.o: Chain.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Chain.o Chain.cpp
 
 ${OBJECTDIR}/Combo.o: Combo.cpp
 	${MKDIR} -p ${OBJECTDIR}

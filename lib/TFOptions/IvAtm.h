@@ -32,13 +32,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-// TODO: re-factor into two classes:
-//   1) mostly static lookups
-//   2) dynamic strike following
-// TODO: also, re-factor the strike classifiers
-
 // this code is deprecating some code in Bundle
 
+// 2019/06/23 refactored some code to Chain
+//   code here not used elsewhere - may need some work - may need to contain or inherit Chain.h
 
 class IvAtm {
 public:
@@ -55,15 +52,13 @@ public:
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
-  struct exception_strike_not_found: public std::runtime_error {
-    exception_strike_not_found( const char* ch ): std::runtime_error( ch ) {}
+  struct exception_at_end_of_chain: public std::runtime_error {
+    exception_at_end_of_chain( const char* ch ): std::runtime_error( ch ) {}
   };
-  struct exception_at_start_of_chain: public exception_strike_not_found {
-    exception_at_start_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
+  struct exception_at_start_of_chain: public std::runtime_error {
+    exception_at_start_of_chain( const char* ch ): std::runtime_error( ch ) {}
   };
-  struct exception_at_end_of_chain: public exception_strike_not_found {
-    exception_at_end_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
-  };
+
 
   IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t, fStartCalc_t, fStopCalc_t );
   IvAtm( IvAtm&& rhs );
@@ -75,28 +70,6 @@ public:
 
   void EmitValues( void );
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
-
-  void SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName );
-  void SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName );
-
-  const std::string GetIQFeedNameCall( double dblStrike ) const;
-  const std::string GetIQFeedNamePut( double dblStrike ) const;
-
-  double Put_Itm( double ) const ;
-  double Put_ItmAtm( double ) const;
-  double Put_Atm( double ) const;
-  double Put_OtmAtm( double ) const;
-  double Put_Otm( double ) const;
-
-  double Call_Itm( double ) const;
-  double Call_ItmAtm( double ) const;
-  double Call_Atm( double ) const;
-  double Call_OtmAtm( double ) const;
-  double Call_Otm( double ) const;
-
-  // returns 0, 1, 2 strikes found
-  // needs exact match on strikeSource
-  int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
 
 protected:
 private:
@@ -178,8 +151,6 @@ private:
 
   double CurrentUnderlying() const { return m_pWatchUnderlying->LastQuote().Midpoint(); }
 
-  mapChain_t::const_iterator FindStrike( const double strike ) const;
-  mapChain_t::iterator FindStrike( const double strike );
   tupleAdjacentStrikes_t FindAdjacentStrikes() const;
   void RecalcATMWatch( double dblUnderlying );
   void UpdateATMWatch( double dblUnderlying );

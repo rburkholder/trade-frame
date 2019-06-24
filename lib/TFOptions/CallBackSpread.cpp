@@ -48,7 +48,7 @@ CallBackSpread::CallBackSpread( CallBackSpread&& rhs )
 
 CallBackSpread::~CallBackSpread( ) { }
 
-CallBackSpread::strike_pair_t CallBackSpread::ChooseStrikes( const IvAtm& chains, double price ) {
+CallBackSpread::strike_pair_t CallBackSpread::ChooseStrikes( const Chain& chain, double price ) {
 
   double strikeOtmCallHigher {};
   double strikeOtmCallLower {};

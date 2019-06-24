@@ -81,15 +81,15 @@ Straddle::~Straddle() {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-Straddle::strike_pair_t Straddle::ChooseStrikes( const IvAtm& chains, double price ) const {
+Straddle::strike_pair_t Straddle::ChooseStrikes( const Chain& chain, double price ) const {
 
   double strikeAtmCall {};
   double strikeAtmPut {};
 
-  strikeAtmCall = chains.Call_Atm( price );
+  strikeAtmCall = chain.Call_Atm( price );
   //assert( 0.0 <= ( strikeAtmCall - price ) );
 
-  strikeAtmPut = chains.Put_Atm( price );
+  strikeAtmPut = chain.Put_Atm( price );
   //assert( 0.0 <= ( price - strikeAtmPut ) );
 
   if ( strikeAtmCall != strikeAtmPut ) {

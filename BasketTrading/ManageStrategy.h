@@ -35,7 +35,7 @@
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 
-#include <TFOptions/IvAtm.h>
+#include <TFOptions/Chain.h>
 #include <TFOptions/Option.h>
 #include <TFOptions/Strangle.h>
 
@@ -98,10 +98,8 @@ public:
 
   using fRegisterWatch_t = std::function<void(pWatch_t&)>;
   using fRegisterOption_t = std::function<void(pOption_t&)>;
-  using fStartCalc_t = ou::tf::option::IvAtm::fStartCalc_t;
-  using fStopCalc_t  = ou::tf::option::IvAtm::fStopCalc_t;
-
-
+  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
+  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
   using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
@@ -223,7 +221,7 @@ private:
   size_t m_ixSdMin;
   double m_dblBollingerSDMin;
 
-  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::IvAtm>;
+  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
   mapChains_t m_mapChains;
   mapChains_t::iterator m_iterChainExpiryInUse;
 
@@ -298,6 +296,18 @@ private:
   ou::ChartEntryShape m_ceLongFills;
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
+
+  struct StateStrangle {
+
+  };
+
+  StateStrangle m_stateStrangle;
+
+  struct StateCondor {
+
+  };
+
+  StateCondor m_stateCondor;
 
   // https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
   // http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
@@ -403,6 +413,9 @@ private:
 
   void RHEquity( const ou::tf::Bar& bar );
   void RHOption( const ou::tf::Bar& bar );
+
+  void StrategyCondor( const ou::tf::Bar& bar );
+  void StrategyStrangle( const ou::tf::Bar& bar );
 
   void HandleGoingNeutral( const ou::tf::Bar& bar );
   void HandleGoingNeutral( const ou::tf::Quote& quote ) {};

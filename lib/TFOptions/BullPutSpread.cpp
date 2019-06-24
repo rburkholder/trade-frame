@@ -48,16 +48,16 @@ BullPut::BullPut( BullPut&& rhs )
 
 BullPut::~BullPut( ) { }
 
-BullPut::strike_pair_t BullPut::ChooseStrikes( const IvAtm& chains, double price ) {
+BullPut::strike_pair_t BullPut::ChooseStrikes( const Chain& chain, double price ) {
 
   double strikeOtmPutHigher {};
   double strikeOtmPutLower {};
 
-  strikeOtmPutHigher = chains.Put_Otm( price );
+  strikeOtmPutHigher = chain.Put_Otm( price );
   double diffHigher = price - strikeOtmPutHigher;
   assert( 0.0 <= ( diffHigher ) );
 
-  strikeOtmPutLower = chains.Put_Otm( strikeOtmPutHigher );
+  strikeOtmPutLower = chain.Put_Otm( strikeOtmPutHigher );
 
   assert( strikeOtmPutHigher > strikeOtmPutLower );
 
