@@ -256,11 +256,29 @@ Chain::mapChain_t::iterator Chain::FindStrike( const double strike ) {
   return iter;
 }
 
-void Chain::EmitValues( void ) const {
+void Chain::EmitValues( void ) const { // TODO: supply output stream
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [](const mapChain_t::value_type& vt){
     std::cout << vt.first << ": " << vt.second.sCall << ", " << vt.second.sPut << std::endl;
-    //std::cout << vt.first << ": " << vt.second.pCall->EmitValues() << ", " << vt.second.pPut->EmitValues() << std::endl;
   });
+}
+
+void Chain::Test( double price ) { // TODO: supply output stream
+  try {
+    std::cout << "Put_Itm: "     << Put_Itm( price ) << std::endl;
+    std::cout << "Put_ItmAtm: "  << Put_ItmAtm( price ) << std::endl;
+    std::cout << "Put_Atm: "     << Put_Atm( price ) << std::endl;
+    std::cout << "Put_OtmAtm: "  << Put_OtmAtm( price ) << std::endl;
+    std::cout << "Put_Otm: "     << Put_Otm( price ) << std::endl;
+
+    std::cout << "Call_Itm: "    << Call_Itm( price ) << std::endl;
+    std::cout << "Call_ItmAtm: " << Call_ItmAtm( price ) << std::endl;
+    std::cout << "Call_Atm: "    << Call_Atm( price ) << std::endl;
+    std::cout << "Call_OtmAtm: " << Call_OtmAtm( price ) << std::endl;
+    std::cout << "Call_Otm: "    << Call_Otm( price ) << std::endl;
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout << "Chain::Test runtime error: " << e.what() << std::endl;
+  }
 }
 
 } // namespace option

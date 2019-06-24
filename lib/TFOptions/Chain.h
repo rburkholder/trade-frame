@@ -68,6 +68,7 @@ public:
 
   void EmitValues( void ) const;
 
+  void Test( double price );
 
 protected:
 private:

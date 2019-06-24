@@ -986,24 +986,8 @@ void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentime
 void ManageStrategy::Test() {
   if ( 0 != m_mapChains.size() ) {
     ou::tf::option::Chain& chain( m_mapChains.begin()->second );
-    double value( 121.5 );
     chain.EmitValues();
-    try {
-      std::cout << "Put_Itm: "     << chain.Put_Itm( value ) << std::endl;
-      std::cout << "Put_ItmAtm: "  << chain.Put_ItmAtm( value ) << std::endl;
-      std::cout << "Put_Atm: "     << chain.Put_Atm( value ) << std::endl;
-      std::cout << "Put_OtmAtm: "  << chain.Put_OtmAtm( value ) << std::endl;
-      std::cout << "Put_Otm: "     << chain.Put_Otm( value ) << std::endl;
-
-      std::cout << "Call_Itm: "    << chain.Call_Itm( value ) << std::endl;
-      std::cout << "Call_ItmAtm: " << chain.Call_ItmAtm( value ) << std::endl;
-      std::cout << "Call_Atm: "    << chain.Call_Atm( value ) << std::endl;
-      std::cout << "Call_OtmAtm: " << chain.Call_OtmAtm( value ) << std::endl;
-      std::cout << "Call_Otm: "    << chain.Call_Otm( value ) << std::endl;
-    }
-    catch ( std::runtime_error& e ) {
-      std::cout << "runtime error: " << e.what() << std::endl;
-    }
+    chain.Test( 121.5 );
   }
 }
 
