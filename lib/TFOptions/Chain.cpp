@@ -31,7 +31,9 @@ namespace option { // options
 
 Chain::Chain( ) { }
 
-Chain::Chain( const Chain&& rhs ) { }
+Chain::Chain( const Chain&& rhs ) { 
+  m_mapChain = std::move( rhs.m_mapChain );
+}
 
 Chain::~Chain( ) { }
 

@@ -77,7 +77,11 @@ private:
     std::string sCall;
     std::string sPut;
     OptionsAtStrike() {}
-    OptionsAtStrike( OptionsAtStrike&& rhs )
+    OptionsAtStrike( const OptionsAtStrike& rhs )
+    : sCall( rhs.sCall ),
+      sPut(  rhs.sPut  )
+    { }
+    OptionsAtStrike( const OptionsAtStrike&& rhs )
     : sCall( std::move( rhs.sCall ) ),
       sPut(  std::move( rhs.sPut  ) )
     { }
