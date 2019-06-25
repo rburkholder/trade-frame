@@ -32,3 +32,13 @@ StrategyBase::StrategyBase( const StrategyBase&& rhs )
 StrategyBase::~StrategyBase( ) {
 }
 
+StrategyBase::citerChain_t StrategyBase::SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry ) {
+  citerChain_t citerChain = std::find_if( mapChains.begin(), mapChains.end(),
+    [date,daysToExpiry](const mapChains_t::value_type& vt)->bool{
+      return daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
+  } );
+  if ( mapChains.end() == citerChain ) {
+    throw exception_chain_no_found( "StrategyBase::SelectChain" );
+  }
+  return citerChain;
+}

@@ -51,6 +51,7 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include "PivotCrossing.h"
+#include "StrategyStrangle.h"
 
 
 // 2019/05/23 Trading Day
@@ -206,9 +207,6 @@ private:
   ou::tf::Trade m_TradeUnderlyingLatest;
   ou::tf::Quote m_QuoteUnderlyingLatest;
 
-//  ou::tf::Quotes m_quotes; // not in use at the moment
-//  ou::tf::Trades m_trades; // not in use at the moment
-
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
 
@@ -224,7 +222,7 @@ private:
   double m_dblBollingerMean;
   double m_dblBollingerLower;
 
-  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
+  using mapChains_t = StrategyBase::mapChains_t;
   mapChains_t m_mapChains;
   mapChains_t::iterator m_iterChainExpiryInUse;
 

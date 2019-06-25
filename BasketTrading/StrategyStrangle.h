@@ -24,15 +24,25 @@
 
 #include <TFOptions/Strangle.h>
 
+// manage a short strangle to collect declining theta
+
 #include "StrategyBase.h"
 
 class StrategyStrangle: public StrategyBase {
 public:
-  StrategyStrangle( );
+
+  //using mapChains_t = ou::tf::option::Combo::mapChains_t;
+
+  StrategyStrangle();
   StrategyStrangle( const StrategyStrangle&& orig );
-  virtual ~StrategyStrangle( );
+  virtual ~StrategyStrangle();
+
+  void ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& );
+
 protected:
 private:
+
+  ou::tf::option::Strangle m_strangle;
 
 };
 

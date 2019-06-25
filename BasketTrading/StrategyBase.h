@@ -22,14 +22,31 @@
 #ifndef STRATEGYBASE_H
 #define STRATEGYBASE_H
 
+#include <map>
+
+#include <boost/date_time/gregorian/greg_date.hpp>
+
+#include <TFOptions/Chain.h>
+
 // base class from which specific strategies inherit
 
 class StrategyBase {
 public:
+
+  using chain_t = ou::tf::option::Chain;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  using citerChain_t = mapChains_t::const_iterator;
+
+  struct exception_chain_no_found: public std::runtime_error {
+    exception_chain_no_found( const char* ch ): std::runtime_error( ch ) {}
+  };
+
   StrategyBase( );
   StrategyBase( const StrategyBase&& orig );
   virtual ~StrategyBase( );
+
 protected:
+  static citerChain_t SelectChain( const mapChains_t&, boost::gregorian::date, boost::gregorian::days daysToExpiry );
 private:
 
 };

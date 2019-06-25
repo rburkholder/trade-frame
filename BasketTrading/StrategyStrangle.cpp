@@ -24,6 +24,10 @@
 
 #include "StrategyStrangle.h"
 
+namespace {
+  boost::gregorian::days nDaysToExpiry( 1 );
+}
+
 StrategyStrangle::StrategyStrangle( ) 
 : StrategyBase()
 {
@@ -37,3 +41,7 @@ StrategyStrangle::StrategyStrangle( const StrategyStrangle&& rhs )
 StrategyStrangle::~StrategyStrangle( ) {
 }
 
+void StrategyStrangle::ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& mapChains ) {
+  citerChain_t citerChain = SelectChain( mapChains, date, nDaysToExpiry );
+  ou::tf::option::Strangle::strike_pair_t pair = m_strangle.ChooseStrikes( citerChain->second, lower, upper );
+}

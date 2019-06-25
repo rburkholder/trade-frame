@@ -564,6 +564,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
       // call back spread
       break;
     case EBollXing::Mean:
+      // short strangle
       // condor
       break;
     case EBollXing::Lower:
