@@ -15,7 +15,7 @@
 /*
  * File:    SpreadCandidate.cpp
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: lib/TFTrading
  * Created on May 25, 2019, 1:25 PM
  */
 

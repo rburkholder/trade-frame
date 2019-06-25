@@ -13,56 +13,48 @@
  ************************************************************************/
 
 /*
- * File:    SpreadValidation.h
+ * File:    SpreadCandidate.h
  * Author:  raymond@burkholder.net
- * Project: TFOptions
- * Created on May 27, 2019, 8:59 AM
+ * Project: lib/TFTrading
+ * Created on May 25, 2019, 1:25 PM
  */
 
-#ifndef SPREADCANDIDATETWOLEGS_H
-#define SPREADCANDIDATETWOLEGS_H
-
-#include <vector>
+#ifndef SPREADCANDIDATE_H
+#define SPREADCANDIDATE_H
 
 #include <TFTrading/Watch.h>
-
-#include "SpreadCandidate.h"
-
-// TODO: move to TFTrading
 
 namespace ou {
 namespace tf {
 
-class SpreadValidation {
+class SpreadCandidate {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  SpreadValidation();
-  SpreadValidation( size_t nLegs );
-  SpreadValidation( const SpreadValidation& rhs ) = delete;
-  SpreadValidation( SpreadValidation&& rhs );
-  ~SpreadValidation();
+  SpreadCandidate();
+  SpreadCandidate( const SpreadCandidate& rhs ) = delete;
+  SpreadCandidate( const SpreadCandidate&& rhs );
+  SpreadCandidate( pWatch_t pWatch );
+  ~SpreadCandidate();
 
-  void SetLegCount( size_t nLegs );
+  void Clear();
+  void SetWatch( pWatch_t pWatch );
+  pWatch_t GetWatch();
+  bool ValidateSpread( size_t nDuration );
+  bool IsActive() const { return m_bActive; };
 
-  void SetWatch( size_t ixLeg, pWatch_t pWatch );
-  pWatch_t GetWatch( size_t ixLeg );
-
-  bool IsActive();
-  bool Validate( size_t nDuration );
-  void ResetOptions();
-
-protected:
 private:
-
-  using vSpreadCandidate_t = std::vector<SpreadCandidate>;
-  vSpreadCandidate_t m_vSpreadCandidate;
-
+  ou::tf::Quote m_quote;
+  bool m_bActive;
+  size_t m_nDesired;
+  size_t m_nUnDesired;
+  size_t m_nConsecutiveSpreadOk;
+  pWatch_t m_pWatch;
+  void UpdateQuote( const ou::tf::Quote& quote );
 };
 
 } // namespace tf
 } // namespace ou
 
-#endif /* SPREADCANDIDATETWOLEGS_H */
-
+#endif /* SPREADCANDIDATE_H */

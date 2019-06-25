@@ -66,6 +66,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/PositionGreek.o \
 	${OBJECTDIR}/ProviderManager.o \
 	${OBJECTDIR}/RiskManager.o \
+	${OBJECTDIR}/SpreadCandidate.o \
+	${OBJECTDIR}/SpreadValidation.o \
 	${OBJECTDIR}/Symbol.o \
 	${OBJECTDIR}/TradingEnumerations.o \
 	${OBJECTDIR}/Watch.o \
@@ -252,6 +254,16 @@ ${OBJECTDIR}/RiskManager.o: RiskManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RiskManager.o RiskManager.cpp
+
+${OBJECTDIR}/SpreadCandidate.o: SpreadCandidate.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadCandidate.o SpreadCandidate.cpp
+
+${OBJECTDIR}/SpreadValidation.o: SpreadValidation.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadValidation.o SpreadValidation.cpp
 
 ${OBJECTDIR}/Symbol.o: Symbol.cpp
 	${MKDIR} -p ${OBJECTDIR}

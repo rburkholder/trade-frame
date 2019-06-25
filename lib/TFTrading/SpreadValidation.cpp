@@ -15,7 +15,7 @@
 /* 
  * File:    SpreadValidation.cpp
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: lib/TFTrading
  * Created on May 27, 2019, 8:59 AM
  */
 

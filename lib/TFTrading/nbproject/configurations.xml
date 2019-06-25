@@ -36,6 +36,8 @@
       <itemPath>ProviderInterface.h</itemPath>
       <itemPath>ProviderManager.h</itemPath>
       <itemPath>RiskManager.h</itemPath>
+      <itemPath>SpreadCandidate.h</itemPath>
+      <itemPath>SpreadValidation.h</itemPath>
       <itemPath>Symbol.h</itemPath>
       <itemPath>TradingEnumerations.h</itemPath>
       <itemPath>Watch.h</itemPath>
@@ -80,6 +82,8 @@
       <itemPath>PositionGreek.cpp</itemPath>
       <itemPath>ProviderManager.cpp</itemPath>
       <itemPath>RiskManager.cpp</itemPath>
+      <itemPath>SpreadCandidate.cpp</itemPath>
+      <itemPath>SpreadValidation.cpp</itemPath>
       <itemPath>Symbol.cpp</itemPath>
       <itemPath>TradingEnumerations.cpp</itemPath>
       <itemPath>Watch.cpp</itemPath>
@@ -244,6 +248,14 @@
       <item path="RiskManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="RiskManager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Symbol.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -416,6 +428,14 @@
       <item path="RiskManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="RiskManager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Symbol.cpp" ex="false" tool="1" flavor2="0">
       </item>

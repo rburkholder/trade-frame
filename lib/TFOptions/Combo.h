@@ -28,9 +28,9 @@
 
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
+#include <TFTrading/SpreadValidation.h>
 
 #include "Chain.h"
-#include "SpreadValidation.h"
 
 #include "Leg.h"
 

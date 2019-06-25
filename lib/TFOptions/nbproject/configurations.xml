@@ -22,8 +22,6 @@
       <itemPath>Option.h</itemPath>
       <itemPath>PopulateWithIBOptions.h</itemPath>
       <itemPath>PutBackSpread.h</itemPath>
-      <itemPath>SpreadCandidate.h</itemPath>
-      <itemPath>SpreadValidation.h</itemPath>
       <itemPath>Straddle.h</itemPath>
       <itemPath>Strangle.h</itemPath>
       <itemPath>Strike.h</itemPath>
@@ -58,8 +56,6 @@
       <itemPath>Option.cpp</itemPath>
       <itemPath>PopulateWithIBOptions.cpp</itemPath>
       <itemPath>PutBackSpread.cpp</itemPath>
-      <itemPath>SpreadCandidate.cpp</itemPath>
-      <itemPath>SpreadValidation.cpp</itemPath>
       <itemPath>Straddle.cpp</itemPath>
       <itemPath>Strangle.cpp</itemPath>
       <itemPath>Strike.cpp</itemPath>
@@ -184,14 +180,6 @@
       <item path="PutBackSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PutBackSpread.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -320,14 +308,6 @@
       <item path="PutBackSpread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PutBackSpread.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SpreadCandidate.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SpreadCandidate.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SpreadValidation.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SpreadValidation.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Straddle.cpp" ex="false" tool="1" flavor2="0">
       </item>

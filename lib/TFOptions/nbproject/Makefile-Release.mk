@@ -53,8 +53,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/Option.o \
 	${OBJECTDIR}/PopulateWithIBOptions.o \
 	${OBJECTDIR}/PutBackSpread.o \
-	${OBJECTDIR}/SpreadCandidate.o \
-	${OBJECTDIR}/SpreadValidation.o \
 	${OBJECTDIR}/Straddle.o \
 	${OBJECTDIR}/Strangle.o \
 	${OBJECTDIR}/Strike.o \
@@ -178,16 +176,6 @@ ${OBJECTDIR}/PutBackSpread.o: PutBackSpread.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PutBackSpread.o PutBackSpread.cpp
-
-${OBJECTDIR}/SpreadCandidate.o: SpreadCandidate.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadCandidate.o SpreadCandidate.cpp
-
-${OBJECTDIR}/SpreadValidation.o: SpreadValidation.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SpreadValidation.o SpreadValidation.cpp
 
 ${OBJECTDIR}/Straddle.o: Straddle.cpp
 	${MKDIR} -p ${OBJECTDIR}
