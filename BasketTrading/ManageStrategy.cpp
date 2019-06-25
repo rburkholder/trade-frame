@@ -524,11 +524,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   // this is one tick behind, so could use m_TradeLatest for latest close-of-last/open-of-next
   //RHEquity( bar );
 
-  // manage trading states and triggers
-  //  1) above bollinger upper
-  //  2) between upper and mean
-  //  3) between mean and lower
-  //  4) below bollinger lower
   // trigger on crossing mean -> StrategyStrangle, convert to StrategyCondor once in place
   // trigger on touching edge -> StrategyBackSpread
   // trigger on higher volatility -> StrategyStrangle once database has history of volatility
@@ -581,18 +576,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   m_stateBollinger = stateBollinger;
 
   RHOption( bar );
-}
-
-double ManageStrategy::CurrentAtmStrike( double mid ) { // needs try/catch around this call
-  double strikeCall {};
-  double strikePut {};
-  strikePut = m_iterChainExpiryInUse->second.Put_Atm( mid );  // may raise an exception (on or nearest strike)
-  strikeCall = m_iterChainExpiryInUse->second.Call_Atm( mid );  // may raise an exception (on or nearest strike)
-  if ( strikePut != strikeCall ) {
-    std::cout << m_sUnderlying << ": atm strike not matching - midpoint=" << mid << ",put=" << strikePut << ",call=" << strikeCall << std::endl;
-    throw std::runtime_error( "strikePut != strikeCall" );
-  }
-  return strikePut;
 }
 
 // turn into a template if needed for other combo types

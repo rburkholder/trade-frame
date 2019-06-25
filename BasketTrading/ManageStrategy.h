@@ -385,8 +385,6 @@ private:
     fBuildPositionCallBack_t&&
   );
 
-  double CurrentAtmStrike( double mid );
-
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 
   void HandleBarTrades01Sec( const ou::tf::Bar& bar );
