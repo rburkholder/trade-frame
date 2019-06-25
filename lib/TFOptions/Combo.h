@@ -38,6 +38,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// == ConstructionTools
+
 struct ConstructionTools {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
@@ -64,6 +66,7 @@ struct ConstructionTools {
   {}
 };
 
+// == Combo
 
 class Combo {
 public:
