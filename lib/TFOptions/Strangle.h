@@ -49,7 +49,8 @@ public:
   using leg_pair_t = Combo::leg_pair_t;
   using strike_pair_t = Combo::strike_pair_t;
 
-  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const; // throw Chain exceptions
+  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const; // (call,put),throw Chain exceptions
+  strike_pair_t ChooseStrikes( const Chain& chain, double lower, double upper ) const; // (call,put), throw Chain exceptions
 
   static const leg_pair_t m_legDefLong;
   static const leg_pair_t m_legDefShort;

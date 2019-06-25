@@ -102,6 +102,22 @@ Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double pric
   return strike_pair_t( strikeOtmCall, strikeOtmPut );
 }
 
+Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double lower, double upper ) const {
+
+  double strikeOtmCall {};
+  double strikeOtmPut {};
+
+  strikeOtmCall = chain.Call_Otm( upper );
+  assert( 0.0 <= ( strikeOtmCall - upper ) );
+
+  strikeOtmPut = chain.Put_Otm( lower );
+  assert( 0.0 <= ( lower - strikeOtmPut ) );
+
+  assert( strikeOtmCall > strikeOtmPut );
+
+  return strike_pair_t( strikeOtmCall, strikeOtmPut );
+}
+
 const Combo::leg_pair_t Strangle::m_legDefLong(
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy, 1 ), // upper
   Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy, 1 )  // lower
