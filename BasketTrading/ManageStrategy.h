@@ -159,6 +159,8 @@ public:
 protected:
 private:
 
+  enum EChartSlot { Price, Volume, PL, Tick };
+
   enum ETradingState {
     TSInitializing, // set for duration of class initialization
     TSWaitForFirstTrade,  // wait for first trade during Regular Trading Hours
@@ -169,29 +171,25 @@ private:
     TSMonitorLong, TSMonitorShort,
     TSNoMore
   };
-
-  enum EChartSlot {
-    Price, Volume, PL, Tick
-  };
-
   ETradingState m_stateTrading;
 
   enum class ETradeDirection { None, Up, Down };
-
-  enum class EmaState {
-    EmaUnstable, EmaUp, EmaDown
-  };
-
-  enum class EBarDirection { None, Up, Down };
-
   ETradeDirection m_eTradeDirection;
 
+  enum class EmaState { EmaUnstable, EmaUp, EmaDown };
   EmaState m_stateEma;
+
+  //enum class EBarDirection { None, Up, Down };
+  //EBarDirection m_rBarDirection[ 3 ];
+
+  enum EBollingerState { Unknown, BelowLower, MeanToLower, MeanToUpper, AboveUpper, _Count };
+  EBollingerState m_stateBollinger;
+
+  enum class EBollXing { None, Lower, Mean, Upper, _Count };
+
   size_t m_nConfirmationIntervals;
 
   ou::tf::OrderSide::enumOrderSide m_DefaultOrderSide;
-
-  //EBarDirection m_rBarDirection[ 3 ];
 
   boost::gregorian::days m_daysToExpiry;
 
@@ -216,10 +214,15 @@ private:
 
   size_t m_nPassedUpper;
   size_t m_nPassedLower;
+
   size_t m_ixSdMax;
   double m_dblBollingerSDMax;
   size_t m_ixSdMin;
   double m_dblBollingerSDMin;
+
+  double m_dblBollingerUpper;
+  double m_dblBollingerMean;
+  double m_dblBollingerLower;
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
   mapChains_t m_mapChains;
@@ -296,18 +299,6 @@ private:
   ou::ChartEntryShape m_ceLongFills;
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
-
-  struct StateStrangle {
-
-  };
-
-  StateStrangle m_stateStrangle;
-
-  struct StateCondor {
-
-  };
-
-  StateCondor m_stateCondor;
 
   // https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
   // http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
@@ -413,9 +404,6 @@ private:
 
   void RHEquity( const ou::tf::Bar& bar );
   void RHOption( const ou::tf::Bar& bar );
-
-  void StrategyCondor( const ou::tf::Bar& bar );
-  void StrategyStrangle( const ou::tf::Bar& bar );
 
   void HandleGoingNeutral( const ou::tf::Bar& bar );
   void HandleGoingNeutral( const ou::tf::Quote& quote ) {};

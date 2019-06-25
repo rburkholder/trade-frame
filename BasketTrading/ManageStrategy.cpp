@@ -142,6 +142,7 @@ ManageStrategy::ManageStrategy(
 //  m_bfTrades60Sec( 60 ),
 //  m_cntUpReturn {}, m_cntDnReturn {},
   m_stateEma( EmaState::EmaUnstable ),
+  m_stateBollinger( EBollingerState::Unknown ),
   //m_eOptionState( EOptionState::Initial1 ),
   m_pChartDataView( pcdvStrategyData ),
   m_ixColour {},
@@ -153,7 +154,7 @@ ManageStrategy::ManageStrategy(
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
-  m_daysToExpiry( 6 ),
+  m_daysToExpiry( 6 ), // will be different for each strategy, to be deprecated
   m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
@@ -522,6 +523,63 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second bars, currently composite of quote spreads
   // this is one tick behind, so could use m_TradeLatest for latest close-of-last/open-of-next
   //RHEquity( bar );
+
+  // manage trading states and triggers
+  //  1) above bollinger upper
+  //  2) between upper and mean
+  //  3) between mean and lower
+  //  4) below bollinger lower
+  // trigger on crossing mean -> StrategyStrangle, convert to StrategyCondor once in place
+  // trigger on touching edge -> StrategyBackSpread
+  // trigger on higher volatility -> StrategyStrangle once database has history of volatility
+
+  static const EBollXing lu[EBollingerState::_Count][EBollingerState::_Count]
+    = {
+/* From:      To:     Unknown           BelowLower     MeanToLower      MeanToUpper       AboveUpper*/
+/* Unknown */     { EBollXing::None, EBollXing::None,  EBollXing::None, EBollXing::None, EBollXing::None  },
+/* AboveUpper */  { EBollXing::None, EBollXing::Lower, EBollXing::Mean, EBollXing::None, EBollXing::None  },
+/* MeanToUpper */ { EBollXing::None, EBollXing::Lower, EBollXing::Mean, EBollXing::None, EBollXing::Upper },
+/* MeanToLower */ { EBollXing::None, EBollXing::Lower, EBollXing::None, EBollXing::Mean, EBollXing::Upper },
+/* BelowLower */  { EBollXing::None, EBollXing::None,  EBollXing::None, EBollXing::Mean, EBollXing::Upper },
+      };
+
+  EBollingerState stateBollinger = EBollingerState::Unknown;
+  const double mid = m_QuoteUnderlyingLatest.Midpoint();
+  if ( m_dblBollingerMean <= mid ) {
+    if ( m_dblBollingerUpper <= mid ) {
+      stateBollinger = EBollingerState::AboveUpper;
+    }
+    else {
+      stateBollinger = EBollingerState::MeanToUpper;
+    }
+  }
+  else {
+    if ( m_dblBollingerLower >= mid ) {
+      stateBollinger = EBollingerState::BelowLower;
+    }
+    else {
+      stateBollinger = EBollingerState::MeanToLower;
+    }
+  }
+
+  EBollXing xing = lu[m_stateBollinger][stateBollinger];
+
+  switch ( xing ) {
+    case EBollXing::Upper:
+      // call back spread
+      break;
+    case EBollXing::Mean:
+      // condor
+      break;
+    case EBollXing::Lower:
+      // put back spread
+      break;
+    default:
+      break;
+  }
+
+  m_stateBollinger = stateBollinger;
+
   RHOption( bar );
 }
 
@@ -570,7 +628,6 @@ void ManageStrategy::BuildPosition(
       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
       f( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
     });
-
 }
 
 /*
@@ -742,14 +799,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
     default:
       break;
   }
-}
-
-void ManageStrategy::StrategyCondor( const ou::tf::Bar& bar ) {
-
-}
-
-void ManageStrategy::StrategyStrangle( const ou::tf::Bar& bar ) {
-
 }
 
 void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
@@ -1155,9 +1204,13 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
     cntMarking--;
   } // end for
 
-  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBUpper(), ou::Colour::Purple,     "BollUp" );
-  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.MeanY(),   ou::Colour::Salmon,     "BollMn" );
-  m_cePivots.AddMark( m_pricesDailyCloseBollinger20.BBLower(), ou::Colour::PowderBlue, "BollLo" );
+  m_dblBollingerUpper = m_pricesDailyCloseBollinger20.BBUpper();
+  m_dblBollingerMean = m_pricesDailyCloseBollinger20.MeanY();
+  m_dblBollingerLower = m_pricesDailyCloseBollinger20.BBLower();
+
+  m_cePivots.AddMark( m_dblBollingerUpper, ou::Colour::Purple,     "BollUp" );
+  m_cePivots.AddMark( m_dblBollingerMean,  ou::Colour::Salmon,     "BollMn" );
+  m_cePivots.AddMark( m_dblBollingerLower, ou::Colour::PowderBlue, "BollLo" );
 
   std::cout
     << m_sUnderlying
