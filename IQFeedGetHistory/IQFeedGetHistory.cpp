@@ -174,3 +174,11 @@ void AppIQFeedGetHistory::StartWorker( const std::string& s, size_t nDatums ) {
     std::cout << "No can do.  IQFeed not connected" << std::endl;
   }
 }
+
+void AppIQFeedGetHistory::OnData1Connected( int ) {
+  std::cout << "History connection connected" << std::endl;
+}
+
+void AppIQFeedGetHistory::OnData1Disconnected( int ) {
+  std::cout << "History connection disconnected" << std::endl;
+}

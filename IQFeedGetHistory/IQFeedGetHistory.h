@@ -32,7 +32,10 @@
 #include "Worker.h"
 
 class AppIQFeedGetHistory:
-  public wxApp, public ou::tf::FrameWork01<AppIQFeedGetHistory> {
+  public wxApp,
+  public ou::tf::FrameWork01<AppIQFeedGetHistory>
+{
+  friend ou::tf::FrameWork01<AppIQFeedGetHistory>;
 public:
 protected:
 private:
@@ -40,10 +43,10 @@ private:
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-  
+
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
-  
+
   wxMenu* m_pMenuLoadDays;
 
   Worker* m_pWorker;
@@ -54,18 +57,22 @@ private:
   void HandleNewSymbolListRemote( void );
   void HandleNewSymbolListLocal( void );
   void HandleLocalBinarySymbolList( void );
-  
+
   void HandleMenuActionDays10( void );
   void HandleMenuActionDays30( void );
   void HandleMenuActionDays100( void );
   void HandleMenuActionDays150( void );
   void HandleMenuActionDays200( void );
   void HandleMenuActionDays0( void );
-  
+
   void StartWorker( const std::string& s, size_t nDatums );
 
   void EnableMenuActionDays();
   void DisableMenuActionDays();
+
+  void OnData1Connected( int );
+  void OnData1Disconnected( int );
+
 
 };
 
