@@ -229,8 +229,8 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
     std::cout
       << sUnderlying
       << ": combo -> quote=" << price
-      << ",strike 1=" << pairStrikes.first
-      << ",strike 2=" << pairStrikes.second
+      << ",strike1=" << pairStrikes.first
+      << ",strike2=" << pairStrikes.second
       << std::endl;
 
     pInstrument_t pInstrumentUnderlying = tools.m_pWatchUnderlying->GetInstrument();
