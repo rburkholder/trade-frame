@@ -154,7 +154,7 @@ ManageStrategy::ManageStrategy(
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_DefaultOrderSide( ou::tf::OrderSide::Buy ),
-  m_daysToExpiry( 6 ), // will be different for each strategy, to be deprecated
+  m_daysToExpiry( 1 ), // will be different for each strategy, to be deprecated
   m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
@@ -719,7 +719,10 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 // TODO: create a trailing stop based upon entry net loss?
               }
             }
-            catch ( std::runtime_error& e ) {
+            catch ( const ou::tf::option::Combo::exception_strike_range_exceeded& e ) {
+              // don't worry about this, price is not with in range yet
+            }
+            catch ( const std::runtime_error& e ) {
               std::cout << m_sUnderlying << " stop trading." << std::endl;
               m_strangleEvaluation.ClearValidation();
               m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place

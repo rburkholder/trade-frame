@@ -194,7 +194,11 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
     pairStrikes = ChooseStrikes( tools.m_chain, price ); // virtual up call
     bStrikesFound = true; // can set as no exception was thrown
   }
-  catch ( std::runtime_error& e ) {
+  catch ( const exception_strike_range_exceeded& e ) {
+    // don't worry about this, price is not with in range yet
+    throw e;
+  }
+  catch ( const std::runtime_error& e ) {
     std::cout
       << sUnderlying
       << " found no strike for mid-point " << price

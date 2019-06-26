@@ -96,7 +96,9 @@ Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double pric
     ) {
     }
     else{
-      throw exception_strike_range_exceeded( "strangle" );
+      std::stringstream ss;
+      ss << "Strangle::ChooseStrikes " << price << "," << dblExclusionRange << "," << strikeOtmCall << "," << strikeOtmPut;
+      throw exception_strike_range_exceeded( ss.str().c_str() );
     }
   }
   return strike_pair_t( strikeOtmCall, strikeOtmPut );
