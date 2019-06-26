@@ -88,11 +88,17 @@ bool SpreadCandidate::ValidateSpread( size_t nDuration ) {
 void SpreadCandidate::UpdateQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   double spread( m_quote.Spread() );
-  if ( ( 0.005 <= spread ) && ( spread < 0.10 ) ) {
-    m_nDesired++;
+  if ( spread < 0.005 ) {
+    // ignore crossed/crossing quote
   }
   else {
-    m_nUnDesired++;
+    if ( ( 0.005 <= spread ) && ( spread < 0.10 )
+      && ( 0.10 < m_quote.Ask() ) && ( 0.10 < m_quote.Bid() ) ) {
+      m_nDesired++;
+    }
+    else {
+      m_nUnDesired++;
+    }
   }
 }
 
