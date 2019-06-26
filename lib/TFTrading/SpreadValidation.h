@@ -28,8 +28,6 @@
 
 #include "SpreadCandidate.h"
 
-// TODO: move to TFTrading
-
 namespace ou {
 namespace tf {
 
