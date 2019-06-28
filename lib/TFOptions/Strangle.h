@@ -57,6 +57,8 @@ public:
 
 private:
 
+  void CheckStop( double price );
+
   void Init();
 
 };

@@ -43,6 +43,7 @@ Strangle::~Strangle() {
 
 void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
+  CheckStop( dblPriceUnderlying );
 //  if ( m_vLeg.empty() ) {
 //    ChooseStrikes( dblPriceUnderlying );
 //  }
@@ -149,20 +150,75 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
 //  }
 }
 
+void Strangle::CheckStop( double price ) {
+
+  double strikeUpper {};
+  double strikeLower {};
+  double dblConstructedValue {};
+
+  switch ( m_state ) {
+    case State::Watching:
+    case State::Positions:
+      for ( Leg& leg: m_vLeg ) {
+        dblConstructedValue += leg.ConstructedValue();
+        double strike = leg.GetPosition()->GetInstrument()->GetStrike();
+        //multiplier = leg.GetPosition()->GetInstrument()->GetRow().nMultiplier;
+        if ( 0.0 == strikeUpper ) {
+          strikeUpper = strikeLower = strike;
+        }
+        else {
+          if ( strike > strikeUpper ) strikeUpper = strike;
+          else {
+            if ( strike < strikeLower ) strikeLower = strike;
+            //else std::cout << "don't know what happened" << std::endl;
+          }
+        }
+      }
+
+      double lower = strikeLower - dblConstructedValue;
+      double upper = strikeUpper + dblConstructedValue;
+      double profit = dblConstructedValue;
+
+      bool bExit( false );
+      if ( ( price > strikeLower ) && ( price < strikeUpper ) ) {
+        //status = "expires";
+      }
+      else {
+        if ( ( price > lower ) && ( price < upper ) ) {
+          //status = "profit";
+          if ( price <= strikeLower ) profit = price - lower;
+          if ( price >= strikeUpper ) profit = upper - price;
+        }
+        else {
+          //status = "loss";
+          if ( price <= lower ) profit = price - lower;
+          if ( price >= upper ) profit = upper - price;
+          bExit = true;
+        }
+      }
+
+      if ( bExit ) {
+        ClosePositions();
+      }
+      break;
+  }
+
+}
+
 double Strangle::GetNet( double price ) {
   double dblNet {};
   double dblConstructedValue {};
   double strikeUpper {};
   double strikeLower {};
-  double multiplier {};
+  //double multiplier {};
   for ( Leg& leg: m_vLeg ) {
-    dblNet += leg.GetNet( price );
+    dblNet += leg.GetNet( price ); // out: leg stats
     double dblLegConstructedValue = leg.ConstructedValue();
     std::cout << ",constructed@" << dblLegConstructedValue;
     dblConstructedValue += dblLegConstructedValue;
     std::cout << std::endl;
     double strike = leg.GetPosition()->GetInstrument()->GetStrike();
-    multiplier = leg.GetPosition()->GetInstrument()->GetRow().nMultiplier;
+    //multiplier = leg.GetPosition()->GetInstrument()->GetRow().nMultiplier;
     if ( 0.0 == strikeUpper ) {
       strikeUpper = strikeLower = strike;
     }
