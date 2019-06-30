@@ -33,10 +33,13 @@ Strangle::Strangle()
 {
 }
 
-Strangle::Strangle( Strangle&& rhs )
+Strangle::Strangle( const Strangle& rhs )
+: Combo( rhs )
+{}
+
+Strangle::Strangle( const Strangle&& rhs )
 : Combo( std::move( rhs ) )
-{
-}
+{}
 
 Strangle::~Strangle() {
 }

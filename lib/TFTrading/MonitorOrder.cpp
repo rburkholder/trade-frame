@@ -38,6 +38,13 @@ MonitorOrder::MonitorOrder( pPosition_t& pPosition )
   m_pPosition( pPosition )
 {}
 
+MonitorOrder::MonitorOrder( const MonitorOrder& rhs )
+: m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
+  m_state( rhs.m_state ),
+  m_pPosition( rhs.m_pPosition ),
+  m_pOrder( rhs.m_pOrder )
+{}
+
 MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
 : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
   m_state( rhs.m_state ),

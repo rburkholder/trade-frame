@@ -34,9 +34,17 @@ Combo::Combo( )
   m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
-Combo::Combo( Combo&& rhs )
+Combo::Combo( const Combo& rhs )
 : m_state( rhs.m_state ),
-  m_vLeg( std::move( m_vLeg ) ),
+  m_vLeg( rhs.m_vLeg ),
+  m_pPortfolio( rhs.m_pPortfolio )
+{
+  m_vLeg.reserve( 16 ); // required for leg.AddChartData
+}
+
+Combo::Combo( const Combo&& rhs )
+: m_state( rhs.m_state ),
+  m_vLeg( std::move( rhs.m_vLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 {
   m_vLeg.reserve( 16 ); // required for leg.AddChartData

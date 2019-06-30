@@ -34,7 +34,7 @@ StrategyStrangle::StrategyStrangle( )
 }
 
 StrategyStrangle::StrategyStrangle( const StrategyStrangle&& rhs )
-: StrategyBase( std::move( rhs ) )
+: StrategyBase( std::move( rhs ) ), m_strangle( std::move( rhs.m_strangle ) )
 {
 }
 

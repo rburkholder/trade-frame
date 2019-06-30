@@ -107,9 +107,9 @@ public:
   };
 
   Combo( );
-  Combo( const Combo& rhs ) = delete;
+  Combo( const Combo& rhs );
   Combo& operator=( const Combo& rhs ) = delete;
-  Combo( Combo&& rhs );
+  Combo( const Combo&& rhs );
   virtual ~Combo( );
 
   void SetPortfolio( pPortfolio_t );

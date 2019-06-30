@@ -42,7 +42,7 @@ public:
 
   Leg();
   Leg( pPosition_t pPosition );
-  Leg( const Leg& rhs ) = delete;
+  Leg( const Leg& rhs );
   Leg& operator=( const Leg& rhs ) = delete;
   Leg( const Leg&& rhs );
 

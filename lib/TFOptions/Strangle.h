@@ -32,9 +32,9 @@ class Strangle: public Combo {
 public:
 
   Strangle();
-  Strangle( const Strangle& rhs ) = delete;
+  Strangle( const Strangle& rhs );
   Strangle& operator=( const Strangle& rhs ) = delete;
-  Strangle( Strangle&& rhs );
+  Strangle( const Strangle&& rhs );
   virtual ~Strangle();
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
