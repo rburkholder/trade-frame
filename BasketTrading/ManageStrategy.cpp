@@ -708,12 +708,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                       strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
 
                       strangle.PlaceOrder( m_DefaultOrderSide );
-                    }
-                  }
+
+                      m_bAllowComboAdd = false;
+                    } // m_DefaultOrderSide
+                  } // m_fAuthorizeSimple
                   else {
                     // ?
                   }
-                  m_bAllowComboAdd = false;
                 }
                 // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
                 // TODO: create a trailing stop based upon entry net loss?
