@@ -28,11 +28,10 @@
 
 #include <TFOptions/Chain.h>
 
-// base class from which specific strategies inherit
+namespace Strategy {
 
-class StrategyBase {
+class Common {
 public:
-
   using chain_t = ou::tf::option::Chain;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   using citerChain_t = mapChains_t::const_iterator;
@@ -41,15 +40,28 @@ public:
     exception_chain_no_found( const char* ch ): std::runtime_error( ch ) {}
   };
 
-  StrategyBase( );
-  StrategyBase( const StrategyBase&& orig );
-  virtual ~StrategyBase( );
+protected:
+  citerChain_t SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry );
+private:
+};
+
+template<typename ComboStrategy, typename Combination>
+class Base: public Common {
+public:
+
+  Base( ) {}
+  Base( const Base&& rhs )
+  : m_combo( std::move( rhs.m_combo ) ) {}
+  virtual ~Base( ) {} // is the virtual necessary?
 
 protected:
-  static citerChain_t SelectChain( const mapChains_t&, boost::gregorian::date, boost::gregorian::days daysToExpiry );
+
+  Combination m_combo;
+
 private:
 
 };
 
-#endif /* STRATEGYBASE_H */
+} // namespace Strategy
 
+#endif /* STRATEGYBASE_H */

@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    StrategyStrangle.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
@@ -28,13 +28,15 @@ namespace {
   boost::gregorian::days nDaysToExpiry( 1 );
 }
 
-StrategyStrangle::StrategyStrangle( ) 
-: StrategyBase()
+namespace Strategy {
+
+StrategyStrangle::StrategyStrangle( )
+: Base<StrategyStrangle,Strangle>()
 {
 }
 
 StrategyStrangle::StrategyStrangle( const StrategyStrangle&& rhs )
-: StrategyBase( std::move( rhs ) ), m_strangle( std::move( rhs.m_strangle ) )
+: Base<StrategyStrangle,Strangle>( std::move( rhs ) )
 {
 }
 
@@ -43,5 +45,7 @@ StrategyStrangle::~StrategyStrangle( ) {
 
 void StrategyStrangle::ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& mapChains ) {
   citerChain_t citerChain = SelectChain( mapChains, date, nDaysToExpiry );
-  ou::tf::option::Strangle::strike_pair_t pair = m_strangle.ChooseStrikes( citerChain->second, lower, upper );
+  ou::tf::option::Strangle::strike_pair_t pair = m_combo.ChooseStrikes( citerChain->second, lower, upper );
 }
+
+} // namespace Strategy

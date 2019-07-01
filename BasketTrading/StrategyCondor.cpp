@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    StrategyCondor.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
@@ -24,16 +24,19 @@
 
 #include "StrategyCondor.h"
 
+namespace Strategy {
+
 StrategyCondor::StrategyCondor( )
-: StrategyBase()
+: Base<StrategyCondor,Condor>()
 {
 }
 
 StrategyCondor::StrategyCondor( const StrategyCondor&& rhs )
-: StrategyBase( std::move( rhs ) )
+: Base<StrategyCondor,Condor>( std::move( rhs ) )
 {
 }
 
 StrategyCondor::~StrategyCondor( ) {
 }
 
+} // namespace Strategy

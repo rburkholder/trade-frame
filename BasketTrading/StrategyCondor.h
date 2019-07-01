@@ -26,15 +26,21 @@
 
 #include "StrategyBase.h"
 
-class StrategyCondor: public StrategyBase {
+namespace Strategy {
+
+class StrategyCondor: public Base<StrategyCondor, ou::tf::option::Condor> {
 public:
+
+  using Condor = ou::tf::option::Condor;
+
   StrategyCondor( );
-  StrategyCondor( const StrategyCondor&& orig );
+  StrategyCondor( const StrategyCondor&& );
   virtual ~StrategyCondor( );
 protected:
 private:
 
 };
 
-#endif /* STRATEGYCONDOR_H */
+} // namespace Strategy
 
+#endif /* STRATEGYCONDOR_H */

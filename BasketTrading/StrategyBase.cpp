@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    StrategyBase.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
@@ -21,18 +21,9 @@
 
 #include "StrategyBase.h"
 
-StrategyBase::StrategyBase( )
-{
-}
+namespace Strategy {
 
-StrategyBase::StrategyBase( const StrategyBase&& rhs )
-{
-}
-
-StrategyBase::~StrategyBase( ) {
-}
-
-StrategyBase::citerChain_t StrategyBase::SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry ) {
+Common::citerChain_t Common::SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry ) {
   citerChain_t citerChain = std::find_if( mapChains.begin(), mapChains.end(),
     [date,daysToExpiry](const mapChains_t::value_type& vt)->bool{
       return daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
@@ -42,3 +33,5 @@ StrategyBase::citerChain_t StrategyBase::SelectChain( const mapChains_t& mapChai
   }
   return citerChain;
 }
+
+} // namespace Strategy

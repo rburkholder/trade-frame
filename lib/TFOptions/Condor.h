@@ -31,9 +31,9 @@ namespace option { // options
 class Condor: public Combo {
 public:
   Condor();
-  Condor( const Condor& rhs ) = delete;
+  Condor( const Condor& rhs );
   Condor& operator=( const Condor& rhs ) = delete;
-  Condor( Condor&& rhs );
+  Condor( const Condor&& rhs );
   virtual ~Condor();
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
@@ -43,12 +43,16 @@ public:
 //  bool ValidateSpread( ConstructionTools&, double price, size_t nDuration );
 //  pOptionPair_t ValidatedOptions();
 
+  using strike_pair_t = Combo::strike_pair_t;
+  strike_pair_t ChooseStrikes( const Chain& chain, double price ) const;
+
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long condor, or short condor
 
 protected:
 private:
 };
 
+/*
 class ShortCondor: public Condor {
 public:
   ShortCondor();
@@ -60,6 +64,8 @@ public:
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
   virtual void PlaceOrder();  // place short condor
+
+  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const;
 protected:
 private:
 };
@@ -78,7 +84,7 @@ public:
 protected:
 private:
 };
-
+*/
 } // namespace option
 } // namespace tf
 } // namespace ou

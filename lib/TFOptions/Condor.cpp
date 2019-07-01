@@ -37,7 +37,12 @@ Condor::Condor()
 {
 }
 
-Condor::Condor( Condor&& rhs )
+Condor::Condor( const Condor& rhs )
+: Combo( rhs )
+{
+}
+
+Condor::Condor( const Condor&& rhs )
 : Combo( std::move( rhs ) )
 {
 }
@@ -52,8 +57,57 @@ void Condor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
 //  }
 }
 
-// ==========
+// TODO: fix this, needs to be four strikes
+Condor::strike_pair_t Condor::ChooseStrikes( const Chain& chain, double price ) const {
 
+  double strikeOtmCall {};
+  double strikeOtmPut {};
+
+  strikeOtmCall = chain.Call_Otm( price );
+  assert( 0.0 <= ( strikeOtmCall - price ) );
+  if ( ( 0.20 * 0.50 ) > ( strikeOtmCall - price ) ) { // within edge of range
+    strikeOtmCall = chain.Call_Otm( strikeOtmCall ); // choose a further out strike
+  }
+  strikeOtmPut = chain.Put_Otm( price );
+  assert( 0.0 <= ( price - strikeOtmPut ) );
+  if ( ( 0.20 * 0.50 ) > ( price - strikeOtmPut ) ) { // within edge of range
+    strikeOtmPut = chain.Put_Otm( strikeOtmPut ); // choose a further out strike
+  }
+  assert( strikeOtmCall > strikeOtmPut );
+  const double dblStrikeDelta = strikeOtmCall - strikeOtmPut;
+  if ( m_dblMaxStrangleDelta > dblStrikeDelta ) {
+    const double dblExclusionRange = 0.5 * ( ( 1.0 - 0.20 ) * dblStrikeDelta );  // enter in middle 20% only
+    if (
+      ( price < ( strikeOtmCall - dblExclusionRange ) ) &&
+      ( price > ( strikeOtmPut  + dblExclusionRange ) )
+    ) {
+    }
+    else{
+      std::stringstream ss;
+      ss << "Strangle::ChooseStrikes " << price << "," << dblExclusionRange << "," << strikeOtmCall << "," << strikeOtmPut;
+      throw exception_strike_range_exceeded( ss.str().c_str() );
+    }
+  }
+  return strike_pair_t( strikeOtmCall, strikeOtmPut );
+}
+
+// TODO: need to fix this if other legs present.  Need to limit to the active legs.
+//   maybe vector of inactive legs
+// NOTE: if volatility drops, then losses occur on premium
+void Condor::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
+  switch ( m_state ) {
+    case State::Positions: // doesn't confirm both put/call are available
+    case State::Watching:
+      for ( Leg& leg: m_vLeg ) {
+        leg.PlaceOrder( side, 1 );
+      }
+      m_state = State::Executing;
+      break;
+  }
+}
+
+// ==========
+/*
 ShortCondor::ShortCondor( )
 : Condor()
 {
@@ -94,7 +148,7 @@ void LongCondor::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
 //  }
 }
 
-
+*/
 
 } // namespace option
 } // namespace tf

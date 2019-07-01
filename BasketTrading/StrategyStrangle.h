@@ -28,13 +28,17 @@
 
 #include "StrategyBase.h"
 
-class StrategyStrangle: public StrategyBase {
+namespace Strategy {
+
+class StrategyStrangle: public Base<StrategyStrangle,ou::tf::option::Strangle> {
 public:
+
+  using Strangle = ou::tf::option::Strangle;
 
   //using mapChains_t = ou::tf::option::Combo::mapChains_t;
 
   StrategyStrangle();
-  StrategyStrangle( const StrategyStrangle&& orig );
+  StrategyStrangle( const StrategyStrangle&& );
   virtual ~StrategyStrangle();
 
   void ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& );
@@ -42,9 +46,8 @@ public:
 protected:
 private:
 
-  ou::tf::option::Strangle m_strangle;
-
 };
 
-#endif /* STRATEGYSTRANGLE_H */
+} // namespace Strategy
 
+#endif /* STRATEGYSTRANGLE_H */

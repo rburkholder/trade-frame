@@ -222,7 +222,7 @@ private:
   double m_dblBollingerMean;
   double m_dblBollingerLower;
 
-  using mapChains_t = StrategyBase::mapChains_t;
+  using mapChains_t = Strategy::Common::mapChains_t;
   mapChains_t m_mapChains;
   mapChains_t::iterator m_iterChainExpiryInUse;
 
