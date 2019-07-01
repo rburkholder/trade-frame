@@ -238,7 +238,7 @@ public:
 
 protected:
 
-  static char* TickTypeStrings[];
+  static const char* TickTypeStrings[];
 
   std::string m_sAccountCode;
   std::string m_sIPAddress;

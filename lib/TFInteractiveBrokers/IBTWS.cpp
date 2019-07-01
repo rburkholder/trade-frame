@@ -1348,7 +1348,7 @@ void IBTWS::realtimeBar(TickerId reqId, long time, double open, double high, dou
 }
 
 // From EWrapper.h
-char *IBTWS::TickTypeStrings[] = {
+const char *IBTWS::TickTypeStrings[] = {
   "BID_SIZE", "BID", "ASK", "ASK_SIZE", "LAST", "LAST_SIZE",
 				"HIGH", "LOW", "VOLUME", "CLOSE",
 				"BID_OPTION_COMPUTATION",
