@@ -74,7 +74,7 @@ MasterPortfolio::MasterPortfolio(
       assert( 0 ); // need the iqfeed provider
   }
 
-  m_DefaultOrderSide = ou::tf::OrderSide::Buy;
+  m_DefaultOrderSide = ou::tf::OrderSide::Unknown;
 
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
   m_cePLUnRealized.SetColour( ou::Colour::DarkCyan );

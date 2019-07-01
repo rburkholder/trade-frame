@@ -29,7 +29,6 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
-#include <wx-3.0/wx/event.h>
 
 #include "BasketTrading.h"
 
@@ -53,7 +52,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 6, 18 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2019, 6, 28 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -263,24 +262,24 @@ void AppBasketTrading::BuildMasterPortfolio() {
 void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
   std::cout << "button buy" << std::endl;
   CallAfter( [this](){
-    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Buy );
     m_enumBuySell = EBuySell::Buy;
+    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
   } );
 }
 
 void AppBasketTrading::HandleButtonSetNeutral( wxCommandEvent& event ) {
   std::cout << "button neutral" << std::endl;
   CallAfter( [this](){
-    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Unknown );
     m_enumBuySell = EBuySell::Neutral;
+    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Unknown );
   } );
 }
 
 void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
   std::cout << "button sell" << std::endl;
   CallAfter( [this](){
-    std::bind( &MasterPortfolio::SetDefaultOrderSide, m_pMasterPortfolio.get(), ou::tf::OrderSide::Sell );
     m_enumBuySell = EBuySell::Sell;
+    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Sell );
   } );
 }
 

@@ -151,7 +151,7 @@ public:
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
-  void SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side ) { m_DefaultOrderSide = side; }
+  void SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side );
 
   void AddStrangle( bool bForced );
 
