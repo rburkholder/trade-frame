@@ -173,20 +173,19 @@ void IBTWS::RequestContractDetails(
 ) {
   RequestContractDetails( sSymbolBaseName, pInstrument,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-                           if ( 0 != fProcess ) {
+                           if ( nullptr != fProcess ) {
                              fProcess( details, pInstrument );
                            }
                          },
                          [fDone](){
-                           if ( 0 != fDone ) {
-                             if ( 0 != fDone ) {
-                               fDone();
-                             }
+                           if ( nullptr != fDone ) {
+                             fDone();
                            }
                          });
 }
 
 // new and better
+// need fixups for std::move: https://github.com/rburkholder/trade-frame/commit/95aa00c9178467c2bcf53d10358b90a506092440
 void IBTWS::RequestContractDetails(
                                    const std::string& sSymbolBaseName, pInstrument_t pInstrument,
                                    fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone
@@ -225,21 +224,18 @@ void IBTWS::RequestContractDetails(
 }
 
 // deprecated
-void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
-  // results supplied at contractDetails()
+void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {  // results supplied at contractDetails()
   //pInstrument_t pInstrument;  // just allocate, and pass as empty
   //RequestContractDetails( contract, fProcess, fDone, pInstrument );
   RequestContractDetails( contract,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-                           if ( 0 != fProcess ) {
+                           if ( nullptr != fProcess ) {
                              fProcess( details, pInstrument );
                            }
                          },
                          [fDone](){
-                           if ( 0 != fDone ) {
-                             if ( 0 != fDone ) {
-                               fDone();
-                             }
+                           if ( nullptr != fDone ) {
+                             fDone();
                            }
                          }
                          );
@@ -257,15 +253,13 @@ void IBTWS::RequestContractDetails(
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
   RequestContractDetails( contract,
                          [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-                           if ( 0 != fProcess ) {
+                           if ( nullptr != fProcess ) {
                              fProcess( details, pInstrument );
                            }
                          },
                          [fDone](){
-                           if ( 0 != fDone ) {
-                             if ( 0 != fDone ) {
-                               fDone();
-                             }
+                           if ( nullptr != fDone ) {
+                             fDone();
                            }
                          },
                          pInstrument
@@ -971,7 +965,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 void IBTWS::contractDetailsEnd( int reqId ) {
   // not called when no symbol available
   //OnContractDetailsDoneHandler_t handler = 0;
-  fOnContractDetailDone_t handler = 0;
+  fOnContractDetailDone_t handler = nullptr;
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
     mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );

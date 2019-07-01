@@ -28,7 +28,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-#include <boost/thread.hpp> 
+#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -62,9 +62,9 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class IBTWS : 
-  public ProviderInterface<IBTWS, IBSymbol>, 
-  public EWrapper 
+class IBTWS :
+  public ProviderInterface<IBTWS, IBSymbol>,
+  public EWrapper
 {
 public:
 
@@ -79,7 +79,7 @@ public:
 
   IBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
   ~IBTWS(void);
-  
+
   // From ProviderInterface:
   void Connect( void );
   void Disconnect( void );
@@ -94,21 +94,21 @@ public:
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
 
   // old, deprecated set of event based handling, these are forwarded to the new set of handlers
-  
+
   typedef FastDelegate2<const ContractDetails&, pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
-  
-  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,            
+
+  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,
                                                          OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
-  
+
   // new set of event based handling
 
   typedef std::function<void(const ContractDetails&, pInstrument_t&)> fOnContractDetail_t;
   typedef std::function<void(void)> fOnContractDetailDone_t;
-  
-  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,            
+
+  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,
                                                          fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
   void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
   void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t );
@@ -128,7 +128,7 @@ public:
     double realizedPNL;
     std::string sExchange;
     std::string sCurrency;
-    PositionDetail(     
+    PositionDetail(
       const std::string& sSymbol_,
       const std::string& sLocalSymbol_,
       long contract_,
@@ -151,7 +151,7 @@ public:
   };
   typedef FastDelegate1<const PositionDetail&> OnPositionDetailHandler_t;
   OnPositionDetailHandler_t OnPositionDetailHandler;
-  
+
   struct AccountValue {
     std::string sKey;
     std::string sVal;
@@ -163,7 +163,7 @@ public:
   };
   typedef FastDelegate1<const AccountValue&> OnAccountValueHandler_t;
   OnAccountValueHandler_t OnAccountValueHandler;
-  
+
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
@@ -210,7 +210,7 @@ public:
       int side, double price, int size);
   void managedAccounts( const std::string& accountsList);
      virtual void receiveFA(faDataType pFaDataType, const std::string& cxml);
-  void historicalData(TickerId reqId, const std::string& date, double open, double high, 
+  void historicalData(TickerId reqId, const std::string& date, double open, double high,
 	   double low, double close, int volume, int barCount, double WAP, int hasGaps);
   void scannerParameters(const std::string& xml);
   void scannerData(int reqId, int rank, const ContractDetails &contractDetails,
@@ -244,7 +244,7 @@ protected:
   std::string m_sIPAddress;
   unsigned int m_nPort;
   TickerId m_curTickerId;
-  
+
   double m_dblBuyingPower;
   double m_dblAvailableFunds;
 
@@ -279,9 +279,9 @@ private:
   OnContractDetailsHandler_t OnContractDetails;
   OnContractDetailsDoneHandler_t OnContractDetailsDone;
 
-  // stuff comes back from IB with ticker id so use this to look up symbol, 
+  // stuff comes back from IB with ticker id so use this to look up symbol,
   //    which is stored in the map of the class from which we inherited
-  std::vector<pSymbol_t> m_vTickerToSymbol;  
+  std::vector<pSymbol_t> m_vTickerToSymbol;
 
   // given a contract id, see if we have a symbol assigned
   typedef std::map<long, pSymbol_t> mapContractToSymbol_t;
@@ -307,15 +307,15 @@ private:
     //OnContractDetailsDoneHandler_t fDone;
     fOnContractDetail_t fOnContractDetail;
     fOnContractDetailDone_t fOnContractDetailDone;
-    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
+    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ )
     //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
-    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ ) 
+    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ )
     //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
-    structRequest_t( reqId_t id_, fOnContractDetail_t fProcess_, fOnContractDetailDone_t fDone_, pInstrument_t pInstrument_ ) 
+    structRequest_t( reqId_t id_, fOnContractDetail_t fProcess_, fOnContractDetailDone_t fDone_, pInstrument_t pInstrument_ )
       : id( id_ ), fOnContractDetail( fProcess_ ), fOnContractDetailDone( fDone_ ), pInstrument( pInstrument_ ) {};
   };
 
-  reqId_t m_nxtReqId; 
+  reqId_t m_nxtReqId;
   std::vector<structRequest_t*> m_vInActiveRequestId;  // can this be re-written with lockless structure?
 //  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
   typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
