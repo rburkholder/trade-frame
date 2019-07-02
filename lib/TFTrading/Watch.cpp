@@ -124,10 +124,10 @@ void Watch::HandleDisconnected( int ) {
 
 void Watch::EnableWatch( void ) {
   if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
+//    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_bWatching = true;
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     // these two message types come second so that the symbol gets registered in previous statements
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
@@ -144,7 +144,7 @@ void Watch::EnableWatch( void ) {
 }
 
 bool Watch::StartWatch( void ) {
-  //std::cout << "Watch::StartWatch: "  << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
+//  std::cout << "Watch::StartWatch: "  << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   if ( 0 == m_cntWatching ) {
     m_bWatchingEnabled = true;
     EnableWatch();
@@ -155,10 +155,10 @@ bool Watch::StartWatch( void ) {
 
 void Watch::DisableWatch( void ) {
   if ( m_bWatching ) {
-    m_bWatching = false;
+//    std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+    m_bWatching = false;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
@@ -171,7 +171,7 @@ void Watch::DisableWatch( void ) {
 }
 
 bool Watch::StopWatch( void ) {  // return true if actively stopped feed
-  //std::cout << "Watch::StopWatch: " << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
+//  std::cout << "Watch::StopWatch: " << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   assert( 0 != m_cntWatching );
   --m_cntWatching;
   if ( 0 == m_cntWatching ) {
