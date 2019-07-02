@@ -161,6 +161,8 @@ private:
 
   void Update( bool bTrending, double dblPrice );
 
+//  void CheckQuote( const ou::tf::Quote& quote ) const;
+
 };
 
 } // namespace option

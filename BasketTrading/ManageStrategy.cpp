@@ -707,6 +707,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                       pPosition_t pPositionPut = m_fConstructPosition( idPortfolio, pOption );
                       strangle.AddPosition( pPositionPut, m_pChartDataView, rColour[ m_ixColour++ ] );
 
+                      m_strangleEvaluation.ClearValidation(); // after positions created to keep watch in options from a quick stop/start
+
                       strangle.PlaceOrder( m_DefaultOrderSide );
 
                       m_bAllowComboAdd = false;

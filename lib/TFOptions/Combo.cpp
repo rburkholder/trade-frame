@@ -54,10 +54,6 @@ Combo::~Combo( ) {
   m_SpreadValidation.ResetOptions();
 }
 
-void Combo::ClearValidation() {
-  m_SpreadValidation.ResetOptions();
-}
-
 void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   assert( m_vLeg.empty() );
   m_pPortfolio = pPortfolio;
@@ -83,7 +79,14 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
   }
+
+//  pPosition->GetWatch()->OnQuote.Add( MakeDelegate( this, &Combo::CheckQuote ) );
+
 }
+
+//void Combo::CheckQuote( const ou::tf::Quote& quote ) const {
+//  std::cout << "CheckQuote: " << quote.Bid() << "," << quote.Ask() << std::endl;
+//}
 
 void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
   for ( Leg& leg: m_vLeg ) {
@@ -227,7 +230,7 @@ bool Combo::ValidateSpread( ConstructionTools& tools, const leg_pair_t& legs, do
       if ( ( pairStrikes.first   != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) )->GetStrike() )
         || ( pairStrikes.second  != boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )->GetStrike() )
       ) {
-        m_SpreadValidation.ResetOptions();
+        m_SpreadValidation.ResetOptions(); // why doesn't this cause a miss on quote stop/start?
         bBuildOptions = true;
       }
     }
@@ -297,11 +300,13 @@ Combo::pOptionPair_t Combo::ValidatedOptions() {
     boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 0 ) ),
     boost::dynamic_pointer_cast<ou::tf::option::Option>( m_SpreadValidation.GetWatch( 1 ) )
     );
-  m_SpreadValidation.ResetOptions();
+//  m_SpreadValidation.ResetOptions();
   return pair;
 }
 
-
+void Combo::ClearValidation() {
+  m_SpreadValidation.ResetOptions();
+}
 
 } // namespace option
 } // namespace tf
