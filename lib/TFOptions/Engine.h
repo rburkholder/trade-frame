@@ -51,12 +51,12 @@ namespace option { // options
 
 class OptionEntry {
 public:
-  typedef size_t size_type;
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
-  typedef Option::pOption_t pOption_t;
+  using size_type = size_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = Option::pOption_t;
   //typedef std::function<void(const ou::tf::Greek&)> fGreekResultCallback_t; // engine provides callback of greek calculation
-  typedef Option::fCallbackWithGreek_t fCallbackWithGreek_t;
-  typedef std::function<void(pOption_t, const ou::tf::Quote&, fCallbackWithGreek_t&)> fCalc_t; // underlying quote
+  using fCallbackWithGreek_t = Option::fCallbackWithGreek_t;
+  using fCalc_t = std::function<void(pOption_t, const ou::tf::Quote&, fCallbackWithGreek_t&)>; // underlying quote
 
 private:
   size_type m_cntInstances; // when pOption and pUnderlying are added in
@@ -159,7 +159,7 @@ private:
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_srvcWork;
   boost::asio::steady_timer m_timerScan;
 
-  OptionEntry::fCalc_t m_fCalc;
+//  OptionEntry::fCalc_t m_fCalc;
 
   const LiborFromIQFeed& m_InterestRateFeed;
 

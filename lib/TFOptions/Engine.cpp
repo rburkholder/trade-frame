@@ -164,10 +164,11 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
   
   for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change the final value to add threads, and fix the TODO further down
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
-    
-    m_fCalc =
-      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fGreek){
-    };
+
+    // not sure what this does or did, commented out for now, may be was a default no-op placeholder
+//    m_fCalc =
+//      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fGreek){
+//    };
   }
   
   m_timerScan.expires_after( boost::asio::chrono::milliseconds(1000) );
