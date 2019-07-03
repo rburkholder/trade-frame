@@ -34,7 +34,7 @@ MonitorOrder::MonitorOrder()
 
 MonitorOrder::MonitorOrder( pPosition_t& pPosition )
 : m_CountDownToAdjustment {},
-  m_state( State::NoPosition ),
+  m_state( State::NoOrder ),
   m_pPosition( pPosition )
 {}
 
@@ -43,7 +43,11 @@ MonitorOrder::MonitorOrder( const MonitorOrder& rhs )
   m_state( rhs.m_state ),
   m_pPosition( rhs.m_pPosition ),
   m_pOrder( rhs.m_pOrder )
-{}
+{
+  // what checks to perform on m_state?  need to be in a good state for things to sync properly
+  assert( !m_pPosition ); // let us see where this goes, may raise an issue with the constructor initialized with position
+  assert( !m_pOrder ); // this causes issues if duplicated
+}
 
 MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
 : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
@@ -53,6 +57,8 @@ MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
 {}
 
 void MonitorOrder::SetPosition( pPosition_t pPosition ) {
+  assert( !m_pPosition );
+  assert( !m_pOrder );
   m_pPosition = pPosition;
   m_state = State::NoOrder;
 }
@@ -81,9 +87,10 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
       }
       break;
     case State::Active:
-      std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": active, cannot place order" << std::endl;
+      std::cout << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": active, cannot place order" << std::endl;
       break;
     case State::NoPosition:
+      std::cout << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": no position" << std::endl;
       break;
   }
   return bOk;
@@ -111,6 +118,7 @@ void MonitorOrder::Tick() {
     case State::Filled:
       m_pOrder.reset();
       m_state = State::NoOrder;
+      // TODO: clear position?
       break;
     case State::NoOrder:
     case State::NoPosition:
