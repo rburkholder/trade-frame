@@ -28,7 +28,7 @@ SpreadValidation::SpreadValidation() {
 }
 
 SpreadValidation::SpreadValidation( size_t nLegs ) {
-  m_vSpreadCandidate.resize( nLegs );
+  SetLegCount( nLegs );
 }
 
 SpreadValidation::SpreadValidation( SpreadValidation&& rhs )
@@ -51,13 +51,14 @@ void SpreadValidation::SetWatch( size_t ixLeg, pWatch_t pCall ) {
 }
 
 SpreadValidation::pWatch_t SpreadValidation::GetWatch( size_t ixLeg ) {
+  assert( ixLeg < m_vSpreadCandidate.size() );
   //return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
   return m_vSpreadCandidate[ ixLeg ].GetWatch();
 }
 
-bool SpreadValidation::IsActive() {
+bool SpreadValidation::IsActive() const {
   bool bActive( true );
-  for ( SpreadCandidate& candidate: m_vSpreadCandidate ) {
+  for ( const SpreadCandidate& candidate: m_vSpreadCandidate ) {
     bActive &= candidate.IsActive();
   }
   return bActive;

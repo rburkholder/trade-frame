@@ -38,8 +38,8 @@ public:
 
   SpreadValidation();
   SpreadValidation( size_t nLegs );
-  SpreadValidation( const SpreadValidation& rhs ) = delete;
-  SpreadValidation( SpreadValidation&& rhs );
+  SpreadValidation( const SpreadValidation& ) = delete;
+  SpreadValidation( SpreadValidation&& );
   ~SpreadValidation();
 
   void SetLegCount( size_t nLegs );
@@ -47,7 +47,7 @@ public:
   void SetWatch( size_t ixLeg, pWatch_t pWatch );
   pWatch_t GetWatch( size_t ixLeg );
 
-  bool IsActive();
+  bool IsActive() const;
   bool Validate( size_t nDuration );
   void ResetOptions();
 
