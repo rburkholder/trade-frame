@@ -42,11 +42,10 @@ public:
   void SetWatch( pWatch_t pWatch );
   pWatch_t GetWatch();
   bool ValidateSpread( size_t nDuration );
-  bool IsActive() const { return m_bActive; };
+  bool IsActive() const { return (bool)m_pWatch; };
 
 private:
   ou::tf::Quote m_quote;
-  bool m_bActive;
   size_t m_nDesired;
   size_t m_nUnDesired;
   size_t m_nConsecutiveSpreadOk;

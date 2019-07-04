@@ -25,31 +25,28 @@ namespace ou {
 namespace tf {
 
 SpreadCandidate::SpreadCandidate()
-: m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {}, m_bActive( false )
+: m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {}
 {}
 
 SpreadCandidate::SpreadCandidate( const SpreadCandidate&& rhs )
 : m_quote( rhs.m_quote ), m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
-  m_bActive( rhs.m_bActive ),
   m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
   m_pWatch( std::move( rhs.m_pWatch ) )
 {}
 
 SpreadCandidate::SpreadCandidate( pWatch_t pWatch )
-: m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {}, 
-  m_bActive( true ) // assumes pWatch is non-null
+: m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {}
 {
+  assert( pWatch );
   SetWatch( pWatch );
 }
 
 SpreadCandidate::~SpreadCandidate() {
-  m_bActive = false;
   Clear();
 }
 
 void SpreadCandidate::Clear() {
   if ( m_pWatch ) {
-    m_bActive = false;
     m_pWatch->StopWatch();
     m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
     m_pWatch.reset();
@@ -57,13 +54,13 @@ void SpreadCandidate::Clear() {
 }
 
 void SpreadCandidate::SetWatch( pWatch_t pWatch ) {
+  assert( pWatch );
   Clear();
   m_pWatch = pWatch;
   if ( m_pWatch ) {
     m_nDesired = m_nUnDesired = m_nConsecutiveSpreadOk = 0;
     m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
     m_pWatch->StartWatch();
-    m_bActive = true;
   }
 }
 
