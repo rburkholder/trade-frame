@@ -29,7 +29,7 @@ SpreadCandidate::SpreadCandidate()
 {}
 
 SpreadCandidate::SpreadCandidate( const SpreadCandidate&& rhs )
-: m_quote( rhs.m_quote ), m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
+: m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
   m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
   m_pWatch( std::move( rhs.m_pWatch ) )
 {}
@@ -83,14 +83,13 @@ bool SpreadCandidate::ValidateSpread( size_t nDuration ) {
 }
 
 void SpreadCandidate::UpdateQuote( const ou::tf::Quote& quote ) {
-  m_quote = quote;
-  double spread( m_quote.Spread() );
+  double spread( quote.Spread() );
   if ( spread < 0.005 ) {
     // ignore crossed/crossing quote
   }
   else {
     if ( ( 0.005 <= spread ) && ( spread < 0.10 )
-      && ( 0.10 < m_quote.Ask() ) && ( 0.10 < m_quote.Bid() ) ) {
+      && ( 0.10 < quote.Ask() ) && ( 0.10 < quote.Bid() ) ) {
       m_nDesired++;
     }
     else {
