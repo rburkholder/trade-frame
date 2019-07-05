@@ -19,18 +19,38 @@
  * Created on June 10, 2019, 6:24 PM
  */
 
-#include "Condor.h"
+#include <array>
 
-// TODO: use VerticalSpread x 2?
-//    need to use a vertical spread: bear call, enter for credit
-//    need to use a vertical spread: bull put,  enter for credit
+#include "LegDef.h"
+#include "Condor.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-using pOption_t = Option::pOption_t;
+namespace {
+
+  static const size_t nStrikes( 4 );
+  static const boost::gregorian::days nDaysToExpiry( 1 );
+
+  using LegDef = ou::tf::option::LegDef;
+  using rLegDef_t = std::array<LegDef,nStrikes>;
+
+  static const rLegDef_t m_rLegDefLong = {
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call ),
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put ),
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put )  // lower
+  };
+
+  static const rLegDef_t m_rLegDefShort = {
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ),
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put ),
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put )  // lower
+  };
+
+}
 
 Condor::Condor()
 : Combo()

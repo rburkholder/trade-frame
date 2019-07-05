@@ -19,6 +19,9 @@
  * Created on June 16, 2019, 6:12 PM
  */
 
+#include <array>
+
+#include "LegDef.h"
 #include "BearCallSpread.h"
 
 namespace ou { // One Unified
@@ -26,17 +29,26 @@ namespace tf { // TradeFrame
 namespace option { // options
 namespace spread { // spread
 
-/*
-const Combo::leg_pair_t BearCall::m_legDefLong(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy,  1 )  // lower
-);
+namespace {
 
-const Combo::leg_pair_t BearCall::m_legDefShort(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy,  1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 )  // lower
-);
-*/
+  static const size_t nStrikes( 2 );
+  static const boost::gregorian::days nDaysToExpiry( 1 );
+
+  using LegDef = ou::tf::option::LegDef;
+  using rLegDef_t = std::array<LegDef,nStrikes>;
+
+  static const rLegDef_t m_rLegDefLong = {
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call )  // lower
+  };
+
+  static const rLegDef_t m_rLegDefShort = {
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call )  // lower
+  };
+
+}
+
 BearCall::BearCall( )
 : Combo()
 {

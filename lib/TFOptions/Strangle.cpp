@@ -36,11 +36,11 @@ namespace {
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,nStrikes>;
 
-  const rLegDef_t m_rLegDefLong = {
+  static const rLegDef_t m_rLegDefLong = {
     LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
     LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Put  )  // lower
   };
-  const rLegDef_t m_rLegDefShort = {
+  static const rLegDef_t m_rLegDefShort = {
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // upper
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  )  // lower
   };

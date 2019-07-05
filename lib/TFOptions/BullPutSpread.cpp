@@ -19,23 +19,36 @@
  * Created on June 16, 2019, 1:49 PM
  */
 
+#include <array>
+
+#include "LegDef.h"
 #include "BullPutSpread.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 namespace spread { // spread
-/*
-const Combo::leg_pair_t BullPut::m_legDefLong(
-  Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Buy,  1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Sell, 1 )  // lower
-);
 
-const Combo::leg_pair_t BullPut::m_legDefShort(
-  Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Sell, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Buy,  1 )  // lower
-);
-*/
+namespace {
+
+  static const size_t nStrikes( 2 );
+  static const boost::gregorian::days nDaysToExpiry( 1 );
+
+  using LegDef = ou::tf::option::LegDef;
+  using rLegDef_t = std::array<LegDef,nStrikes>;
+
+  static const rLegDef_t m_rLegDefLong = {
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put ), // upper
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put )  // lower
+  };
+
+  static const rLegDef_t m_rLegDefShort = {
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put ), // upper
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put )  // lower
+  };
+
+}
+
 BullPut::BullPut( )
 : Combo()
 {
