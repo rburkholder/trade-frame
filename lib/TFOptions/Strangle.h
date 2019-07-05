@@ -51,6 +51,8 @@ public:
   static void ChooseStrikes(
     const mapChains_t& chains, boost::gregorian::date, double lower, double upper, fLegSelected_t&& ); // throw Chain exceptions
 
+  static size_t StrikeCount();
+
 private:
 
   void CheckStop( double price );

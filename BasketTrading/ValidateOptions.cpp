@@ -52,6 +52,10 @@ ValidateOptions::~ValidateOptions( ) {
   m_SpreadValidation.ResetOptions();
 }
 
+void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
+  m_vLegSelected.resize( size );
+}
+
 bool ValidateOptions::ValidateSpread( 
   boost::gregorian::date dateToday, double price, size_t nDuration, fChooseStrikes_t&& fChooseStrikes
 ) {
@@ -62,7 +66,7 @@ bool ValidateOptions::ValidateSpread(
   try {
     fChooseStrikes( m_mapChains, dateToday, price,
       [this,&ixLegSelected](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedName){
-        m_vLegSelected[ ixLegSelected ].Update( strike, dateStrike, sIQFeedName );
+        m_vLegSelected.at( ixLegSelected ).Update( strike, dateStrike, sIQFeedName );
         ixLegSelected++;
       } );
     bStrikesFound = true; // can set as no exception was thrown

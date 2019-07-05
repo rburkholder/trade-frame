@@ -30,8 +30,11 @@ namespace option { // options
 
 namespace {
 
+  static const size_t nStrikes( 2 );
+  static const boost::gregorian::days nDaysToExpiry( 1 );
+
   using LegDef = ou::tf::option::LegDef;
-  using rLegDef_t = std::array<LegDef,2>;
+  using rLegDef_t = std::array<LegDef,nStrikes>;
 
   const rLegDef_t m_rLegDefLong = {
     LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
@@ -42,7 +45,6 @@ namespace {
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  )  // lower
   };
 
-  boost::gregorian::days nDaysToExpiry( 1 );
 }
 
 Strangle::Strangle()
@@ -165,6 +167,10 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
 //        } );
 //    }
 //  }
+}
+
+size_t Strangle::StrikeCount() {
+  return nStrikes;
 }
 
 void Strangle::CheckStop( double price ) {

@@ -294,6 +294,7 @@ ManageStrategy::ManageStrategy(
             m_mapChains,
             m_fConstructOption
           );
+        m_pValidateOptions->SetSize( ou::tf::option::Strangle::StrikeCount() ); // will need to make this generic
             
     } ); // m_fConstructWatch on Underlying Instrument
 

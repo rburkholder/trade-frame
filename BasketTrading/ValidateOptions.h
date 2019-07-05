@@ -65,6 +65,8 @@ public:
   ValidateOptions( const ValidateOptions&& );
   ~ValidateOptions( );
 
+  void SetSize( vLegSelected_t::size_type );
+
   bool ValidateSpread( boost::gregorian::date, double price, size_t nDuration, fChooseStrikes_t&& );
   void ValidatedOptions( fValidatedOption_t&& );
   void ClearValidation();
