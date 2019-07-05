@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BasketTrading.o \
+	${OBJECTDIR}/LegSelected.o \
 	${OBJECTDIR}/ManagePosition.o \
 	${OBJECTDIR}/ManageStrategy.o \
 	${OBJECTDIR}/MasterPortfolio.o \
@@ -46,8 +47,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/Sentiment.o \
 	${OBJECTDIR}/StrategyBase.o \
 	${OBJECTDIR}/StrategyCondor.o \
+	${OBJECTDIR}/StrategyStraddle.o \
 	${OBJECTDIR}/StrategyStrangle.o \
 	${OBJECTDIR}/SymbolSelection.o \
+	${OBJECTDIR}/ValidateOptions.o \
 	${OBJECTDIR}/stdafx.o
 
 
@@ -116,6 +119,11 @@ ${OBJECTDIR}/BasketTrading.o: BasketTrading.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BasketTrading.o BasketTrading.cpp
 
+${OBJECTDIR}/LegSelected.o: LegSelected.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LegSelected.o LegSelected.cpp
+
 ${OBJECTDIR}/ManagePosition.o: ManagePosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -166,6 +174,11 @@ ${OBJECTDIR}/StrategyCondor.o: StrategyCondor.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StrategyCondor.o StrategyCondor.cpp
 
+${OBJECTDIR}/StrategyStraddle.o: StrategyStraddle.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StrategyStraddle.o StrategyStraddle.cpp
+
 ${OBJECTDIR}/StrategyStrangle.o: StrategyStrangle.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -175,6 +188,11 @@ ${OBJECTDIR}/SymbolSelection.o: SymbolSelection.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SymbolSelection.o SymbolSelection.cpp
+
+${OBJECTDIR}/ValidateOptions.o: ValidateOptions.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ValidateOptions.o ValidateOptions.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
