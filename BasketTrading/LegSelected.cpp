@@ -45,7 +45,7 @@ LegSelected::LegSelected( const LegSelected&& rhs )
 }
 
 void LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedName ) {
-  m_bChanged = ( strike != m_dblStrike ) || ( dateExpiry != m_dateExpiry );
+  m_bChanged = ( ( strike != m_dblStrike ) || ( dateExpiry != m_dateExpiry ) );
   if ( m_bChanged ) {
     m_dblStrike = strike;
     m_dateExpiry = dateExpiry;

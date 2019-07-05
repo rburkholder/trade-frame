@@ -89,18 +89,21 @@ bool ValidateOptions::ValidateSpread(
   }
 
   bool bBuildOptions( false );
+  size_t nReason {};
 
   if ( bStrikesFound ) {
     if ( !m_SpreadValidation.IsActive() ) {
+      nReason = 1;
       bBuildOptions = true;
     }
     else {
       bool bAnyChanged( false );
       for ( const vLegSelected_t::value_type& vt: m_vLegSelected ) {
-        bAnyChanged |= vt.Changed();
+        bAnyChanged = ( bAnyChanged || vt.Changed() );
       }
       if ( bAnyChanged ) {
         m_SpreadValidation.ResetOptions(); // why doesn't this cause a miss on quote stop/start?
+        nReason = 2;
         bBuildOptions = true;
       }
     }
@@ -110,6 +113,7 @@ bool ValidateOptions::ValidateSpread(
     const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
     std::cout
       << sUnderlying
+      << "(" << nReason << ")"
       << ": combo -> price=" << price;
     for ( const vLegSelected_t::value_type& vt: m_vLegSelected ) {
       std::cout << ",strike=" << vt.Strike() << "@" << vt.Expiry();
