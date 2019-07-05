@@ -38,8 +38,8 @@ public:
 
   SpreadValidation();
   SpreadValidation( size_t nLegs );
-  SpreadValidation( const SpreadValidation& ) = delete;
-  SpreadValidation( SpreadValidation&& );
+  SpreadValidation( const SpreadValidation& );
+  SpreadValidation( const SpreadValidation&& );
   ~SpreadValidation();
 
   void SetLegCount( size_t nLegs );

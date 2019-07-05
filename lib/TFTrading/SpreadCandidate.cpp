@@ -28,6 +28,12 @@ SpreadCandidate::SpreadCandidate()
 : m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {}
 {}
 
+SpreadCandidate::SpreadCandidate( const SpreadCandidate& rhs )
+: m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
+  m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
+  m_pWatch( rhs.m_pWatch )
+{}
+
 SpreadCandidate::SpreadCandidate( const SpreadCandidate&& rhs )
 : m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
   m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),

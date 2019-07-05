@@ -31,7 +31,12 @@ SpreadValidation::SpreadValidation( size_t nLegs ) {
   SetLegCount( nLegs );
 }
 
-SpreadValidation::SpreadValidation( SpreadValidation&& rhs )
+SpreadValidation::SpreadValidation( const SpreadValidation& rhs )
+: m_vSpreadCandidate( rhs.m_vSpreadCandidate )
+{
+}
+
+SpreadValidation::SpreadValidation( const SpreadValidation&& rhs )
 : m_vSpreadCandidate( std::move( rhs.m_vSpreadCandidate ) )
 {
 }

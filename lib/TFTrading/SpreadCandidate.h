@@ -33,7 +33,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   SpreadCandidate();
-  SpreadCandidate( const SpreadCandidate& ) = delete;
+  SpreadCandidate( const SpreadCandidate& );
   SpreadCandidate( const SpreadCandidate&& );
   SpreadCandidate( pWatch_t pWatch );
   ~SpreadCandidate();
