@@ -225,7 +225,6 @@ private:
 
   using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
   mapChains_t m_mapChains;
-  mapChains_t::iterator m_iterChainExpiryInUse;
 
   fConstructWatch_t m_fConstructWatch;
   fConstructOption_t m_fConstructOption;
@@ -382,7 +381,9 @@ private:
   vEMA_t m_vEMA;
 
   void BuildPosition(
-    const idPortfolio_t&, ou::tf::OptionSide::enumOptionSide, double price,
+    const idPortfolio_t&,
+    boost::gregorian::date,
+    ou::tf::OptionSide::enumOptionSide, double price,
     fBuildPositionCallBack_t&&
   );
 

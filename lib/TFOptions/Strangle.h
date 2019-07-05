@@ -55,6 +55,8 @@ public:
 
   static size_t StrikeCount();
 
+  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price );
+
 private:
 
   void CheckStop( double price );

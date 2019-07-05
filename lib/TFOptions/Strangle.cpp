@@ -134,6 +134,20 @@ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date 
   fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
 }
 
+const std::string Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price ) {
+  std::string sName( "strangle-" + sUnderlying );
+  ChooseStrikes(
+    chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+      sName
+        += "-"
+        +  ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )
+        +  "-"
+        +  boost::lexical_cast<std::string>( strike );
+    }
+    );
+  return sName;
+}
+
 void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
 
   citerChain_t citerChain =

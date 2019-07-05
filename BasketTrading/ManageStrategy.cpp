@@ -484,24 +484,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 //      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
 
-      boost::gregorian::date date( trade.DateTime().date() );
-      m_iterChainExpiryInUse = std::find_if( m_mapChains.begin(), m_mapChains.end(),
-        [this,date](const mapChains_t::value_type& vt)->bool{
-          return m_daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
-      } );
-
-      if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
-        std::cout << m_sUnderlying << " found no chain for " << date << ", trading disabled" << std::endl;
-        m_stateTrading = TSNoMore;
-      }
-      else {
-//        if ( 0 != m_nSharesToTrade ) {
-          m_stateTrading = TSOptionEvaluation; // ready to trade
-//        }
-//        else {
-//          m_stateTrading = TSWaitForFundsAllocation; // need an allocation first
-//        }
-      }
+      m_stateTrading = TSOptionEvaluation; // ready to trade
       }
       break;
 //    case TSWaitForFundsAllocation: // Start() needs to be called
@@ -598,11 +581,18 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 
 // turn into a template if needed for other combo types
 void ManageStrategy::BuildPosition(
-  const idPortfolio_t& idPortfolio, ou::tf::OptionSide::enumOptionSide side, double price,
+  const idPortfolio_t& idPortfolio, 
+  boost::gregorian::date date,
+  ou::tf::OptionSide::enumOptionSide side, double price,
   fBuildPositionCallBack_t&& fBuildPositionCallBack
 ) {
 
-  ou::tf::option::Chain& chain( m_iterChainExpiryInUse->second );
+  mapChains_t::const_iterator iter = std::find_if( m_mapChains.begin(), m_mapChains.end(),
+    [this,date](const mapChains_t::value_type& vt)->bool{
+      return m_daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
+  } );
+
+  const ou::tf::option::Chain& chain( iter->second );
 
   std::string sName;
 
@@ -651,98 +641,82 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         if ( m_bAllowComboAdd ) {
 
-          if ( m_mapChains.end() == m_iterChainExpiryInUse ) {
-            std::cout << m_sUnderlying << " has no m_iterChainExpiryInUse" << std::endl;
-            m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
-          }
-          else {
-
-            try {
-              if ( m_pValidateOptions->ValidateSpread( bar.DateTime().date(), mid, 11,
-                [mid]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::Strangle::fLegSelected_t&& fLegSelected ){
-                  //ou::tf::option::Strangle::ChooseStrikes( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
-                  ou::tf::option::Strangle::ChooseStrikes( chains, date, mid, std::move( fLegSelected ) );
-                }
-                ) ) {
-
-                idPortfolio_t idPortfolio; // also name of combo (strangle)
-                boost::gregorian::date date( m_iterChainExpiryInUse->first );
-                idPortfolio
-                  = "strangle-"
-                  + m_sUnderlying
-                  + "-"
-                  + ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() ) // date stamp when first initiated
-  //                comment out to allow legs to change with dates, track profit over time
-  //                + "-"
-  //                + boost::lexical_cast<std::string>( strikeOtmCall ) // no longer available with refactoring
-  //                + "-"
-  //                + boost::lexical_cast<std::string>( strikeOtmPut ) // no longer available with refactoring
-                  ;
-                mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
-                if ( m_mapCombo.end() == mapCombo_iter ) {
-                  if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
-                    if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) {
-                      std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                      std::pair<mapCombo_t::iterator,bool> result;
-                      //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
-
-                      auto pStrategyStrangle = std::make_shared<Strategy::Strangle>();
-
-                      result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, pStrategyStrangle ) );
-                      assert( result.second );
-                      assert( m_mapCombo.end() != result.first );
-
-                      Strategy::Strangle* pStrategy = std::dynamic_pointer_cast<Strategy::Strangle>( result.first->second ).get();
-                      ou::tf::option::Strangle& strangle( pStrategy->Combo() );
-
-                      if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
-                        std::cout << "WARNING: strategy running out of colours." << std::endl;
-                      }
-                      strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-
-                      //pOption_t pOption;
-                      //mapOption_t::iterator iterOption;
-                      //std::string sOptionName;
-
-                      //Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
-                      m_pValidateOptions->ValidatedOptions(
-                        [this,idPortfolio,&strangle](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
-                          //pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
-                          const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                          mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-                          if ( m_mapOption.end() == iterOption ) {
-                            m_mapOption[ sOptionName ] = pOption;
-                            m_fRegisterOption( pOption );
-                            m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                          }
-                          pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
-                          strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-                          }
-                        );
-
-                      m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
-
-                      strangle.PlaceOrder( m_DefaultOrderSide );
-
-                      m_bAllowComboAdd = false;
-                    } // m_DefaultOrderSide
-                  } // m_fAuthorizeSimple
-                  else {
-                    // ?
-                  }
-                }
-                // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
-                // TODO: create a trailing stop based upon entry net loss?
+          try {
+            boost::gregorian::date date( bar.DateTime().date() );
+            if ( m_pValidateOptions->ValidateSpread(
+              date, mid, 11,
+              [mid]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::Strangle::fLegSelected_t&& fLegSelected ){
+                //ou::tf::option::Strangle::ChooseStrikes( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
+                ou::tf::option::Strangle::ChooseStrikes( chains, date, mid, std::move( fLegSelected ) );
               }
+            ) ) {
+
+              idPortfolio_t idPortfolio
+                = ou::tf::option::Strangle::Name( m_sUnderlying, m_mapChains, date, mid );
+              mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
+              if ( m_mapCombo.end() == mapCombo_iter ) {
+                if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
+                  if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) {
+                    std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                    std::pair<mapCombo_t::iterator,bool> result;
+                    //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
+
+                    auto pStrategyStrangle = std::make_shared<Strategy::Strangle>();
+
+                    result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, pStrategyStrangle ) );
+                    assert( result.second );
+                    assert( m_mapCombo.end() != result.first );
+
+                    Strategy::Strangle* pStrategy = std::dynamic_pointer_cast<Strategy::Strangle>( result.first->second ).get();
+                    ou::tf::option::Strangle& strangle( pStrategy->Combo() );
+
+                    if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                      std::cout << "WARNING: strategy running out of colours." << std::endl;
+                    }
+                    strangle.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+
+                    //pOption_t pOption;
+                    //mapOption_t::iterator iterOption;
+                    //std::string sOptionName;
+
+                    //Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
+                    m_pValidateOptions->ValidatedOptions(
+                      [this,idPortfolio,&strangle](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
+                        //pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
+                        const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                        mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+                        if ( m_mapOption.end() == iterOption ) {
+                          m_mapOption[ sOptionName ] = pOption;
+                          m_fRegisterOption( pOption );
+                          m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                        }
+                        pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
+                        strangle.AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                        }
+                      );
+
+                    m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
+
+                    strangle.PlaceOrder( m_DefaultOrderSide );
+
+                    m_bAllowComboAdd = false;
+                  } // m_DefaultOrderSide
+                } // m_fAuthorizeSimple
+                else {
+                  // ?
+                }
+              }
+              // TODO: re-use existing combo?  what if leg is still active? add one or both legs?  if not profitable, no use adding to loss leg
+              // TODO: create a trailing stop based upon entry net loss?
             }
-            catch ( const ou::tf::option::exception_strike_range_exceeded& e ) {
-              // don't worry about this, price is not with in range yet
-            }
-            catch ( const std::runtime_error& e ) {
-              std::cout << m_sUnderlying << " stop trading." << std::endl;
-              m_pValidateOptions->ClearValidation();
-              m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
-            }
+          }
+          catch ( const ou::tf::option::exception_strike_range_exceeded& e ) {
+            // don't worry about this, price is not with in range yet
+          }
+          catch ( const std::runtime_error& e ) {
+            std::cout << m_sUnderlying << " stop trading." << std::endl;
+            m_pValidateOptions->ClearValidation();
+            m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
         } // m_bAllowedComboAdd
 
