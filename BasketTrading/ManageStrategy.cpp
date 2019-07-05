@@ -659,8 +659,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
             try {
               if ( m_pValidateOptions->ValidateSpread( bar.DateTime().date(), mid, 11,
-                [this]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::Strangle::fLegSelected_t&& fLegSelected ){
-                  ou::tf::option::Strangle::ChooseStrikes( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
+                [mid]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::Strangle::fLegSelected_t&& fLegSelected ){
+                  //ou::tf::option::Strangle::ChooseStrikes( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
+                  ou::tf::option::Strangle::ChooseStrikes( chains, date, mid, std::move( fLegSelected ) );
                 }
                 ) ) {
 

@@ -45,9 +45,11 @@ public:
 
   virtual double GetNet( double price );
 
-  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const; // (call,put),throw Chain exceptions
-
   using fLegSelected_t = std::function<void(double, boost::gregorian::date, const std::string&)>;
+
+  static void ChooseStrikes(
+    const mapChains_t& chains, boost::gregorian::date, double price, fLegSelected_t&& ); // (call,put),throw Chain exceptions
+
   static void ChooseStrikes(
     const mapChains_t& chains, boost::gregorian::date, double lower, double upper, fLegSelected_t&& ); // throw Chain exceptions
 

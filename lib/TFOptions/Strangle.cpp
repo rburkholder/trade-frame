@@ -94,7 +94,12 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double price ) const {
+void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
+
+  citerChain_t citerChain =
+    Combo::SelectChain( chains, date, nDaysToExpiry );
+
+  const ou::tf::option::Chain& chain( citerChain->second );
 
   double strikeOtmCall {};
   double strikeOtmPut {};
@@ -124,7 +129,9 @@ Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double pric
       throw exception_strike_range_exceeded( ss.str().c_str() );
     }
   }
-  return strike_pair_t( strikeOtmCall, strikeOtmPut );
+
+  fLegSelected( strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
+  fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
 }
 
 void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
