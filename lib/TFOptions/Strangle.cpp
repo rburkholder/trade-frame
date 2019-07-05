@@ -19,14 +19,31 @@
  * Created on May 25, 2019, 10:56 PM
  */
 
+#include <array>
+
+#include "LegDef.h"
 #include "Strangle.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-using pOption_t = Option::pOption_t;
+namespace {
+
+  using LegDef = ou::tf::option::LegDef;
+  using rLegDef_t = std::array<LegDef,2>;
+
+  const rLegDef_t m_rLegDefLong = {
+    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Put  )  // lower
+  };
+  const rLegDef_t m_rLegDefShort = {
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // upper
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  )  // lower
+  };
+
+  boost::gregorian::days nDaysToExpiry( 1 );
+}
 
 Strangle::Strangle()
 : Combo()
@@ -108,7 +125,12 @@ Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double pric
   return strike_pair_t( strikeOtmCall, strikeOtmPut );
 }
 
-Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double lower, double upper ) const {
+void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
+
+  citerChain_t citerChain =
+    Combo::SelectChain( chains, date, nDaysToExpiry );
+
+  const ou::tf::option::Chain& chain( citerChain->second );
 
   double strikeOtmCall {};
   double strikeOtmPut {};
@@ -121,18 +143,10 @@ Strangle::strike_pair_t Strangle::ChooseStrikes( const Chain& chain, double lowe
 
   assert( strikeOtmCall > strikeOtmPut );
 
-  return strike_pair_t( strikeOtmCall, strikeOtmPut );
+  fLegSelected( strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
+  fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
+
 }
-
-const Combo::leg_pair_t Strangle::m_legDefLong(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy, 1 )  // lower
-);
-
-const Combo::leg_pair_t Strangle::m_legDefShort(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Sell, 1 )  // lower
-);
 
 // applicable when running a long strangle strategy, has negative dblPrice1 in OrderManager on short strangle
 void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& f ) {

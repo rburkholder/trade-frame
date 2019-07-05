@@ -38,8 +38,8 @@ public:
   virtual ~CallBackSpread( );
 
   //using LegDef = Combo::LegDef;
-  using leg_pair_t = Combo::leg_pair_t;
-  using strike_pair_t = Combo::strike_pair_t;
+  //using leg_pair_t = Combo::leg_pair_t;
+  //using strike_pair_t = Combo::strike_pair_t;
 
   //using pOption_t = ou::tf::option::Option::pOption_t;
   //using pOptionPair_t = std::pair<pOption_t,pOption_t>; // higher lower
@@ -48,8 +48,8 @@ public:
 
   virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ); // throw Chain exceptions
 
-  static const leg_pair_t m_legDefLong;
-  static const leg_pair_t m_legDefShort;
+  //static const leg_pair_t m_legDefLong;
+  //static const leg_pair_t m_legDefShort;
 
 protected:
 private:

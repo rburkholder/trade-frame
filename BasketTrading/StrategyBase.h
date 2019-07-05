@@ -22,28 +22,44 @@
 #ifndef STRATEGYBASE_H
 #define STRATEGYBASE_H
 
-#include <map>
+// utility has std::move
+#include <utility>
 
-#include <boost/date_time/gregorian/greg_date.hpp>
+//#include <map>
 
-#include <TFOptions/Chain.h>
+//#include <boost/date_time/gregorian/greg_date.hpp>
+
+//#include <TFOptions/Chain.h>
+
+//#include "LegSelected.h"
 
 namespace Strategy {
 
+// == Common
+
 class Common {
 public:
-  using chain_t = ou::tf::option::Chain;
-  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
-  using citerChain_t = mapChains_t::const_iterator;
 
-  struct exception_chain_no_found: public std::runtime_error {
-    exception_chain_no_found( const char* ch ): std::runtime_error( ch ) {}
-  };
+  //using vLegSelected_t = LegSelected::vLegSelected_t;
+  //using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
+
+  Common();
+  virtual ~Common();
+
+//  virtual void ChooseStrikes( vLegSelected_t&, const mapChains_t&, boost::gregorian::date, double price ) = 0; // throw Chain exceptions
 
 protected:
-  citerChain_t SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry );
+
+//  using vLeg_t = std::vector<ou::tf::Leg>;
+//  vLeg_t m_vLeg;
+
+
+
 private:
+
 };
+
+// == Base
 
 template<typename ComboStrategy, typename Combination>
 class Base: public Common {
@@ -53,6 +69,8 @@ public:
   Base( const Base&& rhs )
   : m_combo( std::move( rhs.m_combo ) ) {}
   virtual ~Base( ) {} // is the virtual necessary?
+
+  Combination& Combo() { return m_combo; }
 
 protected:
 

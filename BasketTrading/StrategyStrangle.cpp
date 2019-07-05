@@ -19,33 +19,30 @@
  * Created on June 23, 2019, 9:33 PM
  */
 
-// utility has std::move
-#include <utility>
 
 #include "StrategyStrangle.h"
 
-namespace {
-  boost::gregorian::days nDaysToExpiry( 1 );
-}
-
 namespace Strategy {
 
-StrategyStrangle::StrategyStrangle( )
-: Base<StrategyStrangle,Strangle>()
+Strangle::Strangle( )
+: Base<Strangle,ou::tf::option::Strangle>()
 {
 }
 
-StrategyStrangle::StrategyStrangle( const StrategyStrangle&& rhs )
-: Base<StrategyStrangle,Strangle>( std::move( rhs ) )
+Strangle::Strangle( const Strangle&& rhs )
+: Base<Strangle,ou::tf::option::Strangle>( std::move( rhs ) )
 {
 }
 
-StrategyStrangle::~StrategyStrangle( ) {
+Strangle::~Strangle( ) {
 }
 
-void StrategyStrangle::ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& mapChains ) {
-  citerChain_t citerChain = SelectChain( mapChains, date, nDaysToExpiry );
-  ou::tf::option::Strangle::strike_pair_t pair = m_combo.ChooseStrikes( citerChain->second, lower, upper );
-}
+//void Strangle::ChooseStrikes( vLegSelected_t&, const mapChains_t&, boost::gregorian::date, double lower, double upper ) {
+//}
+
+//void StrategyStrangle::ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& mapChains ) {
+//  citerChain_t citerChain = SelectChain( mapChains, date, nDaysToExpiry );
+//  ou::tf::option::Strangle::strike_pair_t pair = m_combo.ChooseStrikes( citerChain->second, lower, upper );
+//}
 
 } // namespace Strategy

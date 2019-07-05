@@ -22,6 +22,8 @@
 #ifndef STRADDLE_H
 #define STRADDLE_H
 
+#include "Exceptions.h"
+
 #include "Combo.h"
 
 namespace ou { // One Unified
@@ -39,20 +41,13 @@ public:
 
   //virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  //virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
 
   //void CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, fBuildLeg_t&& );
 
   //virtual double GetNet( double price );
 
-  //using LegDef = Combo::LegDef;
-  using leg_pair_t = Combo::leg_pair_t;
-  using strike_pair_t = Combo::strike_pair_t;
-
   virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const; // throw Chain exceptions
-
-  static const leg_pair_t m_legDefLong;
-  static const leg_pair_t m_legDefShort;
 
 private:
 

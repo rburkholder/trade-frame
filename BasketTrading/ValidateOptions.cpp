@@ -58,8 +58,13 @@ bool ValidateOptions::ValidateSpread(
 
   double bStrikesFound( false );
 
+  size_t ixLegSelected {};
   try {
-    fChooseStrikes( m_vLegSelected, m_mapChains, dateToday, price ); // may need a lambda to fill the vector
+    fChooseStrikes( m_mapChains, dateToday, price,
+      [this,&ixLegSelected](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedName){
+        m_vLegSelected[ ixLegSelected ].Update( strike, dateStrike, sIQFeedName );
+        ixLegSelected++;
+      } );
     bStrikesFound = true; // can set as no exception was thrown
   }
   catch ( const ou::tf::option::exception_strike_range_exceeded& e ) {

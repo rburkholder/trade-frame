@@ -46,8 +46,10 @@ public:
   using Chain = ou::tf::option::Chain;
   using mapChains_t = std::map<boost::gregorian::date, Chain>;
 
+  using fStrikeSelected_t
+    = std::function<void(double, boost::gregorian::date, const std::string&)>;
   using fChooseStrikes_t
-    = std::function<void(vLegSelected_t&, const mapChains_t&, boost::gregorian::date, double)>; // double is current price
+    = std::function<void(const mapChains_t&, boost::gregorian::date, double, fStrikeSelected_t&&)>; // double is current price
 
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name

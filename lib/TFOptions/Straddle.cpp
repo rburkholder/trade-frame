@@ -28,16 +28,6 @@ namespace option { // options
 using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 using pOption_t = Option::pOption_t;
 
-const Combo::leg_pair_t Straddle::m_legDefLong(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy, 1 )  // lower
-);
-
-const Combo::leg_pair_t Straddle::m_legDefShort(
-  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
-  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Sell, 1 )  // lower
-);
-
 Straddle::Straddle()
 : Combo()
 {
@@ -81,6 +71,20 @@ Straddle::~Straddle() {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
+// TODO: need to fix this if other legs present.  Need to limit to the active legs.
+//   maybe vector of inactive legs
+// NOTE: if volatility drops, then losses occur on premium
+void Straddle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
+  switch ( m_state ) {
+    case State::Positions: // doesn't confirm both put/call are available
+    case State::Watching:
+      for ( Leg& leg: m_vLeg ) {
+        leg.PlaceOrder( side, 1 );
+      }
+      m_state = State::Executing;
+      break;
+  }
+}
 Straddle::strike_pair_t Straddle::ChooseStrikes( const Chain& chain, double price ) const {
 
   double strikeAtmCall {};

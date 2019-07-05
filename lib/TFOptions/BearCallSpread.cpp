@@ -26,6 +26,7 @@ namespace tf { // TradeFrame
 namespace option { // options
 namespace spread { // spread
 
+/*
 const Combo::leg_pair_t BearCall::m_legDefLong(
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy,  1 )  // lower
@@ -35,7 +36,7 @@ const Combo::leg_pair_t BearCall::m_legDefShort(
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy,  1 ), // upper
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 )  // lower
 );
-
+*/
 BearCall::BearCall( )
 : Combo()
 {

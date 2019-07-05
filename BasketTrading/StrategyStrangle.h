@@ -30,21 +30,29 @@
 
 namespace Strategy {
 
-class StrategyStrangle: public Base<StrategyStrangle,ou::tf::option::Strangle> {
+class Strangle: public Base<Strangle,ou::tf::option::Strangle> {
 public:
 
-  using Strangle = ou::tf::option::Strangle;
+  //using Strangle = ou::tf::option::Strangle;
 
   //using mapChains_t = ou::tf::option::Combo::mapChains_t;
 
-  StrategyStrangle();
-  StrategyStrangle( const StrategyStrangle&& );
-  virtual ~StrategyStrangle();
+  Strangle();
+  Strangle( const Strangle&& );
+  virtual ~Strangle();
 
-  void ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& );
+  //void ChooseStrikes( const double lower, const double upper, boost::gregorian::date date, const mapChains_t& );
+  //static void ChooseStrikes(
+  //  const mapChains_t&, boost::gregorian::date, double lower, double upper, ou::tf::option::Strangle::fLegSelected_t&& ); // throw Chain exceptions
 
 protected:
 private:
+
+  //using LegDef = Combo::LegDef;
+  //using leg_pair_t = ou::tf::option::Combo::leg_pair_t;
+
+  //static const leg_pair_t m_legDefLong;
+  //static const leg_pair_t m_legDefShort;
 
 };
 

@@ -25,7 +25,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 namespace spread { // spread
-
+/*
 const Combo::leg_pair_t SyntheticShort::m_legDefLong(
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ),
   Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy,  1 )
@@ -35,7 +35,7 @@ const Combo::leg_pair_t SyntheticShort::m_legDefShort(
   Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy,  1 ),
   Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Sell, 1 )
 );
-
+*/
 SyntheticShort::SyntheticShort( )
 : Combo()
 {

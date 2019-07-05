@@ -28,43 +28,14 @@
 
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
-#include <TFTrading/SpreadValidation.h>
 
+#include "Exceptions.h"
 #include "Chain.h"
-
 #include "Leg.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
-
-// == ConstructionTools
-
-struct ConstructionTools {
-
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pOption_t = ou::tf::option::Option::pOption_t;
-
-  using fConstructedOption_t = std::function<void(pOption_t)>;
-  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
-
-  boost::gregorian::date m_dateExpiry;
-  Chain& m_chain;
-  pWatch_t m_pWatchUnderlying;
-  fConstructOption_t& m_fConstructOption;
-
-  ConstructionTools(
-    boost::gregorian::date dateExpiry,
-    Chain& chain,
-    pWatch_t pWatchUnderlying,
-    fConstructOption_t& fConstructOption
-    )
-  : m_dateExpiry( dateExpiry ), m_chain( chain ),
-    m_pWatchUnderlying( pWatchUnderlying ),
-    m_fConstructOption( fConstructOption )
-  {}
-};
 
 // == Combo
 
@@ -77,6 +48,10 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
+  using Chain = ou::tf::option::Chain;
+  using mapChains_t = std::map<boost::gregorian::date, Chain>;
+  using citerChain_t = mapChains_t::const_iterator;
 
   using EColour = ou::Colour::enumColour;
   using EOptionSide = ou::tf::OptionSide::enumOptionSide;
@@ -91,20 +66,6 @@ public:
   State m_state;
 
   using strike_pair_t = std::pair<double,double>; // higher, lower
-
-  struct LegDef {
-    EOptionSide type;
-    EOrderSide side;
-    uint32_t quantity;
-    LegDef( EOptionSide type_, EOrderSide side_, uint32_t quantity_ )
-      : type( type_ ), side( side_ ), quantity( quantity_ ) {}
-  };
-
-  using leg_pair_t = std::pair<LegDef,LegDef>; // higher, lower
-
-  struct exception_strike_range_exceeded: public std::runtime_error {
-    exception_strike_range_exceeded( const char* ch ): std::runtime_error( ch ) {}
-  };
 
   Combo( );
   Combo( const Combo& rhs );
@@ -136,21 +97,15 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
-  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const = 0; // throw Chain exceptions
+  static citerChain_t SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry );
 
-  using pOption_t = ou::tf::option::Option::pOption_t;
-  using pOptionPair_t = std::pair<pOption_t,pOption_t>;
-  bool ValidateSpread( ConstructionTools&, const leg_pair_t& legs, double price, size_t nDuration );
-  pOptionPair_t ValidatedOptions();
-  void ClearValidation();
+  //virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const = 0; // throw Chain exceptions
 
 protected:
 
   static const double m_dblTwentyPercent;
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
-
-  SpreadValidation m_SpreadValidation;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 

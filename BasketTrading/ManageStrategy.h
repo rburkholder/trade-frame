@@ -51,6 +51,7 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include "PivotCrossing.h"
+#include "ValidateOptions.h"
 #include "StrategyStrangle.h"
 
 
@@ -222,7 +223,7 @@ private:
   double m_dblBollingerMean;
   double m_dblBollingerLower;
 
-  using mapChains_t = Strategy::Common::mapChains_t;
+  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
   mapChains_t m_mapChains;
   mapChains_t::iterator m_iterChainExpiryInUse;
 
@@ -254,10 +255,12 @@ private:
 
   size_t m_ixColour;  // index into rColour for assigning colours to leg p/l
 
-  using Strangle = ou::tf::option::Strangle;
-  Strangle m_strangleEvaluation;
+  using pValidateOptions_t = std::unique_ptr<ValidateOptions>;
+  pValidateOptions_t m_pValidateOptions;
 
-  using mapCombo_t = std::map<std::string,Strangle>;
+  using pStrategyCombo_t = std::shared_ptr<Strategy::Common>;
+
+  using mapCombo_t = std::map<std::string,pStrategyCombo_t>;
   mapCombo_t m_mapCombo;
 
   using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc

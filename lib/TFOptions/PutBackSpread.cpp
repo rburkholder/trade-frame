@@ -25,7 +25,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 namespace spread { // spread
-
+/*
 const Combo::leg_pair_t PutBackSpread::m_legDefLong(
   Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Buy,  1 ), // upper
   Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Sell, 2 )  // lower
@@ -35,7 +35,7 @@ const Combo::leg_pair_t PutBackSpread::m_legDefShort(
   Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Sell, 1 ), // upper
   Combo::LegDef( Combo::EOptionSide::Put, Combo::EOrderSide::Buy,  2 )  // lower
 );
-
+*/
 PutBackSpread::PutBackSpread( )
 : Combo()
 {
