@@ -25,6 +25,20 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+namespace {
+/*
+const Common::leg_pair_t StrategyStraddle::m_legDefLong(
+  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Buy, 1 ), // upper
+  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Buy, 1 )  // lower
+);
+
+const Common::leg_pair_t StrategyStraddle::m_legDefShort(
+  Combo::LegDef( Combo::EOptionSide::Call, Combo::EOrderSide::Sell, 1 ), // upper
+  Combo::LegDef( Combo::EOptionSide::Put,  Combo::EOrderSide::Sell, 1 )  // lower
+);
+*/
+}
+
 using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 using pOption_t = Option::pOption_t;
 
