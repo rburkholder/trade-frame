@@ -30,14 +30,15 @@ namespace option { // options
 
 struct LegDef { // generic definition of each leg of the combo
 
-  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
   using EOrderSide = ou::tf::OrderSide::enumOrderSide;
+  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
 
+  EOrderSide side;
   uint32_t quantity;
   EOptionSide type;
-  EOrderSide side;
+
   LegDef( EOrderSide side_, uint32_t quantity_, EOptionSide type_ )
-    : quantity( quantity_ ), type( type_ ), side( side_ ) {}
+  : side( side_ ), quantity( quantity_ ), type( type_ ) {}
 };
 
 } // namespace option
