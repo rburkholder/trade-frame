@@ -14,9 +14,11 @@
       <itemPath>Combo.h</itemPath>
       <itemPath>Condor.h</itemPath>
       <itemPath>Engine.h</itemPath>
+      <itemPath>Exceptions.h</itemPath>
       <itemPath>Formula.h</itemPath>
       <itemPath>IvAtm.h</itemPath>
       <itemPath>Leg.h</itemPath>
+      <itemPath>LegDef.h</itemPath>
       <itemPath>Margin.h</itemPath>
       <itemPath>NoRiskInterestRateSeries.h</itemPath>
       <itemPath>Option.h</itemPath>
@@ -149,6 +151,8 @@
       </item>
       <item path="Engine.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Exceptions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Formula.h" ex="false" tool="3" flavor2="0">
@@ -160,6 +164,8 @@
       <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Leg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LegDef.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -277,6 +283,8 @@
       </item>
       <item path="Engine.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Exceptions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Formula.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Formula.h" ex="false" tool="3" flavor2="0">
@@ -288,6 +296,8 @@
       <item path="Leg.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Leg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LegDef.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Margin.cpp" ex="false" tool="1" flavor2="0">
       </item>
