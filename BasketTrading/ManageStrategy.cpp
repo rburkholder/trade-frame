@@ -75,8 +75,6 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
-#include "LegSelected.h"
-
 #include "ManageStrategy.h"
 
 namespace {
