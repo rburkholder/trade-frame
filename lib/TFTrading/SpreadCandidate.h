@@ -42,7 +42,7 @@ public:
   void SetWatch( pWatch_t pWatch );
   pWatch_t GetWatch();
   bool ValidateSpread( size_t nDuration );
-  bool IsActive() const { return (bool)m_pWatch; };
+  bool IsActive() const { return 0 != m_pWatch.use_count(); };
 
 private:
   size_t m_nDesired;

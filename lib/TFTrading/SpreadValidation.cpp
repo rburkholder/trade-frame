@@ -46,7 +46,7 @@ SpreadValidation::~SpreadValidation() {
 }
 
 void SpreadValidation::SetLegCount( size_t nLegs ) {
-  if ( 0 == m_vSpreadCandidate.size() ) {
+  if ( nLegs != m_vSpreadCandidate.size() ) {
     m_vSpreadCandidate.resize( nLegs );
   }
 }
@@ -64,7 +64,7 @@ SpreadValidation::pWatch_t SpreadValidation::GetWatch( size_t ixLeg ) {
 bool SpreadValidation::IsActive() const {
   bool bActive( true );
   for ( const SpreadCandidate& candidate: m_vSpreadCandidate ) {
-    bActive &= candidate.IsActive();
+    bActive = bActive && candidate.IsActive();
   }
   return bActive;
 }

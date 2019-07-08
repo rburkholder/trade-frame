@@ -113,7 +113,10 @@ bool ValidateOptions::ValidateSpread(
     const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
     std::cout
       << sUnderlying
-      << "(" << nReason << ")"
+      << "("
+      << nReason
+      << "," << m_vLegSelected.size()
+      << ")"
       << ": combo -> price=" << price;
     for ( const vLegSelected_t::value_type& vt: m_vLegSelected ) {
       std::cout << ",strike=" << vt.Strike() << "@" << vt.Expiry();
