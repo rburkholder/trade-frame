@@ -41,7 +41,9 @@ public:
 
   void Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedName );
 
-  bool Changed() const { return m_bChanged; }
+  bool Changed() { bool bTemp = m_bChanged; m_bChanged = false; return bTemp; }
+  //bool Changed() const { return m_bChanged; }
+  //void ResetChanged() { m_bChanged = false; }
   double Strike() const { return m_dblStrike; }
   boost::gregorian::date Expiry() const { return m_dateExpiry; }
   const std::string& IQFeedName() const { return m_sIQFeedName; }

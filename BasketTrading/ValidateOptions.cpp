@@ -98,7 +98,7 @@ bool ValidateOptions::ValidateSpread(
     }
     else {
       bool bAnyChanged( false );
-      for ( const vLegSelected_t::value_type& vt: m_vLegSelected ) {
+      for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
         bAnyChanged = ( bAnyChanged || vt.Changed() );
       }
       if ( bAnyChanged ) {
@@ -129,7 +129,7 @@ bool ValidateOptions::ValidateSpread(
 
     size_t n {};
     for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
-      if ( vt.Changed() ) {
+//      if ( vt.Changed() || ( 1 == nReason ) ) {
         m_fConstructOption(
           vt.IQFeedName(),
           pInstrumentUnderlying,
@@ -138,7 +138,8 @@ bool ValidateOptions::ValidateSpread(
             m_SpreadValidation.SetWatch( n, pOption );
           }
           );
-      }
+//        vt.ResetChanged();
+//      }
       n++;
     }
   } // bBuildOptions
