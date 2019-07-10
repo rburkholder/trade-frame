@@ -276,7 +276,10 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
 //              if ( "SPY" == iip.sName ) { // limit for testing
-              if ( "NEM" != iip.sName ) { // NEM has a non-standard strike price: 35.12, etc
+              if ( 
+                   ( "NEM" != iip.sName )
+                && ( "SPY" != iip.sName )  // stopped out twice, too volatile
+              ) { // NEM has a non-standard strike price: 35.12, etc
                 AddSymbol( iip );
               }
             }
