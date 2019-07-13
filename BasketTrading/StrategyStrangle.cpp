@@ -19,7 +19,6 @@
  * Created on June 23, 2019, 9:33 PM
  */
 
-
 #include "StrategyStrangle.h"
 
 namespace Strategy {
