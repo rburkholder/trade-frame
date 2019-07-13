@@ -101,7 +101,7 @@ bool ValidateOptions::ValidateSpread(
       for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
         bAnyChanged = ( bAnyChanged || vt.Changed() );
       }
-      if ( bAnyChanged ) {
+      if ( bAnyChanged ) {  // TODO: refine the following logic to reset only legs requiring change
         m_SpreadValidation.ResetOptions(); // why doesn't this cause a miss on quote stop/start?
         nReason = 2;
         bBuildOptions = true;
