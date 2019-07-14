@@ -19,12 +19,12 @@ More pictures under ![ComboTrading](ComboTrading)
 
 ## Building
 
-Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
+Scripts are library version specific. I use Debian Buster x64.  Build notes are as of 2016/09/25.
 There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
 
 You'll need to Have about 10G free to build the project and related libraries and installs (from my libs-build repository).
 
-Debian Stretch netinst (daily snapshot usually works): 
+Debian Stretch netinst (daily snapshot usually works): [since Buster is now 'stable', these links now refer to Bullseye]
 https://www.debian.org/devel/debian-installer/
 http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
 
@@ -151,7 +151,7 @@ Libraries used (use my lib-build respository to download and build the various d
 
 The libraries are cross platform capable: Linux and Windows
 
-The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian Stretch/Testing.
+The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian Buster.
 
 The lib directory has a series of libraries I use throughout the various applications.  Primary libraries include:
 
