@@ -1,0 +1,21 @@
+2019/07/16
+
+git config --local core.autocrlf false
+
+use the VS Vars command line to perform the following:
+
+szip:
+cd szip-2.1.1
+mkdir build
+cd build
+cmake ..
+
+then load the .sln file into visual studio 2019 16.1.6 or greater (some previous versions do not have cmake fixed)
+add an x64 build mechanism
+then all the projects need to have build and release converted to x64 tooling
+also, for szip-static, szip-shared => properties - librarian - all options - additional options -> remove the x86 entry
+
+then build with ALL_BUILD, the debug and release versions
+
+files are in build\bin\Debug and build\bin\Release
+
