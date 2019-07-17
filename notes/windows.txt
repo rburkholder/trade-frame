@@ -2,6 +2,9 @@
 
 64 bit hdf5 build with CMake-hdf5-1.10.5.zip with visual studio 2019 
 
+cd CMake-hdf5-1.10.5/hdf5-1.10.5/
+mkdir build
+cd build
 cmake -G "Visual Studio 16 2019" -A x64 -DHDF5_NO_PACKAGES:BOOL=OFF -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO -DHDF5_BUILD_EXAMPLES:BOOL=OFF -DHDF5_USE_FOLDERS:BOOL=OFF -DHDF5_ENABLE_THREADSAFE:BOOL=OFF -DHDF5_BUILD_FORTRAN:BOOL=OFF -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_HL_LIB:BOOL=OFF -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DHDF5_BUILD_TOOLS:BOOL=OFF  -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON -DSZIP_USE_EXTERNAL:BOOL=OFF -DSZIP_LIBRARY:FILEPATH=..\..\szip-2.1.1\build\Release\szip.lib -DSZIP_INCLUDE_DIR:PATH=..\..\szip-2.1.1\src -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_USE_EXTERNAL:BOOL=OFF -DZLIB_LIBRARY:FILEPATH=..\..\zlib-1.2.11\contrib\vstudio\vc14\x64\ZlibStatRelease\zlibstat -DZLIB_DIR:PATH=..\..\zlib-1.2.11\contrib\vstudio\vc14\x64\ZlibStatRelease\ -DZLIB_INCLUDE_DIR:PATH=..\..\zlib-1.2.11 -DCMAKE_BUILD_TYPE:STRING=Release ..
 cmake --build . --config Release
 cpack -C Release CPackConfig.cmake
@@ -21,6 +24,9 @@ cd szip-2.1.1
 mkdir build
 cd build
 cmake ..
+
+for hdf5 will need to:
+rm szip-2.1.1/build/szip-config.cmake
 
 then load the .sln file into visual studio 2019 16.1.6 or greater (some previous versions do not have cmake fixed)
 add an x64 build mechanism
