@@ -1,5 +1,19 @@
 2019/07/17
 
+when building with hdf5-1.10.5.zip:
+
+cd hdf5-1.10.5
+mkdir build
+cd build
+cmake -G "Visual Studio 16 2019" -A x64 -DHDF5_NO_PACKAGES:BOOL=OFF -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO -DHDF5_BUILD_EXAMPLES:BOOL=OFF -DHDF5_USE_FOLDERS:BOOL=OFF -DHDF5_ENABLE_THREADSAFE:BOOL=OFF -DHDF5_BUILD_FORTRAN:BOOL=OFF -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_HL_LIB:BOOL=OFF -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DHDF5_BUILD_TOOLS:BOOL=OFF -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON -DSZIP_USE_EXTERNAL:BOOL=OFF -DSZIP_LIBRARY:FILEPATH=..\szip-2.1.1\build\Release\szip.lib -DSZIP_INCLUDE_DIR:PATH=..\szip-2.1.1\src -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_USE_EXTERNAL:BOOL=OFF -DZLIB_LIBRARY:FILEPATH=..\zlib-1.2.11\contrib\vstudio\vc14\x64\ZlibStatRelease\zlibstat -DZLIB_DIR:PATH=..\zlib-1.2.11\contrib\vstudio\vc14\x64\ZlibStatRelease\ -DZLIB_INCLUDE_DIR:PATH=..\zlib-1.2.11 -DCMAKE_BUILD_TYPE:STRING=Release ..
+cmake --build . --config Release
+cpack -C Release CPackConfig.cmake
+cd ../..
+unzip hdf5-1.10.5/build/HDF5-1.10.5-win64.zip
+cd tradeframe/lib
+mklink /d hdf5 ..\..\HDF5-1.10.5-win64\include
+
+
 64 bit hdf5 build with CMake-hdf5-1.10.5.zip with visual studio 2019 
 
 cd CMake-hdf5-1.10.5/hdf5-1.10.5/
@@ -38,3 +52,19 @@ then build with ALL_BUILD, the debug and release versions
 files are in build\bin\Debug and build\bin\Release
 
 zlib vc14 build files at https://github.com/rburkholder/zlib-mem
+
+2019/0413
+
+zlib libraries at:
+
+C:\Users\rpb\source\repos\zlib-1.2.11\contrib\vstudio\vc14\x64\ZlibStatRelease\zlibstat.lib
+
+When building zlib, copied the ioapi_mem files to the main zlib directory.
+  had to rename the include for ioapi.h to contrib/minizip/ioapi.h
+  add the ioapi_mem.c to the project
+
+for linking, needed to perform asm based upon revised text at:
+  https://blog.raymond.burkholder.net/index.php?/archives/598-Build-zlib-v1.2.8-with-Visual-Studio-2012.html
+
+for the build, also set the project properties from dll to static library
+
