@@ -1,4 +1,8 @@
+# these are links to include files for format '#include <boost/...>'
+// using built in mklink:
+mklink /d hdf5 ..\..\HDF5-1.10.5-win64\include
 
+// using systemutils:
 ..\..\junction boost C:\Data\Projects\libraries\boost_1_45_0\boost
 
 
