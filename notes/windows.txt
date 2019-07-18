@@ -1,6 +1,10 @@
 2019/07/17
 
-when building with hdf5-1.10.5.zip:
+===
+boost 1.70.0 will work with vs2019, 1.69.0 doesn't appear to do so
+===
+
+when building with hdf5-1.10.5.zip (extra stuff of the Cmake-hdf5 is not needed):
 
 cd hdf5-1.10.5
 mkdir build
