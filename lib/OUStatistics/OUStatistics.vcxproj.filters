@@ -7,105 +7,21 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\NewMat">
-      <UniqueIdentifier>{fc19ea7b-c5e3-4263-96c9-ede30ec670b2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\NewMat">
-      <UniqueIdentifier>{18e4158c-9318-41d2-85d1-424c331db838}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="NewMat\newmatap.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\newmatio.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\newmatnl.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\newmatrc.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\newmatrm.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\precisio.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\controlw.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\include.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\myexcept.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="NewMat\newmat.h">
-      <Filter>Header Files\NewMat</Filter>
-    </ClInclude>
-    <ClInclude Include="ADF.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="NewMat\newmat4.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat5.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat6.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat7.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat8.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat9.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmatex.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmatnl.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmatrm.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\submat.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\bandmat.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\myexcept.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat1.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat2.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
-    <ClCompile Include="NewMat\newmat3.cpp">
-      <Filter>Source Files\NewMat</Filter>
-    </ClCompile>
     <ClCompile Include="ADF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ADF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
