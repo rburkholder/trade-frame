@@ -29,6 +29,8 @@
 
 #include <TFIQFeed/IQFeedProvider.h>
 
+#include <TFTrading/Watch.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
@@ -49,6 +51,8 @@ private:
 
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
+
+  ou::tf::Watch::pWatch_t m_pWatch;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );

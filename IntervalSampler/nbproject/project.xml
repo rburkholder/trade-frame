@@ -14,6 +14,7 @@
                 <make-dep-project>../lib/TFBitsNPieces</make-dep-project>
                 <make-dep-project>../lib/TFTimeSeries</make-dep-project>
                 <make-dep-project>../lib/TFVuTrading</make-dep-project>
+                <make-dep-project>../lib/TFHDF5TimeSeries</make-dep-project>
                 <make-dep-project>../lib/OUCommon</make-dep-project>
             </make-dep-projects>
             <sourceRootList/>

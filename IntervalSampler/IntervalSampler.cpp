@@ -24,6 +24,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include "ReadSymbolFile.h"
 #include "IntervalSampler.h"
 
 IMPLEMENT_APP(AppIntervalSampler)
@@ -63,6 +64,13 @@ bool AppIntervalSampler::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIntervalSampler::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Show( true );
 
+  try {
+    ReadSymbolFile();
+  }
+  catch( std::exception& e ) {
+    std::cout << "error during parsing symbols.txt: " << e.what() << std::endl;
+  }
+
   m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
   m_bIQFeedConnected = false;
 
@@ -80,10 +88,18 @@ bool AppIntervalSampler::OnInit() {
 
   m_pIQFeed->Connect();
 
+  ou::tf::Instrument::pInstrument_t pInstrument
+    = boost::make_shared<ou::tf::Instrument>( "GLD", ou::tf::InstrumentType::Stock, "SMART" );
+  m_pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
+  m_pWatch->StartWatch();
+
   return true;
 }
 
 int AppIntervalSampler::OnExit() {
+
+  m_pWatch->StopWatch();
+  m_pWatch.reset();
 
   m_pIQFeed->Disconnect();
 
