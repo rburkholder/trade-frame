@@ -12,17 +12,19 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
-#include "IntervalSampler.h"
-
-/* 
+/*
  * File:    main.cpp
  * Author:  raymond@burkholder.net
  * Project: IntervalSampler
  * Created on August 6, 2019, 11:08 AM
  */
+
+// An IQFeed based project to collect data from symbols at an interval
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include "IntervalSampler.h"
 
 IMPLEMENT_APP(AppIntervalSampler)
 
@@ -94,17 +96,21 @@ int AppIntervalSampler::OnExit() {
 }
 
 void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread event
+  std::cout << "IQFeed connecting ..." << std::endl;
 }
 
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   m_bIQFeedConnected = true;
+  std::cout << "IQFeed connected." << std::endl;
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread event
+  std::cout << "IQFeed disconnecting ..." << std::endl;
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event
   m_bIQFeedConnected = false;
+  std::cout << "IQFeed disconnected." << std::endl;
 }
 
 void AppIntervalSampler::HandleIQFeedError( size_t e ) {
