@@ -121,17 +121,21 @@ void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread even
 
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   
+  m_bIQFeedConnected = true;
+  std::cout << "IQFeed connected." << std::endl;
+
   if ( !m_out.is_open() ) {
     ptime dt( ou::TimeSource::Instance().External() );
     std::string sdt = boost::posix_time::to_iso_string( dt );
     std::string sFileName = sdt + ".csv";
     m_out.open( sFileName, std::fstream::out );
+    std::cout << "streaming to " << sFileName << std::endl;
+    std::cout << "  note: trade values are open of next bar" << std::endl;
   }
 
-  m_bIQFeedConnected = true;
-  std::cout << "IQFeed connected." << std::endl;
-  
+  assert( 1 < m_vSymbol.size() );
   size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
+  std::cout << "interval: " << m_vSymbol[ 0 ] << " seconds" << std::endl;
 
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
   iterSymbol++;
@@ -171,7 +175,7 @@ void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread e
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event
-  if ( !m_out.is_open() ) {
+  if ( m_out.is_open() ) {
     m_out.close();
   }
   m_bIQFeedConnected = false;
@@ -223,6 +227,10 @@ int AppIntervalSampler::OnExit() { // step 2
       m_pIQFeed->OnDisconnecting.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnecting ) );
       m_pIQFeed->OnDisconnected.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnected ) );
       m_pIQFeed->OnError.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
+    }
+
+    if ( m_out.is_open() ) { // TODO: duplicate of 'disconnected, but disconnected not reached, need a join'
+      m_out.close();
     }
   }
 
