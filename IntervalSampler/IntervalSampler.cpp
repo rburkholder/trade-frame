@@ -21,8 +21,14 @@
 
 // An IQFeed based project to collect data from symbols at an interval
 
+// assumption:  all symbols are 'stocks'.
+//   lookups will be required if non-stock symbols are provided (or not, if no special processing is required)
+
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+
+#include <boost/lexical_cast.hpp>
 
 #include "ReadSymbolFile.h"
 #include "IntervalSampler.h"
@@ -89,18 +95,12 @@ bool AppIntervalSampler::OnInit() {
 
   m_pIQFeed->Connect();
 
-  ou::tf::Instrument::pInstrument_t pInstrument
-    = boost::make_shared<ou::tf::Instrument>( "GLD", ou::tf::InstrumentType::Stock, "SMART" );
-  m_pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-  m_pWatch->StartWatch();
-
   return true;
 }
 
 int AppIntervalSampler::OnExit() {
 
-  m_pWatch->StopWatch();
-  m_pWatch.reset();
+  m_vWatch.clear();
 
   m_pIQFeed->Disconnect();
 
@@ -119,6 +119,28 @@ void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread even
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   m_bIQFeedConnected = true;
   std::cout << "IQFeed connected." << std::endl;
+  
+  size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
+
+  vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
+  iterSymbol++;
+  m_vWatch.resize( m_vSymbol.size() - 1 );
+  vWatch_t::iterator iterWatch = m_vWatch.begin();
+  while ( m_vSymbol.end() != iterSymbol ) {
+    ou::tf::Instrument::pInstrument_t pInstrument
+      = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
+    pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
+    iterWatch->Assign( nSeconds, pWatch,
+                       [](const ou::tf::Instrument::idInstrument_t& idInstrument,
+                            const ou::tf::Bar& bar,
+                            const ou::tf::Quote& quote,
+                            const ou::tf::Trade& trade){
+                         std::cout << idInstrument << ": " << trade.DateTime() << "," << trade.Price() << std::endl;
+                       } );
+    iterSymbol++;
+    iterWatch++;
+  }
+
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread event

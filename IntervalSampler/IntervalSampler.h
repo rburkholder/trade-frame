@@ -23,6 +23,7 @@
 #define INTERVALSAMPLER_H
 
 #include <vector>
+#include <functional>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -30,6 +31,8 @@
 #include <wx/wx.h>
 
 #include <TFIQFeed/IQFeedProvider.h>
+
+#include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Watch.h>
 
@@ -54,10 +57,54 @@ private:
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
 
-  using vSymbols_t = std::vector<std::string>;
-  vSymbols_t m_vSymbol;
+  using vSymbol_t = std::vector<std::string>;
+  vSymbol_t m_vSymbol;
 
-  ou::tf::Watch::pWatch_t m_pWatch;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  struct Watch {
+
+    using fBarComplete_t
+      = std::function<void(
+                            const ou::tf::Instrument::idInstrument_t&,
+                            const ou::tf::Bar&,
+                            const ou::tf::Quote&,
+                            const ou::tf::Trade&
+                            )>;
+
+    pWatch_t m_pWatch;
+    ou::tf::BarFactory m_bf;
+    fBarComplete_t m_fBarComplete;
+    Watch() {};
+    void Assign(
+      ou::tf::BarFactory::duration_t duration,
+      pWatch_t pWatch,
+      fBarComplete_t&& fBarComplete
+    ) {
+      assert( nullptr != fBarComplete );
+      m_fBarComplete = std::move( fBarComplete );
+      m_bf.SetBarWidth( duration );
+      m_pWatch = pWatch;
+      m_bf.SetOnBarComplete( MakeDelegate( this, &Watch::HandleBarComplete ) );
+      m_pWatch->StartWatch();
+    }
+    ~Watch() {
+      if ( m_pWatch ) m_pWatch->StopWatch();
+      m_bf.SetOnBarComplete( nullptr );
+      m_pWatch.reset();
+    }
+
+    void HandleBarComplete( const ou::tf::Bar& bar ) {
+      m_fBarComplete(
+        m_pWatch->GetInstrument()->GetInstrumentName(),
+        bar,
+        m_pWatch->LastQuote(),
+        m_pWatch->LastTrade()
+        );
+    }
+  };
+
+  using vWatch_t = std::vector<Watch>;
+  vWatch_t m_vWatch;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
