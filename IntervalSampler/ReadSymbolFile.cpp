@@ -80,7 +80,7 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
 
 ReadSymbolFile::ReadSymbolFile( vSymbol_t& vSymbol) {
   
-  static const std::string sFileName( "symbols.txt" );
+  static const std::string sFileName( "../symbols.txt" );
 
   std::ifstream in(sFileName);
   in.unsetf(std::ios::skipws);
