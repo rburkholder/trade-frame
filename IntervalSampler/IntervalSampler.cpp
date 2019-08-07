@@ -74,7 +74,7 @@ bool AppIntervalSampler::OnInit() {
     ReadSymbolFile symbols( m_vSymbol );
   }
   catch( std::exception& e ) {
-    std::cout << "error during parsing symbols.txt: " << e.what() << std::endl;
+    std::cerr << "error during parsing symbols.txt: " << e.what() << std::endl;
     wxApp::Exit();
   }
 
