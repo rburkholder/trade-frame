@@ -27,7 +27,7 @@ public:
 
   using vSymbol_t = std::vector<std::string>;
 
-  ReadSymbolFile( vSymbol_t& );
+  ReadSymbolFile( const std::string& sFileName, vSymbol_t& );
   virtual ~ReadSymbolFile( );
 private:
 

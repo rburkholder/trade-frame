@@ -28,6 +28,8 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include "ReadSymbolFile.h"
@@ -70,30 +72,43 @@ bool AppIntervalSampler::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIntervalSampler::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Show( true );
 
-  try {
-    ReadSymbolFile symbols( m_vSymbol );
-  }
-  catch( std::exception& e ) {
-    std::cerr << "error during parsing symbols.txt: " << e.what() << std::endl;
-    wxApp::Exit();
-  }
+  static const std::string sFileName( "../is_symbols.txt" );
 
-  m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
-  m_bIQFeedConnected = false;
+  bool bOk( true );
 
-  m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );
-  m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnected ) );
-  m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnecting ) );
-  m_pIQFeed->OnDisconnected.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnected ) );
-  m_pIQFeed->OnError.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
+  if ( !boost::filesystem::exists( sFileName ) ) {
+    std::cout << "file " << sFileName << " cannot be found" << std::endl;
+    bOk = false;
+  }
+  else {
+    try {
+      ReadSymbolFile symbols( sFileName, m_vSymbol );
+    }
+    catch( std::exception& e ) {
+      std::cout << "error during parsing symbols.txt: " << e.what() << std::endl;
+      //wxApp::Exit();
+      bOk = false;
+    }
+
+    if ( bOk ) {
+      m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
+      m_bIQFeedConnected = false;
+
+      m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );
+      m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnected ) );
+      m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnecting ) );
+      m_pIQFeed->OnDisconnected.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnected ) );
+      m_pIQFeed->OnError.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
+
+      m_pIQFeed->Connect();
+    }
+  }
 
   CallAfter(
     [this](){
       LoadState();
     }
   );
-
-  m_pIQFeed->Connect();
 
   return true;
 }

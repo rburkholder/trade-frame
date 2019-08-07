@@ -78,10 +78,8 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
   qi::rule<Iterator, vSymbol_t()> ruleVector;
 };
 
-ReadSymbolFile::ReadSymbolFile( vSymbol_t& vSymbol) {
+ReadSymbolFile::ReadSymbolFile( const std::string& sFileName, vSymbol_t& vSymbol) {
   
-  static const std::string sFileName( "../symbols.txt" );
-
   std::ifstream in(sFileName);
   in.unsetf(std::ios::skipws);
 
