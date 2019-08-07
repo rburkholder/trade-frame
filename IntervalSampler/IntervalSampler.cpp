@@ -32,6 +32,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <OUCommon/TimeSource.h>
+
 #include "ReadSymbolFile.h"
 #include "IntervalSampler.h"
 
@@ -137,6 +139,14 @@ void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread even
 }
 
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
+  
+  if ( !m_out.is_open() ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    std::string sdt = boost::posix_time::to_iso_string( dt );
+    std::string sFileName = sdt + ".csv";
+    m_out.open( sFileName, std::fstream::out );
+  }
+
   m_bIQFeedConnected = true;
   std::cout << "IQFeed connected." << std::endl;
   
@@ -151,11 +161,12 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
       = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
     iterWatch->Assign( nSeconds, pWatch,
-                       [](const ou::tf::Instrument::idInstrument_t& idInstrument,
+                       [this](const ou::tf::Instrument::idInstrument_t& idInstrument,
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,
                             const ou::tf::Trade& trade){
-                         std::cout
+                         //std::cout
+                         m_out
                            << idInstrument
                            << "," << boost::posix_time::to_iso_string( trade.DateTime() )
                            << "," << bar.High()
@@ -179,6 +190,9 @@ void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread e
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event
+  if ( !m_out.is_open() ) {
+    m_out.close();
+  }
   m_bIQFeedConnected = false;
   std::cout << "IQFeed disconnected." << std::endl;
 }
