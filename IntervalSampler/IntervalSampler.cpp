@@ -115,25 +115,6 @@ bool AppIntervalSampler::OnInit() {
   return true;
 }
 
-int AppIntervalSampler::OnExit() {
-
-  m_vWatch.clear();
-
-  if ( m_pIQFeed ) {
-    if ( m_pIQFeed->Connected() ) {
-      m_pIQFeed->Disconnect();
-
-      m_pIQFeed->OnConnecting.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );
-      m_pIQFeed->OnConnected.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnected ) );
-      m_pIQFeed->OnDisconnecting.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnecting ) );
-      m_pIQFeed->OnDisconnected.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnected ) );
-      m_pIQFeed->OnError.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
-    }
-  }
-  
-  return wxApp::OnExit();
-}
-
 void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread event
   std::cout << "IQFeed connecting ..." << std::endl;
 }
@@ -222,10 +203,29 @@ void AppIntervalSampler::LoadState() {
   }
 }
 
-void AppIntervalSampler::OnClose( wxCloseEvent& event ) {
+void AppIntervalSampler::OnClose( wxCloseEvent& event ) { // step 1
 
   SaveState();
 
   event.Skip();  // auto followed by Destroy();
+}
+
+int AppIntervalSampler::OnExit() { // step 2
+
+  m_vWatch.clear();
+
+  if ( m_pIQFeed ) {
+    if ( m_pIQFeed->Connected() ) {
+      m_pIQFeed->Disconnect();
+
+      m_pIQFeed->OnConnecting.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );
+      m_pIQFeed->OnConnected.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnected ) );
+      m_pIQFeed->OnDisconnecting.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnecting ) );
+      m_pIQFeed->OnDisconnected.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedDisconnected ) );
+      m_pIQFeed->OnError.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
+    }
+  }
+
+  return wxApp::OnExit();
 }
 
