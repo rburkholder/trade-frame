@@ -65,10 +65,11 @@ bool AppIntervalSampler::OnInit() {
   m_pFrameMain->Show( true );
 
   try {
-    ReadSymbolFile();
+    ReadSymbolFile symbols( m_vSymbol );
   }
   catch( std::exception& e ) {
     std::cout << "error during parsing symbols.txt: " << e.what() << std::endl;
+    wxApp::Exit();
   }
 
   m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();

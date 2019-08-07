@@ -24,7 +24,10 @@
 
 class ReadSymbolFile {
 public:
-  ReadSymbolFile( );
+
+  using vSymbol_t = std::vector<std::string>;
+
+  ReadSymbolFile( vSymbol_t& );
   virtual ~ReadSymbolFile( );
 private:
 

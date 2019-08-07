@@ -32,14 +32,12 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 
-//#include <boost/fusion/include/std_pair.hpp>
-
 #include "ReadSymbolFile.h"
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 
-using vSymbol_t = std::vector<std::string>;
+using vSymbol_t = ReadSymbolFile::vSymbol_t;
 
 template<typename Iterator>
 struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
@@ -53,12 +51,12 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
     ruleInterval = +ruleCharNum;
     ruleName = ruleCharInitial >> +ruleCharOther;
 
-    ruleSep = qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' );
+    //ruleSep = qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' );
 
     //ruleItem = ruleSep >> ruleName;
 
     //ruleVector = ruleInterval >> +( qi::eol >> ruleItem ) >> -qi::eol;
-    ruleVector = ruleInterval >> +(ruleSep >> ruleName) >> -qi::eol;
+    ruleVector = ruleInterval >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
 
 //    BOOST_SPIRIT_DEBUG_NODE( ruleNameChar );
 //    BOOST_SPIRIT_DEBUG_NODE( ruleName );
@@ -71,7 +69,7 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
   qi::rule<Iterator, char()> ruleCharNum;
   qi::rule<Iterator, char()> ruleCharInitial;
   qi::rule<Iterator, char()> ruleCharOther;
-  qi::rule<Iterator, char()> ruleSep;
+  //qi::rule<Iterator, char()> ruleSep;
 
   qi::rule<Iterator, std::string()> ruleInterval;
   qi::rule<Iterator, std::string()> ruleName;
@@ -80,14 +78,16 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
   qi::rule<Iterator, vSymbol_t()> ruleVector;
 };
 
-ReadSymbolFile::ReadSymbolFile( ) { 
+ReadSymbolFile::ReadSymbolFile( vSymbol_t& vSymbol) {
   
   static const std::string sFileName( "symbols.txt" );
 
   std::ifstream in(sFileName);
   in.unsetf(std::ios::skipws);
 
-  assert( !in.eof() );
+  if ( in.eof() ) {
+    throw std::runtime_error( sFileName + " is empty" );
+  }
 
   // http://boost-spirit.com/home/2010/01/05/stream-based-parsing-made-easy/
   boost::spirit::istream_iterator begin( in );
@@ -95,20 +95,19 @@ ReadSymbolFile::ReadSymbolFile( ) {
 
   assert( !in.eof() );
 
-  vSymbol_t vSymbol;
-
   decode_symbol_list<boost::spirit::istream_iterator> parser;
 
   bool bResult = qi::parse( begin, end, parser, vSymbol );
 
   if (!bResult) {
-    throw std::runtime_error( "can't decode symbol list" );
+    throw std::runtime_error( "can't decode symbol list: " + sFileName );
   }
-  else {
-    for ( vSymbol_t::value_type vt: vSymbol ) {
-      std::cout << vt << std::endl;
-    }
-  }
+
+  //for ( vSymbol_t::value_type vt: vSymbol ) {
+  //  std::cout << vt << std::endl;
+  //}
+
+  std::cout << "symbol list contains " << vSymbol.size() - 1 << " symbols" << std::endl;
 }
 
 ReadSymbolFile::~ReadSymbolFile( ) {

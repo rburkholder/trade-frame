@@ -22,6 +22,8 @@
 #ifndef INTERVALSAMPLER_H
 #define INTERVALSAMPLER_H
 
+#include <vector>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -51,6 +53,9 @@ private:
 
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
+
+  using vSymbols_t = std::vector<std::string>;
+  vSymbols_t m_vSymbol;
 
   ou::tf::Watch::pWatch_t m_pWatch;
 
