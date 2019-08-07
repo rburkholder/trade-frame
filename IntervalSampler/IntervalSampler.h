@@ -85,14 +85,19 @@ private:
       m_bf.SetBarWidth( duration );
       m_pWatch = pWatch;
       m_bf.SetOnBarComplete( MakeDelegate( this, &Watch::HandleBarComplete ) );
+      //m_pWatch->OnQuote.Add( MakeDelegate( this, &Watch::HandleQuote ) );
+      m_pWatch->OnTrade.Add( MakeDelegate( this, &Watch::HandleTrade ) );
       m_pWatch->StartWatch();
     }
     ~Watch() {
       if ( m_pWatch ) m_pWatch->StopWatch();
       m_bf.SetOnBarComplete( nullptr );
-      m_pWatch.reset();
+      m_pWatch->OnTrade.Remove( MakeDelegate( this, &Watch::HandleTrade ) );
+      m_pWatch.reset(); // TODO: need to wait for queue to flush
     }
-
+    void HandleTrade( const ou::tf::Trade& trade ) {
+      m_bf.Add( trade );
+    }
     void HandleBarComplete( const ou::tf::Bar& bar ) {
       m_fBarComplete(
         m_pWatch->GetInstrument()->GetInstrumentName(),

@@ -155,7 +155,16 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,
                             const ou::tf::Trade& trade){
-                         std::cout << idInstrument << ": " << trade.DateTime() << "," << trade.Price() << std::endl;
+                         std::cout << idInstrument << ": " 
+                           << trade.DateTime()
+                           << "," << bar.High()
+                           << "," << bar.Low()
+                           << "," << bar.Open()
+                           << "," << bar.Close()
+                           << "," << trade.Price() << "," << trade.Volume()
+                           << "," << quote.Ask() << "," << quote.AskSize()
+                           << "," << quote.Bid() << "," << quote.BidSize()
+                           << std::endl;
                        } );
     iterSymbol++;
     iterWatch++;
