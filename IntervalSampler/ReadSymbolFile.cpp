@@ -49,7 +49,7 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
     ruleCharOther   = ruleCharInitial | qi::char_( '.' );
 
     ruleInterval = +ruleCharNum;
-    ruleName = ruleCharInitial >> +ruleCharOther;
+    ruleName = ruleCharInitial >> *ruleCharOther;
 
     //ruleSep = qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' );
 
@@ -100,6 +100,7 @@ ReadSymbolFile::ReadSymbolFile( vSymbol_t& vSymbol) {
   bool bResult = qi::parse( begin, end, parser, vSymbol );
 
   if (!bResult) {
+    std::cerr << "symbol diff: " << vSymbol.size() << std::endl;
     throw std::runtime_error( "can't decode symbol list: " + sFileName );
   }
 
