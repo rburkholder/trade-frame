@@ -133,7 +133,7 @@ void AppIntervalSampler::OutputFileCheck( ptime dt ) {
   //ptime dt( ou::TimeSource::Instance().External() );
   if ( !m_out.is_open() ) {
     OutputFileOpen( dt );
-    m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 15, 30, 0 ) );
+    m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
     std::cout << "  note: trade values are open of next bar" << std::endl;
   }
   else {
