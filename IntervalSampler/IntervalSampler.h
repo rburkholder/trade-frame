@@ -61,6 +61,7 @@ private:
   using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
 
+  ptime m_dtNextRotation;
   std::ofstream m_out;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -119,6 +120,9 @@ private:
   void HandleIQFeedDisconnecting( int );
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
+
+  void OutputFileOpen( ptime dt );
+  void OutputFileCheck( ptime dt );
 
   virtual bool OnInit();
   virtual int OnExit();

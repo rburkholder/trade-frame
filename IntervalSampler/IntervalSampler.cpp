@@ -119,19 +119,35 @@ void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread even
   std::cout << "IQFeed connecting ..." << std::endl;
 }
 
-void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
-  
-  m_bIQFeedConnected = true;
-  std::cout << "IQFeed connected." << std::endl;
+void AppIntervalSampler::OutputFileOpen( ptime dt ) {
+  std::string sdt = boost::posix_time::to_iso_string( dt );
+  std::string sFileName = sdt + ".csv";
+  m_out.open( sFileName, std::fstream::out );
+  std::cout << "streaming to " << sFileName << std::endl;
+}
 
+void AppIntervalSampler::OutputFileCheck( ptime dt ) {
+
+  namespace pt = boost::posix_time;
+
+  //ptime dt( ou::TimeSource::Instance().External() );
   if ( !m_out.is_open() ) {
-    ptime dt( ou::TimeSource::Instance().External() );
-    std::string sdt = boost::posix_time::to_iso_string( dt );
-    std::string sFileName = sdt + ".csv";
-    m_out.open( sFileName, std::fstream::out );
-    std::cout << "streaming to " << sFileName << std::endl;
+    OutputFileOpen( dt );
+    m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 15, 30, 0 ) );
     std::cout << "  note: trade values are open of next bar" << std::endl;
   }
+  else {
+    if ( m_dtNextRotation <= dt ) {
+      m_out.close();
+      OutputFileOpen( dt );
+    }
+  }
+}
+
+void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
+
+  m_bIQFeedConnected = true;
+  std::cout << "IQFeed connected." << std::endl;
 
   assert( 1 < m_vSymbol.size() );
   size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
@@ -150,7 +166,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,
                             const ou::tf::Trade& trade){
-                         //std::cout
+                         OutputFileCheck( trade.DateTime() );
                          m_out
                            << idInstrument
                            << "," << boost::posix_time::to_iso_string( trade.DateTime() )
