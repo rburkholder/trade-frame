@@ -123,6 +123,10 @@ void AppIntervalSampler::OutputFileOpen( ptime dt ) {
   std::string sdt = boost::posix_time::to_iso_string( dt );
   std::string sFileName = sdt + ".csv";
   m_out.open( sFileName, std::fstream::out );
+  if ( !m_out.is_open() ) {
+    std::cerr << "cannot open file for output " << sFileName << std::endl;
+    std::runtime_error( "file not opened" );
+  }
   std::cout << "streaming to " << sFileName << std::endl;
 }
 
@@ -133,13 +137,18 @@ void AppIntervalSampler::OutputFileCheck( ptime dt ) {
   //ptime dt( ou::TimeSource::Instance().External() );
   if ( !m_out.is_open() ) {
     OutputFileOpen( dt );
-    m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
+    m_dtNextRotation = pt::ptime( dt.date(), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
+    if ( m_dtNextRotation <= dt ) {
+      m_dtNextRotation = m_dtNextRotation + boost::gregorian::date_duration( 1 );
+    }
+    std::cout << "  next rotation at " << boost::posix_time::to_iso_string( m_dtNextRotation );
+    //m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
     std::cout << "  note: trade values are open of next bar" << std::endl;
   }
   else {
     if ( m_dtNextRotation <= dt ) {
       m_out.close();
-      OutputFileOpen( dt );
+      OutputFileCheck( dt ); // recursive one step max
     }
   }
 }
