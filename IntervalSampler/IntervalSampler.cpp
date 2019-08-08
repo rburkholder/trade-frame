@@ -141,7 +141,7 @@ void AppIntervalSampler::OutputFileCheck( ptime dt ) {
     if ( m_dtNextRotation <= dt ) {
       m_dtNextRotation = m_dtNextRotation + boost::gregorian::date_duration( 1 );
     }
-    std::cout << "  next rotation at " << boost::posix_time::to_iso_string( m_dtNextRotation );
+    std::cout << "  next rotation at " << boost::posix_time::to_iso_string( m_dtNextRotation ) << std::endl;
     //m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
     std::cout << "  note: trade values are open of next bar" << std::endl;
   }
