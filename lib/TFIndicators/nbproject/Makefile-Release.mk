@@ -91,127 +91,127 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a: ${OBJECTFILES}
 ${OBJECTDIR}/Crossing.o: Crossing.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Crossing.o Crossing.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Crossing.o Crossing.cpp
 
 ${OBJECTDIR}/PivotGroup.o: PivotGroup.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PivotGroup.o PivotGroup.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PivotGroup.o PivotGroup.cpp
 
 ${OBJECTDIR}/Pivots.o: Pivots.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivots.o Pivots.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivots.o Pivots.cpp
 
 ${OBJECTDIR}/RunningMinMax.o: RunningMinMax.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RunningMinMax.o RunningMinMax.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RunningMinMax.o RunningMinMax.cpp
 
 ${OBJECTDIR}/RunningStats.o: RunningStats.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RunningStats.o RunningStats.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RunningStats.o RunningStats.cpp
 
 ${OBJECTDIR}/SlidingWindow.o: SlidingWindow.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SlidingWindow.o SlidingWindow.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SlidingWindow.o SlidingWindow.cpp
 
 ${OBJECTDIR}/StatsInSlidingWindow.o: StatsInSlidingWindow.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StatsInSlidingWindow.o StatsInSlidingWindow.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StatsInSlidingWindow.o StatsInSlidingWindow.cpp
 
 ${OBJECTDIR}/TSDifferential.o: TSDifferential.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSDifferential.o TSDifferential.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSDifferential.o TSDifferential.cpp
 
 ${OBJECTDIR}/TSEMA.o: TSEMA.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSEMA.o TSEMA.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSEMA.o TSEMA.cpp
 
 ${OBJECTDIR}/TSHomogenization.o: TSHomogenization.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSHomogenization.o TSHomogenization.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSHomogenization.o TSHomogenization.cpp
 
 ${OBJECTDIR}/TSMA.o: TSMA.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSMA.o TSMA.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSMA.o TSMA.cpp
 
 ${OBJECTDIR}/TSNorm.o: TSNorm.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSNorm.o TSNorm.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSNorm.o TSNorm.cpp
 
 ${OBJECTDIR}/TSReturns.o: TSReturns.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSReturns.o TSReturns.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSReturns.o TSReturns.cpp
 
 ${OBJECTDIR}/TSSWDonchianChannel.o: TSSWDonchianChannel.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWDonchianChannel.o TSSWDonchianChannel.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWDonchianChannel.o TSSWDonchianChannel.cpp
 
 ${OBJECTDIR}/TSSWEfficiencyRatio.o: TSSWEfficiencyRatio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWEfficiencyRatio.o TSSWEfficiencyRatio.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWEfficiencyRatio.o TSSWEfficiencyRatio.cpp
 
 ${OBJECTDIR}/TSSWRateOfChange.o: TSSWRateOfChange.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRateOfChange.o TSSWRateOfChange.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRateOfChange.o TSSWRateOfChange.cpp
 
 ${OBJECTDIR}/TSSWRealizedVolatility.o: TSSWRealizedVolatility.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRealizedVolatility.o TSSWRealizedVolatility.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRealizedVolatility.o TSSWRealizedVolatility.cpp
 
 ${OBJECTDIR}/TSSWRunningTally.o: TSSWRunningTally.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRunningTally.o TSSWRunningTally.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWRunningTally.o TSSWRunningTally.cpp
 
 ${OBJECTDIR}/TSSWStats.o: TSSWStats.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWStats.o TSSWStats.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWStats.o TSSWStats.cpp
 
 ${OBJECTDIR}/TSSWStochastic.o: TSSWStochastic.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWStochastic.o TSSWStochastic.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWStochastic.o TSSWStochastic.cpp
 
 ${OBJECTDIR}/TSSWTickFrequency.o: TSSWTickFrequency.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWTickFrequency.o TSSWTickFrequency.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSSWTickFrequency.o TSSWTickFrequency.cpp
 
 ${OBJECTDIR}/TSVariance.o: TSVariance.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSVariance.o TSVariance.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSVariance.o TSVariance.cpp
 
 ${OBJECTDIR}/TSVolatility.o: TSVolatility.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSVolatility.o TSVolatility.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSVolatility.o TSVolatility.cpp
 
 ${OBJECTDIR}/ZigZag.o: ZigZag.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ZigZag.o ZigZag.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ZigZag.o ZigZag.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
+	$(COMPILE.cc) -O2 -s -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
 # Subprojects
 .build-subprojects:

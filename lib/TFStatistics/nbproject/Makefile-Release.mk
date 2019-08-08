@@ -43,8 +43,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m64
+CXXFLAGS=-m64
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -68,12 +68,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfstatistics.a: ${OBJECTFILES}
 ${OBJECTDIR}/HistoricalVolatility.o: HistoricalVolatility.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HistoricalVolatility.o HistoricalVolatility.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HistoricalVolatility.o HistoricalVolatility.cpp
 
 ${OBJECTDIR}/Pivot.o: Pivot.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivot.o Pivot.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Pivot.o Pivot.cpp
 
 # Subprojects
 .build-subprojects:

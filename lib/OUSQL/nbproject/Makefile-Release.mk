@@ -67,7 +67,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousql.a: ${OBJECTFILES}
 ${OBJECTDIR}/Actions.o: Actions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Actions.o Actions.cpp
+	$(COMPILE.cc) -O2 -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Actions.o Actions.cpp
 
 # Subprojects
 .build-subprojects:

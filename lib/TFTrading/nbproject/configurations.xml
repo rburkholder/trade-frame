@@ -289,7 +289,7 @@
         <ccTool>
           <developmentMode>5</developmentMode>
           <architecture>2</architecture>
-          <standard>8</standard>
+          <standard>12</standard>
           <incDir>
             <pElem>../</pElem>
           </incDir>

@@ -72,32 +72,32 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a: ${OBJECTFI
 ${OBJECTDIR}/EventIBInstrument.o: EventIBInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventIBInstrument.o EventIBInstrument.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventIBInstrument.o EventIBInstrument.cpp
 
 ${OBJECTDIR}/IBSymbol.o: IBSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBSymbol.o IBSymbol.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBSymbol.o IBSymbol.cpp
 
 ${OBJECTDIR}/IBTWS.o: IBTWS.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBTWS.o IBTWS.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBTWS.o IBTWS.cpp
 
 ${OBJECTDIR}/linux/EClientSocketBase.o: linux/EClientSocketBase.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EClientSocketBase.o linux/EClientSocketBase.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EClientSocketBase.o linux/EClientSocketBase.cpp
 
 ${OBJECTDIR}/linux/EPosixClientSocket.o: linux/EPosixClientSocket.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EPosixClientSocket.o linux/EPosixClientSocket.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EPosixClientSocket.o linux/EPosixClientSocket.cpp
 
 ${OBJECTDIR}/linux/StdAfx.o: linux/StdAfx.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/StdAfx.o linux/StdAfx.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/StdAfx.o linux/StdAfx.cpp
 
 # Subprojects
 .build-subprojects:
