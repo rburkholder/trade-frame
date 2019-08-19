@@ -172,12 +172,14 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
     iterWatch->Assign( nSeconds, pWatch,
                        [this](const ou::tf::Instrument::idInstrument_t& idInstrument,
+                            size_t nSequence,
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,
                             const ou::tf::Trade& trade){
                          OutputFileCheck( trade.DateTime() );
                          m_out
                            << idInstrument
+                           << "," << nSequence
                            << "," << boost::posix_time::to_iso_string( trade.DateTime() )
                            << "," << bar.High()
                            << "," << bar.Low()

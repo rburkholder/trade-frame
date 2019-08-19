@@ -67,9 +67,11 @@ private:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   struct Watch {
 
+    size_t m_nSequence;
     using fBarComplete_t
       = std::function<void(
                             const ou::tf::Instrument::idInstrument_t&,
+                            size_t,
                             const ou::tf::Bar&,
                             const ou::tf::Quote&,
                             const ou::tf::Trade&
@@ -78,7 +80,7 @@ private:
     pWatch_t m_pWatch;
     ou::tf::BarFactory m_bf;
     fBarComplete_t m_fBarComplete;
-    Watch() {};
+    Watch(): m_nSequence {} {};
     void Assign(
       ou::tf::BarFactory::duration_t duration,
       pWatch_t pWatch,
@@ -103,8 +105,10 @@ private:
       m_bf.Add( trade );
     }
     void HandleBarComplete( const ou::tf::Bar& bar ) {
+      m_nSequence++;
       m_fBarComplete(
         m_pWatch->GetInstrument()->GetInstrumentName(),
+        m_nSequence,
         bar,
         m_pWatch->LastQuote(),
         m_pWatch->LastTrade()
