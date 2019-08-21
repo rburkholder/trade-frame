@@ -36,7 +36,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
-#include "Watch.h"
+#include "Capture.h"
 
 class AppIntervalSampler:
   public wxApp
@@ -62,9 +62,8 @@ private:
   ptime m_dtNextRotation;
   std::ofstream m_out;
 
-
-  using vWatch_t = std::vector<Watch>;
-  vWatch_t m_vWatch;
+  using vCapture_t = std::vector<Capture>;
+  vCapture_t m_vCapture;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );

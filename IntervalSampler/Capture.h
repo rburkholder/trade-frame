@@ -28,7 +28,7 @@
 
 #include <TFTrading/Watch.h>
 
-struct Watch {
+struct Capture {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -42,8 +42,8 @@ public:
         const ou::tf::Trade&
         )>;
 
-  Watch();
-  ~Watch();
+  Capture();
+  ~Capture();
 
   void Assign(
     ou::tf::BarFactory::duration_t duration,

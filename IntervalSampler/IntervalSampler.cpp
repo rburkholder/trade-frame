@@ -166,13 +166,13 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
 
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
   iterSymbol++;
-  m_vWatch.resize( m_vSymbol.size() - 1 );
-  vWatch_t::iterator iterWatch = m_vWatch.begin();
+  m_vCapture.resize( m_vSymbol.size() - 1 );
+  vCapture_t::iterator iterCapture = m_vCapture.begin();
   while ( m_vSymbol.end() != iterSymbol ) {
     ou::tf::Instrument::pInstrument_t pInstrument
       = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-    iterWatch->Assign( nSeconds, pWatch,
+    iterCapture->Assign( nSeconds, pWatch,
                        [this](const ou::tf::Instrument::idInstrument_t& idInstrument,
                             size_t nSequence,
                             const ou::tf::Bar& bar,
@@ -194,7 +194,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
                            << std::endl;
                        } );
     iterSymbol++;
-    iterWatch++;
+    iterCapture++;
   }
 
 }
@@ -245,7 +245,7 @@ void AppIntervalSampler::OnClose( wxCloseEvent& event ) { // step 1
 
 int AppIntervalSampler::OnExit() { // step 2
 
-  m_vWatch.clear();
+  m_vCapture.clear();
 
   if ( m_pIQFeed ) {
     if ( m_pIQFeed->Connected() ) {
