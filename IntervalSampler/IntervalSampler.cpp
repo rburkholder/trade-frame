@@ -165,15 +165,18 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   std::cout << "interval: " << m_vSymbol[ 0 ] << " seconds" << std::endl;
 
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
-  iterSymbol++;
+  iterSymbol++; // pass over the first line of duration
   m_vCapture.resize( m_vSymbol.size() - 1 );
   vCapture_t::iterator iterCapture = m_vCapture.begin();
   while ( m_vSymbol.end() != iterSymbol ) {
     ou::tf::Instrument::pInstrument_t pInstrument
       = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-    iterCapture->Assign( nSeconds, pWatch,
-                       [this](const ou::tf::Instrument::idInstrument_t& idInstrument,
+    (*iterCapture) = std::move( std::make_unique<Capture>() );
+    (*iterCapture)->Assign(
+                       nSeconds, pWatch,
+                       [this](
+                            const ou::tf::Instrument::idInstrument_t& idInstrument,
                             size_t nSequence,
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,

@@ -62,7 +62,8 @@ private:
   ptime m_dtNextRotation;
   std::ofstream m_out;
 
-  using vCapture_t = std::vector<Capture>;
+  using pCapture_t = std::unique_ptr<Capture>;
+  using vCapture_t = std::vector<pCapture_t>;
   vCapture_t m_vCapture;
 
   void HandleIQFeedConnecting( int );

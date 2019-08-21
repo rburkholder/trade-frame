@@ -51,14 +51,33 @@ void Capture::Assign(
   m_pWatch->StartWatch();
 }
 
+void Capture::Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, ou::tf::Trade& trade ) {
+  {
+    m_spinlock.lock(); // released on exit
+    bQuoteReady = m_bQuoteReady;
+    if ( m_bQuoteReady ) {
+      quote = m_quote;
+      m_bQuoteReady = false;
+    }
+  }
+  {
+    m_spinlock.lock(); // released on exit
+    bTradeReady = m_bTradeReady;
+    if ( m_bTradeReady ) {
+      trade = m_trade;
+      m_bTradeReady = false;
+    }
+  }
+}
+
 void Capture::HandleQuote( const ou::tf::Quote& quote ) {
-  //m_spinlock.lock(); // released on exit
+  m_spinlock.lock(); // released on exit
   m_quote = quote;
   m_bQuoteReady = true;
 }
 
 void Capture::HandleTrade( const ou::tf::Trade& trade ) {
-  //m_spinlock.lock(); // released on exit
+  m_spinlock.lock(); // released on exit
   m_trade = trade;
   m_bTradeReady = true;
   //m_bf.Add( trade );
@@ -67,11 +86,13 @@ void Capture::HandleTrade( const ou::tf::Trade& trade ) {
 // disabled for now
 void Capture::HandleBarComplete( const ou::tf::Bar& bar ) {
   m_nSequence++;
-  m_fBarComplete(
-    m_pWatch->GetInstrument()->GetInstrumentName(),
-    m_nSequence,
-    bar,
-    m_pWatch->LastQuote(),
-    m_pWatch->LastTrade()
-    );
+  if ( nullptr != m_fBarComplete ) {
+    m_fBarComplete(
+      m_pWatch->GetInstrument()->GetInstrumentName(),
+      m_nSequence,
+      bar,
+      m_pWatch->LastQuote(),
+      m_pWatch->LastTrade()
+      );
+  }
 }

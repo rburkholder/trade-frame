@@ -51,6 +51,8 @@ public:
     fBarComplete_t&& fBarComplete
   );
 
+  void Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, ou::tf::Trade& trade );
+
 protected:
 private:
   size_t m_nSequence;
@@ -59,7 +61,7 @@ private:
   ou::tf::BarFactory m_bf;
   fBarComplete_t m_fBarComplete;
 
-  //ou::SpinLock m_spinlock;
+  ou::SpinLock m_spinlock;
 
   bool m_bQuoteReady;
   ou::tf::Quote m_quote;
