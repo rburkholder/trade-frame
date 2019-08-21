@@ -22,6 +22,8 @@
 #ifndef WATCH_H
 #define WATCH_H
 
+#include <OUCommon/SpinLock.h>
+
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Watch.h>
@@ -57,6 +59,15 @@ private:
   ou::tf::BarFactory m_bf;
   fBarComplete_t m_fBarComplete;
 
+  //ou::SpinLock m_spinlock;
+
+  bool m_bQuoteReady;
+  ou::tf::Quote m_quote;
+
+  bool m_bTradeReady;
+  ou::tf::Trade m_trade;
+
+  void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleBarComplete( const ou::tf::Bar& bar );
 

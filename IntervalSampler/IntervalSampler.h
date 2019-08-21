@@ -62,6 +62,7 @@ private:
   ptime m_dtNextRotation;
   std::ofstream m_out;
 
+
   using vWatch_t = std::vector<Watch>;
   vWatch_t m_vWatch;
 
