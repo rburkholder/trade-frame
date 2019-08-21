@@ -155,6 +155,8 @@ void AppIntervalSampler::OutputFileCheck( ptime dt ) {
 
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
   m_bIQFeedConnected = true;
   std::cout << "IQFeed connected." << std::endl;
 

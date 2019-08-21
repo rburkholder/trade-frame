@@ -33,12 +33,10 @@
 
 #include <TFIQFeed/IQFeedProvider.h>
 
-#include <TFTimeSeries/BarFactory.h>
-
-#include <TFTrading/Watch.h>
-
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+
+#include "Watch.h"
 
 class AppIntervalSampler:
   public wxApp
@@ -63,58 +61,6 @@ private:
 
   ptime m_dtNextRotation;
   std::ofstream m_out;
-
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  struct Watch {
-
-    size_t m_nSequence;
-    using fBarComplete_t
-      = std::function<void(
-                            const ou::tf::Instrument::idInstrument_t&,
-                            size_t,
-                            const ou::tf::Bar&,
-                            const ou::tf::Quote&,
-                            const ou::tf::Trade&
-                            )>;
-
-    pWatch_t m_pWatch;
-    ou::tf::BarFactory m_bf;
-    fBarComplete_t m_fBarComplete;
-    Watch(): m_nSequence {} {};
-    void Assign(
-      ou::tf::BarFactory::duration_t duration,
-      pWatch_t pWatch,
-      fBarComplete_t&& fBarComplete
-    ) {
-      assert( nullptr != fBarComplete );
-      m_fBarComplete = std::move( fBarComplete );
-      m_bf.SetBarWidth( duration );
-      m_pWatch = pWatch;
-      m_bf.SetOnBarComplete( MakeDelegate( this, &Watch::HandleBarComplete ) );
-      //m_pWatch->OnQuote.Add( MakeDelegate( this, &Watch::HandleQuote ) );
-      m_pWatch->OnTrade.Add( MakeDelegate( this, &Watch::HandleTrade ) );
-      m_pWatch->StartWatch();
-    }
-    ~Watch() {
-      if ( m_pWatch ) m_pWatch->StopWatch();
-      m_bf.SetOnBarComplete( nullptr );
-      m_pWatch->OnTrade.Remove( MakeDelegate( this, &Watch::HandleTrade ) );
-      m_pWatch.reset(); // TODO: need to wait for queue to flush
-    }
-    void HandleTrade( const ou::tf::Trade& trade ) {
-      m_bf.Add( trade );
-    }
-    void HandleBarComplete( const ou::tf::Bar& bar ) {
-      m_nSequence++;
-      m_fBarComplete(
-        m_pWatch->GetInstrument()->GetInstrumentName(),
-        m_nSequence,
-        bar,
-        m_pWatch->LastQuote(),
-        m_pWatch->LastTrade()
-        );
-    }
-  };
 
   using vWatch_t = std::vector<Watch>;
   vWatch_t m_vWatch;

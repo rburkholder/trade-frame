@@ -36,7 +36,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/IntervalSampler.o \
-	${OBJECTDIR}/ReadSymbolFile.o
+	${OBJECTDIR}/ReadSymbolFile.o \
+	${OBJECTDIR}/Watch.o
 
 
 # C Compiler Flags
@@ -86,6 +87,11 @@ ${OBJECTDIR}/ReadSymbolFile.o: ReadSymbolFile.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSymbolFile.o ReadSymbolFile.cpp
+
+${OBJECTDIR}/Watch.o: Watch.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Watch.o Watch.cpp
 
 # Subprojects
 .build-subprojects:

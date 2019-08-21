@@ -1,0 +1,66 @@
+/************************************************************************
+ * Copyright(c) 2019, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
+
+/*
+ * File:    Watch.h
+ * Author:  raymond@burkholder.net
+ * Project: IntervalSampler
+ * Created on August 21, 2019, 11:10 AM
+ */
+
+#ifndef WATCH_H
+#define WATCH_H
+
+#include <TFTimeSeries/BarFactory.h>
+
+#include <TFTrading/Watch.h>
+
+struct Watch {
+public:
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  using fBarComplete_t
+    = std::function<void(
+        const ou::tf::Instrument::idInstrument_t&,
+        size_t,
+        const ou::tf::Bar&,
+        const ou::tf::Quote&,
+        const ou::tf::Trade&
+        )>;
+
+  Watch();
+  ~Watch();
+
+  void Assign(
+    ou::tf::BarFactory::duration_t duration,
+    pWatch_t pWatch,
+    fBarComplete_t&& fBarComplete
+  );
+
+protected:
+private:
+  size_t m_nSequence;
+
+  pWatch_t m_pWatch;
+  ou::tf::BarFactory m_bf;
+  fBarComplete_t m_fBarComplete;
+
+  void HandleTrade( const ou::tf::Trade& trade );
+  void HandleBarComplete( const ou::tf::Bar& bar );
+
+};
+
+#endif /* WATCH_H */
+
