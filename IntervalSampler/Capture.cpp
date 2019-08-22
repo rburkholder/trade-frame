@@ -53,37 +53,42 @@ void Capture::Assign(
 
 void Capture::Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, ou::tf::Trade& trade ) {
   {
-    m_spinlock.lock(); // released on exit
+    m_spinlock.lock();
     bQuoteReady = m_bQuoteReady;
     if ( m_bQuoteReady ) {
       quote = m_quote;
       m_bQuoteReady = false;
     }
+    m_spinlock.unlock();
   }
   {
-    m_spinlock.lock(); // released on exit
+    m_spinlock.lock();
     bTradeReady = m_bTradeReady;
     if ( m_bTradeReady ) {
       trade = m_trade;
       m_bTradeReady = false;
     }
+    m_spinlock.unlock();
   }
 }
 
 void Capture::HandleQuote( const ou::tf::Quote& quote ) {
-  m_spinlock.lock(); // released on exit
+  m_spinlock.lock();
   m_quote = quote;
   m_bQuoteReady = true;
+  m_spinlock.unlock();
 }
 
 void Capture::HandleTrade( const ou::tf::Trade& trade ) {
-  m_spinlock.lock(); // released on exit
+  m_spinlock.lock();
   m_trade = trade;
   m_bTradeReady = true;
-  //m_bf.Add( trade );
+//  if ( nullptr != m_fBarComplete ) {
+//    m_bf.Add( trade );
+//  }
+  m_spinlock.unlock();
 }
 
-// disabled for now
 void Capture::HandleBarComplete( const ou::tf::Bar& bar ) {
   m_nSequence++;
   if ( nullptr != m_fBarComplete ) {

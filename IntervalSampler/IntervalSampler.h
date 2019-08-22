@@ -63,14 +63,29 @@ private:
   std::ofstream m_out;
 
   using pCapture_t = std::unique_ptr<Capture>;
-  using vCapture_t = std::vector<pCapture_t>;
-  vCapture_t m_vCapture;
+
+  struct Instance {
+    std::string m_sInstrument;
+    pCapture_t m_pCapture;
+    Instance() {
+      m_pCapture = std::move( std::make_unique<Capture>() );
+    }
+  };
+
+  using vInstance_t = std::vector<Instance>;
+  vInstance_t m_vInstance;
+
+  wxTimer m_timerPoller;
+
+  size_t m_nSequence;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
   void HandleIQFeedDisconnecting( int );
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
+
+  void HandlePoll( wxTimerEvent& event );
 
   void OutputFileOpen( ptime dt );
   void OutputFileCheck( ptime dt );

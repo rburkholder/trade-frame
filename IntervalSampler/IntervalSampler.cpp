@@ -41,6 +41,8 @@ IMPLEMENT_APP(AppIntervalSampler)
 
 bool AppIntervalSampler::OnInit() {
 
+  m_nSequence = 0;
+
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Interval Sampler" );
   wxApp::SetVendorName( "One Unified Net Limited" );
@@ -106,6 +108,9 @@ bool AppIntervalSampler::OnInit() {
     }
   }
 
+  m_timerPoller.SetOwner( this );
+  Bind( wxEVT_TIMER, &AppIntervalSampler::HandlePoll, this, m_timerPoller.GetId() );
+
   CallAfter(
     [this](){
       LoadState();
@@ -166,14 +171,15 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
 
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
   iterSymbol++; // pass over the first line of duration
-  m_vCapture.resize( m_vSymbol.size() - 1 );
-  vCapture_t::iterator iterCapture = m_vCapture.begin();
+  m_vInstance.resize( m_vSymbol.size() - 1 );
+  vInstance_t::iterator iterInstance = m_vInstance.begin();
   while ( m_vSymbol.end() != iterSymbol ) {
     ou::tf::Instrument::pInstrument_t pInstrument
       = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-    (*iterCapture) = std::move( std::make_unique<Capture>() );
-    (*iterCapture)->Assign(
+    //(*iterInstance) = std::move( std::make_unique<Capture>() );
+    (*iterInstance).m_sInstrument = *iterSymbol;
+    (*iterInstance).m_pCapture->Assign(
                        nSeconds, pWatch,
                        [this](
                             const ou::tf::Instrument::idInstrument_t& idInstrument,
@@ -197,13 +203,92 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
                            << std::endl;
                        } );
     iterSymbol++;
-    iterCapture++;
+    iterInstance++;
   }
 
+  CallAfter(
+    [this,nSeconds](){
+      m_timerPoller.Start( 1000 * nSeconds );
+    }
+  );
+
+  std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
+
+}
+
+void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
+  size_t nSequence = m_nSequence + 1;
+  bool bSequenceUsed( false );
+  bool bFileTested( false );
+
+  bool bQuoteFound;
+  ou::tf::Quote quote;
+  bool bTradeFound;
+  ou::tf::Trade trade;
+  for ( vInstance_t::value_type& vt: m_vInstance ) {
+    vt.m_pCapture->Pull( bQuoteFound, quote, bTradeFound, trade );
+    if ( bQuoteFound || bTradeFound ) {
+      if ( !bFileTested ) {
+        ptime dt( boost::date_time::special_values::not_a_date_time );
+        if ( bQuoteFound ) {
+          dt = quote.DateTime();
+        }
+        else {
+          if ( bTradeFound ) {
+            dt = trade.DateTime();
+          }
+        }
+        if ( boost::date_time::special_values::not_a_date_time != dt ) {
+          OutputFileCheck( dt );
+        }
+        bFileTested = true;
+      }
+      m_out
+        << vt.m_sInstrument
+        << "," << nSequence
+        ;
+      if ( bQuoteFound ) {
+        m_out
+          << "," << boost::posix_time::to_iso_string( quote.DateTime() )
+          << "," << quote.Ask() << "," << quote.AskSize()
+          << "," << quote.Bid() << "," << quote.BidSize()
+          ;
+      }
+      else {
+        m_out
+          << "," << "NULL"
+          << "," << "NULL" << "," << "NULL"
+          << "," << "NULL" << "," << "NULL"
+          ;
+      }
+      if ( bTradeFound ) {
+        m_out
+          << "," << boost::posix_time::to_iso_string( trade.DateTime() )
+          << "," << trade.Price() << "," << trade.Volume()
+          ;
+      }
+      else {
+        m_out
+          << "," << "NULL"
+          << "," << "NULL" << "," << "NULL"
+          ;
+      }
+      m_out << std::endl;
+      bSequenceUsed = true;
+    }
+  }
+  if ( bSequenceUsed ) {
+    m_nSequence = nSequence;
+  }
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread event
   std::cout << "IQFeed disconnecting ..." << std::endl;
+  CallAfter(
+    [this](){
+      m_timerPoller.Stop();
+    }
+  );
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event
@@ -248,7 +333,7 @@ void AppIntervalSampler::OnClose( wxCloseEvent& event ) { // step 1
 
 int AppIntervalSampler::OnExit() { // step 2
 
-  m_vCapture.clear();
+  m_vInstance.clear();
 
   if ( m_pIQFeed ) {
     if ( m_pIQFeed->Connected() ) {
