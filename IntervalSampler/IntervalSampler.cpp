@@ -225,57 +225,77 @@ void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
   ou::tf::Quote quote;
   bool bTradeFound;
   ou::tf::Trade trade;
+  bool bBarFound;
+  ou::tf::Bar bar;
   for ( vInstance_t::value_type& vt: m_vInstance ) {
-    vt.m_pCapture->Pull( bQuoteFound, quote, bTradeFound, trade );
-    if ( bQuoteFound || bTradeFound ) {
-      if ( !bFileTested ) {
-        ptime dt( boost::date_time::special_values::not_a_date_time );
-        if ( bQuoteFound ) {
-          dt = quote.DateTime();
+    vt.m_pCapture->Pull( bBarFound, bar, bQuoteFound, quote, bTradeFound, trade );
+    if ( !bFileTested ) {
+      ptime dt( boost::date_time::special_values::not_a_date_time );
+      if ( bQuoteFound ) {
+        dt = quote.DateTime();
+      }
+      else {
+        if ( bTradeFound ) {
+          dt = trade.DateTime();
         }
-        else {
-          if ( bTradeFound ) {
-            dt = trade.DateTime();
-          }
-        }
-        if ( boost::date_time::special_values::not_a_date_time != dt ) {
-          OutputFileCheck( dt );
-        }
+      }
+      if ( boost::date_time::special_values::not_a_date_time != dt ) {
+        OutputFileCheck( dt );
         bFileTested = true;
       }
-      m_out
-        << vt.m_sInstrument
-        << "," << nSequence
-        ;
-      if ( bQuoteFound ) {
-        m_out
-          << "," << boost::posix_time::to_iso_string( quote.DateTime() )
-          << "," << quote.Ask() << "," << quote.AskSize()
-          << "," << quote.Bid() << "," << quote.BidSize()
-          ;
-      }
-      else {
-        m_out
-          << "," << "NULL"
-          << "," << "NULL" << "," << "NULL"
-          << "," << "NULL" << "," << "NULL"
-          ;
-      }
-      if ( bTradeFound ) {
-        m_out
-          << "," << boost::posix_time::to_iso_string( trade.DateTime() )
-          << "," << trade.Price() << "," << trade.Volume()
-          ;
-      }
-      else {
-        m_out
-          << "," << "NULL"
-          << "," << "NULL" << "," << "NULL"
-          ;
-      }
-      m_out << std::endl;
-      bSequenceUsed = true;
     }
+    m_out
+      << vt.m_sInstrument
+      << "," << nSequence
+      ;
+    if ( bBarFound ) {
+      m_out
+        << "," << boost::posix_time::to_iso_string( bar.DateTime() )
+        << "," << bar.Open()
+        << "," << bar.High()
+        << "," << bar.Low()
+        << "," << bar.Close()
+        << "," << bar.Volume()
+        ;
+    }
+    else {
+      m_out
+        << "," << "NULL"
+        << "," << "NULL"
+        << "," << "NULL"
+        << "," << "NULL"
+        << "," << "NULL"
+        << "," << "NULL"
+        ;
+    }
+    if ( bQuoteFound ) {
+      m_out
+        << "," << boost::posix_time::to_iso_string( quote.DateTime() )
+        << "," << quote.Ask() << "," << quote.AskSize()
+        << "," << quote.Bid() << "," << quote.BidSize()
+        ;
+    }
+    else {
+      m_out
+        << "," << "NULL"
+        << "," << "NULL" << "," << "NULL"
+        << "," << "NULL" << "," << "NULL"
+        ;
+    }
+    if ( bTradeFound ) {
+      m_out
+        << "," << boost::posix_time::to_iso_string( trade.DateTime() )
+        << "," << trade.Price() << "," << trade.Volume()
+        ;
+    }
+    else {
+      m_out
+        << "," << "NULL"
+        << "," << "NULL" << "," << "NULL"
+        ;
+    }
+    m_out << std::endl;
+    bSequenceUsed = true;
   }
   if ( bSequenceUsed ) {
     m_nSequence = nSequence;

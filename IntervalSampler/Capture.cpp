@@ -25,6 +25,7 @@ Capture::Capture()
 : m_nSequence {}
 , m_bQuoteReady( false )
 , m_bTradeReady( false )
+, m_bBarReady( false )
 {
 }
 
@@ -51,11 +52,15 @@ void Capture::Assign(
   m_pWatch->StartWatch();
 }
 
-void Capture::Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, ou::tf::Trade& trade ) {
+void Capture::Pull( 
+  bool& bBarReady, ou::tf::Bar& bar,
+  bool& bQuoteReady, ou::tf::Quote& quote,
+  bool& bTradeReady, ou::tf::Trade& trade
+) {
   {
     m_spinlock.lock();
     bQuoteReady = m_bQuoteReady;
-    if ( m_bQuoteReady ) {
+    if ( bQuoteReady ) {
       quote = m_quote;
       m_bQuoteReady = false;
     }
@@ -64,9 +69,18 @@ void Capture::Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, 
   {
     m_spinlock.lock();
     bTradeReady = m_bTradeReady;
-    if ( m_bTradeReady ) {
+    if ( bTradeReady ) {
       trade = m_trade;
       m_bTradeReady = false;
+    }
+//    m_spinlock.unlock();
+//  }
+//  {
+//    m_spinlock.lock();
+    bBarReady = m_bBarReady;
+    if ( bBarReady ) {
+      bar = ou::tf::Bar( m_dtBarStart, m_dblOpen, m_dblHigh, m_dblLow, m_dblClose, m_nVolume );
+      m_bBarReady = false;
     }
     m_spinlock.unlock();
   }
@@ -86,6 +100,7 @@ void Capture::HandleTrade( const ou::tf::Trade& trade ) {
 //  if ( nullptr != m_fBarComplete ) {
 //    m_bf.Add( trade );
 //  }
+  BarAddTrade( trade );
   m_spinlock.unlock();
 }
 
@@ -100,4 +115,22 @@ void Capture::HandleBarComplete( const ou::tf::Bar& bar ) {
       m_pWatch->LastTrade()
       );
   }
+}
+
+void Capture::BarAddTrade( const ou::tf::Trade& trade ) {
+//  m_spinlock.lock();
+  if ( !m_bBarReady ) {
+    m_dtBarStart = trade.DateTime();
+    m_dblHigh = m_dblLow = m_dblOpen = m_dblClose = trade.Price();
+    m_nVolume = trade.Volume();
+    m_bBarReady = true;
+  }
+  else {
+    double price = trade.Price();
+    if ( price > m_dblHigh ) m_dblHigh = price;
+    if ( price < m_dblLow ) m_dblLow = price;
+    m_dblClose = price;
+    m_nVolume += trade.Volume();
+  }
+//  m_spinlock.unlock();
 }

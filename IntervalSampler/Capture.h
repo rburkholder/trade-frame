@@ -51,7 +51,11 @@ public:
     fBarComplete_t&& fBarComplete
   );
 
-  void Pull( bool& bQuoteReady, ou::tf::Quote& quote, bool& bTradeReady, ou::tf::Trade& trade );
+  void Pull(
+    bool& bBarReady, ou::tf::Bar& bar,
+    bool& bQuoteReady, ou::tf::Quote& quote,
+    bool& bTradeReady, ou::tf::Trade& trade
+  );
 
 protected:
 private:
@@ -69,9 +73,19 @@ private:
   bool m_bTradeReady;
   ou::tf::Trade m_trade;
 
+  bool m_bBarReady;
+  boost::posix_time::ptime m_dtBarStart;
+  double m_dblHigh;
+  double m_dblLow;
+  double m_dblOpen;
+  double m_dblClose;
+  size_t m_nVolume;
+
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleBarComplete( const ou::tf::Bar& bar );
+
+  void BarAddTrade( const ou::tf::Trade& trade );
 
 };
 
