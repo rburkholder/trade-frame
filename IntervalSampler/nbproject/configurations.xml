@@ -149,6 +149,7 @@
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options-gcc8-mt-x64-1_69</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>

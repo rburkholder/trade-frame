@@ -24,11 +24,13 @@
 // assumption:  all symbols are 'stocks'.
 //   lookups will be required if non-stock symbols are provided (or not, if no special processing is required)
 
-
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
 #include <boost/filesystem.hpp>
+
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 #include <boost/lexical_cast.hpp>
 
@@ -47,6 +49,62 @@ bool AppIntervalSampler::OnInit() {
   wxApp::SetAppDisplayName( "Interval Sampler" );
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c) 2019 One Unified Net Limited" );
+
+  static const std::string sNameInterval( "interval" );
+  static const std::string sNameStaleOrFiller( "stale_or_filler" );
+  static const std::string sNameFiller( "filler" );
+
+  po::variables_map vm;
+
+  try {
+    static const std::string sFileName( "../IntervalSampler.cfg" );
+
+    po::options_description config( "options" );
+    config.add_options()
+      ( sNameInterval.c_str(),      po::value<std::string>(), "interval (seconds)" )
+      ( sNameStaleOrFiller.c_str(), po::value<std::string>(), "stale or filler" )
+      ( sNameFiller.c_str(),        po::value<std::string>(), "filler" )
+      ;
+
+    std::ifstream ifs( sFileName.c_str() );
+    if ( !ifs ) {
+      std::cout << "file " << sFileName << " does not exist" << std::endl;
+    }
+    else {
+      po::store( po::parse_config_file( ifs, config), vm );
+    }
+
+    int cnt {};
+
+    if ( 0 < vm.count( sNameInterval ) ) {
+      cnt++;
+      std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+    }
+
+    if ( 0 < vm.count( sNameStaleOrFiller ) ) {
+      cnt++;
+      std::cout << "stale or filler: " << vm[sNameStaleOrFiller].as<std::string>() << std::endl;
+    }
+
+    if ( 0 < vm.count( sNameFiller ) ) {
+      cnt++;
+      std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
+    }
+
+    if ( 3 != cnt ) {
+      throw std::runtime_error( "incorrect number of parameters" );
+    }
+
+  }
+  catch ( std::exception& e ) {
+    std::cout << "IntervalSampler config parse error: " << e.what() << std::endl;
+    //throw e; // need to terminate without config
+    return false;
+  }
+
+  std::string sInterval = vm[sNameInterval].as<std::string>();
+  std::string sStaleOrFiller = vm[sNameStaleOrFiller].as<std::string>();
+  std::string sFiller = vm[sNameFiller].as<std::string>();
 
   m_sStateFileName = "IntervalSampler.state";
 
