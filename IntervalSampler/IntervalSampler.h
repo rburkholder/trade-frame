@@ -56,6 +56,8 @@ private:
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
 
+  size_t m_nIntervalSeconds;
+
   using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
 

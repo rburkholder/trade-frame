@@ -54,10 +54,11 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sNameStaleOrFiller( "stale_or_filler" );
   static const std::string sNameFiller( "filler" );
 
+  static const std::string sConfigFileName( "../IntervalSampler.cfg" );
+
   po::variables_map vm;
 
   try {
-    static const std::string sFileName( "../IntervalSampler.cfg" );
 
     po::options_description config( "options" );
     config.add_options()
@@ -66,9 +67,9 @@ bool AppIntervalSampler::OnInit() {
       ( sNameFiller.c_str(),        po::value<std::string>(), "filler" )
       ;
 
-    std::ifstream ifs( sFileName.c_str() );
+    std::ifstream ifs( sConfigFileName.c_str() );
     if ( !ifs ) {
-      std::cout << "file " << sFileName << " does not exist" << std::endl;
+      std::cout << "file " << sConfigFileName << " does not exist" << std::endl;
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
@@ -105,6 +106,12 @@ bool AppIntervalSampler::OnInit() {
   std::string sInterval = vm[sNameInterval].as<std::string>();
   std::string sStaleOrFiller = vm[sNameStaleOrFiller].as<std::string>();
   std::string sFiller = vm[sNameFiller].as<std::string>();
+
+  m_nIntervalSeconds = boost::lexical_cast<size_t>( sInterval );
+  if ( 0 >= m_nIntervalSeconds ) {
+    std::cout << sConfigFileName << ": interval needs to be greater than 0, is " << m_nIntervalSeconds << std::endl;
+    return false;
+  }
 
   m_sStateFileName = "IntervalSampler.state";
 
@@ -224,12 +231,13 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   std::cout << "IQFeed connected." << std::endl;
 
   assert( 1 < m_vSymbol.size() );
-  size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
-  std::cout << "interval: " << m_vSymbol[ 0 ] << " seconds" << std::endl;
+  //size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
+  //std::cout << "interval: " << m_vSymbol[ 0 ] << " seconds" << std::endl;
 
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
-  iterSymbol++; // pass over the first line of duration
-  m_vInstance.resize( m_vSymbol.size() - 1 );
+  //iterSymbol++; // pass over the first line of duration
+  //m_vInstance.resize( m_vSymbol.size() - 1 );
+  m_vInstance.resize( m_vSymbol.size() );
   vInstance_t::iterator iterInstance = m_vInstance.begin();
   while ( m_vSymbol.end() != iterSymbol ) {
     ou::tf::Instrument::pInstrument_t pInstrument
@@ -238,7 +246,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
     //(*iterInstance) = std::move( std::make_unique<Capture>() );
     (*iterInstance).m_sInstrument = *iterSymbol;
     (*iterInstance).m_pCapture->Assign(
-                       nSeconds, pWatch,
+                       m_nIntervalSeconds, pWatch,
                        [this](
                             const ou::tf::Instrument::idInstrument_t& idInstrument,
                             size_t nSequence,
@@ -265,8 +273,8 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   }
 
   CallAfter(
-    [this,nSeconds](){
-      m_timerPoller.Start( 1000 * nSeconds );
+    [this](){
+      m_timerPoller.Start( 1000 * m_nIntervalSeconds );
     }
   );
 

@@ -48,7 +48,7 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
     ruleCharInitial = ruleCharAlpha | ruleCharNum;
     ruleCharOther   = ruleCharInitial | qi::char_( '.' );
 
-    ruleInterval = +ruleCharNum;
+//    ruleInterval = +ruleCharNum;
     ruleName = ruleCharInitial >> *ruleCharOther;
 
     //ruleSep = qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' );
@@ -56,7 +56,8 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
     //ruleItem = ruleSep >> ruleName;
 
     //ruleVector = ruleInterval >> +( qi::eol >> ruleItem ) >> -qi::eol;
-    ruleVector = ruleInterval >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
+    //ruleVector = ruleInterval >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
+    ruleVector = ruleName >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
 
 //    BOOST_SPIRIT_DEBUG_NODE( ruleNameChar );
 //    BOOST_SPIRIT_DEBUG_NODE( ruleName );
@@ -71,7 +72,7 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
   qi::rule<Iterator, char()> ruleCharOther;
   //qi::rule<Iterator, char()> ruleSep;
 
-  qi::rule<Iterator, std::string()> ruleInterval;
+//  qi::rule<Iterator, std::string()> ruleInterval;
   qi::rule<Iterator, std::string()> ruleName;
   //qi::rule<Iterator, std::string()> ruleItem;
 
@@ -106,7 +107,7 @@ ReadSymbolFile::ReadSymbolFile( const std::string& sFileName, vSymbol_t& vSymbol
   //  std::cout << vt << std::endl;
   //}
 
-  std::cout << "symbol list contains " << vSymbol.size() - 1 << " symbols" << std::endl;
+  std::cout << "symbol list contains " << vSymbol.size() << " symbols" << std::endl;
 }
 
 ReadSymbolFile::~ReadSymbolFile( ) {
