@@ -1,4 +1,6 @@
 .dep.inc
+x64/debug
+x64/release
 c_standard_headers_indexer.*
 cpp_standard_headers_indexer.*
 private.xml
