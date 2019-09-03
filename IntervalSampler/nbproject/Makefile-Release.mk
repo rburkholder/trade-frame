@@ -54,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a -lboost_system-gcc8-mt-x64-1_69 -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lhdf5_cpp -lhdf5 -lpthread -ldl -lz
+LDLIBSOPTIONS=../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a -lboost_system-gcc8-mt-x64-1_69 -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_program_options-gcc8-mt-x64-1_69 -lhdf5_cpp -lhdf5 -lpthread -ldl -lz
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

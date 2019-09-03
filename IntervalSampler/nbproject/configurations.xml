@@ -144,12 +144,12 @@
             <linkerLibLibItem>boost_serialization-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_thread-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_regex-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
-            <linkerLibLibItem>boost_program_options-gcc8-mt-x64-1_69</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
@@ -286,6 +286,7 @@
             <linkerLibLibItem>boost_serialization-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_thread-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_regex-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
