@@ -105,7 +105,20 @@ bool AppIntervalSampler::OnInit() {
 
   std::string sInterval = vm[sNameInterval].as<std::string>();
   std::string sStaleOrFiller = vm[sNameStaleOrFiller].as<std::string>();
-  std::string sFiller = vm[sNameFiller].as<std::string>();
+  m_sFieldFiller = vm[sNameFiller].as<std::string>();
+
+  if ( "stale" == sStaleOrFiller ) {
+    m_eDefaultContent = EDefaultContent::stale;
+  }
+  else {
+    if ( "filler" == sStaleOrFiller ) {
+      m_eDefaultContent = EDefaultContent::filler;
+    }
+    else {
+      std::cout << "Unknown default content: " << sStaleOrFiller << std::endl;
+      return false;
+    }
+  }
 
   m_nIntervalSeconds = boost::lexical_cast<size_t>( sInterval );
   if ( 0 >= m_nIntervalSeconds ) {
@@ -304,13 +317,13 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
   ou::tf::Bar bar;
 
   // TODO: may be do the time zone conversion once where m_dtInterval is initially assigned?
-  boost::local_time::local_date_time lt( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
-  boost::posix_time::ptime dt = lt.local_time();
+  boost::local_time::local_date_time ltInterval( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
+  boost::posix_time::ptime dtInterval = ltInterval.local_time();
 
   for ( vInstance_t::value_type& vt: m_vInstance ) {
     vt.m_pCapture->Pull( bBarFound, bar, bQuoteFound, quote, bTradeFound, trade );
     if ( !bFileTested ) {
-      OutputFileCheck( dt );
+      OutputFileCheck( dtInterval );
       bFileTested = true;
     }
     m_out
@@ -319,7 +332,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
       ;
     if ( bBarFound ) {
       m_out
-        << "," << boost::posix_time::to_iso_string( dt )
+        << "," << boost::posix_time::to_iso_string( dtInterval )
         << "," << bar.Open()
         << "," << bar.High()
         << "," << bar.Low()
@@ -329,38 +342,42 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
     }
     else {
       m_out
-        << "," << boost::posix_time::to_iso_string( dt )
-        << "," << "NULL"
-        << "," << "NULL"
-        << "," << "NULL"
-        << "," << "NULL"
-        << "," << "NULL"
+        << "," << boost::posix_time::to_iso_string( dtInterval )
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller
         ;
     }
     if ( bQuoteFound ) {
+      boost::local_time::local_date_time ltQuote( quote.DateTime(), ou::TimeSource::TimeZoneNewYork() );
+      boost::posix_time::ptime dtQuote = ltQuote.local_time();
       m_out
-        << "," << boost::posix_time::to_iso_string( quote.DateTime() )
+        << "," << boost::posix_time::to_iso_string( dtQuote )
         << "," << quote.Ask() << "," << quote.AskSize()
         << "," << quote.Bid() << "," << quote.BidSize()
         ;
     }
     else {
       m_out
-        << "," << "NULL"
-        << "," << "NULL" << "," << "NULL"
-        << "," << "NULL" << "," << "NULL"
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller << "," << m_sFieldFiller
+        << "," << m_sFieldFiller << "," << m_sFieldFiller
         ;
     }
     if ( bTradeFound ) {
+      boost::local_time::local_date_time ltTrade( trade.DateTime(), ou::TimeSource::TimeZoneNewYork() );
+      boost::posix_time::ptime dtTrade = ltTrade.local_time();
       m_out
-        << "," << boost::posix_time::to_iso_string( trade.DateTime() )
+        << "," << boost::posix_time::to_iso_string( dtTrade )
         << "," << trade.Price() << "," << trade.Volume()
         ;
     }
     else {
       m_out
-        << "," << "NULL"
-        << "," << "NULL" << "," << "NULL"
+        << "," << m_sFieldFiller
+        << "," << m_sFieldFiller << "," << m_sFieldFiller
         ;
     }
     m_out << std::endl;
