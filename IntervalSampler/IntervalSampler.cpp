@@ -173,8 +173,8 @@ bool AppIntervalSampler::OnInit() {
     }
   }
 
-  //m_timerPoller.SetOwner( this );
-  //Bind( wxEVT_TIMER, &AppIntervalSampler::HandlePoll, this, m_timerPoller.GetId() );
+  m_pWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( m_context ) );
+  m_thread = std::move( std::thread( [this ]{ m_context.run(); }) );
 
   CallAfter(
     [this](){
@@ -282,12 +282,6 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   m_ptimerInterval->expires_at( m_dtInterval );
   m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
 
-  //CallAfter(
-  //  [this](){
-  //    m_timerPoller.Start( 1000 * m_nIntervalSeconds );
-  //  }
-  //);
-
   std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
 
 }
@@ -377,17 +371,14 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
   }
 
   if ( !error ) {
-
+    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+    m_ptimerInterval->expires_at( m_dtInterval );
+    m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
   }
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread event
   std::cout << "IQFeed disconnecting ..." << std::endl;
-  //CallAfter(
-  //  [this](){
-  //    m_timerPoller.Stop();
-  //  }
-  //);
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event
@@ -425,6 +416,14 @@ void AppIntervalSampler::LoadState() {
 
 void AppIntervalSampler::OnClose( wxCloseEvent& event ) { // step 1
 
+  m_ptimerInterval->cancel();
+  m_pWork->reset();
+  m_thread.join();
+
+  if ( m_out.is_open() ) {
+    m_out.close();
+  }
+
   SaveState();
 
   event.Skip();  // auto followed by Destroy();
@@ -445,9 +444,9 @@ int AppIntervalSampler::OnExit() { // step 2
       m_pIQFeed->OnError.Remove( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedError ) );
     }
 
-    if ( m_out.is_open() ) { // TODO: duplicate of 'disconnected, but disconnected not reached, need a join'
-      m_out.close();
-    }
+    //if ( m_out.is_open() ) { // TODO: duplicate of 'disconnected, but disconnected not reached, need a join'
+    //  m_out.close();
+    //}
   }
 
   return wxApp::OnExit();
