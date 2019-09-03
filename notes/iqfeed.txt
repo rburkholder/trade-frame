@@ -1,0 +1,1 @@
+user@here:~$ wine .wine/drive_c/Program\ Files/DTN/IQFeed/iqconnect.exe -product x1 -version x2 -login x3  -password x4  -autoconnect
