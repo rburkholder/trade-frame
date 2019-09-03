@@ -50,7 +50,7 @@ public:
     return External( &dt );
   };
 
-  inline boost::posix_time::ptime Internal( void ) { 
+  inline boost::posix_time::ptime Internal( void ) {
     return Internal( &m_contextCommon );
   };
 
@@ -70,7 +70,7 @@ public:
       assert( m_contextCommon.m_dtSimulationTime <= dt );
     }
 #endif
-    m_contextCommon.m_dtSimulationTime = dt; 
+    m_contextCommon.m_dtSimulationTime = dt;
   }
   void ForceSimulationTime( const boost::posix_time::ptime &dt ) { m_contextCommon.m_bInSimulation = true; m_contextCommon.m_dtSimulationTime = dt; };
 
@@ -88,7 +88,7 @@ public:
     return lt.utc_time();
   }
 
-  boost::posix_time::ptime ConvertRegionalToUtc( 
+  boost::posix_time::ptime ConvertRegionalToUtc(
           boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
     try {
@@ -100,6 +100,8 @@ public:
       return lt.utc_time();
     }
   }
+
+  static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }
 
 protected:
 private:
