@@ -220,7 +220,7 @@ void AppIntervalSampler::OutputFileCheck( ptime dt ) {
   //ptime dt( ou::TimeSource::Instance().External() );
   if ( !m_out.is_open() ) {
     OutputFileOpen( dt );
-    m_dtNextRotation = pt::ptime( dt.date(), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
+    m_dtNextRotation = pt::ptime( dt.date(), pt::time_duration( 0, 0, 0 ) );
     if ( m_dtNextRotation <= dt ) {
       m_dtNextRotation = m_dtNextRotation + boost::gregorian::date_duration( 1 );
     }
