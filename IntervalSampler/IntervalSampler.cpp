@@ -173,8 +173,8 @@ bool AppIntervalSampler::OnInit() {
     }
   }
 
-  m_timerPoller.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppIntervalSampler::HandlePoll, this, m_timerPoller.GetId() );
+  //m_timerPoller.SetOwner( this );
+  //Bind( wxEVT_TIMER, &AppIntervalSampler::HandlePoll, this, m_timerPoller.GetId() );
 
   CallAfter(
     [this](){
@@ -272,17 +272,32 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
     iterInstance++;
   }
 
-  CallAfter(
-    [this](){
-      m_timerPoller.Start( 1000 * m_nIntervalSeconds );
-    }
-  );
+  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+  m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
+  while ( m_dtInterval <= now ) {
+    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+  }
+
+  m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
+  m_ptimerInterval->expires_at( m_dtInterval );
+  m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
+
+  //CallAfter(
+  //  [this](){
+  //    m_timerPoller.Start( 1000 * m_nIntervalSeconds );
+  //  }
+  //);
 
   std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
 
 }
 
-void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
+void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
+
+  if ( !error ) {
+    // TODO: fill this in
+  }
+
   size_t nSequence = m_nSequence + 1;
   bool bSequenceUsed( false );
   bool bFileTested( false );
@@ -293,22 +308,16 @@ void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
   ou::tf::Trade trade;
   bool bBarFound;
   ou::tf::Bar bar;
+
+  // TODO: may be do the time zone conversion once where m_dtInterval is initially assigned?
+  boost::local_time::local_date_time lt( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
+  boost::posix_time::ptime dt = lt.local_time();
+
   for ( vInstance_t::value_type& vt: m_vInstance ) {
     vt.m_pCapture->Pull( bBarFound, bar, bQuoteFound, quote, bTradeFound, trade );
     if ( !bFileTested ) {
-      ptime dt( boost::date_time::special_values::not_a_date_time );
-      if ( bQuoteFound ) {
-        dt = quote.DateTime();
-      }
-      else {
-        if ( bTradeFound ) {
-          dt = trade.DateTime();
-        }
-      }
-      if ( boost::date_time::special_values::not_a_date_time != dt ) {
-        OutputFileCheck( dt );
-        bFileTested = true;
-      }
+      OutputFileCheck( dt );
+      bFileTested = true;
     }
     m_out
       << vt.m_sInstrument
@@ -316,7 +325,7 @@ void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
       ;
     if ( bBarFound ) {
       m_out
-        << "," << boost::posix_time::to_iso_string( bar.DateTime() )
+        << "," << boost::posix_time::to_iso_string( dt )
         << "," << bar.Open()
         << "," << bar.High()
         << "," << bar.Low()
@@ -326,7 +335,7 @@ void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
     }
     else {
       m_out
-        << "," << "NULL"
+        << "," << boost::posix_time::to_iso_string( dt )
         << "," << "NULL"
         << "," << "NULL"
         << "," << "NULL"
@@ -366,15 +375,19 @@ void AppIntervalSampler::HandlePoll( wxTimerEvent& event ) {
   if ( bSequenceUsed ) {
     m_nSequence = nSequence;
   }
+
+  if ( !error ) {
+
+  }
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnecting( int e ) {  // cross thread event
   std::cout << "IQFeed disconnecting ..." << std::endl;
-  CallAfter(
-    [this](){
-      m_timerPoller.Stop();
-    }
-  );
+  //CallAfter(
+  //  [this](){
+  //    m_timerPoller.Stop();
+  //  }
+  //);
 }
 
 void AppIntervalSampler::HandleIQFeedDisconnected( int e ) { // cross thread event

@@ -29,6 +29,9 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/deadline_timer.hpp>
+
 #include <wx/wx.h>
 
 #include <TFIQFeed/IQFeedProvider.h>
@@ -56,8 +59,6 @@ private:
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
 
-  size_t m_nIntervalSeconds;
-
   using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
 
@@ -77,9 +78,15 @@ private:
   using vInstance_t = std::vector<Instance>;
   vInstance_t m_vInstance;
 
-  wxTimer m_timerPoller;
+  //wxTimer m_timerPoller;
 
   size_t m_nSequence;
+
+  size_t m_nIntervalSeconds;
+  boost::posix_time::ptime m_dtInterval;
+
+  boost::asio::io_context m_context;
+  std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
@@ -87,7 +94,7 @@ private:
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
 
-  void HandlePoll( wxTimerEvent& event );
+  void HandlePoll( const boost::system::error_code& );
 
   void OutputFileOpen( ptime dt );
   void OutputFileCheck( ptime dt );
