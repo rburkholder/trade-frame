@@ -60,8 +60,8 @@ void Capture::Pull(
   {
     m_spinlock.lock();
     bQuoteReady = m_bQuoteReady;
+    quote = m_quote;
     if ( bQuoteReady ) {
-      quote = m_quote;
       m_bQuoteReady = false;
     }
     m_spinlock.unlock();
@@ -69,8 +69,8 @@ void Capture::Pull(
   {
     m_spinlock.lock();
     bTradeReady = m_bTradeReady;
+    trade = m_trade;
     if ( bTradeReady ) {
-      trade = m_trade;
       m_bTradeReady = false;
     }
 //    m_spinlock.unlock();
@@ -78,8 +78,8 @@ void Capture::Pull(
 //  {
 //    m_spinlock.lock();
     bBarReady = m_bBarReady;
+    bar = ou::tf::Bar( m_dtBarStart, m_dblOpen, m_dblHigh, m_dblLow, m_dblClose, m_nVolume );
     if ( bBarReady ) {
-      bar = ou::tf::Bar( m_dtBarStart, m_dblOpen, m_dblHigh, m_dblLow, m_dblClose, m_nVolume );
       m_bBarReady = false;
     }
     m_spinlock.unlock();

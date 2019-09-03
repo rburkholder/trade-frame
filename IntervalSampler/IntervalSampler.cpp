@@ -330,7 +330,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
       << vt.m_sInstrument
       << "," << nSequence
       ;
-    if ( bBarFound ) {
+    if ( bBarFound || ( ( EDefaultContent::stale == m_eDefaultContent ) && !bar.DateTime().is_not_a_date_time() ) ) {
       m_out
         << "," << boost::posix_time::to_iso_string( dtInterval )
         << "," << bar.Open()
@@ -350,7 +350,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
         << "," << m_sFieldFiller
         ;
     }
-    if ( bQuoteFound ) {
+    if ( bQuoteFound || ( ( EDefaultContent::stale == m_eDefaultContent ) && !quote.DateTime().is_not_a_date_time() ) ) {
       boost::local_time::local_date_time ltQuote( quote.DateTime(), ou::TimeSource::TimeZoneNewYork() );
       boost::posix_time::ptime dtQuote = ltQuote.local_time();
       m_out
@@ -366,7 +366,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
         << "," << m_sFieldFiller << "," << m_sFieldFiller
         ;
     }
-    if ( bTradeFound ) {
+    if ( bTradeFound || ( (EDefaultContent::stale == m_eDefaultContent ) && !trade.DateTime().is_not_a_date_time() ) ) {
       boost::local_time::local_date_time ltTrade( trade.DateTime(), ou::TimeSource::TimeZoneNewYork() );
       boost::posix_time::ptime dtTrade = ltTrade.local_time();
       m_out
