@@ -44,6 +44,7 @@ IMPLEMENT_APP(AppIntervalSampler)
 bool AppIntervalSampler::OnInit() {
 
   m_nSequence = 0;
+  m_dateSequence = boost::gregorian::date( 0, 0, 0 );
 
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Interval Sampler" );
@@ -55,6 +56,8 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sNameFiller( "filler" );
 
   static const std::string sConfigFileName( "../IntervalSampler.cfg" );
+
+  m_sStateFileName = "IntervalSampler.state";
 
   po::variables_map vm;
 
@@ -125,8 +128,6 @@ bool AppIntervalSampler::OnInit() {
     std::cout << sConfigFileName << ": interval needs to be greater than 0, is " << m_nIntervalSeconds << std::endl;
     return false;
   }
-
-  m_sStateFileName = "IntervalSampler.state";
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Interval Sampler" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -202,36 +203,39 @@ void AppIntervalSampler::HandleIQFeedConnecting( int e ) {  // cross thread even
   std::cout << "IQFeed connecting ..." << std::endl;
 }
 
-void AppIntervalSampler::OutputFileOpen( ptime dt ) {
-  std::string sdt = boost::posix_time::to_iso_string( dt );
-  std::string sFileName = sdt + ".csv";
-  m_out.open( sFileName, std::fstream::out );
+void AppIntervalSampler::OutputFileOpen( boost::gregorian::date date ) {
+  std::string sDate = boost::gregorian::to_iso_string( date );
+  std::string sFileName = "is_" + sDate + ".csv";
+  m_out.open( sFileName, std::ofstream::out | std::ofstream::app );
   if ( !m_out.is_open() ) {
     std::cerr << "cannot open file for output " << sFileName << std::endl;
-    std::runtime_error( "file not opened" );
+    throw std::runtime_error( "file not opened" );
   }
   std::cout << "streaming to " << sFileName << std::endl;
 }
 
-void AppIntervalSampler::OutputFileCheck( ptime dt ) {
+void AppIntervalSampler::OutputFileCheck( boost::gregorian::date date ) {
 
-  namespace pt = boost::posix_time;
-
-  //ptime dt( ou::TimeSource::Instance().External() );
   if ( !m_out.is_open() ) {
-    OutputFileOpen( dt );
-    m_dtNextRotation = pt::ptime( dt.date(), pt::time_duration( 0, 0, 0 ) );
-    if ( m_dtNextRotation <= dt ) {
-      m_dtNextRotation = m_dtNextRotation + boost::gregorian::date_duration( 1 );
+    OutputFileOpen( date );
+    if ( boost::gregorian::date( 0, 0, 0 ) != m_dateSequence ) {
+      if ( m_dateSequence != date ) {
+        m_nSequence = 0;
+        std::cout << "  sequence restarted" << std::endl;
+      }
     }
-    std::cout << "  next rotation at " << boost::posix_time::to_iso_string( m_dtNextRotation ) << std::endl;
-    //m_dtNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
+    m_dateNextRotation = m_dateSequence = date;
+    if ( m_dateNextRotation <= date ) {
+      m_dateNextRotation = m_dateNextRotation + boost::gregorian::date_duration( 1 );
+    }
+    std::cout << "  next rotation at " << boost::gregorian::to_iso_string( m_dateNextRotation ) << std::endl;
+    //m_dateNextRotation = pt::ptime( dt.date() + boost::gregorian::date_duration( 1 ), pt::time_duration( 21, 30, 0 ) ); // UTC for eastern time
     //std::cout << "  note: trade values are open of next bar" << std::endl;
   }
   else {
-    if ( m_dtNextRotation <= dt ) {
+    if ( m_dateNextRotation <= date ) {
       m_out.close();
-      OutputFileCheck( dt ); // recursive one step max
+      OutputFileCheck( date ); // recursive one step max
     }
   }
 }
@@ -266,7 +270,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
                             const ou::tf::Bar& bar,
                             const ou::tf::Quote& quote,
                             const ou::tf::Trade& trade){
-                         OutputFileCheck( trade.DateTime() );
+                         OutputFileCheck( trade.DateTime().date() );
                          m_out
                            << idInstrument
                            << "," << nSequence
@@ -323,7 +327,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
   for ( vInstance_t::value_type& vt: m_vInstance ) {
     vt.m_pCapture->Pull( bBarFound, bar, bQuoteFound, quote, bTradeFound, trade );
     if ( !bFileTested ) {
-      OutputFileCheck( dtInterval );
+      OutputFileCheck( dtInterval.date() );
       bFileTested = true;
     }
     m_out
@@ -385,6 +389,12 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
   }
   if ( bSequenceUsed ) {
     m_nSequence = nSequence;
+    CallAfter(
+      [this](){
+        SaveState( true );
+      }
+    );
+
   }
 
   if ( !error ) {
@@ -410,12 +420,12 @@ void AppIntervalSampler::HandleIQFeedError( size_t e ) {
   std::cout << "HandleIQFeedError: " << e << std::endl;
 }
 
-void AppIntervalSampler::SaveState() {
-  std::cout << "Saving Config ..." << std::endl;
+void AppIntervalSampler::SaveState( bool bSilent ) {
+  if ( !bSilent ) std::cout << "Saving Config ..." << std::endl;
   std::ofstream ofs( m_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  std::cout << "  done." << std::endl;
+  if ( !bSilent ) std::cout << "  done." << std::endl;
 }
 
 void AppIntervalSampler::LoadState() {

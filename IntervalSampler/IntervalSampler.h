@@ -68,7 +68,8 @@ private:
   using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
 
-  ptime m_dtNextRotation;
+  //ptime m_dtNextRotation;
+  boost::gregorian::date m_dateNextRotation;
   std::ofstream m_out;
 
   using pCapture_t = std::unique_ptr<Capture>;
@@ -87,6 +88,7 @@ private:
   //wxTimer m_timerPoller;
 
   size_t m_nSequence;
+  boost::gregorian::date m_dateSequence;
 
   size_t m_nIntervalSeconds;
   boost::posix_time::ptime m_dtInterval;
@@ -104,31 +106,60 @@ private:
 
   void HandlePoll( const boost::system::error_code& );
 
-  void OutputFileOpen( ptime dt );
-  void OutputFileCheck( ptime dt );
+  void OutputFileOpen( boost::gregorian::date );
+  void OutputFileCheck( boost::gregorian::date );
 
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void SaveState();
+  void SaveState( bool bSilent = false );
   void LoadState();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+
+    if ( boost::gregorian::date( 0, 0, 0 ) == m_dateSequence ) {
+      ar & 0;
+    }
+    else {
+      ar & 1;
+
+      int tmp;
+      tmp = m_dateSequence.year();
+      ar & tmp;
+      tmp = m_dateSequence.month();
+      ar & tmp;
+      tmp = m_dateSequence.day();
+      ar & tmp;
+
+      ar & m_nSequence;
+    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 <= version ) {
+      int tmp, year, month, day;
+
+      ar & tmp;
+      if ( 1 == tmp ) {
+        ar & year;
+        ar & month;
+        ar & day;
+        m_dateSequence = boost::gregorian::date( year, month, day );
+        ar & m_nSequence;
+      }
     }
+  }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppIntervalSampler, 1)
+BOOST_CLASS_VERSION(AppIntervalSampler, 2)
 DECLARE_APP(AppIntervalSampler)
 
 #endif /* INTERVALSAMPLER_H */
