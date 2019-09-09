@@ -41,10 +41,15 @@ namespace po = boost::program_options;
 
 IMPLEMENT_APP(AppIntervalSampler)
 
+namespace {
+   static const boost::gregorian::date dateBad;
+}
+
+
 bool AppIntervalSampler::OnInit() {
 
   m_nSequence = 0;
-  m_dateSequence = boost::gregorian::date( 0, 0, 0 );
+  m_dateSequence = dateBad;
 
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Interval Sampler" );
@@ -218,7 +223,7 @@ void AppIntervalSampler::OutputFileCheck( boost::gregorian::date date ) {
 
   if ( !m_out.is_open() ) {
     OutputFileOpen( date );
-    if ( boost::gregorian::date( 0, 0, 0 ) != m_dateSequence ) {
+    if ( dateBad != m_dateSequence ) {
       if ( m_dateSequence != date ) {
         m_nSequence = 0;
         std::cout << "  sequence restarted" << std::endl;

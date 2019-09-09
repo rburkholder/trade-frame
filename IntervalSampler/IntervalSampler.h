@@ -120,7 +120,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
 
-    if ( boost::gregorian::date( 0, 0, 0 ) == m_dateSequence ) {
+    if ( boost::gregorian::date() == m_dateSequence ) {
       ar & 0;
     }
     else {
