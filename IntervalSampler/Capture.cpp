@@ -47,6 +47,7 @@ void Capture::Assign(
   m_bf.SetBarWidth( duration );
   m_pWatch = pWatch;
   m_bf.SetOnBarComplete( MakeDelegate( this, &Capture::HandleBarComplete ) );
+  m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Capture::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Capture::HandleTrade ) );
   m_pWatch->StartWatch();
