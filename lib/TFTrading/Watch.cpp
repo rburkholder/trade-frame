@@ -32,7 +32,7 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ),
   m_pDataProvider( pDataProvider ),
   m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true )
 {
   assert( 0 != pInstrument.get() );
   assert( 0 != pDataProvider.get() );
@@ -44,7 +44,7 @@ Watch::Watch( const Watch& rhs ) :
   m_pDataProvider( rhs.m_pDataProvider ),
   m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal ),
   m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries )
 {
   assert( 0 == rhs.m_cntWatching );
   assert( !rhs.m_bWatching );
@@ -195,7 +195,7 @@ void Watch::HandleQuote( const Quote& quote ) {
   //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
   {
     //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-    m_quotes.Append( quote );
+    if ( m_bRecordSeries ) m_quotes.Append( quote );
   }
 
   //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
@@ -211,7 +211,7 @@ void Watch::HandleTrade( const Trade& trade ) {
   //OnPossibleResizeBegin( stateTimeSeries_t( m_trades.Capacity(), m_trades.Size() ) );
   {
     //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-    m_trades.Append( trade );
+    if ( m_bRecordSeries ) m_trades.Append( trade );
   }
   //OnPossibleResizeEnd( stateTimeSeries_t( m_trades.Capacity(), m_trades.Size() ) );
   //if ( 0 != m_OnTrade ) m_OnTrade( trade );
@@ -307,6 +307,11 @@ void Watch::SaveSeries( const std::string& sPrefix, const std::string& sDaily ) 
     std::cout << "Watch::SaveSeries2 error: " << sPrefix << std::endl;
   }
 
+}
+
+void Watch::ClearSeries() {
+  m_quotes.Clear();
+  m_trades.Clear();
 }
 
 } // namespace tf

@@ -99,13 +99,20 @@ public:
 
   virtual void EmitValues( void ) const;
 
+  void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; }
+  bool RecordingSeries() const { return m_bRecordSeries; }
+
   virtual void SaveSeries( const std::string& sPrefix );
   virtual void SaveSeries( const std::string& sPrefix, const std::string& sDaily );
+
+  virtual void ClearSeries();
 
 protected:
 
   // use an iterator instead?  or keep as is as it facilitates multi-thread append and access operations
   // or will the stuff in TBB help with this type of access?
+
+  bool m_bRecordSeries;
 
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
