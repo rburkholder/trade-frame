@@ -57,7 +57,16 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
 
     //ruleVector = ruleInterval >> +( qi::eol >> ruleItem ) >> -qi::eol;
     //ruleVector = ruleInterval >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
-    ruleVector = ruleName >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
+    ruleVector = ruleName
+      >> +( (
+        qi::lit( ' ' )
+      | qi::lit( ',' )
+      | qi::lit( '\t' )
+      | qi::lit( '\r' )
+      | qi::lit( '\n' )
+      | ( qi::lit( '\r' ) > qi::lit( '\n' ) )
+      )
+      >> ruleName) >> -qi::eol;
 
 //    BOOST_SPIRIT_DEBUG_NODE( ruleNameChar );
 //    BOOST_SPIRIT_DEBUG_NODE( ruleName );
