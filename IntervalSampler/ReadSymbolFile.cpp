@@ -58,15 +58,14 @@ struct decode_symbol_list: qi::grammar<Iterator, vSymbol_t()> {
     //ruleVector = ruleInterval >> +( qi::eol >> ruleItem ) >> -qi::eol;
     //ruleVector = ruleInterval >> +((qi::lit( ' ' ) | qi::lit( ',' ) | qi::lit( '\t' ) | qi::lit( '\n' )) >> ruleName) >> -qi::eol;
     ruleVector = ruleName
-      >> +( (
+      >> +( +(
         qi::lit( ' ' )
       | qi::lit( ',' )
       | qi::lit( '\t' )
       | qi::lit( '\r' )
       | qi::lit( '\n' )
-      | ( qi::lit( '\r' ) > qi::lit( '\n' ) )
       )
-      >> ruleName) >> -qi::eol;
+      >> ruleName ) >> -qi::eol;
 
 //    BOOST_SPIRIT_DEBUG_NODE( ruleNameChar );
 //    BOOST_SPIRIT_DEBUG_NODE( ruleName );
@@ -106,15 +105,15 @@ ReadSymbolFile::ReadSymbolFile( const std::string& sFileName, vSymbol_t& vSymbol
   decode_symbol_list<boost::spirit::istream_iterator> parser;
 
   bool bResult = qi::parse( begin, end, parser, vSymbol );
+  std::cerr << "symbol diff: " << vSymbol.size() << std::endl;
 
   if (!bResult) {
-    std::cerr << "symbol diff: " << vSymbol.size() << std::endl;
     throw std::runtime_error( "can't decode symbol list: " + sFileName );
   }
 
-  //for ( vSymbol_t::value_type vt: vSymbol ) {
-  //  std::cout << vt << std::endl;
-  //}
+//  for ( vSymbol_t::value_type vt: vSymbol ) {
+//    std::cout << "symbol: '" << vt << "'" << std::endl;
+//  }
 
   std::cout << "symbol list contains " << vSymbol.size() << " symbols" << std::endl;
 }
