@@ -268,6 +268,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
     //(*iterInstance) = std::move( std::make_unique<Capture>() );
     (*iterInstance).m_sInstrument = *iterSymbol;
     (*iterInstance).m_pCapture->Assign(
+        // NOTE: this code path isn't used, and may be out of date
                        m_nIntervalSeconds, pWatch,
                        [this](
                             const ou::tf::Instrument::idInstrument_t& idInstrument,
@@ -392,6 +393,12 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
     m_out << std::endl;
     bSequenceUsed = true;
   }
+
+  // close the file, which will allow a download of data-to-date
+  if ( m_out.is_open() ) {
+    m_out.close();
+  }
+
   if ( bSequenceUsed ) {
     m_nSequence = nSequence;
     CallAfter(
