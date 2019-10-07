@@ -43,6 +43,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/ReadNaicsToSicCodeList.o \
 	${OBJECTDIR}/ReadSicCodeList.o \
 	${OBJECTDIR}/ReadSicToNaicsCodeList.o \
+	${OBJECTDIR}/ReadSymbolFile.o \
 	${OBJECTDIR}/Singleton.o \
 	${OBJECTDIR}/SmartVar.o \
 	${OBJECTDIR}/TimeSource.o \
@@ -114,6 +115,11 @@ ${OBJECTDIR}/ReadSicToNaicsCodeList.o: ReadSicToNaicsCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicToNaicsCodeList.o ReadSicToNaicsCodeList.cpp
+
+${OBJECTDIR}/ReadSymbolFile.o: ReadSymbolFile.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++17 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSymbolFile.o ReadSymbolFile.cpp
 
 ${OBJECTDIR}/Singleton.o: Singleton.cpp
 	${MKDIR} -p ${OBJECTDIR}

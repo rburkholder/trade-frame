@@ -6,7 +6,6 @@
                    projectFiles="true">
       <itemPath>Capture.h</itemPath>
       <itemPath>IntervalSampler.h</itemPath>
-      <itemPath>ReadSymbolFile.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -17,7 +16,6 @@
                    projectFiles="true">
       <itemPath>Capture.cpp</itemPath>
       <itemPath>IntervalSampler.cpp</itemPath>
-      <itemPath>ReadSymbolFile.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -162,10 +160,6 @@
       </item>
       <item path="IntervalSampler.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="ReadSymbolFile.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="ReadSymbolFile.h" ex="false" tool="3" flavor2="0">
-      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -303,10 +297,6 @@
       <item path="IntervalSampler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="IntervalSampler.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ReadSymbolFile.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="ReadSymbolFile.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -54,7 +54,6 @@ private:
   enum class EDefaultContent { filler, stale } m_eDefaultContent;
 
   std::string m_sStateFileName;
-
   std::string m_sFieldFiller;
 
   FrameMain* m_pFrameMain;

@@ -35,8 +35,8 @@ namespace po = boost::program_options;
 #include <boost/lexical_cast.hpp>
 
 #include <OUCommon/TimeSource.h>
+#include <OUCommon/ReadSymbolFile.h>
 
-#include "ReadSymbolFile.h"
 #include "IntervalSampler.h"
 
 IMPLEMENT_APP(AppIntervalSampler)
