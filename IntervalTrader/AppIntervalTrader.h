@@ -38,6 +38,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "Instance.h"
+
 class AppIntervalTrader: public wxApp {
   friend class boost::serialization::access;
 public:
@@ -65,6 +67,9 @@ private:
   boost::asio::io_context m_context;
   std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
+  
+  using vInstance_t = std::vector<Instance>;
+  vInstance_t m_vInstance;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );

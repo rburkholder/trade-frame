@@ -19,6 +19,13 @@
  * Created on October 6, 2019, 1:44 PM
  */
 
+/* As an example, perhaps one where you take the stock that had the 
+ * highest total dollar volume (volume * (open+close)/2) since the last iteration 
+ * (volume and open and close being for that iteration), 
+ * and also a BidPrice/AskPrice difference of less than 10 cents, 
+ * and buy that, and sell it the next iteration.
+ */
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
@@ -31,6 +38,8 @@ namespace po = boost::program_options;
 
 #include <OUCommon/TimeSource.h>
 #include <OUCommon/ReadSymbolFile.h>
+
+#include <TFTrading/Watch.h>
 
 #include "AppIntervalTrader.h"
 
@@ -46,7 +55,6 @@ bool AppIntervalTrader::OnInit() {
   static const std::string sNameInterval( "interval" );
   static const std::string sConfigFileName( "../IntervalTrader.cfg" );
   static const std::string sFileName( "../is_symbols.txt" );
-
 
   m_sStateFileName = "IntervalTrader.state";
 
@@ -167,29 +175,26 @@ void AppIntervalTrader::HandleIQFeedConnecting( int e ) {  // cross thread event
 
 void AppIntervalTrader::HandleIQFeedConnected( int e ) {  // cross thread event
 
-//  using pWatch_t = ou::tf::Watch::pWatch_t;
+  assert( 0 < m_vSymbol.size() );
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
 
   m_bIQFeedConnected = true;
   std::cout << "IQFeed connected." << std::endl;
 
-  assert( 0 < m_vSymbol.size() );
-  //size_t nSeconds = boost::lexical_cast<size_t>( m_vSymbol[ 0 ] );
-  //std::cout << "interval: " << m_vSymbol[ 0 ] << " seconds" << std::endl;
-
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
-  //iterSymbol++; // pass over the first line of duration
-  //m_vInstance.resize( m_vSymbol.size() - 1 );
-//  m_vInstance.resize( m_vSymbol.size() );
-//  vInstance_t::iterator iterInstance = m_vInstance.begin();
-//  while ( m_vSymbol.end() != iterSymbol ) {
-//    ou::tf::Instrument::pInstrument_t pInstrument
-//      = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
-//    pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
+  iterSymbol++; // pass over the first line of duration
+  m_vInstance.resize( m_vSymbol.size() );
+  vInstance_t::iterator iterInstance = m_vInstance.begin();
+  while ( m_vSymbol.end() != iterSymbol ) {
+    ou::tf::Instrument::pInstrument_t pInstrument
+      = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
+    pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
     //(*iterInstance) = std::move( std::make_unique<Capture>() );
 //    (*iterInstance).m_sInstrument = *iterSymbol;
-//    iterSymbol++;
-//    iterInstance++;
-//  }
+    iterSymbol++;
+    iterInstance++;
+  }
 
 //  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
 //  m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
