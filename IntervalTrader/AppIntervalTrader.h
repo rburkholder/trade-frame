@@ -34,6 +34,7 @@
 #include <wx/wx.h>
 
 #include <TFIQFeed/IQFeedProvider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -56,6 +57,11 @@ private:
 
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
+  
+  using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
+  
+  pProviderIB_t m_pIB;
+  bool m_bIBConnected;
 
   using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
@@ -76,6 +82,12 @@ private:
   void HandleIQFeedDisconnecting( int );
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
+
+  void HandleIBConnecting( int ) {};
+  void HandleIBConnected( int ) {};
+  void HandleIBDisconnecting( int ) {};
+  void HandleIBDisconnected( int ) {};
+  void HandleIBError( size_t ) {};
 
   void HandlePoll( const boost::system::error_code& );
 

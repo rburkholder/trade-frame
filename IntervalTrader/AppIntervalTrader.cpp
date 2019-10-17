@@ -69,7 +69,7 @@ bool AppIntervalTrader::OnInit() {
 
     std::ifstream ifs( sConfigFileName.c_str() );
     if ( !ifs ) {
-      std::cout << "file " << sConfigFileName << " does not exist" << std::endl;
+      std::cerr << "file " << sConfigFileName << " does not exist" << std::endl;
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
@@ -79,7 +79,7 @@ bool AppIntervalTrader::OnInit() {
 
     if ( 0 < vm.count( sNameInterval ) ) {
       cnt++;
-      std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+      std::cerr << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
     }
 
     if ( 1 != cnt ) {
@@ -88,7 +88,7 @@ bool AppIntervalTrader::OnInit() {
 
   }
   catch ( std::exception& e ) {
-    std::cout << "IntervalTrader config parse error: " << e.what() << std::endl;
+    std::cerr << "IntervalTrader config parse error: " << e.what() << std::endl;
     //throw e; // need to terminate without config
     return false;
   }
@@ -97,7 +97,7 @@ bool AppIntervalTrader::OnInit() {
 
   m_nIntervalSeconds = boost::lexical_cast<size_t>( sInterval );
   if ( 0 >= m_nIntervalSeconds ) {
-    std::cout << sConfigFileName << ": interval needs to be greater than 0, is " << m_nIntervalSeconds << std::endl;
+    std::cerr << sConfigFileName << ": interval needs to be greater than 0, is " << m_nIntervalSeconds << std::endl;
     return false;
   }
 
@@ -144,16 +144,23 @@ bool AppIntervalTrader::OnInit() {
     }
 
     if ( bOk ) {
-      m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
       m_bIQFeedConnected = false;
-
+      m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnecting ) );
       m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnected ) );
       m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnecting ) );
       m_pIQFeed->OnDisconnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnected ) );
       m_pIQFeed->OnError.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedError ) );
-
       m_pIQFeed->Connect();
+      
+      m_bIBConnected = false;
+      m_pIB = boost::make_shared<ou::tf::IBTWS>();
+      m_pIB->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnecting ) );
+      m_pIB->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnected ) );
+      m_pIB->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBDisconnecting ) );
+      m_pIB->OnDisconnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBDisconnected ) );
+      m_pIB->OnError.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBError ) );
+      m_pIB->Connect();
     }
   }
 
