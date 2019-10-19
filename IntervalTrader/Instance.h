@@ -24,8 +24,8 @@
 
 class Instance {
 public:
-  Instance( );
-  virtual ~Instance( );
+  Instance();
+  virtual ~Instance();
 protected:
 private:
 
