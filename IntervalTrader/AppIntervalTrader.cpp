@@ -195,8 +195,14 @@ void AppIntervalTrader::HandleIQFeedConnected( int e ) {  // cross thread event
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
   m_vInstance.reserve( m_vSymbol.size() );
   for ( vSymbol_t::value_type& sSymbol: m_vSymbol ) {
+
+    // lib/TFIQFeed/BuildInstrument.cpp
     ou::tf::Instrument::pInstrument_t pInstrument
       = boost::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "SMART" );
+    pInstrument->SetMultiplier( 1 );  // default
+    pInstrument->SetMinTick( 0.01 );
+    pInstrument->SetSignificantDigits( 2 );
+
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
     pPosition_t pPosition = boost::make_shared<ou::tf::Position>( pWatch, m_pIB );
     m_pPortfolio->AddPosition( sSymbol, pPosition );
@@ -280,7 +286,9 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
 
     boost::posix_time::time_duration current = dtInterval.time_of_day();
     if ( ( current >= start ) && ( current < ( end - interval ) ) ) {
-      if ( m_pActivePosition ) { // close existing position
+
+      // close existing position
+      if ( m_pActivePosition ) {
         std::cout << "closing position: " << m_pActivePosition->GetInstrument()->GetInstrumentName() << std::endl;
         m_pActivePosition->CancelOrders();
         m_pActivePosition->ClosePosition( ou::tf::OrderType::Market );
@@ -306,11 +314,27 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
       if ( pNewPosition ) {
         std::cout << "opening position: " << pNewPosition->GetInstrument()->GetInstrumentName() << std::endl;
         m_pActivePosition = pNewPosition;
-        pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-        m_pActivePosition->PlaceOrder( pOrder );
+        if ( 0 == m_pActivePosition->GetInstrument()->GetContract() ) {
+          assert( m_pIB );
+          m_pIB->RequestContractDetails(
+            m_pActivePosition->GetInstrument()->GetInstrumentName(),
+            m_pActivePosition->GetInstrument(),
+            [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+              assert( 0 != pInstrument->GetContract() );
+              // TODO: refactor the common bits out - see below
+              pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+              m_pActivePosition->PlaceOrder( pOrder );
+              },
+            nullptr
+          );
+        }
+        else {
+          // TODO: refactor the common bits out - see above
+          pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+          m_pActivePosition->PlaceOrder( pOrder );
+        }
       }
     }
-
 
     m_dtInterval = m_dtInterval + interval;
     m_ptimerInterval->expires_at( m_dtInterval );

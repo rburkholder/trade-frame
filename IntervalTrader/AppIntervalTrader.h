@@ -55,6 +55,7 @@ private:
   using pProviderIQFeed_t = ou::tf::IQFeedProvider::pProvider_t;
   using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
