@@ -272,37 +272,47 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
     // TODO: may be do the time zone conversion once where m_dtInterval is initially assigned?
     boost::local_time::local_date_time ltInterval( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtInterval = ltInterval.local_time();
+    static const boost::posix_time::time_duration start( 9, 30, 0 ); // start of trading
+    static const boost::posix_time::time_duration end(  16,  0, 0 ); // end of trading
 
-    if ( m_pActivePosition ) {
-      std::cout << "closing position: " << m_pActivePosition->GetInstrument()->GetInstrumentName() << std::endl;
-      m_pActivePosition->CancelOrders();
-      m_pActivePosition->ClosePosition( ou::tf::OrderType::Market );
-      m_pActivePosition.reset();
+    // TODO: refactor to one time calculation
+    boost::posix_time::time_duration interval( 0, 0, m_nIntervalSeconds );
+
+    boost::posix_time::time_duration current = dtInterval.time_of_day();
+    if ( ( current >= start ) && ( current < ( end - interval ) ) ) {
+      if ( m_pActivePosition ) { // close existing position
+        std::cout << "closing position: " << m_pActivePosition->GetInstrument()->GetInstrumentName() << std::endl;
+        m_pActivePosition->CancelOrders();
+        m_pActivePosition->ClosePosition( ou::tf::OrderType::Market );
+        m_pActivePosition.reset();
+      }
+
+      // calculate new max dollar volume
+      double dblMaxAccumulatedDollarVolume {};
+      pPosition_t pNewPosition;
+
+      for ( vInstance_t::value_type& instance: m_vInstance ) {
+        instance.Evaluate(
+          [this,&dblMaxAccumulatedDollarVolume,&pNewPosition]( double dblInstrumentAccumulatedDollarVolume, pPosition_t pPosition ){
+            if ( dblMaxAccumulatedDollarVolume < dblInstrumentAccumulatedDollarVolume ) {
+              dblMaxAccumulatedDollarVolume = dblInstrumentAccumulatedDollarVolume;
+              pNewPosition = pPosition;
+            }
+          } );
+      }
+
+      using pOrder_t = ou::tf::Order::pOrder_t;
+
+      if ( pNewPosition ) {
+        std::cout << "opening position: " << pNewPosition->GetInstrument()->GetInstrumentName() << std::endl;
+        m_pActivePosition = pNewPosition;
+        pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+        m_pActivePosition->PlaceOrder( pOrder );
+      }
     }
 
-    double dblMaxAccumulatedDollarVolume {};
-    pPosition_t pActivePosition;
 
-    for ( vInstance_t::value_type& vt: m_vInstance ) {
-      vt.Evaluate(
-        [this,&dblMaxAccumulatedDollarVolume,&pActivePosition]( double dblInstrumentAccumulatedDollarVolume, pPosition_t pPosition ){
-          if ( dblMaxAccumulatedDollarVolume < dblInstrumentAccumulatedDollarVolume ) {
-            dblMaxAccumulatedDollarVolume = dblInstrumentAccumulatedDollarVolume;
-            pActivePosition = pPosition;
-          }
-        } );
-    }
-    
-    using pOrder_t = ou::tf::Order::pOrder_t;
-
-    if ( pActivePosition ) {
-      std::cout << "opening position: " << pActivePosition->GetInstrument()->GetInstrumentName() << std::endl;
-      m_pActivePosition = pActivePosition;
-      pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-      m_pActivePosition->PlaceOrder( pOrder );
-    }
-
-    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+    m_dtInterval = m_dtInterval + interval;
     m_ptimerInterval->expires_at( m_dtInterval );
     m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
   }
