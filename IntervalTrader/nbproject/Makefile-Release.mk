@@ -53,7 +53,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lchartdir -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc8-mt-x64-1_69 -lboost_filesystem-gcc8-mt-x64-1_69 -lboost_regex-gcc8-mt-x64-1_69 -lboost_serialization-gcc8-mt-x64-1_69 -lboost_system-gcc8-mt-x64-1_69 -lboost_thread-gcc8-mt-x64-1_69 -lboost_program_options-gcc8-mt-x64-1_69
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -65,11 +65,13 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFIQFeed/dist/
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a
-
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a
 
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a
+
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a
 
@@ -78,6 +80,8 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/OUSqlite/dist/
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/intervaltrader: ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a
 
@@ -102,13 +106,15 @@ ${OBJECTDIR}/Instance.o: Instance.cpp
 	cd ../lib/TFBitsNPieces && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFIQFeed && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFInteractiveBrokers && ${MAKE} -j2 -f Makefile CONF=Release
-	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFVuTrading && ${MAKE} -j2 -f Makefile CONF=Release
+	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFTrading && ${MAKE} -j2 -f Makefile CONF=Release
+	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/OUCharting && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/OUSqlite && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/OUSQL && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/OUCommon && ${MAKE} -j2 -f Makefile CONF=Release
+	cd ../lib/TFTrading && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFTimeSeries && ${MAKE} -j2 -f Makefile CONF=Release
 	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j2 -f Makefile CONF=Release
 
@@ -121,13 +127,15 @@ ${OBJECTDIR}/Instance.o: Instance.cpp
 	cd ../lib/TFBitsNPieces && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFIQFeed && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFInteractiveBrokers && ${MAKE} -j2 -f Makefile CONF=Release clean
-	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFVuTrading && ${MAKE} -j2 -f Makefile CONF=Release clean
+	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFTrading && ${MAKE} -j2 -f Makefile CONF=Release clean
+	cd ../lib/TFOptions && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/OUCharting && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/OUSqlite && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/OUSQL && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/OUCommon && ${MAKE} -j2 -f Makefile CONF=Release clean
+	cd ../lib/TFTrading && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFTimeSeries && ${MAKE} -j2 -f Makefile CONF=Release clean
 	cd ../lib/TFHDF5TimeSeries && ${MAKE} -j2 -f Makefile CONF=Release clean
 

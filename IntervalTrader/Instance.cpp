@@ -21,11 +21,13 @@
 
 #include "Instance.h"
 
-Instance::Instance( pWatch_t pWatch )
+Instance::Instance( pPosition_t pPosition )
 : m_bIntervalHasTrades( false )
 {
-  assert( pWatch );
-  m_pWatch = pWatch;
+  assert( pPosition );
+  m_pPosition = pPosition;
+  
+  m_pWatch = pPosition->GetWatch();
   m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Instance::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Instance::HandleTrade ) );
@@ -58,7 +60,7 @@ void Instance::HandleTrade( const ou::tf::Trade& trade ) {
 void Instance::Evaluate( fEvaluate_t&& fEvaluate ) {
   if ( m_bIntervalHasTrades ) {
     if ( 0.10 > m_spread ) {
-      fEvaluate( m_pWatch->GetInstrument(), m_volume * ( ( m_dblOpen + m_dblClose ) / 2.0 ) );
+      fEvaluate( m_volume * ( ( m_dblOpen + m_dblClose ) / 2.0 ), m_pPosition );
     }
   }
   m_bIntervalHasTrades = false;

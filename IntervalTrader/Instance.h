@@ -24,16 +24,18 @@
 
 #include <functional>
 
-#include <TFTrading/Watch.h>
+//#include <TFTrading/Watch.h>
+#include <TFTrading/Position.h>
 
 class Instance {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
 
-  using fEvaluate_t = std::function<void( ou::tf::Instrument::pInstrument_t, double )>; // sSymbol, accumulated dollar volume
+  using fEvaluate_t = std::function<void( double, pPosition_t )>; // accumulated dollar volume, position
 
-  Instance( pWatch_t );
+  Instance( pPosition_t );
   virtual ~Instance();
 
   void Evaluate( fEvaluate_t&& );
@@ -41,11 +43,9 @@ protected:
 private:
 
   pWatch_t m_pWatch;
+  pPosition_t m_pPosition;
 
   bool m_bIntervalHasTrades;
-
-  //ou::tf::Quote m_quote;
-  //ou::tf::Trade m_trade;
 
   double m_spread;
 
