@@ -77,6 +77,8 @@ private:
   using vInstance_t = std::vector<Instance>;
   vInstance_t m_vInstance;
 
+  bool m_bPolling;
+
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
   void HandleIQFeedDisconnecting( int );
@@ -88,6 +90,8 @@ private:
   void HandleIBDisconnecting( int );
   void HandleIBDisconnected( int );
   void HandleIBError( size_t );
+
+  void StartPoll();
 
   void HandlePoll( const boost::system::error_code& );
 

@@ -39,8 +39,6 @@ namespace po = boost::program_options;
 #include <OUCommon/TimeSource.h>
 #include <OUCommon/ReadSymbolFile.h>
 
-#include <TFTrading/Watch.h>
-
 #include "AppIntervalTrader.h"
 
 IMPLEMENT_APP(AppIntervalTrader)
@@ -164,6 +162,7 @@ bool AppIntervalTrader::OnInit() {
     }
   }
 
+  m_bPolling = false;
   m_pWork = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( m_context ) );
   m_thread = std::move( std::thread( [this ]{ m_context.run(); }) );
 
@@ -184,61 +183,22 @@ void AppIntervalTrader::HandleIQFeedConnected( int e ) {  // cross thread event
 
   assert( 0 < m_vSymbol.size() );
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-
   m_bIQFeedConnected = true;
   std::cout << "IQFeed connected." << std::endl;
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
   vSymbol_t::const_iterator iterSymbol = m_vSymbol.begin();
-  iterSymbol++; // pass over the first line of duration
-  m_vInstance.resize( m_vSymbol.size() );
-  vInstance_t::iterator iterInstance = m_vInstance.begin();
-  while ( m_vSymbol.end() != iterSymbol ) {
+  m_vInstance.reserve( m_vSymbol.size() );
+  for ( vSymbol_t::value_type& sSymbol: m_vSymbol ) {
     ou::tf::Instrument::pInstrument_t pInstrument
-      = boost::make_shared<ou::tf::Instrument>( *iterSymbol, ou::tf::InstrumentType::Stock, "SMART" );
+      = boost::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-    //(*iterInstance) = std::move( std::make_unique<Capture>() );
-//    (*iterInstance).m_sInstrument = *iterSymbol;
-    iterSymbol++;
-    iterInstance++;
+    m_vInstance.emplace_back( Instance( pWatch ) );
   }
 
-//  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
-//  m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
-//  while ( m_dtInterval <= now ) {
-//    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
-//  }
+std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
 
-//  m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
-//  m_ptimerInterval->expires_at( m_dtInterval );
-//  m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
-
-//  std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
-
-}
-
-void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
-
-  if ( !error ) {
-    // TODO: fill this in
-  }
-
-  bool bQuoteFound;
-  ou::tf::Quote quote;
-  bool bTradeFound;
-  ou::tf::Trade trade;
-  bool bBarFound;
-  ou::tf::Bar bar;
-
-  // TODO: may be do the time zone conversion once where m_dtInterval is initially assigned?
-  boost::local_time::local_date_time ltInterval( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
-  boost::posix_time::ptime dtInterval = ltInterval.local_time();
-
-//  if ( !error ) {
-//    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
-//    m_ptimerInterval->expires_at( m_dtInterval );
-//    m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
-//  }
 }
 
 void AppIntervalTrader::HandleIQFeedDisconnecting( int e ) {  // cross thread event
@@ -295,6 +255,59 @@ void AppIntervalTrader::LoadState() {
   catch(...) {
     std::cout << "load exception" << std::endl;
   }
+}
+
+void AppIntervalTrader::StartPoll() {
+  if ( !m_bPolling ) {
+    if ( m_bIQFeedConnected && m_bIBConnected ) {
+
+      boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+      m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
+      while ( m_dtInterval <= now ) {
+        m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+      }
+
+      m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
+      m_ptimerInterval->expires_at( m_dtInterval );
+      m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
+
+      m_bPolling = true;
+    }
+  }
+
+}
+
+void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
+
+  if ( error ) {
+    std::cout << "AppIntervalTrader::HandlePoll error: " << error.message() << std::endl;
+  }
+  else {
+
+    // TODO: may be do the time zone conversion once where m_dtInterval is initially assigned?
+    boost::local_time::local_date_time ltInterval( m_dtInterval, ou::TimeSource::TimeZoneNewYork() );
+    boost::posix_time::ptime dtInterval = ltInterval.local_time();
+
+    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+    double dblMaxAccumulatedDollarVolume {};
+    pInstrument_t pInstrumentToTrade;
+
+    for ( vInstance_t::value_type& vt: m_vInstance ) {
+      vt.Evaluate(
+        [this,&dblMaxAccumulatedDollarVolume,&pInstrumentToTrade]( ou::tf::Instrument::pInstrument_t pInstrument, double dblInstrumentAccumulatedDollarVolume ){
+          if ( dblMaxAccumulatedDollarVolume < dblInstrumentAccumulatedDollarVolume ) {
+            dblMaxAccumulatedDollarVolume = dblInstrumentAccumulatedDollarVolume;
+            pInstrumentToTrade = pInstrument;
+          }
+        } );
+    }
+
+    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+    m_ptimerInterval->expires_at( m_dtInterval );
+    m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
+  }
+
 }
 
 void AppIntervalTrader::OnClose( wxCloseEvent& event ) { // step 1

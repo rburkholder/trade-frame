@@ -22,12 +22,40 @@
 #ifndef INSTANCE_H
 #define INSTANCE_H
 
+#include <functional>
+
+#include <TFTrading/Watch.h>
+
 class Instance {
 public:
-  Instance();
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  using fEvaluate_t = std::function<void( ou::tf::Instrument::pInstrument_t, double )>; // sSymbol, accumulated dollar volume
+
+  Instance( pWatch_t );
   virtual ~Instance();
+
+  void Evaluate( fEvaluate_t&& );
 protected:
 private:
+
+  pWatch_t m_pWatch;
+
+  bool m_bIntervalHasTrades;
+
+  //ou::tf::Quote m_quote;
+  //ou::tf::Trade m_trade;
+
+  double m_spread;
+
+  double m_dblOpen;
+  double m_dblClose;
+
+  ou::tf::Trade::volume_t m_volume;
+
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
 
 };
 
