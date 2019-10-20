@@ -57,9 +57,9 @@ private:
 
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
-  
+
   using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
-  
+
   pProviderIB_t m_pIB;
   bool m_bIBConnected;
 
@@ -73,7 +73,7 @@ private:
   boost::asio::io_context m_context;
   std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
-  
+
   using vInstance_t = std::vector<Instance>;
   vInstance_t m_vInstance;
 
@@ -83,11 +83,11 @@ private:
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
 
-  void HandleIBConnecting( int ) {};
-  void HandleIBConnected( int ) {};
-  void HandleIBDisconnecting( int ) {};
-  void HandleIBDisconnected( int ) {};
-  void HandleIBError( size_t ) {};
+  void HandleIBConnecting( int );
+  void HandleIBConnected( int );
+  void HandleIBDisconnecting( int );
+  void HandleIBDisconnected( int );
+  void HandleIBError( size_t );
 
   void HandlePoll( const boost::system::error_code& );
 

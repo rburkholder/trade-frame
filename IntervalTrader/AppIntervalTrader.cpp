@@ -262,6 +262,28 @@ void AppIntervalTrader::SaveState( bool bSilent ) {
   if ( !bSilent ) std::cout << "  done." << std::endl;
 }
 
+void AppIntervalTrader::HandleIBConnecting( int ) {
+  std::cout << "Interactive Brokers connecting ..." << std::endl;
+}
+
+void AppIntervalTrader::HandleIBConnected( int ) {
+  m_bIBConnected = false;
+  std::cout << "Interactive Brokers disconnected." << std::endl;
+}
+
+void AppIntervalTrader::HandleIBDisconnecting( int ) {
+  std::cout << "Interactive Brokers disconnecting ..." << std::endl;
+}
+
+void AppIntervalTrader::HandleIBDisconnected( int ) {
+  m_bIBConnected = false;
+  std::cout << "Interactive Brokers disconnected." << std::endl;
+}
+
+void AppIntervalTrader::HandleIBError( size_t e ) {
+  std::cout << "HandleIBError: " << e << std::endl;
+}
+
 void AppIntervalTrader::LoadState() {
   try {
     std::cout << "Loading Config ..." << std::endl;
