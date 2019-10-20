@@ -220,21 +220,13 @@ void AppIntervalTrader::HandleIQFeedError( size_t e ) {
   std::cout << "HandleIQFeedError: " << e << std::endl;
 }
 
-void AppIntervalTrader::SaveState( bool bSilent ) {
-  if ( !bSilent ) std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( m_sStateFileName );
-  boost::archive::text_oarchive oa(ofs);
-  oa & *this;
-  if ( !bSilent ) std::cout << "  done." << std::endl;
-}
-
 void AppIntervalTrader::HandleIBConnecting( int ) {
   std::cout << "Interactive Brokers connecting ..." << std::endl;
 }
 
 void AppIntervalTrader::HandleIBConnected( int ) {
-  m_bIBConnected = false;
-  std::cout << "Interactive Brokers disconnected." << std::endl;
+  m_bIBConnected = true;
+  std::cout << "Interactive Brokers connected." << std::endl;
 }
 
 void AppIntervalTrader::HandleIBDisconnecting( int ) {
@@ -248,19 +240,6 @@ void AppIntervalTrader::HandleIBDisconnected( int ) {
 
 void AppIntervalTrader::HandleIBError( size_t e ) {
   std::cout << "HandleIBError: " << e << std::endl;
-}
-
-void AppIntervalTrader::LoadState() {
-  try {
-    std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( m_sStateFileName );
-    boost::archive::text_iarchive ia(ifs);
-    ia & *this;
-    std::cout << "  done." << std::endl;
-  }
-  catch(...) {
-    std::cout << "load exception" << std::endl;
-  }
 }
 
 void AppIntervalTrader::StartPoll() {
@@ -328,6 +307,27 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
     m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
   }
 
+}
+
+void AppIntervalTrader::SaveState( bool bSilent ) {
+  if ( !bSilent ) std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( m_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  if ( !bSilent ) std::cout << "  done." << std::endl;
+}
+
+void AppIntervalTrader::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( m_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
 }
 
 void AppIntervalTrader::OnClose( wxCloseEvent& event ) { // step 1
