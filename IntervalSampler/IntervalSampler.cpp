@@ -24,6 +24,9 @@
 // assumption:  all symbols are 'stocks'.
 //   lookups will be required if non-stock symbols are provided (or not, if no special processing is required)
 
+#include <vector>
+#include <string>
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
@@ -59,6 +62,7 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sNameInterval( "interval" );
   static const std::string sNameStaleOrFiller( "stale_or_filler" );
   static const std::string sNameFiller( "filler" );
+  static const std::string sNameTime( "time" );
 
   static const std::string sConfigFileName( "../IntervalSampler.cfg" );
 
@@ -73,6 +77,7 @@ bool AppIntervalSampler::OnInit() {
       ( sNameInterval.c_str(),      po::value<std::string>(), "interval (seconds)" )
       ( sNameStaleOrFiller.c_str(), po::value<std::string>(), "stale or filler" )
       ( sNameFiller.c_str(),        po::value<std::string>(), "filler" )
+      ( sNameTime.c_str(),          po::value<std::vector<std::string> >(), "time (multiple instances)" )
       ;
 
     std::ifstream ifs( sConfigFileName.c_str() );
@@ -82,28 +87,32 @@ bool AppIntervalSampler::OnInit() {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
     }
-
-    int cnt {};
-
-    if ( 0 < vm.count( sNameInterval ) ) {
-      cnt++;
-      std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+    
+    if ( 0 < vm.count( sNameTime ) ) {
+      std::cout << "time: " << vm[sNameTime].as<std::vector<std::string> >().size() << std::endl;
     }
+    else {
+      int cnt {};
 
-    if ( 0 < vm.count( sNameStaleOrFiller ) ) {
-      cnt++;
-      std::cout << "stale or filler: " << vm[sNameStaleOrFiller].as<std::string>() << std::endl;
+      if ( 0 < vm.count( sNameInterval ) ) {
+        cnt++;
+        std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+      }
+
+      if ( 0 < vm.count( sNameStaleOrFiller ) ) {
+        cnt++;
+        std::cout << "stale or filler: " << vm[sNameStaleOrFiller].as<std::string>() << std::endl;
+      }
+
+      if ( 0 < vm.count( sNameFiller ) ) {
+        cnt++;
+        std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
+      }
+
+      if ( 3 != cnt ) {
+        throw std::runtime_error( "incorrect number of parameters" );
+      }
     }
-
-    if ( 0 < vm.count( sNameFiller ) ) {
-      cnt++;
-      std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
-    }
-
-    if ( 3 != cnt ) {
-      throw std::runtime_error( "incorrect number of parameters" );
-    }
-
   }
   catch ( std::exception& e ) {
     std::cout << "IntervalSampler config parse error: " << e.what() << std::endl;
