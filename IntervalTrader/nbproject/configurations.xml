@@ -119,6 +119,18 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFTrading"
                             CT="3"
                             CN="Debug"
@@ -128,6 +140,18 @@
                             BC="${MAKE} -j2 -f Makefile CONF=Debug"
                             CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -176,6 +200,18 @@
                             BC="${MAKE} -j2 -f Makefile CONF=Debug"
                             CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucommon.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTrading"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFTrading"
+                            BC="${MAKE} -j2 -f Makefile CONF=Debug"
+                            CC="${MAKE} -j2 -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -302,18 +338,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFOptions"
-                            CT="3"
-                            CN="Release"
-                            AC="false"
-                            BL="true"
-                            WD="../lib/TFOptions"
-                            BC="${MAKE} -j2 -f Makefile CONF=Release"
-                            CC="${MAKE} -j2 -f Makefile CONF=Release clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFVuTrading"
                             CT="3"
                             CN="Release"
@@ -326,6 +350,18 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE} -j2 -f Makefile CONF=Release"
+                            CC="${MAKE} -j2 -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFTrading"
                             CT="3"
                             CN="Release"
@@ -335,6 +371,18 @@
                             BC="${MAKE} -j2 -f Makefile CONF=Release"
                             CC="${MAKE} -j2 -f Makefile CONF=Release clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE} -j2 -f Makefile CONF=Release"
+                            CC="${MAKE} -j2 -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -386,6 +434,18 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTrading"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFTrading"
+                            BC="${MAKE} -j2 -f Makefile CONF=Release"
+                            CC="${MAKE} -j2 -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFTimeSeries"
                             CT="3"
                             CN="Release"
@@ -415,6 +475,7 @@
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
+            <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
             <linkerLibLibItem>boost_date_time-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem-gcc8-mt-x64-1_69</linkerLibLibItem>
@@ -422,6 +483,7 @@
             <linkerLibLibItem>boost_serialization-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_system-gcc8-mt-x64-1_69</linkerLibLibItem>
             <linkerLibLibItem>boost_thread-gcc8-mt-x64-1_69</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options-gcc8-mt-x64-1_69</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>

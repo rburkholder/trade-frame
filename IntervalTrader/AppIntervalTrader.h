@@ -36,6 +36,8 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 
+#include <TFTrading/Portfolio.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
@@ -47,23 +49,28 @@ public:
 protected:
 private:
 
+  using vSymbol_t = std::vector<std::string>;
+  using vInstance_t = std::vector<Instance>;
+
+  using pProviderIQFeed_t = ou::tf::IQFeedProvider::pProvider_t;
+  using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
   std::string m_sStateFileName;
   std::string m_sFieldFiller;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  using pProviderIQFeed_t = ou::tf::IQFeedProvider::pProvider_t;
-
   pProviderIQFeed_t m_pIQFeed;
   bool m_bIQFeedConnected;
-  
-  using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
-  
+
   pProviderIB_t m_pIB;
   bool m_bIBConnected;
 
-  using vSymbol_t = std::vector<std::string>;
   vSymbol_t m_vSymbol;
 
   size_t m_nIntervalSeconds;
@@ -73,9 +80,13 @@ private:
   boost::asio::io_context m_context;
   std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
-  
-  using vInstance_t = std::vector<Instance>;
+
   vInstance_t m_vInstance;
+
+  bool m_bPolling;
+
+  pPortfolio_t m_pPortfolio;
+  pPosition_t m_pActivePosition;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
@@ -83,11 +94,13 @@ private:
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
 
-  void HandleIBConnecting( int ) {};
-  void HandleIBConnected( int ) {};
-  void HandleIBDisconnecting( int ) {};
-  void HandleIBDisconnected( int ) {};
-  void HandleIBError( size_t ) {};
+  void HandleIBConnecting( int );
+  void HandleIBConnected( int );
+  void HandleIBDisconnecting( int );
+  void HandleIBDisconnected( int );
+  void HandleIBError( size_t );
+
+  void StartPoll();
 
   void HandlePoll( const boost::system::error_code& );
 

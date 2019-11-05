@@ -13,14 +13,14 @@
  ************************************************************************/
 
 /*
- * File:    Watch.h
+ * File:    Capture.h
  * Author:  raymond@burkholder.net
  * Project: IntervalSampler
  * Created on August 21, 2019, 11:10 AM
  */
 
-#ifndef WATCH_H
-#define WATCH_H
+#ifndef CAPTURE_H
+#define CAPTURE_H
 
 #include <OUCommon/SpinLock.h>
 
@@ -89,5 +89,5 @@ private:
 
 };
 
-#endif /* WATCH_H */
+#endif /* CAPTURE_H */
 

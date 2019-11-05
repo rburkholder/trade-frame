@@ -30,11 +30,13 @@ Capture::Capture()
 }
 
 Capture::~Capture() {
-  if ( m_pWatch ) m_pWatch->StopWatch();
   m_bf.SetOnBarComplete( nullptr );
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &Capture::HandleTrade ) );
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &Capture::HandleQuote ) );
-  m_pWatch.reset(); // TODO: need to wait for queue to flush
+  if ( m_pWatch ) {
+    m_pWatch->StopWatch();
+    m_pWatch->OnTrade.Remove( MakeDelegate( this, &Capture::HandleTrade ) );
+    m_pWatch->OnQuote.Remove( MakeDelegate( this, &Capture::HandleQuote ) );
+    m_pWatch.reset(); // TODO: need to wait for queue to flush
+  }
 }
 
 void Capture::Assign(
