@@ -62,11 +62,15 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sNameInterval( "interval" );
   static const std::string sNameStaleOrFiller( "stale_or_filler" );
   static const std::string sNameFiller( "filler" );
-  static const std::string sNameTime( "time" );
+  static const std::string sNameCollectAt( "collect_at" );
+  static const std::string sNameMethod( "method" );
 
   static const std::string sConfigFileName( "../IntervalSampler.cfg" );
 
   m_sStateFileName = "IntervalSampler.state";
+  
+  m_eCollectionMethod = ECollectionMethod::unknown;
+  m_eDefaultContent   = EDefaultContent::unknown;
 
   po::variables_map vm;
 
@@ -77,7 +81,8 @@ bool AppIntervalSampler::OnInit() {
       ( sNameInterval.c_str(),      po::value<std::string>(), "interval (seconds)" )
       ( sNameStaleOrFiller.c_str(), po::value<std::string>(), "stale or filler" )
       ( sNameFiller.c_str(),        po::value<std::string>(), "filler" )
-      ( sNameTime.c_str(),          po::value<std::vector<std::string> >(), "time (multiple instances)" )
+      ( sNameCollectAt.c_str(),     po::value<std::vector<std::string> >(), "collect at hh:mm (multiple instances allowed)" )
+      ( sNameMethod.c_str(),        po::value<std::string>(), "collection method: interval|time" )
       ;
 
     std::ifstream ifs( sConfigFileName.c_str() );
@@ -88,58 +93,76 @@ bool AppIntervalSampler::OnInit() {
       po::store( po::parse_config_file( ifs, config), vm );
     }
     
-    if ( 0 < vm.count( sNameTime ) ) {
-      std::cout << "time: " << vm[sNameTime].as<std::vector<std::string> >().size() << std::endl;
+    if ( 0 < vm.count( sNameCollectAt ) ) {
+      std::cout << "time: " << vm[sNameCollectAt].as<std::vector<std::string> >().size() << std::endl;
+    }
+
+    int cnt {};
+
+    if ( 0 < vm.count( sNameInterval ) ) {
+      cnt++;
+      std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+    }
+
+    if ( 0 < vm.count( sNameStaleOrFiller ) ) {
+      cnt++;
+      std::cout << "stale or filler: " << vm[sNameStaleOrFiller].as<std::string>() << std::endl;
+    }
+
+    if ( 0 < vm.count( sNameFiller ) ) {
+      cnt++;
+      std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
+    }
+    
+    if ( 0 == vm.count( sNameMethod ) ) {
+      throw std::runtime_error( "please define collection method" );
     }
     else {
-      int cnt {};
+      std::string sMethod = vm[sNameMethod].as<std::string>();
+      if ( "interval" == sMethod ) {
+        
+        if ( 3 != cnt ) {
+          throw std::runtime_error( "incorrect number of interval parameters" );
+        }
 
-      if ( 0 < vm.count( sNameInterval ) ) {
-        cnt++;
-        std::cout << "interval: " << vm[sNameInterval].as<std::string>() << std::endl;
+        std::string sInterval = vm[sNameInterval].as<std::string>();
+        std::string sStaleOrFiller = vm[sNameStaleOrFiller].as<std::string>();
+        m_sFieldFiller = vm[sNameFiller].as<std::string>();
+
+        if ( "stale" == sStaleOrFiller ) {
+          m_eDefaultContent = EDefaultContent::stale;
+        }
+        else {
+          if ( "filler" == sStaleOrFiller ) {
+            m_eDefaultContent = EDefaultContent::filler;
+          }
+          else {
+            throw std::runtime_error( "Unknown default content type: " + sStaleOrFiller );
+          }
+        }
+
+        m_nIntervalSeconds = boost::lexical_cast<size_t>( sInterval );
+        if ( 0 >= m_nIntervalSeconds ) {
+          throw std::runtime_error( sConfigFileName + ": interval needs to be greater than 0, is " + boost::lexical_cast<std::string>( m_nIntervalSeconds ) );
+        }
+        
+        m_eCollectionMethod = ECollectionMethod::interval;
+
       }
-
-      if ( 0 < vm.count( sNameStaleOrFiller ) ) {
-        cnt++;
-        std::cout << "stale or filler: " << vm[sNameStaleOrFiller].as<std::string>() << std::endl;
-      }
-
-      if ( 0 < vm.count( sNameFiller ) ) {
-        cnt++;
-        std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
-      }
-
-      if ( 3 != cnt ) {
-        throw std::runtime_error( "incorrect number of parameters" );
+      else {
+        if ( "time" == sMethod ) {
+          m_eCollectionMethod = ECollectionMethod::time;
+        }
+        else {
+          throw std::runtime_error( "unknown method selected: " + sMethod );
+        }
       }
     }
+
   }
   catch ( std::exception& e ) {
     std::cout << "IntervalSampler config parse error: " << e.what() << std::endl;
     //throw e; // need to terminate without config
-    return false;
-  }
-
-  std::string sInterval = vm[sNameInterval].as<std::string>();
-  std::string sStaleOrFiller = vm[sNameStaleOrFiller].as<std::string>();
-  m_sFieldFiller = vm[sNameFiller].as<std::string>();
-
-  if ( "stale" == sStaleOrFiller ) {
-    m_eDefaultContent = EDefaultContent::stale;
-  }
-  else {
-    if ( "filler" == sStaleOrFiller ) {
-      m_eDefaultContent = EDefaultContent::filler;
-    }
-    else {
-      std::cout << "Unknown default content: " << sStaleOrFiller << std::endl;
-      return false;
-    }
-  }
-
-  m_nIntervalSeconds = boost::lexical_cast<size_t>( sInterval );
-  if ( 0 >= m_nIntervalSeconds ) {
-    std::cout << sConfigFileName << ": interval needs to be greater than 0, is " << m_nIntervalSeconds << std::endl;
     return false;
   }
 

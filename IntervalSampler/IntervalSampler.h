@@ -51,7 +51,8 @@ public:
 protected:
 private:
 
-  enum class EDefaultContent { filler, stale } m_eDefaultContent;
+  enum class ECollectionMethod { unknown, interval, time } m_eCollectionMethod;
+  enum class EDefaultContent   { unknown, filler, stale } m_eDefaultContent;
 
   std::string m_sStateFileName;
   std::string m_sFieldFiller;
