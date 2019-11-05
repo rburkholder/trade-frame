@@ -30,6 +30,8 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/executor_work_guard.hpp>
@@ -97,6 +99,8 @@ private:
   boost::asio::io_context m_context;
   std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
+  
+  std::vector<boost::posix_time::time_duration> m_vtdCollectAt;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );

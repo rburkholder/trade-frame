@@ -151,6 +151,9 @@ bool AppIntervalSampler::OnInit() {
       }
       else {
         if ( "time" == sMethod ) {
+          for ( auto& sCollectAt: vm[sNameCollectAt].as<std::vector<std::string> >() ) {
+            m_vtdCollectAt.emplace_back( boost::posix_time::duration_from_string( sCollectAt ) );
+          }
           m_eCollectionMethod = ECollectionMethod::time;
         }
         else {
@@ -328,9 +331,27 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   }
 
   boost::posix_time::ptime now = ou::TimeSource::Instance().External();
-  m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
-  while ( m_dtInterval <= now ) {
-    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+  switch ( m_eCollectionMethod ) {
+    case ECollectionMethod::interval:
+      m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
+      while ( m_dtInterval <= now ) {
+        m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+      }
+      break;
+    case ECollectionMethod::time: {
+      bool bFound( false );
+      for ( auto td: m_vtdCollectAt ) {
+        boost::posix_time::ptime next( boost::posix_time::ptime( now.date(), td ) );
+        if ( now < next ) {
+          m_dtInterval = next;
+          bFound = true;
+        }
+      }
+      if ( !bFound ) {
+        m_dtInterval = boost::posix_time::ptime( now.date() + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
+      }
+      }
+      break;
   }
 
   m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
