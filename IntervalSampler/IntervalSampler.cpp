@@ -94,7 +94,7 @@ bool AppIntervalSampler::OnInit() {
     }
     
     if ( 0 < vm.count( sNameCollectAt ) ) {
-      std::cout << "time: " << vm[sNameCollectAt].as<std::vector<std::string> >().size() << std::endl;
+      std::cout << "collect_at entries: " << vm[sNameCollectAt].as<std::vector<std::string> >().size() << std::endl;
     }
 
     int cnt {};
