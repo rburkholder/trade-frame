@@ -358,6 +358,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
       if ( !bFound ) {
         m_dtInterval = boost::posix_time::ptime( now.date() + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
       }
+      std::cout << "collect_at: " << m_dtInterval << std::endl;
       }
       break;
   }
