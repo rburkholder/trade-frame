@@ -100,7 +100,9 @@ private:
   std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
   
-  std::vector<boost::posix_time::time_duration> m_vtdCollectAt;
+  // TODO: convert to map (auto-sorts on insertion)
+  using vtdCollectAt_t = std::vector<boost::posix_time::time_duration>;
+  vtdCollectAt_t m_vtdCollectAt;
 
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );

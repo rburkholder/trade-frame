@@ -154,7 +154,15 @@ bool AppIntervalSampler::OnInit() {
           for ( auto& sCollectAt: vm[sNameCollectAt].as<std::vector<std::string> >() ) {
             m_vtdCollectAt.emplace_back( boost::posix_time::duration_from_string( sCollectAt ) );
           }
-          m_eCollectionMethod = ECollectionMethod::time;
+          if ( 0 == m_vtdCollectAt.size() ) {
+            throw std::runtime_error( "method:time requires at least one collect_at entry" );
+          }
+          else {
+            for ( vtdCollectAt_t::value_type td: m_vtdCollectAt ) {
+              std::cout << "collect_at: " << boost::posix_time::to_simple_string( td ) << std::endl;
+            }
+            m_eCollectionMethod = ECollectionMethod::time;
+          }
         }
         else {
           throw std::runtime_error( "unknown method selected: " + sMethod );
