@@ -338,27 +338,32 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
     iterInstance++;
   }
 
-  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
   switch ( m_eCollectionMethod ) {
-    case ECollectionMethod::interval:
+    case ECollectionMethod::interval: {
+      boost::posix_time::ptime now( ou::TimeSource::Instance().External() );
       m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
       while ( m_dtInterval <= now ) {
         m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
       }
+      }
       break;
     case ECollectionMethod::time: {
       bool bFound( false );
+      boost::posix_time::ptime nowLocal = ou::TimeSource::Instance().Local();  // local time
+      boost::gregorian::date dateNowLocal( nowLocal.date() );
       for ( auto td: m_vtdCollectAt ) {
-        boost::posix_time::ptime next( boost::posix_time::ptime( now.date(), td ) );
-        if ( now < next ) {
-          m_dtInterval = next;
+        boost::local_time::local_date_time nextLocal( boost::posix_time::ptime( dateNowLocal, td ), ou::TimeSource::TimeZoneNewYork() );
+        if ( nowLocal < nextLocal.local_time() ) {
+          m_dtInterval = nextLocal.utc_time();
           bFound = true;
+          break;
         }
       }
       if ( !bFound ) {
-        m_dtInterval = boost::posix_time::ptime( now.date() + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
+        boost::local_time::local_date_time nextLocal( boost::posix_time::ptime( dateNowLocal + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() ), ou::TimeSource::TimeZoneNewYork() );
+        m_dtInterval = nextLocal.utc_time();
       }
-      std::cout << "collect_at: " << m_dtInterval << std::endl;
+      std::cout << "collect_at(utc): " << m_dtInterval << std::endl;
       }
       break;
   }
