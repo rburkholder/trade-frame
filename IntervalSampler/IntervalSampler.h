@@ -106,6 +106,8 @@ private:
   using vtdCollectAt_t = std::vector<boost::posix_time::time_duration>;
   vtdCollectAt_t m_vtdCollectAt;
 
+  void CalcNextPollTime();
+  void CalcNextPoll();
   void SubmitPoll();
 
   void HandleIQFeedConnecting( int );

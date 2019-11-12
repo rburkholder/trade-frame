@@ -298,6 +298,47 @@ void AppIntervalSampler::OutputFileCheck( boost::gregorian::date date ) {
   }
 }
 
+void AppIntervalSampler::CalcNextPollTime() {
+  bool bFound( false );
+  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+  boost::posix_time::time_duration offset = m_ptz->base_utc_offset();
+  if ( m_ptz->has_dst() ) { // not the most precise of calculations
+    const boost::posix_time::ptime dst_bgn = m_ptz->dst_local_start_time( now.date().year() );
+    const boost::posix_time::ptime dst_end = m_ptz->dst_local_end_time( now.date().year() );
+    if ( ( dst_bgn <= now ) && ( now < dst_end ) ) {
+      offset += m_ptz->dst_offset();
+    }
+  }
+  boost::posix_time::ptime nowLocal = now + offset;
+  boost::gregorian::date dateNowLocal( nowLocal.date() );
+  for ( auto td: m_vtdCollectAt ) {
+    boost::posix_time::ptime dtCollectAtLocal( dateNowLocal, td );
+    boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
+    if ( now < dtCollectAtUtc ) {
+      m_dtInterval = dtCollectAtUtc;
+      bFound = true;
+      break;
+    }
+  }
+  if ( !bFound ) {
+    boost::posix_time::ptime dtCollectAtLocal( dateNowLocal + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
+    boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
+    m_dtInterval = dtCollectAtUtc;
+  }
+  std::cout << "next collect_at(utc): " << m_dtInterval << std::endl;
+}
+
+void AppIntervalSampler::CalcNextPoll() {
+  switch ( m_eCollectionMethod ) {
+    case ECollectionMethod::interval:
+      m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+      break;
+    case ECollectionMethod::time:
+      CalcNextPollTime();
+      break;
+  }
+}
+
 void AppIntervalSampler::SubmitPoll() {
   m_ptimerInterval->expires_at( m_dtInterval );
   m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
@@ -362,35 +403,8 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
       }
       }
       break;
-    case ECollectionMethod::time: {
-      bool bFound( false );
-      boost::posix_time::ptime now = ou::TimeSource::Instance().External();
-      boost::posix_time::time_duration offset = m_ptz->base_utc_offset();
-      if ( m_ptz->has_dst() ) { // not the most precise of calculations
-        const boost::posix_time::ptime dst_bgn = m_ptz->dst_local_start_time( now.date().year() );
-        const boost::posix_time::ptime dst_end = m_ptz->dst_local_end_time( now.date().year() );
-        if ( ( dst_bgn <= now ) && ( now < dst_end ) ) {
-          offset += m_ptz->dst_offset();
-        }
-      }
-      boost::posix_time::ptime nowLocal = now + offset;
-      boost::gregorian::date dateNowLocal( nowLocal.date() );
-      for ( auto td: m_vtdCollectAt ) {
-        boost::posix_time::ptime dtCollectAtLocal( dateNowLocal, td );
-        boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
-        if ( now < dtCollectAtUtc ) {
-          m_dtInterval = dtCollectAtUtc;
-          bFound = true;
-          break;
-        }
-      }
-      if ( !bFound ) {
-        boost::posix_time::ptime dtCollectAtLocal( dateNowLocal + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
-        boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
-        m_dtInterval = dtCollectAtUtc;
-      }
-      std::cout << "collect_at(utc): " << m_dtInterval << std::endl;
-      }
+    case ECollectionMethod::time:
+      CalcNextPollTime();
       break;
   }
 
@@ -502,7 +516,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
   }
 
   if ( !error ) {
-    m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
+    CalcNextPoll();
     SubmitPoll();
   }
 }
