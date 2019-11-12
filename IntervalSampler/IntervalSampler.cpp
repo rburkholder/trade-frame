@@ -298,6 +298,11 @@ void AppIntervalSampler::OutputFileCheck( boost::gregorian::date date ) {
   }
 }
 
+void AppIntervalSampler::SubmitPoll() {
+  m_ptimerInterval->expires_at( m_dtInterval );
+  m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
+}
+
 void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -390,8 +395,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
   }
 
   m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
-  m_ptimerInterval->expires_at( m_dtInterval );
-  m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
+  SubmitPoll();
 
   std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
 
@@ -499,8 +503,7 @@ void AppIntervalSampler::HandlePoll( const boost::system::error_code& error ) {
 
   if ( !error ) {
     m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
-    m_ptimerInterval->expires_at( m_dtInterval );
-    m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
+    SubmitPoll();
   }
 }
 
