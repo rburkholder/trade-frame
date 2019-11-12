@@ -38,7 +38,10 @@ TimeSource::TimeSource(void)
     // this may not make it to the gui console if this is called prior to gui setup
     std::cout << "TimeSource::TimeSource: can't load date_time_zonespec.csv" << std::endl;
   }
- 
+}
+
+boost::local_time::time_zone_ptr TimeSource::LoadTimeZone( const std::string& sRegion ) {
+  return m_tzDb.time_zone_from_region( sRegion );
 }
 
 boost::posix_time::ptime TimeSource::External( boost::posix_time::ptime* dt ) { 

@@ -102,6 +102,8 @@ public:
   }
 
   static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }
+  
+  boost::local_time::time_zone_ptr LoadTimeZone( const std::string& sRegion );
 
 protected:
 private:
