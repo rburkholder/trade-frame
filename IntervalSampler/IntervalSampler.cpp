@@ -64,6 +64,7 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sNameFiller( "filler" );
   static const std::string sNameCollectAt( "collect_at" );
   static const std::string sNameMethod( "method" );
+  static const std::string sNameRegion( "region" );
 
   static const std::string sConfigFileName( "../IntervalSampler.cfg" );
 
@@ -83,6 +84,7 @@ bool AppIntervalSampler::OnInit() {
       ( sNameFiller.c_str(),        po::value<std::string>(), "filler" )
       ( sNameCollectAt.c_str(),     po::value<std::vector<std::string> >(), "collect at hh:mm (multiple instances allowed)" )
       ( sNameMethod.c_str(),        po::value<std::string>(), "collection method: interval|time" )
+      ( sNameRegion.c_str(),        po::value<std::string>(), "time zone region (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)" )
       ;
 
     std::ifstream ifs( sConfigFileName.c_str() );
@@ -151,6 +153,14 @@ bool AppIntervalSampler::OnInit() {
       }
       else {
         if ( "time" == sMethod ) {
+          if ( 0 == vm.count( sNameRegion ) ) {
+            throw std::runtime_error( "time zone region required" );
+          }
+          else {
+            std::string sTimeZoneRegion = vm[ sNameRegion ].as<std::string>();
+            m_ptz = ou::TimeSource::Instance().LoadTimeZone( sTimeZoneRegion );
+            std::cout << sTimeZoneRegion << ": offset=" << m_ptz->base_utc_offset() << ", dst=" << m_ptz->dst_offset() << std::endl;
+          }
           for ( auto& sCollectAt: vm[sNameCollectAt].as<std::vector<std::string> >() ) {
             m_vtdCollectAt.emplace_back( boost::posix_time::duration_from_string( sCollectAt ) );
           }
@@ -349,19 +359,30 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
       break;
     case ECollectionMethod::time: {
       bool bFound( false );
-      boost::posix_time::ptime nowLocal = ou::TimeSource::Instance().Local();  // local time
+      boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+      boost::posix_time::time_duration offset = m_ptz->base_utc_offset();
+      if ( m_ptz->has_dst() ) { // not the most precise of calculations
+        const boost::posix_time::ptime dst_bgn = m_ptz->dst_local_start_time( now.date().year() );
+        const boost::posix_time::ptime dst_end = m_ptz->dst_local_end_time( now.date().year() );
+        if ( ( dst_bgn <= now ) && ( now < dst_end ) ) {
+          offset += m_ptz->dst_offset();
+        }
+      }
+      boost::posix_time::ptime nowLocal = now + offset;
       boost::gregorian::date dateNowLocal( nowLocal.date() );
       for ( auto td: m_vtdCollectAt ) {
-        boost::local_time::local_date_time nextLocal( boost::posix_time::ptime( dateNowLocal, td ), ou::TimeSource::TimeZoneNewYork() );
-        if ( nowLocal < nextLocal.local_time() ) {
-          m_dtInterval = nextLocal.utc_time();
+        boost::posix_time::ptime dtCollectAtLocal( dateNowLocal, td );
+        boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
+        if ( now < dtCollectAtUtc ) {
+          m_dtInterval = dtCollectAtUtc;
           bFound = true;
           break;
         }
       }
       if ( !bFound ) {
-        boost::local_time::local_date_time nextLocal( boost::posix_time::ptime( dateNowLocal + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() ), ou::TimeSource::TimeZoneNewYork() );
-        m_dtInterval = nextLocal.utc_time();
+        boost::posix_time::ptime dtCollectAtLocal( dateNowLocal + boost::gregorian::date_duration( 1 ), m_vtdCollectAt.front() );
+        boost::posix_time::ptime dtCollectAtUtc( dtCollectAtLocal - offset );
+        m_dtInterval = dtCollectAtUtc;
       }
       std::cout << "collect_at(utc): " << m_dtInterval << std::endl;
       }

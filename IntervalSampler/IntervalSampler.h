@@ -101,6 +101,8 @@ private:
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
   
   // TODO: convert to map (auto-sorts on insertion)
+  //std::string m_sTimeZoneRegion;
+  boost::local_time::time_zone_ptr m_ptz;
   using vtdCollectAt_t = std::vector<boost::posix_time::time_duration>;
   vtdCollectAt_t m_vtdCollectAt;
 
