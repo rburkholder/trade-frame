@@ -1,0 +1,20 @@
+# trade-frame (solution root)
+cmake_minimum_required (VERSION 3.13)
+
+project(trade-frame)
+
+add_subdirectory(lib)
+add_subdirectory(ArmsIndex)
+add_subdirectory(IQFeedMarketSymbols)
+add_subdirectory(IQFeedGetHistory)
+add_subdirectory(Hdf5Chart)
+add_subdirectory(LiveChart)
+add_subdirectory(IntervalSampler)
+add_subdirectory(IntervalTrader)
+add_subdirectory(ComboTrading)
+add_subdirectory(BasketTrading)
+add_subdirectory(HedgedBollinger)
+add_subdirectory(Weeklies)
+add_subdirectory(Scanner)
+#add_subdirectory(BookTrader)
+
