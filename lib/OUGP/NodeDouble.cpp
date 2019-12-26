@@ -150,7 +150,7 @@ NodeDoubleDvd::~NodeDoubleDvd( void ) {
 double NodeDoubleDvd::EvaluateDouble( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
-  return ( 0.0 == d2 ) ? HUGE : d1 / d2;
+  return ( 0.0 == d2 ) ? HUGE_VAL : d1 / d2;
 }
 
 } // namespace gp
