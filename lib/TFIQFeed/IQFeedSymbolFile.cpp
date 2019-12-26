@@ -35,7 +35,7 @@ namespace ascii = boost::spirit::ascii;
 using namespace boost::phoenix;
 using namespace boost::phoenix::arg_names;
 
-#include <OUCommon/KeywordMatch.h>
+#include <OUCommon/KeyWordMatch.h>
 #include <OUCommon/Debug.h>
 
 #include "IQFeedSymbolFile.h"
