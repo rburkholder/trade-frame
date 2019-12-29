@@ -21,8 +21,14 @@
             <file>file:/home/rpb/projects/t1/trade-frame/HedgedBollinger/HedgedBollinger.h</file>
         </group>
         <group>
-            <file>file:/var/local/rpb/projects/trade-frame/HedgedBollinger/HedgedBollinger.h</file>
-            <file>file:/var/local/rpb/projects/trade-frame/HedgedBollinger/HedgedBollinger.cpp</file>
+            <file>file:/home/rpb/data/projects/trade-frame/HedgedBollinger/Strategy1.cpp</file>
+        </group>
+        <group name="TradeFrame free group"/>
+        <group name="tradeframe">
+            <file>file:/home/rpb/data/projects/trade-frame/HedgedBollinger/Strategy1.cpp</file>
+        </group>
+        <group name="tr">
+            <file>file:/home/rpb/data/projects/trade-frame/HedgedBollinger/HedgedBollinger.cpp</file>
         </group>
     </open-files>
 </project-private>
