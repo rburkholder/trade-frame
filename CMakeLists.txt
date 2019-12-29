@@ -17,4 +17,5 @@ add_subdirectory(HedgedBollinger)
 add_subdirectory(Weeklies)
 add_subdirectory(Scanner)
 #add_subdirectory(BookTrader)
+add_subdirectory(ESBracketOrder)
 
