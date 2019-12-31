@@ -36,8 +36,73 @@ bool AppESBracketOrder::OnInit() {
 
   m_sStateFileName = "IntervalTrader.state";
 
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Interval Trader" );
+  wxWindowID idFrameMain = m_pFrameMain->GetId();
+  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
+  //m_pFrameMain->Bind(
+  //  wxEVT_SIZE,
+  //  [this](wxSizeEvent& event){
+  //    std::cout << "w=" << event.GetSize().GetWidth() << ",h=" << event.GetSize().GetHeight() << std::endl;
+  //    event.Skip();
+  //    },
+  //  idFrameMain );
+  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+  //m_pFrameMain->Center();
+  //m_pFrameMain->Move( 200, 100 );
+  //m_pFrameMain->SetSize( 1400, 800 );
+  SetTopWindow( m_pFrameMain );
+
+  wxBoxSizer* sizerMain = new wxBoxSizer( wxVERTICAL );
+  m_pFrameMain->SetSizer( sizerMain );
+
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
+  sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_pPanelLogging->Show( true );
+
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppESBracketOrder::OnClose, this );  // start close of windows and controls
+  m_pFrameMain->Show( true );
+
+//  bool bOk( true );
+
+  m_bIBConnected = false;
+  m_pIB = boost::make_shared<ou::tf::IBTWS>();
+  m_pIB->OnConnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnecting ) );
+  m_pIB->OnConnected.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnected ) );
+  m_pIB->OnDisconnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBDisconnecting ) );
+  m_pIB->OnDisconnected.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBDisconnected ) );
+  m_pIB->OnError.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBError ) );
+  m_pIB->Connect();
+
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
   return true;
 
+}
+
+void AppESBracketOrder::HandleIBConnecting( int ) {
+  std::cout << "Interactive Brokers connecting ..." << std::endl;
+}
+
+void AppESBracketOrder::HandleIBConnected( int ) {
+  m_bIBConnected = true;
+  std::cout << "Interactive Brokers connected." << std::endl;
+}
+
+void AppESBracketOrder::HandleIBDisconnecting( int ) {
+  std::cout << "Interactive Brokers disconnecting ..." << std::endl;
+}
+
+void AppESBracketOrder::HandleIBDisconnected( int ) {
+  m_bIBConnected = false;
+  std::cout << "Interactive Brokers disconnected." << std::endl;
+}
+
+void AppESBracketOrder::HandleIBError( size_t e ) {
+  std::cout << "HandleIBError: " << e << std::endl;
 }
 
 void AppESBracketOrder::SaveState( bool bSilent ) {

@@ -28,13 +28,38 @@
 
 #include <wx/wx.h>
 
+#include <TFTrading/Portfolio.h>
+
+#include <TFInteractiveBrokers/IBTWS.h>
+
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelLogging.h>
+
 class AppESBracketOrder: public wxApp {
   friend class boost::serialization::access;
 public:
 protected:
 private:
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
+
   std::string m_sStateFileName;
+
+  FrameMain* m_pFrameMain;
+  ou::tf::PanelLogging* m_pPanelLogging;
+
+  pProviderIB_t m_pIB;
+  bool m_bIBConnected;
+
+  void HandleIBConnecting( int );
+  void HandleIBConnected( int );
+  void HandleIBDisconnecting( int );
+  void HandleIBDisconnected( int );
+  void HandleIBError( size_t );
 
   virtual bool OnInit();
   virtual int OnExit();
