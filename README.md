@@ -5,9 +5,9 @@
 This is an application I use for automated trading securities.  
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
-I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.  Regular make files are available as a side effect.
-
 A C++17 compiler is used to build the libraries and code.
+
+CMake is used for build the projects and libraries.
 
 ## Example
 
@@ -43,15 +43,6 @@ wine iqfeed_client_5_2_5_0.exe
 # interactive brokers Java for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
-
-# netbeans ide and build env
-# the following only offers up to c++14.  
-# wget https://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
-# sh netbeans-8.2-cpp-linux-x64.sh
-# as I wish to use some c++17 features such as string_view, c++17 is needed.
-#   netbeans 9 and 10 do not offer this, but there is a developer repository one can use:
-wget http://137.254.56.27/dev/nightly/2018-04-20_00-02-34/bundles/netbeans-trunk-nightly-201804200002-cpp-linux-x64.sh
-sh netbeans-trunk-nightly-201804200002-cpp-linux-x64.sh
 
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
@@ -97,8 +88,6 @@ popd
 * Start Interactive Brokers TWS and connect to a paper trading account 
 .* do not use an active account for testing
 .* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
-* Start NetBeans
-,* File -> Project Groups -> New Group -> Folder of Projects -> [browse to trade-frame]
 * IQFeedMarketSymbols project:
   * run the app:
     * Actions -> New Symbol List Remote
@@ -146,12 +135,13 @@ Libraries used (use my lib-build respository to download and build the various d
 * curl
 * zlib
 * hdf5
-* sqlite
-* exelformat
+* sqlite (included in source)
+* exelformat (included in source)
 
 The libraries are cross platform capable: Linux and Windows
 
-The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian Buster.
+The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
+to port back to Windows.
 
 The lib directory has a series of libraries I use throughout the various applications.  Primary libraries include:
 
