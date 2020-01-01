@@ -30,13 +30,13 @@ IMPLEMENT_APP(AppESBracketOrder)
 bool AppESBracketOrder::OnInit() {
 
   wxApp::OnInit();
-  wxApp::SetAppDisplayName( "Interval Trader" );
+  wxApp::SetAppDisplayName( "ES Bracket Trader" );
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c) 2019 One Unified Net Limited" );
 
-  m_sStateFileName = "IntervalTrader.state";
+  m_sStateFileName = "ESBracketTrader.state";
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Interval Trader" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "ES Bracket Trader Trader" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind(

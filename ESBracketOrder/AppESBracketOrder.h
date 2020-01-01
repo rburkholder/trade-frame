@@ -70,12 +70,12 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-//    ar & *m_pFrameMain;
+    ar & *m_pFrameMain;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-//    ar & *m_pFrameMain;
+    ar & *m_pFrameMain;
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
