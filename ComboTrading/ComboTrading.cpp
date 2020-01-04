@@ -140,7 +140,7 @@ bool AppComboTrading::OnInit() {
   m_pPanelCharts = nullptr;
   //m_pPanelOptionCombo = nullptr;
 
-  m_pOptionEngine.reset( new ou::tf::option::Engine( m_libor ) );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_libor );
   m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
         ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
