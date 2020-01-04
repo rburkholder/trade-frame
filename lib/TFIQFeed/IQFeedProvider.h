@@ -25,8 +25,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class IQFeedProvider :
-  public ProviderInterface<IQFeedProvider,IQFeedSymbol>, 
-  public IQFeed<IQFeedProvider> 
+  public ProviderInterface<IQFeedProvider,IQFeedSymbol>,
+  public IQFeed<IQFeedProvider>
 {
   friend IQFeed<IQFeedProvider>;
 public:
@@ -53,7 +53,7 @@ protected:
   void StopQuoteTradeWatch( IQFeedSymbol *pSymbol );
 
   // overridden from ProviderInterface, called when application adds/removes watches
-  virtual void StartQuoteWatch( pSymbol_t pSymbol ) ;
+  virtual void StartQuoteWatch( pSymbol_t pSymbol );
   virtual void  StopQuoteWatch( pSymbol_t pSymbol );
 
   virtual void StartTradeWatch( pSymbol_t pSymbol );
