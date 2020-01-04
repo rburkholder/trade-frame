@@ -35,8 +35,8 @@
 /*
 Discussion of calling sequence for open, quote, trade, depth handlers:
 * client application calls Provider to add a handler
-* ProviderInterface maintains list of symbols, 
-   and will use the pure virtual override to create a new one when necessary 
+* ProviderInterface maintains list of symbols,
+   and will use the pure virtual override to create a new one when necessary
 */
 
 //
@@ -75,7 +75,6 @@ public:
     {};
   virtual ~ProviderInterfaceBase( void ) {};
 
-  
   virtual void Connect( void ) {}; // called by inheriting provider
   //virtual void Connecting( void ) {}; // called by inheriting provider
   ou::Delegate<int> OnConnecting;
@@ -175,7 +174,7 @@ public:
   pSymbol_t Add( pInstrument_cref pInstrument );
 
   pSymbol_t GetSymbol( const symbol_id_t& );
-  
+
   void  PlaceOrder( Order::pOrder_t pOrder );
   void CancelOrder( Order::pOrder_t pOrder );
 
@@ -204,14 +203,14 @@ protected:
 
   bool Exists( pInstrument_cref pInstrument, typename mapSymbols_t::iterator& iter );
 
-  virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
+  virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0;
   pSymbol_t AddCSymbol( pSymbol_t pSymbol );
 
 private:
 };
 
 template <typename P, typename S>
-ProviderInterface<P,S>::ProviderInterface(void) 
+ProviderInterface<P,S>::ProviderInterface(void)
 {
 }
 
@@ -231,7 +230,7 @@ ProviderInterface<P,S>::~ProviderInterface(void) {
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::ConnectionComplete(void) {
-  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(), 
+  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(),
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetQuoteHandlerCount() ) StartQuoteWatch( vt.second );
       if ( vt.second->GetTradeHandlerCount() ) StartTradeWatch( vt.second );
@@ -243,7 +242,7 @@ void ProviderInterface<P,S>::ConnectionComplete(void) {
 
 template <typename P, typename S>
 void ProviderInterface<P,S>::Disconnecting(void) {
-  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(), 
+  std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(),
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
       if ( vt.second->GetTradeHandlerCount() ) StopTradeWatch( vt.second );
@@ -440,7 +439,7 @@ void ProviderInterface<P,S>::PlaceOrder( pOrder_t pOrder ) {
 }
 
 template <typename P, typename S>
-void ProviderInterface<P,S>::CancelOrder( pOrder_t pOrder ) { 
+void ProviderInterface<P,S>::CancelOrder( pOrder_t pOrder ) {
 //  pOrder->SetProviderName( m_sName );
 //  COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 //  if ( &ProviderInterface<P,S>::CancelOrder != &P::CancelOrder ) {
