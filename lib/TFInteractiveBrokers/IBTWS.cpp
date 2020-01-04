@@ -194,30 +194,37 @@ void IBTWS::RequestContractDetails(
   Contract contract;
   contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
-  contract.exchange = "SMART";
+  if ( pInstrument->GetExchangeName().empty() ) {
+    contract.exchange = "SMART";
+  }
+  else {
+    contract.exchange = pInstrument->GetExchangeName();
+  }
+  //contract.exchange = pInstrument->GetExchangeName();  // need lookup table from IQFeed exchanges
   //std::cout << "Exchange supplied to IBTWS: " << pInstrument->GetExchangeName() << std::endl;
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
-    // nothing to do?
+    contract.exchange = "SMART"; // override iqfeed supplied value
     break;
   case InstrumentType::Option:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
+    contract.exchange = "SMART"; // override iqfeed supplied value
     //contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );  // needed for small options
     break;
   case InstrumentType::Future:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
-    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options
-    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options
+    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
+    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options, IQFeed supplied
     break;
   case InstrumentType::FuturesOption:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
-    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC
-    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?
+    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
+    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
     break;
   }
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
