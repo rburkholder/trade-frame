@@ -131,6 +131,7 @@ void Watch::EnableWatch( void ) {
     // these two message types come second so that the symbol gets registered in previous statements
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
+      // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
       ou::tf::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
@@ -161,6 +162,7 @@ void Watch::DisableWatch( void ) {
     m_bWatching = false;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
+      // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
       ou::tf::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
