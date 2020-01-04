@@ -23,6 +23,8 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include <TFTrading/Instrument.h>
+
 #include "AppESBracketOrder.h"
 
 IMPLEMENT_APP(AppESBracketOrder)
@@ -90,6 +92,19 @@ void AppESBracketOrder::HandleIBConnecting( int ) {
 void AppESBracketOrder::HandleIBConnected( int ) {
   m_bIBConnected = true;
   std::cout << "Interactive Brokers connected." << std::endl;
+
+  std::string sBaseName( "ES" );
+  ou::tf::Instrument::pInstrument_t pInstrument = boost::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "CME", 2020, 3, 20 );
+
+  m_pIB->RequestContractDetails(
+    sBaseName, pInstrument,
+    [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+      std::cout << details.marketName << "," << details.summary.conId << std::endl;
+      }
+    ,
+    [](){}
+    );
+
 }
 
 void AppESBracketOrder::HandleIBDisconnecting( int ) {
