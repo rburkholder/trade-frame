@@ -59,7 +59,6 @@ private:
 
 DecodeStatusWord dsw;
 
-
 IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ):
   ProviderInterface<IBTWS,IBSymbol>(),
   EWrapper(),

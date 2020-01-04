@@ -78,7 +78,7 @@ public:
   typedef ::ContractDetails ContractDetails;
 
   IBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
-  ~IBTWS(void);
+  virtual ~IBTWS(void);
 
   // From ProviderInterface:
   void Connect( void );
