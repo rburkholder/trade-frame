@@ -28,6 +28,9 @@
 
 #include <wx/wx.h>
 
+#include <TFTimeSeries/BarFactory.h>
+
+#include <TFTrading/Watch.h>
 #include <TFTrading/Portfolio.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
@@ -54,6 +57,18 @@ private:
 
   pProviderIB_t m_pIB;
   bool m_bIBConnected;
+
+  bool m_bInitialized;
+
+  ou::tf::Watch::pWatch_t m_pWatch;
+
+  ou::tf::BarFactory m_bfTrade;
+
+  void StartWatch();
+  void StopWatch();
+
+  void HandleQuote( const ou::tf::Quote& );
+  void HandleTrade( const ou::tf::Trade& );
 
   void HandleIBConnecting( int );
   void HandleIBConnected( int );

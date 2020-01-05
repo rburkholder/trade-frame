@@ -31,6 +31,9 @@ IMPLEMENT_APP(AppESBracketOrder)
 
 bool AppESBracketOrder::OnInit() {
 
+  m_bInitialized = false;
+  m_bfTrade.SetBarWidth( 6 ); // 6 seconds
+
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "ES Bracket Trader" );
   wxApp::SetVendorName( "One Unified Net Limited" );
@@ -85,6 +88,23 @@ bool AppESBracketOrder::OnInit() {
 
 }
 
+void AppESBracketOrder::HandleQuote( const ou::tf::Quote& quote ) {
+}
+
+void AppESBracketOrder::HandleTrade( const ou::tf::Trade& trade ) {
+  m_bfTrade.Add( trade );
+}
+
+void AppESBracketOrder::StartWatch() {
+  m_pWatch->OnQuote.Add( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
+  m_pWatch->OnTrade.Add( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
+}
+
+void AppESBracketOrder::StopWatch() {
+  m_pWatch->OnQuote.Remove( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
+  m_pWatch->OnTrade.Remove( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
+}
+
 void AppESBracketOrder::HandleIBConnecting( int ) {
   std::cout << "Interactive Brokers connecting ..." << std::endl;
 }
@@ -93,22 +113,32 @@ void AppESBracketOrder::HandleIBConnected( int ) {
   m_bIBConnected = true;
   std::cout << "Interactive Brokers connected." << std::endl;
 
-  std::string sBaseName( "ES" );
-  ou::tf::Instrument::pInstrument_t pInstrument = boost::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "CME", 2020, 3, 20 );
+  if ( !m_bInitialized ) {
+    static const std::string sBaseName( "ES" );
+    ou::tf::Instrument::pInstrument_t pInstrument = boost::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "GLOBEX", 2020, 3, 20 );
+    m_pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIB );
 
-  m_pIB->RequestContractDetails(
-    sBaseName, pInstrument,
-    [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
-      std::cout << details.marketName << "," << details.summary.conId << std::endl;
-      }
-    ,
-    [](){}
-    );
-
+    m_pIB->RequestContractDetails(
+      sBaseName, pInstrument,
+      [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+        std::cout << details.marketName << "," << details.summary.conId << std::endl;
+        StartWatch(); // need to wait for contract id on first time around
+        }
+      ,
+      [](){}
+      );
+    m_bInitialized = true;
+  }
+  else {
+    StartWatch();
+  }
 }
 
 void AppESBracketOrder::HandleIBDisconnecting( int ) {
   std::cout << "Interactive Brokers disconnecting ..." << std::endl;
+  if ( m_bInitialized ) {
+    StopWatch();
+  }
 }
 
 void AppESBracketOrder::HandleIBDisconnected( int ) {
