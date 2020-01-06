@@ -24,22 +24,22 @@ namespace ou { // One Unified
 // 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765   - fibonacci numbers (seconds)
 // .91 1.5 2.4  3.9, 6.3, 10.2 16.5 26.6  54.0  69.7  112.8  - ratio to 60 seconds (1 minute)
 
-ChartDVBasics::ChartDVBasics(void) 
-  : m_dvChart(),
-  m_bfTrades( 10 ),
-  m_bfBuys( 10 ),
-  m_bfSells( 10 ),
-  m_bFirstTrade( true ),
-  m_rtTickDiffs( m_pricesTickDiffs, seconds( 120 ) ),
-  m_rocTickDiffs( m_pricesTickDiffsROC, seconds( 30 ) ),
-  m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
-  m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 ),
-  m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
-  m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
-  m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
-  m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
-  m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
-  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+ChartDVBasics::ChartDVBasics(void)
+  : m_dvChart()
+  , m_bfTrades( 10 )
+  , m_bfBuys( 10 )
+  , m_bfSells( 10 )
+  , m_bFirstTrade( true )
+  , m_rtTickDiffs( m_pricesTickDiffs, seconds( 120 ) )
+  , m_rocTickDiffs( m_pricesTickDiffsROC, seconds( 30 ) )
+  , m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 )
+  , m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
+  , m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red )
+  , m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+  , m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+  , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+  , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
+  , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 
 {
 
@@ -129,10 +129,10 @@ ChartDVBasics::ChartDVBasics(void)
   m_zigzagPrice.SetDnDecisionPointFound( MakeDelegate( this, &ChartDVBasics::HandleZigZagDnDp ) );
 }
 
-ChartDVBasics::~ChartDVBasics(void) { 
-  m_bfTrades.SetOnBarComplete( 0 );
-  m_bfBuys.SetOnBarComplete( 0 );
-  m_bfSells.SetOnBarComplete( 0 );
+ChartDVBasics::~ChartDVBasics(void) {
+  m_bfTrades.SetOnBarComplete( nullptr );
+  m_bfBuys.SetOnBarComplete( nullptr );
+  m_bfSells.SetOnBarComplete( nullptr );
 }
 
 void ChartDVBasics::HandleBarCompletionTrades( const ou::tf::Bar& bar ) {
@@ -271,7 +271,7 @@ void ChartDVBasics::HandleTrade( const ou::tf::Trade& trade ) {
     if ( -45 > dif ) dif = -45;
     m_ceTickDiffsRoc.Append( dt, dif );
   }
-  
+
 }
 
 void ChartDVBasics::HandleQuote( const ou::tf::Quote& quote ) {
