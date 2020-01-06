@@ -21,6 +21,7 @@
 #ifndef APPESBRACKETORDER_H
 #define APPESBRACKETORDER_H
 
+#include "TFTimeSeries/DatedDatum.h"
 #include <string>
 
 #include <boost/serialization/version.hpp>
@@ -28,15 +29,21 @@
 
 #include <wx/wx.h>
 
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartMaster.h>
+
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Watch.h>
+#include <TFTrading/Order.h>
+#include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/WinChartView.h>
 
 class AppESBracketOrder: public wxApp {
   friend class boost::serialization::access;
@@ -45,8 +52,8 @@ protected:
 private:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPosition_t   = ou::tf::Position::pPosition_t;
+  using pPortfolio_t  = ou::tf::Portfolio::pPortfolio_t;
 
   using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
 
@@ -64,11 +71,19 @@ private:
 
   ou::tf::BarFactory m_bfTrade;
 
+  wxTimer m_timerGuiRefresh;
+  ou::ChartMaster m_chart;
+  ou::tf::WinChartView* m_pWinChartView;
+
   void StartWatch();
   void StopWatch();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleOnBarComplete( const ou::tf::Bar& );
+
+  void HandleGuiRefresh( wxTimerEvent& );
 
   void HandleIBConnecting( int );
   void HandleIBConnected( int );
