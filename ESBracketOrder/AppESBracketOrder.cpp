@@ -76,8 +76,10 @@ bool AppESBracketOrder::OnInit() {
   m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
   Bind( wxEVT_TIMER, &AppESBracketOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
+
   m_bIBConnected = false;
   m_pIB = boost::make_shared<ou::tf::IBTWS>();
+  m_pIB->SetClientId( 6 );
   m_pIB->OnConnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnecting ) );
   m_pIB->OnConnected.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnected ) );
   m_pIB->OnDisconnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBDisconnecting ) );
@@ -103,7 +105,7 @@ void AppESBracketOrder::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void AppESBracketOrder::HandleOnBarComplete( const ou::tf::Bar& bar ) {
-  std::cout << "bar: " << bar.Open() << "," << bar.Volume() << std::endl;
+  //std::cout << "bar: " << bar.Open() << "," << bar.Volume() << std::endl;
 }
 
 void AppESBracketOrder::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -138,6 +140,8 @@ void AppESBracketOrder::HandleIBConnected( int ) {
       sBaseName, pInstrument,
       [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
         std::cout << details.marketName << "," << details.summary.conId << std::endl;
+        m_pStrategy = std::make_unique<Strategy>( m_pWatch );
+        m_pWinChartView->SetChartDataView( m_pStrategy->GetChartDataView() );
         StartWatch(); // need to wait for contract id on first time around
         }
       ,

@@ -45,6 +45,8 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
+#include "Strategy.h"
+
 class AppESBracketOrder: public wxApp {
   friend class boost::serialization::access;
 public:
@@ -74,6 +76,9 @@ private:
   wxTimer m_timerGuiRefresh;
   ou::ChartMaster m_chart;
   ou::tf::WinChartView* m_pWinChartView;
+
+  using pStrategy_t = std::unique_ptr<Strategy>;
+  pStrategy_t m_pStrategy;
 
   void StartWatch();
   void StopWatch();

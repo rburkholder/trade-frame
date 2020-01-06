@@ -26,11 +26,13 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 set(
   file_h
     AppESBracketOrder.h
+    Strategy.h
   )
 
 set(
   file_cpp
     AppESBracketOrder.cpp
+    Strategy.cpp
   )
 
 add_executable(
@@ -72,6 +74,7 @@ target_link_libraries(
       TFTimeSeries
       TFHDF5TimeSeries
       OUCharting
+      TFIndicators
       OUStatistics
       OUSQL
       OUSqlite
