@@ -28,6 +28,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/wx.h>
+#include <wx/splitter.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartMaster.h>
@@ -63,6 +64,7 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+  wxSplitterWindow* m_splitLogGraph;
 
   pProviderIB_t m_pIB;
   bool m_bIBConnected;
@@ -106,18 +108,24 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & m_splitLogGraph->GetSashPosition();
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 == version ) {
+      int pos;
+      ar & pos;
+      m_splitLogGraph->SetSashPosition( pos );
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppESBracketOrder, 1)
+BOOST_CLASS_VERSION(AppESBracketOrder, 2)
 DECLARE_APP(AppESBracketOrder)
 
 #endif /* APPESBRACKETORDER_H */

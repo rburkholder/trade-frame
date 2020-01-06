@@ -60,12 +60,21 @@ bool AppESBracketOrder::OnInit() {
   wxBoxSizer* sizerMain = new wxBoxSizer( wxVERTICAL );
   m_pFrameMain->SetSizer( sizerMain );
 
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-  m_pPanelLogging->Show( true );
+  m_splitLogGraph = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_LIVE_UPDATE );
+  m_splitLogGraph->SetMinimumPaneSize(20);
 
-  m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  sizerMain->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 3);
+  m_pPanelLogging = new ou::tf::PanelLogging( m_splitLogGraph, wxID_ANY );
+  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
+  m_pWinChartView = new ou::tf::WinChartView( m_splitLogGraph, wxID_ANY );
+  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
+  m_splitLogGraph->SplitVertically(m_pPanelLogging, m_pWinChartView, m_splitLogGraph->GetSize().GetWidth() / 4 );
+
+  //sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  //m_pPanelLogging->Show( true );
+
+  sizerMain->Add( m_splitLogGraph, 1, wxGROW|wxALL, 2 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppESBracketOrder::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Show( true );
