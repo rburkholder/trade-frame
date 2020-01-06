@@ -27,7 +27,6 @@
 #include <boost/thread/thread_only.hpp>
 
 #include <TFTimeSeries/TimeSeries.h>
-#include <TFTimeSeries/BarFactory.h>
 
 #include <OUCharting/ChartEntryIndicator.h>
 
@@ -38,18 +37,18 @@
 
 #include <OUCharting/ChartDVBasics.h>
 
-class Strategy: 
+class Strategy:
   public ou::ChartDVBasics,
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
-  friend ou::tf::DailyTradeTimeFrame<Strategy>; 
+  friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  Strategy( ou::tf::option::MultiExpiryBundle* meb, 
+  Strategy( ou::tf::option::MultiExpiryBundle* meb,
     pPortfolio_t pPortfolioLongs, pPortfolio_t pPortfolioShorts, pProvider_t pExecutionProvider );
   ~Strategy(void);
 
@@ -58,10 +57,10 @@ public:
 protected:
 private:
 
-  enum ETradingState { 
-    eTSUnknown, 
+  enum ETradingState {
+    eTSUnknown,
     eTSSlopeRisingAboveMean,eTSSlopeRisingBelowMean,
-    eTSSlopeFallingAboveMean, eTSSlopeFallingBelowMean, 
+    eTSSlopeFallingAboveMean, eTSSlopeFallingBelowMean,
     eTSCount
   };
   enum EBollingerState { eBollingerUnknown, eBollingerLow, eBollingerHigh, eBollingerMid };
