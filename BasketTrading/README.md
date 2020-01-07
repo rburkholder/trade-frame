@@ -13,3 +13,6 @@ are maintained day to day.
 * SymbolSelection - Determines instruments to be traded by MasterPortfolio
 
 Currently designed to run straddles on weekly options.
+
+Option Strategy Descriptions:
+https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/overview
