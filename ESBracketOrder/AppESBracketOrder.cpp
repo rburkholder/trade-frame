@@ -32,7 +32,6 @@ IMPLEMENT_APP(AppESBracketOrder)
 bool AppESBracketOrder::OnInit() {
 
   m_bInitialized = false;
-  m_bfTrade.SetBarWidth( 6 ); // 6 seconds
 
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "ES Bracket Trader" );
@@ -79,8 +78,6 @@ bool AppESBracketOrder::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppESBracketOrder::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Show( true );
 
-  m_bfTrade.SetOnBarComplete( MakeDelegate( this, &AppESBracketOrder::HandleOnBarComplete ) );
-
 //  bool bOk( true );
   m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
   Bind( wxEVT_TIMER, &AppESBracketOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
@@ -110,26 +107,21 @@ void AppESBracketOrder::HandleQuote( const ou::tf::Quote& quote ) {
 }
 
 void AppESBracketOrder::HandleTrade( const ou::tf::Trade& trade ) {
-  m_bfTrade.Add( trade );
-}
-
-void AppESBracketOrder::HandleOnBarComplete( const ou::tf::Bar& bar ) {
-  //std::cout << "bar: " << bar.Open() << "," << bar.Volume() << std::endl;
 }
 
 void AppESBracketOrder::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 void AppESBracketOrder::StartWatch() {
-  m_pWatch->OnQuote.Add( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
-  m_pWatch->OnTrade.Add( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
+//  m_pWatch->OnQuote.Add( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
+//  m_pWatch->OnTrade.Add( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
   m_pWatch->StartWatch();
 }
 
 void AppESBracketOrder::StopWatch() {
   m_pWatch->StopWatch();
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
+//  m_pWatch->OnQuote.Remove( MakeDelegate( this, &AppESBracketOrder::HandleQuote ) );
+//  m_pWatch->OnTrade.Remove( MakeDelegate( this, &AppESBracketOrder::HandleTrade ) );
 }
 
 void AppESBracketOrder::HandleIBConnecting( int ) {

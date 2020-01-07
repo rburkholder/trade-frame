@@ -64,6 +64,9 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
+      OUCharting
+      OUStatistics
+      OUFormulas
       TFBitsNPieces
       TFInteractiveBrokers
       TFSimulation
@@ -73,13 +76,10 @@ target_link_libraries(
       TFIQFeed
       TFTimeSeries
       TFHDF5TimeSeries
-      OUCharting
       TFIndicators
-      OUStatistics
       OUSQL
       OUSqlite
       OUCommon
-      OUFormulas
       hdf5_cpp
       hdf5
       sz

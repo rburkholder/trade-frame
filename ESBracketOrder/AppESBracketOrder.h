@@ -30,15 +30,10 @@
 #include <wx/wx.h>
 #include <wx/splitter.h>
 
-#include <OUCharting/ChartDataView.h>
-#include <OUCharting/ChartMaster.h>
-
-#include <TFTimeSeries/BarFactory.h>
+//#include <OUCharting/ChartDataView.h>
+//#include <OUCharting/ChartMaster.h>
 
 #include <TFTrading/Watch.h>
-#include <TFTrading/Order.h>
-#include <TFTrading/Position.h>
-#include <TFTrading/Portfolio.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
@@ -73,8 +68,6 @@ private:
 
   ou::tf::Watch::pWatch_t m_pWatch;
 
-  ou::tf::BarFactory m_bfTrade;
-
   wxTimer m_timerGuiRefresh;
   ou::ChartMaster m_chart;
   ou::tf::WinChartView* m_pWinChartView;
@@ -87,8 +80,6 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
-
-  void HandleOnBarComplete( const ou::tf::Bar& );
 
   void HandleGuiRefresh( wxTimerEvent& );
 
