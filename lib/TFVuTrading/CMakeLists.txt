@@ -21,6 +21,7 @@ set(
     DragDropInstrumentTarget.h
     EventDrawChart.h
     FrameMain.h
+    FrameOrderEntry.h
     GridIBAccountValues.h
     GridIBAccountValues_impl.h
     GridIBPositionDetails.h
@@ -74,6 +75,7 @@ set(
     DragDropInstrumentTarget.cpp
     EventDrawChart.cpp
     FrameMain.cpp
+    FrameOrderEntry.cpp
     GridIBAccountValues.cpp
     GridIBAccountValues_impl.cpp
     GridIBPositionDetails.cpp
