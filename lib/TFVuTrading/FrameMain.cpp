@@ -14,9 +14,10 @@
 
 // Generic frame for wx based applications
 
-#include <wx-3.0/wx/window.h>
-
-#include "stdafx.h"
+#include <wx/wx.h>
+#include <wx/window.h>
+#include <wx/frame.h>
+#include <wx/statusbr.h>
 
 #include "FrameMain.h"
 
@@ -63,7 +64,7 @@ void FrameMain::CreateControls( void ) {
 //    m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
 //    m_statusBar->SetFieldsCount(2);
 //    itemFrame1->SetStatusBar(m_statusBar);
-   
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );
     Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
 }
@@ -87,7 +88,7 @@ wxMenu* FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vIt
     structMenuItem* p = *iter;
     p->ix = m_vPtrItems.size();
     m_vPtrItems.push_back( p );
-    
+
     m_ixDynamicMenuItem++;
     itemMenuAction->Append(m_ixDynamicMenuItem, p->text, wxEmptyString, wxITEM_NORMAL);
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnDynamicActionClick, this, m_ixDynamicMenuItem, -1, p );
@@ -98,7 +99,7 @@ wxMenu* FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vIt
 
 void FrameMain::OnDynamicActionClick( wxCommandEvent& event ) {
   structMenuItem* p = dynamic_cast<structMenuItem*>( event.m_callbackUserData );
-  if ( 0 != p->OnActionHandler ) 
+  if ( 0 != p->OnActionHandler )
     p->OnActionHandler();
 }
 

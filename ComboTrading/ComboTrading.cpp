@@ -40,8 +40,8 @@
 #include <TFVuTrading/DragDropInstrument.h>
 
 #include <wx/app.h>
-#include <wx/window.h>
 #include <wx/timer.h>
+#include <wx/frame.h>
 
 #include "ComboTrading.h"
 

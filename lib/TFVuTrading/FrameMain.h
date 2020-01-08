@@ -23,9 +23,6 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/frame.h>
-#include <wx/statusbr.h>
-
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -34,6 +31,10 @@ using namespace fastdelegate;
 #define SYMBOL_FRAMEGENERIC_IDNAME ID_FRAMEGENERIC
 #define SYMBOL_FRAMEGENERIC_SIZE wxSize(400, 500)
 #define SYMBOL_FRAMEGENERIC_POSITION wxDefaultPosition
+
+class wxFrame;
+class wxMenuBar;
+class wxStatusBar;
 
 class FrameMain: public wxFrame {
   friend class boost::serialization::access;
@@ -55,27 +56,27 @@ public:
   typedef std::vector<structMenuItem*> vpItems_t;
 
   FrameMain(void);
-  FrameMain( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_FRAMEGENERIC_IDNAME, 
-    const wxString& caption = SYMBOL_FRAMEGENERIC_TITLE, 
-    const wxPoint& pos = SYMBOL_FRAMEGENERIC_POSITION, 
-    const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE, 
+  FrameMain(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_FRAMEGENERIC_IDNAME,
+    const wxString& caption = SYMBOL_FRAMEGENERIC_TITLE,
+    const wxPoint& pos = SYMBOL_FRAMEGENERIC_POSITION,
+    const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE,
     long style = SYMBOL_FRAMEGENERIC_STYLE );
   ~FrameMain(void);
 
-  bool Create( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_FRAMEGENERIC_IDNAME, 
-    const wxString& caption = SYMBOL_FRAMEGENERIC_TITLE, 
-    const wxPoint& pos = SYMBOL_FRAMEGENERIC_POSITION, 
-    const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE, 
+  bool Create(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_FRAMEGENERIC_IDNAME,
+    const wxString& caption = SYMBOL_FRAMEGENERIC_TITLE,
+    const wxPoint& pos = SYMBOL_FRAMEGENERIC_POSITION,
+    const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE,
     long style = SYMBOL_FRAMEGENERIC_STYLE );
 
   int AddFileMenuItem( const wxString& );
-  
+
   wxMenu* AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
-  
+
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -86,7 +87,7 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN,
     ID_DYNAMIC_MENU_ACTIONS // must be last in line
   };
-  
+
   int m_ixDynamicMenuItem;  // initialized to ID_DYNAMIC_MENU_ACTIONS and incremented with each new menu entry
   wxMenu* m_menuFile;
 
@@ -102,7 +103,7 @@ private:
   void OnMenuExitClick( wxCommandEvent& event );
   void OnDynamicActionClick( wxCommandEvent& event );
   void OnClose( wxCloseEvent& event );
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);
