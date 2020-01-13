@@ -40,9 +40,8 @@ void Strategy::HandleButtonUpdate() {
 }
 
 void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
-//void Strategy::HandleButtonSend() {
   // TODO: need to track orders, nothing new while existing ones active?
-  //ou::tf::OrderSide::enumOrderSide side( ou::tf::OrderSide::Buy );
+  static const double dblOffset( 1.00 );
   if ( 0.0 < m_tradeLast.Price() ) {
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy:
@@ -63,7 +62,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
               ou::tf::OrderType::enumOrderType::Limit,
               ou::tf::OrderSide::enumOrderSide::Sell,
               1,
-              m_tradeLast.Price() + 1.00
+              m_tradeLast.Price() + dblOffset
               // idPosition
               // dt order submitted
               );
@@ -74,7 +73,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
               ou::tf::OrderType::enumOrderType::Stop,
               ou::tf::OrderSide::enumOrderSide::Sell,
               1,
-              m_tradeLast.Price() - 1.00
+              m_tradeLast.Price() - dblOffset
               // idPosition
               // dt order submitted
               );
@@ -96,7 +95,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
               ou::tf::OrderType::enumOrderType::Limit,
               ou::tf::OrderSide::enumOrderSide::Buy,
               1,
-              m_tradeLast.Price() - 1.00
+              m_tradeLast.Price() - dblOffset
               // idPosition
               // dt order submitted
               );
@@ -106,7 +105,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
               ou::tf::OrderType::enumOrderType::Stop,
               ou::tf::OrderSide::enumOrderSide::Buy,
               1,
-              m_tradeLast.Price() + 1.00
+              m_tradeLast.Price() + dblOffset
               // idPosition
               // dt order submitted
               );
