@@ -88,6 +88,8 @@ public:
 
   // From ProviderInterface Execution Section
   void PlaceOrder( pOrder_t order );
+  void PlaceOrder( pOrder_t order, long idParent, bool bTransmit );
+  void PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop );
   void CancelOrder( pOrder_t order );
 
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );
