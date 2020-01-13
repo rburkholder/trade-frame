@@ -385,9 +385,14 @@ const char *IBTWS::szOrderType[] = {
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void IBTWS::PlaceOrder( pOrder_t pOrder ) {
+  PlaceOrder( pOrder, 0, true );
+}
+
+void IBTWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
 
   ::Order twsorder;
   twsorder.orderId = pOrder->GetOrderId();
+  twsorder.parentId = idParent;
 
   Contract contract;
   contract.conId = pOrder->GetInstrument()->GetContract();  // mostly enough to have contract id
@@ -434,12 +439,18 @@ void IBTWS::PlaceOrder( pOrder_t pOrder ) {
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
   }
-  twsorder.transmit = true;
+  twsorder.transmit = bTransmit;
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
 
   ProviderInterface<IBTWS,IBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
+}
+
+void IBTWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop ) {
+  PlaceOrder( pOrderEntry, 0, false );
+  PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );
+  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
 }
 
 void IBTWS::CancelOrder( pOrder_t pOrder ) {
