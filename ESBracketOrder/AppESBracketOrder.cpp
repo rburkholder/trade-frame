@@ -20,10 +20,19 @@
 
 #include <fstream>
 
+#include <functional>
+#include <wx/wx.h>
+#include <wx/frame.h>
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include <wx/splitter.h>
+
 #include <TFTrading/Instrument.h>
+
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/FrameOrderEntry.h>
 
 #include "AppESBracketOrder.h"
 
@@ -40,7 +49,7 @@ bool AppESBracketOrder::OnInit() {
 
   m_sStateFileName = "ESBracketTrader.state";
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "ES Bracket Trader Trader" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "ES Bracket Trader" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind(
@@ -78,10 +87,16 @@ bool AppESBracketOrder::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppESBracketOrder::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Show( true );
 
+//  m_pFrameButtons = new wxFrame( m_pFrameMain, -1, "Button Bar", wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP );
+//  wxBoxSizer* sizerButtons = new wxBoxSizer( wxVERTICAL );
+//  m_pFrameButtons->SetSizer( sizerButtons );
+
+m_pFrameOrderEntry = new FrameOrderEntry(  m_pFrameMain, wxID_ANY, "Order Entry", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxSTAY_ON_TOP  );
+m_pFrameOrderEntry->Show( true );
+
 //  bool bOk( true );
   m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
   Bind( wxEVT_TIMER, &AppESBracketOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-
 
   m_bIBConnected = false;
   m_pIB = boost::make_shared<ou::tf::IBTWS>();
@@ -142,6 +157,12 @@ void AppESBracketOrder::HandleIBConnected( int ) {
       [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
         std::cout << details.marketName << "," << details.summary.conId << std::endl;
         m_pStrategy = std::make_unique<Strategy>( m_pWatch );
+        namespace ph = std::placeholders;
+        m_pFrameOrderEntry->SetButtons(
+          std::bind( &Strategy::HandleButtonUpdate, m_pStrategy.get() ),
+          std::bind( &Strategy::HandleButtonSend,   m_pStrategy.get(), ph::_1 ),
+          std::bind( &Strategy::HandleButtonCancel, m_pStrategy.get() )
+          );
         m_pWinChartView->SetChartDataView( m_pStrategy->GetChartDataView() );
         StartWatch(); // need to wait for contract id on first time around
         }
@@ -193,6 +214,12 @@ void AppESBracketOrder::LoadState() {
 }
 
 void AppESBracketOrder::OnClose( wxCloseEvent& event ) { // step 1
+
+  if ( m_bInitialized ) {
+    StopWatch();
+  }
+
+  m_pIB->Disconnect();
 
   SaveState();
 

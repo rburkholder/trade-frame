@@ -18515,7 +18515,7 @@
                   <string name="proxy-Id name">"wxID_STATIC"</string>
                   <long name="proxy-Id value">5105</long>
                   <string name="proxy-Implementation filename">""</string>
-                  <string name="proxy-Label">"Limit Price"</string>
+                  <string name="proxy-Label">"Entry Price"</string>
                   <string name="proxy-Member variable name">""</string>
                   <string name="proxy-Name">""</string>
                   <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
@@ -18584,12 +18584,12 @@
                   <long name="proxy-Height">-1</long>
                   <string name="proxy-Help text">""</string>
                   <bool name="proxy-Hidden">0</bool>
-                  <string name="proxy-Id name">"ID_txtLimitPrice"</string>
+                  <string name="proxy-Id name">"ID_txtEntryPrice"</string>
                   <long name="proxy-Id value">10010</long>
                   <string name="proxy-Implementation filename">""</string>
                   <string name="proxy-Initial value">""</string>
                   <long name="proxy-Max length">10</long>
-                  <string name="proxy-Member variable name">"m_txtLimitPrice"</string>
+                  <string name="proxy-Member variable name">"m_txtEntryPrice"</string>
                   <string name="proxy-Name">""</string>
                   <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                   <bool name="proxy-Separate files">0</bool>
@@ -18632,7 +18632,7 @@
                   <bool name="proxy-wxWANTS_CHARS">0</bool>
                   <long name="proxy-X">-1</long>
                   <long name="proxy-Y">-1</long>
-                  <string name="title">"wxTextCtrl: ID_txtLimitPrice"</string>
+                  <string name="title">"wxTextCtrl: ID_txtEntryPrice"</string>
                   <long name="title-mode">0</long>
                   <string name="type">"dialog-control-document"</string>
                 </document>

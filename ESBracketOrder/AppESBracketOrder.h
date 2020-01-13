@@ -21,27 +21,24 @@
 #ifndef APPESBRACKETORDER_H
 #define APPESBRACKETORDER_H
 
-#include "TFTimeSeries/DatedDatum.h"
 #include <string>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/wx.h>
-#include <wx/splitter.h>
-
-//#include <OUCharting/ChartDataView.h>
-//#include <OUCharting/ChartMaster.h>
-
 #include <TFTrading/Watch.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
-#include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
 #include "Strategy.h"
+
+class wxSplitterWindow;
+
+class FrameMain;
+class FrameOrderEntry;
 
 class AppESBracketOrder: public wxApp {
   friend class boost::serialization::access;
@@ -60,6 +57,8 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   wxSplitterWindow* m_splitLogGraph;
+
+  FrameOrderEntry* m_pFrameOrderEntry;
 
   pProviderIB_t m_pIB;
   bool m_bIBConnected;

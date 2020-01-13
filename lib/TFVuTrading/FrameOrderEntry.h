@@ -25,6 +25,8 @@
 
 #include <wx/frame.h>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #define SYMBOL_FRAMEORDERENTRY_STYLE wxCAPTION|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL
 #define SYMBOL_FRAMEORDERENTRY_TITLE _("Order Entry")
 #define SYMBOL_FRAMEORDERENTRY_IDNAME ID_FRAMEORDERENTRY
@@ -39,6 +41,20 @@ class wxButton;
 class FrameOrderEntry: public wxFrame {
   friend class boost::serialization::access;
 public:
+
+  using fButton_t = std::function<void()>;
+  using fButtonSend_t = std::function<void(ou::tf::OrderSide::enumOrderSide)>;
+
+  struct OrderParameters {
+    ou::tf::TimeInForce::enumTimeInForce m_eTimeInForce;
+    ou::tf::OrderType::enumOrderType m_eOrderType;
+    std::string m_sProfitPrice;
+    std::string m_sLimitPrice;
+    std::string m_sStopPrice;
+    std::string m_sOrderQuantity;
+    ou::tf::OrderSide::enumOrderSide m_eOrderSide;
+    enum class EOperation { Update, Send, Cancel } m_eOperation;
+  };
 
   FrameOrderEntry();
   FrameOrderEntry(
@@ -58,6 +74,7 @@ public:
     const wxSize& size = SYMBOL_FRAMEORDERENTRY_SIZE,
     long style = SYMBOL_FRAMEORDERENTRY_STYLE );
 
+  void SetButtons( fButton_t&& fUpdate, fButtonSend_t&& fSend, fButton_t&& fCancel );
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
@@ -65,16 +82,17 @@ public:
 
 protected:
 private:
+
   enum {
       ID_Null=wxID_HIGHEST
     , ID_FRAMEORDERENTRY
-     , ID_radioDay
+    , ID_radioDay
     , ID_radioGTC
     , ID_radioMarket
     , ID_radioLimit
     , ID_radioStop
     , ID_txtProfitPrice
-    , ID_txtLimitPrice
+    , ID_txtEntryPrice
     , ID_txtStopPrice
     , ID_txtQuantity
     , ID_radioLong
@@ -90,7 +108,7 @@ private:
     wxRadioButton* m_radioOrderLimit;
     wxRadioButton* m_radioOrderStop;
     wxTextCtrl* m_txtProfitPrice;
-    wxTextCtrl* m_txtLimitPrice;
+    wxTextCtrl* m_txtEntryPrice;
     wxTextCtrl* m_txtStopPrice;
     wxTextCtrl* m_txtQuantity;
     wxRadioButton* m_radioLong;
@@ -98,6 +116,24 @@ private:
     wxButton* m_btnUpdate;
     wxButton* m_btnSend;
     wxButton* m_btnCancel;
+
+  ou::tf::OrderSide::enumOrderSide m_eOrderSide;
+
+  fButton_t m_fUpdate;
+  fButtonSend_t m_fSend;
+  fButton_t m_fCancel;
+
+  void HandleRadioTIFDay( wxCommandEvent& event );
+  void HandleRadioTIFGTC( wxCommandEvent& event );
+  void HandleRadioOrderMarket( wxCommandEvent& event );
+  void HandleRadioOrderLimit( wxCommandEvent& event );
+  void HandleRadioOrderStop( wxCommandEvent& event );
+  void HandleRadioSideLong( wxCommandEvent& event );
+  void HandleRadioSideShort( wxCommandEvent& event );
+
+  void HandleBtnUpdate( wxCommandEvent& event );
+  void HandleBtnSend( wxCommandEvent& event );
+  void HandleBtnCancel( wxCommandEvent& event );
 
   void Init();
   void CreateControls();

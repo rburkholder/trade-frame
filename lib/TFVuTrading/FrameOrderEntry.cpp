@@ -23,6 +23,7 @@
 #include <wx/sizer.h>
 
 #include "FrameOrderEntry.h"
+#include "TFTrading/TradingEnumerations.h"
 
 FrameOrderEntry::FrameOrderEntry() {
   Init();
@@ -34,7 +35,6 @@ FrameOrderEntry::FrameOrderEntry( wxWindow* parent, wxWindowID id, const wxStrin
 }
 
 FrameOrderEntry::~FrameOrderEntry(void) {
-  std::cout << "FrameMain::~FrameMain" << this->GetName() << std::endl;
 }
 
 bool FrameOrderEntry::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
@@ -51,20 +51,20 @@ bool FrameOrderEntry::Create( wxWindow* parent, wxWindowID id, const wxString& c
 }
 
 void FrameOrderEntry::Init() {
-  m_radioExpiryDay = NULL;
-  m_radioExpiryGTC = NULL;
-  m_radioOrderMarket = NULL;
-  m_radioOrderLimit = NULL;
-  m_radioOrderStop = NULL;
-  m_txtProfitPrice = NULL;
-  m_txtLimitPrice = NULL;
-  m_txtStopPrice = NULL;
-  m_txtQuantity = NULL;
-  m_radioLong = NULL;
-  m_radioShort = NULL;
-  m_btnUpdate = NULL;
-  m_btnSend = NULL;
-  m_btnCancel = NULL;
+    m_radioExpiryDay = NULL;
+    m_radioExpiryGTC = NULL;
+    m_radioOrderMarket = NULL;
+    m_radioOrderLimit = NULL;
+    m_radioOrderStop = NULL;
+    m_txtProfitPrice = NULL;
+    m_txtEntryPrice = NULL;
+    m_txtStopPrice = NULL;
+    m_txtQuantity = NULL;
+    m_radioLong = NULL;
+    m_radioShort = NULL;
+    m_btnUpdate = NULL;
+    m_btnSend = NULL;
+    m_btnCancel = NULL;
 }
 
 void FrameOrderEntry::CreateControls( void ) {
@@ -116,12 +116,12 @@ void FrameOrderEntry::CreateControls( void ) {
     wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer9->Add(itemBoxSizer6, 0, wxALIGN_RIGHT|wxALL, 2);
 
-    wxStaticText* itemStaticText7 = new wxStaticText( itemFrame1, wxID_STATIC, _("Limit Price"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+    wxStaticText* itemStaticText7 = new wxStaticText( itemFrame1, wxID_STATIC, _("Entry Price"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
     itemBoxSizer6->Add(itemStaticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtLimitPrice = new wxTextCtrl( itemFrame1, ID_txtLimitPrice, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_txtLimitPrice->SetMaxLength(10);
-    itemBoxSizer6->Add(m_txtLimitPrice, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_txtEntryPrice = new wxTextCtrl( itemFrame1, ID_txtEntryPrice, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtEntryPrice->SetMaxLength(10);
+    itemBoxSizer6->Add(m_txtEntryPrice, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer10 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer9->Add(itemBoxSizer10, 0, wxALIGN_RIGHT|wxALL, 2);
@@ -172,7 +172,70 @@ void FrameOrderEntry::CreateControls( void ) {
     m_btnCancel = new wxButton( itemFrame1, ID_btnCancel, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer21->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    Bind( wxEVT_CLOSE_WINDOW, &FrameOrderEntry::OnClose, this );
+
+  // TODO: bind the minimize/mazimize events to prevent invocation
+
+  EnableCloseButton( false ); // doesn't seem to work
+
+  m_eOrderSide = ou::tf::OrderSide::Buy;
+  m_radioLong->SetValue( true );
+
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioTIFDay,      this, ID_radioDay );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioTIFGTC,      this, ID_radioGTC );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioOrderMarket, this, ID_radioMarket );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioOrderLimit,  this, ID_radioLimit );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioOrderStop,   this, ID_radioStop );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioSideLong,    this, ID_radioLong );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameOrderEntry::HandleRadioSideShort,   this, ID_radioShort );
+
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameOrderEntry::HandleBtnUpdate, this, ID_btnUpdate );
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameOrderEntry::HandleBtnSend,   this, ID_btnSend );
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameOrderEntry::HandleBtnCancel, this, ID_btnCancel );
+
+  Bind( wxEVT_CLOSE_WINDOW, &FrameOrderEntry::OnClose, this );
+}
+
+void FrameOrderEntry::SetButtons( fButton_t&& fUpdate, fButtonSend_t&& fSend, fButton_t&& fCancel ) {
+  m_fUpdate = std::move( fUpdate );
+  m_fSend   = std::move( fSend );
+  m_fCancel = std::move( fCancel );
+}
+
+void FrameOrderEntry::HandleRadioTIFDay( wxCommandEvent& event ) {
+}
+
+void FrameOrderEntry::HandleRadioTIFGTC( wxCommandEvent& event ) {
+}
+
+void FrameOrderEntry::HandleRadioOrderMarket( wxCommandEvent& event ) {
+}
+
+void FrameOrderEntry::HandleRadioOrderLimit( wxCommandEvent& event ) {
+}
+
+void FrameOrderEntry::HandleRadioOrderStop( wxCommandEvent& event ) {
+}
+
+void FrameOrderEntry::HandleRadioSideLong( wxCommandEvent& event ) {
+  //m_radioLong->SetValue(true);
+  m_eOrderSide = ou::tf::OrderSide::Buy;
+}
+
+void FrameOrderEntry::HandleRadioSideShort( wxCommandEvent& event ) {
+  //m_radioShort->SetValue(true);
+  m_eOrderSide = ou::tf::OrderSide::Sell;
+}
+
+void FrameOrderEntry::HandleBtnUpdate( wxCommandEvent& event ) {
+  if ( m_fUpdate ) m_fUpdate();
+}
+
+void FrameOrderEntry::HandleBtnSend( wxCommandEvent& event ) {
+  if ( m_fSend ) m_fSend( m_eOrderSide );
+}
+
+void FrameOrderEntry::HandleBtnCancel( wxCommandEvent& event ) {
+  if ( m_fCancel ) m_fCancel();
 }
 
 void FrameOrderEntry::OnClose( wxCloseEvent& event ) {
