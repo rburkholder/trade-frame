@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <OUCommon/TimeSource.h>
 
 #include "OrderManager.h"
@@ -48,7 +46,7 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // market order
     idPosition_t idPosition
     ) {
   assert( nOrderQuantity > 0 );
-  pOrder_t pOrder( new Order( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition ) );
+  pOrder_t pOrder = boost::make_shared<ou::tf::Order>( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -61,7 +59,7 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // limit or stop
     ) {
   assert( nOrderQuantity > 0 );
   assert( dblPrice1 > 0 );
-  pOrder_t pOrder( new Order( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition ) );
+  pOrder_t pOrder = boost::make_shared<ou::tf::Order>( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -75,7 +73,7 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // limit and stop
   assert( nOrderQuantity > 0 );
   assert( dblPrice1 > 0 );
   assert( dblPrice2 > 0 );
-  pOrder_t pOrder( new Order( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition ) );
+  pOrder_t pOrder = boost::make_shared<ou::tf::Order>( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -239,7 +237,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         }
         pInstrument_t pInstrument;
         OnOrderNeedsDetails( rowOrder.idInstrument, pInstrument );
-        pOrder_t pOrder( new Order( rowOrder, pInstrument ) );
+        pOrder_t pOrder = boost::make_shared<ou::tf::Order>( rowOrder, pInstrument );
         std::pair<iterOrders_t, bool> response;
         response = m_mapOrders.insert( pairOrderState_t(rowOrder.idOrder, structOrderState( pOrder ) ) );
         if ( false == response.second ) {
@@ -253,7 +251,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         while ( m_pSession->Execute( pExecutionQuery ) ) {
           Execution::TableRowDef rowExecution;
           m_pSession->Columns<OrderManagerQueries::OrderKey, Execution::TableRowDef>( pExecutionQuery, rowExecution );
-          pExecution_t pExecution( new Execution( rowExecution ) );
+          pExecution_t pExecution = boost::make_shared<ou::tf::Execution>( rowExecution );
           iter->second.pmapExecutions->insert( pairExecution_t( rowExecution.idExecution, pExecution ) );
         }
       }
@@ -379,7 +377,7 @@ void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) {
           break;
         }
         // add execution record
-        pExecution_t pExecution( new Execution( exec ) );
+        pExecution_t pExecution = boost::make_shared<ou::tf::Execution>( exec );
         pExecution->SetOrderId( nOrderId );
         ou::db::QueryFields<Execution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
           = m_pSession->Insert<Execution::TableRowDefNoKey>(
