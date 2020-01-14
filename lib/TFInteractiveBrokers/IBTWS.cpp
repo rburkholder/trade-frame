@@ -428,8 +428,8 @@ void IBTWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       twsorder.auxPrice = 0;
       break;
     case OrderType::Stop:
+      twsorder.lmtPrice = 0;
       twsorder.auxPrice = pOrder->GetPrice1();
-      twsorder.auxPrice = 0;
       break;
     case OrderType::StopLimit:
       twsorder.lmtPrice = pOrder->GetPrice1();
