@@ -58,8 +58,6 @@ private:
 
   ou::tf::Trade m_tradeLast;
 
-  long m_idOrderNext;
-
   pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderStop;

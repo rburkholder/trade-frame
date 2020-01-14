@@ -18,12 +18,13 @@
  * Created: January 6, 2020, 11:41 AM
  */
 
+#include "TFTrading/OrderManager.h"
 #include "TFTrading/TradingEnumerations.h"
 
 #include "Strategy.h"
 
 Strategy::Strategy( pWatch_t pWatch )
-: ou::ChartDVBasics(), m_idOrderNext( 1 )
+: ou::ChartDVBasics()
 {
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
   m_pWatch = pWatch;
@@ -42,73 +43,65 @@ void Strategy::HandleButtonUpdate() {
 void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   // TODO: need to track orders, nothing new while existing ones active?
   static const double dblOffset( 1.00 );
+  ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
   if ( 0.0 < m_tradeLast.Price() ) {
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy:
-        m_pOrderEntry
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Limit,
-              ou::tf::OrderSide::enumOrderSide::Buy,
-              1,
-              m_tradeLast.Price()
-              // idPosition
-              // dt order submitted
-              );
-        m_pOrderEntry->SetOrderId( m_idOrderNext++ );
-        m_pOrderProfit
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Limit,
-              ou::tf::OrderSide::enumOrderSide::Sell,
-              1,
-              m_tradeLast.Price() + dblOffset
-              // idPosition
-              // dt order submitted
-              );
-        m_pOrderProfit->SetOrderId( m_idOrderNext++ );
-        m_pOrderStop
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Stop,
-              ou::tf::OrderSide::enumOrderSide::Sell,
-              1,
-              m_tradeLast.Price() - dblOffset
-              // idPosition
-              // dt order submitted
-              );
-        m_pOrderStop->SetOrderId( m_idOrderNext++ );
+        m_pOrderEntry = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Limit,
+          ou::tf::OrderSide::enumOrderSide::Buy,
+          1,
+          m_tradeLast.Price()
+          // idPosition
+          // dt order submitted
+          );
+        m_pOrderProfit = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Limit,
+          ou::tf::OrderSide::enumOrderSide::Sell,
+          1,
+          m_tradeLast.Price() + dblOffset
+          // idPosition
+          // dt order submitted
+          );
+        m_pOrderStop = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Stop,
+          ou::tf::OrderSide::enumOrderSide::Sell,
+          1,
+          m_tradeLast.Price() - dblOffset
+          // idPosition
+          // dt order submitted
+          );
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell:
-        m_pOrderEntry
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Market,
-              ou::tf::OrderSide::enumOrderSide::Sell,
-              1
-              // idPosition
-              // dt order submitted
-              );
-        m_pOrderProfit
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Limit,
-              ou::tf::OrderSide::enumOrderSide::Buy,
-              1,
-              m_tradeLast.Price() - dblOffset
-              // idPosition
-              // dt order submitted
-              );
-        m_pOrderStop
-          = boost::make_shared<ou::tf::Order>(
-              m_pWatch->GetInstrument(),
-              ou::tf::OrderType::enumOrderType::Stop,
-              ou::tf::OrderSide::enumOrderSide::Buy,
-              1,
-              m_tradeLast.Price() + dblOffset
-              // idPosition
-              // dt order submitted
-              );
+        m_pOrderEntry = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Market,
+          ou::tf::OrderSide::enumOrderSide::Sell,
+          1
+          // idPosition
+          // dt order submitted
+          );
+        m_pOrderProfit = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Limit,
+          ou::tf::OrderSide::enumOrderSide::Buy,
+          1,
+          m_tradeLast.Price() - dblOffset
+          // idPosition
+          // dt order submitted
+          );
+        m_pOrderStop = om.ConstructOrder(
+          m_pWatch->GetInstrument(),
+          ou::tf::OrderType::enumOrderType::Stop,
+          ou::tf::OrderSide::enumOrderSide::Buy,
+          1,
+          m_tradeLast.Price() + dblOffset
+          // idPosition
+          // dt order submitted
+          );
         break;
     }
     m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
