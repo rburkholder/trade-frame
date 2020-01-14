@@ -1014,13 +1014,13 @@ void IBTWS::nextValidId( OrderId orderId) {
   m_ss.str("");
   Order::idOrder_t id = OrderManager::Instance().CheckOrderId( orderId );
   if ( orderId > id ) {
-    m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
+    m_ss << "old order id (" << id << "), new order id (" << orderId << ")";
   }
   else {
-    m_ss << "next order id (" << id << "), IB had (" << orderId << ")" << std::endl;
+    m_ss << "next order id (" << id << "), IB had (" << orderId << ")";
   }
 
-//  OutputDebugString( m_ss.str().c_str() );
+  //std::cout << m_ss.str() << std::endl;
 }
 
 // called from contractDetails, info comes from IB
