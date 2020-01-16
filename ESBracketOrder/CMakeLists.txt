@@ -70,8 +70,9 @@ target_link_libraries(
       TFBitsNPieces
       TFInteractiveBrokers
       TFSimulation
-      TFOptions
       TFVuTrading
+      TFTrading
+      TFOptions
       TFTrading
       TFIQFeed
       TFTimeSeries

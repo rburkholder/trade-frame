@@ -20,12 +20,11 @@
 
 #pragma once
 
-#include "TFTimeSeries/DatedDatum.h"
 #include <OUCharting/ChartDVBasics.h>
 
-#include <TFTrading/Watch.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 
+#include <TFTrading/Watch.h>
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
@@ -61,6 +60,8 @@ private:
   pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderStop;
+
+  pPosition_t m_pPosition;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

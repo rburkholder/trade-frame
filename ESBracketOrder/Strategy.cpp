@@ -18,7 +18,6 @@
  * Created: January 6, 2020, 11:41 AM
  */
 
-#include "TFTrading/OrderManager.h"
 #include "TFTrading/TradingEnumerations.h"
 
 #include "Strategy.h"
@@ -30,6 +29,7 @@ Strategy::Strategy( pWatch_t pWatch )
   m_pWatch = pWatch;
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
+  m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
 }
 
 Strategy::~Strategy() {
@@ -43,12 +43,10 @@ void Strategy::HandleButtonUpdate() {
 void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   // TODO: need to track orders, nothing new while existing ones active?
   static const double dblOffset( 1.00 );
-  ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
   if ( 0.0 < m_tradeLast.Price() ) {
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy:
-        m_pOrderEntry = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
@@ -56,8 +54,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderProfit = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
           1,
@@ -65,8 +62,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderStop = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Stop,
           ou::tf::OrderSide::enumOrderSide::Sell,
           1,
@@ -76,16 +72,14 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           );
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell:
-        m_pOrderEntry = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
           ou::tf::OrderSide::enumOrderSide::Sell,
           1
           // idPosition
           // dt order submitted
           );
-        m_pOrderProfit = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
@@ -93,8 +87,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderStop = om.ConstructOrder(
-          m_pWatch->GetInstrument(),
+        m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Stop,
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
