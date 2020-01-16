@@ -204,7 +204,6 @@ public:
   double GetPrice2( void ) const { return m_row.dblPrice2; };
   void SetPrice2( double dblPrice ) { m_row.dblPrice2 = dblPrice; } // prepares for UpdatePrice
   double GetAverageFillPrice( void ) const { return m_row.dblAverageFillPrice; };
-  void SetOrderId( idOrder_t );
   idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
   boost::uint32_t GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
@@ -251,6 +250,7 @@ protected:
   double m_dblPriceXQuantity; // used for calculating average price
 
   void ConstructOrder( void );
+  void SetOrderId( idOrder_t );  // use OrderManager to construct orders
 
 private:
 
