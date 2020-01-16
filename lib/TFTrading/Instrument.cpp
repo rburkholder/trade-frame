@@ -25,11 +25,11 @@ namespace tf { // TradeFrame
 
 /*
   if ( NULL != m_pUnderlying.get() ) {
-    rtn += sqlite3_bind_text(  
+    rtn += sqlite3_bind_text(
       pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
   }
   else {
-    rtn += sqlite3_bind_text(   
+    rtn += sqlite3_bind_text(
       pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), "", -1, SQLITE_STATIC );
   }
 */
@@ -38,9 +38,9 @@ namespace tf { // TradeFrame
 static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
 
 std::string Instrument::BuildDate( uint16_t year, uint16_t month, uint16_t day ) {
-  return 
+  return
     boost::lexical_cast<std::string>( year )
-    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
+    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
     + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
     ;
 }
@@ -65,15 +65,15 @@ std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, 
 std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day ) { // month is 1 based
  std::string sGenericName( sUnderlying );
   sGenericName += "-" + boost::lexical_cast<std::string>( year )
-    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
+    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
     + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) )
     ;
   return sGenericName;
 }
 
-Instrument::Instrument( const TableRowDef& row ) 
-  : m_row( row ), 
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+Instrument::Instrument( const TableRowDef& row )
+  : m_row( row ),
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -93,8 +93,8 @@ Instrument::Instrument( const TableRowDef& row )
   }
 }
 
-//Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
-//  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
+//Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying )
+//  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ),
 //  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
 //  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 //{
@@ -107,19 +107,19 @@ Instrument::Instrument(
   const idExchange_t &idExchange
                          )
 : m_row( idInstrument, eType, idExchange ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
 }
 
  // future
-Instrument::Instrument( 
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
+Instrument::Instrument(
+  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType,
   const idExchange_t& idExchange,
-  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day ) 
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day )
 : m_row( idInstrument, eType, idExchange, year, month, day ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -128,18 +128,18 @@ Instrument::Instrument(
 }
 
  // option yymm
-Instrument::Instrument( 
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
+Instrument::Instrument(
+  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
 //  pInstrument_t pUnderlying,
-  OptionSide::enumOptionSide eOptionSide, 
-  double dblStrike ) 
-  : m_row( idInstrument, eType, idExchange, 
-//  pUnderlying->GetInstrumentName(), 
+  OptionSide::enumOptionSide eOptionSide,
+  double dblStrike )
+  : m_row( idInstrument, eType, idExchange,
+//  pUnderlying->GetInstrumentName(),
   year, month, eOptionSide, dblStrike ),
-//  m_pUnderlying( pUnderlying ), 
-//  m_eUnderlyingStatus( EUnderlyingSet ), 
+//  m_pUnderlying( pUnderlying ),
+//  m_eUnderlyingStatus( EUnderlyingSet ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -151,19 +151,19 @@ Instrument::Instrument(
 }
 
  // option yymmdd
-Instrument::Instrument( 
-  idInstrument_cref idInstrument, 
-  InstrumentType::enumInstrumentTypes eType, 
+Instrument::Instrument(
+  idInstrument_cref idInstrument,
+  InstrumentType::enumInstrumentTypes eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //  pInstrument_t pUnderlying,
-  OptionSide::enumOptionSide eOptionSide, 
-  double dblStrike ) 
-  : m_row( idInstrument, eType, idExchange, 
-//  pUnderlying->GetInstrumentName(), 
+  OptionSide::enumOptionSide eOptionSide,
+  double dblStrike )
+  : m_row( idInstrument, eType, idExchange,
+//  pUnderlying->GetInstrumentName(),
   year, month, day, eOptionSide, dblStrike ),
-//  m_pUnderlying( pUnderlying ), 
-//  m_eUnderlyingStatus( EUnderlyingSet ), 
+//  m_pUnderlying( pUnderlying ),
+//  m_eUnderlyingStatus( EUnderlyingSet ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -176,22 +176,22 @@ Instrument::Instrument(
 
 // currency
 Instrument::Instrument(
-  const idInstrument_t& idInstrument, 
+  const idInstrument_t& idInstrument,
 //                       const idInstrument_t& idCounterInstrument,
-  InstrumentType::enumInstrumentTypes eType, 
+  InstrumentType::enumInstrumentTypes eType,
   const idExchange_t& idExchange,
-  Currency::enumCurrency base, 
+  Currency::enumCurrency base,
   Currency::enumCurrency counter
-  ) 
-  : m_row( idInstrument, 
-//  idCounterInstrument, 
+  )
+  : m_row( idInstrument,
+//  idCounterInstrument,
   eType, idExchange, base, counter ),
-//  m_pUnderlying( pUnderlying ), 
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+//  m_pUnderlying( pUnderlying ),
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
-  
+
 }
 
 /*
@@ -211,11 +211,11 @@ Instrument::Instrument(
 }
 */
 
-Instrument::Instrument(const Instrument& instrument) 
+Instrument::Instrument(const Instrument& instrument)
 :
   m_row( instrument.m_row ),
 //  m_pUnderlying( instrument.m_pUnderlying ),
-//  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ), 
+//  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -268,7 +268,7 @@ Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) 
 
 bool Instrument::operator==( const Instrument& rhs ) const {
   return (
-    ( m_row.idInstrument == rhs.m_row.idInstrument ) 
+    ( m_row.idInstrument == rhs.m_row.idInstrument )
     && ( m_row.idExchange == rhs.m_row.idExchange )
     && ( m_row.eType == rhs.m_row.eType )
 //    && ( m_row.idUnderlying == rhs.m_row.idUnderlying )
@@ -305,7 +305,7 @@ double Instrument::NormalizeOrderPrice( double price ) const {
   double n = price / m_row.dblMinTick;
   double t = std::floor( n );
   double r = n - t;
-  return ( 0.5 <= r ) 
+  return ( 0.5 <= r )
     ? std::ceil( n ) * m_row.dblMinTick
     : t * m_row.dblMinTick
     ;
