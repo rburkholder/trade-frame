@@ -58,6 +58,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price(), "long" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -66,6 +67,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price() + dblOffset, "profit" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Stop,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -74,15 +76,17 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price() - dblOffset, "loss" );
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell:
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Market,
+          ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
           1
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price(), "short" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -91,6 +95,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price() - dblOffset, "profit" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Stop,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -99,6 +104,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), m_tradeLast.Price() + dblOffset, "loss" );
         break;
     }
     // TOOD: place through OrderManager at some point
@@ -125,7 +131,7 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
 }
 
 void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
-  std::cout << "unrealized p/l from " << delta.get<1>() << " to " << delta.get<2>() << std::endl;
+  //std::cout << "unrealized p/l from " << delta.get<1>() << " to " << delta.get<2>() << std::endl;
 }
 
 void Strategy::HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
