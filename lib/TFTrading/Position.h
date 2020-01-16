@@ -298,10 +298,6 @@ protected:
 
 private:
 
-  bool m_bExecutionAccountAssigned;
-  bool m_bDataAccountAssigned;
-  bool m_bWatchConstructedLocally;
-
   double m_dblMultiplier;
 
   void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
