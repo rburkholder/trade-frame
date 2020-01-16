@@ -299,16 +299,13 @@ boost::posix_time::ptime Instrument::GetExpiryUtc( void ) const {
 }
 
 double Instrument::NormalizeOrderPrice( double price ) const {
-  // works for 0.1, 0.01, may not work for others
   assert( 0.0 <= price );
   assert( 0.0 < m_row.dblMinTick );
-  double n = price / m_row.dblMinTick;
-  double t = std::floor( n );
-  double r = n - t;
-  return ( 0.5 <= r )
-    ? std::ceil( n ) * m_row.dblMinTick
-    : t * m_row.dblMinTick
-    ;
+  const double round = m_row.dblMinTick / 2.0;
+  const double multiple_rough = price / m_row.dblMinTick;
+  const double multiple_floor = std::floor( multiple_rough );
+  const double lower = multiple_floor * m_row.dblMinTick;
+  return ( price < ( lower + round ) ) ? lower : ( lower + m_row.dblMinTick );
 }
 
 /*
