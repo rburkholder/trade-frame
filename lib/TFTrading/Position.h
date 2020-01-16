@@ -51,35 +51,34 @@ namespace tf { // TradeFrame
 
 class Position {
   friend class boost::serialization::access;
+  friend std::ostream& operator<<( std::ostream& os, const Position& );
 public:
 
-  friend std::ostream& operator<<( std::ostream& os, const Position& );
+  using pPosition_t = boost::shared_ptr<Position>;
 
-  typedef boost::shared_ptr<Position> pPosition_t;
+  using pProvider_t = ProviderInterfaceBase::pProvider_t;
 
-  typedef ProviderInterfaceBase::pProvider_t pProvider_t;
+  using pInstrument_t = Instrument::pInstrument_t;
+  using pInstrument_cref = Instrument::pInstrument_cref;
 
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef Instrument::pInstrument_cref pInstrument_cref;
+  using pWatch_t = Watch::pWatch_t;
 
-  typedef Watch::pWatch_t pWatch_t;
+  using idOrder_t = Order::idOrder_t;
+  using pOrder_t = Order::pOrder_t ;
+  using pOrder_ref = Order::pOrder_ref;
 
-  typedef Order::idOrder_t idOrder_t;
-  typedef Order::pOrder_t pOrder_t;
-  typedef Order::pOrder_ref pOrder_ref;
+  using execution_pair_t = std::pair<const Position&, const Execution&>;
+  using execution_delegate_t = const execution_pair_t&;
 
-  typedef std::pair<const Position&, const Execution&> execution_pair_t;
-  typedef const execution_pair_t& execution_delegate_t;
+  using quote_pair_t = std::pair<const Position&, const Quote&>;
+  using trade_pair_t = std::pair<const Position&, const Trade&>;
 
-  typedef std::pair<const Position&, const Quote&> quote_pair_t;
-  typedef std::pair<const Position&, const Trade&> trade_pair_t;
+  using PositionDelta_delegate_t = boost::tuple<const Position&, double, double>;  // position, old value, new value
 
-  typedef boost::tuple<const Position&, double, double> PositionDelta_delegate_t;  // position, old value, new value
-
-  typedef keytypes::idPosition_t idPosition_t;
-  typedef keytypes::idPortfolio_t idPortfolio_t;
-  typedef keytypes::idAccount_t idAccount_t;
-  typedef keytypes::idInstrument_t idInstrument_t;
+  using idPosition_t = keytypes::idPosition_t;
+  using idPortfolio_t = keytypes::idPortfolio_t;
+  using idAccount_t = keytypes::idAccount_t;
+  using idInstrument_t = keytypes::idInstrument_t;
 
   struct TableRowDefNoKey {
     template<class A>
@@ -283,14 +282,14 @@ public:
 
 protected:
 
-  typedef SymbolBase::quote_t quote_t;
-  typedef SymbolBase::trade_t trade_t;
+  using quote_t = SymbolBase::quote_t;
+  using trade_t = SymbolBase::trade_t;
   pProvider_t m_pExecutionProvider;
 
   pWatch_t m_pWatch;
 
-  typedef std::vector<pOrder_t> vOrders_t;
-  typedef vOrders_t::iterator vOrders_iter_t;
+  using vOrders_t = std::vector<pOrder_t>;
+  using vOrders_iter_t = vOrders_t::iterator;
   vOrders_t m_vOpenOrders;  // active orders waiting to be executed or canceled
   vOrders_t m_vClosedOrders;  // orders that have executed or have canceled
   vOrders_t m_vAllOrders;  // keeps track of all orders in case we have to search both lists
