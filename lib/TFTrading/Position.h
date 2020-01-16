@@ -303,6 +303,8 @@ private:
   void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
   void Construction( void );
 
+  void Register( pOrder_t pOrder );
+
   void HandleExecution( const std::pair<const Order&, const Execution&>& );
   void HandleCommission( const Order& );
   void HandleCancellation( const Order& );

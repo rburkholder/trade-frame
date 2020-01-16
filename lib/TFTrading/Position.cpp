@@ -11,10 +11,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <algorithm>
+
 #include <TFOptions/Option.h>
 
 #include "OrderManager.h"
-
 #include "Position.h"
 
 namespace ou { // One Unified
@@ -147,6 +148,7 @@ Position::~Position(void) {
   }
 
   for ( std::vector<pOrder_t>::iterator iter = m_vAllOrders.begin(); iter != m_vAllOrders.end(); ++iter ) {
+    iter->get()->OnOrderCancelled.Remove( MakeDelegate( this, &Position::HandleCancellation ) );
     iter->get()->OnCommission.Remove( MakeDelegate( this, &Position::HandleCommission ) );
     iter->get()->OnExecution.Remove( MakeDelegate( this, &Position::HandleExecution ) );
   }
@@ -236,10 +238,9 @@ Order::pOrder_t Position::ConstructOrder( // market
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
   assert( nullptr != m_pWatch.get() );
-  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   pOrder_t pOrder
    = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
-  //PlaceOrder( pOrder );
+  Register( pOrder );
   return pOrder;
 }
 
@@ -252,10 +253,9 @@ Order::pOrder_t Position::ConstructOrder( // limit or stop
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
   assert( nullptr != m_pWatch.get() );
-  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   pOrder_t pOrder
    = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
-  //PlaceOrder( pOrder );
+  Register( pOrder );
   return pOrder;
 }
 
@@ -269,10 +269,9 @@ Order::pOrder_t Position::ConstructOrder( // limit and stop
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
   assert( nullptr != m_pWatch.get() );
-  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
    = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
-  //PlaceOrder( pOrder );
+  Register( pOrder );
   return pOrder;
 }
 
@@ -287,14 +286,23 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
   if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
 
   m_row.nPositionPending += pOrder->GetQuantity();
+  const auto id = pOrder->GetOrderId();
+  if ( 0 == std::count_if(
+    m_vAllOrders.begin(), m_vAllOrders.end(),  // this may not be efficient for large order lists, maybe use a map sometime
+    [id]( pOrder_t& pOrder ){ return ( id == pOrder->GetOrderId() ); } ) ) {
+      Register( pOrder );
+    }
+  OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
+
+  OnPositionChanged( *this );
+}
+
+void Position::Register( pOrder_t pOrder ) {
   m_vAllOrders.push_back( pOrder );
   m_vOpenOrders.push_back( pOrder );
   pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) );
   pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
-  OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
-
-  OnPositionChanged( *this );
 }
 
 void Position::UpdateOrder( pOrder_t pOrder ) {
@@ -324,14 +332,12 @@ void Position::CancelOrders( void ) {
     [this](pOrder_t& pOrder){
       CancelOrder( pOrder );
     });
-  //m_OpenOrders.clear();
 }
 
 void Position::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       CancelOrder( iter );
-      //m_OpenOrders.erase( iter );
       break;
     }
   }
