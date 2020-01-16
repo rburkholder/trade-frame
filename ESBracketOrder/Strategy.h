@@ -65,4 +65,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& );  // unrealized p/l
+  void HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& );  // realized p/l
 };

@@ -30,9 +30,13 @@ Strategy::Strategy( pWatch_t pWatch )
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
   m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
+  m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
+  m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
 }
 
 Strategy::~Strategy() {
+  m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &Strategy::HandleUnRealizedPL) );
+  m_pPosition->OnExecution.Remove( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
 }
@@ -97,6 +101,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           );
         break;
     }
+    // TOOD: place through OrderManager at some point
     m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
   }
 }
@@ -117,4 +122,12 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
   //std::cout << "trade: " << trade.Volume() << "@" << trade.Price() << std::endl;
   m_tradeLast = trade;
   ou::ChartDVBasics::HandleTrade( trade );
+}
+
+void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
+  std::cout << "unrealized p/l from " << delta.get<1>() << " to " << delta.get<2>() << std::endl;
+}
+
+void Strategy::HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
+  std::cout << "realized p/l from " << delta.get<1>() << " to " << delta.get<2>() << std::endl;
 }
