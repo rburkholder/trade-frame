@@ -22,12 +22,14 @@
 
 #include <OUCharting/ChartDVBasics.h>
 
-#include <TFInteractiveBrokers/IBTWS.h>
+#include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
+
+#include <TFInteractiveBrokers/IBTWS.h>
 
 class Strategy:
   public ou::ChartDVBasics
@@ -57,6 +59,9 @@ private:
 
   ou::tf::Trade m_tradeLast;
 
+  double m_dblAverageBarSize;
+  ou::tf::BarFactory m_bfBar;
+
   pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderStop;
@@ -65,6 +70,8 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleBarComplete( const ou::tf::Bar& );
 
   void HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& );  // unrealized p/l
   void HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& );  // realized p/l
