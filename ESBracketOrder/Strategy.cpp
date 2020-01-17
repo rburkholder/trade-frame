@@ -23,7 +23,7 @@
 #include "Strategy.h"
 
 Strategy::Strategy( pWatch_t pWatch )
-: ou::ChartDVBasics(), m_bfBar( 20 ), m_dblAverageBarSize {}
+: ou::ChartDVBasics(), m_bfBar( 20 ), m_dblAverageBarSize {}, m_cntBars {}
 {
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
@@ -119,6 +119,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 }
 
 void Strategy::HandleButtonCancel() {
+  m_pPosition->CancelOrders();
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
@@ -140,6 +141,23 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
 void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   // at 20 seconds, will take 3 - 4 minutes to stabilize
   m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
+  if ( 0 < m_cntBars ) {
+    BarMatching bm;
+    bm.Compare( m_barLast, bar );
+    OrderResults ors;
+    mapMatching_pair_t pair = m_mapMatching.try_emplace( bm, ors );
+    pair.first->second.cntBars++;
+    std::cout
+      << "bar "
+      << m_mapMatching.size()
+      << " "
+      << ( pair.second ? "insert" : "update" )
+      << " "
+      << pair.first->second.cntBars
+      << std::endl;
+  }
+  m_cntBars++;
+  m_barLast = bar;
 }
 
 void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
