@@ -325,4 +325,3 @@ void Instrument::SetUnderlying( pInstrument_t pUnderlying ) {
 */
 } // namespace tf
 } // namespace ou
-
