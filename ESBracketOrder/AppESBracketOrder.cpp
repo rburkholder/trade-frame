@@ -20,13 +20,11 @@
 
 #include <fstream>
 
-#include <functional>
-#include <wx/wx.h>
-#include <wx/frame.h>
-
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+#include <wx/wx.h>
+#include <wx/frame.h>
 #include <wx/splitter.h>
 
 #include <TFTrading/Instrument.h>
@@ -215,9 +213,9 @@ void AppESBracketOrder::LoadState() {
 
 void AppESBracketOrder::OnClose( wxCloseEvent& event ) { // step 1
 
-  if ( m_bInitialized ) {
-    StopWatch();
-  }
+  //if ( m_bInitialized ) {
+  //  StopWatch();
+  //}
 
   m_pIB->Disconnect();
 
