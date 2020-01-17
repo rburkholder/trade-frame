@@ -49,6 +49,8 @@ public:
   //void HandleButtonSend();
   void HandleButtonCancel();
 
+  void EmitBarSummary();
+
 protected:
 private:
 

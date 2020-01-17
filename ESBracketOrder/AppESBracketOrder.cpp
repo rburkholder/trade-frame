@@ -89,8 +89,13 @@ bool AppESBracketOrder::OnInit() {
 //  wxBoxSizer* sizerButtons = new wxBoxSizer( wxVERTICAL );
 //  m_pFrameButtons->SetSizer( sizerButtons );
 
-m_pFrameOrderEntry = new FrameOrderEntry(  m_pFrameMain, wxID_ANY, "Order Entry", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxSTAY_ON_TOP  );
-m_pFrameOrderEntry->Show( true );
+  m_pFrameOrderEntry = new FrameOrderEntry(  m_pFrameMain, wxID_ANY, "Order Entry", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxSTAY_ON_TOP  );
+  m_pFrameOrderEntry->Show( true );
+
+  FrameMain::vpItems_t vItemsActions;
+  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  vItemsActions.push_back( new mi( "Emit Bar Summary", MakeDelegate( this, &AppESBracketOrder::HandleMenuActionEmitBarSummary ) ) );
+  wxMenu* pMenuActions = m_pFrameMain->AddDynamicMenu( "Actions", vItemsActions );
 
 //  bool bOk( true );
   m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
@@ -114,6 +119,10 @@ m_pFrameOrderEntry->Show( true );
 
   return true;
 
+}
+
+void AppESBracketOrder::HandleMenuActionEmitBarSummary() {
+  m_pStrategy->EmitBarSummary();
 }
 
 void AppESBracketOrder::HandleQuote( const ou::tf::Quote& quote ) {

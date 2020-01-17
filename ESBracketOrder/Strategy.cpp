@@ -139,6 +139,7 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
 }
 
 void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
+  // threading problem here with gui looking at m_mapMatching
   // at 20 seconds, will take 3 - 4 minutes to stabilize
   m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
   if ( 0 < m_cntBars ) {
@@ -147,17 +148,30 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
     OrderResults ors;
     mapMatching_pair_t pair = m_mapMatching.try_emplace( bm, ors );
     pair.first->second.cntBars++;
-    std::cout
-      << "bar "
-      << m_mapMatching.size()
-      << " "
-      << ( pair.second ? "insert" : "update" )
-      << " "
-      << pair.first->second.cntBars
-      << std::endl;
+//    std::cout
+//      << "bar "
+//      << m_mapMatching.size()
+//      << " "
+//      << ( pair.second ? "insert" : "update" )
+//      << " "
+//      << pair.first->second.cntBars
+//      << std::endl;
   }
   m_cntBars++;
   m_barLast = bar;
+}
+
+void Strategy::EmitBarSummary() {
+  std::for_each(
+    m_mapMatching.begin(), m_mapMatching.end(),
+    [](mapMatching_t::value_type& vt){
+      std::cout
+        << vt.second.cntBars
+        << ","
+        << vt.first.high << "," << vt.first.low << "," << vt.first.close << "," << vt.first.volume
+        << std::endl;
+    }
+    );
 }
 
 void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
