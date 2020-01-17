@@ -267,7 +267,11 @@ Order::pOrder_t Position::ConstructOrder( // limit and stop
   double dblPrice2
 ) {
   assert( OrderSide::Unknown != eOrderSide );
-  assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
+  assert(
+       ( OrderType::StopLimit == eOrderType )
+    || ( OrderType::Trail == eOrderType )
+    || ( OrderType::TrailLimit == eOrderType )
+    );
   assert( nullptr != m_pWatch.get() );
   pOrder_t pOrder
    = OrderManager::LocalCommonInstance().ConstructOrder( m_pWatch->GetInstrument(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );

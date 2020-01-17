@@ -431,6 +431,11 @@ void IBTWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = pOrder->GetPrice1();
       break;
+    case OrderType::Trail:
+      twsorder.lmtPrice = 0;
+      twsorder.trailStopPrice = pOrder->GetPrice1(); // stop price
+      twsorder.auxPrice = pOrder->GetPrice2(); // trail amount
+      break;
     case OrderType::StopLimit:
       twsorder.lmtPrice = pOrder->GetPrice1();
       twsorder.auxPrice = pOrder->GetPrice2();
