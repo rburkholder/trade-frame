@@ -147,6 +147,9 @@ private:
 
   void HandleBarComplete( const ou::tf::Bar& );
 
+  void HandleOrderCancelled( const ou::tf::Order& );
+  void HandleOrderFilled( const ou::tf::Order& );
+
   void HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& );  // unrealized p/l
   void HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& );  // realized p/l
 };
