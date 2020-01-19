@@ -22,8 +22,16 @@
 
 #include "Strategy.h"
 
+namespace {
+  static const size_t nBars { 10 };
+}
+
 Strategy::Strategy( pWatch_t pWatch )
-: ou::ChartDVBasics(), m_bfBar( 20 ), m_dblAverageBarSize {}, m_cntBars {}
+: ou::ChartDVBasics()
+, m_bfBar( 20 )
+, m_dblAverageBarSize {}
+, m_cntBars {}
+, m_state( EState::initial )
 {
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
@@ -55,7 +63,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   if ( 0.0 < m_tradeLast.Price() ) {
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy:
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "long" );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "long entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -64,9 +73,11 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        m_pOrderEntry->SetDescription( "long" );
         //m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        //m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "profit" );
+        m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -75,9 +86,11 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderProfit->SetDescription( "profit" );
+        //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "loss" );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Trail,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -87,11 +100,14 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderStop->SetDescription( "loss" );
+        //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell:
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "short" );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "short entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -100,9 +116,11 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
+        m_pOrderEntry->SetDescription( "short" );
         //m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        //m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "profit" );
+        m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -111,9 +129,11 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderProfit->SetDescription( "profit" );
+        //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "loss" );
+
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Trail,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -123,8 +143,10 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderStop->SetDescription( "loss" );
+        //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
         break;
     }
     // TOOD: place through OrderManager at some point
@@ -134,20 +156,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
 void Strategy::HandleButtonCancel() {
   m_pPosition->CancelOrders();
-}
-
-void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
-}
-
-void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
-  switch ( order.GetOrderSide() ) {
-    case ou::tf::OrderSide::Buy:
-      ou::ChartDVBasics::m_ceShortExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "exit" );
-      break;
-    case ou::tf::OrderSide::Sell:
-      ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "exit" );
-      break;
-  }
+  m_state = EState::quiesce;
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
@@ -171,22 +180,114 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   // at 20 seconds, will take 3 - 4 minutes to stabilize
   m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
   if ( 0 < m_cntBars ) {
-    BarMatching bm;
-    bm.Compare( m_barLast, bar );
-    OrderResults ors;
-    mapMatching_pair_t pair = m_mapMatching.try_emplace( bm, ors );
-    pair.first->second.cntBars++;
-//    std::cout
-//      << "bar "
-//      << m_mapMatching.size()
-//      << " "
-//      << ( pair.second ? "insert" : "update" )
-//      << " "
-//      << pair.first->second.cntBars
-//      << std::endl;
+    BarMatching key;
+    key.Set( m_barLast, bar );
+    OrderResults orsBlank;
+    mapMatching_pair_t pair = m_mapMatching.try_emplace( key, orsBlank );
+    pair.first->second.cntInstances++;
+    switch ( m_state ) {
+      case EState::initial:
+        if ( nBars <= m_cntBars ) m_state = EState::entry_wait;
+        break;
+      case EState::entry_wait:
+        {
+          mapMatching_t::iterator entry( pair.first );
+          m_keyMapMatching = entry->first;
+          switch ( m_keyMapMatching.close ) {
+            case 1:
+              m_state = EState::entry_filling;
+              HandleButtonSend( ou::tf::OrderSide::Buy );
+              break;
+            case 0:
+              // no entry
+              break;
+            case -1:
+              m_state = EState::entry_filling;
+              HandleButtonSend( ou::tf::OrderSide::Sell );
+              break;
+          }
+        }
+        break;
+      case EState::entry_filling:
+        // managed in HandleOrderFilled
+        break;
+      case EState::exit_filling:
+        break;
+      case EState::cancel_wait:
+        break;
+      case EState::quiesce:
+        break;
+    }
   }
-  m_cntBars++;
   m_barLast = bar;
+  m_cntBars++;
+}
+
+void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
+}
+
+void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
+  std::string sMessage = "unknown ";
+  switch ( m_state ) {
+    case EState::initial:
+      break;
+    case EState::entry_wait:
+      sMessage = "entry wait ";
+      break;
+    case EState::entry_filling:
+      sMessage = "entry filling ";
+      m_state = EState::exit_filling;
+      m_stateInfo.sideEntry = order.GetOrderSide();
+      m_stateInfo.dblEntryPrice = order.GetAverageFillPrice();
+      break;
+    case EState::exit_filling:
+      {
+        sMessage = "exit ";
+        m_state = EState::entry_wait; // start over
+        mapMatching_t::iterator entry = m_mapMatching.find( m_BarMatching );
+        assert( m_mapMatching.end() != entry );
+        switch ( m_stateInfo.sideEntry ) {
+          case ou::tf::OrderSide::Buy:
+            entry->second.longs.cntOrders++;
+            if ( "profit" == order.GetDescription() ) {
+              entry->second.longs.cntWins++;
+              entry->second.longs.dblProfit += ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
+            }
+            if ( "loss" == order.GetDescription() ) {
+              entry->second.longs.cntLosses++;
+              entry->second.longs.dblProfit -= ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
+            }
+            break;
+          case ou::tf::OrderSide::Sell:
+            entry->second.shorts.cntOrders++;
+            if ( "profit" == order.GetDescription() ) {
+              entry->second.shorts.cntWins++;
+              entry->second.longs.dblProfit += ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
+            }
+            if ( "loss" == order.GetDescription() ) {
+              entry->second.longs.cntLosses++;
+              entry->second.longs.dblProfit -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
+            }
+            break;
+        }
+      }
+      break;
+    case EState::cancel_wait:
+      sMessage = "cancel ";
+      break;
+    case EState::quiesce:
+      sMessage = "quiesce ";
+      break;
+  }
+
+  switch ( order.GetOrderSide() ) {
+    case ou::tf::OrderSide::Buy:
+      ou::ChartDVBasics::m_ceShortExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy filled" );
+      break;
+    case ou::tf::OrderSide::Sell:
+      ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell filled" );
+      break;
+  }
 }
 
 void Strategy::EmitBarSummary() {
@@ -194,10 +295,17 @@ void Strategy::EmitBarSummary() {
   std::for_each(
     m_mapMatching.begin(), m_mapMatching.end(),
     [](mapMatching_t::value_type& vt){
+      const Results& longs(  vt.second.longs  );
+      const Results& shorts( vt.second.shorts );
       std::cout
-        << vt.second.cntBars
-        << ","
-        << vt.first.high << "," << vt.first.low << "," << vt.first.close << "," << vt.first.volume
+        << vt.second.cntInstances << "," << ( longs.cntOrders + shorts.cntOrders )
+        << "," << vt.first.high << "," << vt.first.low << "," << vt.first.close << "," << vt.first.volume
+        << "," << longs.cntOrders
+               << "," << longs.cntWins   << "," << longs.dblProfit
+               << "," << longs.cntLosses << "," << longs.dblLoss
+        << "," << shorts.cntOrders
+               << "," << shorts.cntWins   << "," << shorts.dblProfit
+               << "," << shorts.cntLosses << "," << shorts.dblLoss
         << std::endl;
     }
     );

@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "TFTimeSeries/DatedDatum.h"
 #include <map>
 
 #include <OUCharting/ChartDVBasics.h>
@@ -76,7 +75,7 @@ private:
         else return 1;
       }
     }
-    void Compare( const ou::tf::Bar& bar1, const ou::tf::Bar& bar2 ) {
+    void Set( const ou::tf::Bar& bar1, const ou::tf::Bar& bar2 ) {
       high   = ComparePod( bar1.High(),   bar2.High() );
       low    = ComparePod( bar1.Low(),    bar2.Low() );
       close  = ComparePod( bar1.Close(),  bar2.Close() );
@@ -109,19 +108,23 @@ private:
     unsigned int cntOrders; // should match cntWins + cntLosses
     unsigned int cntWins;
     unsigned int cntLosses;
-    Results(): cntOrders {}, cntWins {}, cntLosses {} {}
+    double dblProfit;
+    double dblLoss;
+    Results(): cntOrders {}, cntWins {}, cntLosses {}, dblProfit {}, dblLoss {} {}
   };
 
   struct OrderResults {
-    unsigned int cntBars; // count of bar transitions
+    unsigned int cntInstances; // count of bar transitions
     Results longs;
     Results shorts;
-    OrderResults(): cntBars {} {}
+    OrderResults(): cntInstances {} {}
   };
 
   using mapMatching_t = std::map<BarMatching,OrderResults>;
   using mapMatching_pair_t = std::pair<mapMatching_t::iterator, bool>;
   mapMatching_t m_mapMatching;
+
+  BarMatching m_keyMapMatching;
 
   size_t m_cntBars;
   ou::tf::Bar m_barLast;
@@ -141,6 +144,17 @@ private:
   pPosition_t m_pPosition;
 
   BarMatching m_BarMatching;
+
+  struct State {
+    ou::tf::OrderSide::enumOrderSide sideEntry;
+    double dblEntryPrice;
+    State(): dblEntryPrice {} {};
+  };
+
+  State m_stateInfo;
+
+  enum class EState { initial, entry_wait, entry_filling, exit_filling, cancel_wait, quiesce };
+  EState m_state;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
