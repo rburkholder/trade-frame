@@ -239,6 +239,14 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_state = EState::exit_filling;
       m_stateInfo.sideEntry = order.GetOrderSide();
       m_stateInfo.dblEntryPrice = order.GetAverageFillPrice();
+      switch ( order.GetOrderSide() ) {
+        case ou::tf::OrderSide::Buy:
+          ou::ChartDVBasics::m_ceShortEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
+          break;
+        case ou::tf::OrderSide::Sell:
+          ou::ChartDVBasics::m_ceLongEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
+          break;
+      }
       break;
     case EState::exit_filling:
       {
@@ -257,6 +265,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
               entry->second.longs.cntLosses++;
               entry->second.longs.dblProfit -= ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
             }
+            ou::ChartDVBasics::m_ceShortExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
             break;
           case ou::tf::OrderSide::Sell:
             entry->second.shorts.cntOrders++;
@@ -268,6 +277,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
               entry->second.longs.cntLosses++;
               entry->second.longs.dblProfit -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
             }
+            ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
             break;
         }
       }
@@ -280,14 +290,6 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
   }
 
-  switch ( order.GetOrderSide() ) {
-    case ou::tf::OrderSide::Buy:
-      ou::ChartDVBasics::m_ceShortExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy filled" );
-      break;
-    case ou::tf::OrderSide::Sell:
-      ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell filled" );
-      break;
-  }
 }
 
 void Strategy::EmitBarSummary() {
