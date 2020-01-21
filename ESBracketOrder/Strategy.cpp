@@ -56,7 +56,9 @@ void Strategy::HandleButtonUpdate() {
 
 void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   // TODO: need to track orders, nothing new while existing ones active?
-  const double dblOffset( 2.0 * m_dblAverageBarSize );
+  double dblOffset( 2.0 * m_dblAverageBarSize );
+  double min = 2.0 * m_pWatch->GetInstrument()->GetMinTick();
+  if ( min >= dblOffset ) dblOffset = min;
   const double dblEntry = m_tradeLast.Price();
   const double dblUpper = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry + dblOffset );
   const double dblLower = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry - dblOffset );
