@@ -143,9 +143,8 @@ private:
 
   pPosition_t m_pPosition;
 
-  BarMatching m_BarMatching;
-
   struct State {
+    BarMatching barMatching;
     ou::tf::OrderSide::enumOrderSide sideEntry;
     double dblEntryPrice;
     State(): dblEntryPrice {} {};

@@ -197,6 +197,7 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
           m_keyMapMatching = entry->first;
           switch ( m_keyMapMatching.close ) {
             case 1:
+              m_stateInfo.barMatching = key;
               m_state = EState::entry_filling;
               HandleButtonSend( ou::tf::OrderSide::Buy );
               break;
@@ -204,6 +205,7 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
               // no entry
               break;
             case -1:
+              m_stateInfo.barMatching = key;
               m_state = EState::entry_filling;
               HandleButtonSend( ou::tf::OrderSide::Sell );
               break;
@@ -254,7 +256,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       {
         sMessage = "exit ";
         m_state = EState::entry_wait; // start over
-        mapMatching_t::iterator entry = m_mapMatching.find( m_BarMatching );
+        mapMatching_t::iterator entry = m_mapMatching.find( m_stateInfo.barMatching );
         assert( m_mapMatching.end() != entry );
         switch ( m_stateInfo.sideEntry ) {
           case ou::tf::OrderSide::Buy:
