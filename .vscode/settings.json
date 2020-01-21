@@ -1,0 +1,14 @@
+{
+  "clangd.path": "/usr/lib/llvm-9/bin/clangd",
+  "clangd.arguments": [
+    ],
+  "C_Cpp.autocomplete": "Disabled",
+  "C_Cpp.formatting": "Default",
+  "C_Cpp.errorSquiggles": "Enabled",
+  "C_Cpp.intelliSenseEngine": "Disabled",
+  "C_Cpp.default.intelliSenseMode": "clang-x64",
+  "editor.tabSize": 2,
+  "files.associations": {
+    "*.ipp": "cpp"
+  }
+}
