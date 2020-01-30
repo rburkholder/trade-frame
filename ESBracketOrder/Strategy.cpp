@@ -185,17 +185,17 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
     BarMatching key;
     key.Set( m_barLast, bar );
     OrderResults orsBlank;
-    mapMatching_pair_t pair = m_mapMatching.try_emplace( key, orsBlank );
-    pair.first->second.cntInstances++;
+    mapMatching_pair_t pair = m_mapMatching.try_emplace( key, orsBlank ); // find or create entry
+    // pair.second => true if inserted, false if not
+    auto& [mapKey, mapValue] = *pair.first;
+    mapValue.cntInstances++;
     switch ( m_state ) {
       case EState::initial:
         if ( nBars <= m_cntBars ) m_state = EState::entry_wait;
         break;
       case EState::entry_wait:
         {
-          mapMatching_t::iterator entry( pair.first );
-          m_keyMapMatching = entry->first;
-          switch ( m_keyMapMatching.close ) {
+          switch ( key.close ) {
             case 1:
               m_stateInfo.barMatching = key;
               m_state = EState::entry_filling;

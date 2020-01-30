@@ -124,8 +124,6 @@ private:
   using mapMatching_pair_t = std::pair<mapMatching_t::iterator, bool>;
   mapMatching_t m_mapMatching;
 
-  BarMatching m_keyMapMatching;
-
   size_t m_cntBars;
   ou::tf::Bar m_barLast;
 
@@ -143,14 +141,14 @@ private:
 
   pPosition_t m_pPosition;
 
-  struct State {
+  struct StateInfo {
     BarMatching barMatching;
     ou::tf::OrderSide::enumOrderSide sideEntry;
     double dblEntryPrice;
-    State(): dblEntryPrice {} {};
+    StateInfo(): dblEntryPrice {} {};
   };
 
-  State m_stateInfo;
+  StateInfo m_stateInfo;
 
   enum class EState { initial, entry_wait, entry_filling, exit_filling, cancel_wait, quiesce };
   EState m_state;
