@@ -153,6 +153,9 @@ private:
   enum class EState { initial, entry_wait, entry_filling, exit_filling, cancel_wait, quiesce };
   EState m_state;
 
+  using mapEntry_t = std::map<BarMatching,ou::tf::OrderSide::enumOrderSide>;
+  mapEntry_t m_mapEntry;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 

@@ -32,6 +32,10 @@ Strategy::Strategy( pWatch_t pWatch )
 , m_dblAverageBarSize {}
 , m_cntBars {}
 , m_state( EState::initial )
+, m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
+    { { 1,1,1,-1 }, ou::tf::OrderSide::Sell },
+    { { 1,1,1, 1 }, ou::tf::OrderSide::Sell }
+    }
 {
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
@@ -195,20 +199,29 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
         break;
       case EState::entry_wait:
         {
-          switch ( key.close ) {
-            case 1:
-              m_stateInfo.barMatching = key;
-              m_state = EState::entry_filling;
-              HandleButtonSend( ou::tf::OrderSide::Buy );
-              break;
-            case 0:
-              // no entry
-              break;
-            case -1:
-              m_stateInfo.barMatching = key;
-              m_state = EState::entry_filling;
-              HandleButtonSend( ou::tf::OrderSide::Sell );
-              break;
+          mapEntry_t::iterator iter = m_mapEntry.find( key );
+          if ( m_mapEntry.end() == iter ) {
+            switch ( key.close ) {
+              case 1:
+                m_stateInfo.barMatching = key;
+                m_state = EState::entry_filling;
+                HandleButtonSend( ou::tf::OrderSide::Buy );
+                break;
+              case 0:
+                // no entry
+                break;
+              case -1:
+                m_stateInfo.barMatching = key;
+                m_state = EState::entry_filling;
+                HandleButtonSend( ou::tf::OrderSide::Sell );
+                break;
+            }
+          }
+          else {
+            // use pre-calculated entry direction
+            m_stateInfo.barMatching = key;
+            m_state = EState::entry_filling;
+            HandleButtonSend( iter->second );
           }
         }
         break;
@@ -275,11 +288,11 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
             entry->second.shorts.cntOrders++;
             if ( "profit" == order.GetDescription() ) {
               entry->second.shorts.cntWins++;
-              entry->second.longs.dblProfit += ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
+              entry->second.shorts.dblProfit += ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
             }
             if ( "loss" == order.GetDescription() ) {
-              entry->second.longs.cntLosses++;
-              entry->second.longs.dblProfit -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
+              entry->second.shorts.cntLosses++;
+              entry->second.shorts.dblProfit -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
             }
             ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
             break;
