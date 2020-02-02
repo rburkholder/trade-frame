@@ -30,12 +30,15 @@
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
+#include <TFTrading/DailyTradeTimeFrames.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
 class Strategy:
-  public ou::ChartDVBasics
+  public ou::ChartDVBasics,
+  public ou::tf::DailyTradeTimeFrame<Strategy>
 {
+  friend class ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -160,6 +163,12 @@ private:
   void HandleTrade( const ou::tf::Trade& );
 
   void HandleBarComplete( const ou::tf::Bar& );
+
+  TimeFrame m_tfLatest;
+
+  void HandleRHTrading( const ou::tf::Bar& );
+  void HandleCancelling( const ou::tf::Bar& );
+  void HandleGoingNeutral( const ou::tf::Bar& );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

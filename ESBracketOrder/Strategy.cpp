@@ -25,6 +25,10 @@
  // TODO: run long(21 bar)/short(7 bar) ema and see if can trade on crossing
  //    needs minimum range movement so as not to over-trade
  //    then can influence entry direction, and maybe let profit run.
+ // TODO: add P/L to chart
+ // TODO: remove the cap, let the profit run
+ // TODO: narrow the stop range, or, if let profit run, then leave at two bars
+ // TODO: need shorter range bollinger bands
 
 #include "TFTrading/TradingEnumerations.h"
 
@@ -36,10 +40,12 @@ namespace {
 
 Strategy::Strategy( pWatch_t pWatch )
 : ou::ChartDVBasics()
+, ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_bfBar( 20 )
 , m_dblAverageBarSize {}
 , m_cntBars {}
 , m_state( EState::initial )
+, m_tfLatest( TimeFrame::Closed )
 , m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
     { { -1,-1,-1,-1 }, ou::tf::OrderSide::Buy  },
     { { -1,-1,-1, 1 }, ou::tf::OrderSide::Buy  },
@@ -56,6 +62,25 @@ Strategy::Strategy( pWatch_t pWatch )
   m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+
+  ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
+  std::cout << "ou::TimeSource::Instance().External(): " << dtNow << std::endl;
+  boost::gregorian::date dateMarketOpen( MarketOpenDate( dtNow ) );
+  std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
+  InitForUS24HourFutures( dateMarketOpen );
+  // this may be offset incorrectly.
+  //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
+  ptime dtMo( GetMarketOpen() );
+  if ( dtNow > dtMo ) {
+    SetRegularHoursOpen( dtNow );  // collect some data first
+    // change later to 10 to collect enough data to start trading:
+    //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
+    SetStartTrading( dtNow + boost::posix_time::minutes( 2 ) );  // collect some data first
+  }
+  else {
+    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // collect some data first
+    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
+  }
 }
 
 Strategy::~Strategy() {
@@ -193,62 +218,7 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
 }
 
 void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
-  // threading problem here with gui looking at m_mapMatching
-  // at 20 seconds, will take 3 - 4 minutes to stabilize
-  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
-  if ( 0 < m_cntBars ) {
-    BarMatching key;
-    key.Set( m_barLast, bar );
-    OrderResults orsBlank;
-    mapMatching_pair_t pair = m_mapMatching.try_emplace( key, orsBlank ); // find or create entry
-    // pair.second => true if inserted, false if not
-    auto& [mapKey, mapValue] = *pair.first;
-    mapValue.cntInstances++;
-    switch ( m_state ) {
-      case EState::initial:
-        if ( nBars <= m_cntBars ) m_state = EState::entry_wait;
-        break;
-      case EState::entry_wait:
-        {
-          mapEntry_t::iterator iter = m_mapEntry.find( key );
-          if ( m_mapEntry.end() == iter ) {
-            switch ( key.close ) {
-              case 1:
-                m_stateInfo.barMatching = key;
-                m_state = EState::entry_filling;
-                HandleButtonSend( ou::tf::OrderSide::Buy );
-                break;
-              case 0:
-                // no entry
-                break;
-              case -1:
-                m_stateInfo.barMatching = key;
-                m_state = EState::entry_filling;
-                HandleButtonSend( ou::tf::OrderSide::Sell );
-                break;
-            }
-          }
-          else {
-            // use pre-calculated entry direction
-            m_stateInfo.barMatching = key;
-            m_state = EState::entry_filling;
-            HandleButtonSend( iter->second );
-          }
-        }
-        break;
-      case EState::entry_filling:
-        // managed in HandleOrderFilled
-        break;
-      case EState::exit_filling:
-        break;
-      case EState::cancel_wait:
-        break;
-      case EState::quiesce:
-        break;
-    }
-  }
-  m_barLast = bar;
-  m_cntBars++;
+  TimeTick( bar );
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
@@ -318,6 +288,85 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
   }
 
+}
+
+void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
+  // threading problem here with gui looking at m_mapMatching
+  // at 20 seconds, will take 3 - 4 minutes to stabilize
+  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
+  if ( 0 < m_cntBars ) {
+    BarMatching key;
+    key.Set( m_barLast, bar );
+    OrderResults orsBlank;
+    mapMatching_pair_t pair = m_mapMatching.try_emplace( key, orsBlank ); // find or create entry
+    // pair.second => true if inserted, false if not
+    auto& [mapKey, mapValue] = *pair.first;
+    mapValue.cntInstances++;
+    switch ( m_state ) {
+      case EState::initial:
+        if ( nBars <= m_cntBars ) m_state = EState::entry_wait;
+        break;
+      case EState::entry_wait:
+        {
+          mapEntry_t::iterator iter = m_mapEntry.find( key );
+          if ( m_mapEntry.end() == iter ) {
+            switch ( key.close ) {
+              case 1:
+                m_stateInfo.barMatching = key;
+                m_state = EState::entry_filling;
+                HandleButtonSend( ou::tf::OrderSide::Buy );
+                break;
+              case 0:
+                // no entry
+                break;
+              case -1:
+                m_stateInfo.barMatching = key;
+                m_state = EState::entry_filling;
+                HandleButtonSend( ou::tf::OrderSide::Sell );
+                break;
+            }
+          }
+          else {
+            // use pre-calculated entry direction
+            m_stateInfo.barMatching = key;
+            m_state = EState::entry_filling;
+            HandleButtonSend( iter->second );
+          }
+        }
+        break;
+      case EState::entry_filling:
+        // managed in HandleOrderFilled
+        break;
+      case EState::exit_filling:
+        break;
+      case EState::cancel_wait:
+        break;
+      case EState::quiesce:
+        break;
+    }
+  }
+  m_barLast = bar;
+  m_cntBars++;
+}
+
+void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
+  if ( m_tfLatest != CurrentTimeFrame() ) {
+    m_tfLatest = CurrentTimeFrame();
+    m_pPosition->CancelOrders();
+  }
+  else {
+
+  }
+}
+
+void Strategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
+  if ( m_tfLatest != CurrentTimeFrame() ) {
+    m_tfLatest = CurrentTimeFrame();
+    m_pPosition->ClosePosition();
+  }
+  else {
+
+  }
 }
 
 void Strategy::EmitBarSummary() {
