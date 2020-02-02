@@ -18,6 +18,14 @@
  * Created: January 6, 2020, 11:41 AM
  */
 
+ // TODO: timer on entry (monitor for average length of entry and use 2x as cancel, enter in other direction)
+ //    or use four bars or so as maximum
+ // TODO: if stop rises by 50%, bump up the profit exit?
+ //    if rise is in direction of ema?
+ // TODO: run long(21 bar)/short(7 bar) ema and see if can trade on crossing
+ //    needs minimum range movement so as not to over-trade
+ //    then can influence entry direction, and maybe let profit run.
+
 #include "TFTrading/TradingEnumerations.h"
 
 #include "Strategy.h"
@@ -33,8 +41,11 @@ Strategy::Strategy( pWatch_t pWatch )
 , m_cntBars {}
 , m_state( EState::initial )
 , m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
-    { { 1,1,1,-1 }, ou::tf::OrderSide::Sell },
-    { { 1,1,1, 1 }, ou::tf::OrderSide::Sell }
+    { { -1,-1,-1,-1 }, ou::tf::OrderSide::Buy  },
+    { { -1,-1,-1, 1 }, ou::tf::OrderSide::Buy  },
+    { { -1, 0,-1, 1 }, ou::tf::OrderSide::Buy  },
+    { {  1, 1, 1,-1 }, ou::tf::OrderSide::Sell },
+    { {  1, 1, 1, 1 }, ou::tf::OrderSide::Sell }
     }
 {
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
