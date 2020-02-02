@@ -43,7 +43,7 @@ public:
   template<typename DD>  // DD is DatedDatum construct
   void TimeTick( DD& dd );
 
-  boost::gregorian::date NormalizeDate( boost::posix_time::ptime dt );
+  boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt );
   boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
     return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
   }
@@ -127,14 +127,15 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
 }
 
 template<class T>
-boost::gregorian::date DailyTradeTimeFrame<T>:: NormalizeDate( boost::posix_time::ptime dt ) {
-  boost::posix_time::ptime dtTransition = Normalize( dt.date(), boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );  // market transition time
+boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_time::ptime dtUtcCurrent ) {
+  boost::posix_time::ptime dtUtcTransition
+    = Normalize( dtUtcCurrent.date(), boost::posix_time::time_duration( 17, 0, 0 ), "America/New_York" );  // market transition time
   boost::gregorian::date date;
-  if ( dt.time_of_day() < dtTransition.time_of_day() ) {  // morning side
-    date = dt.date() - boost::gregorian::date_duration(1);
+  if ( dtUtcCurrent.time_of_day() < dtUtcTransition.time_of_day() ) {  // morning side
+    date = dtUtcCurrent.date() - boost::gregorian::date_duration(1);
   }
   else {  // evening side
-    date = dt.date();
+    date = dtUtcCurrent.date();
   }
   return date;
 }

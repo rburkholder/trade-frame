@@ -71,7 +71,7 @@ Strategy::Strategy(
   //std::stringstream ss;
 
   ptime dt( ou::TimeSource::Instance().External() );  // provided in utc
-  boost::gregorian::date date( NormalizeDate( dt ) );
+  boost::gregorian::date date( MarketOpenDate( dt ) );
   InitForUS24HourFutures( date );
   // this may be offset incorrectly.
   //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
