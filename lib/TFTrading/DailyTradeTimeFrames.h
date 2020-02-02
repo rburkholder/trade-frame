@@ -147,7 +147,7 @@ void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date
   m_dtRHOpen              = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration(  9, 30,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration(  9, 30, 30 ), "America/New_York" );
   m_dtTimeForCancellation = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 57,  0 ), "America/New_York" );
-  m_dtGoNeutral           = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 57, 15 ), "America/New_York" );
+  m_dtGoNeutral           = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 57,  5 ), "America/New_York" );
   m_dtWaitForRHClose      = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 58,  0 ), "America/New_York" );
   m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
