@@ -21,10 +21,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-namespace TimeFrame {
-  enum enumTimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AfterRH };
-}
-
 // 20121223 note a weakness in the statemachine: assumes continuous quotes to update statemachine
 //     will a period time injection be required to step the machine given a lack of quotes?
 
@@ -67,6 +63,11 @@ public:
   boost::posix_time::ptime GetMarketClose( void ) { return m_dtMarketClose; };
 
 protected:
+
+  enum class TimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AfterRH };
+
+  TimeFrame CurrentTimeFrame() const { return m_stateTimeFrame; }
+
   // per type
   template<typename DD> void HandleCommon( const DD& dd ) {};
   template<typename DD> void HandleRHTrading( const DD& dd ) {};
@@ -92,7 +93,7 @@ private:
   boost::posix_time::ptime m_dtRHClose;
   boost::posix_time::ptime m_dtMarketClose;
 
-  TimeFrame::enumTimeFrame m_stateTimeFrame;
+  TimeFrame m_stateTimeFrame;
 
   void InitForUSEquityExchanges( boost::gregorian::date );
 
