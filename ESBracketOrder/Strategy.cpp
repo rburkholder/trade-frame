@@ -70,17 +70,17 @@ Strategy::Strategy( pWatch_t pWatch )
   InitForUS24HourFutures( dateMarketOpen );
   // this may be offset incorrectly.
   //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
-  ptime dtMo( GetMarketOpen() );
-  if ( dtNow > dtMo ) {
-    SetRegularHoursOpen( dtNow );  // collect some data first
+//  ptime dtMo( GetMarketOpen() );
+//  if ( dtNow > dtMo ) {
+//    SetRegularHoursOpen( dtNow );  // collect some data first
     // change later to 10 to collect enough data to start trading:
     //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
-    SetStartTrading( dtNow + boost::posix_time::minutes( 2 ) );  // collect some data first
-  }
-  else {
-    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // collect some data first
-    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
-  }
+//    SetStartTrading( dtNow + boost::posix_time::minutes( 2 ) );  // collect some data first
+//  }
+//  else {
+//    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // collect some data first
+//    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
+//  }
 }
 
 Strategy::~Strategy() {
