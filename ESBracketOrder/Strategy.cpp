@@ -192,6 +192,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         break;
     }
     // TOOD: place through OrderManager at some point
+    //    then can use Position to cancel orders
     m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
   }
 }
@@ -351,11 +352,22 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
 
 void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
   if ( m_tfLatest != CurrentTimeFrame() ) {
+    // a one-shot trigger
     m_tfLatest = CurrentTimeFrame();
-    m_pPosition->CancelOrders();
+    //m_pPosition->CancelOrders();
+    // orders not placed through Position/OrderManager, so can not cancel orders via that avenue
+    if ( m_pOrderEntry ) {
+      m_pIB->CancelOrder( m_pOrderEntry );
+    }
+    if ( m_pOrderProfit ) {
+      m_pIB->CancelOrder( m_pOrderProfit );
+    }
+    if ( m_pOrderStop ) {
+      m_pIB->CancelOrder( m_pOrderStop );
+    }
   }
   else {
-
+    // wait for transition to next state
   }
 }
 
