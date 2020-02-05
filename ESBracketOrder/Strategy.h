@@ -134,6 +134,7 @@ private:
   pWatch_t m_pWatch;
 
   ou::tf::Trade m_tradeLast;
+  ou::tf::Quote m_quoteLast;
 
   double m_dblAverageBarSize;
   ou::tf::BarFactory m_bfBar;

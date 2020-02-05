@@ -100,7 +100,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   double dblOffset( 2.0 * m_dblAverageBarSize );
   double min = 2.0 * m_pWatch->GetInstrument()->GetMinTick();
   if ( min >= dblOffset ) dblOffset = min;
-  const double dblEntry = m_tradeLast.Price();
+  //const double dblEntry = m_tradeLast.Price();
+  const double dblEntry = m_quoteLast.Midpoint();
   const double dblUpper = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry + dblOffset );
   const double dblLower = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry - dblOffset );
   if ( 0.0 < m_tradeLast.Price() ) {
@@ -112,7 +113,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
-          dblEntry
+          m_quoteLast.Ask()
           // idPosition
           // dt order submitted
           );
@@ -139,7 +140,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderSide::enumOrderSide::Sell,
           1,
           dblLower,
-          dblEntry - dblLower
+          m_quoteLast.Bid() - dblLower // TODO: try ask side, widens the field
           // idPosition
           // dt order submitted
           );
@@ -155,7 +156,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
           1,
-          dblEntry
+          m_quoteLast.Bid()
           // idPosition
           // dt order submitted
           );
@@ -182,7 +183,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
           dblUpper,
-          dblUpper - dblEntry
+          dblUpper - m_quoteLast.Ask()  // TODO: try bid side, widens the field
           // idPosition
           // dt order submitted
           );
@@ -209,6 +210,7 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   ou::tf::Quote::price_t ask( quote.Ask() );
   if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
     ou::ChartDVBasics::HandleQuote( quote );
+    m_quoteLast = quote;
   }
 }
 
