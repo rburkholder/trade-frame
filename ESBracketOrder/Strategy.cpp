@@ -234,18 +234,18 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
-  std::string sMessage = "HandleOrderFilled: unknown ";
+  std::string sMessage = "unknown ";
   switch ( m_state ) {
     case EState::initial:
       break;
     case EState::entry_wait:
-      sMessage = "HandleOrderFilled: entry wait ";
+      sMessage = "entry wait ";
       break;
     case EState::entry_cancelling:
       std::cout << "HandleOrderFilled in entry_cancelling, need to fix the state machine!" << std::endl;
       // fall through to handle the fill and proceed
     case EState::entry_filling:
-      sMessage = "HandleOrderFilled: entry filling ";
+      sMessage = "filled ";
       m_state = EState::exit_filling;
       m_stateInfo.sideEntry = order.GetOrderSide();
       m_stateInfo.dblEntryPrice = order.GetAverageFillPrice();
@@ -260,7 +260,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
     case EState::exit_filling:
       {
-        sMessage = "HandleOrderFilled: exit ";
+        sMessage = "exit ";
         m_state = EState::entry_wait; // start over
         mapMatching_t::iterator entry = m_mapMatching.find( m_stateInfo.barMatching );
         assert( m_mapMatching.end() != entry );
@@ -293,10 +293,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       }
       break;
     case EState::cancel_wait:
-      sMessage = "HandleOrderFilled: cancel ";
+      sMessage = "cancel ";
       break;
     case EState::quiesce:
-      sMessage = "HandleOrderFilled: quiesce ";
+      sMessage = "quiesce ";
       break;
   }
 
