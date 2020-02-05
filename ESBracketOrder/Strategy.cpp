@@ -118,7 +118,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // dt order submitted
           );
         m_pOrderEntry->SetDescription( "long" );
-        //m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "profit target" );
@@ -161,7 +161,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           // dt order submitted
           );
         m_pOrderEntry->SetDescription( "short" );
-        //m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "profit target" );
@@ -230,7 +230,11 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   // TODO: may need to be more detailed here,
   //   need to check that the primery entry order has indeed been cancelled
   //   if only a few of the orders were cancelled, then may need to perform a close
-  m_state = EState::entry_wait;
+  std::cout << "HandleOrderCancelled: " << order.GetOrderId() << "," << order.GetDescription() << std::endl;
+  if ( EState::entry_cancelling == m_state ) {
+    m_state = EState::entry_wait;
+  }
+
 }
 
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
