@@ -140,7 +140,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderSide::enumOrderSide::Sell,
           1,
           dblLower,
-          m_quoteLast.Bid() - dblLower // TODO: try ask side, widens the field
+          m_quoteLast.Ask() - dblLower
           // idPosition
           // dt order submitted
           );
@@ -183,7 +183,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
           ou::tf::OrderSide::enumOrderSide::Buy,
           1,
           dblUpper,
-          dblUpper - m_quoteLast.Ask()  // TODO: try bid side, widens the field
+          dblUpper - m_quoteLast.Bid()
           // idPosition
           // dt order submitted
           );
@@ -195,7 +195,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
     }
     // TOOD: place through OrderManager at some point
     //    then can use Position to cancel orders
-    m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
+    //m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
+    m_pIB->PlaceComboOrder( m_pOrderEntry, m_pOrderStop );
   }
 }
 
