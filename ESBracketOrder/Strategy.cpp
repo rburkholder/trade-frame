@@ -29,6 +29,7 @@
  // TODO: remove the cap, let the profit run
  // TODO: narrow the stop range, or, if let profit run, then leave at two bars
  // TODO: need shorter range bollinger bands
+ // TODO: use the Merrill Pattern for trade entry statistics
 
 #include "TFTrading/TradingEnumerations.h"
 
@@ -219,22 +220,30 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
 }
 
 void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
+  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
   TimeTick( bar );
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
+  // TODO: may need to be more detailed here,
+  //   need to check that the primery entry order has indeed been cancelled
+  //   if only a few of the orders were cancelled, then may need to perform a close
+  m_state = EState::entry_wait;
 }
 
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
-  std::string sMessage = "unknown ";
+  std::string sMessage = "HandleOrderFilled: unknown ";
   switch ( m_state ) {
     case EState::initial:
       break;
     case EState::entry_wait:
-      sMessage = "entry wait ";
+      sMessage = "HandleOrderFilled: entry wait ";
       break;
+    case EState::entry_cancelling:
+      std::cout << "HandleOrderFilled in entry_cancelling, need to fix the state machine!" << std::endl;
+      // fall through to handle the fill and proceed
     case EState::entry_filling:
-      sMessage = "entry filling ";
+      sMessage = "HandleOrderFilled: entry filling ";
       m_state = EState::exit_filling;
       m_stateInfo.sideEntry = order.GetOrderSide();
       m_stateInfo.dblEntryPrice = order.GetAverageFillPrice();
@@ -249,7 +258,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
     case EState::exit_filling:
       {
-        sMessage = "exit ";
+        sMessage = "HandleOrderFilled: exit ";
         m_state = EState::entry_wait; // start over
         mapMatching_t::iterator entry = m_mapMatching.find( m_stateInfo.barMatching );
         assert( m_mapMatching.end() != entry );
@@ -282,10 +291,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       }
       break;
     case EState::cancel_wait:
-      sMessage = "cancel ";
+      sMessage = "HandleOrderFilled: cancel ";
       break;
     case EState::quiesce:
-      sMessage = "quiesce ";
+      sMessage = "HandleOrderFilled: quiesce ";
       break;
   }
 
@@ -294,7 +303,6 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
   // threading problem here with gui looking at m_mapMatching
   // at 20 seconds, will take 3 - 4 minutes to stabilize
-  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
   if ( 0 < m_cntBars ) {
     BarMatching key;
     key.Set( m_barLast, bar );
@@ -314,6 +322,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
             switch ( key.close ) {
               case 1:
                 m_stateInfo.barMatching = key;
+                m_stateInfo.nBarDuration = 0;
                 m_state = EState::entry_filling;
                 HandleButtonSend( ou::tf::OrderSide::Buy );
                 break;
@@ -322,6 +331,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
                 break;
               case -1:
                 m_stateInfo.barMatching = key;
+                m_stateInfo.nBarDuration = 0;
                 m_state = EState::entry_filling;
                 HandleButtonSend( ou::tf::OrderSide::Sell );
                 break;
@@ -336,7 +346,16 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
         }
         break;
       case EState::entry_filling:
-        // managed in HandleOrderFilled
+        // primarily managed in HandleOrderFilled
+        m_stateInfo.nBarDuration++;
+        if ( 1 < m_stateInfo.nBarDuration ) {
+          m_state = EState::entry_cancelling;
+          //CancelOrders();
+          m_pIB->CancelOrder( m_pOrderEntry ); // TODO: need to check that the two exit orders are also cancelled
+        }
+        break;
+      case EState::entry_cancelling:
+        // either HandleOrderCancelled or HandleOrderFilled will move to the next state
         break;
       case EState::exit_filling:
         break;
@@ -350,21 +369,25 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
   m_cntBars++;
 }
 
+void Strategy::CancelOrders() {
+  if ( m_pOrderEntry ) {
+    m_pIB->CancelOrder( m_pOrderEntry );
+  }
+  if ( m_pOrderProfit ) {
+    m_pIB->CancelOrder( m_pOrderProfit );
+  }
+  if ( m_pOrderStop ) {
+    m_pIB->CancelOrder( m_pOrderStop );
+  }
+}
+
 void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
   if ( m_tfLatest != CurrentTimeFrame() ) {
     // a one-shot trigger
     m_tfLatest = CurrentTimeFrame();
     //m_pPosition->CancelOrders();
     // orders not placed through Position/OrderManager, so can not cancel orders via that avenue
-    if ( m_pOrderEntry ) {
-      m_pIB->CancelOrder( m_pOrderEntry );
-    }
-    if ( m_pOrderProfit ) {
-      m_pIB->CancelOrder( m_pOrderProfit );
-    }
-    if ( m_pOrderStop ) {
-      m_pIB->CancelOrder( m_pOrderStop );
-    }
+    CancelOrders();
   }
   else {
     // wait for transition to next state

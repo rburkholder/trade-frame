@@ -145,6 +145,7 @@ private:
   pPosition_t m_pPosition;
 
   struct StateInfo {
+    size_t nBarDuration; // use bars to determine waiting period to entry, or cancel
     BarMatching barMatching;
     ou::tf::OrderSide::enumOrderSide sideEntry;
     double dblEntryPrice;
@@ -153,7 +154,7 @@ private:
 
   StateInfo m_stateInfo;
 
-  enum class EState { initial, entry_wait, entry_filling, exit_filling, cancel_wait, quiesce };
+  enum class EState { initial, entry_wait, entry_filling, entry_cancelling, exit_filling, cancel_wait, quiesce };
   EState m_state;
 
   using mapEntry_t = std::map<BarMatching,ou::tf::OrderSide::enumOrderSide>;
@@ -163,6 +164,8 @@ private:
   void HandleTrade( const ou::tf::Trade& );
 
   void HandleBarComplete( const ou::tf::Bar& );
+
+  void CancelOrders();
 
   TimeFrame m_tfLatest;
 
