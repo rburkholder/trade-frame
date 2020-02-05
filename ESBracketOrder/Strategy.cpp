@@ -273,7 +273,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
             }
             if ( "loss" == order.GetDescription() ) {
               entry->second.longs.cntLosses++;
-              entry->second.longs.dblProfit -= ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
+              entry->second.longs.dblLoss -= ( m_stateInfo.dblEntryPrice - order.GetAverageFillPrice() );
             }
             ou::ChartDVBasics::m_ceShortExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
             break;
@@ -285,7 +285,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
             }
             if ( "loss" == order.GetDescription() ) {
               entry->second.shorts.cntLosses++;
-              entry->second.shorts.dblProfit -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
+              entry->second.shorts.dblLoss -= ( order.GetAverageFillPrice() - m_stateInfo.dblEntryPrice );
             }
             ou::ChartDVBasics::m_ceLongExits.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
             break;
