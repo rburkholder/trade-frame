@@ -120,7 +120,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderEntry->SetDescription( "long" );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
+/*
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
@@ -133,7 +133,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderProfit->SetDescription( "profit" );
         //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
+*/
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Trail,
@@ -163,7 +163,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderEntry->SetDescription( "short" );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
+/*
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLower, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
@@ -176,7 +176,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderProfit->SetDescription( "profit" );
         //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
+*/
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblUpper, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Trail,
