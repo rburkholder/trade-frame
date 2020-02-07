@@ -43,15 +43,15 @@ ChartDVBasics::ChartDVBasics(void)
 
 {
 
+  m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(   55 ) ) );
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(  144 ) ) );
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(  377 ) ) );
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(  987 ) ) );
-  m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds( 2584 ) ) );
 
-  m_vInfoBollinger[0].SetProperties( ou::Colour::DarkOliveGreen, "Bollinger1 - 2.4" );
-  m_vInfoBollinger[1].SetProperties( ou::Colour::Turquoise, "Bollinger2 - 6.3" );
-  m_vInfoBollinger[2].SetProperties( ou::Colour::GreenYellow, "Bollinger3 - 16.5" );
-  m_vInfoBollinger[3].SetProperties( ou::Colour::MediumSlateBlue, "Bollinger4 - 54.0" );
+  m_vInfoBollinger[0].SetProperties( ou::Colour::DarkOliveGreen,  "Bollinger1 -  55s" );
+  m_vInfoBollinger[1].SetProperties( ou::Colour::Turquoise,       "Bollinger2 - 144s" );
+  m_vInfoBollinger[2].SetProperties( ou::Colour::GreenYellow,     "Bollinger3 - 377s" );
+  m_vInfoBollinger[3].SetProperties( ou::Colour::MediumSlateBlue, "Bollinger4 - 987s" );
 
   m_dvChart.Add( 0, &m_ceQuoteUpper );
   m_dvChart.Add( 0, &m_ceQuoteLower );
