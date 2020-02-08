@@ -47,6 +47,7 @@ Strategy::Strategy( pWatch_t pWatch )
 , m_cntBars {}
 , m_state( EState::initial )
 , m_tfLatest( TimeFrame::Closed )
+, m_vTriCrossing { Tri::zero, Tri::zero, Tri::zero }
 , m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
     { { -1,-1,-1,-1 }, ou::tf::OrderSide::Buy  },
     { { -1,-1,-1, 1 }, ou::tf::OrderSide::Buy  },
@@ -55,6 +56,9 @@ Strategy::Strategy( pWatch_t pWatch )
     { {  1, 1, 1, 1 }, ou::tf::OrderSide::Sell }
     }
 {
+
+  assert( 3 == m_vTriCrossing.size() );
+
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
   m_pWatch = pWatch;
@@ -89,7 +93,7 @@ Strategy::~Strategy() {
   m_pPosition->OnExecution.Remove( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
-  m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
+  m_bfBar.SetOnBarComplete( nullptr );
 }
 
 void Strategy::HandleButtonUpdate() {
@@ -218,12 +222,41 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
 void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
   //std::cout << "trade: " << trade.Volume() << "@" << trade.Price() << std::endl;
   m_tradeLast = trade;
-  m_bfBar.Add( trade );
   ou::ChartDVBasics::HandleTrade( trade );
+  m_bfBar.Add( trade ); // comes after ChartDVBasics as updated stats are required
 }
 
 void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
+
+  double ema[ 4 ];
+
+  ema[ 0 ] = ou::ChartDVBasics::m_vInfoBollinger[ 0 ].m_stats.MeanY(); // fastest moving
+  ema[ 1 ] = ou::ChartDVBasics::m_vInfoBollinger[ 1 ].m_stats.MeanY();
+  ema[ 2 ] = ou::ChartDVBasics::m_vInfoBollinger[ 2 ].m_stats.MeanY();
+  ema[ 3 ] = ou::ChartDVBasics::m_vInfoBollinger[ 3 ].m_stats.MeanY(); // slowest moving
+
+  m_vTriCrossing.clear();
+  m_vTriCrossing.assign( 3, Tri::zero );
+
+  vTri_t vTri;
+
+  for ( unsigned int ix = 0; ix < 3; ix++ ) {
+    if ( ema[ ix ] == ema[ ix + 1 ] ) {
+      vTri.emplace_back( Tri::zero );
+    }
+    else {
+      vTri.emplace_back( ema[ ix ] > ema[ ix + 1 ] ? Tri::up : Tri::down );
+      if ( Tri::zero != m_vTriEmaLatest[ ix ] ) {
+        if ( vTri[ ix ] != m_vTriEmaLatest[ ix ] ) {
+          m_vTriCrossing[ ix ] = ( Tri::up == vTri[ ix ] ) ? Tri::up : Tri::down;
+        }
+      }
+    }
+  }
+
+  m_vTriEmaLatest = vTri;
+
   TimeTick( bar );
 }
 
@@ -390,6 +423,7 @@ void Strategy::CancelOrders() {
 
 void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
   if ( m_tfLatest != CurrentTimeFrame() ) {
+    std::cout << "Time Frame: Cancelling" << std::endl;
     // a one-shot trigger
     m_tfLatest = CurrentTimeFrame();
     //m_pPosition->CancelOrders();
@@ -403,6 +437,7 @@ void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
 
 void Strategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
   if ( m_tfLatest != CurrentTimeFrame() ) {
+    std::cout << "Time Frame: Going Neutral" << std::endl;
     m_tfLatest = CurrentTimeFrame();
     m_pPosition->ClosePosition();
   }

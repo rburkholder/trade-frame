@@ -107,6 +107,55 @@ private:
     }
   };
 
+  enum class Tri { down=-1, zero=0, up=1 };
+  using vTri_t = std::vector<Tri>;
+
+  vTri_t m_vTriEmaLatest; // latest relative ema
+  vTri_t m_vTriCrossing;  // indicates crossings
+
+  struct Match {
+
+    vTri_t m_vTri;
+
+    void Reset() { m_vTri.clear(); }
+
+    void Reset( vTri_t::size_type size ) {
+      m_vTri.clear();
+      m_vTri.assign( size, Tri::zero );
+    }
+
+    template<typename Pod>
+    Tri Compare( Pod x, Pod y ) const {
+      if ( x == y ) return Tri::zero;
+      else {
+        if ( x < y ) return Tri::up;
+        else return Tri::down;
+      }
+    }
+
+    template<typename Pod>
+    void Append( Pod A, Pod B ) {
+      Tri tri = Compare( A, B );
+      m_vTri.emplace_back( tri );
+    }
+
+    bool operator<( const vTri_t& vTri ) const {
+      assert( 0 < m_vTri.size() );
+      assert( m_vTri.size() == vTri.size() );
+      for ( vTri_t::size_type ix = 0; ix < m_vTri.size(); ix++ ) {
+        Tri triA = m_vTri[ ix ];
+        Tri triB =   vTri[ ix ];
+        if ( triA != triB ) {
+          return triA < triB;
+        }
+      }
+      return false;
+    }
+
+  };
+
+  Match m_matchCrossing;
+
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
     unsigned int cntWins;
