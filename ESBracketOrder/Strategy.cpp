@@ -49,11 +49,11 @@ Strategy::Strategy( pWatch_t pWatch )
 , m_tfLatest( TimeFrame::Closed )
 , m_vTriCrossing { Tri::zero, Tri::zero, Tri::zero }
 , m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
-    { { -1,-1,-1,-1 }, ou::tf::OrderSide::Sell  },
-    { { -1,-1,-1, 1 }, ou::tf::OrderSide::Sell  },
-    { { -1, 0,-1, 1 }, ou::tf::OrderSide::Sell  },
-    { {  1, 1, 1,-1 }, ou::tf::OrderSide::Buy },
-    { {  1, 1, 1, 1 }, ou::tf::OrderSide::Buy }
+//    { { -1,-1,-1,-1 }, ou::tf::OrderSide::Sell  },
+//    { { -1,-1,-1, 1 }, ou::tf::OrderSide::Sell  },
+    { { -1, 0,-1, 1 }, ou::tf::OrderSide::Sell  }
+//    { {  1, 1, 1,-1 }, ou::tf::OrderSide::Buy },
+//    { {  1, 1, 1, 1 }, ou::tf::OrderSide::Buy }
     }
 {
 
@@ -369,7 +369,19 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
         {
           mapEntry_t::iterator iter = m_mapEntry.find( key );
           if ( m_mapEntry.end() == iter ) {
-            switch ( key.close ) {
+            int decision {};
+            if ( mapValue.longs.cntWins != mapValue.shorts.cntWins ) {
+              decision = ( mapValue.longs.cntWins > mapValue.shorts.cntWins ) ? 1 : -1;
+            }
+            else {
+              if ( mapValue.longs.cntLosses != mapValue.shorts.cntLosses ) {
+                decision = ( mapValue.longs.cntLosses < mapValue.shorts.cntLosses ) ? 1 : -1;
+              }
+              else {
+                decision = mapKey.close;
+              }
+            }
+            switch ( decision ) {
               case 1:
                 m_stateInfo.barMatching = key;
                 m_stateInfo.nBarDuration = 0;
