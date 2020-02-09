@@ -22,32 +22,20 @@
 #include <string>
 
 namespace ou {
+namespace tf {
+namespace Merrill {
 
-class Merrill {
-public:
-
-  enum class EPattern {
-    UnDefined,
-    DownTrend, InvertedHeadAndShoulders,
-    UpTrend,   HeadAndShoulders,
-    Broadening, Uninteresting, Triangle
-  };
-
-  Merrill();
-  virtual ~Merrill();
-
-  EPattern Classify( double, double, double, double, double );
-
-protected:
-private:
-
-  struct Pattern {
-    std::string sName;
-    EPattern pattern;
-  };
-
-  using mapPattern_t = std::map<std::string,Pattern>;
-  mapPattern_t m_mapPattern;
+enum class EPattern {
+  UnDefined = 0,
+  DownTrend, InvertedHeadAndShoulders,
+  UpTrend,   HeadAndShoulders,
+  Broadening, Uninteresting, Triangle
 };
 
+void Validate();
+EPattern Classify( double, double, double, double, double );
+const std::string& Name( EPattern );
+
+} // namespace Merrill
+} // namespace tf
 } // namespace ou

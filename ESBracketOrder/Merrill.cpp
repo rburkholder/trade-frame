@@ -20,14 +20,22 @@
 
 // page 94 in Bollinger Bands
 
+#include <vector>
 #include <cassert>
 
 #include "Merrill.h"
 
-namespace ou {
+namespace {
 
-Merrill::Merrill()
-: m_mapPattern {
+  using EPattern = ou::tf::Merrill::EPattern;
+
+  struct Pattern {
+    std::string sName;
+    EPattern pattern;
+  };
+
+  using mapPattern_t = std::map<std::string,Pattern>;
+  mapPattern_t m_mapPattern {
     { "21435", { "M1", EPattern::DownTrend } },
     { "21534", { "M2", EPattern::InvertedHeadAndShoulders } },
     { "31425", { "M3", EPattern::DownTrend } },
@@ -62,7 +70,26 @@ Merrill::Merrill()
     { "45132", { "W15", EPattern::HeadAndShoulders } },
     { "45231", { "W16", EPattern::UpTrend } }
     }
-{
+    ;
+
+  std::vector<std::string> vNames {
+    { "UnDefined" },
+    { "DownTrend" },
+    { "InvertedHeadAndShoulders" },
+    { "UpTrend" },
+    { "HeadAndShoulders" },
+    { "Broadening" },
+    { "Uninteresting" },
+    { "Triangle" }
+  };
+
+}
+
+namespace ou {
+namespace tf {
+namespace Merrill {
+
+void Validate() {
   for ( auto& pair: m_mapPattern ) {
     auto [ key,value ] = pair;
     assert( 5 == key.size() );
@@ -74,9 +101,12 @@ Merrill::Merrill()
   }
 }
 
-Merrill::~Merrill() {}
+const std::string& Name( EPattern pattern ) {
+  return vNames[ (size_t)pattern ];
+}
 
-Merrill::EPattern Merrill::Classify( double p1, double p2, double p3, double p4, double p5 ) {
+
+EPattern Classify( double p1, double p2, double p3, double p4, double p5 ) {
 
   using mapSort_t = std::multimap<double,std::string>;
   mapSort_t mapSort {
@@ -103,4 +133,6 @@ Merrill::EPattern Merrill::Classify( double p1, double p2, double p3, double p4,
 
 }
 
+} // namespace Merrill
+} // namespace tf
 } // namespace ou
