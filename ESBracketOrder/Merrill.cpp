@@ -90,7 +90,7 @@ Merrill::EPattern Merrill::Classify( double p1, double p2, double p3, double p4,
   std::string sequence;
   for ( auto& pair: mapSort ) {
     auto [key,value] = pair;
-    sequence += value;
+    sequence = value + sequence; // ranked top down on chart
   }
 
   assert( 5 == sequence.size() );
