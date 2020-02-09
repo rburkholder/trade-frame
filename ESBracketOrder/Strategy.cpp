@@ -77,19 +77,22 @@ Strategy::Strategy( pWatch_t pWatch )
   boost::gregorian::date dateMarketOpen( MarketOpenDate( dtNow ) );
   std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
   InitForUS24HourFutures( dateMarketOpen );
-  // this may be offset incorrectly.
-  //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
-//  ptime dtMo( GetMarketOpen() );
-//  if ( dtNow > dtMo ) {
-//    SetRegularHoursOpen( dtNow );  // collect some data first
-    // change later to 10 to collect enough data to start trading:
-    //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
-//    SetStartTrading( dtNow + boost::posix_time::minutes( 2 ) );  // collect some data first
-//  }
-//  else {
-//    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // collect some data first
-//    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
-//  }
+
+  if ( false ) { // false for standard day time trading, true for 24 hour futures trading
+    // this may be offset incorrectly.
+    //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
+    ptime dtMo( GetMarketOpen() );
+    if ( dtNow > dtMo ) {
+      SetRegularHoursOpen( dtNow );
+      // change later to 10 to collect enough data to start trading:
+      //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
+      SetStartTrading( dtNow + boost::posix_time::minutes( 2 ) );  // time for history to accumulate
+    }
+    else {
+      SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // time for history to accumulate
+      SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // time for history to accumulate
+    }
+  }
 
   m_dvChart.Add( 3, &m_ceMerrill );
 }
