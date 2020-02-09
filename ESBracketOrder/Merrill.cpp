@@ -65,11 +65,12 @@ Merrill::Merrill()
 {
   for ( auto& pair: m_mapPattern ) {
     auto [ key,value ] = pair;
-    assert(  std::string::npos != key.find( "1" ) );
-    assert(  std::string::npos != key.find( "2" ) );
-    assert(  std::string::npos != key.find( "3" ) );
-    assert(  std::string::npos != key.find( "4" ) );
-    assert(  std::string::npos != key.find( "5" ) );
+    assert( 5 == key.size() );
+    assert( std::string::npos != key.find( "1" ) );
+    assert( std::string::npos != key.find( "2" ) );
+    assert( std::string::npos != key.find( "3" ) );
+    assert( std::string::npos != key.find( "4" ) );
+    assert( std::string::npos != key.find( "5" ) );
   }
 }
 
