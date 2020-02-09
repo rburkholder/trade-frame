@@ -114,8 +114,9 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy: {
 
         double dblEntry = m_quoteLast.Ask();
+        // TODO: adjust when entry is executed?
         double dblProfit = dblEntry + 2.0 * tick;
-        double dblLoss   = dblEntry - 8.0 * tick;;
+        double dblLoss   = dblEntry - 3.0 * tick;
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "long entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
@@ -162,7 +163,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         double dblEntry = m_quoteLast.Bid();
         double dblProfit = dblEntry - 2.0 * tick;
-        double dblLoss   = dblEntry + 8.0 * tick;;
+        double dblLoss   = dblEntry + 3.0 * tick;;
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "short entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
