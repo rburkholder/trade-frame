@@ -31,8 +31,7 @@
  // TODO: need shorter range bollinger bands
  // TODO: use the Merrill Pattern for trade entry statistics
 
-#include "TFTrading/TradingEnumerations.h"
-
+#include "Merrill.h"
 #include "Strategy.h"
 
 namespace {
@@ -58,6 +57,11 @@ Strategy::Strategy( pWatch_t pWatch )
 {
 
   assert( 3 == m_vTriCrossing.size() );
+
+  m_vMerrill.resize( 4 );
+  for ( rMerrill_t& v: m_vMerrill ) {
+    for ( auto& d: v ) d = 0.0;
+  }
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
   m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pWatch->GetProvider() );
@@ -252,6 +256,7 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
 
   vTri_t vTri;
 
+  // calculate current crossings
   for ( unsigned int ix = 0; ix < 3; ix++ ) {
     if ( ema[ ix ] == ema[ ix + 1 ] ) {
       vTri.emplace_back( Tri::zero );
@@ -261,6 +266,11 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
       if ( Tri::zero != m_vTriEmaLatest[ ix ] ) {
         if ( vTri[ ix ] != m_vTriEmaLatest[ ix ] ) {
           m_vTriCrossing[ ix ] = ( Tri::up == vTri[ ix ] ) ? Tri::up : Tri::down;
+          rMerrill_t& r( m_vMerrill[ ix ] );
+          r[ 0 ] = r[ 1 ];  r[ 1 ] = r[ 2 ]; r[ 2 ] = r[ 3 ]; r[ 3 ] = r[ 4 ];
+          r[ 4 ] = bar.Close();
+          ou::tf::Merrill::EPattern pattern = ou::tf::Merrill::Classify( r[ 0 ], r[ 1 ], r[ 2 ], r[ 3 ], r[ 4 ] );
+          std::cout << "Merrill " << ix << " " << ou::tf::Merrill::Name( pattern ) << std::endl;
         }
       }
     }

@@ -21,6 +21,7 @@
 #pragma once
 
 #include <map>
+#include <array>
 
 #include <OUCharting/ChartDVBasics.h>
 
@@ -156,7 +157,11 @@ private:
 
   };
 
-  Match m_matchCrossing;
+  //Match m_matchCrossing;
+
+  using rMerrill_t = std::array<double,5>;
+  using vMerrill_t = std::vector<rMerrill_t>;
+  vMerrill_t m_vMerrill;
 
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
