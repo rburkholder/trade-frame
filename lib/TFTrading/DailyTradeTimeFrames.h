@@ -14,6 +14,9 @@
 
 #pragma once
 
+// timezone reference:
+// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <OUCommon/TimeSource.h>
