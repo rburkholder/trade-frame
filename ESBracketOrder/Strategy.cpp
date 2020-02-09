@@ -378,7 +378,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
                 decision = ( mapValue.longs.cntLosses < mapValue.shorts.cntLosses ) ? 1 : -1;
               }
               else {
-                decision = mapKey.close;
+                decision = ( 0 != mapKey.close ) ? mapKey.close : mapKey.high + mapKey.low + mapKey.close + mapKey.volume;
+                if (  1 < decision ) decision =  1;
+                if ( -1 > decision ) decision = -1;
               }
             }
             switch ( decision ) {
