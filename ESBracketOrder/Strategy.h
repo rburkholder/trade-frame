@@ -74,16 +74,18 @@ private:
     int ComparePod( pod x, pod y ) const {
       if ( x == y ) return 0;
       else {
-        if ( x < y ) return -1;
-        else return 1;
+        if ( x < y ) return 1;
+        else return -1;
       }
     }
+
     void Set( const ou::tf::Bar& bar1, const ou::tf::Bar& bar2 ) {
       high   = ComparePod( bar1.High(),   bar2.High() );
       low    = ComparePod( bar1.Low(),    bar2.Low() );
       close  = ComparePod( bar1.Close(),  bar2.Close() );
       volume = ComparePod( bar1.Volume(), bar2.Volume() );
     }
+
     bool operator<( const BarMatching& bm ) const {
       if ( high != bm.high ) {
         return high < bm.high;

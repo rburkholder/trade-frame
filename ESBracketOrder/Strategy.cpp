@@ -49,11 +49,11 @@ Strategy::Strategy( pWatch_t pWatch )
 , m_tfLatest( TimeFrame::Closed )
 , m_vTriCrossing { Tri::zero, Tri::zero, Tri::zero }
 , m_mapEntry { // OverRide: Enter with OrderSdie based upon OrderResults statistics
-    { { -1,-1,-1,-1 }, ou::tf::OrderSide::Buy  },
-    { { -1,-1,-1, 1 }, ou::tf::OrderSide::Buy  },
-    { { -1, 0,-1, 1 }, ou::tf::OrderSide::Buy  },
-    { {  1, 1, 1,-1 }, ou::tf::OrderSide::Sell },
-    { {  1, 1, 1, 1 }, ou::tf::OrderSide::Sell }
+    { { -1,-1,-1,-1 }, ou::tf::OrderSide::Sell  },
+    { { -1,-1,-1, 1 }, ou::tf::OrderSide::Sell  },
+    { { -1, 0,-1, 1 }, ou::tf::OrderSide::Sell  },
+    { {  1, 1, 1,-1 }, ou::tf::OrderSide::Buy },
+    { {  1, 1, 1, 1 }, ou::tf::OrderSide::Buy }
     }
 {
 
