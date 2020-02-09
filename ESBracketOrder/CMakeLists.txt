@@ -25,12 +25,14 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 
 set(
   file_h
+    Merrill.h
     AppESBracketOrder.h
     Strategy.h
   )
 
 set(
   file_cpp
+    Merrill.cpp
     AppESBracketOrder.cpp
     Strategy.cpp
   )
