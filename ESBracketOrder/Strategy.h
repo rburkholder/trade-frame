@@ -163,6 +163,8 @@ private:
   using vMerrill_t = std::vector<rMerrill_t>;
   vMerrill_t m_vMerrill;
 
+  ou::ChartEntryShape m_ceMerrill;
+
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
     unsigned int cntWins;

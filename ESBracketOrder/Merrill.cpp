@@ -27,6 +27,8 @@
 
 namespace {
 
+  std::string sEmpty;
+
   using EPattern = ou::tf::Merrill::EPattern;
 
   struct Pattern {
@@ -106,7 +108,7 @@ const std::string& Name( EPattern pattern ) {
 }
 
 
-EPattern Classify( double p1, double p2, double p3, double p4, double p5 ) {
+result_t Classify( double p1, double p2, double p3, double p4, double p5 ) {
 
   using mapSort_t = std::multimap<double,std::string>;
   mapSort_t mapSort {
@@ -127,9 +129,9 @@ EPattern Classify( double p1, double p2, double p3, double p4, double p5 ) {
 
   mapPattern_t::iterator iter = m_mapPattern.find( sequence );
   if ( m_mapPattern.end() == iter ) {
-    return EPattern::UnDefined;
+    return result_t( EPattern::UnDefined, sEmpty);
   }
-  else return iter->second.pattern;
+  else return result_t( iter->second.pattern, iter->second.sName );
 
 }
 

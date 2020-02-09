@@ -32,8 +32,10 @@ enum class EPattern {
   Broadening, Uninteresting, Triangle
 };
 
+using result_t = std::pair<EPattern,const std::string&>;
+
 void Validate();
-EPattern Classify( double, double, double, double, double );
+result_t Classify( double, double, double, double, double );
 const std::string& Name( EPattern );
 
 } // namespace Merrill

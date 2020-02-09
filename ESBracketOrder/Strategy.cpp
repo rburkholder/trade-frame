@@ -90,6 +90,8 @@ Strategy::Strategy( pWatch_t pWatch )
 //    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 2 ) );  // collect some data first
 //    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
 //  }
+
+  m_dvChart.Add( 3, &m_ceMerrill );
 }
 
 Strategy::~Strategy() {
@@ -269,8 +271,9 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
           rMerrill_t& r( m_vMerrill[ ix ] );
           r[ 0 ] = r[ 1 ];  r[ 1 ] = r[ 2 ]; r[ 2 ] = r[ 3 ]; r[ 3 ] = r[ 4 ];
           r[ 4 ] = bar.Close();
-          ou::tf::Merrill::EPattern pattern = ou::tf::Merrill::Classify( r[ 0 ], r[ 1 ], r[ 2 ], r[ 3 ], r[ 4 ] );
-          std::cout << "Merrill " << ix << " " << ou::tf::Merrill::Name( pattern ) << std::endl;
+          ou::tf::Merrill::result_t result( ou::tf::Merrill::Classify( r[ 0 ], r[ 1 ], r[ 2 ], r[ 3 ], r[ 4 ] ) );
+          std::cout << "Merrill " << ix << " " << ou::tf::Merrill::Name( result.first ) << std::endl;
+          m_ceMerrill.AddLabel( bar.DateTime(), ix, result.second + "-" + ou::tf::Merrill::Name( result.first ) );
         }
       }
     }
