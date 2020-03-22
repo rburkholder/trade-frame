@@ -56,8 +56,11 @@ Strategy::Strategy( pWatch_t pWatch )
     }
 {
 
+  ou::tf::Merrill::Validate(); // some code checking
+
   assert( 3 == m_vTriCrossing.size() );
 
+  // TODO: need to refactor, array needs to be typedef in Merrill
   m_vMerrill.resize( 4 );
   for ( rMerrill_t& v: m_vMerrill ) {
     for ( auto& d: v ) d = 0.0;
@@ -243,11 +246,6 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
   //std::cout << "trade: " << trade.Volume() << "@" << trade.Price() << std::endl;
   m_tradeLast = trade;
   ou::ChartDVBasics::HandleTrade( trade );
-  m_bfBar.Add( trade ); // comes after ChartDVBasics as updated stats are required
-}
-
-void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
-  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
 
   double ema[ 4 ];
 
@@ -267,16 +265,19 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
       vTri.emplace_back( Tri::zero );
     }
     else {
-      vTri.emplace_back( ema[ ix ] > ema[ ix + 1 ] ? Tri::up : Tri::down );
+      Tri triCurrent = ema[ ix ] > ema[ ix + 1 ] ? Tri::up : Tri::down;
+      vTri.emplace_back( triCurrent );
       if ( Tri::zero != m_vTriEmaLatest[ ix ] ) {
         if ( vTri[ ix ] != m_vTriEmaLatest[ ix ] ) {
-          m_vTriCrossing[ ix ] = ( Tri::up == vTri[ ix ] ) ? Tri::up : Tri::down;
+          m_vTriCrossing[ ix ] = triCurrent;
           rMerrill_t& r( m_vMerrill[ ix ] );
           r[ 0 ] = r[ 1 ];  r[ 1 ] = r[ 2 ]; r[ 2 ] = r[ 3 ]; r[ 3 ] = r[ 4 ];
-          r[ 4 ] = bar.Close();
+          r[ 4 ] = trade.Price();
           ou::tf::Merrill::result_t result( ou::tf::Merrill::Classify( r[ 0 ], r[ 1 ], r[ 2 ], r[ 3 ], r[ 4 ] ) );
-          std::cout << "Merrill " << ix << " " << ou::tf::Merrill::Name( result.first ) << std::endl;
-          m_ceMerrill.AddLabel( bar.DateTime(), ix, result.second + "-" + ou::tf::Merrill::Name( result.first ) );
+          if ( ou::tf::Merrill::EPattern::UnDefined != result.first ) {
+            std::cout << "Merrill " << ix << " " << ou::tf::Merrill::Name( result.first ) << std::endl;
+            m_ceMerrill.AddLabel( trade.DateTime(), ix, result.second + "-" + ou::tf::Merrill::Name( result.first ) );
+          }
         }
       }
     }
@@ -284,6 +285,11 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
 
   m_vTriEmaLatest = vTri;
 
+  m_bfBar.Add( trade ); // comes after ChartDVBasics as updated stats are required
+}
+
+void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
+  m_dblAverageBarSize = 0.9 * m_dblAverageBarSize + 0.1 * ( bar.High() - bar.Low() );
   TimeTick( bar );
 }
 
