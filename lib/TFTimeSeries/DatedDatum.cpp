@@ -26,7 +26,7 @@ namespace tf { // TradeFrame
 //
 
 DatedDatum::DatedDatum(void) :
-  m_dt( not_a_date_time ) { 
+  m_dt( not_a_date_time ) {
 }
 
 DatedDatum::DatedDatum(const boost::posix_time::ptime& dt):
@@ -42,7 +42,7 @@ DatedDatum::DatedDatum(const std::string& dt) {
   assert( dt.length() == 19 );
   const char* s = dt.c_str();
   m_dt = ptime( // convert to lexical_cast ?
-    boost::gregorian::date( atoi( s ), atoi( s + 5 ), atoi( s + 8 ) ), 
+    boost::gregorian::date( atoi( s ), atoi( s + 5 ), atoi( s + 8 ) ),
     boost::posix_time::time_duration( atoi( s + 11 ), atoi( s + 14 ), atoi( s + 17 ) ) );
 }
 
@@ -65,20 +65,20 @@ Quote::Quote(void): DatedDatum(), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ),
 Quote::Quote(const ptime &dt): DatedDatum(dt), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ) {
 }
 
-Quote::Quote(const Quote& quote): 
-  DatedDatum( quote.m_dt ), 
-    m_dblBid( quote.m_dblBid ), m_dblAsk( quote.m_dblAsk ), 
+Quote::Quote(const Quote& quote):
+  DatedDatum( quote.m_dt ),
+    m_dblBid( quote.m_dblBid ), m_dblAsk( quote.m_dblAsk ),
     m_nBidSize( quote.m_nBidSize ), m_nAskSize( quote.m_nAskSize )
 {
 }
 
 Quote::Quote( const ptime& dt, price_t dblBid, bidsize_t nBidSize, price_t dblAsk, asksize_t nAskSize ) :
-DatedDatum( dt ), 
-    m_dblBid( dblBid ), m_dblAsk( dblAsk ), 
+DatedDatum( dt ),
+    m_dblBid( dblBid ), m_dblAsk( dblAsk ),
     m_nBidSize( nBidSize ), m_nAskSize( nAskSize ) {
 }
 
-Quote::Quote( const std::string& dt, const std::string& bid, 
+Quote::Quote( const std::string& dt, const std::string& bid,
                const std::string& bidsize, const std::string& ask, const std::string& asksize ) :
 DatedDatum( dt ) {
   char* stopchar;
@@ -91,9 +91,8 @@ DatedDatum( dt ) {
 Quote::~Quote(void) {
 }
 
-//bool IsValid( void ) const { return ( ( 0 != m_dblBid ) && ( 0 != m_dblAsk ) && ( 0 != m_nBidSize ) && ( 0 != m_nAskSize ) ); };
 bool Quote::IsValid() const {
-  bool bOk( true);
+  bool bOk( true );
   //bOk &= ( ( 0 == m_nBidSize ) && ( 0.0 == m_dblBid ) ); // NOTE: some options are zero bid
   //bOk &= ( ( 0 != m_nAskSize ) && ( 0.0 != m_dblAsk ) );
   // TODO: what other tests?
@@ -120,7 +119,7 @@ Trade::Trade(void): DatedDatum(), m_dblPrice( 0 ), m_nTradeSize( 0 ) {
 Trade::Trade(const ptime& dt): DatedDatum(dt), m_dblPrice( 0 ), m_nTradeSize( 0 ) {
 }
 
-Trade::Trade(const Trade& trade): DatedDatum( trade.m_dt ), 
+Trade::Trade(const Trade& trade): DatedDatum( trade.m_dt ),
     m_dblPrice( trade.m_dblPrice ), m_nTradeSize( trade.m_nTradeSize ) {
 }
 
@@ -154,17 +153,17 @@ Bar::Bar(void): DatedDatum(), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_d
 Bar::Bar( const ptime& dt): DatedDatum(dt), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 ) {
 }
 
-Bar::Bar(const Bar& bar): DatedDatum( bar.m_dt ), 
+Bar::Bar(const Bar& bar): DatedDatum( bar.m_dt ),
   m_dblOpen( bar.m_dblOpen ), m_dblHigh( bar.m_dblHigh ), m_dblLow( bar.m_dblLow ), m_dblClose( bar.m_dblClose ), m_nVolume( bar.m_nVolume ) {
 }
 
 Bar::Bar(const boost::posix_time::ptime& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume):
-DatedDatum( dt ), 
+DatedDatum( dt ),
   m_dblOpen( dblOpen ), m_dblHigh( dblHigh ), m_dblLow( dblLow ), m_dblClose( dblClose ), m_nVolume( nVolume ) {
 }
 
-Bar::Bar(const std::string& dt, const std::string& open, 
-           const std::string& high, const std::string& low, 
+Bar::Bar(const std::string& dt, const std::string& open,
+           const std::string& high, const std::string& low,
            const std::string& close, const std::string& volume):
 DatedDatum( dt ) {
   char* stopchar;
@@ -201,7 +200,7 @@ MarketDepth::MarketDepth(const ptime& dt): DatedDatum(dt), m_eSide( None ), m_nS
   //m_szMMID[ 0 ] = 0;
 }
 
-MarketDepth::MarketDepth(const MarketDepth& md): DatedDatum( md.m_dt ), 
+MarketDepth::MarketDepth(const MarketDepth& md): DatedDatum( md.m_dt ),
   m_eSide( md.m_eSide ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_uMMID( md.m_uMMID ) {
   //strcpy_s( m_szMMID, 10, md.m_szMMID );
 }
@@ -214,7 +213,7 @@ MarketDepth::MarketDepth(const boost::posix_time::ptime& dt, char chSide, volume
   //strcpy_s( m_szMMID, 10, MMID );
 }
 
-MarketDepth::MarketDepth(const std::string& dt, char chSide, const std::string& shares, 
+MarketDepth::MarketDepth(const std::string& dt, char chSide, const std::string& shares,
                            const std::string& price, const std::string& mmid) :
 DatedDatum( dt ) {
   char* stopchar;
@@ -245,11 +244,11 @@ H5::CompType* MarketDepth::DefineDataType( H5::CompType* pComp ) {
   pComp->insertMember( "MMID0",  HOFFSET( MarketDepth, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "MMID1",  HOFFSET( MarketDepth, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "MMID2",  HOFFSET( MarketDepth, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID3",  HOFFSET( MarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );  
-  return pComp; 
+  pComp->insertMember( "MMID3",  HOFFSET( MarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );
+  return pComp;
 }
 
-// 
+//
 // Greek
 //
 
@@ -259,19 +258,19 @@ Greek::Greek( void ): DatedDatum(), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 )
 Greek::Greek( const ptime& dt ): DatedDatum(dt), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
 }
 
-Greek::Greek( const Greek& greeks ): DatedDatum( greeks.m_dt ), 
-  m_dblImpliedVolatility( greeks.m_dblImpliedVolatility ), 
+Greek::Greek( const Greek& greeks ): DatedDatum( greeks.m_dt ),
+  m_dblImpliedVolatility( greeks.m_dblImpliedVolatility ),
   m_dblDelta( greeks.m_dblDelta ), m_dblGamma( greeks.m_dblGamma ), m_dblTheta( greeks.m_dblTheta ), m_dblVega( greeks.m_dblVega ), m_dblRho( greeks.m_dblRho ) {
 }
 
-Greek::Greek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks ): DatedDatum( dt ), 
-  m_dblImpliedVolatility( dblImpliedVolatility ), 
+Greek::Greek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks ): DatedDatum( dt ),
+  m_dblImpliedVolatility( dblImpliedVolatility ),
   m_dblDelta( greeks.delta ), m_dblGamma( greeks.gamma ), m_dblTheta( greeks.theta ), m_dblVega( greeks.vega ), m_dblRho( greeks.rho ) {
 }
 
 Greek::Greek( const boost::posix_time::ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ):
-  DatedDatum( dt ), 
-  m_dblImpliedVolatility( dblImpliedVolatility ), 
+  DatedDatum( dt ),
+  m_dblImpliedVolatility( dblImpliedVolatility ),
   m_dblDelta( dblDelta ), m_dblGamma( dblGamma ), m_dblTheta( dblTheta ), m_dblVega( dblVega ), m_dblRho( dblRho ) {
 }
 
@@ -300,7 +299,7 @@ Price::Price(void): DatedDatum(), m_dblPrice( 0 ) {
 Price::Price(const ptime& dt): DatedDatum(dt), m_dblPrice( 0 ) {
 }
 
-Price::Price(const Price& price): DatedDatum( price.m_dt ), 
+Price::Price(const Price& price): DatedDatum( price.m_dt ),
     m_dblPrice( price.m_dblPrice ) {
 }
 
@@ -333,7 +332,7 @@ PriceIV::PriceIV( void ): Price(), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
 PriceIV::PriceIV(const ptime& dt): Price(dt),  m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
 }
 
-PriceIV::PriceIV( const PriceIV& rhs ) 
+PriceIV::PriceIV( const PriceIV& rhs )
   : Price( rhs.m_dt, rhs.Value() ), m_dblIVCall( rhs.m_dblIVCall ), m_dblIVPut( rhs.m_dblIVPut )
 {
 }
@@ -360,7 +359,7 @@ PriceIVExpiry::PriceIVExpiry( void ): Price(), m_dtExpiry( not_a_date_time), m_d
 PriceIVExpiry::PriceIVExpiry(const ptime& dt): Price(dt), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
 }
 
-PriceIVExpiry::PriceIVExpiry( const PriceIVExpiry& rhs ) 
+PriceIVExpiry::PriceIVExpiry( const PriceIVExpiry& rhs )
   : Price( rhs.m_dt, rhs.Value() ), m_dtExpiry( rhs.m_dtExpiry ), m_dblIVCall( rhs.m_dblIVCall ), m_dblIVPut( rhs.m_dblIVPut )
 {
 }
