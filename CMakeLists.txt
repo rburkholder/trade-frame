@@ -18,4 +18,4 @@ add_subdirectory(Weeklies)
 add_subdirectory(Scanner)
 #add_subdirectory(BookTrader)
 add_subdirectory(ESBracketOrder)
-
+add_subdirectory(MultipleFutures)

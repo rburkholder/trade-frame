@@ -11,6 +11,27 @@
   "configurations": [
 
     {
+      "name": "(gdb) MultipleFutures",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/MultipleFutures/AppMultipleFutures",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    }
+
+    {
       "name": "(gdb) ESBracketOrder",
       "type": "cppdbg",
       "request": "launch",
