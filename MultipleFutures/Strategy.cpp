@@ -56,7 +56,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
       m_tsK.Append( k );
     }
     )
-, m_smaK( m_tsK, 3, seconds( nSecondsPerBar ) )
+, m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
