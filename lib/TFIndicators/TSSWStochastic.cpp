@@ -12,25 +12,29 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "TSSWStochastic.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-using base = RunningMinMax<TSSWStochastic,double>;
+using minmax = RunningMinMax<TSSWStochastic,double>;
 
-TSSWStochastic::TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth ) 
+TSSWStochastic::TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth )
   : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( quotes, tdWindowWidth ),
-    m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 )
+    m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 ), m_bAvailable( false )
 {
 }
 
-TSSWStochastic::TSSWStochastic( const TSSWStochastic& rhs) 
+TSSWStochastic::TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration tdPeriodWidth, fK_t&& fK )
+  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( quotes, nPeriods, tdPeriodWidth ),
+    m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 ), m_fK( std::move( fK ) ), m_bAvailable( false )
+{
+}
+
+TSSWStochastic::TSSWStochastic( const TSSWStochastic& rhs)
   : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( rhs ),
-  m_lastAdd( rhs.m_lastAdd ), m_lastExpire( rhs.m_lastExpire ), m_k( rhs.m_k ),
-  base( rhs )
+  m_lastAdd( rhs.m_lastAdd ), m_lastExpire( rhs.m_lastExpire ), m_k( rhs.m_k ), m_bAvailable( false ),
+  minmax( rhs )
 {
 }
 
@@ -38,32 +42,53 @@ TSSWStochastic::~TSSWStochastic(void) {
 }
 
 void TSSWStochastic::Add( const Quote& quote ) {
-  double tmp = quote.Midpoint();
-  if ( tmp != m_lastAdd ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
-    m_lastAdd = tmp;
-    base::Add( m_lastAdd );
+  if ( quote.IsNonZero() ) {
+    double tmp = quote.Midpoint();
+    if ( tmp != m_lastAdd ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
+      m_lastAdd = tmp;
+      minmax::Add( m_lastAdd );
+    }
+    m_dtLatest = quote.DateTime();
+    m_bAvailable = true;
+  }
+  else {
+    m_bAvailable = false;
   }
 }
 
 void TSSWStochastic::Expire( const Quote& quote ) {
-  double tmp = quote.Midpoint();
-  if ( tmp != m_lastExpire ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
-    m_lastExpire = tmp;
-    base::Remove( m_lastExpire );
+  if ( quote.IsNonZero() ) {
+    double tmp = quote.Midpoint();
+    if ( tmp != m_lastExpire ) {  // cut down on number of updates (can't use, needs to be replicated in Add)
+      m_lastExpire = tmp;
+      minmax::Remove( m_lastExpire );
+    }
+    m_bAvailable = true;
   }
+  // false
 }
 
 void TSSWStochastic::PostUpdate( void ) {
-  double max( base::Max() );
-  double min( base::Min() );
-  m_k = max == min ? 0 : ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0;
+  if ( m_bAvailable ) {
+    static int n { 0 };
+    double max( minmax::Max() );
+    double min( minmax::Min() );
+    m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
+    if ( 15 > n ) {
+      std::cout
+        << "stochastic: "
+        << m_lastAdd << "," << m_lastExpire << ","
+        << min << "," << m_k << "," << max << std::endl;
+      n++;
+    }
+    if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
+  }
 }
 
 void TSSWStochastic::Reset( void ) {
   m_lastAdd = m_lastExpire = m_k = 0;
-  base::Reset();
+  minmax::Reset();
 }
-
 
 } // namespace tf
 } // namespace ou
