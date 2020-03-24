@@ -70,17 +70,9 @@ void TSSWStochastic::Expire( const Quote& quote ) {
 
 void TSSWStochastic::PostUpdate( void ) {
   if ( m_bAvailable ) {
-    static int n { 0 };
     double max( minmax::Max() );
     double min( minmax::Min() );
     m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
-    if ( 15 > n ) {
-      std::cout
-        << "stochastic: "
-        << m_lastAdd << "," << m_lastExpire << ","
-        << min << "," << m_k << "," << max << std::endl;
-      n++;
-    }
     if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
   }
 }
