@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include "OUCharting/ChartEntryIndicator.h"
-#include "TFTimeSeries/TimeSeries.h"
 #include <map>
 
 #include <OUCharting/ChartDVBasics.h>
@@ -52,7 +50,6 @@ public:
   virtual ~Strategy();
 
   void HandleButtonUpdate();
-  void HandleButtonSend( ou::tf::OrderSide::enumOrderSide );
   //void HandleButtonSend();
   void HandleButtonCancel();
 
@@ -75,6 +72,20 @@ private:
   ou::ChartEntryIndicator m_ceStochastic;
   ou::ChartEntryIndicator m_ceStochasticSmoothed;
   ou::ChartEntryMark m_ceStochasticLimits;
+
+  struct Trade {
+    ou::tf::OrderSide::enumOrderSide side;
+    double entry;
+    double offset;
+    double stop;
+    double trail;
+    void Clear() {
+      entry = stop = 0.0;
+      side = ou::tf::OrderSide::Unknown;
+      }
+    Trade(): entry {}, stop {}, side( ou::tf::OrderSide::Unknown ) {}
+  };
+  Trade m_trade;
 
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
@@ -110,7 +121,7 @@ private:
 
   pPosition_t m_pPosition;
 
-  enum class EState { initial, entry_wait, entry_filling, entry_cancelling, exit_filling, cancel_wait, quiesce };
+  enum class EState { initial, entry_wait, entry_filling, entry_cancelling, exit_tracking, exit_filling, cancel_wait, quiesce };
   EState m_state;
 
   TimeFrame m_tfLatest;
@@ -140,11 +151,16 @@ private:
 
   void HandleBarComplete( const ou::tf::Bar& );
 
+  void Entry( ou::tf::OrderSide::enumOrderSide );
   void CancelOrders();
 
   void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancelling( const ou::tf::Bar& );
   void HandleGoingNeutral( const ou::tf::Bar& );
+
+  void HandleRHTrading( const ou::tf::Quote& );
+  void HandleCancelling( const ou::tf::Quote& ) {}
+  void HandleGoingNeutral( const ou::tf::Quote& ) {}
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

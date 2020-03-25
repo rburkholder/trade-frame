@@ -176,7 +176,10 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
       static_cast<T*>(this)->HandleCancelling( dd );
     }
     else {
-      static_cast<T*>(this)->HandleRHTrading( dd );
+      // need to disambiguate DD on each side of !=
+      //if ( &DailyTradeTimeFrame<T>::HandleRHTrading != &T::HandleRHTrading ) {
+        static_cast<T*>(this)->HandleRHTrading( dd );
+      //}
     }
     break;
   case TimeFrame::PauseForQuotes:
