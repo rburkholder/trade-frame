@@ -36,7 +36,7 @@
 #include "TFTimeSeries/DatedDatum.h"
 
 namespace {
-  static const size_t nBars { 10 };
+  static const size_t nBars { 2 };
 }
 
 Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
@@ -56,7 +56,9 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
       m_tsK.Append( k );
     }
     )
+, m_stateStochastic( EStateStochastic::Quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
+, m_curK {}, m_lowerK( 15.0 ), m_upperK( 85.0 )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
@@ -67,7 +69,6 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  //m_stochastic.OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochastic ) );
   dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed ) );
 
   ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
@@ -76,7 +77,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
   InitForUS24HourFutures( dateMarketOpen );
 
-  if ( false ) { // false for standard day time trading, true for 24 hour futures trading
+  if ( true ) { // false for standard day time trading, true for 24 hour futures trading
     // this may be offset incorrectly.
     //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
     ptime dtMo( GetMarketOpen() );
@@ -95,13 +96,19 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_ceStochastic.SetColour( ou::Colour::Aquamarine );
   m_ceStochasticSmoothed.SetName( "Fast Stoch" );
 
+  m_ceStochasticLimits.AddMark( 100.0, ou::Colour::DarkGray, "Top" );
+  m_ceStochasticLimits.AddMark( m_upperK, ou::Colour::Black, "Upper" );
+  m_ceStochasticLimits.AddMark(  50.0, ou::Colour::DarkGray, "Middle" );
+  m_ceStochasticLimits.AddMark( m_lowerK, ou::Colour::Black, "Lower" );
+  m_ceStochasticLimits.AddMark(   0.0, ou::Colour::DarkGray, "Bottom" );
+
   m_dvChart.Add( 3, &m_ceStochastic );
   m_dvChart.Add( 3, &m_ceStochasticSmoothed );
+  //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
 }
 
 Strategy::~Strategy() {
   dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed ) );
-  //m_stochastic.OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochastic ) );
   m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &Strategy::HandleUnRealizedPL) );
   m_pPosition->OnExecution.Remove( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -263,13 +270,62 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-//void Strategy::UpdateStochastic( const ou::tf::Quote& quote ) {
-//  double K = m_stochastic.K();
-  //m_ceStochastic.Append( quote.DateTime(), K );
-//}
-
 void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
+  // run the states.  let the trades run/stop to completion.
+  // need indicator of where in trades are.
+
   m_ceStochasticSmoothed.Append( price );
+
+  double K( price.Value() );
+
+  switch ( m_stateStochastic ) {
+    case EStateStochastic::Quiesced:
+      // needs external source to force state change (after delta time)
+      break;
+    case EStateStochastic::WaitForNeutral:
+      if ( ( m_upperK > K ) && ( m_lowerK < K ) ) {
+        m_stateStochastic = EStateStochastic::WaitForFirstCrossing;
+      }
+      break;
+    case EStateStochastic::WaitForFirstCrossing:
+      if ( m_upperK < K ) {
+        m_stateStochastic = EStateStochastic::HiCrossedUp;
+      }
+      if ( m_lowerK > K ) {
+        m_stateStochastic = EStateStochastic::LoCrossedDown;
+      }
+      break;
+    case EStateStochastic::WaitForHiCrossUp:
+      if ( m_upperK < K ) {
+        m_stateStochastic = EStateStochastic::HiCrossedUp;
+      }
+      break;
+    case EStateStochastic::HiCrossedUp:
+      if ( m_upperK > K ) {
+        if ( EState::entry_wait == m_state ) {
+          HandleButtonSend( ou::tf::OrderSide::Sell );
+        }
+        m_stateStochastic = EStateStochastic::WaitForLoCrossDown;
+      }
+      break;
+//    case EStateStochastic::HiCrossedDown:
+//      break;
+    case EStateStochastic::WaitForLoCrossDown:
+      if ( m_lowerK > K ) {
+        m_stateStochastic = EStateStochastic::LoCrossedDown;
+      }
+      break;
+    case EStateStochastic::LoCrossedDown:
+      if ( m_lowerK < K ) {
+        if ( EState::entry_wait == m_state ) {
+          HandleButtonSend( ou::tf::OrderSide::Buy );
+        }
+        m_stateStochastic = EStateStochastic::WaitForHiCrossUp;
+      }
+      break;
+//    case EStateStochastic::LoCrossedUp:
+//      break;
+  }
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
@@ -280,7 +336,6 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   if ( EState::entry_cancelling == m_state ) {
     m_state = EState::entry_wait;
   }
-
 }
 
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
@@ -319,7 +374,6 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       sMessage = "quiesce ";
       break;
   }
-
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
@@ -328,10 +382,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
   if ( 0 < m_cntBars ) {
     switch ( m_state ) {
       case EState::initial:
-        if ( nBars <= m_cntBars ) m_state = EState::entry_wait;
+        if ( nBars <= m_cntBars ) {
+          m_state = EState::entry_wait;
+          m_stateStochastic = EStateStochastic::WaitForFirstCrossing;
+        }
         break;
       case EState::entry_wait:
         {
+          // trades generated in UpdateStochasticSmoothed
         }
         break;
       case EState::entry_filling:

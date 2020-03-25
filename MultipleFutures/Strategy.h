@@ -74,6 +74,7 @@ private:
   //ou::ChartEntryShape m_ceStochastic;
   ou::ChartEntryIndicator m_ceStochastic;
   ou::ChartEntryIndicator m_ceStochasticSmoothed;
+  ou::ChartEntryMark m_ceStochasticLimits;
 
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
@@ -119,10 +120,20 @@ private:
   ou::tf::Prices m_tsK;
   ou::tf::TSSWSMA<ou::tf::Prices> m_smaK;
 
+  double m_curK;
+  const double m_upperK;
+  const double m_lowerK;
+
+  enum class EStateStochastic {
+    Quiesced, WaitForFirstCrossing, WaitForNeutral,
+    WaitForHiCrossUp, HiCrossedUp, //HiCrossedDown,
+    WaitForLoCrossDown, LoCrossedDown, //LoCrossedUp
+    };
+  EStateStochastic m_stateStochastic;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  //void UpdateStochastic( const ou::tf::Quote& );
   void UpdateStochasticSmoothed( const ou::tf::Price& );
 
   void HandleBarComplete( const ou::tf::Bar& );
