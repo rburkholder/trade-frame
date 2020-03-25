@@ -127,8 +127,8 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
   static const double multiplier( 2.0 );
   // TODO: need to track orders, nothing new while existing ones active?
   m_trade.offset = multiplier * m_dblAverageBarSize;
-  double tick = m_pWatch->GetInstrument()->GetMinTick();
-  double min = multiplier * tick;
+  m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
+  double min = multiplier * m_trade.tick;
   if ( min > m_trade.offset ) m_trade.offset = min;
   //const double dblEntry = m_tradeLast.Price();
   //const double dblEntry = m_quoteLast.Midpoint();
@@ -174,7 +174,6 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderProfit->SetDescription( "profit" );
         //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
 */
         }
         break;
@@ -214,7 +213,6 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderProfit->SetDescription( "profit" );
         //m_pOrderProfit->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderProfit->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
 */
         }
         break;
@@ -419,6 +417,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               if ( trail > m_trade.trail ) {
                 m_trade.trail = trail;
                 m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+                m_trade.offset -= m_trade.tick;
+                if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
               }
             }
             }
@@ -452,6 +452,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               if ( trail < m_trade.trail ){
                 m_trade.trail = trail;
                 m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+                m_trade.offset -= m_trade.tick;
+                if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
               }
             }
             }

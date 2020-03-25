@@ -80,11 +80,18 @@ private:
     double offset;
     //double stop;
     double trail;
-    void Clear() {
-      entry = 0.0;
-      side = ou::tf::OrderSide::Unknown;
-      }
+    double tick;
     Trade(): entry {}, side( ou::tf::OrderSide::Unknown ) {}
+    Trade( ou::tf::OrderSide::enumOrderSide side_, double entry_, double offset_ ) {
+      side = side_;
+      offset = offset_;
+      switch ( side ) {
+        case ou::tf::OrderSide::enumOrderSide::Buy:
+          break;
+        case ou::tf::OrderSide::enumOrderSide::Sell:
+          break;
+      }
+    }
     void Emit( std::ostream& io ) {
       io << entry << ", " << offset << "," << trail;;
     }
