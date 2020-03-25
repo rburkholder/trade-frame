@@ -295,6 +295,7 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
       break;
     case EStateStochastic::WaitForHiCrossUp:
       if ( m_upperK0 < K ) {
+        m_pPosition->ClosePosition();
         m_stateStochastic = EStateStochastic::HiCrossedUp;
       }
       break;
@@ -311,6 +312,7 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
 //      break;
     case EStateStochastic::WaitForLoCrossDown:
       if ( m_lowerK0 > K ) {
+        m_pPosition->ClosePosition();
         m_stateStochastic = EStateStochastic::LoCrossedDown;
       }
       break;
