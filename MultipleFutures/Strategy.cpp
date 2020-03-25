@@ -417,8 +417,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               if ( trail > m_trade.trail ) {
                 m_trade.trail = trail;
                 m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-                m_trade.offset -= m_trade.tick;
-                if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
+                //m_trade.offset -= m_trade.tick;
+                //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
               }
             }
             }
@@ -452,8 +452,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
               if ( trail < m_trade.trail ){
                 m_trade.trail = trail;
                 m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-                m_trade.offset -= m_trade.tick;
-                if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
+                //m_trade.offset -= m_trade.tick;
+                //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
               }
             }
             }
