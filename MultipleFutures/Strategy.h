@@ -78,13 +78,16 @@ private:
     ou::tf::OrderSide::enumOrderSide side;
     double entry;
     double offset;
-    double stop;
+    //double stop;
     double trail;
     void Clear() {
-      entry = stop = 0.0;
+      entry = 0.0;
       side = ou::tf::OrderSide::Unknown;
       }
-    Trade(): entry {}, stop {}, side( ou::tf::OrderSide::Unknown ) {}
+    Trade(): entry {}, side( ou::tf::OrderSide::Unknown ) {}
+    void Emit( std::ostream& io ) {
+      io << entry << ", " << offset << "," << trail;;
+    }
   };
   Trade m_trade;
 
