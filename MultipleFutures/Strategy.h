@@ -68,10 +68,11 @@ private:
   using mapCounts_t = std::map<ou::tf::Trade::price_t,size_t>;
   mapCounts_t m_mapPrices;
 
-  //ou::ChartEntryShape m_ceStochastic;
+  ou::ChartEntryShape m_ceStop;
   ou::ChartEntryIndicator m_ceStochastic;
   ou::ChartEntryIndicator m_ceStochasticSmoothed;
   ou::ChartEntryMark m_ceStochasticLimits;
+  ou::ChartEntryIndicator m_cePositionPL;
 
   struct Trade {
     ou::tf::OrderSide::enumOrderSide side;

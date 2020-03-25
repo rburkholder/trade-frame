@@ -96,6 +96,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 
   m_ceStochastic.SetColour( ou::Colour::Aquamarine );
   m_ceStochasticSmoothed.SetName( "Fast Stoch" );
+  m_cePositionPL.SetName( "Position P/L");
 
   m_ceStochasticLimits.AddMark( 100.0, ou::Colour::DarkGray, "Top" );
   //m_ceStochasticLimits.AddMark( m_upperK, ou::Colour::Black, "Upper" );
@@ -103,9 +104,11 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   //m_ceStochasticLimits.AddMark( m_lowerK, ou::Colour::Black, "Lower" );
   m_ceStochasticLimits.AddMark(   0.0, ou::Colour::DarkGray, "Bottom" );
 
+  m_dvChart.Add( 0, &m_ceStop );
   m_dvChart.Add( 3, &m_ceStochastic );
   m_dvChart.Add( 3, &m_ceStochasticSmoothed );
   //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
+  m_dvChart.Add( 4, &m_cePositionPL );
 }
 
 Strategy::~Strategy() {
@@ -142,6 +145,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         m_trade.trail = m_trade.stop = m_trade.entry - m_trade.offset;
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
+        m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -187,6 +191,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         m_trade.trail = m_trade.stop = m_trade.entry + m_trade.offset;
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
+        m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -260,6 +265,13 @@ void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
   ema[ 1 ] = ou::ChartDVBasics::m_vInfoBollinger[ 1 ].m_stats.MeanY();
   ema[ 2 ] = ou::ChartDVBasics::m_vInfoBollinger[ 2 ].m_stats.MeanY();
   ema[ 3 ] = ou::ChartDVBasics::m_vInfoBollinger[ 3 ].m_stats.MeanY(); // slowest moving
+
+  double dblUnRealized;
+  double dblRealized;
+  double dblCommissionsPaid;
+  double dblTotal;
+  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_cePositionPL.Append( trade.DateTime(), dblTotal );
 
   m_bfBar.Add( trade ); // comes after ChartDVBasics as updated stats are required
 }
@@ -420,7 +432,10 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             }
             else {
               double trail = quote.Bid() - m_trade.offset;
-              if ( trail > m_trade.trail ) m_trade.trail = trail;
+              if ( trail > m_trade.trail ) {
+                m_trade.trail = trail;
+                m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+              }
             }
             }
             break;
@@ -455,8 +470,10 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             }
             else {
               double trail = quote.Ask() + m_trade.offset;
-              if ( trail < m_trade.trail ) m_trade.trail = trail;
-
+              if ( trail < m_trade.trail ){
+                m_trade.trail = trail;
+                m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+              }
             }
             }
             break;
