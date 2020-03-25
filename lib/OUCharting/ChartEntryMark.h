@@ -22,11 +22,13 @@
 
 // level markers (horizontal lines at a price level)
 
+// 2020/03/24 - seems to lock up data presentation
+
 namespace ou { // One Unified
 
 class ChartEntryMark: public ChartEntryBase {
 public:
-  
+
   struct Mark_t {
     double m_dblPrice;
     ou::Colour::enumColour m_colour;
