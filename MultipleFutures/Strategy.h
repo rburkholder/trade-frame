@@ -121,8 +121,10 @@ private:
   ou::tf::TSSWSMA<ou::tf::Prices> m_smaK;
 
   double m_curK;
-  const double m_upperK;
-  const double m_lowerK;
+  const double m_upperK0; // hysteresis cross up
+  const double m_upperK1; // hysteresis cross down
+  const double m_lowerK1; // hysteresis cross up
+  const double m_lowerK0; // hysteresis cross down
 
   enum class EStateStochastic {
     Quiesced, WaitForFirstCrossing, WaitForNeutral,

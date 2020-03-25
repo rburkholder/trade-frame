@@ -58,7 +58,8 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
     )
 , m_stateStochastic( EStateStochastic::Quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
-, m_curK {}, m_lowerK( 15.0 ), m_upperK( 85.0 )
+, m_curK {}
+, m_lowerK0( 14.5 ), m_lowerK1( 15.5 ), m_upperK0( 85.5 ), m_upperK1( 84.5 )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
@@ -97,9 +98,9 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_ceStochasticSmoothed.SetName( "Fast Stoch" );
 
   m_ceStochasticLimits.AddMark( 100.0, ou::Colour::DarkGray, "Top" );
-  m_ceStochasticLimits.AddMark( m_upperK, ou::Colour::Black, "Upper" );
+  //m_ceStochasticLimits.AddMark( m_upperK, ou::Colour::Black, "Upper" );
   m_ceStochasticLimits.AddMark(  50.0, ou::Colour::DarkGray, "Middle" );
-  m_ceStochasticLimits.AddMark( m_lowerK, ou::Colour::Black, "Lower" );
+  //m_ceStochasticLimits.AddMark( m_lowerK, ou::Colour::Black, "Lower" );
   m_ceStochasticLimits.AddMark(   0.0, ou::Colour::DarkGray, "Bottom" );
 
   m_dvChart.Add( 3, &m_ceStochastic );
@@ -283,25 +284,25 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
       // needs external source to force state change (after delta time)
       break;
     case EStateStochastic::WaitForNeutral:
-      if ( ( m_upperK > K ) && ( m_lowerK < K ) ) {
+      if ( ( m_upperK1 > K ) && ( m_lowerK1 < K ) ) {
         m_stateStochastic = EStateStochastic::WaitForFirstCrossing;
       }
       break;
     case EStateStochastic::WaitForFirstCrossing:
-      if ( m_upperK < K ) {
+      if ( m_upperK0 < K ) {
         m_stateStochastic = EStateStochastic::HiCrossedUp;
       }
-      if ( m_lowerK > K ) {
+      if ( m_lowerK0 > K ) {
         m_stateStochastic = EStateStochastic::LoCrossedDown;
       }
       break;
     case EStateStochastic::WaitForHiCrossUp:
-      if ( m_upperK < K ) {
+      if ( m_upperK0 < K ) {
         m_stateStochastic = EStateStochastic::HiCrossedUp;
       }
       break;
     case EStateStochastic::HiCrossedUp:
-      if ( m_upperK > K ) {
+      if ( m_upperK1 > K ) {
         if ( EState::entry_wait == m_state ) {
           HandleButtonSend( ou::tf::OrderSide::Sell );
         }
@@ -311,12 +312,12 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
 //    case EStateStochastic::HiCrossedDown:
 //      break;
     case EStateStochastic::WaitForLoCrossDown:
-      if ( m_lowerK > K ) {
+      if ( m_lowerK0 > K ) {
         m_stateStochastic = EStateStochastic::LoCrossedDown;
       }
       break;
     case EStateStochastic::LoCrossedDown:
-      if ( m_lowerK < K ) {
+      if ( m_lowerK1 < K ) {
         if ( EState::entry_wait == m_state ) {
           HandleButtonSend( ou::tf::OrderSide::Buy );
         }
