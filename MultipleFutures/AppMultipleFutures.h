@@ -66,7 +66,7 @@ private:
 
   bool m_bInitialized;
 
-  wxTimer m_timerGuiRefresh;
+  //wxTimer m_timerGuiRefresh;
   ou::ChartMaster m_chart;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;

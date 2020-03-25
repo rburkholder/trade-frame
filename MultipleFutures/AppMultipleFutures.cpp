@@ -98,8 +98,8 @@ bool AppMultipleFutures::OnInit() {
   wxMenu* pMenuActions = m_pFrameMain->AddDynamicMenu( "Actions", vItemsActions );
 
 //  bool bOk( true );
-  m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
-  Bind( wxEVT_TIMER, &AppMultipleFutures::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+//  m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
+//  Bind( wxEVT_TIMER, &AppMultipleFutures::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_bIBConnected = false;
   m_pIB = boost::make_shared<ou::tf::IBTWS>();
@@ -241,9 +241,14 @@ void AppMultipleFutures::OnClose( wxCloseEvent& event ) { // step 1
   //  StopWatch();
   //}
 
+  m_pWinChartView->SetChartDataView( nullptr );
+
   m_pIB->Disconnect();
+  while ( m_pIB->Connected() ) {}
 
   SaveState();
+
+  m_vInstance.clear();
 
   event.Skip();  // auto followed by Destroy();
 }
