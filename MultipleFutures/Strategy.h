@@ -49,7 +49,7 @@ public:
   Strategy( pWatch_t, uint16_t nSecondsPerBar );
   virtual ~Strategy();
 
-  void HandleButtonUpdate();
+  void HandleButtonUpdate() {}
   //void HandleButtonSend();
   void HandleButtonCancel();
 

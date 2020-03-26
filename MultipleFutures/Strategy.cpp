@@ -120,9 +120,6 @@ Strategy::~Strategy() {
   m_bfBar.SetOnBarComplete( nullptr );
 }
 
-void Strategy::HandleButtonUpdate() {
-}
-
 void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
   static const double multiplier( 2.0 );
   // TODO: need to track orders, nothing new while existing ones active?
@@ -225,22 +222,6 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
   }
 }
 
-void Strategy::HandleButtonCancel() {
-  m_pPosition->CancelOrders();
-  m_state = EState::quiesce;
-}
-
-void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
-  //std::cout << "quote: " << quote.Bid() << "," << quote.Ask() << std::endl;
-  ou::tf::Quote::price_t bid( quote.Bid() );
-  ou::tf::Quote::price_t ask( quote.Ask() );
-  if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
-    ou::ChartDVBasics::HandleQuote( quote );
-    TimeTick( quote );
-    m_quoteLast = quote;
-  }
-}
-
 void Strategy::Exit( ou::tf::Quote::dt_t dt ) {
 
   ou::ChartDVBasics::m_ceLongEntries.AddLabel( dt, m_trade.trail, "stop mkt" );
@@ -281,6 +262,17 @@ void Strategy::Exit( ou::tf::Quote::dt_t dt ) {
   std::cout << std::endl;
 
   m_pPosition->PlaceOrder( m_pOrderStop );
+}
+
+void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
+  //std::cout << "quote: " << quote.Bid() << "," << quote.Ask() << std::endl;
+  ou::tf::Quote::price_t bid( quote.Bid() );
+  ou::tf::Quote::price_t ask( quote.Ask() );
+  if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
+    ou::ChartDVBasics::HandleQuote( quote );
+    TimeTick( quote );
+    m_quoteLast = quote;
+  }
 }
 
 void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
@@ -371,20 +363,6 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
       break;
 //    case EStateStochastic::LoCrossedUp:
 //      break;
-  }
-}
-
-void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
-  // TODO: may need to be more detailed here,
-  //   need to check that the primery entry order has indeed been cancelled
-  //   if only a few of the orders were cancelled, then may need to perform a close
-  std::cout << "HandleOrderCancelled: " << order.GetOrderId() << "," << order.GetDescription() << std::endl;
-  if ( EState::entry_cancelling == m_state ) {
-    m_state = EState::entry_wait;
-  }
-  else {
-    // TODO: migth be in entry state or something (need to validate)
-    std::cout << "HandleOrderCancelled no entry_wait: "<< order.GetOrderId() << "," << order.GetDescription() << std::endl;
   }
 }
 
@@ -538,6 +516,20 @@ void Strategy::HandleCancelling( const ou::tf::Bar& bar ) {
   }
 }
 
+void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
+  // TODO: may need to be more detailed here,
+  //   need to check that the primery entry order has indeed been cancelled
+  //   if only a few of the orders were cancelled, then may need to perform a close
+  std::cout << "HandleOrderCancelled: " << order.GetOrderId() << "," << order.GetDescription() << std::endl;
+  if ( EState::entry_cancelling == m_state ) {
+    m_state = EState::entry_wait;
+  }
+  else {
+    // TODO: migth be in entry state or something (need to validate)
+    std::cout << "HandleOrderCancelled no entry_wait: "<< order.GetOrderId() << "," << order.GetDescription() << std::endl;
+  }
+}
+
 void Strategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
   if ( m_tfLatest != CurrentTimeFrame() ) {
     std::cout << "Time Frame: Going Neutral" << std::endl;
@@ -558,4 +550,9 @@ void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegat
 
 void Strategy::HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
   std::cout << "realized p/l from " << delta.get<1>() << " to " << delta.get<2>() << std::endl;
+}
+
+void Strategy::HandleButtonCancel() {
+  m_pPosition->CancelOrders();
+  m_state = EState::quiesce;
 }
