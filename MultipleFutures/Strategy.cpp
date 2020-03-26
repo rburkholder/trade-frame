@@ -222,9 +222,9 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
   }
 }
 
-void Strategy::Exit( ou::tf::Quote::dt_t dt ) {
+void Strategy::Exit( ou::tf::Quote::dt_t dt, double exit, const std::string& sComment ) {
 
-  ou::ChartDVBasics::m_ceLongEntries.AddLabel( dt, m_trade.trail, "stop mkt" );
+  ou::ChartDVBasics::m_ceLongEntries.AddLabel( dt, exit, sComment );
 
   switch ( m_trade.side ) {
     case ou::tf::OrderSide::Buy: {
@@ -253,7 +253,7 @@ void Strategy::Exit( ou::tf::Quote::dt_t dt ) {
       break;
   }
 
-  m_pOrderStop->SetDescription( "stop" );
+  m_pOrderStop->SetDescription( sComment );
   //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 
@@ -270,22 +270,23 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   ou::tf::Quote::price_t ask( quote.Ask() );
   if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
     ou::ChartDVBasics::HandleQuote( quote );
+    m_quoteLast = quote; // actions can use latest quote
     TimeTick( quote );
-    m_quoteLast = quote;
   }
 }
 
 void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
+
   //std::cout << "trade: " << trade.Volume() << "@" << trade.Price() << std::endl;
   m_tradeLast = trade;
   ou::ChartDVBasics::HandleTrade( trade );
 
-  double ema[ 4 ];
+  //double ema[ 4 ];
 
-  ema[ 0 ] = ou::ChartDVBasics::m_vInfoBollinger[ 0 ].m_stats.MeanY(); // fastest moving
-  ema[ 1 ] = ou::ChartDVBasics::m_vInfoBollinger[ 1 ].m_stats.MeanY();
-  ema[ 2 ] = ou::ChartDVBasics::m_vInfoBollinger[ 2 ].m_stats.MeanY();
-  ema[ 3 ] = ou::ChartDVBasics::m_vInfoBollinger[ 3 ].m_stats.MeanY(); // slowest moving
+  //ema[ 0 ] = ou::ChartDVBasics::m_vInfoBollinger[ 0 ].m_stats.MeanY(); // fastest moving
+  //ema[ 1 ] = ou::ChartDVBasics::m_vInfoBollinger[ 1 ].m_stats.MeanY();
+  //ema[ 2 ] = ou::ChartDVBasics::m_vInfoBollinger[ 2 ].m_stats.MeanY();
+  //ema[ 3 ] = ou::ChartDVBasics::m_vInfoBollinger[ 3 ].m_stats.MeanY(); // slowest moving
 
   double dblUnRealized;
   double dblRealized;
@@ -329,36 +330,48 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
       break;
     case EStateStochastic::WaitForHiCrossUp:
       if ( m_upperK0 < K ) {
-        m_state = EState::exit_filling;
-        Exit( price.DateTime() );
         m_stateStochastic = EStateStochastic::HiCrossedUp;
+        switch ( m_state ) {
+          case EState::exit_tracking:
+            m_state = EState::exit_filling;
+            Exit( price.DateTime(), K, "Exit Hi Cross Up" );
+            break;
+        }
       }
       break;
     case EStateStochastic::HiCrossedUp:
       if ( m_upperK1 > K ) {
-        if ( EState::entry_wait == m_state ) {
-          m_state = EState::entry_filling;
-          Entry( ou::tf::OrderSide::Sell );
-        }
         m_stateStochastic = EStateStochastic::WaitForLoCrossDown;
+        switch ( m_state ) {
+          case EState::entry_wait:
+            m_state = EState::entry_filling;
+            Entry( ou::tf::OrderSide::Sell );
+            break;
+        }
       }
       break;
 //    case EStateStochastic::HiCrossedDown:
 //      break;
     case EStateStochastic::WaitForLoCrossDown:
       if ( m_lowerK0 > K ) {
-        m_state = EState::exit_filling;
-        Exit( price.DateTime() );
         m_stateStochastic = EStateStochastic::LoCrossedDown;
+        switch ( m_state ) {
+          case EState::exit_tracking:
+            m_state = EState::exit_filling;
+            Exit( price.DateTime(), K, "Exit Lo Cross Down" );
+            break;
+        }
       }
       break;
     case EStateStochastic::LoCrossedDown:
       if ( m_lowerK1 < K ) {
-        if ( EState::entry_wait == m_state ) {
-          m_state = EState::entry_filling;
-          Entry( ou::tf::OrderSide::Buy );
-        }
         m_stateStochastic = EStateStochastic::WaitForHiCrossUp;
+        switch ( m_state ) {
+          case EState::entry_wait:
+            m_state = EState::entry_filling;
+            Entry( ou::tf::OrderSide::Buy );
+            break;
+        }
       }
       break;
 //    case EStateStochastic::LoCrossedUp:
@@ -391,7 +404,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
     case EState::exit_tracking:
       {
-
+        // handled in UpdateStochasticSmoothed and HandleRHTrading( quote )
       }
       break;
     case EState::exit_filling:
@@ -410,13 +423,14 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
+  // Check stops
   switch ( m_state ) {
     case EState::exit_tracking: {
         switch ( m_trade.side ) {
           case ou::tf::OrderSide::Buy: {
             if ( m_trade.trail > quote.Ask() ) {
               m_state = EState::exit_filling;
-              Exit( quote.DateTime() );
+              Exit( quote.DateTime(), quote.Ask(), "Buy Stop" );
             }
             else {
               double trail = quote.Bid() - m_trade.offset;
@@ -432,7 +446,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           case ou::tf::OrderSide::Sell: {
             if ( m_trade.trail < quote.Bid() ) {
               m_state = EState::exit_filling;
-              Exit( quote.DateTime() );
+              Exit( quote.DateTime(), quote.Bid(), "Sell Stop" );
             }
             else {
               double trail = quote.Ask() + m_trade.offset;
@@ -475,7 +489,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
         // either HandleOrderCancelled or HandleOrderFilled will move to the next state
         break;
       case EState::exit_tracking: {
-
+        // handled in HandleRHTrading( quote )
         }
         break;
       case EState::exit_filling:
