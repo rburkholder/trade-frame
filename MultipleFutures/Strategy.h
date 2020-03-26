@@ -163,6 +163,7 @@ private:
   void HandleBarComplete( const ou::tf::Bar& );
 
   void Entry( ou::tf::OrderSide::enumOrderSide );
+  void Exit( ou::tf::Quote::dt_t );
   void CancelOrders();
 
   void HandleRHTrading( const ou::tf::Bar& );

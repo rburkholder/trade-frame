@@ -241,6 +241,48 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   }
 }
 
+void Strategy::Exit( ou::tf::Quote::dt_t dt ) {
+
+  ou::ChartDVBasics::m_ceLongEntries.AddLabel( dt, m_trade.trail, "stop mkt" );
+
+  switch ( m_trade.side ) {
+    case ou::tf::OrderSide::Buy: {
+      m_pOrderStop = m_pPosition->ConstructOrder(
+        ou::tf::OrderType::enumOrderType::Market,
+        ou::tf::OrderSide::enumOrderSide::Sell,
+        1
+        //dblLoss,
+        //dblEntry - dblLoss
+        // idPosition
+        // dt order submitted
+        );
+      }
+      break;
+    case ou::tf::OrderSide::Sell: {
+      m_pOrderStop = m_pPosition->ConstructOrder(
+        ou::tf::OrderType::enumOrderType::Market,
+        ou::tf::OrderSide::enumOrderSide::Buy,
+        1
+        //dblLoss,
+        //dblLoss - dblEntry
+        // idPosition
+        // dt order submitted
+        );
+      }
+      break;
+  }
+
+  m_pOrderStop->SetDescription( "stop" );
+  //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
+  std::cout << dt;
+  m_trade.Emit( std::cout );
+  std::cout << std::endl;
+
+  m_pPosition->PlaceOrder( m_pOrderStop );
+}
+
 void Strategy::HandleTrade( const ou::tf::Trade &trade ) {
   //std::cout << "trade: " << trade.Volume() << "@" << trade.Price() << std::endl;
   m_tradeLast = trade;
@@ -295,7 +337,8 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
       break;
     case EStateStochastic::WaitForHiCrossUp:
       if ( m_upperK0 < K ) {
-        m_pPosition->ClosePosition();
+        m_state = EState::exit_filling;
+        Exit( price.DateTime() );
         m_stateStochastic = EStateStochastic::HiCrossedUp;
       }
       break;
@@ -312,7 +355,8 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
 //      break;
     case EStateStochastic::WaitForLoCrossDown:
       if ( m_lowerK0 > K ) {
-        m_pPosition->ClosePosition();
+        m_state = EState::exit_filling;
+        Exit( price.DateTime() );
         m_stateStochastic = EStateStochastic::LoCrossedDown;
       }
       break;
@@ -394,25 +438,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           case ou::tf::OrderSide::Buy: {
             if ( m_trade.trail > quote.Ask() ) {
               m_state = EState::exit_filling;
-              ou::ChartDVBasics::m_ceLongEntries.AddLabel( quote.DateTime(), m_trade.trail, "stop mkt" );
-              m_pOrderStop = m_pPosition->ConstructOrder(
-                ou::tf::OrderType::enumOrderType::Market,
-                ou::tf::OrderSide::enumOrderSide::Sell,
-                1
-                //dblLoss,
-                //dblEntry - dblLoss
-                // idPosition
-                // dt order submitted
-                );
-              m_pOrderStop->SetDescription( "stop" );
-              //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-              m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
-              std::cout << m_quoteLast.DateTime();
-              m_trade.Emit( std::cout );
-              std::cout << std::endl;
-
-              m_pPosition->PlaceOrder( m_pOrderStop );
+              Exit( quote.DateTime() );
             }
             else {
               double trail = quote.Bid() - m_trade.offset;
@@ -428,26 +454,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           case ou::tf::OrderSide::Sell: {
             if ( m_trade.trail < quote.Bid() ) {
               m_state = EState::exit_filling;
-              ou::ChartDVBasics::m_ceLongEntries.AddLabel( quote.DateTime(), m_trade.trail, "stop mkt" );
-              m_pOrderStop = m_pPosition->ConstructOrder(
-                ou::tf::OrderType::enumOrderType::Market,
-                ou::tf::OrderSide::enumOrderSide::Buy,
-                1
-                //dblLoss,
-                //dblLoss - dblEntry
-                // idPosition
-                // dt order submitted
-                );
-              m_pOrderStop->SetDescription( "stop" );
-
-              //m_pOrderStop->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-              m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-
-              std::cout << m_quoteLast.DateTime();
-              m_trade.Emit( std::cout );
-              std::cout << std::endl;
-
-              m_pPosition->PlaceOrder( m_pOrderStop );
+              Exit( quote.DateTime() );
             }
             else {
               double trail = quote.Ask() + m_trade.offset;
