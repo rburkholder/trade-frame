@@ -334,7 +334,7 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
         switch ( m_state ) {
           case EState::exit_tracking:
             m_state = EState::exit_filling;
-            Exit( price.DateTime(), K, "Exit Hi Cross Up" );
+            Exit( price.DateTime(), m_quoteLast.Midpoint(), "Exit Hi Cross Up" );
             break;
         }
       }
@@ -358,7 +358,7 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
         switch ( m_state ) {
           case EState::exit_tracking:
             m_state = EState::exit_filling;
-            Exit( price.DateTime(), K, "Exit Lo Cross Down" );
+            Exit( price.DateTime(),m_quoteLast.Midpoint(), "Exit Lo Cross Down" );
             break;
         }
       }
