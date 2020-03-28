@@ -144,10 +144,10 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
         m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
+          ou::tf::OrderType::enumOrderType::Market,
           ou::tf::OrderSide::enumOrderSide::Buy,
-          1,
-          m_trade.entry
+          1
+          //m_trade.entry
           // idPosition
           // dt order submitted
           );
@@ -183,10 +183,10 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
         m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
+          ou::tf::OrderType::enumOrderType::Market,
           ou::tf::OrderSide::enumOrderSide::Sell,
-          1,
-          m_trade.entry
+          1
+          //m_trade.entry
           // idPosition
           // dt order submitted
           );
