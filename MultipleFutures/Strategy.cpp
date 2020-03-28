@@ -338,16 +338,16 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
             break;
         }
       }
-      else {
-        if ( m_lowerK0 > K ) { // took a turn downwards
-          switch ( m_state ) {
-            case EState::exit_tracking:
-              m_state = EState::exit_filling;
-              Exit( price.DateTime(),m_quoteLast.Midpoint(), "Exit Lo Cross Down 1" );
-              break;
-          }
-        }
-      }
+//      else {
+//        if ( m_lowerK0 > K ) { // took a turn downwards
+//          switch ( m_state ) {
+//            case EState::exit_tracking:
+//              m_state = EState::exit_filling;
+//              Exit( price.DateTime(),m_quoteLast.Midpoint(), "Exit Lo Cross Down 1" );
+//              break;
+//          }
+//        }
+//      }
       break;
     case EStateStochastic::HiCrossedUp:
       if ( m_upperK1 > K ) {
@@ -372,16 +372,16 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
             break;
         }
       }
-      else {
-        if ( m_upperK0 < K ) { // took a turn upwards
-          switch ( m_state ) {
-            case EState::exit_tracking:
-              m_state = EState::exit_filling;
-              Exit( price.DateTime(),m_quoteLast.Midpoint(), "Exit Hi Cross Up 1" );
-              break;
-          }
-        }
-      }
+//      else {
+//        if ( m_upperK0 < K ) { // took a turn upwards
+//          switch ( m_state ) {
+//            case EState::exit_tracking:
+//              m_state = EState::exit_filling;
+//              Exit( price.DateTime(),m_quoteLast.Midpoint(), "Exit Hi Cross Up 1" );
+//              break;
+//          }
+//        }
+//      }
       break;
     case EStateStochastic::LoCrossedDown:
       if ( m_lowerK1 < K ) {
