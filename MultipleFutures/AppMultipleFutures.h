@@ -37,6 +37,8 @@
 #include "Strategy.h"
 
 class wxSplitterWindow;
+class wxNotebook;
+class wxBookCtrlEvent;
 
 class FrameMain;
 class FrameOrderEntry;
@@ -58,6 +60,7 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   wxSplitterWindow* m_splitLogGraph;
+  wxNotebook* m_nbStrategy;
 
   FrameOrderEntry* m_pFrameOrderEntry;
 
@@ -74,17 +77,29 @@ private:
   using pStrategy_t = std::unique_ptr<Strategy>;
 
   struct Instance {
+
     pWatch_t m_pWatch; // move this into strategy for start/stop
     pStrategy_t m_pStrategy;
-    Instance( pWatch_t pWatch, pStrategy_t pStrategy )
-    : m_pWatch( pWatch ), m_pStrategy( std::move( pStrategy ) )
+    pWinChartView_t m_pWinChartView;
+
+    Instance( pWatch_t pWatch, pStrategy_t&& pStrategy )
+    : m_pWatch( pWatch ), m_pStrategy( std::move( pStrategy ) ),
+      m_pWinChartView( nullptr )
     {}
+    Instance( Instance&& instance )
+    : m_pWatch( instance.m_pWatch ), m_pStrategy( std::move( instance.m_pStrategy ) ),
+      m_pWinChartView( instance.m_pWinChartView )
+      {}
+    ~Instance() {
+      if ( nullptr != m_pWinChartView ) {
+        m_pWinChartView->SetChartDataView( nullptr );
+      }
+
+    }
   };
 
   using vInstance_t = std::vector<Instance>;
   vInstance_t m_vInstance;
-
-  pWinChartView_t m_pWinChartView;
 
   void ConstructInstance(
     boost::uint16_t nSecondsPerBar,
@@ -105,6 +120,9 @@ private:
   void HandleIBDisconnecting( int );
   void HandleIBDisconnected( int );
   void HandleIBError( size_t );
+
+  void OnNotebookPageChanging( wxBookCtrlEvent& event );
+  void OnNotebookPageChanged( wxBookCtrlEvent& event );
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -133,7 +151,7 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppMultipleFutures, 1)
+BOOST_CLASS_VERSION(AppMultipleFutures, 2)
 DECLARE_APP(AppMultipleFutures)
 
 #endif /* APPMULTIPLEFUTURES_H */

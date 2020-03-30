@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/frame.h>
 #include <wx/splitter.h>
+#include "wx/notebook.h"
 
 #include <TFTrading/Instrument.h>
 
@@ -72,10 +73,9 @@ bool AppMultipleFutures::OnInit() {
   m_pPanelLogging = new ou::tf::PanelLogging( m_splitLogGraph, wxID_ANY );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 
-  m_pWinChartView = new ou::tf::WinChartView( m_splitLogGraph, wxID_ANY );
-  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  m_nbStrategy = new wxNotebook( m_splitLogGraph, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT );
 
-  m_splitLogGraph->SplitVertically(m_pPanelLogging, m_pWinChartView, m_splitLogGraph->GetSize().GetWidth() / 4 );
+  m_splitLogGraph->SplitVertically( m_pPanelLogging, m_nbStrategy, m_splitLogGraph->GetSize().GetWidth() / 4 );
 
   //sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
   //m_pPanelLogging->Show( true );
@@ -89,8 +89,8 @@ bool AppMultipleFutures::OnInit() {
 //  wxBoxSizer* sizerButtons = new wxBoxSizer( wxVERTICAL );
 //  m_pFrameButtons->SetSizer( sizerButtons );
 
-  m_pFrameOrderEntry = new FrameOrderEntry(  m_pFrameMain, wxID_ANY, "Order Entry", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxSTAY_ON_TOP  );
-  m_pFrameOrderEntry->Show( true );
+//  m_pFrameOrderEntry = new FrameOrderEntry(  m_pFrameMain, wxID_ANY, "Order Entry", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxSTAY_ON_TOP  );
+//  m_pFrameOrderEntry->Show( true );
 
   FrameMain::vpItems_t vItemsActions;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
@@ -100,6 +100,9 @@ bool AppMultipleFutures::OnInit() {
 //  bool bOk( true );
 //  m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
 //  Bind( wxEVT_TIMER, &AppMultipleFutures::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+
+  m_nbStrategy->Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &AppMultipleFutures::OnNotebookPageChanging, this );
+  m_nbStrategy->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &AppMultipleFutures::OnNotebookPageChanged, this );
 
   m_bIBConnected = false;
   m_pIB = boost::make_shared<ou::tf::IBTWS>();
@@ -119,6 +122,18 @@ bool AppMultipleFutures::OnInit() {
 
   return true;
 
+}
+
+void AppMultipleFutures::OnNotebookPageChanging( wxBookCtrlEvent& event ) {
+//  m_pWinChartView = new ou::tf::WinChartView( m_splitLogGraph, wxID_ANY );
+//  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  event.Skip();
+}
+
+void AppMultipleFutures::OnNotebookPageChanged( wxBookCtrlEvent& event ) {
+//  m_pWinChartView = new ou::tf::WinChartView( m_splitLogGraph, wxID_ANY );
+//  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  event.Skip();
 }
 
 void AppMultipleFutures::HandleMenuActionEmitBarSummary() {
@@ -171,8 +186,12 @@ void AppMultipleFutures::ConstructInstance( boost::uint16_t nSecPerBar, boost::u
 //        std::bind( &Strategy::HandleButtonSend,   m_pStrategy.get(), ph::_1 ),
 //        std::bind( &Strategy::HandleButtonCancel, m_pStrategy.get() )
 //        );
-      m_pWinChartView->SetChartDataView( pStrategy->GetChartDataView() );  // TODO: will need a selector
-      m_vInstance.emplace_back( vInstance_t::value_type( pWatch, std::move( pStrategy ) ) );
+      m_vInstance.emplace_back( std::move( vInstance_t::value_type( pWatch, std::move( pStrategy ) ) ) );
+      vInstance_t::value_type& instance( m_vInstance.back() );
+      instance.m_pWinChartView = new ou::tf::WinChartView( m_nbStrategy, wxID_ANY );
+      instance.m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+      instance.m_pWinChartView->SetChartDataView( instance.m_pStrategy->GetChartDataView() );  // TODO: will need a selector
+      m_nbStrategy->AddPage( instance.m_pWinChartView, pWatch->GetInstrument()->GetInstrumentName() );
       pWatch->StartWatch(); // need to wait for contract id on first time around
       }
     ,
@@ -189,6 +208,7 @@ void AppMultipleFutures::HandleIBConnected( int ) {
     m_bInitialized = true;
 
     ConstructInstance(  30, 2020,  6, 19 );
+//    ConstructInstance( 200, 2020,  6, 19 );
 //    ConstructInstance( 180, 2020,  9, 18 );
 //    ConstructInstance( 300, 2020, 12, 18 );
 
@@ -240,8 +260,6 @@ void AppMultipleFutures::OnClose( wxCloseEvent& event ) { // step 1
   //if ( m_bInitialized ) {
   //  StopWatch();
   //}
-
-  m_pWinChartView->SetChartDataView( nullptr );
 
   m_pIB->Disconnect();
   while ( m_pIB->Connected() ) {}
