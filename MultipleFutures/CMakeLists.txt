@@ -64,13 +64,13 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
-      OUCharting
       OUStatistics
       OUFormulas
       TFBitsNPieces
       TFInteractiveBrokers
       TFSimulation
       TFVuTrading
+      OUCharting
       TFTrading
       TFOptions
       TFTrading

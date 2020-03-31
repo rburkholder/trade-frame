@@ -70,7 +70,7 @@ private:
   bool m_bInitialized;
 
   //wxTimer m_timerGuiRefresh;
-  ou::ChartMaster m_chart;
+  //ou::ChartMaster m_chart;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pWinChartView_t = ou::tf::WinChartView*; // should this be instead unique or shared?
