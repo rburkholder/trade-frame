@@ -59,7 +59,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 , m_stateStochastic( EStateStochastic::Quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
 , m_curK {}
-, m_lowerK0( 14.5 ), m_lowerK1( 15.5 ), m_upperK0( 85.5 ), m_upperK1( 84.5 )
+, m_lowerK0( 19.5 ), m_lowerK1( 20.5 ), m_upperK0( 79.5 ), m_upperK1( 80.5 )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
