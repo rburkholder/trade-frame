@@ -109,8 +109,8 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_dvChart.Add( 3, &m_ceStochastic );
   m_dvChart.Add( 3, &m_ceStochasticSmoothed );
   //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
-  m_dvChart.Add( 4, &m_cePositionPL );
-  m_dvChart.Add( 5, &m_ceStochasticSize );
+  m_dvChart.Add( 4, &m_ceStochasticSize );
+  m_dvChart.Add( 5, &m_cePositionPL );
 }
 
 Strategy::~Strategy() {
