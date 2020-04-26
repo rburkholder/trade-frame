@@ -96,6 +96,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 
   m_ceStochastic.SetColour( ou::Colour::Aquamarine );
   m_ceStochasticSmoothed.SetName( "Fast Stoch" );
+  m_ceStochasticSize.SetName( "Fast Stoch Size" );
   m_cePositionPL.SetName( "Position P/L");
 
   m_ceStochasticLimits.AddMark( 100.0, ou::Colour::DarkGray, "Top" );
@@ -109,6 +110,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_dvChart.Add( 3, &m_ceStochasticSmoothed );
   //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
   m_dvChart.Add( 4, &m_cePositionPL );
+  m_dvChart.Add( 5, &m_ceStochasticSize );
 }
 
 Strategy::~Strategy() {
@@ -308,6 +310,7 @@ void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
   // need indicator of where in trades are.
 
   m_ceStochasticSmoothed.Append( price );
+  m_ceStochasticSize.Append( price.DateTime(), m_stochastic.Size() );
 
   double K( price.Value() );
 

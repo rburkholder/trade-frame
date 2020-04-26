@@ -41,6 +41,10 @@ TSSWStochastic::TSSWStochastic( const TSSWStochastic& rhs)
 TSSWStochastic::~TSSWStochastic(void) {
 }
 
+double TSSWStochastic::Size( void ) const {
+  return ( minmax::Max() - minmax::Min() );
+}
+
 void TSSWStochastic::Add( const Quote& quote ) {
   if ( quote.IsNonZero() ) {
     double tmp = quote.Midpoint();

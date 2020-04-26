@@ -71,6 +71,7 @@ private:
   ou::ChartEntryShape m_ceStop;
   ou::ChartEntryIndicator m_ceStochastic;
   ou::ChartEntryIndicator m_ceStochasticSmoothed;
+  ou::ChartEntryIndicator m_ceStochasticSize;
   ou::ChartEntryMark m_ceStochasticLimits;
   ou::ChartEntryIndicator m_cePositionPL;
 
