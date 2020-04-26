@@ -93,6 +93,8 @@ private:
     ~Instance() {
       if ( nullptr != m_pWinChartView ) {
         m_pWinChartView->SetChartDataView( nullptr );
+        m_pWinChartView->Destroy();
+        m_pWinChartView = nullptr;
       }
 
     }
