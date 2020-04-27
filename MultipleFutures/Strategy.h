@@ -146,6 +146,8 @@ private:
   double m_curK;
   const double m_upperK0; // hysteresis cross up
   const double m_upperK1; // hysteresis cross down
+  const double m_upperK2; // hysteresis mid
+  const double m_lowerK2; // hysteresis mid
   const double m_lowerK1; // hysteresis cross up
   const double m_lowerK0; // hysteresis cross down
 
@@ -159,7 +161,7 @@ private:
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  void UpdateStochasticSmoothed( const ou::tf::Price& );
+  void UpdateStochasticSmoothed1( const ou::tf::Price& );
 
   void HandleBarComplete( const ou::tf::Bar& );
 

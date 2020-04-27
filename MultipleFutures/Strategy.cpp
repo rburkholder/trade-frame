@@ -59,7 +59,8 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 , m_stateStochastic( EStateStochastic::Quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
 , m_curK {}
-, m_lowerK0( 19.5 ), m_lowerK1( 20.5 ), m_upperK0( 79.5 ), m_upperK1( 80.5 )
+, m_lowerK0( 19.5 ), m_lowerK1( 20.5 ), m_lowerK2( 49.5 )
+, m_upperK0( 80.5 ), m_upperK1( 79.5 ), m_upperK2( 50.5 )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
@@ -70,7 +71,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed ) );
+  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
 
   ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
   std::cout << "ou::TimeSource::Instance().External(): " << dtNow << std::endl;
@@ -114,7 +115,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 }
 
 Strategy::~Strategy() {
-  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed ) );
+  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
   m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &Strategy::HandleUnRealizedPL) );
   m_pPosition->OnExecution.Remove( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -305,7 +306,7 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-void Strategy::UpdateStochasticSmoothed( const ou::tf::Price& price ) {
+void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
   // run the states.  let the trades run/stop to completion.
   // need indicator of where in trades are.
 
