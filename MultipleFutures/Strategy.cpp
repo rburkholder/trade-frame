@@ -59,8 +59,9 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 , m_stateStochastic( EStateStochastic::Quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
 , m_curK {}
-, m_lowerK0( 19.5 ), m_lowerK1( 20.5 ), m_lowerK2( 49.5 )
-, m_upperK0( 80.5 ), m_upperK1( 79.5 ), m_upperK2( 50.5 )
+, m_upperK0( 50.5 ), m_upperK1( 79.5 ), m_upperK2( 80.5 )
+, m_middle( 50.0 )
+, m_lowerK0( 49.5 ), m_lowerK1( 20.5 ), m_lowerK2( 19.5 )
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
@@ -112,6 +113,35 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
   m_dvChart.Add( 4, &m_ceStochasticSize );
   m_dvChart.Add( 5, &m_cePositionPL );
+
+  std::vector<double> s2 = { 0.0, 5.0, 20.0, 30.0, 49.6, 50.0, 50.4, 70.0, 80.0, 95.0, 100.0 };
+  for ( double value: s2 ) {
+    std::cout << "'" << value << "=";
+    switch ( StateStochastic2( value ) ) {
+      case EStateStochastic2::upper2:
+        std::cout << "upper2";
+        break;
+      case EStateStochastic2::upper1:
+        std::cout << "upper1";
+        break;
+      case EStateStochastic2::upper0:
+        std::cout << "upper0";
+        break;
+      case EStateStochastic2::zero:
+        std::cout << "zero";
+        break;
+      case EStateStochastic2::lower0:
+        std::cout << "lower0";
+        break;
+      case EStateStochastic2::lower1:
+        std::cout << "lower1";
+        break;
+      case EStateStochastic2::lower2:
+        std::cout << "lower2";
+        break;
+    }
+    std::cout << "'" << std::endl;
+  }
 }
 
 Strategy::~Strategy() {
@@ -306,6 +336,66 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
+Strategy::EStateStochastic2 Strategy::StateStochastic2( double K ) {
+
+  EStateStochastic2 state( EStateStochastic2::quiesced );
+
+  if ( 50.0 == K ) {
+    state = EStateStochastic2::zero;
+  }
+  else {
+    if ( 50.0 < K ) {
+      if ( m_upperK1 < K ) {
+        if ( m_upperK2 < K ) {
+          state = EStateStochastic2::upper2;
+        }
+        else {
+          state = EStateStochastic2::upper1;
+        }
+      }
+      else {
+        if ( m_upperK0 < K ) {
+          state = EStateStochastic2::upper0;
+        }
+        else {
+          state = EStateStochastic2::zero;
+        }
+
+      }
+    }
+    else {
+      if ( m_lowerK1 < K ) {
+        if ( m_lowerK0 < K ) {
+          state = EStateStochastic2::zero;
+        }
+        else {
+          state = EStateStochastic2::lower0;
+        }
+      }
+      else {
+        if ( m_lowerK2 < K ) {
+          state = EStateStochastic2::lower1;
+        }
+        else {
+          state = EStateStochastic2::lower2;
+        }
+      }
+    }
+  }
+
+  return state;
+}
+
+void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& price ) {
+
+  m_ceStochasticSmoothed.Append( price );
+  m_ceStochasticSize.Append( price.DateTime(), m_stochastic.Size() );
+
+  double K( price.Value() );
+
+
+}
+
 void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
   // run the states.  let the trades run/stop to completion.
   // need indicator of where in trades are.
@@ -325,15 +415,15 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
       }
       break;
     case EStateStochastic::WaitForFirstCrossing:
-      if ( m_upperK0 < K ) {
+      if ( m_upperK2 < K ) {
         m_stateStochastic = EStateStochastic::HiCrossedUp;
       }
-      if ( m_lowerK0 > K ) {
+      if ( m_lowerK2 > K ) {
         m_stateStochastic = EStateStochastic::LoCrossedDown;
       }
       break;
     case EStateStochastic::WaitForHiCrossUp:
-      if ( m_upperK0 < K ) {
+      if ( m_upperK2 < K ) {
         m_stateStochastic = EStateStochastic::HiCrossedUp;
         switch ( m_state ) {
           case EState::exit_tracking:
@@ -367,7 +457,7 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
 //    case EStateStochastic::HiCrossedDown:
 //      break;
     case EStateStochastic::WaitForLoCrossDown:
-      if ( m_lowerK0 > K ) {
+      if ( m_lowerK2 > K ) {
         m_stateStochastic = EStateStochastic::LoCrossedDown;
         switch ( m_state ) {
           case EState::exit_tracking:

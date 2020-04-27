@@ -147,6 +147,7 @@ private:
   const double m_upperK0; // hysteresis cross up
   const double m_upperK1; // hysteresis cross down
   const double m_upperK2; // hysteresis mid
+  const double m_middle;
   const double m_lowerK2; // hysteresis mid
   const double m_lowerK1; // hysteresis cross up
   const double m_lowerK0; // hysteresis cross down
@@ -158,10 +159,20 @@ private:
     };
   EStateStochastic m_stateStochastic;
 
+  enum class EStateStochastic2 {
+    quiesced, zero,
+    upper0, upper1, upper2,
+    lower0, lower1, lower2
+  };
+  EStateStochastic2 m_stateStochastic2;
+
+  EStateStochastic2 StateStochastic2( double );
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
   void UpdateStochasticSmoothed1( const ou::tf::Price& );
+  void UpdateStochasticSmoothed2( const ou::tf::Price& );
 
   void HandleBarComplete( const ou::tf::Bar& );
 
