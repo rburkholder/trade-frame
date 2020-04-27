@@ -268,6 +268,13 @@ void AppMultipleFutures::OnClose( wxCloseEvent& event ) { // step 1
 
   m_vInstance.clear();
 
+  m_nbStrategy->Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &AppMultipleFutures::OnNotebookPageChanging, this );
+  m_nbStrategy->Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &AppMultipleFutures::OnNotebookPageChanged, this );
+  //m_nbStrategy->DeleteAllPages();
+  while ( 0 != m_nbStrategy->GetPageCount() ) {
+    m_nbStrategy->RemovePage( 0 );
+  }
+
   event.Skip();  // auto followed by Destroy();
 }
 

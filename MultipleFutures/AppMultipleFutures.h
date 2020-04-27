@@ -73,7 +73,7 @@ private:
   //ou::ChartMaster m_chart;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pWinChartView_t = ou::tf::WinChartView*; // should this be instead unique or shared?
+  using pWinChartView_t = ou::tf::WinChartView*;
   using pStrategy_t = std::unique_ptr<Strategy>;
 
   struct Instance {
@@ -96,7 +96,6 @@ private:
         m_pWinChartView->Destroy();
         m_pWinChartView = nullptr;
       }
-
     }
   };
 
@@ -142,7 +141,7 @@ private:
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    if ( 2 == version ) {
+    if ( 2 <= version ) {
       int pos;
       ar & pos;
       m_splitLogGraph->SetSashPosition( pos );
