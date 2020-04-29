@@ -34,6 +34,7 @@
 #include <wx/utils.h>
 
 #include "Strategy.h"
+#include "TFTrading/TradingEnumerations.h"
 
 namespace {
   static const size_t nBars { 2 };
@@ -56,12 +57,14 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
       m_tsK.Append( k );
     }
     )
-, m_stateStochastic( EStateStochastic::Quiesced )
+, m_stateStochastic1( EStateStochastic1::Quiesced )
+, m_stateStochastic2( EStochastic2::quiesced )
 , m_smaK( m_tsK, 1, seconds( nSecondsPerBar ) )
 , m_curK {}
 , m_upperK0( 50.5 ), m_upperK1( 79.5 ), m_upperK2( 80.5 )
 , m_middle( 50.0 )
 , m_lowerK0( 49.5 ), m_lowerK1( 20.5 ), m_lowerK2( 19.5 )
+, m_stopPriorToCrossing {}
 {
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
@@ -72,7 +75,8 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
+  //dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
+  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed2 ) );
 
   ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
   std::cout << "ou::TimeSource::Instance().External(): " << dtNow << std::endl;
@@ -114,38 +118,42 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_dvChart.Add( 4, &m_ceStochasticSize );
   m_dvChart.Add( 5, &m_cePositionPL );
 
-  std::vector<double> s2 = { 0.0, 5.0, 20.0, 30.0, 49.6, 50.0, 50.4, 70.0, 80.0, 95.0, 100.0 };
-  for ( double value: s2 ) {
-    std::cout << "'" << value << "=";
-    switch ( StateStochastic2( value ) ) {
-      case EStateStochastic2::upper2:
-        std::cout << "upper2";
-        break;
-      case EStateStochastic2::upper1:
-        std::cout << "upper1";
-        break;
-      case EStateStochastic2::upper0:
-        std::cout << "upper0";
-        break;
-      case EStateStochastic2::zero:
-        std::cout << "zero";
-        break;
-      case EStateStochastic2::lower0:
-        std::cout << "lower0";
-        break;
-      case EStateStochastic2::lower1:
-        std::cout << "lower1";
-        break;
-      case EStateStochastic2::lower2:
-        std::cout << "lower2";
-        break;
+  // test categorization
+  if ( false ) {
+    std::vector<double> s2 = { 0.0, 5.0, 20.0, 30.0, 49.6, 50.0, 50.4, 70.0, 80.0, 95.0, 100.0 };
+    for ( double value: s2 ) {
+      std::cout << "'" << value << "=";
+      switch ( Stochastic2( value ) ) {
+        case EStochastic2::upper2:
+          std::cout << "upper2";
+          break;
+        case EStochastic2::upper1:
+          std::cout << "upper1";
+          break;
+        case EStochastic2::upper0:
+          std::cout << "upper0";
+          break;
+        case EStochastic2::middle:
+          std::cout << "middle";
+          break;
+        case EStochastic2::lower0:
+          std::cout << "lower0";
+          break;
+        case EStochastic2::lower1:
+          std::cout << "lower1";
+          break;
+        case EStochastic2::lower2:
+          std::cout << "lower2";
+          break;
+      }
+      std::cout << "'" << std::endl;
     }
-    std::cout << "'" << std::endl;
   }
 }
 
 Strategy::~Strategy() {
-  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
+  //dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
+  dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Remove( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed2 ) );
   m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &Strategy::HandleUnRealizedPL) );
   m_pPosition->OnExecution.Remove( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -153,17 +161,35 @@ Strategy::~Strategy() {
   m_bfBar.SetOnBarComplete( nullptr );
 }
 
-void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
+void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
   static const double multiplier( 2.0 );
   // TODO: need to track orders, nothing new while existing ones active?
   m_trade.offset = multiplier * m_dblAverageBarSize;
-  m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
   double min = multiplier * m_trade.tick;
   if ( min > m_trade.offset ) m_trade.offset = min;
   //const double dblEntry = m_tradeLast.Price();
   //const double dblEntry = m_quoteLast.Midpoint();
   //const double dblUpper = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry + dblOffset );
   //const double dblLower = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry - dblOffset );
+  Entry( side );
+}
+
+void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side ) {
+  static const double multiplier( 2.0 );
+  double min = multiplier * m_trade.tick;
+  m_trade.offset = m_stopUpper - m_stopLower;
+  if ( min > m_trade.offset ) m_trade.offset = min;
+  // TODO: fix so that the stop is dragged up / down slowly, until just beyond the other crossing line
+//  switch ( side ) {
+//    case ou::tf::OrderSide::Buy:
+//      break;
+//    case ou::tf::OrderSide::Sell:
+//      break;
+//  }
+  Entry( side );
+}
+
+void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
   if ( 0.0 < m_tradeLast.Price() ) {
     m_trade.side = side;
     switch ( side ) {
@@ -302,8 +328,8 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   ou::tf::Quote::price_t bid( quote.Bid() );
   ou::tf::Quote::price_t ask( quote.Ask() );
   if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
-    ou::ChartDVBasics::HandleQuote( quote );
     m_quoteLast = quote; // actions can use latest quote
+    ou::ChartDVBasics::HandleQuote( quote );
     TimeTick( quote );
   }
 }
@@ -336,29 +362,29 @@ void Strategy::HandleBarComplete( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-Strategy::EStateStochastic2 Strategy::StateStochastic2( double K ) {
+Strategy::EStochastic2 Strategy::Stochastic2( double K ) {
 
-  EStateStochastic2 state( EStateStochastic2::quiesced );
+  EStochastic2 state( EStochastic2::quiesced );
 
   if ( 50.0 == K ) {
-    state = EStateStochastic2::zero;
+    state = EStochastic2::middle;
   }
   else {
     if ( 50.0 < K ) {
       if ( m_upperK1 < K ) {
         if ( m_upperK2 < K ) {
-          state = EStateStochastic2::upper2;
+          state = EStochastic2::upper2;
         }
         else {
-          state = EStateStochastic2::upper1;
+          state = EStochastic2::upper1;
         }
       }
       else {
         if ( m_upperK0 < K ) {
-          state = EStateStochastic2::upper0;
+          state = EStochastic2::upper0;
         }
         else {
-          state = EStateStochastic2::zero;
+          state = EStochastic2::middle;
         }
 
       }
@@ -366,18 +392,18 @@ Strategy::EStateStochastic2 Strategy::StateStochastic2( double K ) {
     else {
       if ( m_lowerK1 < K ) {
         if ( m_lowerK0 < K ) {
-          state = EStateStochastic2::zero;
+          state = EStochastic2::middle;
         }
         else {
-          state = EStateStochastic2::lower0;
+          state = EStochastic2::lower0;
         }
       }
       else {
         if ( m_lowerK2 < K ) {
-          state = EStateStochastic2::lower1;
+          state = EStochastic2::lower1;
         }
         else {
-          state = EStateStochastic2::lower2;
+          state = EStochastic2::lower2;
         }
       }
     }
@@ -386,13 +412,114 @@ Strategy::EStateStochastic2 Strategy::StateStochastic2( double K ) {
   return state;
 }
 
-void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& price ) {
+void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
 
-  m_ceStochasticSmoothed.Append( price );
-  m_ceStochasticSize.Append( price.DateTime(), m_stochastic.Size() );
+  m_ceStochasticSmoothed.Append( smoothed );
+  m_ceStochasticSize.Append( smoothed.DateTime(), m_stochastic.Size() );
 
-  double K( price.Value() );
+  double K( smoothed.Value() );
 
+  EStochastic2 stateStochastic2 = Stochastic2( K );
+
+  switch ( m_state ) {
+    case EState::entry_wait:
+      if ( stateStochastic2 != m_stateStochastic2 ) {
+        switch ( stateStochastic2 ) {
+          case EStochastic2::quiesced:
+            m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
+            break;
+          case EStochastic2::wait:
+            if ( EStochastic2::middle == stateStochastic2 ) {
+              m_stateStochastic2 = EStochastic2::middle;
+            }
+            break;
+          case EStochastic2::upper2:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::upper1:
+              case EStochastic2::upper0:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
+                break;
+            }
+            break;
+          case EStochastic2::upper1:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::upper2:
+                m_stopUpper = m_stopPriorToCrossing;
+                break;
+              case EStochastic2::upper0:
+              case EStochastic2::middle:
+                m_stopLower = m_stopPriorToCrossing;
+                break;
+            }
+            break;
+          case EStochastic2::upper0:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::middle:
+              case EStochastic2::lower0:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
+                break;
+              case EStochastic2::upper2:
+              case EStochastic2::upper1:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+            }
+            break;
+          case EStochastic2::middle:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::upper1:
+              case EStochastic2::upper0:
+                m_stopUpper = m_stopPriorToCrossing;
+                break;
+              case EStochastic2::lower0:
+              case EStochastic2::lower1:
+                m_stopLower = m_stopPriorToCrossing;
+                break;
+            }
+            break;
+          case EStochastic2::lower0:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::lower1:
+              case EStochastic2::lower2:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
+                break;
+              case EStochastic2::upper0:
+              case EStochastic2::middle:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+            }
+            break;
+          case EStochastic2::lower1:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::middle:
+              case EStochastic2::lower0:
+                m_stopUpper = m_stopPriorToCrossing;
+                break;
+              case EStochastic2::lower2:
+                m_stopLower = m_stopPriorToCrossing;
+                break;
+            }
+            break;
+          case EStochastic2::lower2:
+            switch ( m_stateStochastic2 ) {
+              case EStochastic2::lower0:
+              case EStochastic2::lower1:
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+            }
+            break;
+        }
+      }
+      break;
+  }
+
+  m_stateStochastic2 = stateStochastic2;
+  m_stopPriorToCrossing = m_pWatch->GetQuotes().last().Midpoint();
 
 }
 
@@ -405,26 +532,27 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
 
   double K( price.Value() );
 
-  switch ( m_stateStochastic ) {
-    case EStateStochastic::Quiesced:
+  switch ( m_stateStochastic1 ) {
+    case EStateStochastic1::Quiesced:
       // needs external source to force state change (after delta time)
+      m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
       break;
-    case EStateStochastic::WaitForNeutral:
+    case EStateStochastic1::WaitForNeutral:
       if ( ( m_upperK1 > K ) && ( m_lowerK1 < K ) ) {
-        m_stateStochastic = EStateStochastic::WaitForFirstCrossing;
+        m_stateStochastic1 = EStateStochastic1::WaitForFirstCrossing;
       }
       break;
-    case EStateStochastic::WaitForFirstCrossing:
+    case EStateStochastic1::WaitForFirstCrossing:
       if ( m_upperK2 < K ) {
-        m_stateStochastic = EStateStochastic::HiCrossedUp;
+        m_stateStochastic1 = EStateStochastic1::HiCrossedUp;
       }
       if ( m_lowerK2 > K ) {
-        m_stateStochastic = EStateStochastic::LoCrossedDown;
+        m_stateStochastic1 = EStateStochastic1::LoCrossedDown;
       }
       break;
-    case EStateStochastic::WaitForHiCrossUp:
+    case EStateStochastic1::WaitForHiCrossUp:
       if ( m_upperK2 < K ) {
-        m_stateStochastic = EStateStochastic::HiCrossedUp;
+        m_stateStochastic1 = EStateStochastic1::HiCrossedUp;
         switch ( m_state ) {
           case EState::exit_tracking:
             m_state = EState::exit_filling;
@@ -443,22 +571,22 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
 //        }
 //      }
       break;
-    case EStateStochastic::HiCrossedUp:
+    case EStateStochastic1::HiCrossedUp:
       if ( m_upperK1 > K ) {
-        m_stateStochastic = EStateStochastic::WaitForLoCrossDown;
+        m_stateStochastic1 = EStateStochastic1::WaitForLoCrossDown;
         switch ( m_state ) {
           case EState::entry_wait:
             m_state = EState::entry_filling;
-            Entry( ou::tf::OrderSide::Sell );
+            Entry1( ou::tf::OrderSide::Sell );
             break;
         }
       }
       break;
 //    case EStateStochastic::HiCrossedDown:
 //      break;
-    case EStateStochastic::WaitForLoCrossDown:
+    case EStateStochastic1::WaitForLoCrossDown:
       if ( m_lowerK2 > K ) {
-        m_stateStochastic = EStateStochastic::LoCrossedDown;
+        m_stateStochastic1 = EStateStochastic1::LoCrossedDown;
         switch ( m_state ) {
           case EState::exit_tracking:
             m_state = EState::exit_filling;
@@ -477,13 +605,13 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
 //        }
 //      }
       break;
-    case EStateStochastic::LoCrossedDown:
+    case EStateStochastic1::LoCrossedDown:
       if ( m_lowerK1 < K ) {
-        m_stateStochastic = EStateStochastic::WaitForHiCrossUp;
+        m_stateStochastic1 = EStateStochastic1::WaitForHiCrossUp;
         switch ( m_state ) {
           case EState::entry_wait:
             m_state = EState::entry_filling;
-            Entry( ou::tf::OrderSide::Buy );
+            Entry1( ou::tf::OrderSide::Buy );
             break;
         }
       }
@@ -587,12 +715,13 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) {
       case EState::initial:
         if ( nBars <= m_cntBars ) {
           m_state = EState::entry_wait;
-          m_stateStochastic = EStateStochastic::WaitForFirstCrossing;
+          m_stateStochastic1 = EStateStochastic1::WaitForFirstCrossing;
+          m_stateStochastic2 = EStochastic2::wait;
         }
         break;
       case EState::entry_wait:
         {
-          // trades generated in UpdateStochasticSmoothed
+          // trades generated in UpdateStochasticSmoothedx
         }
         break;
       case EState::entry_filling:

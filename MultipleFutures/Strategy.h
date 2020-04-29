@@ -152,21 +152,25 @@ private:
   const double m_lowerK1; // hysteresis cross up
   const double m_lowerK0; // hysteresis cross down
 
-  enum class EStateStochastic {
+  enum class EStateStochastic1 {
     Quiesced, WaitForFirstCrossing, WaitForNeutral,
     WaitForHiCrossUp, HiCrossedUp, //HiCrossedDown,
     WaitForLoCrossDown, LoCrossedDown, //LoCrossedUp
     };
-  EStateStochastic m_stateStochastic;
+  EStateStochastic1 m_stateStochastic1;
 
-  enum class EStateStochastic2 {
-    quiesced, zero,
+  enum class EStochastic2 {
+    quiesced, wait,
     upper0, upper1, upper2,
+    middle,
     lower0, lower1, lower2
   };
-  EStateStochastic2 m_stateStochastic2;
+  EStochastic2 m_stateStochastic2;
+  double m_stopUpper;
+  double m_stopLower;
+  double m_stopPriorToCrossing;
 
-  EStateStochastic2 StateStochastic2( double );
+  EStochastic2 Stochastic2( double );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
@@ -177,6 +181,8 @@ private:
   void HandleBarComplete( const ou::tf::Bar& );
 
   void Entry( ou::tf::OrderSide::enumOrderSide );
+  void Entry1( ou::tf::OrderSide::enumOrderSide );
+  void Entry2( ou::tf::OrderSide::enumOrderSide );
   void Exit( ou::tf::Quote::dt_t, double exit, const std::string& sComment );
   void CancelOrders();
 
