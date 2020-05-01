@@ -34,7 +34,6 @@
 #include <wx/utils.h>
 
 #include "Strategy.h"
-#include "TFTrading/TradingEnumerations.h"
 
 namespace {
   static const size_t nBars { 2 };
@@ -664,45 +663,48 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   }
 }
 
+void Strategy::StopTest( const ou::tf::Quote& quote ) {
+  switch ( m_trade.side ) {
+    case ou::tf::OrderSide::Buy: {
+      if ( m_trade.trail > quote.Ask() ) {
+        m_state = EState::exit_filling;
+        Exit( quote.DateTime(), quote.Ask(), "Buy Stop" );
+      }
+      else {
+        double trail = quote.Bid() - m_trade.offset;
+        if ( trail > m_trade.trail ) {
+          m_trade.trail = trail;
+          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+          //m_trade.offset -= m_trade.tick;
+          //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
+        }
+      }
+      }
+      break;
+    case ou::tf::OrderSide::Sell: {
+      if ( m_trade.trail < quote.Bid() ) {
+        m_state = EState::exit_filling;
+        Exit( quote.DateTime(), quote.Bid(), "Sell Stop" );
+      }
+      else {
+        double trail = quote.Ask() + m_trade.offset;
+        if ( trail < m_trade.trail ){
+          m_trade.trail = trail;
+          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+          //m_trade.offset -= m_trade.tick;
+          //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
+        }
+      }
+      }
+      break;
+  }
+}
+
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // Check stops
   switch ( m_state ) {
-    case EState::exit_tracking: {
-        switch ( m_trade.side ) {
-          case ou::tf::OrderSide::Buy: {
-            if ( m_trade.trail > quote.Ask() ) {
-              m_state = EState::exit_filling;
-              Exit( quote.DateTime(), quote.Ask(), "Buy Stop" );
-            }
-            else {
-              double trail = quote.Bid() - m_trade.offset;
-              if ( trail > m_trade.trail ) {
-                m_trade.trail = trail;
-                m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-                //m_trade.offset -= m_trade.tick;
-                //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
-              }
-            }
-            }
-            break;
-          case ou::tf::OrderSide::Sell: {
-            if ( m_trade.trail < quote.Bid() ) {
-              m_state = EState::exit_filling;
-              Exit( quote.DateTime(), quote.Bid(), "Sell Stop" );
-            }
-            else {
-              double trail = quote.Ask() + m_trade.offset;
-              if ( trail < m_trade.trail ){
-                m_trade.trail = trail;
-                m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-                //m_trade.offset -= m_trade.tick;
-                //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
-              }
-            }
-            }
-            break;
-        }
-      }
+    case EState::exit_tracking:
+      StopTest( quote );
       break;
   }
 }

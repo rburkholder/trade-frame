@@ -180,6 +180,8 @@ private:
 
   void HandleBarComplete( const ou::tf::Bar& );
 
+  void StopTest( const ou::tf::Quote& quote );
+
   void Entry( ou::tf::OrderSide::enumOrderSide );
   void Entry1( ou::tf::OrderSide::enumOrderSide );
   void Entry2( ou::tf::OrderSide::enumOrderSide );
