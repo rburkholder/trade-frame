@@ -79,11 +79,13 @@ private:
     ou::tf::OrderSide::enumOrderSide side;
     double entry;
     double offset;
-    //double stop;
+    double stop;
     double trail;
     double tick;
-    Trade(): entry {}, side( ou::tf::OrderSide::Unknown ) {}
-    Trade( ou::tf::OrderSide::enumOrderSide side_, double entry_, double offset_ ) {
+    Trade(): entry {}, stop {}, trail {}, offset {}, side( ou::tf::OrderSide::Unknown ) {}
+    Trade( ou::tf::OrderSide::enumOrderSide side_, double entry_, double offset_ )
+    : Trade()
+    {
       side = side_;
       offset = offset_;
       switch ( side ) {
@@ -94,7 +96,7 @@ private:
       }
     }
     void Emit( std::ostream& io ) {
-      io << entry << ", " << offset << "," << trail;;
+      io << "trade: " << entry << "," << offset << "," << trail;;
     }
   };
   Trade m_trade;
@@ -166,9 +168,6 @@ private:
     lower0, lower1, lower2
   };
   EStochastic2 m_stateStochastic2;
-  double m_stopUpper;
-  double m_stopLower;
-  double m_stopPriorToCrossing;
 
   EStochastic2 Stochastic2( double );
 
@@ -180,7 +179,7 @@ private:
 
   void HandleBarComplete( const ou::tf::Bar& );
 
-  void StopTest( const ou::tf::Quote& quote );
+  void StopTest1( const ou::tf::Quote& quote );
 
   void Entry( ou::tf::OrderSide::enumOrderSide );
   void Entry1( ou::tf::OrderSide::enumOrderSide );
