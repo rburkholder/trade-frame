@@ -29,6 +29,7 @@
  // TODO: narrow the stop range, or, if let profit run, then leave at two bars
  // TODO: need shorter range bollinger bands
  // TODO: add statistics to monitor min/max p/l in each in-market
+ // TODO: translate K to price, and mark on main price chart
 
 #include <wx/utils.h>
 
@@ -103,17 +104,20 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_ceStochasticSize.SetName( "Fast Stoch Size" );
   m_cePositionPL.SetName( "Position P/L");
 
-  m_ceStochasticLimits.AddMark( 100.0, ou::Colour::DarkGray, "Top" );
-  //m_ceStochasticLimits.AddMark( m_upperK, ou::Colour::Black, "Upper" );
-  m_ceStochasticLimits.AddMark(  50.0, ou::Colour::DarkGray, "Middle" );
-  //m_ceStochasticLimits.AddMark( m_lowerK, ou::Colour::Black, "Lower" );
-  m_ceStochasticLimits.AddMark(   0.0, ou::Colour::DarkGray, "Bottom" );
+  m_ceStochasticLimits.AddMark( 100.0, ou::Colour::Black, "Top" );
+  m_ceStochasticLimits.AddMark(  80.0, ou::Colour::DarkOrange, "Upper" );
+  m_ceStochasticLimits.AddMark(  50.0, ou::Colour::DarkSalmon, "Middle" );
+  m_ceStochasticLimits.AddMark(  20.0, ou::Colour::DarkOrange, "Lower" );
+  m_ceStochasticLimits.AddMark(   0.0, ou::Colour::Black, "Bottom" );
 
+  m_cePositionPLZero.AddMark( 0.0, ou::Colour::Black, "0.0" );
+
+  m_dvChart.Add( 3, &m_ceStochasticSmoothed );
   m_dvChart.Add( 3, &m_ceStop );
   m_dvChart.Add( 3, &m_ceStochastic );
-  m_dvChart.Add( 3, &m_ceStochasticSmoothed );
-  //m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
+  m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
   m_dvChart.Add( 4, &m_ceStochasticSize );
+  m_dvChart.Add( 5, &m_cePositionPLZero );
   m_dvChart.Add( 5, &m_cePositionPL );
 
   // test categorization
@@ -193,8 +197,10 @@ void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side ) {
   // TODO: fix so that the stop is dragged up / down slowly, until just beyond the other crossing line
   switch ( side ) {
     case ou::tf::OrderSide::Buy:
+      m_trade.entry = m_quoteLast.Ask();  // TODO: set based upon execution price
       break;
     case ou::tf::OrderSide::Sell:
+      m_trade.entry = m_quoteLast.Bid();  // TODO: set based upon execution price
       break;
   }
   Entry( side );

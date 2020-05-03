@@ -74,6 +74,7 @@ private:
   ou::ChartEntryIndicator m_ceStochasticSize;
   ou::ChartEntryMark m_ceStochasticLimits;
   ou::ChartEntryIndicator m_cePositionPL;
+  ou::ChartEntryMark m_cePositionPLZero;
 
   struct Trade {
     ou::tf::OrderSide::enumOrderSide side;
