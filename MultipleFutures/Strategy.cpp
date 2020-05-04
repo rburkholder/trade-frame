@@ -213,7 +213,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy: {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
-        m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+        //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -248,7 +248,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
       case ou::tf::OrderSide::enumOrderSide::Sell: {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
-        m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+        //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
           ou::tf::OrderSide::enumOrderSide::Sell,
@@ -486,6 +486,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait: // starting point
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper2" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Buy );
                     break;
@@ -524,6 +525,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait:
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 rise" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Buy );
                     break;
@@ -544,6 +546,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait: // starting point
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 fall" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Sell );
                     break;
@@ -585,6 +588,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait:
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 rise" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Buy );
                     break;
@@ -598,6 +602,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait:
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 fall" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Sell );
                     break;
@@ -636,6 +641,7 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
                   case EState::entry_wait:
                     m_trade.offset = 1.0;
                     m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower2" );
                     m_state = EState::entry_filling;
                     Entry2( ou::tf::OrderSide::Sell );
                     break;
@@ -665,7 +671,7 @@ void Strategy::AdjustBuyStop( double K ) {
   double trail = K - m_trade.offset;
   if ( trail > m_trade.trail ) {  // maybe in 0.10 steps?
     m_trade.trail = trail;
-    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust buy" );
   }
 }
 
@@ -673,7 +679,7 @@ void Strategy::AdjustSellStop( double K ) {
   double trail = K + m_trade.offset;
   if ( trail < m_trade.trail ){  // maybe in 0.10 steps?
     m_trade.trail = trail;
-    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust sell" );
   }
 }
 
@@ -792,10 +798,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_state = EState::exit_tracking;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
-          ou::ChartDVBasics::m_ceShortEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
+          ou::ChartDVBasics::m_ceLongEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
           break;
         case ou::tf::OrderSide::Sell:
-          ou::ChartDVBasics::m_ceLongEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "filled" );
+          ou::ChartDVBasics::m_ceShortEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
           break;
       }
       break;
@@ -830,7 +836,7 @@ void Strategy::StopTest1( const ou::tf::Quote& quote ) {
         double trail = quote.Bid() - m_trade.offset;
         if ( trail > m_trade.trail ) {
           m_trade.trail = trail;
-          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "StopTest1 buy" );
           //m_trade.offset -= m_trade.tick;
           //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
         }
@@ -845,7 +851,7 @@ void Strategy::StopTest1( const ou::tf::Quote& quote ) {
         double trail = quote.Ask() + m_trade.offset;
         if ( trail < m_trade.trail ){
           m_trade.trail = trail;
-          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+          m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "StopTest1 sell" );
           //m_trade.offset -= m_trade.tick;
           //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
         }

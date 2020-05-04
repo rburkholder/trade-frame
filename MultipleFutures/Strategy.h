@@ -97,7 +97,7 @@ private:
       }
     }
     void Emit( std::ostream& io ) {
-      io << "trade: " << entry << "," << offset << "," << trail;;
+      io << "trade: " << entry << "," << offset << "," << stop << "," << trail;;
     }
   };
   Trade m_trade;
