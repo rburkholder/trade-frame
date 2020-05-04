@@ -429,37 +429,90 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
 
   EStochastic2 stateStochastic2 = Stochastic2( K );
 
+  if ( EState::exit_tracking == m_state ) { // initial test for stop
+    switch ( m_trade.side ) {
+      case ou::tf::OrderSide::Buy:
+        if ( m_trade.stop > K ) {
+          m_state = EState::exit_filling;  // note the state change (skips the next m_state switch)
+          Exit( smoothed.DateTime(), m_quoteLast.Ask(), "Buy Stop" );
+        }
+        else {
+          if ( m_trade.trail > K ) {
+            m_state = EState::exit_filling;  // note the state change (skips the next m_state switch)
+            Exit( smoothed.DateTime(), m_quoteLast.Ask(), "Buy Stop Trail" );
+          }
+        }
+        break;
+      case ou::tf::OrderSide::Sell:
+        if ( m_trade.trail < K ) {
+          m_state = EState::exit_filling;  // note the state change (skips the next m_state switch)
+          Exit( smoothed.DateTime(), m_quoteLast.Bid(), "Sell Stop" );
+        }
+        else {
+          if ( m_trade.trail < K ) {
+            m_state = EState::exit_filling;  // note the state change (skips the next m_state switch)
+            Exit( smoothed.DateTime(), m_quoteLast.Bid(), "Sell Stop Trail" );
+          }
+        }
+        break;
+    }
+  }
+
   switch ( m_state ) {
     case EState::entry_wait:
       if ( stateStochastic2 != m_stateStochastic2 ) { // check for state change
         switch ( stateStochastic2 ) {
           case EStochastic2::quiesced:
-            m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
+            switch ( m_state ) {
+              case EState::entry_wait:
+                m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
+                break;
+            }
             break;
           case EStochastic2::wait:
-            if ( EStochastic2::middle == stateStochastic2 ) {
-              m_stateStochastic2 = EStochastic2::middle;
+            switch ( m_state ) {
+              case EState::entry_wait: // starting point
+                if ( EStochastic2::middle == stateStochastic2 ) {
+                  m_stateStochastic2 = EStochastic2::middle;
+                }
+                break;
             }
             break;
           case EStochastic2::upper2:
             switch ( m_stateStochastic2 ) {
               case EStochastic2::upper1: // rising
               case EStochastic2::upper0:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K - m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Buy );
+                switch ( m_state ) {
+                  case EState::entry_wait: // starting point
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Buy );
+                    break;
+                  case EState::exit_tracking:
+                    switch ( m_trade.side ) {
+                      case ou::tf::OrderSide::Buy:
+                        AdjustBuyStop( K );
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        break;
+                    }
+                    break;
+                }
                 break;
             }
             break;
           case EStochastic2::upper1:
             switch ( m_stateStochastic2 ) {
               case EStochastic2::upper2: // falling
-                //m_stopUpper = m_stopPriorToCrossing;
                 break;
               case EStochastic2::upper0: // rising
               case EStochastic2::middle:
-                //m_stopLower = m_stopPriorToCrossing;
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    AdjustBuyStop( 65.0 ); // halfways into upper0
+                    break;
+                }
                 break;
             }
             break;
@@ -467,17 +520,36 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
             switch ( m_stateStochastic2 ) {
               case EStochastic2::middle: // rising
               case EStochastic2::lower0:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K - m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Buy );
+                switch ( m_state ) {
+                  case EState::entry_wait:
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Buy );
+                    break;
+                  case EState::exit_tracking:
+                    switch ( m_trade.side ) {
+                      case ou::tf::OrderSide::Buy:
+                        AdjustBuyStop( K );
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        break;
+                    }
+                    break;
+                }
                 break;
               case EStochastic2::upper2: // falling
               case EStochastic2::upper1:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K + m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Sell );
+                switch ( m_state ) {
+                  case EState::entry_wait: // starting point
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Sell );
+                    break;
+                  case EState::exit_tracking:
+                    break;
+                }
                 break;
             }
             break;
@@ -485,11 +557,23 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
             switch ( m_stateStochastic2 ) {
               case EStochastic2::upper1: // falling
               case EStochastic2::upper0:
-                //m_stopUpper = m_stopPriorToCrossing;
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    break;
+                  case ou::tf::OrderSide::Sell:
+                    AdjustSellStop( 65.0 );
+                    break;
+                }
                 break;
               case EStochastic2::lower0: // rising
               case EStochastic2::lower1:
-                //m_stopLower = m_stopPriorToCrossing;
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    AdjustBuyStop( 35.0 );
+                    break;
+                  case ou::tf::OrderSide::Sell:
+                    break;
+                }
                 break;
             }
             break;
@@ -497,17 +581,36 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
             switch ( m_stateStochastic2 ) {
               case EStochastic2::lower1: // rising
               case EStochastic2::lower2:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K - m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Buy );
+                switch ( m_state ) {
+                  case EState::entry_wait:
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K - m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Buy );
+                    break;
+                  case EState::exit_tracking:
+                    break;
+                }
                 break;
               case EStochastic2::upper0: // falling
               case EStochastic2::middle:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K + m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Sell );
+                switch ( m_state ) {
+                  case EState::entry_wait:
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Sell );
+                    break;
+                  case EState::exit_tracking:
+                    switch ( m_trade.side ) {
+                      case ou::tf::OrderSide::Buy:
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        AdjustSellStop( K );
+                        break;
+                    }
+                    break;
+                }
                 break;
             }
             break;
@@ -515,10 +618,13 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
             switch ( m_stateStochastic2 ) {
               case EStochastic2::middle: // falling
               case EStochastic2::lower0:
-                //m_stopUpper = m_stopPriorToCrossing;
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Sell:
+                    AdjustSellStop( 35.0 ); // halfways into lower0
+                    break;
+                }
                 break;
               case EStochastic2::lower2: // rising
-                //m_stopLower = m_stopPriorToCrossing;
                 break;
             }
             break;
@@ -526,56 +632,51 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
             switch ( m_stateStochastic2 ) {
               case EStochastic2::lower0: // falling
               case EStochastic2::lower1:
-                m_trade.offset = 1.0;
-                m_trade.stop = m_trade.trail = K + m_trade.offset;
-                m_state = EState::entry_filling;
-                Entry2( ou::tf::OrderSide::Sell );
+                switch ( m_state ) {
+                  case EState::entry_wait:
+                    m_trade.offset = 1.0;
+                    m_trade.stop = m_trade.trail = K + m_trade.offset;
+                    m_state = EState::entry_filling;
+                    Entry2( ou::tf::OrderSide::Sell );
+                    break;
+                  case EState::exit_tracking:
+                    switch ( m_trade.side ) {
+                      case ou::tf::OrderSide::Buy:
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        AdjustSellStop( K );
+                        break;
+                    }
+                    break;
+                }
                 break;
             }
             break;
         }
       }
       break;
-    case EState::exit_tracking:
-      switch ( m_trade.side ) {
-        case ou::tf::OrderSide::Buy:
-          if ( m_trade.stop > K ) {
-            m_state = EState::exit_filling;
-            Exit( smoothed.DateTime(), m_quoteLast.Ask(), "Buy Stop" );
-          }
-          else {
-            double trail = K - m_trade.offset;
-            if ( trail > m_trade.trail ) {  // maybe in 0.10 steps?
-              m_trade.trail = trail;
-              m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-              //m_trade.offset -= m_trade.tick;
-              //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
-            }
-          }
-          break;
-        case ou::tf::OrderSide::Sell:
-          if ( m_trade.trail < K ) {
-            m_state = EState::exit_filling;
-            Exit( smoothed.DateTime(), m_quoteLast.Bid(), "Sell Stop" );
-          }
-          else {
-            double trail = K + m_trade.offset;
-            if ( trail < m_trade.trail ){  // maybe in 0.10 steps?
-              m_trade.trail = trail;
-              m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
-              //m_trade.offset -= m_trade.tick;
-              //if ( 0 >= m_trade.offset ) m_trade.offset = m_trade.tick;
-            }
-          }
-          break;
-      }
-      break;
   }
 
   m_stateStochastic2 = stateStochastic2;
-  //m_stopPriorToCrossing = m_pWatch->GetQuotes().last().Midpoint();
 
 }
+
+void Strategy::AdjustBuyStop( double K ) {
+  double trail = K - m_trade.offset;
+  if ( trail > m_trade.trail ) {  // maybe in 0.10 steps?
+    m_trade.trail = trail;
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+  }
+}
+
+void Strategy::AdjustSellStop( double K ) {
+  double trail = K + m_trade.offset;
+  if ( trail < m_trade.trail ){  // maybe in 0.10 steps?
+    m_trade.trail = trail;
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
+  }
+}
+
 
 void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
   // run the states.  let the trades run/stop to completion.

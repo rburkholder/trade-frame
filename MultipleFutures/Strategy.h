@@ -177,6 +177,8 @@ private:
 
   void UpdateStochasticSmoothed1( const ou::tf::Price& );
   void UpdateStochasticSmoothed2( const ou::tf::Price& );
+  void AdjustBuyStop( double K );
+  void AdjustSellStop( double K );
 
   void HandleBarComplete( const ou::tf::Bar& );
 
