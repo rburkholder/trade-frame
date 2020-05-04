@@ -458,209 +458,205 @@ void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
     }
   }
 
-  switch ( m_state ) {
-    case EState::entry_wait:
-      if ( stateStochastic2 != m_stateStochastic2 ) { // check for state change
-        switch ( stateStochastic2 ) {
-          case EStochastic2::quiesced:
-            switch ( m_state ) {
-              case EState::entry_wait:
-                m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
-                break;
+  if ( stateStochastic2 != m_stateStochastic2 ) { // check for state change
+    switch ( stateStochastic2 ) {
+      case EStochastic2::quiesced:
+        switch ( m_state ) {
+          case EState::entry_wait:
+            m_trade.tick = m_pWatch->GetInstrument()->GetMinTick();
+            break;
+        }
+        break;
+      case EStochastic2::wait:
+        switch ( m_state ) {
+          case EState::entry_wait: // starting point
+            if ( EStochastic2::middle == stateStochastic2 ) {
+              m_stateStochastic2 = EStochastic2::middle;
             }
             break;
-          case EStochastic2::wait:
+        }
+        break;
+      case EStochastic2::upper2:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::upper1: // rising
+          case EStochastic2::upper0:
             switch ( m_state ) {
               case EState::entry_wait: // starting point
-                if ( EStochastic2::middle == stateStochastic2 ) {
-                  m_stateStochastic2 = EStochastic2::middle;
-                }
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K - m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper2" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
                 break;
-            }
-            break;
-          case EStochastic2::upper2:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::upper1: // rising
-              case EStochastic2::upper0:
-                switch ( m_state ) {
-                  case EState::entry_wait: // starting point
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K - m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper2" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Buy );
-                    break;
-                  case EState::exit_tracking:
-                    switch ( m_trade.side ) {
-                      case ou::tf::OrderSide::Buy:
-                        AdjustBuyStop( K );
-                        break;
-                      case ou::tf::OrderSide::Sell:
-                        break;
-                    }
-                    break;
-                }
-                break;
-            }
-            break;
-          case EStochastic2::upper1:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::upper2: // falling
-                break;
-              case EStochastic2::upper0: // rising
-              case EStochastic2::middle:
+              case EState::exit_tracking:
                 switch ( m_trade.side ) {
                   case ou::tf::OrderSide::Buy:
-                    AdjustBuyStop( 65.0 ); // halfways into upper0
-                    break;
-                }
-                break;
-            }
-            break;
-          case EStochastic2::upper0:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::middle: // rising
-              case EStochastic2::lower0:
-                switch ( m_state ) {
-                  case EState::entry_wait:
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K - m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 rise" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Buy );
-                    break;
-                  case EState::exit_tracking:
-                    switch ( m_trade.side ) {
-                      case ou::tf::OrderSide::Buy:
-                        AdjustBuyStop( K );
-                        break;
-                      case ou::tf::OrderSide::Sell:
-                        break;
-                    }
-                    break;
-                }
-                break;
-              case EStochastic2::upper2: // falling
-              case EStochastic2::upper1:
-                switch ( m_state ) {
-                  case EState::entry_wait: // starting point
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K + m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 fall" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Sell );
-                    break;
-                  case EState::exit_tracking:
-                    break;
-                }
-                break;
-            }
-            break;
-          case EStochastic2::middle:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::upper1: // falling
-              case EStochastic2::upper0:
-                switch ( m_trade.side ) {
-                  case ou::tf::OrderSide::Buy:
+                    AdjustBuyStop( K );
                     break;
                   case ou::tf::OrderSide::Sell:
-                    AdjustSellStop( 65.0 );
-                    break;
-                }
-                break;
-              case EStochastic2::lower0: // rising
-              case EStochastic2::lower1:
-                switch ( m_trade.side ) {
-                  case ou::tf::OrderSide::Buy:
-                    AdjustBuyStop( 35.0 );
-                    break;
-                  case ou::tf::OrderSide::Sell:
-                    break;
-                }
-                break;
-            }
-            break;
-          case EStochastic2::lower0:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::lower1: // rising
-              case EStochastic2::lower2:
-                switch ( m_state ) {
-                  case EState::entry_wait:
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K - m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 rise" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Buy );
-                    break;
-                  case EState::exit_tracking:
-                    break;
-                }
-                break;
-              case EStochastic2::upper0: // falling
-              case EStochastic2::middle:
-                switch ( m_state ) {
-                  case EState::entry_wait:
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K + m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 fall" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Sell );
-                    break;
-                  case EState::exit_tracking:
-                    switch ( m_trade.side ) {
-                      case ou::tf::OrderSide::Buy:
-                        break;
-                      case ou::tf::OrderSide::Sell:
-                        AdjustSellStop( K );
-                        break;
-                    }
-                    break;
-                }
-                break;
-            }
-            break;
-          case EStochastic2::lower1:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::middle: // falling
-              case EStochastic2::lower0:
-                switch ( m_trade.side ) {
-                  case ou::tf::OrderSide::Sell:
-                    AdjustSellStop( 35.0 ); // halfways into lower0
-                    break;
-                }
-                break;
-              case EStochastic2::lower2: // rising
-                break;
-            }
-            break;
-          case EStochastic2::lower2:
-            switch ( m_stateStochastic2 ) {
-              case EStochastic2::lower0: // falling
-              case EStochastic2::lower1:
-                switch ( m_state ) {
-                  case EState::entry_wait:
-                    m_trade.offset = 1.0;
-                    m_trade.stop = m_trade.trail = K + m_trade.offset;
-                    m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower2" );
-                    m_state = EState::entry_filling;
-                    Entry2( ou::tf::OrderSide::Sell );
-                    break;
-                  case EState::exit_tracking:
-                    switch ( m_trade.side ) {
-                      case ou::tf::OrderSide::Buy:
-                        break;
-                      case ou::tf::OrderSide::Sell:
-                        AdjustSellStop( K );
-                        break;
-                    }
                     break;
                 }
                 break;
             }
             break;
         }
-      }
-      break;
+        break;
+      case EStochastic2::upper1:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::upper2: // falling
+            break;
+          case EStochastic2::upper0: // rising
+          case EStochastic2::middle:
+            switch ( m_trade.side ) {
+              case ou::tf::OrderSide::Buy:
+                AdjustBuyStop( 65.0 ); // halfways into upper0
+                break;
+            }
+            break;
+        }
+        break;
+      case EStochastic2::upper0:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::middle: // rising
+          case EStochastic2::lower0:
+            switch ( m_state ) {
+              case EState::entry_wait:
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K - m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 rise" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
+                break;
+              case EState::exit_tracking:
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    AdjustBuyStop( K );
+                    break;
+                  case ou::tf::OrderSide::Sell:
+                    break;
+                }
+                break;
+            }
+            break;
+          case EStochastic2::upper2: // falling
+          case EStochastic2::upper1:
+            switch ( m_state ) {
+              case EState::entry_wait: // starting point
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K + m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "upper0 fall" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+              case EState::exit_tracking:
+                break;
+            }
+            break;
+        }
+        break;
+      case EStochastic2::middle:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::upper1: // falling
+          case EStochastic2::upper0:
+            switch ( m_trade.side ) {
+              case ou::tf::OrderSide::Buy:
+                break;
+              case ou::tf::OrderSide::Sell:
+                AdjustSellStop( 65.0 );
+                break;
+            }
+            break;
+          case EStochastic2::lower0: // rising
+          case EStochastic2::lower1:
+            switch ( m_trade.side ) {
+              case ou::tf::OrderSide::Buy:
+                AdjustBuyStop( 35.0 );
+                break;
+              case ou::tf::OrderSide::Sell:
+                break;
+            }
+            break;
+        }
+        break;
+      case EStochastic2::lower0:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::lower1: // rising
+          case EStochastic2::lower2:
+            switch ( m_state ) {
+              case EState::entry_wait:
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K - m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 rise" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Buy );
+                break;
+              case EState::exit_tracking:
+                break;
+            }
+            break;
+          case EStochastic2::upper0: // falling
+          case EStochastic2::middle:
+            switch ( m_state ) {
+              case EState::entry_wait:
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K + m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower0 fall" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+              case EState::exit_tracking:
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    break;
+                  case ou::tf::OrderSide::Sell:
+                    AdjustSellStop( K );
+                    break;
+                }
+                break;
+            }
+            break;
+        }
+        break;
+      case EStochastic2::lower1:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::middle: // falling
+          case EStochastic2::lower0:
+            switch ( m_trade.side ) {
+              case ou::tf::OrderSide::Sell:
+                AdjustSellStop( 35.0 ); // halfways into lower0
+                break;
+            }
+            break;
+          case EStochastic2::lower2: // rising
+            break;
+        }
+        break;
+      case EStochastic2::lower2:
+        switch ( m_stateStochastic2 ) {
+          case EStochastic2::lower0: // falling
+          case EStochastic2::lower1:
+            switch ( m_state ) {
+              case EState::entry_wait:
+                m_trade.offset = 1.0;
+                m_trade.stop = m_trade.trail = K + m_trade.offset;
+                m_ceStop.AddLabel( smoothed.DateTime(), m_trade.stop, "lower2" );
+                m_state = EState::entry_filling;
+                Entry2( ou::tf::OrderSide::Sell );
+                break;
+              case EState::exit_tracking:
+                switch ( m_trade.side ) {
+                  case ou::tf::OrderSide::Buy:
+                    break;
+                  case ou::tf::OrderSide::Sell:
+                    AdjustSellStop( K );
+                    break;
+                }
+                break;
+            }
+            break;
+        }
+        break;
+    }
   }
 
   m_stateStochastic2 = stateStochastic2;
