@@ -791,7 +791,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       std::cout << "HandleOrderFilled in entry_cancelling, need to fix the state machine!" << std::endl;
       // fall through to handle the fill and proceed
     case EState::entry_filling:
-      sMessage = "filled ";
+      sMessage = "entry fill ";
       m_state = EState::exit_tracking;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
@@ -808,9 +808,15 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       }
       break;
     case EState::exit_filling:
-      {
-        sMessage = "exit ";
-        m_state = EState::entry_wait; // start over
+      sMessage = "exit fill ";
+      m_state = EState::entry_wait;
+      switch ( order.GetOrderSide() ) {
+        case ou::tf::OrderSide::Buy:
+          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
+          break;
+        case ou::tf::OrderSide::Sell:
+          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
+          break;
       }
       break;
     case EState::cancel_wait:
