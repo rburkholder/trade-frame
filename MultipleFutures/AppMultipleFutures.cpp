@@ -207,7 +207,7 @@ void AppMultipleFutures::HandleIBConnected( int ) {
   if ( !m_bInitialized ) {
     m_bInitialized = true;
 
-    ConstructInstance(  30, 2020,  6, 19 );
+    ConstructInstance(  90, 2020,  6, 19 );
 //    ConstructInstance( 200, 2020,  6, 19 );
 //    ConstructInstance( 180, 2020,  9, 18 );
 //    ConstructInstance( 300, 2020, 12, 18 );
