@@ -163,6 +163,7 @@ Strategy::~Strategy() {
   m_bfBar.SetOnBarComplete( nullptr );
 }
 
+// called by UpdateStochasticSmoothed1, which is unused
 void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
   static const double multiplier( 2.0 );
   // TODO: need to track orders, nothing new while existing ones active?
@@ -247,7 +248,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell: {
 
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
+        ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
@@ -265,7 +266,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         m_trade.Emit( std::cout );
         std::cout << std::endl;
 /*
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), dblProfit, "profit target" );
+        ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), dblProfit, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Limit,
           ou::tf::OrderSide::enumOrderSide::Buy,
@@ -291,10 +292,9 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
 
 void Strategy::Exit( ou::tf::Quote::dt_t dt, double exit, const std::string& sComment ) {
 
-  ou::ChartDVBasics::m_ceLongEntries.AddLabel( dt, exit, sComment );
-
   switch ( m_trade.side ) {
     case ou::tf::OrderSide::Buy: {
+      ou::ChartDVBasics::m_ceLongExits.AddLabel( dt, exit, sComment );
       m_pOrderStop = m_pPosition->ConstructOrder(
         ou::tf::OrderType::enumOrderType::Market,
         ou::tf::OrderSide::enumOrderSide::Sell,
@@ -307,6 +307,7 @@ void Strategy::Exit( ou::tf::Quote::dt_t dt, double exit, const std::string& sCo
       }
       break;
     case ou::tf::OrderSide::Sell: {
+      ou::ChartDVBasics::m_ceShortExits.AddLabel( dt, exit, sComment );
       m_pOrderStop = m_pPosition->ConstructOrder(
         ou::tf::OrderType::enumOrderType::Market,
         ou::tf::OrderSide::enumOrderSide::Buy,
@@ -679,7 +680,7 @@ void Strategy::AdjustSellStop( double K ) {
   }
 }
 
-
+// currently not utilized
 void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
   // run the states.  let the trades run/stop to completion.
   // need indicator of where in trades are.
@@ -794,10 +795,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_state = EState::exit_tracking;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
-          ou::ChartDVBasics::m_ceLongEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
+          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
           break;
         case ou::tf::OrderSide::Sell:
-          ou::ChartDVBasics::m_ceShortEntries.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
+          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
           break;
       }
       break;
