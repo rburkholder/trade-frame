@@ -131,13 +131,17 @@ private:
   ou::tf::BarFactory m_bfBar;
 
   pOrder_t m_pOrderEntry;
-  pOrder_t m_pOrderProfit;
-  pOrder_t m_pOrderStop;
+  //pOrder_t m_pOrderProfit;
+  //pOrder_t m_pOrderStop;
+  pOrder_t m_pOrderExit;
 
   pPosition_t m_pPosition;
 
   enum class EState { initial, entry_wait, entry_filling, entry_cancelling, exit_tracking, exit_filling, cancel_wait, quiesce };
   EState m_state;
+
+  enum class EExitType { exit, stop };
+  //EExitType m_typeExit;
 
   TimeFrame m_tfLatest;
 
@@ -187,8 +191,11 @@ private:
   void Entry( ou::tf::OrderSide::enumOrderSide );
   void Entry1( ou::tf::OrderSide::enumOrderSide );
   void Entry2( ou::tf::OrderSide::enumOrderSide );
-  void Exit( ou::tf::Quote::dt_t, double exit, const std::string& sComment );
+  void Exit( EExitType typeExit, ou::tf::Quote::dt_t, double exit, const std::string& sComment );
   void CancelOrders();
+
+  void Entry2Buy(  const ou::tf::Price& smoothedK, const std::string& sComment );
+  void Entry2Sell( const ou::tf::Price& smoothedK, const std::string& sComment );
 
   void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancelling( const ou::tf::Bar& );
@@ -199,7 +206,9 @@ private:
   void HandleGoingNeutral( const ou::tf::Quote& ) {}
 
   void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
+  void HandleEntryOrderFilled( const ou::tf::Order& );
+  void HandleExitOrderFilled( const ou::tf::Order& );
+  void HandleStopOrderFilled( const ou::tf::Order& );
 
   void HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& );  // unrealized p/l
   void HandleExecution( const ou::tf::Position::PositionDelta_delegate_t& );  // realized p/l
