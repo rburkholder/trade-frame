@@ -101,7 +101,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 
   m_ceStochastic.SetColour( ou::Colour::Aquamarine );
   m_ceStochasticSmoothed.SetName( "Fast Stoch" );
-  m_ceStochasticSize.SetName( "Fast Stoch Size" );
+//  m_ceStochasticSize.SetName( "Fast Stoch Size" );
   m_cePositionPL.SetName( "Position P/L");
 
   m_ceStochasticLimits.AddMark( 100.0, ou::Colour::Black, "Top" );
@@ -116,7 +116,7 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_dvChart.Add( 3, &m_ceStop );
   m_dvChart.Add( 3, &m_ceStochastic );
   m_dvChart.Add( 3, &m_ceStochasticLimits ); // stops chart from showing data, even with just one marker
-  m_dvChart.Add( 4, &m_ceStochasticSize );
+//  m_dvChart.Add( 4, &m_ceStochasticSize );
   m_dvChart.Add( 5, &m_cePositionPLZero );
   m_dvChart.Add( 5, &m_cePositionPL );
 
@@ -424,7 +424,7 @@ Strategy::EStochastic2 Strategy::Stochastic2( double K ) {
 void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothed ) {
 
   m_ceStochasticSmoothed.Append( smoothed );
-  m_ceStochasticSize.Append( smoothed.DateTime(), m_stochastic.Size() );
+//  m_ceStochasticSize.Append( smoothed.DateTime(), m_stochastic.Size() );
 
   double K( smoothed.Value() );
 
@@ -668,7 +668,7 @@ void Strategy::AdjustBuyStop( double K ) {
   double trail = K - m_trade.offset;
   if ( trail > m_trade.trail ) {  // maybe in 0.10 steps?
     m_trade.trail = trail;
-    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust buy" );
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust buy stop" );
   }
 }
 
@@ -676,7 +676,7 @@ void Strategy::AdjustSellStop( double K ) {
   double trail = K + m_trade.offset;
   if ( trail < m_trade.trail ){  // maybe in 0.10 steps?
     m_trade.trail = trail;
-    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust sell" );
+    m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "adjust sell stop" );
   }
 }
 
@@ -686,7 +686,7 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
   // need indicator of where in trades are.
 
   m_ceStochasticSmoothed.Append( price );
-  m_ceStochasticSize.Append( price.DateTime(), m_stochastic.Size() );
+//  m_ceStochasticSize.Append( price.DateTime(), m_stochastic.Size() );
 
   double K( price.Value() );
 
@@ -795,10 +795,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_state = EState::exit_tracking;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
-          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
+//          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
           break;
         case ou::tf::OrderSide::Sell:
-          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
+//          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
           break;
       }
       break;
@@ -812,10 +812,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_state = EState::entry_wait;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
-          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
+//          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
           break;
         case ou::tf::OrderSide::Sell:
-          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
+//          ou::ChartDVBasics::m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "sell" );
           break;
       }
       break;
@@ -828,6 +828,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   }
 }
 
+// not in use
 void Strategy::StopTest1( const ou::tf::Quote& quote ) {
   switch ( m_trade.side ) {
     case ou::tf::OrderSide::Buy:
