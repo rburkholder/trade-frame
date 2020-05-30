@@ -120,6 +120,9 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   m_dvChart.Add( 5, &m_cePositionPLZero );
   m_dvChart.Add( 5, &m_cePositionPL );
 
+  m_dvChart.Add( 3, &m_ceKLongEntry );
+  m_dvChart.Add( 3, &m_ceKShortEntry );
+
   // test categorization
   if ( false ) {
     std::vector<double> s2 = { 0.0, 5.0, 20.0, 30.0, 49.6, 50.0, 50.4, 70.0, 80.0, 95.0, 100.0 };
@@ -213,7 +216,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy: {
 
-        //ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
@@ -248,7 +251,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell: {
 
-        //ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
+        ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
@@ -431,7 +434,7 @@ Strategy::EStochastic2 Strategy::Stochastic2( double K ) {
 void Strategy::Entry2Buy(  const ou::tf::Price& smoothedK, const std::string& sComment ) {
   m_trade.offset = 1.0;
   m_trade.stop = m_trade.trail = smoothedK.Value() - m_trade.offset;
-  m_ceLongEntries.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
+  m_ceKLongEntry.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
   m_state = EState::entry_filling;
   Entry2( ou::tf::OrderSide::Buy );
 }
@@ -439,7 +442,7 @@ void Strategy::Entry2Buy(  const ou::tf::Price& smoothedK, const std::string& sC
 void Strategy::Entry2Sell( const ou::tf::Price& smoothedK, const std::string& sComment ) {
   m_trade.offset = 1.0;
   m_trade.stop = m_trade.trail = smoothedK.Value() + m_trade.offset;
-  m_ceShortEntries.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
+  m_ceKShortEntry.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
   m_state = EState::entry_filling;
   Entry2( ou::tf::OrderSide::Sell );
 }

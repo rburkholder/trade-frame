@@ -76,6 +76,9 @@ private:
   ou::ChartEntryIndicator m_cePositionPL;
   ou::ChartEntryMark m_cePositionPLZero;
 
+  ou::ChartEntryShape m_ceKLongEntry;
+  ou::ChartEntryShape m_ceKShortEntry;
+
   struct Trade {
     ou::tf::OrderSide::enumOrderSide side;
     double entry;
