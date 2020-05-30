@@ -159,18 +159,20 @@ Position::~Position(void) {
 
 }
 
-void Position::HandleQuote( const quote_t quote ) {
+void Position::HandleQuote( const quote_t& quote ) {
 
+  // TODO: use a flag to determine if to use zero based or not?
+  //       maybe allow on optiosn, but not futures/equity?
   if ( ( 0 == quote.Bid() ) && ( 0 == quote.Ask() ) ) {
     return; // some very otm options will have a 0 bid
   }
 
-  OnQuote( quote );
+  OnQuote( quote );  // note OnQuotePostProcess deals with post-update notification
 
-  double dblPreviousUnRealizedPL = m_row.dblUnRealizedPL;
+  bool bProcessed( false );
+  double dblMarketValue {};
+  double dblPreviousUnRealizedPL( m_row.dblUnRealizedPL );
 
-  bool bProcessed(false);
-  double dblMarketValue;
   switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
       dblMarketValue = m_row.nPositionActive * quote.Bid() * m_dblMultiplier;
@@ -193,7 +195,7 @@ void Position::HandleQuote( const quote_t quote ) {
 
 }
 
-void Position::HandleTrade( const trade_t trade ) {
+void Position::HandleTrade( const trade_t& trade ) {
   OnTrade( trade );
 }
 

@@ -256,8 +256,8 @@ public:
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
   ou::Delegate<const ou::tf::Trade&> OnTrade;
-  ou::Delegate<const ou::tf::Quote&> OnQuote;
-  ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL
+  ou::Delegate<const ou::tf::Quote&> OnQuote;  // emitted in HandleQuote, prior to statistic calculations
+  ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL, emitted by HandleQuote
 
   ou::Delegate<const Position&> OnPositionChanged;  // after order placement, order canceled, order execution
 
@@ -269,7 +269,7 @@ public:
 
   ou::Delegate<const PositionDelta_delegate_t&> OnExecution;   // < - used by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - used by portfolio
-  ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;// < - use by portfolio, ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL )  when unrealizedPL changes, updated by HandleQuote
 
   void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
@@ -312,8 +312,8 @@ private:
   void CancelOrder( vOrders_iter_t iter );
   void CancelOrder( pOrder_t& pOrder );
 
-  void HandleQuote( const quote_t );
-  void HandleTrade( const trade_t );
+  void HandleQuote( const quote_t& ); // is this meant to be a copy or a reference?
+  void HandleTrade( const trade_t& ); // is this meant to be a copy or a reference?
 
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 
