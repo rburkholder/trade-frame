@@ -105,6 +105,75 @@ private:
   };
   Trade m_trade;
 
+  struct RoundTrip {
+    bool bComplete;
+    std::string sText;
+    ou::tf::OrderSide::enumOrderSide eOrderSide;
+    ptime dtEntry;
+    ptime dtExit;
+    double priceEntry;
+    double priceExit;
+    double dblProfitMax;
+    double dblLossMax;
+    RoundTrip( const std::string& sText_, ou::tf::OrderSide::enumOrderSide side, ptime dtEntry_, double priceEntry_ )
+    : sText( sText_ ), eOrderSide( side ), dtEntry( dtEntry_ ), priceEntry( priceEntry_ ),
+      bComplete( false ), priceExit {}, dblProfitMax {}, dblLossMax {}
+    {}
+    RoundTrip( const RoundTrip&& rt )
+    : sText( std::move( rt.sText ) ),
+      bComplete( rt.bComplete ), eOrderSide( rt.eOrderSide ),
+      dtEntry( rt.dtEntry ), dtExit( rt.dtExit ),
+      priceEntry( rt.priceEntry ), priceExit( rt.priceExit ),
+      dblProfitMax( rt.dblProfitMax ), dblLossMax( rt.dblLossMax )
+      {}
+    void Exit( ptime dtExit_, double priceExit_ ) {
+      assert( !bComplete );
+      dtExit = dtExit_;
+      priceExit = priceExit_;
+      bComplete = true;
+    }
+    double PL() const {
+      switch ( eOrderSide ) {
+        case ou::tf::OrderSide::Buy:
+          return ( priceExit - priceEntry );
+          break;
+        case ou::tf::OrderSide::Sell:
+          return ( priceEntry - priceExit );
+          break;
+      }
+      return 0.0;
+      }
+    void Update( const ou::tf::Quote& quote ) {
+      switch ( eOrderSide ) {
+        case ou::tf::OrderSide::Buy: {
+          double diff = quote.Bid() - priceEntry;
+          if ( 0.0 > diff ) {
+            if ( dblLossMax > diff ) dblLossMax = diff;
+          }
+          else {
+            if ( dblProfitMax < diff ) dblProfitMax = diff;
+          }
+          priceExit = quote.Bid();
+          }
+          break;
+        case ou::tf::OrderSide::Sell: {
+          double diff = priceEntry - quote.Ask();
+          if ( 0.0 > diff ) {
+            if ( dblLossMax > diff ) dblLossMax = diff;
+          }
+          else {
+            if ( dblProfitMax < diff ) dblProfitMax = diff;
+          }
+          priceExit = quote.Ask();
+          }
+          break;
+      }
+    }
+  };
+
+  using vRoundTrip_t = std::vector<RoundTrip>;
+  vRoundTrip_t m_vRoundTrip;
+/*
   struct Results {
     unsigned int cntOrders; // should match cntWins + cntLosses
     unsigned int cntWins;
@@ -120,7 +189,7 @@ private:
     Results shorts;
     OrderResults(): cntInstances {} {}
   };
-
+*/
   size_t m_cntBars;
   ou::tf::Bar m_barLast;
 

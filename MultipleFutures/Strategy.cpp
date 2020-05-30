@@ -348,6 +348,7 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   ou::tf::Quote::price_t ask( quote.Ask() );
   if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
     m_quoteLast = quote; // actions can use latest quote
+    m_vRoundTrip.back().Update( quote );
     ou::ChartDVBasics::HandleQuote( quote );
     TimeTick( quote );
   }
@@ -809,7 +810,9 @@ void Strategy::UpdateStochasticSmoothed1( const ou::tf::Price& price ) {
 }
 
 void Strategy::HandleEntryOrderFilled( const ou::tf::Order& order ) {
-      m_state = EState::exit_tracking;
+    m_vRoundTrip.emplace_back(
+      RoundTrip( order.GetDescription(), order.GetOrderSide(), order.GetDateTimeOrderFilled(), order.GetAverageFillPrice() ) );
+    m_state = EState::exit_tracking;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
 //          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
@@ -821,7 +824,8 @@ void Strategy::HandleEntryOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
-      m_state = EState::entry_wait;
+  m_vRoundTrip.back().Exit( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice() );
+  m_state = EState::entry_wait;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
 //          ou::ChartDVBasics::m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), sMessage + "buy" );
@@ -833,6 +837,7 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleStopOrderFilled( const ou::tf::Order& order ) {
+  m_vRoundTrip.back().Exit( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice() );
 //      m_state = EState::entry_wait;
       switch ( order.GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
@@ -984,6 +989,17 @@ void Strategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::EmitBarSummary() {
+  for ( const RoundTrip& trip: m_vRoundTrip ) {
+    std::cout
+      << trip.bComplete << ",'"
+      << trip.dtEntry << ","
+      << trip.eOrderSide << ","
+      << trip.priceEntry << ","
+      << trip.dblProfitMax << ","
+      << trip.dblLossMax
+      << std::endl;
+      ;
+  }
 }
 
 void Strategy::HandleUnRealizedPL( const ou::tf::Position::PositionDelta_delegate_t& delta ) {
