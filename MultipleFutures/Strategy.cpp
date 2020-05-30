@@ -192,10 +192,10 @@ void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
       break;
   }
 
-  Entry( side );
+  Entry( side, "" );
 }
 
-void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side ) {
+void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side, const std::string& sComment ) {
   //m_trade.offset = m_stopUpper - m_stopLower;
   //if ( min > m_trade.offset ) m_trade.offset = min;
   // TODO: fix so that the stop is dragged up / down slowly, until just beyond the other crossing line
@@ -207,16 +207,16 @@ void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side ) {
       m_trade.entry = m_quoteLast.Bid();  // TODO: set based upon execution price
       break;
   }
-  Entry( side );
+  Entry( side, sComment );
 }
 
-void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
+void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& sComment ) {
   if ( 0.0 < m_tradeLast.Price() ) {
     m_trade.side = side;
     switch ( side ) {
       case ou::tf::OrderSide::enumOrderSide::Buy: {
 
-        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "long entry" );
+        ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "lEn" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
@@ -226,7 +226,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderEntry->SetDescription( "long" );
+        m_pOrderEntry->SetDescription( sComment );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleEntryOrderFilled ) );
 
@@ -251,7 +251,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
         break;
       case ou::tf::OrderSide::enumOrderSide::Sell: {
 
-        ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "short entry" );
+        ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "sEn" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
           ou::tf::OrderType::enumOrderType::Market,
@@ -261,7 +261,7 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side ) {
           // idPosition
           // dt order submitted
           );
-        m_pOrderEntry->SetDescription( "short" );
+        m_pOrderEntry->SetDescription( sComment );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleEntryOrderFilled ) );
 
@@ -297,7 +297,7 @@ void Strategy::Exit( EExitType typeExit, ou::tf::Quote::dt_t dt, double exit, co
 
   switch ( m_trade.side ) {
     case ou::tf::OrderSide::Buy: {
-      ou::ChartDVBasics::m_ceLongExits.AddLabel( dt, exit, sComment );
+      ou::ChartDVBasics::m_ceLongExits.AddLabel( dt, exit, "lEx" );
       m_pOrderExit = m_pPosition->ConstructOrder(
         ou::tf::OrderType::enumOrderType::Market,
         ou::tf::OrderSide::enumOrderSide::Sell,
@@ -310,7 +310,7 @@ void Strategy::Exit( EExitType typeExit, ou::tf::Quote::dt_t dt, double exit, co
       }
       break;
     case ou::tf::OrderSide::Sell: {
-      ou::ChartDVBasics::m_ceShortExits.AddLabel( dt, exit, sComment );
+      ou::ChartDVBasics::m_ceShortExits.AddLabel( dt, exit, "sEx" );
       m_pOrderExit = m_pPosition->ConstructOrder(
         ou::tf::OrderType::enumOrderType::Market,
         ou::tf::OrderSide::enumOrderSide::Buy,
@@ -437,7 +437,7 @@ void Strategy::Entry2Buy(  const ou::tf::Price& smoothedK, const std::string& sC
   m_trade.stop = m_trade.trail = smoothedK.Value() - m_trade.offset;
   m_ceKLongEntry.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
   m_state = EState::entry_filling;
-  Entry2( ou::tf::OrderSide::Buy );
+  Entry2( ou::tf::OrderSide::Buy, sComment );
 }
 
 void Strategy::Entry2Sell( const ou::tf::Price& smoothedK, const std::string& sComment ) {
@@ -445,7 +445,7 @@ void Strategy::Entry2Sell( const ou::tf::Price& smoothedK, const std::string& sC
   m_trade.stop = m_trade.trail = smoothedK.Value() + m_trade.offset;
   m_ceKShortEntry.AddLabel( smoothedK.DateTime(), m_trade.stop, sComment );
   m_state = EState::entry_filling;
-  Entry2( ou::tf::OrderSide::Sell );
+  Entry2( ou::tf::OrderSide::Sell, sComment );
 }
 
 void Strategy::UpdateStochasticSmoothed2( const ou::tf::Price& smoothedK ) {
@@ -988,7 +988,7 @@ void Strategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
   }
 }
 
-void Strategy::EmitBarSummary() {
+void Strategy::EmitSummary() {
   for ( const RoundTrip& trip: m_vRoundTrip ) {
     std::cout
       << trip.bComplete << ",'"
@@ -996,7 +996,8 @@ void Strategy::EmitBarSummary() {
       << trip.eOrderSide << ","
       << trip.priceEntry << ","
       << trip.dblProfitMax << ","
-      << trip.dblLossMax
+      << trip.dblLossMax << ","
+      << trip.sText
       << std::endl;
       ;
   }

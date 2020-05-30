@@ -94,7 +94,7 @@ bool AppMultipleFutures::OnInit() {
 
   FrameMain::vpItems_t vItemsActions;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItemsActions.push_back( new mi( "Emit Bar Summary", MakeDelegate( this, &AppMultipleFutures::HandleMenuActionEmitBarSummary ) ) );
+  vItemsActions.push_back( new mi( "Emit Bar Summary", MakeDelegate( this, &AppMultipleFutures::HandleMenuActionEmitSummary ) ) );
   wxMenu* pMenuActions = m_pFrameMain->AddDynamicMenu( "Actions", vItemsActions );
 
 //  bool bOk( true );
@@ -136,9 +136,9 @@ void AppMultipleFutures::OnNotebookPageChanged( wxBookCtrlEvent& event ) {
   event.Skip();
 }
 
-void AppMultipleFutures::HandleMenuActionEmitBarSummary() {
+void AppMultipleFutures::HandleMenuActionEmitSummary() {
   for ( vInstance_t::value_type& vt: m_vInstance ) {
-    vt.m_pStrategy->EmitBarSummary();
+    vt.m_pStrategy->EmitSummary();
   }
 }
 

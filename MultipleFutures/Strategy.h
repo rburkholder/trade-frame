@@ -53,7 +53,7 @@ public:
   //void HandleButtonSend();
   void HandleButtonCancel();
 
-  void EmitBarSummary();
+  void EmitSummary();
 
 protected:
 private:
@@ -260,9 +260,9 @@ private:
 
   void StopTest1( const ou::tf::Quote& quote );
 
-  void Entry( ou::tf::OrderSide::enumOrderSide );
+  void Entry( ou::tf::OrderSide::enumOrderSide, const std::string& sComment );
   void Entry1( ou::tf::OrderSide::enumOrderSide );
-  void Entry2( ou::tf::OrderSide::enumOrderSide );
+  void Entry2( ou::tf::OrderSide::enumOrderSide, const std::string& sComment );
   void Exit( EExitType typeExit, ou::tf::Quote::dt_t, double exit, const std::string& sComment );
   void CancelOrders();
 

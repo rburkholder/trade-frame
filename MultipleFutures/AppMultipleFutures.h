@@ -109,7 +109,7 @@ private:
   void StartWatch();
   void StopWatch();
 
-  void HandleMenuActionEmitBarSummary();
+  void HandleMenuActionEmitSummary();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
