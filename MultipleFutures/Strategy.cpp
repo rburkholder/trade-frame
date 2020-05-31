@@ -229,10 +229,6 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& 
         m_pOrderEntry->SetDescription( sComment );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleEntryOrderFilled ) );
-
-        std::cout << m_quoteLast.DateTime();
-        m_trade.Emit( std::cout );
-        std::cout << std::endl;
 /*
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), dblProfit, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
@@ -264,10 +260,6 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& 
         m_pOrderEntry->SetDescription( sComment );
         m_pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleEntryOrderFilled ) );
-
-        std::cout << m_quoteLast.DateTime();
-        m_trade.Emit( std::cout );
-        std::cout << std::endl;
 /*
         ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), dblProfit, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
@@ -289,6 +281,11 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& 
     //    then can use Position to cancel orders
     //m_pIB->PlaceBracketOrder( m_pOrderEntry, m_pOrderProfit, m_pOrderStop );
     //m_pIB->PlaceComboOrder( m_pOrderEntry, m_pOrderStop );
+
+    std::cout << m_quoteLast.DateTime();
+    m_trade.Emit( std::cout );
+    std::cout << std::endl;
+
     m_pPosition->PlaceOrder( m_pOrderEntry );
   }
 }
@@ -972,7 +969,7 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
     m_state = EState::entry_wait;
   }
   else {
-    // TODO: migth be in entry state or something (need to validate)
+    // TODO: might be in entry state or something (need to validate)
     std::cout << "HandleOrderCancelled no entry_wait: "<< order.GetOrderId() << "," << order.GetDescription() << std::endl;
   }
 }
