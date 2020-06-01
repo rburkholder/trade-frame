@@ -128,6 +128,7 @@ private:
       {}
     void Exit( ptime dtExit_, double priceExit_ ) {
       assert( !bComplete );
+      eOrderSide = ou::tf::OrderSide::Unknown;
       dtExit = dtExit_;
       priceExit = priceExit_;
       bComplete = true;

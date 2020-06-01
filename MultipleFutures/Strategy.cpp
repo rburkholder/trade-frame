@@ -345,7 +345,9 @@ void Strategy::HandleQuote( const ou::tf::Quote &quote ) {
   ou::tf::Quote::price_t ask( quote.Ask() );
   if ( ( 0.0 < bid ) && ( 0.0 < ask ) ) {
     m_quoteLast = quote; // actions can use latest quote
-    m_vRoundTrip.back().Update( quote );
+    if ( 0 < m_vRoundTrip.size() ) {
+      m_vRoundTrip.back().Update( quote );
+    }
     ou::ChartDVBasics::HandleQuote( quote );
     TimeTick( quote );
   }
