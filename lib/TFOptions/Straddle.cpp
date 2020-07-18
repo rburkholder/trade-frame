@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    Straddle.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
@@ -53,7 +53,11 @@ Straddle::Straddle()
 {
 }
 
-Straddle::Straddle( Straddle&& rhs )
+Straddle::Straddle( const Straddle& rhs )
+: Combo( rhs )
+{}
+
+Straddle::Straddle( const Straddle&& rhs )
 : Combo( std::move( rhs ) )
 {
 }

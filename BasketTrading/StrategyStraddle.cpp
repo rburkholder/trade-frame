@@ -12,24 +12,27 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    StrategyStraddle.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
  * Created on July 4, 2019, 11:09 AM
  */
 
-// utility has std::move
-#include <utility>
-
 #include "StrategyStraddle.h"
 
 namespace Strategy {
 
-StrategyStraddle::StrategyStraddle( ) { }
+Straddle::Straddle( )
+: Base<Straddle,ou::tf::option::Straddle>()
+{
+}
 
-StrategyStraddle::StrategyStraddle( const StrategyStraddle&& rhs ) { }
+Straddle::Straddle( const Straddle&& rhs )
+: Base<Straddle,ou::tf::option::Straddle>( std::move( rhs ) )
+{
+}
 
-StrategyStraddle::~StrategyStraddle( ) { }
+Straddle::~Straddle( ) { }
 
 } // namespace Strategy

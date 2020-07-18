@@ -34,9 +34,9 @@ class Straddle: public Combo {
 public:
 
   Straddle();
-  Straddle( const Straddle& rhs ) = delete;
+  Straddle( const Straddle& rhs );
   Straddle& operator=( const Straddle& rhs ) = delete;
-  Straddle( Straddle&& rhs );
+  Straddle( const Straddle&& rhs );
   virtual ~Straddle();
 
   //virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );

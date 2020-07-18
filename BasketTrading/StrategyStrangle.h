@@ -24,18 +24,14 @@
 
 #include <TFOptions/Strangle.h>
 
-// manage a short strangle to collect declining theta
-
 #include "StrategyBase.h"
+
+// manage a short strangle to collect declining theta
 
 namespace Strategy {
 
 class Strangle: public Base<Strangle,ou::tf::option::Strangle> {
 public:
-
-  //using Strangle = ou::tf::option::Strangle;
-
-  //using mapChains_t = ou::tf::option::Combo::mapChains_t;
 
   Strangle();
   Strangle( const Strangle&& );

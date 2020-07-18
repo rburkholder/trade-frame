@@ -28,14 +28,12 @@
 
 namespace Strategy {
 
-class StrategyStraddle: public Base<StrategyStraddle, ou::tf::option::Straddle> {
+class Straddle: public Base<Straddle, ou::tf::option::Straddle> {
 public:
 
-  using Straddle = ou::tf::option::Straddle;
-
-  StrategyStraddle( );
-  StrategyStraddle( const StrategyStraddle&& );
-  virtual ~StrategyStraddle( );
+  Straddle( );
+  Straddle( const Straddle&& );
+  virtual ~Straddle( );
 
 protected:
 private:

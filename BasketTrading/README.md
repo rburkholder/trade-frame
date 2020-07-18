@@ -9,10 +9,10 @@ are maintained day to day.
 * PanelBasketTradingMain - GUI container for buttons, BasketTrading assigns the event handlers
 * PanelPortfolioStats - GUI container for presenting elementary P/L during session
 * MasterPortfolio - Maintains instances of ManageStrategy
-* ManageStrategy - Instance created for each primary instrument chosen
+* ManageStrategy - Instance created for each primary instrument chosen - header & 'using' chooses combo style
 * SymbolSelection - Determines instruments to be traded by MasterPortfolio
 
-Currently designed to run straddles on weekly options.
+Currently designed to run strangles on weekly options.
 
 Option Strategy Descriptions:
 https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/overview
