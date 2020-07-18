@@ -493,8 +493,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       break;
     case TSOptionEvaluation:
       break;
-    case TSMonitorStrangle:
-      break;
+//    case TSMonitorCombo:
+//      break;
     case TSMonitorLong: {
       pEMA_t& pEMA( m_vEMA.back() );
       if ( trade.Price() < pEMA->dblEmaLatest ) {
