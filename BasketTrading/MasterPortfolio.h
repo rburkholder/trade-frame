@@ -89,7 +89,7 @@ public:
   void CloseFarItm();
   void CloseForProfits();
   void CloseItmLeg();
-  void AddStrangle( bool bForced );
+  void AddCombo( bool bForced );
   void EmitInfo();
 
 protected:

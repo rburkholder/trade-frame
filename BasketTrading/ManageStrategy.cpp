@@ -1085,7 +1085,7 @@ void ManageStrategy::CloseItmLeg() {
   }
 }
 
-void ManageStrategy::AddStrangle( bool bForced ) {
+void ManageStrategy::AddCombo( bool bForced ) {
   if ( bForced ) {
     m_bAllowComboAdd = true;
   }

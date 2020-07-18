@@ -129,8 +129,8 @@ private:
   void HandleCloseForProfits( void );
   void HandleCloseItmLeg( void );
 
-  void HandleAddStrangleAllowed( void );
-  void HandleAddStrangleForced( void );
+  void HandleAddComboAllowed( void );
+  void HandleAddComboForced( void );
 
   void HandlePopulateDatabase( void );
   void HandleLoadDatabase( void );

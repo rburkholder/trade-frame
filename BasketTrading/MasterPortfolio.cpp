@@ -144,7 +144,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
       << ",O=" << pPortfolio->GetRow().idOwner
       << ",ID=" << pPortfolio->GetRow().idPortfolio
       << std::endl;
-    
+
     std::pair<mapStrategyArtifacts_t::iterator,bool> pair
       = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) ) ) );
     assert( pair.second );
@@ -276,7 +276,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           [this,bAddToList](const IIPivot& iip) {
             if ( bAddToList ) {
 //              if ( "SPY" == iip.sName ) { // limit for testing
-              if ( 
+              if (
                    ( "NEM" != iip.sName )
                 && ( "RHT" != iip.sName )  // engulfed by ibm
                 && ( "SPY" != iip.sName )  // stopped out twice, too volatile
@@ -814,10 +814,10 @@ void MasterPortfolio::CloseItmLeg() {
     } );
 }
 
-void MasterPortfolio::AddStrangle( bool bForced ) {
+void MasterPortfolio::AddCombo( bool bForced ) {
   for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
     Strategy& strategy( vt.second );
-    strategy.pManageStrategy->AddStrangle( bForced );
+    strategy.pManageStrategy->AddCombo( bForced );
   }
 }
 

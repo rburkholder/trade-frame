@@ -154,7 +154,7 @@ public:
 
   void SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side );
 
-  void AddStrangle( bool bForced );
+  void AddCombo( bool bForced );
 
   double EmitInfo();
 
