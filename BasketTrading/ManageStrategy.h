@@ -28,17 +28,6 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <TFIQFeed/MarketSymbol.h>
-
-#include <TFIndicators/TSSWStats.h>
-
-#include <TFTimeSeries/TimeSeries.h>
-#include <TFTimeSeries/BarFactory.h>
-
-#include <TFOptions/Chain.h>
-#include <TFOptions/Option.h>
-#include <TFOptions/Combo.h>
-
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryVolume.h>
@@ -46,8 +35,19 @@
 #include <OUCharting/ChartEntryShape.h>
 #include <OUCharting/ChartEntryMark.h>
 
-#include <TFTrading/Portfolio.h>
+#include <TFTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/BarFactory.h>
+
+#include <TFIndicators/TSSWStats.h>
+
+#include <TFIQFeed/MarketSymbol.h>
+
+#include <TFOptions/Chain.h>
+#include <TFOptions/Option.h>
+#include <TFOptions/Combo.h>
+
 #include <TFTrading/Position.h>
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include "StrategyBase.h"
