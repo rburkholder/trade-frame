@@ -670,7 +670,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) {
                     std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                     std::pair<mapCombo_t::iterator,bool> result;
-                    //result = m_mapCombo.insert( mapCombo_t::value_type( strikeAtm, Strangle( strikeLower, strikeAtm, strikeUpper ) ) );
 
                     auto psharedStrategy = std::make_shared<strategy_t>();
 
@@ -690,10 +689,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     //mapOption_t::iterator iterOption;
                     //std::string sOptionName;
 
-                    //Strangle::pOptionPair_t pair = m_strangleEvaluation.ValidatedOptions();
                     m_pValidateOptions->ValidatedOptions(
                       [this,idPortfolio,&combo](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
-                        //pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pair.first );
                         const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
                         mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
                         if ( m_mapOption.end() == iterOption ) {
@@ -1051,7 +1048,6 @@ double ManageStrategy::EmitInfo() {
     for ( mapCombo_t::value_type& vt: m_mapCombo ) {
       strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
       strategy_t::combo_t& combo( pStrategy->Combo() );
-      //Strangle& strangle( vt.second );
       std::cout << "  portfolio: " << combo.GetPortfolio()->Id() << std::endl;
       dblNet += combo.GetNet( price );
     }
@@ -1065,7 +1061,6 @@ void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
     strategy_t::combo_t& combo( pStrategy->Combo() );
-    //Strangle& strangle( vt.second );
     if ( 0.0 != price ) {
       combo.CloseExpiryItm( price, date );
     }
@@ -1077,7 +1072,6 @@ void ManageStrategy::CloseFarItm() {
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
     strategy_t::combo_t& combo( pStrategy->Combo() );
-    //Strangle& strangle( vt.second );
     if ( 0.0 != price ) {
       combo.CloseFarItm( price );
     }
@@ -1089,7 +1083,6 @@ void ManageStrategy::CloseItmLeg() {
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
     strategy_t::combo_t& combo( pStrategy->Combo() );
-    //Strangle& strangle( vt.second );
     if ( 0.0 != price ) {
       m_bClosedItmLeg |= combo.CloseItmLeg( price );
     }
@@ -1111,7 +1104,6 @@ void ManageStrategy::CloseForProfits() {
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
     strategy_t::combo_t& combo( pStrategy->Combo() );
-    //Strangle& strangle( vt.second );
     if ( 0.0 != price ) {
       combo.CloseForProfits( price );
     }
@@ -1123,7 +1115,6 @@ void ManageStrategy::TakeProfits() {
   for ( mapCombo_t::value_type& vt: m_mapCombo ) {
     strategy_t* pStrategy = std::dynamic_pointer_cast<strategy_t>( vt.second ).get();
     strategy_t::combo_t& combo( pStrategy->Combo() );
-    //Strangle& strangle( vt.second );
     if ( 0.0 != price ) {
       combo.TakeProfits( price );
     }
