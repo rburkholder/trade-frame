@@ -97,20 +97,20 @@ ManageStrategy::ManageStrategy(
   const std::string& sUnderlying,
   const std::string& sDailyBarPath,
   const ou::tf::Bar& barPriorDaily,
-  pPortfolio_t pPortfolioStrategy,
+  pPortfolio_t pPortfolioStrategy, // => m_pPortfolioStrategy
   fGatherOptionDefinitions_t fGatherOptionDefinitions,
-  fConstructWatch_t fConstructWatch,
-  fConstructOption_t fConstructOption,
-  fConstructPosition_t fConstructPosition,
-  fConstructPortfolio_t fConstructPortfolio,
-  fRegisterWatch_t fRegisterWatch,
-  fRegisterOption_t fRegisterOption,
-  fStartCalc_t fStartCalc,
-  fStopCalc_t fStopCalc,
-  fFirstTrade_t fFirstTrade,
-  fAuthorizeUnderlying_t fAuthorizeUnderlying,
-  fAuthorizeOption_t fAuthorizeOption,
-  fAuthorizeSimple_t fAuthorizeSimple,
+  fConstructWatch_t fConstructWatch, // => m_fConstructWatch
+  fConstructOption_t fConstructOption, // => m_fConstructOption
+  fConstructPosition_t fConstructPosition, // => m_fConstructPosition
+  fConstructPortfolio_t fConstructPortfolio, // => m_fConstructPortfolio
+  fRegisterWatch_t fRegisterWatch, // => m_fRegisterWatch
+  fRegisterOption_t fRegisterOption, // => m_fRegisterOption
+  fStartCalc_t fStartCalc, // => m_fStartCalc
+  fStopCalc_t fStopCalc, // => m_fStopCalc
+  fFirstTrade_t fFirstTrade, // => m_fFirstTrade
+  fAuthorizeUnderlying_t fAuthorizeUnderlying, // => m_fAuthorizeUnderlying
+  fAuthorizeOption_t fAuthorizeOption, // => m_fAuthorizeOption
+  fAuthorizeSimple_t fAuthorizeSimple, // => m_fAuthorizeSimple
   fBar_t fBar,
   pChartDataView_t pcdvStrategyData
   )
@@ -124,7 +124,7 @@ ManageStrategy::ManageStrategy(
   m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
   m_fConstructPortfolio( fConstructPortfolio ),
-  m_stateTrading( TSInitializing ),
+  m_stateTrading( ETradingState::TSInitializing ),
   m_fRegisterWatch( fRegisterWatch ),
   m_fRegisterOption( fRegisterOption ),
   m_fStartCalc( fStartCalc ),
@@ -185,7 +185,7 @@ ManageStrategy::ManageStrategy(
   //m_ceUpReturn.SetColour( ou::Colour::Red );
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
-  
+
   pcdvStrategyData->Add( EChartSlot::Price, &m_cePrice );
   pcdvStrategyData->Add( EChartSlot::Price, &m_cePivots );
   pcdvStrategyData->Add( EChartSlot::Volume, &m_ceVolume );
@@ -295,7 +295,7 @@ ManageStrategy::ManageStrategy(
             m_fConstructOption
           );
         m_pValidateOptions->SetSize( ou::tf::option::Strangle::StrikeCount() ); // will need to make this generic
-            
+
     } ); // m_fConstructWatch on Underlying Instrument
 
   }
@@ -309,7 +309,7 @@ ManageStrategy::ManageStrategy(
 }
 
 ManageStrategy::~ManageStrategy( ) {
-  
+
   m_mapCombo.clear();
   for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
     m_fStopCalc( vt.second, m_pPositionUnderlying->GetWatch() );
@@ -345,7 +345,7 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
     nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_barPriorDaily.Close() ) )/ 100;
     std::cout << m_sUnderlying << " funds on bar close: " << dblFunds << ", " << m_barPriorDaily.Close() << ", " << nOptionContractsToTrade << std::endl;
   }
-  
+
   volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
   std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
   return nUnderlyingSharesToTrade;
@@ -442,7 +442,7 @@ void ManageStrategy::HandleBellHeard( void ) {
 }
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
-//  if ( quote.IsValid() ) {
+//  if ( quote.IsValid() ) {  // far out of the money options have a 0.0 bid
     m_QuoteUnderlyingLatest = quote;
     m_bfQuotes01Sec.Add( quote.DateTime(), quote.Spread(), 1 );
 //    m_quotes.Append( quote );
@@ -581,7 +581,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 
 // turn into a template if needed for other combo types
 void ManageStrategy::BuildPosition(
-  const idPortfolio_t& idPortfolio, 
+  const idPortfolio_t& idPortfolio,
   boost::gregorian::date date,
   ou::tf::OptionSide::enumOptionSide side, double price,
   fBuildPositionCallBack_t&& fBuildPositionCallBack
@@ -594,19 +594,19 @@ void ManageStrategy::BuildPosition(
 
   const ou::tf::option::Chain& chain( iter->second );
 
-  std::string sName;
+  std::string sIQFeedOptionCode;
 
   switch ( side ) { // should this be here or in the caller?
     case ou::tf::OptionSide::Call:
-      sName = chain.GetIQFeedNameCall( chain.Call_Otm( price ) );
+      sIQFeedOptionCode = chain.GetIQFeedNameCall( chain.Call_Otm( price ) );
       break;
     case ou::tf::OptionSide::Put:
-      sName = chain.GetIQFeedNamePut( chain.Put_Otm( price ) );
+      sIQFeedOptionCode = chain.GetIQFeedNamePut( chain.Put_Otm( price ) );
       break;
   }
 
   m_fConstructOption(
-    sName,
+    sIQFeedOptionCode,
     m_pPositionUnderlying->GetWatch()->GetInstrument(),
     [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
       const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
@@ -726,7 +726,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
             Strategy::Strangle* pStrategy = std::dynamic_pointer_cast<Strategy::Strangle>( entry.second ).get();
             ou::tf::option::Strangle& strangle( pStrategy->Combo() );
-            
+
             switch ( strangle.m_state ) {
               case ou::tf::option::Strangle::State::Initializing:
                 break;
@@ -949,7 +949,7 @@ void ManageStrategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
-  
+
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
     m_vEMA.push_back( std::make_shared<EMA>(  5, m_pChartDataView, ou::Colour::DarkOrange ) );
     m_vEMA.back().get()->SetName( "Ema 5s" );
@@ -972,9 +972,9 @@ void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
         p->Update( bar.DateTime(), bar.Close() );
       } );
   }
-  
+
   //TimeTick( bar );  // using quotes as time tick
-   
+
 }
 
 void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
@@ -990,7 +990,7 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   double dblRealized;
   double dblCommissionsPaid;
   double dblTotal;
-  
+
   m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
 
@@ -1032,7 +1032,7 @@ double ManageStrategy::EmitInfo() {
   double dblNet {};
   double price( m_pPositionUnderlying->GetWatch()->LastTrade().Price() );
   if ( 0 < m_mapCombo.size() ) {
-    std::cout 
+    std::cout
       << "Info "
       << m_sUnderlying
       << "@" << price

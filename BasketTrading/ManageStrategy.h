@@ -52,7 +52,7 @@
 
 #include "PivotCrossing.h"
 #include "ValidateOptions.h"
-#include "StrategyStrangle.h"
+#include "StrategyStrangle.h"  // most code developed for this, see lib/TFOptions/Strangle.x
 
 
 // 2019/05/23 Trading Day
