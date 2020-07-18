@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    Strangle.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
@@ -74,7 +74,7 @@ void Strangle::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
 // TODO: need to fix this if other legs present.  Need to limit to the active legs.
 //   maybe vector of inactive legs
 // NOTE: if volatility drops, then losses occur on premium
-void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) { 
+void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
@@ -94,7 +94,7 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
+/* static */ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
 
   citerChain_t citerChain =
     Combo::SelectChain( chains, date, nDaysToExpiry );
@@ -134,7 +134,7 @@ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date 
   fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
 }
 
-const std::string Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price ) {
+const std::string /* static */ Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price ) {
   std::string sName( "strangle-" + sUnderlying );
   ChooseStrikes(
     chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
@@ -148,7 +148,7 @@ const std::string Strangle::Name( const std::string& sUnderlying, const mapChain
   return sName;
 }
 
-void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
+/* static */ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
 
   citerChain_t citerChain =
     Combo::SelectChain( chains, date, nDaysToExpiry );
@@ -190,7 +190,7 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
 //  }
 }
 
-size_t Strangle::StrikeCount() {
+size_t /* static */ Strangle::StrikeCount() {
   return nStrikes;
 }
 
