@@ -70,6 +70,14 @@
 // 2019/06/11 add zig-zag - based on historical 2sd range / 10?
 // 2019/06/11 use 2sd historical range for determining edges of spreads and 1 by 2 back spreads
 
+// 2019/05/23 Trading Day
+//   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
+//   strangles were profitable on the basket elements
+//   profitable legs could be exited
+//   TODO: watch ATM IV to see if profitable legs should be rolled-up/down or just exited
+//      and new strikes entered when IV returns closer to noral
+//      or sell premium(short the same leg?)
+
 #include <algorithm>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>

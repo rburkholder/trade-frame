@@ -37,7 +37,6 @@
 
 #include <TFOptions/Chain.h>
 #include <TFOptions/Option.h>
-#include <TFOptions/Strangle.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
@@ -54,14 +53,6 @@
 #include "ValidateOptions.h"
 #include "StrategyStrangle.h"  // most code developed for this, see lib/TFOptions/Strangle.x
 
-
-// 2019/05/23 Trading Day
-//   ES dropped from 2056 at futures open to about 2016 in the morning (-1.15->-1.2% drop)
-//   strangles were profitable on the basket elements
-//   profitable legs could be exited
-//   TODO: watch ATM IV to see if profitable legs should be rolled-up/down or just exited
-//      and new strikes entered when IV returns closer to noral
-//      or sell premium(short the same leg?)
 
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
