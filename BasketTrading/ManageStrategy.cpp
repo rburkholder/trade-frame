@@ -85,6 +85,8 @@
 
 #include "ManageStrategy.h"
 
+#include "StrategyStrangle.h"  // most code developed for this, see lib/TFOptions/Strangle.x
+
 namespace {
   ou::Colour::enumColour rColour[] = {
     ou::Colour::DarkBlue,

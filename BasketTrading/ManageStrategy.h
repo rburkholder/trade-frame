@@ -37,6 +37,7 @@
 
 #include <TFOptions/Chain.h>
 #include <TFOptions/Option.h>
+#include <TFOptions/Combo.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
@@ -49,10 +50,9 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include "StrategyBase.h"
 #include "PivotCrossing.h"
 #include "ValidateOptions.h"
-#include "StrategyStrangle.h"  // most code developed for this, see lib/TFOptions/Strangle.x
-
 
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
