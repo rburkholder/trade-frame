@@ -53,8 +53,6 @@ protected:
 //  using vLeg_t = std::vector<ou::tf::Leg>;
 //  vLeg_t m_vLeg;
 
-
-
 private:
 
 };
@@ -64,6 +62,8 @@ private:
 template<typename ComboStrategy, typename Combination>
 class Base: public Common {
 public:
+
+  using combo_t = Combination;
 
   Base( ) {}
   Base( const Base&& rhs )
