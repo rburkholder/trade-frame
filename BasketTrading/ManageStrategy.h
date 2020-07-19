@@ -44,7 +44,7 @@
 
 #include <TFOptions/Chain.h>
 #include <TFOptions/Option.h>
-#include <TFOptions/Combo.h>
+#include <TFOptionCombos/Combo.h>
 
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>

@@ -29,8 +29,9 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 
+#include <TFOptions/Chain.h>
+
 #include "Exceptions.h"
-#include "Chain.h"
 #include "Leg.h"
 
 namespace ou { // One Unified

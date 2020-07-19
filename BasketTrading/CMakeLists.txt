@@ -90,6 +90,7 @@ target_link_libraries(
       TFStatistics
       TFIndicators
       TFOptions
+      TFOptionCombos
       TFVuTrading
       TFTrading
       TFTimeSeries

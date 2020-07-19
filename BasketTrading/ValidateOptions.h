@@ -27,8 +27,9 @@
 #include <TFTrading/SpreadValidation.h>
 
 #include <TFOptions/Chain.h>
-#include <TFOptions/Leg.h>
-#include <TFOptions/Exceptions.h>
+
+#include <TFOptionCombos/Leg.h>
+#include <TFOptionCombos/Exceptions.h>
 
 #include "LegSelected.h"
 
