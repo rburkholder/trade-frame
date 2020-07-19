@@ -22,10 +22,11 @@
 #ifndef STRATEGYBASE_H
 #define STRATEGYBASE_H
 
-// utility has std::move
+// has std::move
 #include <utility>
 
-//#include <map>
+// has size_t
+#include <stddef.h>
 
 //#include <boost/date_time/gregorian/greg_date.hpp>
 
@@ -65,12 +66,14 @@ public:
 
   using combo_t = Combination;
 
-  Base( ) {}
+  Base() {}
   Base( const Base&& rhs )
   : m_combo( std::move( rhs.m_combo ) ) {}
   virtual ~Base( ) {} // is the virtual necessary?
 
   Combination& Combo() { return m_combo; }
+
+  static size_t LegCount() { return Combination::LegCount(); }
 
 protected:
 

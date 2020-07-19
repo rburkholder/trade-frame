@@ -30,11 +30,11 @@ namespace option { // options
 
 namespace {
 
-  static const size_t nStrikes( 2 );
+  static const size_t nLegs( 2 );
   static const boost::gregorian::days nDaysToExpiry( 1 );
 
   using LegDef = ou::tf::option::LegDef;
-  using rLegDef_t = std::array<LegDef,nStrikes>;
+  using rLegDef_t = std::array<LegDef,nLegs>;
 
   static const rLegDef_t m_rLegDefLong = {
     LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
@@ -94,7 +94,7 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-/* static */ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
+/* static */ void Strangle::ChooseLegs( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
 
   citerChain_t citerChain =
     Combo::SelectChain( chains, date, nDaysToExpiry );
@@ -136,7 +136,7 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 const std::string /* static */ Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price ) {
   std::string sName( "strangle-" + sUnderlying );
-  ChooseStrikes(
+  ChooseLegs(
     chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       sName
         += "-"
@@ -148,7 +148,7 @@ const std::string /* static */ Strangle::Name( const std::string& sUnderlying, c
   return sName;
 }
 
-/* static */ void Strangle::ChooseStrikes( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
+/* static */ void Strangle::ChooseLegs( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
 
   citerChain_t citerChain =
     Combo::SelectChain( chains, date, nDaysToExpiry );
@@ -190,8 +190,8 @@ void Strangle::CloseItmLegForProfit( double price, EOrderSide defaultOrderSide, 
 //  }
 }
 
-size_t /* static */ Strangle::StrikeCount() {
-  return nStrikes;
+size_t /* static */ Strangle::LegCount() {
+  return nLegs;
 }
 
 void Strangle::CheckStop( double price ) {

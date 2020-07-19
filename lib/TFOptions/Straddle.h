@@ -47,7 +47,7 @@ public:
 
   //virtual double GetNet( double price );
 
-  virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const; // throw Chain exceptions
+  virtual strike_pair_t ChooseLegs( const Chain& chain, double price ) const; // throw Chain exceptions
 
 private:
 

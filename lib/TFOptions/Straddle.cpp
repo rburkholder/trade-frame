@@ -30,11 +30,11 @@ namespace option { // options
 
 namespace {
 
-  static const size_t nStrikes( 2 );
+  static const size_t nLegs( 2 );
   static const boost::gregorian::days nDaysToExpiry( 1 );
 
   using LegDef = ou::tf::option::LegDef;
-  using rLegDef_t = std::array<LegDef,nStrikes>;
+  using rLegDef_t = std::array<LegDef,nLegs>;
 
   static const rLegDef_t m_rLegDefLong = {
     LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
@@ -109,7 +109,7 @@ void Straddle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
       break;
   }
 }
-Straddle::strike_pair_t Straddle::ChooseStrikes( const Chain& chain, double price ) const {
+Straddle::strike_pair_t Straddle::ChooseLegs( const Chain& chain, double price ) const {
 
   double strikeAtmCall {};
   double strikeAtmPut {};

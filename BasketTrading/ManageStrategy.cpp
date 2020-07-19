@@ -305,7 +305,7 @@ ManageStrategy::ManageStrategy(
             m_mapChains,
             m_fConstructOption
           );
-        m_pValidateOptions->SetSize( strategy_t::combo_t::StrikeCount() ); // will need to make this generic
+        m_pValidateOptions->SetSize( strategy_t::LegCount() ); // will need to make this generic
 
     } ); // m_fConstructWatch on Underlying Instrument
 
@@ -657,8 +657,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateSpread(
               date, mid, 11,
               [mid]( const mapChains_t& chains, boost::gregorian::date date, double price, strategy_t::combo_t::fLegSelected_t&& fLegSelected ){
-                //strategy_t::combo_t::ChooseStrikes( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
-                strategy_t::combo_t::ChooseStrikes( chains, date, mid, std::move( fLegSelected ) );
+                //strategy_t::combo_t::ChooseLegs( chains, date, m_dblBollingerLower, m_dblBollingerUpper, std::move( fLegSelected ) );
+                strategy_t::combo_t::ChooseLegs( chains, date, mid, std::move( fLegSelected ) );
               }
             ) ) {
 

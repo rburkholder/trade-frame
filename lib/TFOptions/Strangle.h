@@ -47,13 +47,13 @@ public:
 
   using fLegSelected_t = std::function<void(double, boost::gregorian::date, const std::string&)>;
 
-  static void ChooseStrikes(
+  static void ChooseLegs(
     const mapChains_t& chains, boost::gregorian::date, double price, fLegSelected_t&& ); // (call,put),throw Chain exceptions
 
-  static void ChooseStrikes(
+  static void ChooseLegs(
     const mapChains_t& chains, boost::gregorian::date, double lower, double upper, fLegSelected_t&& ); // throw Chain exceptions
 
-  static size_t StrikeCount();
+  static size_t LegCount();
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price );
 
