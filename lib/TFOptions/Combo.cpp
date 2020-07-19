@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    Combo.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
@@ -30,7 +30,7 @@ const double Combo::m_dblMaxStrangleDelta( 1.01 );     // not 1.00 to prevent ro
 
 Combo::Combo( )
 : m_state( State::Initializing )
-{ 
+{
   m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
@@ -39,7 +39,7 @@ Combo::Combo( const Combo& rhs )
   m_vLeg( rhs.m_vLeg ),
   m_pPortfolio( rhs.m_pPortfolio )
 {
-  m_vLeg.reserve( 16 ); // required for leg.AddChartData
+  m_vLeg.reserve( 16 ); // required for leg.AddChartData -- is this actually needed?
 }
 
 Combo::Combo( const Combo&& rhs )
@@ -47,7 +47,7 @@ Combo::Combo( const Combo&& rhs )
   m_vLeg( std::move( rhs.m_vLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 {
-  m_vLeg.reserve( 16 ); // required for leg.AddChartData
+  m_vLeg.reserve( 16 ); // required for leg.AddChartData -- is this actually needed?
 }
 
 Combo::~Combo( ) {

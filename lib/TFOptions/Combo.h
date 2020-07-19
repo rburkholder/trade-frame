@@ -65,6 +65,7 @@ public:
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
+  // to be deprecated by converting to new style ChooseLegs
   using strike_pair_t = std::pair<double,double>; // higher, lower
 
   Combo( );
