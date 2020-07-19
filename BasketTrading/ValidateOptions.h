@@ -48,7 +48,7 @@ public:
 
   using fStrikeSelected_t
     = std::function<void(double, boost::gregorian::date, const std::string&)>;
-  using fChooseStrikes_t
+  using fChooseLegs_t
     = std::function<void(const mapChains_t&, boost::gregorian::date, double, fStrikeSelected_t&&)>; // double is current price
 
   using fConstructedOption_t = std::function<void(pOption_t)>;
@@ -67,7 +67,7 @@ public:
 
   void SetSize( vLegSelected_t::size_type );
 
-  bool ValidateSpread( boost::gregorian::date, double price, size_t nDuration, fChooseStrikes_t&& );
+  bool ValidateSpread( boost::gregorian::date, double price, size_t nDuration, fChooseLegs_t&& );
   void ValidatedOptions( fValidatedOption_t&& );
   void ClearValidation();
 

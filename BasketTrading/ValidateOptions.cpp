@@ -57,14 +57,14 @@ void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
 }
 
 bool ValidateOptions::ValidateSpread(
-  boost::gregorian::date dateToday, double price, size_t nDuration, fChooseStrikes_t&& fChooseStrikes
+  boost::gregorian::date dateToday, double price, size_t nDuration, fChooseLegs_t&& fChooseLegs
 ) {
 
   bool bStrikesFound( false );
 
   size_t ixLegSelected {};
   try {
-    fChooseStrikes(
+    fChooseLegs(
       m_mapChains, dateToday, price,
       [this,&ixLegSelected](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedName){
         m_vLegSelected.at( ixLegSelected ).Update( strike, dateStrike, sIQFeedName );
