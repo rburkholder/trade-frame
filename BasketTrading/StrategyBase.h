@@ -25,15 +25,6 @@
 // has std::move
 #include <utility>
 
-// has size_t
-#include <stddef.h>
-
-//#include <boost/date_time/gregorian/greg_date.hpp>
-
-//#include <TFOptions/Chain.h>
-
-//#include "LegSelected.h"
-
 namespace Strategy {
 
 // == Common
@@ -41,18 +32,10 @@ namespace Strategy {
 class Common {
 public:
 
-  //using vLegSelected_t = LegSelected::vLegSelected_t;
-  //using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
-
   Common();
   virtual ~Common();
 
-//  virtual void ChooseStrikes( vLegSelected_t&, const mapChains_t&, boost::gregorian::date, double price ) = 0; // throw Chain exceptions
-
 protected:
-
-//  using vLeg_t = std::vector<ou::tf::Leg>;
-//  vLeg_t m_vLeg;
 
 private:
 
@@ -69,11 +52,9 @@ public:
   Base() {}
   Base( const Base&& rhs )
   : m_combo( std::move( rhs.m_combo ) ) {}
-  virtual ~Base( ) {} // is the virtual necessary?
+  virtual ~Base( ) {}
 
   Combination& Combo() { return m_combo; }
-
-  static size_t LegCount() { return Combination::LegCount(); }
 
 protected:
 

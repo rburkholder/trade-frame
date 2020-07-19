@@ -305,7 +305,7 @@ ManageStrategy::ManageStrategy(
             m_mapChains,
             m_fConstructOption
           );
-        m_pValidateOptions->SetSize( strategy_t::LegCount() ); // will need to make this generic
+        m_pValidateOptions->SetSize( strategy_t::combo_t::LegCount() ); // will need to make this generic
 
     } ); // m_fConstructWatch on Underlying Instrument
 
@@ -362,6 +362,7 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
   return nUnderlyingSharesToTrade;
 }
 
+// add pre-existing positions from database
 void ManageStrategy::Add( pPosition_t pPosition ) {
   pInstrument_t pInstrument = pPosition->GetInstrument();
   pWatch_t pWatch = pPosition->GetWatch();
