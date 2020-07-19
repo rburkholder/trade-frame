@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    ValidateOptions.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
@@ -21,9 +21,9 @@
 
 #include "ValidateOptions.h"
 
-ValidateOptions::ValidateOptions( 
+ValidateOptions::ValidateOptions(
   pWatch_t pWatchUnderlying,  // underlying
-  const mapChains_t& mapChains, 
+  const mapChains_t& mapChains,
   fConstructOption_t& fConstructOption )
 : m_pWatchUnderlying( pWatchUnderlying ),
   m_mapChains( mapChains ),
@@ -56,11 +56,11 @@ void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
   m_vLegSelected.resize( size );
 }
 
-bool ValidateOptions::ValidateSpread( 
+bool ValidateOptions::ValidateSpread(
   boost::gregorian::date dateToday, double price, size_t nDuration, fChooseStrikes_t&& fChooseStrikes
 ) {
 
-  double bStrikesFound( false );
+  bool bStrikesFound( false );
 
   size_t ixLegSelected {};
   try {
@@ -124,7 +124,7 @@ bool ValidateOptions::ValidateSpread(
     std::cout << std::endl;
 
     pInstrument_t pInstrumentUnderlying = m_pWatchUnderlying->GetInstrument();
-    
+
     m_SpreadValidation.SetLegCount( m_vLegSelected.size() );
 
     size_t n {};
