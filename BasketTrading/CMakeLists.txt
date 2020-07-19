@@ -35,10 +35,6 @@ set(
     PanelPortfolioStats.h
     PivotCrossing.h
     Sentiment.h
-    StrategyBase.h
-    StrategyCondor.h
-    StrategyStraddle.h
-    StrategyStrangle.h
     SymbolSelection.h
     ValidateOptions.h
   )
@@ -55,10 +51,6 @@ set(
     PanelPortfolioStats.cpp
     PivotCrossing.cpp
     Sentiment.cpp
-    StrategyBase.cpp
-    StrategyCondor.cpp
-    StrategyStraddle.cpp
-    StrategyStrangle.cpp
     SymbolSelection.cpp
     ValidateOptions.cpp
   )

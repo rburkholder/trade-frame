@@ -50,7 +50,6 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-#include "StrategyBase.h"
 #include "PivotCrossing.h"
 #include "ValidateOptions.h"
 
@@ -248,9 +247,9 @@ private:
   using pValidateOptions_t = std::unique_ptr<ValidateOptions>;
   pValidateOptions_t m_pValidateOptions;
 
-  using pStrategyCombo_t = std::shared_ptr<Strategy::Common>;
+  using pCombo_t = std::shared_ptr<ou::tf::option::Combo>;
 
-  using mapCombo_t = std::map<std::string,pStrategyCombo_t>;
+  using mapCombo_t = std::map<std::string,pCombo_t>;
   mapCombo_t m_mapCombo;
 
   using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
