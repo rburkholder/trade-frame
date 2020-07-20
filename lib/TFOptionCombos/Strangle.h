@@ -45,12 +45,15 @@ public:
 
   virtual double GetNet( double price );
 
-  static void ChooseLegs(
-    const mapChains_t& chains, boost::gregorian::date, double price, fLegSelected_t&& ); // throw Chain exceptions
+  static void ChooseLegs( // throw Chain exceptions
+    double slope,
+    const mapChains_t& chains,
+    boost::gregorian::date, double price,
+    fLegSelected_t&& );
 
   static size_t LegCount();
 
-  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price );
+  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope );
 
 private:
 

@@ -94,7 +94,12 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
 
 // TODO: should be able to construct so leg1 + leg2 credit > 1.00
 
-/* static */ void Strangle::ChooseLegs( const mapChains_t& chains, boost::gregorian::date date, double price, fLegSelected_t&& fLegSelected ) {
+/* static */ void Strangle::ChooseLegs( // throw Chain exceptions
+    double slope,
+    const mapChains_t& chains,
+    boost::gregorian::date date, double price,
+    fLegSelected_t&& fLegSelected )
+{
 
   citerChain_t citerChain =
     Combo::SelectChain( chains, date, nDaysToExpiry );
@@ -134,10 +139,10 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
   fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
 }
 
-const std::string /* static */ Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price ) {
+const std::string /* static */ Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope ) {
   std::string sName( "strangle-" + sUnderlying );
   ChooseLegs(
-    chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+    slope, chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       sName
         += "-"
         +  ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )

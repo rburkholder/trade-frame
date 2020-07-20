@@ -652,16 +652,17 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         if ( m_bAllowComboAdd ) {
 
           try {
+            double slope( m_pricesDailyCloseBollinger20.Slope() );
             boost::gregorian::date date( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateSpread(
               date, mid, 11,
-              [mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( chains, date, mid, std::move( fLegSelected ) );
+              [slope,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
+                combo_t::ChooseLegs( slope, chains, date, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid );
+                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
@@ -1171,7 +1172,7 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
     ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
     m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
-    if ( 55 >= cntMarking ) { // only last 50 bars show attractors
+    if ( 55 >= cntMarking ) { // only last bars show attractors
       m_cePivots.AddMark( iterBars->High(), ou::Colour::LightSalmon, "High" );
       m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
 
