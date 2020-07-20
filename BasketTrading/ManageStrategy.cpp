@@ -164,7 +164,7 @@ ManageStrategy::ManageStrategy(
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_DefaultOrderSide( ou::tf::OrderSide::Unknown ),
+  m_DefaultOrderSide( ou::tf::OrderSide::Unknown ),  // TODO: update based upon current trend
   m_daysToExpiry( 1 ), // will be different for each strategy, to be deprecated
   m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
 {
@@ -637,6 +637,8 @@ void ManageStrategy::BuildPosition(
  */
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
+  // TODO: need to track trend to generate approprate entry
+
   switch ( m_stateTrading ) {
     case TSOptionEvaluation:
       {
@@ -663,7 +665,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() == mapCombo_iter ) {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
-                  if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) {
+                  if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) { // TODO: need this further up to aid in ChooseLegs
                     std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
                     std::pair<mapCombo_t::iterator,bool> result;
 
