@@ -15,7 +15,7 @@
 /*
  * File:    Combo.cpp
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: TFOptionCombos
  * Created on June 7, 2019, 5:08 PM
  */
 

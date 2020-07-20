@@ -15,7 +15,7 @@
 /*
  * File:    Strangle.cpp
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: TFOptionCombos
  * Created on May 25, 2019, 10:56 PM
  */
 
