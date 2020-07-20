@@ -311,9 +311,6 @@ double Strangle::GetNet( double price ) {
   return profitTotal;
 }
 
-void Strangle::Init() {
-}
-
 } // namespace option
 } // namespace tf
 } // namespace ou
