@@ -13,6 +13,7 @@ set(
     BearCallSpread.h
     BullPutSpread.h
     CallBackSpread.h
+    Collar.h
     Combo.h
     Condor.h
     Exceptions.h
@@ -31,6 +32,7 @@ set(
     BearCallSpread.cpp
     BullPutSpread.cpp
     CallBackSpread.cpp
+    Collar.cpp
     Combo.cpp
     Condor.cpp
     Leg.cpp
