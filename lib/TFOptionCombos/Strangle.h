@@ -50,9 +50,6 @@ public:
   static void ChooseLegs(
     const mapChains_t& chains, boost::gregorian::date, double price, fLegSelected_t&& ); // throw Chain exceptions
 
-  static void ChooseLegs(
-    const mapChains_t& chains, boost::gregorian::date, double lower, double upper, fLegSelected_t&& ); // throw Chain exceptions
-
   static size_t LegCount();
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price );

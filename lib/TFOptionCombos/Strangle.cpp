@@ -45,7 +45,7 @@ namespace {
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  )  // lower
   };
 
-}
+} // namespace anon
 
 Strangle::Strangle()
 : Combo()
@@ -146,29 +146,6 @@ const std::string /* static */ Strangle::Name( const std::string& sUnderlying, c
     }
     );
   return sName;
-}
-
-/* static */ void Strangle::ChooseLegs( const mapChains_t& chains, boost::gregorian::date date, double lower, double upper, fLegSelected_t&& fLegSelected ) {
-
-  citerChain_t citerChain =
-    Combo::SelectChain( chains, date, nDaysToExpiry );
-
-  const ou::tf::option::Chain& chain( citerChain->second );
-
-  double strikeOtmCall {};
-  double strikeOtmPut {};
-
-  strikeOtmCall = chain.Call_Otm( upper );
-  assert( 0.0 <= ( strikeOtmCall - upper ) );
-
-  strikeOtmPut = chain.Put_Otm( lower );
-  assert( 0.0 <= ( lower - strikeOtmPut ) );
-
-  assert( strikeOtmCall > strikeOtmPut );
-
-  fLegSelected( strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
-  fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
-
 }
 
 // applicable when running a long strangle strategy, has negative dblPrice1 in OrderManager on short strangle
