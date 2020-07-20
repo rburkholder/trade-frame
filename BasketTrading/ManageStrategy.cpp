@@ -727,7 +727,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           m_mapCombo.begin(), m_mapCombo.end(),
           [this,mid,&bar](mapCombo_t::value_type& entry){
 
-            combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( entry.second ).get();
+            auto pCombo = entry.second;
 
             switch ( pCombo->m_state ) {
               case combo_t::State::Initializing:
