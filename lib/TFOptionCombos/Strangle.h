@@ -45,8 +45,6 @@ public:
 
   virtual double GetNet( double price );
 
-  using fLegSelected_t = std::function<void(double, boost::gregorian::date, const std::string&)>;
-
   static void ChooseLegs(
     const mapChains_t& chains, boost::gregorian::date, double price, fLegSelected_t&& ); // throw Chain exceptions
 

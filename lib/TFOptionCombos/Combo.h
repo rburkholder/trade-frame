@@ -63,6 +63,8 @@ public:
   using fBuildLeg_t
     = std::function<void(const idPortfolio_t&, EOptionSide, double, fBuildPositionCallBack_t&&)>;
 
+  using fLegSelected_t = std::function<void(double, boost::gregorian::date, const std::string&)>;
+
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
