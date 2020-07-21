@@ -10,6 +10,92 @@
   },
   "configurations": [
 
+
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedGetHistory/",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedGetHistory//IQFeedGetHistory/",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) Weeklies",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Weeklies/Weeklies",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) BasketTrading",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/BasketTrading/BasketTrading",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
     {
       "name": "(gdb) MultipleFutures",
       "type": "cppdbg",
@@ -29,7 +115,7 @@
         }
       ],
       "miDebuggerPath": "/usr/bin/gdb"
-    }
+    },
 
     {
       "name": "(gdb) ESBracketOrder",
