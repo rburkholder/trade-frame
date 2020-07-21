@@ -83,7 +83,8 @@ size_t /* static */ Collar::LegCount() {
     double slope,
     const mapChains_t& chains,
     boost::gregorian::date date, double price,
-    fLegSelected_t&& fLegSelected )
+    fLegSelected_t&& fLegSelected
+)
 {
 
   citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, nDaysToExpirySynthetic );
@@ -125,7 +126,7 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope ) {
-  std::string sName( "collar-" + sUnderlying );
+  std::string sName( "collar" + sUnderlying );
   size_t ix {};
 
   if ( 0.0 <= slope ) {
@@ -160,18 +161,55 @@ size_t /* static */ Collar::LegCount() {
             +  boost::lexical_cast<std::string>( strike );
           break;
       }
+      ix++;
     }
     );
   return sName;
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide ) {
-
+void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
+  switch ( m_state ) {
+    case State::Positions: // doesn't confirm both put/call are available
+    case State::Watching:
+      switch ( side ) {
+        case ou::tf::OrderSide::Buy:
+          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          break;
+        case ou::tf::OrderSide::Sell:
+          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          break;
+      }
+      m_state = State::Executing;
+      break;
+  }
 }
 
-
-
 void Collar::CheckStop( double price ) {
+}
+
+double Collar::GetNet( double price ) {
+
+  double dblNet {};
+  double dblConstructedValue {};
+
+  for ( Leg& leg: m_vLeg ) {
+    dblNet += leg.GetNet( price ); // out: leg stats
+    double dblLegConstructedValue = leg.ConstructedValue();
+    std::cout << ",constructed@" << dblLegConstructedValue;
+    dblConstructedValue += dblLegConstructedValue;
+    std::cout << std::endl;
+  }
+
+  double profitTotal {};
+
+  return profitTotal;
+
 }
 
 } // namespace option

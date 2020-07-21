@@ -49,7 +49,9 @@ public:
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long strangle, or short strangle
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long or short
+
+  virtual double GetNet( double price );
 
 protected:
 private:
