@@ -83,8 +83,11 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
-#include <TFOptionCombos/Strangle.h>
-using combo_t = ou::tf::option::Strangle;
+//#include <TFOptionCombos/Strangle.h>
+//using combo_t = ou::tf::option::Strangle;
+
+#include <TFOptionCombos/Collar.h>
+using combo_t = ou::tf::option::Collar;
 
 #include "ManageStrategy.h"
 
