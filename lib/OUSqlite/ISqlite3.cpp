@@ -23,7 +23,7 @@
 namespace ou {
 namespace db {
 
-ISqlite3::ISqlite3(void) 
+ISqlite3::ISqlite3(void)
   : m_db( 0 )
 {
 }
@@ -33,7 +33,8 @@ ISqlite3::~ISqlite3(void) {
 
 void ISqlite3::SessionOpen( const std::string& sDbFileName, enumOpenFlags flags ) {
 
-  int sqlite3_flags = SQLITE_OPEN_READWRITE;
+  //https://sqlite.org/threadsafe.html, https://sqlite.org/c3ref/open.html
+  int sqlite3_flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX;
   sqlite3_flags |= ( 0 < ( flags & EOpenFlagsAutoCreate ) ) ? SQLITE_OPEN_CREATE : 0;
 
   int rtn = sqlite3_open_v2( sDbFileName.c_str(), &m_db, sqlite3_flags, 0 );
@@ -54,13 +55,13 @@ void ISqlite3::SessionClose( void ) {
     else {
       assert( false );
     }
-    
+
   }
 }
 
 void ISqlite3::PrepareStatement( structStatementState& statement, std::string& sStatement ) {
   sStatement += ";";
-  int rtn = sqlite3_prepare_v2( 
+  int rtn = sqlite3_prepare_v2(
     m_db, sStatement.c_str(), -1, &statement.pStmt, NULL );
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "ISqlite3::PrepareStatement: " );
