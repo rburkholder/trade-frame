@@ -27,8 +27,9 @@ To run, you'll need to:
 * When just starting out, run _IQFeedGetHistory_ with 0 for daily bars, this will load all available daily bars for the common US exchanges
 * On a daily basis, run _IQFeedGetHistory_ late at night, or first thing in the morning with 10 for daily bars, to load the latest
 * _BasketTrading_ can then be started prior to market hours
-  * Use menu Symbols -> Load List to load symbol list, it may take a little while
+  * Use Symbols -> Load List to load symbol list, it may take a little while, and wait for it to complete
   * Click 'Turn On' for IQF and IB, both need to be running, IQF for the data stream, and IB for execution (be sure to use paper trading to start)
+  * Use Manage -> Load to select and load symbols 
   * When playing around, delete ./x64/debug/BasketTrading.db to reset trades and lists
 
 If you have problems, let me know.  I need to re-run to be sure I havn't broken anything.
