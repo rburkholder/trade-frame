@@ -26,7 +26,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-  
+
 template<typename CRTP>
 class FrameWork01 {
 public:
@@ -78,11 +78,11 @@ protected:
   void      OnIQFeedConnecting( int ) {};
   void          OnIBConnecting( int ) {};
   void   OnSimulatorConnecting( int ) {};
-  
+
   void       OnIQFeedConnected( int ) {};
-  void           OnIBConnected( int ) {}; 
+  void           OnIBConnected( int ) {};
   void    OnSimulatorConnected( int ) {};
-  
+
   void    OnIQFeedDisconnecting( int ) {};
   void        OnIBDisconnecting( int ) {};
   void OnSimulatorDisconnecting( int ) {};
@@ -116,20 +116,20 @@ private:
 
   void HandleProviderStateChangeIQFeed( ou::tf::eProviderState_t );
   void HandleProviderStateChangeIB( ou::tf::eProviderState_t );
-  void HandleProviderStateChangeSimulation( ou::tf::eProviderState_t ); 
+  void HandleProviderStateChangeSimulation( ou::tf::eProviderState_t );
 
   void HandleIBConnecting( int );
   void HandleIBConnected( int );
   void HandleIBDisconnecting( int );
   void HandleIBDisconnected( int );
   void HandleIBError( size_t );
-  
+
   void HandleIQFeedConnecting( int );
   void HandleIQFeedConnected( int );
   void HandleIQFeedDisconnecting( int );
   void HandleIQFeedDisconnected( int );
   void HandleIQFeedError( size_t );
-  
+
   void HandleSimulatorConnecting( int );
   void HandleSimulatorConnected( int );
   void HandleSimulatorDisconnecting( int );
@@ -147,7 +147,7 @@ private:
   void HandleOnData2Disconnected( int );
 
   void HandleOnExecConnecting( int );  // need to test for connection failure, when ib is not running
-  void HandleOnExecConnected( int ); 
+  void HandleOnExecConnected( int );
   void HandleOnExecDisconnecting( int );
   void HandleOnExecDisconnected( int );
 
@@ -163,7 +163,7 @@ template<typename CRTP>
 FrameWork01<CRTP>::FrameWork01( void ) :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
-  m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ), 
+  m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ),
   m_iqfeed( new ou::tf::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
   m_bData1Connected( false ), m_bData2Connected( false ), m_bExecConnected( false )
@@ -188,15 +188,15 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   // key needs to match to account
   // ensure providers have been initialized above first
   pProvider_t p;
-  
+
   p = m_iqfeed;
   //p = boost::static_pointer_cast<pProvider_t>( m_iqfeed );
   ProviderManager::LocalCommonInstance().Register(  "iq01", p );
-  
+
   p = m_tws;
   //p = boost::static_pointer_cast<pProvider_t>( m_tws );
   ProviderManager::LocalCommonInstance().Register(  "ib01", p );
-  
+
   p = m_sim;
   //p = boost::static_pointer_cast<pProvider_t>( m_sim );
   ProviderManager::LocalCommonInstance().Register( "sim01", p );
@@ -288,7 +288,7 @@ void FrameWork01<CRTP>::HandleProviderStateChangeSimulation( ou::tf::eProviderSt
   HandleStateChangeRequest( state, m_bSimConnected, m_sim );
 }
 
-template<typename CRTP> // 2017.12.22 is this actually useful for anything?
+template<typename CRTP>
 void FrameWork01<CRTP>::HandleStateChangeRequest( eProviderState_t state, bool bConnected, pProvider_t p ) {
   switch ( state ) {
   case eProviderState_t::ProviderGoingOn:
@@ -572,7 +572,7 @@ void FrameWork01<CRTP>::SetMode( void ) {
     if ( ( ou::tf::keytypes::EProviderSimulator == m_pData1Provider->ID() ) && ( ou::tf::keytypes::EProviderSimulator == m_pExecutionProvider->ID() ) ) {
       m_mode = EModeSimulation;
     }
-    if ( 
+    if (
       ( ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) || ( ou::tf::keytypes::EProviderIB == m_pData1Provider->ID() ) )
       && ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) )
     {
