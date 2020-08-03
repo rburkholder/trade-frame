@@ -45,7 +45,6 @@
 #include <TFVuTrading/PanelFinancialChart.h>
 
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
-#include <wx-3.0/wx/gtk/radiobut.h>
 
 #include "MasterPortfolio.h"
 #include "PanelPortfolioStats.h"
