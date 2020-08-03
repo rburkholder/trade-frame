@@ -32,7 +32,8 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ),
   m_pDataProvider( pDataProvider ),
   m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true ),
+  m_bEventsAttached( false )
 {
   assert( 0 != pInstrument.get() );
   assert( 0 != pDataProvider.get() );
@@ -44,7 +45,8 @@ Watch::Watch( const Watch& rhs ) :
   m_pDataProvider( rhs.m_pDataProvider ),
   m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal ),
   m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries ),
+  m_bEventsAttached( false )
 {
   assert( 0 == rhs.m_cntWatching );
   assert( !rhs.m_bWatching );
@@ -52,11 +54,13 @@ Watch::Watch( const Watch& rhs ) :
 }
 
 Watch::~Watch(void) {
+  RemoveEvents();
   while ( 0 != m_cntWatching ) {
     StopWatch();
   }
 }
 
+// TODO: need to test this code.  Initialize state properly?
 Watch& Watch::operator=( const Watch& rhs ) {
   assert( 0 == rhs.m_cntWatching );
   assert( 0 == m_cntWatching );
@@ -84,13 +88,17 @@ void Watch::Initialize( void ) {
 }
 
 void Watch::AddEvents( void ) {
+  assert( !m_bEventsAttached );
   m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Watch::HandleConnected ) );
   m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Watch::HandleDisconnecting ) );
+  m_bEventsAttached = true;
 }
 
 void Watch::RemoveEvents( void ) {
+  assert( m_bEventsAttached );
   m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Watch::HandleConnected ) );
   m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &Watch::HandleDisconnecting ) );
+  m_bEventsAttached = false;
 }
 
 void Watch::SetProvider( pProvider_t pDataProvider ) {
@@ -156,7 +164,7 @@ bool Watch::StartWatch( void ) {
 
 void Watch::DisableWatch( void ) {
   if ( m_bWatching ) {
-//    std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+    //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     m_bWatching = false;

@@ -130,6 +130,7 @@ private:
 
   bool m_bWatchingEnabled;
   bool m_bWatching; // in/out of connected state
+  bool m_bEventsAttached; // code validation
 
   Fundamentals_t m_fundamentals;
   Summary_t m_summary;
