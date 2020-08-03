@@ -494,6 +494,7 @@ void SessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpenF
 template<class IDatabase>
 void SessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
+    m_bOpened = false;
     m_mapTableDefs.clear();
     for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); iter++ ) {
       if ( nullptr != iter->get() ) { // TODO: investigate why is zero
@@ -503,7 +504,6 @@ void SessionImpl<IDatabase>::ImplClose( void ) {
     }
     m_vQuery.clear();
     m_db.SessionClose();
-    m_bOpened = false;
     // 2013/08/26 process memory doesn't appear to be relaimed after this
     //   trying again with addition of reset();
   }
