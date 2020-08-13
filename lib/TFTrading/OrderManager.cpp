@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <boost/smart_ptr.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include "OrderManager.h"
