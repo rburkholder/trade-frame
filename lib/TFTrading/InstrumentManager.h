@@ -16,6 +16,7 @@
 // 2011/03/16  add persist-to-db superclass for saving/retrieving instruments
 
 #include <map>
+#include <mutex>
 #include <string>
 
 #include <OUCommon/ManagerBase.h>
@@ -96,6 +97,8 @@ private:
   typedef std::map<idInstrument_t,pInstrument_t> map_t;
   typedef map_t::iterator iterMap;
   typedef std::pair<idInstrument_t,pInstrument_t> pair_t;
+
+  std::mutex m_mutexLoadInstrument;
 
   map_t m_map;
 

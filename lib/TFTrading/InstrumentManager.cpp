@@ -130,6 +130,7 @@ void InstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentNa
 }
 
 void InstrumentManager::Assign( pInstrument_cref pInstrument ) {
+  //std::lock_guard<std::mutex> lock( m_mutex );
   if ( m_map.end() != m_map.find( pInstrument->GetInstrumentName() ) ) {
     throw std::runtime_error( "InstrumentManager::Assign instrument already exists: " + pInstrument->GetInstrumentName() );
   }
@@ -141,6 +142,7 @@ void InstrumentManager::Assign( pInstrument_cref pInstrument ) {
 }
 
 InstrumentManager::pInstrument_t InstrumentManager::Get( idInstrument_cref idName ) {
+  //std::lock_guard<std::mutex> lock( m_mutex );
   pInstrument_t pInstrument;
   iterMap iter = m_map.find( idName );
   if ( m_map.end() != iter ) {
@@ -159,6 +161,7 @@ InstrumentManager::pInstrument_t InstrumentManager::Get( idInstrument_cref idNam
 }
 
 bool InstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the query to make the get faster rather than searching the map again
+  //std::lock_guard<std::mutex> lock( m_mutex );
   bool bFound = ( m_map.end() != m_map.find( id ) );
   if ( !bFound ) {
     if ( nullptr != m_pSession ) {
@@ -174,6 +177,7 @@ bool InstrumentManager::Exists( pInstrument_cref pInstrument ) {
 }
 
 bool InstrumentManager::Exists( idInstrument_cref id, pInstrument_t& pInstrument ) {
+  //std::lock_guard<std::mutex> lock( m_mutex );
   bool bFound( false );
   map_t::const_iterator iter( m_map.find( id ) );
   if ( m_map.end() != iter ) {
@@ -201,6 +205,7 @@ namespace InstrumentManagerQueries {
 }
 
 bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
+  std::lock_guard<std::mutex> lock( m_mutexLoadInstrument );
       // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
   assert( nullptr != m_pSession );
   assert( m_map.end() == m_map.find( id ) );  // ensures we havn't already loaded an instrument
