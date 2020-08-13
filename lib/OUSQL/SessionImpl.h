@@ -81,13 +81,13 @@ public:
   virtual ~QueryBase( void ) {};
 
   void SetHasFields( void ) { m_bHasFields = true; };
-  inline bool HasFields( void ) { return m_bHasFields; };
+  inline bool HasFields( void ) const { return m_bHasFields; };
 
   void SetPrepared( void ) { m_bPrepared = true; };
-  inline bool IsPrepared( void ) { return m_bPrepared; };
+  inline bool IsPrepared( void ) const { return m_bPrepared; };
 
   // instrusive reference counting
-  size_t RefCnt( void ) { return m_cntRef; };
+  size_t RefCnt( void ) const { return m_cntRef; };
   void Ref( void ) { ++m_cntRef; };
   size_t UnRef( void ) { --m_cntRef; return m_cntRef; };
 
@@ -97,7 +97,7 @@ public:
     return m_sQueryText;
   };
 
-  const std::string& QueryText( void ) { return m_sQueryText; };
+  const std::string& QueryText( void ) const { return m_sQueryText; };
 
 protected:
   enumClause m_clause;
@@ -117,7 +117,7 @@ class QueryFields:
 public:
   typedef boost::intrusive_ptr<QueryFields<F> > pQueryFields_t;
   explicit QueryFields( F& f ): QueryBase(), var( f ) {};
-  ~QueryFields( void ) {};
+  virtual ~QueryFields( void ) {};
   F& var;  // 2011/03/07  I want to make this a reference to a constant var at some point
    // will require mods to Bind, and will need Fields( A& a ) const, hopefully will work with the Actions passed in
 protected:
