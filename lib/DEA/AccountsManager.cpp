@@ -46,7 +46,7 @@ bool AccountsManager::LocateAccount( const idAccount_t& idAccount, pAccount_t& p
   if ( 0 != m_pSession ) {
     AccountsManagerQueries::AccountKey keyAccount( idAccount );
     ou::db::QueryFields<AccountsManagerQueries::AccountKey>::pQueryFields_t pAccountQuery
-      = m_pSession->SQL<AccountsManagerQueries::AccountKey>( "select * from chartofaccounts", keyAccount ).Where( "accountid=?" ).NoExecute();
+      = m_pSession->SQL<AccountsManagerQueries::AccountKey>( "select * from chartofaccounts", keyAccount )->Where( "accountid=?" ).NoExecute();
     m_pSession->Bind<AccountsManagerQueries::AccountKey>( pAccountQuery );
     if ( m_pSession->Execute( pAccountQuery ) ) {
       Account::TableRowDef rowAccount;
@@ -58,15 +58,15 @@ bool AccountsManager::LocateAccount( const idAccount_t& idAccount, pAccount_t& p
   return bFound;
 }
 
-AccountsManager::pAccount_t AccountsManager::ConstructAccount( 
-  const idAccount_t& idAccount, const idCurrency_t& idCurrency, 
-  const std::string& sLocation, const std::string& sDepartment, 
+AccountsManager::pAccount_t AccountsManager::ConstructAccount(
+  const idAccount_t& idAccount, const idCurrency_t& idCurrency,
+  const std::string& sLocation, const std::string& sDepartment,
   const std::string& sCategory, const std::string& sSubCategory, const std::string& sDescription ) {
   pAccount_t pAccount;
   if ( 0 != m_pSession ) {
     if ( LocateAccount( idAccount, pAccount ) ) throw std::runtime_error( "account exists" );
     else {
-      pAccount.reset( new Account( Account::TableRowDef( 
+      pAccount.reset( new Account( Account::TableRowDef(
         idAccount, idCurrency, sLocation, sDepartment,
         sCategory, sSubCategory, sDescription ) ) );
       ou::db::QueryFields<Account::TableRowDef>::pQueryFields_t pQuery
@@ -78,14 +78,14 @@ AccountsManager::pAccount_t AccountsManager::ConstructAccount(
 
 // General Journal Entry
 
-AccountsManager::pGLEntry_t AccountsManager::ConstructGeneralJournalEntry( 
+AccountsManager::pGLEntry_t AccountsManager::ConstructGeneralJournalEntry(
   const idReference_t& idReference, const idAccount_t& idAccount, const idUser_t& idUser,
   money_t mnyDebit, money_t mnyCredit,
   const std::string& sCode, const std::string& sDescription ) {
   pGLEntry_t pGLEntry;
   if ( 0 != m_pSession ) {
-    pGLEntry.reset( 
-      new GeneralJournalEntry( 
+    pGLEntry.reset(
+      new GeneralJournalEntry(
         0, GeneralJournalEntry::TableRowDefNoKey( idReference, idAccount, idUser, mnyDebit, mnyCredit, sCode, sDescription ) ) );
     pGLEntry->SetCreationTime( ou::TimeSource::LocalCommonInstance().Internal() );
     ou::db::QueryFields<GeneralJournalEntry::TableRowDefNoKey>::pQueryFields_t pQueryWrite

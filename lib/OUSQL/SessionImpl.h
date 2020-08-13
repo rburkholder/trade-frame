@@ -225,7 +225,7 @@ class QueryState:
 //  friend S;  // ** g++ does not like this, need to provide specific function?
 public:
 
-  using pQueryState_t = boost::intrusive_ptr<QueryState<SS, F, S> >;
+  //using pQueryState_t = boost::intrusive_ptr<QueryState<SS, F, S> >;
 
   QueryState( S& session, F& f ): Query<F>( f ), m_session( session ) {};
   virtual ~QueryState( void ) {
@@ -351,24 +351,24 @@ public:
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>& Insert( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* Insert( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Insert>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>& Update( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* Update( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Update>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>& Delete( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* Delete( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Delete>( f );
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
-  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery, F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* SQL( const std::string& sSqlQuery, F& f ) {
 
     typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
@@ -384,12 +384,12 @@ public:
 
     //m_vQuery.push_back( pQuery );
 
-    return *pQuery;
+    return pQuery;
   }
 
   // query with no parameters
   template<class F>
-  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* SQL( const std::string& sSqlQuery ) {
     F f;  // warning, this variable goes out of scope before the query is destroyed
     return SQL( sSqlQuery, f );
   }
@@ -426,7 +426,7 @@ protected:
   }
 
   template<class F, class Action>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>* ComposeSql( F& f ) {
 
     using query_t = QueryState<typename IDatabase::structStatementState, F, session_t>;
 
@@ -441,7 +441,7 @@ protected:
 
     //m_vQuery.push_back( pQuery );
 
-    return *pQuery;
+    return pQuery;
   }
 
 private:

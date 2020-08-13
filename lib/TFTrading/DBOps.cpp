@@ -87,9 +87,9 @@ bool DBOps::LoadOptions( idInstrument_cref sInstrumentName, boost::uint16_t nYea
   bool bFound = false;
   OptionsQueryParameters query( sInstrumentName, nYear, nMonth, nDay );
 
-  ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery 
-    = SQL<OptionsQueryParameters>( 
-      "select * from instruments", query ).Where( "instrumentid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
+  ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery
+    = SQL<OptionsQueryParameters>(
+      "select * from instruments", query )->Where( "instrumentid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
 
   ou::tf::Instrument::TableRowDef instrument;  // can we put stuff directly into object?
   ou::tf::Instrument::pInstrument_t pInstrument;

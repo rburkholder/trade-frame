@@ -72,7 +72,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const std::string
 
   if ( nullptr != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
-    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q )->Where( sWhere );
   }
 
 }
@@ -91,7 +91,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, con
 
   if ( nullptr != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
-    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q )->Where( sWhere );
   }
 
 }
@@ -102,7 +102,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
 
   if ( nullptr != m_pSession ) {
     Q q( key );
-    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q )->Where( sWhere );
   }
 
 }
@@ -121,7 +121,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhe
 
   if ( nullptr != m_pSession ) {
     Q q( key );
-    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q )->Where( sWhere );
   }
   map.erase( iter );
 

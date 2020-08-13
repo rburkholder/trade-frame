@@ -23,8 +23,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-AccountManager::AccountManager( void ) 
-: ou::db::ManagerBase<AccountManager>()//, 
+AccountManager::AccountManager( void )
+: ou::db::ManagerBase<AccountManager>()//,
   //m_session( 0 )
 {
 }
@@ -46,7 +46,7 @@ AccountManager::pAccountAdvisor_t AccountManager::ConstructAccountAdvisor( const
   }
   else {
     m_mapAccountAdvisor.insert( pairAccountAdvisor_t( idAdvisor, p ) );
-    ou::db::QueryFields<AccountAdvisor::TableRowDef>::pQueryFields_t pQuery 
+    ou::db::QueryFields<AccountAdvisor::TableRowDef>::pQueryFields_t pQuery
       = m_pSession->Insert<AccountAdvisor::TableRowDef>( const_cast<AccountAdvisor::TableRowDef&>( p->GetRow() ) );
   }
 
@@ -75,7 +75,7 @@ AccountManager::pAccountAdvisor_t AccountManager::GetAccountAdvisor( const idAcc
   else {
     AccountManagerQueries::AccountAdvisorKey key( idAdvisor );
     ou::db::QueryFields<AccountManagerQueries::AccountAdvisorKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key ).Where( "accountadvisorid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key )->Where( "accountadvisorid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountAdvisorKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       AccountAdvisor::TableRowDef rowAccountAdvisor;
@@ -95,7 +95,7 @@ void AccountManager::DeleteAccountAdvisor( const idAccountAdvisor_t& idAccountAd
 
   pAccountAdvisor_t pAccountAdvisor( GetAccountAdvisor( idAccountAdvisor ) );  // has exception if does not exist
 
-  DeleteRecord<idAccountAdvisor_t, mapAccountAdvisor_t, AccountManagerQueries::AccountAdvisorKey>( 
+  DeleteRecord<idAccountAdvisor_t, mapAccountAdvisor_t, AccountManagerQueries::AccountAdvisorKey>(
     idAccountAdvisor, m_mapAccountAdvisor, "accountadvisorid = ?" );
 }
 
@@ -103,7 +103,7 @@ void AccountManager::DeleteAccountAdvisor( const idAccountAdvisor_t& idAccountAd
 // Account Owner
 //
 
-AccountManager::pAccountOwner_t AccountManager::ConstructAccountOwner( 
+AccountManager::pAccountOwner_t AccountManager::ConstructAccountOwner(
   const idAccountOwner_t& idAccountOwner, const idAccountAdvisor_t& idAccountAdvisor,
     const std::string& sFirstName, const std::string& sLastName ) {
 
@@ -117,7 +117,7 @@ AccountManager::pAccountOwner_t AccountManager::ConstructAccountOwner(
   }
   else {
     m_mapAccountOwner.insert( pairAccountOwner_t( idAccountOwner, p ) );
-    ou::db::QueryFields<AccountOwner::TableRowDef>::pQueryFields_t pQuery 
+    ou::db::QueryFields<AccountOwner::TableRowDef>::pQueryFields_t pQuery
       = m_pSession->Insert<AccountOwner::TableRowDef>( const_cast<AccountOwner::TableRowDef&>( p->GetRow() ) );
   }
 
@@ -146,7 +146,7 @@ AccountManager::pAccountOwner_t AccountManager::GetAccountOwner( const idAccount
   else {
     AccountManagerQueries::AccountOwnerKey key( idAccountOwner );
     ou::db::QueryFields<AccountManagerQueries::AccountOwnerKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key ).Where( "accountownerid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key )->Where( "accountownerid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountOwnerKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       AccountOwner::TableRowDef rowAccountOwner;
@@ -166,18 +166,18 @@ void AccountManager::DeleteAccountOwner( const idAccountOwner_t& idAccountOwner 
 
   pAccountOwner_t pAccountOwner( GetAccountOwner( idAccountOwner ) );  // has exception if does not exist
 
-  DeleteRecord<idAccountOwner_t, mapAccountOwner_t, AccountManagerQueries::AccountOwnerKey>( 
+  DeleteRecord<idAccountOwner_t, mapAccountOwner_t, AccountManagerQueries::AccountOwnerKey>(
     idAccountOwner, m_mapAccountOwner, "accountownerid = ?" );
 
 }
 
 //
-// Account 
+// Account
 //
 
-AccountManager::pAccount_t AccountManager::ConstructAccount( 
+AccountManager::pAccount_t AccountManager::ConstructAccount(
   const idAccount_t& idAccount, const idAccountOwner_t& idAccountOwner,
-    std::string sAccountName, keytypes::eidProvider_t idProvider, 
+    std::string sAccountName, keytypes::eidProvider_t idProvider,
     std::string sBrokerName, std::string sBrokerAccountId, std::string sLogin, std::string sPassword ) {
 
   // todo: assert that idAccountOwner already exists
@@ -190,7 +190,7 @@ AccountManager::pAccount_t AccountManager::ConstructAccount(
   }
   else {
     m_mapAccount.insert( pairAccount_t( idAccount, p ) );
-    ou::db::QueryFields<Account::TableRowDef>::pQueryFields_t pQuery 
+    ou::db::QueryFields<Account::TableRowDef>::pQueryFields_t pQuery
       = m_pSession->Insert<Account::TableRowDef>( const_cast<Account::TableRowDef&>( p->GetRow() ) );
   }
 
@@ -219,7 +219,7 @@ AccountManager::pAccount_t AccountManager::GetAccount( const idAccount_t& idAcco
   else {
     AccountManagerQueries::AccountKey key( idAccount );
     ou::db::QueryFields<AccountManagerQueries::AccountKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key ).Where( "accountid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key )->Where( "accountid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       Account::TableRowDef rowAccount;
@@ -239,7 +239,7 @@ void AccountManager::DeleteAccount( const idAccount_t& idAccount ) {
 
   pAccount_t pAccount( GetAccount( idAccount ) );  // has exception if does not exist
 
-  DeleteRecord<idAccount_t, mapAccount_t, AccountManagerQueries::AccountKey>( 
+  DeleteRecord<idAccount_t, mapAccount_t, AccountManagerQueries::AccountKey>(
     idAccount, m_mapAccount, "accountid = ?" );
 
 }

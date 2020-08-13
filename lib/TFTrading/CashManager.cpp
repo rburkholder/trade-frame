@@ -57,12 +57,12 @@ namespace CashAccountManagerQueries {
     }
     const ou::tf::keytypes::idAccount_t& idAccount;
     const ou::tf::keytypes::idCurrency_t& idCurrency;
-    CashAccountKey( 
-      const idAccount_t& idAccount_, 
+    CashAccountKey(
+      const idAccount_t& idAccount_,
       const idCurrency_t& idCurrency_ )
       : idAccount( idAccount_ ), idCurrency( idCurrency_ ) {};
     typedef ou::MultiKeyCompare<idAccount_t, idCurrency_t> key_t;
-    CashAccountKey( const key_t& key ) 
+    CashAccountKey( const key_t& key )
       : idAccount( key.GetKey1() ), idCurrency( key.GetKey2() ) {};
   };
 }
@@ -79,8 +79,8 @@ CashManager::pCashAccount_t CashManager::GetCashAccount( const idAccount_t& idAc
   else {
     CashAccountManagerQueries::CashAccountKey key( idAccount, idCurrency );
     ou::db::QueryFields<CashAccountManagerQueries::CashAccountKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<CashAccountManagerQueries::CashAccountKey>( "select * from cashaccounts", key )
-      .Where( "accountid = ? and currencyid = ?" ).NoExecute();
+      = m_pSession->SQL<CashAccountManagerQueries::CashAccountKey>( "select * from cashaccounts", key )->
+        Where( "accountid = ? and currencyid = ?" ).NoExecute();
     m_pSession->Bind<CashAccountManagerQueries::CashAccountKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       CashAccount::TableRowDef rowCashAccount;
@@ -101,12 +101,12 @@ void CashManager::DeleteAccount( const idAccount_t& idAccount, const idCurrency_
   pCashAccount_t pCashAccount( GetCashAccount( idAccount, idCurrency ) );  // has exception if does not exist
 
   key_t keyMap( idAccount, idCurrency );
-  DeleteRecord<key_t, mapCashAccount_t, CashAccountManagerQueries::CashAccountKey>( 
+  DeleteRecord<key_t, mapCashAccount_t, CashAccountManagerQueries::CashAccountKey>(
     keyMap, mapCashAccount, "accountid = ? and currencyid = ?" );
 
 }
 
-//CashManager::pCashTransaction_t CashManager::AddCashTransaction( 
+//CashManager::pCashTransaction_t CashManager::AddCashTransaction(
 //    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription ) {
 //}
 
@@ -123,7 +123,7 @@ void CashManager::HandleRegisterRows( ou::db::Session& session ) {
 }
 
 void CashManager::HandlePopulateTables( ou::db::Session& session ) {
-  // populate with default currency: USD?  This should therefore be overridden somewhere as default currency 
+  // populate with default currency: USD?  This should therefore be overridden somewhere as default currency
   //  is different in various jurisdictions
   // should come from a TLV table?
 }
