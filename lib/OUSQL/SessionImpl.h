@@ -48,7 +48,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/intrusive_ptr.hpp>
-#include <boost/smart_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "Constants.h"
@@ -75,7 +74,7 @@ protected:
   enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy, EClauseBind, EClauseNoExecute };
 public:
 
-  typedef boost::intrusive_ptr<QueryBase> pQueryBase_t;
+  using pQueryBase_t = boost::intrusive_ptr<QueryBase>;
 
   QueryBase( void ): m_clause( EClauseNone ), m_bHasFields( false ), m_cntRef( 0 ), m_bPrepared( false ) {};
   virtual ~QueryBase( void ) {};
@@ -229,7 +228,9 @@ public:
   using pQueryState_t = boost::intrusive_ptr<QueryState<SS, F, S> >;
 
   QueryState( S& session, F& f ): Query<F>( f ), m_session( session ) {};
-  virtual ~QueryState( void ) {};
+  virtual ~QueryState( void ) {
+    m_session.Release( *this );
+  };
 
 protected:
 
@@ -256,6 +257,7 @@ public:
 
   typedef SessionImpl<IDatabase> session_t;
   typedef boost::shared_ptr<session_t> pSession_t;
+  typedef QueryBase::pQueryBase_t pQueryBase_t;
 
   SessionImpl( void );
   virtual ~SessionImpl( void );
@@ -297,7 +299,7 @@ public:
     return m_db.ExecuteStatement( StatementState );
   }
 
-  bool Execute( QueryBase::pQueryBase_t pQuery ) {
+  bool Execute( pQueryBase_t pQuery ) {
     return Execute( *pQuery.get() );
   }
 
@@ -309,7 +311,7 @@ public:
     columns.Fields( action );
   }
 
-  void Reset( QueryBase::pQueryBase_t pQuery ) {
+  void Reset( pQueryBase_t pQuery ) {
     typename IDatabase::structStatementState& StatementState
       = *dynamic_cast<typename IDatabase::structStatementState*>( pQuery.get() );
     m_db.ResetStatement( StatementState );
@@ -342,7 +344,7 @@ public:
       m_mapTableDefs.begin(),
       mapTableDefs_pair_t( sTableName, pQuery) );
 
-    m_vQuery.push_back( pQuery );
+    //m_vQuery.push_back( pQuery );
 
     return *pQuery;
 
@@ -380,7 +382,7 @@ public:
 
     pQuery->SetExecuteOneTime();
 
-    m_vQuery.push_back( pQuery );
+    //m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }
@@ -390,6 +392,10 @@ public:
   QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
     F f;  // warning, this variable goes out of scope before the query is destroyed
     return SQL( sSqlQuery, f );
+  }
+
+  void Release( typename IDatabase::structStatementState& statement ) {
+    m_db.CloseStatement( statement );
   }
 
   template<class F>
@@ -433,7 +439,7 @@ protected:
 
     pQuery->SetExecuteOneTime();
 
-    m_vQuery.push_back( pQuery );
+    //m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }
@@ -444,16 +450,14 @@ private:
 
   IDatabase m_db;
 
-  typedef QueryBase::pQueryBase_t pQueryBase_t;
-
   typedef std::map<std::string, pQueryBase_t> mapTableDefs_t;  // map table name to table definition
   typedef typename mapTableDefs_t::iterator mapTableDefs_iter_t;
   typedef std::pair<std::string, pQueryBase_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
-  typedef std::vector<pQueryBase_t> vQuery_t;
-  typedef vQuery_t::iterator vQuery_iter_t;
-  vQuery_t m_vQuery;  // 2013/08/26
+  //typedef std::vector<pQueryBase_t> vQuery_t;
+  //typedef vQuery_t::iterator vQuery_iter_t;
+  //vQuery_t m_vQuery;  // 2013/08/26
   // this is a bad thing to have around, statements should be closed after use.
   // don't worry about re-use, cross that bridge later.
   // in one application there are 32,000 queries, and none are closed,
@@ -495,14 +499,13 @@ template<class IDatabase>
 void SessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
     m_bOpened = false;
-    m_mapTableDefs.clear();
-    for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); iter++ ) {
-      if ( nullptr != iter->get() ) { // TODO: investigate why is zero
-        m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
-        iter->reset();
-      }
-    }
-    m_vQuery.clear();
+    //for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); iter++ ) {
+    //  if ( nullptr != iter->get() ) { // TODO: investigate why is zero
+    //    Release( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
+    //    iter->reset();
+    //  }
+    //}
+    //m_vQuery.clear();
     m_db.SessionClose();
     // 2013/08/26 process memory doesn't appear to be relaimed after this
     //   trying again with addition of reset();
@@ -516,6 +519,7 @@ void SessionImpl<IDatabase>::CreateTables( void ) {
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
     Execute( iter->second );
   }
+  m_mapTableDefs.clear();
 }
 
 } // db
