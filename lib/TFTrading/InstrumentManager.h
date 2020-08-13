@@ -39,31 +39,31 @@ public:
   typedef Instrument::idInstrument_cref idInstrument_cref;
 
   InstrumentManager(void);
-  ~InstrumentManager(void);
+  virtual ~InstrumentManager(void);
 
-  pInstrument_t ConstructInstrument( 
+  pInstrument_t ConstructInstrument(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
-  pInstrument_t ConstructFuture(     
+  pInstrument_t ConstructFuture(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
     boost::uint16_t year, boost::uint16_t month );
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
     boost::uint16_t year, boost::uint16_t month,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ); 
+    OptionSide::enumOptionSide side,
+    double strike );
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ); 
-  pInstrument_t ConstructCurrency( 
-    idInstrument_cref idInstrumentName, 
+    OptionSide::enumOptionSide side,
+    double strike );
+  pInstrument_t ConstructCurrency(
+    idInstrument_cref idInstrumentName,
 //    idInstrument_cref idCounterInstrument,
     //pInstrument_t pUnderlying,
-    const std::string& sExchangeName, 
+    const std::string& sExchangeName,
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
   void Register( pInstrument_t& pInstrument );
@@ -76,8 +76,8 @@ public:
 
   template<typename F> void ScanOptions( F f, idInstrument_cref, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day );
 
-  void AttachToSession( ou::db::Session* pSession );
-  void DetachFromSession( ou::db::Session* pSession );
+  virtual void AttachToSession( ou::db::Session* pSession );
+  virtual void DetachFromSession( ou::db::Session* pSession );
 
   // move these to IQFeed somewhere
 //  pInstrument_t GetIQFeedInstrument( const std::string& sName );
@@ -100,7 +100,7 @@ private:
   map_t m_map;
 
   void SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& );
-  void SaveAlternateInstrumentName( 
+  void SaveAlternateInstrumentName(
     const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t& );
 
   void HandleRegisterTables( ou::db::Session& session );
@@ -123,7 +123,7 @@ namespace InstrumentManagerQueries {
     const ou::tf::keytypes::idInstrument_t& idInstrument;
     boost::uint16_t nYear; // future, option
     boost::uint16_t nMonth; // future, option
-    boost::uint16_t nDay; // future, option    
+    boost::uint16_t nDay; // future, option
     OptionSelection( const ou::tf::keytypes::idInstrument_t& idInstrument_, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
       : idInstrument( idInstrument_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ) {};
   };
@@ -138,11 +138,11 @@ namespace InstrumentManagerQueries {
   };
 }
 
-template<typename F> 
+template<typename F>
 void InstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
   InstrumentManagerQueries::OptionSelection idInstrument( id, nYear, nMonth, nDay );
   ou::db::QueryFields<InstrumentManagerQueries::OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>( 
+    = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>(
       "select instrumentid from instruments", idInstrument ).Where( "underlyingid = ? and year = ? and month = ? and day = ?" ).NoExecute();
   m_pSession->Bind<InstrumentManagerQueries::OptionSelection>( pExistsQuery );
   InstrumentManagerQueries::OptionSymbolName name;

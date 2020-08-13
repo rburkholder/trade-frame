@@ -40,7 +40,7 @@ template<class T>
 class ManagerBase: public ou::Singleton<T> {
 public:
 
-  ManagerBase( void ): m_pSession( 0 ) {};
+  ManagerBase( void ): m_pSession( nullptr ) {};
   virtual ~ManagerBase( void ) {};
 
   virtual void AttachToSession( ou::db::Session* pSession ) { m_pSession = pSession; };
@@ -70,7 +70,7 @@ template<class T>
 template<class K, class R, class Q>
 void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const std::string& sWhere ) {
 
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
     typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
   }
@@ -89,7 +89,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, con
     throw std::runtime_error( s );
   }
 
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
     typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
   }
@@ -100,7 +100,7 @@ template<class T>
 template<class K, class Q> // K:key, Q:query
 void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
 
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     Q q( key );
     typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
   }
@@ -119,7 +119,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhe
     throw std::runtime_error( s );
   }
 
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     Q q( key );
     typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
   }
