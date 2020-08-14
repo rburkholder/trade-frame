@@ -872,20 +872,18 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   assert( 0 < contractDetails.summary.conId );
 
-  //OnContractDetailsHandler_t handler = 0;
-  fOnContractDetail_t handler = 0;
-  mapActiveRequestId_t::iterator iterRequest;
+  fOnContractDetail_t handler = nullptr;
+  pInstrument_t pInstrument;
   {
+    mapActiveRequestId_t::iterator iterRequest;
     boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
     iterRequest = m_mapActiveRequestId.find( reqId );  // entry removed with contractDetailsEnd
     if ( m_mapActiveRequestId.end() == iterRequest ) {
       throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
     }
+    handler = iterRequest->second->fOnContractDetail;
+    pInstrument = iterRequest->second->pInstrument;  // might be empty
   }
-
-  //handler = iterRequest->second->fProcess;
-  handler = iterRequest->second->fOnContractDetail;
-  pInstrument_t pInstrument = iterRequest->second->pInstrument;  // might be empty
 
   // need some logic here:
   // * if instrument is supplied, only supplement some existing information
@@ -905,7 +903,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   //assert( !( (0 != pInstrument.get()) && (m_mapContractToSymbol.end() != iter) ) );  // illegal call:  instrument and contract already exist, and should have been mated
 
-  if ( ( 0 == pInstrument.get() ) && ( m_mapContractToSymbol.end() != iterMap ) ) {
+  if ( ( nullptr == pInstrument.get() ) && ( m_mapContractToSymbol.end() != iterMap ) ) {
     pInstrument = iterMap->second->GetInstrument();
   }
 
