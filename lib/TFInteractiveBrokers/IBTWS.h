@@ -305,22 +305,19 @@ private:
 
   struct structRequest_t {
     reqId_t id;
+    bool bResubmitContract;
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
-    //OnContractDetailsHandler_t fProcess;
-    //OnContractDetailsDoneHandler_t fDone;
     fOnContractDetail_t fOnContractDetail;
     fOnContractDetailDone_t fOnContractDetailDone;
-    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ )
-    //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
-    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ )
-    //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
+    Contract contract; // used when having to resubmit
     structRequest_t( reqId_t id_, fOnContractDetail_t fProcess_, fOnContractDetailDone_t fDone_, pInstrument_t pInstrument_ )
-      : id( id_ ), fOnContractDetail( fProcess_ ), fOnContractDetailDone( fDone_ ), pInstrument( pInstrument_ ) {};
+      : id( id_ ), fOnContractDetail( fProcess_ ), fOnContractDetailDone( fDone_ ), pInstrument( pInstrument_ ),
+        bResubmitContract( false )
+      {};
   };
 
   reqId_t m_nxtReqId;
   std::vector<structRequest_t*> m_vInActiveRequestId;  // can this be re-written with lockless structure?
-//  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
   typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
   mapActiveRequestId_t m_mapActiveRequestId;
   boost::mutex m_mutexContractRequest;

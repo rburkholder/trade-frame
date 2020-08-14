@@ -278,8 +278,7 @@ void IBTWS::RequestContractDetails(
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
   // pInstrument can be empty, or can have an instrument
   // results supplied at contractDetails()
-  structRequest_t* pRequest;
-  pRequest = 0;
+  structRequest_t* pRequest = nullptr;
   // needs to be thread protected:
   boost::mutex::scoped_lock lock(m_mutexContractRequest);
   if ( 0 == m_vInActiveRequestId.size() ) {
@@ -289,14 +288,26 @@ void IBTWS::RequestContractDetails(
     pRequest = m_vInActiveRequestId.back();
     m_vInActiveRequestId.pop_back();
     pRequest->id = m_nxtReqId++;
-    //pRequest->fProcess = fProcess;
-    //pRequest->fDone = fDone;
     pRequest->fOnContractDetail = fProcess;
     pRequest->fOnContractDetailDone = fDone;
     pRequest->pInstrument = pInstrument;
   }
   m_mapActiveRequestId[ pRequest->id ] = pRequest;
-  pTWS->reqContractDetails( pRequest->id, contract );
+
+  if ( 5 < m_mapActiveRequestId.size() ) {
+    std::cout
+      << pRequest->id << ": "
+      << "m_mapActiveRequestId size=" << m_mapActiveRequestId.size()
+      << ", " << pInstrument->GetInstrumentName( )
+      << " submission delayed"
+      << std::endl;
+    pRequest->contract = contract;
+    pRequest->bResubmitContract = true;
+  }
+  else {
+    pTWS->reqContractDetails( pRequest->id, contract );
+  }
+
 }
 
 //IBSymbol *IBTWS::NewCSymbol( const std::string &sSymbolName ) {
@@ -881,7 +892,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     if ( m_mapActiveRequestId.end() == iterRequest ) {
       throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
     }
-    handler = iterRequest->second->fOnContractDetail;
+    handler = std::move( iterRequest->second->fOnContractDetail );
     pInstrument = iterRequest->second->pInstrument;  // might be empty
   }
 
@@ -990,7 +1001,6 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
 void IBTWS::contractDetailsEnd( int reqId ) {
   // not called when no symbol available
-  //OnContractDetailsDoneHandler_t handler = 0;
   fOnContractDetailDone_t handler = nullptr;
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
@@ -998,11 +1008,32 @@ void IBTWS::contractDetailsEnd( int reqId ) {
     if ( m_mapActiveRequestId.end() == iterRequest ) {
       throw std::runtime_error( "contractDetailsEnd out of sync" );
     }
-    reqId_t id = iterRequest->second->id;
-    //handler = iterRequest->second->fDone;
-    handler = iterRequest->second->fOnContractDetailDone;
+    //reqId_t id = iterRequest->second->id;
+    handler = std::move( iterRequest->second->fOnContractDetailDone );
+
+    iterRequest->second->fOnContractDetail = nullptr;
+    iterRequest->second->fOnContractDetailDone = nullptr;
+    iterRequest->second->pInstrument.reset();
+
     m_vInActiveRequestId.push_back( iterRequest->second );
     m_mapActiveRequestId.erase( iterRequest );
+
+    for ( mapActiveRequestId_t::value_type& vt: m_mapActiveRequestId ) {
+      // find first available contract to submit, should be first come first served
+      auto [key, request ] = vt;
+      if ( request->bResubmitContract ) {
+        request->bResubmitContract = false;
+        std::cout
+          << request->id << ": "
+          << "m_mapActiveRequestId size=" << m_mapActiveRequestId.size()
+          << ", " << request->pInstrument->GetInstrumentName( )
+          << " resubmitted"
+          << std::endl;
+        pTWS->reqContractDetails( request->id, request->contract );
+        break;
+      }
+    }
+
 //    while ( 0 != m_mapActiveRequestId.size() ) {
       // check for expired / ignored requests
 //      iterRequest = m_mapActiveRequestId.begin();
