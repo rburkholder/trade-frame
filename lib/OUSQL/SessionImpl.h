@@ -114,7 +114,7 @@ class QueryFields:
   public QueryBase
 {
 public:
-  typedef boost::intrusive_ptr<QueryFields<F> > pQueryFields_t;
+  using pQueryFields_t = boost::intrusive_ptr<QueryFields<F> >;
   explicit QueryFields( F& f ): QueryBase(), var( f ) {};
   virtual ~QueryFields( void ) {};
   F& var;  // 2011/03/07  I want to make this a reference to a constant var at some point
@@ -129,7 +129,10 @@ template<class F>
 class Query: public QueryFields<F> {  // rename to Query once SessionImpl Query has been renamed successfully
 public:
 
-  explicit Query( F& f ): m_bExecuteOneTime( false ), QueryFields<F>( f ) {};
+  explicit Query( F& f )
+  : m_bExecuteOneTime( false ), QueryFields<F>( f ) {
+
+  };
   ~Query( void ) {};
 
   Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
@@ -160,12 +163,13 @@ public:
     return *this;
   }
 
-  operator QueryFields<F>() {
-    return dynamic_cast<QueryFields<F> >( *this );
-  }
+//  operator QueryFields<F>() {
+//    return dynamic_cast<QueryFields<F> >( *this );
+//  }
 
-  // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment), execute the bind and execute
-  // may need to add an auto-reset before the bind:  therefore need m_bBound member variable
+  // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment),
+  // execute the bind and execute may need to add an auto-reset before the bind:
+  //    therefore need m_bBound member variable
 /*
   operator QueryFields<F>*() {
     if ( m_bExecuteOneTime ) {
@@ -184,7 +188,9 @@ public:
     return dynamic_cast<QueryFields<F>&>( *this );
   }
 */
-  operator typename QueryFields<F>::pQueryFields_t() { // this one is actually used
+
+  // conversion operator
+  operator typename QueryFields<F>::pQueryFields_t() {
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
       m_bExecuteOneTime = false;
@@ -351,24 +357,24 @@ public:
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>* Insert( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Insert( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Insert>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>* Update( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Update( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Update>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>* Delete( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Delete( F& f ) {
     return ComposeSql<F, typename IDatabase::Action_Compose_Delete>( f );
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
-  QueryState<typename IDatabase::structStatementState, F, session_t>* SQL( const std::string& sSqlQuery, F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery, F& f ) {
 
     typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
@@ -384,12 +390,12 @@ public:
 
     //m_vQuery.push_back( pQuery );
 
-    return pQuery;
+    return *pQuery;
   }
 
   // query with no parameters
   template<class F>
-  QueryState<typename IDatabase::structStatementState, F, session_t>* SQL( const std::string& sSqlQuery ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
     F f;  // warning, this variable goes out of scope before the query is destroyed
     return SQL( sSqlQuery, f );
   }
@@ -426,7 +432,7 @@ protected:
   }
 
   template<class F, class Action>  // do reset, auto bind when doing execute
-  QueryState<typename IDatabase::structStatementState, F, session_t>* ComposeSql( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
 
     using query_t = QueryState<typename IDatabase::structStatementState, F, session_t>;
 
@@ -441,7 +447,7 @@ protected:
 
     //m_vQuery.push_back( pQuery );
 
-    return pQuery;
+    return *pQuery;
   }
 
 private:

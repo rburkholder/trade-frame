@@ -79,8 +79,8 @@ CashManager::pCashAccount_t CashManager::GetCashAccount( const idAccount_t& idAc
   else {
     CashAccountManagerQueries::CashAccountKey key( idAccount, idCurrency );
     ou::db::QueryFields<CashAccountManagerQueries::CashAccountKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<CashAccountManagerQueries::CashAccountKey>( "select * from cashaccounts", key )->
-        Where( "accountid = ? and currencyid = ?" ).NoExecute();
+      = m_pSession->SQL<CashAccountManagerQueries::CashAccountKey>( "select * from cashaccounts", key )
+        .Where( "accountid = ? and currencyid = ?" ).NoExecute();
     m_pSession->Bind<CashAccountManagerQueries::CashAccountKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       CashAccount::TableRowDef rowCashAccount;

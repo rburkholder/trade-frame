@@ -75,7 +75,7 @@ AccountManager::pAccountAdvisor_t AccountManager::GetAccountAdvisor( const idAcc
   else {
     AccountManagerQueries::AccountAdvisorKey key( idAdvisor );
     ou::db::QueryFields<AccountManagerQueries::AccountAdvisorKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key )->Where( "accountadvisorid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key ).Where( "accountadvisorid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountAdvisorKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       AccountAdvisor::TableRowDef rowAccountAdvisor;
@@ -146,7 +146,7 @@ AccountManager::pAccountOwner_t AccountManager::GetAccountOwner( const idAccount
   else {
     AccountManagerQueries::AccountOwnerKey key( idAccountOwner );
     ou::db::QueryFields<AccountManagerQueries::AccountOwnerKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key )->Where( "accountownerid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key ).Where( "accountownerid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountOwnerKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       AccountOwner::TableRowDef rowAccountOwner;
@@ -219,7 +219,7 @@ AccountManager::pAccount_t AccountManager::GetAccount( const idAccount_t& idAcco
   else {
     AccountManagerQueries::AccountKey key( idAccount );
     ou::db::QueryFields<AccountManagerQueries::AccountKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key )->Where( "accountid = ?" ).NoExecute();
+      = m_pSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key ).Where( "accountid = ?" ).NoExecute();
     m_pSession->Bind<AccountManagerQueries::AccountKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       Account::TableRowDef rowAccount;

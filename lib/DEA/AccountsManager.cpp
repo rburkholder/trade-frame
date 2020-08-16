@@ -46,7 +46,7 @@ bool AccountsManager::LocateAccount( const idAccount_t& idAccount, pAccount_t& p
   if ( 0 != m_pSession ) {
     AccountsManagerQueries::AccountKey keyAccount( idAccount );
     ou::db::QueryFields<AccountsManagerQueries::AccountKey>::pQueryFields_t pAccountQuery
-      = m_pSession->SQL<AccountsManagerQueries::AccountKey>( "select * from chartofaccounts", keyAccount )->Where( "accountid=?" ).NoExecute();
+      = m_pSession->SQL<AccountsManagerQueries::AccountKey>( "select * from chartofaccounts", keyAccount ).Where( "accountid=?" ).NoExecute();
     m_pSession->Bind<AccountsManagerQueries::AccountKey>( pAccountQuery );
     if ( m_pSession->Execute( pAccountQuery ) ) {
       Account::TableRowDef rowAccount;

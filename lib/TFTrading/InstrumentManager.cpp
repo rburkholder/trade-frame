@@ -213,7 +213,7 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   bool bFound = false;
   InstrumentManagerQueries::InstrumentKey idInstrument( id );
   ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument )->Where( "instrumentid = ?" ).NoExecute();
+    = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
   m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
   if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     Instrument::TableRowDef instrument;
@@ -259,7 +259,7 @@ void InstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument
   assert( 0 != pInstrument.get() );
   InstrumentManagerQueries::InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
    ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-     = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument )->Where( "instrumentid = ?" ).NoExecute();
+     = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
   m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
   AlternateInstrumentName::TableRowDef altname;
   while ( m_pSession->Execute( pExistsQuery ) ) {
@@ -326,7 +326,7 @@ void InstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
 
   std::vector<std::string>::iterator iter = vsExchangesPreload.begin();
 
-  ou::db::QueryFields<Exchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<Exchange::TableRowDef>( exchange )->NoExecute();
+  ou::db::QueryFields<Exchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<Exchange::TableRowDef>( exchange ).NoExecute();
 
   while ( vsExchangesPreload.end() != iter ) {
     exchange.idExchange = *(iter++);

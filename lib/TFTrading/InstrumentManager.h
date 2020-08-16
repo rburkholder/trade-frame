@@ -146,7 +146,7 @@ void InstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t 
   InstrumentManagerQueries::OptionSelection idInstrument( id, nYear, nMonth, nDay );
   ou::db::QueryFields<InstrumentManagerQueries::OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
     = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>(
-      "select instrumentid from instruments", idInstrument )->Where( "underlyingid = ? and year = ? and month = ? and day = ?" ).NoExecute();
+      "select instrumentid from instruments", idInstrument ).Where( "underlyingid = ? and year = ? and month = ? and day = ?" ).NoExecute();
   m_pSession->Bind<InstrumentManagerQueries::OptionSelection>( pExistsQuery );
   InstrumentManagerQueries::OptionSymbolName name;
   pInstrument_t pInstrument;

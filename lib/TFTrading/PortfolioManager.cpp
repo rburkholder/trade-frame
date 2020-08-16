@@ -89,7 +89,7 @@ void PortfolioManager::HandlePositionOnExecution( const Position& position ) {
       row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblUnRealizedPL, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionData>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionData>(
-        "update positions set ordersidepending=?, quantitypending=?, ordersideactive=?, quantityactive=?, constructedvalue=?, unrealizedpl=?, realizedpl=?", update )->Where( "positionid=?" );
+        "update positions set ordersidepending=?, quantitypending=?, ordersideactive=?, quantityactive=?, constructedvalue=?, unrealizedpl=?, realizedpl=?", update ).Where( "positionid=?" );
   }
 }
 
@@ -114,7 +114,7 @@ void PortfolioManager::HandlePositionOnCommission( const Position& position ) {
     const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
-      = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commission=?", update )->Where( "positionid=?" );
+      = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commission=?", update ).Where( "positionid=?" );
   }
 }  // the Where could be appended with boost::fusion type structure for the fields, and bind?
   // need to cache the queries
@@ -140,7 +140,7 @@ void PortfolioManager::HandlePortfolioOnExecution( const Portfolio& portfolio ) 
     const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
-      = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update )->Where( "portfolioid=?" );
+      = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "portfolioid=?" );
   }
 }
 
@@ -165,7 +165,7 @@ void PortfolioManager::HandlePortfolioOnCommission( const Portfolio& portfolio )
     const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
-      = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commission=?", update )->Where( "portfolioid=?" );
+      = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commission=?", update ).Where( "portfolioid=?" );
   }
 }
 
@@ -195,7 +195,7 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
     // following portfolio / position code is shared with LoadActivePortfolios and could be factored out
     PortfolioManagerQueries::PortfolioKey key( idPortfolio );
     ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from portfolios", key )->Where( "portfolioid = ?" ).NoExecute();
+      = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from portfolios", key ).Where( "portfolioid = ?" ).NoExecute();
     m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       Portfolio::TableRowDef rowPortfolio;
@@ -235,7 +235,7 @@ bool PortfolioManager::PortfolioExists( const idPortfolio_t& idPortfolio ) {
     // following portfolio / position code is shared with LoadActivePortfolios and could be factored out
     PortfolioManagerQueries::PortfolioKey key( idPortfolio );
     ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select portfolioid from portfolios", key )->Where( "portfolioid = ?" ).NoExecute();
+      = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select portfolioid from portfolios", key ).Where( "portfolioid = ?" ).NoExecute();
     m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       bExists = true;
@@ -297,7 +297,7 @@ void PortfolioManager::LoadActivePortfolios( void ) {
 
   PortfolioManagerQueries::ActivePortfolios parameter( true );
   ou::db::QueryFields<PortfolioManagerQueries::ActivePortfolios>::pQueryFields_t pQuery
-    = m_pSession->SQL<PortfolioManagerQueries::ActivePortfolios>( "select * from portfolios", parameter )->Where( "active=?" ).NoExecute();
+    = m_pSession->SQL<PortfolioManagerQueries::ActivePortfolios>( "select * from portfolios", parameter ).Where( "active=?" ).NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::ActivePortfolios>( pQuery );
   while ( m_pSession->Execute( pQuery ) ) {
 
@@ -356,7 +356,7 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
 
   ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
     = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key )
-      ->Where( "portfolioid = ?" )
+      .Where( "portfolioid = ?" )
       .OrderBy( "positionid" )
       .NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );

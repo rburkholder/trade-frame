@@ -140,7 +140,7 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
           update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder1>( // todo:  cache this query
-            "update orders set orderstatus=?, datetimesubmitted=?, signalprice=?", update )->Where( "orderid=?" );
+            "update orders set orderstatus=?, datetimesubmitted=?, signalprice=?", update ).Where( "orderid=?" );
       }
     }
     else {
@@ -182,7 +182,7 @@ void OrderManager::UpdateOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder
           update( pOrder->GetOrderId(), pOrder->GetRow().dblPrice1, pOrder->GetRow().dblPrice2 );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder2>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder2>( // todo:  cache this query
-            "update orders set price1=?, price2=?", update )->Where( "orderid=?" );
+            "update orders set price1=?, price2=?", update ).Where( "orderid=?" );
       }
     }
     else {
@@ -227,7 +227,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
     if ( 0 != m_pSession ) {
       OrderManagerQueries::OrderKey keyOrder( nOrderId );
       ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pOrderExistsQuery
-        = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder )->Where( "orderid=?" ).NoExecute();
+        = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder ).Where( "orderid=?" ).NoExecute();
       m_pSession->Bind<OrderManagerQueries::OrderKey>( pOrderExistsQuery );
       if ( m_pSession->Execute( pOrderExistsQuery ) ) {
         bFound = true;
@@ -249,7 +249,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
 
         // load up executions
         ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pExecutionQuery
-          = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from executions", keyOrder )->Where( "orderid=?" ).NoExecute();
+          = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from executions", keyOrder ).Where( "orderid=?" ).NoExecute();
         while ( m_pSession->Execute( pExecutionQuery ) ) {
           Execution::TableRowDef rowExecution;
           m_pSession->Columns<OrderManagerQueries::OrderKey, Execution::TableRowDef>( pExecutionQuery, rowExecution );
@@ -310,7 +310,7 @@ void OrderManager::ReportCancellation( idOrder_t nOrderId ) {
           close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtOrderClose>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtOrderClose>( // todo:  cache this query
-            "update orders set orderstatus=?, datetimeclosed=?", close )->Where( "orderid=?" );
+            "update orders set orderstatus=?, datetimeclosed=?", close ).Where( "orderid=?" );
       }
     }
     else {
@@ -365,7 +365,7 @@ void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) {
               order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::TimeSource::LocalCommonInstance().Internal() );
             ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
               = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-              OrderManagerQueries::sUpdateOrderQuery, order )->Where( "orderid=?" );
+              OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
           }
           break;
         default:
@@ -374,7 +374,7 @@ void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) {
               order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
             ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
               = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-              OrderManagerQueries::sUpdateOrderQuery, order )->Where( "orderid=?" );
+              OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
           }
           break;
         }
@@ -427,7 +427,7 @@ void OrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) 
           commission( pOrder->GetOrderId(), dblCommission );
         ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
-            "update orders set commission=?", commission )->Where( "orderid=?" );
+            "update orders set commission=?", commission ).Where( "orderid=?" );
       }
       pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
       // as a result, may need to set delegates here so database is updated before order calls delegates.
@@ -469,7 +469,7 @@ void OrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderError
           error( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
         ou::db::QueryFields<OrderManagerQueries::UpdateOnOrderError>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateOnOrderError>( // todo:  cache this query
-            "update orders set orderstatus=?, datetimeclosed=?", error )->Where( "orderid=?" );
+            "update orders set orderstatus=?, datetimeclosed=?", error ).Where( "orderid=?" );
       }
     }
     else {
