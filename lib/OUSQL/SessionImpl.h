@@ -234,8 +234,6 @@ class QueryState:
 //  friend S;  // ** g++ does not like this, need to provide specific function?
 public:
 
-  //using pQueryState_t = boost::intrusive_ptr<QueryState<SS, F, S> >;
-
   QueryState( S& session, F& f ): Query<F>( f ), m_session( session ) {};
   virtual ~QueryState( void ) {
     m_session.Release( *this );
@@ -353,8 +351,6 @@ public:
       m_mapTableDefs.begin(),
       mapTableDefs_pair_t( sTableName, pQuery) );
 
-    //m_vQuery.push_back( pQuery );
-
     return *pQuery;
 
   }
@@ -391,8 +387,6 @@ public:
 
     pQuery->SetExecuteOneTime();
 
-    //m_vQuery.push_back( pQuery );
-
     return *pQuery;
   }
 
@@ -424,7 +418,6 @@ public:
 protected:
 
   template<class F>
-  //const std::string& MapFieldsToTable( void ) {
   const std::string& GetTableName( void ) {
     std::string t( typeid( F ).name() );
     mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
@@ -448,8 +441,6 @@ protected:
 
     pQuery->SetExecuteOneTime();
 
-    //m_vQuery.push_back( pQuery );
-
     return *pQuery;
   }
 
@@ -463,14 +454,6 @@ private:
   typedef typename mapTableDefs_t::iterator mapTableDefs_iter_t;
   typedef std::pair<std::string, pQueryBase_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
-
-  //typedef std::vector<pQueryBase_t> vQuery_t;
-  //typedef vQuery_t::iterator vQuery_iter_t;
-  //vQuery_t m_vQuery;  // 2013/08/26
-  // this is a bad thing to have around, statements should be closed after use.
-  // don't worry about re-use, cross that bridge later.
-  // in one application there are 32,000 queries, and none are closed,
-  // resulting in very long times to reclaim space at the end
 
   typedef std::map<std::string, std::string> mapFieldsToTable_t;
   typedef mapFieldsToTable_t::iterator mapFieldsToTable_iter_t;
@@ -508,13 +491,6 @@ template<class IDatabase>
 void SessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
     m_bOpened = false;
-    //for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); iter++ ) {
-    //  if ( nullptr != iter->get() ) { // TODO: investigate why is zero
-    //    Release( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
-    //    iter->reset();
-    //  }
-    //}
-    //m_vQuery.clear();
     m_db.SessionClose();
     // 2013/08/26 process memory doesn't appear to be relaimed after this
     //   trying again with addition of reset();
