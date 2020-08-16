@@ -12,7 +12,7 @@ are maintained day to day.
 * ManageStrategy - Instance created for each primary instrument chosen - header & 'using' chooses combo style
 * SymbolSelection - Determines instruments to be traded by MasterPortfolio
 
-Currently designed to run strangles on weekly options.
+Currently designed to test a collar strategy (not yet complete) on weekly options.
 
 Option Strategy Descriptions:
 https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/overview
