@@ -234,7 +234,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
     },
-    // obtain obtain instrument details given instrument name:
+    // obtain instrument details given instrument name:
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
     },
