@@ -277,10 +277,10 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             if ( bAddToList ) {
 //              if ( "SPY" == iip.sName ) { // limit for testing
               if (
-                   ( "NEM" != iip.sName )
-                && ( "RHT" != iip.sName )  // engulfed by ibm
-                && ( "SPY" != iip.sName )  // stopped out twice, too volatile
-              ) { // NEM has a non-standard strike price: 35.12, etc
+                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
+                && ( "RHT" != iip.sName ) // engulfed by ibm
+//                && ( "SPY" != iip.sName )  // stopped out twice, too volatile
+              ) {
                 AddSymbol( iip );
               }
             }
