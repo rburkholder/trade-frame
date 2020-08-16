@@ -189,6 +189,9 @@ public:
   }
 */
 
+// reference:
+//   https://en.cppreference.com/w/cpp/language/cast_operator
+
   // conversion operator
   operator typename QueryFields<F>::pQueryFields_t() {
     if ( m_bExecuteOneTime ) {
