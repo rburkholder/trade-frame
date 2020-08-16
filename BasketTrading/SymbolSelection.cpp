@@ -122,7 +122,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, const setSymbols_t& s
         return bReturn;
       },
       [&fCheck]( data_t& data, const std::string& sPath, const std::string& sObjectName, const ou::tf::Bars& bars ){ // Result
-         
+
         double hv = std::for_each( bars.at( bars.Size() - 20 ), bars.end(), ou::HistoricalVolatility() );
         Scenario ii( sObjectName, sPath, bars.last(), data.volumeEma, hv );
         //CheckForDarvas( bars.begin(), bars.end(), ii, fSelected );
@@ -214,7 +214,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
 
     using vUnderlyinginfo_citer_t = ou::tf::cboe::vUnderlyinginfo_t::const_iterator ;
 
-    std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
+    //std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
 
 //    for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
   //    std::cout <<
@@ -235,7 +235,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
 //  //    }
 //    }
 
-    std::cout << "SignalGenerator running eod and building output spreadsheet ..." << std::endl;
+    std::cout << "SignalGenerator running eod and building output ..." << std::endl;
 
     size_t nSelected {};
 

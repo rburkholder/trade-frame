@@ -279,9 +279,12 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
               if (
                    ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
                 && ( "RHT" != iip.sName ) // engulfed by ibm
-//                && ( "SPY" != iip.sName )  // stopped out twice, too volatile
               ) {
-                AddSymbol( iip );
+                // see if we get wider swings with this
+                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
+                if ( 1.24 < dblSum ) {
+                  AddSymbol( iip );
+                }
               }
             }
             else {
@@ -309,7 +312,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           }
         );
 
-        std::cout << "Symbol List finished." << std::endl;
+        // is m_setSymbols used for anything?
+
+        std::cout << "Symbol List finished, " << m_mapStrategy.size() << " symbols chosen" << std::endl;
     } );
 
   }
