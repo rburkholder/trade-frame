@@ -65,7 +65,6 @@ bool ValidateOptions::ValidateSpread(
   boost::gregorian::date dateToday, double priceUnderlying, size_t nDuration, fChooseLegs_t&& fChooseLegs
 ) {
 
-  size_t nChanged {};
   bool bValidated( false );
   bool bRecirculate;
   do {
@@ -77,6 +76,7 @@ bool ValidateOptions::ValidateSpread(
       case EState::FirstTime:
       case EState::FindStrikes:  // always run each time through to detect change in strikes as underlying moves
         {
+          size_t nChanged {};
           size_t ixLeg {};
           try {
             fChooseLegs(
@@ -104,7 +104,6 @@ bool ValidateOptions::ValidateSpread(
               << " found no strike for "
               << " mid-point=" << priceUnderlying
               << ", today=" << dateToday
-        //        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
               << " [" << e.what() << "]"
               << std::endl;
             throw e;
@@ -142,7 +141,6 @@ bool ValidateOptions::ValidateSpread(
           }
           std::cout << std::endl;
           m_state = EState::WaitForBuildCompletion;
-          bRecirculate = true;
         }
         break;
       case EState::WaitForBuildCompletion:
