@@ -68,7 +68,7 @@ public:
 
   void SetSize( vLegSelected_t::size_type );
 
-  bool ValidateSpread( boost::gregorian::date, double price, size_t nDuration, fChooseLegs_t&& );
+  bool ValidateSpread( boost::gregorian::date, double priceUnderlying, size_t nDuration, fChooseLegs_t&& );
   void ValidatedOptions( fValidatedOption_t&& );
   void ClearValidation();
 

@@ -57,7 +57,7 @@ void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
 }
 
 bool ValidateOptions::ValidateSpread(
-  boost::gregorian::date dateToday, double price, size_t nDuration, fChooseLegs_t&& fChooseLegs
+  boost::gregorian::date dateToday, double priceUnderlying, size_t nDuration, fChooseLegs_t&& fChooseLegs
 ) {
 
   bool bStrikesFound( false );
@@ -65,9 +65,9 @@ bool ValidateOptions::ValidateSpread(
   size_t ixLegSelected {};
   try {
     fChooseLegs(
-      m_mapChains, dateToday, price,
-      [this,&ixLegSelected](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedName){
-        m_vLegSelected.at( ixLegSelected ).Update( strike, dateStrike, sIQFeedName );
+      m_mapChains, dateToday, priceUnderlying,
+      [this,&ixLegSelected](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedOptionName){
+        m_vLegSelected.at( ixLegSelected ).Update( strike, dateStrike, sIQFeedOptionName );
         ixLegSelected++;
       } );
     bStrikesFound = true; // can set as no exception was thrown
@@ -81,7 +81,7 @@ bool ValidateOptions::ValidateSpread(
     std::cout
       << sUnderlying
       << " found no strike for "
-      << " mid-point=" << price
+      << " mid-point=" << priceUnderlying
       << ", today=" << dateToday
 //        << " for quote " << m_QuoteUnderlyingLatest.DateTime().date()
       << " [" << e.what() << "]"
@@ -118,7 +118,7 @@ bool ValidateOptions::ValidateSpread(
       << nReason
       << "," << m_vLegSelected.size()
       << ")"
-      << ": combo -> price=" << price;
+      << ": combo -> price=" << priceUnderlying;
     for ( const vLegSelected_t::value_type& vt: m_vLegSelected ) {
       std::cout << ",strike=" << vt.Strike() << "@" << vt.Expiry();
     }
@@ -132,8 +132,7 @@ bool ValidateOptions::ValidateSpread(
     for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
 //      if ( vt.Changed() || ( 1 == nReason ) ) {
         m_fConstructOption(
-          vt.IQFeedName(),
-          pInstrumentUnderlying,
+          vt.IQFeedOptionName(), pInstrumentUnderlying,
           [this,&vt,n]( pOption_t pOption ) {
             vt.Option() = pOption;
             m_SpreadValidation.SetWatch( n, pOption );
