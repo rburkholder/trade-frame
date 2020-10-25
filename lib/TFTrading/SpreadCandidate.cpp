@@ -72,7 +72,7 @@ void SpreadCandidate::SetWatch( pWatch_t pWatch ) {
 
 SpreadCandidate::pWatch_t SpreadCandidate::GetWatch() { return m_pWatch; }
 
-bool SpreadCandidate::ValidateSpread( size_t nDuration ) {
+bool SpreadCandidate::Validate( size_t nDuration ) {
   bool bOk( false );
   if ( m_pWatch ) {
     if ( ( 5 * m_nUnDesired ) < ( m_nUnDesired + m_nDesired ) ) { // undesired is < 20% of total

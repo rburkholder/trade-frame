@@ -126,7 +126,7 @@ bool ValidateOptions::ValidateSpread(
           m_state = EState::WaitForBuildCompletion;
           for ( vLegSelected_t::value_type& leg: m_vLegSelected ) {
             std::cout << ",strike=" << leg.Strike() << "@" << leg.Expiry();
-            if ( leg.Changed() /*|| ( 1 == nReason )*/ ) {
+            if ( leg.Changed() ) {
               std::cout << '+';
               m_SpreadValidation.ClearWatch( ix );  // IsActive becomes false
               m_fConstructOption(

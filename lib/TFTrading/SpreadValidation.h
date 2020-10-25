@@ -31,6 +31,7 @@
 namespace ou {
 namespace tf {
 
+// Validate Quote Spread on a collection of Options
 class SpreadValidation {
 public:
 

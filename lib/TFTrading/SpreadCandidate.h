@@ -27,6 +27,7 @@
 namespace ou {
 namespace tf {
 
+// Confirm that Quote Spread seems reasonable
 class SpreadCandidate {
 public:
 
@@ -41,7 +42,7 @@ public:
   void Clear();
   void SetWatch( pWatch_t pWatch );
   pWatch_t GetWatch();
-  bool ValidateSpread( size_t nDuration );
+  bool Validate( size_t nDuration );
   bool IsActive() const { return 0 != m_pWatch.use_count(); };
 
 private:

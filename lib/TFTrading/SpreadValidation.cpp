@@ -72,7 +72,7 @@ bool SpreadValidation::IsActive() const {
 bool SpreadValidation::Validate( size_t nDuration ) {
   bool bValidation( true );
   for ( SpreadCandidate& candidate: m_vSpreadCandidate ) {
-    bValidation &= candidate.ValidateSpread( nDuration );
+    bValidation &= candidate.Validate( nDuration );
   }
   return bValidation;
 }
