@@ -39,14 +39,14 @@ public:
   LegSelected( const LegSelected& );
   LegSelected( const LegSelected&& );
 
-  void Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedName );
+  void Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName );
 
   bool Changed() { bool bTemp = m_bChanged; m_bChanged = false; return bTemp; }
   //bool Changed() const { return m_bChanged; }
   //void ResetChanged() { m_bChanged = false; }
   double Strike() const { return m_dblStrike; }
   boost::gregorian::date Expiry() const { return m_dateExpiry; }
-  const std::string& IQFeedName() const { return m_sIQFeedName; }
+  const std::string& IQFeedOptionName() const { return m_sIQFeedOptionName; }
   pOption_t& Option() { return m_pOption; } // cheating by returning a reference
 
   void Clear();
@@ -55,7 +55,7 @@ private:
   bool m_bChanged;
   double m_dblStrike;
   boost::gregorian::date m_dateExpiry;
-  std::string m_sIQFeedName;
+  std::string m_sIQFeedOptionName;
   pOption_t m_pOption; // set after initial construction
 };
 

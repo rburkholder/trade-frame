@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    LegSelected.cpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
@@ -27,10 +27,10 @@ LegSelected::LegSelected()
 {}
 
 LegSelected::LegSelected( const LegSelected& rhs )
-:  m_bChanged( rhs.m_bChanged ),
+: m_bChanged( rhs.m_bChanged ),
   m_dblStrike( rhs.m_dblStrike ),
   m_dateExpiry( rhs.m_dateExpiry ),
-  m_sIQFeedName( rhs.m_sIQFeedName ),
+  m_sIQFeedOptionName( rhs.m_sIQFeedOptionName ),
   m_pOption( rhs.m_pOption )
 {
 }
@@ -39,23 +39,29 @@ LegSelected::LegSelected( const LegSelected&& rhs )
 : m_bChanged( rhs.m_bChanged ),
   m_dblStrike( rhs.m_dblStrike ),
   m_dateExpiry( rhs.m_dateExpiry ),
-  m_sIQFeedName( std::move( rhs.m_sIQFeedName ) ),
+  m_sIQFeedOptionName( std::move( rhs.m_sIQFeedOptionName ) ),
   m_pOption( std::move( rhs.m_pOption ) )
 {
 }
 
-void LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedName ) {
-  m_bChanged = ( ( strike != m_dblStrike ) || ( dateExpiry != m_dateExpiry ) );
+void LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName ) {
+  if ( sIQFeedOptionName.empty() ) {
+    m_bChanged = true;
+  }
+  else {
+    m_bChanged = ( ( strike != m_dblStrike ) || ( dateExpiry != m_dateExpiry ) );
+  }
+
   if ( m_bChanged ) {
     m_dblStrike = strike;
     m_dateExpiry = dateExpiry;
-    m_sIQFeedName = sIQFeedName;
+    m_sIQFeedOptionName = sIQFeedOptionName;
   }
 }
 
 void LegSelected::Clear() {
   m_bChanged = false;
   m_dblStrike = 0.0;
-  m_sIQFeedName.clear();
+  m_sIQFeedOptionName.clear();
   m_pOption.reset();
 }
