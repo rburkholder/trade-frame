@@ -650,6 +650,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         if ( m_mapCombo.empty() ) {
           m_bAllowComboAdd = true;
+          // also might see if combo is 'live' or not
         }
 
         if ( m_bAllowComboAdd ) {
@@ -664,52 +665,59 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               }
             ) ) {
 
+              // for a collar, always enter long
+              //ou::tf::OrderSide::enumOrderSide eOrderSide
+              //  = ( 0.0 <= slope ) ? ou::tf::OrderSide::Buy : ou::tf::OrderSide::enumOrderSide::Sell;
+
               idPortfolio_t idPortfolio
                 = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
-              if ( m_mapCombo.end() == mapCombo_iter ) {
+              if ( m_mapCombo.end() != mapCombo_iter ) {
+                // is this an issue? is this an error?
+              }
+              else {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
-                  if ( ou::tf::OrderSide::Unknown != m_DefaultOrderSide ) { // TODO: need this further up to aid in ChooseLegs
-                    std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                    std::pair<mapCombo_t::iterator,bool> result;
+                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
+                  std::pair<mapCombo_t::iterator,bool> result;
 
-                    auto spCombo = std::make_shared<combo_t>();
+                  m_bAllowComboAdd = false;
 
-                    result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, spCombo) );
-                    assert( result.second );
-                    assert( m_mapCombo.end() != result.first );
+                  auto spCombo = std::make_shared<combo_t>();
 
-                    combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( result.first->second ).get();
+                  result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, spCombo) );
+                  assert( result.second );
+                  assert( m_mapCombo.end() != result.first );
 
-                    if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
-                      std::cout << "WARNING: strategy running out of colours." << std::endl;
-                    }
-                    pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+                  combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( result.first->second ).get();
 
-                    //pOption_t pOption;
-                    //mapOption_t::iterator iterOption;
-                    //std::string sOptionName;
+                  if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
+                    std::cout << "WARNING: strategy running out of colours." << std::endl;
+                  }
+                  pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
 
-                    m_pValidateOptions->ValidatedOptions(
-                      [this,idPortfolio,pCombo](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
-                        const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                        mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-                        if ( m_mapOption.end() == iterOption ) {
-                          m_mapOption[ sOptionName ] = pOption;
-                          m_fRegisterOption( pOption );
-                          m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                        }
-                        pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
-                        pCombo->AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-                        }
-                      );
+                  //pOption_t pOption;
+                  //mapOption_t::iterator iterOption;
+                  //std::string sOptionName;
 
-                    m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
+                  m_pValidateOptions->ValidatedOptions(
+                    [this,idPortfolio,pCombo](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
+                      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+                      if ( m_mapOption.end() == iterOption ) {
+                        m_mapOption[ sOptionName ] = pOption;
+                        m_fRegisterOption( pOption );
+                        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                      }
+                      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
+                      pCombo->AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                      }
+                    );
 
-                    pCombo->PlaceOrder( m_DefaultOrderSide );
+                  m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                    m_bAllowComboAdd = false;
-                  } // m_DefaultOrderSide
+                  pCombo->PlaceOrder( m_DefaultOrderSide );
+                  // TODO: *** need to change trading state to TSMonitorLong or TSMonitorShort?
+
                 } // m_fAuthorizeSimple
                 else {
                   // ?
