@@ -67,8 +67,9 @@ bool ValidateOptions::ValidateSpread(
 
   size_t nChanged {};
   bool bValidated( false );
-  bool bRecirculate( false );
+  bool bRecirculate;
   do {
+    bRecirculate = false;
     switch ( m_state ) {
       case EState::WaitForSize:
         // state changes in SetSize()
