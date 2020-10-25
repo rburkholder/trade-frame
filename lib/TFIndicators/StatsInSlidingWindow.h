@@ -45,7 +45,7 @@ template<class T> StatsInSlidingWindow<T>::StatsInSlidingWindow(
 }
 
 template<class T> StatsInSlidingWindow<T>::~StatsInSlidingWindow(void) {
-  SlidingWindow<T>::~SlidingWindow();
+  //SlidingWindow<T>::~SlidingWindow();
 }
 
 template<class T> void StatsInSlidingWindow<T>::Add(boost::posix_time::ptime dt, double val) {
