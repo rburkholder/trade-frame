@@ -98,7 +98,8 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
     double slope,
     const mapChains_t& chains,
     boost::gregorian::date date, double price,
-    fLegSelected_t&& fLegSelected )
+    fLegSelected_t&& fLegSelected
+)
 {
 
   citerChain_t citerChain =
