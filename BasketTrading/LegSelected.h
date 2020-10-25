@@ -39,11 +39,10 @@ public:
   LegSelected( const LegSelected& );
   LegSelected( const LegSelected&& );
 
-  void Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName );
+  // return 0 if not changed, 1 if changed
+  unsigned int Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName );
 
   bool Changed() { bool bTemp = m_bChanged; m_bChanged = false; return bTemp; }
-  //bool Changed() const { return m_bChanged; }
-  //void ResetChanged() { m_bChanged = false; }
   double Strike() const { return m_dblStrike; }
   boost::gregorian::date Expiry() const { return m_dateExpiry; }
   const std::string& IQFeedOptionName() const { return m_sIQFeedOptionName; }

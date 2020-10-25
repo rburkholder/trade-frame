@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    SpreadValidation.cpp
  * Author:  raymond@burkholder.net
  * Project: lib/TFTrading
@@ -77,7 +77,11 @@ bool SpreadValidation::Validate( size_t nDuration ) {
   return bValidation;
 }
 
-void SpreadValidation::ResetOptions() {
+void SpreadValidation::ClearWatch( size_t ixLeg ) {
+  m_vSpreadCandidate.at( ixLeg ).Clear();
+}
+
+void SpreadValidation::ClearCandidates() {
   for ( SpreadCandidate& candidate: m_vSpreadCandidate ) {
     candidate.Clear();
   }

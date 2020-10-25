@@ -74,14 +74,22 @@ public:
 
 private:
 
+  enum class EState {
+    WaitForSize, FirstTime, FindStrikes,
+    BuildOptions, WaitForBuildCompletion,
+    Validate
+    };
+  EState m_state;
+
   pWatch_t m_pWatchUnderlying;
 
   const mapChains_t& m_mapChains;
 
-  vLegSelected_t m_vLegSelected;
-
   fConstructOption_t& m_fConstructOption;
 
+  // track leg selection based upon underlying price
+  vLegSelected_t m_vLegSelected;
+  // when legs change, revisit validation
   ou::tf::SpreadValidation m_SpreadValidation;
 
 };

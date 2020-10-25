@@ -44,7 +44,7 @@ LegSelected::LegSelected( const LegSelected&& rhs )
 {
 }
 
-void LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName ) {
+unsigned int LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName ) {
   if ( sIQFeedOptionName.empty() ) {
     m_bChanged = true;
   }
@@ -57,6 +57,8 @@ void LegSelected::Update( double strike, boost::gregorian::date dateExpiry, cons
     m_dateExpiry = dateExpiry;
     m_sIQFeedOptionName = sIQFeedOptionName;
   }
+
+  return ( m_bChanged ? 1 : 0 );
 }
 
 void LegSelected::Clear() {
