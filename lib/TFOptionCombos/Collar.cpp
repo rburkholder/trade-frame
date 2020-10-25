@@ -82,7 +82,8 @@ size_t /* static */ Collar::LegCount() {
 /* static */ void Collar::ChooseLegs( // throw Chain exceptions
     double slope,
     const mapChains_t& chains,
-    boost::gregorian::date date, double price,
+    boost::gregorian::date date,
+    double price, // underlying mid-quote
     fLegSelected_t&& fLegSelected
 )
 {
@@ -92,7 +93,6 @@ size_t /* static */ Collar::LegCount() {
 
   citerChain_t citerChainFront = Combo::SelectChain( chains, date, nDaysToExpiryFront );
   const ou::tf::option::Chain& chainFront( citerChainFront->second );
-
 
   if ( 0.0 <= slope ) { // long
 

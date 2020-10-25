@@ -42,14 +42,17 @@ public:
   static void ChooseLegs( // throw Chain exceptions
     double slope,
     const mapChains_t& chains,
-    boost::gregorian::date, double price,
+    boost::gregorian::date,
+    double price, // underlying mid-quote
     fLegSelected_t&& );
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope );
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long or short
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
+  // long by default for entry,
+  // short doesn't make much sense at this point for entry
 
   virtual double GetNet( double price );
 
