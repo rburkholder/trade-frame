@@ -1042,19 +1042,21 @@ void ManageStrategy::Test() {
 
 double ManageStrategy::EmitInfo() {
   double dblNet {};
-  double price( m_pPositionUnderlying->GetWatch()->LastTrade().Price() );
-  if ( 0 < m_mapCombo.size() ) {
-    std::cout
-      << "Info "
-      << m_sUnderlying
-      << "@" << price
-      << std::endl;
-    for ( mapCombo_t::value_type& vt: m_mapCombo ) {
-      combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( vt.second ).get();
-      std::cout << "  portfolio: " << pCombo->GetPortfolio()->Id() << std::endl;
-      dblNet += pCombo->GetNet( price );
+  if ( m_pPositionUnderlying ) {
+    double price( m_pPositionUnderlying->GetWatch()->LastTrade().Price() );
+    if ( 0 < m_mapCombo.size() ) {
+      std::cout
+        << "Info "
+        << m_sUnderlying
+        << "@" << price
+        << std::endl;
+      for ( mapCombo_t::value_type& vt: m_mapCombo ) {
+        combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( vt.second ).get();
+        std::cout << "  portfolio: " << pCombo->GetPortfolio()->Id() << std::endl;
+        dblNet += pCombo->GetNet( price );
+      }
+      std::cout << "  net: " << dblNet << std::endl;
     }
-    std::cout << "  net: " << dblNet << std::endl;
   }
   return dblNet;
 }
