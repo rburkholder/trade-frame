@@ -271,20 +271,22 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           }
         );
 
+        std::set<std::string> vDesired = { "SPY", "SLV", "GLD", "USO", "XBI" };
+
         SymbolSelection selector(
           dtLatestEod, m_setSymbols,
-          [this,bAddToList](const IIPivot& iip) {
+          [this,bAddToList,&vDesired](const IIPivot& iip) {
             if ( bAddToList ) {
-//              if ( "SPY" == iip.sName ) { // limit for testing
-              if (
-                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
-                && ( "RHT" != iip.sName ) // engulfed by ibm
-              ) {
+              if ( vDesired.end() != vDesired.find( iip.sName ) ) {
+//              if (
+//                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
+//              )
+//              {
                 // see if we get wider swings with this
-                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
-                if ( 1.24 < dblSum ) {
+//                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
+//                if ( 1.24 < dblSum ) {
                   AddSymbol( iip );
-                }
+//                }
               }
             }
             else {
