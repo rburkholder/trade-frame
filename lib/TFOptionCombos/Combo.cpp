@@ -29,13 +29,14 @@ const double Combo::m_dblMaxStrikeDelta( 0.51 );       // not 0.50 to prevent ro
 const double Combo::m_dblMaxStrangleDelta( 1.01 );     // not 1.00 to prevent rounding problems
 
 Combo::Combo( )
-: m_state( State::Initializing )
+: m_state( State::Initializing ), m_eDirection( EDirection::Unknown )
 {
   m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
 Combo::Combo( const Combo& rhs )
-: m_state( rhs.m_state ),
+: m_eDirection( rhs.m_eDirection ),
+  m_state( rhs.m_state ),
   m_vLeg( rhs.m_vLeg ),
   m_pPortfolio( rhs.m_pPortfolio )
 {
@@ -43,7 +44,8 @@ Combo::Combo( const Combo& rhs )
 }
 
 Combo::Combo( const Combo&& rhs )
-: m_state( rhs.m_state ),
+: m_eDirection( rhs.m_eDirection ),
+  m_state( rhs.m_state ),
   m_vLeg( std::move( rhs.m_vLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 {
@@ -79,15 +81,14 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
     m_state = State::Positions;
   }
 
-//  pPosition->GetWatch()->OnQuote.Add( MakeDelegate( this, &Combo::CheckQuote ) );
-
 }
 
-//void Combo::CheckQuote( const ou::tf::Quote& quote ) const {
-//  std::cout << "CheckQuote: " << quote.Bid() << "," << quote.Ask() << std::endl;
-//}
+void Combo::SetDirection( double slope20Day ) {
+  m_eDirection = ( 0.0 < slope20Day ) ? EDirection::Rising : EDirection::Falling;
+}
 
-void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) { // TODO: make use of bInTrend to trigger exit latch
+// TODO: make use of bInTrend to trigger exit latch
+void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   for ( Leg& leg: m_vLeg ) {
     leg.Tick( dt );
   }

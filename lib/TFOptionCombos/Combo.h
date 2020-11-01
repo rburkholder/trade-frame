@@ -84,7 +84,7 @@ public:
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
+  virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide ) = 0;
 
   virtual double GetNet( double price );
 
@@ -103,24 +103,25 @@ public:
 
   static citerChain_t SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry );
 
-  //virtual strike_pair_t ChooseStrikes( const Chain& chain, double price ) const = 0; // throw Chain exceptions
-
 protected:
 
   static const double m_dblTwentyPercent;
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
 
+  enum class EDirection { Rising, Falling, Unknown };
+  EDirection m_eDirection;
+
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
   using vLeg_t = std::vector<ou::tf::Leg>;
   vLeg_t m_vLeg;
 
+  void SetDirection( double slope20Day );
+
 private:
 
   void Update( bool bTrending, double dblPrice );
-
-//  void CheckQuote( const ou::tf::Quote& quote ) const;
 
 };
 

@@ -640,13 +640,11 @@ void ManageStrategy::BuildPosition(
  */
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
-  // TODO: need to track trend to generate approprate entry
+  const double mid = m_QuoteUnderlyingLatest.Midpoint();
 
   switch ( m_stateTrading ) {
     case TSOptionEvaluation:
       {
-
-        const double mid = m_QuoteUnderlyingLatest.Midpoint();
 
         if ( m_mapCombo.empty() ) {
           m_bAllowComboAdd = true;
@@ -656,19 +654,19 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         if ( m_bAllowComboAdd ) {
 
           try {
-            double slope( m_pricesDailyCloseBollinger20.Slope() );
+            double slope20Day( m_pricesDailyCloseBollinger20.Slope() );
             boost::gregorian::date date( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateBidAsk(
               date, mid, 11,
-              [slope,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( slope, chains, date, mid, std::move( fLegSelected ) );
+              [slope20Day,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
+                combo_t::ChooseLegs( slope20Day, chains, date, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope );
+                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope20Day );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() != mapCombo_iter ) {
                 // is this an issue? is this an error?
@@ -678,7 +676,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                   m_bAllowComboAdd = false;
 
-                  std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << slope << ")" << std::endl;
+                  std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << slope20Day << ")" << std::endl;
                   std::pair<mapCombo_t::iterator,bool> result;
 
                   auto spCombo = std::make_shared<combo_t>();
@@ -711,8 +709,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                  pCombo->PlaceOrder( m_DefaultOrderSide );
-                  // TODO: *** need to change trading state to TSMonitorLong or TSMonitorShort?
+                  pCombo->PlaceOrder( slope20Day, m_DefaultOrderSide );
+                  m_stateTrading = ETradingState::TSMonitorCombo;
 
                 } // m_fAuthorizeSimple
                 else {
@@ -733,35 +731,18 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         } // m_bAllowedComboAdd
 
-        std::for_each(
-          m_mapCombo.begin(), m_mapCombo.end(),
-          [this,mid,&bar](mapCombo_t::value_type& entry){
+      }
+      break;
+//    case TSWaitForEntry:
+//      break;
+    case TSMonitorCombo:
+      {
+        // TODO: track pivot crossing, track momentun
+        //   pivot acts as stop, momentum can carry through
+        //     if momentum changes first, then roll
+        //     if momentum doesn't change, but trades back over pivot, then roll
+        //     don't roll if not profitable yet (commision plus bid/ask spread )
 
-            auto pCombo = entry.second;
-
-            switch ( pCombo->m_state ) {
-              case combo_t::State::Initializing:
-                break;
-              case combo_t::State::Positions:
-                pCombo->Tick( true, mid, bar.DateTime() );
-                break;
-              case combo_t::State::Executing:
-                pCombo->Tick( true, mid, bar.DateTime() );
-                break;
-              case combo_t::State::Watching:
-                pCombo->Tick( true, mid, bar.DateTime() );
-                break;
-              case combo_t::State::Canceled:
-                pCombo->Tick( true, mid, bar.DateTime() );
-                break;
-              case combo_t::State::Closing:
-                pCombo->Tick( true, mid, bar.DateTime() );
-                break;
-            }
-          }
-        );
-
-        //bool bClosed( false );
         PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
         // TODO: need to cross upwards for calls, cross downwards for puts (for long strangle)
 //        if ( PivotCrossing::ECrossing::none != crossing ) {
@@ -779,14 +760,30 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             // use the crossing for the trigger for the trailing stop
 //          }
 //        }
-//        if ( bClosed ) { // handled above
-          // choice:
-          //   a) for now: open another otm leg in the same direction
-          //   b) if sufficient total profit, open a new strangle
-//        }
+
+        std::for_each(
+          m_mapCombo.begin(), m_mapCombo.end(),
+          [this,mid,&bar](mapCombo_t::value_type& entry){
+
+            auto pCombo = entry.second;
+
+            switch ( pCombo->m_state ) {
+              case combo_t::State::Initializing:
+                break;
+              case combo_t::State::Positions:
+              case combo_t::State::Executing:
+              case combo_t::State::Watching:
+              case combo_t::State::Canceled:
+              case combo_t::State::Closing:
+                pCombo->Tick( true, mid, bar.DateTime() );
+                break;
+              default:
+                break;
+            }
+          }
+        );
+
       }
-      break;
-    case TSWaitForEntry:
       break;
     default:
       break;

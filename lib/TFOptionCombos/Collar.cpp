@@ -72,7 +72,7 @@ Collar::~Collar() {
 
 void Collar::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
-  CheckStop( dblPriceUnderlying );
+  //CheckStop( dblPriceUnderlying );
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -168,7 +168,8 @@ size_t /* static */ Collar::LegCount() {
   return sName;
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
+void Collar::PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide side ) {
+  Combo::SetDirection( slope20Day );
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
@@ -189,9 +190,6 @@ void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
       m_state = State::Executing;
       break;
   }
-}
-
-void Collar::CheckStop( double price ) {
 }
 
 double Collar::GetNet( double price ) {

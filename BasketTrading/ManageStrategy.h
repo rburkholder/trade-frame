@@ -159,7 +159,7 @@ private:
 //    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
     TSWaitForEntry, // start of equity trading
     TSOptionEvaluation, // start of option trading
-//    TSMonitorCombo,
+    TSMonitorCombo,
     TSMonitorLong, TSMonitorShort,
     TSNoMore
   };

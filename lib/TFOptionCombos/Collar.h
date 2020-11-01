@@ -50,7 +50,7 @@ public:
 
   virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
+  virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide );
   // long by default for entry,
   // short doesn't make much sense at this point for entry
 
@@ -58,8 +58,6 @@ public:
 
 protected:
 private:
-
-  void CheckStop( double price );
 
   };
 
