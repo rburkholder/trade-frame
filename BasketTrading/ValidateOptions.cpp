@@ -61,7 +61,7 @@ void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
   m_state = EState::FirstTime;
 }
 
-bool ValidateOptions::ValidateSpread(
+bool ValidateOptions::ValidateBidAsk(
   boost::gregorian::date dateToday, double priceUnderlying, size_t nDuration, fChooseLegs_t&& fChooseLegs
 ) {
 
@@ -164,7 +164,6 @@ void ValidateOptions::ValidatedOptions( fValidatedOption_t&& fValidatedOption ) 
   for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
     fValidatedOption( vt.Option() );
   }
-//  m_SpreadValidation.ResetOptions();
 }
 
 void ValidateOptions::ClearValidation() {

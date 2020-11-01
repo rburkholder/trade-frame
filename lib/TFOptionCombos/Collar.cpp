@@ -83,7 +83,7 @@ size_t /* static */ Collar::LegCount() {
     double slope,
     const mapChains_t& chains,
     boost::gregorian::date date,
-    double price, // underlying mid-quote
+    double priceUnderlying,
     fLegSelected_t&& fLegSelected
 )
 {
@@ -96,7 +96,7 @@ size_t /* static */ Collar::LegCount() {
 
   if ( 0.0 <= slope ) { // long
 
-    double strikeSyntheticItm( chainSynthetic.Call_Itm( price ) );
+    double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
 
     double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
     strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
@@ -110,7 +110,7 @@ size_t /* static */ Collar::LegCount() {
   }
   else { // short
 
-    double strikeSyntheticItm( chainSynthetic.Put_Itm( price ) );
+    double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
 
     double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
     strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
@@ -126,14 +126,15 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope ) {
-  std::string sName( "collar" + sUnderlying );
+
+  std::string sName( "collar-" + sUnderlying );
   size_t ix {};
 
   if ( 0.0 <= slope ) {
-    sName += "-long";
+    sName += "-rise";
   }
   else {
-    sName += "-short";
+    sName += "-fall";
   }
 
   ChooseLegs(

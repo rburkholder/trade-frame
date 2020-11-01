@@ -43,7 +43,7 @@ public:
     double slope,
     const mapChains_t& chains,
     boost::gregorian::date,
-    double price, // underlying mid-quote
+    double priceUnderlying,
     fLegSelected_t&& );
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope );

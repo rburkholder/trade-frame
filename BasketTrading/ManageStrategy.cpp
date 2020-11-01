@@ -658,16 +658,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           try {
             double slope( m_pricesDailyCloseBollinger20.Slope() );
             boost::gregorian::date date( bar.DateTime().date() );
-            if ( m_pValidateOptions->ValidateSpread(
+            if ( m_pValidateOptions->ValidateBidAsk(
               date, mid, 11,
               [slope,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
                 combo_t::ChooseLegs( slope, chains, date, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
-              // for a collar, always enter long
-              //ou::tf::OrderSide::enumOrderSide eOrderSide
-              //  = ( 0.0 <= slope ) ? ou::tf::OrderSide::Buy : ou::tf::OrderSide::enumOrderSide::Sell;
+              // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
                 = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope );
@@ -677,27 +675,25 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               }
               else {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
-                  std::cout << m_sUnderlying << ": option spreads validated, creating positions" << std::endl;
-                  std::pair<mapCombo_t::iterator,bool> result;
 
                   m_bAllowComboAdd = false;
 
+                  std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << slope << ")" << std::endl;
+                  std::pair<mapCombo_t::iterator,bool> result;
+
                   auto spCombo = std::make_shared<combo_t>();
 
-                  result = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, spCombo) );
-                  assert( result.second );
-                  assert( m_mapCombo.end() != result.first );
+                  auto [iterCombo,bResult] = m_mapCombo.insert( mapCombo_t::value_type( idPortfolio, spCombo) );
+                  assert( bResult );
+                  assert( m_mapCombo.end() != iterCombo );
 
-                  combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( result.first->second ).get();
+                  combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( iterCombo->second ).get();
 
                   if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                     std::cout << "WARNING: strategy running out of colours." << std::endl;
                   }
+                  std::cout << m_sUnderlying << " construct portfolio: " << m_pPortfolioStrategy->Id() << "adds " << idPortfolio << std::endl;
                   pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
-
-                  //pOption_t pOption;
-                  //mapOption_t::iterator iterOption;
-                  //std::string sOptionName;
 
                   m_pValidateOptions->ValidatedOptions(
                     [this,idPortfolio,pCombo](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
