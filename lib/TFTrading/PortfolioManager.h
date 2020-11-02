@@ -74,8 +74,8 @@ public:
 
   bool PortfolioExists( const idPortfolio_t& idPortfolio );
 
-  pPortfolio_t ConstructPortfolio( 
-    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, 
+  pPortfolio_t ConstructPortfolio(
+    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
     EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription = "" );
   pPortfolio_t GetPortfolio( const idPortfolio_t& idPortfolio );
   void UpdatePortfolio( const idPortfolio_t& idPortfolio );
@@ -83,15 +83,15 @@ public:
 
   pPosition_t ConstructPosition( // old mechanism
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
-    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_cref pInstrument
     );
 
   pPosition_t ConstructPosition( // new mechanism
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
-    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
-    const pProvider_t& pExecutionProvider, 
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
+    const pProvider_t& pExecutionProvider,
     pWatch_t pWatch
     );
 
@@ -150,7 +150,7 @@ private:
 
   void ConstructPosition( // re-factored code
     const idPortfolio_t& idPortfolio, const std::string& sName,
-    fConstructPosition_t
+    fConstructPosition_t&&
   );
 
   void PortfolioCommon( pPortfolio_t& );

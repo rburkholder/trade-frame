@@ -411,10 +411,12 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
 {
   pPosition_t pPosition;
 
-  ConstructPosition( idPortfolio, sName, [&,pInstrument,pExecutionProvider, pDataProvider]()->pPosition_t{
-    pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
-    return pPosition;
-  } );
+  ConstructPosition(
+    idPortfolio, sName,
+    [&,pInstrument,pExecutionProvider, pDataProvider]()->pPosition_t{
+      pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+      return pPosition;
+    } );
 
   return pPosition;
 }
@@ -427,17 +429,19 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
 {
   pPosition_t pPosition;
 
-  ConstructPosition( idPortfolio, sName, [&,pWatch,pExecutionProvider]()->pPosition_t{
-    pPosition.reset( new Position( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
-    return pPosition;
-  } );
+  ConstructPosition(
+    idPortfolio, sName,
+    [&,pWatch,pExecutionProvider]()->pPosition_t{
+      pPosition.reset( new Position( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+      return pPosition;
+    } );
 
   return pPosition;
 }
 
 void PortfolioManager::ConstructPosition( // re-factored code
     const idPortfolio_t& idPortfolio, const std::string& sName,
-    fConstructPosition_t fConstructPosition
+    fConstructPosition_t&& fConstructPosition
   )
 {
   // confirm portfolio exists
