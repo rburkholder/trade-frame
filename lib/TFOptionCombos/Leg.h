@@ -15,7 +15,7 @@
 /*
  * File:    Leg.h
  * Author:  raymond@burkholder.net
- * Project: TFBitsNPieces
+ * Project: TFOptionCombos
  * Created on May 25, 2019, 4:46 PM
  */
 
@@ -72,7 +72,7 @@ public:
   double ConstructedValue() const;
 
 private:
-  bool m_bOption;
+  bool m_bOption;  // only set upon assignment of appropriate position
   pPosition_t m_pPosition;
   ou::tf::MonitorOrder m_monitor;
   ou::ChartEntryIndicator m_ceProfitLoss;

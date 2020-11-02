@@ -12,10 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    Leg.cpp
  * Author:  raymond@burkholder.net
- * Project: TFBitsNPieces
+ * Project: TFOptionCombos
  * Created on May 25, 2019, 4:46 PM
  */
 
@@ -48,7 +48,7 @@ Leg::Leg( const Leg& rhs )
 Leg::Leg( const Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
   m_monitor( std::move( rhs.m_monitor ) ),
-  m_bOption( std::move( rhs.m_bOption ) )
+  m_bOption( rhs.m_bOption )
 {
   Init();
 }
@@ -58,6 +58,7 @@ void Leg::SetPosition( pPosition_t pPosition ) {
   m_monitor.SetPosition( pPosition );
 
   ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
+  // NOTE: this may generate error!
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
   m_bOption = false;
@@ -160,20 +161,22 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
 }
 
 void Leg::AddChartData( pChartDataView_t pChartData ) {
-  m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-  pChartData->Add( 2, &m_ceProfitLoss );
+  if ( m_pPosition ) {
+    m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    pChartData->Add( 2, &m_ceProfitLoss );
 
-  if ( m_bOption ) {
-    m_ceImpliedVolatility.SetName( "IV: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 11, &m_ceImpliedVolatility );
-    m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 12, &m_ceDelta );
-    m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 13, &m_ceGamma );
-    m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 14, &m_ceTheta );
-    m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 15, &m_ceVega );
+    if ( m_bOption ) {
+      m_ceImpliedVolatility.SetName( "IV: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      pChartData->Add( 11, &m_ceImpliedVolatility );
+      m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      pChartData->Add( 12, &m_ceDelta );
+      m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      pChartData->Add( 13, &m_ceGamma );
+      m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      pChartData->Add( 14, &m_ceTheta );
+      m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      pChartData->Add( 15, &m_ceVega );
+    }
   }
 }
 
