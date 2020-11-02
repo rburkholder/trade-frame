@@ -117,6 +117,7 @@ protected:
   using vLeg_t = std::vector<ou::tf::Leg>;
   vLeg_t m_vLeg;
 
+  // TODO: if long term momentum changes, then maybe exit and switch
   void SetDirection( double slope20Day );
 
 private:
