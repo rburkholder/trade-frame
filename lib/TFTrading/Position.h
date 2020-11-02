@@ -46,6 +46,9 @@
 
 // todo:  there is nothing for setting a portfolio id
 
+// Usage Note:
+//   Position watches continously
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
