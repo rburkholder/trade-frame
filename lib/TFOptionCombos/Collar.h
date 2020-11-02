@@ -59,7 +59,10 @@ public:
 protected:
 private:
 
-  };
+  ou::tf::Leg m_itmCall;
+  ou::tf::Leg m_itmPut;
+
+};
 
 } // namespace option
 } // namespace tf

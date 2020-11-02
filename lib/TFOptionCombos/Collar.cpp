@@ -72,7 +72,20 @@ Collar::~Collar() {
 
 void Collar::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
-  //CheckStop( dblPriceUnderlying );
+  // at expiry, then exit or roll
+  // for rising collar:
+  //   roll profitable long synthetic call up when trend changes downwards
+  //   roll profitable long front put down when trend changes upwards
+  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+  // for falling collar:
+  //   roll profitable long synthetic put down when trend changed upwards
+  //   roll profitable long front call up when trend chagnes downwards
+  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+
+  // need to manage states:  will need to obtain contract for the option, if not tracking
+  // therefore, track options so ready to trade on demand? ... then watch is available as well
+  //   set state so tracking with a) available option, b) waiting for option creation
+  // track ITM call (for roll-up), ITM put (for roll-down) (with moving average)
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -94,7 +107,7 @@ size_t /* static */ Collar::LegCount() {
   citerChain_t citerChainFront = Combo::SelectChain( chains, date, nDaysToExpiryFront );
   const ou::tf::option::Chain& chainFront( citerChainFront->second );
 
-  if ( 0.0 <= slope ) { // long
+  if ( 0.0 <= slope ) { // momentum rising
 
     double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
 
@@ -104,11 +117,11 @@ size_t /* static */ Collar::LegCount() {
     double strikeProtective( strikeSyntheticItm );
 
     fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut( strikeSyntheticItm ) );
-    fLegSelected( strikeCovered,    citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCovered ) );
-    fLegSelected( strikeProtective, citerChainFront->first, chainFront.GetIQFeedNamePut( strikeProtective ) );
+    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+    fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
+    fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
   }
-  else { // short
+  else { // momentum falling
 
     double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
 
@@ -117,10 +130,10 @@ size_t /* static */ Collar::LegCount() {
 
     double strikeProtective( strikeSyntheticItm );
 
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut( strikeSyntheticItm ) );
+    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
     fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-    fLegSelected( strikeCovered,    citerChainFront->first, chainFront.GetIQFeedNamePut( strikeCovered ) );
-    fLegSelected( strikeProtective, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeProtective ) );
+    fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
+    fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
   }
 
 }
@@ -175,15 +188,15 @@ void Collar::PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide sid
     case State::Watching:
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
-          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
           m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
           m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
-          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
           break;
         case ou::tf::OrderSide::Sell:
           m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
-          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
-          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
+          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
           m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
           break;
       }
