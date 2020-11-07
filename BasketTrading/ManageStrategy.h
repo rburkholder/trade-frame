@@ -72,13 +72,13 @@ public:
   using pOrder_t = ou::tf::Position::pOrder_t;
 
   using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
-  using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t)>;
+  using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t&&)>;
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   using fConstructedOption_t = std::function<void(pOption_t)>;
 
-  using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t)>;
-  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
+  using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
+  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t&, pWatch_t )>;
 

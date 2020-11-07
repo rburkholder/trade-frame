@@ -591,6 +591,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 }
 
 // turn into a template if needed for other combo types
+// Not used at this point
 void ManageStrategy::BuildPosition(
   const idPortfolio_t& idPortfolio,
   boost::gregorian::date date,

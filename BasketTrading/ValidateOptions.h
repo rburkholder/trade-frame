@@ -53,7 +53,7 @@ public:
     = std::function<void(const mapChains_t&, boost::gregorian::date, double, fStrikeSelected_t&&)>; // double is current price
 
   using fConstructedOption_t = std::function<void(pOption_t)>;
-  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t)>;  // source from IQFeed Symbol Name
+  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   using fValidatedOption_t = std::function<void(pOption_t)>;
 
