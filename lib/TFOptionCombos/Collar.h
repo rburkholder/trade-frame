@@ -22,8 +22,6 @@
 #ifndef COLLAR_H
 #define COLLAR_H
 
-#include <TFOptions/Option.h>
-
 #include "Combo.h"
 
 namespace ou { // One Unified
@@ -52,9 +50,8 @@ public:
 
   virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
+  // long by default for entry, short doesn't make much sense due to combo type
   virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide );
-  // long by default for entry,
-  // short doesn't make much sense at this point for entry
 
   virtual double GetNet( double price );
 
@@ -62,13 +59,13 @@ protected:
   virtual void Initialize( boost::gregorian::date, const mapChains_t* );
 private:
 
+  const ou::tf::option::Chain* m_pchainFront;
+  const ou::tf::option::Chain* m_pchainSynthetic;
+
   using pOption_t = ou::tf::option::Option::pOption_t;
 
-  pOption_t m_pItmTrackingCall;
-  pOption_t m_pItmTrackingPut;
-
-  const ou::tf::option::Chain* m_pchainSynthetic;
-  const ou::tf::option::Chain* m_pchainFront;
+  pOption_t m_pItmTrackLegFrontLong; // ELeg::FrontLong
+  pOption_t m_pItmTrackLegSynthLong; // ELeg::SynthLong
 
 };
 

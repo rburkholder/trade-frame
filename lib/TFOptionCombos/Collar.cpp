@@ -39,6 +39,8 @@ namespace {
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,nLegs>;
 
+  enum class ELeg { SynthLong = 0, SynthShort, FrontShort, FrontLong };
+
   static const rLegDef_t m_rLegDefLong = {
     LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call ), // synthetic long
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  ), // synthetic long
@@ -55,16 +57,16 @@ namespace {
 } // namespace anon
 
 Collar::Collar()
-: Combo()
+: Combo(), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
 {
 }
 
 Collar::Collar( const Collar& rhs )
-: Combo( rhs )
+: Combo( rhs ), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
 {}
 
 Collar::Collar( const Collar&& rhs )
-: Combo( std::move( rhs ) )
+: Combo( std::move( rhs ) ), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
 {}
 
 Collar::~Collar() {
@@ -83,8 +85,6 @@ void Collar::Initialize( boost::gregorian::date date, const mapChains_t* pmapCha
 void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( doubleUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
 
-  // bInTrend should be slope instead, then can check sign and magnitude
-
   // need to manage states:  will need to obtain contract for the option, if not tracking
   // therefore, track options so ready to trade on demand? ... then watch is available as well
   //   set state so tracking with a) available option, b) waiting for option creation
@@ -93,7 +93,7 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
   // need to keep track of options, start / stop collection
   // external construction tracks, just provide the name
 
-  // m_eDirection has initial entry direction to use for determining leg type comparisons
+  // maybe use stops for exits & rolls?
 
   // at expiry, then exit or roll
   switch ( Combo::m_e20DayDirection ) {
@@ -104,7 +104,38 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
         double strikeSyntheticItm( m_pchainSynthetic->Call_Itm( dblPriceUnderlying ) );
         //   roll profitable long front protective put down when trend changes upwards
         double strikeProtective( strikeSyntheticItm );
-        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
+
+        // ELeg::SynthLong side
+        static const vLeg_t::size_type ixSynthLong( (unsigned int)ELeg::SynthLong );
+        pPosition_t pPosition( m_vLeg[ixSynthLong].GetPosition() );
+        if ( pPosition ) {
+          pWatch_t pWatch = pPosition->GetWatch();
+          pInstrument_t pInstrument = pWatch->GetInstrument();
+          if ( pInstrument->IsOption() ) {
+            // TODO: assert this is a long call
+            if ( strikeSyntheticItm > pInstrument->GetStrike() ) {
+              if ( m_pItmTrackLegSynthLong ) {
+                if ( strikeSyntheticItm > m_pItmTrackLegSynthLong->GetStrike() ) {
+                  // TODO: move to next option
+                  // TODO: if falling, move back down to option, or try the roll?
+                }
+                else {
+                  // nothing to do, track in existing option
+                }
+              }
+              else {
+                // need to obtain option, but track via state machine to request only once
+              }
+            }
+            else {
+              // nothing to do, hasn't moved enough itm
+            }
+          }
+          else {
+            // need a message, or maybe do an assert
+          }
+        }
       }
       break;
     case Combo::E20DayDirection::Falling:
@@ -114,7 +145,7 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
         double strikeSyntheticItm( m_pchainSynthetic->Put_Itm( dblPriceUnderlying ) );
         //   roll profitable long front protective call up when trend chagnes downwards
         double strikeProtective( strikeSyntheticItm );
-        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
       }
       break;
     case Combo::E20DayDirection::Unknown:
