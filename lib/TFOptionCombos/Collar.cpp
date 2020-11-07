@@ -96,9 +96,6 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
   // maybe use stops for exits & rolls?
 
   // at expiry, then exit or roll
-  switch ( Combo::m_e20DayDirection ) {
-    case Combo::E20DayDirection::Rising:
-      {
         //   manipulate the long positions
         //   roll profitable long synthetic call up when trend changes downwards
         double strikeSyntheticItm( m_pchainSynthetic->Call_Itm( dblPriceUnderlying ) );
@@ -136,22 +133,6 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
             // need a message, or maybe do an assert
           }
         }
-      }
-      break;
-    case Combo::E20DayDirection::Falling:
-      {
-        //   manipulate the long positions
-        //   roll profitable long synthetic put down when trend changed upwards
-        double strikeSyntheticItm( m_pchainSynthetic->Put_Itm( dblPriceUnderlying ) );
-        //   roll profitable long front protective call up when trend chagnes downwards
-        double strikeProtective( strikeSyntheticItm );
-        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
-      }
-      break;
-    case Combo::E20DayDirection::Unknown:
-      // probably still waiting for entry at this point
-      break;
-  }
 
 }
 
@@ -160,7 +141,7 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ void Collar::ChooseLegs( // throw Chain exceptions
-    double slope,
+    Combo::E20DayDirection direction,
     const mapChains_t& chains,
     boost::gregorian::date date,
     double priceUnderlying,
@@ -174,51 +155,58 @@ size_t /* static */ Collar::LegCount() {
   citerChain_t citerChainFront = Combo::SelectChain( chains, date, nDaysToExpiryFront );
   const ou::tf::option::Chain& chainFront( citerChainFront->second );
 
-  if ( 0.0 <= slope ) { // momentum rising
+  switch ( direction ) {
+    case E20DayDirection::Unknown:
+      break;
+    case E20DayDirection::Rising:
+      {
+        double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
 
-    double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
+        double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
+        strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
 
-    double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
-    strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
+        double strikeProtective( strikeSyntheticItm );
 
-    double strikeProtective( strikeSyntheticItm );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
+        fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
+      }
+      break;
+    case E20DayDirection::Falling:
+      {
+        double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
 
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-    fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
-    fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
+        double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
+        strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
+
+        double strikeProtective( strikeSyntheticItm );
+
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
+        fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
+      }
+      break;
   }
-  else { // momentum falling
-
-    double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
-
-    double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
-    strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
-
-    double strikeProtective( strikeSyntheticItm );
-
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-    fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-    fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
-    fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
-  }
-
 }
 
-/* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope ) {
+/* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection direction ) {
 
   std::string sName( "collar-" + sUnderlying );
   size_t ix {};
 
-  if ( 0.0 <= slope ) {
-    sName += "-rise";
-  }
-  else {
-    sName += "-fall";
+  switch ( direction ) {
+    case Combo::E20DayDirection::Rising:
+      sName += "-rise";
+      break;
+    case Combo::E20DayDirection::Falling:
+      sName += "-fall";
+      break;
   }
 
   ChooseLegs(
-    slope, chains, date, price, [&sName,&ix](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+    direction, chains, date, price, [&sName,&ix](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       switch ( ix ) {
         case 0:
           sName
@@ -248,8 +236,7 @@ size_t /* static */ Collar::LegCount() {
   return sName;
 }
 
-void Collar::PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide side ) {
-  Combo::SetDirection( slope20Day );
+void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:

@@ -29,14 +29,13 @@ const double Combo::m_dblMaxStrikeDelta( 0.51 );       // not 0.50 to prevent ro
 const double Combo::m_dblMaxStrangleDelta( 1.01 );     // not 1.00 to prevent rounding problems
 
 Combo::Combo( )
-: m_state( State::Initializing ), m_e20DayDirection( E20DayDirection::Unknown )
+: m_state( State::Initializing )
 {
   m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
 Combo::Combo( const Combo& rhs )
-: m_e20DayDirection( rhs.m_e20DayDirection ),
-  m_state( rhs.m_state ),
+: m_state( rhs.m_state ),
   m_vLeg( rhs.m_vLeg ),
   m_pPortfolio( rhs.m_pPortfolio )
 {
@@ -44,8 +43,7 @@ Combo::Combo( const Combo& rhs )
 }
 
 Combo::Combo( const Combo&& rhs )
-: m_e20DayDirection( rhs.m_e20DayDirection ),
-  m_state( rhs.m_state ),
+: m_state( rhs.m_state ),
   m_vLeg( std::move( rhs.m_vLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 {
@@ -93,11 +91,7 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
 
 }
 
-void Combo::SetDirection( double slope20Day ) {
-  m_e20DayDirection = ( 0.0 < slope20Day ) ? E20DayDirection::Rising : E20DayDirection::Falling;
-}
-
-// TODO: make use of bInTrend to trigger exit latch
+// TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   for ( Leg& leg: m_vLeg ) {
     leg.Tick( dt );

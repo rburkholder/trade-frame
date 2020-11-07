@@ -40,18 +40,18 @@ public:
   static size_t LegCount();
 
   static void ChooseLegs( // throw Chain exceptions
-    double slope,
+    Combo::E20DayDirection direction,
     const mapChains_t& chains,
     boost::gregorian::date,
     double priceUnderlying,
     fLegSelected_t&& );
 
-  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope );
+  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection );
 
   virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   // long by default for entry, short doesn't make much sense due to combo type
-  virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide );
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
 
   virtual double GetNet( double price );
 

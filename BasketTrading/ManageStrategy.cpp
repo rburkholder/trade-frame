@@ -78,6 +78,7 @@
 //      and new strikes entered when IV returns closer to noral
 //      or sell premium(short the same leg?)
 
+#include "TFOptionCombos/Combo.h"
 #include <algorithm>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
@@ -655,19 +656,23 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         if ( m_bAllowComboAdd ) {
 
           try {
-            double slope20Day( m_pricesDailyCloseBollinger20.Slope() );
-            boost::gregorian::date date( bar.DateTime().date() );
+            const double slope20Day( m_pricesDailyCloseBollinger20.Slope() );
+            const ou::tf::option::Combo::E20DayDirection direction
+              = ( 0.0 <= slope20Day )
+              ? ou::tf::option::Combo::E20DayDirection::Rising
+              : ou::tf::option::Combo::E20DayDirection::Falling;
+            const boost::gregorian::date date( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateBidAsk(
               date, mid, 11,
-              [slope20Day,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( slope20Day, chains, date, mid, std::move( fLegSelected ) );
+              [mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
+                combo_t::ChooseLegs( direction, chains, date, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, slope20Day );
+                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, direction );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() != mapCombo_iter ) {
                 // is this an issue? is this an error?
@@ -710,7 +715,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                  pCombo->PlaceOrder( slope20Day, m_DefaultOrderSide );
+                  pCombo->PlaceOrder( m_DefaultOrderSide );
                   m_stateTrading = ETradingState::TSMonitorCombo;
 
                 } // m_fAuthorizeSimple

@@ -74,6 +74,8 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
+  enum class E20DayDirection { Unknown, Rising, Falling };
+
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
@@ -99,7 +101,7 @@ public:
 
   virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide ) = 0;
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
 
   virtual double GetNet( double price );
 
@@ -124,9 +126,6 @@ protected:
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
 
-  enum class E20DayDirection { Rising, Falling, Unknown };
-  E20DayDirection m_e20DayDirection;
-
   fConstructOption_t m_fConstructOption;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
@@ -135,9 +134,6 @@ protected:
   vLeg_t m_vLeg;
 
   virtual void Initialize( boost::gregorian::date date, const mapChains_t* ) = 0;
-
-  // TODO: if long term momentum changes, then maybe exit and switch
-  void SetDirection( double slope20Day );
 
 private:
 
