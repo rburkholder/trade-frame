@@ -65,6 +65,15 @@ public:
 
   using fLegSelected_t = std::function<void(double, boost::gregorian::date, const std::string&)>;
 
+  using pWatch_t      = ou::tf::option::Option::pWatch_t;
+  using pOption_t     = ou::tf::option::Option::pOption_t;
+
+  using fConstructedWatch_t  = std::function<void(pWatch_t)>;
+  using fConstructedOption_t = std::function<void(pOption_t)>;
+
+  using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
+  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
+
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
   State m_state;
 
@@ -76,6 +85,12 @@ public:
   Combo& operator=( const Combo& rhs ) = delete;
   Combo( const Combo&& rhs );
   virtual ~Combo( );
+
+  void Initialize(
+    boost::gregorian::date date,
+    const mapChains_t*,
+    fConstructOption_t&&
+  );
 
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
@@ -109,13 +124,19 @@ protected:
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
 
-  enum class EDirection { Rising, Falling, Unknown };
-  EDirection m_eDirection;
+  enum class E20DayDirection { Rising, Falling, Unknown };
+  E20DayDirection m_e20DayDirection;
+
+  //const mapChains_t* m_pmapChains;
+
+  fConstructOption_t m_fConstructOption;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
   using vLeg_t = std::vector<ou::tf::Leg>;
   vLeg_t m_vLeg;
+
+  virtual void Initialize( boost::gregorian::date date, const mapChains_t* ) = 0;
 
   // TODO: if long term momentum changes, then maybe exit and switch
   void SetDirection( double slope20Day );

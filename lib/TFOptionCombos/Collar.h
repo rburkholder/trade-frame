@@ -22,6 +22,8 @@
 #ifndef COLLAR_H
 #define COLLAR_H
 
+#include <TFOptions/Option.h>
+
 #include "Combo.h"
 
 namespace ou { // One Unified
@@ -57,10 +59,16 @@ public:
   virtual double GetNet( double price );
 
 protected:
+  virtual void Initialize( boost::gregorian::date, const mapChains_t* );
 private:
 
-  ou::tf::Leg m_itmCall;
-  ou::tf::Leg m_itmPut;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
+  pOption_t m_pItmTrackingCall;
+  pOption_t m_pItmTrackingPut;
+
+  const ou::tf::option::Chain* m_pchainSynthetic;
+  const ou::tf::option::Chain* m_pchainFront;
 
 };
 

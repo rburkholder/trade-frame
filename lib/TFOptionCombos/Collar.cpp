@@ -70,22 +70,58 @@ Collar::Collar( const Collar&& rhs )
 Collar::~Collar() {
 }
 
+void Collar::Initialize( boost::gregorian::date date, const mapChains_t* pmapChains ) {
+
+  citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
+  m_pchainSynthetic = &citerChainSynthetic->second;
+
+  citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
+  m_pchainFront = &citerChainFront->second;
+
+}
+
 void Collar::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
-  // at expiry, then exit or roll
-  // for rising collar:
-  //   roll profitable long synthetic call up when trend changes downwards
-  //   roll profitable long front put down when trend changes upwards
-  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
-  // for falling collar:
-  //   roll profitable long synthetic put down when trend changed upwards
-  //   roll profitable long front call up when trend chagnes downwards
-  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+
+  // bInTrend should be slope instead, then can check sign and magnitude
 
   // need to manage states:  will need to obtain contract for the option, if not tracking
   // therefore, track options so ready to trade on demand? ... then watch is available as well
   //   set state so tracking with a) available option, b) waiting for option creation
   // track ITM call (for roll-up), ITM put (for roll-down) (with moving average)
+
+  // need to keep track of options, start / stop collection
+  // external construction tracks, just provide the name
+
+  // m_eDirection has initial entry direction to use for determining leg type comparisons
+
+  // at expiry, then exit or roll
+  switch ( Combo::m_e20DayDirection ) {
+    case Combo::E20DayDirection::Rising:
+      {
+        //   manipulate the long positions
+        //   roll profitable long synthetic call up when trend changes downwards
+        double strikeSyntheticItm( m_pchainSynthetic->Call_Itm( dblPriceUnderlying ) );
+        //   roll profitable long front protective put down when trend changes upwards
+        double strikeProtective( strikeSyntheticItm );
+        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+      }
+      break;
+    case Combo::E20DayDirection::Falling:
+      {
+        //   manipulate the long positions
+        //   roll profitable long synthetic put down when trend changed upwards
+        double strikeSyntheticItm( m_pchainSynthetic->Put_Itm( dblPriceUnderlying ) );
+        //   roll profitable long front protective call up when trend chagnes downwards
+        double strikeProtective( strikeSyntheticItm );
+        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier)
+      }
+      break;
+    case Combo::E20DayDirection::Unknown:
+      // probably still waiting for entry at this point
+      break;
+  }
+
 }
 
 size_t /* static */ Collar::LegCount() {
