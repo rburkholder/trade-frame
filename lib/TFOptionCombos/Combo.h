@@ -127,8 +127,6 @@ protected:
   enum class E20DayDirection { Rising, Falling, Unknown };
   E20DayDirection m_e20DayDirection;
 
-  //const mapChains_t* m_pmapChains;
-
   fConstructOption_t m_fConstructOption;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
