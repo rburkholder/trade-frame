@@ -762,9 +762,10 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 //          }
 //        }
 
+        double slope( m_vEMA[2]->dblEmaLatest - m_vEMA[3]->dblEmaLatest ); // fast - slow
         std::for_each(
           m_mapCombo.begin(), m_mapCombo.end(),
-          [this,mid,&bar](mapCombo_t::value_type& entry){
+          [this,slope,mid,&bar](mapCombo_t::value_type& entry){
 
             auto pCombo = entry.second;
 
@@ -776,7 +777,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               case combo_t::State::Watching:
               case combo_t::State::Canceled:
               case combo_t::State::Closing:
-                pCombo->Tick( true, mid, bar.DateTime() );
+                // TODO: maybe try send stochastic as well
+                pCombo->Tick( slope, mid, bar.DateTime() ); // TODO: need to pass slope of underlying
                 break;
               default:
                 break;

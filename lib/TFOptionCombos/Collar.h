@@ -50,7 +50,7 @@ public:
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope );
 
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide );
   // long by default for entry,

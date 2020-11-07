@@ -98,7 +98,7 @@ void Combo::SetDirection( double slope20Day ) {
 }
 
 // TODO: make use of bInTrend to trigger exit latch
-void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
+void Combo::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   for ( Leg& leg: m_vLeg ) {
     leg.Tick( dt );
   }
@@ -109,7 +109,7 @@ void Combo::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
       }
       break;
     case State::Watching:
-      Update( bInTrend, dblPriceUnderlying );
+      Update( doubleUnderlyingSlope, dblPriceUnderlying );
       break;
   }
 }
@@ -208,10 +208,6 @@ Combo::citerChain_t Combo::SelectChain( const mapChains_t& mapChains, boost::gre
     throw ou::tf::option::exception_chain_not_found( "Combo::SelectChain" );
   }
   return citerChain;
-}
-
-void Combo::Update( bool bTrending, double dblPrice ) {
-  // TODO: incorporate trending underlying
 }
 
 } // namespace option

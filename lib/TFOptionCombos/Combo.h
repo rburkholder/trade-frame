@@ -97,7 +97,7 @@ public:
 
   void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   virtual void PlaceOrder( double slope20Day, ou::tf::OrderSide::enumOrderSide ) = 0;
 
@@ -143,7 +143,7 @@ protected:
 
 private:
 
-  void Update( bool bTrending, double dblPrice );
+  void Update( double doubleUnderlyingSlope, double dblPrice ) {};
 
 };
 

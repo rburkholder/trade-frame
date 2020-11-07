@@ -80,8 +80,8 @@ void Collar::Initialize( boost::gregorian::date date, const mapChains_t* pmapCha
 
 }
 
-void Collar::Tick( bool bInTrend, double dblPriceUnderlying, ptime dt ) {
-  Combo::Tick( bInTrend, dblPriceUnderlying, dt ); // first or last in sequence?
+void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
+  Combo::Tick( doubleUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
 
   // bInTrend should be slope instead, then can check sign and magnitude
 
