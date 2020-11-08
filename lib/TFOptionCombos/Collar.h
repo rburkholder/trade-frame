@@ -23,6 +23,7 @@
 #define COLLAR_H
 
 #include "Combo.h"
+#include "Tracker.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -59,25 +60,8 @@ protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
 
-  enum class ETransition { Initial, Vacant, Fill, Acquire, Track };
-  using pOption_t = ou::tf::option::Option::pOption_t;
-
-  struct Tracker {
-    ETransition m_transition;
-    const ou::tf::option::Chain* m_pChain;
-    pOption_t m_pOption;
-    Tracker(): m_transition( ETransition::Initial ), m_pChain( nullptr ) {}
-    void SetChain( const ou::tf::option::Chain* pChain ) {
-      m_pChain = pChain;
-      m_transition = ETransition::Track;
-    }
-  };
-
   Tracker m_trackerFront;
   Tracker m_trackerSynthetic;
-
-  void TestLong( const vLeg_t::size_type, double dblUnderlying, Tracker& );
-  void Construct( ou::tf::OptionSide::enumOptionSide, double strikeItm, Tracker& );
 
 };
 

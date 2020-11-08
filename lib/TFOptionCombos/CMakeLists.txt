@@ -24,6 +24,7 @@ set(
     Strangle.h
     SyntheticLong.h
     SyntheticShort.h
+    Tracker.h
     VerticalSpread.h
   )
 
@@ -41,6 +42,7 @@ set(
     Strangle.cpp
     SyntheticLong.cpp
     SyntheticShort.cpp
+    Tracker.cpp
     VerticalSpread.cpp
   )
 
