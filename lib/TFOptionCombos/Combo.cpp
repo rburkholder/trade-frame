@@ -53,7 +53,7 @@ Combo::Combo( const Combo&& rhs )
 Combo::~Combo( ) {
 }
 
-void Combo::Initialize(
+void Combo::Finalize(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
   fConstructOption_t&& fConstructOption

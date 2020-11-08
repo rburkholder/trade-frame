@@ -159,7 +159,8 @@ private:
 //    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
     TSWaitForEntry, // start of equity trading
     TSOptionEvaluation, // start of option trading
-    TSMonitorCombo,
+    TSComboFinalize,
+    TSComboMonitor,
     TSMonitorLong, TSMonitorShort,
     TSNoMore
   };
@@ -178,6 +179,8 @@ private:
   EBollingerState m_stateBollinger;
 
   enum class EBollXing { None, Lower, Mean, Upper, _Count };
+
+  bool m_bOneTimeMessage;
 
   size_t m_nConfirmationIntervals;
 

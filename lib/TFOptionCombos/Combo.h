@@ -88,7 +88,7 @@ public:
   Combo( const Combo&& rhs );
   virtual ~Combo( );
 
-  void Initialize(
+  void Finalize(
     boost::gregorian::date date,
     const mapChains_t*,
     fConstructOption_t&&

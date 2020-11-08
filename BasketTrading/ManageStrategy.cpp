@@ -78,7 +78,6 @@
 //      and new strikes entered when IV returns closer to noral
 //      or sell premium(short the same leg?)
 
-#include "TFOptionCombos/Combo.h"
 #include <algorithm>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
@@ -131,6 +130,7 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
+  m_bOneTimeMessage( false ),
   m_sUnderlying( sUnderlying ),
   m_sDailyBarPath( sDailyBarPath ),
   m_barPriorDaily( barPriorDaily ),
@@ -367,6 +367,7 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
 }
 
 // add pre-existing positions from database
+// NOTE: are there out of order problems, as Collar vLeg is ordered in a particular manner
 void ManageStrategy::Add( pPosition_t pPosition ) {
   pInstrument_t pInstrument = pPosition->GetInstrument();
   pWatch_t pWatch = pPosition->GetWatch();
@@ -642,6 +643,9 @@ void ManageStrategy::BuildPosition(
  */
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
+  // what happens with Add()?  What starte are we in?  What states are executed to reach here?
+  // need to determine states and then sequence to get the combo initialized
+
   const double mid = m_QuoteUnderlyingLatest.Midpoint();
 
   switch ( m_stateTrading ) {
@@ -715,21 +719,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                  pCombo->Initialize(
-                    dateBar, &m_mapChains,
-                    [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){
-                      // TODO: maintain a local map for quick reference
-                      m_fConstructOption(
-                        sOptionName,
-                        m_pPositionUnderlying->GetWatch()->GetInstrument(),
-                        [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
-                          f( pOption );
-                        }
-                      );
-                    });
-
                   pCombo->PlaceOrder( m_DefaultOrderSide );
-                  m_stateTrading = ETradingState::TSMonitorCombo;
+                  m_stateTrading = ETradingState::TSComboFinalize;
 
                 } // m_fAuthorizeSimple
                 else {
@@ -749,12 +740,41 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
         } // m_bAllowedComboAdd
+        else {
+          if ( !m_bOneTimeMessage ) {
+            std::cout << "*** " << m_sUnderlying << " this might be a good place for second day state change" << std::endl;
+            m_bOneTimeMessage = true;
+          }
+        }
 
+      }
+      break;
+    case TSComboFinalize:
+      {
+        const boost::gregorian::date dateBar( bar.DateTime().date() );
+        std::for_each(
+          m_mapCombo.begin(), m_mapCombo.end(),
+          [this,dateBar](mapCombo_t::value_type& entry){
+            auto pCombo = entry.second;
+            pCombo->Finalize(
+              dateBar, &m_mapChains,
+              [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){
+                // TODO: maintain a local map for quick reference
+                m_fConstructOption(
+                  sOptionName,
+                  m_pPositionUnderlying->GetWatch()->GetInstrument(),
+                  [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
+                    f( pOption );
+                  }
+                );
+              });
+          });
+        m_stateTrading = ETradingState::TSComboMonitor;
       }
       break;
 //    case TSWaitForEntry:
 //      break;
-    case TSMonitorCombo:
+    case TSComboMonitor:
       {
         // TODO: track pivot crossing, track momentun
         //   pivot acts as stop, momentum can carry through
