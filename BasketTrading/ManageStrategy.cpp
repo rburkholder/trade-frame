@@ -661,9 +661,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               = ( 0.0 <= slope20Day )
               ? ou::tf::option::Combo::E20DayDirection::Rising
               : ou::tf::option::Combo::E20DayDirection::Falling;
-            const boost::gregorian::date date( bar.DateTime().date() );
+            const boost::gregorian::date dateBar( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateBidAsk(
-              date, mid, 11,
+              dateBar, mid, 11,
               [mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
                 combo_t::ChooseLegs( direction, chains, date, mid, std::move( fLegSelected ) );
               }
@@ -672,7 +672,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( m_sUnderlying, m_mapChains, date, mid, direction );
+                = combo_t::Name( m_sUnderlying, m_mapChains, dateBar, mid, direction );
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() != mapCombo_iter ) {
                 // is this an issue? is this an error?
@@ -714,6 +714,19 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     );
 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
+
+                  pCombo->Initialize(
+                    dateBar, &m_mapChains,
+                    [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){
+                      // TODO: maintain a local map for quick reference
+                      m_fConstructOption(
+                        sOptionName,
+                        m_pPositionUnderlying->GetWatch()->GetInstrument(),
+                        [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
+                          f( pOption );
+                        }
+                      );
+                    });
 
                   pCombo->PlaceOrder( m_DefaultOrderSide );
                   m_stateTrading = ETradingState::TSMonitorCombo;

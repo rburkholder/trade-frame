@@ -56,16 +56,28 @@ public:
   virtual double GetNet( double price );
 
 protected:
-  virtual void Initialize( boost::gregorian::date, const mapChains_t* );
+  virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
 
-  const ou::tf::option::Chain* m_pchainFront;
-  const ou::tf::option::Chain* m_pchainSynthetic;
-
+  enum class ETransition { Initial, Vacant, Fill, Acquire, Track };
   using pOption_t = ou::tf::option::Option::pOption_t;
 
-  pOption_t m_pItmTrackLegFrontLong; // ELeg::FrontLong
-  pOption_t m_pItmTrackLegSynthLong; // ELeg::SynthLong
+  struct Tracker {
+    ETransition m_transition;
+    const ou::tf::option::Chain* m_pChain;
+    pOption_t m_pOption;
+    Tracker(): m_transition( ETransition::Initial ), m_pChain( nullptr ) {}
+    void SetChain( const ou::tf::option::Chain* pChain ) {
+      m_pChain = pChain;
+      m_transition = ETransition::Track;
+    }
+  };
+
+  Tracker m_trackerFront;
+  Tracker m_trackerSynthetic;
+
+  void TestLong( const vLeg_t::size_type, double dblUnderlying, Tracker& );
+  void Construct( ou::tf::OptionSide::enumOptionSide, double strikeItm, Tracker& );
 
 };
 

@@ -60,7 +60,7 @@ void Combo::Initialize(
 ) {
   //m_pmapChains = pmapChains;
   m_fConstructOption = std::move( fConstructOption );
-  Initialize( date, pmapChains );
+  Init( date, pmapChains );
 }
 
 void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {

@@ -72,7 +72,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
 
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
-  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
+  using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
@@ -133,7 +133,7 @@ protected:
   using vLeg_t = std::vector<ou::tf::Leg>;
   vLeg_t m_vLeg;
 
-  virtual void Initialize( boost::gregorian::date date, const mapChains_t* ) = 0;
+  virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
 
 private:
 

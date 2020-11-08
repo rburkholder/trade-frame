@@ -57,29 +57,36 @@ namespace {
 } // namespace anon
 
 Collar::Collar()
-: Combo(), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
+: Combo()
 {
 }
 
 Collar::Collar( const Collar& rhs )
-: Combo( rhs ), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
+: Combo( rhs )
 {}
 
 Collar::Collar( const Collar&& rhs )
-: Combo( std::move( rhs ) ), m_pchainFront( nullptr ), m_pchainSynthetic( nullptr )
+: Combo( std::move( rhs ) )
 {}
 
 Collar::~Collar() {
 }
 
-void Collar::Initialize( boost::gregorian::date date, const mapChains_t* pmapChains ) {
+void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
 
   citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
-  m_pchainSynthetic = &citerChainSynthetic->second;
+  m_trackerSynthetic.SetChain( &citerChainSynthetic->second );
 
   citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
-  m_pchainFront = &citerChainFront->second;
+  m_trackerFront.SetChain( &citerChainFront->second );
 
+}
+
+namespace {
+  using comp_t = std::function<bool(double,double)>;
+  bool lt( double a, double b ) { return a < b; }
+  bool gt( double a, double b ) { return a > b; }
+  bool eq( double a, double b ) { return a == b; }
 }
 
 void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
@@ -96,44 +103,88 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
   // maybe use stops for exits & rolls?
 
   // at expiry, then exit or roll
-        //   manipulate the long positions
-        //   roll profitable long synthetic call up when trend changes downwards
-        double strikeSyntheticItm( m_pchainSynthetic->Call_Itm( dblPriceUnderlying ) );
-        //   roll profitable long front protective put down when trend changes upwards
-        double strikeProtective( strikeSyntheticItm );
-        //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
 
-        // ELeg::SynthLong side
-        static const vLeg_t::size_type ixSynthLong( (unsigned int)ELeg::SynthLong );
-        pPosition_t pPosition( m_vLeg[ixSynthLong].GetPosition() );
-        if ( pPosition ) {
-          pWatch_t pWatch = pPosition->GetWatch();
-          pInstrument_t pInstrument = pWatch->GetInstrument();
-          if ( pInstrument->IsOption() ) {
-            // TODO: assert this is a long call
-            if ( strikeSyntheticItm > pInstrument->GetStrike() ) {
-              if ( m_pItmTrackLegSynthLong ) {
-                if ( strikeSyntheticItm > m_pItmTrackLegSynthLong->GetStrike() ) {
-                  // TODO: move to next option
-                  // TODO: if falling, move back down to option, or try the roll?
-                }
-                else {
-                  // nothing to do, track in existing option
-                }
-              }
-              else {
-                // need to obtain option, but track via state machine to request only once
-              }
-            }
-            else {
-              // nothing to do, hasn't moved enough itm
-            }
+  static const vLeg_t::size_type ixSynthLong( (unsigned int)ELeg::SynthLong );
+  static const vLeg_t::size_type ixFrontLong( (unsigned int)ELeg::FrontLong );
+
+  //   manipulate the long positions
+  //   roll profitable long synthetic call up when trend changes downwards
+  //   roll profitable long front protective put down when trend changes upwards
+  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
+
+  TestLong( ixFrontLong, dblPriceUnderlying, m_trackerFront );
+  TestLong( ixSynthLong, dblPriceUnderlying, m_trackerSynthetic );
+
+}
+
+void Collar::TestLong( vLeg_t::size_type ixLong, double dblUnderlying, Tracker& tracker ) {
+
+  pPosition_t pPosition( m_vLeg[ixLong].GetPosition() ); // TODO: assert this is long, turn into one time operation
+  if ( pPosition ) {
+    pWatch_t pWatch = pPosition->GetWatch();
+    pInstrument_t pInstrument = pWatch->GetInstrument();
+    if ( pInstrument->IsOption() ) {
+
+      double strikeItm;
+
+      comp_t comp;  // TODO: a one time operation upon assignment of position
+      switch ( pInstrument->GetOptionSide() ) {
+        case ou::tf::OptionSide::Call:
+          comp = &gt;
+          strikeItm = tracker.m_pChain->Call_Itm( dblUnderlying );
+          break;
+        case ou::tf::OptionSide::Put:
+          comp = &eq;
+          strikeItm = tracker.m_pChain->Put_Itm( dblUnderlying );
+          break;
+      }
+      assert( comp );
+
+      if ( comp( strikeItm, pInstrument->GetStrike() ) ) { // is new strike further itm?
+        if ( tracker.m_pOption ) { // if already tracking the option
+          if ( comp( strikeItm, tracker.m_pOption->GetStrike() ) ) { // move further itm?
+            tracker.m_transition = ETransition::Vacant;
+            tracker.m_pOption.reset();
+            Construct( pInstrument->GetOptionSide(), strikeItm, tracker );
           }
           else {
-            // need a message, or maybe do an assert
+            // TODO: if retreating, stay pat, retreat, or try the roll?
+            // nothing to do, track in existing option as quotes are updated
           }
         }
+        else {
+          // need to obtain option, but track via state machine to request only once
+          tracker.m_transition = ETransition::Vacant;
+          Construct( pInstrument->GetOptionSide(), strikeItm, tracker );
+        }
+      }
+      else {
+        // nothing to do, hasn't moved enough itm
+      }
+    }
+    else {
+      // notification, requires option
+    }
+  }
+}
 
+void Collar::Construct( ou::tf::OptionSide::enumOptionSide side, double strikeItm, Tracker& tracker ) {
+  std::string sName;
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      sName = tracker.m_pChain->Call_Itm( strikeItm );
+      break;
+    case ou::tf::OptionSide::Put:
+      sName = tracker.m_pChain->Put_Itm( strikeItm );
+      break;
+  }
+  tracker.m_transition = ETransition::Acquire;
+  Combo::m_fConstructOption(
+    sName,
+    [this, &tracker]( pOption_t pOption ){
+      tracker.m_pOption = pOption;
+      tracker.m_transition = ETransition::Track;
+    } );
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -281,7 +332,6 @@ double Collar::GetNet( double price ) {
 } // namespace option
 } // namespace tf
 } // namespace ou
-
 
 /*
 
