@@ -96,6 +96,31 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
   return bOk;
 }
 
+void MonitorOrder::ClosePosition() {
+  if ( m_pPosition ) {
+    const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
+    if ( IsOrderActive() ) {
+      std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
+    }
+    else {
+      if ( 0 != row.nPositionPending ) {
+        std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
+      }
+      if ( 0 != row.nPositionActive ) {
+        std::cout << row.sName << ": monitored closing position" << std::endl;
+        switch ( row.eOrderSideActive ) {
+          case ou::tf::OrderSide::Buy:
+            PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
+            break;
+          case ou::tf::OrderSide::Sell:
+            PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
+            break;
+        }
+      }
+    }
+  }
+}
+
 void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Order out of UpdateOrder
   switch ( m_state ) {
     case State::Active:
@@ -191,4 +216,3 @@ void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate
 
 } // namespace ou
 } // namespace tf
-  

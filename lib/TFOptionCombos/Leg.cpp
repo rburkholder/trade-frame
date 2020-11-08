@@ -105,26 +105,7 @@ void Leg::CancelOrder() {
 
 void Leg::ClosePosition() {
   if ( m_pPosition ) {
-    const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
-    if ( m_monitor.IsOrderActive() ) {
-      std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
-    }
-    else {
-      if ( 0 != row.nPositionPending ) {
-        std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
-      }
-      if ( 0 != row.nPositionActive ) {
-        std::cout << row.sName << ": closing position" << std::endl;
-        switch ( row.eOrderSideActive ) {
-          case ou::tf::OrderSide::Buy:
-            m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
-            break;
-          case ou::tf::OrderSide::Sell:
-            m_monitor.PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
-            break;
-        }
-      }
-    }
+    m_monitor.ClosePosition();
   }
 }
 
