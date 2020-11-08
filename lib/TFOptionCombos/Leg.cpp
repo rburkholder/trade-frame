@@ -161,6 +161,20 @@ void Leg::AddChartData( pChartDataView_t pChartData ) {
   }
 }
 
+void Leg::DelChartData( pChartDataView_t pChartData ) {
+  if ( m_pPosition ) {
+    pChartData->Remove( 2, &m_ceProfitLoss );
+
+    if ( m_bOption ) {
+      pChartData->Remove( 11, &m_ceImpliedVolatility );
+      pChartData->Remove( 12, &m_ceDelta );
+      pChartData->Remove( 13, &m_ceGamma );
+      pChartData->Remove( 14, &m_ceTheta );
+      pChartData->Remove( 15, &m_ceVega );
+    }
+  }
+}
+
 bool Leg::CloseItm( const double price ) {
   bool bClosed( false );
   if ( m_pPosition ) {

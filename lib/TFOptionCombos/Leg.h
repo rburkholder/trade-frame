@@ -62,6 +62,7 @@ public:
   void SetColour( ou::Colour::enumColour colour );
 
   void AddChartData( pChartDataView_t pChartData );
+  void DelChartData( pChartDataView_t pChartData );
 
   bool CloseItm( const double price );
   bool CloseItmForProfit( const double price );
