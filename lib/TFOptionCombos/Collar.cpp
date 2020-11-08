@@ -104,8 +104,8 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
 
   // at expiry, then exit or roll
 
-  static const vLeg_t::size_type ixSynthLong( (unsigned int)ELeg::SynthLong );
-  static const vLeg_t::size_type ixFrontLong( (unsigned int)ELeg::FrontLong );
+  static const vLeg_t::size_type ixSynthLong( (size_t)ELeg::SynthLong );
+  static const vLeg_t::size_type ixFrontLong( (size_t)ELeg::FrontLong );
 
   //   manipulate the long positions
   //   roll profitable long synthetic call up when trend changes downwards
@@ -127,7 +127,7 @@ void Collar::TestLong( vLeg_t::size_type ixLong, double dblUnderlying, Tracker& 
 
       double strikeItm;
 
-      comp_t comp;  // TODO: a one time operation upon assignment of position
+      comp_t comp( nullptr );  // TODO: a one time operation upon assignment of position
       switch ( pInstrument->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
           comp = &gt;
