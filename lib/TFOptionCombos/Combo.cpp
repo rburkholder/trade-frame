@@ -56,10 +56,12 @@ Combo::~Combo( ) {
 void Combo::Finalize(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
-  fConstructOption_t&& fConstructOption
+  fConstructOption_t&& fConstructOption,
+  fRoll_t&& fRoll
 ) {
   //m_pmapChains = pmapChains;
   m_fConstructOption = std::move( fConstructOption );
+  m_fRoll = std::move( fRoll );
   Init( date, pmapChains );
 }
 
@@ -68,7 +70,6 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-// TODO:  need to accept existing positions, need to create own new positions
 void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
   bool bLegFound( false );
   for ( Leg& leg: m_vLeg ) {
@@ -88,11 +89,27 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
   }
+}
 
+// over-write existing Leg
+void Combo::AddPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
+  if ( ix < m_vLeg.size() ) {
+    assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+    //Leg leg( pPosition );
+    Leg& leg( m_vLeg[ix] );
+    //m_vLeg.emplace_back( std::move( leg ) );
+    //leg.DelChartData( pChartData );  // continue or erase?
+    leg.SetPosition( pPosition );
+    //m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
+    //m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
+  }
+  if ( State::Initializing == m_state ) {
+    m_state = State::Positions;
+  }
 }
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
-void Combo::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
+void Combo::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   for ( Leg& leg: m_vLeg ) {
     leg.Tick( dt );
   }
@@ -103,7 +120,7 @@ void Combo::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime
       }
       break;
     case State::Watching:
-      Update( doubleUnderlyingSlope, dblPriceUnderlying );
+      //Update( dblUnderlyingSlope, dblPriceUnderlying );
       break;
   }
 }

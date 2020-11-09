@@ -40,15 +40,20 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
+  using fRoll_t = std::function<void(pOption_t)>;
+
   Tracker();
+  ~Tracker();
 
   void Initialize( // ensure it is re-usable
     pPosition_t pPosition,
     const chain_t* pChain,
-    fConstructOption_t&&
+    fConstructOption_t&&,
+    fRoll_t&&
     );
 
-  void TestLong( double dblUnderlying );
+  void TestLong( double dblUnderlyingSlope, double dblUnderlying );
+
 protected:
 private:
 
@@ -64,17 +69,22 @@ private:
   double m_dblStrikePosition;
   ou::tf::OptionSide::enumOptionSide m_sidePosition;
 
-  enum class ETransition { Initial, Vacant, Fill, Acquire, Track };
+  double m_dblUnderlyingSlope;
+
+  enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll };
   ETransition m_transition;
 
   const chain_t* m_pChain;
 
   pPosition_t m_pPosition;
+  pWatch_t m_pWatch;
   pOption_t m_pOption;
 
   fConstructOption_t m_fConstructOption;
+  fRoll_t m_fRoll;
 
   void Construct( double strikeItm );
+  void HandleOptionQuote( const ou::tf::Quote& );
 
 };
 

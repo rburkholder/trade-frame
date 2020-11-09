@@ -40,7 +40,7 @@ namespace option { // options
 
 // == Combo
 
-class Combo {
+class Combo {  // TODO: convert to CRTP?
 public:
 
   using idPortfolio_t = ou::tf::Portfolio::idPortfolio_t;
@@ -74,6 +74,8 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
+  using fRoll_t = std::function<void(Combo*,size_t,pOption_t)>;
+
   enum class E20DayDirection { Unknown, Rising, Falling };
 
   enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
@@ -91,17 +93,20 @@ public:
   void Finalize(
     boost::gregorian::date date,
     const mapChains_t*,
-    fConstructOption_t&&
+    fConstructOption_t&&,
+    fRoll_t&&
   );
 
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
   void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  void AddPosition( size_t ix, pPosition_t, pChartDataView_t pChartData );
 
-  virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
+  virtual void PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide ) = 0;
 
   virtual double GetNet( double price );
 
@@ -127,6 +132,7 @@ protected:
   static const double m_dblMaxStrangleDelta;
 
   fConstructOption_t m_fConstructOption;
+  fRoll_t m_fRoll;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
@@ -137,7 +143,7 @@ protected:
 
 private:
 
-  void Update( double doubleUnderlyingSlope, double dblPrice ) {};
+  //void Update( double doubleUnderlyingSlope, double dblPrice ) {};
 
 };
 

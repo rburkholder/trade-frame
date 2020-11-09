@@ -36,22 +36,33 @@ Tracker::Tracker()
 : m_transition( ETransition::Initial ),
   m_pChain( nullptr ),
   m_compare( nullptr ),
-  m_luStrike( nullptr )
+  m_luStrike( nullptr ),
+  m_dblUnderlyingSlope {}
 {}
+
+Tracker::~Tracker() {
+  if ( m_pOption ) {
+    m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
+  }
+}
 
 void Tracker::Initialize(
   pPosition_t pPosition,
   const ou::tf::option::Chain* pChain,
-  fConstructOption_t&& fConstructOption
+  fConstructOption_t&& fConstructOption,
+  fRoll_t&& fRoll
 ) {
+
+  assert( ETransition::Initial == m_transition );
+
   m_pPosition = pPosition;
   m_pChain = pChain;
-  m_transition = ETransition::Track;
 
   m_fConstructOption = std::move( fConstructOption );
+  m_fRoll = std::move( fRoll );
 
-  pWatch_t pWatch = pPosition->GetWatch();
-  pInstrument_t pInstrument = pWatch->GetInstrument();
+  m_pWatch = pPosition->GetWatch();
+  pInstrument_t pInstrument = m_pWatch->GetInstrument();
   assert( pInstrument->IsOption() );
 
   m_dblStrikePosition = pInstrument->GetStrike();
@@ -63,14 +74,18 @@ void Tracker::Initialize(
       m_luStrike = [this](double dblUnderlying){ return m_pChain->Call_Itm( dblUnderlying ); };
       break;
     case ou::tf::OptionSide::Put:
-      m_compare = &eq;
+      m_compare = &lt;
       m_luStrike = [this](double dblUnderlying){ return m_pChain->Put_Itm( dblUnderlying ); };
       break;
   }
   assert( m_compare );
+
+  m_transition = ETransition::Track;
 }
 
-void Tracker::TestLong( double dblUnderlying ) {
+void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
+
+  m_dblUnderlyingSlope = dblUnderlyingSlope;
 
   double strikeItm = m_luStrike( dblUnderlying );
 
@@ -78,6 +93,7 @@ void Tracker::TestLong( double dblUnderlying ) {
     if ( m_pOption ) { // if already tracking the option
       if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
         m_transition = ETransition::Vacant;
+        m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
         m_pOption.reset();
         Construct( strikeItm );
       }
@@ -112,11 +128,46 @@ void Tracker::Construct( double strikeItm ) {
     sName,
     [this]( pOption_t pOption ){
       m_pOption = pOption;
+      m_pOption->OnQuote.Add( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
       m_transition = ETransition::Track;
     } );
 }
 
+void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
+  switch ( m_transition ) {
+    case ETransition::Initial:
+      break;
+    case ETransition::Vacant:
+      break;
+    case ETransition::Fill:
+      break;
+    case ETransition::Acquire:
+      break;
+    case ETransition::Track:
+      {
+        if ( m_compare( 0.0, m_dblUnderlyingSlope ) ) {
+          // nothing if the slope is going in the right direction
+        }
+        else {
+          const ou::tf::Quote& watch( m_pWatch->LastQuote() );
+          double diff = watch.Bid() - quote.Ask();  // sell existing at bid, buy new at the ask
+          diff -= ( watch.Spread() + quote.Spread() ) / 2.0;  // entry spread
+          diff -= 0.10;  // commissions and such
+          if ( 0.10 < diff ) { // make at least 10 cents on the roll
+            m_transition = ETransition::Roll;
+            m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
+            m_fRoll( m_pOption );
+            m_pOption.reset();
+            m_pWatch.reset();
+            m_pPosition.reset();
+            m_transition = ETransition::Initial;  // start all over again
+          }
+        }
+      }
+      break;
+  }
 
+}
 
 
 } // namespace option

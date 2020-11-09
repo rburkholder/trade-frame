@@ -770,7 +770,21 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     f( pOption );
                   }
                 );
-              });
+              },
+              [this]( ou::tf::option::Combo* p, size_t ix, pOption_t pOption ) { // fRoll_t
+                combo_t* pCombo = reinterpret_cast<combo_t*>( p );
+                const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
+                mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+                if ( m_mapOption.end() == iterOption ) {
+                  m_mapOption[ sOptionName ] = pOption;
+                  m_fRegisterOption( pOption );
+                  m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
+                }
+                pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption );
+                pCombo->AddPosition( ix, pPosition, m_pChartDataView );
+                pCombo->PlaceOrder( ix, m_DefaultOrderSide );
+              }
+              );
           });
         m_stateTrading = ETradingState::TSComboMonitor;
       }

@@ -22,6 +22,8 @@
 #ifndef COLLAR_H
 #define COLLAR_H
 
+#include <TFTrading/MonitorOrder.h>
+
 #include "Combo.h"
 #include "Tracker.h"
 
@@ -49,10 +51,11 @@ public:
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection );
 
-  virtual void Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   // long by default for entry, short doesn't make much sense due to combo type
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
+  virtual void PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide );
 
   virtual double GetNet( double price );
 
@@ -62,6 +65,8 @@ private:
 
   Tracker m_trackerFront;
   Tracker m_trackerSynthetic;
+
+  ou::tf::MonitorOrder m_monitor;  // used for closing
 
 };
 

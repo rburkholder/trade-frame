@@ -84,8 +84,13 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_trackerSynthetic.Initialize(
     pPositionSynthetic, &citerChainSynthetic->second,
     [this]( const std::string& sName, fConstructedOption_t&& f ){
-      return m_fConstructOption( sName, std::move( f ) );
-      }
+      m_fConstructOption( sName, std::move( f ) );
+      },
+    [this,pPositionSynthetic]( pOption_t pOption ) { // fRoll_t
+      m_monitor.SetPosition( pPositionSynthetic );
+      m_monitor.ClosePosition();
+      m_fRoll( this, ixSynthLong, pOption );
+    }
     );
 
   pPosition_t pPositionFront( m_vLeg[ixFrontLong].GetPosition() );
@@ -94,14 +99,21 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_trackerFront.Initialize(
     pPositionFront, &citerChainFront->second,
     [this]( const std::string& sName, fConstructedOption_t&& f ){
-      return m_fConstructOption( sName, std::move( f ) );
-      }
+      m_fConstructOption( sName, std::move( f ) );
+      },
+    [this,pPositionFront]( pOption_t pOption ) { // fRoll_t
+      m_monitor.SetPosition( pPositionFront );
+      m_monitor.ClosePosition();
+      m_fRoll( this, ixFrontLong, pOption );
+    }
     );
 
 }
 
-void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
-  Combo::Tick( doubleUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
+void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
+  Combo::Tick( dblUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
+
+  if ( m_monitor.IsOrderActive() ) m_monitor.Tick();
 
   // need to manage states:  will need to obtain contract for the option, if not tracking
   // therefore, track options so ready to trade on demand? ... then watch is available as well
@@ -120,8 +132,8 @@ void Collar::Tick( double doubleUnderlyingSlope, double dblPriceUnderlying, ptim
   //   roll profitable long front protective put down when trend changes upwards
   //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
 
-  m_trackerFront.TestLong( dblPriceUnderlying );
-  m_trackerSynthetic.TestLong( dblPriceUnderlying );
+  m_trackerFront.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+  m_trackerSynthetic.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
 
 }
 
@@ -241,6 +253,24 @@ void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
           m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
           m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
           m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          break;
+      }
+      m_state = State::Executing;
+      break;
+  }
+}
+
+void Collar::PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide side ) {
+  assert( ix < m_vLeg.size() );
+  switch ( m_state ) {
+    case State::Positions: // doesn't confirm both put/call are available
+    case State::Watching:
+      switch ( side ) {
+        case ou::tf::OrderSide::Buy:
+          m_vLeg[ix].PlaceOrder( m_rLegDefLong[ix].side, 1 );
+          break;
+        case ou::tf::OrderSide::Sell:
+          m_vLeg[ix].PlaceOrder( m_rLegDefShort[ix].side, 1 );
           break;
       }
       m_state = State::Executing;
