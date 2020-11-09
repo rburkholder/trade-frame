@@ -29,7 +29,8 @@ namespace {
 }
 
 MonitorOrder::MonitorOrder()
-: m_CountDownToAdjustment {}
+: m_CountDownToAdjustment {},
+  m_state( State::NoPosition )
   {}
 
 MonitorOrder::MonitorOrder( pPosition_t& pPosition )
