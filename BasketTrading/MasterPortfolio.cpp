@@ -271,7 +271,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           }
         );
 
-        std::set<std::string> vDesired = { "SPY", "SLV", "GLD", "USO", "XBI" };
+        std::set<std::string> vDesired = { "SPY", "SLV", "GLD", "XBI" }; // USB, XLP
 
         SymbolSelection selector(
           dtLatestEod, m_setSymbols,
