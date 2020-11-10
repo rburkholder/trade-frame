@@ -37,12 +37,12 @@ namespace {
   using rLegDef_t = std::array<LegDef,nLegs>;
 
   static const rLegDef_t m_rLegDefLong = {
-    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call ), // upper
-    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Put  )  // lower
+    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Call, 0.10 ), // upper
+    LegDef( LegDef::EOrderSide::Buy, 1, LegDef::EOptionSide::Put,  0.10 )  // lower
   };
   static const rLegDef_t m_rLegDefShort = {
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // upper
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  )  // lower
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.10 ), // upper
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.10 )  // lower
   };
 
 } // namespace anon
@@ -136,14 +136,21 @@ void Strangle::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
     }
   }
 
-  fLegSelected( strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
-  fLegSelected( strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
+  if ( 0.0 <= slope ) {
+    fLegSelected( m_rLegDefLong[0].dblSpread, strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
+    fLegSelected( m_rLegDefLong[1].dblSpread, strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
+  }
+  else {
+    fLegSelected( m_rLegDefShort[0].dblSpread, strikeOtmCall, citerChain->first, chain.GetIQFeedNameCall( strikeOtmCall ) );
+    fLegSelected( m_rLegDefShort[1].dblSpread, strikeOtmPut,  citerChain->first, chain.GetIQFeedNamePut( strikeOtmPut ) );
+  }
 }
 
 const std::string /* static */ Strangle::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, double slope ) {
   std::string sName( "strangle-" + sUnderlying );
   ChooseLegs(
-    slope, chains, date, price, [&sName](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+    slope, chains, date, price,
+    [&sName](double dblSpread, double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       sName
         += "-"
         +  ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )

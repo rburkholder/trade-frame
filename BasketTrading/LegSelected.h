@@ -25,8 +25,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-
 #include <TFOptions/Option.h>
 
 class LegSelected { // specific definition of each leg for trading
@@ -40,9 +38,10 @@ public:
   LegSelected( const LegSelected&& );
 
   // return 0 if not changed, 1 if changed
-  unsigned int Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName );
+  unsigned int Update( double spread, double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName );
 
   bool Changed() { bool bTemp = m_bChanged; m_bChanged = false; return bTemp; }
+  double Spread() const { return m_dblSpread; }
   double Strike() const { return m_dblStrike; }
   boost::gregorian::date Expiry() const { return m_dateExpiry; }
   const std::string& IQFeedOptionName() const { return m_sIQFeedOptionName; }
@@ -52,6 +51,7 @@ public:
 
 private:
   bool m_bChanged;
+  double m_dblSpread;
   double m_dblStrike;
   boost::gregorian::date m_dateExpiry;
   std::string m_sIQFeedOptionName;

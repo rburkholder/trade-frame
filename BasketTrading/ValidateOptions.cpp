@@ -81,8 +81,8 @@ bool ValidateOptions::ValidateBidAsk(
           try {
             fChooseLegs(
               m_mapChains, dateToday, priceUnderlying,
-              [this,&ixLeg,&nChanged](double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedOptionName){
-                nChanged += m_vLegSelected.at( ixLeg ).Update( strike, dateStrike, sIQFeedOptionName );
+              [this,&ixLeg,&nChanged](double spread, double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedOptionName){
+                nChanged += m_vLegSelected.at( ixLeg ).Update( spread, strike, dateStrike, sIQFeedOptionName );
                 ixLeg++;
               } );
             if ( 0 == nChanged ) {
@@ -133,7 +133,7 @@ bool ValidateOptions::ValidateBidAsk(
                 leg.IQFeedOptionName(), pInstrumentUnderlying,
                 [this,&leg,ix]( pOption_t pOption ) {
                   leg.Option() = pOption;
-                  m_SpreadValidation.SetWatch( ix, pOption );
+                  m_SpreadValidation.SetWatch( ix, pOption, leg.Spread() );
                 }
                 );
             }

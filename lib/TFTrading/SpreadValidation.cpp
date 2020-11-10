@@ -51,8 +51,8 @@ void SpreadValidation::SetLegCount( size_t nLegs ) {
   }
 }
 
-void SpreadValidation::SetWatch( size_t ixLeg, pWatch_t pCall ) {
-  m_vSpreadCandidate[ ixLeg ].SetWatch( pCall );
+void SpreadValidation::SetWatch( size_t ixLeg, pWatch_t pWatch, double dblSpread ) {
+  m_vSpreadCandidate[ ixLeg ].SetWatch( pWatch, dblSpread );
 }
 
 SpreadValidation::pWatch_t SpreadValidation::GetWatch( size_t ixLeg ) {

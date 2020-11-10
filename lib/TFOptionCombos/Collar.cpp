@@ -41,17 +41,17 @@ namespace {
 
   enum class ELeg { SynthLong = 0, SynthShort, FrontShort, FrontLong };
 
-  static const rLegDef_t m_rLegDefLong = {
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call ), // synthetic long
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  ), // synthetic long
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // covered
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put  )  // protective
+  static const rLegDef_t m_rLegDefRise = {
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call, 0.20 ), // synthetic long
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.20 ), // synthetic long
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.10 ), // covered
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.10 )  // protective
   };
-  static const rLegDef_t m_rLegDefShort = {
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put  ), // synthetic short
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call ), // synthetic short
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put  ), // covered
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call )  // protective
+  static const rLegDef_t m_rLegDefFall = {
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.20 ), // synthetic short
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.20 ), // synthetic short
+    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.10 ), // covered
+    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call, 0.10 )  // protective
   };
 
 } // namespace anon
@@ -168,10 +168,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( strikeSyntheticItm );
 
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
-        fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
+        fLegSelected( m_rLegDefRise[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( m_rLegDefRise[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( m_rLegDefRise[2].dblSpread, strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
+        fLegSelected( m_rLegDefRise[3].dblSpread, strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
       }
       break;
     case E20DayDirection::Falling:
@@ -183,10 +183,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( strikeSyntheticItm );
 
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
-        fLegSelected( strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
+        fLegSelected( m_rLegDefFall[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( m_rLegDefFall[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( m_rLegDefFall[2].dblSpread, strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
+        fLegSelected( m_rLegDefFall[3].dblSpread, strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
       }
       break;
   }
@@ -207,7 +207,8 @@ size_t /* static */ Collar::LegCount() {
   }
 
   ChooseLegs(
-    direction, chains, date, price, [&sName,&ix](double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+    direction, chains, date, price,
+    [&sName,&ix]( double spread, double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       switch ( ix ) {
         case 0:
           sName
@@ -267,10 +268,10 @@ void Collar::PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide side ) {
     case State::Watching:
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
-          m_vLeg[ix].PlaceOrder( m_rLegDefLong[ix].side, 1 );
+          m_vLeg[ix].PlaceOrder( m_rLegDefRise[ix].side, 1 );
           break;
         case ou::tf::OrderSide::Sell:
-          m_vLeg[ix].PlaceOrder( m_rLegDefShort[ix].side, 1 );
+          m_vLeg[ix].PlaceOrder( m_rLegDefFall[ix].side, 1 );
           break;
       }
       m_state = State::Executing;

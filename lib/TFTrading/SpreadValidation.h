@@ -45,7 +45,7 @@ public:
 
   void SetLegCount( size_t nLegs );
 
-  void SetWatch( size_t ixLeg, pWatch_t pWatch );
+  void SetWatch( size_t ixLeg, pWatch_t pWatch, double dblSpread );
   pWatch_t GetWatch( size_t ixLeg );
   void ClearWatch( size_t ixLeg );
 
