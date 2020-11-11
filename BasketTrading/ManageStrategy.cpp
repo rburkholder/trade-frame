@@ -720,7 +720,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
                   pCombo->PlaceOrder( m_DefaultOrderSide );
-                  m_stateTrading = ETradingState::TSComboFinalize;
+                  m_stateTrading = ETradingState::TSComboPrepare;
 
                 } // m_fAuthorizeSimple
                 else {
@@ -746,13 +746,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             m_bOneTimeMessage = true;
             // TODO: need to confirm order of Add'd positions is correct for use
             // TODO: all positions need to be available
-            //m_stateTrading = ETradingState::TSComboFinalize;  // state machine needs to be confirmed
+            //m_stateTrading = ETradingState::TSComboPrepare;  // state machine needs to be confirmed
           }
         }
 
       }
       break;
-    case TSComboFinalize:
+    case TSComboPrepare:
       {
         const boost::gregorian::date dateBar( bar.DateTime().date() );
         std::for_each(
@@ -784,7 +784,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 pCombo->AddPosition( ix, pPosition, m_pChartDataView );
                 pCombo->PlaceOrder( ix, m_DefaultOrderSide );
               }
-              );
+              ); // Prepare
           });
         m_stateTrading = ETradingState::TSComboMonitor;
       }
