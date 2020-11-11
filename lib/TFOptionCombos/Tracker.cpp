@@ -89,33 +89,40 @@ void Tracker::Initialize(
 
 void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
 
-  m_dblUnderlyingSlope = dblUnderlyingSlope;
+  switch ( m_transition ) {
+    case ETransition::Track:
+      {
+        m_dblUnderlyingSlope = dblUnderlyingSlope;
 
-  double strikeItm = m_luStrike( dblUnderlying );
+        double strikeItm = m_luStrike( dblUnderlying );
 
-  if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
-    if ( m_pOption ) { // if already tracking the option
-      if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
-        m_transition = ETransition::Vacant;
-        m_pOption->StopWatch();
-        m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
-        m_pOption.reset();
-        Construct( strikeItm );
+        if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
+          if ( m_pOption ) { // if already tracking the option
+            if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
+              m_transition = ETransition::Vacant;
+              m_pOption->StopWatch();
+              m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
+              m_pOption.reset();
+              Construct( strikeItm );
+            }
+            else {
+              // TODO: if retreating, stay pat, retreat, or try the roll?
+              // nothing to do, track in existing option as quotes are updated
+            }
+          }
+          else {
+            // need to obtain option, but track via state machine to request only once
+            m_transition = ETransition::Vacant;
+            Construct( strikeItm );
+          }
+        }
+        else {
+          // nothing to do, hasn't moved enough itm
+        }
       }
-      else {
-        // TODO: if retreating, stay pat, retreat, or try the roll?
-        // nothing to do, track in existing option as quotes are updated
-      }
-    }
-    else {
-      // need to obtain option, but track via state machine to request only once
-      m_transition = ETransition::Vacant;
-      Construct( strikeItm );
-    }
+      break;
   }
-  else {
-    // nothing to do, hasn't moved enough itm
-  }
+
 }
 
 void Tracker::Construct( double strikeItm ) {
