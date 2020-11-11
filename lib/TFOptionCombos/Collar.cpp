@@ -304,6 +304,10 @@ double Collar::GetNet( double price ) {
 
 /*
 
+2020/11/09
+
+Use Stochastic for entry at the edges, and improve the mean reversion
+
 2020/07/13
 
 long collar: synthetic long, covered call, long put
