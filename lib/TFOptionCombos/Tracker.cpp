@@ -42,6 +42,7 @@ Tracker::Tracker()
 
 Tracker::~Tracker() {
   if ( m_pOption ) {
+    m_pOption->StopWatch();
     m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
     m_pOption.reset();
     m_pPosition.reset();
@@ -96,6 +97,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
     if ( m_pOption ) { // if already tracking the option
       if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
         m_transition = ETransition::Vacant;
+        m_pOption->StopWatch();
         m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
         m_pOption.reset();
         Construct( strikeItm );
@@ -126,12 +128,14 @@ void Tracker::Construct( double strikeItm ) {
       sName = m_pChain->GetIQFeedNamePut( strikeItm );
       break;
   }
+  std::cout << "Tracker::Construct: " << sName << std::endl;
   m_transition = ETransition::Acquire;
   m_fConstructOption(
     sName,
     [this]( pOption_t pOption ){
       m_pOption = pOption;
       m_pOption->OnQuote.Add( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
+      m_pOption->StartWatch();
       m_transition = ETransition::Track;
     } );
 }
@@ -158,6 +162,7 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
           diff -= 0.10;  // commissions and such
           if ( 0.10 < diff ) { // make at least 10 cents on the roll
             m_transition = ETransition::Roll;
+            m_pOption->StopWatch();
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
             m_fRoll( m_pOption );
             m_pOption.reset();
