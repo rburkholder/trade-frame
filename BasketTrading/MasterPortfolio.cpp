@@ -650,7 +650,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     std::for_each(  // add existing underlying positions to the strategy, active or not
       artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
       [this,&strategy](mapPosition_t::value_type& vt){
-        strategy.pManageStrategy->Add( vt.second );
+        strategy.pManageStrategy->AddPosition( vt.second );
       }
     );
     std::for_each(
@@ -662,7 +662,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
         std::for_each( // add existing option positions to the strategy, which will request appropriate portfolio
           artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
           [this,&strategy](mapPosition_t::value_type& vt){
-            strategy.pManageStrategy->Add( vt.second );
+            strategy.pManageStrategy->AddPosition( vt.second );
           }
         );
       }

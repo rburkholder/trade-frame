@@ -368,7 +368,7 @@ ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) c
 
 // add pre-existing positions from database
 // NOTE: are there out of order problems, as Collar vLeg is ordered in a particular manner
-void ManageStrategy::Add( pPosition_t pPosition ) {
+void ManageStrategy::AddPosition( pPosition_t pPosition ) {
   pInstrument_t pInstrument = pPosition->GetInstrument();
   pWatch_t pWatch = pPosition->GetWatch();
   switch ( pInstrument->GetInstrumentType() ) {

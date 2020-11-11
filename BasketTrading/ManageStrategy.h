@@ -132,7 +132,7 @@ public:
   void Stop( void );
   void SaveSeries( const std::string& sPrefix );
 
-  void Add( pPosition_t ); // add pre-existing position
+  void AddPosition( pPosition_t ); // add pre-existing position
 
   void Test( void );
 
