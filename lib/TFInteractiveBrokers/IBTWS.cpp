@@ -151,11 +151,17 @@ void IBTWS::DisconnectCommon( bool bSignalEnd ){
 // so... be aware of cross thread issues
 void IBTWS::ProcessMessages( void ) {
   bool bOK = true;
-  while ( bOK && m_bConnected ) {
-  // maybe only activate while messages are queued up
-  //   but will lose something when receiving market data
-  //while ( m_bConnected ) {
-    bOK = pTWS->checkMessages();  // code in EClientSocketBaseImpl.h has code change on linux for select()
+  try {
+    while ( bOK && m_bConnected ) {
+    // maybe only activate while messages are queued up
+    //   but will lose something when receiving market data
+    //while ( m_bConnected ) {
+      bOK = pTWS->checkMessages();  // code in EClientSocketBaseImpl.h has code change on linux for select()
+    }
+  }
+  catch(...) {
+    std::cout << "IBTWS socket failure, need to disconnect and restart ..." << std::endl;;
+    // probably need to run Disconnect or DisconnectCommon
   }
   m_bConnected = false;  // placeholder for debug
 
