@@ -759,7 +759,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           m_mapCombo.begin(), m_mapCombo.end(),
           [this,dateBar](mapCombo_t::value_type& entry){
             auto pCombo = entry.second;
-            pCombo->Finalize(
+            pCombo->Prepare(
               dateBar, &m_mapChains,
               [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){
                 // TODO: maintain a local map for quick reference
