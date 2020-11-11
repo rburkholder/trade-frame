@@ -46,7 +46,7 @@ MonitorOrder::MonitorOrder( const MonitorOrder& rhs )
   m_pOrder( rhs.m_pOrder )
 {
   // what checks to perform on m_state?  need to be in a good state for things to sync properly
-  assert( !m_pPosition ); // let us see where this goes, may raise an issue with the constructor initialized with position
+  //assert( !m_pPosition ); // let us see where this goes, may raise an issue with the constructor initialized with position
   assert( !m_pOrder ); // this causes issues if duplicated
 }
 
@@ -58,8 +58,8 @@ MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
 {}
 
 void MonitorOrder::SetPosition( pPosition_t pPosition ) {
-  assert( !m_pPosition );
-  assert( !m_pOrder );
+  //assert( !m_pPosition );
+  assert( !m_pOrder ); // no outstanding orders should exist
   m_pPosition = pPosition;
   m_state = State::NoOrder;
 }
@@ -82,7 +82,12 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_CountDownToAdjustment = nAdjustmentPeriods;
           m_state = State::Active;
           m_pPosition->PlaceOrder( m_pOrder );
-          std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << ": placed at " << dblNormalizedPrice << std::endl;
+          std::cout
+            << m_pPosition->GetInstrument()->GetInstrumentName()
+            << " " << m_pOrder->GetOrderSideName()
+            << " placed at " << dblNormalizedPrice
+            << " monitored"
+            << std::endl;
           bOk = true;
         }
       }
@@ -108,7 +113,7 @@ void MonitorOrder::ClosePosition() {
         std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
       }
       if ( 0 != row.nPositionActive ) {
-        std::cout << row.sName << ": monitored closing position" << std::endl;
+        std::cout << row.sName << ": monitored closing position," << row.eOrderSideActive << "," << row.nPositionActive << std::endl;
         switch ( row.eOrderSideActive ) {
           case ou::tf::OrderSide::Buy:
             PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
