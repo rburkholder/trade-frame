@@ -180,8 +180,6 @@ private:
 
   enum class EBollXing { None, Lower, Mean, Upper, _Count };
 
-  bool m_bOneTimeMessage;
-
   size_t m_nConfirmationIntervals;
 
   ou::tf::OrderSide::enumOrderSide m_DefaultOrderSide;

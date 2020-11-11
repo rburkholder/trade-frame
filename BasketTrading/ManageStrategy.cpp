@@ -130,7 +130,6 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
-  m_bOneTimeMessage( false ),
   m_sUnderlying( sUnderlying ),
   m_sDailyBarPath( sDailyBarPath ),
   m_barPriorDaily( barPriorDaily ),
@@ -741,18 +740,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         } // m_bAllowedComboAdd
         else {
-          if ( !m_bOneTimeMessage ) {
-            std::cout << "*** " << m_sUnderlying << " this might be a good place for second day state change" << std::endl;
-            m_bOneTimeMessage = true;
-            // TODO: all positions need to be available
-            //m_stateTrading = ETradingState::TSComboPrepare;  // state machine needs to be confirmed
-          }
+          m_stateTrading = ETradingState::TSComboPrepare;  // state machine needs to be confirmed
         }
 
       }
       break;
     case TSComboPrepare:
       {
+        std::cout << "TSComboPrepare: " << m_sUnderlying << std::endl;
         const boost::gregorian::date dateBar( bar.DateTime().date() );
         std::for_each(
           m_mapCombo.begin(), m_mapCombo.end(),
