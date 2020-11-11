@@ -43,6 +43,9 @@ Tracker::Tracker()
 Tracker::~Tracker() {
   if ( m_pOption ) {
     m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
+    m_pOption.reset();
+    m_pPosition.reset();
+    m_pWatch.reset();
   }
 }
 
@@ -61,7 +64,7 @@ void Tracker::Initialize(
   m_fConstructOption = std::move( fConstructOption );
   m_fRoll = std::move( fRoll );
 
-  m_pWatch = pPosition->GetWatch();
+  m_pWatch = m_pPosition->GetWatch();
   pInstrument_t pInstrument = m_pWatch->GetInstrument();
   assert( pInstrument->IsOption() );
 
