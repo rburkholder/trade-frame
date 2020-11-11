@@ -811,29 +811,31 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 //          }
 //        }
 
-        double slope( m_vEMA[2]->dblEmaLatest - m_vEMA[3]->dblEmaLatest ); // fast - slow
-        std::for_each(
-          m_mapCombo.begin(), m_mapCombo.end(),
-          [this,slope,mid,&bar](mapCombo_t::value_type& entry){
+        if ( 4 == m_vEMA.size() ) { // on second day, is m_vEMA built?
+          double slope( m_vEMA[2]->dblEmaLatest - m_vEMA[3]->dblEmaLatest ); // fast - slow
+          std::for_each(
+            m_mapCombo.begin(), m_mapCombo.end(),
+            [this,slope,mid,&bar](mapCombo_t::value_type& entry){
 
-            auto pCombo = entry.second;
+              auto pCombo = entry.second;
 
-            switch ( pCombo->m_state ) {
-              case combo_t::State::Initializing:
-                break;
-              case combo_t::State::Positions:
-              case combo_t::State::Executing:
-              case combo_t::State::Watching:
-              case combo_t::State::Canceled:
-              case combo_t::State::Closing:
-                // TODO: maybe try send stochastic as well
-                pCombo->Tick( slope, mid, bar.DateTime() ); // TODO: need to pass slope of underlying
-                break;
-              default:
-                break;
+              switch ( pCombo->m_state ) {
+                case combo_t::State::Initializing:
+                  break;
+                case combo_t::State::Positions:
+                case combo_t::State::Executing:
+                case combo_t::State::Watching:
+                case combo_t::State::Canceled:
+                case combo_t::State::Closing:
+                  // TODO: maybe try send stochastic as well
+                  pCombo->Tick( slope, mid, bar.DateTime() ); // TODO: need to pass slope of underlying
+                  break;
+                default:
+                  break;
+              }
             }
-          }
-        );
+          );
+        }
 
       }
       break;
