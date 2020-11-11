@@ -279,25 +279,6 @@ void Collar::PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide side ) {
   }
 }
 
-double Collar::GetNet( double price ) {
-
-  double dblNet {};
-  double dblConstructedValue {};
-
-  for ( Leg& leg: m_vLeg ) {
-    dblNet += leg.GetNet( price ); // out: leg stats
-    double dblLegConstructedValue = leg.ConstructedValue();
-    std::cout << ",constructed@" << dblLegConstructedValue;
-    dblConstructedValue += dblLegConstructedValue;
-    std::cout << std::endl;
-  }
-
-  double profitTotal {};
-
-  return profitTotal;
-
-}
-
 } // namespace option
 } // namespace tf
 } // namespace ou

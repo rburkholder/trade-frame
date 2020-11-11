@@ -57,8 +57,6 @@ public:
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
   virtual void PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide );
 
-  virtual double GetNet( double price );
-
 protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
