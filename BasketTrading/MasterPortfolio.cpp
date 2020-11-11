@@ -190,6 +190,7 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   }
   std::pair<mapPosition_t::iterator,bool> pair
     = artifacts.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
+  artifacts.m_vIdPosition.emplace_back( pPosition->GetRow().sName );
   assert( pair.second );
 }
 
@@ -659,12 +660,17 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
         mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( vt.first );
         assert( m_mapStrategyArtifacts.end() != iter );
         StrategyArtifacts& artifacts( iter->second );
-        std::for_each( // add existing option positions to the strategy, which will request appropriate portfolio
-          artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
-          [this,&strategy](mapPosition_t::value_type& vt){
-            strategy.pManageStrategy->AddPosition( vt.second );
-          }
-        );
+        for ( const vIdPosition_t::value_type& idPosition: artifacts.m_vIdPosition ) {
+          mapPosition_iter iter = artifacts.m_mapPosition.find( idPosition );
+          assert( artifacts.m_mapPosition.end() != iter );
+          strategy.pManageStrategy->AddPosition( iter->second );
+        }
+//        std::for_each( // add existing option positions to the strategy, which will request appropriate portfolio
+//          artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
+//          [this,&strategy](mapPosition_t::value_type& vt){
+//            strategy.pManageStrategy->AddPosition( vt.second );
+//          }
+//        );
       }
     );
     artifacts.m_bAccessed = true;

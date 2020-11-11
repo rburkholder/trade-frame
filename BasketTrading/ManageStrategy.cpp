@@ -744,7 +744,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           if ( !m_bOneTimeMessage ) {
             std::cout << "*** " << m_sUnderlying << " this might be a good place for second day state change" << std::endl;
             m_bOneTimeMessage = true;
-            // TODO: need to confirm order of Add'd positions is correct for use
             // TODO: all positions need to be available
             //m_stateTrading = ETradingState::TSComboPrepare;  // state machine needs to be confirmed
           }

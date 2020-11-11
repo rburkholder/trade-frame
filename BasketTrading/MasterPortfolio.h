@@ -182,12 +182,14 @@ private:
   using mapPosition_iter = mapPosition_t::iterator;
   using mapPortfolio_t = std::map<std::string,pPortfolio_t>;
   using mapPortfolio_iter = mapPortfolio_t::iterator;
+  using vIdPosition_t = std::vector<std::string>; // records proper leg ordering TODO convert to reference
   struct StrategyArtifacts {
     // stuff during database load goes here temporarily
     bool m_bAccessed;
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
     mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup
     mapPosition_t m_mapPosition; // positions associated with portfolio
+    vIdPosition_t m_vIdPosition; // keeps ordering of positions
     StrategyArtifacts( pPortfolio_t pPortfolio )
     : m_bAccessed( false ),
       m_pPortfolio( pPortfolio )
