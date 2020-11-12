@@ -246,7 +246,7 @@ ManageStrategy::ManageStrategy(
         }
 
         // create a position with the watch
-        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying );
+        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying, "" ); // no note needed for underlying
         assert( m_pPositionUnderlying );
         assert( m_pPositionUnderlying->GetWatch() );
 
@@ -384,12 +384,11 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
       break;
     case ou::tf::InstrumentType::Option:
       if ( pPosition->IsActive() ) {
-        idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
+        idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
         mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
 
-        if ( m_mapCombo.end() == mapCombo_iter ) {
-          // need to construct empty combo when first leg presented
+        if ( m_mapCombo.end() == mapCombo_iter ) { // need to construct empty combo when first leg presented
 
           pCombo_t spCombo = std::make_shared<combo_t>();
           combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( spCombo ).get();
@@ -418,18 +417,35 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
         }
 
-        combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
+        bool bIxLegFound( false );
+        std::string sNote = pPosition->GetNote();
+        if ( 5 == sNote.size() ) { // "leg=x"
+          char chIx = sNote[ 4 ];
+          if ( ( '0' <= chIx ) && ( '3' >= chIx ) ) {
+            bIxLegFound = true;
+            size_t ix = chIx - '0';
 
-        switch ( pInstrument->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            std::cout << "setcall " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-            pCombo->AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-            break;
-          case ou::tf::OptionSide::Put:
-            std::cout << "setput  " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-            pCombo->AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-            break;
+            combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
+
+            switch ( pInstrument->GetOptionSide() ) {
+              case ou::tf::OptionSide::Call:
+                std::cout << "setcall " << ix << "=" << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+                pCombo->SetColour( ix, rColour[ m_ixColour++ ] );
+                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
+                break;
+              case ou::tf::OptionSide::Put:
+                std::cout << "setput  " << ix << "=" << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+                pCombo->SetColour( ix, rColour[ m_ixColour++ ] );
+                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
+                break;
+            }
+          }
         }
+
+        if ( !bIxLegFound ) {
+          std::cout << "** could not find leg ix for " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+        }
+
 
 //        if ( pPosition->IsActive() ) {
           m_fAuthorizeSimple( m_sUnderlying, true ); // update count
@@ -629,7 +645,7 @@ void ManageStrategy::BuildPosition(
         m_fRegisterOption( pOption );
         m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
       }
-      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
+      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, "" );
       f( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
     });
 }
@@ -703,7 +719,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
 
                   m_pValidateOptions->ValidatedOptions(
-                    [this,idPortfolio,pCombo](pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
+                    [this,idPortfolio,pCombo](size_t ix, pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
                       const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
                       mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
                       if ( m_mapOption.end() == iterOption ) {
@@ -711,8 +727,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                         m_fRegisterOption( pOption );
                         m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                       }
-                      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption );
-                      pCombo->AddPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                      std::string sNote = "leg=" + boost::lexical_cast<std::string>( ix );
+                      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, sNote );
+                      pCombo->AppendPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
                       }
                     );
 
@@ -774,8 +791,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_fRegisterOption( pOption );
                   m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                 }
-                pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption );
-                pCombo->AddPosition( ix, pPosition, m_pChartDataView );
+                std::string sNote = "leg=" + boost::lexical_cast<std::string>( ix );
+                pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, sNote );
+                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
                 pCombo->PlaceOrder( ix, m_DefaultOrderSide );
               }
               ); // Prepare

@@ -70,7 +70,7 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
+void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
   bool bLegFound( false );
   for ( Leg& leg: m_vLeg ) {
     if ( pPosition->GetInstrument()->GetInstrumentName() == leg.GetPosition()->GetInstrument()->GetInstrumentName() ) {
@@ -84,7 +84,7 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
     Leg leg( pPosition );
     m_vLeg.emplace_back( std::move( leg ) );
     m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-    m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
+    m_vLeg.back().SetChartData( pChartData ); // comes after as there is no move on indicators
   }
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
@@ -92,19 +92,25 @@ void Combo::AddPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou:
 }
 
 // over-write existing Leg
-void Combo::AddPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
+void Combo::SetPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
   if ( ix < m_vLeg.size() ) {
     assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
     //Leg leg( pPosition );
     Leg& leg( m_vLeg[ix] );
     //m_vLeg.emplace_back( std::move( leg ) );
-    //leg.DelChartData( pChartData );  // continue or erase?
+    leg.DelChartData( pChartData );  // continue or erase?
     leg.SetPosition( pPosition );
     //m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-    //m_vLeg.back().AddChartData( pChartData ); // comes after as there is no move on indicators
+    leg.SetChartData( pChartData ); // comes after as there is no move on indicators
   }
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
+  }
+}
+
+void Combo::SetColour( size_t ix, ou::Colour::enumColour colour ) {
+  if ( ix < m_vLeg.size() ) {
+    m_vLeg[ix].SetColour( colour );
   }
 }
 

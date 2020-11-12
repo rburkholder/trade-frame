@@ -55,7 +55,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
-  using fValidatedOption_t = std::function<void(pOption_t)>;
+  using fValidatedOption_t = std::function<void(size_t,pOption_t)>; // size_t is ix into combo vLeg
 
   ValidateOptions(
     pWatch_t,  // underlying

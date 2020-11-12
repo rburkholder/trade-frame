@@ -209,6 +209,9 @@ public:
   idPosition_t Id() const { return m_row.idPosition; }
   bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
 
+  void SetNote( const std::string& sNote ) { m_row.sNotes = sNote; }
+  const std::string GetNote() const { return m_row.sNotes; }
+
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
   bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };

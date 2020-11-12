@@ -141,7 +141,7 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
   m_ceVega.SetColour( colour );
 }
 
-void Leg::AddChartData( pChartDataView_t pChartData ) {
+void Leg::SetChartData( pChartDataView_t pChartData ) {
   if ( m_pPosition ) {
     m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
     pChartData->Add( 2, &m_ceProfitLoss );

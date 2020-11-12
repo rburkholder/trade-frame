@@ -100,8 +100,10 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  void AddPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
-  void AddPosition( size_t ix, pPosition_t, pChartDataView_t pChartData );
+  void AppendPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  void SetPosition( size_t ix, pPosition_t, pChartDataView_t pChartData );
+
+  void SetColour( size_t ix, ou::Colour::enumColour);
 
   virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
