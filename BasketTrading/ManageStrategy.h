@@ -123,6 +123,8 @@ public:
     );
   virtual ~ManageStrategy( );
 
+  void Run();
+
   const std::string& GetUnderlying() const { return m_sUnderlying; }
   pPortfolio_t GetPortfolio() { return m_pPortfolioStrategy; }
 

@@ -190,7 +190,8 @@ public:
   virtual ~Position(void);
 
   const std::string& Notes( void ) const { return m_row.sNotes; };
-  void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
+  void SetNotes( const std::string& sNote ) { m_row.sNotes = sNote; }
+  void AppendNotes( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
   pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
   pWatch_t GetWatch( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
@@ -208,9 +209,6 @@ public:
 
   idPosition_t Id() const { return m_row.idPosition; }
   bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
-
-  void SetNote( const std::string& sNote ) { m_row.sNotes = sNote; }
-  const std::string GetNote() const { return m_row.sNotes; }
 
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };

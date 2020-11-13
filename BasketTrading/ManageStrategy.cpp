@@ -317,9 +317,6 @@ ManageStrategy::ManageStrategy(
     std::cout << "*** " << "something wrong with " << m_sUnderlying << " creation." << std::endl;
   }
 
- m_stateTrading = TSWaitForFirstTrade;
-
-  //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
 ManageStrategy::~ManageStrategy( ) {
@@ -337,6 +334,13 @@ ManageStrategy::~ManageStrategy( ) {
       pWatch->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
     }
   }
+}
+
+void ManageStrategy::Run() {
+
+ m_stateTrading = TSWaitForFirstTrade;
+
+  //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
 void ManageStrategy::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
@@ -418,7 +422,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         }
 
         bool bIxLegFound( false );
-        std::string sNote = pPosition->GetNote();
+        const std::string& sNote = pPosition->Notes();
         if ( 5 == sNote.size() ) { // "leg=x"
           char chIx = sNote[ 4 ];
           if ( ( '0' <= chIx ) && ( '3' >= chIx ) ) {
@@ -751,7 +755,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             // don't worry about this, price is not with in range yet
           }
           catch ( const std::runtime_error& e ) {
-            std::cout << m_sUnderlying << " stop trading." << std::endl;
+            std::cout << m_sUnderlying << " run time error, stop trading: " << e.what() << std::endl;
             m_pValidateOptions->ClearValidation();
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
@@ -791,6 +795,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_fRegisterOption( pOption );
                   m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                 }
+                // TODO: each leg should have identifying algorithm, if legs are accumulated
                 std::string sNote = "leg=" + boost::lexical_cast<std::string>( ix );
                 pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, sNote );
                 pCombo->SetPosition( ix, pPosition, m_pChartDataView );

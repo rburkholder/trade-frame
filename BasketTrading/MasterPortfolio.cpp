@@ -175,7 +175,7 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   std::cout
     << "load position: " << pPosition->GetRow().idPosition
     << " (" << pPosition->GetRow().sName << ")"
-    << "," << pPosition->GetNote()
+    << "," << pPosition->Notes()
     << ",quan=" << pPosition->GetActiveSize()
     << std::endl;
 
@@ -534,8 +534,10 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                 const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
                 pPosition = instance.ConstructPosition(
                   idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
-                pPosition->SetNote( sNote );
-                instance.UpdatePosition( idPortfolio, sInstrumentName );
+                if ( 0 != sNote.size() ) {
+                  pPosition->SetNotes( sNote );
+                  instance.PositionUpdateNotes( pPosition );
+                }
                 Add( pPosition );  // update the archive
               }
 
@@ -680,6 +682,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
   }
 
   m_fSupplyStrategyChart( EStrategyChart::Info, sUnderlying, pChartDataView );
+
+  strategy.pManageStrategy->Run();
 
 } // AddSymbol
 
