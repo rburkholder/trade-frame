@@ -221,6 +221,34 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
   return pPortfolio;
 }
 
+//////
+
+namespace PortfolioManagerQueries {
+  struct UpdatePositionNotes {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "notes", sNotes );
+      ou::db::Field( a, "positionid", idPosition );
+    }
+    const ou::tf::keytypes::idPosition_t idPosition;
+    std::string sNotes;
+    UpdatePositionNotes( const ou::tf::keytypes::idPosition_t idPosition_, const std::string& sNotes_ )
+      : idPosition( idPosition_ ), sNotes( sNotes_ ) {};
+  };
+}
+
+void PortfolioManager::PositionUpdateNotes( pPosition_t pPosition ) {
+  if ( 0 != m_pSession ) {
+    const Position::TableRowDef& row( pPosition->GetRow() );
+    PortfolioManagerQueries::UpdatePositionNotes update( row.idPosition, row.sNotes );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionNotes>::pQueryFields_t pQuery
+      = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionNotes>( "update positions set notes=?", update ).Where( "positionid=?" );
+  }
+}  // the Where could be appended with boost::fusion type structure for the fields, and bind?
+  // need to cache the queries
+
+//////
+
 bool PortfolioManager::PortfolioExists( const idPortfolio_t& idPortfolio ) {
 
   assert( "" != idPortfolio );  // todo:  add this check in other handlers
@@ -448,20 +476,24 @@ void PortfolioManager::ConstructPosition( // re-factored code
   GetPortfolio( idPortfolio );
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() == iterPortfolio ) {  // should exist as we already just 'got' it
-    throw std::runtime_error( "ConstructPosition:  idPortfolio does not exist" );
+    throw std::runtime_error( "ConstructPosition: idPortfolio does not exist" );
   }
 
   if ( "" == sName ) {
     throw std::runtime_error( "ConstructPosition: name is empty" );
   }
 
-  mapPosition_iter_t iterPosition = iterPortfolio->second.mapPosition.find( sName );
-  if ( iterPortfolio->second.mapPosition.end() != iterPosition ) {
+  auto& [id,portfolio] = *iterPortfolio;
+
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  if ( portfolio.mapPosition.end() != iterPosition ) {
     throw std::runtime_error( "ConstructPosition:  sName already exists" );
   }
 
   pPosition_t pPosition;
   pPosition = fConstructPosition();
+
+  portfolio.mapPosition.insert( mapPosition_pair_t( sName, pPosition ) );
 
   if ( 0 == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
@@ -476,7 +508,7 @@ void PortfolioManager::ConstructPosition( // re-factored code
   pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
   pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
 
-  iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
+  portfolio.pPortfolio->AddPosition( sName, pPosition );
 
   OnPositionAdded( pPosition );
 
@@ -490,9 +522,12 @@ PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t
   }
   assert( "" != sName );
 
-  mapPosition_iter_t iterPosition = iterPortfolio->second.mapPosition.find( sName );
-  if ( iterPortfolio->second.mapPosition.end() == iterPosition ) {
-    throw std::runtime_error( "GetPosition: sName does not exist" );
+  auto& [id,portfolio] = *iterPortfolio;
+
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  if ( portfolio.mapPosition.end() == iterPosition ) {
+    const std::string sError( "GetPosition: " + sName + " does not exist" );
+    throw std::runtime_error( sError );
   }
 
   return iterPosition->second;
@@ -512,6 +547,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
+// TODO: this may not be functional, has runtime 'type not found' error
 void PortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
   idPosition_t idPosition( pPosition->GetRow().idPosition );

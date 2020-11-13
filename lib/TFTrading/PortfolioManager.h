@@ -96,13 +96,15 @@ public:
     );
 
   pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName );
-  void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
+  void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ); // TODO: may not be funcfional
   void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
 
   typedef FastDelegate1<pPosition_t&> OnPositionNeedsDetailsHandler;
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
     OnPositionNeedsDetails = function;
   }
+
+  void PositionUpdateNotes( pPosition_t );
 
   ou::Delegate<pPortfolio_t&> OnPortfolioLoaded;
   ou::Delegate<pPortfolio_t&> OnPortfolioAdded;
