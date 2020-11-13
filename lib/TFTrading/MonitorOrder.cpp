@@ -83,6 +83,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_state = State::Active;
           m_pPosition->PlaceOrder( m_pOrder );
           std::cout
+            << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
             << m_pPosition->GetInstrument()->GetInstrumentName()
             << " " << m_pOrder->GetOrderSideName()
             << " placed at " << dblNormalizedPrice
@@ -140,10 +141,10 @@ void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Orde
   }
 }
 
-void MonitorOrder::Tick() {
+void MonitorOrder::Tick( ptime dt ) {
   switch ( m_state ) {
     case State::Active:
-      UpdateOrder();
+      UpdateOrder( dt );
       break;
     case State::Cancelled:
     case State::Filled:
@@ -159,7 +160,10 @@ void MonitorOrder::Tick() {
 
 bool MonitorOrder::IsOrderActive() const { return ( State::Active == m_state ); }
 
-void MonitorOrder::UpdateOrder() { // true when order has been filled
+void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
+
+  auto tod = dt.time_of_day();
+
   if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
     // TODO: generate message? error on filled, but may be present on cancel
   }
@@ -189,6 +193,7 @@ void MonitorOrder::UpdateOrder() { // true when order has been filled
         const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
         double spread = quote.Spread();
         std::cout
+          << tod << " "
           << m_pPosition->GetInstrument()->GetInstrumentName()
           << ": update order to " << m_pOrder->GetPrice1()
           //<< " on " << dblNormalizedPrice
@@ -207,6 +212,12 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
       m_state = State::Cancelled;
+      {
+        std::cout
+          << order.GetInstrument()->GetInstrumentName()
+          << ": cancelled"
+          << std::endl;
+      }
       break;
   }
 }
@@ -216,8 +227,17 @@ void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
       m_state = State::Filled;
+      {
+        auto tod = order.GetDateTimeOrderFilled().time_of_day();
+        std::cout
+          << tod << " "
+          << order.GetInstrument()->GetInstrumentName()
+          << ": filled at " << m_pOrder->GetAverageFillPrice()
+          << std::endl;
+      }
       break;
   }
+
 }
 
 } // namespace ou

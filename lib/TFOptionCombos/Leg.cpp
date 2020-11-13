@@ -75,7 +75,7 @@ void Leg::SetPosition( pPosition_t pPosition ) {
 Leg::pPosition_t Leg::GetPosition() { return m_pPosition; }
 
 void Leg::Tick( ptime dt ) {
-  m_monitor.Tick();
+  m_monitor.Tick( dt );
   if ( m_pPosition ) {
     double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
     m_ceProfitLoss.Append( dt, dblPL );

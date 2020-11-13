@@ -83,7 +83,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
   m_trackerSynthetic.Initialize(
     pPositionSynthetic, &citerChainSynthetic->second,
-    [this]( const std::string& sName, fConstructedOption_t&& f ){
+    [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
     [this,pPositionSynthetic]( pOption_t pOption ) { // fRoll_t
@@ -98,7 +98,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
   m_trackerFront.Initialize(
     pPositionFront, &citerChainFront->second,
-    [this]( const std::string& sName, fConstructedOption_t&& f ){
+    [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
     [this,pPositionFront]( pOption_t pOption ) { // fRoll_t
@@ -113,7 +113,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
 void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( dblUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
 
-  if ( m_monitor.IsOrderActive() ) m_monitor.Tick();
+  if ( m_monitor.IsOrderActive() ) m_monitor.Tick( dt );
 
   // need to manage states:  will need to obtain contract for the option, if not tracking
   // therefore, track options so ready to trade on demand? ... then watch is available as well
