@@ -114,7 +114,7 @@ void MonitorOrder::ClosePosition() {
         std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
       }
       if ( 0 != row.nPositionActive ) {
-        std::cout << row.sName << ": monitored closing position," << row.eOrderSideActive << "," << row.nPositionActive << std::endl;
+        std::cout << row.sName << ": monitored closing position, side=" << row.eOrderSideActive << ", q=" << row.nPositionActive << std::endl;
         switch ( row.eOrderSideActive ) {
           case ou::tf::OrderSide::Buy:
             PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
