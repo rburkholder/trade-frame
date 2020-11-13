@@ -15,8 +15,6 @@
 // _148423314X 2017 Data Mining Algorithms in C++: Data Patterns and Algorithms for Modern Applications
 //    may have some interesting thoughts on data mining inter-day and intra-day data for relationships
 
-#include "stdafx.h"
-
 #include <set>
 #include <algorithm>
 
@@ -174,7 +172,12 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 
 // auto loading position from database, and from runtime creations
 void MasterPortfolio::Add( pPosition_t pPosition ) {
-  std::cout << "load position: " << pPosition->GetRow().idPosition << "(" << pPosition->GetRow().sName << ")" << std::endl;
+  std::cout
+    << "load position: " << pPosition->GetRow().idPosition
+    << " (" << pPosition->GetRow().sName << ")"
+    << "," << pPosition->GetNote()
+    << ",quan=" << pPosition->GetActiveSize()
+    << std::endl;
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->GetRow().idPortfolio );  // need to preload the iterator for random adds
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
@@ -527,9 +530,12 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                 }
               }
               else {
-                pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition(
-                  idPortfolio, pWatch->GetInstrument()->GetInstrumentName(), "Basket", "ib01", "iq01", m_pExec, pWatch );
+                auto& instance( ou::tf::PortfolioManager::Instance() );
+                const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
+                pPosition = instance.ConstructPosition(
+                  idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
                 pPosition->SetNote( sNote );
+                instance.UpdatePosition( idPortfolio, sInstrumentName );
                 Add( pPosition );  // update the archive
               }
 
