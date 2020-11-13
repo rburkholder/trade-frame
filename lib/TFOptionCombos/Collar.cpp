@@ -19,6 +19,10 @@
  * Created on July 19, 2020, 05:43 PM
  */
 
+ // 2020/11/12 when rolling a call up, buy a put for the downward journey?
+ //            when rolling a put down, buy a call for the upward journey?
+ // 2020/11/12 upon return to original strike, buy in again?
+
 #include <array>
 
 #include "LegDef.h"
