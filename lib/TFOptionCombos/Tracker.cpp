@@ -37,7 +37,7 @@ Tracker::Tracker()
   m_pChain( nullptr ),
   m_compare( nullptr ),
   m_luStrike( nullptr ),
-  m_dblUnderlyingSlope {}
+  m_dblUnderlyingSlope {}, m_dblUnderlying {}
 {}
 
 Tracker::~Tracker() {
@@ -92,6 +92,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
   switch ( m_transition ) {
     case ETransition::Track:
       {
+        m_dblUnderlying      = dblUnderlying;
         m_dblUnderlyingSlope = dblUnderlyingSlope;
 
         double strikeItm = m_luStrike( dblUnderlying );
@@ -172,7 +173,8 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
               << quote.DateTime().time_of_day() << " "
               << m_pOption->GetInstrument()->GetInstrumentName()
               << " roll on diff=" << diff
-              << ", slope=" << m_dblUnderlyingSlope
+              << ",underlying=" << m_dblUnderlying
+              << ",slope=" << m_dblUnderlyingSlope
               << std::endl;
             m_transition = ETransition::Roll;
             m_pOption->StopWatch();

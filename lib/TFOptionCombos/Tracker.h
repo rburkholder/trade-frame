@@ -69,6 +69,7 @@ private:
   double m_dblStrikePosition;
   ou::tf::OptionSide::enumOptionSide m_sidePosition;
 
+  double m_dblUnderlying;
   double m_dblUnderlyingSlope;
 
   enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll };
