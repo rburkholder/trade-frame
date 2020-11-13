@@ -715,7 +715,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                     std::cout << "WARNING: strategy running out of colours." << std::endl;
                   }
-                  std::cout << m_sUnderlying << " construct portfolio: " << m_pPortfolioStrategy->Id() << "adds " << idPortfolio << std::endl;
+                  std::cout << m_sUnderlying << " construct portfolio: " << m_pPortfolioStrategy->Id() << " adds " << idPortfolio << std::endl;
                   pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
 
                   m_pValidateOptions->ValidatedOptions(
