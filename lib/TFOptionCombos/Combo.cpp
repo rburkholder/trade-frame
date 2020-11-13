@@ -93,16 +93,17 @@ void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, 
 
 // over-write existing Leg
 void Combo::SetPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
-  if ( ix < m_vLeg.size() ) {
-    assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
-    //Leg leg( pPosition );
-    Leg& leg( m_vLeg[ix] );
-    //m_vLeg.emplace_back( std::move( leg ) );
-    leg.DelChartData( pChartData );  // continue or erase?
-    leg.SetPosition( pPosition );
-    //m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-    leg.SetChartData( pChartData ); // comes after as there is no move on indicators
+  if ( m_vLeg.size() <= ix ) {
+    m_vLeg.resize( ix + 1 );
   }
+  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+  //Leg leg( pPosition );
+  Leg& leg( m_vLeg[ix] );
+  //m_vLeg.emplace_back( std::move( leg ) );
+  leg.DelChartData( pChartData );  // continue or erase?
+  leg.SetPosition( pPosition );
+  //m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
+  leg.SetChartData( pChartData ); // comes after as there is no move on indicators
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
   }
