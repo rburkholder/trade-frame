@@ -168,6 +168,12 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
           diff -= ( watch.Spread() + quote.Spread() ) / 2.0;  // entry spread
           diff -= 0.10;  // commissions and such
           if ( 0.10 < diff ) { // make at least 10 cents on the roll
+            std::cout
+              << quote.DateTime().time_of_day() << " "
+              << m_pOption->GetInstrument()->GetInstrumentName()
+              << " roll on diff=" << diff
+              << ", slope=" << m_dblUnderlyingSlope
+              << std::endl;
             m_transition = ETransition::Roll;
             m_pOption->StopWatch();
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
