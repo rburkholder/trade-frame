@@ -37,7 +37,7 @@ namespace {
   static const size_t nLegs( 4 );
 
   // assuming weekly options
-  static const boost::gregorian::days nDaysToExpiryFront( 1 );
+  static const boost::gregorian::days nDaysToExpiryFront( 5 );
   static const boost::gregorian::days nDaysToExpirySynthetic( 30 );
 
   using LegDef = ou::tf::option::LegDef;
