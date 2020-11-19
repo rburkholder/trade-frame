@@ -76,20 +76,28 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
         double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
         if ( m_pOrder ) {
+          m_state = State::Active;
           m_pOrder->SetSignalPrice( dblNormalizedPrice );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
           m_CountDownToAdjustment = nAdjustmentPeriods;
-          m_state = State::Active;
           m_pPosition->PlaceOrder( m_pOrder );
           std::cout
+            << m_pOrder->GetOrderId() << " "
+            << m_pOrder->GetInstrument()->GetInstrumentName() << ":"
             << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
-            << m_pPosition->GetInstrument()->GetInstrumentName()
-            << " " << m_pOrder->GetOrderSideName()
+            << m_pOrder->GetOrderSideName()
             << " placed at " << dblNormalizedPrice
             << " monitored"
             << std::endl;
           bOk = true;
+        }
+        else {
+          m_state = State::NoOrder;
+          std::cout
+            << "MonitorOrder::PlaceOrder: "
+            << m_pPosition->GetInstrument()->GetInstrumentName() << " failed to construct order"
+            << std::endl;
         }
       }
       break;
@@ -148,7 +156,7 @@ void MonitorOrder::Tick( ptime dt ) {
       break;
     case State::Cancelled:
     case State::Filled:
-      m_pOrder.reset();
+      //m_pOrder.reset();
       m_state = State::NoOrder;
       // TODO: clear position?
       break;
@@ -207,35 +215,52 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
 }
 
 void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+  auto tod = order.GetDateTimeOrderFilled().time_of_day();
   switch ( m_state ) {
     case State::Active:
+      assert( order.GetOrderId() == m_pOrder->GetOrderId() );
+      m_state = State::Cancelled;
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-      m_state = State::Cancelled;
-      {
-        std::cout
-          << order.GetInstrument()->GetInstrumentName()
-          << ": cancelled"
-          << std::endl;
-      }
+      std::cout
+        << tod << " "
+        << order.GetOrderId() << " "
+        << order.GetInstrument()->GetInstrumentName()
+        << ": cancelled"
+        << std::endl;
+      m_pOrder.reset();
       break;
+    default:
+      std::cout
+        << tod << " "
+        << order.GetOrderId() << " "
+        << order.GetInstrument()->GetInstrumentName()
+        << ": cancelled has no matching state (" << (int)m_state << ")"
+        << std::endl;
   }
 }
 void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+  auto tod = order.GetDateTimeOrderFilled().time_of_day();
   switch ( m_state ) {
     case State::Active:
+      assert( order.GetOrderId() == m_pOrder->GetOrderId() );
+      m_state = State::Filled;
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-      m_state = State::Filled;
-      {
-        auto tod = order.GetDateTimeOrderFilled().time_of_day();
-        std::cout
-          << tod << " "
-          << order.GetInstrument()->GetInstrumentName()
-          << ": filled at " << m_pOrder->GetAverageFillPrice()
-          << std::endl;
-      }
+      std::cout
+        << tod << " "
+        << order.GetInstrument()->GetInstrumentName()
+        << ": filled at " << m_pOrder->GetAverageFillPrice()
+        << std::endl;
+      m_pOrder.reset();
       break;
+    default:
+      std::cout
+        << tod << " "
+        << order.GetOrderId() << " "
+        << order.GetInstrument()->GetInstrumentName()
+        << ": fillled has no matching state (" << (int)m_state << ")"
+        << std::endl;
   }
 
 }
