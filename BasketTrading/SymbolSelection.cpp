@@ -24,7 +24,7 @@
 #include <iostream>
 
 #include <TFBitsNPieces/InstrumentFilter.h>
-#include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
 
 #include <TFIndicators/Darvas.h>
 

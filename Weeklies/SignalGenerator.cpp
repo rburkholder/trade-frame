@@ -16,7 +16,7 @@
 
 #include "stdafx.h"
 
-#include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFStatistics/Pivot.h>

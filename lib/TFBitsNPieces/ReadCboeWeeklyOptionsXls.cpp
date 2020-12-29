@@ -14,15 +14,13 @@
 
 // Started 2013/09/21
 
-#include "stdafx.h"
-
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 #include <ExcelFormat/ExcelFormat.h>
 
-#include "ReadCboeWeeklyOptions.h"
+#include "ReadCboeWeeklyOptionsXls.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
