@@ -20,6 +20,7 @@ set(
     IQFeedSymbolFileToSqlite.h
     IQFeedSymbolListOps.h
     LiborFromIQFeed.h
+    ReadCboeWeeklyOptionsCsv.h
     ReadCboeWeeklyOptionsXls.h
     TreeOps.h
     TreeOpsItems.h
@@ -34,6 +35,7 @@ set(
     IQFeedInstrumentBuild.cpp
     IQFeedSymbolListOps.cpp
     LiborFromIQFeed.cpp
+    ReadCboeWeeklyOptionsCsv.cpp
     ReadCboeWeeklyOptionsXls.cpp
     TreeOps.cpp
     TreeOpsItems.cpp
