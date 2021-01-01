@@ -45,13 +45,13 @@ namespace {
 
   enum class ELeg { SynthLong = 0, SynthShort, FrontShort, FrontLong };
 
-  static const rLegDef_t m_rLegDefRise = {
+  static const rLegDef_t m_rLegDefRise = { // rising momentum
     LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call, 0.20 ), // synthetic long
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.20 ), // synthetic long
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.10 ), // covered
     LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.10 )  // protective
   };
-  static const rLegDef_t m_rLegDefFall = {
+  static const rLegDef_t m_rLegDefFall = { // falling momentum
     LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.20 ), // synthetic short
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.20 ), // synthetic short
     LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.10 ), // covered
@@ -64,10 +64,6 @@ Collar::Collar()
 : Combo()
 {
 }
-
-Collar::Collar( const Collar& rhs )
-: Combo( rhs )
-{}
 
 Collar::Collar( const Collar&& rhs )
 : Combo( std::move( rhs ) )
