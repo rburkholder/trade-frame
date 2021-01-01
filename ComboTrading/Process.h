@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptionsCsv.h>
 
 class Process {
 public:
@@ -27,7 +27,6 @@ public:
 protected:
 private:
 
-  ou::tf::cboe::OptionExpiryDates_t m_cboeExpiries;
-  ou::tf::cboe::vUnderlyinginfo_t m_cboeVui;
+  ou::tf::cboe::csv::vUnderlyinginfo_t m_vUnderlyingInfo;
 
 };

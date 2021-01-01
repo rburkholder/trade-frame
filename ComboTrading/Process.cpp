@@ -29,7 +29,7 @@ void Process::LoadWeeklies( void ) {
 
   bool bOk( true );
   try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( m_cboeExpiries, m_cboeVui );
+    ou::tf::cboe::csv::ReadCboeWeeklyOptions( m_vUnderlyingInfo );
   }
   catch(...) {
     bOk = false;
@@ -39,17 +39,8 @@ void Process::LoadWeeklies( void ) {
   std::cout << "LoadWeeklies done." << std::endl;
 
   if ( bOk ) {
-    std::sort( m_cboeVui.begin(), m_cboeVui.end() );
-    for ( ou::tf::cboe::vUnderlyinginfo_t::const_iterator iter = m_cboeVui.begin(); m_cboeVui.end() != iter; ++iter ) {
-      if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
-	std::cout
-		<< iter->sSymbol
-		<< "," << iter->sProductType // "Equity", "ETF"
-		<< "," << iter->sDescription
-		<< "," << iter->bStandardWeekly
-		<< "," << iter->bExpandedWeekly
-		<< std::endl;
-      }
+    std::sort( m_vUnderlyingInfo.begin(), m_vUnderlyingInfo.end() );
+    for ( ou::tf::cboe::csv::vUnderlyinginfo_t::const_iterator iter = m_vUnderlyingInfo.begin(); m_vUnderlyingInfo.end() != iter; ++iter ) {
     }
   }
 

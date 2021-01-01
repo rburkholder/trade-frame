@@ -16,7 +16,7 @@
 
 #include "stdafx.h"
 
-#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptionsCsv.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFStatistics/Pivot.h>
@@ -41,20 +41,19 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  ou::tf::cboe::OptionExpiryDates_t expiries;
-  ou::tf::cboe::vUnderlyinginfo_t vui;
+  ou::tf::cboe::csv::vUnderlyinginfo_t vui;
 
   pt::ptime dtLast( gregorian::date( 2019, 6, 17 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
   try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( expiries, vui );
+    ou::tf::cboe::csv::ReadCboeWeeklyOptions( vui );
   }
   catch(...) {
   }
 
-  typedef ou::tf::cboe::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
+  typedef ou::tf::cboe::csv::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
 
   std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
 
@@ -72,7 +71,7 @@ void SignalGenerator::Run( void ) {
 //    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
       //ScanBars( iter->sSymbol );
       BarSummary bs;
-      bs.sType = iter->sProductType;
+      //bs.sType = iter->sProductType;
       m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, bs ) );
 //    }
   }
@@ -221,7 +220,8 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   int ix( 0 );
 
   cell = m_sheet->Cell( iy, ix++ ); // Type
-  cell->SetString( iter->second.sType.c_str() );
+  //cell->SetString( iter->second.sType.c_str() );  // no longer available
+  cell->SetString( "" );
 
   cell = m_sheet->Cell( iy, ix++ ); // Symbol
   cell->SetString( sObject.c_str() );

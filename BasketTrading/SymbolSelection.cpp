@@ -24,7 +24,7 @@
 #include <iostream>
 
 #include <TFBitsNPieces/InstrumentFilter.h>
-#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
+#include <TFBitsNPieces/ReadCboeWeeklyOptionsCsv.h>
 
 #include <TFIndicators/Darvas.h>
 
@@ -179,18 +179,16 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
 : SymbolSelection( dtLast )
 {
 
-  using mapUnderlyingInfo_t = std::map<std::string,ou::tf::cboe::UnderlyingInfo>;
+  using mapUnderlyingInfo_t = std::map<std::string,ou::tf::cboe::csv::UnderlyingInfo>;
 
-  ou::tf::cboe::OptionExpiryDates_t expiries;
   mapUnderlyingInfo_t mapUnderlyingInfo;
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
   bool bOk( true );
   try {
-    ou::tf::cboe::ReadCboeWeeklyOptions(
-      expiries,
-      [&mapUnderlyingInfo](const ou::tf::cboe::UnderlyingInfo& ui){
+    ou::tf::cboe::csv::ReadCboeWeeklyOptions(
+      [&mapUnderlyingInfo](const ou::tf::cboe::csv::UnderlyingInfo& ui){
         mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ui.sSymbol );
         if ( citer != mapUnderlyingInfo.end() ) {
           std::cout << "SymbolSelection Pivot Symbol duplicated: " << ui.sSymbol << std::endl;
@@ -212,7 +210,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
 
   if ( bOk ) {
 
-    using vUnderlyinginfo_citer_t = ou::tf::cboe::vUnderlyinginfo_t::const_iterator ;
+    using vUnderlyinginfo_citer_t = ou::tf::cboe::csv::vUnderlyinginfo_t::const_iterator ;
 
     //std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
 
@@ -245,7 +243,7 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
       [&fSelected,&mapUnderlyingInfo,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
         mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ii.sName );
         if ( mapUnderlyingInfo.end() != citer ) {
-          const ou::tf::cboe::UnderlyingInfo& ui( citer->second );
+          const ou::tf::cboe::csv::UnderlyingInfo& ui( citer->second );
           ou::tf::statistics::Pivot pivot( bars );
           pivot.Points( ii.dblR2, ii.dblR1, ii.dblPV, ii.dblS1, ii.dblS2 );
           ii.dblProbabilityAboveAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );
