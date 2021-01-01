@@ -26,6 +26,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace cboe {
+namespace xls {
 
     using vOptionExpiryDates_t = std::vector<boost::gregorian::date>;
 
@@ -64,6 +65,7 @@ namespace cboe {
 void ReadCboeWeeklyOptions( OptionExpiryDates_t&, fUnderlyingInfo_t );
 void ReadCboeWeeklyOptions( OptionExpiryDates_t&, vUnderlyinginfo_t& );
 
+} // namespace xls
 } // namespace cboe
 } // namespace tf
 } // namespace ou

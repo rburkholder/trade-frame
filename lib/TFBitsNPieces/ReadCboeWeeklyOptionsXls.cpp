@@ -25,6 +25,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace cboe {
+namespace xls {
 
 bool AssignCellContent( const ExcelFormat::BasicExcelCell* cell, std::string& s ) {
   bool bProcess( true );
@@ -327,6 +328,7 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, fUnderlyingInfo_t fUn
   xls.Close();
 }
 
+} // namespace xls
 } // namespace cboe
 } // namespace tf
 } // namespace ou
