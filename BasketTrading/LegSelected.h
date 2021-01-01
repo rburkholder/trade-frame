@@ -23,7 +23,6 @@
 #define LEGSELECTED_H
 
 #include <string>
-#include <vector>
 
 #include <TFOptions/Option.h>
 
@@ -31,7 +30,6 @@ class LegSelected { // specific definition of each leg for trading
 public:
 
   using pOption_t = ou::tf::option::Option::pOption_t;
-  using vLegSelected_t = std::vector<LegSelected>;
 
   LegSelected();
   LegSelected( const LegSelected& );

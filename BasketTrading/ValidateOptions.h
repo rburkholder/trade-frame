@@ -36,7 +36,7 @@
 class ValidateOptions {
 public:
 
-  using vLegSelected_t = LegSelected::vLegSelected_t;
+  using vLegSelected_t = std::vector<LegSelected>;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
