@@ -156,9 +156,9 @@ public:
   template<typename Iter>
   void SetSymbols( Iter begin, Iter end );
 
-  void SetMaxSimultaneousQueries( size_t n ) { 
+  void SetMaxSimultaneousQueries( size_t n ) {
     assert( n > 0 );
-    m_nMaxSimultaneousQueries = n; 
+    m_nMaxSimultaneousQueries = n;
   };
   size_t GetMaxSimultaneousQueries( void ) { return m_nMaxSimultaneousQueries; };
 
@@ -178,7 +178,7 @@ public:
     structResultBar* bars;  // one of bars or ticks will be used in any one session
     structResultTicks* ticks;
     query_t query;
-    structQueryState( void ) 
+    structQueryState( void )
       : bars( NULL ), ticks( NULL ), b( false )//, ix( 0 )
     {
       query.SetUserTag( this );
@@ -197,7 +197,7 @@ public:
   void OnCompletion( void );  // this needs to have an over ride to find out when all symbols are complete, needs to friend this class
 
 
-protected:  
+protected:
 
   enum enumProcessingState {
     EConstructing, EQuiescent, ESymbolListBuilt, ERetrievingWithMoreInQ, ERetrievingWithQEmpty, EInDestruction
@@ -207,13 +207,13 @@ protected:
   } m_ResultType;
 
   // CRTP callbacks for inheriting class
-  void OnBars( structResultBar* bars ) { 
+  void OnBars( structResultBar* bars ) {
     //bars->Clear();
-    ReQueueBars( bars ); 
+    ReQueueBars( bars );
   };
-  void OnTicks( structResultTicks* ticks ) { 
+  void OnTicks( structResultTicks* ticks ) {
     //ticks->Clear();
-    ReQueueTicks( ticks ); 
+    ReQueueTicks( ticks );
   };
 
   // CRTP based callbacks from HistoryQueryTag
@@ -241,8 +241,8 @@ private:
 };
 
 template <typename T>
-HistoryBulkQuery<T>::HistoryBulkQuery( void ) 
-: 
+HistoryBulkQuery<T>::HistoryBulkQuery( void )
+:
   m_stateBulkQuery( EConstructing ),
   m_nMaxSimultaneousQueries( 10 ),
   m_nCurSimultaneousQueries( 0 ),
@@ -288,11 +288,26 @@ void HistoryBulkQuery<T>::GenerateQueries( void ) {
   ProcessSymbolList();  // startup first set of queries
 }
 
+/*
+NOTE: 2020/12/23 IQFeed changed their request rates from 15 simultaneous requests:
+
+The new method is a straightforward "requests per second" rate limiting method. It is a bucket limit system similar to the Linux kernel's iptables hashlimit. As a result, you
+start with a full bucket of request credits. Each request consumes 1 credit and credits are re-allocated every few milliseconds unless you are already at max. If you send a request
+when you are out of requests, you will get an error stating too many requests (the error message is the same as before). This new method allows all customers to have the same
+limit. Also, customers can monitor the limit themselves, and know their real limit without trial and error
+
+With all that said, the new limit for requests is 50/second (with one new credit added each 20ms).
+
+email: 12/23/20, 4:24 PM
+forum: http://forums.iqfeed.net/index.cfm?page=topic&topicID=5832
+
+*/
+
 template <typename T>
 void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
   boost::mutex::scoped_lock lock( m_mutexProcessSymbolListScopeLock );  // lock for the scope
   structQueryState* pqs;
-  m_stateBulkQuery = ERetrievingWithMoreInQ;  
+  m_stateBulkQuery = ERetrievingWithMoreInQ;
   while ( ( m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
     // generate another query
     m_nCurSimultaneousQueries.fetch_add( 1, boost::memory_order_acquire );
@@ -314,7 +329,7 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
         pqs->bars->sSymbol = *m_iterSymbols;
         break;
     }
-    
+
     // wait for query to reach connected state (do we need to do this anymore?)
 
     pqs->query.RetrieveNEndOfDays(*m_iterSymbols, m_n );
@@ -322,7 +337,7 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
   }
 
   if ( m_listSymbols.end() == m_iterSymbols ) {
-    m_stateBulkQuery = ERetrievingWithQEmpty; 
+    m_stateBulkQuery = ERetrievingWithQEmpty;
   }
 
   if ( 0 == m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) ) { // no more queries outstanding so finish up
