@@ -32,7 +32,7 @@ public:
   using pOption_t = ou::tf::option::Option::pOption_t;
 
   LegSelected();
-  LegSelected( const LegSelected& );
+  LegSelected( const LegSelected& ) = delete;
   LegSelected( const LegSelected&& );
 
   // return 0 if not changed, 1 if changed

@@ -26,15 +26,6 @@ LegSelected::LegSelected()
   m_dblStrike {}
 {}
 
-LegSelected::LegSelected( const LegSelected& rhs )
-: m_bChanged( rhs.m_bChanged ),
-  m_dblStrike( rhs.m_dblStrike ),
-  m_dateExpiry( rhs.m_dateExpiry ),
-  m_sIQFeedOptionName( rhs.m_sIQFeedOptionName ),
-  m_pOption( rhs.m_pOption )
-{
-}
-
 LegSelected::LegSelected( const LegSelected&& rhs )
 : m_bChanged( rhs.m_bChanged ),
   m_dblStrike( rhs.m_dblStrike ),
