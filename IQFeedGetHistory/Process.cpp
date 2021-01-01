@@ -61,7 +61,7 @@ void Process::Start( void ) {
 
   //ou::tf::iqfeed::InMemoryMktSymbolList list;
 
-  std::string sSymbols( "../symbols.ser" );
+  static const std::string sSymbols( "../symbols.ser" );
 /*
   if (false) {
 //  if (false) {
