@@ -144,15 +144,19 @@ boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_tim
   return date;
 }
 
+// TODO: based upon interior notes below, may need to instance this per future
+//   override this initializer, or create a specific one
 template<class T>
 void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
-  m_dtRHOpen              = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration(  9, 30,  0 ), "America/New_York" );
-  m_dtStartTrading        = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration(  9, 30, 30 ), "America/New_York" );
-  m_dtTimeForCancellation = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 57,  0 ), "America/New_York" );
-  m_dtGoNeutral           = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 57,  5 ), "America/New_York" );
-  m_dtWaitForRHClose      = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 15, 58,  0 ), "America/New_York" );
-  m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16,  0,  0 ), "America/New_York" );
+  m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
+  m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );
+  // TO incorporate: ES has 15 minute break in the afternoon (15:15-15:30, then open till 16:00)
+  m_dtTimeForCancellation = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16, 57,  0 ), "America/New_York" );
+  m_dtGoNeutral           = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16, 57,  5 ), "America/New_York" );
+  m_dtWaitForRHClose      = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16, 58,  0 ), "America/New_York" );
+  // will need to generify this:  ES till 15:15, GC till 17:00
+  m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
 }
 
