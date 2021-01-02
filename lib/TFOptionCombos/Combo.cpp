@@ -31,14 +31,6 @@ Combo::Combo( )
   m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
-Combo::Combo( const Combo& rhs )
-: m_state( rhs.m_state ),
-  m_vLeg( rhs.m_vLeg ),
-  m_pPortfolio( rhs.m_pPortfolio )
-{
-  m_vLeg.reserve( 16 ); // required for leg.AddChartData -- is this actually needed?
-}
-
 Combo::Combo( const Combo&& rhs )
 : m_state( rhs.m_state ),
   m_vLeg( std::move( rhs.m_vLeg ) ),
@@ -88,7 +80,7 @@ void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, 
   }
 }
 
-// over-write existing Leg
+// will over-write existing Leg
 void Combo::SetPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
   if ( m_vLeg.size() <= ix ) {
     m_vLeg.resize( ix + 1 );
