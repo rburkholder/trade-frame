@@ -17,8 +17,9 @@ set(
     Combo.h
     Condor.h
     Exceptions.h
-    LegDef.h
     Leg.h
+    LegDef.h
+    LegDescription.h
     PutBackSpread.h
     Straddle.h
     Strangle.h
@@ -37,6 +38,7 @@ set(
     Combo.cpp
     Condor.cpp
     Leg.cpp
+    LegDescription.cpp
     PutBackSpread.cpp
     Straddle.cpp
     Strangle.cpp
