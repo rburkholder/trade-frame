@@ -183,6 +183,8 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_pOption.reset();
             m_pWatch.reset();
             m_pPosition.reset();
+            m_compare = nullptr;
+            m_luStrike = nullptr;
             m_transition = ETransition::Initial;  // start all over again
           }
         }
