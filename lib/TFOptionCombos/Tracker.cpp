@@ -75,11 +75,11 @@ void Tracker::Initialize(
   switch ( pInstrument->GetOptionSide() ) {
     case ou::tf::OptionSide::Call:
       m_compare = &gt;
-      m_luStrike = [this](double dblUnderlying){ return m_pChain->Call_Itm( dblUnderlying ); };
+      m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
       break;
     case ou::tf::OptionSide::Put:
       m_compare = &lt;
-      m_luStrike = [this](double dblUnderlying){ return m_pChain->Put_Itm( dblUnderlying ); };
+      m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
       break;
   }
   assert( m_compare );
