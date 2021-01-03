@@ -78,10 +78,11 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   // TODO: validate that a roll generates a new position
 
   pPosition_t pPositionSynthetic( m_mapLeg[LegNote::Type::SynthLong].GetPosition() );
+  pWatch_t pWatchSynthetic = pPositionSynthetic->GetWatch();
   assert( pPositionSynthetic );
   citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
   m_trackerSynthetic.Initialize(
-    pPositionSynthetic, &citerChainSynthetic->second,
+    pWatchSynthetic, &citerChainSynthetic->second,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
@@ -93,10 +94,11 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
     );
 
   pPosition_t pPositionFront( m_mapLeg[LegNote::Type::Protect].GetPosition() );
+  pWatch_t pWatchFront = pPositionFront->GetWatch();
   assert( pPositionFront );  // TODO: assert this is long,
   citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
   m_trackerFront.Initialize(
-    pPositionFront, &citerChainFront->second,
+    pWatchFront, &citerChainFront->second,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },

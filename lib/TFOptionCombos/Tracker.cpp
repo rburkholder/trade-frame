@@ -16,7 +16,7 @@
  * File:    Tracker.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptionCombos
- * Created on Novemeber 8, 2020, 11:41 AM
+ * Created: Novemeber 8, 2020, 11:41 AM
  */
 
  #include "Tracker.h"
@@ -26,10 +26,11 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 namespace {
-
   bool lt( double a, double b ) { return a < b; }
   bool gt( double a, double b ) { return a > b; }
   bool eq( double a, double b ) { return a == b; }
+  bool ge( double a, double b ) { return a >= b; }
+  bool le( double a, double b ) { return a <= b; }
 }
 
 Tracker::Tracker()
@@ -45,13 +46,12 @@ Tracker::~Tracker() {
     m_pOption->StopWatch();
     m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
     m_pOption.reset();
-    m_pPosition.reset();
-    m_pWatch.reset();
   }
+  m_pWatch.reset();
 }
 
 void Tracker::Initialize(
-  pPosition_t pPosition,
+  pWatch_t pWatch,
   const ou::tf::option::Chain* pChain,
   fConstructOption_t&& fConstructOption,
   fRoll_t&& fRoll
@@ -59,18 +59,19 @@ void Tracker::Initialize(
 
   assert( ETransition::Initial == m_transition );
 
-  m_pPosition = pPosition;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  m_pWatch = pWatch;
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
   m_fRoll = std::move( fRoll );
 
-  m_pWatch = m_pPosition->GetWatch();
   pInstrument_t pInstrument = m_pWatch->GetInstrument();
   assert( pInstrument->IsOption() );
 
-  m_dblStrikePosition = pInstrument->GetStrike();
-  m_sidePosition = pInstrument->GetOptionSide();
+  m_dblStrikeWatch = pInstrument->GetStrike();
+  m_sideWatch = pInstrument->GetOptionSide();
 
   switch ( pInstrument->GetOptionSide() ) {
     case ou::tf::OptionSide::Call:
@@ -97,7 +98,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
 
         double strikeItm = m_luStrike( dblUnderlying );
 
-        if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
+        if ( m_compare( strikeItm, m_dblStrikeWatch ) ) { // is new strike further itm?
           if ( m_pOption ) { // if already tracking the option
             if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
               m_transition = ETransition::Vacant;
@@ -128,7 +129,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
 
 void Tracker::Construct( double strikeItm ) {
   std::string sName;
-  switch ( m_sidePosition ) {
+  switch ( m_sideWatch ) {
     case ou::tf::OptionSide::Call:
       sName = m_pChain->GetIQFeedNameCall( strikeItm );
       break;
@@ -162,13 +163,15 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
       {
         if ( m_compare( 0.0, m_dblUnderlyingSlope ) ) {
           // nothing if the slope is going in the right direction
+          // positive for long call, negative for long put
         }
         else {
           const ou::tf::Quote& watch( m_pWatch->LastQuote() );
-          double diff = watch.Bid() - quote.Ask();  // sell existing at bid, buy new at the ask
-          diff -= ( watch.Spread() + quote.Spread() ) / 2.0;  // entry spread
-          diff -= 0.10;  // commissions and such
-          if ( 0.10 < diff ) { // make at least 10 cents on the roll
+          // test if roll will be profitable
+          double diff = watch.Bid() - quote.Ask();  // sell existing at bid, buy new at the ask => gross profit
+          diff -= ( watch.Spread() + quote.Spread() ) / 2.0;  // subtract exit spread
+          diff -= 0.10;  // subtract commissions and such
+          if ( 0.10 < diff ) { // desire at least 10 cents on the roll
             std::cout
               << quote.DateTime().time_of_day() << " "
               << m_pOption->GetInstrument()->GetInstrumentName()
@@ -182,7 +185,6 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_fRoll( m_pOption );
             m_pOption.reset();
             m_pWatch.reset();
-            m_pPosition.reset();
             m_compare = nullptr;
             m_luStrike = nullptr;
             m_transition = ETransition::Initial;  // start all over again
