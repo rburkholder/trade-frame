@@ -13,43 +13,49 @@
  ************************************************************************/
 
 /*
- * File:    LegDescription.h
+ * File:    LegNote.h
  * Author:  raymond@burkholder.net
  * Project: TFOptionCombos
  * Created: January 1, 2021, 15:50
  *
- * provides text for Position record
+ * provides text for Position notes
  */
 
-#ifndef LEGDESCRIPTION_H
-#define LEGDESCRIPTION_H
+#ifndef LEGNOTE_H
+#define LEGNOTE_H
 
 #include <string>
 
-class LegDescription {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace option { // options
+
+class LegNote {
 public:
 
-  // leg: [1,2,...]
-  enum class Type { SynthLong, SynthShort, Cover, Protect };
   enum class State { Open, Expired, Closed };
-  enum class Option { Call, Put };
+  enum class Type { SynthLong, SynthShort, Cover, Protect };
   enum class Side { Long, Short };
+  enum class Option { Call, Put };
   enum class Momentum { Rise, Fall };
   enum class Algo { Collar };
 
   struct values_t {
-    unsigned int m_ixLeg;
-    Type m_type;
     State m_state;
-    Option m_option;
+    Type m_type;
     Side m_side;
+    Option m_option;
     Momentum m_momentum;
     Algo m_algo;
   };
 
-  LegDescription() {}
-  LegDescription( const std::string& ); // construct from formatted string
-  virtual ~LegDescription();
+  LegNote();
+  LegNote( const values_t& );
+  LegNote( const std::string& ); // construct from formatted string
+  LegNote( const LegNote&& );
+  LegNote( const LegNote& );
+  LegNote& operator=( const LegNote&& );
+  virtual ~LegNote();
 
   const values_t& Decode( const std::string& );
   const std::string Encode() const;
@@ -61,10 +67,16 @@ public:
 protected:
 private:
 
+  bool m_bValid;
+
   values_t m_values;
 
   void Parse( const std::string& );
 
 };
 
-#endif /* LEGDESCRIPTION_H */
+} // namespace option
+} // namespace tf
+} // namespace ou
+
+#endif /* LEGNOTE_H */

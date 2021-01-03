@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    LegDescription.cpp
+ * File:    LegNote.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptionCombos
  * Created: January 1, 2021, 15:50
@@ -29,63 +29,65 @@
 #include <boost/spirit/include/qi_numeric.hpp>
 #include <boost/spirit/include/qi.hpp>
 
- #include "LegDescription.h"
+ #include "LegNote.h"
 
- using values_t = LegDescription::values_t;
+ using values_t = ou::tf::option::LegNote::values_t;
 
  BOOST_FUSION_ADAPT_STRUCT(
   values_t,
-  (unsigned int, m_ixLeg)
-  (LegDescription::Type, m_type),
-  (LegDescription::State, m_state),
-  (LegDescription::Option, m_option),
-  (LegDescription::Side, m_side),
-  (LegDescription::Momentum, m_momentum),
-  (LegDescription::Algo, m_algo)
+  (ou::tf::option::LegNote::State, m_state),
+  (ou::tf::option::LegNote::Type, m_type),
+  (ou::tf::option::LegNote::Side, m_side),
+  (ou::tf::option::LegNote::Option, m_option),
+  (ou::tf::option::LegNote::Momentum, m_momentum),
+  (ou::tf::option::LegNote::Algo, m_algo)
   )
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace option { // options
 
 namespace qi = boost::spirit::qi;
 
 template<typename Iterator>
-struct LegDescriptionParser: qi::grammar<Iterator, values_t()> {
+struct LegNoteParser: qi::grammar<Iterator, values_t()> {
 
-  LegDescriptionParser( void): LegDescriptionParser::base_type( start ) {
+  LegNoteParser( void): LegNoteParser::base_type( start ) {
 
     // Todo, case insensitive: https://www.boost.org/doc/libs/1_75_0/libs/spirit/doc/html/spirit/qi/reference/string/symbols.html
 
     type_.add
-      ( "synthlong",  LegDescription::Type::SynthLong )
-      ( "synthshort", LegDescription::Type::SynthShort )
-      ( "cover",      LegDescription::Type::Cover )
-      ( "protect",    LegDescription::Type::Protect )
+      ( "synthlong",  LegNote::Type::SynthLong )
+      ( "synthshort", LegNote::Type::SynthShort )
+      ( "cover",      LegNote::Type::Cover )
+      ( "protect",    LegNote::Type::Protect )
       ;
 
     state_.add
-      ( "open",    LegDescription::State::Open )
-      ( "expired", LegDescription::State::Expired )
-      ( "closed",  LegDescription::State::Closed )
+      ( "open",    LegNote::State::Open )
+      ( "expired", LegNote::State::Expired )
+      ( "closed",  LegNote::State::Closed )
       ;
 
     option_.add
-      ( "call", LegDescription::Option::Call )
-      ( "put",  LegDescription::Option::Put )
+      ( "call", LegNote::Option::Call )
+      ( "put",  LegNote::Option::Put )
       ;
 
     side_.add
-      ( "long",  LegDescription::Side::Long )
-      ( "short", LegDescription::Side::Short )
+      ( "long",  LegNote::Side::Long )
+      ( "short", LegNote::Side::Short )
       ;
 
     momentum_.add
-      ( "rise", LegDescription::Momentum::Rise )
-      ( "fall", LegDescription::Momentum::Fall )
+      ( "rise", LegNote::Momentum::Rise )
+      ( "fall", LegNote::Momentum::Fall )
       ;
 
     algo_.add
-      ( "collar", LegDescription::Algo::Collar )
+      ( "collar", LegNote::Algo::Collar )
       ;
 
-    ix %=       qi::lit( "leg=" ) >> qi::uint_;
     type %=     qi::lit( "type=") >> type_;
     state %=    qi::lit( "state=" ) >> state_;
     option %=   qi::lit( "option=" ) >> option_;
@@ -95,7 +97,6 @@ struct LegDescriptionParser: qi::grammar<Iterator, values_t()> {
 
     // Todo: allow random order, partial list?
     start %=
-      ix       >> qi::lit( ',' ) >>
       type     >> qi::lit( ',' ) >>
       state    >> qi::lit( ',' ) >>
       option   >> qi::lit( ',' ) >>
@@ -106,43 +107,66 @@ struct LegDescriptionParser: qi::grammar<Iterator, values_t()> {
 
   }
 
-  qi::symbols<char,LegDescription::Type> type_;
-  qi::symbols<char,LegDescription::State> state_;
-  qi::symbols<char,LegDescription::Option> option_;
-  qi::symbols<char,LegDescription::Side> side_;
-  qi::symbols<char,LegDescription::Momentum> momentum_;
-  qi::symbols<char,LegDescription::Algo> algo_;
+  qi::symbols<char,LegNote::Type> type_;
+  qi::symbols<char,LegNote::State> state_;
+  qi::symbols<char,LegNote::Option> option_;
+  qi::symbols<char,LegNote::Side> side_;
+  qi::symbols<char,LegNote::Momentum> momentum_;
+  qi::symbols<char,LegNote::Algo> algo_;
 
-  qi::rule<Iterator,unsigned int()> ix;
-  qi::rule<Iterator,LegDescription::Type> type;
-  qi::rule<Iterator,LegDescription::State> state;
-  qi::rule<Iterator,LegDescription::Option> option;
-  qi::rule<Iterator,LegDescription::Side> side;
-  qi::rule<Iterator,LegDescription::Momentum> momentum;
-  qi::rule<Iterator,LegDescription::Algo> algo;
+  qi::rule<Iterator,LegNote::Type> type;
+  qi::rule<Iterator,LegNote::State> state;
+  qi::rule<Iterator,LegNote::Option> option;
+  qi::rule<Iterator,LegNote::Side> side;
+  qi::rule<Iterator,LegNote::Momentum> momentum;
+  qi::rule<Iterator,LegNote::Algo> algo;
 
   qi::rule<Iterator, values_t()> start;
 };
 
-LegDescription::LegDescription( const std::string& s ) {
+LegNote::LegNote()
+: m_bValid( false ) {}
+
+LegNote::LegNote( const values_t& values )
+: m_bValid( true ), m_values( values )
+{}
+
+LegNote::LegNote( const std::string& s )
+: m_bValid( false )
+{
   Parse( s );
 }
 
-LegDescription::~LegDescription() {
+LegNote::LegNote( const LegNote&& rhs )
+: m_bValid( rhs.m_bValid ), m_values( std::move( rhs.m_values ) )
+{}
+
+LegNote::LegNote( const LegNote& rhs )
+: m_bValid( rhs.m_bValid ), m_values( rhs.m_values )
+{}
+
+LegNote& LegNote::operator=( const LegNote&& rhs ) {
+  if ( this != &rhs ) {
+    m_bValid = std::move( rhs.m_bValid );
+    m_values = std::move( rhs.m_values );
+  }
+  return *this;
 }
 
-const LegDescription::values_t& LegDescription::Decode( const std::string& s ) {
+LegNote::~LegNote() {
+}
+
+const LegNote::values_t& LegNote::Decode( const std::string& s ) {
   Parse( s );
   return m_values;
 }
 
-const std::string LegDescription::Encode() const {
+const std::string LegNote::Encode() const {
+  // TODO: raise error if not valid
 
   std::stringstream ss;
 
-  ss << "leg=" << m_values.m_ixLeg;
-
-  ss << ",type=";
+  ss << "type=";
   switch ( m_values.m_type ) {
     case Type::Cover:
       ss << "cover";
@@ -211,21 +235,25 @@ const std::string LegDescription::Encode() const {
   return ss.str();
 }
 
-const LegDescription::values_t& LegDescription::Values() const {
+const LegNote::values_t& LegNote::Values() const {
+  // TODO: raise error if not valid
   return m_values;
 }
 
-void LegDescription::Assign( const values_t& values ) {
+void LegNote::Assign( const values_t& values ) {
   m_values = values;
+  m_bValid = true;
 }
 
-void LegDescription::Parse( const std::string& s ) {
+void LegNote::Parse( const std::string& s ) {
+
+  m_bValid = false;
 
   if ( s.empty() ) {
-    throw std::runtime_error( "LegDescription constructor, zero length string" );
+    throw std::runtime_error( "LegNote constructor, zero length string" );
   }
 
-  LegDescriptionParser<std::string::const_iterator> parser;
+  LegNoteParser<std::string::const_iterator> parser;
 
   std::string::const_iterator begin( s.begin() );
   std::string::const_iterator end( s.end() );
@@ -233,7 +261,13 @@ void LegDescription::Parse( const std::string& s ) {
   bool b = qi::parse( begin, end, parser, m_values );
   if ( b && ( begin == end ) ) {}
   else {
-    std::runtime_error( "LegDescription has unknown content: " + s );
+    std::runtime_error( "LegNote has unknown content: " + s );
   }
 
+  m_bValid = true;
+
 }
+
+} // namespace option
+} // namespace tf
+} // namespace ou

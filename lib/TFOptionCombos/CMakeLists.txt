@@ -10,42 +10,42 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
-    BearCallSpread.h
-    BullPutSpread.h
-    CallBackSpread.h
+#    BearCallSpread.h
+#    BullPutSpread.h
+#    CallBackSpread.h
     Collar.h
     Combo.h
-    Condor.h
+#    Condor.h
     Exceptions.h
     Leg.h
     LegDef.h
-    LegDescription.h
-    PutBackSpread.h
-    Straddle.h
-    Strangle.h
-    SyntheticLong.h
-    SyntheticShort.h
+    LegNote.h
+#    PutBackSpread.h
+#    Straddle.h
+#    Strangle.h
+#    SyntheticLong.h
+#    SyntheticShort.h
     Tracker.h
-    VerticalSpread.h
+#    VerticalSpread.h
   )
 
 set(
   file_cpp
-    BearCallSpread.cpp
-    BullPutSpread.cpp
-    CallBackSpread.cpp
+#    BearCallSpread.cpp
+#    BullPutSpread.cpp
+#    CallBackSpread.cpp
     Collar.cpp
     Combo.cpp
-    Condor.cpp
+#    Condor.cpp
     Leg.cpp
-    LegDescription.cpp
-    PutBackSpread.cpp
-    Straddle.cpp
-    Strangle.cpp
-    SyntheticLong.cpp
-    SyntheticShort.cpp
+    LegNote.cpp
+#    PutBackSpread.cpp
+#    Straddle.cpp
+#    Strangle.cpp
+#    SyntheticLong.cpp
+#    SyntheticShort.cpp
     Tracker.cpp
-    VerticalSpread.cpp
+#    VerticalSpread.cpp
   )
 
 add_library(
