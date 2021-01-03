@@ -28,15 +28,13 @@ namespace option { // options
 Combo::Combo( )
 : m_state( State::Initializing )
 {
-  m_vLeg.reserve( 16 ); // required for leg.AddChartData
 }
 
 Combo::Combo( const Combo&& rhs )
 : m_state( rhs.m_state ),
-  m_vLeg( std::move( rhs.m_vLeg ) ),
+  m_mapLeg( std::move( rhs.m_mapLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 {
-  m_vLeg.reserve( 16 ); // required for leg.AddChartData -- is this actually needed?
 }
 
 Combo::~Combo( ) {
@@ -48,17 +46,16 @@ void Combo::Prepare(
   fConstructOption_t&& fConstructOption,
   fRoll_t&& fRoll
 ) {
-  //m_pmapChains = pmapChains;
   m_fConstructOption = std::move( fConstructOption );
   m_fRoll = std::move( fRoll );
   Init( date, pmapChains );
 }
 
 void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
-  assert( m_vLeg.empty() );
+  assert( m_mapLeg.empty() );
   m_pPortfolio = pPortfolio;
 }
-
+/*
 void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
   bool bLegFound( false );
   for ( Leg& leg: m_vLeg ) {
@@ -79,34 +76,41 @@ void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, 
     m_state = State::Positions;
   }
 }
+*/
+// will over-write existing Leg, needs notes field in pPosition
+const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
 
-// will over-write existing Leg
-void Combo::SetPosition( size_t ix, pPosition_t pPosition, pChartDataView_t pChartData ) {
-  if ( m_vLeg.size() <= ix ) {
-    m_vLeg.resize( ix + 1 );
-  }
   assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
-  //Leg leg( pPosition );
-  Leg& leg( m_vLeg[ix] );
-  //m_vLeg.emplace_back( std::move( leg ) );
-  leg.DelChartData( pChartData );  // continue or erase?
-  leg.SetPosition( pPosition );
-  //m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-  leg.SetChartData( pChartData ); // comes after as there is no move on indicators
+
+  Leg leg;
+  const LegNote::values_t& legValues( leg.SetPosition( pPosition ) );
+
+  using result_t = std::pair<mapLeg_t::iterator, bool>;
+  result_t result;
+  mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
+  if ( m_mapLeg.end() == iter ) {
+    result = m_mapLeg.insert( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+    assert( result.second );
+    iter = result.first;
+  }
+  else {
+    iter->second = std::move( leg );
+  }
+
+  iter->second.SetColour( colour ); // comes after as there is no move on indicators
+  iter->second.SetChartData( pChartData ); // comes after as there is no move on indicators
+
   if ( State::Initializing == m_state ) {
     m_state = State::Positions;
   }
-}
 
-void Combo::SetColour( size_t ix, ou::Colour::enumColour colour ) {
-  if ( ix < m_vLeg.size() ) {
-    m_vLeg[ix].SetColour( colour );
-  }
+  return legValues;
 }
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     leg.Tick( dt );
   }
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
@@ -126,7 +130,8 @@ double Combo::GetNet( double price ) {
   double dblNet {};
   double dblConstructedValue {};
 
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     dblNet += leg.GetNet( price );
     double dblLegConstructedValue = leg.ConstructedValue();
     std::cout << ",constructed@" << dblLegConstructedValue;
@@ -140,7 +145,8 @@ double Combo::GetNet( double price ) {
 
 bool Combo::CloseItmLeg( double price ) {
   bool bClosed( false );
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     bClosed |= leg.CloseItm( price );
   }
   return bClosed;
@@ -148,7 +154,8 @@ bool Combo::CloseItmLeg( double price ) {
 
 bool Combo::CloseItmLegForProfit( double price ) {
   bool bClosed( false );
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     bClosed |= leg.CloseItmForProfit( price );
   }
   return bClosed;
@@ -164,7 +171,8 @@ void Combo::TakeProfits( double price ) {
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
 void Combo::CloseExpiryItm( double price, const boost::gregorian::date date ) {
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     leg.CloseExpiryItm( date, price );
   }
 }
@@ -180,14 +188,16 @@ void Combo::CloseFarItm( double price ) {
 }
 
 void Combo::CancelOrders() {
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     leg.CancelOrder();
   }
   m_state = State::Canceled;
 }
 
 void Combo::ClosePositions() {
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     if ( leg.IsActive() ) {
       leg.ClosePosition();
     }
@@ -197,14 +207,16 @@ void Combo::ClosePositions() {
 
 bool Combo::AreOrdersActive() const { // TODO: is an external call still necessary?
   bool bOrdersActive( false );
-  for ( const Leg& leg: m_vLeg ) {
+  for ( const mapLeg_t::value_type& entry: m_mapLeg ) {
+    const Leg& leg( entry.second );
     bOrdersActive |= leg.IsOrderActive();
   }
   return bOrdersActive;
 }
 
 void Combo::SaveSeries( const std::string& sPrefix ) {
-  for ( Leg& leg: m_vLeg ) {
+  for ( mapLeg_t::value_type& entry: m_mapLeg ) {
+    Leg& leg( entry.second );
     leg.SaveSeries( sPrefix );
   }
 }

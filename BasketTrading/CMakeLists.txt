@@ -112,7 +112,7 @@ target_link_libraries(
       chartdir
       ${Boost_LIBRARIES}
 #      wx_gtk3u_xrc-3.0
-#      wx_gtk3u_html-3.0 
+#      wx_gtk3u_html-3.0
 #      wx_gtk3u_qa-3.0
       wx_gtk3u_adv-3.0
       wx_gtk3u_core-3.0

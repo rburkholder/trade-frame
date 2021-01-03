@@ -22,7 +22,7 @@
 #ifndef COMBO_H
 #define COMBO_H
 
-#include <vector>
+#include <map>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -31,8 +31,9 @@
 
 #include <TFOptions/Chain.h>
 
-#include "Exceptions.h"
 #include "Leg.h"
+#include "LegNote.h"
+#include "Exceptions.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -74,7 +75,7 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
-  using fRoll_t = std::function<void(Combo*,size_t,pOption_t)>;
+  using fRoll_t = std::function<void(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
@@ -85,7 +86,7 @@ public:
   using strike_pair_t = std::pair<double,double>; // higher, lower
 
   Combo( );
-  Combo( const Combo& rhs );
+  Combo( const Combo& rhs ) = delete;
   Combo& operator=( const Combo& rhs ) = delete;
   Combo( const Combo&& rhs );
   virtual ~Combo( );
@@ -100,15 +101,14 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  void AppendPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  //void AppendPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
-  void SetPosition( size_t ix, pPosition_t, pChartDataView_t pChartData );
-  void SetColour( size_t ix, ou::Colour::enumColour);
+  const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
   virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ) = 0;
-  virtual void PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide ) = 0;
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity ) = 0;
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ) = 0;
 
   virtual double GetNet( double price );
 
@@ -138,8 +138,8 @@ protected:
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
-  using vLeg_t = std::vector<ou::tf::Leg>;
-  vLeg_t m_vLeg;
+  using mapLeg_t = std::map<LegNote::Type,ou::tf::Leg>;
+  mapLeg_t m_mapLeg;
 
   virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
 

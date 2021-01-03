@@ -83,9 +83,7 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
-//#include <TFOptionCombos/Strangle.h>
-//using combo_t = ou::tf::option::Strangle;
-
+#include <TFOptionCombos/LegNote.h>
 #include <TFOptionCombos/Collar.h>
 using combo_t = ou::tf::option::Collar;
 
@@ -413,43 +411,19 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         }
         catch( std::runtime_error& e ) {
           std::cout << "ManageStrategy::Add: " << e.what() << std::endl;
+          // do we end here, what is the nature of the error?
         }
 
         mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
         if ( m_mapOption.end() == iterOption ) {
           m_mapOption[ sOptionName ] = pOption;
+          // TODO: activate calc only if option is active
           m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
         }
 
-        bool bIxLegFound( false );
-        const std::string& sNote = pPosition->Notes();
-        if ( 5 == sNote.size() ) { // "leg=x"
-          char chIx = sNote[ 4 ];
-          if ( ( '0' <= chIx ) && ( '3' >= chIx ) ) {
-            bIxLegFound = true;
-            size_t ix = chIx - '0';
-
-            combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
-
-            switch ( pInstrument->GetOptionSide() ) {
-              case ou::tf::OptionSide::Call:
-                std::cout << "setcall " << ix << "=" << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-                pCombo->SetColour( ix, rColour[ m_ixColour++ ] );
-                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
-                break;
-              case ou::tf::OptionSide::Put:
-                std::cout << "setput  " << ix << "=" << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-                pCombo->SetColour( ix, rColour[ m_ixColour++ ] );
-                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
-                break;
-            }
-          }
-        }
-
-        if ( !bIxLegFound ) {
-          std::cout << "** could not find leg ix for " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-        }
-
+        std::cout << "set combo position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+        combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
+        pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
 
 //        if ( pPosition->IsActive() ) {
           m_fAuthorizeSimple( m_sUnderlying, true ); // update count
@@ -658,11 +632,17 @@ void ManageStrategy::BuildPosition(
  * TODO:
  *   split out each option strategy
  *   add additional states
- *
+* rules:
+ *   expiry day:
+ *     atm, itm : roll, same strike
+ *     otm: expire
+ *          re-enter at atm?
+ *          zero-price, zero-cost close/expire for the position
  */
+
 void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second bars, currently a bar of quote spreads
 
-  // what happens with Add()?  What starte are we in?  What states are executed to reach here?
+  // what happens with Add()?  What state are we in?  What states are executed to reach here?
   // need to determine states and then sequence to get the combo initialized
 
   const double mid = m_QuoteUnderlyingLatest.Midpoint();
@@ -699,6 +679,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               mapCombo_t::iterator mapCombo_iter = m_mapCombo.find( idPortfolio );
               if ( m_mapCombo.end() != mapCombo_iter ) {
                 // is this an issue? is this an error?
+                // TODO: run multiple combos
               }
               else {
                 if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
@@ -706,7 +687,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_bAllowComboAdd = false;
 
                   std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << slope20Day << ")" << std::endl;
-                  std::pair<mapCombo_t::iterator,bool> result;
 
                   auto spCombo = std::make_shared<combo_t>();
 
@@ -723,7 +703,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
 
                   m_pValidateOptions->ValidatedOptions(
-                    [this,idPortfolio,pCombo](size_t ix, pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
+                    [this,idPortfolio,pCombo,direction](size_t ix,pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
                       const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
                       mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
                       if ( m_mapOption.end() == iterOption ) {
@@ -731,15 +711,18 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                         m_fRegisterOption( pOption );
                         m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                       }
-                      std::string sNote = "leg=" + boost::lexical_cast<std::string>( ix );
-                      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, sNote );
-                      pCombo->AppendPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+
+                      ou::tf::option::LegNote::values_t lnValues;
+                      combo_t::FillLegNote( ix, direction, lnValues );
+                      ou::tf::option::LegNote ln( lnValues );
+                      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
+                      pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
                       }
                     );
 
                   m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                  pCombo->PlaceOrder( m_DefaultOrderSide );
+                  pCombo->PlaceOrder( m_DefaultOrderSide, 1 );
                   m_stateTrading = ETradingState::TSComboPrepare;
 
                 } // m_fAuthorizeSimple
@@ -772,7 +755,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         const boost::gregorian::date dateBar( bar.DateTime().date() );
         std::for_each(
           m_mapCombo.begin(), m_mapCombo.end(),
-          [this,dateBar](mapCombo_t::value_type& entry){
+          [this,dateBar](mapCombo_t::value_type& entry){ // fConstructOption_t
             auto pCombo = entry.second;
             pCombo->Prepare(
               dateBar, &m_mapChains,
@@ -786,7 +769,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   }
                 );
               },
-              [this]( ou::tf::option::Combo* p, size_t ix, pOption_t pOption ) { // fRoll_t
+              [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note ) { // fRoll_t
                 combo_t* pCombo = reinterpret_cast<combo_t*>( p );
                 const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
                 mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
@@ -796,10 +779,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                 }
                 // TODO: each leg should have identifying algorithm, if legs are accumulated
-                std::string sNote = "leg=" + boost::lexical_cast<std::string>( ix );
-                pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, sNote );
-                pCombo->SetPosition( ix, pPosition, m_pChartDataView );
-                pCombo->PlaceOrder( ix, m_DefaultOrderSide );
+                pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
+                const ou::tf::option::LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                pCombo->PlaceOrder( m_DefaultOrderSide, 1, lnValues.m_type );
               }
               ); // Prepare
           });

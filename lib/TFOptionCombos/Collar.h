@@ -35,7 +35,7 @@ class Collar: public Combo {
 public:
 
   Collar();
-  Collar( const Collar& rhs );
+  Collar( const Collar& rhs ) = delete;
   Collar& operator=( const Collar& rhs ) = delete;
   Collar( const Collar&& rhs );
   virtual ~Collar();
@@ -49,13 +49,15 @@ public:
     double priceUnderlying,
     fLegSelected_t&& );
 
+  static void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
+
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection );
 
   virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
 
   // long by default for entry, short doesn't make much sense due to combo type
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide );
-  virtual void PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide );
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity );
+  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
 
 protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );

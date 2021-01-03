@@ -22,7 +22,7 @@
 #ifndef LEGDEF_H
 #define LEGDEF_H
 
-#include <TFTrading/TradingEnumerations.h>
+#include "LegNote.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -30,19 +30,17 @@ namespace option { // options
 
 struct LegDef { // generic definition of each leg of the combo
 
-  using EOrderSide = ou::tf::OrderSide::enumOrderSide;
-  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
-
-  EOrderSide side;
+  LegNote::Type type;
+  LegNote::Side side;
+  LegNote::Option option;
   uint32_t quantity;
-  EOptionSide type;
   double dblSpread;
 
-  LegDef( EOrderSide side_, uint32_t quantity_, EOptionSide type_ )
-  : side( side_ ), quantity( quantity_ ), type( type_ ), dblSpread( 0.10 ) {}
+  LegDef( uint32_t quantity_, LegNote::Type type_, LegNote::Side side_, LegNote::Option option_ )
+  : quantity( quantity_ ), type( type_ ), side( side_ ), option( option_ ), dblSpread( 0.10 ) {}
 
-  LegDef( EOrderSide side_, uint32_t quantity_, EOptionSide type_, double dblSpread_ )
-  : side( side_ ), quantity( quantity_ ), type( type_ ), dblSpread( dblSpread_) {}
+  LegDef( uint32_t quantity_, LegNote::Type type_, LegNote::Side side_, LegNote::Option option_, double dblSpread_ )
+  : quantity( quantity_ ), type( type_ ), side( side_ ), option( option_ ), dblSpread( dblSpread_) {}
 };
 
 } // namespace option

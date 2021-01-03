@@ -28,7 +28,10 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/MonitorOrder.h>
 
+// TODO: may need option version inheritance
 #include <TFOptions/Option.h>
+
+#include "LegNote.h"
 
 namespace ou {
 namespace tf {
@@ -41,13 +44,14 @@ public:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   Leg();
+  Leg( const Leg&& rhs );
   Leg( pPosition_t pPosition );
   Leg( const Leg& rhs );
-  Leg& operator=( const Leg& rhs ) = delete;
-  Leg( const Leg&& rhs );
+  Leg& operator=( const Leg&& rhs );
+  virtual ~Leg();
 
-  void SetPosition( pPosition_t pPosition );
-  pPosition_t GetPosition();
+  const option::LegNote::values_t& SetPosition( pPosition_t pPosition );
+  pPosition_t GetPosition() const;
 
   void Tick( ptime dt );
 
@@ -62,20 +66,29 @@ public:
   void SetColour( ou::Colour::enumColour colour );
 
   void SetChartData( pChartDataView_t pChartData );
-  void DelChartData( pChartDataView_t pChartData );
+  void DelChartData();
 
   bool CloseItm( const double price );
   bool CloseItmForProfit( const double price );
   void CloseExpiryItm( const boost::gregorian::date date, const double price );
   void CloseExpiryOtm( const boost::gregorian::date date, const double price );
 
-  double GetNet( double price );
+  double GetNet( double price ) const;
   double ConstructedValue() const;
 
+  const option::LegNote& GetLegNote() const { return m_legNote; }
+
 private:
+
   bool m_bOption;  // only set upon assignment of appropriate position
+
   pPosition_t m_pPosition;
+  option::LegNote m_legNote;
+
   ou::tf::MonitorOrder m_monitor;
+
+  pChartDataView_t m_pChartDataView;
+
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::ChartEntryIndicator m_ceImpliedVolatility;

@@ -43,19 +43,17 @@ namespace {
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,nLegs>;
 
-  enum class ELeg { SynthLong = 0, SynthShort, FrontShort, FrontLong };
-
   static const rLegDef_t m_rLegDefRise = { // rising momentum
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call, 0.20 ), // synthetic long
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.20 ), // synthetic long
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.10 ), // covered
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.10 )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call, 0.20 ), // synthetic long
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put,  0.20 ), // synthetic long
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call, 0.10 ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put,  0.10 )  // protective
   };
   static const rLegDef_t m_rLegDefFall = { // falling momentum
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Put,  0.20 ), // synthetic short
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Call, 0.20 ), // synthetic short
-    LegDef( LegDef::EOrderSide::Sell, 1, LegDef::EOptionSide::Put,  0.10 ), // covered
-    LegDef( LegDef::EOrderSide::Buy,  1, LegDef::EOptionSide::Call, 0.10 )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put,  0.20 ), // synthetic short
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call, 0.20 ), // synthetic short
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put,  0.10 ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call, 0.10 )  // protective
   };
 
 } // namespace anon
@@ -75,25 +73,26 @@ Collar::~Collar() {
 // needs to happen after all Legs have been created
 void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
 
-  static const vLeg_t::size_type ixSynthLong( (size_t)ELeg::SynthLong );
-  static const vLeg_t::size_type ixFrontLong( (size_t)ELeg::FrontLong );
+  assert( 4 == m_mapLeg.size() );  // need to verify this, based upon comment
 
-  pPosition_t pPositionSynthetic( m_vLeg[ixSynthLong].GetPosition() );
-  assert( pPositionSynthetic );  // TODO: assert this is long,
+  // TODO: validate that a roll generates a new position
+
+  pPosition_t pPositionSynthetic( m_mapLeg[LegNote::Type::SynthLong].GetPosition() );
+  assert( pPositionSynthetic );
   citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
   m_trackerSynthetic.Initialize(
     pPositionSynthetic, &citerChainSynthetic->second,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,pPositionSynthetic]( pOption_t pOption ) { // fRoll_t
+    [this,pPositionSynthetic]( pOption_t pOption ) { // m_fRoll
       m_monitor.SetPosition( pPositionSynthetic );
       m_monitor.ClosePosition();
-      m_fRoll( this, ixSynthLong, pOption );
+      m_fRoll( this, pOption, pPositionSynthetic->Notes() );
     }
     );
 
-  pPosition_t pPositionFront( m_vLeg[ixFrontLong].GetPosition() );
+  pPosition_t pPositionFront( m_mapLeg[LegNote::Type::Protect].GetPosition() );
   assert( pPositionFront );  // TODO: assert this is long,
   citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
   m_trackerFront.Initialize(
@@ -101,10 +100,10 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,pPositionFront]( pOption_t pOption ) { // fRoll_t
+    [this,pPositionFront]( pOption_t pOption ) { // m_fRoll
       m_monitor.SetPosition( pPositionFront );
       m_monitor.ClosePosition();
-      m_fRoll( this, ixFrontLong, pOption );
+      m_fRoll( this, pOption, pPositionFront->Notes() );
     }
     );
 
@@ -192,6 +191,32 @@ size_t /* static */ Collar::LegCount() {
   }
 }
 
+/* static */ void Collar::FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
+
+  assert( ix < nLegs );
+
+  values.m_algo = LegNote::Algo::Collar;
+  values.m_state = LegNote::State::Open;
+
+  switch ( direction ) {
+    case E20DayDirection::Unknown:
+      break;
+    case E20DayDirection::Rising:
+      values.m_momentum = LegNote::Momentum::Rise;
+      values.m_type     = m_rLegDefRise[ix].type;
+      values.m_side     = m_rLegDefRise[ix].side;
+      values.m_option   = m_rLegDefRise[ix].option;
+      break;
+    case E20DayDirection::Falling:
+      values.m_momentum = LegNote::Momentum::Fall;
+      values.m_type     = m_rLegDefFall[ix].type;
+      values.m_side     = m_rLegDefFall[ix].side;
+      values.m_option   = m_rLegDefFall[ix].option;
+      break;
+  }
+
+}
+
 /* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection direction ) {
 
   std::string sName( "collar-" + sUnderlying );
@@ -238,22 +263,22 @@ size_t /* static */ Collar::LegCount() {
   return sName;
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
+void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, uint32_t nOrderQuantity ) {
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
-          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
-          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
-          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
-          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
+          m_mapLeg[LegNote::Type::SynthLong].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[LegNote::Type::SynthShort].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[LegNote::Type::Cover].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[LegNote::Type::Protect].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
           break;
         case ou::tf::OrderSide::Sell:
-          m_vLeg[0].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
-          m_vLeg[1].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
-          m_vLeg[2].PlaceOrder( ou::tf::OrderSide::Buy,  1 );
-          m_vLeg[3].PlaceOrder( ou::tf::OrderSide::Sell, 1 );
+          m_mapLeg[LegNote::Type::SynthLong].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[LegNote::Type::SynthShort].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[LegNote::Type::Cover].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[LegNote::Type::Protect].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           break;
       }
       m_state = State::Executing;
@@ -261,19 +286,35 @@ void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side ) {
   }
 }
 
-void Collar::PlaceOrder( size_t ix, ou::tf::OrderSide::enumOrderSide side ) {
-  assert( ix < m_vLeg.size() );
+void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
+
+  LegNote::Side ln_side = m_mapLeg[type].GetLegNote().Values().m_side; // this is normal entry with order_side as buy
+
+  if ( ou::tf::OrderSide::Buy == order_side ) {
+    switch ( ln_side ) { // normal mapping
+      case LegNote::Side::Long:
+        order_side = ou::tf::OrderSide::Buy;
+        break;
+      case LegNote::Side::Short:
+        order_side = ou::tf::OrderSide::Sell;
+        break;
+    }
+  }
+  else { // reverse the mapping
+    switch ( ln_side ) {
+      case LegNote::Side::Long:
+        order_side = ou::tf::OrderSide::Sell;
+        break;
+      case LegNote::Side::Short:
+        order_side = ou::tf::OrderSide::Buy;
+        break;
+    }
+  }
+
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      switch ( side ) {
-        case ou::tf::OrderSide::Buy:
-          m_vLeg[ix].PlaceOrder( m_rLegDefRise[ix].side, 1 );
-          break;
-        case ou::tf::OrderSide::Sell:
-          m_vLeg[ix].PlaceOrder( m_rLegDefFall[ix].side, 1 );
-          break;
-      }
+      m_mapLeg[type].PlaceOrder( order_side, nOrderQuantity );
       m_state = State::Executing;
       break;
   }

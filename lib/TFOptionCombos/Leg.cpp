@@ -40,7 +40,8 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 Leg::Leg( const Leg& rhs )
 : m_pPosition( rhs.m_pPosition ),
   m_monitor( rhs.m_monitor ),
-  m_bOption( rhs.m_bOption )
+  m_bOption( rhs.m_bOption ),
+  m_legNote( rhs.m_legNote )
 {
   Init();
 }
@@ -48,17 +49,38 @@ Leg::Leg( const Leg& rhs )
 Leg::Leg( const Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
   m_monitor( std::move( rhs.m_monitor ) ),
-  m_bOption( rhs.m_bOption )
+  m_legNote( std::move( rhs.m_legNote ) ),
+  m_bOption( std::move( rhs.m_bOption ) )
 {
   Init();
 }
 
-void Leg::SetPosition( pPosition_t pPosition ) {
+Leg& Leg::operator=( const Leg&& rhs ) {
+  if ( this != &rhs ) {
+    m_pPosition = std::move( rhs.m_pPosition );
+    m_monitor = std::move( rhs.m_monitor );
+    m_legNote = std::move( rhs.m_legNote );
+    m_bOption = rhs.m_bOption;
+    Init();
+  }
+  return *this;
+}
+
+Leg::~Leg() {
+  DelChartData();
+  assert( !m_monitor.IsOrderActive() );
+}
+
+const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition ) {
+
   m_pPosition = pPosition;
+  m_legNote.Decode( pPosition->Notes() );
+
+  assert( !m_monitor.IsOrderActive() );
   m_monitor.SetPosition( pPosition );
 
   ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
-  // NOTE: this may generate error!
+  // NOTE: this may generate error with non-option!
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
   m_bOption = false;
@@ -70,9 +92,11 @@ void Leg::SetPosition( pPosition_t pPosition ) {
     m_ceTheta.Clear();
     m_ceVega.Clear();
   }
+
+  return m_legNote.Values();
 }
 
-Leg::pPosition_t Leg::GetPosition() { return m_pPosition; }
+Leg::pPosition_t Leg::GetPosition() const { return m_pPosition; }
 
 void Leg::Tick( ptime dt ) {
   m_monitor.Tick( dt );
@@ -141,38 +165,42 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
   m_ceVega.SetColour( colour );
 }
 
-void Leg::SetChartData( pChartDataView_t pChartData ) {
+void Leg::SetChartData( pChartDataView_t pChartDataView ) {
+  DelChartData();
   if ( m_pPosition ) {
     m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-    pChartData->Add( 2, &m_ceProfitLoss );
+    pChartDataView->Add( 2, &m_ceProfitLoss );
 
     if ( m_bOption ) {
       m_ceImpliedVolatility.SetName( "IV: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-      pChartData->Add( 11, &m_ceImpliedVolatility );
+      pChartDataView->Add( 11, &m_ceImpliedVolatility );
       m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-      pChartData->Add( 12, &m_ceDelta );
+      pChartDataView->Add( 12, &m_ceDelta );
       m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-      pChartData->Add( 13, &m_ceGamma );
+      pChartDataView->Add( 13, &m_ceGamma );
       m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-      pChartData->Add( 14, &m_ceTheta );
+      pChartDataView->Add( 14, &m_ceTheta );
       m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
-      pChartData->Add( 15, &m_ceVega );
+      pChartDataView->Add( 15, &m_ceVega );
     }
+    m_pChartDataView = pChartDataView;
   }
 }
 
-void Leg::DelChartData( pChartDataView_t pChartData ) {
-  if ( m_pPosition ) {
-    pChartData->Remove( 2, &m_ceProfitLoss );
-
-    if ( m_bOption ) {
-      pChartData->Remove( 11, &m_ceImpliedVolatility );
-      pChartData->Remove( 12, &m_ceDelta );
-      pChartData->Remove( 13, &m_ceGamma );
-      pChartData->Remove( 14, &m_ceTheta );
-      pChartData->Remove( 15, &m_ceVega );
+void Leg::DelChartData() {
+  //if ( m_pPosition ) {
+    if ( m_pChartDataView ) {
+      m_pChartDataView->Remove( 2, &m_ceProfitLoss );
+      if ( m_bOption ) {
+        m_pChartDataView->Remove( 11, &m_ceImpliedVolatility );
+        m_pChartDataView->Remove( 12, &m_ceDelta );
+        m_pChartDataView->Remove( 13, &m_ceGamma );
+        m_pChartDataView->Remove( 14, &m_ceTheta );
+        m_pChartDataView->Remove( 15, &m_ceVega );
+      }
+      m_pChartDataView.reset();
     }
-  }
+  //}
 }
 
 bool Leg::CloseItm( const double price ) {
@@ -279,7 +307,7 @@ void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
   }
 }
 
-double Leg::GetNet( double price ) {
+double Leg::GetNet( double price ) const {
   double dblValue {};
   if ( m_pPosition ) {
     dblValue = m_pPosition->GetUnRealizedPL();
