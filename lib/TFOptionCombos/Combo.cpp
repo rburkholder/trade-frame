@@ -25,15 +25,17 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Combo::Combo( )
+Combo::Combo()
 : m_state( State::Initializing )
 {
 }
 
-Combo::Combo( const Combo&& rhs )
+Combo::Combo( Combo&& rhs )
 : m_state( rhs.m_state ),
   m_mapLeg( std::move( rhs.m_mapLeg ) ),
-  m_pPortfolio( std::move( rhs.m_pPortfolio ) )
+  m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
+  m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
+  m_fRoll( std::move( rhs.m_fRoll ) )
 {
 }
 
@@ -55,28 +57,7 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   assert( m_mapLeg.empty() );
   m_pPortfolio = pPortfolio;
 }
-/*
-void Combo::AppendPosition( pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
-  bool bLegFound( false );
-  for ( Leg& leg: m_vLeg ) {
-    if ( pPosition->GetInstrument()->GetInstrumentName() == leg.GetPosition()->GetInstrument()->GetInstrumentName() ) {
-      bLegFound = true;
-      break;
-    }
-  }
-  if ( !bLegFound ) {
-    assert( m_vLeg.size() < m_vLeg.capacity() );
-    assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
-    Leg leg( pPosition );
-    m_vLeg.emplace_back( std::move( leg ) );
-    m_vLeg.back().SetColour( colour ); // comes after as there is no move on indicators
-    m_vLeg.back().SetChartData( pChartData ); // comes after as there is no move on indicators
-  }
-  if ( State::Initializing == m_state ) {
-    m_state = State::Positions;
-  }
-}
-*/
+
 // will over-write existing Leg, needs notes field in pPosition
 const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
 
@@ -89,7 +70,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
   result_t result;
   mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
   if ( m_mapLeg.end() == iter ) {
-    result = m_mapLeg.insert( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+    result = m_mapLeg.emplace( legValues.m_type, std::move( leg ) );
     assert( result.second );
     iter = result.first;
   }

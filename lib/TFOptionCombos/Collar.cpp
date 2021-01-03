@@ -63,7 +63,7 @@ Collar::Collar()
 {
 }
 
-Collar::Collar( const Collar&& rhs )
+Collar::Collar( Collar&& rhs )
 : Combo( std::move( rhs ) )
 {}
 

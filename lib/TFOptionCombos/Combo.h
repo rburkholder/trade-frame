@@ -86,9 +86,9 @@ public:
   using strike_pair_t = std::pair<double,double>; // higher, lower
 
   Combo( );
-  Combo( const Combo& rhs ) = delete;
-  Combo& operator=( const Combo& rhs ) = delete;
-  Combo( const Combo&& rhs );
+  Combo( Combo&& ); // needs experiementation on why no const works, const does not
+  Combo( const Combo& ) = delete;
+  Combo& operator=( const Combo& ) = delete;
   virtual ~Combo( );
 
   void Prepare(
@@ -100,8 +100,6 @@ public:
 
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
-
-  //void AppendPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
   const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
@@ -144,8 +142,6 @@ protected:
   virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
 
 private:
-
-  //void Update( double doubleUnderlyingSlope, double dblPrice ) {};
 
 };
 

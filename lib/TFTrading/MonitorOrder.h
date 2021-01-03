@@ -36,10 +36,10 @@ public:
   using pPosition_t = Position::pPosition_t;
 
   MonitorOrder();
-  MonitorOrder( pPosition_t& pPosition );
-  MonitorOrder( const MonitorOrder& rhs ); // TODO: work on cleaning this up
   MonitorOrder( const MonitorOrder&& rhs );
+  MonitorOrder( pPosition_t& pPosition );
   MonitorOrder& operator=( const MonitorOrder&& );
+  MonitorOrder( const MonitorOrder& rhs ) = delete; // TODO: work on cleaning this up
 
   void SetPosition( pPosition_t pPosition );
 

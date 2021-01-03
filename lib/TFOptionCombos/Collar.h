@@ -35,9 +35,9 @@ class Collar: public Combo {
 public:
 
   Collar();
-  Collar( const Collar& rhs ) = delete;
+  Collar( Collar&& );
+  Collar( const Collar& ) = delete;
   Collar& operator=( const Collar& rhs ) = delete;
-  Collar( const Collar&& rhs );
   virtual ~Collar();
 
   static size_t LegCount();
