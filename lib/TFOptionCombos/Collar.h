@@ -35,7 +35,7 @@ class Collar: public Combo {
 public:
 
   Collar();
-  Collar( Collar&& );
+  Collar( const Collar&& );
   Collar( const Collar& ) = delete;
   Collar& operator=( const Collar& rhs ) = delete;
   virtual ~Collar();
