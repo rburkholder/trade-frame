@@ -20,8 +20,8 @@
  */
 
  /*
-   Rolls a long call up or a long put down to take
-     as a vertical or as a diagonal
+   Rolls a long call up or a long put down to take profit
+     => as a vertical or as a diagonal based upon chain provided
  */
 
 #pragma once
@@ -49,6 +49,8 @@ public:
   using fRoll_t = std::function<void(pOption_t)>;
 
   Tracker();
+  Tracker( const Tracker& ) = delete;
+  Tracker( const Tracker&& );
   ~Tracker();
 
   void Initialize( // ensure it is re-usable

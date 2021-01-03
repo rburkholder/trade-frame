@@ -41,6 +41,21 @@ Tracker::Tracker()
   m_dblUnderlyingSlope {}, m_dblUnderlying {}
 {}
 
+Tracker::Tracker( const Tracker&& rhs )
+: m_compare( std::move( rhs.m_compare ) ),
+  m_luStrike( std::move( rhs.m_luStrike ) ),
+  m_dblStrikeWatch( rhs.m_dblStrikeWatch ),
+  m_sideWatch( rhs.m_sideWatch ),
+  m_dblUnderlying( rhs.m_dblUnderlying ),
+  m_dblUnderlyingSlope( rhs.m_dblUnderlyingSlope ),
+  m_transition( rhs.m_transition ),
+  m_pChain( std::move( rhs.m_pChain ) ),
+  m_pWatch( std::move( rhs.m_pWatch ) ),
+  m_pOption( std::move( rhs.m_pOption ) ),
+  m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
+  m_fRoll( std::move( rhs.m_fRoll ) )
+{}
+
 Tracker::~Tracker() {
   if ( m_pOption ) {
     m_pOption->StopWatch();
@@ -193,9 +208,7 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
       }
       break;
   }
-
 }
-
 
 } // namespace option
 } // namespace tf
