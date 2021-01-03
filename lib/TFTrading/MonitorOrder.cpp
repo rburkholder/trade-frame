@@ -57,6 +57,16 @@ MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
   m_pOrder( std::move( rhs.m_pOrder ) )
 {}
 
+MonitorOrder& MonitorOrder::operator=( const MonitorOrder&& rhs ) {
+  if ( this != &rhs ) {
+    m_CountDownToAdjustment = rhs.m_CountDownToAdjustment;
+    m_state = rhs.m_state;
+    m_pPosition = std::move( rhs.m_pPosition ),
+    m_pOrder = std::move( rhs.m_pOrder );
+  }
+  return *this;
+}
+
 void MonitorOrder::SetPosition( pPosition_t pPosition ) {
   //assert( !m_pPosition );
   assert( !m_pOrder ); // no outstanding orders should exist

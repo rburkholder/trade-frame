@@ -39,6 +39,7 @@ public:
   MonitorOrder( pPosition_t& pPosition );
   MonitorOrder( const MonitorOrder& rhs ); // TODO: work on cleaning this up
   MonitorOrder( const MonitorOrder&& rhs );
+  MonitorOrder& operator=( const MonitorOrder&& );
 
   void SetPosition( pPosition_t pPosition );
 
