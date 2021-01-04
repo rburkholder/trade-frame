@@ -16,12 +16,8 @@
  * File:    Collar.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptionCombos
- * Created on July 19, 2020, 05:43 PM
+ * Created: July 19, 2020, 05:43 PM
  */
-
- // 2020/11/12 when rolling a call up, buy a put for the downward journey?
- //            when rolling a put down, buy a call for the upward journey?
- // 2020/11/12 upon return to original strike, buy in again?
 
 #include <array>
 
@@ -74,6 +70,8 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
 
   assert( 4 == m_mapLeg.size() );  // need to verify this, based upon comment
 
+  // TODO: check if position is active prior to Initialize
+
   pPosition_t pPositionSynthetic( m_mapLeg[LegNote::Type::SynthLong].GetPosition() );
   assert( pPositionSynthetic );
   pWatch_t pWatchSynthetic = pPositionSynthetic->GetWatch();
@@ -113,25 +111,38 @@ void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime d
 
   if ( m_monitor.IsOrderActive() ) m_monitor.Tick( dt );
 
-  // need to manage states:  will need to obtain contract for the option, if not tracking
-  // therefore, track options so ready to trade on demand? ... then watch is available as well
-  //   set state so tracking with a) available option, b) waiting for option creation
-  // track ITM call (for roll-up), ITM put (for roll-down) (with moving average)
-
-  // need to keep track of options, start / stop collection
-  // external construction tracks, just provide the name
-
-  // maybe use stops for exits & rolls?
-
-  // at expiry, then exit or roll
-
-  //   manipulate the long positions
-  //   roll profitable long synthetic call up when trend changes downwards
-  //   roll profitable long front protective put down when trend changes upwards
-  //   buy back short options at 0.10? or 0.05? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
-
+  // vertical/diagonal roll for profitable long protective when trend is in wrong direction
   m_trackerFront.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+  // vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
   m_trackerSynthetic.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+
+  // TODO:
+  //   at expiry:
+  //     otm: accounting adjustment for expiring, enter new position (itm or at expiring strike?)
+  //     itm: horizontal calendar roll
+  //   buy back short options at 0.10? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
+  //     re-enter, or just keep the leg expired?
+
+  // manual accounting:
+  //  was otm, but crossed itm and was assigned
+
+  // 2021/01/03 set old positions to State=Expired/Closed
+  //  * trigger on Leg over-write
+  //  * should always have four active legs
+
+  // 2021/01/03 need to close combos, and no longer load them
+  //  those in the correct direction, keep
+  //  those in the wrong direction, close
+
+  // To Consider:
+
+  // 2020/11/12 when rolling a call up, buy a put for the downward journey?
+  //            when rolling a put down, buy a call for the upward journey?
+  // 2020/11/12 upon return to original strike, buy in again?
+
+  // change 20 day slope to 5 day slope
+
+  // when closing a dead short, consider going long on the same price (buy-out then buy-in)
 
 }
 
@@ -168,8 +179,8 @@ size_t /* static */ Collar::LegCount() {
 
         fLegSelected( m_rLegDefRise[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
         fLegSelected( m_rLegDefRise[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefRise[2].dblSpread, strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeCovered ) );
-        fLegSelected( m_rLegDefRise[3].dblSpread, strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeProtective ) );
+        fLegSelected( m_rLegDefRise[2].dblSpread, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
+        fLegSelected( m_rLegDefRise[3].dblSpread, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
       }
       break;
     case E20DayDirection::Falling:
@@ -183,8 +194,8 @@ size_t /* static */ Collar::LegCount() {
 
         fLegSelected( m_rLegDefFall[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
         fLegSelected( m_rLegDefFall[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefFall[2].dblSpread, strikeCovered,      citerChainFront->first,     chainFront.GetIQFeedNamePut(      strikeCovered ) );
-        fLegSelected( m_rLegDefFall[3].dblSpread, strikeProtective,   citerChainFront->first,     chainFront.GetIQFeedNameCall(     strikeProtective ) );
+        fLegSelected( m_rLegDefFall[2].dblSpread, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
+        fLegSelected( m_rLegDefFall[3].dblSpread, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
       }
       break;
   }

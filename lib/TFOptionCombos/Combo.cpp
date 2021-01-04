@@ -32,7 +32,7 @@ Combo::Combo()
 
 Combo::Combo( Combo&& rhs )
 : m_state( rhs.m_state ),
-  m_mapLeg( std::move( rhs.m_mapLeg ) ),
+  m_mapLeg( std::move( rhs.m_mapLeg ) ), // this seems to prevent a 'const Combo&&'
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fRoll( std::move( rhs.m_fRoll ) )
