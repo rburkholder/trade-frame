@@ -57,10 +57,8 @@ namespace {
 Collar::Collar()
 : Combo() {}
 
-Collar::Collar( const Collar&& rhs )
-: m_trackerFront( std::move( rhs.m_trackerFront ) ),
-  m_trackerSynthetic( std::move( rhs.m_trackerSynthetic ) ),
-  m_monitor( std::move( rhs.m_monitor ) )
+Collar::Collar( Collar&& rhs )
+: m_mapCollarLeg( std::move( rhs.m_mapCollarLeg ) )
 {}
 
 Collar::~Collar() {}
@@ -68,51 +66,64 @@ Collar::~Collar() {}
 // needs to happen after all Legs have been created
 void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
 
+  // this assert will need to go away if legs are built incrementally
   assert( 4 == m_mapLeg.size() );  // need to verify this, based upon comment
 
   // TODO: check if position is active prior to Initialize
+  // TODO: call again upon a roll or other adjustment in any of the legs
+  //   therefore fix the leg which had the adjustment
+  // TODO: so much happening, almost ready to start firing events on state change
 
-  pPosition_t pPositionSynthetic( m_mapLeg[LegNote::Type::SynthLong].GetPosition() );
-  assert( pPositionSynthetic );
-  citerChain_t citerChainSynthetic = Combo::SelectChain( *pmapChains, date, nDaysToExpirySynthetic );
-  m_trackerSynthetic.Initialize(
-    pPositionSynthetic, &citerChainSynthetic->second,
+  mapCollarLeg_t::iterator iterMapCollarLeg;
+
+  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
+  InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, nDaysToExpirySynthetic );
+
+  // === vertical/diagonal roll for profitable long protective when trend is in wrong direction
+  InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
+
+}
+
+void Collar::InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    ) {
+
+  mapCollarLeg_t::iterator iterMapCollarLeg = m_mapCollarLeg.find( type );
+  if ( m_mapCollarLeg.end() == iterMapCollarLeg ) {
+    auto pair = m_mapCollarLeg.emplace( std::make_pair( type, CollarLeg() ) );
+    assert( pair.second );
+    iterMapCollarLeg = pair.first;
+  }
+  CollarLeg& cl( iterMapCollarLeg->second );
+
+  pPosition_t pPosition( m_mapLeg[type].GetPosition() );
+  assert( pPosition );
+  citerChain_t citerChain = Combo::SelectChain( *pmapChains, date, days_to_expiry );
+  const Chain& chain( citerChain->second );
+  cl.m_tracker.Initialize(
+    pPosition, &chain,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,pPositionSynthetic]( pOption_t pOption ) { // m_fRoll
-      m_monitor.SetPosition( pPositionSynthetic );
-      m_monitor.ClosePosition();
-      m_fRoll( this, pOption, pPositionSynthetic->Notes() );
+    [this,pPosition,&cl]( pOption_t pOption ) { // m_fRoll
+      cl.m_monitor.SetPosition( pPosition );
+      cl.m_monitor.ClosePosition();
+      m_fRoll( this, pOption, pPosition->Notes() );
     }
-    );
-
-  pPosition_t pPositionFront( m_mapLeg[LegNote::Type::Protect].GetPosition() );
-  assert( pPositionFront );  // TODO: assert this is long,
-  citerChain_t citerChainFront = Combo::SelectChain( *pmapChains, date, nDaysToExpiryFront );
-  m_trackerFront.Initialize(
-    pPositionFront, &citerChainFront->second,
-    [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
-      m_fConstructOption( sName, std::move( f ) );
-      },
-    [this,pPositionFront]( pOption_t pOption ) { // m_fRoll
-      m_monitor.SetPosition( pPositionFront );
-      m_monitor.ClosePosition();
-      m_fRoll( this, pOption, pPositionFront->Notes() );
-    }
-    );
-
+  );
 }
 
 void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
   Combo::Tick( dblUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
 
-  if ( m_monitor.IsOrderActive() ) m_monitor.Tick( dt );
-
-  // vertical/diagonal roll for profitable long protective when trend is in wrong direction
-  m_trackerFront.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
-  // vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  m_trackerSynthetic.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+  for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
+    CollarLeg& leg( entry.second );
+    if ( leg.m_monitor.IsOrderActive() ) leg.m_monitor.Tick( dt );
+    leg.m_tracker.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+  }
 
   // TODO:
   //   at expiry:
@@ -120,6 +131,7 @@ void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime d
   //     itm: horizontal calendar roll
   //   buy back short options at 0.10? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
   //     re-enter, or just keep the leg expired?
+  //  position note needs to be updated on roll, and such
 
   // manual accounting:
   //  was otm, but crossed itm and was assigned

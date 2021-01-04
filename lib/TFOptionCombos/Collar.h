@@ -35,7 +35,7 @@ class Collar: public Combo {
 public:
 
   Collar();
-  Collar( const Collar&& );
+  Collar( Collar&& );
   Collar( const Collar& ) = delete;
   Collar& operator=( const Collar& rhs ) = delete;
   virtual ~Collar();
@@ -63,10 +63,20 @@ protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
 
-  Tracker m_trackerFront;
-  Tracker m_trackerSynthetic;
+  struct CollarLeg {
+    Tracker m_tracker;
+    ou::tf::MonitorOrder m_monitor; // used for closing, for now
+  };
 
-  ou::tf::MonitorOrder m_monitor;  // used for closing
+  using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>;
+  mapCollarLeg_t m_mapCollarLeg;
+
+  void InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    );
 
 };
 
