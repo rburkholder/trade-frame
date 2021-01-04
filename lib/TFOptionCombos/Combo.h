@@ -26,8 +26,9 @@
 
 #include <OUCharting/ChartDataView.h>
 
-#include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
+#include <TFTrading/Portfolio.h>
+
 
 #include <TFOptions/Chain.h>
 

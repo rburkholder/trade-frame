@@ -50,7 +50,7 @@ public:
 
   Tracker();
   Tracker( const Tracker& ) = delete;
-  Tracker( const Tracker&& );
+  Tracker( Tracker&& );
   ~Tracker();
 
   void Initialize( // ensure it is re-usable

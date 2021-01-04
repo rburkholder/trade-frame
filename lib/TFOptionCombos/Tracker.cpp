@@ -41,7 +41,7 @@ Tracker::Tracker()
   m_dblUnderlyingSlope {}, m_dblUnderlying {}
 {}
 
-Tracker::Tracker( const Tracker&& rhs )
+Tracker::Tracker( Tracker&& rhs )
 : m_compare( std::move( rhs.m_compare ) ),
   m_luStrike( std::move( rhs.m_luStrike ) ),
   m_dblStrikeWatch( rhs.m_dblStrikeWatch ),

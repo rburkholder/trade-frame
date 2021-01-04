@@ -44,7 +44,7 @@ public:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   Leg();
-  Leg( const Leg&& rhs );
+  Leg( Leg&& rhs );
   Leg( const Leg& rhs ) = delete;
   Leg( pPosition_t pPosition );
   Leg& operator=( const Leg&& rhs );

@@ -37,7 +37,7 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
   SetPosition( pPosition );
 }
 
-Leg::Leg( const Leg&& rhs )
+Leg::Leg( Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
   m_monitor( std::move( rhs.m_monitor ) ),
   m_legNote( std::move( rhs.m_legNote ) ),

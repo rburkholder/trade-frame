@@ -36,7 +36,7 @@ public:
   using pPosition_t = Position::pPosition_t;
 
   MonitorOrder();
-  MonitorOrder( const MonitorOrder&& rhs );
+  MonitorOrder( MonitorOrder&& rhs );
   MonitorOrder( pPosition_t& pPosition );
   MonitorOrder& operator=( const MonitorOrder&& );
   MonitorOrder( const MonitorOrder& rhs ) = delete; // TODO: work on cleaning this up

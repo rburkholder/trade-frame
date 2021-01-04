@@ -42,7 +42,7 @@ MonitorOrder::MonitorOrder( pPosition_t& pPosition )
 // what checks to perform on m_state?  need to be in a good state for things to sync properly
 //assert( !m_pPosition ); // let us see where this goes, may raise an issue with the constructor initialized with position
 //assert( !m_pOrder ); // this causes issues if duplicated
-MonitorOrder::MonitorOrder( const MonitorOrder&& rhs )
+MonitorOrder::MonitorOrder( MonitorOrder&& rhs )
 : m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
   m_state( rhs.m_state ),
   m_pPosition( std::move( rhs.m_pPosition ) ),
