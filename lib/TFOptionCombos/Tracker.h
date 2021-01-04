@@ -38,7 +38,7 @@ namespace option { // options
 class Tracker {
 public:
 
-  using pWatch_t  = ou::tf::option::Option::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
 
   using chain_t = ou::tf::option::Chain;
@@ -54,7 +54,7 @@ public:
   ~Tracker();
 
   void Initialize( // ensure it is re-usable
-    pWatch_t pWatch,
+    pPosition_t pPosition,
     const chain_t* pChain,
     fConstructOption_t&&,
     fRoll_t&&
@@ -82,7 +82,7 @@ private:
 
   const chain_t* m_pChain;
 
-  pWatch_t m_pWatch;
+  pPosition_t m_pPosition;
   pOption_t m_pOption;
 
   fConstructOption_t m_fConstructOption;

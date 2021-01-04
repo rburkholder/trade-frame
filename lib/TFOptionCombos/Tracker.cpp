@@ -50,7 +50,7 @@ Tracker::Tracker( const Tracker&& rhs )
   m_dblUnderlyingSlope( rhs.m_dblUnderlyingSlope ),
   m_transition( rhs.m_transition ),
   m_pChain( std::move( rhs.m_pChain ) ),
-  m_pWatch( std::move( rhs.m_pWatch ) ),
+  m_pPosition( std::move( rhs.m_pPosition ) ),
   m_pOption( std::move( rhs.m_pOption ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fRoll( std::move( rhs.m_fRoll ) )
@@ -62,11 +62,11 @@ Tracker::~Tracker() {
     m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
     m_pOption.reset();
   }
-  m_pWatch.reset();
+  m_pPosition.reset();
 }
 
 void Tracker::Initialize(
-  pWatch_t pWatch,
+  pPosition_t pPosition,
   const ou::tf::option::Chain* pChain,
   fConstructOption_t&& fConstructOption,
   fRoll_t&& fRoll
@@ -76,13 +76,14 @@ void Tracker::Initialize(
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  m_pWatch = pWatch;
+  m_pPosition = pPosition;
+
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
   m_fRoll = std::move( fRoll );
 
-  pInstrument_t pInstrument = m_pWatch->GetInstrument();
+  pInstrument_t pInstrument = m_pPosition->GetWatch()->GetInstrument();
   assert( pInstrument->IsOption() );
 
   m_dblStrikeWatch = pInstrument->GetStrike();
@@ -181,11 +182,10 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
           // positive for long call, negative for long put
         }
         else {
-          const ou::tf::Quote& watch( m_pWatch->LastQuote() );
           // test if roll will be profitable
-          double diff = watch.Bid() - quote.Ask();  // sell existing at bid, buy new at the ask => gross profit
-          diff -= ( watch.Spread() + quote.Spread() ) / 2.0;  // subtract exit spread
-          diff -= 0.10;  // subtract commissions and such
+          double diff = m_pPosition->GetUnRealizedPL() - quote.Ask();  // buy new at the ask
+          diff -= quote.Spread();  // subtract exit spread for extra margin?
+          diff -= 0.10;  // subtract commissions and such plus some spare change
           if ( 0.10 < diff ) { // desire at least 10 cents on the roll
             std::cout
               << quote.DateTime().time_of_day() << " "
@@ -199,7 +199,7 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
             m_fRoll( m_pOption );
             m_pOption.reset();
-            m_pWatch.reset();
+            m_pPosition.reset();
             m_compare = nullptr;
             m_luStrike = nullptr;
             m_transition = ETransition::Initial;  // start all over again
