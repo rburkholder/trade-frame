@@ -21,6 +21,8 @@
 
 #include <array>
 
+#include <TFTrading/PortfolioManager.h>
+
 #include "LegDef.h"
 #include "Collar.h"
 
@@ -84,6 +86,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
 
 }
 
+// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
 void Collar::InitTrackLongOption(
     LegNote::Type type,
     const mapChains_t* pmapChains,
@@ -108,10 +111,24 @@ void Collar::InitTrackLongOption(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,pPosition,&cl]( pOption_t pOption ) { // m_fRoll
-      cl.m_monitor.SetPosition( pPosition );
+    [this,pPositionOld=pPosition,&cl]( pOption_t pOption )->pPosition_t { // m_fRoll
+
+      const std::string sNotes( pPositionOld->Notes() );
+      LegNote ln( sNotes );
+
+      LegNote::values_t values( ln.Values() );
+      values.m_state = LegNote::State::Closed;
+      ln.Assign( values );
+      pPositionOld->SetNotes( ln.Encode() );
+      auto& instance( ou::tf::PortfolioManager::Instance() ); // NOTE this direct call!!
+      instance.PositionUpdateNotes( pPositionOld );
+
+      cl.m_monitor.SetPosition( pPositionOld );
       cl.m_monitor.ClosePosition();
-      m_fRoll( this, pOption, pPosition->Notes() );
+
+      // TODO: will need to supply previous option => stop calc, may need a clean up lambda
+      //   then the note change above can be performed elsewhere
+      return m_fRoll( this, pOption, sNotes );
     }
   );
 }
@@ -122,6 +139,8 @@ void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime d
   for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
     CollarLeg& leg( entry.second );
     if ( leg.m_monitor.IsOrderActive() ) leg.m_monitor.Tick( dt );
+
+    // NOTE: need to change this when shorts are monitored (switch on LegNote::Side, or let Tracker decide with indirection)
     leg.m_tracker.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
   }
 

@@ -66,23 +66,27 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
   Leg leg;
   const LegNote::values_t& legValues( leg.SetPosition( pPosition ) );
 
-  using result_t = std::pair<mapLeg_t::iterator, bool>;
-  result_t result;
-  mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
-  if ( m_mapLeg.end() == iter ) {
-    result = m_mapLeg.emplace( legValues.m_type, std::move( leg ) );
-    assert( result.second );
-    iter = result.first;
-  }
-  else {
-    iter->second = std::move( leg );
-  }
+  if ( LegNote::State::Open == legValues.m_state ) {
 
-  iter->second.SetColour( colour ); // comes after as there is no move on indicators
-  iter->second.SetChartData( pChartData ); // comes after as there is no move on indicators
+    using result_t = std::pair<mapLeg_t::iterator, bool>;
+    result_t result;
+    mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
+    if ( m_mapLeg.end() == iter ) {
+      result = m_mapLeg.emplace( legValues.m_type, std::move( leg ) );
+      assert( result.second );
+      iter = result.first;
+    }
+    else {
+      iter->second = std::move( leg );
+    }
 
-  if ( State::Initializing == m_state ) {
-    m_state = State::Positions;
+    iter->second.SetColour( colour ); // comes after as there is no move on indicators
+    iter->second.SetChartData( pChartData ); // comes after as there is no move on indicators
+
+    if ( State::Initializing == m_state ) {
+      m_state = State::Positions;
+    }
+
   }
 
   return legValues;

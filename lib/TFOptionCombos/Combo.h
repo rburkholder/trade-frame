@@ -76,7 +76,7 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
-  using fRoll_t = std::function<void(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
+  using fRoll_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 

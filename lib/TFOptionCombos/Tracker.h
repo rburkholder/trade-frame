@@ -46,7 +46,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fRoll_t = std::function<void(pOption_t)>;
+  using fRoll_t = std::function<pPosition_t(pOption_t)>;
 
   Tracker();
   Tracker( const Tracker& ) = delete;
@@ -90,6 +90,7 @@ private:
 
   void Construct( double strikeItm );
   void HandleOptionQuote( const ou::tf::Quote& );
+  void Initialize( pPosition_t );
 
 };
 

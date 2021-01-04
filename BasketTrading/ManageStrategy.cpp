@@ -423,11 +423,15 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
         std::cout << "set combo position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
         combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
-        pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-
-//        if ( pPosition->IsActive() ) {
+        // TODO: may need special call for colour for non-Open positions
+        using LegNote = ou::tf::option::LegNote;
+        const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+        if ( LegNote::State::Open == lnValues.m_state ) {
           m_fAuthorizeSimple( m_sUnderlying, true ); // update count
-//        }
+        }
+        else {
+          m_ixColour--;
+        }
       }
       break;
   }
@@ -769,7 +773,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   }
                 );
               },
-              [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note ) { // fRoll_t
+              [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fRoll_t
                 combo_t* pCombo = reinterpret_cast<combo_t*>( p );
                 const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
                 mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
@@ -778,10 +782,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   m_fRegisterOption( pOption );
                   m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
                 }
-                // TODO: each leg should have identifying algorithm, if legs are accumulated
                 pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
-                const ou::tf::option::LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                using LegNote = ou::tf::option::LegNote;
+                const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
                 pCombo->PlaceOrder( m_DefaultOrderSide, 1, lnValues.m_type );
+                return pPosition;
               }
               ); // Prepare
           });

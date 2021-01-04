@@ -74,14 +74,21 @@ void Tracker::Initialize(
 
   assert( ETransition::Initial == m_transition );
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
-  m_pPosition = pPosition;
-
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
   m_fRoll = std::move( fRoll );
+
+  Initialize( pPosition );
+
+  m_transition = ETransition::Track;
+}
+
+void Tracker::Initialize( pPosition_t pPosition ) {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  m_pPosition = pPosition;
 
   pInstrument_t pInstrument = m_pPosition->GetWatch()->GetInstrument();
   assert( pInstrument->IsOption() );
@@ -101,7 +108,6 @@ void Tracker::Initialize(
   }
   assert( m_compare );
 
-  m_transition = ETransition::Track;
 }
 
 void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
@@ -195,14 +201,14 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
               << ",slope=" << m_dblUnderlyingSlope
               << std::endl;
             m_transition = ETransition::Roll;
+            m_pPosition.reset();
             m_pOption->StopWatch();
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
-            m_fRoll( m_pOption );
-            m_pOption.reset();
-            m_pPosition.reset();
             m_compare = nullptr;
             m_luStrike = nullptr;
-            m_transition = ETransition::Initial;  // start all over again
+            Initialize( m_fRoll( m_pOption ) );
+            m_pOption.reset();
+            m_transition = ETransition::Track;  // start all over again
           }
         }
       }
