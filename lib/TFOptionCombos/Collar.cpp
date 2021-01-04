@@ -111,7 +111,7 @@ void Collar::InitTrackLongOption(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,pPositionOld=pPosition,&cl]( pOption_t pOption )->pPosition_t { // m_fRoll
+    [this,&cl]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // m_fRoll
 
       const std::string sNotes( pPositionOld->Notes() );
       LegNote ln( sNotes );

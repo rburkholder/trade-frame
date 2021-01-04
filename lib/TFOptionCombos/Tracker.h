@@ -46,7 +46,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fRoll_t = std::function<pPosition_t(pOption_t)>;
+  using fRoll_t = std::function<pPosition_t(pPosition_t,pOption_t)>;
 
   Tracker();
   Tracker( const Tracker& ) = delete;

@@ -201,12 +201,12 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
               << ",slope=" << m_dblUnderlyingSlope
               << std::endl;
             m_transition = ETransition::Roll;
-            m_pPosition.reset();
             m_pOption->StopWatch();
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
             m_compare = nullptr;
             m_luStrike = nullptr;
-            Initialize( m_fRoll( m_pOption ) );
+            Initialize( m_fRoll( m_pPosition, m_pOption ) );
+            //m_pPosition.reset();  // over-written during reset
             m_pOption.reset();
             m_transition = ETransition::Track;  // start all over again
           }
