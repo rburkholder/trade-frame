@@ -50,11 +50,11 @@ public:
   };
 
   LegNote();
-  LegNote( const values_t& );
-  LegNote( const std::string& ); // construct from formatted string
   LegNote( const LegNote&& );
-  LegNote( const LegNote& );
+  LegNote( const values_t& );
+  LegNote( const std::string& ); // construct from formatted string, typically saved in Position
   LegNote& operator=( const LegNote&& );
+  LegNote( const LegNote& ) = delete;
   virtual ~LegNote();
 
   const values_t& Decode( const std::string& );

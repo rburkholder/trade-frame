@@ -141,10 +141,6 @@ LegNote::LegNote( const LegNote&& rhs )
 : m_bValid( rhs.m_bValid ), m_values( std::move( rhs.m_values ) )
 {}
 
-LegNote::LegNote( const LegNote& rhs )
-: m_bValid( rhs.m_bValid ), m_values( rhs.m_values )
-{}
-
 LegNote& LegNote::operator=( const LegNote&& rhs ) {
   if ( this != &rhs ) {
     m_bValid = std::move( rhs.m_bValid );
