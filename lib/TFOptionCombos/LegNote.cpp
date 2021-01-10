@@ -35,10 +35,10 @@
 
  BOOST_FUSION_ADAPT_STRUCT(
   values_t,
-  (ou::tf::option::LegNote::State, m_state),
   (ou::tf::option::LegNote::Type, m_type),
-  (ou::tf::option::LegNote::Side, m_side),
+  (ou::tf::option::LegNote::State, m_state),
   (ou::tf::option::LegNote::Option, m_option),
+  (ou::tf::option::LegNote::Side, m_side),
   (ou::tf::option::LegNote::Momentum, m_momentum),
   (ou::tf::option::LegNote::Algo, m_algo)
   )
@@ -88,21 +88,21 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "collar", LegNote::Algo::Collar )
       ;
 
-    type %=     qi::lit( "type=") >> type_;
-    state %=    qi::lit( "state=" ) >> state_;
-    option %=   qi::lit( "option=" ) >> option_;
-    side %=     qi::lit( "side=" ) >> side_;
-    momentum %= qi::lit( "momentum=" ) >> momentum_;
-    algo %=     qi::lit( "algo=" ) >> algo_;
+    type =     qi::lit( "type=") >> type_;
+    state =    qi::lit( "state=" ) >> state_;
+    option =   qi::lit( "option=" ) >> option_;
+    side =     qi::lit( "side=" ) >> side_;
+    momentum = qi::lit( "momentum=" ) >> momentum_;
+    algo =     qi::lit( "algo=" ) >> algo_;
 
     // Todo: allow random order, partial list?
-    start %=
+    start =
       type     >> qi::lit( ',' ) >>
       state    >> qi::lit( ',' ) >>
       option   >> qi::lit( ',' ) >>
       side     >> qi::lit( ',' ) >>
       momentum >> qi::lit( ',' ) >>
-      algo
+      algo >> qi::eps
       ;
 
   }
@@ -211,7 +211,7 @@ const std::string LegNote::Encode() const {
       break;
   }
 
-  ss << ",momeentum=";
+  ss << ",momentum=";
   switch ( m_values.m_momentum ) {
     case Momentum::Rise:
       ss << "rise";
@@ -254,10 +254,16 @@ void LegNote::Parse( const std::string& s ) {
   std::string::const_iterator begin( s.begin() );
   std::string::const_iterator end( s.end() );
 
+  size_t start_diff = end - begin;
+
   bool b = qi::parse( begin, end, parser, m_values );
   if ( b && ( begin == end ) ) {}
   else {
-    std::runtime_error( "LegNote has unknown content: " + s );
+    size_t end_diff = end - begin;
+    std::stringstream ss;
+    ss << "LegNote has unknown content: " << start_diff << "," << end_diff << "," << s;
+    std::string e = ss.str();
+    throw std::runtime_error( e );
   }
 
   m_bValid = true;
