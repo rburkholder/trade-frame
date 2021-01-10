@@ -41,7 +41,7 @@ Leg::Leg( Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
   m_monitor( std::move( rhs.m_monitor ) ),
   m_legNote( std::move( rhs.m_legNote ) ),
-  m_bOption( std::move( rhs.m_bOption ) ),
+  m_bOption( rhs.m_bOption ),
   m_pChartDataView( std::move( rhs.m_pChartDataView ) )
 {
   Init();
@@ -53,6 +53,7 @@ Leg& Leg::operator=( const Leg&& rhs ) {
     m_monitor = std::move( rhs.m_monitor );
     m_legNote = std::move( rhs.m_legNote );
     m_bOption = rhs.m_bOption;
+    m_pChartDataView = std::move( rhs.m_pChartDataView );
     Init();
   }
   return *this;
