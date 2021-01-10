@@ -720,6 +720,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                       combo_t::FillLegNote( ix, direction, lnValues );
                       ou::tf::option::LegNote ln( lnValues );
                       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
+                      assert( pPosition );
                       pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
                       }
                     );
