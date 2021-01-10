@@ -39,7 +39,8 @@ Combo::Combo( Combo&& rhs )
 {
 }
 
-Combo::~Combo( ) {
+Combo::~Combo() {
+  m_mapLeg.clear();
 }
 
 void Combo::Prepare(
@@ -61,6 +62,8 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
 // will over-write existing Leg, needs notes field in pPosition
 const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
 
+  assert( pPosition );
+  assert( pChartData );
   assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
 
   Leg leg;
@@ -68,11 +71,11 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
 
   if ( LegNote::State::Open == legValues.m_state ) {
 
-    using result_t = std::pair<mapLeg_t::iterator, bool>;
-    result_t result;
     mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
     if ( m_mapLeg.end() == iter ) {
-      result = m_mapLeg.emplace( legValues.m_type, std::move( leg ) );
+      using result_t = std::pair<mapLeg_t::iterator, bool>;
+      result_t result;
+      result = m_mapLeg.emplace( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
       assert( result.second );
       iter = result.first;
     }
