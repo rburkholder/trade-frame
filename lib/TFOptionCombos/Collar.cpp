@@ -63,9 +63,12 @@ Collar::Collar( Collar&& rhs )
 : m_mapCollarLeg( std::move( rhs.m_mapCollarLeg ) )
 {}
 
-Collar::~Collar() {}
+Collar::~Collar() {
+  m_mapCollarLeg.clear();
+}
 
 // needs to happen after all Legs have been created
+// called from Combo::Prepare
 void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
 
   // this assert will need to go away if legs are built incrementally
