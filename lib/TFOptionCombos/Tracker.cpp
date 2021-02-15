@@ -38,7 +38,7 @@ Tracker::Tracker()
   m_pChain( nullptr ),
   m_compare( nullptr ),
   m_luStrike( nullptr ),
-  m_dblUnderlyingSlope {}, m_dblUnderlying {}
+  m_dblUnderlyingSlope {}, m_dblUnderlyingPrice {}
 {}
 
 Tracker::Tracker( Tracker&& rhs )
@@ -46,7 +46,7 @@ Tracker::Tracker( Tracker&& rhs )
   m_luStrike( std::move( rhs.m_luStrike ) ),
   m_dblStrikeWatch( rhs.m_dblStrikeWatch ),
   m_sideWatch( rhs.m_sideWatch ),
-  m_dblUnderlying( rhs.m_dblUnderlying ),
+  m_dblUnderlyingPrice( rhs.m_dblUnderlyingPrice ),
   m_dblUnderlyingSlope( rhs.m_dblUnderlyingSlope ),
   m_transition( rhs.m_transition ),
   m_pChain( std::move( rhs.m_pChain ) ),
@@ -110,15 +110,15 @@ void Tracker::Initialize( pPosition_t pPosition ) {
 
 }
 
-void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlying ) {
+void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
   switch ( m_transition ) {
     case ETransition::Track:
       {
-        m_dblUnderlying      = dblUnderlying;
+        m_dblUnderlyingPrice = dblUnderlyingPrice;
         m_dblUnderlyingSlope = dblUnderlyingSlope;
 
-        double strikeItm = m_luStrike( dblUnderlying );
+        double strikeItm = m_luStrike( dblUnderlyingPrice );
 
         if ( m_compare( strikeItm, m_dblStrikeWatch ) ) { // is new strike further itm?
           if ( m_pOption ) { // if already tracking the option
@@ -188,8 +188,9 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
           // positive for long call, negative for long put
         }
         else {
-          // test if roll will be profitable
-          double diff = m_pPosition->GetUnRealizedPL() - quote.Ask();  // buy new at the ask
+          // test if roll will be profitable for long option
+          //double diff = m_pPosition->GetUnRealizedPL() - quote.Ask();  // buy new at the ask
+          double diff = m_pPosition->GetUnRealizedPL();
           diff -= quote.Spread();  // subtract exit spread for extra margin?
           diff -= 0.10;  // subtract commissions and such plus some spare change
           if ( 0.10 < diff ) { // desire at least 10 cents on the roll
@@ -197,7 +198,7 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
               << quote.DateTime().time_of_day() << " "
               << m_pOption->GetInstrument()->GetInstrumentName()
               << " roll on diff=" << diff
-              << ",underlying=" << m_dblUnderlying
+              << ",underlying=" << m_dblUnderlyingPrice
               << ",slope=" << m_dblUnderlyingSlope
               << std::endl;
             m_transition = ETransition::Roll;
@@ -205,9 +206,8 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleOptionQuote ) );
             m_compare = nullptr;
             m_luStrike = nullptr;
-            Initialize( m_fRoll( m_pPosition, m_pOption ) );
-            //m_pPosition.reset();  // over-written during reset
-            m_pOption.reset();
+            pOption_t pOption( std::move( m_pOption ) );
+            Initialize( m_fRoll( m_pPosition, std::move( pOption ) ) );
             m_transition = ETransition::Track;  // start all over again
           }
         }

@@ -46,7 +46,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fRoll_t = std::function<pPosition_t(pPosition_t,pOption_t)>;
+  using fRoll_t = std::function<pPosition_t/*new?*/(pPosition_t/*old?*/,pOption_t)>;
 
   Tracker();
   Tracker( const Tracker& ) = delete;
@@ -60,7 +60,7 @@ public:
     fRoll_t&&
     );
 
-  void TestLong( double dblUnderlyingSlope, double dblUnderlying );
+  void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
 
 protected:
 private:
@@ -74,7 +74,7 @@ private:
   double m_dblStrikeWatch;
   ou::tf::OptionSide::enumOptionSide m_sideWatch;
 
-  double m_dblUnderlying;
+  double m_dblUnderlyingPrice;
   double m_dblUnderlyingSlope;
 
   enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll };

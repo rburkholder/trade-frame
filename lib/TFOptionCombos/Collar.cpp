@@ -136,15 +136,16 @@ void Collar::InitTrackLongOption(
   );
 }
 
-void Collar::Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt ) {
-  Combo::Tick( dblUnderlyingSlope, dblPriceUnderlying, dt ); // first or last in sequence?
+void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
+  Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
 
   for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
     CollarLeg& leg( entry.second );
     if ( leg.m_monitor.IsOrderActive() ) leg.m_monitor.Tick( dt );
 
     // NOTE: need to change this when shorts are monitored (switch on LegNote::Side, or let Tracker decide with indirection)
-    leg.m_tracker.TestLong( dblUnderlyingSlope, dblPriceUnderlying );
+    // TODO: convert to the new fTest_t capabliity, cycle through the vector and run the functions
+    leg.m_tracker.TestLong( dblUnderlyingSlope, dblUnderlyingPrice );
   }
 
   // TODO:

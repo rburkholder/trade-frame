@@ -53,7 +53,7 @@ public:
 
   static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection );
 
-  virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
   // long by default for entry, short doesn't make much sense due to combo type
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity );
@@ -63,9 +63,12 @@ protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
 
+  using fTest_t = std::function<void(double,double)>; // underlying slope, price
+
   struct CollarLeg {
     Tracker m_tracker;
     ou::tf::MonitorOrder m_monitor; // used for closing, for now
+    std::vector<fTest_t> fTest; // functions to test & process leg
   };
 
   using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>;

@@ -104,7 +104,7 @@ public:
 
   const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
 
-  virtual void Tick( double dblUnderlyingSlope, double dblPriceUnderlying, ptime dt );
+  virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity ) = 0;
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ) = 0;
