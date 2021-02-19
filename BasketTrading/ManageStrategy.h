@@ -53,6 +53,8 @@
 #include "PivotCrossing.h"
 #include "ValidateOptions.h"
 
+class OptionRepository;
+
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
 {
@@ -104,6 +106,7 @@ public:
     const std::string& sUnderlying,
     const std::string& sDailyBarPath,
     const ou::tf::Bar& barPriorDaily,
+    // TODO: convert these to left assign
     pPortfolio_t,
     fGatherOptionDefinitions_t,
     fConstructWatch_t,
@@ -225,13 +228,12 @@ private:
   fConstructPortfolio_t m_fConstructPortfolio;
 
   fRegisterWatch_t m_fRegisterWatch;
-  fRegisterOption_t m_fRegisterOption;
-  fStartCalc_t m_fStartCalc;
-  fStopCalc_t m_fStopCalc;
 
   fAuthorizeSimple_t m_fAuthorizeSimple;
   fAuthorizeUnderlying_t m_fAuthorizeUnderlying;
   fAuthorizeOption_t m_fAuthorizeOption;
+
+  std::unique_ptr<OptionRepository> m_pOptionRepository;
 
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
@@ -254,9 +256,6 @@ private:
 
   using mapCombo_t = std::map<std::string,pCombo_t>;
   mapCombo_t m_mapCombo;
-
-  using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
-  mapOption_t m_mapOption;
 
   ou::tf::Bars m_barsDaily;
   ou::tf::Prices m_pricesDailyClose;

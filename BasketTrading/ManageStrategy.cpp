@@ -105,6 +105,102 @@ namespace {
   };
 }
 
+class OptionRepository {
+public:
+
+  using fRegisterOption_t = ManageStrategy::fRegisterOption_t;
+  using fStartCalc_t = ManageStrategy::fStartCalc_t;
+  using fStopCalc_t  = ManageStrategy::fStopCalc_t;
+
+  //using pPosition_t  = ou::tf::Position::pPosition_t;
+  using pWatch_t      = ou::tf::option::Option::pWatch_t;
+  using pOption_t   = ou::tf::option::Option::pOption_t;
+
+  OptionRepository(
+    fRegisterOption_t&& fRegisterOption,
+    fStartCalc_t&& fStartCalc,
+    fStopCalc_t&& fStopCalc
+  ) :
+    m_fRegisterOption( std::move( fRegisterOption ) ),
+    m_fStartCalc( std::move( fStartCalc ) ),
+    m_fStopCalc( std::move( fStopCalc ) )
+  {
+    assert( nullptr != m_fStartCalc );
+    assert( nullptr != m_fStopCalc );
+    assert( nullptr != m_fRegisterOption );
+  }
+
+  ~OptionRepository() {
+    for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
+      m_fStopCalc( vt.second, m_pWatchUnderlying );
+    }
+    m_mapOption.clear();
+  }
+
+  // don't worry about reference counting, options in a strategy need to be unique
+  // however, may need to worry about the option if from previous time frame
+
+  void AssignWatchUnderlying( pWatch_t&& pWatchUnderlying ) {
+    m_pWatchUnderlying = std::move( pWatchUnderlying );
+  }
+
+  void Add( pOption_t pOption ) {
+
+    const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+
+    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+    if ( m_mapOption.end() == iterOption ) {
+
+      try {
+        m_fRegisterOption( pOption );
+      }
+      catch( std::runtime_error& e ) {
+        std::cout << "OptionRepository::Add: " << e.what() << std::endl;
+        // simply telling us we are already registered, convert from error to status?
+      }
+
+      m_mapOption[ sOptionName ] = pOption;
+      // TODO: activate calc only if option is active
+      m_fStartCalc( pOption, m_pWatchUnderlying );
+    }
+    else {
+      std::cout << "OptionRepository::Add: error, duplicate entry: " << sOptionName << std::endl;
+    }
+
+  }
+
+  void Remove( pOption_t pOption ) {
+
+    const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+
+    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+    if ( m_mapOption.end() != iterOption ) {
+
+      m_fStopCalc( pOption, m_pWatchUnderlying );
+      // TODO: stop calc only if option is active
+      m_mapOption.erase( iterOption );
+
+    }
+    else {
+      std::cout << "OptionRepository::Remove: error, option not found: " << sOptionName << std::endl;
+    }
+
+  }
+
+protected:
+private:
+
+  pWatch_t m_pWatchUnderlying;
+
+  fRegisterOption_t m_fRegisterOption;
+  fStartCalc_t m_fStartCalc;
+  fStopCalc_t m_fStopCalc;
+
+  using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
+  mapOption_t m_mapOption;
+
+};
+
 ManageStrategy::ManageStrategy(
   const std::string& sUnderlying,
   const std::string& sDailyBarPath,
@@ -138,9 +234,6 @@ ManageStrategy::ManageStrategy(
   m_fConstructPortfolio( fConstructPortfolio ),
   m_stateTrading( ETradingState::TSInitializing ),
   m_fRegisterWatch( fRegisterWatch ),
-  m_fRegisterOption( fRegisterOption ),
-  m_fStartCalc( fStartCalc ),
-  m_fStopCalc( fStopCalc ),
   m_fFirstTrade( fFirstTrade ),
   m_fAuthorizeUnderlying( fAuthorizeUnderlying ),
   m_fAuthorizeOption( fAuthorizeOption ),
@@ -176,8 +269,6 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
   assert( nullptr != m_fConstructPortfolio );
-  assert( nullptr != m_fStartCalc );
-  assert( nullptr != m_fStopCalc );
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
   assert( pcdvStrategyData );
@@ -216,6 +307,12 @@ ManageStrategy::ManageStrategy(
   pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortExits );
   pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongExits );
 
+  m_pOptionRepository = std::make_unique<OptionRepository>(
+    std::move( fRegisterOption ),
+    std::move( fStartCalc ),
+    std::move( fStartCalc )
+  );
+
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
@@ -247,6 +344,8 @@ ManageStrategy::ManageStrategy(
         m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying, "" ); // no note needed for underlying
         assert( m_pPositionUnderlying );
         assert( m_pPositionUnderlying->GetWatch() );
+
+        m_pOptionRepository->AssignWatchUnderlying( m_pPositionUnderlying->GetWatch() );
 
         // collect option chains for the underlying
         fGatherOptionDefinitions(
@@ -320,10 +419,7 @@ ManageStrategy::ManageStrategy(
 ManageStrategy::~ManageStrategy( ) {
 
   m_mapCombo.clear();
-  for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
-    m_fStopCalc( vt.second, m_pPositionUnderlying->GetWatch() );
-  }
-  m_mapOption.clear();
+  m_pOptionRepository.reset();
   m_vEMA.clear();
   if ( m_pPositionUnderlying ) {
     pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
@@ -404,22 +500,8 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         }
 
         pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-        const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
 
-        try {
-          m_fRegisterOption( pOption );
-        }
-        catch( std::runtime_error& e ) {
-          std::cout << "ManageStrategy::Add: " << e.what() << std::endl;
-          // do we end here, what is the nature of the error?
-        }
-
-        mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-        if ( m_mapOption.end() == iterOption ) {
-          m_mapOption[ sOptionName ] = pOption;
-          // TODO: activate calc only if option is active
-          m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-        }
+        m_pOptionRepository->Add( pOption );
 
         std::cout << "set combo position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
         combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( mapCombo_iter->second ).get();
@@ -620,13 +702,7 @@ void ManageStrategy::BuildPosition(
     sIQFeedOptionCode,
     m_pPositionUnderlying->GetWatch()->GetInstrument(),
     [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
-      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-      if ( m_mapOption.end() == iterOption ) {
-        m_mapOption[ sOptionName ] = pOption;
-        m_fRegisterOption( pOption );
-        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-      }
+      m_pOptionRepository->Add( pOption );
       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, "" );
       f( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
     });
@@ -708,13 +784,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                   m_pValidateOptions->ValidatedOptions(
                     [this,idPortfolio,pCombo,direction](size_t ix,pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
-                      const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                      mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-                      if ( m_mapOption.end() == iterOption ) {
-                        m_mapOption[ sOptionName ] = pOption;
-                        m_fRegisterOption( pOption );
-                        m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                      }
+
+                      m_pOptionRepository->Add( pOption );
 
                       ou::tf::option::LegNote::values_t lnValues;
                       combo_t::FillLegNote( ix, direction, lnValues );
@@ -776,13 +847,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               },
               [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fRoll_t
                 combo_t* pCombo = reinterpret_cast<combo_t*>( p );
-                const std::string& sOptionName = pOption->GetInstrument()->GetInstrumentName();
-                mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-                if ( m_mapOption.end() == iterOption ) {
-                  m_mapOption[ sOptionName ] = pOption;
-                  m_fRegisterOption( pOption );
-                  m_fStartCalc( pOption, m_pPositionUnderlying->GetWatch() );
-                }
+                m_pOptionRepository->Add( pOption );
                 pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
                 using LegNote = ou::tf::option::LegNote;
                 const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
