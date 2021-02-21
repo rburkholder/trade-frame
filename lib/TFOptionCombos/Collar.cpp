@@ -103,18 +103,19 @@ void Collar::InitTrackLongOption(
     assert( pair.second );
     iterMapCollarLeg = pair.first;
   }
-  CollarLeg& cl( iterMapCollarLeg->second );
+  CollarLeg& cleg( iterMapCollarLeg->second );
 
   pPosition_t pPosition( m_mapLeg[type].GetPosition() );
   assert( pPosition );
   citerChain_t citerChain = Combo::SelectChain( *pmapChains, date, days_to_expiry );
   const Chain& chain( citerChain->second );
-  cl.m_tracker.Initialize(
+
+  cleg.m_tracker.Initialize(
     pPosition, &chain,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,&cl]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // m_fRoll
+    [this,&cleg]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // m_fRoll
 
       const std::string sNotes( pPositionOld->Notes() );
       LegNote ln( sNotes );
@@ -126,12 +127,19 @@ void Collar::InitTrackLongOption(
       auto& instance( ou::tf::PortfolioManager::Instance() ); // NOTE this direct call!!
       instance.PositionUpdateNotes( pPositionOld );
 
-      cl.m_monitor.SetPosition( pPositionOld );
-      cl.m_monitor.ClosePosition();
+      cleg.m_monitor.SetPosition( pPositionOld );
+      cleg.m_monitor.ClosePosition();
 
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere
       return m_fRoll( this, pOption, sNotes );
+    }
+  );
+
+  cleg.vfTest.emplace( // invalidates on new size() > capacity()
+    cleg.vfTest.end(),
+    [ tracker = &cleg.m_tracker ]( double dblUnderlyingSlope, double dblUnderlyingPrice ){
+      tracker->TestLong( dblUnderlyingSlope, dblUnderlyingPrice );
     }
   );
 }
@@ -140,12 +148,12 @@ void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime d
   Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
 
   for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
-    CollarLeg& leg( entry.second );
-    if ( leg.m_monitor.IsOrderActive() ) leg.m_monitor.Tick( dt );
+    CollarLeg& cleg( entry.second );
+    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
 
-    // NOTE: need to change this when shorts are monitored (switch on LegNote::Side, or let Tracker decide with indirection)
-    // TODO: convert to the new fTest_t capabliity, cycle through the vector and run the functions
-    leg.m_tracker.TestLong( dblUnderlyingSlope, dblUnderlyingPrice );
+    for ( vfTest_t::value_type& fTest: cleg.vfTest ) {
+      fTest( dblUnderlyingSlope, dblUnderlyingPrice );
+    }
   }
 
   // TODO:

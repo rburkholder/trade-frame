@@ -64,11 +64,12 @@ protected:
 private:
 
   using fTest_t = std::function<void(double,double)>; // underlying slope, price
+  using vfTest_t = std::vector<fTest_t>;
 
   struct CollarLeg {
     Tracker m_tracker;
     ou::tf::MonitorOrder m_monitor; // used for closing, for now
-    std::vector<fTest_t> fTest; // functions to test & process leg
+    vfTest_t vfTest; // functions to test & process leg
   };
 
   using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>;
