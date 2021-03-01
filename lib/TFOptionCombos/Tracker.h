@@ -63,6 +63,7 @@ public:
     );
 
   void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
+  void TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice );
 
 protected:
 private:
@@ -73,8 +74,8 @@ private:
   using lu_strike_t = std::function<double(double)>;
   lu_strike_t m_luStrike;
 
-  double m_dblStrikeWatch;
-  ou::tf::OptionSide::enumOptionSide m_sideWatch;
+  double m_dblStrikePosition;
+  ou::tf::OptionSide::enumOptionSide m_sidePosition;
 
   double m_dblUnderlyingPrice;
   double m_dblUnderlyingSlope;
@@ -84,15 +85,15 @@ private:
 
   const chain_t* m_pChain;
 
-  pPosition_t m_pPosition;
-  pOption_t m_pOption;
+  pPosition_t m_pPosition; // existing option / position
+  pOption_t m_pOption; // track an option for next position
 
   fConstructOption_t m_fConstructOption;
   fOpenLeg_t m_fOpenLeg;
   fCloseLeg_t m_fCloseLeg;
 
   void Construct( double strikeItm );
-  void HandleOptionQuote( const ou::tf::Quote& );
+  void HandleLongOptionQuote( const ou::tf::Quote& );
   void Initialize( pPosition_t );
 
 };

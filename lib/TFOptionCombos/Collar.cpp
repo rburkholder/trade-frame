@@ -171,17 +171,19 @@ void Collar::InitTrackShortOption(
 
   CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
-  // a) buy out 0.10 (simply closing the option)
+  // a) buy out 0.10 (simply closing the position)
   // b) rotate if itm (somewhere else, affects long & short)
 
   cleg.vfTest.emplace(
     cleg.vfTest.end(),
     [ tracker = &cleg.m_tracker ]( double dblUnderlyingSlope, double dblUnderlyingPrice ){
-
+      tracker->TestShort( dblUnderlyingSlope, dblUnderlyingPrice );
     }
   );
 
 }
+
+// TODO: need to disable Tracker monitoring out of hours
 
 void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
