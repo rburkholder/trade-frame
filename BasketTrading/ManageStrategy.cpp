@@ -845,7 +845,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   }
                 );
               },
-              [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fRoll_t
+              [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenLeg_t
                 combo_t* pCombo = reinterpret_cast<combo_t*>( p );
                 m_pOptionRepository->Add( pOption );
                 pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );

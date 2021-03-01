@@ -53,7 +53,7 @@ Tracker::Tracker( Tracker&& rhs )
   m_pPosition( std::move( rhs.m_pPosition ) ),
   m_pOption( std::move( rhs.m_pOption ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
-  m_fRoll( std::move( rhs.m_fRoll ) )
+  m_fOpenLeg( std::move( rhs.m_fOpenLeg ) )
 {}
 
 Tracker::~Tracker() {
@@ -69,8 +69,8 @@ void Tracker::Initialize(
   pPosition_t pPosition,
   const ou::tf::option::Chain* pChain,
   fConstructOption_t&& fConstructOption,
-  fClose_t&& fClose,
-  fRoll_t&& fRoll
+  fCloseLeg_t&& fCloseLeg,
+  fOpenLeg_t&& fOpenLeg
 ) {
 
   assert( ETransition::Initial == m_transition );
@@ -78,8 +78,8 @@ void Tracker::Initialize(
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
-  m_fClose = std::move( fClose );
-  m_fRoll = std::move( fRoll );
+  m_fCloseLeg = std::move( fCloseLeg );
+  m_fOpenLeg = std::move( fOpenLeg );
 
   Initialize( pPosition );
 
@@ -210,8 +210,8 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_luStrike = nullptr;
             pOption_t pOption( std::move( m_pOption ) );
             std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-            m_fClose( m_pPosition );
-            Initialize( m_fRoll( std::move( pOption ), sNotes ) );
+            m_fCloseLeg( m_pPosition );
+            Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) );
             m_transition = ETransition::Track;  // start all over again
           }
         }

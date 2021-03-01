@@ -116,7 +116,7 @@ Collar::CollarLeg& Collar::InitTracker(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,&cleg]( pPosition_t pPositionOld ) { // m_fClose
+    [this,&cleg]( pPosition_t pPositionOld ) { // m_fCloseLeg
 
       const std::string sNotes( pPositionOld->Notes() );
       LegNote ln( sNotes );
@@ -132,7 +132,7 @@ Collar::CollarLeg& Collar::InitTracker(
       cleg.m_monitor.ClosePosition();
 
     },
-    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fRoll
+    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
 
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere

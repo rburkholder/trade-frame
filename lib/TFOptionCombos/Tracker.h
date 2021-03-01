@@ -46,8 +46,8 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fRoll_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string&)>;  // Fix -> OpenLeg
-  using fClose_t = std::function<void(pPosition_t)>; // fix -> CloseLeg
+  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string&)>;
+  using fCloseLeg_t = std::function<void(pPosition_t)>;
 
   Tracker();
   Tracker( const Tracker& ) = delete;
@@ -58,8 +58,8 @@ public:
     pPosition_t pPosition,
     const chain_t* pChain,
     fConstructOption_t&&,
-    fClose_t&&,
-    fRoll_t&&
+    fCloseLeg_t&&,
+    fOpenLeg_t&&
     );
 
   void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
@@ -88,8 +88,8 @@ private:
   pOption_t m_pOption;
 
   fConstructOption_t m_fConstructOption;
-  fRoll_t m_fRoll;
-  fClose_t m_fClose;
+  fOpenLeg_t m_fOpenLeg;
+  fCloseLeg_t m_fCloseLeg;
 
   void Construct( double strikeItm );
   void HandleOptionQuote( const ou::tf::Quote& );
