@@ -136,7 +136,7 @@ Collar::CollarLeg& Collar::InitTracker(
 
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere
-      return m_fRoll( this, pOption, sNotes );
+      return m_fOpenLeg( this, pOption, sNotes );
     }
   );
 
