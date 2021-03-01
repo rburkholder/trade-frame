@@ -46,17 +46,19 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fRoll_t = std::function<pPosition_t/*new?*/(pPosition_t/*old?*/,pOption_t)>;
+  using fRoll_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string&)>;  // Fix -> OpenLeg
+  using fClose_t = std::function<void(pPosition_t)>; // fix -> CloseLeg
 
   Tracker();
   Tracker( const Tracker& ) = delete;
   Tracker( Tracker&& );
   ~Tracker();
 
-  void Initialize( // ensure it is re-usable
+  void Initialize( // use for call roll-up, put roll-down
     pPosition_t pPosition,
     const chain_t* pChain,
     fConstructOption_t&&,
+    fClose_t&&,
     fRoll_t&&
     );
 
@@ -87,6 +89,7 @@ private:
 
   fConstructOption_t m_fConstructOption;
   fRoll_t m_fRoll;
+  fClose_t m_fClose;
 
   void Construct( double strikeItm );
   void HandleOptionQuote( const ou::tf::Quote& );

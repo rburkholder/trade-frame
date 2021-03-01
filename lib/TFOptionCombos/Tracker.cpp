@@ -69,6 +69,7 @@ void Tracker::Initialize(
   pPosition_t pPosition,
   const ou::tf::option::Chain* pChain,
   fConstructOption_t&& fConstructOption,
+  fClose_t&& fClose,
   fRoll_t&& fRoll
 ) {
 
@@ -77,6 +78,7 @@ void Tracker::Initialize(
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
+  m_fClose = std::move( fClose );
   m_fRoll = std::move( fRoll );
 
   Initialize( pPosition );
@@ -207,7 +209,9 @@ void Tracker::HandleOptionQuote( const ou::tf::Quote& quote ) {
             m_compare = nullptr;
             m_luStrike = nullptr;
             pOption_t pOption( std::move( m_pOption ) );
-            Initialize( m_fRoll( m_pPosition, std::move( pOption ) ) );
+            std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+            m_fClose( m_pPosition );
+            Initialize( m_fRoll( std::move( pOption ), sNotes ) );
             m_transition = ETransition::Track;  // start all over again
           }
         }

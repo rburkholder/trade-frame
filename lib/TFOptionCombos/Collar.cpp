@@ -82,20 +82,21 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   mapCollarLeg_t::iterator iterMapCollarLeg;
 
   // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
+  // TODO: check that the leg is active
   InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, nDaysToExpirySynthetic );
 
   // === vertical/diagonal roll for profitable long protective when trend is in wrong direction
+  // TODO: check that the leg is active
   InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
 
 }
 
-// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
-void Collar::InitTrackLongOption(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-    ) {
+Collar::CollarLeg& Collar::InitTracker(
+  LegNote::Type type,
+  const mapChains_t* pmapChains,
+  boost::gregorian::date date,
+  boost::gregorian::days days_to_expiry
+) {
 
   mapCollarLeg_t::iterator iterMapCollarLeg = m_mapCollarLeg.find( type );
   if ( m_mapCollarLeg.end() == iterMapCollarLeg ) {
@@ -115,7 +116,7 @@ void Collar::InitTrackLongOption(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
-    [this,&cleg]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // m_fRoll
+    [this,&cleg]( pPosition_t pPositionOld ) { // m_fClose
 
       const std::string sNotes( pPositionOld->Notes() );
       LegNote ln( sNotes );
@@ -130,11 +131,28 @@ void Collar::InitTrackLongOption(
       cleg.m_monitor.SetPosition( pPositionOld );
       cleg.m_monitor.ClosePosition();
 
+    },
+    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fRoll
+
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere
       return m_fRoll( this, pOption, sNotes );
     }
   );
+
+  return cleg;
+
+}
+
+// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
+void Collar::InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    ) {
+
+  CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
   cleg.vfTest.emplace( // invalidates on new size() > capacity()
     cleg.vfTest.end(),
@@ -142,6 +160,27 @@ void Collar::InitTrackLongOption(
       tracker->TestLong( dblUnderlyingSlope, dblUnderlyingPrice );
     }
   );
+}
+
+void Collar::InitTrackShortOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+) {
+
+  CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+
+  // a) buy out 0.10 (simply closing the option)
+  // b) rotate if itm (somewhere else, affects long & short)
+
+  cleg.vfTest.emplace(
+    cleg.vfTest.end(),
+    [ tracker = &cleg.m_tracker ]( double dblUnderlyingSlope, double dblUnderlyingPrice ){
+
+    }
+  );
+
 }
 
 void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {

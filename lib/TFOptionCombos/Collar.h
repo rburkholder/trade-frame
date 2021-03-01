@@ -75,7 +75,21 @@ private:
   using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>;
   mapCollarLeg_t m_mapCollarLeg;
 
+  CollarLeg& InitTracker(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+  );
+
   void InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    );
+
+  void InitTrackShortOption(
     LegNote::Type type,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
