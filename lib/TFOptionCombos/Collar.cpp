@@ -89,6 +89,14 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   // TODO: check that the leg is active
   InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
 
+  // === close out at 0.10
+  // TODO: check that the leg is active
+  InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, nDaysToExpirySynthetic );
+
+  // === close out at 0.10
+  // TODO: check that the leg is active
+  InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, nDaysToExpiryFront );
+
 }
 
 Collar::CollarLeg& Collar::InitTracker(
@@ -173,6 +181,7 @@ void Collar::InitTrackShortOption(
 
   // a) buy out 0.10 (simply closing the position)
   // b) rotate if itm (somewhere else, affects long & short)
+  // c) stop monitoring out of hours
 
   cleg.vfTest.emplace(
     cleg.vfTest.end(),
