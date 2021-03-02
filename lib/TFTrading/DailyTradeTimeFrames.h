@@ -40,10 +40,10 @@ public:
   virtual ~DailyTradeTimeFrame(void) {};
 
   template<typename DD>  // DD is DatedDatum construct
-  void TimeTick( DD& dd );
+  void TimeTick( const DD& dd );
 
-  boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt );
-  boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
+  boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt ) const;
+  boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) const {
     return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
   }
 
@@ -57,13 +57,13 @@ public:
   void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; };
   void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };
 
-  boost::posix_time::ptime GetMarketOpen( void ) { return m_dtMarketOpen; };
-  boost::posix_time::ptime GetRegularHoursOpen( void ) { return m_dtRHOpen; };
-  boost::posix_time::ptime GetStartTrading( void ) { return m_dtStartTrading; };
-  boost::posix_time::ptime GetCancellation( void ) { return m_dtTimeForCancellation; };
-  boost::posix_time::ptime GetGoNeutral( void ) { return m_dtGoNeutral; };
-  boost::posix_time::ptime GetRegularHoursClose( void ) { return m_dtRHClose; };
-  boost::posix_time::ptime GetMarketClose( void ) { return m_dtMarketClose; };
+  boost::posix_time::ptime GetMarketOpen( void ) const { return m_dtMarketOpen; };
+  boost::posix_time::ptime GetRegularHoursOpen( void ) const { return m_dtRHOpen; };
+  boost::posix_time::ptime GetStartTrading( void ) const { return m_dtStartTrading; };
+  boost::posix_time::ptime GetCancellation( void ) const { return m_dtTimeForCancellation; };
+  boost::posix_time::ptime GetGoNeutral( void ) const { return m_dtGoNeutral; };
+  boost::posix_time::ptime GetRegularHoursClose( void ) const { return m_dtRHClose; };
+  boost::posix_time::ptime GetMarketClose( void ) const { return m_dtMarketClose; };
 
 protected:
 
@@ -131,7 +131,7 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
 }
 
 template<class T>
-boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_time::ptime dtUtcCurrent ) {
+boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_time::ptime dtUtcCurrent ) const {
   boost::posix_time::ptime dtUtcTransition
     = Normalize( dtUtcCurrent.date(), boost::posix_time::time_duration( 17, 0, 0 ), "America/New_York" );  // market transition time
   boost::gregorian::date date;
@@ -162,7 +162,7 @@ void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date
 
 template<class T>
 template<typename DD>
-void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
+void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
 
   std::stringstream ss;
 
