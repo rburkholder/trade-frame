@@ -67,7 +67,7 @@ public:
 
 protected:
 
-  enum class TimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AfterRH };
+  enum class TimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AtRHClose, AfterRH };
 
   TimeFrame CurrentTimeFrame() const { return m_stateTimeFrame; }
 
@@ -82,10 +82,11 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {};
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
   template<typename DD> void HandleMarketClosed( const DD& dd ) {};
-  // event change one shots, but may be called more than once, once for each data type
-  void HandleBellHeard( void ) {};
-  void HandleCancel( void ) {};
-  void HandleGoNeutral( void ) {};
+  // event change one shots
+  void HandleBellHeard( void ) {}
+  void HandleCancel( void ) {}
+  void HandleGoNeutral( void ) {}
+  void HandleAtRHClose( void ) {}
 private:
   boost::posix_time::ptime m_dtMarketOpen;
   boost::posix_time::ptime m_dtRHOpen;
@@ -220,6 +221,8 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     break;
   case TimeFrame::WaitForRHClose:
     if ( dt >= m_dtRHClose ) {
+      m_stateTimeFrame = TimeFrame::AtRHClose;
+      static_cast<T*>(this)->HandleAtRHClose();  // one shot
       m_stateTimeFrame = TimeFrame::AfterRH;
       static_cast<T*>(this)->HandleAfterRH( dd );
     }
