@@ -393,6 +393,7 @@ private:
   void HandleBellHeard( void );
   void HandleCancel( void );
   void HandleGoNeutral( void );
+  void HandleAtRHClose( void );
 
   void RHEquity( const ou::tf::Bar& bar );
   void RHOption( const ou::tf::Bar& bar );

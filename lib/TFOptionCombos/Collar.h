@@ -59,6 +59,10 @@ public:
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity );
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
 
+  virtual void CancelOrders();
+  virtual void GoNeutral();
+  virtual void AtClose();
+
 protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:

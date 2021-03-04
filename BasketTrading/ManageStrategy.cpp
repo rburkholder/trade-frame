@@ -1022,17 +1022,18 @@ void ManageStrategy::HandleCancel( void ) {
   }
 }
 
-// 3 minutes, 45 seconds prior to close
+// one shot, 3 minutes, 45 seconds prior to close
 void ManageStrategy::HandleGoNeutral( void ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
       break;
     default:
 //      std::cout << m_sUnderlying << " go neutral" << std::endl;
-      if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
+      //if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
       std::for_each(
         m_mapCombo.begin(), m_mapCombo.end(),
         [this](mapCombo_t::value_type& entry){
+          entry.second->GoNeutral();
 //          entry.second.ClosePositions();  // maintain positions over night
         }
         );
@@ -1042,6 +1043,21 @@ void ManageStrategy::HandleGoNeutral( void ) {
 
 void ManageStrategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
   RHOption( bar );
+}
+
+void ManageStrategy::HandleAtRHClose( void ) {
+  switch ( m_stateTrading ) {
+    case TSNoMore:
+      break;
+    default:
+      std::for_each(
+        m_mapCombo.begin(), m_mapCombo.end(),
+        [this](mapCombo_t::value_type& entry){
+          entry.second->AtClose();
+        }
+        );
+      break;
+  }
 }
 
 void ManageStrategy::HandleAfterRH( const ou::tf::Quote& quote ) {

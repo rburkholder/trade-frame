@@ -111,6 +111,9 @@ public:
 
   virtual double GetNet( double price );
 
+  virtual void GoNeutral() {}
+  virtual void AtClose() {}
+
   void CloseForProfits( double price );
   void TakeProfits( double price );
   void CloseExpiryItm( double price, const boost::gregorian::date date );
@@ -118,8 +121,8 @@ public:
   bool CloseItmLeg( double price );
   bool CloseItmLegForProfit( double price );
 
-  void CancelOrders();
-  void ClosePositions();
+  virtual void CancelOrders();
+  void ClosePositions();  // TODO: adjust in superclass
 
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
@@ -141,6 +144,7 @@ protected:
   mapLeg_t m_mapLeg;
 
   virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
+  void OverwritePosition( pPosition_t );
 
 private:
 

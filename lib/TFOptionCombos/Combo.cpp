@@ -95,6 +95,20 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
   return legValues;
 }
 
+void Combo::OverwritePosition( pPosition_t pPosition ) {
+
+  assert( pPosition );
+  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+  LegNote ln( pPosition->Notes() );
+  LegNote::values_t legValues( ln.Values() );
+  mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
+  assert( m_mapLeg.end() != iter );
+  Leg& leg( iter->second );
+  leg.SetPosition( pPosition );
+  // Note: chart data is cleared
+
+}
+
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
@@ -176,21 +190,21 @@ void Combo::CloseFarItm( double price ) {
 }
 
 void Combo::CancelOrders() {
+  m_state = State::Canceled;
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
     leg.CancelOrder();
   }
-  m_state = State::Canceled;
 }
 
 void Combo::ClosePositions() {
+  m_state = State::Closing;
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
     if ( leg.IsActive() ) {
       leg.ClosePosition();
     }
   }
-  m_state = State::Closing;
 }
 
 bool Combo::AreOrdersActive() const { // TODO: is an external call still necessary?

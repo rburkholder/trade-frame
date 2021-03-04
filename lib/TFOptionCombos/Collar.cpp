@@ -144,7 +144,12 @@ Collar::CollarLeg& Collar::InitTracker(
 
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere
-      return m_fOpenLeg( this, pOption, sNotes );
+
+      // TODO: does this get added to the m_pPortfolio?
+
+      pPosition_t pPosition = m_fOpenLeg( this, pOption, sNotes );
+      Combo::OverwritePosition( pPosition );
+      return pPosition;
     }
   );
 
@@ -192,7 +197,22 @@ void Collar::InitTrackShortOption(
 
 }
 
+void Collar::CancelOrders() {
+  Combo::CancelOrders();
+  for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
+    cleg.second.m_tracker.Stop();
+    cleg.second.m_monitor.CancelOrder(); // or wait for completion?
+  }
+}
+
+void Collar::GoNeutral() {
+  // on expiry days, roll ITM
+}
+
 // TODO: need to disable Tracker monitoring out of hours
+void Collar::AtClose() {
+
+}
 
 void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
