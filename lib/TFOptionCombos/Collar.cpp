@@ -147,7 +147,7 @@ Collar::CollarLeg& Collar::InitTracker(
 
       // TODO: does this get added to the m_pPortfolio?
 
-      pPosition_t pPosition = m_fOpenLeg( this, pOption, sNotes );
+      pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
       Combo::OverwritePosition( pPosition );
       return pPosition;
     }

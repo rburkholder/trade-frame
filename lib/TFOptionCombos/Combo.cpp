@@ -35,7 +35,7 @@ Combo::Combo( Combo&& rhs )
   m_mapLeg( std::move( rhs.m_mapLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
-  m_fOpenLeg( std::move( rhs.m_fOpenLeg ) )
+  m_fOpenPosition( std::move( rhs.m_fOpenPosition ) )
 {
 }
 
@@ -47,10 +47,10 @@ void Combo::Prepare(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
   fConstructOption_t&& fConstructOption,
-  fOpenLeg_t&& fOpenLeg
+  fOpenPosition_t&& fOpenPosition
 ) {
   m_fConstructOption = std::move( fConstructOption );
-  m_fOpenLeg = std::move( fOpenLeg );
+  m_fOpenPosition = std::move( fOpenPosition );
   Init( date, pmapChains );
 }
 
