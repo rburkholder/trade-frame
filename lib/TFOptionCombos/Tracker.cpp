@@ -60,12 +60,7 @@ Tracker::Tracker( Tracker&& rhs )
 }
 
 Tracker::~Tracker() {
-  if ( m_pOption ) {
-    m_pOption->StopWatch();
-    m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
-    m_pOption.reset();
-  }
-  m_pPosition.reset();
+  Stop();
 }
 
 void Tracker::Initialize(
@@ -255,6 +250,21 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
     case ETransition::Acquire:
       break;
   }
+}
+
+void Tracker::Stop() {
+  m_transition = ETransition::Done;
+  if ( m_pOption ) {
+    m_pOption->StopWatch();
+    m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
+    m_pOption.reset();
+  }
+  m_pPosition.reset();
+  m_fConstructOption = nullptr;
+  m_fOpenLeg = nullptr;
+  m_fCloseLeg = nullptr;
+  m_compare = nullptr;
+  m_luStrike = nullptr;
 }
 
 } // namespace option
