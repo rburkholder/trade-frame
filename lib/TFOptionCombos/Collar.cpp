@@ -139,6 +139,8 @@ Collar::CollarLeg& Collar::InitTracker(
       cleg.m_monitor.SetPosition( pPositionOld );
       cleg.m_monitor.ClosePosition();
 
+      m_fRemovePosition( pPositionOld );
+
     },
     [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
 

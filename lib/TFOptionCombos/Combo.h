@@ -77,6 +77,7 @@ public:
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   using fOpenPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
+  using fRemovePosition_t = std::function<void(pPosition_t)>;
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
@@ -96,7 +97,8 @@ public:
     boost::gregorian::date date,
     const mapChains_t*,
     fConstructOption_t&&,
-    fOpenPosition_t&&
+    fOpenPosition_t&&,
+    fRemovePosition_t&&
   );
 
   void SetPortfolio( pPortfolio_t );
@@ -137,6 +139,7 @@ protected:
 
   fConstructOption_t m_fConstructOption;
   fOpenPosition_t m_fOpenPosition;
+  fRemovePosition_t m_fRemovePosition;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 

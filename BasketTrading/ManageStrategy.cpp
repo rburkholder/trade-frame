@@ -851,8 +851,14 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
                 using LegNote = ou::tf::option::LegNote;
                 const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-                pCombo->PlaceOrder( m_DefaultOrderSide, 1, lnValues.m_type );
+                pCombo->PlaceOrder( m_DefaultOrderSide, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
                 return pPosition;
+              },
+              [this]( pPosition_t pPosition ){ // fRemovePosition_t
+                pWatch_t pWatch = pPosition->GetWatch();
+                assert( pWatch->GetInstrument()->IsOption() );
+                pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+                m_pOptionRepository->Remove( pOption );
               }
               ); // Prepare
           });
