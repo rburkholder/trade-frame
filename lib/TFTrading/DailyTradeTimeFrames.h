@@ -83,10 +83,10 @@ protected:
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
   template<typename DD> void HandleMarketClosed( const DD& dd ) {};
   // event change one shots
-  void HandleBellHeard( void ) {}
-  void HandleCancel( void ) {}
-  void HandleGoNeutral( void ) {}
-  void HandleAtRHClose( void ) {}
+  void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {}
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {}
+  void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {}
 private:
   boost::posix_time::ptime m_dtMarketOpen;
   boost::posix_time::ptime m_dtRHOpen;
@@ -176,7 +176,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
   case TimeFrame::RHTrading:
     if ( dt >= m_dtTimeForCancellation ) {  // any problems crossing midnight for futures type trading?
       m_stateTimeFrame = TimeFrame::Cancel;
-      static_cast<T*>(this)->HandleCancel();  // one shot
+      boost::gregorian::date date( dt.date() );
+      boost::posix_time::time_duration time( dt.time_of_day() );
+      static_cast<T*>(this)->HandleCancel( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::Cancelling;
       static_cast<T*>(this)->HandleCancelling( dd );
     }
@@ -199,7 +201,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
   case TimeFrame::Cancelling:
     if ( dt >= m_dtGoNeutral ) {
       m_stateTimeFrame = TimeFrame::GoNeutral;
-      static_cast<T*>(this)->HandleGoNeutral();  // one shot
+      boost::gregorian::date date( dt.date() );
+      boost::posix_time::time_duration time( dt.time_of_day() );
+      static_cast<T*>(this)->HandleGoNeutral( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
 //      if ( &DailyTradeTimeFrame<T>::HandleGoingNeutral<DD> != &T::HandleGoingNeutral ) { // need to figure out comparison to bar|quote|trade|etc (DD)
         static_cast<T*>(this)->HandleGoingNeutral( dd );
@@ -222,7 +226,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
   case TimeFrame::WaitForRHClose:
     if ( dt >= m_dtRHClose ) {
       m_stateTimeFrame = TimeFrame::AtRHClose;
-      static_cast<T*>(this)->HandleAtRHClose();  // one shot
+      boost::gregorian::date date( dt.date() );
+      boost::posix_time::time_duration time( dt.time_of_day() );
+      static_cast<T*>(this)->HandleAtRHClose( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::AfterRH;
       static_cast<T*>(this)->HandleAfterRH( dd );
     }
@@ -243,7 +249,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     ss << dt << "," << m_dtRHOpen;
     if ( dt >= m_dtRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
-      static_cast<T*>(this)->HandleBellHeard();  // one shot
+      boost::gregorian::date date( dt.date() );
+      boost::posix_time::time_duration time( dt.time_of_day() );
+      static_cast<T*>(this)->HandleBellHeard( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::PauseForQuotes;
       static_cast<T*>(this)->HandlePauseForQuotes( dd );
     }

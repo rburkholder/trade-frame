@@ -390,10 +390,10 @@ private:
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
 
   // one shot inherited states:
-  void HandleBellHeard( void );
-  void HandleCancel( void );
-  void HandleGoNeutral( void );
-  void HandleAtRHClose( void );
+  void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
 
   void RHEquity( const ou::tf::Bar& bar );
   void RHOption( const ou::tf::Bar& bar );

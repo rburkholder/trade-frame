@@ -81,9 +81,9 @@ private:
   void HandleAfterRH( const ou::tf::Bar& bar ) {};
 
   // one shot inherited states:
-  void HandleBellHeard( void );
-  void HandleCancel( void );
-  void HandleGoNeutral( void );
+  void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
   // Datum based inherited states:
   void HandleRHTrading( const ou::tf::Bar& bar );

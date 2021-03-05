@@ -117,17 +117,17 @@ ou::tf::DatedDatum::volume_t ManagePosition::CalcShareCount( double dblFunds ) {
   return ( static_cast<ou::tf::DatedDatum::volume_t>( dblFunds / m_barInfo.Close() ) / 100 ) * 100;  // round down to nearest 100
 }
 
-void ManagePosition::HandleBellHeard( void ) {
+void ManagePosition::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
   m_bSetOpen = true;
   m_bCountBars = true;
 }
 
-void ManagePosition::HandleCancel( void ) {
+void ManagePosition::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {
   std::cout << "EOD Cancel " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   m_pPosition->CancelOrders();
 }
 
-void ManagePosition::HandleGoNeutral( void ) {
+void ManagePosition::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {
   std::cout << "EOD Close " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   m_pPosition->ClosePosition();
 }

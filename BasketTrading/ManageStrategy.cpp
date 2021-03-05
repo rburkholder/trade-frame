@@ -520,17 +520,18 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 }
 
 void ManageStrategy::Stop( void ) {
-  HandleCancel();
+  std::cout << m_sUnderlying << " stop" << std::endl;
   std::for_each(
     m_mapCombo.begin(), m_mapCombo.end(),
     [this](mapCombo_t::value_type& entry){
       combo_t* pCombo = std::dynamic_pointer_cast<combo_t>( entry.second ).get();
+      pCombo->CancelOrders(); // TODO: generify via Common or Base
       pCombo->ClosePositions(); // TODO: generify via Common or Base
     }
     );
 }
 
-void ManageStrategy::HandleBellHeard( void ) {
+void ManageStrategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
 }
 
 void ManageStrategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
@@ -1009,13 +1010,13 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
 }
 
 // 4 minutes prior to close
-void ManageStrategy::HandleCancel( void ) {
+void ManageStrategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
       break;
     default:
       std::cout << m_sUnderlying << " cancel" << std::endl;
-      if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
+      //if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
       std::for_each(
         m_mapCombo.begin(), m_mapCombo.end(),
         [this](mapCombo_t::value_type& entry){
@@ -1029,7 +1030,7 @@ void ManageStrategy::HandleCancel( void ) {
 }
 
 // one shot, 3 minutes, 45 seconds prior to close
-void ManageStrategy::HandleGoNeutral( void ) {
+void ManageStrategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
       break;
@@ -1051,7 +1052,7 @@ void ManageStrategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {
   RHOption( bar );
 }
 
-void ManageStrategy::HandleAtRHClose( void ) {
+void ManageStrategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
       break;

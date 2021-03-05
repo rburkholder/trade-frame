@@ -164,7 +164,7 @@ private:
   void HandleInboundQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleInboundTradeUnderlying( const ou::tf::Trade& trade );
 
-  void HandleCancel( void );  // called with trade and quote
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );  // called with trade and quote
 
   void HandleCommon( const ou::tf::Quote& quote );
   void HandleRHTrading( const ou::tf::Quote& quote );
