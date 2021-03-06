@@ -202,18 +202,19 @@ void Collar::InitTrackShortOption(
 void Collar::CancelOrders() {
   Combo::CancelOrders();
   for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
-    cleg.second.m_tracker.Stop();
+    cleg.second.m_tracker.Quiesce();
     cleg.second.m_monitor.CancelOrder(); // or wait for completion?
   }
 }
 
-void Collar::GoNeutral() {
+void Collar::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
   // on expiry days, roll ITM
+  // relies on tracker having been quiesced
 }
 
 // TODO: need to disable Tracker monitoring out of hours
 void Collar::AtClose() {
-
+  // maybe remove options?
 }
 
 void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {

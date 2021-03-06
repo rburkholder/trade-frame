@@ -60,7 +60,13 @@ Tracker::Tracker( Tracker&& rhs )
 }
 
 Tracker::~Tracker() {
-  Stop();
+  Quiesce();
+  m_pPosition.reset();
+  m_fConstructOption = nullptr;
+  m_fOpenLeg = nullptr;
+  m_fCloseLeg = nullptr;
+  m_compare = nullptr;
+  m_luStrike = nullptr;
 }
 
 void Tracker::Initialize(
@@ -100,7 +106,7 @@ void Tracker::Initialize( pPosition_t pPosition ) {
   m_dblStrikePosition = pInstrument->GetStrike();
   m_sidePosition = pInstrument->GetOptionSide();
 
-  switch ( pInstrument->GetOptionSide() ) {
+  switch ( m_sidePosition ) {
     case ou::tf::OptionSide::Call:
       m_compare = &gt;
       m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
@@ -184,6 +190,7 @@ void Tracker::TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice ) 
 }
 
 void Tracker::Construct( double strikeItm ) {
+  m_transition = ETransition::Acquire;
   std::string sName;
   switch ( m_sidePosition ) {
     case ou::tf::OptionSide::Call:
@@ -194,7 +201,6 @@ void Tracker::Construct( double strikeItm ) {
       break;
   }
   std::cout << "Tracker::Construct: " << sName << std::endl;
-  m_transition = ETransition::Acquire;
   m_fConstructOption(
     sName,
     [this]( pOption_t pOption ){
@@ -252,19 +258,13 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
   }
 }
 
-void Tracker::Stop() {
-  m_transition = ETransition::Done;
+void Tracker::Quiesce() {
+  m_transition = ETransition::Quiesce;
   if ( m_pOption ) {
     m_pOption->StopWatch();
     m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
     m_pOption.reset();
   }
-  m_pPosition.reset();
-  m_fConstructOption = nullptr;
-  m_fOpenLeg = nullptr;
-  m_fCloseLeg = nullptr;
-  m_compare = nullptr;
-  m_luStrike = nullptr;
 }
 
 } // namespace option

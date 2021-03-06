@@ -65,7 +65,7 @@ public:
   void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice );
 
-  void Stop();
+  void Quiesce();
 
 protected:
 private:
@@ -82,7 +82,7 @@ private:
   double m_dblUnderlyingPrice;
   double m_dblUnderlyingSlope;
 
-  enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll, Done };
+  enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll, Quiesce, Done };
   ETransition m_transition;
 
   const chain_t* m_pChain;

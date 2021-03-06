@@ -60,7 +60,7 @@ public:
   virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
 
   virtual void CancelOrders();
-  virtual void GoNeutral();
+  virtual void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time );
   virtual void AtClose();
 
 protected:

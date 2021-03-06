@@ -1030,18 +1030,16 @@ void ManageStrategy::HandleCancel( boost::gregorian::date, boost::posix_time::ti
 }
 
 // one shot, 3 minutes, 45 seconds prior to close
-void ManageStrategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {
+void ManageStrategy::HandleGoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
   switch ( m_stateTrading ) {
     case TSNoMore:
       break;
     default:
 //      std::cout << m_sUnderlying << " go neutral" << std::endl;
-      //if ( m_pPositionUnderlying ) m_pPositionUnderlying->ClosePosition();
       std::for_each(
         m_mapCombo.begin(), m_mapCombo.end(),
-        [this](mapCombo_t::value_type& entry){
-          entry.second->GoNeutral();
-//          entry.second.ClosePositions();  // maintain positions over night
+        [this, date, time](mapCombo_t::value_type& entry){
+          entry.second->GoNeutral( date, time );
         }
         );
       break;

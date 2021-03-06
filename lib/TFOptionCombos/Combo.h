@@ -113,7 +113,7 @@ public:
 
   virtual double GetNet( double price );
 
-  virtual void GoNeutral() {}
+  virtual void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {}
   virtual void AtClose() {}
 
   void CloseForProfits( double price );
