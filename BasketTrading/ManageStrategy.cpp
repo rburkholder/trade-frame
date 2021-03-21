@@ -212,9 +212,9 @@ ManageStrategy::ManageStrategy(
   fConstructPosition_t fConstructPosition, // => m_fConstructPosition
   fConstructPortfolio_t fConstructPortfolio, // => m_fConstructPortfolio
   fRegisterWatch_t fRegisterWatch, // => m_fRegisterWatch
-  fRegisterOption_t fRegisterOption, // => m_fRegisterOption
-  fStartCalc_t fStartCalc, // => m_fStartCalc
-  fStopCalc_t fStopCalc, // => m_fStopCalc
+  fRegisterOption_t&& fRegisterOption, // => m_fRegisterOption
+  fStartCalc_t&& fStartCalc, // => m_fStartCalc
+  fStopCalc_t&& fStopCalc, // => m_fStopCalc
   fFirstTrade_t fFirstTrade, // => m_fFirstTrade
   fAuthorizeUnderlying_t fAuthorizeUnderlying, // => m_fAuthorizeUnderlying
   fAuthorizeOption_t fAuthorizeOption, // => m_fAuthorizeOption
@@ -310,7 +310,7 @@ ManageStrategy::ManageStrategy(
   m_pOptionRepository = std::make_unique<OptionRepository>(
     std::move( fRegisterOption ),
     std::move( fStartCalc ),
-    std::move( fStartCalc )
+    std::move( fStopCalc )
   );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
