@@ -171,8 +171,8 @@ void Collar::InitTrackLongOption(
 
   cleg.vfTest.emplace( // invalidates on new size() > capacity()
     cleg.vfTest.end(),
-    [ tracker = &cleg.m_tracker ]( double dblUnderlyingSlope, double dblUnderlyingPrice ){
-      tracker->TestLong( dblUnderlyingSlope, dblUnderlyingPrice );
+    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
+      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     }
   );
 }
@@ -192,8 +192,8 @@ void Collar::InitTrackShortOption(
 
   cleg.vfTest.emplace(
     cleg.vfTest.end(),
-    [ tracker = &cleg.m_tracker ]( double dblUnderlyingSlope, double dblUnderlyingPrice ){
-      tracker->TestShort( dblUnderlyingSlope, dblUnderlyingPrice );
+    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
+      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     }
   );
 
@@ -228,7 +228,7 @@ void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime d
     if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
 
     for ( vfTest_t::value_type& fTest: cleg.vfTest ) {
-      fTest( dblUnderlyingSlope, dblUnderlyingPrice );
+      fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     }
   }
 

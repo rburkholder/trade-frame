@@ -120,7 +120,7 @@ void Tracker::Initialize( pPosition_t pPosition ) {
 
 }
 
-void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
   switch ( m_transition ) {
     case ETransition::Track:
@@ -138,7 +138,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
               m_pOption->StopWatch();
               m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
               m_pOption.reset();
-              Construct( strikeItm );
+              Construct( dt, strikeItm );
             }
             else {
               // TODO: if retreating, stay pat, retreat, or try the roll?
@@ -148,7 +148,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
           else {
             // need to obtain option, but track via state machine to request only once
             m_transition = ETransition::Vacant;
-            Construct( strikeItm );
+            Construct( dt, strikeItm );
           }
         }
         else {
@@ -160,7 +160,7 @@ void Tracker::TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
 }
 
-void Tracker::TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
   switch ( m_transition ) {
     case ETransition::Track:
@@ -182,7 +182,7 @@ void Tracker::TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice ) 
   }
 }
 
-void Tracker::Construct( double strikeItm ) {
+void Tracker::Construct( boost::posix_time::ptime dt, double strikeItm ) {
   m_transition = ETransition::Acquire;
   std::string sName;
   switch ( m_sidePosition ) {
@@ -193,7 +193,11 @@ void Tracker::Construct( double strikeItm ) {
       sName = m_pChain->GetIQFeedNamePut( strikeItm );
       break;
   }
-  std::cout << "Tracker::Construct: " << sName << std::endl;
+  std::cout
+    << dt.time_of_day() << " "
+    << "Tracker::Construct: "
+    << sName
+    << std::endl;
   m_fConstructOption(
     sName,
     [this]( pOption_t pOption ){

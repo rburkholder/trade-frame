@@ -62,8 +62,8 @@ public:
     fOpenLeg_t&&
     );
 
-  void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
-  void TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice );
+  void TestLong( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
+  void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
   void Quiesce();
@@ -95,7 +95,7 @@ private:
   fOpenLeg_t m_fOpenLeg;
   fCloseLeg_t m_fCloseLeg;
 
-  void Construct( double strikeItm );
+  void Construct( boost::posix_time::ptime, double strikeItm );
   void HandleLongOptionQuote( const ou::tf::Quote& );
   void Initialize( pPosition_t );
 

@@ -67,7 +67,7 @@ protected:
   virtual void Init( boost::gregorian::date, const mapChains_t* );
 private:
 
-  using fTest_t = std::function<void(double,double)>; // underlying slope, price
+  using fTest_t = std::function<void(boost::posix_time::ptime,double,double)>; // underlying slope, price
   using vfTest_t = std::vector<fTest_t>;
 
   struct CollarLeg {
