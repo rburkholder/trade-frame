@@ -204,6 +204,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
         double spread = quote.Spread();
         std::cout
           << tod << " "
+          << m_pOrder->GetOrderId() << " "
           << m_pPosition->GetInstrument()->GetInstrumentName()
           << ": update order to " << m_pOrder->GetPrice1()
           //<< " on " << dblNormalizedPrice
@@ -217,44 +218,46 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
 }
 
 void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
-  auto tod = order.GetDateTimeOrderFilled().time_of_day();
+  //auto tod = order.GetDateTimeOrderFilled().time_of_day(); [not available in cancelled order]
   switch ( m_state ) {
     case State::Active:
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
-      m_state = State::Cancelled;
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
       std::cout
-        << tod << " "
+//        << tod << " "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": cancelled"
         << std::endl;
       m_pOrder.reset();
+      m_state = State::Cancelled;
       break;
     default:
       std::cout
-        << tod << " "
+//        << tod << " "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": cancelled has no matching state (" << (int)m_state << ")"
         << std::endl;
   }
 }
+
 void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
   auto tod = order.GetDateTimeOrderFilled().time_of_day();
   switch ( m_state ) {
     case State::Active:
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
-      m_state = State::Filled;
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
       std::cout
         << tod << " "
+        << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": filled at " << m_pOrder->GetAverageFillPrice()
         << std::endl;
       m_pOrder.reset();
+      m_state = State::Filled;
       break;
     default:
       std::cout
