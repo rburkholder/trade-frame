@@ -208,7 +208,8 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
           << m_pPosition->GetInstrument()->GetInstrumentName()
           << ": update order to " << m_pOrder->GetPrice1()
           //<< " on " << dblNormalizedPrice
-          << " spread " << spread
+          << ", bid=" << quote.Bid()
+          << ", ask=" << quote.Ask()
           << std::endl;
         m_pPosition->UpdateOrder( m_pOrder );
         m_CountDownToAdjustment = nAdjustmentPeriods;
