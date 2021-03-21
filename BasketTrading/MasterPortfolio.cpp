@@ -173,10 +173,11 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 // auto loading position from database, and from runtime creations
 void MasterPortfolio::Add( pPosition_t pPosition ) {
   std::cout
-    << "load position: " << pPosition->GetRow().idPosition
-    << " (" << pPosition->GetRow().sName << ")"
-    << "," << pPosition->Notes()
+    << "load position: "
+    << pPosition->GetRow().sName
     << ",quan=" << pPosition->GetActiveSize()
+    << ",id=" << pPosition->GetRow().idPosition << ","
+    << pPosition->Notes()
     << std::endl;
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->GetRow().idPortfolio );  // need to preload the iterator for random adds
