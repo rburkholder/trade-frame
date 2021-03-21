@@ -89,7 +89,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
             << m_pOrder->GetOrderId() << " "
             << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
             << m_pOrder->GetOrderSideName()
-            << " placed at " << dblNormalizedPrice
+            << " limit submitted at " << dblNormalizedPrice
             << " monitored"
             << std::endl;
           bOk = true;
