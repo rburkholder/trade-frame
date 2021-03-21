@@ -60,6 +60,12 @@ Leg& Leg::operator=( const Leg&& rhs ) {
 }
 
 Leg::~Leg() {
+  if ( m_pPosition ) {
+    std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+  else {
+    std::cout << "Leg destruction: unknown" << std::endl;
+  }
   DelChartData();
   assert( !m_monitor.IsOrderActive() );
 }
@@ -83,6 +89,8 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
       while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
     }
   }
+
+  std::cout << "Leg::SetPosition: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
 
   m_pPosition = pPosition;
   m_legNote.Decode( m_pPosition->Notes() );
