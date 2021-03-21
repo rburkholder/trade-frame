@@ -208,8 +208,11 @@ void Collar::CancelOrders() {
 }
 
 void Collar::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
-  // on expiry days, roll ITM
   // relies on tracker having been quiesced
+  // TODO: is the tracker/position active?
+  for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
+    cleg.second.m_tracker.TestItmRoll( date, time );
+  }
 }
 
 // TODO: need to disable Tracker monitoring out of hours

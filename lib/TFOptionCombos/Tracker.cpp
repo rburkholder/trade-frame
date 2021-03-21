@@ -175,16 +175,9 @@ void Tracker::TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice ) 
           m_fCloseLeg( m_pPosition );
           m_transition = ETransition::Initial;
         }
-
       }
       break;
-    case ETransition::Initial:
-      break;
-    case ETransition::Vacant:
-      break;
-    case ETransition::Fill:
-      break;
-    case ETransition::Acquire:
+    default:
       break;
   }
 }
@@ -247,13 +240,57 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
         }
       }
       break;
-    case ETransition::Initial:
+    default:
       break;
-    case ETransition::Vacant:
+  }
+}
+
+void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_duration time ) {
+  switch ( m_transition ) {
+    case ETransition::Quiesce:
+      {
+        if ( m_pPosition ) {
+          if ( m_pPosition->IsActive() ) {
+            if ( m_pPosition->GetInstrument()->GetExpiry() == date ) {
+
+              m_transition = ETransition::Roll;
+
+              double strike( m_dblStrikePosition );
+              ou::tf::OptionSide::enumOptionSide sidePosition( m_sidePosition );
+
+              m_compare = nullptr;
+              m_luStrike = nullptr;
+              std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+              m_fCloseLeg( m_pPosition );
+
+              std::string sName;
+              switch ( sidePosition ) {
+                case ou::tf::OptionSide::Call:
+                  sName = m_pChain->GetIQFeedNameCall( strike );
+                  break;
+                case ou::tf::OptionSide::Put:
+                  sName = m_pChain->GetIQFeedNamePut( strike );
+                  break;
+                default:
+                  break;
+              }
+              std::cout << "Tracker::TestItmRoll: " << sName << std::endl;
+
+              m_fConstructOption(
+                sName,
+                [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
+                  Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
+                  m_transition = ETransition::Quiesce;
+                } );
+            }
+          }
+        }
+      }
       break;
-    case ETransition::Fill:
-      break;
-    case ETransition::Acquire:
+    default:
+      std::cout
+        << "Tracker::TestItmRoll: bad state: " << int( m_transition )
+        << std::endl;
       break;
   }
 }

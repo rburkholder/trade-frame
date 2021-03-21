@@ -64,6 +64,7 @@ public:
 
   void TestLong( double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestShort( double dblUnderlyingSlope, double dblUnderlyingPrice );
+  void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
   void Quiesce();
 
