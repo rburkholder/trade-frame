@@ -97,7 +97,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
 
   return legValues;
 }
-
+/*
 void Combo::OverwritePosition( pPosition_t pPosition ) {
 
   assert( pPosition );
@@ -111,7 +111,7 @@ void Combo::OverwritePosition( pPosition_t pPosition ) {
   // Note: chart data is cleared
 
 }
-
+*/
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {

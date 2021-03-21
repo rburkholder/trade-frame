@@ -147,10 +147,8 @@ Collar::CollarLeg& Collar::InitTracker(
       // TODO: will need to supply previous option => stop calc, may need a clean up lambda
       //   then the note change above can be performed elsewhere
 
-      // TODO: does this get added to the m_pPortfolio?
-
       pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
-      Combo::OverwritePosition( pPosition );
+      // Combo::OverwritePosition( pPosition ); - not needed, performed in fOpenOpenPosition
       return pPosition;
     }
   );

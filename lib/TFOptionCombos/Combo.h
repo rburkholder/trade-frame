@@ -147,7 +147,7 @@ protected:
   mapLeg_t m_mapLeg;
 
   virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
-  void OverwritePosition( pPosition_t );
+  //void OverwritePosition( pPosition_t );
 
 private:
 
