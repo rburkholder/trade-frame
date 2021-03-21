@@ -85,9 +85,9 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_CountDownToAdjustment = nAdjustmentPeriods;
           m_pPosition->PlaceOrder( m_pOrder );
           std::cout
-            << m_pOrder->GetOrderId() << " "
-            << m_pOrder->GetInstrument()->GetInstrumentName() << ":"
             << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
+            << m_pOrder->GetOrderId() << " "
+            << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
             << m_pOrder->GetOrderSideName()
             << " placed at " << dblNormalizedPrice
             << " monitored"
