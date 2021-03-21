@@ -66,13 +66,30 @@ Leg::~Leg() {
 
 const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition ) {
 
+  if ( m_pPosition ) {
+    std::cout
+      << "Leg::SetPosition over-write position "
+      << m_pPosition->GetInstrument()->GetInstrumentName()
+      << " with "
+      << pPosition->GetInstrument()->GetInstrumentName()
+      << std::endl;
+
+    if ( m_monitor.IsOrderActive() ) {
+      std::cout
+        << "Leg::SetPosition cancelling order for position "
+        << m_pPosition->GetInstrument()->GetInstrumentName()
+        << std::endl;
+      m_monitor.CancelOrder();
+      while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
+    }
+  }
+
   m_pPosition = pPosition;
-  m_legNote.Decode( pPosition->Notes() );
+  m_legNote.Decode( m_pPosition->Notes() );
 
-  assert( !m_monitor.IsOrderActive() );
-  m_monitor.SetPosition( pPosition );
+  m_monitor.SetPosition( m_pPosition );
 
-  ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
+  ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
   // NOTE: this may generate error with non-option!
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
