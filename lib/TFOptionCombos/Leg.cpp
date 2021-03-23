@@ -64,7 +64,7 @@ Leg::~Leg() {
     std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
-    std::cout << "Leg destruction: unknown" << std::endl;
+    //std::cout << "Leg destruction: unknown" << std::endl;
   }
   DelChartData();
   assert( !m_monitor.IsOrderActive() );
@@ -88,9 +88,11 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
       m_monitor.CancelOrder();
       while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
     }
+    m_pPosition.reset();
+    m_bOption = false;
   }
 
-  std::cout << "Leg::SetPosition: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  std::cout << "Leg::SetPosition: " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
 
   m_pPosition = pPosition;
   m_legNote.Decode( m_pPosition->Notes() );
@@ -101,7 +103,6 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
   // NOTE: this may generate error with non-option!
   ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
-  m_bOption = false;
   if ( pOption ) {
     m_bOption = true;
     m_ceImpliedVolatility.Clear();
@@ -340,18 +341,18 @@ double Leg::GetNet( double price ) const {
       pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
       switch ( pOption->GetInstrument()->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
-          if ( price > m_pPosition->GetInstrument()->GetStrike() ) {
+          if ( price >= m_pPosition->GetInstrument()->GetStrike() ) {
             std::cout << "(ITM)";
           }
-          if ( price < m_pPosition->GetInstrument()->GetStrike() ) {
+          else {
             std::cout << "(otm)";
           }
           break;
         case ou::tf::OptionSide::Put:
-          if ( price < m_pPosition->GetInstrument()->GetStrike() ) {
+          if ( price <= m_pPosition->GetInstrument()->GetStrike() ) {
             std::cout << "(ITM)";
           }
-          if ( price > m_pPosition->GetInstrument()->GetStrike() ) {
+          else {
             std::cout << "(otm)";
           }
           break;
