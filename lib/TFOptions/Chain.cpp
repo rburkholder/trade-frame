@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:    Chains.cpp
  * Author:  raymond@burkholder.net
  * Project: TFOptions
@@ -31,7 +31,7 @@ namespace option { // options
 
 Chain::Chain( ) { }
 
-Chain::Chain( const Chain&& rhs ) { 
+Chain::Chain( const Chain&& rhs ) {
   m_mapChain = std::move( rhs.m_mapChain );
 }
 
@@ -244,7 +244,7 @@ const std::string Chain::GetIQFeedNamePut( double dblStrike ) const {
 Chain::mapChain_t::const_iterator Chain::FindStrike( const double strike ) const {
   mapChain_t::const_iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
-    throw exception_strike_not_found( "Chain::FindStrike const: can't find strike" );
+    throw exception_strike_not_found( "Chain::FindStrike const: no strike" );
   }
   return iter;
 }
@@ -253,7 +253,12 @@ Chain::mapChain_t::const_iterator Chain::FindStrike( const double strike ) const
 Chain::mapChain_t::iterator Chain::FindStrike( const double strike ) {
   mapChain_t::iterator iter = m_mapChain.find( strike );
   if ( m_mapChain.end() == iter ) {
-    throw exception_strike_not_found( "Chain::FindStrike: can't find strike" );
+    std::cout
+      << "Chain::FindStrike error: "
+      << "strike " << strike
+      << ", m_mapChain size=" << m_mapChain.size()
+      << std::endl;
+    throw exception_strike_not_found( "Chain::FindStrike: no strike" );
   }
   return iter;
 }
