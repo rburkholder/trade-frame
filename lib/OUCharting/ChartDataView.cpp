@@ -91,8 +91,12 @@ void ChartDataView::UpdateActualChartId() {
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
     [this](local::ChartEntryCarrier& cec){
       mapCntChartIndexes_t::iterator iter = m_mapCntChartIndexes.find( cec.GetLogicalChartId() );
-      assert( m_mapCntChartIndexes.end() != iter );
-      cec.SetActualChartId( iter->second.ixActualChartId );
+      // TODO: need to work on this when shutting down: ced.m_nLogicalChart not found map
+      //   maybe faulty logic in Remove
+      //assert( m_mapCntChartIndexes.end() != iter );
+      if ( m_mapCntChartIndexes.end() != iter ) {
+        cec.SetActualChartId( iter->second.ixActualChartId );
+      }
     });
 }
 
