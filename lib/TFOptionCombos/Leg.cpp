@@ -187,19 +187,20 @@ void Leg::SetColour( ou::Colour::enumColour colour ) {
 void Leg::SetChartData( pChartDataView_t pChartDataView ) {
   DelChartData();
   if ( m_pPosition ) {
-    m_ceProfitLoss.SetName( "P/L: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+    const std::string& sInstrumentNmae( m_pPosition->GetInstrument()->GetInstrumentName() );
+    m_ceProfitLoss.SetName( "P/L: " + sInstrumentNmae );
     pChartDataView->Add( 2, &m_ceProfitLoss );
 
     if ( m_bOption ) {
-      m_ceImpliedVolatility.SetName( "IV: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      m_ceImpliedVolatility.SetName( "IV: " + sInstrumentNmae );
       pChartDataView->Add( 11, &m_ceImpliedVolatility );
-      m_ceDelta.SetName( "Delta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      m_ceDelta.SetName( "Delta: " + sInstrumentNmae );
       pChartDataView->Add( 12, &m_ceDelta );
-      m_ceGamma.SetName( "Gamma: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      m_ceGamma.SetName( "Gamma: " + sInstrumentNmae );
       pChartDataView->Add( 13, &m_ceGamma );
-      m_ceTheta.SetName( "Theta: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      m_ceTheta.SetName( "Theta: " + sInstrumentNmae );
       pChartDataView->Add( 14, &m_ceTheta );
-      m_ceVega.SetName( "Vega: " + m_pPosition->GetInstrument()->GetInstrumentName() );
+      m_ceVega.SetName( "Vega: " + sInstrumentNmae );
       pChartDataView->Add( 15, &m_ceVega );
     }
     m_pChartDataView = pChartDataView;
