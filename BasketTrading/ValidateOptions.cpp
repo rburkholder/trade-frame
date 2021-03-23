@@ -101,8 +101,9 @@ bool ValidateOptions::ValidateBidAsk(
             const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
             std::cout
               << sUnderlying
-              << " found no strike for "
-              << " mid-point=" << priceUnderlying
+              << " found no strike for"
+              << " underlying=" << priceUnderlying
+              << ", ixLeg=" << ixLeg
               << ", today=" << dateToday
               << " [" << e.what() << "]"
               << std::endl;
