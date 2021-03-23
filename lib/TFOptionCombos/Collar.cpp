@@ -290,7 +290,7 @@ size_t /* static */ Collar::LegCount() {
         double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
         strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
 
-        double strikeProtective( strikeSyntheticItm );
+        double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
         fLegSelected( m_rLegDefRise[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
         fLegSelected( m_rLegDefRise[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
@@ -305,7 +305,7 @@ size_t /* static */ Collar::LegCount() {
         double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
         strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
 
-        double strikeProtective( strikeSyntheticItm );
+        double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
         fLegSelected( m_rLegDefFall[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
         fLegSelected( m_rLegDefFall[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
