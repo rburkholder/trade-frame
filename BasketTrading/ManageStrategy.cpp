@@ -749,7 +749,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( direction, chains, date, mid, std::move( fLegSelected ) );
+                combo_t::ChooseLegs( direction, chains, date, mid, fLegSelected );
               }
             ) ) {
 

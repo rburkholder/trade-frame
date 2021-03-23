@@ -270,7 +270,7 @@ size_t /* static */ Collar::LegCount() {
     const mapChains_t& chains,
     boost::gregorian::date date,
     double priceUnderlying,
-    fLegSelected_t&& fLegSelected
+    const fLegSelected_t& fLegSelected
 )
 {
 

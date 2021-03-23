@@ -47,7 +47,7 @@ public:
     const mapChains_t& chains,
     boost::gregorian::date,
     double priceUnderlying,
-    fLegSelected_t&& );
+    const fLegSelected_t& );
 
   static void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
 
