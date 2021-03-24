@@ -355,10 +355,20 @@ double Leg::GetNet( double price ) const {
   double dblValue {};
   if ( m_pPosition ) {
     dblValue = m_pPosition->GetUnRealizedPL();
+    std::string sign;
+    switch ( m_pPosition->GetRow().eOrderSideActive ) {
+      case ou::tf::OrderSide::Buy:
+        sign = "+";
+        break;
+      case ou::tf::OrderSide::Sell:
+        sign = "-";
+        break;
+    }
     std::cout
       << "  leg: "
       << m_pPosition->GetInstrument()->GetInstrumentName()
       << "=>"
+      << sign
       << m_pPosition->GetActiveSize()
       << "@"
       << dblValue;
