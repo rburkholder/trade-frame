@@ -86,8 +86,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
       iter->second = std::move( leg );
     }
 
-    iter->second.SetColour( colour ); // comes after as there is no move on indicators
-    iter->second.SetChartData( pChartData ); // comes after as there is no move on indicators
+    iter->second.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
     if ( State::Initializing == m_state ) {
       m_state = State::Positions;
