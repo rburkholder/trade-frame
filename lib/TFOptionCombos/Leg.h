@@ -63,9 +63,7 @@ public:
 
   void SaveSeries( const std::string& sPrefix );
 
-  void SetColour( ou::Colour::enumColour colour );
-
-  void SetChartData( pChartDataView_t pChartData );
+  void SetChartData( pChartDataView_t pChartData, ou::Colour::enumColour );
   void DelChartData();
 
   bool CloseItm( const double price );
@@ -97,7 +95,6 @@ private:
   ou::ChartEntryIndicator m_ceVega;
   ou::ChartEntryIndicator m_ceTheta;
 
-  void Init();
 };
 
 } // namespace ou

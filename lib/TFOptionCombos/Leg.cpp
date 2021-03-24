@@ -27,13 +27,11 @@ namespace tf {
 Leg::Leg()
 : m_bOption( false )
 {
-  Init();
 }
 
 Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 : m_bOption( false )
 {
-  Init();
   SetPosition( pPosition );
 }
 
@@ -44,29 +42,28 @@ Leg::Leg( Leg&& rhs )
   m_bOption( rhs.m_bOption ),
   m_pChartDataView( std::move( rhs.m_pChartDataView ) )
 {
-  Init();
 }
 
 Leg& Leg::operator=( const Leg&& rhs ) {
   if ( this != &rhs ) {
+    DelChartData();
     m_pPosition = std::move( rhs.m_pPosition );
     m_monitor = std::move( rhs.m_monitor );
     m_legNote = std::move( rhs.m_legNote );
     m_bOption = rhs.m_bOption;
-    m_pChartDataView = std::move( rhs.m_pChartDataView );
-    Init();
+    //m_pChartDataView = std::move( rhs.m_pChartDataView );
   }
   return *this;
 }
 
 Leg::~Leg() {
+  DelChartData();
   if ( m_pPosition ) {
-    std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+    //std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
     //std::cout << "Leg destruction: unknown" << std::endl;
   }
-  DelChartData();
   assert( !m_monitor.IsOrderActive() );
 }
 
@@ -88,6 +85,7 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
       m_monitor.CancelOrder();
       while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
     }
+    DelChartData();
     m_pPosition.reset();
     m_bOption = false;
   }
@@ -175,33 +173,45 @@ void Leg::SaveSeries( const std::string& sPrefix ) {
   }
 }
 
-void Leg::SetColour( ou::Colour::enumColour colour ) {
-  m_ceProfitLoss.SetColour( colour );
-  m_ceImpliedVolatility.SetColour( colour );
-  m_ceDelta.SetColour( colour );
-  m_ceGamma.SetColour( colour );
-  m_ceTheta.SetColour( colour );
-  m_ceVega.SetColour( colour );
+namespace {
+  constexpr size_t ixPL = 2;
+  constexpr size_t ixIV = 11;
+  constexpr size_t ixDelta = 12;
+  constexpr size_t ixGamma = 13;
+  constexpr size_t ixTheta = 14;
+  constexpr size_t ixVega = 15;
 }
 
-void Leg::SetChartData( pChartDataView_t pChartDataView ) {
+void Leg::SetChartData( pChartDataView_t pChartDataView, ou::Colour::enumColour colour ) {
+
   DelChartData();
+
   if ( m_pPosition ) {
     const std::string& sInstrumentNmae( m_pPosition->GetInstrument()->GetInstrumentName() );
     m_ceProfitLoss.SetName( "P/L: " + sInstrumentNmae );
-    pChartDataView->Add( 2, &m_ceProfitLoss );
+    m_ceProfitLoss.SetColour( colour );
+    pChartDataView->Add( ixPL, &m_ceProfitLoss );
 
     if ( m_bOption ) {
       m_ceImpliedVolatility.SetName( "IV: " + sInstrumentNmae );
-      pChartDataView->Add( 11, &m_ceImpliedVolatility );
+      m_ceImpliedVolatility.SetColour( colour );
+      pChartDataView->Add( ixIV, &m_ceImpliedVolatility );
+
       m_ceDelta.SetName( "Delta: " + sInstrumentNmae );
-      pChartDataView->Add( 12, &m_ceDelta );
+      m_ceDelta.SetColour( colour );
+      pChartDataView->Add( ixDelta, &m_ceDelta );
+
       m_ceGamma.SetName( "Gamma: " + sInstrumentNmae );
-      pChartDataView->Add( 13, &m_ceGamma );
+      m_ceGamma.SetColour( colour );
+      pChartDataView->Add( ixGamma, &m_ceGamma );
+
       m_ceTheta.SetName( "Theta: " + sInstrumentNmae );
-      pChartDataView->Add( 14, &m_ceTheta );
+      m_ceTheta.SetColour( colour );
+      pChartDataView->Add( ixTheta, &m_ceTheta );
+
       m_ceVega.SetName( "Vega: " + sInstrumentNmae );
-      pChartDataView->Add( 15, &m_ceVega );
+      m_ceVega.SetColour( colour );
+      pChartDataView->Add( ixVega, &m_ceVega );
     }
     m_pChartDataView = pChartDataView;
   }
@@ -210,14 +220,28 @@ void Leg::SetChartData( pChartDataView_t pChartDataView ) {
 void Leg::DelChartData() {
   //if ( m_pPosition ) {
     if ( m_pChartDataView ) {
-      m_pChartDataView->Remove( 2, &m_ceProfitLoss );
+
+      m_pChartDataView->Remove( ixPL, &m_ceProfitLoss );
+      m_ceProfitLoss.Clear();
+
       if ( m_bOption ) {
-        m_pChartDataView->Remove( 11, &m_ceImpliedVolatility );
-        m_pChartDataView->Remove( 12, &m_ceDelta );
-        m_pChartDataView->Remove( 13, &m_ceGamma );
-        m_pChartDataView->Remove( 14, &m_ceTheta );
-        m_pChartDataView->Remove( 15, &m_ceVega );
+
+        m_pChartDataView->Remove( ixIV, &m_ceImpliedVolatility );
+        m_ceImpliedVolatility.Clear();
+
+        m_pChartDataView->Remove( ixDelta, &m_ceDelta );
+        m_ceDelta.Clear();
+
+        m_pChartDataView->Remove( ixGamma, &m_ceGamma );
+        m_ceGamma.Clear();
+
+        m_pChartDataView->Remove( ixTheta, &m_ceTheta );
+        m_ceTheta.Clear();
+
+        m_pChartDataView->Remove( ixVega, &m_ceVega );
+        m_ceVega.Clear();
       }
+
       m_pChartDataView.reset();
     }
   //}
@@ -385,9 +409,6 @@ double Leg::ConstructedValue() const {
     }
   }
   return value;
-}
-
-void Leg::Init() {
 }
 
 } // namespace ou
