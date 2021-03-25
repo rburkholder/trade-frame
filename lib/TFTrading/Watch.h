@@ -97,7 +97,7 @@ public:
   virtual bool StartWatch( void );
   virtual bool StopWatch( void );
 
-  virtual void EmitValues( void ) const;
+  virtual void EmitValues( bool bEmitName = true ) const;
 
   void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; }
   bool RecordingSeries() const { return m_bRecordSeries; }

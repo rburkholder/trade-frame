@@ -18,23 +18,23 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Strike::Strike( void ) 
+Strike::Strike( void )
 : m_dblStrike( 0 ),
   m_bWatchable( false ), m_nWatching( 0 )
 {
 }
 
-Strike::Strike( double dblStrike ) 
+Strike::Strike( double dblStrike )
 : m_dblStrike( dblStrike ),
   m_bWatchable( false ), m_nWatching( 0 )
 {
 }
 
-Strike::Strike( const Strike& rhs ) 
+Strike::Strike( const Strike& rhs )
 : m_dblStrike( rhs.m_dblStrike ),
   m_call( rhs.m_call ), m_put( rhs.m_put ),
   m_bWatchable( false ), m_nWatching( 0 )
-{ 
+{
   assert( 0 == rhs.m_nWatching );
 }
 
@@ -50,54 +50,56 @@ Strike& Strike::operator=( const Strike& rhs ) {
   return *this;
 };
 
-void Strike::AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) { 
-  assert( 0 == m_call.use_count() ); 
+void Strike::AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
+  assert( 0 == m_call.use_count() );
   assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-  if ( 0 != m_call.use_count() ) {
+  if ( 0 != m_call.use_count() ) { // look at this: not needed given the above assertion
     if ( 0 < m_nWatching ) m_call->StopWatch();
   }
-  m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider, pGreekProvider ) ); 
+  m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider, pGreekProvider ) );
   if ( 0 < m_nWatching ) m_call->StartWatch();
 };
 
-void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )  { 
-  assert( 0 == m_put.use_count() );  
+void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )  {
+  assert( 0 == m_put.use_count() );
   assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-  if ( 0 != m_put.use_count() ) {
+  if ( 0 != m_put.use_count() ) { // look at this: not needed given the above assertion
     if ( 0 < m_nWatching ) m_put->StopWatch();
   }
-  m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider, pGreekProvider ) ); 
+  m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider, pGreekProvider ) );
   if ( 0 < m_nWatching ) m_put->StartWatch();
 };
 
-void Strike::AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider ) { 
-  assert( 0 == m_call.use_count() ); 
+void Strike::AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider ) {
+  assert( 0 == m_call.use_count() );
   assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-  if ( 0 != m_call.use_count() ) {
+  if ( 0 != m_call.use_count() ) { // look at this: not needed given the above assertion
     if ( 0 < m_nWatching ) m_call->StopWatch();
   }
-  m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider ) ); 
+  m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider ) );
   if ( 0 < m_nWatching ) m_call->StartWatch();
 };
 
-void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider )  { 
-  assert( 0 == m_put.use_count() );  
+void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider )  {
+  assert( 0 == m_put.use_count() );
   assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-  if ( 0 != m_put.use_count() ) {
+  if ( 0 != m_put.use_count() ) { // look at this: not needed given the above assertion
     if ( 0 < m_nWatching ) m_put->StopWatch();
   }
-  m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider ) ); 
+  m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider ) );
   if ( 0 < m_nWatching ) m_put->StartWatch();
 };
 
 void Strike::EmitValues( void ) {
-  if ( 0 != m_call.get() ) m_call->EmitValues();
-  if ( 0 != m_put.get()  ) m_put->EmitValues();
+  if ( m_call ) m_call->EmitValues();
+  std::cout << std::endl;
+  if ( m_put  ) m_put->EmitValues();
+  std::cout << std::endl;
 }
 
 void Strike::SaveSeries( const std::string& sPrefix ) {
-  if ( 0 != m_call.get() ) m_call->SaveSeries( sPrefix );
-  if ( 0 != m_put.get()  ) m_put->SaveSeries( sPrefix );
+  if ( m_call ) m_call->SaveSeries( sPrefix );
+  if ( m_put  ) m_put->SaveSeries( sPrefix );
 }
 
 void Strike::SetWatchableOn( void ) {
@@ -121,8 +123,8 @@ void Strike::WatchStart( void ) {
   if ( m_bWatchable ) {
     ++m_nWatching;
     if ( 1 == m_nWatching ) {
-      if ( 0 != m_call.get() ) m_call->StartWatch();
-      if ( 0 != m_put.get() ) m_put->StartWatch();
+      if ( m_call ) m_call->StartWatch();
+      if ( m_put  ) m_put->StartWatch();
     }
   }
 }
@@ -131,8 +133,8 @@ void Strike::WatchStop( void ) {
   assert( 0 != m_nWatching );
   -- m_nWatching;
   if ( 0 == m_nWatching ) {
-    if ( 0 != m_call.get() ) m_call->StopWatch();
-    if ( 0 != m_put.get() ) m_put->StopWatch();
+    if ( m_call ) m_call->StopWatch();
+    if ( m_put  ) m_put->StopWatch();
   }
 }
 

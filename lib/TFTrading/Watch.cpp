@@ -191,13 +191,17 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
   return 0 == m_cntWatching;
 }
 
-void Watch::EmitValues( void ) const {
-  std::cout << m_pInstrument->GetInstrumentName() << ": "
+void Watch::EmitValues( bool bEmitName ) const {
+  if ( bEmitName ) {
+    std::cout << m_pInstrument->GetInstrumentName() << ": ";
+  }
+  std::cout
     << "Cnt=" << m_quotes.Size() << "(q)," << m_trades.Size() << "(t)"
     << ",P=" << m_trade.Price()
     << ",B=" << m_quote.Bid()
     << ",A=" << m_quote.Ask()
-    << std::endl;
+    //<< std::endl
+    ;
 }
 
 void Watch::HandleQuote( const Quote& quote ) {

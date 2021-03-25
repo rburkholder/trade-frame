@@ -74,7 +74,7 @@ Option& Option::operator=( const Option& rhs ) {
 
 void Option::Initialize( void ) {
   assert( Watch::m_pInstrument->IsOption() || Watch::m_pInstrument->IsFuturesOption() );
-  if ( 0 != m_pGreekProvider.get() ) 
+  if ( m_pGreekProvider )
     assert( m_pGreekProvider->ProvidesGreeks() );
   m_greeks.Reserve( 1024 );  // reduce startup allocations
 }
@@ -82,7 +82,7 @@ void Option::Initialize( void ) {
 bool Option::StartWatch( void ) {
   bool b = Watch::StartWatch();
   if ( b ) {
-    if ( 0 != m_pGreekProvider.get() ) 
+    if ( m_pGreekProvider )
       m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
   return b;
@@ -100,10 +100,10 @@ void Option::CalcRate( // version 1, called by version 2, updates input
 
   static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
 //    time_duration tdurOneYear( 360 * 24, 0, 0 );  // https://www.interactivebrokers.com/en/index.php?f=interest&p=schedule
-//    time_duration tdurOneYear( 250 * 24, 0, 0 );  
+//    time_duration tdurOneYear( 250 * 24, 0, 0 );
   static long lSecForOneYear = tdurOneYear.total_seconds();
   //long lSecToExpiry = ( m_dtExpiry - now ).total_seconds();
-  
+
   boost::posix_time::time_duration durToExpiry = dtUtcExpiry - dtUtcNow;
   int lSecToExpiry = durToExpiry.total_seconds();
   double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
@@ -119,11 +119,11 @@ void Option::CalcRate( // version 2, calls version 1, uses instrument expiry dat
         const boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
 
   assert( boost::posix_time::not_a_date_time != dtUtcNow );
-  
+
   // system time is already utc
-//  boost::posix_time::ptime dtUtcNow = 
+//  boost::posix_time::ptime dtUtcNow =
 //          ou::TimeSource::Instance().
-//              ConvertRegionalToUtc( dtUtcNow.date(), dtUtcNow.time_of_day(), "America/New_York", true );  
+//              ConvertRegionalToUtc( dtUtcNow.date(), dtUtcNow.time_of_day(), "America/New_York", true );
 
   ptime dtUtcExpiry( m_pInstrument->GetExpiryUtc() );
   if ( dtUtcNow < dtUtcExpiry ) {
@@ -137,18 +137,18 @@ void Option::CalcRate( // version 2, calls version 1, uses instrument expiry dat
   CalcRate( input, libor, dtUtcNow, dtUtcExpiry );
 }
 
-void Option::CalcGreeks( 
+void Option::CalcGreeks(
   ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess ) {
   // example caller: void ExpiryBundle::CalcGreeksAtStrike
-  
+
   // needs CalcRate before entering here
   // needs input.S (underlying price)
-  
+
   if ( !Watching() ) return;  // not watching so no active data
-  
+
   input.X = m_dblStrike;
-  //input.S = underlying  
-  
+  //input.S = underlying
+
   // todo: use the haskell book to get an estimator
   // Manaster and Koehler Start Value, Option Pricing Formulas, pg 454
   if ( bNeedsGuess ) {
@@ -157,7 +157,7 @@ void Option::CalcGreeks(
     double dblVolatilityGuess = std::sqrt( std::abs( std::log( input.S / input.X ) + input.r * input.T ) * 2.0 / input.T );
     input.v = dblVolatilityGuess;
   }
-  
+
 //  std::cout << "Guess " << input.v << std::endl;
 
   try {
@@ -176,22 +176,24 @@ void Option::CalcGreeks(
 bool Option::StopWatch( void ) {
   bool b = Watch::StopWatch();
   if ( b ) {
-    if ( 0 != m_pGreekProvider.get() ) 
+    if ( m_pGreekProvider )
       m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
   return b;
 }
 
-void Option::EmitValues( void ) {
-  Watch::EmitValues();
-  std::cout << m_pInstrument->GetInstrumentName() << ": " 
-    << "IV:" << m_greek.ImpliedVolatility() << "," 
-    << "D:" << m_greek.Delta() << "," 
-    << "G:" << m_greek.Gamma() << "," 
-    << "T:" << m_greek.Theta() << "," 
+void Option::EmitValues( bool bEmitName ) {
+  Watch::EmitValues( bEmitName );
+  std::cout
+    << ","
+    << "IV:" << m_greek.ImpliedVolatility() << ","
+    << "D:" << m_greek.Delta() << ","
+    << "G:" << m_greek.Gamma() << ","
+    << "T:" << m_greek.Theta() << ","
     << "V:" << m_greek.Vega() << ","
     << "R:" << m_greek.Rho()
-    << std::endl;
+    //<< std::endl
+    ;
 }
 
 void Option::HandleGreek( const Greek& greek ) {
@@ -208,7 +210,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
 
-  HDF5Attributes::structOption option( 
+  HDF5Attributes::structOption option(
     m_dblStrike, m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay(), m_pInstrument->GetOptionSide() );
 
   Watch::SaveSeries( sPrefix );
@@ -234,7 +236,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
     attrGreeks.SetSignature( ou::tf::Greek::Signature() );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrGreeks.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-    if ( 0 != m_pGreekProvider.get() ) {
+    if ( m_pGreekProvider ) {
       attrGreeks.SetProviderType( m_pGreekProvider->ID() );
     }
     else {
@@ -243,7 +245,6 @@ void Option::SaveSeries( const std::string& sPrefix ) {
   }
 
 }
-
 
 //
 // ==================^

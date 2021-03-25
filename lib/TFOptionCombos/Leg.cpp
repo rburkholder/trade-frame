@@ -392,15 +392,10 @@ double Leg::GetNet( double price ) const {
           }
           break;
       }
+      std::cout << ",";
+      pOption->EmitValues( false );
+      std::cout << ",";
     }
-//    if ( 0.0 == dblValue ) {
-      const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-      std::cout
-        << ",b" << quote.Bid()
-        << ",a" << quote.Ask()
-        ;
-//    }
-//    std::cout << std::endl;
   }
   return dblValue;
 }

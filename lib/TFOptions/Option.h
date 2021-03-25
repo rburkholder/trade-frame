@@ -69,7 +69,7 @@ public:
   virtual bool StartWatch( void );
   virtual bool StopWatch( void );
 
-  virtual void EmitValues( void );
+  virtual void EmitValues( bool bEmitName = true );
 
   // TODO: needs spinlock
   inline const Greek& LastGreek( void ) const { return m_greek; };
