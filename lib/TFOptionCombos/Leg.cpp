@@ -60,6 +60,7 @@ Leg::~Leg() {
   DelChartData();
   if ( m_pPosition ) {
     //std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+    m_pPosition.reset();
   }
   else {
     //std::cout << "Leg destruction: unknown" << std::endl;
