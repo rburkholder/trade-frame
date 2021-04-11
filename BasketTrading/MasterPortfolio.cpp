@@ -275,7 +275,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           }
         );
 
-        std::set<std::string> vDesired = { "SPY", "SLV", "GLD", "XBI" }; // USB, XLP
+        std::set<std::string> vDesired = { "SPY", "SLV", "GLD" }; // USB, XLP, XBI
 
         SymbolSelection selector(
           dtLatestEod, m_setSymbols,
@@ -767,12 +767,12 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
 //} // Start
 
-void MasterPortfolio::Stop( void ) {
+void MasterPortfolio::ClosePositions( void ) {
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
     [](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
-        strategy.pManageStrategy->Stop();
+        strategy.pManageStrategy->ClosePositions();
     } );
 }
 

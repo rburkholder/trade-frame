@@ -116,8 +116,7 @@ private:
 
   void HandleButtonLoad( void );
 //  void HandleButtonStart( void );
-  void HandleExitPositionsButton( void );
-  void HandleButtonStop( void );
+  void HandleButtonClosePositions( void );
   void HandleButtonSave( void );
   void HandleEmitInfo( void );
   void HandleButtonTest( void );

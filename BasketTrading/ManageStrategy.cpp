@@ -519,8 +519,8 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
   }
 }
 
-void ManageStrategy::Stop( void ) {
-  std::cout << m_sUnderlying << " stop" << std::endl;
+void ManageStrategy::ClosePositions( void ) {
+  std::cout << m_sUnderlying << " close positions" << std::endl;
   std::for_each(
     m_mapCombo.begin(), m_mapCombo.end(),
     [this](mapCombo_t::value_type& entry){

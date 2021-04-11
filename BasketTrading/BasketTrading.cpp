@@ -197,7 +197,7 @@ bool AppBasketTrading::OnInit() {
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleButtonLoad ) ) );
 //  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
-  vItems.push_back( new mi( "a3 Exit Positions", MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) ) ); // doesn't do anything at the moment
+  vItems.push_back( new mi( "a3 Close Positions", MakeDelegate( this, &AppBasketTrading::HandleButtonClosePositions ) ) );
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleButtonSave ) ) );
   vItems.push_back( new mi( "a5 Emit Info", MakeDelegate( this, &AppBasketTrading::HandleEmitInfo ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
@@ -388,15 +388,11 @@ void AppBasketTrading::HandleMenuActionTestSelection( void ) {
 //    } );
 //}
 
-void AppBasketTrading::HandleButtonStop(void) {
+void AppBasketTrading::HandleButtonClosePositions(void) {
   CallAfter(
     [this](){
-      m_pMasterPortfolio->Stop();
+      m_pMasterPortfolio->ClosePositions();
     });
-}
-
-void AppBasketTrading::HandleExitPositionsButton(void) {
-  m_pMasterPortfolio->Stop();
 }
 
 void AppBasketTrading::HandleButtonSave(void) {

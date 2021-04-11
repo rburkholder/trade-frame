@@ -77,7 +77,7 @@ public:
 
   void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
 
-  void Stop( void );
+  void ClosePositions( void );
   void SaveSeries( const std::string& sPath );
 
   void Test( void );
