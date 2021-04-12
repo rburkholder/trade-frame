@@ -252,10 +252,8 @@ private:
   using pValidateOptions_t = std::unique_ptr<ValidateOptions>;
   pValidateOptions_t m_pValidateOptions;
 
-  using pCombo_t = std::shared_ptr<ou::tf::option::Combo>;
-
-  using mapCombo_t = std::map<std::string,pCombo_t>;
-  mapCombo_t m_mapCombo;
+  using pCombo_t = std::unique_ptr<ou::tf::option::Combo>;
+  pCombo_t m_pCombo;
 
   ou::tf::Bars m_barsDaily;
   ou::tf::Prices m_pricesDailyClose;
