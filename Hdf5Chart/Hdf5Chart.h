@@ -19,18 +19,11 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/timer.h>
-
-#include <OUCommon/Worker.h>
-
 #include <TFBitsNPieces/FrameWork01.h>
-
-#include <TFTrading/DBOps.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelChartHdf5.h>
-//#include <TFVuTrading/PanelManualOrder.h>
 
 class AppHdf5Chart:
   public wxApp, public ou::tf::FrameWork01<AppHdf5Chart> {
@@ -40,30 +33,15 @@ public:
 protected:
 private:
 
-  ou::action::Worker m_worker;
-
   FrameMain* m_pFrameMain;
-//  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-//  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   ou::tf::PanelChartHdf5* m_pPanelChartHdf5;
 
   std::string m_sStateFileName;
-  ou::tf::DBOps m_db;
-
-  //wxTimer m_timerGuiRefresh;
 
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
-
-  void HandleRegisterTables( ou::db::Session& session );
-  void HandleRegisterRows( ou::db::Session& session );
-  void HandlePopulateDatabase( void );
-
-  void HandleGuiRefresh( wxTimerEvent& event );
-
-  //void AutoStartCollection( void );
 
   void OnData1Connected( int );
   void OnData2Connected( int );
