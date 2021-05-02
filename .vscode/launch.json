@@ -10,8 +10,6 @@
   },
   "configurations": [
 
-
-
     {
       "name": "(gdb) IQFeedMarketSymbols",
       "type": "cppdbg",
@@ -80,6 +78,27 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/BasketTrading/BasketTrading",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) Hdf5Chart",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Hdf5Chart/Hdf5Chart",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",
