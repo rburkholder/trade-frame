@@ -16,11 +16,16 @@
 
 #include <iostream>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "Hdf5Chart.h"
 
 IMPLEMENT_APP(AppHdf5Chart)
 
 bool AppHdf5Chart::OnInit() {
+
+  m_sStateFileName = "Hdf5Chart.state";
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hdf5 Chart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -120,6 +125,12 @@ bool AppHdf5Chart::OnInit() {
 
 //  this->m_pData1Provider->Connect();
 
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
   return 1;
 
 }
@@ -147,6 +158,27 @@ void AppHdf5Chart::HandleGuiRefresh( wxTimerEvent& event ) {
   */
 }
 
+void AppHdf5Chart::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( m_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppHdf5Chart::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( m_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
+}
+
 int AppHdf5Chart::OnExit() {
   std::cout << "AppHdf5Chart::OnExit" << std::endl;
   // Exit Steps: #4
@@ -158,10 +190,6 @@ int AppHdf5Chart::OnExit() {
   return wxAppConsole::OnExit();
 }
 
-//void AppWeeklies::HandlePanelFocusPropogate( unsigned int ix ) {
-//}
-
-
 void AppHdf5Chart::OnClose( wxCloseEvent& event ) {
   std::cout << "AppHdf5Chart::OnClose" << std::endl;
   // Exit Steps: #2 -> FrameMain::OnClose
@@ -170,6 +198,9 @@ void AppHdf5Chart::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
+
+  SaveState();
+
   event.Skip();  // auto followed by Destroy();
 }
 

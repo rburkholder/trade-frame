@@ -16,6 +16,9 @@
 
 // Started 2013/09/26
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/timer.h>
 
 #include <OUCommon/Worker.h>
@@ -31,6 +34,7 @@
 
 class AppHdf5Chart:
   public wxApp, public ou::tf::FrameWork01<AppHdf5Chart> {
+    friend class boost::serialization::access;
     friend ou::tf::FrameWork01<AppHdf5Chart>;
 public:
 protected:
@@ -44,6 +48,7 @@ private:
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   ou::tf::PanelChartHdf5* m_pPanelChartHdf5;
 
+  std::string m_sStateFileName;
   ou::tf::DBOps m_db;
 
   //wxTimer m_timerGuiRefresh;
@@ -69,8 +74,25 @@ private:
 
   //void HandleMenuActionLoadTree( void );
 
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+    //ar & m_splitPanels->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+    //m_splitPanels->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
-// Implements MyApp& wxGetApp()
+BOOST_CLASS_VERSION(AppHdf5Chart, 1)
 DECLARE_APP(AppHdf5Chart)
 
