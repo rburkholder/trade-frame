@@ -4,6 +4,8 @@ x64/release
 c_standard_headers_indexer.*
 cpp_standard_headers_indexer.*
 private.xml
+DialogBlocks/*.h
+DialogBlocks/*.cpp
 Hdf5Chart/build/
 Hdf5Chart/dist/
 HedgedBollinger/build/
@@ -69,3 +71,4 @@ LiveChart/dist/
 /IntervalSampler/dist/
 /IntervalTrader/build/
 /IntervalTrader/dist/
+
