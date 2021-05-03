@@ -88,7 +88,7 @@ private:
 
   void OnClose( wxCloseEvent& event );
 
-  void LoadDataAndGenerateChart( CustomItemData::enumDatumType, const std::string& sPath );
+  size_t LoadDataAndGenerateChart( CustomItemData::enumDatumType, const std::string& sPath );
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );

@@ -61,7 +61,7 @@ public:
 
   // only usual timeseries can be used here
   template<typename TS> // TS=timeseries
-  void ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath ) {
+  size_t ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath ) {
 
     pChartDataView->SetNames( sName, sPath );
 
@@ -76,14 +76,18 @@ public:
 
     AddChartEntries( pChartDataView, series );
 
+    return cnt;
+
   }
 
   // Normal timeseries plus equities/options structs can be used here:
   template<typename TS> // TS=timeseries
-  void ChartTimeSeries( ou::ChartDataView* pChartDataView, const TS& series, const std::string& sName, const std::string& sDescription ) {
+  size_t ChartTimeSeries( ou::ChartDataView* pChartDataView, const TS& series, const std::string& sName, const std::string& sDescription ) {
 
     pChartDataView->SetNames( sName, sDescription );
     AddChartEntries( pChartDataView, series );
+
+    return 0;
 
   }
 

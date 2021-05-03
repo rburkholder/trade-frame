@@ -195,6 +195,8 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
   CustomItemData* pdata = dynamic_cast<CustomItemData*>( m_pHdf5Root->GetItemData( id ) );
 
+  size_t cntSeriesElements {};
+
   switch ( pdata->m_eNodeType ) {
   case CustomItemData::Root:
     break;
@@ -203,19 +205,15 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
     break;
   case CustomItemData::Object:
     // load and view time series here
-    LoadDataAndGenerateChart( pdata->m_eDatumType, sPath );
+    cntSeriesElements = LoadDataAndGenerateChart( pdata->m_eDatumType, sPath );
     break;
   }
 
-  std::cout << sPath << std::endl;
+  std::cout << sPath << " with " << cntSeriesElements << " elements" << std::endl;
 
 }
 
-//void PanelChartHdf5::HandleMenuActionStartChart( void ) {
-//  m_bReadyToDrawChart = true;
-//  m_pChart = new ChartTest( m_pData1Provider );
-
-void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
+size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
 
   if ( nullptr != m_pChartDataView ) {
     m_pWinChartView->SetChartDataView( nullptr );
@@ -224,25 +222,27 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
   }
   m_pChartDataView = new ou::ChartDataView;
 
+  size_t cntSeriesElements {};
+
   if ( CustomItemData::NoDatum == edt ) {
     std::cout << "Can't do this chart type" << std::endl;
   }
   else {
     switch ( edt ) {
     case CustomItemData::Bars:
-      m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm, m_pChartDataView, "Bars", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm, m_pChartDataView, "Bars", sPath );
       break;
     case CustomItemData::Quotes:
-      m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm, m_pChartDataView, "Quotes", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm, m_pChartDataView, "Quotes", sPath );
       break;
     case CustomItemData::Trades:
-      m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
       break;
     case CustomItemData::AtmIV:
-      m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm, m_pChartDataView, "Price IV", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm, m_pChartDataView, "Price IV", sPath );
       break;
     case CustomItemData::Greeks:
-      m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
       break;
     default:
       throw std::runtime_error("unknown CustomItemData");
@@ -250,6 +250,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
   }
 
   m_pWinChartView->SetChartDataView( m_pChartDataView, false );
+
+  return cntSeriesElements;
 }
 
 wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {
