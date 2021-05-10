@@ -19,6 +19,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+namespace {
+  static const size_t nMaxElements { 25000 };
+}
+
 ModelChartHdf5::ModelChartHdf5( void ) {
   m_ceQuoteUpper.SetName( "Ask" );
   m_ceQuoteLower.SetName( "Bid" );
@@ -40,6 +44,8 @@ ModelChartHdf5::ModelChartHdf5( void ) {
 ModelChartHdf5::~ModelChartHdf5(void) {
 }
 
+// ChartBars
+
 void ModelChartHdf5::DefineChartBars( ou::ChartDataView* pChartDataView ) {
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceBars );
@@ -47,14 +53,20 @@ void ModelChartHdf5::DefineChartBars( ou::ChartDataView* pChartDataView ) {
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars ) {
+
   DefineChartBars( pChartDataView );
   m_ceBars.Clear();
   m_ceVolume.Clear();
-  for ( ou::tf::Bars::const_iterator iter = bars.begin(); bars.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( bars.Size() / nMaxElements );
+
+  for ( ou::tf::Bars::const_iterator iter = bars.begin(); iter < bars.end(); iter = iter += skip ) {
     m_ceBars.AppendBar( *iter );
     m_ceVolume.Append( iter->DateTime(), iter->Volume() );
   }
 }
+
+// ChartQuotes
 
 void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
@@ -70,13 +82,17 @@ void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes ) {
+
   DefineChartQuotes( pChartDataView );
   m_ceQuoteUpper.Clear();
   m_ceVolumeUpper.Clear();
   m_ceQuoteLower.Clear();
   m_ceVolumeLower.Clear();
   m_ceQuoteSpread.Clear();
-  for ( ou::tf::Quotes::const_iterator iter = quotes.begin(); quotes.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( quotes.Size() / nMaxElements );
+
+  for ( ou::tf::Quotes::const_iterator iter = quotes.begin(); iter < quotes.end(); iter = iter += skip ) {
     m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
     m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
     m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
@@ -84,6 +100,8 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
   }
 }
+
+// ChartTrades
 
 void ModelChartHdf5::DefineChartTrades( ou::ChartDataView* pChartDataView ) {
   m_ceTrade.SetColour( ou::Colour::Green );
@@ -96,11 +114,16 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
   DefineChartTrades( pChartDataView );
   m_ceTrade.Clear();
   m_ceVolume.Clear();
-  for ( ou::tf::Trades::const_iterator iter = trades.begin(); trades.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( trades.Size() / nMaxElements );
+
+  for ( ou::tf::Trades::const_iterator iter = trades.begin(); iter < trades.end(); iter = iter += skip ) {
     m_ceTrade.Append( iter->DateTime(), iter->Price() );
     m_ceVolume.Append( iter->DateTime(), iter->Volume() );
   }
 }
+
+// ChartPriceIVs
 
 void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
   m_ceTrade.SetColour( ou::Colour::Green );
@@ -116,12 +139,17 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
   m_ceTrade.Clear();
   m_ceCallIV.Clear();
   m_cePutIV.Clear();
-  for ( ou::tf::PriceIVExpirys::const_iterator iter = ivs.begin(); ivs.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( ivs.Size() / nMaxElements );
+
+  for ( ou::tf::PriceIVExpirys::const_iterator iter = ivs.begin(); iter < ivs.end(); iter = iter += skip ) {
     m_ceTrade.Append( iter->DateTime(), iter->Value() );
     m_ceCallIV.Append( iter->DateTime(), iter->IVCall() );
     m_cePutIV.Append( iter->DateTime(), iter->IVPut() );
   }
 }
+
+// ChartGreeks
 
 void ModelChartHdf5::DefineChartGreeks( ou::ChartDataView* pChartDataView ) {
   m_ceImpVol.SetColour( ou::Colour::Black );
@@ -146,7 +174,10 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
   m_ceTheta.Clear();
   m_ceVega.Clear();
   m_ceRho.Clear();
-  for ( ou::tf::Greeks::const_iterator iter = greeks.begin(); greeks.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( greeks.Size() / nMaxElements );
+
+  for ( ou::tf::Greeks::const_iterator iter = greeks.begin(); iter < greeks.end(); iter = iter += skip ) {
     m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
     m_ceDelta.Append( iter->DateTime(), iter->Delta() );
     m_ceGamma.Append( iter->DateTime(), iter->Gamma() );
@@ -155,6 +186,8 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_ceRho.Append( iter->DateTime(), iter->Rho() );
   }
 }
+
+// ChartEquities
 
 void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
 
@@ -189,24 +222,36 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   m_ceQuoteLower.Clear();
   //m_ceVolumeLower.Clear();
   m_ceQuoteSpread.Clear();
-  for ( ou::tf::Quotes::const_iterator iter
-          = equities.quotes.begin(); equities.quotes.end() != iter; ++iter ) {
-    m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
-    //m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
-    m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
-    //m_ceVolumeLower.Append( iter->DateTime(), - (int) iter->BidSize() );
-    m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
+
+  {
+    size_t skipQuotes = 1 + ( equities.quotes.Size() / nMaxElements );
+
+    for ( ou::tf::Quotes::const_iterator iter = equities.quotes.begin();
+          iter < equities.quotes.end(); iter = iter += skipQuotes ) {
+      m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
+      //m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
+      m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
+      //m_ceVolumeLower.Append( iter->DateTime(), - (int) iter->BidSize() );
+      m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
+    }
   }
 
   // Trades
   m_ceTrade.Clear();
   m_ceVolume.Clear();
-  for ( ou::tf::Trades::const_iterator iter
-          = equities.trades.begin(); equities.trades.end() != iter; ++iter ) {
-    m_ceTrade.Append( iter->DateTime(), iter->Price() );
-    m_ceVolume.Append( iter->DateTime(), iter->Volume() );
+
+  {
+    size_t skipTrades = 1 + ( equities.trades.Size() / nMaxElements );
+
+    for ( ou::tf::Trades::const_iterator iter = equities.trades.begin();
+          iter < equities.trades.end(); iter = iter += skipTrades ) {
+      m_ceTrade.Append( iter->DateTime(), iter->Price() );
+      m_ceVolume.Append( iter->DateTime(), iter->Volume() );
+    }
   }
 }
+
+// ChartOptions
 
 void ModelChartHdf5::DefineChartOptions( ou::ChartDataView* pChartDataView ) {
 
@@ -239,8 +284,11 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
   m_ceTheta.Clear();
   m_ceVega.Clear();
   m_ceRho.Clear();
-  for ( ou::tf::Greeks::const_iterator iter
-          = options.greeks.begin(); options.greeks.end() != iter; ++iter ) {
+
+  size_t skip = 1 + ( options.greeks.Size() / nMaxElements );
+
+  for ( ou::tf::Greeks::const_iterator iter = options.greeks.begin();
+        iter < options.greeks.end(); iter = iter += skip ) {
     m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
     m_ceDelta.Append( iter->DateTime(), iter->Delta() );
     m_ceGamma.Append( iter->DateTime(), iter->Gamma() );
@@ -249,6 +297,8 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
     m_ceRho.Append( iter->DateTime(), iter->Rho() );
   }
 }
+
+// Supporting methods
 
 void ModelChartHdf5::HandleQuote( const ou::tf::Quote& quote ) {
 
