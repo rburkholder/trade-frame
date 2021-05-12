@@ -51,14 +51,6 @@ public:
       : Equities( quotes_, trades_ ), greeks( greeks_ ) {}
   };
 
-  void DefineChartBars( ou::ChartDataView* pChartDataView );
-  void DefineChartQuotes( ou::ChartDataView* pChartDataView );
-  void DefineChartTrades( ou::ChartDataView* pChartDataView );
-  void DefineChartPriceIVs( ou::ChartDataView* pChartDataView );
-  void DefineChartGreeks( ou::ChartDataView* pChartDataView );
-  void DefineChartEquities( ou::ChartDataView* pChartDataView );
-  void DefineChartOptions( ou::ChartDataView* pChartDataView );
-
   // only usual timeseries can be used here
   template<typename TS> // TS=timeseries
   size_t ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath ) {
@@ -114,6 +106,16 @@ private:
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryVolume m_ceVolumeUpper;
   ou::ChartEntryVolume m_ceVolumeLower;
+
+  void Clear();
+
+  void DefineChartBars( ou::ChartDataView* pChartDataView );
+  void DefineChartQuotes( ou::ChartDataView* pChartDataView );
+  void DefineChartTrades( ou::ChartDataView* pChartDataView );
+  void DefineChartPriceIVs( ou::ChartDataView* pChartDataView );
+  void DefineChartGreeks( ou::ChartDataView* pChartDataView );
+  void DefineChartEquities( ou::ChartDataView* pChartDataView );
+  void DefineChartOptions( ou::ChartDataView* pChartDataView );
 
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes );

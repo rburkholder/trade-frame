@@ -188,15 +188,14 @@ private:
     //pWatch_t GetWatch() { return m_pWatch; }
     //void EmitValues( void ) { m_pWatch->EmitValues(); }
     void ApplyDataTo( ou::ChartDataView* view ) {
-      if ( 0 == m_pWatch.use_count() )
-        assert( 0 );
+      assert( m_pWatch );
       pInstrument_t pInstrument = m_pWatch->GetInstrument();
-      if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-        m_chartData.DefineChartOptions( view );
-      }
-      else {
-        m_chartData.DefineChartEquities( view );
-      }
+//      if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+//        m_chartData.DefineChartOptions( view );
+//      }
+//      else {
+//        m_chartData.DefineChartEquities( view );
+//      }
     }
   private:
     bool m_bActive;

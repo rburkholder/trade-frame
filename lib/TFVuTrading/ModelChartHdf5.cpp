@@ -47,6 +47,7 @@ ModelChartHdf5::~ModelChartHdf5(void) {
 // ChartBars
 
 void ModelChartHdf5::DefineChartBars( ou::ChartDataView* pChartDataView ) {
+  Clear();
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceBars );
   pChartDataView->Add( 1, &m_ceVolume );
@@ -55,8 +56,6 @@ void ModelChartHdf5::DefineChartBars( ou::ChartDataView* pChartDataView ) {
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars ) {
 
   DefineChartBars( pChartDataView );
-  m_ceBars.Clear();
-  m_ceVolume.Clear();
 
   size_t skip = 1 + ( bars.Size() / nMaxElements );
 
@@ -69,6 +68,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 // ChartQuotes
 
 void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
+  Clear();
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
   m_ceVolumeUpper.SetColour( ou::Colour::Red );
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
@@ -84,11 +84,6 @@ void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes ) {
 
   DefineChartQuotes( pChartDataView );
-  m_ceQuoteUpper.Clear();
-  m_ceVolumeUpper.Clear();
-  m_ceQuoteLower.Clear();
-  m_ceVolumeLower.Clear();
-  m_ceQuoteSpread.Clear();
 
   size_t skip = 1 + ( quotes.Size() / nMaxElements );
 
@@ -104,6 +99,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 // ChartTrades
 
 void ModelChartHdf5::DefineChartTrades( ou::ChartDataView* pChartDataView ) {
+  Clear();
   m_ceTrade.SetColour( ou::Colour::Green );
   m_ceVolume.SetColour( ou::Colour::Black );
   pChartDataView->Add( 0, &m_ceTrade );
@@ -112,8 +108,6 @@ void ModelChartHdf5::DefineChartTrades( ou::ChartDataView* pChartDataView ) {
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades ) {
   DefineChartTrades( pChartDataView );
-  m_ceTrade.Clear();
-  m_ceVolume.Clear();
 
   size_t skip = 1 + ( trades.Size() / nMaxElements );
 
@@ -126,6 +120,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 // ChartPriceIVs
 
 void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
+  Clear();
   m_ceTrade.SetColour( ou::Colour::Green );
   m_cePutIV.SetColour( ou::Colour::Red );
   m_ceCallIV.SetColour( ou::Colour::Blue );
@@ -136,9 +131,6 @@ void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs ) {
   DefineChartPriceIVs( pChartDataView );
-  m_ceTrade.Clear();
-  m_ceCallIV.Clear();
-  m_cePutIV.Clear();
 
   size_t skip = 1 + ( ivs.Size() / nMaxElements );
 
@@ -152,6 +144,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 // ChartGreeks
 
 void ModelChartHdf5::DefineChartGreeks( ou::ChartDataView* pChartDataView ) {
+  Clear();
   m_ceImpVol.SetColour( ou::Colour::Black );
   m_ceDelta.SetColour( ou::Colour::Black );
   m_ceGamma.SetColour( ou::Colour::Black );
@@ -168,12 +161,6 @@ void ModelChartHdf5::DefineChartGreeks( ou::ChartDataView* pChartDataView ) {
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks ) {
   DefineChartGreeks( pChartDataView );
-  m_ceImpVol.Clear();
-  m_ceDelta.Clear();
-  m_ceGamma.Clear();
-  m_ceTheta.Clear();
-  m_ceVega.Clear();
-  m_ceRho.Clear();
 
   size_t skip = 1 + ( greeks.Size() / nMaxElements );
 
@@ -190,6 +177,8 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 // ChartEquities
 
 void ModelChartHdf5::DefineChartEquities( ou::ChartDataView* pChartDataView ) {
+
+  Clear();
 
   // Quotes
 
@@ -217,11 +206,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   DefineChartEquities( pChartDataView );
 
   // Quotes
-  m_ceQuoteUpper.Clear();
-  //m_ceVolumeUpper.Clear();
-  m_ceQuoteLower.Clear();
-  //m_ceVolumeLower.Clear();
-  m_ceQuoteSpread.Clear();
 
   {
     size_t skipQuotes = 1 + ( equities.quotes.Size() / nMaxElements );
@@ -237,8 +221,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   }
 
   // Trades
-  m_ceTrade.Clear();
-  m_ceVolume.Clear();
 
   {
     size_t skipTrades = 1 + ( equities.trades.Size() / nMaxElements );
@@ -278,13 +260,6 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
   Equities equities( options.quotes, options.trades );
   AddChartEntries( pChartDataView, equities );
 
-  m_ceImpVol.Clear();
-  m_ceDelta.Clear();
-  m_ceGamma.Clear();
-  m_ceTheta.Clear();
-  m_ceVega.Clear();
-  m_ceRho.Clear();
-
   size_t skip = 1 + ( options.greeks.Size() / nMaxElements );
 
   for ( ou::tf::Greeks::const_iterator iter = options.greeks.begin();
@@ -299,6 +274,25 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
 }
 
 // Supporting methods
+
+void ModelChartHdf5::Clear() {
+
+  m_ceQuoteUpper.Clear();
+  m_ceQuoteLower.Clear();
+  m_ceQuoteSpread.Clear();
+  m_ceTrade.Clear();
+  m_ceCallIV.Clear();
+  m_cePutIV.Clear();
+  m_ceImpVol.Clear();
+  m_ceDelta.Clear();
+  m_ceGamma.Clear();
+  m_ceTheta.Clear();
+  m_ceVega.Clear();
+  m_ceRho.Clear();
+  m_ceVolume.Clear();
+  m_ceVolumeUpper.Clear();
+  m_ceVolumeLower.Clear();
+}
 
 void ModelChartHdf5::HandleQuote( const ou::tf::Quote& quote ) {
 
