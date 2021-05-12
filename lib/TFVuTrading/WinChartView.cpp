@@ -18,8 +18,6 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
 #include <wx/dcclient.h>
@@ -48,7 +46,6 @@ WinChartView::WinChartView(
 }
 
 WinChartView::~WinChartView() {
-
 }
 
 void WinChartView::Init( void ) {
@@ -59,6 +56,10 @@ void WinChartView::Init( void ) {
   m_pThreadDrawChart = nullptr;
   m_pChartDataView = nullptr;
 
+  m_dblViewPortRatio = 1.0;
+  m_bBeginExtentFound = false;
+
+  // TODO: convert to minimum width?
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
 
 }
@@ -78,6 +79,8 @@ void WinChartView::BindEvents() {
 
   if ( !m_bBound ) {
 
+    m_bBound = true;
+
     Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
     Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
 
@@ -91,9 +94,7 @@ void WinChartView::BindEvents() {
     Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
     m_timerGuiRefresh.Start( 250 );
 
-    m_bBound = true;
   }
-
 }
 
 void WinChartView::CreateControls() {
@@ -147,11 +148,21 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
 }
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
-  int delta = event.GetWheelDelta();
+
+  //int delta = event.GetWheelDelta();
   int rotation = event.GetWheelRotation(); // has positive, negative, use delta to normalize
-  bool bShift = event.ShiftDown();
-  bool bControl = event.ControlDown();
-  bool bAlt = event.AltDown();
+  //bool bShift = event.ShiftDown();
+  //bool bControl = event.ControlDown();
+  //bool bAlt = event.AltDown();
+
+  wxPoint pos = event.GetPosition();
+  wxSize size = GetClientSize();
+
+  if ( 0 == size.GetWidth() ) m_dblViewPortRatio = 1.0;
+  else {
+    m_dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
+  }
+
   //std::cout
   //      << "Wheel: " << delta << "," << rotation << ",sca:"
   //    << bShift << bControl << bAlt
@@ -167,8 +178,23 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     m_tdViewPortWidth /= 12;
   }
 
+  m_bReCalcViewPort = true;
+
   DrawChart();
   //event.Skip();
+}
+
+void WinChartView::RescaleViewPort() {
+  ViewPort_t vp;
+  if ( !m_bBeginExtentFound ) {
+    vp = m_pChartDataView->GetExtents();
+    if ( vp.HasBegin() ) m_bBeginExtentFound = true;
+  }
+  else {
+    // assume 'begin' extent never changes - time moves forward
+    vp.dtBegin = m_vpPrior.dtBegin; // may or may not need this line
+    vp.dtEnd = m_pChartDataView->GetExtentEnd();
+  }
 }
 
 void WinChartView::HandleMouseEnter( wxMouseEvent& event ) {
@@ -190,8 +216,6 @@ void WinChartView::HandlePaint( wxPaintEvent& event ) {
 
 // placeholder for unused code
 void WinChartView::ManualDraw( void ) {
-
-// ====
   if ( nullptr != m_pChartDataView ) {
     try {
       //m_bPaintingChart = true;
@@ -241,15 +265,18 @@ void WinChartView::ThreadDrawChart( void ) {
 
         // chart moves at 1s step - not sure if this is trader friendly though
         static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-        boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-        boost::posix_time::ptime dtEnd = now + td;
+        auto now_ = now;
+        boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
+        boost::posix_time::ptime dtEnd = now_ + td;
 
         boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-        std::stringstream ss;
-        ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+        //std::stringstream ss;
+        //ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
 
         m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+
+        m_bReCalcViewPort = false;
       }
 
       UpdateChartMaster();

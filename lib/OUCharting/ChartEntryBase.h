@@ -26,9 +26,6 @@
 #include <string>
 #include <memory>
 
-//#include <boost/lockfree/spsc_queue.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #ifdef RGB
 #undef RGB
 // windows COLORREF is backwards from what ChartDir is expecting
@@ -105,8 +102,19 @@ public:
   using vDateTime_t = std::vector<boost::posix_time::ptime>;
   using size_type   =  vDateTime_t::size_type;
 
+  struct range_t {
+    boost::posix_time::ptime dtBegin;
+    boost::posix_time::ptime dtEnd;
+    range_t()
+    : dtBegin( boost::posix_time::not_a_date_time ), dtEnd( boost::posix_time::not_a_date_time ) {}
+    range_t( boost::posix_time::ptime dtBegin_, boost::posix_time::ptime dtEnd_ )
+    : dtBegin( dtBegin_ ), dtEnd( dtEnd_ ) {}
+    inline bool HasBegin() const { return boost::posix_time::not_a_date_time != dtBegin; }
+    inline bool HasEnd() const { return boost::posix_time::not_a_date_time != dtEnd; }
+    inline bool HasBoth() const { return HasBegin() && HasEnd(); }
+  };
+
   ChartEntryTime( void );
-  //ChartEntryTime( size_type nSize );
   virtual ~ChartEntryTime( void );
 
   void Append( boost::posix_time::ptime dt ); // background append
@@ -116,12 +124,16 @@ public:
 
   virtual void ClearQueue( void );
 
+  void SetViewPort( const range_t& );
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+
+  range_t GetExtents() const;
+  boost::posix_time::ptime GetExtentBegin() const;
+  boost::posix_time::ptime GetExtentEnd() const;
 
 protected:
 
-  boost::posix_time::ptime m_dtViewPortBegin;
-  boost::posix_time::ptime m_dtViewPortEnd;
+  range_t m_rangeViewPort;
 
   void AppendFg( boost::posix_time::ptime dt ); // foreground append
 

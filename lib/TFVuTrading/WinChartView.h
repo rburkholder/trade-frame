@@ -80,7 +80,8 @@ protected:
 
 private:
 
-  typedef boost::shared_ptr<wxBitmap> pwxBitmap_t;
+  using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
+  using ViewPort_t = ChartEntryTime::range_t;
 
   enum {
     ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
@@ -88,8 +89,12 @@ private:
 
   boost::posix_time::time_duration m_tdViewPortWidth;
 
+  double m_dblViewPortRatio; // 0.0 ... 1.0 (expands around mouse)
+  ViewPort_t m_vpPrior;
+  bool m_bBeginExtentFound;
+
   ou::ChartMaster m_chartMaster;
-  ou::ChartDataView*  m_pChartDataView;
+  ou::ChartDataView* m_pChartDataView;
 
   wxTimer m_timerGuiRefresh;
   bool m_bInDrawChart;
@@ -109,6 +114,8 @@ private:
   //void HandleGuiDrawChart( EventDrawChart& event );
   void StartThread( void );
   void StopThread( void );
+
+  void RescaleViewPort( void );
 
   void UpdateChartMaster();
 

@@ -23,11 +23,8 @@
 #include "ChartEntryBase.h"
 
 namespace ou { // One Unified
-namespace local {
 
-// ChartDataView contains the ChartEntries
-//   to be viewed in a master chart viewport
-
+// TODO: migrate to cpp file with forward declaration
 class ChartEntryCarrier { // used by ChartViewPort objects to chart data
 public:
   //ChartDataViewCarrier( void );
@@ -39,26 +36,31 @@ public:
   size_t GetLogicalChartId( void ) const { return m_nLogicalChart; };
   size_t GetActualChartId( void ) const { return m_nActualChart; };
   ChartEntryBase* GetChartEntry( void ) { return m_pChartEntry; };
+  const ChartEntryBase* GetChartEntry( void ) const { return m_pChartEntry; };
 protected:
+private:
   size_t m_nLogicalChart;  // as supplied by trading rules
   size_t m_nActualChart;   // as supplied by ChartDataView management (monotonically increasing)
   ChartEntryBase* m_pChartEntry;
-private:
 };
-
-} // local
 
 // nChart:  0, 1 reserved:
 //   0: main price chart
 //   1: main volume chart
 
+// ChartDataView contains the ChartEntries
+//   to be viewed in a master chart viewport
+
 class ChartDataView {
 public:
 
-  using const_iterator = std::vector<local::ChartEntryCarrier>::const_iterator;
-  using       iterator = std::vector<local::ChartEntryCarrier>::iterator;
+  // TODO: won't need these once converted to lambda
+  using const_iterator = std::vector<ChartEntryCarrier>::const_iterator;
+  using       iterator = std::vector<ChartEntryCarrier>::iterator;
 
   using pChartDataView_t = std::shared_ptr<ChartDataView>;
+
+  using ViewPort_t = ChartEntryTime::range_t;
 
   ChartDataView( void );
   virtual ~ChartDataView(void);
@@ -72,6 +74,9 @@ public:
 
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+  void SetViewPort( const ViewPort_t& );
+  ViewPort_t GetViewPort() const;
+
   void SetNames( const std::string& sDescription, const std::string& sName ) {
     m_sDescription = sDescription;
     m_sName = sName;
@@ -79,9 +84,13 @@ public:
   const std::string& GetName( void ) const { return m_sName; };
   const std::string& GetDescription( void ) const { return m_sDescription; };
 
-  size_t GetChartCount( void ) const{ return m_mapCntChartIndexes.size(); };
+  ViewPort_t GetExtents() const;
+  boost::posix_time::ptime GetExtentBegin() const;
+  boost::posix_time::ptime GetExtentEnd() const;
 
-  // used by ChartMaster, maybe change to std::function iteration
+  size_t GetChartCount( void ) const { return m_mapCntChartIndexes.size(); };
+
+  // used by ChartMaster, maybe change to std::function iteration, or lambda callback
   iterator begin( void ) { return m_vChartEntryCarrier.begin(); };
   iterator end( void ) { return m_vChartEntryCarrier.end(); };
 
@@ -113,7 +122,7 @@ private:
   using mapCntChartIndexes_t = std::map<size_t /* carrier nChart */, structChartMapping>;
   mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
 
-  using vChartEntryCarrier_t = std::vector<local::ChartEntryCarrier>;
+  using vChartEntryCarrier_t = std::vector<ChartEntryCarrier>;
   vChartEntryCarrier_t m_vChartEntryCarrier;
 
   void UpdateActualChartId();

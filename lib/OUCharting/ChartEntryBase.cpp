@@ -36,8 +36,7 @@ ChartEntryBase::~ChartEntryBase() {
 //
 
 ChartEntryTime::ChartEntryTime() :
-  ChartEntryBase(),
-    m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+  ChartEntryBase()
 {
 }
 
@@ -82,7 +81,7 @@ void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
         dt.date().year(), dt.date().month(), dt.date().day(),
         dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 
-    if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt > m_dtViewPortEnd ) ) {
+    if ( ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) && ( dt > m_rangeViewPort.dtEnd ) ) {
       // don't append any more values to visible area
     }
     else {
@@ -96,9 +95,14 @@ void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
 
 // called from WinChartView::ThreadDrawChart1 -> ChartDataView::SetViewPort
 void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  SetViewPort( range_t( dtBegin, dtEnd ) );
+}
+
+void ChartEntryTime::SetViewPort( const range_t& range ) {
+
   // record the viewport
-  m_dtViewPortBegin = dtBegin;
-  m_dtViewPortEnd = dtEnd;
+  m_rangeViewPort = range;
+
   // initialize viewport values
   m_ixStart = 0;
   m_nElements = 0;
@@ -109,16 +113,18 @@ void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix
   // should this be here or not?
   //ClearQueue();  // should this be here?
 
+  // TODO: why would there be not_a_date_time in the vector?
+  //   need to test for insertions like this?
   if ( 0 != m_vDateTime.size() ) {
     vDateTime_t::const_iterator iterBegin( m_vDateTime.begin() );
     vDateTime_t::const_iterator iterEnd( m_vDateTime.end() );
 
-    if ( boost::posix_time::not_a_date_time != dtBegin ) {
-      iterBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), dtBegin );
+    if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtBegin ) {
+      iterBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), m_rangeViewPort.dtBegin );
     }
     if ( m_vDateTime.end() != iterBegin ) {
-      if ( boost::posix_time::not_a_date_time != dtEnd ) {
-        iterEnd = std::upper_bound( iterBegin, m_vDateTime.cend(), dtEnd );
+      if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) {
+        iterEnd = std::upper_bound( iterBegin, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
       }
       m_ixStart = iterBegin - m_vDateTime.begin();
       m_nElements = iterEnd - iterBegin;
@@ -126,6 +132,22 @@ void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix
   }
 }
 
+ChartEntryTime::range_t ChartEntryTime::GetExtents() const {
+  if ( 0 == m_vDateTime.size() ) {
+    return range_t( boost::posix_time::not_a_date_time, boost::posix_time::not_a_date_time );
+  }
+  else {
+    return range_t( m_vDateTime.front(), m_vDateTime.back() );
+  }
+}
+
+boost::posix_time::ptime ChartEntryTime::GetExtentBegin() const {
+  return 0 == m_vDateTime.size() ? boost::posix_time::not_a_date_time : m_vDateTime.front();
+}
+
+boost::posix_time::ptime ChartEntryTime::GetExtentEnd() const {
+  return 0 == m_vDateTime.size() ? boost::posix_time::not_a_date_time : m_vDateTime.back();
+}
 
 // there are out-of-order issues or loss-of-data issues if m_bUseThreadSafety is changed while something is in the Queue
 void ChartEntryTime::ClearQueue( void ) {

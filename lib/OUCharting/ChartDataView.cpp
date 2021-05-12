@@ -18,7 +18,6 @@
 #include "ChartDataView.h"
 
 namespace ou { // One Unified
-namespace local {
 
 //
 // ChartEntryCarrier
@@ -48,8 +47,6 @@ ChartEntryCarrier::~ChartEntryCarrier() {
   m_nActualChart = 0;
   m_pChartEntry = 0;
 }
-
-} // local
 
 //
 // ChartDataView
@@ -89,7 +86,7 @@ void ChartDataView::UpdateActualChartId() {
 
   std::for_each( // update ActualChartId's in all the carriers.
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
-    [this](local::ChartEntryCarrier& cec){
+    [this](ChartEntryCarrier& cec){
       mapCntChartIndexes_t::iterator iter = m_mapCntChartIndexes.find( cec.GetLogicalChartId() );
       // TODO: need to work on this when shutting down: ced.m_nLogicalChart not found map
       //   maybe faulty logic in Remove
@@ -101,7 +98,7 @@ void ChartDataView::UpdateActualChartId() {
 }
 
 void ChartDataView::Add( size_t nChart, ChartEntryBase* pEntry ) {
-  m_vChartEntryCarrier.push_back( std::move( local::ChartEntryCarrier( nChart, pEntry ) ) );
+  m_vChartEntryCarrier.push_back( std::move( ChartEntryCarrier( nChart, pEntry ) ) );
 
   mapCntChartIndexes_t::iterator iter1 = m_mapCntChartIndexes.find( nChart );
   if ( m_mapCntChartIndexes.end() == iter1 ) {
@@ -120,7 +117,7 @@ void ChartDataView::Add( size_t nChart, ChartEntryBase* pEntry ) {
 void ChartDataView::Remove( size_t nChart, ChartEntryBase* pEntry ) {
   vChartEntryCarrier_t::iterator iterChartEntryCarrier = std::find_if(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
-    [nChart,pEntry](local::ChartEntryCarrier& cec)->bool{
+    [nChart,pEntry](ChartEntryCarrier& cec)->bool{
       return ( ( cec.GetLogicalChartId() == nChart )
             && ( cec.GetChartEntry() == pEntry ) );
     });
@@ -156,6 +153,106 @@ void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_
       p->SetViewPort( dtBegin, dtEnd );
     }
   }
+}
+
+void ChartDataView::SetViewPort( const ViewPort_t& vp ) {
+  SetViewPort( vp.dtBegin, vp.dtEnd );
+}
+
+ChartDataView::ViewPort_t ChartDataView::GetViewPort() const {
+  return ViewPort_t( m_dtViewPortBegin, m_dtViewPortEnd );
+}
+
+ChartDataView::ViewPort_t ChartDataView::GetExtents() const {
+  ViewPort_t view;
+  std::for_each(
+    m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
+    [&view](const ChartEntryCarrier& cec ){
+      try {
+        ViewPort_t extent = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() )->GetExtents();
+
+        if ( boost::posix_time::not_a_date_time != view.dtBegin ) {
+          if ( boost::posix_time::not_a_date_time != extent.dtBegin ) {
+            if ( extent.dtBegin < view.dtBegin ) {
+              view.dtBegin = extent.dtBegin;
+            }
+          }
+        }
+        else {
+          view.dtBegin = extent.dtBegin;
+        }
+
+        if ( boost::posix_time::not_a_date_time != view.dtEnd ) {
+          if ( boost::posix_time::not_a_date_time != extent.dtEnd ) {
+            if ( extent.dtEnd > view.dtEnd ) {
+              view.dtEnd = extent.dtEnd;
+            }
+          }
+        }
+        else {
+          view.dtEnd = extent.dtEnd;
+        }
+
+      }
+      catch (... ) {
+        // just ignore classes without ChartEntryTime
+      }
+    });
+  return view;
+}
+
+boost::posix_time::ptime ChartDataView::GetExtentBegin() const {
+  boost::posix_time::ptime begin { boost::posix_time::not_a_date_time };
+  std::for_each(
+    m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
+    [&begin](const ChartEntryCarrier& cec ){
+      try {
+        boost::posix_time::ptime extent = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() )->GetExtentBegin();
+
+        if ( boost::posix_time::not_a_date_time != begin ) {
+          if ( boost::posix_time::not_a_date_time != extent ) {
+            if ( extent < begin ) {
+              begin = extent;
+            }
+          }
+        }
+        else {
+          begin = extent;
+        }
+
+      }
+      catch (... ) {
+        // just ignore classes without ChartEntryTime
+      }
+    });
+  return begin;
+}
+
+boost::posix_time::ptime ChartDataView::GetExtentEnd() const {
+  boost::posix_time::ptime end { boost::posix_time::not_a_date_time };
+  std::for_each(
+    m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
+    [&end](const ChartEntryCarrier& cec ){
+      try {
+        boost::posix_time::ptime extent = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() )->GetExtentEnd();
+
+        if ( boost::posix_time::not_a_date_time != end ) {
+          if ( boost::posix_time::not_a_date_time != extent ) {
+            if ( extent > end ) {
+              end = extent;
+            }
+          }
+        }
+        else {
+          end = extent;
+        }
+
+      }
+      catch (... ) {
+        // just ignore classes without ChartEntryTime
+      }
+    });
+  return end;
 }
 
 } // namespace ou
