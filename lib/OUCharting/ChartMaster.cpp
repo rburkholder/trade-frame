@@ -67,7 +67,7 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   m_nChartHeight = height;
   if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
 }
-
+/*
 void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   m_dblViewPortXBegin =
     ( boost::posix_time::not_a_date_time != dtBegin )
@@ -86,7 +86,7 @@ void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_ti
     :
     0;
 }
-
+*/
 void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
   m_tdBarWidth = tdBarWidth;
   //m_pCdv-

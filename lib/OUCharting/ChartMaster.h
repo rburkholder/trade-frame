@@ -35,7 +35,7 @@ public:
   ChartDataView* GetChartDataView( void ) const { return m_pCdv; };
 
   // can use not_a_date_time for one, the other, or both
-  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+  //void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
   bool GetChartDataViewChanged( void );
