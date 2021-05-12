@@ -35,7 +35,7 @@ public:
   ChartDataView* GetChartDataView( void ) const { return m_pCdv; };
 
   // can use not_a_date_time for one, the other, or both
-  //void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+  //void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ); // deprecated - use ChartDataView instead
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
   bool GetChartDataViewChanged( void );
@@ -53,8 +53,8 @@ protected:
   unsigned int m_nChartHeight;
   ChartDataView* m_pCdv;
 
-  double m_dblViewPortXBegin;  // initial data time stamp
-  double m_dblViewPortXEnd;  // last data time stamp
+  double m_dblViewPortXBegin;  // initial data time stamp - deprecated, to be removed
+  double m_dblViewPortXEnd;  // last data time stamp - deprecated, to be remvoed
 
   boost::posix_time::time_duration m_tdBarWidth;
 
