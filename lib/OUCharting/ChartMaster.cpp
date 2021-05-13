@@ -95,9 +95,11 @@ void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
 void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
   struct structSubChart {
-    XYChart* xy; // xy chart at this position
-    structSubChart( void ) : xy( 0 ) {};
+    XYChart* pChart; // xy chart at this position
+    structSubChart( void ) : pChart( nullptr ) {};
   };
+
+  using vSubChart_t = std::vector<structSubChart>;
 
   if ( nullptr != m_pCdv ) { // DataView has something to draw
     //if ( m_pCdv->GetChanged() ) {
@@ -115,8 +117,8 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       int heightChart1 = heightChart0 / 4;
       int heightChartN = heightChart0 / 3;
 
-      std::vector<structSubChart> vCharts;
-      vCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
+      vSubChart_t vSubCharts;
+      vSubCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
 
       size_t ix = 0;
       int y = 15;  // was 25
@@ -124,6 +126,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       int xAxisHeight = 50;
       XYChart *pXY;  // used for each sub-chart
       XYChart *pXY0;  // main chart
+
       while ( ix < n ) {
         switch ( ix ) {
           case 0:  // main chart
@@ -169,7 +172,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             y += heightChartN;
             break;
         }
-        vCharts[ ix ].xy = pXY;
+        vSubCharts[ ix ].pChart = pXY;
         ++ix;
       }
 
@@ -179,7 +182,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
-        if ( iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes ) ) {
+        if ( iter->GetChartEntry()->AddEntryToChart( vSubCharts[ ixChart ].pChart, &Attributes ) ) {
           // following assumes values are always > 0
           if( 0 == m_dblViewPortXBegin ) {
             dblXBegin = ( 0 == dblXBegin )
@@ -213,8 +216,8 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       MemBlock m = multi.makeChart( BMP );
       if ( 0 != m_OnDrawChart ) m_OnDrawChart( m );
 
-      for ( std::vector<structSubChart>::iterator iter = vCharts.begin(); iter < vCharts.end(); ++iter ) {
-        delete (*iter).xy;
+      for ( structSubChart& chart: vSubCharts ) {
+        delete chart.pChart;
       }
     }
   }
