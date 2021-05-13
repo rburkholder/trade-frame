@@ -115,7 +115,7 @@ bool AppLiveChart::OnInit() {
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
   m_sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
 
-  m_pChart = 0;
+  m_pChart = nullptr;
   m_bPaintingChart = false;
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
@@ -173,6 +173,7 @@ void AppLiveChart::HandleMenuActionStartChart( void ) {
 //  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
+// TODO: convert to WinChartView
 void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
   if ( m_bReadyToDrawChart && !m_bPaintingChart ) {
     try {

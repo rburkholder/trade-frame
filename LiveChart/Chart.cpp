@@ -18,19 +18,22 @@
 
 #include "Chart.h"
 
-ChartTest::ChartTest( pProvider_t pProvider ) 
+ChartTest::ChartTest( pProvider_t pProvider )
   : ou::ChartDVBasics()
 {
-  this->GetChartDataView()->SetNames( "LiveChart", "QGC#" );
+  //static const std::string name( "QGC#" );
+  static const std::string name( "GLD" );
+  this->GetChartDataView()->SetNames( "LiveChart", name );
   ou::tf::Instrument::pInstrument_t pInstrument
-    = ou::tf::InstrumentManager::Instance().ConstructInstrument( "QGC#", "SMART", ou::tf::InstrumentType::Future );
+    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Stock );
+//    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
   m_pWatch->StartWatch();
 
 }
- 
+
 ChartTest::~ChartTest(void) {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
