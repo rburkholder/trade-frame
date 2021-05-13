@@ -221,6 +221,7 @@ void WinChartView::HandleSize( wxSizeEvent& event ) {
 }
 
 void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
+  if ( m_fRefreshData ) m_fRefreshData();
   DrawChart();
 }
 

@@ -67,6 +67,11 @@ public:
   void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true );
   ou::ChartDataView* GetChartDataView( void ) const { return m_pChartDataView; }
 
+  using fOnRefreshData_t = std::function<void()>;
+  void SetOnRefreshData( fOnRefreshData_t && f ) {
+    m_fRefreshData = std::move( f );
+  }
+
   // really don't want these here, but necessary to deal with searchdynamiceventtable issues
   virtual void BindEvents();
   virtual void UnbindEvents();
@@ -92,6 +97,8 @@ private:
   double m_dblViewPortRatio; // 0.0 ... 1.0 (expands around mouse)
   ViewPort_t m_vpPrior;
   bool m_bBeginExtentFound;
+
+  fOnRefreshData_t m_fRefreshData; // refreh chart data
 
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
