@@ -21,15 +21,6 @@
 
 namespace ou { // One Unified
 
-  ChartMaster::ChartMaster(void)
-: m_pCdv( nullptr),
-  m_nChartWidth( 600 ), m_nChartHeight( 900 ),
-  m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
-  m_bCreated( false )
-{
-  Initialize();
-}
-
 ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 : m_pCdv( nullptr),
   m_nChartWidth( width ), m_nChartHeight( height ),
@@ -38,6 +29,8 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 {
   Initialize();
 }
+
+ChartMaster::ChartMaster(): ChartMaster( 600, 900 ) {}
 
 ChartMaster::~ChartMaster(void) {
 }
@@ -214,7 +207,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       }
 
       MemBlock m = multi.makeChart( BMP );
-      if ( 0 != m_OnDrawChart ) m_OnDrawChart( m );
+      if ( m_fOnDrawChart ) m_fOnDrawChart( m );
 
       for ( structSubChart& chart: vSubCharts ) {
         delete chart.pChart;

@@ -222,7 +222,7 @@ void WinChartView::ManualDraw( void ) {
       wxSize size = this->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
       // turn this into a lambda instead
-      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::HandleDrawChart ) );
+      m_chartMaster.SetOnDrawChart( std::move( std::bind( &WinChartView::HandleDrawChart, this, std::placeholders::_1 ) ) );
       m_chartMaster.DrawChart( );
     }
     catch (...) {
@@ -289,7 +289,7 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.SetChartDataView( m_pChartDataView );
   m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
   // could use lambda instead here
-  m_chartMaster.SetOnDrawChart( MakeDelegate( this, &WinChartView::CallBackDrawChart ) );  // this line could be factored out?
+  m_chartMaster.SetOnDrawChart( std::move( std::bind( &WinChartView::CallBackDrawChart, this, std::placeholders::_1 ) ) );  // this line could be factored out?
   m_chartMaster.DrawChart( );
 }
 

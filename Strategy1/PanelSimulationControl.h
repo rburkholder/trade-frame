@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
+#include <string>
+#include <functional>
 
 #define SYMBOL_PANELSIMULATIONCONTROL_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELSIMULATIONCONTROL_TITLE _("Simulation Control")
@@ -27,21 +27,21 @@ class PanelSimulationControl: public wxPanel
 public:
 
   PanelSimulationControl();
-  PanelSimulationControl( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELSIMULATIONCONTROL_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELSIMULATIONCONTROL_POSITION, 
-    const wxSize& size = SYMBOL_PANELSIMULATIONCONTROL_SIZE, 
+  PanelSimulationControl(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELSIMULATIONCONTROL_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELSIMULATIONCONTROL_POSITION,
+    const wxSize& size = SYMBOL_PANELSIMULATIONCONTROL_SIZE,
     long style = SYMBOL_PANELSIMULATIONCONTROL_STYLE );
   ~PanelSimulationControl();
 
-  bool Create( 
-    wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANELSIMULATIONCONTROL_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANELSIMULATIONCONTROL_POSITION, 
-    const wxSize& size = SYMBOL_PANELSIMULATIONCONTROL_SIZE, 
+  bool Create(
+    wxWindow* parent,
+    wxWindowID id = SYMBOL_PANELSIMULATIONCONTROL_IDNAME,
+    const wxPoint& pos = SYMBOL_PANELSIMULATIONCONTROL_POSITION,
+    const wxSize& size = SYMBOL_PANELSIMULATIONCONTROL_SIZE,
     long style = SYMBOL_PANELSIMULATIONCONTROL_STYLE );
-  
+
   void Init();
   void CreateControls();
 
@@ -52,19 +52,20 @@ public:
   std::string GetInstrumentName( void) const { return m_txtInstrumentName->GetLineText( 0 ); };
   std::string GetGroupDirectory( void ) const { return m_txtGroupDirectory->GetLineText( 0 ); };
 
-  typedef FastDelegate0<> OnStartSimulation_t;
-  void SetOnStartSimulation( OnStartSimulation_t function ) {
-    m_OnStartSimulation = function;
+  using fOnStartSimulation_t = std::function<void()>;
+  void SetOnStartSimulation( fOnStartSimulation_t function ) {
+    m_fOnStartSimulation = function;
   }
 
   typedef FastDelegate0<> OnDrawChart_t;
-  void SetOnDrawChart( OnDrawChart_t function ) {
-    m_OnDrawChart = function;
+  using fOnDrawChart_t = std::function<void()>;
+  void SetOnDrawChart( fOnDrawChart_t function ) {
+    m_fOnDrawChart = function;
   }
 
 protected:
 private:
-  enum { ID_Null=wxID_HIGHEST, ID_PANELSIMULATIONCONTROL, 
+  enum { ID_Null=wxID_HIGHEST, ID_PANELSIMULATIONCONTROL,
     ID_TEXT_INSTRUMENTNAME, ID_TEXT_GROUPDIRECTORY, ID_BTN_STARTSIM, ID_BTN_DRAWCHART,
     ID_STATIC_RESULT, ID_GAUGE_PROGRESS
   };
@@ -74,8 +75,8 @@ private:
   wxStaticText* m_staticResult;
   wxGauge* m_gaugeProgress;
 
-  OnStartSimulation_t m_OnStartSimulation;
-  OnDrawChart_t m_OnDrawChart;
+  fOnStartSimulation_t m_fOnStartSimulation;
+  fOnDrawChart_t m_fOnDrawChart;
 
   void OnBtnStartSimulationClicked( wxCommandEvent& event );
   void OnBtnDrawChartClicked( wxCommandEvent& event );

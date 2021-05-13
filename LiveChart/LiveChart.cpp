@@ -26,8 +26,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <boost/foreach.hpp>
-
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
 #include <wx/splitter.h>
@@ -145,7 +143,7 @@ bool AppLiveChart::OnInit() {
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
-  
+
 //  m_db.Open( sDbName );
 
   FrameMain::vpItems_t vItems;
@@ -182,7 +180,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
       wxSize size = m_winChart->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
       m_chartMaster.SetChartDataView( m_pChart->GetChartDataView() );
-      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &AppLiveChart::HandleDrawChart ) );
+      m_chartMaster.SetOnDrawChart( std::move( std::bind( &AppLiveChart::HandleDrawChart, this, std::placeholders::_1 ) ) );
       m_chartMaster.DrawChart( );
     }
     catch (...) {
@@ -191,7 +189,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
   m_bPaintingChart = false;
 }
 
-void AppLiveChart::HandleSize( wxSizeEvent& event ) { 
+void AppLiveChart::HandleSize( wxSizeEvent& event ) {
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
@@ -209,7 +207,7 @@ void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
     ptime now = ou::TimeSource::Instance().External();
     static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
     boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-    ptime dtEnd = now + td; 
+    ptime dtEnd = now + td;
     static boost::posix_time::time_duration tdLength( 0, 10, 0 );
     ptime dtBegin = dtEnd - tdLength;
     m_pChart->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
@@ -250,7 +248,7 @@ void AppLiveChart::HandleSaveValues( void ) {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
-    std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/" 
+    std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/"
       + m_pChart->GetWatch()->GetInstrument()->GetInstrumentName() );
     m_pChart->GetWatch()->SaveSeries( sPrefixSession );
   }
@@ -284,7 +282,7 @@ void AppLiveChart::OnClose( wxCloseEvent& event ) {
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -334,7 +332,7 @@ void AppLiveChart::HandleRegisterRows(  ou::db::Session& session ) {
 
 void AppLiveChart::HandlePopulateDatabase( void ) {
 /*
-  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
@@ -350,11 +348,11 @@ void AppLiveChart::HandlePopulateDatabase( void ) {
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
   m_pPortfolioCurrencyUSD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 */
 }

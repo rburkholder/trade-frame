@@ -14,11 +14,9 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
 
 #include "ChartDataView.h"
 
@@ -26,9 +24,10 @@ namespace ou { // One Unified
 
 class ChartMaster  {
 public:
-  ChartMaster(void);
+  ChartMaster();
   ChartMaster( unsigned int width, unsigned int height );
   virtual ~ChartMaster(void);
+
   void SetChartDimensions( unsigned int width, unsigned int height);
   //void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
   void SetChartDataView( ChartDataView* pcdv );
@@ -42,9 +41,9 @@ public:
   void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
   bool isCreated( void ) const { return m_bCreated; };
 
-  typedef FastDelegate1<const MemBlock&> OnDrawChart_t;
-  void SetOnDrawChart( OnDrawChart_t function ) {
-    m_OnDrawChart = function;
+  using fOnDrawChart_t = std::function<void( const MemBlock& )>;
+  void SetOnDrawChart( fOnDrawChart_t&& function ) {
+    m_fOnDrawChart = std::move( function );
   }
 protected:
 
@@ -58,7 +57,7 @@ protected:
 
   boost::posix_time::time_duration m_tdBarWidth;
 
-  OnDrawChart_t m_OnDrawChart;
+  fOnDrawChart_t m_fOnDrawChart;
 
   bool m_bCreated;
 

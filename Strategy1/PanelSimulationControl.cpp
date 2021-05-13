@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
-
 #include "PanelSimulationControl.h"
 
 PanelSimulationControl::PanelSimulationControl(void) {
@@ -39,7 +37,7 @@ bool PanelSimulationControl::Create( wxWindow* parent, wxWindowID id, const wxPo
   Centre();
   return true;
 }
-  
+
 void PanelSimulationControl::Init() {
   m_txtInstrumentName = NULL;
   m_txtGroupDirectory = NULL;
@@ -91,9 +89,9 @@ wxIcon PanelSimulationControl::GetIconResource( const wxString& name ) {
 }
 
 void PanelSimulationControl::OnBtnStartSimulationClicked( wxCommandEvent& event ) {
-  if ( 0 != m_OnStartSimulation ) m_OnStartSimulation();
+  if ( m_fOnStartSimulation ) m_fOnStartSimulation();
 }
 
 void PanelSimulationControl::OnBtnDrawChartClicked( wxCommandEvent& event ) {
-  if ( 0 != m_OnDrawChart ) m_OnDrawChart();
+  if ( m_fOnDrawChart ) m_fOnDrawChart();
 }

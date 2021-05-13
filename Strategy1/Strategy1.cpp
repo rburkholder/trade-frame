@@ -15,7 +15,7 @@
 // Strategy1.cpp : Defines the entry point for the application.
 //
 
-#include "stdafx.h"
+#include <functional>
 
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
@@ -61,8 +61,8 @@ bool AppStrategy1::OnInit() {
   m_winChart->Bind( wxEVT_PAINT, &AppStrategy1::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &AppStrategy1::HandleSize, this, idChart );
 
-  m_pPanelSimulationControl->SetOnStartSimulation( MakeDelegate( this, &AppStrategy1::HandleBtnSimulationStart) );
-  m_pPanelSimulationControl->SetOnDrawChart( MakeDelegate( this, &AppStrategy1::HandleBtnDrawChart) );
+  m_pPanelSimulationControl->SetOnStartSimulation( std::move( std::bind( &AppStrategy1::HandleBtnSimulationStart, this ) ) );
+  m_pPanelSimulationControl->SetOnDrawChart( std::move( std::bind( &AppStrategy1::HandleBtnDrawChart, this ) ) );
 
   LinkToPanelProviderControl();
 
@@ -96,7 +96,7 @@ void AppStrategy1::HandleBtnSimulationStart( void ) {
     m_pStrategy->Start();
     break;
   }
-  
+
 }
 
 void AppStrategy1::HandleBtnDrawChart( void ) {
@@ -117,7 +117,7 @@ void AppStrategy1::HandlePaint( wxPaintEvent& event ) {
       wxSize size = m_winChart->GetClientSize();
       m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
       m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
-      m_chart.SetOnDrawChart( MakeDelegate( this, &AppStrategy1::HandleDrawChart ) );
+      m_chart.SetOnDrawChart( std::move( std::bind( &AppStrategy1::HandleDrawChart, this, std::placeholders::_1 ) ) );
       m_chart.DrawChart( );
     }
     catch (...) {
@@ -125,7 +125,7 @@ void AppStrategy1::HandlePaint( wxPaintEvent& event ) {
   }
 }
 
-void AppStrategy1::HandleSize( wxSizeEvent& event ) { 
+void AppStrategy1::HandleSize( wxSizeEvent& event ) {
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
