@@ -110,8 +110,6 @@ private:
   bool m_bBound;
 
   void ThreadDrawChart( void );  // thread starts here
-  void CallBackDrawChart( const MemBlock& m );  // a callback here to perform bitmap
-  //void HandleGuiDrawChart( EventDrawChart& event );
   void StartThread( void );
   void StopThread( void );
 

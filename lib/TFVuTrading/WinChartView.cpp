@@ -289,22 +289,21 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.SetChartDataView( m_pChartDataView );
   m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
   // could use lambda instead here
-  m_chartMaster.SetOnDrawChart( std::move( std::bind( &WinChartView::CallBackDrawChart, this, std::placeholders::_1 ) ) );  // this line could be factored out?
+  m_chartMaster.SetOnDrawChart(
+    [this]( const MemBlock& m ){ // in background thread to draw composed chart into memory, and send to gui thread
+      wxMemoryInputStream in( m.data, m.len );  // need this
+      pwxBitmap_t p( new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
+      //QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) ); // which will invoke HandleGuiDrawChart
+      CallAfter([this,p](){ // perform draw in gui thread
+        if ( 0 != m_pChartBitmap.use_count() ) m_pChartBitmap.reset();
+        m_pChartBitmap = p;  //  bit map remains for use in HandlePaint
+        wxClientDC dc( this );
+        dc.DrawBitmap( *m_pChartBitmap, 0, 0);
+        m_bInDrawChart = false;
+      });
+    }
+    );
   m_chartMaster.DrawChart( );
-}
-
-// background thread to draw composed chart into memory, and send to gui thread
-void WinChartView::CallBackDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );  // need this
-  pwxBitmap_t p( new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
-  //QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) ); // which will invoke HandleGuiDrawChart
-  CallAfter([this,p](){
-    if ( 0 != m_pChartBitmap.use_count() ) m_pChartBitmap.reset();
-    m_pChartBitmap = p;  //  bit map remains for use in HandlePaint
-    wxClientDC dc( this );
-    dc.DrawBitmap( *m_pChartBitmap, 0, 0);
-    m_bInDrawChart = false;
-  });
 }
 
 // this is superceded by ThreadDrawChart2/HandleGuiDrawChart when crossing threads
