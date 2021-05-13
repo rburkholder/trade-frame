@@ -16,9 +16,9 @@
 
 #include <TFTrading/InstrumentManager.h>
 
-#include "Chart.h"
+#include "ChartData.h"
 
-ChartTest::ChartTest( pProvider_t pProvider )
+ChartData::ChartData( pProvider_t pProvider )
   : ou::ChartDVBasics()
 {
   //static const std::string name( "QGC#" );
@@ -34,7 +34,7 @@ ChartTest::ChartTest( pProvider_t pProvider )
 
 }
 
-ChartTest::~ChartTest(void) {
+ChartData::~ChartData(void) {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );

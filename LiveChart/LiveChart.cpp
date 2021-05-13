@@ -15,16 +15,14 @@
 #include "stdafx.h"
 
 #include <iostream>
+#include <functional>
 
 #include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/timer/timer.hpp>
 
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
@@ -39,13 +37,11 @@
 
 //#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
-//#include <TFOptions/CalcExpiry.h>
-
 #include "LiveChart.h"
 
 IMPLEMENT_APP(AppLiveChart)
 
-size_t atm = 125;
+//size_t atm = 125;
 
 bool AppLiveChart::OnInit() {
 
@@ -115,7 +111,7 @@ bool AppLiveChart::OnInit() {
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
   m_sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
 
-  m_pChart = nullptr;
+  m_pChartData = nullptr;
   m_bPaintingChart = false;
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
@@ -168,7 +164,7 @@ bool AppLiveChart::OnInit() {
 
 void AppLiveChart::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
-  m_pChart = new ChartTest( m_pData1Provider );
+  m_pChartData = new ChartData( m_pData1Provider );
 
 //  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
@@ -180,7 +176,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
       m_bPaintingChart = true;
       wxSize size = m_winChart->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetChartDataView( m_pChart->GetChartDataView() );
+      m_chartMaster.SetChartDataView( m_pChartData->GetChartDataView() );
       m_chartMaster.SetOnDrawChart( std::move( std::bind( &AppLiveChart::HandleDrawChart, this, std::placeholders::_1 ) ) );
       m_chartMaster.DrawChart( );
     }
@@ -204,14 +200,14 @@ void AppLiveChart::HandleDrawChart( const MemBlock& m ) {
 
 void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
 
-  if ( 0 != m_pChart ) {
+  if ( nullptr != m_pChartData ) {
     ptime now = ou::TimeSource::Instance().External();
     static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
     boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
     ptime dtEnd = now + td;
     static boost::posix_time::time_duration tdLength( 0, 10, 0 );
     ptime dtBegin = dtEnd - tdLength;
-    m_pChart->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
+    m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
 
     m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   }
@@ -250,8 +246,8 @@ void AppLiveChart::HandleSaveValues( void ) {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
     std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/"
-      + m_pChart->GetWatch()->GetInstrument()->GetInstrumentName() );
-    m_pChart->GetWatch()->SaveSeries( sPrefixSession );
+      + m_pChartData->GetWatch()->GetInstrument()->GetInstrumentName() );
+    m_pChartData->GetWatch()->SaveSeries( sPrefixSession );
   }
   catch(...) {
     std::cout << " ... issues with saving ... " << std::endl;

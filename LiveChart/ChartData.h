@@ -21,13 +21,13 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
-class ChartTest: public ou::ChartDVBasics {
+class ChartData: public ou::ChartDVBasics {
 public:
 
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  ChartTest( pProvider_t );
-  ~ChartTest(void);
+  ChartData( pProvider_t );
+  ~ChartData(void);
 
   ou::tf::Watch* GetWatch( void ) { return m_pWatch; };
 

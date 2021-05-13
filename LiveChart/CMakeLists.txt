@@ -25,13 +25,13 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 
 set(
   file_h
-    Chart.h
+    ChartData.h
     LiveChart.h
   )
 
 set(
   file_cpp
-    Chart.cpp
+    ChartData.cpp
     LiveChart.cpp
   )
 

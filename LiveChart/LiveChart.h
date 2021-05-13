@@ -30,7 +30,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
-#include "Chart.h"
+#include "ChartData.h"
 
 class AppLiveChart:
   public wxApp, public ou::tf::FrameWork01<AppLiveChart> {
@@ -47,7 +47,7 @@ private:
   wxWindow* m_winChart;
   bool m_bReadyToDrawChart;
   ou::ChartMaster m_chartMaster;
-  ChartTest* m_pChart;
+  ChartData* m_pChartData;
   bool m_bPaintingChart;
 
   ou::tf::DBOps m_db;
@@ -77,8 +77,6 @@ private:
   void HandlePopulateDatabase( void );
 
   void HandleGuiRefresh( wxTimerEvent& event );
-    
-  //void AutoStartCollection( void );
 
   void OnData1Connected( int );
   void OnData2Connected( int );
@@ -86,8 +84,6 @@ private:
   void OnData1Disconnected( int );
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
-
-  void CalcIV( ptime dt );
 
   void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
@@ -120,4 +116,3 @@ private:
 
 // Implements MyApp& wxGetApp()
 DECLARE_APP(AppLiveChart)
-
