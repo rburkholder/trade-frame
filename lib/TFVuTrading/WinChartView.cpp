@@ -214,24 +214,6 @@ void WinChartView::HandlePaint( wxPaintEvent& event ) {
   }
 }
 
-// placeholder for unused code
-void WinChartView::ManualDraw( void ) {
-  if ( nullptr != m_pChartDataView ) {
-    try {
-      //m_bPaintingChart = true;
-      wxSize size = this->GetClientSize();
-      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      // turn this into a lambda instead
-      m_chartMaster.SetOnDrawChart( std::move( std::bind( &WinChartView::HandleDrawChart, this, std::placeholders::_1 ) ) );
-      m_chartMaster.DrawChart( );
-    }
-    catch (...) {
-    }
-  }
-  //m_bPaintingChart = false;
-}
-
-
 void WinChartView::HandleSize( wxSizeEvent& event ) {
   // let the timer do the refresh instead?
   //this->RefreshRect( this->GetClientRect(), false );
@@ -306,16 +288,6 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.DrawChart( );
 }
 
-// this is superceded by ThreadDrawChart2/HandleGuiDrawChart when crossing threads
-// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
-// placeholder from ManualDraw
-void WinChartView::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
-  wxPaintDC cdc( this );  // can only be used inside of paint, use ClientDC otherwise
-  cdc.DrawBitmap(bmp, 0, 0);
-}
-
 void WinChartView::UnbindEvents( void ) {
 
   if ( m_bBound ) {
@@ -348,6 +320,8 @@ void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
+// crossing threads
+// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
 
 } // namespace tf
 } // namespace ou

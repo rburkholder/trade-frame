@@ -117,7 +117,6 @@ private:
 
   void UpdateChartMaster();
 
-  void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
 
@@ -129,8 +128,6 @@ private:
   void OnDestroy( wxWindowDestroyEvent& event );
 
   void HandleGuiRefresh( wxTimerEvent& event );
-
-  void ManualDraw( void ); // code placeholder for now
 
 };
 
