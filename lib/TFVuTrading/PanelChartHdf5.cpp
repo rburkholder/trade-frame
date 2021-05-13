@@ -68,10 +68,10 @@ bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos
 
 void PanelChartHdf5::CreateControls() {
 
-    PanelChartHdf5* itemPanel1 = this;
+  PanelChartHdf5* itemPanel1 = this;
 
-    wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-    itemPanel1->SetSizer(sizerMain);
+  wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+  itemPanel1->SetSizer(sizerMain);
 
   // splitter
   wxSplitterWindow* splitter;
