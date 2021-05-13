@@ -16,12 +16,10 @@
 
 // Started 2013/09/26
 
-#include <wx/timer.h>
+#include <wx/app.h>
 #include <wx/treectrl.h>
 
 #include <OUCommon/Worker.h>
-
-#include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -29,6 +27,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "ChartData.h"
 
@@ -43,18 +42,13 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::WinChartView* m_pWinChartView;
 
-  wxWindow* m_winChart;
-  bool m_bReadyToDrawChart;
-  ou::ChartMaster m_chartMaster;
   ChartData* m_pChartData;
-  bool m_bPaintingChart;
 
   ou::tf::DBOps m_db;
 
-  wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
-  bool m_bIVCalcActive;
 
   class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:
@@ -76,8 +70,6 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
   void HandlePopulateDatabase( void );
 
-  void HandleGuiRefresh( wxTimerEvent& event );
-
   void OnData1Connected( int );
   void OnData2Connected( int );
   void OnExecConnected( int );
@@ -89,24 +81,18 @@ private:
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
   void HandleMenuAction2LoadIQFeedSymbolList( void );
   void HandleMenuActionInitializeSymbolSet( void );
-  void HandleMenuActionStartWatch( void );
-  void HandleMenuActionStopWatch( void );
   void HandleMenuActionSaveValues( void );
   void HandleMenuActionEmitYieldCurve( void );
-  void HandleMenuActionStartChart( void );
   void HandleMenuActionLoadTree( void );
 
   void HandleObtainNewIQFeedSymbolListRemote( void );
   void HandleObtainNewIQFeedSymbolListLocal( void );
   void HandleLoadIQFeedSymbolList( void );
+
   void HandleSaveValues( void );
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
-
-  void HandleDrawChart( const MemBlock& );
-  void HandlePaint( wxPaintEvent& event );
-  void HandleSize( wxSizeEvent& event );
 
   void HandleBuildTreePathParts( const std::string& sPath );
 
@@ -114,5 +100,4 @@ private:
 
 };
 
-// Implements MyApp& wxGetApp()
 DECLARE_APP(AppLiveChart)

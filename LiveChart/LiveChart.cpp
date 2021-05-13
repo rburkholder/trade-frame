@@ -12,40 +12,27 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <iostream>
-#include <functional>
 
-#include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
+//#include <boost/lexical_cast.hpp>
 
-#include <wx/mstream.h>
-#include <wx/bitmap.h>
+#include <wx/frame.h>
+#include <wx/sizer.h>
 #include <wx/splitter.h>
 #include <wx/panel.h>
-
-#include <OUCommon/TimeSource.h>
 
 //#include <TFTrading/InstrumentManager.h>
 //#include <TFTrading/AccountManager.h>
 //#include <TFTrading/OrderManager.h>
 
-//#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
-
 #include "LiveChart.h"
 
 IMPLEMENT_APP(AppLiveChart)
 
-//size_t atm = 125;
-
 bool AppLiveChart::OnInit() {
-
-//  m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "LiveChart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -111,14 +98,9 @@ bool AppLiveChart::OnInit() {
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
   m_sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
 
-  m_pChartData = nullptr;
-  m_bPaintingChart = false;
-  m_bReadyToDrawChart = false;
-  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
-  wxWindowID idChart = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &AppLiveChart::HandlePaint, this, idChart );
-  m_winChart->Bind( wxEVT_SIZE, &AppLiveChart::HandleSize, this, idChart );
+  m_pWinChartView = new ou::tf::WinChartView( panelSplitterRightPanel, wxID_ANY );
+
+  sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
@@ -128,10 +110,6 @@ bool AppLiveChart::OnInit() {
   m_bData1Connected = false;
   m_bData2Connected = false;
   m_bExecConnected = false;
-
-  m_timerGuiRefresh.SetOwner( this );
-
-  Bind( wxEVT_TIMER, &AppLiveChart::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppLiveChart::OnClose, this );  // start close of windows and controls
 
@@ -148,89 +126,33 @@ bool AppLiveChart::OnInit() {
 //  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppLiveChart::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
 //  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppLiveChart::HandleMenuAction2LoadIQFeedSymbolList ) ) );
 //  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppLiveChart::HandleMenuActionInitializeSymbolSet ) ) );
-  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartWatch ) ) );
-  vItems.push_back( new mi( "c2 Start Chart", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartChart ) ) );
-  vItems.push_back( new mi( "c3 Stop Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStopWatch ) ) );
+//  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartWatch ) ) );
+//  vItems.push_back( new mi( "c2 Start Chart", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartChart ) ) );
+//  vItems.push_back( new mi( "c3 Stop Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStopWatch ) ) );
   vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppLiveChart::HandleMenuActionSaveValues ) ) );
 //  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppLiveChart::HandleMenuActionEmitYieldCurve ) ) );
 //  vItems.push_back( new mi( "e1 Load Tree", MakeDelegate( this, &AppLiveChart::HandleMenuActionLoadTree ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  this->m_pData1Provider->Connect();
+  m_pChartData = new ChartData( m_pData1Provider );
+  m_pData1Provider->Connect();
+
+  m_pWinChartView->SetOnRefreshData(
+    [this](){
+      if ( nullptr != m_pChartData ) {
+        ptime now = ou::TimeSource::Instance().External();
+        static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+        boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+        ptime dtEnd = now + td;
+        static boost::posix_time::time_duration tdLength( 0, 10, 0 );
+        ptime dtBegin = dtEnd - tdLength;
+        m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
+      }
+    } );
+
+  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
 
   return 1;
-
-}
-
-void AppLiveChart::HandleMenuActionStartChart( void ) {
-  m_bReadyToDrawChart = true;
-  m_pChartData = new ChartData( m_pData1Provider );
-
-//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-}
-
-// TODO: convert to WinChartView
-void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
-  if ( m_bReadyToDrawChart && !m_bPaintingChart ) {
-    try {
-      m_bPaintingChart = true;
-      wxSize size = m_winChart->GetClientSize();
-      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetChartDataView( m_pChartData->GetChartDataView() );
-      m_chartMaster.SetOnDrawChart( std::move( std::bind( &AppLiveChart::HandleDrawChart, this, std::placeholders::_1 ) ) );
-      m_chartMaster.DrawChart( );
-    }
-    catch (...) {
-    }
-  }
-  m_bPaintingChart = false;
-}
-
-void AppLiveChart::HandleSize( wxSizeEvent& event ) {
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-}
-
-// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
-void AppLiveChart::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
-  wxPaintDC cdc( m_winChart );
-  cdc.DrawBitmap(bmp, 0, 0);
-}
-
-void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
-
-  if ( nullptr != m_pChartData ) {
-    ptime now = ou::TimeSource::Instance().External();
-    static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-    boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-    ptime dtEnd = now + td;
-    static boost::posix_time::time_duration tdLength( 0, 10, 0 );
-    ptime dtBegin = dtEnd - tdLength;
-    m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
-
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-  }
-
-}
-
-void AppLiveChart::HandleMenuActionStartWatch( void ) {
-/*
-  m_pBundle->StartWatch();
-
-  m_bIVCalcActive = false;
-  ptime dt;
-  ou::TimeSource::Instance().Internal( &dt );
-  m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds() );
-  */
-  m_timerGuiRefresh.Start( 250 );
-}
-
-void AppLiveChart::HandleMenuActionStopWatch( void ) {
-
-  m_timerGuiRefresh.Stop();
-
-//  m_pBundle->StopWatch();
 
 }
 
@@ -258,24 +180,14 @@ void AppLiveChart::HandleSaveValues( void ) {
 int AppLiveChart::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
   this->m_pData1Provider->Disconnect();
-//  m_listIQFeedSymbols.Clear();
   if ( m_db.IsOpen() ) m_db.Close();
-
-//  delete m_pdm;
-//  m_pdm = 0;
 
   return wxAppConsole::OnExit();
 }
 
-//void AppWeeklies::HandlePanelFocusPropogate( unsigned int ix ) {
-//}
-
-
 void AppLiveChart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
-  m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed

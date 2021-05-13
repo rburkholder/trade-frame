@@ -67,16 +67,16 @@ target_link_libraries(
       TFInteractiveBrokers
       TFIQFeed
       TFSimulation
-      OUCharting
       TFVuTrading
       TFTrading
       TFOptions
-      TFIndicators
       TFHDF5TimeSeries
-      TFTimeSeries
       OUCommon
       OUSQL
       OUSqlite
+      OUCharting
+      TFIndicators
+      TFTimeSeries
       hdf5_cpp
       hdf5
       sz
