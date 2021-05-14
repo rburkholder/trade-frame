@@ -16,9 +16,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <memory>
-
-#include <OUCommon/Delegate.h>
+#include <functional>
 
 #include "ChartEntryBase.h"
 
@@ -90,9 +88,12 @@ public:
 
   size_t GetChartCount( void ) const { return m_mapCntChartIndexes.size(); };
 
-  // used by ChartMaster, maybe change to std::function iteration, or lambda callback
-  iterator begin( void ) { return m_vChartEntryCarrier.begin(); };
-  iterator end( void ) { return m_vChartEntryCarrier.end(); };
+  using fEachChartEntryCarrier_t = std::function<void( ChartEntryCarrier& )>;
+  void EachChartEntryCarrier( fEachChartEntryCarrier_t&& f ) {
+    for ( ChartEntryCarrier& carrier: m_vChartEntryCarrier ) {
+      f( carrier );
+    }
+  }
 
 protected:
 

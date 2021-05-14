@@ -11,12 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
-#include <vector>
-
-//#include <OUCommon/Colour.h>
-
+#include "ChartDataView.h"
 #include "ChartMaster.h"
 
 namespace ou { // One Unified
@@ -24,18 +19,17 @@ namespace ou { // One Unified
 ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 : m_pCdv( nullptr),
   m_nChartWidth( width ), m_nChartHeight( height ),
-  m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
-  m_bCreated( false )
+  m_bHasData( false )
 {
   Initialize();
 }
 
 ChartMaster::ChartMaster(): ChartMaster( 600, 900 ) {}
 
-ChartMaster::~ChartMaster(void) {
+ChartMaster::~ChartMaster() {
 }
 
-void ChartMaster::Initialize( void ) {
+void ChartMaster::Initialize() {
   char code[2048];
   //bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1", &code );
   //bool b = Chart::setLicenseCode( "UDEV-23FP-5DWS-X22U-BBBD-FBD8", &code );
@@ -45,21 +39,32 @@ void ChartMaster::Initialize( void ) {
 }
 
 void ChartMaster::SetChartDataView( ChartDataView* pcdv ) {
+
   m_pCdv = pcdv;
+
+  m_pChart = std::make_unique<MultiChart>( m_nChartWidth, m_nChartHeight );
+  ChartStructure();
+
   if ( nullptr != pcdv ) {
     m_pCdv->SetChanged();
   }
 };
 
-bool ChartMaster::GetChartDataViewChanged( void ) { // flag is reset during call
+void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
+
+  m_nChartWidth = width;
+  m_nChartHeight = height;
+
+  m_pChart = std::make_unique<MultiChart>( m_nChartWidth, m_nChartHeight );
+  ChartStructure();
+
+  if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
+}
+
+bool ChartMaster::GetChartDataViewChanged() { // flag is reset during call
   return ( nullptr == m_pCdv ) ? false : m_pCdv->GetChanged();
 }
 
-void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
-  m_nChartWidth = width;
-  m_nChartHeight = height;
-  if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
-}
 /*
 void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   m_dblViewPortXBegin =
@@ -80,137 +85,127 @@ void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_ti
     0;
 }
 */
+
 void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
   m_tdBarWidth = tdBarWidth;
-  //m_pCdv-
+}
+
+void ChartMaster::ChartStructure() {
+
+  //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
+
+  std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetDescription() );
+  m_pChart->addTitle( sTitle.c_str() );
+
+  // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
+  // calc assumes chart 0 and chart 1 are always present
+  size_t n = m_pCdv->GetChartCount();
+  int heightChart0 = ( 12 * ( m_nChartHeight - 25 ) ) / ( 15 + ( 4 * ( n - 2 ) ) );
+  int heightChart1 = heightChart0 / 4;
+  int heightChartN = heightChart0 / 3;
+
+  m_vSubCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
+
+  size_t ix = 0;
+  int y = 15;  // was 25
+  int x = 50;
+  int xAxisHeight = 50;
+  XYChart* pXY;  // used for each sub-chart
+
+  while ( ix < n ) {
+    switch ( ix ) {
+      case 0:  // main chart
+        m_pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
+        pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight )->setGridColor(0xc0c0c0, 0xc0c0c0);
+        pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
+        pXY->setClipping();
+        pXY->setXAxisOnTop( true );
+        pXY->xAxis()->setWidth( 2 );
+        pXY->yAxis()->setWidth( 2 );
+        pXY->yAxis()->setMargin( 2, 5 );
+        pXY->addLegend( x, xAxisHeight, true, 0, 9.0 );
+        m_pChart->addChart( 0, y, pXY );
+        m_pChart->setMainChart( pXY );
+        y += heightChart0;
+        break;
+      case 1: // volume chart
+        pXY = new XYChart( m_nChartWidth, heightChart1 );
+        pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 )->setGridColor(0xc0c0c0, 0xc0c0c0);
+        pXY->setClipping();
+        //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+        pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
+        pXY->xAxis()->copyAxis( m_pXY0->xAxis() ); // use settings from main subchart
+        pXY->xAxis()->setWidth( 2 );
+        pXY->yAxis()->setWidth( 2 );
+        pXY->yAxis()->setMargin( 5, 5 );
+        pXY->addLegend( x, 0, true, 0, 9.0 );
+        m_pChart->addChart( 0, y, pXY );
+        y += heightChart1;
+        break;
+      default:  // secondary indicator charts
+        pXY = new XYChart( m_nChartWidth, heightChartN );
+        pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN )->setGridColor(0xc0c0c0, 0xc0c0c0);
+        pXY->setClipping();
+        //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+        pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
+        pXY->xAxis()->copyAxis( m_pXY0->xAxis() ); // use settings from main subchart
+        pXY->xAxis()->setWidth( 2 );
+        pXY->yAxis()->setWidth( 2 );
+        pXY->yAxis()->setMargin( 5, 5 );
+        pXY->addLegend( x, 0, true, 0, 9.0 );
+        m_pChart->addChart( 0, y, pXY );
+        y += heightChartN;
+        break;
+    }
+    m_vSubCharts[ ix ] = std::unique_ptr<XYChart>( pXY );
+    ++ix;
+  }
+}
+
+void ChartMaster::ChartData( XYChart* pXY0 ) {
+
+  // determine XAxis min/max while adding chart data
+  double dblXBegin {};
+  double dblXEnd {};
+  m_pCdv->EachChartEntryCarrier(
+    [this,&dblXBegin,&dblXEnd]( ou::ChartEntryCarrier& carrier ){
+      size_t ixChart = carrier.GetActualChartId();
+      ChartEntryBase::structChartAttributes Attributes;
+      if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), &Attributes ) ) {
+        // following assumes values are always > 0
+        dblXBegin = ( 0 == dblXBegin )
+          ? Attributes.dblXMin
+          : std::min<double>( dblXBegin, Attributes.dblXMin );
+        dblXEnd   = ( 0 == dblXEnd   )
+          ? Attributes.dblXMax
+          : std::max<double>( dblXEnd,   Attributes.dblXMax );
+      }
+    } );
+
+  // time axis scales
+  if ( dblXBegin != dblXEnd ) {
+    pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
+    m_bHasData = true;
+  }
+  else {
+    m_bHasData = false;
+    //std::cout << "Time Scales match" << std::endl;
+  }
+
 }
 
 void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
-  struct structSubChart {
-    XYChart* pChart; // xy chart at this position
-    structSubChart( void ) : pChart( nullptr ) {};
-  };
+  if ( m_pChart ) {
+    if ( m_pCdv ) { // DataView has something to draw
 
-  using vSubChart_t = std::vector<structSubChart>;
+      //ChartStructure();  // performed elsewhere
 
-  if ( nullptr != m_pCdv ) { // DataView has something to draw
-    //if ( m_pCdv->GetChanged() ) {
-    if ( true ) {
-      //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
-      MultiChart multi( m_nChartWidth, m_nChartHeight );
+      ChartData( m_pXY0 );
 
-      std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetDescription() );
-      multi.addTitle( sTitle.c_str() );
-
-      // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
-      // calc assumes chart 0 and chart 1 are always present
-      size_t n = m_pCdv->GetChartCount();
-      int heightChart0 = ( 12 * ( m_nChartHeight - 25 ) ) / ( 15 + ( 4 * ( n - 2 ) ) );
-      int heightChart1 = heightChart0 / 4;
-      int heightChartN = heightChart0 / 3;
-
-      vSubChart_t vSubCharts;
-      vSubCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
-
-      size_t ix = 0;
-      int y = 15;  // was 25
-      int x = 50;
-      int xAxisHeight = 50;
-      XYChart *pXY;  // used for each sub-chart
-      XYChart *pXY0;  // main chart
-
-      while ( ix < n ) {
-        switch ( ix ) {
-          case 0:  // main chart
-            pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
-            pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight )->setGridColor(0xc0c0c0, 0xc0c0c0);
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
-            pXY->setClipping();
-            pXY->setXAxisOnTop( true );
-            pXY->xAxis()->setWidth( 2 );
-            pXY->yAxis()->setWidth( 2 );
-            pXY->yAxis()->setMargin( 2, 5 );
-            pXY->addLegend( x, xAxisHeight, true, 0, 9.0 );
-            multi.addChart( 0, y, pXY );
-            multi.setMainChart( pXY );
-            y += heightChart0;
-            break;
-          case 1: // volume chart
-            pXY = new XYChart( m_nChartWidth, heightChart1 );
-            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 )->setGridColor(0xc0c0c0, 0xc0c0c0);
-            pXY->setClipping();
-            //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
-            pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
-            pXY->xAxis()->setWidth( 2 );
-            pXY->yAxis()->setWidth( 2 );
-            pXY->yAxis()->setMargin( 5, 5 );
-            pXY->addLegend( x, 0, true, 0, 9.0 );
-            multi.addChart( 0, y, pXY );
-            y += heightChart1;
-            break;
-          default:  // secondary indicator charts
-            pXY = new XYChart( m_nChartWidth, heightChartN );
-            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN )->setGridColor(0xc0c0c0, 0xc0c0c0);
-            pXY->setClipping();
-            //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor);
-            pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
-            pXY->xAxis()->setWidth( 2 );
-            pXY->yAxis()->setWidth( 2 );
-            pXY->yAxis()->setMargin( 5, 5 );
-            pXY->addLegend( x, 0, true, 0, 9.0 );
-            multi.addChart( 0, y, pXY );
-            y += heightChartN;
-            break;
-        }
-        vSubCharts[ ix ].pChart = pXY;
-        ++ix;
-      }
-
-      // determine XAxis min/max while adding chart data
-      double dblXBegin = m_dblViewPortXBegin;
-      double dblXEnd = m_dblViewPortXEnd;
-      for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
-        size_t ixChart = iter->GetActualChartId();
-        ChartEntryBase::structChartAttributes Attributes;
-        if ( iter->GetChartEntry()->AddEntryToChart( vSubCharts[ ixChart ].pChart, &Attributes ) ) {
-          // following assumes values are always > 0
-          if( 0 == m_dblViewPortXBegin ) {
-            dblXBegin = ( 0 == dblXBegin )
-              ? Attributes.dblXMin
-              : std::min<double>( dblXBegin, Attributes.dblXMin );
-          }
-          if( 0 == m_dblViewPortXEnd ) {
-            dblXEnd   = ( 0 == dblXEnd   )
-              ? Attributes.dblXMax
-              : std::max<double>( dblXEnd,   Attributes.dblXMax );
-          }
-//          if ( 610.0 < ( dblXEnd - dblXBegin ) ) {
-//            double dif = dblXEnd - dblXBegin;
-//            static double change( 0 );
-//            if ( dif > change ) {
-//              change = dif;
-              //std::cout << "diff " << dif << std::endl;
-//            }
-//          }
-        }
-      }
-
-      // time axis scales
-      if ( dblXBegin != dblXEnd ) {
-        pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
-      }
-      else {
-        //std::cout << "Time Scales match" << std::endl;
-      }
-
-      MemBlock m = multi.makeChart( BMP );
-      if ( m_fOnDrawChart ) m_fOnDrawChart( m );
-
-      for ( structSubChart& chart: vSubCharts ) {
-        delete chart.pChart;
+      if ( m_bHasData ) {
+        MemBlock m = m_pChart->makeChart( BMP );
+        if ( m_fOnDrawChart ) m_fOnDrawChart( m );
       }
     }
   }
