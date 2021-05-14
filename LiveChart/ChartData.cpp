@@ -22,11 +22,12 @@ ChartData::ChartData( pProvider_t pProvider )
   : ou::ChartDVBasics()
 {
   //static const std::string name( "QGC#" );
-  static const std::string name( "GLD" );
+  //static const std::string name( "GLD" );
+  static const std::string name( "TST$Y" );
   this->GetChartDataView()->SetNames( "LiveChart", name );
   ou::tf::Instrument::pInstrument_t pInstrument
-    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Stock );
-//    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Future );
+//    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Stock );
+    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
