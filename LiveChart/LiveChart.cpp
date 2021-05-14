@@ -14,7 +14,6 @@
 
 #include <iostream>
 
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 //#include <boost/lexical_cast.hpp>
@@ -29,6 +28,10 @@
 //#include <TFTrading/OrderManager.h>
 
 #include "LiveChart.h"
+
+namespace {
+  static const std::string sStateFileName = "LiveChart.state";
+}
 
 IMPLEMENT_APP(AppLiveChart)
 
@@ -150,6 +153,12 @@ bool AppLiveChart::OnInit() {
 
   m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
 
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
   return 1;
 
 }
@@ -188,8 +197,9 @@ void AppLiveChart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a
+
+  SaveState();
+
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -229,6 +239,27 @@ void AppLiveChart::OnData2Disconnected( int ) {
 
 void AppLiveChart::OnExecDisconnected( int ) {
   m_bExecConnected = false;
+}
+
+void AppLiveChart::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppLiveChart::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
 }
 
 void AppLiveChart::HandleRegisterTables(  ou::db::Session& session ) {

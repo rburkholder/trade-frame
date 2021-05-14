@@ -16,6 +16,9 @@
 
 // Started 2013/09/26
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/app.h>
 #include <wx/treectrl.h>
 
@@ -33,6 +36,7 @@
 
 class AppLiveChart:
   public wxApp, public ou::tf::FrameWork01<AppLiveChart> {
+    friend class boost::serialization::access;
     friend ou::tf::FrameWork01<AppLiveChart>;
 public:
 protected:
@@ -98,6 +102,24 @@ private:
 
   void HandleTreeEventItemActivated( wxTreeEvent& event );
 
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+    //ar & m_splitPanels->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+    //m_splitPanels->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
+BOOST_CLASS_VERSION(AppLiveChart, 1)
 DECLARE_APP(AppLiveChart)
