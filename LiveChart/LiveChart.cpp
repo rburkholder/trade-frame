@@ -139,15 +139,13 @@ bool AppLiveChart::OnInit() {
 
   m_pWinChartView->SetOnRefreshData(
     [this](){
-      if ( nullptr != m_pChartData ) {
-        ptime now = ou::TimeSource::Instance().External();
-        static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-        boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-        ptime dtEnd = now + td;
-        static boost::posix_time::time_duration tdLength( 0, 10, 0 );
-        ptime dtBegin = dtEnd - tdLength;
-        m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
-      }
+      ptime now = ou::TimeSource::Instance().External();
+      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+      ptime dtEnd = now + td;
+      static boost::posix_time::time_duration tdLength( 0, 10, 0 );
+      ptime dtBegin = dtEnd - tdLength;
+      m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
     } );
 
   m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
