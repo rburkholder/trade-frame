@@ -25,14 +25,12 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-
+#include <boost/thread/mutex.hpp>
 #include <boost/thread/thread_only.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
 
-#include <wx/window.h>
 #include <wx/timer.h>
+#include <wx/window.h>
 
 #include <OUCharting/ChartMaster.h>
 #include <OUCharting/ChartDataView.h>
