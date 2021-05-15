@@ -22,6 +22,7 @@
 class MultiChart;
 class XYChart;
 class MemBlock;
+class DrawArea;
 
 namespace ou { // One Unified
 
@@ -40,13 +41,17 @@ public:
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
   bool GetChartDataViewChanged();
-  void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
+  void DrawChart();
   //bool isCreated( void ) const { return m_bCreated; };
 
   using fOnDrawChart_t = std::function<void( const MemBlock& )>;
   void SetOnDrawChart( fOnDrawChart_t&& function ) {
     m_fOnDrawChart = std::move( function );
   }
+
+  void CrossHairPosition( int x, int y );
+  void CrossHairDraw( bool );
+
 protected:
 
   unsigned int m_nChartWidth;
@@ -67,13 +72,23 @@ private:
   vSubChart_t m_vSubCharts;
 
   XYChart* m_pXY0;
+  DrawArea* m_pDA;
 
   bool m_bHasData;
+
+  int m_intCrossHairX, m_intCrossHairY;
+  bool m_bCrossHair;
 
   void Initialize();
 
   void ChartStructure();
   void ChartData( XYChart* );
+
+  void DrawDynamicLayer();
+
+  void RenderChart();
+
+  bool ResetDynamicLayer();
 
 };
 

@@ -11,14 +11,19 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+//#include <boost/lexical_cast.hpp>
+#include <sstream>
+
 #include "ChartDataView.h"
 #include "ChartMaster.h"
+#include "OUCommon/Colour.h"
 
 namespace ou { // One Unified
 
 ChartMaster::ChartMaster( unsigned int width, unsigned int height )
-: m_pCdv( nullptr),
+: m_pCdv( nullptr), m_pDA( nullptr ),
   m_nChartWidth( width ), m_nChartHeight( height ),
+  m_intCrossHairX {}, m_intCrossHairY {}, m_bCrossHair( false ),
   m_bHasData( false )
 {
   Initialize();
@@ -40,25 +45,30 @@ void ChartMaster::Initialize() {
 
 void ChartMaster::SetChartDataView( ChartDataView* pcdv ) {
 
+  //ResetDynamicLayer();
+
   m_pCdv = pcdv;
 
   m_pChart = std::make_unique<MultiChart>( m_nChartWidth, m_nChartHeight );
   ChartStructure();
 
-  if ( nullptr != pcdv ) {
-    m_pCdv->SetChanged();
-  }
+  //if ( nullptr != pcdv ) {
+  //  m_pCdv->SetChanged();
+  //}
 };
 
 void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
 
+  //ResetDynamicLayer();
+
   m_nChartWidth = width;
   m_nChartHeight = height;
 
+  //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
   m_pChart = std::make_unique<MultiChart>( m_nChartWidth, m_nChartHeight );
   ChartStructure();
 
-  if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
+  //if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
 }
 
 bool ChartMaster::GetChartDataViewChanged() { // flag is reset during call
@@ -91,8 +101,6 @@ void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
 }
 
 void ChartMaster::ChartStructure() {
-
-  //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
 
   std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetDescription() );
   m_pChart->addTitle( sTitle.c_str() );
@@ -194,20 +202,59 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
 
 }
 
-void ChartMaster::DrawChart( bool bViewPortChanged ) {
+void ChartMaster::DrawChart() {
 
   if ( m_pChart ) {
     if ( m_pCdv ) { // DataView has something to draw
 
-      //ChartStructure();  // performed elsewhere
-
       ChartData( m_pXY0 );
 
       if ( m_bHasData ) {
-        MemBlock m = m_pChart->makeChart( BMP );
-        if ( m_fOnDrawChart ) m_fOnDrawChart( m );
+        if ( m_bCrossHair ) DrawDynamicLayer();
       }
+
+      RenderChart();
+
     }
+  }
+}
+
+void ChartMaster::RenderChart() {
+  if ( m_bHasData ) {
+    MemBlock m = m_pChart->makeChart( BMP );
+    if ( m_fOnDrawChart ) m_fOnDrawChart( m );
+  }
+}
+
+bool ChartMaster::ResetDynamicLayer() {
+  bool bExisted { false };
+  if ( nullptr != m_pDA ) {
+    bExisted = true;
+    m_pChart->removeDynamicLayer();
+    m_pDA = nullptr;
+  }
+  return bExisted;
+}
+
+void ChartMaster::CrossHairPosition( int x, int y ) {
+  m_intCrossHairX = x;
+  m_intCrossHairY = y;
+}
+
+void ChartMaster::CrossHairDraw( bool bDraw ) {
+  m_bCrossHair = bDraw;
+}
+
+void ChartMaster::DrawDynamicLayer() {
+  // TODO: maybe trigger more often than data update happens?
+  //   trigger a call back for sync?
+  if ( m_pChart ) {
+    m_pDA = m_pChart->initDynamicLayer(); // new/clear
+    std::stringstream ss;
+    ss << "x=" << m_intCrossHairX << ",y=" << m_intCrossHairY;
+    m_pDA->text( ss.str().c_str(), "normal", 10, 10, 10, Colour::Black );
+    m_pDA->hline( 0, m_nChartWidth - 1,  m_intCrossHairY, Colour::Gray );
+    m_pDA->vline( 0, m_nChartHeight - 1, m_intCrossHairX, Colour::Gray );
   }
 }
 
