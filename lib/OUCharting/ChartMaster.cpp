@@ -251,8 +251,35 @@ void ChartMaster::DrawDynamicLayer() {
     std::stringstream ss;
     ss << "x=" << m_intCrossHairX << ",y=" << m_intCrossHairY;
     m_pDA->text( ss.str().c_str(), "normal", 10, 10, 10, Colour::Black );
-    m_pDA->hline( 0, m_nChartWidth - 1,  m_intCrossHairY, Colour::Gray );
-    m_pDA->vline( 0, m_nChartHeight - 1, m_intCrossHairX, Colour::Gray );
+
+    int n = m_pChart->getChartCount();
+    assert( 0 < n );
+
+    BaseChart* p;
+
+    p = m_pChart->getChart( 0 );
+    XYChart* pChart0 = dynamic_cast<XYChart*>( p );
+    PlotArea* pArea0 = pChart0->getPlotArea();
+
+    p = m_pChart->getChart( n - 1 );
+    XYChart* pChartN = dynamic_cast<XYChart*>( p );
+    PlotArea* pAreaN = pChartN->getPlotArea();
+
+    const int top    = pChart0->getAbsOffsetY() + pArea0->getTopY();
+    const int bottom = pChartN->getAbsOffsetY() + pAreaN->getBottomY();
+    const int left   = pChart0->getAbsOffsetX() + pArea0->getLeftX();
+    const int right  = pChart0->getAbsOffsetX() + pArea0->getRightX();
+
+    if (
+      ( top <= m_intCrossHairY  ) &&
+      ( bottom >= m_intCrossHairY ) &&
+      ( left <= m_intCrossHairX ) &&
+      ( right >= m_intCrossHairX )
+    ) {
+      m_pDA->hline( left, right, m_intCrossHairY, Colour::Gray );
+      m_pDA->vline( top, bottom, m_intCrossHairX, Colour::Gray );
+    }
+
   }
 }
 
