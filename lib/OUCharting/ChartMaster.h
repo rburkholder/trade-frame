@@ -34,15 +34,14 @@ public:
   ChartMaster( unsigned int width, unsigned int height );
   virtual ~ChartMaster();
 
-  void SetChartDimensions( unsigned int width, unsigned int height);
   void SetChartDataView( ChartDataView* pcdv );
   ChartDataView* GetChartDataView( void ) const { return m_pCdv; };
+  bool GetChartDataViewChanged();
 
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
-  bool GetChartDataViewChanged();
+  void SetChartDimensions( unsigned int width, unsigned int height);
   void DrawChart();
-  //bool isCreated( void ) const { return m_bCreated; };
 
   using fOnDrawChart_t = std::function<void( const MemBlock& )>;
   void SetOnDrawChart( fOnDrawChart_t&& function ) {
