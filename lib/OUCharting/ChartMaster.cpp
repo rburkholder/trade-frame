@@ -206,11 +206,6 @@ void ChartMaster::DrawChart() {
     if ( m_pCdv ) { // DataView has something to draw
 
       ChartData( m_pXY0 );
-
-      if ( m_bHasData ) {
-        if ( m_bCrossHair ) DrawDynamicLayer();
-      }
-
       RenderChart();
 
     }
@@ -219,6 +214,7 @@ void ChartMaster::DrawChart() {
 
 void ChartMaster::RenderChart() {
   if ( m_bHasData ) {
+    if ( m_bCrossHair ) DrawDynamicLayer();
     MemBlock m = m_pChart->makeChart( BMP );
     if ( m_fOnDrawChart ) m_fOnDrawChart( m );
   }
@@ -247,10 +243,12 @@ void ChartMaster::DrawDynamicLayer() {
   // TODO: maybe trigger more often than data update happens?
   //   trigger a call back for sync?
   if ( m_pChart ) {
+
     m_pDA = m_pChart->initDynamicLayer(); // new/clear
-    std::stringstream ss;
-    ss << "x=" << m_intCrossHairX << ",y=" << m_intCrossHairY;
-    m_pDA->text( ss.str().c_str(), "normal", 10, 10, 10, Colour::Black );
+
+    //std::stringstream ss;
+    //ss << "x=" << m_intCrossHairX << ",y=" << m_intCrossHairY;
+    //m_pDA->text( ss.str().c_str(), "normal", 10, 10, 10, Colour::Black );
 
     int n = m_pChart->getChartCount();
     assert( 0 < n );
