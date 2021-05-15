@@ -140,18 +140,18 @@ bool AppLiveChart::OnInit() {
   m_pChartData = new ChartData( m_pData1Provider );
   m_pData1Provider->Connect();
 
-  m_pWinChartView->SetOnRefreshData(
-    [this](){
-      ptime now = ou::TimeSource::Instance().External();
-      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-      ptime dtEnd = now + td;
-      static boost::posix_time::time_duration tdLength( 0, 10, 0 );
-      ptime dtBegin = dtEnd - tdLength;
-      m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
-    } );
+//  m_pWinChartView->SetOnRefreshData(
+//    [this](){
+//      ptime now = ou::TimeSource::Instance().External();
+//      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+//      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+//      ptime dtEnd = now + td;
+//      static boost::posix_time::time_duration tdLength( 0, 10, 0 );
+//      ptime dtBegin = dtEnd - tdLength;
+//      m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
+//    } );
 
-  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
+  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
 
   CallAfter(
     [this](){

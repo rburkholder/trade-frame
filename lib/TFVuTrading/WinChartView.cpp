@@ -133,7 +133,6 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bRe
   }
 }
 
-
 void WinChartView::HandleMouse( wxMouseEvent& event ) {
   //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
   //if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
@@ -246,7 +245,7 @@ void WinChartView::ThreadDrawChart( void ) {
 
     if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
       // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-      if ( m_bReCalcViewPort ) {
+      //if ( m_bReCalcViewPort ) {
         boost::posix_time::ptime now = ou::TimeSource::Instance().External();
 
         // chart moves at 1s step - not sure if this is trader friendly though
@@ -263,7 +262,7 @@ void WinChartView::ThreadDrawChart( void ) {
         m_pChartDataView->SetViewPort( dtBegin, dtEnd );
 
         m_bReCalcViewPort = false;
-      }
+      //}
 
       UpdateChartMaster();
     }

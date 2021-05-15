@@ -52,9 +52,7 @@ void ChartMaster::SetChartDataView( ChartDataView* pcdv ) {
   m_pChart = std::make_unique<MultiChart>( m_nChartWidth, m_nChartHeight );
   ChartStructure();
 
-  //if ( nullptr != pcdv ) {
-  //  m_pCdv->SetChanged();
-  //}
+  //if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
 };
 
 void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
