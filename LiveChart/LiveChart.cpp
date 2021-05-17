@@ -187,7 +187,6 @@ void AppLiveChart::HandleSaveValues( void ) {
 int AppLiveChart::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
-  this->m_pData1Provider->Disconnect();
   if ( m_db.IsOpen() ) m_db.Close();
 
   return wxAppConsole::OnExit();
@@ -195,6 +194,7 @@ int AppLiveChart::OnExit() {
 
 void AppLiveChart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
+  this->m_pData1Provider->Disconnect();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
 
