@@ -154,23 +154,23 @@ private:
       else {
         //std::cout << "WatchInfo::Set (activate) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
         m_bActive = true;
-	m_pWatch = pWatch;
+	      m_pWatch = pWatch;
         pInstrument_t pInstrument = m_pWatch->GetInstrument();
         if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
           ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( m_pWatch.get() );
           pOption->OnGreek.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleGreek ) );
         }
-	m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
-	m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
+        m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
+        m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
         //std::cout << "WatchInfo::Set (before) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-	m_pWatch->StartWatch();
+        m_pWatch->StartWatch();
         //std::cout << "WatchInfo::Set (after) " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       }
     }
     virtual ~WatchInfo( void ) {
       //std::cout << "WatchInfo::~WatchInfo " << m_pWatch->GetInstrument()->GetInstrumentName() << std::endl;
       if ( 0 == m_pWatch.use_count() ) {
-	std::cout << "WatchInfo use_count is 0, bad thing" << std::endl;
+        std::cout << "WatchInfo use_count is 0, bad thing" << std::endl;
       }
       else {
         if ( m_bActive ) {
@@ -198,6 +198,7 @@ private:
 //      }
     }
   private:
+
     bool m_bActive;
     pWatch_t m_pWatch;
     ou::tf::ModelChartHdf5 m_chartData;
