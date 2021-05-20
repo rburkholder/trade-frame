@@ -1,3 +1,17 @@
+2021/05/20
+
+https://www.investopedia.com/trading/options-trading-volume-and-open-interest/
+* a big increase in price accompanied by low trading volume does not necessarily signify strength. In fact, that combination may well indicate that a price reversal is coming soon. 
+* Open interest indicates the total number of option contracts that are currently out there. These are contracts that have been traded but not yet liquidated by an offsetting trade or an exercise or assignment. 
+* open interest is not updated during the trading day.
+* Open interest also gives you key information regarding the liquidity of an option. If there is no open interest in an option, there is no secondary market for that option. When options have a significant open interest, it means there are a large number of buyers and sellers out there. An active secondary market increases the odds of getting option orders filled at good prices. 
+* All other things being equal, the bigger the open interest, the easier it will be to trade that option at a reasonable spread between the bid and ask.
+
+https://www.optionsplaybook.com/options-introduction/open-interest/
+* As opposed to stocks, which have a fixed number of shares outstanding, there’s no minimum or maximum number of option contracts that can exist for any given underlying stock. There will simply be as many option contracts as trader demand dictates.
+* whenever you enter an option order, it’s not good enough to simply say “buy” or “sell” as you would with a stock. You need to specify whether you are buying or selling “to open” or “to close” your position.
+* open interest is a lagging number: it's not updated during the course of a trading day. Instead, it is officially posted by The OCC the morning after any given trading session, once the figures have been calculated. For the rest of the trading day the figure remains static.
+
 2021/05/18
 Tracking Market Gamma - more details are following and using option trades
 https://faac6eed-793d-4bff-8146-33b8614b8705.filesusr.com/ugd/5fe006_08f114fd7a8c48629a080aed2cc5c321.pdf
