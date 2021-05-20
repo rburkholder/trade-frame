@@ -22,11 +22,11 @@ More pictures under ![ComboTrading](ComboTrading)
 Scripts are library version specific. I use Debian Buster x64.  Build notes are as of 2016/09/25.
 There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
 
-You'll need to Have about 10G free to build the project and related libraries and installs (from my libs-build repository).
+You'll need to have about 10G drive space free to build the project, the related libraries, as well as the installs (from my libs-build repository).
 
-Debian Stretch netinst (daily snapshot usually works): [since Buster is now 'stable', these links now refer to Bullseye]
-https://www.debian.org/devel/debian-installer/
-http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
+Debian Buster/Bullseye netinst (daily snapshot usually works):
+* https://www.debian.org/devel/debian-installer/
+* http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
 
 
 ```
@@ -53,6 +53,8 @@ cd ..
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
 
+# NOTE:  these build notes are incorrect, CMAKE is now used to maintain builds,
+#        these build notes need to be updated
 # pre-build some of the example apps 
 # (first example built will take a while as most support libraries are built as well)
 pushd trade-frame
@@ -178,3 +180,4 @@ Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index
 
 * IQFeed testing: you can utilize the symbol TST$Y, this symbol sends a loop of data 24/7. (2019/03/12)
 * Interactive Brokers: use edemo/demouser as a signin - random data on many symbols 24/7.
+
