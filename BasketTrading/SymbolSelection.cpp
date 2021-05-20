@@ -14,8 +14,6 @@
 
 // Project: BasketTrading
 
-#include "stdafx.h"
-
 #include <cmath>
 #include <set>
 #include <map>
@@ -179,59 +177,27 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
 : SymbolSelection( dtLast )
 {
 
-  using mapUnderlyingInfo_t = std::map<std::string,ou::tf::cboe::csv::UnderlyingInfo>;
-
-  mapUnderlyingInfo_t mapUnderlyingInfo;
+  using mapSymbol_t = std::map<std::string,std::string>;
+  mapSymbol_t mapSymbol;
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
-  bool bOk( true );
+  bool bOk( false );
   try {
     ou::tf::cboe::csv::ReadCboeWeeklyOptions(
-      [&mapUnderlyingInfo](const ou::tf::cboe::csv::UnderlyingInfo& ui){
-        mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ui.sSymbol );
-        if ( citer != mapUnderlyingInfo.end() ) {
-          std::cout << "SymbolSelection Pivot Symbol duplicated: " << ui.sSymbol << std::endl;
-        }
-        else {
-          std::string sSymbol( ui.sSymbol );
-          mapUnderlyingInfo.insert( mapUnderlyingInfo_t::value_type( sSymbol, std::move( ui ) ) );
-        }
+      [&mapSymbol]( const ou::tf::cboe::csv::SymbolEntry& se ){
+        mapSymbol[ se.sSymbol ] = se.sDescription;
       } );
+    bOk = true;
   }
   catch( std::runtime_error& e ) {
-    bOk = false;
     std::cout << "SignalGenerator - ReadCboeWeeklyOptions error: " << e.what() << std::endl;
   }
   catch(...) {
-    bOk = false;
     std::cout << "SignalGenerator - unknown error during ReadCboeWeeklyOptions" << std::endl;
   }
 
   if ( bOk ) {
-
-    using vUnderlyinginfo_citer_t = ou::tf::cboe::csv::vUnderlyinginfo_t::const_iterator ;
-
-    //std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
-
-//    for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
-  //    std::cout <<
-  //	    iter->sSymbol
-  //	    << "," << iter->bAdded
-  //	    << "," << iter->bStandardWeekly
-  //	    << "," << iter->bExpandedWeekly
-  //	    << "," << iter->bEOW
-  //	    << "," << iter->sProductType
-  //	    << "," << iter->sDescription
-  //	    << std::endl;
-
-  //    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
-        //ScanBars( iter->sSymbol );
-//        BarSummary bs;
-//        bs.sType = iter->sProductType;
-//        m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, bs ) );
-//  //    }
-//    }
 
     std::cout << "SignalGenerator running eod and building output ..." << std::endl;
 
@@ -240,10 +206,10 @@ SymbolSelection::SymbolSelection( const ptime dtLast, const setSymbols_t& setSym
     namespace ph = std::placeholders;
     Process<IIPivot>(
       m_dtOneYearAgo, m_dtLast, m_nMinBars, setSymbols,
-      [&fSelected,&mapUnderlyingInfo,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
-        mapUnderlyingInfo_t::const_iterator citer = mapUnderlyingInfo.find( ii.sName );
-        if ( mapUnderlyingInfo.end() != citer ) {
-          const ou::tf::cboe::csv::UnderlyingInfo& ui( citer->second );
+      [&fSelected,&mapSymbol,&nSelected](const ou::tf::Bars& bars, IIPivot& ii){
+        mapSymbol_t::const_iterator citer = mapSymbol.find( ii.sName );
+        if ( mapSymbol.end() != citer ) {
+          //const ou::tf::cboe::csv::UnderlyingInfo& ui( citer->second );
           ou::tf::statistics::Pivot pivot( bars );
           pivot.Points( ii.dblR2, ii.dblR1, ii.dblPV, ii.dblS1, ii.dblS2 );
           ii.dblProbabilityAboveAndUp   = pivot.ItemOfInterest( ou::tf::statistics::Pivot::EItemsOfInterest::BtwnPVR1_X_Up );

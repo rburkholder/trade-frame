@@ -14,9 +14,8 @@
 
 // Project:  Weeklies
 
-#include "stdafx.h"
-
 #include <TFBitsNPieces/ReadCboeWeeklyOptionsCsv.h>
+//#include <TFBitsNPieces/ReadCboeWeeklyOptionsXls.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFStatistics/Pivot.h>
@@ -41,39 +40,29 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  ou::tf::cboe::csv::vUnderlyinginfo_t vui;
-
-  pt::ptime dtLast( gregorian::date( 2019, 6, 17 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2021, 5, 19 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
+  std::vector<std::string> vSymbol;
+
   try {
-    ou::tf::cboe::csv::ReadCboeWeeklyOptions( vui );
+    ou::tf::cboe::csv::ReadCboeWeeklyOptions(
+      [&vSymbol]( const ou::tf::cboe::csv::SymbolEntry& entry ){
+        vSymbol.push_back( entry.sSymbol );
+      });
   }
   catch(...) {
+    std::cout << "SignalGenerator failed." << std::endl;
   }
-
-  typedef ou::tf::cboe::csv::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
 
   std::cout << "SignalGenerator pre-processing cboe spreadsheet ..." << std::endl;
 
-  for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
-//    std::cout <<
-//	    iter->sSymbol
-//	    << "," << iter->bAdded
-//	    << "," << iter->bStandardWeekly
-//	    << "," << iter->bExpandedWeekly
-//	    << "," << iter->bEOW
-//	    << "," << iter->sProductType
-//	    << "," << iter->sDescription
-//	    << std::endl;
-
-//    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
+  for ( const std::string& sSymbol: vSymbol ) {
       //ScanBars( iter->sSymbol );
       BarSummary bs;
       //bs.sType = iter->sProductType;
-      m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, bs ) );
-//    }
+      m_mapSymbol.insert( mapSymbol_t::value_type( sSymbol, bs ) );
   }
 
   std::cout << "SignalGenerator running eod and building output spreadsheet (" << sSpreadSheetName << ") ..." << std::endl;

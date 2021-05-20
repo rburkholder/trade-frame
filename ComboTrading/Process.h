@@ -27,6 +27,6 @@ public:
 protected:
 private:
 
-  ou::tf::cboe::csv::vUnderlyinginfo_t m_vUnderlyingInfo;
+  ou::tf::cboe::csv::WeeklyOptions m_weekly;
 
 };
