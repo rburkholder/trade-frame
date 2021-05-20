@@ -1,4 +1,4 @@
-# 2021/05/20
+## 2021/05/20
 
 https://www.investopedia.com/trading/options-trading-volume-and-open-interest/
 * a big increase in price accompanied by low trading volume does not necessarily signify strength. In fact, that combination may well indicate that a price reversal is coming soon. 
@@ -12,16 +12,15 @@ https://www.optionsplaybook.com/options-introduction/open-interest/
 * whenever you enter an option order, it’s not good enough to simply say “buy” or “sell” as you would with a stock. You need to specify whether you are buying or selling “to open” or “to close” your position.
 * open interest is a lagging number: it's not updated during the course of a trading day. Instead, it is officially posted by The OCC the morning after any given trading session, once the figures have been calculated. For the rest of the trading day the figure remains static.
 
-#2021/05/18
+## 2021/05/18
 
-* Tracking Market Gamma - more details are following and using option trades
-* https://faac6eed-793d-4bff-8146-33b8614b8705.filesusr.com/ugd/5fe006_08f114fd7a8c48629a080aed2cc5c321.pdf
+* Tracking Market Gamma - more details are following and using option trades https://faac6eed-793d-4bff-8146-33b8614b8705.filesusr.com/ugd/5fe006_08f114fd7a8c48629a080aed2cc5c321.pdf
 
-# 2021/05/17
+## 2021/05/17
 
-* additional second order indicatorsa like vanna and charm: https://www.rcmalternatives.com/2020/11/10-options-definitions-you-need-to-know/
+* additional second order indicatorsa like vanna and charm: [Options Definitions](https://www.rcmalternatives.com/2020/11/10-options-definitions-you-need-to-know/)
 
-* Very nice white paper on an ES inventory book based upon options:  https://squeezemetrics.com/download/The_Implied_Order_Book.pdf
+* Very nice white paper on an ES inventory book based upon options: [Implied Order Book](https://squeezemetrics.com/download/The_Implied_Order_Book.pdf)
 
 * "Because publicly reported open interest (OI) only tells us the number of contracts in existence on any given day, we have to delve into transaction-level data to assess the direction (buy/sell) of every SPX option trade and to bin it according to how it ought to affect open interest, and then finally, to verify trade direction by tracking the subsequent actual change in OI. Every option contract must be tracked through time in this manner to maintain an accurate picture of dealers' option exposures (DDOI). "
 
@@ -57,19 +56,19 @@ https://www.optionsplaybook.com/options-introduction/open-interest/
 
 * This means that, when things get really bad, long puts actually end up adding a bit of liquidity. This means that the effect of customers buying put protection tends to be short, sharp corrections—not crashes
 
-# 2013/09/05
+## 2013/09/05
 
 https://www.interactivebrokers.com/en/software/tws/usersguidebook/technicalanalytics/market_scanner_types.htm
 
-# 30-day (V30) Implied Volatilities:
+### 30-day (V30) Implied Volatilities:
 
 * Implied volatility is calculated using a 100-step binary tree for American style options, and a Black-Scholes model for European style options. Interest rates are calculated using the settlement prices from the days Eurodollar futures contracts, and dividends are based on historical payouts.
 
 * The 30-day volatility is the at-market volatility estimated for a maturity thirty calendar days forward of the current trading day. It is based on option prices from two consecutive expiration months. The first expiration month is that which has at least eight calendar days to run. The implied volatility is estimated for the eight options on the four closest to market strikes in each expiry. The implied volatilities are fit to a parabola as a function of the strike price for each expiry. The at-the-market implied volatility for an expiry is then taken to be the value of the fit parabola at the expected future price for the expiry. A linear interpolation (or extrapolation, as required) of the 30-day variance based on the squares of the at-market volatilities is performed. V30 is then the square root of the estimated variance. If there is no first expiration month with less than sixty calendar days to run, we do not calculate a V30.
 
-# 2012/12/29
+## 2012/12/29
 
-## Black Scholes And Beyond
+### Black Scholes And Beyond
 ```
 pg 16 Dividends:  ex-dividend date The date on which buyers of a stock are no longer elibigble to recieve the next dividend payment.
 pg 23 Riskless Zero Coupon Bond interest rate calculation.  
