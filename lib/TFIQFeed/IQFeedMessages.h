@@ -51,25 +51,23 @@ public:
 
   IQFBaseMessage( void );
   IQFBaseMessage( iterator_t& current, iterator_t& end );
-  ~IQFBaseMessage(void);
 
   void Assign( iterator_t& current, iterator_t& end );
 
   // change to return a fielddelimiter_t
-  const std::string& Field( ixFields_t ); // returns reference to a field (will be sNull or sField );
-  double Double( ixFields_t );  // use boost::spirit?
-  int Integer( ixFields_t );  // use boost::spirit?
-  date Date( ixFields_t );
+  const std::string Field( ixFields_t ) const;
+  double Double( ixFields_t ) const;  // use boost::spirit?
+  int Integer( ixFields_t ) const;  // use boost::spirit?
+  date Date( ixFields_t ) const;
 
-  iterator_t FieldBegin( ixFields_t );
-  iterator_t FieldEnd( ixFields_t );
+  iterator_t FieldBegin( ixFields_t ) const;
+  iterator_t FieldEnd( ixFields_t ) const;
 
 protected:
 
-  std::vector<fielddelimiter_t> m_vFieldDelimiters;
+  ~IQFBaseMessage(void);
 
-  std::string sNull;  // always the empty string
-  std::string sField;  // will hold content of selected field during field request call
+  std::vector<fielddelimiter_t> m_vFieldDelimiters;
 
   void Tokenize( iterator_t& begin, iterator_t& end );  // scans for ',' and builds the m_vFieldDelimiters vector
 
@@ -98,7 +96,7 @@ public:
 
   void Assign( iterator_t& current, iterator_t& end );
 
-  ptime& TimeStamp( void ) { return m_dt; };
+  ptime TimeStamp( void ) const { return m_dt; };
 
 protected:
   ptime m_dt;
@@ -125,32 +123,33 @@ public:
   IQFNewsMessage( iterator_t& current, iterator_t& end );
   ~IQFNewsMessage(void);
 
-  const std::string& Distributor( void ) { return Field( NDistributor ); };
-  const std::string& StoryId( void ) { return Field( NStoryId ); };
-  const std::string& SymbolList( void ) { return Field( NSymbolList ); };
-  const std::string& DateTime( void ) { return Field( NDateTime ); };
-  const std::string& Headline( void ) {
-    m_sHeadLine.assign( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second );
-    return m_sHeadLine;
+  const std::string Distributor( void ) const { return Field( NDistributor ); };
+  const std::string StoryId( void ) const { return Field( NStoryId ); };
+  const std::string SymbolList( void ) const { return Field( NSymbolList ); };
+  const std::string DateTime( void ) const { return Field( NDateTime ); };
+  const std::string Headline( void ) const {
+    std::string sHeadLine;
+    sHeadLine.assign( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second );
+    return sHeadLine;
   };
 
-  fielddelimiter_t Distributor_iter( void ) {
+  fielddelimiter_t Distributor_iter( void ) const {
     BOOST_ASSERT( NDistributor <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDistributor ];
   }
-  fielddelimiter_t StoryId_iter( void ) {
+  fielddelimiter_t StoryId_iter( void ) const {
     BOOST_ASSERT( NStoryId <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NStoryId ];
   }
-  fielddelimiter_t SymbolList_iter( void ) {
+  fielddelimiter_t SymbolList_iter( void ) const {
     BOOST_ASSERT( NSymbolList <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NSymbolList ];
   }
-  fielddelimiter_t DateTime_iter( void ) {
+  fielddelimiter_t DateTime_iter( void ) const {
     BOOST_ASSERT( NDateTime <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDateTime ];
   }
-  fielddelimiter_t HeadLine_iter( void ) {
+  fielddelimiter_t HeadLine_iter( void ) const {
     BOOST_ASSERT( NHeadLine <= m_vFieldDelimiters.size() - 1 );
     fielddelimiter_t fd( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second ); // necessary to incorporate included commas, and field 0 has end of buffer marker
     return fd;
@@ -159,7 +158,6 @@ public:
 
 protected:
 private:
-  std::string m_sHeadLine;
 };
 
 //**** IQFFundamentalMessage
@@ -284,7 +282,7 @@ public:
   IQFPricingMessage( iterator_t& current, iterator_t& end );
   ~IQFPricingMessage(void);
 
-  ptime LastTradeTime( void );
+  ptime LastTradeTime( void ) const;
 protected:
 
 private:
@@ -359,17 +357,19 @@ void IQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end ) 
 }
 
 template <class T, class charT>
-const std::string& IQFBaseMessage<T, charT>::Field( ixFields_t fld ) {
+const std::string IQFBaseMessage<T, charT>::Field( ixFields_t fld ) const {
+  std::string sField;
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
-  if ( fielddelimiter.first == fielddelimiter.second ) return sNull;
-  else sField.assign( fielddelimiter.first, fielddelimiter.second );
+  if ( fielddelimiter.first != fielddelimiter.second ) {
+    sField.assign( fielddelimiter.first, fielddelimiter.second );
+  }
   return sField;
 }
 
 template <class T, class charT>
-double IQFBaseMessage<T, charT>::Double( ixFields_t fld ) {
+double IQFBaseMessage<T, charT>::Double( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -390,7 +390,7 @@ double IQFBaseMessage<T, charT>::Double( ixFields_t fld ) {
 }
 
 template <class T, class charT>
-int IQFBaseMessage<T, charT>::Integer( ixFields_t fld ) {
+int IQFBaseMessage<T, charT>::Integer( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -411,7 +411,7 @@ int IQFBaseMessage<T, charT>::Integer( ixFields_t fld ) {
 }
 
 template <class T, class charT>
-date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) {
+date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   int nYear, nMonth, nDay;
@@ -447,14 +447,14 @@ date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) {
 }
 
 template <class T, class charT>
-typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldBegin( ixFields_t fld ) {
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldBegin( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].first;
 }
 
 template <class T, class charT>
-typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd( ixFields_t fld ) {
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].second;
@@ -480,7 +480,7 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 }
 
 template <class T, class charT>
-ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) {
+ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) const {
 
   // TODO: test that the delimiters are available (ie message was truncated)
   fielddelimiter_t date = this->m_vFieldDelimiters[ QPLastTradeDate ];
