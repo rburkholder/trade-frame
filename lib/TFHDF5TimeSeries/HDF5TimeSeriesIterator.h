@@ -30,7 +30,7 @@ namespace tf { // TradeFrame
 // DD is expecting type derived from DatedDatum
 template<class DD> class HDF5TimeSeriesContainer;
 
-template<class DD> class HDF5TimeSeriesIterator: 
+template<class DD> class HDF5TimeSeriesIterator:
   public std::iterator<std::random_access_iterator_tag, DD, hsize_t> {
     friend class HDF5TimeSeriesContainer<DD>;
 public:
@@ -40,10 +40,10 @@ public:
   typedef std::random_access_iterator_tag iterator_category;
   typedef std::iterator<std::random_access_iterator_tag, DD, hsize_t> base_iterator;
 
-  explicit HDF5TimeSeriesIterator<DD>( void );
-  explicit HDF5TimeSeriesIterator<DD>( HDF5TimeSeriesAccessor<DD> *pAccessor, hsize_t Index );  // begin() or later init
+  HDF5TimeSeriesIterator<DD>();
+  HDF5TimeSeriesIterator<DD>( HDF5TimeSeriesAccessor<DD> *pAccessor, hsize_t Index );  // begin() or later init
   HDF5TimeSeriesIterator<DD>( const HDF5TimeSeriesIterator<DD>& other );  // copy constructor
-  ~HDF5TimeSeriesIterator<DD>( void ) { };
+  ~HDF5TimeSeriesIterator<DD>() {};
   HDF5TimeSeriesIterator<DD>& operator=( const HDF5TimeSeriesIterator<DD>& other );
   HDF5TimeSeriesIterator<DD>& operator++(); // pre-increment
   HDF5TimeSeriesIterator<DD>  operator++( int ); // post-increment
@@ -56,7 +56,7 @@ public:
   bool operator<( const HDF5TimeSeriesIterator<DD>& other ) const;
   bool operator==( const HDF5TimeSeriesIterator<DD>& other ) const;
   bool operator!=( const HDF5TimeSeriesIterator<DD>& other ) const;
-  //HDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
+  //HDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index );
   typename base_iterator::reference operator*();
   //reference operator->();
 protected:
@@ -67,21 +67,21 @@ protected:
 private:
 };
 
-template<class DD> 
-HDF5TimeSeriesIterator<DD>::HDF5TimeSeriesIterator( void ):
-  m_pAccessor( NULL ), 
+template<class DD>
+HDF5TimeSeriesIterator<DD>::HDF5TimeSeriesIterator():
+  m_pAccessor( NULL ),
   m_ItemIndex( 0 ),
   m_bValidIndex( false )
    {
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>::HDF5TimeSeriesIterator( HDF5TimeSeriesAccessor<DD> *pAccessor, hsize_t Index ):
-  m_pAccessor( pAccessor ), 
+  m_pAccessor( pAccessor ),
   m_ItemIndex( Index ),
-  m_bValidIndex( false ) { 
+  m_bValidIndex( false ) {
 
-  if ( Index > m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
+  if ( Index > m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" );
   // Index == m_pAccessor->size() is same as end();
   //if ( Index < m_pAccessor->size() ) {
   //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // don't preload
@@ -89,16 +89,16 @@ HDF5TimeSeriesIterator<DD>::HDF5TimeSeriesIterator( HDF5TimeSeriesAccessor<DD> *
   m_bValidIndex = true;
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>::HDF5TimeSeriesIterator( const HDF5TimeSeriesIterator<DD>& other ) :
   m_pAccessor( other.m_pAccessor ),
-  m_bValidIndex( other.m_bValidIndex ), 
+  m_bValidIndex( other.m_bValidIndex ),
   m_ItemIndex( other.m_ItemIndex ),
-  m_DD( other.m_DD ) 
+  m_DD( other.m_DD )
   {
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator=( const HDF5TimeSeriesIterator<DD> &other ) {
   // has two choices:  first assigned from, second being assigned to
   if ( this == &other ) {
@@ -114,7 +114,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator=( const HDF5Tim
   return( *this );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator++() { // pre-increment
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
@@ -125,7 +125,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator++() { // pre-in
   return( *this );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator++( int ) { // post-increment
   HDF5TimeSeriesIterator<DD> result( *this );  // make a copy of what is before increment
   assert( m_bValidIndex );
@@ -134,10 +134,10 @@ HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator++( int ) { // po
   //if ( m_ItemIndex < m_pAccessor->size() ) {
   //  m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   //}
-  return( result ); 
+  return( result );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator--() { // pre-decrement
   assert( m_bValidIndex );
   assert( 0 < m_ItemIndex );
@@ -148,7 +148,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator--() { // pre-de
   return( *this );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator--( int ) { // post-decrement
   HDF5TimeSeriesIterator<DD> result( *this );  // make a copy of what is before decrement
   assert( m_bValidIndex );
@@ -157,10 +157,10 @@ HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator--( int ) { // po
   //if ( m_ItemIndex < m_pAccessor->size() ) {
   //  m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   //}
-  return( result ); 
+  return( result );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator+=( const hsize_t inc ) { // plus assignment
   assert( m_bValidIndex );
   m_ItemIndex += inc;
@@ -171,7 +171,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator+=( const hsize_
   return( *this );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator-=( const hsize_t inc ) { // plus assignment
   assert( m_bValidIndex );
   assert( inc <= m_ItemIndex );
@@ -182,7 +182,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator-=( const hsize_
   return( *this );
 }
 
-template<class DD> 
+template<class DD>
 HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator-( const hsize_t val ) { // subtraction
   assert( val <= m_ItemIndex );
   HDF5TimeSeriesIterator<DD> result( *this );  // make a copy of this
@@ -190,30 +190,30 @@ HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator-( const hsize_t 
   return result;
 }
 
-template<class DD> 
+template<class DD>
 hsize_t HDF5TimeSeriesIterator<DD>::operator-( const HDF5TimeSeriesIterator<DD>& other ) const { // subtraction
   return m_ItemIndex - other.m_ItemIndex;
 }
 
-template<class DD> 
+template<class DD>
 bool HDF5TimeSeriesIterator<DD>::operator<( const HDF5TimeSeriesIterator<DD>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return ( m_ItemIndex < other.m_ItemIndex );
 }
 
-template<class DD> 
+template<class DD>
 bool HDF5TimeSeriesIterator<DD>::operator==( const HDF5TimeSeriesIterator<DD>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return ( m_ItemIndex == other.m_ItemIndex );
 }
 
-template<class DD> 
+template<class DD>
 bool HDF5TimeSeriesIterator<DD>::operator!=( const HDF5TimeSeriesIterator<DD>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return !( m_ItemIndex == other.m_ItemIndex );
 }
 
-template<class DD> 
+template<class DD>
 typename HDF5TimeSeriesIterator<DD>::base_iterator::reference HDF5TimeSeriesIterator<DD>::operator*() {
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
