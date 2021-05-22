@@ -1159,7 +1159,11 @@ double ManageStrategy::EmitInfo() {
         << m_sUnderlying
         << "@" << price
         << std::endl;
+
       std::cout << "  portfolio: " << combo.GetPortfolio()->Id() << std::endl;
+      std::cout << "  underlying: ";
+      m_pPositionUnderlying->GetWatch()->EmitValues( true );
+      std::cout << std::endl;
 
       dblNet += combo.GetNet( price );
       std::cout << "  net: " << dblNet << std::endl;
