@@ -20,11 +20,14 @@
 // TODO:  graphical P/L loss summary
 //    VWAP used to build one minute bars, and use 1min, 2min, 3min bars to generate trend trade?
 
-#include "stdafx.h"
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <boost/lexical_cast.hpp>
+
+#include <wx/sizer.h>
+#include <wx/frame.h>
+#include <wx/window.h>
+#include <wx/radiobut.h>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -52,7 +55,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2019, 6, 28 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2021, 5, 21 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -139,11 +142,11 @@ bool AppBasketTrading::OnInit() {
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
+
   m_timerGuiRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   m_timerGuiRefresh.Start( 250 );
-
-  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
 
   // maybe set scenario with database and with in memory data structure?
 

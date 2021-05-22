@@ -33,6 +33,7 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/app.h>
 #include <wx/timer.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -48,6 +49,8 @@
 
 #include "MasterPortfolio.h"
 #include "PanelPortfolioStats.h"
+
+class wxRadioButton;
 
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
