@@ -32,6 +32,8 @@ using namespace boost::posix_time;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// TODO: convert to crtp, remove virtual destructor?
+
 class DatedDatum {
 public:
 
@@ -42,13 +44,13 @@ public:
 
   typedef double price_t;
 
-  DatedDatum( void );
+  DatedDatum();
   DatedDatum( const ptime& dt );
   DatedDatum( const DatedDatum& datum );
   DatedDatum( const std::string& dt ); // YYYY-MM-DD HH:MM:SS
-  virtual ~DatedDatum( void );
+  virtual ~DatedDatum();
 
-  bool IsNull( void ) const { return m_dt.is_not_a_date_time(); };
+  bool IsNull() const { return m_dt.is_not_a_date_time(); };
 
   bool operator<( const DatedDatum &datum ) const { return m_dt < datum.m_dt; };
   bool operator<=( const DatedDatum& datum ) const { return m_dt <= datum.m_dt; };
@@ -57,11 +59,11 @@ public:
   bool operator==( const DatedDatum& datum ) const { return m_dt == datum.m_dt; };
   bool operator!=( const DatedDatum& datum ) const { return m_dt != datum.m_dt; };
 
-  const ptime& DateTime( void ) const { return m_dt; };
+  const ptime& DateTime() const { return m_dt; };
   void DateTime( const ptime& dt ) { m_dt = dt; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );  // create new one if null
-  static boost::uint64_t Signature( void ) { return 9; };
+  static boost::uint64_t Signature() { return 9; };
 
 protected:
   dt_t m_dt;
