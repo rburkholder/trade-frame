@@ -64,18 +64,6 @@ protected:
   enum { ID_Null=wxID_HIGHEST, ID_PANELFINANCIALCHART, ID_CHART
   };
 
-  class CustomItemData: public wxTreeItemData {
-  public:
-    //enum EDataType { PL, Quotes, Trades, Bars, Greeks, AtmIV, NoData } m_eDataType;
-    pChartDataView_t m_pChartDataView; // contains the various time series
-    //CustomItemData( EDataType eDataType )
-    //: m_eDataType( eDataType )
-    //{}
-    CustomItemData( pChartDataView_t pChartDataView )
-    : m_pChartDataView( pChartDataView )
-    {}
-  };
-
 private:
 
   wxTreeCtrl* m_pTree;

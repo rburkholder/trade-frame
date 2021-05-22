@@ -17,10 +17,28 @@
 
 #include "PanelFinancialChart.h"
 
+namespace {
+
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
+  class CustomItemData: public wxTreeItemData {
+  public:
+    //enum EDataType { PL, Quotes, Trades, Bars, Greeks, AtmIV, NoData } m_eDataType;
+    pChartDataView_t m_pChartDataView; // contains the various time series
+    //CustomItemData( EDataType eDataType )
+    //: m_eDataType( eDataType )
+    //{}
+    CustomItemData( pChartDataView_t pChartDataView )
+    : m_pChartDataView( pChartDataView )
+    {}
+  };
+
+}
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelFinancialChart::PanelFinancialChart(void) 
+PanelFinancialChart::PanelFinancialChart(void)
 : wxPanel(), m_pWinChartView( nullptr )
 {
   Init();
@@ -51,7 +69,7 @@ bool PanelFinancialChart::Create( wxWindow* parent, wxWindowID id, const wxPoint
 void PanelFinancialChart::Init() {
 }
 
-void PanelFinancialChart::CreateControls() {    
+void PanelFinancialChart::CreateControls() {
 
   PanelFinancialChart* itemPanel1 = this;
 
