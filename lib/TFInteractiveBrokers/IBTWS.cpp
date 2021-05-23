@@ -38,9 +38,9 @@
 
 #include "IBTWS.h"
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
+namespace {
 
+// TODO: use spirit to parse?  will it be faster?
 struct DecodeStatusWord {
   enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
   DecodeStatusWord( void ): kwm( Unknown, 50 ) {
@@ -54,10 +54,15 @@ struct DecodeStatusWord {
   }
   enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
 private:
-  KeyWordMatch<enumStatus> kwm;;
+  ou::KeyWordMatch<enumStatus> kwm;;
 };
 
 DecodeStatusWord dsw;
+
+}
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ):
   ProviderInterface<IBTWS,IBSymbol>(),
