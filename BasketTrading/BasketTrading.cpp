@@ -241,20 +241,17 @@ void AppBasketTrading::BuildMasterPortfolio() {
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
     },
-    // add items to menu (TODO: add underlying daily, add combo, add leg for combo, add menu events for each
-    [this](MasterPortfolio::EStrategyChart esc, const std::string& sName, pChartDataView_t pChartDataView){
-      switch ( esc ) {
-        case MasterPortfolio::EStrategyChart::Root:
-          m_pPanelFinancialChart->UpdateRoot( sName, pChartDataView );
-          break;
-        case MasterPortfolio::EStrategyChart::Active:
-          m_pPanelFinancialChart->AppendActive( sName, pChartDataView );
-          break;
-        case MasterPortfolio::EStrategyChart::Info:
-          m_pPanelFinancialChart->AppendInfo( sName, pChartDataView );
-          break;
-      }
-
+    // root ChartDataView to PanelFinancialChart
+    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->wxTreeItemId{
+      return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
+    },
+    // add ChartDataView to PanelFinancialChart
+    [this]( wxTreeItemId idParent, const std::string& sName,  pChartDataView_t pChartDataView )->wxTreeItemId{
+      return m_pPanelFinancialChart->AppendItem( idParent, sName, pChartDataView );
+    },
+    // del ChartDataView from PanelFinancialChart
+    [this]( wxTreeItemId id ){
+      m_pPanelFinancialChart->DeleteItem( id );
     },
     // pass in the aggregation portfolio
     m_pPortfolioStrategyAggregate

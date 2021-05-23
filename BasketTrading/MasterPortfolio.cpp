@@ -33,26 +33,31 @@ namespace {
 
 MasterPortfolio::MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGatherOptionDefinitions_t fGatherOptionDefinitions,
-    fGetTableRowDef_t fGetTableRowDef,
-    fSupplyStrategyChart_t fSupplyStrategyChart,
+    fGatherOptionDefinitions_t&& fGatherOptionDefinitions,
+    fGetTableRowDef_t&& fGetTableRowDef,
+    fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel,
     pPortfolio_t pMasterPortfolio
     )
   : m_bStarted( false ),
     m_nSharesTrading( 0 ),
     m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
     m_fGetTableRowDef( std::move( fGetTableRowDef ) ),
-    m_fSupplyStrategyChart( fSupplyStrategyChart ),
+    m_fChartRoot( std::move( fChartRoot ) ),
+    m_fChartAdd( std::move( fChartAdd ) ),
+    m_fChartDel( std::move( fChartDel ) ),
     m_pMasterPortfolio( pMasterPortfolio ),
     m_pExec( pExec ),
     m_pData1( pData1 ),
     m_pData2( pData2 )
     //m_eAllocate( EAllocate::Waiting )
 {
-  assert( nullptr != m_fOptionNamesByUnderlying );
-  assert( nullptr != m_fGetTableRowDef );
-  assert( nullptr != m_fSupplyStrategyChart );
+  assert( m_fOptionNamesByUnderlying );
+  assert( m_fGetTableRowDef );
+  assert( m_fChartRoot );
+  assert( m_fChartAdd );
+  assert( m_fChartDel );
 
+  assert( pMasterPortfolio );
   assert( pExec );
   assert( pData1 );
 
@@ -90,7 +95,10 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->Add( 0, &m_cePLRealized );
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
-  m_fSupplyStrategyChart( EStrategyChart::Root, "Master P/L", m_pChartDataView );
+  m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
+
+  m_idTreeSymbols = m_fChartAdd( m_idTreeRoot, "Symbols", nullptr );
+  m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr );
 
   std::stringstream ss;
   ss.str( "" );
@@ -602,7 +610,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio );
             if ( bAuthorized ) {
               if ( !strategy.m_bChartActivated ) {
-                m_fSupplyStrategyChart( EStrategyChart::Active, strategy.iip.sName, strategy.pChartDataView );
+                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
                 strategy.m_bChartActivated = true;
               }
             }
@@ -618,7 +626,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio, pWatch );
             if ( bAuthorized ) {
               if ( !strategy.m_bChartActivated ) {
-                m_fSupplyStrategyChart( EStrategyChart::Active, strategy.iip.sName, strategy.pChartDataView );
+                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
                 strategy.m_bChartActivated = true;
               }
             }
@@ -634,7 +642,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
             bool bAuthorized = mm.Authorize( sName );
             if ( bAuthorized || bExists ) {
               if ( !strategy.m_bChartActivated ) {
-                m_fSupplyStrategyChart( EStrategyChart::Active, strategy.iip.sName, strategy.pChartDataView );
+                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
                 strategy.m_bChartActivated = true;
               }
             }
@@ -682,7 +690,8 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     artifacts.m_bAccessed = true;
   }
 
-  m_fSupplyStrategyChart( EStrategyChart::Info, sUnderlying, pChartDataView );
+  //strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
+  m_fChartAdd( m_idTreeSymbols, sUnderlying, pChartDataView );
 
   strategy.pManageStrategy->Run();
 

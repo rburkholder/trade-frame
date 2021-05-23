@@ -22,6 +22,8 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/treebase.h>
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
@@ -38,15 +40,12 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
-//#include "Sentiment.h"
 #include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
 class MasterPortfolio {
   friend class boost::serialization::access;
 public:
-
-  enum class EStrategyChart { Root, Active, Info };
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pPortfolio_t =  ou::tf::PortfolioManager::pPortfolio_t;
@@ -60,11 +59,15 @@ public:
   using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
   using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
-  using fSupplyStrategyChart_t = std::function<void(EStrategyChart,const std::string&,pChartDataView_t)>;
+  using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
+  using fChartAdd_t = std::function<wxTreeItemId(wxTreeItemId,const std::string&,pChartDataView_t)>;
+  using fChartDel_t = std::function<void(wxTreeItemId)>;
 
   MasterPortfolio(
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGatherOptionDefinitions_t, fGetTableRowDef_t, fSupplyStrategyChart_t,
+    fGatherOptionDefinitions_t &&,
+    fGetTableRowDef_t &&,
+    fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&,
     pPortfolio_t pMasterPortfolio );
   ~MasterPortfolio(void);
 
@@ -72,8 +75,6 @@ public:
   void Add( pPosition_t );  // from database load
 
   void Load( ptime dtLatestEod, bool bAddToList );
-  //void GetSentiment( size_t& nUp, size_t& nDown ) const; // TODO: will probably be jitter around 60 second crossing
-  //void Start();
 
   void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
 
@@ -130,8 +131,6 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  //Sentiment m_sentiment;
-
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryIndicator m_cePLCurrent;
@@ -139,9 +138,14 @@ private:
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
+  wxTreeItemId m_idTreeRoot;
+  wxTreeItemId m_idTreeSymbols;
+  wxTreeItemId m_idTreeStrategies;
+
   using pManageStrategy_t = std::unique_ptr<ManageStrategy>;
 
   struct Strategy {
+    wxTreeItemId idTree;
     const IIPivot iip;
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
@@ -159,23 +163,10 @@ private:
       priceOpen {}, dblBestProbability {}
     {}
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }
-//    const Strategy& operator=( const Strategy&& rhs) {
-//      iip = std::move( rhs.iip );
-//      pManageStrategy = std::move( rhs.pManageStrategy );
-//      return *this;
-//    }
   };
 
   using mapStrategy_t = std::map<ou::tf::Portfolio::idPortfolio_t,Strategy>;
   mapStrategy_t m_mapStrategy;
-
-  //struct Ranking {
-  //  std::string sName; // for lookup in m_mapStrategy
-  //  IIPivot::Direction direction;
-  //  Ranking( const std::string& sName_, IIPivot::Direction direction_ )
-  //    : sName( sName_ ), direction( direction_ )
-  //  {}
-  //};
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
@@ -202,25 +193,17 @@ private:
   using mapStrategyArtifacts_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyArtifacts>;
   using mapStrategyArtifacts_iter = mapStrategyArtifacts_t::iterator;
   mapStrategyArtifacts_t m_mapStrategyArtifacts;
-  //mapStrategyArtifacts_iter m_curStrategyArtifacts;  // positions go to 'current' portfolio
 
   setSymbols_t m_setSymbols;
-
-  //enum class EAllocate { Waiting, Process, Done };
-
-  //EAllocate m_eAllocate;
-  //using mapPivotProbability_t = std::multimap<double,Ranking>; // double is probability
-  //mapPivotProbability_t m_mapPivotProbability;
-
-  //using mapVolume_t = std::multimap<volume_t, std::string>; // string is name of instrument
-  //mapVolume_t m_mapVolumeRanking;
 
   using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   mapVolatility_t m_mapVolatility;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
-  fSupplyStrategyChart_t m_fSupplyStrategyChart;
+  fChartRoot_t m_fChartRoot;
+  fChartAdd_t m_fChartAdd;
+  fChartDel_t m_fChartDel;
 
   void AddSymbol( const IIPivot& );
 

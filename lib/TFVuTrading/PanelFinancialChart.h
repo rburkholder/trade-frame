@@ -14,9 +14,9 @@
 #pragma once
 
 // used by BasketTrading
-// similar to PanelChartHdf5 (which might be refactorable)
+// similar to PanelChartHdf5 (which might be refactorable/replaceable)
 
-#include <memory>
+#include <functional>
 
 #include <wx/treectrl.h>
 
@@ -51,13 +51,28 @@ public:
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
 
-  void UpdateRoot( const std::string& sName, pChartDataView_t );
-  void AppendActive( const std::string& sName, pChartDataView_t );
-  void AppendInfo( const std::string& sName, pChartDataView_t );
+  using fAdd_t = std::function<wxTreeItemId()>;
+  using fDel_t = std::function<void(wxTreeItemId)>;
+  // using fComposeMenu_t = std::funcion<
 
-  static bool ShowToolTips() { return true; };
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
+  struct TreeItemFunctions {
+    fAdd_t fAdd;
+    fDel_t fDel;
+    TreeItemFunctions() {}
+    TreeItemFunctions( fAdd_t&& fAdd_, fDel_t&& fDel_ )
+    : fAdd( std::move( fAdd_ ) ), fDel( std::move( fDel_ ) )
+    {}
+    TreeItemFunctions( const TreeItemFunctions&& tif )
+    : fAdd( std::move( tif.fAdd ) ), fDel( std::move( tif.fDel ) )
+    {}
+
+  };
+
+//  wxTreeItemId SetRoot(                  const std::string& sName, pChartDataView_t, TreeItemFunctions&& );
+//  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t, TreeItemFunctions&& );
+  wxTreeItemId SetRoot(                  const std::string& sName, pChartDataView_t );
+  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t );
+  void DeleteItem( wxTreeItemId );
 
 protected:
 
@@ -69,16 +84,19 @@ private:
   wxTreeCtrl* m_pTree;
   WinChartView* m_pWinChartView; // handles drawing the chart
 
-  wxTreeItemId m_idRoot;
-  wxTreeItemId m_idActive;
-  wxTreeItemId m_idInfo;
-
   void Init();
   void CreateControls();
 
-  void HandleTreeEventItemActivated( wxTreeEvent& event );
-  void HandleTreeEventItemGetToolTip( wxTreeEvent& event );
+  void HandleTreeEventItemActivated( wxTreeEvent& );
+  void HandleTreeEventItemRightClick( wxTreeEvent& );
+  void HandleTreeEventItemMenu( wxTreeEvent& );
+  void HandleTreeEventItemGetToolTip( wxTreeEvent& );
+
   void OnClose( wxCloseEvent& event );
+
+  static bool ShowToolTips() { return true; };
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
 
 };
 
