@@ -12,24 +12,17 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#ifdef _WIN32
-#include "StdAfx.h"
-#else
-#include "linux/StdAfx.h"
-#endif
-
-#include <iostream>
-#include <stdexcept>
 #include <limits>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 
 #include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/date_time.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 
 #include <OUCommon/KeyWordMatch.h>
-#include <OUCommon/Debug.h>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
@@ -1379,7 +1372,6 @@ void IBTWS::updateAccountValue(const std::string& key, const std::string& val,
 }
 
 void IBTWS::connectionClosed() {
-  DEBUGOUT( "connection closed" << std::endl );
 }
 
 void IBTWS::updateMktDepth(TickerId id, int position, int operation, int side,
