@@ -83,6 +83,7 @@ public:
   IQFSystemMessage( iterator_t& current, iterator_t& end );
   ~IQFSystemMessage(void);
 
+protected:
 private:
 };
 
@@ -155,7 +156,6 @@ public:
     return fd;
   }
 
-
 protected:
 private:
 };
@@ -214,6 +214,7 @@ public:
   IQFFundamentalMessage( iterator_t& current, iterator_t& end );
   ~IQFFundamentalMessage(void);
 
+protected:
 private:
 };
 
@@ -280,11 +281,11 @@ public:
 
   IQFPricingMessage( void );
   IQFPricingMessage( iterator_t& current, iterator_t& end );
-  ~IQFPricingMessage(void);
 
   ptime LastTradeTime( void ) const;
-protected:
 
+protected:
+  ~IQFPricingMessage(void);
 private:
 };
 
@@ -298,7 +299,6 @@ public:
   ~IQFUpdateMessage(void);
 
 protected:
-
 private:
 };
 
@@ -310,9 +310,9 @@ public:
   IQFSummaryMessage( iterator_t& current, iterator_t& end );
   ~IQFSummaryMessage(void);
 
+protected:
 private:
 };
-
 
 template <class T, class charT>
 IQFBaseMessage<T, charT>::IQFBaseMessage( void )
