@@ -27,7 +27,7 @@
 
 #include "IQFeedMessages.h"
 
-// In the future, for auxilliary routines making use of IQFeed, 
+// In the future, for auxilliary routines making use of IQFeed,
 //   think about incorporating the following concept:
 //     m_pPort = m_pIQFeedProvider->CheckOutLookupPort();
 //     m_pIQFeedProvider->CheckInLookupPort( m_pPort );
@@ -44,11 +44,19 @@ public:
   typedef typename ou::Network<IQFeed<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
-  IQFeed(void);
-  virtual ~IQFeed(void);
+  IQFeed();
+  virtual ~IQFeed();
 
   // used for returning message buffer
   // linebuffer_t needs to be kept with msg as there are dynamic accesses from it
+  void inline DynamicFeedUpdateDone( linebuffer_t* p, IQFDynamicFeedUpdateMessage* msg ) {
+    this->GiveBackBuffer( p );
+    m_reposDynamicFeedUpdateMessages.CheckInL( msg );
+  }
+  void inline DynamicFeedSummaryDone( linebuffer_t* p, IQFDynamicFeedSummaryMessage* msg ) {
+    this->GiveBackBuffer( p );
+    m_reposDynamicFeedSummaryMessages.CheckInL( msg );
+  }
   void inline UpdateDone( linebuffer_t* p, IQFUpdateMessage* msg ) {
     this->GiveBackBuffer( p );
     m_reposUpdateMessages.CheckInL( msg );
@@ -113,6 +121,8 @@ protected:
   void OnIQFeedDisConnected( void ) {};
   void OnIQFeedSendDone( void ) {};
   void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage* msg) {};
+  void OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage* msg) {};
+  void OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage* msg) {};
   void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage* msg) {};
   void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage* msg) {};
   void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage* msg) {};
@@ -121,6 +131,8 @@ protected:
 
 private:
 
+  typename ou::BufferRepository<IQFDynamicFeedUpdateMessage> m_reposDynamicFeedUpdateMessages;
+  typename ou::BufferRepository<IQFDynamicFeedSummaryMessage> m_reposDynamicFeedSummaryMessages;
   typename ou::BufferRepository<IQFUpdateMessage> m_reposUpdateMessages;
   typename ou::BufferRepository<IQFSummaryMessage> m_reposSummaryMessages;
   typename ou::BufferRepository<IQFNewsMessage> m_reposNewsMessages;
@@ -128,14 +140,16 @@ private:
   typename ou::BufferRepository<IQFTimeMessage> m_reposTimeMessages;
   typename ou::BufferRepository<IQFSystemMessage> m_reposSystemMessages;
 
+  unsigned int m_version; // 50 or 60
+
 };
 
 template <typename T>
-IQFeed<T>::IQFeed( void ) 
+IQFeed<T>::IQFeed( void )
 : ou::Network<IQFeed<T> >( "127.0.0.1", 5009 ),
-  m_stateNews( NEWSISOFF )
-{
-}
+  m_stateNews( NEWSISOFF ),
+  m_version( 50 )
+{}
 
 template <typename T>
 IQFeed<T>::~IQFeed(void) {
@@ -167,41 +181,69 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   typename linebuffer_t::iterator iter = (*pBuffer).begin();
   typename linebuffer_t::iterator end = (*pBuffer).end();
 
-#if defined _DEBUG
-
-//  std::string str( iter, end );
-//  str += '\n';
-//  OutputDebugString( str.c_str() );
-#endif
-
   BOOST_ASSERT( iter != end );
 
+//  std::string str( iter, end );
+//  std::cout << str << std::endl;
+
   switch ( *iter ) {
-    case 'Q': 
+    case 'Q':
       {
-        IQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
-        msg->Assign( iter, end );
-        if ( &IQFeed<T>::OnIQFeedUpdateMessage != &T::OnIQFeedUpdateMessage ) {
-          static_cast<T*>( this )->OnIQFeedUpdateMessage( pBuffer, msg);
-        }
-        else {
-          UpdateDone( pBuffer, msg );
+        switch ( m_version ) {
+          case 50: {
+            IQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
+            msg->Assign( iter, end );
+            if ( &IQFeed<T>::OnIQFeedUpdateMessage != &T::OnIQFeedUpdateMessage ) {
+              static_cast<T*>( this )->OnIQFeedUpdateMessage( pBuffer, msg);
+            }
+            else {
+              UpdateDone( pBuffer, msg );
+            }
+            }
+            break;
+          case 60: {
+            IQFDynamicFeedUpdateMessage* msg = m_reposDynamicFeedUpdateMessages.CheckOutL();
+            msg->Assign( iter, end );
+            if ( &IQFeed<T>::OnIQFeedDynamicFeedUpdateMessage != &T::OnIQFeedDynamicFeedUpdateMessage ) {
+              static_cast<T*>( this )->OnIQFeedDynamicFeedUpdateMessage( pBuffer, msg);
+            }
+            else {
+              DynamicFeedUpdateDone( pBuffer, msg );
+            }
+            }
+            break;
         }
       }
       break;
-    case 'P': 
+    case 'P':
       {
-        IQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
-        msg->Assign( iter, end );
-        if ( &IQFeed<T>::OnIQFeedSummaryMessage != &T::OnIQFeedSummaryMessage ) {
-          static_cast<T*>( this )->OnIQFeedSummaryMessage( pBuffer, msg);
-        }
-        else {
-          SummaryDone( pBuffer, msg );
+        switch ( m_version ) {
+          case 50: {
+            IQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
+            msg->Assign( iter, end );
+            if ( &IQFeed<T>::OnIQFeedSummaryMessage != &T::OnIQFeedSummaryMessage ) {
+              static_cast<T*>( this )->OnIQFeedSummaryMessage( pBuffer, msg);
+            }
+            else {
+              SummaryDone( pBuffer, msg );
+            }
+            }
+            break;
+          case 60: {
+            IQFDynamicFeedSummaryMessage* msg = m_reposDynamicFeedSummaryMessages.CheckOutL();
+            msg->Assign( iter, end );
+            if ( &IQFeed<T>::OnIQFeedDynamicFeedSummaryMessage != &T::OnIQFeedDynamicFeedSummaryMessage ) {
+              static_cast<T*>( this )->OnIQFeedDynamicFeedSummaryMessage( pBuffer, msg);
+            }
+            else {
+              DynamicFeedSummaryDone( pBuffer, msg );
+            }
+            }
+            break;
         }
       }
       break;
-    case 'N': 
+    case 'N':
       {
         IQFNewsMessage* msg = m_reposNewsMessages.CheckOutL();
         msg->Assign( iter, end );
@@ -213,7 +255,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
       }
       break;
-    case 'F': 
+    case 'F':
       {
         IQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOutL();
         msg->Assign( iter, end );
@@ -225,7 +267,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
       }
       break;
-    case 'T': 
+    case 'T':
       {
         IQFTimeMessage* msg = m_reposTimeMessages.CheckOutL();
         msg->Assign( iter, end );
@@ -237,7 +279,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
       }
       break;
-    case 'S': 
+    case 'S':
       {
         IQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
@@ -245,12 +287,23 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
           ou::Network<IQFeed<T> >::Send( ss.str() );
+          ou::Network<IQFeed<T> >::Send( "S,TIMESTAMPSOFF\n" );  // TODO: maybe send on S,KEYOK, check that there are no listeners to the event
         }
         if ( "CUST" == msg->Field( 2 ) ) {
-          if ( "4.3.0.3" > msg->Field( 7 ) ) {
-//            cout << "Need IQFeed version of 4.3.0.3 or greater (" << msg.Field( 7 ) << ")" << endl;
+          if ( "6.1.0.20" > msg->Field( 7 ) ) {
+            std::cout << "Need IQFeed version of 6.1.0.20 or greater (" << msg->Field( 7 ) << ")" << std::endl;
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
+          else {
+            m_version = 60;
+            ou::Network<IQFeed<T> >::Send( "S,SET PROTOCOL,6.1\n" );
+            std::string sFieldRequest( "S,SELECT UPDATE FIELDS," );
+            sFieldRequest += IQFDynamicFeedMessage<T>::selector;
+            sFieldRequest += "\n";
+            ou::Network<IQFeed<T> >::Send( sFieldRequest );
+          }
+        }
+        if ( "KEYOK" == msg->Field( 2 ) ) {
         }
         if ( &IQFeed<T>::OnIQFeedSystemMessage != &T::OnIQFeedSystemMessage ) {
           static_cast<T*>( this )->OnIQFeedSystemMessage( pBuffer, msg);

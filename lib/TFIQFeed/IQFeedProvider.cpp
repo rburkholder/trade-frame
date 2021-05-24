@@ -23,8 +23,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-IQFeedProvider::IQFeedProvider( void ) 
-: ProviderInterface<IQFeedProvider,IQFeedSymbol>(), 
+IQFeedProvider::IQFeedProvider( void )
+: ProviderInterface<IQFeedProvider,IQFeedSymbol>(),
   IQFeed<IQFeedProvider>()
 {
   m_sName = "IQF";
@@ -106,6 +106,28 @@ void IQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
 
 void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
   StopQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+}
+
+void IQFeedProvider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg ) {
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
+  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedUpdateMessage::DFSymbol ) );
+  pSymbol_t pSym;
+  if ( m_mapSymbols.end() != mapSymbols_iter ) {
+    pSym = mapSymbols_iter -> second;
+    pSym ->HandleDynamicFeedUpdateMessage( pMsg );
+  }
+  this->DynamicFeedUpdateDone( pBuffer, pMsg );
+}
+
+void IQFeedProvider::OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage *pMsg ) {
+  inherited_t::mapSymbols_t::iterator mapSymbols_iter;
+  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedSummaryMessage::DFSymbol ) );
+  pSymbol_t pSym;
+  if ( m_mapSymbols.end() != mapSymbols_iter ) {
+    pSym = mapSymbols_iter -> second;
+    pSym ->HandleDynamicFeedSummaryMessage( pMsg );
+  }
+  this->DynamicFeedSummaryDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg ) {

@@ -289,7 +289,6 @@ protected:
 private:
 };
 
-
 //**** IQFUpdateMessage
 class IQFUpdateMessage: public IQFPricingMessage<IQFUpdateMessage> { // Q
 public:
@@ -313,6 +312,153 @@ public:
 protected:
 private:
 };
+
+// *******
+
+//**** IQFDynamicFeedMessage ( root for IQFDynamicFeedSummaryMessage, IQFDynamicFeedUpdateMessage)
+template <class T, class charT = unsigned char>
+class IQFDynamicFeedMessage: public IQFBaseMessage<IQFDynamicFeedMessage<T, charT> > { // Q, P
+public:
+
+  enum enumFieldIds {
+    DFSymbol = 2,
+    DFTtlVol = 3,
+    DFBid = 4,
+    DFAsk = 5,
+    DFBidSize = 6,
+    DFAskSize = 7,
+    DFNumTrades = 8,
+    DFMostRecentTrade = 9,
+    DFMostRecentTradeSize = 10,
+    DFMostRecentTradeTime = 11,
+    DFMostRecentTradeConditions = 12,
+    DFMostRecentTradeMarketCenter = 13,
+    DFMessageContents = 14,
+    DFMostRecentTradeAggressor = 15,
+    _DFLastEntry
+  };
+
+  typedef typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::iterator_t iterator_t;
+  typedef typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
+
+  static const std::string selector;
+
+  IQFDynamicFeedMessage( void )
+  : IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >() {}
+  IQFDynamicFeedMessage( iterator_t& current, iterator_t& end )
+  : IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >( current, end ) {}
+
+protected:
+  ~IQFDynamicFeedMessage(void){}
+private:
+};
+
+template <class T, class charT>
+const std::string IQFDynamicFeedMessage<T, charT>::selector( "Symbol,Total Volume,Bid,Ask,Bid Size,Ask Size,Number of Trades Today,Most Recent Trade,Most Recent Trade Size,Most Recent Trade Time,Most Recent Trade Conditions,Most Recent Trade Market Center,Message Contents,Most Recent Trade Aggressor" );
+//                                     S,SELECT UPDATE FIELDS,Symbol,Total Volume,Bid,Ask,Bid Size,Ask Size,Number of Trades Today,Most Recent Trade,Most Recent Trade Size,Most Recent Trade Time,Most Recent Trade Conditions,Most Recent Trade Market Center,Message Contents,Most Recent Trade Aggressor
+// S,SET PROTOCOL,6.1
+// rTST$Y
+// http://www.iqfeed.net/dev/api/docs/Level1UpdateSummaryMessage.cfm
+
+//**** IQFDynamicFeedSummaryMessage
+class IQFDynamicFeedSummaryMessage: public IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage> { // P
+public:
+
+  IQFDynamicFeedSummaryMessage( void )
+  : IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage>() {}
+  IQFDynamicFeedSummaryMessage( iterator_t& current, iterator_t& end )
+  : IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage>( current, end ) {}
+  ~IQFDynamicFeedSummaryMessage(void){}
+
+protected:
+private:
+};
+
+//**** IQFDynamicFeedUpdateMessage
+class IQFDynamicFeedUpdateMessage: public IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage> { // Q
+public:
+
+  IQFDynamicFeedUpdateMessage( void )
+  : IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage>() {}
+  IQFDynamicFeedUpdateMessage( iterator_t& current, iterator_t& end )
+  : IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage>( current, end ) {}
+  ~IQFDynamicFeedUpdateMessage(void){}
+
+protected:
+private:
+};
+
+// *******
+
+//**** IQFDynamicInfoBaseMessage ( root for IQFDynamicInfoSummaryMessage, IQFDynamicInfoUpdateMessage)
+template <class T, class charT = unsigned char>
+class IQFDynamicInfoMessage: public IQFBaseMessage<IQFDynamicInfoMessage<T, charT> > { // Q, P
+public:
+
+  enum enumFieldIds {
+    DISymbol = 2,
+    DIOpenInterest = 3,
+    DIOpen = 4,
+    DISettle = 5,
+    DIDelay = 6,
+    DIRestrictedCode = 7,
+    DINetAssetValue = 8,
+    DIAverageMaturity = 9,
+    DI7DayYield = 10,
+    DIPriceEarningsRatio = 11,
+    DIMarketCapitalization = 12,
+    DIFractionDisplayCode = 13,
+    DIDecimalPrecision = 14,
+    DIDaysToExpiration = 15,
+    DIPreviousDayVolume = 16,
+    DIFinancialStatusIndicator = 17,
+    DISettlementDate = 18,
+    DIAvailableRegions = 19,
+    _DILastEntry
+  };
+
+  typedef typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::iterator_t iterator_t;
+  typedef typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
+
+  static const std::string selector;
+
+  IQFDynamicInfoMessage();
+  IQFDynamicInfoMessage( iterator_t& current, iterator_t& end );
+  ~IQFDynamicInfoMessage();
+
+protected:
+private:
+};
+
+template <class T, class charT>
+const std::string IQFDynamicInfoMessage<T, charT>::selector( "Symbol,Open Interest,Open,Settle,Delay,Restricted Code,Net Asset Value,Average Maturity,7 Day Yield,Price-Earnings Ratio,Market Capitalization,Fraction Display Code,Decimal Precision,Days to Expiration,Previous Day Volume,Financial Status Indicator,Settlement Date,Available Regions" );
+//                                     S,SELECT UPDATE FIELDS,Symbol,Open Interest,Open,Settle,Delay,Restricted Code,Net Asset Value,Average Maturity,7 Day Yield,Price-Earnings Ratio,Market Capitalization,Fraction Display Code,Decimal Precision,Days to Expiration,Previous Day Volume,Financial Status Indicator,Settlement Date,Available Regions
+
+//**** IQFDynamicInfoSummaryMessage
+class IQFDynamicInfoSummaryMessage: public IQFDynamicInfoMessage<IQFDynamicInfoSummaryMessage> { // P
+public:
+
+  IQFDynamicInfoSummaryMessage();
+  IQFDynamicInfoSummaryMessage( iterator_t& current, iterator_t& end );
+  ~IQFDynamicInfoSummaryMessage();
+
+protected:
+private:
+};
+
+//**** IQFDynamicInfoUpdateMessage
+class IQFDynamicInfoUpdateMessage: public IQFDynamicInfoMessage<IQFDynamicInfoUpdateMessage> { // Q
+public:
+
+  IQFDynamicInfoUpdateMessage();
+  IQFDynamicInfoUpdateMessage( iterator_t& current, iterator_t& end );
+  ~IQFDynamicInfoUpdateMessage();
+
+protected:
+private:
+};
+
+// *******
 
 template <class T, class charT>
 IQFBaseMessage<T, charT>::IQFBaseMessage( void )

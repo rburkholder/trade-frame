@@ -100,12 +100,18 @@ protected:
   void HandleFundamentalMessage( IQFFundamentalMessage *pMsg );
   void HandleUpdateMessage( IQFUpdateMessage *pMsg );
   void HandleSummaryMessage( IQFSummaryMessage *pMsg );
+  void HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage *pMsg );
+  void HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage *pMsg );
   void HandleNewsMessage( IQFNewsMessage *pMsg );
 
   template <typename T>
   void DecodePricingMessage( IQFPricingMessage<T> *pMsg );
 
+  template <typename T>
+  void DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg );
+
 private:
+  bool m_bWaitForFirstQuote;
 };
 
 } // namespace tf
