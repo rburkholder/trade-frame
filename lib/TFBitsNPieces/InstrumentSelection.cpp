@@ -74,7 +74,7 @@ void InstrumentSelection::ProcessGroupItem( const std::string& sObjectPath, cons
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> barRepository( m_dm, sObjectPath );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
   begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDate1 );
-  end = lower_bound( begin, barRepository.end(), m_dtDate2 ); 
+  end = lower_bound( begin, barRepository.end(), m_dtDate2 );
   hsize_t cnt = end - begin;
   if ( 8 < cnt ) {
 //    ptime dttmp = (*(end-1)).DateTime();
@@ -84,7 +84,7 @@ void InstrumentSelection::ProcessGroupItem( const std::string& sObjectPath, cons
     barRepository.Read( begin, end, &bars );
     ou::tf::Bars::const_iterator iterVolume = bars.begin();
     ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
-    if ( ( 1000000 < volAverage ) 
+    if ( ( 1000000 < volAverage )
       && ( 12.0 <= bars.Last()->Close() )
       && ( 80.0 >= bars.Last()->Close() ) ) {
         Info info( sObjectName, *bars.Last() );
