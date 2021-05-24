@@ -290,6 +290,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           [this,bAddToList,&vDesired](const IIPivot& iip) {
             if ( bAddToList ) {
               if ( vDesired.end() != vDesired.find( iip.sName ) ) {
+                std::cout << "desired: " << iip.sName << std::endl;
 //              if (
 //                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
 //              )
