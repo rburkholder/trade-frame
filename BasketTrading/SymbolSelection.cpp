@@ -90,7 +90,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, const setSymbols_t& s
     ou::tf::InstrumentFilter<data_t,ou::tf::Bars> filter(
       "/bar/86400/",
       dtBegin, dtEnd,
-      200, data, //  need to figure out where 200 comes from, and the relation to nMinBars
+      200, data, //  need to figure out where 200 comes from, and the relation to nMinBars (=> 200sma)
       []( data_t&, const std::string& sPath, const std::string& sGroup )->bool{ // Use Group
         return true;
       },
@@ -103,7 +103,7 @@ void Process( ptime dtBegin, ptime dtEnd, size_t nMinBars, const setSymbols_t& s
             data.volumeEma = std::for_each( iterVolume, bars.end(), VolumeEma() );
             if ( ( 1000000 < data.volumeEma )
               && ( 30.0 <=  bars.last().Close() )
-              && ( 300.0 >= bars.last().Close() )
+              && ( 500.0 >= bars.last().Close() )  // provides SPY at 4xx
               && ( dtEnd.date() == bars.last().DateTime().date() )
               && ( 120 < bars.Size() )
               ) {
