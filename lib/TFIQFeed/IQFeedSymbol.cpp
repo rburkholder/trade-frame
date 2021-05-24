@@ -90,6 +90,7 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg )  {
         if ( m_nBidSize != nBidSize ) { m_nBidSize = nBidSize; m_bNewQuote = true; }
         break;
       case 'o':
+        // TODO: may not be using the correct field here.
         dblOpen = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
         if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
           m_dblOpen = dblOpen;
