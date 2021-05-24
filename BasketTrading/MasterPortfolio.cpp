@@ -578,9 +578,13 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
     // ManageStrategy::fRegisterOption_t
           std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
     // ManageStrategy::fStartCalc_t
-          std::bind( &ou::tf::option::Engine::Add, m_pOptionEngine.get(), ph::_1, ph::_2 ), // option, underlying
+          [this]( pOption_t pOption, pWatch_t pUnderlying ){
+            m_pOptionEngine->Add( pOption, pUnderlying );
+          },
     // ManageStrategy::m_fStopCalc
-          std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 ), // option, underlying
+          [this]( pOption_t pOption, pWatch_t pUnderlying ){
+            m_pOptionEngine->Remove( pOption, pUnderlying );
+          },
     // ManageStrategy::m_fFirstTrade
           [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters
