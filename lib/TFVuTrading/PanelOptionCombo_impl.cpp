@@ -17,12 +17,11 @@
 #include <set>
 #include <functional>
 
-#include <wx/textctrl.h>
 #include <wx/menu.h>
+#include <wx/textctrl.h>
 #include <wx/statline.h>
 
 #include <TFVuTrading/DragDropInstrumentTarget.h>
-#include <wx-3.0/wx/mousestate.h>
 
 #include "PanelOptionCombo_impl.h"
 
