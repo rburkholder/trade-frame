@@ -24,18 +24,57 @@
 
 #include <map>
 #include <string>
+#include <stdexcept>
 
-// this code might be deprecating some code in Bundle
+// use this for light weight strike calculations and name lookups
+// use Bundle for for full Strike/Call/Put watch
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+namespace chain {
+
+  struct Option { // inherit to add addtiional fields
+    std::string sName;
+    Option() {}
+    Option( const std::string& sName_ )
+    : sName( sName_ ) {}
+    Option( const std::string&& sName_ )
+    : sName( std::move( sName_ ) ) {}
+    Option( const Option& rhs )
+    : sName( rhs.sName ) {}
+    Option( const Option&& rhs )
+    : sName( std::move( rhs.sName ) ) {}
+  };
+
+  template<typename Option=Option>
+  struct Strike {
+    Option call;
+    Option put;
+    Strike() {}
+    Strike( Option&& call_, Option&& put_ )
+    : call( std::move( call_ ) ),
+      put( std::move( put_ ) )
+      {}
+    Strike( const Strike& rhs )
+    : call( rhs.call ),
+      put( rhs.put )
+      {}
+    Strike( const Strike&& rhs )
+    : call( std::move( rhs.call ) ),
+      put( std::move( rhs.put ) )
+      {}
+  };
+}
+
 class Chain {
 public:
-  Chain( );
-  Chain( const Chain&& rhs );
-  virtual ~Chain( );
+  Chain() {}
+  Chain( const Chain&& rhs ) {
+    m_mapChain = std::move( rhs.m_mapChain );
+  }
+  virtual ~Chain() {};
 
   struct exception_strike_not_found: public std::runtime_error {
     exception_strike_not_found( const char* ch ): std::runtime_error( ch ) {}
@@ -73,21 +112,9 @@ public:
 protected:
 private:
 
-  struct OptionsAtStrike {
-    std::string sCall;
-    std::string sPut;
-    OptionsAtStrike() {}
-    OptionsAtStrike( const OptionsAtStrike& rhs )
-    : sCall( rhs.sCall ),
-      sPut(  rhs.sPut  )
-    { }
-    OptionsAtStrike( const OptionsAtStrike&& rhs )
-    : sCall( std::move( rhs.sCall ) ),
-      sPut(  std::move( rhs.sPut  ) )
-    { }
-  };
-
-  using mapChain_t = std::map<double, OptionsAtStrike>;
+  using option_t = chain::Option;
+  using strike_t = chain::Strike<chain::Option>;
+  using mapChain_t = std::map<double, strike_t>;
 
   mapChain_t m_mapChain;
 

@@ -29,14 +29,6 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Chain::Chain( ) { }
-
-Chain::Chain( const Chain&& rhs ) {
-  m_mapChain = std::move( rhs.m_mapChain );
-}
-
-Chain::~Chain( ) { }
-
 double Chain::Put_Itm( double value ) const { // price < strike
   mapChain_t::const_iterator iter = std::upper_bound(
     m_mapChain.begin(), m_mapChain.end(), value,
@@ -215,29 +207,29 @@ int Chain::AdjacentStrikes( double strikeSource, double& strikeLower, double& st
 void Chain::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
   mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), mapChain_t::value_type( dblStrike, OptionsAtStrike() ) );
+    iter = m_mapChain.insert( m_mapChain.begin(), std::move( mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( 0 == iter->second.sCall.size() );
-  iter->second.sCall = sIQFeedSymbolName;
+  assert( 0 == iter->second.call.sName.size() );
+  iter->second.call.sName = sIQFeedSymbolName;
 }
 
 void Chain::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
   mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), mapChain_t::value_type( dblStrike, OptionsAtStrike() ) );
+    iter = m_mapChain.insert( m_mapChain.begin(), std::move( mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( 0 == iter->second.sPut.size() );
-  iter->second.sPut = sIQFeedSymbolName;
+  assert( 0 == iter->second.put.sName.size() );
+  iter->second.put.sName = sIQFeedSymbolName;
 }
 
 const std::string Chain::GetIQFeedNameCall( double dblStrike ) const {
   mapChain_t::const_iterator iter = FindStrike( dblStrike );
-  return iter->second.sCall;
+  return iter->second.call.sName;
 }
 
 const std::string Chain::GetIQFeedNamePut( double dblStrike ) const {
   mapChain_t::const_iterator iter = FindStrike( dblStrike );
-  return iter->second.sPut;
+  return iter->second.put.sName;
 }
 
 // const iterator
@@ -265,7 +257,7 @@ Chain::mapChain_t::iterator Chain::FindStrike( const double strike ) {
 
 void Chain::EmitValues( void ) const { // TODO: supply output stream
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [](const mapChain_t::value_type& vt){
-    std::cout << vt.first << ": " << vt.second.sCall << ", " << vt.second.sPut << std::endl;
+    std::cout << vt.first << ": " << vt.second.call.sName << ", " << vt.second.put.sName << std::endl;
   });
 }
 
