@@ -219,6 +219,8 @@ bool Combo::AreOrdersActive() const { // TODO: is an external call still necessa
 }
 
 void Combo::SaveSeries( const std::string& sPrefix ) {
+  // TODO: after legs are closed, can they still be saved?
+  //   should something else be used?  maybe OptionRepository instead?
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
     leg.SaveSeries( sPrefix );
