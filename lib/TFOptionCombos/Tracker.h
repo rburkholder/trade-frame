@@ -41,7 +41,7 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
 
-  using chain_t = ou::tf::option::Chain;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::Option>;
 
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;

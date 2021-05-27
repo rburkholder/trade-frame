@@ -71,7 +71,7 @@ Tracker::~Tracker() {
 
 void Tracker::Initialize(
   pPosition_t pPosition,
-  const ou::tf::option::Chain* pChain,
+  const chain_t* pChain,
   fConstructOption_t&& fConstructOption,
   fCloseLeg_t&& fCloseLeg,
   fOpenLeg_t&& fOpenLeg

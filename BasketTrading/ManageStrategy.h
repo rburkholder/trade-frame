@@ -219,7 +219,8 @@ private:
   double m_dblBollingerMean;
   double m_dblBollingerLower;
 
-  using mapChains_t = std::map<boost::gregorian::date, ou::tf::option::Chain>;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::Option>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
   fConstructWatch_t m_fConstructWatch;

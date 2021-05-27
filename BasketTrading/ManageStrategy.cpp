@@ -358,7 +358,7 @@ ManageStrategy::ManageStrategy(
               mapChains_t::iterator iterChains;
 
               {
-                ou::tf::option::Chain chain;
+                chain_t chain;
 
                 iterChains = m_mapChains.find( date ); // see if expiry date exists
                 if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
@@ -370,7 +370,7 @@ ManageStrategy::ManageStrategy(
               }
 
               {
-                ou::tf::option::Chain& chain( iterChains->second );
+                chain_t& chain( iterChains->second );
 
                 //std::cout << "  option: " << row.sSymbol << std::endl;
 
@@ -683,7 +683,7 @@ void ManageStrategy::BuildPosition(
       return m_daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
   } );
 
-  const ou::tf::option::Chain& chain( iter->second );
+  const chain_t& chain( iter->second );
 
   std::string sIQFeedOptionCode;
 
@@ -1142,7 +1142,7 @@ void ManageStrategy::HandleBarTrades60Sec( const ou::tf::Bar& bar ) { // sentime
 
 void ManageStrategy::Test() {
   if ( 0 != m_mapChains.size() ) {
-    ou::tf::option::Chain& chain( m_mapChains.begin()->second );
+    chain_t& chain( m_mapChains.begin()->second );
     chain.EmitValues();
     chain.Test( 121.5 );
   }
