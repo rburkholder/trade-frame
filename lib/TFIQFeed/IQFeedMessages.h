@@ -88,6 +88,18 @@ private:
 };
 
 //****
+class IQFErrorMessage: public IQFBaseMessage<IQFErrorMessage> { // S
+public:
+
+  IQFErrorMessage( void );
+  IQFErrorMessage( iterator_t& current, iterator_t& end );
+  ~IQFErrorMessage(void);
+
+protected:
+private:
+};
+
+//****
 class IQFTimeMessage: public IQFBaseMessage<IQFTimeMessage> { // T
 public:
 

@@ -81,6 +81,10 @@ public:
     this->GiveBackBuffer( p );
     m_reposSystemMessages.CheckInL( msg );
   }
+  void inline ErrorDone( linebuffer_t* p, IQFErrorMessage* msg ) {
+    this->GiveBackBuffer( p );
+    m_reposErrorMessages.CheckInL( msg );
+  }
 
   void SetNewsOn( void );
   void SetNewsOff( void );
@@ -128,6 +132,7 @@ protected:
   void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage* msg) {};
   void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage* msg) {};
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage* msg) {};
+  void OnIQFeedErrorMessage( linebuffer_t* pBuffer, IQFErrorMessage* msg) {};
 
 private:
 
@@ -139,8 +144,10 @@ private:
   typename ou::BufferRepository<IQFFundamentalMessage> m_reposFundamentalMessages;
   typename ou::BufferRepository<IQFTimeMessage> m_reposTimeMessages;
   typename ou::BufferRepository<IQFSystemMessage> m_reposSystemMessages;
+  typename ou::BufferRepository<IQFErrorMessage> m_reposErrorMessages;
 
-  unsigned int m_version; // 50 or 60
+  enum Version { v49, v61 };
+  Version m_version;
 
 };
 
@@ -148,7 +155,7 @@ template <typename T>
 IQFeed<T>::IQFeed( void )
 : ou::Network<IQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF ),
-  m_version( 50 )
+  m_version( v49 )
 {}
 
 template <typename T>
@@ -183,14 +190,14 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
   BOOST_ASSERT( iter != end );
 
-//  std::string str( iter, end );
-//  std::cout << str << std::endl;
+  //std::string str( iter, end );
+  //std::cout << str << std::endl;
 
   switch ( *iter ) {
     case 'Q':
       {
         switch ( m_version ) {
-          case 50: {
+          case v49: {
             IQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedUpdateMessage != &T::OnIQFeedUpdateMessage ) {
@@ -201,7 +208,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             }
             }
             break;
-          case 60: {
+          case v61: {
             IQFDynamicFeedUpdateMessage* msg = m_reposDynamicFeedUpdateMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedDynamicFeedUpdateMessage != &T::OnIQFeedDynamicFeedUpdateMessage ) {
@@ -218,7 +225,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
     case 'P':
       {
         switch ( m_version ) {
-          case 50: {
+          case v49: {
             IQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedSummaryMessage != &T::OnIQFeedSummaryMessage ) {
@@ -229,7 +236,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             }
             }
             break;
-          case 60: {
+          case v61: {
             IQFDynamicFeedSummaryMessage* msg = m_reposDynamicFeedSummaryMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedDynamicFeedSummaryMessage != &T::OnIQFeedDynamicFeedSummaryMessage ) {
@@ -283,6 +290,9 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         IQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
+        //std::string s( msg->Field( 2 ) );
+        //std::cout << "system message: " << s << std::endl;
+        // TODO: for field comparisons, use spirit or the trie method
         if ( "KEY" == msg->Field( 2 ) ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
@@ -295,12 +305,15 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
           else {
-            m_version = 60;
-            ou::Network<IQFeed<T> >::Send( "S,SET PROTOCOL,6.1\n" );
-            std::string sFieldRequest( "S,SELECT UPDATE FIELDS," );
-            sFieldRequest += IQFDynamicFeedMessage<T>::selector;
-            sFieldRequest += "\n";
-            ou::Network<IQFeed<T> >::Send( sFieldRequest );
+            if ( v61 != m_version ) { // TODO: need to do better job of this when more versions added
+              m_version = v61;
+              ou::Network<IQFeed<T> >::Send( "S,SET PROTOCOL,6.1\n" );
+              std::string sFieldRequest( "S,SELECT UPDATE FIELDS," );
+              sFieldRequest += IQFDynamicFeedMessage<T>::selector;
+              sFieldRequest += "\n";
+              ou::Network<IQFeed<T> >::Send( sFieldRequest );
+              std::cout << "iqfeed protocol updated" << std::endl;
+            }
           }
         }
         if ( "KEYOK" == msg->Field( 2 ) ) {
@@ -311,6 +324,14 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         else {
           SystemDone( pBuffer, msg );
         }
+      }
+      break;
+    case 'E':
+      {
+        IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
+        msg->Assign( iter, end );
+        std::cout << "IQFeed error message: " << pBuffer << std::endl;
+        ErrorDone( pBuffer, msg );
       }
       break;
     default:

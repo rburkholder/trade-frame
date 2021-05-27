@@ -21,8 +21,8 @@
 
 #include "IQFeedMessages.h"
 
-// News Message: This does appear to be an error in the documentation. 
-// "SNT:AAPL::1:20070901:;" 
+// News Message: This does appear to be an error in the documentation.
+// "SNT:AAPL::1:20070901:;"
 // Enter the date with a range, such as "20070901-20070910" to get the data you are looking for.
 
 namespace ou { // One Unified
@@ -34,12 +34,12 @@ namespace tf { // TradeFrame
 
 //**** IQFSystemMessage
 
-IQFSystemMessage::IQFSystemMessage( void ) 
+IQFSystemMessage::IQFSystemMessage( void )
 : IQFBaseMessage<IQFSystemMessage>()
 {
 }
 
-IQFSystemMessage::IQFSystemMessage( iterator_t& current, iterator_t& end ) 
+IQFSystemMessage::IQFSystemMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFSystemMessage>( current, end )
 {
 }
@@ -47,14 +47,29 @@ IQFSystemMessage::IQFSystemMessage( iterator_t& current, iterator_t& end )
 IQFSystemMessage::~IQFSystemMessage() {
 }
 
+//**** IQFErrorMessage
+
+IQFErrorMessage::IQFErrorMessage( void )
+: IQFBaseMessage<IQFErrorMessage>()
+{
+}
+
+IQFErrorMessage::IQFErrorMessage( iterator_t& current, iterator_t& end )
+: IQFBaseMessage<IQFErrorMessage>( current, end )
+{
+}
+
+IQFErrorMessage::~IQFErrorMessage() {
+}
+
 //**** IQFNewsMessage
 
-IQFNewsMessage::IQFNewsMessage( void ) 
+IQFNewsMessage::IQFNewsMessage( void )
 : IQFBaseMessage<IQFNewsMessage>()
 {
 }
 
-IQFNewsMessage::IQFNewsMessage( iterator_t& current, iterator_t& end ) 
+IQFNewsMessage::IQFNewsMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFNewsMessage>()
 {
 }
@@ -65,12 +80,12 @@ IQFNewsMessage::~IQFNewsMessage() {
 //**** IQFFundamentalMessage
 // resize the vector to accept with out resizing so often?
 
-IQFFundamentalMessage::IQFFundamentalMessage( void ) 
+IQFFundamentalMessage::IQFFundamentalMessage( void )
 : IQFBaseMessage<IQFFundamentalMessage>()
 {
 }
 
-IQFFundamentalMessage::IQFFundamentalMessage( iterator_t& current, iterator_t& end ) 
+IQFFundamentalMessage::IQFFundamentalMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFFundamentalMessage>( current, end )
 {
 }
@@ -85,7 +100,7 @@ IQFUpdateMessage::IQFUpdateMessage( void )
 {
 }
 
-IQFUpdateMessage::IQFUpdateMessage( iterator_t& current, iterator_t& end ) 
+IQFUpdateMessage::IQFUpdateMessage( iterator_t& current, iterator_t& end )
 : IQFPricingMessage<IQFUpdateMessage>( current, end )
 {
 }
@@ -95,12 +110,12 @@ IQFUpdateMessage::~IQFUpdateMessage() {
 
 //**** IQFSummaryMessage
 
-IQFSummaryMessage::IQFSummaryMessage( void ) 
+IQFSummaryMessage::IQFSummaryMessage( void )
 : IQFPricingMessage<IQFSummaryMessage>()
 {
 }
 
-IQFSummaryMessage::IQFSummaryMessage( iterator_t& current, iterator_t& end ) 
+IQFSummaryMessage::IQFSummaryMessage( iterator_t& current, iterator_t& end )
 : IQFPricingMessage<IQFSummaryMessage>( current, end )
 {
 }
@@ -112,14 +127,14 @@ IQFSummaryMessage::~IQFSummaryMessage() {
 
 IQFTimeMessage::IQFTimeMessage( void )
 : IQFBaseMessage<IQFTimeMessage>(),
-  m_bMarketIsOpen( false ), 
+  m_bMarketIsOpen( false ),
   m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
 {
 }
 
-IQFTimeMessage::IQFTimeMessage( iterator_t& current, iterator_t& end ) 
+IQFTimeMessage::IQFTimeMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFTimeMessage>(),
-  m_bMarketIsOpen( false ), 
+  m_bMarketIsOpen( false ),
   m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
 {
   Assign( current, end );
