@@ -5,9 +5,9 @@
 This is an application I use for automated trading securities.  
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
-A C++17 compiler is used to build the libraries and code.
+A C++17 compiler is used to build the libraries and code. It used to build on Windows a number of years ago, but the focus recently has been in a Linux environment.
 
-CMake is used for build the projects and libraries.
+CMake is used for build management.
 
 ## Example
 
@@ -44,7 +44,7 @@ wine iqfeed_client_5_2_5_0.exe
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
 
-# initial library install
+# install and build initial build environment and libraries
 git clone https://github.com/rburkholder/libs-build.git
 cd libs-build
 ./build.sh tradeframe
