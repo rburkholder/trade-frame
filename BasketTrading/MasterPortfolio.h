@@ -96,16 +96,16 @@ public:
 protected:
 private:
 
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
-  typedef ou::tf::option::Option::pOption_t pOption_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
 
-  typedef ou::tf::Order::pOrder_t pOrder_t;
+  using pOrder_t = ou::tf::Order::pOrder_t;
 
-  typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
+  using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::IQFeedProvider::pProvider_t;
+  using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
-  typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
+  using pInstrument_t =ou::tf::IBTWS::pInstrument_t;
 
   std::string m_sTSDataStreamStarted;
 

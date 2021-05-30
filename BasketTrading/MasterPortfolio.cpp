@@ -327,9 +327,11 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
           }
         );
 
+
+
         // is m_setSymbols used for anything?
 
-        std::cout << "Symbol List finished, " << m_mapStrategy.size() << " symbols chosen" << std::endl;
+        std::cout << "Symbol Load finished, " << m_mapStrategy.size() << " symbols chosen" << std::endl;
     } );
 
   }
