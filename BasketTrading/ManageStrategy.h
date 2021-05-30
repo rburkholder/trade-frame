@@ -43,6 +43,7 @@
 #include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Chain.h>
+#include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
 #include <TFOptionCombos/Combo.h>
 
@@ -73,8 +74,8 @@ public:
 
   using pOrder_t = ou::tf::Position::pOrder_t;
 
-  using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
-  using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t&&)>;
+  using fOptionDefinition_t        = ou::tf::option::fOptionDefinition_t;
+  using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   using fConstructedOption_t = std::function<void(pOption_t)>;
@@ -108,7 +109,7 @@ public:
     const ou::tf::Bar& barPriorDaily,
     // TODO: convert these to left assign
     pPortfolio_t,
-    fGatherOptionDefinitions_t,
+    fGatherOptionDefinitions_t&,
     fConstructWatch_t,
     fConstructOption_t,
     fConstructPosition_t,

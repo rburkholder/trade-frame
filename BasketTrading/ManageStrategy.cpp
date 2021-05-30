@@ -83,9 +83,9 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
-#include <TFOptionCombos/LegNote.h>
 #include <TFOptionCombos/Collar.h>
 using combo_t = ou::tf::option::Collar;
+#include <TFOptionCombos/LegNote.h>
 
 #include "ManageStrategy.h"
 
@@ -206,7 +206,7 @@ ManageStrategy::ManageStrategy(
   const std::string& sDailyBarPath,
   const ou::tf::Bar& barPriorDaily,
   pPortfolio_t pPortfolioStrategy, // => m_pPortfolioStrategy
-  fGatherOptionDefinitions_t fGatherOptionDefinitions,
+  fGatherOptionDefinitions_t& fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch, // => m_fConstructWatch
   fConstructOption_t fConstructOption, // => m_fConstructOption
   fConstructPosition_t fConstructPosition, // => m_fConstructPosition
@@ -327,7 +327,7 @@ ManageStrategy::ManageStrategy(
 
     m_fConstructWatch( // underlying construction only
       m_sUnderlying,
-      [this,fGatherOptionDefinitions](pWatch_t pWatchUnderlying){
+      [this,&fGatherOptionDefinitions](pWatch_t pWatchUnderlying){
 
         std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
 
@@ -348,48 +348,7 @@ ManageStrategy::ManageStrategy(
         m_pOptionRepository->AssignWatchUnderlying( m_pPositionUnderlying->GetWatch() );
 
         // collect option chains for the underlying
-        fGatherOptionDefinitions(
-          pWatchUnderlying->GetInstrument()->GetInstrumentName(),
-          [this](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
-
-            if ( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc ) {
-              boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
-
-              mapChains_t::iterator iterChains;
-
-              {
-                chain_t chain;
-
-                iterChains = m_mapChains.find( date ); // see if expiry date exists
-                if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
-                  iterChains = m_mapChains.insert(
-                    m_mapChains.begin(),
-                    mapChains_t::value_type( date, std::move( chain ) )
-                    );
-                }
-              }
-
-              {
-                chain_t& chain( iterChains->second );
-
-                //std::cout << "  option: " << row.sSymbol << std::endl;
-
-                try {
-                  switch ( row.eOptionSide ) {
-                    case ou::tf::OptionSide::Call:
-                      chain.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
-                      break;
-                    case ou::tf::OptionSide::Put:
-                      chain.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
-                      break;
-                  }
-                }
-                catch ( std::runtime_error& e ) {
-                  std::cout << "ManageStrategy::fGatherOptionDefinitions error" << std::endl;
-                }
-              }
-            }
-        });
+        ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, pWatchUnderlying->GetInstrument()->GetInstrumentName(), fGatherOptionDefinitions );
 
         assert( 0 != m_mapChains.size() );
 

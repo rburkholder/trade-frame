@@ -55,7 +55,7 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2021, 5, 21 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = ptime( date( 2021, 5, 28 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -234,7 +234,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     // obtain option chains for underlying:
-    [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t f){
+    [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t&& f){
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
     },
     // obtain instrument details given instrument name:
