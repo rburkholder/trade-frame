@@ -12,12 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
-#include <iostream>
 #include <sstream>
-
-#include <boost/assert.hpp>
 
 #include "IQFeedMessages.h"
 
