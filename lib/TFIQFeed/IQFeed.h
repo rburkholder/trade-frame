@@ -312,7 +312,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
               sFieldRequest += IQFDynamicFeedMessage<T>::selector;
               sFieldRequest += "\n";
               ou::Network<IQFeed<T> >::Send( sFieldRequest );
-              std::cout << "iqfeed protocol updated" << std::endl;
+              //std::cout << "iqfeed protocol updated" << std::endl;
             }
           }
         }
