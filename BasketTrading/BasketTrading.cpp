@@ -20,8 +20,6 @@
 // TODO:  graphical P/L loss summary
 //    VWAP used to build one minute bars, and use 1min, 2min, 3min bars to generate trend trade?
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
@@ -55,7 +53,8 @@ bool AppBasketTrading::OnInit() {
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
 
-  m_dtLatestEod = ptime( date( 2021, 5, 28 ), time_duration( 23, 59, 59 ) );
+  // latest daily bar
+  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 5, 28 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
