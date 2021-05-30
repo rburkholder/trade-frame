@@ -77,58 +77,61 @@ private:
 */
 class TimeSeriesBase { // used for dynamic_cast capability
 public:
-  virtual ~TimeSeriesBase( void ) {};
+  virtual ~TimeSeriesBase() {};
 protected:
 private:
 };
 /*
 class Lockable {
 public:
-  void lock( void ) { m_mutex.lock(); }
-  void unlock( void ) { m_mutex.unlock(); }
+  void lock() { m_mutex.lock(); }
+  void unlock() { m_mutex.unlock(); }
 protected:
 private:
   boost::mutex m_mutex;
 };
 */
-template<typename T>
+template<typename T=ou::tf::DatedDatum>
 class TimeSeries:
   public TimeSeriesBase
 //  ,public Lockable
 {
 public:
 
-  typedef T datum_t;
+  using datum_t = T ;
 
-  typedef typename ou::allocator<T, heap<T> > allocator_t;
+  using allocator_t = typename ou::allocator<T, heap<T> >;
 
-  typedef typename std::vector<T, allocator_t> vTimeSeries_t;
+  using vTimeSeries_t = typename std::vector<T, allocator_t>;
 
-  typedef typename vTimeSeries_t::size_type size_type;
+  using size_type = typename vTimeSeries_t::size_type;
 
-  typedef typename vTimeSeries_t::iterator iterator;
-  typedef typename vTimeSeries_t::const_iterator const_iterator;
-  typedef typename vTimeSeries_t::reference reference;
-  typedef typename vTimeSeries_t::const_reference const_reference;
+  using iterator        = typename vTimeSeries_t::iterator;
+  using const_iterator  = typename vTimeSeries_t::const_iterator;
+  using reference       = typename vTimeSeries_t::reference;
+  using const_reference = typename vTimeSeries_t::const_reference;
 
-  TimeSeries<T>( void );
+  using dt_t = typename datum_t::dt_t;
+
+  TimeSeries<T>();
   TimeSeries<T>( size_type nSize );
   TimeSeries<T>( const std::string& sName, size_type nSize = 0 );
   TimeSeries<T>( const TimeSeries<T>& );
-  virtual ~TimeSeries<T>( void );
+  virtual ~TimeSeries<T>();
 
   size_type Size() const { return m_vSeries.size(); };
 
-  void Clear( void );
+  void Clear();
   void Append( const T& datum );
-  void Insert( const ptime& time, const T& datum );  // time overrides datum.time?
+  void Insert( const dt_t& time, const T& datum );  // time overrides datum.time?
   void Insert( const T& datum );
   void Resize( size_type Size ) { m_vSeries.resize( Size );  };
 
-  void Sort( void ); // use when loaded from external data
-  void Flip( void ) { reverse( m_vSeries.begin(), m_vSeries.end() ); };
+  void Sort(); // use when loaded from external data
+  void Flip() { reverse( m_vSeries.begin(), m_vSeries.end() ); };
 
   // these three methods update m_vIterator, used mostly with MergeDatedDatumCarrier, (const can't be used)
+  // TODO: convert to lamdda visitor
   const T* First();
   const T* Next();
   const T* Last();
@@ -138,9 +141,9 @@ public:
   const_reference At( size_type ix );
   const_reference last() const { assert( 0 < m_vSeries.size() ); return m_vSeries.back(); };
 
-  //const_reference At( const ptime& time );
-  const_iterator AtOrAfter( const ptime& time ) const;
-  const_iterator After( const ptime& time ) const;
+  //const_reference At( const dt_t& time );
+  const_iterator AtOrAfter( const dt_t& time ) const;
+  const_iterator After( const dt_t& time ) const;
 
   const_iterator begin() const { return m_vSeries.cbegin(); };
   const_iterator end() const { return m_vSeries.cend(); };
@@ -156,21 +159,21 @@ public:
   ou::Delegate<const T&> OnAppend;
 
   void SetName( const std::string& sName ) { m_sName = sName; };
-  const std::string& GetName( void ) const { return m_sName; };
+  const std::string& GetName() const { return m_sName; };
 
-  virtual TimeSeries<T>* Subset( const ptime &time ); // from At or After to end
-  virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ); // from At or After for n T
+  virtual TimeSeries<T>* Subset( const dt_t &time ); // from At or After to end
+  virtual TimeSeries<T>* Subset( const dt_t &time, unsigned int n ); // from At or After for n T
 
   H5::DataSpace* DefineDataSpace( H5::DataSpace* pSpace = NULL );
 
   // should this be locked?
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
 
-  size_type Capacity( void ) const { return m_vSeries.capacity(); }
+  size_type Capacity() const { return m_vSeries.capacity(); }
 
   // TSVariance, TSMA uses this, sets to false
-  void DisableAppend( void ) { m_bAppendToVector = false; };
-  bool AppendEnabled( void ) const { return m_bAppendToVector; };  // affects Append(...) only
+  void DisableAppend() { m_bAppendToVector = false; };
+  bool AppendEnabled() const { return m_bAppendToVector; };  // affects Append(...) only
 
   template<typename Functor>
   typename Functor::return_type ForEach( Functor f ) const {
@@ -192,7 +195,7 @@ private:
 };
 
 template<typename T>
-TimeSeries<T>::TimeSeries(void)
+TimeSeries<T>::TimeSeries()
   : TimeSeries( "", 0 ) {
 
 }
@@ -222,7 +225,7 @@ TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
 }
 
 template<typename T>
-TimeSeries<T>::~TimeSeries(void) {
+TimeSeries<T>::~TimeSeries() {
   //m_vSeries.get_allocator().lockRequest = 0;
   Clear();
 }
@@ -245,7 +248,7 @@ void TimeSeries<T>::Append(const T& datum) {
 }
 
 template<typename T>
-void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
+void TimeSeries<T>::Insert( const dt_t& dt, const T& datum ) {
   T key( dt );
   std::pair<iterator, iterator> p;
   //strict_lock<TimeSeries<T> > guard(*this);
@@ -272,7 +275,7 @@ void TimeSeries<T>::Insert( const T& datum ) {
 }
 
 template<typename T>
-void TimeSeries<T>::Clear( void ) {
+void TimeSeries<T>::Clear() {
   //strict_lock<TimeSeries<T> > guard(*this);
   m_vSeries.clear();
 }
@@ -345,7 +348,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
 
 /*
 template<typename T>
-typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::At( const dt_t& dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -361,7 +364,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
 */
 
 template<typename T>
-typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt ) const {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const dt_t &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -377,7 +380,7 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt
 }
 
 template<typename T>
-typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) const {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const dt_t &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -389,13 +392,13 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) c
 }
 
 template<typename T>
-void TimeSeries<T>::Sort( void ) {
+void TimeSeries<T>::Sort() {
   //strict_lock<TimeSeries<T> > guard(*this);
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
 }
 
 template<typename T>
-TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
+TimeSeries<T>* TimeSeries<T>::Subset( const dt_t &dt ) {
   T datum( dt );
   TimeSeries<T>* series = nullptr;
   const_iterator iter;
@@ -415,7 +418,7 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
 }
 
 template<typename T>
-TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n is max count
+TimeSeries<T>* TimeSeries<T>::Subset( const dt_t &dt, unsigned int n ) { // n is max count
   T datum( dt );
   TimeSeries<T>* series = NULL;
   const_iterator iter;
@@ -456,11 +459,11 @@ H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace* pSpace ) {
 class Bars: public TimeSeries<Bar> {
 public:
   typedef Bar datum_t;
-  Bars(void) {};
+  Bars() {};
   Bars( size_type size ): TimeSeries<datum_t>( size ) {};
-  virtual ~Bars(void) {};
-  Bars* Subset( ptime time ) { return (Bars*) TimeSeries<datum_t>::Subset( time ); };
-  Bars* Subset( ptime time, unsigned int n ) { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); };
+  virtual ~Bars() {};
+  Bars* Subset( dt_t time ) { return (Bars*) TimeSeries<datum_t>::Subset( time ); };
+  Bars* Subset( dt_t time, unsigned int n ) { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -470,11 +473,11 @@ private:
 class Trades: public TimeSeries<Trade> {
 public:
   typedef Trade datum_t;
-  Trades( void ) {};
+  Trades() {};
   Trades( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Trades( void ) {};
-  Trades* Subset( ptime time ) { return (Trades*) TimeSeries<datum_t>::Subset( time ); };
-  Trades* Subset( ptime time, unsigned int n ) { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~Trades() {};
+  Trades* Subset( dt_t time ) { return (Trades*) TimeSeries<datum_t>::Subset( time ); };
+  Trades* Subset( dt_t time, unsigned int n ) { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -484,11 +487,11 @@ private:
 class Quotes: public TimeSeries<Quote> {
 public:
   typedef Quote datum_t;
-  Quotes( void ) {};
+  Quotes() {};
   Quotes( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Quotes( void ) {};
-  Quotes* Subset( ptime time ) { return (Quotes*) TimeSeries<datum_t>::Subset( time ); };
-  Quotes* Subset( ptime time, unsigned int n ) { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~Quotes() {};
+  Quotes* Subset( dt_t time ) { return (Quotes*) TimeSeries<datum_t>::Subset( time ); };
+  Quotes* Subset( dt_t time, unsigned int n ) { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -498,11 +501,11 @@ private:
 class MarketDepths: public TimeSeries<MarketDepth> {
 public:
   typedef MarketDepth datum_t;
-  MarketDepths( void ) {};
+  MarketDepths() {};
   MarketDepths( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~MarketDepths( void ) {};
-  MarketDepths* Subset( ptime time ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); };
-  MarketDepths* Subset( ptime time, unsigned int n ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~MarketDepths() {};
+  MarketDepths* Subset( dt_t time ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); };
+  MarketDepths* Subset( dt_t time, unsigned int n ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -512,11 +515,11 @@ private:
 class Greeks: public TimeSeries<Greek> {
 public:
   typedef Greek datum_t;
-  Greeks( void ) {};
+  Greeks() {};
   Greeks( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Greeks( void ) {};
-  Greeks* Subset( ptime time ) { return (Greeks*) TimeSeries<datum_t>::Subset( time ); };
-  Greeks* Subset( ptime time, unsigned int n ) { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~Greeks() {};
+  Greeks* Subset( dt_t time ) { return (Greeks*) TimeSeries<datum_t>::Subset( time ); };
+  Greeks* Subset( dt_t time, unsigned int n ) { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -527,11 +530,11 @@ private:
 class Prices: public TimeSeries<Price> {
 public:
   typedef Price datum_t;
-  Prices( void ) {};
+  Prices() {};
   Prices( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Prices( void ) {};
-  Prices* Subset( ptime time ) { return (Prices*) TimeSeries<datum_t>::Subset( time ); };
-  Prices* Subset( ptime time, unsigned int n ) { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~Prices() {};
+  Prices* Subset( dt_t time ) { return (Prices*) TimeSeries<datum_t>::Subset( time ); };
+  Prices* Subset( dt_t time, unsigned int n ) { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -541,11 +544,11 @@ private:
 class PriceIVs: public TimeSeries<PriceIV> {
 public:
   typedef PriceIV datum_t;
-  PriceIVs( void ) {};
+  PriceIVs() {};
   PriceIVs( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~PriceIVs( void ) {};
-  PriceIVs* Subset( ptime time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
-  PriceIVs* Subset( ptime time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~PriceIVs() {};
+  PriceIVs* Subset( dt_t time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVs* Subset( dt_t time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -555,11 +558,11 @@ private:
 class PriceIVExpirys: public TimeSeries<PriceIVExpiry> {
 public:
   typedef PriceIVExpiry datum_t;
-  PriceIVExpirys( void ) {};
+  PriceIVExpirys() {};
   PriceIVExpirys( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~PriceIVExpirys( void ) {};
-  PriceIVExpirys* Subset( ptime time ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time ); };
-  PriceIVExpirys* Subset( ptime time, unsigned int n ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time, n ); };
+  ~PriceIVExpirys() {};
+  PriceIVExpirys* Subset( dt_t time ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVExpirys* Subset( dt_t time, unsigned int n ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
