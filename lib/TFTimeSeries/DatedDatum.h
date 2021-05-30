@@ -14,10 +14,6 @@
 
 #pragma once
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
 #include <math.h>
 
 #include <hdf5/H5Cpp.h>
@@ -45,7 +41,7 @@ public:
   using price_t = double;
 
   DatedDatum();
-  DatedDatum( const ptime& dt );
+  DatedDatum( const dt_t& dt );
   DatedDatum( const DatedDatum& datum );
   DatedDatum( const std::string& dt ); // YYYY-MM-DD HH:MM:SS
   virtual ~DatedDatum();
@@ -59,8 +55,8 @@ public:
   bool operator==( const DatedDatum& datum ) const { return m_dt == datum.m_dt; };
   bool operator!=( const DatedDatum& datum ) const { return m_dt != datum.m_dt; };
 
-  const ptime& DateTime() const { return m_dt; };
-  void DateTime( const ptime& dt ) { m_dt = dt; };
+  const dt_t& DateTime() const { return m_dt; };
+  void DateTime( const dt_t& dt ) { m_dt = dt; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );  // create new one if null
   static boost::uint64_t Signature() { return 9; };
@@ -81,9 +77,9 @@ public:
   using asksize_t = quotesize_t;
 
   Quote( void );
-  Quote( const ptime& dt );
+  Quote( const dt_t& dt );
   Quote( const Quote& quote );
-  Quote( const ptime& dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
+  Quote( const dt_t& dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
   Quote( const std::string& dt,
     const std::string& bid, const std::string& bidsize,
     const std::string& ask, const std::string& asksize );
@@ -123,9 +119,9 @@ class Trade: public DatedDatum {
 public:
 
   Trade( void );
-  Trade( const ptime &dt );
+  Trade( const dt_t &dt );
   Trade( const Trade &trade );
-  Trade( const ptime& dt, price_t dblTrade, volume_t nTradeSize );
+  Trade( const dt_t& dt, price_t dblTrade, volume_t nTradeSize );
   Trade( const std::string& dt, const std::string& trade, const std::string& size );
   ~Trade( void );
 
@@ -149,9 +145,9 @@ class Bar: public DatedDatum {
 public:
 
   Bar( void );
-  Bar( const ptime& dt );
+  Bar( const dt_t& dt );
   Bar( const Bar& bar );
-  Bar( const ptime& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
+  Bar( const dt_t& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
   Bar( const std::string& dt, const std::string& open, const std::string& high,
     const std::string& low, const std::string& close, const std::string& volume );
   ~Bar (void );
@@ -191,9 +187,9 @@ public:
   enum ESide : char { Bid, Ask, None };
 
   MarketDepth( void );
-  MarketDepth( const ptime& dt );
+  MarketDepth( const dt_t& dt );
   MarketDepth( const MarketDepth& md );
-  MarketDepth( const ptime& dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
+  MarketDepth( const dt_t& dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
   MarketDepth( const std::string& dt, char chSide, const std::string& shares,
     const std::string& price, const std::string& mmid );
    ~MarketDepth(void);
@@ -238,10 +234,10 @@ public:
   };
 
   Greek( void );
-  Greek( const ptime& dt );
+  Greek( const dt_t& dt );
   Greek( const Greek& greeks );
-  Greek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks );
-  Greek( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
+  Greek( const dt_t& dt, double dblImpliedVolatility, const greeks_t& greeks );
+  Greek( const dt_t& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
   ~Greek( void );
 
   double ImpliedVolatility( void ) const { return m_dblImpliedVolatility; };
@@ -258,7 +254,7 @@ public:
   void Vega( double dblVega ) { m_dblVega = dblVega; };
   void Rho( double dblRho ) { m_dblRho = dblRho; };
 
-  void Assign( const ptime& dt, double dblImplVol, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ) {
+  void Assign( const dt_t& dt, double dblImplVol, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ) {
     m_dt = dt;
     m_dblImpliedVolatility = dblImplVol;
     m_dblDelta = dblDelta;
@@ -291,9 +287,9 @@ class Price: public DatedDatum {
 public:
 
   Price( void );
-  Price( const ptime& dt );
+  Price( const dt_t& dt );
   Price( const Price& price );
-  Price( const ptime& dt, price_t dblPrice );
+  Price( const dt_t& dt, price_t dblPrice );
   Price( const std::string &dt, const std::string& price );
   ~Price( void );
 
@@ -314,9 +310,9 @@ private:
 class PriceIV: public Price {
 public:
   PriceIV( void );
-  PriceIV( const ptime& dt );
+  PriceIV( const dt_t& dt );
   PriceIV( const PriceIV& rhs );
-  PriceIV( const ptime& dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut );
+  PriceIV( const dt_t& dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut );
   ~PriceIV( void ) {};
 
   double IVCall( void ) const { return m_dblIVCall; };
@@ -340,21 +336,21 @@ private:
 class PriceIVExpiry: public Price {
 public:
   PriceIVExpiry( void );
-  PriceIVExpiry( const ptime& dt );
+  PriceIVExpiry( const dt_t& dt );
   PriceIVExpiry( const PriceIVExpiry& rhs );
-  PriceIVExpiry( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut );
+  PriceIVExpiry( const dt_t& dtSampled, price_t dblPrice, const dt_t& dtExpiry, double dblIVCall, double dblIVPut );
   ~PriceIVExpiry( void ) {};
 
   double IVCall( void ) const { return m_dblIVCall; };
   double IVPut( void ) const { return m_dblIVPut; };
-  ptime Expiry( void ) const { return m_dtExpiry; };
+  dt_t Expiry( void ) const { return m_dtExpiry; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static boost::uint64_t Signature( void ) { return Price::Signature() * 1000 + 411; };
 
 protected:
 private:
-  ptime m_dtExpiry;
+  dt_t m_dtExpiry;
   double m_dblIVCall;
   double m_dblIVPut;
 };
