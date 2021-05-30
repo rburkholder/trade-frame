@@ -37,12 +37,12 @@ namespace tf { // TradeFrame
 class DatedDatum {
 public:
 
-  typedef unsigned long volume_t;
-  typedef volume_t tradesize_t;
-  typedef volume_t quotesize_t;
-  typedef boost::posix_time::ptime dt_t;
+  using volume_t = unsigned long;
+  using tradesize_t = volume_t;
+  using quotesize_t = volume_t;
+  using dt_t = boost::posix_time::ptime;
 
-  typedef double price_t;
+  using price_t = double;
 
   DatedDatum();
   DatedDatum( const ptime& dt );
@@ -77,8 +77,8 @@ private:
 class Quote: public DatedDatum {
 public:
 
-  typedef quotesize_t bidsize_t;
-  typedef quotesize_t asksize_t;
+  using bidsize_t = quotesize_t;
+  using asksize_t = quotesize_t;
 
   Quote( void );
   Quote( const ptime& dt );
@@ -173,10 +173,10 @@ public:
 
 protected:
 private:
-  double m_dblOpen;
-  double m_dblHigh;
-  double m_dblLow;
-  double m_dblClose;
+  price_t m_dblOpen;
+  price_t m_dblHigh;
+  price_t m_dblLow;
+  price_t m_dblClose;
   volume_t m_nVolume;
 };
 
@@ -187,7 +187,7 @@ private:
 class MarketDepth: public DatedDatum {
 public:
 
-  typedef unsigned long MMID_t;
+  using MMID_t = unsigned long;
   enum ESide : char { Bid, Ask, None };
 
   MarketDepth( void );
