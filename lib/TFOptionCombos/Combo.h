@@ -52,7 +52,7 @@ public:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::Option>;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   using citerChain_t = mapChains_t::const_iterator;
 

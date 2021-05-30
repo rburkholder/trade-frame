@@ -39,16 +39,16 @@ namespace option { // options
 
 namespace chain {
 
-  struct Option { // inherit to add addtiional fields
+  struct OptionName { // inherit to add addtiional fields
     std::string sName;
-    Option() {}
-    Option( const std::string& sName_ )
+    OptionName() {}
+    OptionName( const std::string& sName_ )
     : sName( sName_ ) {}
-    Option( const std::string&& sName_ )
+    OptionName( const std::string&& sName_ )
     : sName( std::move( sName_ ) ) {}
-    Option( const Option& rhs )
+    OptionName( const OptionName& rhs )
     : sName( rhs.sName ) {}
-    Option( const Option&& rhs )
+    OptionName( const OptionName&& rhs )
     : sName( std::move( rhs.sName ) ) {}
   };
 

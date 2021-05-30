@@ -44,7 +44,7 @@ public:
   using pOption_t = ou::tf::option::Option::pOption_t;
   using vOption_t = std::vector<pOption_t>;
 
-  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::Option>;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
 
   using fStrikeSelected_t
