@@ -40,7 +40,7 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  pt::ptime dtLast( gregorian::date( 2021, 5, 19 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
+  pt::ptime dtLast( gregorian::date( 2021, 5, 28 ), pt::time_duration( 23, 59, 59 ) );  // use date of last bar to retrieve
 
   std::cout << "SignalGenerator parsing cboe spreadsheet ..." << std::endl;
 
