@@ -151,16 +151,16 @@ private:
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
-    bool m_bChartActivated;
+    bool bChartActivated;
     pChartDataView_t pChartDataView;
     Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
     : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
-      m_bChartActivated( false ), pChartDataView( pChartDataView_ ),
+      bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
     Strategy( const IIPivot&& iip_, pChartDataView_t& pChartDataView_ )
     : iip( std::move( iip_ ) ),
-      m_bChartActivated( false ), pChartDataView( pChartDataView_ ),
+      bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }

@@ -622,9 +622,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio );
             if ( bAuthorized ) {
-              if ( !strategy.m_bChartActivated ) {
+              if ( !strategy.bChartActivated ) {
                 strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-                strategy.m_bChartActivated = true;
+                strategy.bChartActivated = true;
               }
             }
             //ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
@@ -638,9 +638,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio, pWatch );
             if ( bAuthorized ) {
-              if ( !strategy.m_bChartActivated ) {
+              if ( !strategy.bChartActivated ) {
                 strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-                strategy.m_bChartActivated = true;
+                strategy.bChartActivated = true;
               }
             }
             //ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
@@ -654,9 +654,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
             if ( bAuthorized || bExists ) {
-              if ( !strategy.m_bChartActivated ) {
+              if ( !strategy.bChartActivated ) {
                 strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-                strategy.m_bChartActivated = true;
+                strategy.bChartActivated = true;
               }
             }
             return bAuthorized;
