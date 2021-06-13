@@ -51,7 +51,7 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
 
         iterator_t iterChains;
 
-        {
+        { // find existing expiry, or create new one
           chain_t chain;
 
           iterChains = map.find( date ); // see if expiry date exists
@@ -63,7 +63,7 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
           }
         }
 
-        {
+        { // populate new call or put, no test for pre-existance
           chain_t& chain( iterChains->second );
 
           //std::cout << "  option: " << row.sSymbol << std::endl;
