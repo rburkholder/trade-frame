@@ -148,8 +148,6 @@ public:
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
-  void SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side );
-
   void AddCombo( bool bForced );
 
   double EmitInfo();
@@ -187,8 +185,6 @@ private:
   enum class EBollXing { None, Lower, Mean, Upper, _Count };
 
   size_t m_nConfirmationIntervals;
-
-  ou::tf::OrderSide::enumOrderSide m_DefaultOrderSide;
 
   boost::gregorian::days m_daysToExpiry;
 

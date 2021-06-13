@@ -258,7 +258,6 @@ ManageStrategy::ManageStrategy(
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_DefaultOrderSide( ou::tf::OrderSide::Unknown ),  // TODO: update based upon current trend
   m_daysToExpiry( 1 ), // will be different for each strategy, to be deprecated
   m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
 {
@@ -746,7 +745,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                 m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                combo.PlaceOrder( m_DefaultOrderSide, 1 );
+                combo.PlaceOrder( ou::tf::OrderSide::Buy, 1 );
                 m_stateTrading = ETradingState::TSComboPrepare;
 
               } // m_fAuthorizeSimple
@@ -795,7 +794,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
             using LegNote = ou::tf::option::LegNote;
             const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-            pCombo->PlaceOrder( m_DefaultOrderSide, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
+            pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
             return pPosition;
           },
           [this]( pPosition_t pPosition ){ // fRemovePosition_t
@@ -1308,8 +1307,4 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
 //    AddChartEntries( pChartDataView, series );
 
-}
-
-void ManageStrategy::SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side ) {
-  m_DefaultOrderSide = side;
 }

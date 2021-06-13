@@ -41,14 +41,10 @@ namespace {
 
 bool AppBasketTrading::OnInit() {
 
-  m_rbBuy = nullptr;
-  m_rbNeutral = nullptr;
-  m_rbSell = nullptr;
-
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Basket Trading" );
   wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c) 2019 One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2021 One Unified Net Limited" );
 
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
@@ -115,24 +111,6 @@ bool AppBasketTrading::OnInit() {
 
 //  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
 //  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
-
-  wxBoxSizer* sizerBuySell = new wxBoxSizer( wxHORIZONTAL );
-  sizerLeft->Add( sizerBuySell );
-
-  m_rbBuy = new wxRadioButton( m_pFrameMain, wxID_ANY, "Buy", wxDefaultPosition, wxDefaultSize, wxRB_GROUP ); // wxRB_GROUP indicates start of group
-  sizerBuySell->Add( m_rbBuy );
-  m_rbBuy->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
-
-  m_rbNeutral = new wxRadioButton( m_pFrameMain, wxID_ANY, "Neutral", wxDefaultPosition, wxDefaultSize );
-  sizerBuySell->Add( m_rbNeutral );
-  m_rbNeutral->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetNeutral, this );
-
-  m_rbSell = new wxRadioButton( m_pFrameMain, wxID_ANY, "Sell", wxDefaultPosition, wxDefaultSize, 0 );
-  sizerBuySell->Add( m_rbSell );
-  m_rbSell->Bind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
-
-  m_rbNeutral->SetValue( true );
-  m_enumBuySell = EBuySell::Neutral;
 
   m_pFrameMain->Show( true );
 
@@ -257,30 +235,6 @@ void AppBasketTrading::BuildMasterPortfolio() {
     }
     );
   //std::cout << "  done." << std::endl;
-}
-
-void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {
-  std::cout << "button buy" << std::endl;
-  CallAfter( [this](){
-    m_enumBuySell = EBuySell::Buy;
-    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
-  } );
-}
-
-void AppBasketTrading::HandleButtonSetNeutral( wxCommandEvent& event ) {
-  std::cout << "button neutral" << std::endl;
-  CallAfter( [this](){
-    m_enumBuySell = EBuySell::Neutral;
-    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Unknown );
-  } );
-}
-
-void AppBasketTrading::HandleButtonSetSell( wxCommandEvent& event ) {
-  std::cout << "button sell" << std::endl;
-  CallAfter( [this](){
-    m_enumBuySell = EBuySell::Sell;
-    m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Sell );
-  } );
 }
 
 void AppBasketTrading::HandleButtonTest() {
@@ -451,9 +405,6 @@ void AppBasketTrading::LoadState() {
 }
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
-  m_rbBuy->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetBuy, this );
-  m_rbNeutral->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetNeutral, this );
-  m_rbSell->Unbind( wxEVT_RADIOBUTTON, &AppBasketTrading::HandleButtonSetSell, this );
 
   if ( m_worker.joinable() ) m_worker.join();
   m_timerGuiRefresh.Stop();

@@ -90,10 +90,7 @@ private:
 
   wxTimer m_timerGuiRefresh;
 
-  wxRadioButton* m_rbBuy;
-  wxRadioButton* m_rbNeutral;
-  wxRadioButton* m_rbSell;
-  enum EBuySell { Neutral, Buy, Sell };
+  enum EBuySell { Neutral, Buy, Sell }; // deprecated
   EBuySell m_enumBuySell;
 
   double m_dblMaxPL;
@@ -151,37 +148,33 @@ private:
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
 
-  void HandleButtonSetBuy( wxCommandEvent& event );
-  void HandleButtonSetNeutral( wxCommandEvent& event );
-  void HandleButtonSetSell( wxCommandEvent& event );
-
   void SaveState();
   void LoadState();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    ar & m_enumBuySell;
+    //ar & m_enumBuySell;
     //ar & m_splitPanels->GetSashPosition();
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    if ( 2 == version ) {
+    if ( 2 <= version ) {
       ar & m_enumBuySell;
       switch ( m_enumBuySell ) {
         case EBuySell::Buy:
-          m_rbBuy->SetValue( true );
-          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
+          //m_rbBuy->SetValue( true );
+          //m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Buy );
           break;
         case EBuySell::Neutral:
-          m_rbNeutral->SetValue( true );
-          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Unknown );
+          //m_rbNeutral->SetValue( true );
+          //m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Unknown );
           break;
         case EBuySell::Sell:
-          m_rbSell->SetValue( true );
-          m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Sell );
+          //m_rbSell->SetValue( true );
+          //m_pMasterPortfolio->SetDefaultOrderSide( ou::tf::OrderSide::Sell );
           break;
       }
     }
@@ -192,6 +185,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 2)
+BOOST_CLASS_VERSION(AppBasketTrading, 3)
 DECLARE_APP(AppBasketTrading)
 

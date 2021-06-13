@@ -77,8 +77,6 @@ MasterPortfolio::MasterPortfolio(
       assert( 0 ); // need the iqfeed provider
   }
 
-  m_DefaultOrderSide = ou::tf::OrderSide::Unknown;
-
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
   m_cePLUnRealized.SetColour( ou::Colour::DarkCyan );
   m_cePLRealized.SetColour( ou::Colour::MediumSlateBlue );
@@ -674,7 +672,6 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
   strategy.Set( std::move( pManageStrategy ) );
 
   strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
-  strategy.pManageStrategy->SetDefaultOrderSide( m_DefaultOrderSide );
 
   m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -873,12 +870,4 @@ void MasterPortfolio::TakeProfits() {
       Strategy& strategy( pair.second );
         strategy.pManageStrategy->TakeProfits();
     } );
-}
-
-void MasterPortfolio::SetDefaultOrderSide( ou::tf::OrderSide::enumOrderSide side ) {
-  m_DefaultOrderSide = side;
-  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-    Strategy& strategy( vt.second );
-    strategy.pManageStrategy->SetDefaultOrderSide( side );
-  }
 }
