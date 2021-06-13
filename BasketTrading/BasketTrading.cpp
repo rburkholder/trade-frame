@@ -158,7 +158,7 @@ bool AppBasketTrading::OnInit() {
     });
   });
 
-  m_sPortfolioStrategyAggregate = "Basket-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
+  m_sPortfolioStrategyAggregate = "started-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppBasketTrading::HandlePortfolioLoad ) );
@@ -226,11 +226,14 @@ bool AppBasketTrading::OnInit() {
 
 void AppBasketTrading::BuildMasterPortfolio() {
 
-  std::cout << "BuildMasterPortfolio ..." << std::endl;
+  //std::cout << "BuildMasterPortfolio ..." << std::endl;
 
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
+    // aggregation portfolio
+    m_pPortfolioStrategyAggregate,
+    // providers
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     // obtain option chains for underlying:
     [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t&& f){
@@ -251,11 +254,9 @@ void AppBasketTrading::BuildMasterPortfolio() {
     // del ChartDataView from PanelFinancialChart
     [this]( wxTreeItemId id ){
       m_pPanelFinancialChart->DeleteItem( id );
-    },
-    // pass in the aggregation portfolio
-    m_pPortfolioStrategyAggregate
+    }
     );
-  std::cout << "  done." << std::endl;
+  //std::cout << "  done." << std::endl;
 }
 
 void AppBasketTrading::HandleButtonSetBuy( wxCommandEvent& event ) {

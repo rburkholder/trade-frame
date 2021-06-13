@@ -28,15 +28,15 @@
 #include "MasterPortfolio.h"
 
 namespace {
-  const std::string sPortfolioPrefix( "strategy-" );
+  const std::string sPortfolioPrefix( "basket-" );
 }
 
 MasterPortfolio::MasterPortfolio(
+    pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGatherOptionDefinitions_t&& fGatherOptionDefinitions,
     fGetTableRowDef_t&& fGetTableRowDef,
-    fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel,
-    pPortfolio_t pMasterPortfolio
+    fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel
     )
   : m_bStarted( false ),
     m_nSharesTrading( 0 ),
@@ -298,7 +298,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
                 // see if we get wider swings with this
 //                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
 //                if ( 1.24 < dblSum ) {
-                  AddSymbol( iip );
+                  AddUnderlyingSymbol( iip );
 //                }
               }
             }
@@ -337,7 +337,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::AddSymbol( const std::string& sSymbolUnderlying ) {
+void MasterPortfolio::BuildUnderlyingChains( const std::string& sSymbolUnderlying ) {
   mapChainAggregate_t::iterator iterMapOptionAggregate
     = m_mapChainAggregate.find( sSymbolUnderlying );
   if ( m_mapChainAggregate.end() == iterMapOptionAggregate ) {
@@ -345,7 +345,7 @@ void MasterPortfolio::AddSymbol( const std::string& sSymbolUnderlying ) {
   }
 }
 
-void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
+void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
 
   std::string sUnderlying( iip.sName );
 

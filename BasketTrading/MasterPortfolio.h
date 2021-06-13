@@ -65,11 +65,12 @@ public:
   using fChartDel_t = std::function<void(wxTreeItemId)>;
 
   MasterPortfolio(
+    pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGatherOptionDefinitions_t &&,
     fGetTableRowDef_t &&,
-    fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&,
-    pPortfolio_t pMasterPortfolio );
+    fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&
+    );
   ~MasterPortfolio(void);
 
   void Add( pPortfolio_t ); // from database load
@@ -209,8 +210,8 @@ private:
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;
 
-  void AddSymbol( const std::string& sSymbolUnderlying ); // m_mapChainAggregate
-  void AddSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
+  void BuildUnderlyingChains( const std::string& sSymbolUnderlying ); // m_mapChainAggregate
+  void AddUnderlyingSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
