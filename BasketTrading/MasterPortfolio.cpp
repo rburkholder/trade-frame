@@ -337,6 +337,14 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
+void MasterPortfolio::AddSymbol( const std::string& sSymbolUnderlying ) {
+  mapChainAggregate_t::iterator iterMapOptionAggregate
+    = m_mapChainAggregate.find( sSymbolUnderlying );
+  if ( m_mapChainAggregate.end() == iterMapOptionAggregate ) {
+    //m_mapChainAggregate.emplace( std::make_pair( sSymbolUnderlying, ou::tf::option::Aggregate() pWatch ) );
+  }
+}
+
 void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
   std::string sUnderlying( iip.sName );

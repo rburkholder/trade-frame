@@ -10,10 +10,12 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
+    Aggregate.h
     Binomial.h
     Bundle.h
     CalcExpiry.h
     Chain.h
+    Chains.h
     Engine.h
     Formula.h
     IvAtm.h
@@ -26,10 +28,12 @@ set(
 
 set(
   file_cpp
+    Aggregate.cpp
     Binomial.cpp
     Bundle.cpp
     CalcExpiry.cpp
     Chain.cpp
+    Chains.cpp
     Engine.cpp
     Formula.cpp
     IvAtm.cpp

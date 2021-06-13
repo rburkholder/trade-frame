@@ -31,6 +31,7 @@
 
 #include <TFOptions/Option.h>
 #include <TFOptions/Engine.h>
+#include <TFOptions/Aggregate.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFTrading/ProviderManager.h>
@@ -131,6 +132,9 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
+  using mapChainAggregate_t = std::map<const std::string /*symbol*/, ou::tf::option::Aggregate>;
+  mapChainAggregate_t m_mapChainAggregate;
+
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryIndicator m_cePLCurrent;
@@ -205,7 +209,8 @@ private:
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;
 
-  void AddSymbol( const IIPivot& );
+  void AddSymbol( const std::string& sSymbolUnderlying ); // m_mapChainAggregate
+  void AddSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
