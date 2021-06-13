@@ -57,6 +57,8 @@ private:
   pWatch_t m_pWatchUnderlying;
 
   struct OptionStats: public ou::tf::option::chain::OptionName {
+    // should volumes net out?  seems they will monotonically increase
+    //   without input from open interest numbers.  does it matter?
     volume_t sell;
     volume_t buy;
     ou::tf::Quotes quotes;
