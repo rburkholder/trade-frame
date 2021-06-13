@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian_calendar.hpp>
 //using namespace boost::posix_time;
@@ -45,7 +45,7 @@ public:
   typedef keytypes::idExchange_t idExchange_t;
   typedef keytypes::idInstrument_t idInstrument_t;
   typedef const idInstrument_t& idInstrument_cref;
-  typedef boost::shared_ptr<Instrument> pInstrument_t;
+  typedef std::shared_ptr<Instrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
 
   static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );

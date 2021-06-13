@@ -30,7 +30,7 @@ namespace option { // options
 class Option: public ou::tf::Watch {
 public:
 
-  typedef boost::shared_ptr<Option> pOption_t;
+  typedef std::shared_ptr<Option> pOption_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 

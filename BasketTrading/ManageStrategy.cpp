@@ -459,7 +459,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
         }
 
-        pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+        pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
         m_pOptionRepository->Add( pOption );
 
         std::cout << "set combo position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
@@ -801,7 +801,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           [this]( pPosition_t pPosition ){ // fRemovePosition_t
             pWatch_t pWatch = pPosition->GetWatch();
             assert( pWatch->GetInstrument()->IsOption() );
-            pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+            pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
             m_pOptionRepository->Remove( pOption );
           }
           ); // Prepare

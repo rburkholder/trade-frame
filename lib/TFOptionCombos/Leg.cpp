@@ -100,7 +100,7 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
 
   ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
   // NOTE: this may generate error with non-option!
-  ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+  ou::tf::option::Option::pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
 
   if ( pOption ) {
     m_bOption = true;
@@ -123,7 +123,7 @@ void Leg::Tick( ptime dt ) {
     m_ceProfitLoss.Append( dt, dblPL );
     if ( m_bOption ) {
       ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
-      ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      ou::tf::option::Option::pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
       m_ceImpliedVolatility.Append( dt, pOption->ImpliedVolatility() );
       m_ceDelta.Append( dt, pOption->Delta() );
       m_ceGamma.Append( dt, pOption->Gamma() );
@@ -165,7 +165,7 @@ void Leg::SaveSeries( const std::string& sPrefix ) {
   if ( m_pPosition ) {
     if ( m_bOption ) {
       ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
-      ou::tf::option::Option::pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      ou::tf::option::Option::pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
       pOption->SaveSeries( sPrefix );
     }
     else {
@@ -309,7 +309,7 @@ bool Leg::CloseItmForProfit( const double price ) {
 void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price ) {
   using pInstrument_t = Position::pInstrument_t;
   if ( m_pPosition ) {
-    pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+    pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
     pInstrument_t pInstrument = pOption->GetInstrument();
     if ( date == pInstrument->GetExpiry() ) {
       const double strike = pInstrument->GetStrike();
@@ -332,7 +332,7 @@ void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price 
 void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
   using pInstrument_t = Position::pInstrument_t;
   if ( m_pPosition ) {
-    pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+    pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
     pInstrument_t pInstrument = pOption->GetInstrument();
     if ( date == pInstrument->GetExpiry() ) {
       const double strike = pInstrument->GetStrike();
@@ -374,7 +374,7 @@ double Leg::GetNet( double price ) const {
       << "@"
       << dblValue;
     if ( m_bOption ) {
-      pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+      pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
       switch ( pOption->GetInstrument()->GetOptionSide() ) {
         case ou::tf::OptionSide::Call:
           if ( price >= m_pPosition->GetInstrument()->GetStrike() ) {

@@ -198,12 +198,12 @@ void AppIntervalTrader::HandleIQFeedConnected( int e ) {  // cross thread event
 
     // lib/TFIQFeed/BuildInstrument.cpp
     ou::tf::Instrument::pInstrument_t pInstrument
-      = boost::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "SMART" );
+      = std::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "SMART" );
     pInstrument->SetMultiplier( 1 );  // default
     pInstrument->SetMinTick( 0.01 );
     pInstrument->SetSignificantDigits( 2 );
 
-    pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
     pPosition_t pPosition = boost::make_shared<ou::tf::Position>( pWatch, m_pIB );
     m_pPortfolio->AddPosition( sSymbol, pPosition );
     m_vInstance.emplace_back( Instance( pPosition ) );

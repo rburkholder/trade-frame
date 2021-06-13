@@ -419,7 +419,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
                 //pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
                 //pWatch_t pWatch;
                 //m_pOptionEngine->Find( pEquityInstrument, pWatch );
-                pWatch_t pWatch( new ou::tf::Watch( pEquityInstrument, m_pData1 ) );
+                pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pEquityInstrument, m_pData1 );
 
                 // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
                 if ( bNeedContract ) {
@@ -465,7 +465,7 @@ void MasterPortfolio::AddSymbol( const IIPivot& iip ) {
 
               if ( bUseExistingOption ) {
                 // option should exist given code at line 118 Position.cpp ConstructWatch
-                pOption_t pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( iterPosition->second->GetWatch() );
+                pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( iterPosition->second->GetWatch() );
                 fOption( pOption );
               }
               else {

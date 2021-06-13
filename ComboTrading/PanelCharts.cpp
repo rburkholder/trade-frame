@@ -255,7 +255,7 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
         }
         else {
           if ( entry.m_bAddedToEngine ) {
-            m_fCalcOptionGreek_Remove( boost::dynamic_pointer_cast<ou::tf::option::Option>( entry.m_pWatch ), entry.m_pWatchUnderlying ); // any error result?
+            m_fCalcOptionGreek_Remove( std::dynamic_pointer_cast<ou::tf::option::Option>( entry.m_pWatch ), entry.m_pWatchUnderlying ); // any error result?
             entry.m_bAddedToEngine = false;
           }
           entry.m_cntMenuDependents--;
@@ -485,7 +485,7 @@ void PanelCharts::ConstructInstrumentEntry( const wxTreeItemId& item, pInstrumen
         else {
           pWatchUnderlying = iterUnderlying->second.m_pWatch;
           //pOption_t pOption;
-          //pOption = boost::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+          //pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
           m_fCalcOptionGreek_Add( pOption, pWatchUnderlying );
         }
       }

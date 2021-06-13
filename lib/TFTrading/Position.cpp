@@ -107,13 +107,13 @@ void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataPr
     case ou::tf::InstrumentType::Option:
     case ou::tf::InstrumentType::FuturesOption:
       {
-        pOption_t pOption = boost::make_shared<ou::tf::option::Option>( pInstrument, pDataProvider );
+        pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, pDataProvider );
         m_pWatch = std::move( pOption );
       }
       break;
     default:
       {
-        pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, pDataProvider );
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pDataProvider );
         m_pWatch = std::move( pWatch );
       }
       break;

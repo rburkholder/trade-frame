@@ -172,9 +172,9 @@ void AppMultipleFutures::ConstructInstance( boost::uint16_t nSecPerBar, boost::u
   static const std::string sBaseName( "ES" );
 
   ou::tf::Instrument::pInstrument_t pInstrument
-    = boost::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "GLOBEX", year, month, day );
+    = std::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "GLOBEX", year, month, day );
 
-  pWatch_t pWatch = boost::make_shared<ou::tf::Watch>( pInstrument, m_pIB );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIB );
   m_pIB->RequestContractDetails(
     sBaseName, pInstrument,
     [this,pWatch,nSecPerBar]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){

@@ -57,7 +57,7 @@ void SpreadValidation::SetWatch( size_t ixLeg, pWatch_t pWatch, double dblSpread
 
 SpreadValidation::pWatch_t SpreadValidation::GetWatch( size_t ixLeg ) {
   assert( ixLeg < m_vSpreadCandidate.size() );
-  //return boost::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
+  //return std::dynamic_pointer_cast<ou::tf::option::Option>( m_scCall.GetWatch() );
   return m_vSpreadCandidate[ ixLeg ].GetWatch();
 }
 

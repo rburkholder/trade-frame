@@ -17,8 +17,6 @@
 
 #include <map>
 
-#include <boost/smart_ptr.hpp>
-
 #include <OUCommon/Delegate.h>
 
 #include <TFTrading/PortfolioManager.h>

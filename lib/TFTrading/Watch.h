@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr.hpp>
+#include <memory>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -38,7 +38,7 @@ namespace tf { // TradeFrame
 class Watch {
 public:
 
-  typedef boost::shared_ptr<Watch> pWatch_t;
+  typedef std::shared_ptr<Watch> pWatch_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
