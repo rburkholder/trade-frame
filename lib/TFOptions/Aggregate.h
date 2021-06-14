@@ -33,6 +33,8 @@
 
 #include <TFTrading/Watch.h>
 
+#include "Chains.h"
+
 #include "Chain.h"
 
 namespace ou { // One Unified
@@ -47,10 +49,14 @@ public:
   Aggregate(
     pWatch_t pWatchUnderlying
   );
+
+  void LoadChains( fGatherOptionDefinitions_t& );
+
   // TODO:
   //   constructor needs engine add/remove, underlying, option construction (no IB contract, no registration)
   //   iqfeed sybmol will require trade-only watch request
   //   will require registration to P message for current quote
+
 protected:
 private:
 

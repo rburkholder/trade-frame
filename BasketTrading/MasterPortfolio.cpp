@@ -128,7 +128,7 @@ MasterPortfolio::~MasterPortfolio(void) {
   if ( m_worker.joinable() )
     m_worker.join();
   //TODO: need to wait for m_pOptionEngine to finish
-  m_mapVolatility.clear();
+  //m_mapVolatility.clear();
   m_mapStrategyArtifacts.clear();
   m_mapStrategy.clear();
   m_pOptionEngine.release();
@@ -335,12 +335,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::BuildUnderlyingChains( const std::string& sSymbolUnderlying ) {
-  mapChainAggregate_t::iterator iterMapOptionAggregate
-    = m_mapChainAggregate.find( sSymbolUnderlying );
-  if ( m_mapChainAggregate.end() == iterMapOptionAggregate ) {
-    //m_mapChainAggregate.emplace( std::make_pair( sSymbolUnderlying, ou::tf::option::Aggregate() pWatch ) );
-  }
+// TODO: don't really need this anymore, placeholder for real code
+void MasterPortfolio::BuildUnderlyingChains( gex_t& gex ) {
+  gex.LoadChains( m_fOptionNamesByUnderlying );
 }
 
 void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
@@ -673,7 +670,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
 
   strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
 
-  m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
+  //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
   if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) {
     StrategyArtifacts& artifacts( iterStrategyArtifacts->second );

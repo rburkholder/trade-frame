@@ -30,7 +30,10 @@ Aggregate::Aggregate(
 )
 : m_pWatchUnderlying( pWatchUnderlying )
 {
+}
 
+void Aggregate::LoadChains( fGatherOptionDefinitions_t& f ) {
+  ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, m_pWatchUnderlying->GetInstrument()->GetInstrumentName(), f );
 }
 
 } // namespace option

@@ -129,9 +129,6 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  using mapChainAggregate_t = std::map<const std::string /*symbol*/, ou::tf::option::Aggregate>;
-  mapChainAggregate_t m_mapChainAggregate;
-
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryIndicator m_cePLCurrent;
@@ -197,8 +194,20 @@ private:
 
   setSymbols_t m_setSymbols;
 
-  using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
-  mapVolatility_t m_mapVolatility;
+  using gex_t = ou::tf::option::Aggregate;
+
+  struct Underlying { // contains: 1) active strategies, 2) gex calcs
+    Underlying( pWatch_t pWatchUnderlying_ )
+    : pWatchUnderlying( pWatchUnderlying_ ), GexCalc( pWatchUnderlying_ )
+    {
+      assert( pWatchUnderlying_ );
+    }
+    pWatch_t pWatchUnderlying;
+    gex_t GexCalc;
+  };
+
+  //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
+  //mapVolatility_t m_mapVolatility;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fGetTableRowDef_t m_fGetTableRowDef;
@@ -206,7 +215,7 @@ private:
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;
 
-  void BuildUnderlyingChains( const std::string& sSymbolUnderlying ); // m_mapChainAggregate
+  void BuildUnderlyingChains( gex_t& );
   void AddUnderlyingSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
 
   template<typename Archive>
