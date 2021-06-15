@@ -206,6 +206,7 @@ ManageStrategy::ManageStrategy(
   const std::string& sDailyBarPath,
   const ou::tf::Bar& barPriorDaily,
   pPortfolio_t pPortfolioStrategy, // => m_pPortfolioStrategy
+  pChartDataView_t pcdvStrategyData,
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
   fConstructWatch_t fConstructWatch, // => m_fConstructWatch
   fConstructOption_t fConstructOption, // => m_fConstructOption
@@ -219,8 +220,7 @@ ManageStrategy::ManageStrategy(
   fAuthorizeUnderlying_t fAuthorizeUnderlying, // => m_fAuthorizeUnderlying
   fAuthorizeOption_t fAuthorizeOption, // => m_fAuthorizeOption
   fAuthorizeSimple_t fAuthorizeSimple, // => m_fAuthorizeSimple
-  fBar_t fBar,
-  pChartDataView_t pcdvStrategyData
+  fBar_t fBar
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
@@ -228,6 +228,8 @@ ManageStrategy::ManageStrategy(
   m_sDailyBarPath( sDailyBarPath ),
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
+  m_pChartDataView( pcdvStrategyData ),
+
   m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
@@ -239,6 +241,7 @@ ManageStrategy::ManageStrategy(
   m_fAuthorizeOption( fAuthorizeOption ),
   m_fAuthorizeSimple( fAuthorizeSimple ),
   m_fBar( fBar ),
+
   m_eTradeDirection( ETradeDirection::None ),
   m_bfQuotes01Sec( 1 ),
   m_bfTrades01Sec( 1 ),
@@ -246,10 +249,11 @@ ManageStrategy::ManageStrategy(
 //  m_bfTicks06sec( 6 ),
 //  m_bfTrades60Sec( 60 ),
 //  m_cntUpReturn {}, m_cntDnReturn {},
+
   m_stateEma( EmaState::EmaUnstable ),
   m_stateBollinger( EBollingerState::Unknown ),
   //m_eOptionState( EOptionState::Initial1 ),
-  m_pChartDataView( pcdvStrategyData ),
+
   m_ixColour {},
   m_bClosedItmLeg( false ), m_bAllowComboAdd( false ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),

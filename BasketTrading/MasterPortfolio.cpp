@@ -379,6 +379,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         iip.sPath,
         iip_.bar,
         pPortfolioStrategy,
+        pChartDataView,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,
     // ManageStrategy::fConstructWatch_t - underlying construction only
@@ -662,8 +663,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
           [this](ManageStrategy& ms, const ou::tf::Bar& bar){
             // calculate sentiment
             //m_sentiment.Update( bar );
-          },
-          pChartDataView
+          }
       );
 
   strategy.Set( std::move( pManageStrategy ) );

@@ -109,6 +109,7 @@ public:
     const ou::tf::Bar& barPriorDaily,
     // TODO: convert these to left assign
     pPortfolio_t,
+    pChartDataView_t,
     fGatherOptionDefinitions_t&,
     fConstructWatch_t,
     fConstructOption_t,
@@ -122,8 +123,7 @@ public:
     fAuthorizeUnderlying_t,
     fAuthorizeOption_t,
     fAuthorizeSimple_t,
-    fBar_t,
-    pChartDataView_t
+    fBar_t
     );
   virtual ~ManageStrategy( );
 
