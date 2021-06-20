@@ -40,6 +40,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
+#include "Underlying.h"
 #include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
@@ -192,6 +193,9 @@ private:
   mapStrategyArtifacts_t m_mapStrategyArtifacts;
 
   setSymbols_t m_setSymbols;
+
+  using mapUnderlying_t = std::map<std::string, Underlying>;
+  mapUnderlying_t m_mapUnderlying;
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;

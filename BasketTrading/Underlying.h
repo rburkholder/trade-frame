@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryMark.h>
 
@@ -28,16 +30,25 @@
 
 #include <TFTrading/Watch.h>
 
-class Underlying { // contains: 1) to contain active strategies, 2) gex calcs
+#include <TFBitsNPieces/BollingerTransitions.h>
+
+ // contains:
+ //  1) will contain active strategies,
+ //  2) gex calcs
+ //  3) structures common to assigned strategies
+
+class Underlying {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+  using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
 
   Underlying(
     pWatch_t pWatchUnderlying_,
     const std::string& sDailyBarPath
   );
+
+  void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
 
   // TODO: will need two mapChain types:
   //   1) basic for passing to strategy
@@ -47,14 +58,20 @@ protected:
 private:
 
   using gex_t = ou::tf::option::Aggregate;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
+  std::string m_sDailyBarPath;
 
   pWatch_t pWatchUnderlying;
   gex_t GexCalc;
-  std::string m_sDailyBarPath;
 
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryMark m_cePivots;
+
+  fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;  // TODO: needs to be populated
+
+  ou::tf::BollingerTransitions m_BollingerTransitions;
 
   void BuildUnderlyingChains( gex_t& );
 };

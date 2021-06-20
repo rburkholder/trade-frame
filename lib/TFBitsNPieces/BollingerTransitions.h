@@ -23,8 +23,6 @@ class ChartEntryMark;
 
 namespace tf { // TradeFrame
 
-
-
 class BollingerTransitions {
 public:
 
