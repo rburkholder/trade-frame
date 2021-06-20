@@ -159,7 +159,7 @@ Position::~Position(void) {
 
 }
 
-void Position::HandleQuote( const quote_t& quote ) {
+void Position::HandleQuote( quote_t& quote ) {
 
   // TODO: use a flag to determine if to use zero based or not?
   //       maybe allow on optiosn, but not futures/equity?
@@ -195,7 +195,7 @@ void Position::HandleQuote( const quote_t& quote ) {
 
 }
 
-void Position::HandleTrade( const trade_t& trade ) {
+void Position::HandleTrade( trade_t& trade ) {
   OnTrade( trade );
 }
 

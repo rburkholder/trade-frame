@@ -316,8 +316,8 @@ private:
   void CancelOrder( vOrders_iter_t iter );
   void CancelOrder( pOrder_t& pOrder );
 
-  void HandleQuote( const quote_t& ); // is this meant to be a copy or a reference?
-  void HandleTrade( const trade_t& ); // is this meant to be a copy or a reference?
+  void HandleQuote( quote_t& );
+  void HandleTrade( trade_t& );
 
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 
