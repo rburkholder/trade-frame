@@ -366,6 +366,10 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
   Strategy& strategy( iterStrategy->second );
   const IIPivot& iip_( iterStrategy->second.iip );
 
+  // TODO: use Underlying instance instead
+  //strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
+  //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
+
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy;
@@ -663,10 +667,6 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
       );
 
   strategy.Set( std::move( pManageStrategy ) );
-
-  strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
-
-  //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
   if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) {
     StrategyArtifacts& artifacts( iterStrategyArtifacts->second );

@@ -392,16 +392,6 @@ void ManageStrategy::Run() {
   //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
-void ManageStrategy::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
-  // TFIndicators/Pivots.h has R3, S3 plus colour assignments
-  m_pivotCrossing.Set( dblR2, dblR1, dblPV, dblS1, dblS2 );
-  m_cePivots.AddMark( dblR2, ou::Colour::Red, "R2" );
-  m_cePivots.AddMark( dblR1, ou::Colour::Red, "R1" );
-  m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
-  m_cePivots.AddMark( dblS1, ou::Colour::Blue, "S1" );
-  m_cePivots.AddMark( dblS2, ou::Colour::Blue, "S2" );
-}
-
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {
   volume_t nOptionContractsToTrade {};
   if ( 0.0 != m_dblOpen ) {
@@ -570,7 +560,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   //RHEquity( bar );
 
   //const double mid = m_QuoteUnderlyingLatest.Midpoint();
-  // BollingerTransitions::Crossing( mid )
+  // BollingerTransitions::Crossing( mid ) // TODO: needs to be migrated to Underlying
 
   RHOption( bar );
 }
@@ -764,7 +754,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         //     if momentum doesn't change, but trades back over pivot, then roll
         //     don't roll if not profitable yet (commision plus bid/ask spread )
 
-        PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
+        //PivotCrossing::ECrossing crossing = m_pivotCrossing.Update( mid );
         // TODO: need to cross upwards for calls, cross downwards for puts (for long strangle)
 //        if ( PivotCrossing::ECrossing::none != crossing ) {
 //          for ( mapCombo_t::value_type& vt: m_mapCombo ) {

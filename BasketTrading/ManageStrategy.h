@@ -48,7 +48,7 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-#include "PivotCrossing.h"
+//#include "PivotCrossing.h"
 #include "ValidateOptions.h"
 
 class OptionRepository;
@@ -131,7 +131,6 @@ public:
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   //void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void ClosePositions( void );
   void SaveSeries( const std::string& sPrefix );
 
@@ -221,7 +220,7 @@ private:
   pPosition_t m_pPositionUnderlying;
   pPortfolio_t m_pPortfolioStrategy;
 
-  PivotCrossing m_pivotCrossing;
+  //PivotCrossing m_pivotCrossing;
 
   pChartDataView_t m_pChartDataView;
 
