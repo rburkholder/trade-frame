@@ -335,11 +335,6 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-// TODO: don't really need this anymore, placeholder for real code
-void MasterPortfolio::BuildUnderlyingChains( gex_t& gex ) {
-  gex.LoadChains( m_fOptionNamesByUnderlying );
-}
-
 void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
 
   std::string sUnderlying( iip.sName );

@@ -36,6 +36,7 @@ set(
     PivotCrossing.h
     Sentiment.h
     SymbolSelection.h
+    Underlying.h
     ValidateOptions.h
   )
 
@@ -52,6 +53,7 @@ set(
     PivotCrossing.cpp
     Sentiment.cpp
     SymbolSelection.cpp
+    Underlying.cpp
     ValidateOptions.cpp
   )
 

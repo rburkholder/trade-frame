@@ -31,7 +31,6 @@
 
 #include <TFOptions/Option.h>
 #include <TFOptions/Engine.h>
-#include <TFOptions/Aggregate.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFTrading/ProviderManager.h>
@@ -194,27 +193,6 @@ private:
 
   setSymbols_t m_setSymbols;
 
-  using gex_t = ou::tf::option::Aggregate;
-
-  struct Underlying { // contains: 1) to contain active strategies, 2) gex calcs
-    Underlying(
-      pWatch_t pWatchUnderlying_,
-      const std::string& sDailyBarPath
-    )
-    : pWatchUnderlying( pWatchUnderlying_ ),
-      GexCalc( pWatchUnderlying_ ),
-      m_sDailyBarPath( sDailyBarPath )
-    {
-      assert( pWatchUnderlying_ );
-      m_pChartDataView = std::make_shared<ou::ChartDataView>();
-      //BollingerTransitions::ReadDailyBars( m_sDailyBarPath, m_cePivots ); // TODO: enable this for visual clues
-    }
-    pWatch_t pWatchUnderlying;
-    gex_t GexCalc;
-    std::string m_sDailyBarPath;
-    pChartDataView_t m_pChartDataView;
-  };
-
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
@@ -224,7 +202,6 @@ private:
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;
 
-  void BuildUnderlyingChains( gex_t& );
   void AddUnderlyingSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
 
   template<typename Archive>
