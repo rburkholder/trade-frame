@@ -204,14 +204,6 @@ private:
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
 
-  size_t m_nPassedUpper;
-  size_t m_nPassedLower;
-
-  size_t m_ixSdMax;
-  double m_dblBollingerSDMax;
-  size_t m_ixSdMin;
-  double m_dblBollingerSDMin;
-
   double m_dblBollingerUpper;
   double m_dblBollingerMean;
   double m_dblBollingerLower;
@@ -253,7 +245,6 @@ private:
   using pCombo_t = std::unique_ptr<ou::tf::option::Combo>;
   pCombo_t m_pCombo;
 
-  ou::tf::Bars m_barsDaily;
   ou::tf::Prices m_pricesDailyClose;
   ou::tf::TSSWStatsPrice m_pricesDailyCloseBollinger20;
 

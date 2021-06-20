@@ -1198,29 +1198,39 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
   //void ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath )
 
+  size_t nPassedUpper {};
+  size_t nPassedLower {};
+
+  size_t ixSdMin {};
+  size_t ixSdMax {};
+
+  double dblBollingerSDMax {};
+  double dblBollingerSDMin {};
+
+  ou::tf::Bars barsDaily;
+
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> tsRepository( dm, sPath );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
   begin = tsRepository.begin();
   end = tsRepository.end();
-  m_barsDaily.Clear();
+  barsDaily.Clear();
   const hsize_t cnt = end - begin;
-  m_barsDaily.Resize( cnt );
-  tsRepository.Read( begin, end, &m_barsDaily );
+  barsDaily.Resize( cnt );
+  tsRepository.Read( begin, end, &barsDaily );
 
   m_pricesDailyClose.Clear();
   m_pricesDailyCloseBollinger20.Reset();
-  //m_cePivots.Clear(); // need to separate out differently (marks for daily bars only)
 
   bool bLoopStarted( false );
   bool bPassedUpper( false );
   bool bPassedLower( false );
 
-  m_nPassedUpper = m_nPassedLower = 0;
-  m_ixSdMax = m_ixSdMin = 0;
+  nPassedUpper = nPassedLower = 0;
+  ixSdMax = ixSdMin = 0;
   size_t cntMarking = cnt;
 
-  for ( ou::tf::Bars::const_iterator iterBars = m_barsDaily.begin(); m_barsDaily.end() != iterBars; ++iterBars ) {
+  for ( ou::tf::Bars::const_iterator iterBars = barsDaily.begin(); barsDaily.end() != iterBars; ++iterBars ) {
 
     if ( bLoopStarted ) { // calculations use previous day's bollinger
       bPassedUpper = bPassedLower = false;
@@ -1233,23 +1243,23 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
       if ( bPassedUpper || bPassedLower ) {
         if ( bPassedUpper && bPassedLower ) {
-          m_nPassedUpper++;
-          m_nPassedLower++;
+          nPassedUpper++;
+          nPassedLower++;
         }
         else {
           if ( bPassedUpper ) {
-            m_nPassedUpper++;
-            m_nPassedLower = 0;
+            nPassedUpper++;
+            nPassedLower = 0;
           }
           if ( bPassedLower ) {
-            m_nPassedUpper = 0;
-            m_nPassedLower++;
+            nPassedUpper = 0;
+            nPassedLower++;
           }
         }
       }
       else {
-        m_nPassedUpper = 0;
-        m_nPassedLower = 0;
+        nPassedUpper = 0;
+        nPassedLower = 0;
       }
     }
     else {
@@ -1263,18 +1273,18 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
       m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
 
       const double sd = m_pricesDailyCloseBollinger20.SD();
-      if ( sd > m_dblBollingerSDMax ) {
-        m_dblBollingerSDMax = sd;
-        m_ixSdMax = cntMarking;
+      if ( sd > dblBollingerSDMax ) {
+        dblBollingerSDMax = sd;
+        ixSdMax = cntMarking;
       }
-      if ( sd < m_dblBollingerSDMin ) {
-        m_dblBollingerSDMin = sd;
-        m_ixSdMin = cntMarking;
+      if ( sd < dblBollingerSDMin ) {
+        dblBollingerSDMin = sd;
+        ixSdMin = cntMarking;
       }
     }
     else {
-      m_dblBollingerSDMax = m_dblBollingerSDMin = m_pricesDailyCloseBollinger20.SD();
-      m_ixSdMax = m_ixSdMin = cntMarking;
+      dblBollingerSDMax = dblBollingerSDMin = m_pricesDailyCloseBollinger20.SD();
+      ixSdMax = ixSdMin = cntMarking;
     }
     cntMarking--;
   } // end for
@@ -1289,11 +1299,11 @@ void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
 
   std::cout
     << m_sUnderlying
-    << " sd min=" << m_dblBollingerSDMin << "@" << m_ixSdMin
+    << " sd min=" << dblBollingerSDMin << "@" << ixSdMin
     << ",cur= " << m_pricesDailyCloseBollinger20.SD()
-    << ",max=" << m_dblBollingerSDMax << "@" << m_ixSdMax;
-  if ( 1 == m_nPassedUpper ) std::cout << " - first touch on upper bollinger";
-  if ( 1 == m_nPassedLower ) std::cout << " - first touch on lower bollinger";
+    << ",max=" << dblBollingerSDMax << "@" << ixSdMax;
+  if ( 1 == nPassedUpper ) std::cout << " - first touch on upper bollinger";
+  if ( 1 == nPassedLower ) std::cout << " - first touch on lower bollinger";
   std::cout << std::endl;
 
   // trigger: if cross a bollinger band today, with m_nPassedxx 0, then a successful trigger for entry
