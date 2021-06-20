@@ -35,10 +35,7 @@
 #include <OUCharting/ChartEntryShape.h>
 #include <OUCharting/ChartEntryMark.h>
 
-#include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
-
-#include <TFIndicators/TSSWStats.h>
 
 #include <TFIQFeed/MarketSymbol.h>
 
@@ -105,8 +102,8 @@ public:
 
   ManageStrategy(
     const std::string& sUnderlying,
-    const std::string& sDailyBarPath,
     const ou::tf::Bar& barPriorDaily,
+    double dblSlopeUnderlying,
     // TODO: convert these to left assign
     pPortfolio_t,
     pChartDataView_t,
@@ -179,11 +176,6 @@ private:
   //enum class EBarDirection { None, Up, Down };
   //EBarDirection m_rBarDirection[ 3 ];
 
-  enum EBollingerState { Unknown, BelowLower, MeanToLower, MeanToUpper, AboveUpper, _Count };
-  EBollingerState m_stateBollinger;
-
-  enum class EBollXing { None, Lower, Mean, Upper, _Count };
-
   size_t m_nConfirmationIntervals;
 
   boost::gregorian::days m_daysToExpiry;
@@ -191,7 +183,7 @@ private:
   using volume_t = ou::tf::DatedDatum::volume_t;
 
   std::string m_sUnderlying;
-  std::string m_sDailyBarPath;
+  double m_dblSlope20DayUnderlying;
 
   bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
   bool m_bAllowComboAdd; // allows state machine to open new combo
@@ -203,10 +195,6 @@ private:
 
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
-
-  double m_dblBollingerUpper;
-  double m_dblBollingerMean;
-  double m_dblBollingerLower;
 
   using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
@@ -244,9 +232,6 @@ private:
 
   using pCombo_t = std::unique_ptr<ou::tf::option::Combo>;
   pCombo_t m_pCombo;
-
-  ou::tf::Prices m_pricesDailyClose;
-  ou::tf::TSSWStatsPrice m_pricesDailyCloseBollinger20;
 
   ou::tf::BarFactory m_bfQuotes01Sec; // provides more frequent ticks for Order Monitoring
 
@@ -397,8 +382,6 @@ private:
   void HandleAfterRH( const ou::tf::Quote& quote );
   void HandleAfterRH( const ou::tf::Trade& trade );
   void HandleAfterRH( const ou::tf::Bar& bar );
-
-  void ReadDailyBars( const std::string& sPath );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

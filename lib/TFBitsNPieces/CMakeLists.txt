@@ -11,6 +11,7 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 set(
   file_h
 #    CalcAboveBelow.h
+    BollingerTransitions.h
     FirstOrDefaultCombiner.h
     FrameWork01.h
     GridColumnSizer.h
@@ -29,6 +30,7 @@ set(
 set(
   file_cpp
 #    CalcAboveBelow.cpp
+    BollingerTransitions.cpp
     FrameWork01.cpp
     GridColumnSizer.cpp
     InstrumentSelection.cpp

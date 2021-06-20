@@ -376,8 +376,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
   pManageStrategy_t pManageStrategy;
   pManageStrategy = std::make_unique<ManageStrategy>(
         sUnderlying,
-        iip.sPath,
+//        iip.sPath, // TODO: supply to Underlying instead
         iip_.bar,
+        1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         pPortfolioStrategy,
         pChartDataView,
     // ManageStrategy::fGatherOptionDefinitions_t

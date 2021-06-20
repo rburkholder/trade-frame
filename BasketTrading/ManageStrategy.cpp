@@ -80,9 +80,6 @@
 
 #include <algorithm>
 
-#include <TFHDF5TimeSeries/HDF5DataManager.h>
-#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
-
 #include <TFOptionCombos/Collar.h>
 using combo_t = ou::tf::option::Collar;
 #include <TFOptionCombos/LegNote.h>
@@ -203,8 +200,8 @@ private:
 
 ManageStrategy::ManageStrategy(
   const std::string& sUnderlying,
-  const std::string& sDailyBarPath,
   const ou::tf::Bar& barPriorDaily,
+  double dblSlope20DayUnderlying,
   pPortfolio_t pPortfolioStrategy, // => m_pPortfolioStrategy
   pChartDataView_t pcdvStrategyData,
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
@@ -224,8 +221,8 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
+  m_dblSlope20DayUnderlying( dblSlope20DayUnderlying ),
   m_sUnderlying( sUnderlying ),
-  m_sDailyBarPath( sDailyBarPath ),
   m_barPriorDaily( barPriorDaily ),
   m_pPortfolioStrategy( pPortfolioStrategy ),
   m_pChartDataView( pcdvStrategyData ),
@@ -251,7 +248,6 @@ ManageStrategy::ManageStrategy(
 //  m_cntUpReturn {}, m_cntDnReturn {},
 
   m_stateEma( EmaState::EmaUnstable ),
-  m_stateBollinger( EBollingerState::Unknown ),
   //m_eOptionState( EOptionState::Initial1 ),
 
   m_ixColour {},
@@ -262,8 +258,7 @@ ManageStrategy::ManageStrategy(
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_daysToExpiry( 1 ), // will be different for each strategy, to be deprecated
-  m_pricesDailyCloseBollinger20( m_pricesDailyClose, time_duration( 0, 0, 0 ), 20 )
+  m_daysToExpiry( 1 ) // will be different for each strategy, to be deprecated
 {
   //std::cout << m_sUnderlying << " loading up ... " << std::endl;
 
@@ -321,8 +316,6 @@ ManageStrategy::ManageStrategy(
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
   //m_bfTicks06sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTicks06Sec ) );
 //  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
-
-  ReadDailyBars( m_sDailyBarPath );
 
   try {
 
@@ -576,57 +569,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   // this is one tick behind, so could use m_TradeLatest for latest close-of-last/open-of-next
   //RHEquity( bar );
 
-  // trigger on crossing mean -> StrategyStrangle, convert to StrategyCondor once in place
-  // trigger on touching edge -> StrategyBackSpread
-  // trigger on higher volatility -> StrategyStrangle once database has history of volatility
-
-  static const EBollXing lu[EBollingerState::_Count][EBollingerState::_Count]
-    = {
-/* From:      To:     Unknown           BelowLower     MeanToLower      MeanToUpper       AboveUpper*/
-/* Unknown */     { EBollXing::None, EBollXing::None,  EBollXing::None, EBollXing::None, EBollXing::None  },
-/* AboveUpper */  { EBollXing::None, EBollXing::Lower, EBollXing::Mean, EBollXing::None, EBollXing::None  },
-/* MeanToUpper */ { EBollXing::None, EBollXing::Lower, EBollXing::Mean, EBollXing::None, EBollXing::Upper },
-/* MeanToLower */ { EBollXing::None, EBollXing::Lower, EBollXing::None, EBollXing::Mean, EBollXing::Upper },
-/* BelowLower */  { EBollXing::None, EBollXing::None,  EBollXing::None, EBollXing::Mean, EBollXing::Upper },
-      };
-
-  EBollingerState stateBollinger = EBollingerState::Unknown;
-  const double mid = m_QuoteUnderlyingLatest.Midpoint();
-  if ( m_dblBollingerMean <= mid ) {
-    if ( m_dblBollingerUpper <= mid ) {
-      stateBollinger = EBollingerState::AboveUpper;
-    }
-    else {
-      stateBollinger = EBollingerState::MeanToUpper;
-    }
-  }
-  else {
-    if ( m_dblBollingerLower >= mid ) {
-      stateBollinger = EBollingerState::BelowLower;
-    }
-    else {
-      stateBollinger = EBollingerState::MeanToLower;
-    }
-  }
-
-  EBollXing xing = lu[m_stateBollinger][stateBollinger];
-
-  switch ( xing ) {
-    case EBollXing::Upper:
-      // call back spread
-      break;
-    case EBollXing::Mean:
-      // short strangle
-      // condor
-      break;
-    case EBollXing::Lower:
-      // put back spread
-      break;
-    default:
-      break;
-  }
-
-  m_stateBollinger = stateBollinger;
+  //const double mid = m_QuoteUnderlyingLatest.Midpoint();
+  // BollingerTransitions::Crossing( mid )
 
   RHOption( bar );
 }
@@ -699,9 +643,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         if ( m_bAllowComboAdd ) {
 
           try {
-            const double slope20Day( m_pricesDailyCloseBollinger20.Slope() );
             const ou::tf::option::Combo::E20DayDirection direction
-              = ( 0.0 <= slope20Day )
+              = ( 0.0 <= m_dblSlope20DayUnderlying )
               ? ou::tf::option::Combo::E20DayDirection::Rising
               : ou::tf::option::Combo::E20DayDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
@@ -721,7 +664,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                 m_bAllowComboAdd = false;
 
-                std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << slope20Day << ")" << std::endl;
+                std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << m_dblSlope20DayUnderlying << ")" << std::endl;
 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );
@@ -1194,131 +1137,3 @@ void ManageStrategy::TakeProfits() {
   }
 }
 
-void ManageStrategy::ReadDailyBars( const std::string& sPath ) {
-
-  //void ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath )
-
-  size_t nPassedUpper {};
-  size_t nPassedLower {};
-
-  size_t ixSdMin {};
-  size_t ixSdMax {};
-
-  double dblBollingerSDMax {};
-  double dblBollingerSDMin {};
-
-  ou::tf::Bars barsDaily;
-
-  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
-  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> tsRepository( dm, sPath );
-  ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
-  begin = tsRepository.begin();
-  end = tsRepository.end();
-  barsDaily.Clear();
-  const hsize_t cnt = end - begin;
-  barsDaily.Resize( cnt );
-  tsRepository.Read( begin, end, &barsDaily );
-
-  m_pricesDailyClose.Clear();
-  m_pricesDailyCloseBollinger20.Reset();
-
-  bool bLoopStarted( false );
-  bool bPassedUpper( false );
-  bool bPassedLower( false );
-
-  nPassedUpper = nPassedLower = 0;
-  ixSdMax = ixSdMin = 0;
-  size_t cntMarking = cnt;
-
-  for ( ou::tf::Bars::const_iterator iterBars = barsDaily.begin(); barsDaily.end() != iterBars; ++iterBars ) {
-
-    if ( bLoopStarted ) { // calculations use previous day's bollinger
-      bPassedUpper = bPassedLower = false;
-      if ( iterBars->High() >= m_pricesDailyCloseBollinger20.BBUpper() ) {
-        bPassedUpper = true;
-      }
-      if ( iterBars->Low() <= m_pricesDailyCloseBollinger20.BBLower() ) {
-        bPassedLower = true;
-      }
-
-      if ( bPassedUpper || bPassedLower ) {
-        if ( bPassedUpper && bPassedLower ) {
-          nPassedUpper++;
-          nPassedLower++;
-        }
-        else {
-          if ( bPassedUpper ) {
-            nPassedUpper++;
-            nPassedLower = 0;
-          }
-          if ( bPassedLower ) {
-            nPassedUpper = 0;
-            nPassedLower++;
-          }
-        }
-      }
-      else {
-        nPassedUpper = 0;
-        nPassedLower = 0;
-      }
-    }
-    else {
-      bLoopStarted = true;
-    }
-
-    ou::tf::Price price( iterBars->DateTime(), iterBars->Close() );
-    m_pricesDailyClose.Append( price ); // automatically updates indicators (bollinger)
-    if ( 55 >= cntMarking ) { // only last bars show attractors
-      m_cePivots.AddMark( iterBars->High(), ou::Colour::LightSalmon, "High" );
-      m_cePivots.AddMark( iterBars->Low(),  ou::Colour::LightPink,   "Low" );
-
-      const double sd = m_pricesDailyCloseBollinger20.SD();
-      if ( sd > dblBollingerSDMax ) {
-        dblBollingerSDMax = sd;
-        ixSdMax = cntMarking;
-      }
-      if ( sd < dblBollingerSDMin ) {
-        dblBollingerSDMin = sd;
-        ixSdMin = cntMarking;
-      }
-    }
-    else {
-      dblBollingerSDMax = dblBollingerSDMin = m_pricesDailyCloseBollinger20.SD();
-      ixSdMax = ixSdMin = cntMarking;
-    }
-    cntMarking--;
-  } // end for
-
-  m_dblBollingerUpper = m_pricesDailyCloseBollinger20.BBUpper();
-  m_dblBollingerMean = m_pricesDailyCloseBollinger20.MeanY();
-  m_dblBollingerLower = m_pricesDailyCloseBollinger20.BBLower();
-
-  m_cePivots.AddMark( m_dblBollingerUpper, ou::Colour::Purple,     "BollUp" );
-  m_cePivots.AddMark( m_dblBollingerMean,  ou::Colour::Salmon,     "BollMn" );
-  m_cePivots.AddMark( m_dblBollingerLower, ou::Colour::PowderBlue, "BollLo" );
-
-  std::cout
-    << m_sUnderlying
-    << " sd min=" << dblBollingerSDMin << "@" << ixSdMin
-    << ",cur= " << m_pricesDailyCloseBollinger20.SD()
-    << ",max=" << dblBollingerSDMax << "@" << ixSdMax;
-  if ( 1 == nPassedUpper ) std::cout << " - first touch on upper bollinger";
-  if ( 1 == nPassedLower ) std::cout << " - first touch on lower bollinger";
-  std::cout << std::endl;
-
-  // trigger: if cross a bollinger band today, with m_nPassedxx 0, then a successful trigger for entry
-  //          and ixSDmxx is not 1, then probably best time for backspread on near band as volatility has range to increase.
-  //          and a normal spread on far band
-  //          (within 6 days of expiry, allows some time for movement)
-  // trigger: if crosses bollinger mean, then run a bull-put and bear-call
-  //          (within min of 1 day of expiry to catch last day, or weekend theta decay)
-  // trigger: darvas, initiate synthetic with protective option
-  //          (synthetic 13 days, protective 4 days)
-  // trigger:  sell strangle on high volatility, and exit on normal volatility
-  //           will need database to indicate historical implied volatility
-  //           will need to run options all the time in order to monitor implied volatility
-  //           (1 day to expiry to reduce duration risk)
-
-//    AddChartEntries( pChartDataView, series );
-
-}
