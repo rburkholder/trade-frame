@@ -50,7 +50,7 @@ bool AppBasketTrading::OnInit() {
   m_sStateFileName = "BasketTrading.state";
 
   // latest daily bar
-  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 5, 28 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 6, 18 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
