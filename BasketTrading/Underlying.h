@@ -29,6 +29,7 @@
 #include <TFOptions/Aggregate.h>
 
 #include <TFTrading/Watch.h>
+#include <TFTrading/Portfolio.h>
 
 #include <TFBitsNPieces/BollingerTransitions.h>
 
@@ -41,14 +42,23 @@ class Underlying {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
 
   Underlying(
-    pWatch_t pWatchUnderlying_,
-    const std::string& sDailyBarPath
+    pWatch_t pWatch,
+    pPortfolio_t pPortfolio
   );
 
+  void ReadDailyBars( const std::string& sDailyBarPath );
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
+  void SetChartDataView( pChartDataView_t );
+
+  pWatch_t GetWatch() { return m_pWatch; }
+  pPortfolio_t GetPortfolio() { return m_pPortfolioAggregate; }
+
+  void SaveSeries( const std::string& sPrefix );
 
   // TODO: will need two mapChain types:
   //   1) basic for passing to strategy
@@ -58,12 +68,11 @@ protected:
 private:
 
   using gex_t = ou::tf::option::Aggregate;
-  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  std::string m_sDailyBarPath;
+  pWatch_t m_pWatch;
+  pPortfolio_t m_pPortfolioAggregate; // aggregates strategies associated with underlying
 
-  pWatch_t pWatchUnderlying;
-  gex_t GexCalc;
+  gex_t m_GexCalc;
 
   pChartDataView_t m_pChartDataView;
 
@@ -73,5 +82,4 @@ private:
 
   ou::tf::BollingerTransitions m_BollingerTransitions;
 
-  void BuildUnderlyingChains( gex_t& );
 };

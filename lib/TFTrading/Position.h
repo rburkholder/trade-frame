@@ -208,6 +208,8 @@ public:
   }
 
   idPosition_t Id() const { return m_row.idPosition; }
+  idPortfolio_t IdPortfolio() const { return m_row.idPortfolio; }
+
   bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
 
   bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };

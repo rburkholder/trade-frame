@@ -60,6 +60,7 @@ public:
   using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
   using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
+
   using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
   using fChartAdd_t = std::function<wxTreeItemId(wxTreeItemId,const std::string&,pChartDataView_t)>;
   using fChartDel_t = std::function<void(wxTreeItemId)>;
@@ -71,7 +72,7 @@ public:
     fGetTableRowDef_t &&,
     fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&
     );
-  ~MasterPortfolio(void);
+  ~MasterPortfolio();
 
   void Add( pPortfolio_t ); // from database load
   void Add( pPosition_t );  // from database load
@@ -137,40 +138,61 @@ private:
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
   wxTreeItemId m_idTreeRoot;
-  wxTreeItemId m_idTreeSymbols;
+  wxTreeItemId m_idTreeUnderlying;
   wxTreeItemId m_idTreeStrategies;
 
-  using pManageStrategy_t = std::unique_ptr<ManageStrategy>;
+  using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
     wxTreeItemId idTree;
-    const IIPivot iip;
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
     bool bChartActivated;
     pChartDataView_t pChartDataView;
-    Strategy( const IIPivot&& iip_, pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
-    : iip( std::move( iip_ ) ), pManageStrategy( std::move( pManageStrategy_ ) ),
+    Strategy( pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
+    : pManageStrategy( std::move( pManageStrategy_ ) ),
       bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
-    Strategy( const IIPivot&& iip_, pChartDataView_t& pChartDataView_ )
-    : iip( std::move( iip_ ) ),
+    Strategy( pChartDataView_t& pChartDataView_ )
+    :
       bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
     {}
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }
   };
 
-  using mapStrategy_t = std::map<ou::tf::Portfolio::idPortfolio_t,Strategy>;
-  mapStrategy_t m_mapStrategy;
+  using pUnderlying_t = std::unique_ptr<Underlying>;
+  using pStrategy_t = std::unique_ptr<Strategy>;
+  using mapStrategy_t = std::map<idPortfolio_t,pStrategy_t>;
+  using iterStrategy_t = mapStrategy_t::iterator;
+
+  struct UnderlyingWithStrategies {
+    const IIPivot iip;
+    pUnderlying_t pUnderlying;
+    pManageStrategy_t pManageStrategyInWaiting;
+    mapStrategy_t mapStrategyActive;
+    mapStrategy_t mapStrategyClosed;
+
+    UnderlyingWithStrategies( const IIPivot&& iip_ ): iip( std::move( iip_ ) ) {}
+    void ClosePositions() {}
+    void SaveSeries( const std::string& sPrefix ) {}
+    double EmitInfo() { return 0.0; }
+    void CloseForProfits() {}
+    void TakeProfits() {}
+  };
+
+  using mapUnderlyingWithStrategies_t = std::map<std::string, UnderlyingWithStrategies>;
+  using iterUnderlyingWithStrategies_t = mapUnderlyingWithStrategies_t::iterator;
+  mapUnderlyingWithStrategies_t m_mapUnderlyingWithStrategies;
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
   using mapPosition_iter = mapPosition_t::iterator;
   using mapPortfolio_t = std::map<std::string,pPortfolio_t>;
   using mapPortfolio_iter = mapPortfolio_t::iterator;
+
   struct StrategyArtifacts {
     // stuff during database load goes here temporarily
     bool m_bAccessed;
@@ -194,9 +216,6 @@ private:
 
   setSymbols_t m_setSymbols;
 
-  using mapUnderlying_t = std::map<std::string, Underlying>;
-  mapUnderlying_t m_mapUnderlying;
-
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
@@ -207,6 +226,11 @@ private:
   fChartDel_t m_fChartDel;
 
   void AddUnderlyingSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
+
+  using fConstructedWatch_t  = std::function<void(pWatch_t)>;
+  void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );
+  pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
+  void StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

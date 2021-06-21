@@ -22,22 +22,17 @@
 #include "Underlying.h"
 
 Underlying::Underlying(
-  pWatch_t pWatchUnderlying_,
-  const std::string& sDailyBarPath
+  pWatch_t pWatch,
+  pPortfolio_t pPortfolioAggregate
 )
-: pWatchUnderlying( pWatchUnderlying_ ),
-  GexCalc( pWatchUnderlying_ ),
-  m_sDailyBarPath( sDailyBarPath )
+:
+  m_pWatch( pWatch ),
+  m_GexCalc( pWatch ),
+  m_pPortfolioAggregate( pPortfolioAggregate )
 {
-  assert( pWatchUnderlying_ );
-  m_pChartDataView = std::make_shared<ou::ChartDataView>();
-  m_BollingerTransitions.ReadDailyBars( sDailyBarPath, m_cePivots );
-}
-
-
-// TODO: don't really need this anymore, placeholder for real code
-void Underlying::BuildUnderlyingChains( gex_t& gex ) {
-  //gex.LoadChains( m_fOptionNamesByUnderlying );  // is currently unpopulated
+  assert( pWatch );
+  assert( pPortfolioAggregate );
+  //m_GexCalc.LoadChains( m_fOptionNamesByUnderlying );  // is currently unpopulated
 }
 
 void Underlying::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
@@ -50,3 +45,14 @@ void Underlying::SetPivots( double dblR2, double dblR1, double dblPV, double dbl
   m_cePivots.AddMark( dblS2, ou::Colour::Blue, "S2" );
 }
 
+void Underlying::SaveSeries( const std::string& sPrefix ) {
+  m_pWatch->SaveSeries( sPrefix );
+}
+
+void Underlying::ReadDailyBars( const std::string& sDailyBarPath ) {
+  m_BollingerTransitions.ReadDailyBars( sDailyBarPath, m_cePivots );
+}
+
+void Underlying::SetChartDataView( pChartDataView_t pChartDataView ) {
+  m_pChartDataView = pChartDataView;
+}

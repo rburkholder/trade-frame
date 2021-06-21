@@ -28,7 +28,7 @@
 #include "MasterPortfolio.h"
 
 namespace {
-  const std::string sPortfolioPrefix( "basket-" );
+  const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
 }
 
 MasterPortfolio::MasterPortfolio(
@@ -63,18 +63,18 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
-      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );
+      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );  // TODO: convert to boost:: to std::
       break;
     default:
-      assert( 0 ); // need the IB provider, or at least some provider
+      assert( false ); // need the IB provider, or at least some provider
   }
 
   switch ( pData1->ID() ) {
     case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = boost::dynamic_pointer_cast<ou::tf::IQFeedProvider>( pData1 );
+      m_pIQ = boost::dynamic_pointer_cast<ou::tf::IQFeedProvider>( pData1 );  // TODO: convert to boost:: to std::
       break;
     default:
-      assert( 0 ); // need the iqfeed provider
+      assert( false ); // need the iqfeed provider
   }
 
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
@@ -95,11 +95,11 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
   m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
 
-  m_idTreeSymbols = m_fChartAdd( m_idTreeRoot, "Symbols", nullptr );
+  m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr );
   m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr );
 
   std::stringstream ss;
-  ss.str( "" );
+  //ss.str( "" );
   ss << ou::TimeSource::Instance().External();
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
@@ -109,14 +109,14 @@ MasterPortfolio::MasterPortfolio(
     = [this](pInstrument_t pInstrument)->pWatch_t {
       // fix: need to look up and retrieve the pre-constructed watch
         //ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
-        pWatch_t pWatch;  // will cause a fault, should not need to be used
+        pWatch_t pWatch;  // will cause a fault, should not need to be used -- hmm?  check this!
         return pWatch;
       };
   m_pOptionEngine->m_fBuildOption
     = [this](pInstrument_t pInstrument)->pOption_t {
       // fix: need to lookup and retrieve the pre-constructed option
         //ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
-        pOption_t pOption; // will cause a fault, should not need to be used
+        pOption_t pOption; // will cause a fault, should not need to be used -- hmm?  check this!
         return pOption;
       };
 
@@ -124,29 +124,35 @@ MasterPortfolio::MasterPortfolio(
 
 }
 
-MasterPortfolio::~MasterPortfolio(void) {
-  if ( m_worker.joinable() )
+MasterPortfolio::~MasterPortfolio() {
+  if ( m_worker.joinable() ) {
     m_worker.join();
+  }
   //TODO: need to wait for m_pOptionEngine to finish
   //m_mapVolatility.clear();
   m_mapStrategyArtifacts.clear();
-  m_mapStrategy.clear();
+  m_mapUnderlyingWithStrategies.clear();
   m_pOptionEngine.release();
   m_libor.SetWatchOff();
 }
 
-// auto loading portfolio from database
+// auto loading portfolio from database into the mapArtifacts cache
 void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
+
+  // TODO: will need to test that strategy portfolios are active??
 
   // will have a mixture of 'standard' and 'multilegged'
   mapStrategyArtifacts_t::iterator iterArtifacts = m_mapStrategyArtifacts.find( pPortfolio->Id() );
-  if ( m_mapStrategyArtifacts.end() == iterArtifacts ) {
+  if ( m_mapStrategyArtifacts.end() != iterArtifacts ) {
+    std::cout << "MasterPortfolio::Add already added portfolio " << pPortfolio->Id() << std::endl;
+  }
+  else {
 
     std::cout
       << "Add Portfolio: "
       << "T=" << pPortfolio->GetRow().ePortfolioType
       << ",O=" << pPortfolio->GetRow().idOwner
-      << ",ID=" << pPortfolio->GetRow().idPortfolio
+      << ",ID=" << pPortfolio->Id()
       << std::endl;
 
     std::pair<mapStrategyArtifacts_t::iterator,bool> pair
@@ -161,14 +167,16 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
       case ou::tf::Portfolio::EPortfolioType::Standard:
         // this is the strategy level portfolio
         break;
+      case ou::tf::Portfolio::EPortfolioType::Aggregate:
       case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
         // this is the combo level portfolio of positions, needs to be associated with owner
         //    which allows it to be submitted to ManageStrategy
         {
           mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
           assert( m_mapStrategyArtifacts.end() != iter );
-          std::pair<mapPortfolio_iter,bool> pair2
-            = iter->second.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
+          StrategyArtifacts& saOwner( iter->second );
+          std::pair<mapPortfolio_iter,bool> pair2 // insert child
+            = saOwner.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
           assert( pair2.second );
         }
         break;
@@ -176,30 +184,31 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   }
 }
 
-// auto loading position from database, and from runtime creations
+// auto loading position from database into the mapArtifacts cache (and from runtime creations?)
 void MasterPortfolio::Add( pPosition_t pPosition ) {
+
   std::cout
-    << "load position: "
+    << "Add Position: "
     << pPosition->GetRow().sName
     << ",quan=" << pPosition->GetActiveSize()
     << ",id=" << pPosition->GetRow().idPosition << ","
     << pPosition->Notes()
     << std::endl;
 
-  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->GetRow().idPortfolio );  // need to preload the iterator for random adds
+  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->IdPortfolio() );  // need to preload the iterator for random adds
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
     assert( false );
   }
 
-  StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
-  if ( pPosition->GetRow().idPortfolio != artifacts.m_pPortfolio->Id() ) {
+  StrategyArtifacts& artifact( iterStrategyArtifacts->second );
+  if ( pPosition->GetRow().idPortfolio != artifact.m_pPortfolio->Id() ) {
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
-    std::string idPortfolio1( pPosition->GetRow().idPortfolio );
-    std::string idPortfolio2( artifacts.m_pPortfolio->Id() );
+    std::string idPortfolio1( pPosition->IdPortfolio() );
+    std::string idPortfolio2( artifact.m_pPortfolio->Id() );
     assert( false );
   }
   std::pair<mapPosition_t::iterator,bool> pair
-    = artifacts.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
+    = artifact.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
   assert( pair.second );
 }
 
@@ -214,45 +223,23 @@ void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, 
 
 void MasterPortfolio::Test() {
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& vt){vt.second.pManageStrategy->Test();}
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [](mapUnderlyingWithStrategies_t::value_type& vt){
+      //vt.second.pManageStrategy->Test();
+      }
     );
 }
 
+// look for potential underlying symbols to support strategy implementation
 void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
-  if ( !m_mapStrategy.empty() ) {
+
+  if ( !m_mapUnderlyingWithStrategies.empty() ) {
     std::cout << "MasterPortfolio: already loaded." << std::endl;
   }
   else {
     if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
     m_worker = std::thread(
       [this,dtLatestEod,bAddToList](){
-/*
-        using setInstrumentInfo_t = SymbolSelection::setIIDarvas_t;
-        using InstrumentInfo_t = IIDarvas;
-        setInstrumentInfo_t setInstrumentInfo;
-
-        SymbolSelection selector(
-          dtLatestEod,
-          [&setInstrumentInfo](const InstrumentInfo_t& ii) {
-            setInstrumentInfo.insert( ii );
-          } );
-
-        if ( bAddToList ) {
-          std::for_each( setInstrumentInfo.begin(), setInstrumentInfo.end(),
-                        [this](const InstrumentInfo_t& ii){
-                          AddSymbol( ii.sName, ii.barLast, ii.dblStop );
-                        } );
-        }
-        else {
-          std::cout << "Symbol List: " << std::endl;
-          std::for_each(
-            setInstrumentInfo.begin(), setInstrumentInfo.end(),
-            [this]( const setInstrumentInfo_t::value_type& item ) {
-              std::cout << item.sName << std::endl;
-            } );
-        }
-*/
 
         std::for_each( // ensure overnight positions are represented in the new day
           m_mapStrategyArtifacts.begin(), m_mapStrategyArtifacts.end(),
@@ -260,10 +247,10 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             StrategyArtifacts& artifact( vt.second );
             if ( !artifact.m_bAccessed ) {
               std::string idPortfolio( vt.first );
-              std::string sTemp( idPortfolio.substr( 0, sPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
-              if ( sTemp == sPortfolioPrefix ) {
-                std::string symbol( idPortfolio.substr( sPortfolioPrefix.size() ) );
-                std::cout << vt.first << " (" << symbol << ") being examined :";
+              std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
+              if ( sTemp == sUnderlyingPortfolioPrefix ) {
+                std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
+                std::cout << vt.first << " (" << sUnderlying << ") being examined :";
                 bool bPositionActive( false );
                 std::for_each(
                   artifact.m_mapPosition.begin(), artifact.m_mapPosition.end(),
@@ -273,8 +260,12 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
                 );
                 if ( bPositionActive ) {
                   std::cout << vt.first << " has position";
-                  m_setSymbols.insert( symbol );
+                  m_setSymbols.insert( sUnderlying );
                 }
+                // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
+                //    no, should run this test on the baskets as well, then bring in underlying
+                //    at this point, this test will come up empty, as no positions in the underlying
+                //      just sub-portfolios for the strategies
                 std::cout << std::endl;
               }
             }
@@ -300,7 +291,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 //                }
               }
             }
-            else {
+            else { // simply emit statisitcs
               std::cout
                 << iip.sName
                 << ": " << iip.dblPV
@@ -312,24 +303,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
             }
           } );
 
-        std::for_each(
-          m_setSymbols.begin(), m_setSymbols.end(),
-          [this](const setSymbols_t::value_type& vt){
-            mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( vt );
-            if ( m_mapStrategy.end() == iterStrategy ) {
-            }
-            else {
-              //m_fSupplyStrategyChart( EStrategyChart::Active, symbol, strategy.pChartDataView );
-              //std::cout << vt << " has strategy" << std::endl;
-            }
-          }
-        );
-
-
-
-        // is m_setSymbols used for anything?
-
-        std::cout << "Symbol Load finished, " << m_mapStrategy.size() << " symbols chosen" << std::endl;
+        std::cout << "Symbol Load finished, " << m_mapUnderlyingWithStrategies.size() << " symbols chosen" << std::endl;
     } );
 
   }
@@ -337,125 +311,134 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
 void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
 
-  std::string sUnderlying( iip.sName );
+  const std::string sUnderlying( iip.sName );
 
-  pPortfolio_t pPortfolioStrategy;
-  const ou::tf::Portfolio::idPortfolio_t idPortfolio( sPortfolioPrefix + sUnderlying );
+  if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sUnderlying ) ) {
+    std::cout << "NOTE: underlying " << sUnderlying << " already added" << std::endl;
+  }
+  else {
 
-  assert( m_mapStrategy.end() == m_mapStrategy.find( idPortfolio ) );
+    auto result
+      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( iip ) ) ) );
+    assert( result.second );
 
-  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolio );
-  if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // create new portfolio
-    ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" );
-    pPortfolioStrategy
-      = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-          idPortfolio, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Strategy Basket"
+    ConstructWatchUnderlying(
+      sUnderlying,
+      [this,iter=result.first]( pWatch_t pWatchUnderlying ){
+
+        const std::string& sUnderlying( pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+        assert( sUnderlying == iter->first );
+        //assert( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sUnderlying ) );
+
+        const ou::tf::Portfolio::idPortfolio_t idPortfolioUnderlying( sUnderlyingPortfolioPrefix + sUnderlying );
+
+        pPortfolio_t pPortfolioUnderlying;
+        mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
+        if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) { // use existing portfolio
+          StrategyArtifacts& sa( iterStrategyArtifacts->second );
+          pPortfolioUnderlying = sa.m_pPortfolio;
+        }
+        else { // create new portfolio
+          ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "aggregate" );
+          pPortfolioUnderlying
+            = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+                idPortfolioUnderlying, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Aggregate, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Underlying Aggregate"
+            );
+        }
+
+        pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
+
+        UnderlyingWithStrategies& uws( iter->second );
+        const IIPivot& iip( uws.iip );
+        uws.pUnderlying = std::make_unique<Underlying>( pWatchUnderlying, pPortfolioUnderlying );
+        uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
+        uws.pUnderlying->SetChartDataView( pChartDataView );
+
+        m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView );
+
+        //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
+
+        StartStrategies( sUnderlying, pPortfolioUnderlying );
+      }
       );
+
   }
-  else { // use existing portfolio
-    pPortfolioStrategy = iterStrategyArtifacts->second.m_pPortfolio;
+}
+
+void MasterPortfolio::ConstructWatchUnderlying( const std::string& sIQFeedEquityName, fConstructedWatch_t&& fWatch ) {
+
+  const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
+
+  bool bNeedContract( false );
+  pInstrument_t pInstrumentUnderlying;
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+
+  if ( im.Exists( sIQFeedEquityName, pInstrumentUnderlying ) ) {
+    // pEquityInstrument has been populated
+    assert( 0 != pInstrumentUnderlying->GetContract() );
   }
+  else {
+    pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sIQFeedEquityName, trd );  // builds equity option, may not build futures option
+    bNeedContract = true;
+  }
+
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrumentUnderlying, m_pData1 );
+
+  // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
+  if ( !bNeedContract ) {
+    fWatch( pWatch );
+  }
+  else {
+    if ( !m_pIB ) {
+      throw std::runtime_error( "MasterPortfolio::ConstructWatchUnderlying: IB provider unavailable for contract");
+    }
+    else {
+        m_pIB->RequestContractDetails(
+          sIQFeedEquityName, pInstrumentUnderlying,  // TOOD: for futures, may need different name for IB
+          [this,pWatch,fWatch](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+            // the contract details fill in the contract in the instrument, which can then be passed back to the caller
+            //   as a fully defined, registered instrument
+            assert( 0 != pInstrument->GetContract() );
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            // TODO: test that the instument is the same as in the watch?
+            fWatch( pWatch );
+          },
+          nullptr  // request complete doesn't need a function
+          );
+    }
+  }
+}
+
+MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying ) {
+
+  iterUnderlyingWithStrategies_t iterUnderlyingWithStrategies
+    = m_mapUnderlyingWithStrategies.find( sUnderlying );
+  UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
+  assert( !uws.pManageStrategyInWaiting );  // need empty location
+  const IIPivot& iip_( uws.iip );
+
+  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
-  std::pair<mapStrategy_t::iterator, bool> result
-    = m_mapStrategy.insert( mapStrategy_t::value_type( idPortfolio, std::move( Strategy( std::move( iip ), pChartDataView ) ) ) ); // lookup needs to come before move
-  assert( result.second );
-
-  mapStrategy_t::iterator iterStrategy( result.first );
-  Strategy& strategy( iterStrategy->second );
-  const IIPivot& iip_( iterStrategy->second.iip );
-
-  // TODO: use Underlying instance instead
-  //strategy.pManageStrategy->SetPivots( iip_.dblR2, iip_.dblR1, iip_.dblPV, iip_.dblS1, iip_.dblS2 );
-  //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
-
   namespace ph = std::placeholders;
 
-  pManageStrategy_t pManageStrategy;
-  pManageStrategy = std::make_unique<ManageStrategy>(
-        sUnderlying,
-//        iip.sPath, // TODO: supply to Underlying instead
-        iip_.bar,
+  uws.pManageStrategyInWaiting = std::make_shared<ManageStrategy>(
+        //iip.sPath, // TODO: supply to Underlying instead
+        //iip_.bar,
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
-        pPortfolioStrategy,
+        uws.pUnderlying->GetWatch(),
+        pPortfolioUnderlying,
         pChartDataView,
     // ManageStrategy::fGatherOptionDefinitions_t
-        m_fOptionNamesByUnderlying,
-    // ManageStrategy::fConstructWatch_t - underlying construction only
-        [this,pPortfolioStrategy](const std::string& sIQFeedEquityName, ManageStrategy::fConstructedWatch_t fWatch){
-
-              bool bUseExistingWatch( true );
-              mapPosition_iter iterPosition;
-              mapStrategyArtifacts_iter iterArtifact = m_mapStrategyArtifacts.find( pPortfolioStrategy->Id() );
-              if ( m_mapStrategyArtifacts.end() == iterArtifact ) {
-                bUseExistingWatch = false;
-              }
-              else {
-                StrategyArtifacts& artifact( iterArtifact->second );
-                iterPosition = artifact.m_mapPosition.find( sIQFeedEquityName );
-                if ( artifact.m_mapPosition.end() == iterPosition ) {
-                  bUseExistingWatch = false;
-                }
-              }
-
-              if ( bUseExistingWatch ) { // pull watch out of existing position
-                pWatch_t pWatch = iterPosition->second->GetWatch();
-
-                fWatch( pWatch );
-              }
-              else {  // build instrument, obtain IB contract, register instrument
-                const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
-
-                bool bNeedContract( false );
-                pInstrument_t pEquityInstrument;
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-
-                if ( im.Exists( sIQFeedEquityName, pEquityInstrument ) ) {
-                  // pEquityInstrument has been populated
-                  assert( 0 != pEquityInstrument->GetContract() );
-                }
-                else {
-                  pEquityInstrument = ou::tf::iqfeed::BuildInstrument( sIQFeedEquityName, trd );  // builds equity option, may not build futures option
-                  bNeedContract = true;
-                }
-
-                //pWatch_t pWatch = m_pOptionEngine->m_fBuildWatch( pEquityInstrument );
-                //pWatch_t pWatch;
-                //m_pOptionEngine->Find( pEquityInstrument, pWatch );
-                pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pEquityInstrument, m_pData1 );
-
-                // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
-                if ( bNeedContract ) {
-                  if ( nullptr == m_pIB.get() ) {
-                    throw std::runtime_error( "MasterPortfolio::AddSymbol fConstructWatch_t: IB provider unavailable for contract");
-                  }
-                  else {
-                      m_pIB->RequestContractDetails(
-                        sIQFeedEquityName, pEquityInstrument,
-                        [this,pWatch,fWatch](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
-                          // the contract details fill in the contract in the instrument, which can then be passed back to the caller
-                          //   as a fully defined, registered instrument
-                          assert( 0 != pInstrument->GetContract() );
-                          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-                          im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                          fWatch( pWatch );
-                        },
-                        nullptr  // request complete doesn't need a function
-                        );
-                  }
-                }
-                else {
-                  fWatch( pWatch );
-                }
-              }
-        },
+        m_fOptionNamesByUnderlying,  // TODO, need to pass in mapChains from Underlying
     // ManageStrategy::fConstructOption_t
-        [this,pPortfolioStrategy](const std::string& sIQFeedOptionName, const pInstrument_t pUnderlyingInstrument, ManageStrategy::fConstructedOption_t fOption){
+        [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, const pInstrument_t pUnderlyingInstrument, ManageStrategy::fConstructedOption_t fOption){
 
               bool bUseExistingOption( true );
               mapPosition_iter iterPosition;
-              mapStrategyArtifacts_iter iterArtifact = m_mapStrategyArtifacts.find( pPortfolioStrategy->Id() );
+              mapStrategyArtifacts_iter iterArtifact = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
               if ( m_mapStrategyArtifacts.end() == iterArtifact ) {
                 bUseExistingOption = false;
               }
@@ -522,7 +505,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
               }
         },
     // ManageStrategy::fConstructPosition_t
-        [this,pPortfolioStrategy]( const ou::tf::Portfolio::idPortfolio_t& idPortfolio, pWatch_t pWatch, const std::string& sNote )->ManageStrategy::pPosition_t{
+        [this]( const idPortfolio_t& idPortfolio, pWatch_t pWatch, const std::string& sNote )->ManageStrategy::pPosition_t{
               pPosition_t pPosition;
               bool bUseExistingPosition( true );
               mapPosition_t::iterator iterPosition;
@@ -560,24 +543,37 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
               return pPosition;
           },
     // ManageStrategy::fConstructPortfolio_t
-          [this]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioMaster )->pPortfolio_t {
+          [this,sUnderlying]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioOwner )->pPortfolio_t {
             pPortfolio_t pPortfolio;
             bool bUseExistingPortfolio( true );
-            mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( idPortfolioNew );
-            if ( m_mapStrategyArtifacts.end() == iter ) {
+            mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioNew );
+            if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
               bUseExistingPortfolio = false;
             }
             if ( bUseExistingPortfolio ) {
-              pPortfolio = iter->second.m_pPortfolio;
+              pPortfolio = iterStrategyArtifacts->second.m_pPortfolio;
             }
             else {
               ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
               pPortfolio
                 = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-                    idPortfolioNew, idAccountOwner, idPortfolioMaster, ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
+                    idPortfolioNew, idAccountOwner, idPortfolioOwner, ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
                 );
               Add( pPortfolio );  // update the archive
             }
+
+            // move from pManageStrategyInWaiting to mapStrategyActive
+            iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
+            assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
+            UnderlyingWithStrategies& uws( iterUWS->second );
+            assert( uws.pManageStrategyInWaiting );
+
+            pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
+
+            uws.mapStrategyActive.emplace(
+              std::make_pair( idPortfolioNew, std::make_unique<Strategy>( std::move( uws.pManageStrategyInWaiting ), pChartDataView ) )
+              );
+
             return pPortfolio;
           },
     // ManageStrategy::fRegisterWatch_t
@@ -595,10 +591,11 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
     // ManageStrategy::m_fFirstTrade
           [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters
-            mapStrategy_t::iterator iter = m_mapStrategy.find( ms.GetPortfolio()->Id() );
-            assert( m_mapStrategy.end() != iter );
-            Strategy& strategy( iter->second );
-            strategy.priceOpen = trade.Price();
+            // TODO: need to do this differently
+            //mapStrategy_t::iterator iter = m_mapStrategy.find( ms.GetPortfolio()->Id() );
+            //assert( m_mapStrategy.end() != iter );
+            //Strategy& strategy( iter->second );
+            //strategy.priceOpen = trade.Price();
             //IIPivot::Pair pair = strategy.iip.Test( trade.Price() );
             //strategy.dblBestProbability = pair.first;
             //std::cout << "FirstTrade " << m_mapPivotProbability.size() << " - " << strategy.iip.sName << ": " << (int)pair.second << ", " << pair.first << std::endl;
@@ -616,44 +613,54 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
             //}
           },
     // ManageStrategy::m_fAuthorizeUnderlying
-          [this,&strategy]( pOrder_t& pOrder, pPosition_t& pPosition, pPortfolio_t& pPortfolio )->bool{
-            ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
-            bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio );
-            if ( bAuthorized ) {
-              if ( !strategy.bChartActivated ) {
-                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-                strategy.bChartActivated = true;
-              }
-            }
+          [this]( pOrder_t& pOrder, pPosition_t& pPosition, pPortfolio_t& pPortfolio )->bool{
+            //ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
+            //bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio );
+            //if ( bAuthorized ) {
+            //  if ( !strategy.bChartActivated ) {
+            //    strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
+            //    strategy.bChartActivated = true;
+            //  }
+            //}
             //ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
             //m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
             //strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
             //strategy.pManageStrategy->Start();
-            return bAuthorized;
+            return true;
           },
     // ManageStrategy::m_fAuthorizeOption
-          [this,&strategy]( pOrder_t& pOrder, pPosition_t& pPosition, pPortfolio_t& pPortfolio, pWatch_t& pWatch )->bool{
+          [this/*,&strategy*/]( pOrder_t& pOrder, pPosition_t& pPosition, pPortfolio_t& pPortfolio, pWatch_t& pWatch )->bool{
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
-            bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio, pWatch );
-            if ( bAuthorized ) {
-              if ( !strategy.bChartActivated ) {
-                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-                strategy.bChartActivated = true;
-              }
-            }
+            //bool bAuthorized = mm.Authorize( pOrder, pPosition, pPortfolio, pWatch );
+            //if ( bAuthorized ) {
+            //  if ( !strategy.bChartActivated ) {
+            //    strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
+            //    strategy.bChartActivated = true;
+            //  }
+            //}
             //ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
             //m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
             //strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
             //strategy.pManageStrategy->Start();
-            return bAuthorized;
+            //return bAuthorized;
+            return true;
           },
     // ManageStrategy::m_fAuthorizeSimple
-          [this,&strategy]( const std::string& sName, bool bExists )->bool{
+          [this,sUnderlying]( const idPortfolio_t& idPortfolio, const std::string& sName, bool bExists )->bool{
+
+            iterUnderlyingWithStrategies_t iterUnderlyingWithStrategies
+              = m_mapUnderlyingWithStrategies.find( sUnderlying );
+            UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
+
+            iterStrategy_t iterStrategy = uws.mapStrategyActive.find( idPortfolio );
+            assert( uws.mapStrategyActive.end() != iterStrategy );
+            Strategy& strategy( *iterStrategy->second );
+
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
             if ( bAuthorized || bExists ) {
               if ( !strategy.bChartActivated ) {
-                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
+                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
                 strategy.bChartActivated = true;
               }
             }
@@ -666,127 +673,62 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
           }
       );
 
-  strategy.Set( std::move( pManageStrategy ) );
+  return uws.pManageStrategyInWaiting;
 
-  if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) {
+} // ConstructStrategy
+
+void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying ) {
+
+  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
+
+  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
+  if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // start empty strategy
+    pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, pPortfolioUnderlying ) ); // initial strategy
+    pManageStrategy->Run();
+  }
+  else { // process existing strategies
     StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
-    std::for_each(  // add existing underlying positions to the strategy, active or not
-      artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
-      [this,&strategy](mapPosition_t::value_type& vt){
-        strategy.pManageStrategy->AddPosition( vt.second );
-      }
-    );
-    std::for_each(
-      artifacts.m_mapPortfolio.begin(), artifacts.m_mapPortfolio.end(),
-      [this,&strategy](mapPortfolio_t::value_type& vt){
-        mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( vt.first );
-        assert( m_mapStrategyArtifacts.end() != iter );
-        StrategyArtifacts& artifacts( iter->second );
+    assert( artifacts.m_mapPosition.empty() );  // this works for now, no underlying positions
 
-        std::for_each( // add existing option positions to the strategy, which will request appropriate portfolio
-          artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
-          [this,&strategy](mapPosition_t::value_type& vt){
-            strategy.pManageStrategy->AddPosition( vt.second ); // ManageStrategy will filter on Active and ixLeg
-          }
-        );
+    //std::for_each(  // add existing underlying positions to the strategy, active or not
+    //  artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
+    //  [this,&strategy](mapPosition_t::value_type& vt){
+    //    strategy.pManageStrategy->AddPosition( vt.second );
+    //  }
+    //);
+
+    // iterate the portfolioStrategies belonging to the portfolioUnderlying
+    for ( mapPortfolio_t::value_type& vt: artifacts.m_mapPortfolio ) {
+      // TODO: need to determine if comboPortfolio is active
+      const idPortfolio_t& idPortfolioCombo( vt.second->Id() );
+
+      mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioCombo );
+      StrategyArtifacts& artifactsCombo( iterStrategyArtifacts->second );
+      assert( !artifactsCombo.m_mapPosition.empty() );
+      pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, artifactsCombo.m_pPortfolio ) );
+
+      bool bActivated( false );
+      for ( mapPosition_t::value_type& vt: artifacts.m_mapPosition ) {
+        if ( vt.second->IsActive() ) {
+          pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
+          bActivated = true;
+        }
+        if ( bActivated ) {
+          pManageStrategy->Run();
+        }
 
       }
-    );
-    artifacts.m_bAccessed = true;
+      artifacts.m_bAccessed = true;
+    }
   }
 
-  //strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->GetRow().idPortfolio, strategy.pChartDataView );
-  m_fChartAdd( m_idTreeSymbols, sUnderlying, pChartDataView );
-
-  strategy.pManageStrategy->Run();
-
-} // AddSymbol
-
-//void MasterPortfolio::GetSentiment( size_t& nUp, size_t& nDown ) const {
-//  m_sentiment.Get( nUp, nDown );
-//}
-
-//void MasterPortfolio::Start() {
-
-//  if ( m_bStarted ) {
-//    std::cout << "MasterPortfolio: already started." << std::endl;
-//  }
-//  else {
-//    std::cout << "m_mapVolatility has " << m_mapVolatility.size() << " entries." << std::endl;
-//    m_bStarted = true;
-    //m_eAllocate = EAllocate::Done;
-
-    // startup Strategy which has previous positions
-//    std::for_each(
-//      m_setSymbols.begin(), m_setSymbols.end(),
-//      [this,&nToSelect,dblAmountToTradePerInstrument](const setSymbols_t::value_type& vt){
-//        Strategy& strategy( m_mapStrategy.find( vt )->second );
-//        ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-//        std::cout
-//          << strategy.iip.sName
-//          //<< " ranking=" << strategy.dblBestProbability
-//          //<< " direction=" << (int)ranking.direction
-//          << " to trade: " << volume
-//          << " (from previous)"
-//          << std::endl;
-//        strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
-//        m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-//        strategy.pManageStrategy->Start();
-//        m_fSupplyStrategyChart( EStrategyChart::Active, vt, strategy.pChartDataView );
-//        if ( 0 < nToSelect ) nToSelect--;
-//      }
-//    );
-
-//    std::for_each(
-//      m_mapVolatility.rbegin(), m_mapVolatility.rend(),
-//      [this,&nToSelect,dblAmountToTradePerInstrument](mapVolatility_t::value_type& vt){
-//        if ( 0 < nToSelect ) {
-//          //Ranking& ranking( vt.second );
-//          std::string sName( vt.second );
-//          setSymbols_t::const_iterator iterSymbols = m_setSymbols.find( sName );
-//          if ( m_setSymbols.end() == iterSymbols ) {
-//            Strategy& strategy( m_mapStrategy.find( sName )->second ); // doesn't work as m_mapStrategy uses portfolio name
-//            ou::tf::DatedDatum::volume_t volume = strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-//            if ( 100 <= volume ) {
-//              std::cout
-//                << strategy.iip.sName
-//                //<< " ranking=" << strategy.dblBestProbability
-//                //<< " direction=" << (int)ranking.direction
-//                << " to trade: " << volume
-//                << " (new start)"
-//                << std::endl;
-//              strategy.pManageStrategy->SetFundsToTrade( dblAmountToTradePerInstrument );
-//              m_nSharesTrading += strategy.pManageStrategy->CalcShareCount( dblAmountToTradePerInstrument );
-//              strategy.pManageStrategy->Start();
-//  //            switch ( ranking.direction ) {
-//  //              case IIPivot::Direction::Up:
-//  //                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Up );
-//  //                break;
-//  //              case IIPivot::Direction::Down:
-//  //                strategy.pManageStrategy->Start( ManageStrategy::ETradeDirection::Down );
-//  //                break;
-//  //              case IIPivot::Direction::Unknown:
-//  //                assert( 0 );
-//  //                break;
-//  //            }
-//              //m_fSupplyStrategyChart( EStrategyChart::Active, vt.second.sName, strategy.pChartDataView );
-//              m_fSupplyStrategyChart( EStrategyChart::Active, sName, strategy.pChartDataView );
-//              nToSelect--;
-//            }
-//          }
-//        }
-//      } );
-//    std::cout << "Total Shares to be traded: " << m_nSharesTrading << std::endl;
-//  }
-
-//} // Start
+}
 
 void MasterPortfolio::ClosePositions( void ) {
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->ClosePositions();
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [](mapUnderlyingWithStrategies_t::value_type& uws){
+      uws.second.ClosePositions();
     } );
 }
 
@@ -794,10 +736,9 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
   m_libor.SaveSeries( sPath );
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [&sPath](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-      strategy.pManageStrategy->SaveSeries( sPath );
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [&sPath](mapUnderlyingWithStrategies_t::value_type& uws){
+      uws.second.SaveSeries( sPath );
     } );
   std::cout << "done." << std::endl;
 }
@@ -805,62 +746,67 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
 void MasterPortfolio::EmitInfo( void ) {
   double dblNet {};
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [&dblNet](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        dblNet += strategy.pManageStrategy->EmitInfo();
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [&dblNet](mapUnderlyingWithStrategies_t::value_type& uws){
+      dblNet += uws.second.EmitInfo();
     } );
   std::cout << "Portfolio net: " << dblNet << std::endl;
 }
 
 void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
+  /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
     [&date](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
         strategy.pManageStrategy->CloseExpiryItm( date );
     } );
+    */
 }
 
 void MasterPortfolio::CloseFarItm() {
+  /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
     [](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
         strategy.pManageStrategy->CloseFarItm();
     } );
+    */
 }
 
 void MasterPortfolio::CloseForProfits() {
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->CloseForProfits();
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [](mapUnderlyingWithStrategies_t::value_type& uws){
+      uws.second.CloseForProfits();
     } );
 }
 
 void MasterPortfolio::CloseItmLeg() {
+  /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
     [](mapStrategy_t::value_type& pair){
       Strategy& strategy( pair.second );
         strategy.pManageStrategy->CloseItmLeg();
     } );
+    */
 }
 
 void MasterPortfolio::AddCombo( bool bForced ) {
+  /*
   for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
     Strategy& strategy( vt.second );
     strategy.pManageStrategy->AddCombo( bForced );
   }
+  */
 }
 
 void MasterPortfolio::TakeProfits() {
   std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->TakeProfits();
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [](mapUnderlyingWithStrategies_t::value_type& uws){
+      uws.second.TakeProfits();
     } );
 }

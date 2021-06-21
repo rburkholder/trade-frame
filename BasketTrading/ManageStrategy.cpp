@@ -137,8 +137,8 @@ public:
   // don't worry about reference counting, options in a strategy need to be unique
   // however, may need to worry about the option if from previous time frame
 
-  void AssignWatchUnderlying( pWatch_t&& pWatchUnderlying ) {
-    m_pWatchUnderlying = std::move( pWatchUnderlying );
+  void AssignWatchUnderlying( pWatch_t pWatchUnderlying ) {
+    m_pWatchUnderlying = pWatchUnderlying;
   }
 
   void Add( pOption_t pOption ) {
@@ -199,13 +199,13 @@ private:
 };
 
 ManageStrategy::ManageStrategy(
-  const std::string& sUnderlying,
-  const ou::tf::Bar& barPriorDaily,
+  //const ou::tf::Bar& barPriorDaily,
   double dblSlope20DayUnderlying,
-  pPortfolio_t pPortfolioStrategy, // => m_pPortfolioStrategy
+  pWatch_t pWatchUnderlying,
+  pPortfolio_t pPortfolioOwning, // => owning portfolio
   pChartDataView_t pcdvStrategyData,
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
-  fConstructWatch_t fConstructWatch, // => m_fConstructWatch
+  //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
   fConstructOption_t fConstructOption, // => m_fConstructOption
   fConstructPosition_t fConstructPosition, // => m_fConstructPosition
   fConstructPortfolio_t fConstructPortfolio, // => m_fConstructPortfolio
@@ -222,12 +222,12 @@ ManageStrategy::ManageStrategy(
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
   m_dblSlope20DayUnderlying( dblSlope20DayUnderlying ),
-  m_sUnderlying( sUnderlying ),
-  m_barPriorDaily( barPriorDaily ),
-  m_pPortfolioStrategy( pPortfolioStrategy ),
+  //m_barPriorDaily( barPriorDaily ),
+  m_pWatchUnderlying( pWatchUnderlying ),
+  m_pPortfolioOwning( pPortfolioOwning ),
   m_pChartDataView( pcdvStrategyData ),
 
-  m_fConstructWatch( fConstructWatch ),
+  //m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
   m_fConstructPortfolio( fConstructPortfolio ),
@@ -260,10 +260,11 @@ ManageStrategy::ManageStrategy(
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
   m_daysToExpiry( 1 ) // will be different for each strategy, to be deprecated
 {
-  //std::cout << m_sUnderlying << " loading up ... " << std::endl;
+  assert( m_pWatchUnderlying );
+  assert( m_pPortfolioOwning );
 
   assert( nullptr != fGatherOptionDefinitions );
-  assert( nullptr != m_fConstructWatch );
+  //assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
   assert( nullptr != m_fConstructPortfolio );
@@ -275,7 +276,7 @@ ManageStrategy::ManageStrategy(
   //m_rBarDirection[ 1 ] = EBarDirection::None;
   //m_rBarDirection[ 2 ] = EBarDirection::None;
 
-  pcdvStrategyData->SetNames( "Charts", m_sUnderlying );
+  pcdvStrategyData->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
@@ -315,74 +316,52 @@ ManageStrategy::ManageStrategy(
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
   //m_bfTicks06sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTicks06Sec ) );
-//  m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
+  //m_bfTrades60Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades60Sec ) );
+
+  pInstrument_t pInstrumentUnderlying = m_pWatchUnderlying->GetInstrument();
 
   try {
 
-    //std::cout << "Construct Watch: " << m_sUnderlying << std::endl;
+    if ( 0 == pInstrumentUnderlying->GetContract() ) {
+      std::cout << pInstrumentUnderlying->GetInstrumentName() << " has no contract" << std::endl;
+      m_stateTrading = TSNoMore;
+    }
 
-    m_fConstructWatch( // underlying construction only
-      m_sUnderlying,
-      [this,&fGatherOptionDefinitions](pWatch_t pWatchUnderlying){
+    m_pOptionRepository->AssignWatchUnderlying( m_pWatchUnderlying );
 
-        std::cout << m_sUnderlying << " watch arrived ... " << std::endl;
+    // collect option chains for the underlying
+    // TODO: this will be passed in
+    ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, pWatchUnderlying->GetInstrument()->GetInstrumentName(), fGatherOptionDefinitions );
 
-        assert( m_pPortfolioStrategy );
-        assert( pWatchUnderlying );
-        //assert( 0 != pWatchUnderlying->GetInstrument()->GetContract() );
-        pInstrument_t pInstrumentUnderlying = pWatchUnderlying->GetInstrument();
-        if ( 0 == pInstrumentUnderlying->GetContract() ) {
-          std::cout << pInstrumentUnderlying->GetInstrumentName() << " has no contract" << std::endl;
-          m_stateTrading = TSNoMore;
-        }
+    assert( 0 != m_mapChains.size() );
 
-        // create a position with the watch
-        m_pPositionUnderlying = m_fConstructPosition( m_pPortfolioStrategy->Id(), pWatchUnderlying, "" ); // no note needed for underlying
-        assert( m_pPositionUnderlying );
-        assert( m_pPositionUnderlying->GetWatch() );
+    //m_fRegisterWatch( pWatchUnderlying );  // TODO: ensure this is performed in caller
 
-        m_pOptionRepository->AssignWatchUnderlying( m_pPositionUnderlying->GetWatch() );
+    m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+    m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
-        // collect option chains for the underlying
-        ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, pWatchUnderlying->GetInstrument()->GetInstrumentName(), fGatherOptionDefinitions );
-
-        assert( 0 != m_mapChains.size() );
-
-        //std::cout << m_sUnderlying << " watch done." << std::endl;
-
-        m_fRegisterWatch( pWatchUnderlying );
-
-        pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-        pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
-
-        m_pValidateOptions = std::make_unique<ValidateOptions>(
-            pWatchUnderlying,
-            m_mapChains,
-            m_fConstructOption
-          );
-        m_pValidateOptions->SetSize( combo_t::LegCount() ); // will need to make this generic
-
-    } ); // m_fConstructWatch on Underlying Instrument
+    m_pValidateOptions = std::make_unique<ValidateOptions>(
+        m_pWatchUnderlying,
+        m_mapChains,
+        m_fConstructOption
+      );
+    m_pValidateOptions->SetSize( combo_t::LegCount() ); // will need to make this generic
 
   }
   catch (...) {
-    std::cout << "*** " << "something wrong with " << m_sUnderlying << " creation." << std::endl;
+    std::cout << "*** " << "something wrong with " << pInstrumentUnderlying->GetInstrumentName() << " creation." << std::endl;
   }
 
 }
 
 ManageStrategy::~ManageStrategy( ) {
 
+  m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
+  m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
+
   m_pCombo.reset();
   m_pOptionRepository.reset();
   m_vEMA.clear();
-  if ( m_pPositionUnderlying ) {
-    pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
-    if ( pWatch ) {
-      pWatch->OnQuote.Remove( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
-      pWatch->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
-    }
-  }
 }
 
 void ManageStrategy::Run() {
@@ -392,34 +371,39 @@ void ManageStrategy::Run() {
   //std::cout << m_sUnderlying << " loading done." << std::endl;
 }
 
+// is this used currently?
 ou::tf::DatedDatum::volume_t ManageStrategy::CalcShareCount( double dblFunds ) const {
   volume_t nOptionContractsToTrade {};
+  const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
   if ( 0.0 != m_dblOpen ) {
     nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_dblOpen ) )/ 100;
-    std::cout << m_sUnderlying << " funds on open: " << dblFunds << ", " << m_dblOpen << ", " << nOptionContractsToTrade << std::endl;
+    std::cout << sUnderlying << " funds on open: " << dblFunds << ", " << m_dblOpen << ", " << nOptionContractsToTrade << std::endl;
   }
   else {
-    nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_barPriorDaily.Close() ) )/ 100;
-    std::cout << m_sUnderlying << " funds on bar close: " << dblFunds << ", " << m_barPriorDaily.Close() << ", " << nOptionContractsToTrade << std::endl;
+    //nOptionContractsToTrade = ( (volume_t)std::floor( dblFunds / m_barPriorDaily.Close() ) )/ 100;
+    nOptionContractsToTrade = 1;
+    //std::cout << sUnderlying << " funds on bar close: " << dblFunds << ", " << m_barPriorDaily.Close() << ", " << nOptionContractsToTrade << std::endl;
   }
 
   volume_t nUnderlyingSharesToTrade = nOptionContractsToTrade * 100;  // round down to nearest 100
-  std::cout << m_sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
+  std::cout << sUnderlying << " funds: " << nOptionContractsToTrade << ", " << nUnderlyingSharesToTrade << std::endl;
   return nUnderlyingSharesToTrade;
 }
 
 // add pre-existing positions from database
-// NOTE: are there out of order problems, as Collar vLeg is ordered in a particular manner
+// NOTE: are there out of order problems, as Collar vLeg is ordered in a particular manner?  LegInfo may have now resolved this
 void ManageStrategy::AddPosition( pPosition_t pPosition ) {
+
   pInstrument_t pInstrument = pPosition->GetInstrument();
   pWatch_t pWatch = pPosition->GetWatch();
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Stock:
-      assert( m_pPositionUnderlying );
-      assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
-      assert( pPosition.get() == m_pPositionUnderlying.get() );
+      //assert( m_pPositionUnderlying );
+      //assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
+      //assert( pPosition.get() == m_pPositionUnderlying.get() );
+      std::cout << "ManageStrategy::AddPosition adding underlying position, needs additional code: " << pInstrument->GetInstrumentName() << std::endl;
       try {
-        m_fRegisterWatch( pWatch );
+        //m_fRegisterWatch( pWatch );
       }
       catch( std::runtime_error& e ) {
         std::cout << e.what() << std::endl;
@@ -441,7 +425,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
 
-          pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+          pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
 
         }
 
@@ -454,7 +438,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         using LegNote = ou::tf::option::LegNote;
         const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
         if ( LegNote::State::Open == lnValues.m_state ) {
-          m_fAuthorizeSimple( m_sUnderlying, true ); // update count
+          m_fAuthorizeSimple( idPortfolio, pInstrument->GetInstrumentName(), true ); // update count
         }
         else {
           m_ixColour--;
@@ -465,7 +449,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 }
 
 void ManageStrategy::ClosePositions( void ) {
-  std::cout << m_sUnderlying << " close positions" << std::endl;
+  std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << " close positions" << std::endl;
   if ( m_pCombo ) {
     combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
     combo.CancelOrders(); // TODO: generify via Common or Base
@@ -533,9 +517,9 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
     case TSMonitorLong: {
       pEMA_t& pEMA( m_vEMA.back() );
       if ( trade.Price() < pEMA->dblEmaLatest ) {
-        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-        m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-        std::cout << m_sUnderlying << " closing long" << std::endl;
+        //m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        //m_ceLongExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+        //std::cout << m_sUnderlying << " closing long" << std::endl;
         m_stateTrading = TSWaitForEntry;
       }
       }
@@ -543,9 +527,9 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
     case TSMonitorShort: {
       pEMA_t& pEMA( m_vEMA.back() );
       if ( trade.Price() > pEMA->dblEmaLatest ) {
-        m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
-        m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
-        std::cout << m_sUnderlying << " closing short" << std::endl;
+        //m_pPositionUnderlying->ClosePosition( ou::tf::OrderType::Market );
+        //m_ceShortExits.AddLabel( trade.DateTime(), trade.Price(), "Stop" );
+        //std::cout << m_sUnderlying << " closing short" << std::endl;
         m_stateTrading = TSWaitForEntry;
       }
       }
@@ -594,7 +578,7 @@ void ManageStrategy::BuildPosition(
 
   m_fConstructOption(
     sIQFeedOptionCode,
-    m_pPositionUnderlying->GetWatch()->GetInstrument(),
+    m_pWatchUnderlying->GetInstrument(),
     [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
       m_pOptionRepository->Add( pOption );
       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, "" );
@@ -632,6 +616,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         if ( m_bAllowComboAdd ) {
 
+          const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+
           try {
             const ou::tf::option::Combo::E20DayDirection direction
               = ( 0.0 <= m_dblSlope20DayUnderlying )
@@ -648,13 +634,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( m_sUnderlying, m_mapChains, dateBar, mid, direction );
+                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction );
 
-              if ( m_fAuthorizeSimple( m_sUnderlying, false ) ) {
+              if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
                 m_bAllowComboAdd = false;
 
-                std::cout << m_sUnderlying << ": bid/ask spread ok, opening positions (slope=" << m_dblSlope20DayUnderlying << ")" << std::endl;
+                std::cout << sUnderlying << ": bid/ask spread ok, opening positions (slope=" << m_dblSlope20DayUnderlying << ")" << std::endl;
 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );
@@ -663,8 +649,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                   std::cout << "WARNING: strategy running out of colours." << std::endl;
                 }
-                std::cout << m_sUnderlying << " construct portfolio: " << m_pPortfolioStrategy->Id() << " adds " << idPortfolio << std::endl;
-                combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioStrategy->Id() ) );
+                std::cout << sUnderlying << " construct portfolio: " << m_pPortfolioOwning->Id() << " adds " << idPortfolio << std::endl;
+                combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
 
                 m_pValidateOptions->ValidatedOptions(
                   [this,idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
@@ -697,7 +683,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             // don't worry about this, price is not with in range yet
           }
           catch ( const std::runtime_error& e ) {
-            std::cout << m_sUnderlying << " run time error, stop trading: " << e.what() << std::endl;
+            std::cout << sUnderlying << " run time error, stop trading: " << e.what() << std::endl;
             m_pValidateOptions->ClearValidation();
             m_stateTrading = TSNoMore;  // TODO: fix this for multiple combos in place
           }
@@ -710,7 +696,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
       break;
     case TSComboPrepare:
       {
-        std::cout << "TSComboPrepare: " << m_sUnderlying << std::endl;
+        const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+
+        std::cout << "TSComboPrepare: " << sUnderlying << std::endl;
         const boost::gregorian::date dateBar( bar.DateTime().date() );
 
         m_pCombo->Prepare( // fConstructOption_t?
@@ -719,7 +707,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             // TODO: maintain a local map for quick reference
             m_fConstructOption(
               sOptionName,
-              m_pPositionUnderlying->GetWatch()->GetInstrument(),
+              m_pWatchUnderlying->GetInstrument(),
               [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
                 f( pOption );
               }
@@ -829,7 +817,7 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
 //      bAllFalling &= ( EBarDirection::Down == m_rBarDirection[ 2 ] );
       static const size_t nConfirmationIntervalsPreload( 19 );
       if ( bAllRising && bAllFalling ) { // special message for questionable result
-        std::cout << m_sUnderlying << ": bAllRising && bAllFalling" << std::endl;
+        std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << ": bAllRising && bAllFalling" << std::endl;
         m_stateEma = EmaState::EmaUnstable;
         m_nConfirmationIntervals = nConfirmationIntervalsPreload;
       }
@@ -844,9 +832,9 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
               m_nConfirmationIntervals--;
               if ( 0 == m_nConfirmationIntervals ) {
 //                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing long " << m_nSharesToTrade << std::endl;
-                m_pPositionUnderlying->CancelOrders();
+//                m_pPositionUnderlying->CancelOrders();
 //                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
-                m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
+//                m_ceLongEntries.AddLabel( bar.DateTime(), bar.Close(), "Long" );
                 m_stateTrading = TSMonitorLong;
                 m_stateEma = EmaState::EmaUnstable;
               }
@@ -861,9 +849,9 @@ void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
               m_nConfirmationIntervals--;
               if ( 0 == m_nConfirmationIntervals ) {
 //                std::cout << m_pPositionUnderlying->GetInstrument()->GetInstrumentName() << " " << bar.DateTime() << ": placing short " << m_nSharesToTrade << std::endl;
-                m_pPositionUnderlying->CancelOrders();
+//                m_pPositionUnderlying->CancelOrders();
 //                m_pPositionUnderlying->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
-                m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
+//                m_ceShortEntries.AddLabel( bar.DateTime(), bar.Close(), "Short" );
                 m_stateTrading = TSMonitorShort;
                 m_stateEma = EmaState::EmaUnstable;
               }
@@ -886,7 +874,7 @@ void ManageStrategy::HandleCancel( boost::gregorian::date, boost::posix_time::ti
       break;
     default:
       {
-        std::cout << m_sUnderlying << " cancel" << std::endl;
+        std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << " cancel" << std::endl;
         if ( m_pCombo ) {
           //if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
           combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
@@ -949,9 +937,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
-  if ( nullptr != m_pPositionUnderlying.get() ) {
-    m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
-  }
+  // TODO: pWatchUnderlying should be saved in caller hierarchy
   if ( m_pCombo ) {
     combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
     //entry.second.ClosePositions();
@@ -1006,7 +992,7 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   double dblCommissionsPaid;
   double dblTotal;
 
-  m_pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPortfolioOwning->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
 
 //  if ( m_pPositionCall ) {
@@ -1045,24 +1031,22 @@ void ManageStrategy::Test() {
 
 double ManageStrategy::EmitInfo() {
   double dblNet {};
-  if ( m_pPositionUnderlying ) {
-    if ( m_pCombo ) {
-      double price( m_pPositionUnderlying->GetWatch()->LastTrade().Price() );
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
-      std::cout
-        << "Info "
-        << m_sUnderlying
-        << "@" << price
-        << std::endl;
+  if ( m_pCombo ) {
+    double price( m_pWatchUnderlying->LastTrade().Price() );
+    combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+    std::cout
+      << "Info "
+      << m_pWatchUnderlying->GetInstrument()->GetInstrumentName()
+      << "@" << price
+      << std::endl;
 
-      std::cout << "  portfolio: " << combo.GetPortfolio()->Id() << std::endl;
-      std::cout << "  underlying: ";
-      m_pPositionUnderlying->GetWatch()->EmitValues( true );
-      std::cout << std::endl;
+    std::cout << "  portfolio: " << combo.GetPortfolio()->Id() << std::endl;
+    std::cout << "  underlying: ";
+    m_pWatchUnderlying->EmitValues( true );
+    std::cout << std::endl;
 
-      dblNet += combo.GetNet( price );
-      std::cout << "  net: " << dblNet << std::endl;
-    }
+    dblNet += combo.GetNet( price );
+    std::cout << "  net: " << dblNet << std::endl;
   }
   return dblNet;
 }

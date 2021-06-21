@@ -74,17 +74,17 @@ public:
   using fOptionDefinition_t        = ou::tf::option::fOptionDefinition_t;
   using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
 
-  using fConstructedWatch_t  = std::function<void(pWatch_t)>;
+  //using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   using fConstructedOption_t = std::function<void(pOption_t)>;
 
-  using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
+  //using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t&, pWatch_t, const std::string& )>; // string used for "leg=x" for second day
 
   using fConstructPortfolio_t = std::function<pPortfolio_t( const idPortfolio_t&, const idPortfolio_t&)>; // id of new, id of ManageStrategy portfolio
 
-  using fAuthorizeSimple_t     = std::function<bool(const std::string&,bool)>; // underlying, has active positions
+  using fAuthorizeSimple_t     = std::function<bool(const idPortfolio_t&, const std::string& /* sUnderlying */,bool /* has active positions */)>;
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
   using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
 
@@ -101,14 +101,14 @@ public:
   using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;;
 
   ManageStrategy(
-    const std::string& sUnderlying,
-    const ou::tf::Bar& barPriorDaily,
+    //const ou::tf::Bar& barPriorDaily,
     double dblSlopeUnderlying,
     // TODO: convert these to left assign
-    pPortfolio_t,
+    pWatch_t, // underlying
+    pPortfolio_t, // owning portfolio
     pChartDataView_t,
     fGatherOptionDefinitions_t&,
-    fConstructWatch_t,
+    //fConstructWatch_t,
     fConstructOption_t,
     fConstructPosition_t,
     fConstructPortfolio_t,
@@ -126,8 +126,7 @@ public:
 
   void Run();
 
-  const std::string& GetUnderlying() const { return m_sUnderlying; }
-  pPortfolio_t GetPortfolio() { return m_pPortfolioStrategy; }
+  pPortfolio_t GetPortfolio() { return m_pCombo->GetPortfolio(); }
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   //void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
@@ -181,8 +180,10 @@ private:
 
   using volume_t = ou::tf::DatedDatum::volume_t;
 
-  std::string m_sUnderlying;
+  //std::string m_sUnderlying;
   double m_dblSlope20DayUnderlying;
+
+  pWatch_t m_pWatchUnderlying;
 
   bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
   bool m_bAllowComboAdd; // allows state machine to open new combo
@@ -199,7 +200,7 @@ private:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
-  fConstructWatch_t m_fConstructWatch;
+  //fConstructWatch_t m_fConstructWatch;
   fConstructOption_t m_fConstructOption;
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
@@ -215,10 +216,9 @@ private:
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
 
-  const ou::tf::Bar& m_barPriorDaily;
+  //const ou::tf::Bar& m_barPriorDaily;
 
-  pPosition_t m_pPositionUnderlying;
-  pPortfolio_t m_pPortfolioStrategy;
+  pPortfolio_t m_pPortfolioOwning; // owning portfolio
 
   //PivotCrossing m_pivotCrossing;
 
