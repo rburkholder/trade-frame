@@ -54,6 +54,7 @@ public:
   void ReadDailyBars( const std::string& sDailyBarPath );
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void SetChartDataView( pChartDataView_t );
+  void PopulateChains( fGatherOptionDefinitions_t& );
 
   pWatch_t GetWatch() { return m_pWatch; }
   pPortfolio_t GetPortfolio() { return m_pPortfolioAggregate; }
@@ -77,8 +78,6 @@ private:
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryMark m_cePivots;
-
-  fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;  // TODO: needs to be populated
 
   ou::tf::BollingerTransitions m_BollingerTransitions;
 

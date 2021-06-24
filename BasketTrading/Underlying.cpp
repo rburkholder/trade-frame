@@ -32,7 +32,6 @@ Underlying::Underlying(
 {
   assert( pWatch );
   assert( pPortfolioAggregate );
-  //m_GexCalc.LoadChains( m_fOptionNamesByUnderlying );  // is currently unpopulated
 }
 
 void Underlying::SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 ) {
@@ -55,4 +54,8 @@ void Underlying::ReadDailyBars( const std::string& sDailyBarPath ) {
 
 void Underlying::SetChartDataView( pChartDataView_t pChartDataView ) {
   m_pChartDataView = pChartDataView;
+}
+
+void Underlying::PopulateChains( fGatherOptionDefinitions_t& f ) {
+  m_GexCalc.LoadChains( f );  // is currently unpopulated
 }

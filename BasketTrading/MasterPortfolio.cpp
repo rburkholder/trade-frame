@@ -353,6 +353,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying = std::make_unique<Underlying>( pWatchUnderlying, pPortfolioUnderlying );
         uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
         uws.pUnderlying->SetChartDataView( pChartDataView );
+        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
         uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView );
 
