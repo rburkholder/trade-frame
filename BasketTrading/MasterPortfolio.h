@@ -144,7 +144,7 @@ private:
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
-    wxTreeItemId idTree;
+    wxTreeItemId idTreeItem;
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
@@ -170,6 +170,7 @@ private:
 
   struct UnderlyingWithStrategies {
     const IIPivot iip;
+    wxTreeItemId idTreeItem;
     pUnderlying_t pUnderlying;
     pManageStrategy_t pManageStrategyInWaiting;
     mapStrategy_t mapStrategyActive;

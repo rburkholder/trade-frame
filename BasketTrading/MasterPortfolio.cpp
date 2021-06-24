@@ -203,8 +203,8 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   StrategyArtifacts& artifact( iterStrategyArtifacts->second );
   if ( pPosition->GetRow().idPortfolio != artifact.m_pPortfolio->Id() ) {
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
-    std::string idPortfolio1( pPosition->IdPortfolio() );
-    std::string idPortfolio2( artifact.m_pPortfolio->Id() );
+    idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
+    idPortfolio_t idPortfolio2( artifact.m_pPortfolio->Id() );
     assert( false );
   }
   std::pair<mapPosition_t::iterator,bool> pair
@@ -354,7 +354,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
         uws.pUnderlying->SetChartDataView( pChartDataView );
 
-        m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView );
+        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView );
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -660,7 +660,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
             bool bAuthorized = mm.Authorize( sName );
             if ( bAuthorized || bExists ) {
               if ( !strategy.bChartActivated ) {
-                strategy.idTree = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
+                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
                 strategy.bChartActivated = true;
               }
             }
