@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#pragma once
+
 #include <TFTimeSeries/DatedDatum.h>
 
 #include "ChartEntryPrice.h"
