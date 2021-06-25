@@ -24,7 +24,11 @@
 #include <string>
 
 #include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
+#include <OUCharting/ChartEntryVolume.h>
+
+#include <TFTimeSeries/BarFactory.h>
 
 #include <TFOptions/Aggregate.h>
 
@@ -32,6 +36,8 @@
 #include <TFTrading/Portfolio.h>
 
 #include <TFBitsNPieces/BollingerTransitions.h>
+
+//#include "PivotCrossing.h"
 
  // contains:
  //  1) will contain active strategies,
@@ -50,10 +56,12 @@ public:
     pWatch_t pWatch,
     pPortfolio_t pPortfolio
   );
+  ~Underlying();
 
   void ReadDailyBars( const std::string& sDailyBarPath );
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void SetChartDataView( pChartDataView_t );
+  void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptionDefinitions_t& );
 
   pWatch_t GetWatch() { return m_pWatch; }
@@ -68,6 +76,8 @@ public:
 protected:
 private:
 
+  enum EChartSlot { Price, Volume, PL, Tick };
+
   using gex_t = ou::tf::option::Aggregate;
 
   pWatch_t m_pWatch;
@@ -77,8 +87,16 @@ private:
 
   pChartDataView_t m_pChartDataView;
 
+  ou::tf::BarFactory m_bfTrades06Sec; // charting
+
+  ou::ChartEntryBars m_cePrice;
+  ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
 
   ou::tf::BollingerTransitions m_BollingerTransitions;
+
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
+  void HandleBarTrades06Sec( const ou::tf::Bar& bar );
 
 };

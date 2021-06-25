@@ -30,10 +30,10 @@
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryMark.h>
+#include <OUCharting/ChartEntryShape.h>
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
-#include <OUCharting/ChartEntryShape.h>
-#include <OUCharting/ChartEntryMark.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
@@ -48,7 +48,6 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-//#include "PivotCrossing.h"
 #include "ValidateOptions.h"
 
 class OptionRepository;
@@ -134,6 +133,8 @@ public:
   void SaveSeries( const std::string& sPrefix );
 
   void AddPosition( pPosition_t ); // add pre-existing position
+
+  pChartDataView_t GetChartDataView() { return m_pChartDataView; }
 
   void Test( void );
 
@@ -239,10 +240,6 @@ private:
   //ou::tf::BarFactory m_bfTrades60Sec; // sentiment analysis
 
   //ou::tf::BarFactory m_bfTicks06sec; // monitors liquidity, use to determine a minimum count for entry
-
-  ou::ChartEntryBars m_cePrice;
-  ou::ChartEntryVolume m_ceVolume;
-  ou::ChartEntryMark m_cePivots;
 
   ou::ChartEntryVolume m_ceTickCount;
 

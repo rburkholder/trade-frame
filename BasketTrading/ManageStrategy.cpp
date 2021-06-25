@@ -102,6 +102,8 @@ namespace {
   };
 }
 
+// == OptionRepository
+
 class OptionRepository {
 public:
 
@@ -198,12 +200,14 @@ private:
 
 };
 
+// == ManageStrategy
+
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
   double dblSlope20DayUnderlying,
   pWatch_t pWatchUnderlying,
   pPortfolio_t pPortfolioOwning, // => owning portfolio
-  pChartDataView_t pcdvStrategyData,
+  pChartDataView_t pChartDataView,
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
   fConstructOption_t fConstructOption, // => m_fConstructOption
@@ -225,7 +229,7 @@ ManageStrategy::ManageStrategy(
   //m_barPriorDaily( barPriorDaily ),
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
-  m_pChartDataView( pcdvStrategyData ),
+  m_pChartDataView( pChartDataView ),
 
   //m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
@@ -270,16 +274,14 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fConstructPortfolio );
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
-  assert( pcdvStrategyData );
+  assert( pChartDataView );
 
   //m_rBarDirection[ 0 ] = EBarDirection::None;
   //m_rBarDirection[ 1 ] = EBarDirection::None;
   //m_rBarDirection[ 2 ] = EBarDirection::None;
 
-  pcdvStrategyData->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+  pChartDataView->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
-  m_cePrice.SetName( "Price" );
-  m_ceVolume.SetName( "Volume" );
   //m_ceUpReturn.SetName( "Up Return" );
   //m_ceDnReturn.SetName( "Dn Return" );
   m_ceProfitLossPortfolio.SetName( "P/L Portfolio" );
@@ -288,23 +290,19 @@ ManageStrategy::ManageStrategy(
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
 
-  pcdvStrategyData->Add( EChartSlot::Price, &m_cePrice );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_cePivots );
-  pcdvStrategyData->Add( EChartSlot::Volume, &m_ceVolume );
+  pChartDataView->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
 
-  pcdvStrategyData->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
+  //pChartDataView->Add( EChartSlot::Tick, &m_ceTickCount );
 
-  //pcdvStrategyData->Add( EChartSlot::Tick, &m_ceTickCount );
+  //pChartDataView->Add( 4, &m_ceUpReturn );
+  //pChartDataView->Add( 4, &m_ceDnReturn );
 
-  //pcdvStrategyData->Add( 4, &m_ceUpReturn );
-  //pcdvStrategyData->Add( 4, &m_ceDnReturn );
-
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortEntries );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongEntries );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortFills );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongFills );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceShortExits );
-  pcdvStrategyData->Add( EChartSlot::Price, &m_ceLongExits );
+  pChartDataView->Add( EChartSlot::Price, &m_ceShortEntries );
+  pChartDataView->Add( EChartSlot::Price, &m_ceLongEntries );
+  pChartDataView->Add( EChartSlot::Price, &m_ceShortFills );
+  pChartDataView->Add( EChartSlot::Price, &m_ceLongFills );
+  pChartDataView->Add( EChartSlot::Price, &m_ceShortExits );
+  pChartDataView->Add( EChartSlot::Price, &m_ceLongExits );
 
   m_pOptionRepository = std::make_unique<OptionRepository>(
     std::move( fRegisterOption ),
@@ -980,8 +978,8 @@ void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
 
 void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 
-  m_cePrice.AppendBar( bar );
-  m_ceVolume.Append( bar );
+  //m_cePrice.AppendBar( bar );
+  //m_ceVolume.Append( bar );
 
 //  m_rBarDirection[ 0 ] = m_rBarDirection[ 1 ];
 //  m_rBarDirection[ 1 ] = m_rBarDirection[ 2 ];

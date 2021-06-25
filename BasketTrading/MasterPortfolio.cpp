@@ -569,11 +569,12 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
             UnderlyingWithStrategies& uws( iterUWS->second );
             assert( uws.pManageStrategyInWaiting );
 
-            pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
+            pChartDataView_t pChartDataView = uws.pManageStrategyInWaiting->GetChartDataView();
 
             uws.mapStrategyActive.emplace(
               std::make_pair( idPortfolioNew, std::make_unique<Strategy>( std::move( uws.pManageStrategyInWaiting ), pChartDataView ) )
               );
+            uws.pUnderlying->PopulateChartDataView( pChartDataView );
 
             return pPortfolio;
           },
