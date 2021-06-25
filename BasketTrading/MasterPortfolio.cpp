@@ -339,7 +339,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
           pPortfolioUnderlying = sa.m_pPortfolio;
         }
         else { // create new portfolio
-          ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "aggregate" );
+          ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "aoRay" );  // TODO: need bring account owner from caller
           pPortfolioUnderlying
             = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
                 idPortfolioUnderlying, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Aggregate, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Underlying Aggregate"
