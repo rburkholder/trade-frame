@@ -57,25 +57,25 @@ public:
   using greekhandler_t = ou::Delegate<greek_t>::OnDispatchHandler;
 
   // these handlers are typically updated through the provider, rather than through client code
+  void AddOnOpenHandler( tradehandler_t );
+  void RemoveOnOpenHandler( tradehandler_t );
+  size_t GetOpenHandlerCount() const { return m_OnOpen.Size(); };
+
   bool AddQuoteHandler( quotehandler_t );
   bool RemoveQuoteHandler( quotehandler_t );
   size_t GetQuoteHandlerCount() const { return m_OnQuote.Size(); };
 
-  void AddOnOpenHandler( tradehandler_t );
-  void RemoveOnOpenHandler( tradehandler_t );
-  size_t GetOpenHandlerCount() { return m_OnOpen.Size(); };
-
   bool AddTradeHandler( tradehandler_t );
   bool RemoveTradeHandler( tradehandler_t );
-  size_t GetTradeHandlerCount() { return m_OnTrade.Size(); };
+  size_t GetTradeHandlerCount() const { return m_OnTrade.Size(); };
 
   bool AddDepthHandler( depthhandler_t );
   bool RemoveDepthHandler( depthhandler_t );
-  size_t GetDepthHandlerCount() { return m_OnDepth.Size(); };
+  size_t GetDepthHandlerCount() const { return m_OnDepth.Size(); };
 
   bool AddGreekHandler( greekhandler_t );
   bool RemoveGreekHandler( greekhandler_t );
-  size_t GetGreekHandlerCount() { return m_OnGreek.Size(); };
+  size_t GetGreekHandlerCount() const { return m_OnGreek.Size(); };
 
   // these are typically used by the provider only
   bool  OpenWatchNeeded() const { return !m_OnOpen.IsEmpty(); };
