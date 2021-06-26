@@ -415,17 +415,18 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
   iterUnderlyingWithStrategies_t iterUnderlyingWithStrategies
     = m_mapUnderlyingWithStrategies.find( sUnderlying );
+  assert( m_mapUnderlyingWithStrategies.end() != iterUnderlyingWithStrategies );
   UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
-  assert( !uws.pManageStrategyInWaiting );  // need empty location
-  const IIPivot& iip_( uws.iip );
+  assert( !uws.pStrategyInWaiting );  // need empty location
 
+  const IIPivot& iip_( uws.iip );
   const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
   pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
 
   namespace ph = std::placeholders;
 
-  uws.pManageStrategyInWaiting = std::make_shared<ManageStrategy>(
+  pManageStrategy_t pManageStrategy = std::make_shared<ManageStrategy>(
         //iip.sPath, // TODO: supply to Underlying instead
         //iip_.bar,
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
@@ -563,16 +564,16 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               Add( pPortfolio );  // update the archive
             }
 
-            // move from pManageStrategyInWaiting to mapStrategyActive
+            // move from pStrategyInWaiting to mapStrategyActive
             iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
             assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
             UnderlyingWithStrategies& uws( iterUWS->second );
-            assert( uws.pManageStrategyInWaiting );
+            assert( uws.pStrategyInWaiting );
 
-            pChartDataView_t pChartDataView = uws.pManageStrategyInWaiting->GetChartDataView();
+            pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pChartDataView;
 
             uws.mapStrategyActive.emplace(
-              std::make_pair( idPortfolioNew, std::make_unique<Strategy>( std::move( uws.pManageStrategyInWaiting ), pChartDataView ) )
+              std::make_pair( idPortfolioNew, std::move( uws.pStrategyInWaiting ) )
               );
             uws.pUnderlying->PopulateChartDataView( pChartDataView );
 
@@ -675,7 +676,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           }
       );
 
-  return uws.pManageStrategyInWaiting;
+  uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ), std::move( pChartDataView ) );
+  return uws.pStrategyInWaiting->pManageStrategy;
 
 } // ConstructStrategy
 

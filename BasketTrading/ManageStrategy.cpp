@@ -632,7 +632,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               idPortfolio_t idPortfolio
-                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction );
+                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction );  // "collar-GLD-rise-20210730-165-20210630-167-165"
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 

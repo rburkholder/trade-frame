@@ -150,7 +150,7 @@ private:
     double dblBestProbability;
     bool bChartActivated;
     pChartDataView_t pChartDataView;
-    Strategy( pManageStrategy_t pManageStrategy_, pChartDataView_t& pChartDataView_ )
+    Strategy( pManageStrategy_t pManageStrategy_, pChartDataView_t pChartDataView_ )
     : pManageStrategy( std::move( pManageStrategy_ ) ),
       bChartActivated( false ), pChartDataView( pChartDataView_ ),
       priceOpen {}, dblBestProbability {}
@@ -172,7 +172,7 @@ private:
     const IIPivot iip;
     wxTreeItemId idTreeItem;
     pUnderlying_t pUnderlying;
-    pManageStrategy_t pManageStrategyInWaiting;
+    pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
 
