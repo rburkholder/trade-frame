@@ -49,9 +49,6 @@ public:
 
 protected:
 
-  void StartQuoteTradeWatch( IQFeedSymbol *pSymbol );
-  void StopQuoteTradeWatch( IQFeedSymbol *pSymbol );
-
   // overridden from ProviderInterface, called when application adds/removes watches
   virtual void StartQuoteWatch( pSymbol_t pSymbol );
   virtual void  StopQuoteWatch( pSymbol_t pSymbol );
@@ -78,6 +75,8 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
+
+  void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 
 };
 

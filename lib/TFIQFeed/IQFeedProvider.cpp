@@ -74,38 +74,107 @@ IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument 
   return pSymbol;
 }
 
-void IQFeedProvider::StartQuoteTradeWatch( IQFeedSymbol* pSymbol ) {
-  if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
-    std::string s = "w" + pSymbol->GetId() + "\n";
-    IQFeed<IQFeedProvider>::Send( s );
-    pSymbol->SetQuoteTradeWatchInProgress();
-  }
+namespace {
+  static const char transition[4][4] = {
+    /* from             to    None Quote Trade Both*/
+    /* WatchState::None  */ { '-', 'w',  't',  'w' },
+    /* WatchState::Quote */ { 'r', '-',  't',  '-' },
+    /* WatchState::Trade */ { 'r', 'w',  '-',  'w' },
+    /* WatchState::Both  */ { 'r', '-',  't',  '-' }
+  };  // - = no change, w = watch, t = trades only, r = reset
+      // reverse diagonal is illegal as it includes two simultaneous watch changes
 }
 
-void IQFeedProvider::StopQuoteTradeWatch( IQFeedSymbol* pSymbol ) {
-  if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
-    // don't do anything, as stuff still active
-  }
-  else {
-    std::string s = "r" + pSymbol->GetId() + "\n";
+void IQFeedProvider::UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol* pSymbol ) {
+  if ( '-' != command ) {
+    std::string s = command + pSymbol->GetId() + "\n";
     IQFeed<IQFeedProvider>::Send( s );
   }
+  pSymbol->SetWatchState( next );
 }
 
-void IQFeedProvider::StartQuoteWatch(pSymbol_t pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+void IQFeedProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
+  IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
+  IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
+  switch ( current ) {
+    case IQFeedSymbol::WatchState::None:
+      next = IQFeedSymbol::WatchState::WSQuote;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::WSQuote:
+      // nothing to do
+      break;
+    case IQFeedSymbol::WatchState::WSTrade:
+      next = IQFeedSymbol::WatchState::Both;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::Both:
+      // nothing to do
+      break;
+  }
 }
 
 void IQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+  IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
+  IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
+  switch ( current ) {
+    case IQFeedSymbol::WatchState::None:
+      std::cout << "IQFeedProvider::StopQuoteWatch error with None: " << pSymbol->GetId() << std::endl;
+      break;
+    case IQFeedSymbol::WatchState::WSQuote:
+      next = IQFeedSymbol::WatchState::None;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::WSTrade:
+      std::cout << "IQFeedProvider::StopQuoteWatch error with Trade: " << pSymbol->GetId() << std::endl;
+      break;
+    case IQFeedSymbol::WatchState::Both:
+      next = IQFeedSymbol::WatchState::WSTrade;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+  }
 }
 
 void IQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+  IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
+  IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
+  switch ( current ) {
+    case IQFeedSymbol::WatchState::None:
+      next = IQFeedSymbol::WatchState::WSTrade;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::WSQuote:
+      next = IQFeedSymbol::WatchState::Both;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::WSTrade:
+      // nothing to do
+      break;
+    case IQFeedSymbol::WatchState::Both:
+      // nothing to do
+      break;
+  }
 }
 
 void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+  IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
+  IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
+  switch ( current ) {
+    case IQFeedSymbol::WatchState::None:
+      std::cout << "IQFeedProvider::StopTradeWatch error with None: " << pSymbol->GetId() << std::endl;
+      break;
+    case IQFeedSymbol::WatchState::WSQuote:
+      std::cout << "IQFeedProvider::StopTradeWatch error with Quote: " << pSymbol->GetId() << std::endl;
+      break;
+    case IQFeedSymbol::WatchState::WSTrade:
+      next = IQFeedSymbol::WatchState::None;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+    case IQFeedSymbol::WatchState::Both:
+      next = IQFeedSymbol::WatchState::WSQuote;
+      UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
+      break;
+  }
 }
 
 void IQFeedProvider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg ) {

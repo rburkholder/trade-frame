@@ -31,7 +31,8 @@ IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument
   m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ),
   m_nShortInterest( 0 ), m_dblPriceEarnings( 0 ), m_dbl52WkHi( 0 ), m_dbl52WkLo( 0 ), m_dblDividendYield( 0.0 ),
   m_nOpenInterest( 0 ), m_QStatus( qUnknown ),
-  m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
+  m_stateWatch( WatchState::None ),
+  m_bDepthWatchInProgress( false ),
   m_bWaitForFirstQuote( true )
 {
 }

@@ -87,10 +87,12 @@ protected:
   unsigned short m_cnt;  // used for watch/unwatch
   enum enumQStatus { qUnknown, qFound, qNotFound } m_QStatus;
 
-  void SetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = true; };
-  void ResetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = false; };
-  bool GetQuoteTradeWatchInProgress() const { return m_bQuoteTradeWatchInProgress; };
-  bool m_bQuoteTradeWatchInProgress;
+  enum WatchState {
+    None, WSQuote, WSTrade, Both
+  };
+
+  void SetWatchState( WatchState state ) { m_stateWatch = state; };
+  WatchState GetWatchState() const { return m_stateWatch; };
 
   void SetDepthWatchInProgress() { m_bDepthWatchInProgress = true; };
   void ResetDepthWatchInProgress() { m_bDepthWatchInProgress = false; };
@@ -111,6 +113,9 @@ protected:
   void DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg );
 
 private:
+
+  WatchState m_stateWatch;
+
   bool m_bWaitForFirstQuote;
 };
 
