@@ -49,54 +49,54 @@ namespace tf { // TradeFrame
 class ProviderInterfaceBase {
 public:
 
-  typedef boost::shared_ptr<ProviderInterfaceBase> pProvider_t;
+  using pProvider_t = boost::shared_ptr<ProviderInterfaceBase>;
 
-  typedef Order::pOrder_t pOrder_t;
+  using pOrder_t = Order::pOrder_t;
 //  typedef keytypes::idProvider_t idProvider_t;
 
-  typedef SymbolBase::quotehandler_t quotehandler_t;
-  typedef SymbolBase::tradehandler_t tradehandler_t;
-  typedef SymbolBase::depthhandler_t depthhandler_t;
-  typedef SymbolBase::greekhandler_t greekhandler_t;
+  using quotehandler_t = SymbolBase::quotehandler_t;
+  using tradehandler_t = SymbolBase::tradehandler_t ;
+  using depthhandler_t = SymbolBase::depthhandler_t;
+  using greekhandler_t = SymbolBase::greekhandler_t;
 
-  typedef SymbolBase::pInstrument_t pInstrument_t;
-  typedef SymbolBase::pInstrument_cref pInstrument_cref;
+  using pInstrument_t = SymbolBase::pInstrument_t;
+  using pInstrument_cref =  SymbolBase::pInstrument_cref;
 
-  typedef keytypes::eidProvider_t eidProvider_t;
+  using eidProvider_t = keytypes::eidProvider_t;
 
-  const std::string& GetName( void ) const { return m_sName; };
+  const std::string& GetName() const { return m_sName; };
   void SetName( const std::string& sName ) { m_sName = sName; };
-  eidProvider_t ID( void ) const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
+  eidProvider_t ID() const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
 
-  ProviderInterfaceBase( void )
+  ProviderInterfaceBase()
     : m_nID( keytypes::EProviderUnknown ), m_bConnected( false ),
       m_pProvidesBrokerInterface( false ),
       m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepth( false )
     {};
-  virtual ~ProviderInterfaceBase( void ) {};
+  virtual ~ProviderInterfaceBase() {};
 
-  virtual void Connect( void ) {}; // called by inheriting provider
-  //virtual void Connecting( void ) {}; // called by inheriting provider
+  virtual void Connect() {}; // called by inheriting provider
+  //virtual void Connecting() {}; // called by inheriting provider
   ou::Delegate<int> OnConnecting;
   ou::Delegate<int> OnConnected;  // could be in another thread
-  //virtual void Connected( void ) {}; // called by inheriting provider
+  //virtual void Connected() {}; // called by inheriting provider
 
-  //virtual void Disconnecting( void ) {}; // called by inheriting provider
+  //virtual void Disconnecting( {}; // called by inheriting provider
   ou::Delegate<int> OnDisconnecting;
   ou::Delegate<int> OnDisconnected;  // could be in another thread
-  //virtual void Disconnected( void ) {}; // called by inheriting provider
-  virtual void Disconnect( void ) {}; // called by inheriting provider
+  //virtual void Disconnected( {}; // called by inheriting provider
+  virtual void Disconnect() {}; // called by inheriting provider
 
   ou::Delegate<size_t> OnError;
 
-  bool Connected( void ) const { return m_bConnected; };
+  bool Connected() const { return m_bConnected; };
 
-  bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };
+  bool ProvidesBrokerInterface() const { return m_pProvidesBrokerInterface; };
 
-  bool ProvidesQuotes( void ) const { return m_bProvidesQuotes; };
-  bool ProvidesTrades( void ) const { return m_bProvidesTrades; };
-  bool ProvidesDepth( void )  const { return m_bProvidesDepth; };
-  bool ProvidesGreeks( void ) const { return m_bProvidesGreeks; };
+  bool ProvidesQuotes() const { return m_bProvidesQuotes; };
+  bool ProvidesTrades() const { return m_bProvidesTrades; };
+  bool ProvidesDepth()  const { return m_bProvidesDepth; };
+  bool ProvidesGreeks() const { return m_bProvidesGreeks; };
 
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
   virtual void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
@@ -149,11 +149,11 @@ template <typename P, typename S>  // p = provider, S = symbol
 class ProviderInterface: public ProviderInterfaceBase {
 public:
 
-  typedef typename SymbolBase::symbol_id_t symbol_id_t;
-  typedef typename S::pSymbol_t pSymbol_t;
+  using symbol_id_t = typename SymbolBase::symbol_id_t;
+  using pSymbol_t = typename S::pSymbol_t;
 
-  ProviderInterface(void);
-  virtual ~ProviderInterface(void);
+  ProviderInterface();
+  virtual ~ProviderInterface();
 
   void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
   void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
@@ -180,14 +180,14 @@ public:
 
 protected:
 
-  typedef std::map<symbol_id_t, pSymbol_t> mapSymbols_t;
-  typedef std::pair<symbol_id_t, pSymbol_t> pair_mapSymbols_t;
+  using mapSymbols_t = std::map<symbol_id_t, pSymbol_t>;
+  using pair_mapSymbols_t = std::pair<symbol_id_t, pSymbol_t>;
   mapSymbols_t m_mapSymbols;
 
   //void Connecting( void );
-  void ConnectionComplete( void );
-  void Disconnecting( void );
-  //void Disconnected( void );
+  void ConnectionComplete();
+  void Disconnecting();
+  //void Disconnected();
 
   virtual void StartQuoteWatch( pSymbol_t pSymbol ) {};
   virtual void  StopQuoteWatch( pSymbol_t pSymbol ) {};
@@ -229,7 +229,7 @@ ProviderInterface<P,S>::~ProviderInterface(void) {
 }
 
 template <typename P, typename S>
-void ProviderInterface<P,S>::ConnectionComplete(void) {
+void ProviderInterface<P,S>::ConnectionComplete() {
   std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(),
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetQuoteHandlerCount() ) StartQuoteWatch( vt.second );
@@ -241,7 +241,7 @@ void ProviderInterface<P,S>::ConnectionComplete(void) {
 }
 
 template <typename P, typename S>
-void ProviderInterface<P,S>::Disconnecting(void) {
+void ProviderInterface<P,S>::Disconnecting() {
   std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(),
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
