@@ -41,11 +41,13 @@ Underlying::Underlying(
 
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Underlying::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Underlying::HandleTrade ) );
+  m_pWatch->StartWatch();
 
 }
 
 Underlying::~Underlying() {
 
+  m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Underlying::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &Underlying::HandleTrade ) );
 
