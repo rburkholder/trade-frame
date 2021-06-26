@@ -32,9 +32,9 @@ class IQFeedSymbol : public Symbol<IQFeedSymbol> {
   friend class IQFeedProvider;
 public:
 
-  typedef Symbol<IQFeedSymbol> inherited_t;
-  typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef std::string symbol_id_t;
+  using inherited_t = Symbol<IQFeedSymbol>;
+  using pInstrument_t = inherited_t::pInstrument_t;
+  using symbol_id_t =  std::string;
 
   // Public for RowKeyValues.  Pass in a structure sometime.
   // Public for CVuChartArmsIntraDay.  Pass in structure sometime.
@@ -87,14 +87,14 @@ protected:
   unsigned short m_cnt;  // used for watch/unwatch
   enum enumQStatus { qUnknown, qFound, qNotFound } m_QStatus;
 
-  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
-  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
-  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
+  void SetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = true; };
+  void ResetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = false; };
+  bool GetQuoteTradeWatchInProgress() const { return m_bQuoteTradeWatchInProgress; };
   bool m_bQuoteTradeWatchInProgress;
 
-  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
-  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
-  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
+  void SetDepthWatchInProgress() { m_bDepthWatchInProgress = true; };
+  void ResetDepthWatchInProgress() { m_bDepthWatchInProgress = false; };
+  bool GetDepthWatchInProgress() const { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
   void HandleFundamentalMessage( IQFFundamentalMessage *pMsg );
