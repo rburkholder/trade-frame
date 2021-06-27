@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -53,7 +51,7 @@ Watch::Watch( const Watch& rhs ) :
   Initialize();
 }
 
-Watch::~Watch(void) {
+Watch::~Watch() {
   RemoveEvents();
   while ( 0 != m_cntWatching ) {
     StopWatch();
@@ -73,7 +71,7 @@ Watch& Watch::operator=( const Watch& rhs ) {
   return *this;
 }
 
-void Watch::Initialize( void ) {
+void Watch::Initialize() {
   assert( 0 != m_pInstrument.get() );
   assert( 0 != m_pDataProvider.get() );
   assert( m_pDataProvider->ProvidesQuotes() );
@@ -87,14 +85,14 @@ void Watch::Initialize( void ) {
   //  EnableWatch takes care of some of that, but doesn't confirm contract if using IBTWS as provider
 }
 
-void Watch::AddEvents( void ) {
+void Watch::AddEvents() {
   assert( !m_bEventsAttached );
   m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Watch::HandleConnected ) );
   m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Watch::HandleDisconnecting ) );
   m_bEventsAttached = true;
 }
 
-void Watch::RemoveEvents( void ) {
+void Watch::RemoveEvents() {
   assert( m_bEventsAttached );
   m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Watch::HandleConnected ) );
   m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &Watch::HandleDisconnecting ) );
@@ -130,7 +128,7 @@ void Watch::HandleDisconnected( int ) {
 
 }
 
-void Watch::EnableWatch( void ) {
+void Watch::EnableWatch() {
   if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
 //    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_bWatching = true;
@@ -152,7 +150,7 @@ void Watch::EnableWatch( void ) {
   }
 }
 
-bool Watch::StartWatch( void ) {
+bool Watch::StartWatch() {
 //  std::cout << "Watch::StartWatch: "  << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   if ( 0 == m_cntWatching ) {
     m_bWatchingEnabled = true;
@@ -162,7 +160,7 @@ bool Watch::StartWatch( void ) {
   return ( 1 == m_cntWatching );
 }
 
-void Watch::DisableWatch( void ) {
+void Watch::DisableWatch() {
   if ( m_bWatching ) {
     //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
@@ -180,7 +178,7 @@ void Watch::DisableWatch( void ) {
   }
 }
 
-bool Watch::StopWatch( void ) {  // return true if actively stopped feed
+bool Watch::StopWatch() {  // return true if actively stopped feed
 //  std::cout << "Watch::StopWatch: " << this->m_pInstrument->GetInstrumentName() << " " << m_cntWatching << std::endl;
   assert( 0 != m_cntWatching );
   --m_cntWatching;

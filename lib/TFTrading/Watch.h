@@ -38,9 +38,9 @@ namespace tf { // TradeFrame
 class Watch {
 public:
 
-  typedef std::shared_ptr<Watch> pWatch_t;
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  using pWatch_t = std::shared_ptr<Watch>;
+  using pInstrument_t = Instrument::pInstrument_t;
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
   struct Fundamentals_t {
     double dblHistoricalVolatility;
@@ -63,29 +63,29 @@ public:
 
   Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );
   Watch( const Watch& rhs );
-  virtual ~Watch(void);
+  virtual ~Watch();
 
   virtual Watch& operator=( const Watch& rhs );
 
   bool operator< ( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <  rhs.m_pInstrument->GetInstrumentName(); };
   bool operator<=( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <= rhs.m_pInstrument->GetInstrumentName(); };
 
-  pInstrument_t GetInstrument( void ) { return m_pInstrument; };
+  pInstrument_t GetInstrument() { return m_pInstrument; };
 
   void SetProvider( pProvider_t pDataProvider );
-  pProvider_t GetProvider( void ) { return m_pDataProvider; };
+  pProvider_t GetProvider() { return m_pDataProvider; };
 
-  bool Watching( void ) const { return 0 != m_cntWatching; };
+  bool Watching() const { return 0 != m_cntWatching; };
 
   // TODO: these need spinlocks
-  inline const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
-  inline const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
+  inline const Quote& LastQuote() const { return m_quote; };  // may have thread sync issue
+  inline const Trade& LastTrade() const { return m_trade; };  // may have thread sync issue
 
-  const Fundamentals_t& Fundamentals( void ) const { return m_fundamentals; };
-  const Summary_t& Summary( void ) const { return m_summary; };
+  const Fundamentals_t& Fundamentals() const { return m_fundamentals; };
+  const Summary_t& Summary() const { return m_summary; };
 
-  const Quotes& GetQuotes( void ) const { return m_quotes; };
-  const Trades& GetTrades( void ) const { return m_trades; };
+  const Quotes& GetQuotes() const { return m_quotes; };
+  const Trades& GetTrades() const { return m_trades; };
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
@@ -94,8 +94,8 @@ public:
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeEnd;
 
-  virtual bool StartWatch( void );
-  virtual bool StopWatch( void );
+  virtual bool StartWatch();
+  virtual bool StopWatch();
 
   virtual void EmitValues( bool bEmitName = true ) const;
 
@@ -139,10 +139,10 @@ private:
   ou::tf::Trade::price_t m_PriceMin;
   ou::tf::Trade::volume_t m_VolumeTotal;
 
-  void Initialize( void );
+  void Initialize();
 
-  void AddEvents( void );
-  void RemoveEvents( void );
+  void AddEvents();
+  void RemoveEvents();
 
   void HandleConnecting( int );
   void HandleConnected( int );
