@@ -131,10 +131,8 @@ void Watch::EnableWatch() {
   if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
 //    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     m_bWatching = true;
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    // these two message types come second so that the symbol gets registered in previous statements
-    if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
+
+    if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) { // hook up prior to watch start
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
       // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
@@ -146,6 +144,10 @@ void Watch::EnableWatch() {
     else {
       std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
     }
+
+    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
+    // these two message types come second so that the symbol gets registered in previous statements
   }
 }
 
