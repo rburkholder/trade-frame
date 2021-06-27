@@ -44,7 +44,7 @@ void IQFeedProvider::Connect() {
   }
 }
 
-void IQFeedProvider::OnIQFeedConnected( void ) {
+void IQFeedProvider::OnIQFeedConnected() {
   m_bConnected = true;
   inherited_t::ConnectionComplete();
   ProviderInterfaceBase::OnConnected( 0 );
@@ -59,7 +59,7 @@ void IQFeedProvider::Disconnect() {
   }
 }
 
-void IQFeedProvider::OnIQFeedDisConnected( void ) {
+void IQFeedProvider::OnIQFeedDisConnected() {
   m_bConnected = false;
   ProviderInterfaceBase::OnDisconnected( 0 );
 }

@@ -31,19 +31,19 @@ class IQFeedProvider :
   friend IQFeed<IQFeedProvider>;
 public:
 
-  typedef boost::shared_ptr<IQFeedProvider> pProvider_t;
-  typedef ProviderInterface<IQFeedProvider,IQFeedSymbol> inherited_t;
-  typedef inherited_t::symbol_id_t symbol_id_t;
-  typedef inherited_t::pSymbol_t pSymbol_t;
-  typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef IQFeed<IQFeedProvider> IQFeed_t;
+  using pProvider_t = boost::shared_ptr<IQFeedProvider>;
+  using inherited_t = ProviderInterface<IQFeedProvider,IQFeedSymbol>;
+  using symbol_id_t = inherited_t::symbol_id_t ;
+  using pSymbol_t = inherited_t::pSymbol_t;
+  using pInstrument_t = inherited_t::pInstrument_t;
+  using IQFeed_t = IQFeed<IQFeedProvider>;
 
-  IQFeedProvider( void );
-  virtual ~IQFeedProvider( void );
+  IQFeedProvider();
+  virtual ~IQFeedProvider();
 
   // do these need to be virtual?  use crtp?
-  virtual void Connect( void );
-  virtual void Disconnect( void );
+  virtual void Connect();
+  virtual void Disconnect();
 
   void SetAlternateInstrumentName( pInstrument_t );
 
@@ -70,8 +70,8 @@ protected:
   void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg );
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg );
 
-  void OnIQFeedDisConnected( void );  // CRTP on IQFeed
-  void OnIQFeedConnected( void ); // CRTP on IQFeed
+  void OnIQFeedDisConnected();  // CRTP on IQFeed
+  void OnIQFeedConnected(); // CRTP on IQFeed
   void OnIQFeedError( size_t );
 
 private:
