@@ -52,8 +52,8 @@ void IQFeedProvider::OnIQFeedConnected() {
 
 void IQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
-    inherited_t::Disconnecting();
-    ProviderInterfaceBase::OnDisconnecting( 0 );
+    ProviderInterfaceBase::OnDisconnecting( 0 ); // watches are regsitered here
+    inherited_t::Disconnecting();  // provider then cleans up
     IQFeed_t::Disconnect();
     inherited_t::Disconnect();
   }
@@ -88,6 +88,7 @@ namespace {
 void IQFeedProvider::UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol* pSymbol ) {
   if ( '-' != command ) {
     std::string s = command + pSymbol->GetId() + "\n";
+    //std::cout << command + pSymbol->GetId() << std::endl;
     IQFeed<IQFeedProvider>::Send( s );
   }
   pSymbol->SetWatchState( next );

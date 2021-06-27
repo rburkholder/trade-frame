@@ -155,11 +155,11 @@ public:
   ProviderInterface();
   virtual ~ProviderInterface();
 
-  void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
-  void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
-
   void    AddOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
   void RemoveOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
+
+  void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
+  void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
 
   void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
   void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
@@ -244,8 +244,8 @@ template <typename P, typename S>
 void ProviderInterface<P,S>::Disconnecting() {
   std::for_each( m_mapSymbols.begin(), m_mapSymbols.end(),
     [this](typename mapSymbols_t::value_type& vt){
-      if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
       if ( vt.second->GetTradeHandlerCount() ) StopTradeWatch( vt.second );
+      if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
       if ( vt.second->GetDepthHandlerCount() ) StopDepthWatch( vt.second );
       if ( vt.second->GetGreekHandlerCount() ) StopGreekWatch( vt.second );
     }

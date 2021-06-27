@@ -125,7 +125,6 @@ void Watch::HandleDisconnecting( int ) {
 
 // non gui thread
 void Watch::HandleDisconnected( int ) {
-
 }
 
 void Watch::EnableWatch() {
@@ -163,8 +162,8 @@ bool Watch::StartWatch() {
 void Watch::DisableWatch() {
   if ( m_bWatching ) {
     //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
-    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
+    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_bWatching = false;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
