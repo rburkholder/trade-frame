@@ -39,31 +39,31 @@ public:
 
   friend std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrirs );
 
-  typedef ou::tf::Watch::pProvider_t pProvider_t;
+  using pProvider_t = ou::tf::Watch::pProvider_t;
 
   struct structSymbol { // used for importing symbols into the object
     time_duration td;
     std::string Symbol;
-    structSymbol( void ) {};
+    structSymbol() {};
     structSymbol( const boost::posix_time::time_duration& td_, const std::string& Symbol_ )
       : td( td_ ), Symbol( Symbol_ ) {};
   };
 
-  NoRiskInterestRateSeries( void );
-  virtual ~NoRiskInterestRateSeries( void );
+  NoRiskInterestRateSeries();
+  virtual ~NoRiskInterestRateSeries();
 
   void SetWatchOn( pProvider_t pProvider );
-  void SetWatchOff( void );
+  void SetWatchOff();
 
   double ValueAt( boost::posix_time::time_duration td ) const;  // index to determine appropriate interest rate
-  
-  bool Watching( void ) const { return m_bWatching; }
-  
+
+  bool Watching() const { return m_bWatching; }
+
   void SaveSeries( const std::string& sPrefix );
 
 protected:
 
-  typedef std::vector<structSymbol> vSymbol_t;
+  using vSymbol_t = std::vector<structSymbol>;
 
   std::string m_sDescription;
 
@@ -71,7 +71,7 @@ protected:
 
 private:
 
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
 
   struct structInterestRate {
     boost::posix_time::time_duration td;
@@ -84,9 +84,9 @@ private:
       : td( symbol.td ), Symbol( symbol.Symbol ) {};
   };
 
-  typedef std::vector<structInterestRate> vInterestRate_t;
-  typedef vInterestRate_t::iterator vInterestRate_iter_t;
-  typedef vInterestRate_t::const_iterator vInterestRate_citer_t;
+  using vInterestRate_t = std::vector<structInterestRate>;
+  using vInterestRate_iter_t = vInterestRate_t::iterator;
+  using vInterestRate_citer_t = vInterestRate_t::const_iterator;
   vInterestRate_t m_vInterestRate;
 
   struct compareInterestRate {
@@ -95,10 +95,10 @@ private:
 
   bool m_bInitialized;
   bool m_bWatching;
-  
+
   pProvider_t m_pProvider;
 
-  void Initialize( void );
+  void Initialize();
 
 };
 
@@ -106,8 +106,8 @@ std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrir
 
 class LiborFromIQFeed: public NoRiskInterestRateSeries {
 public:
-  LiborFromIQFeed( void );
-  virtual ~LiborFromIQFeed( void );
+  LiborFromIQFeed();
+  virtual ~LiborFromIQFeed();
 protected:
 private:
 };
@@ -117,8 +117,8 @@ private:
 
 class FedRateFromIQFeed: public NoRiskInterestRateSeries {
 public:
-  FedRateFromIQFeed( void );
-  virtual ~FedRateFromIQFeed( void );
+  FedRateFromIQFeed();
+  virtual ~FedRateFromIQFeed();
 protected:
 private:
 };

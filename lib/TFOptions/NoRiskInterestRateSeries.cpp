@@ -23,15 +23,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-NoRiskInterestRateSeries::NoRiskInterestRateSeries( void ) 
+NoRiskInterestRateSeries::NoRiskInterestRateSeries()
   : m_bInitialized( false ), m_bWatching( false ), m_sDescription( "rates")
 {
 }
 
-NoRiskInterestRateSeries::~NoRiskInterestRateSeries(void) {
+NoRiskInterestRateSeries::~NoRiskInterestRateSeries() {
 }
 
-void NoRiskInterestRateSeries::Initialize( void ) {
+void NoRiskInterestRateSeries::Initialize() {
 
   ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   ou::tf::Instrument::pInstrument_t pInstrument;
@@ -61,7 +61,7 @@ void NoRiskInterestRateSeries::SetWatchOn( pProvider_t pProvider ) {
   }
 }
 
-void NoRiskInterestRateSeries::SetWatchOff( void ) {
+void NoRiskInterestRateSeries::SetWatchOff() {
   if ( m_bWatching ) {
     m_bWatching = false;
     for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++ iter ) {
@@ -77,15 +77,15 @@ void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
 }
 
 double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
-  
+
   assert( boost::posix_time::not_a_date_time != td );
   assert( td >= m_vInterestRate[ 0 ].td );
   //assert( m_bWatching );  // don't worry about this as the values don't vary much anyway
-  
+
   structInterestRate tmp( td, "" );
   vInterestRate_citer_t iter1 = std::lower_bound( m_vInterestRate.begin(), m_vInterestRate.end(), tmp, compareInterestRate() );
   vInterestRate_citer_t iter2;
-  
+
   if ( m_vInterestRate.end() == iter1 ) {
     // extrapolate beyond end
     --iter1;
@@ -103,13 +103,13 @@ double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
       --iter1;
     }
   }
-  double rate = iter1->pWatch->LastTrade().Price() + 
-    ( ( iter2->pWatch->LastTrade().Price() - iter1->pWatch->LastTrade().Price() ) * 
+  double rate = iter1->pWatch->LastTrade().Price() +
+    ( ( iter2->pWatch->LastTrade().Price() - iter1->pWatch->LastTrade().Price() ) *
     ( ( (double)( td - iter1->td ).total_seconds() ) / ( (double) ( iter2->td - iter1->td ).total_seconds() ) ) );
   return rate;
 }
 
-//void NoRiskInterestRateSeries::EmitYieldCurve( void ) {
+//void NoRiskInterestRateSeries::EmitYieldCurve() {
 //  for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++ iter ) {
 //    std::cout << iter->Symbol << " " << iter->pWatch->LastTrade().Price() << std::endl;
 //  }
@@ -134,14 +134,14 @@ void NoRiskInterestRateSeries::AssignSymbols( const vSymbol_t& vSymbol ) {
 
 using namespace boost::assign;
 
-LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
+LiborFromIQFeed::LiborFromIQFeed(): NoRiskInterestRateSeries() {
   m_sDescription = "libor";
-  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
+  using structSymbol = NoRiskInterestRateSeries::structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vLibor;
-  // http://www.global-rates.com/interest-rates/libor/american-dollar/american-dollar.aspx 
+  // http://www.global-rates.com/interest-rates/libor/american-dollar/american-dollar.aspx
   //   shows some are not available
   // also based upon that chart, the values here do correspond to USD libor
-  vLibor += 
+  vLibor +=
     structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
     structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week
     //structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
@@ -156,18 +156,18 @@ LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
     //structSymbol( time_duration( hours( 270 * 24 ) ),  "9MLIB.X" ), //  9 month
     //structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
     //structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
-    structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year 
+    structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year
   NoRiskInterestRateSeries::AssignSymbols( vLibor );
 }
 
-LiborFromIQFeed::~LiborFromIQFeed( void ) {
+LiborFromIQFeed::~LiborFromIQFeed() {
 }
 
 // *** FedRateFromIQFeed
 
-FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
+FedRateFromIQFeed::FedRateFromIQFeed(): NoRiskInterestRateSeries() {
   m_sDescription = "fedrate";
-  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
+  using structSymbol = NoRiskInterestRateSeries::structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vFedRate;
   vFedRate +=
     structSymbol( time_duration( hours(   0 * 24 ) ),  "TB30.X" ), // overnight, base at 0 days needed for algorithm
@@ -177,12 +177,12 @@ FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
     structSymbol( time_duration( hours( 365 * 24 ) ),  "1YCMY.X" ); //  1 year
   // these are 10x actual value:
 //TNX.XO	CBOE TREASURY YIELD 10 YEAR	CBOE	CBOE	INDEX	/ 1000
-//TYX.XO	CBOE 30 YEAR TREASURY YIELD INDEX	CBOE	CBOE	INDEX	/ 1000							
+//TYX.XO	CBOE 30 YEAR TREASURY YIELD INDEX	CBOE	CBOE	INDEX	/ 1000
   NoRiskInterestRateSeries::AssignSymbols( vFedRate );
 
 }
 
-FedRateFromIQFeed::~FedRateFromIQFeed( void ) {
+FedRateFromIQFeed::~FedRateFromIQFeed() {
 }
 
 } // namespace tf
