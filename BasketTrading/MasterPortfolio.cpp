@@ -563,20 +563,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
                 );
               Add( pPortfolio );  // update the archive
             }
-
-            // move from pStrategyInWaiting to mapStrategyActive
-            iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
-            assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
-            UnderlyingWithStrategies& uws( iterUWS->second );
-            assert( uws.pStrategyInWaiting );
-
-            pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pChartDataView;
-
-            uws.mapStrategyActive.emplace(
-              std::make_pair( idPortfolioNew, std::move( uws.pStrategyInWaiting ) )
-              );
-            uws.pUnderlying->PopulateChartDataView( pChartDataView );
-
             return pPortfolio;
           },
     // ManageStrategy::fRegisterWatch_t
@@ -651,19 +637,30 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
     // ManageStrategy::m_fAuthorizeSimple
           [this,sUnderlying]( const idPortfolio_t& idPortfolio, const std::string& sName, bool bExists )->bool{
 
-            iterUnderlyingWithStrategies_t iterUnderlyingWithStrategies
-              = m_mapUnderlyingWithStrategies.find( sUnderlying );
-            UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
-
-            iterStrategy_t iterStrategy = uws.mapStrategyActive.find( idPortfolio );
-            assert( uws.mapStrategyActive.end() != iterStrategy );
-            Strategy& strategy( *iterStrategy->second );
+            // NOTE: at this point, idPortfolio has not yet been transformed into a portfolio instance
 
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
             if ( bAuthorized || bExists ) {
+
+              // move from pStrategyInWaiting to mapStrategyActive
+              iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
+              assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
+              UnderlyingWithStrategies& uws( iterUWS->second );
+              assert( uws.pStrategyInWaiting );
+
+              pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pChartDataView;
+
+              auto result = uws.mapStrategyActive.emplace(
+                std::make_pair( idPortfolio, std::move( uws.pStrategyInWaiting ) )
+                );
+              assert( result.second );
+              Strategy& strategy( *result.first->second );
+
+              uws.pUnderlying->PopulateChartDataView( pChartDataView );
+
               if ( !strategy.bChartActivated ) {
-                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, strategy.pManageStrategy->GetPortfolio()->Id(), strategy.pChartDataView );
+                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView );
                 strategy.bChartActivated = true;
               }
             }
