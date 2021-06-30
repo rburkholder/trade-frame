@@ -50,7 +50,7 @@ bool AppBasketTrading::OnInit() {
   m_sStateFileName = "BasketTrading.state";
 
   // latest daily bar
-  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 6, 18 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 6, 29 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -455,15 +455,15 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
 
   m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of all Portfolios" );
+    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Master of all Portfolios" );
 
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of all USD Portfolios" );
+    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "CurrencySummary of USD Portfolios" );
 
   m_pPortfolioStrategyAggregate
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(  // TODO: change from MultiLeggedPosition to Basket
-    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Aggregate of Instrument Instances" );
+    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Instrument Instances" );
 
 }
 
@@ -490,6 +490,10 @@ void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
       BuildMasterPortfolio();
       break;
     case ou::tf::Portfolio::EPortfolioType::Standard:
+      assert( m_pMasterPortfolio );
+      m_pMasterPortfolio->Add( pPortfolio );
+      break;
+    case ou::tf::Portfolio::EPortfolioType::Aggregate:
       assert( m_pMasterPortfolio );
       m_pMasterPortfolio->Add( pPortfolio );
       break;

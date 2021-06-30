@@ -171,7 +171,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
       case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
         // this is the combo level portfolio of positions, needs to be associated with owner
         //    which allows it to be submitted to ManageStrategy
-        {
+        { // example: idOwner "portfolio-SPY", idPortfolio "collar-SPY-rise-20210730-427.5-20210706-429-427"
           mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
           assert( m_mapStrategyArtifacts.end() != iter );
           StrategyArtifacts& saOwner( iter->second );
@@ -344,6 +344,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
             = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
                 idPortfolioUnderlying, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Aggregate, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Underlying Aggregate"
             );
+          Add( pPortfolioUnderlying );  // update the archive
         }
 
         pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
