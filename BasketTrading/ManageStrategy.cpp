@@ -364,9 +364,9 @@ ManageStrategy::~ManageStrategy( ) {
 
 void ManageStrategy::Run() {
 
- m_stateTrading = TSWaitForFirstTrade;
-
+  m_stateTrading = TSWaitForFirstTrade;
   //std::cout << m_sUnderlying << " loading done." << std::endl;
+
 }
 
 // is this used currently?
