@@ -463,7 +463,7 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
 
   m_pPortfolioStrategyAggregate
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(  // TODO: change from MultiLeggedPosition to Basket
-    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Instrument Instances" );
+    m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Underlying Instances" );
 
 }
 
