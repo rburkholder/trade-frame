@@ -18,9 +18,17 @@
 
 #include <functional>
 
-#include <wx/treectrl.h>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
+#include <wx/panel.h>
+#include <wx/splitter.h>
 
 #include "WinChartView.h"
+
+class wxTreeItemId;
+class wxTreeCtrl;
+class wxTreeEvent;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -32,6 +40,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELFINANCIALCHART_POSITION wxDefaultPosition
 
 class PanelFinancialChart: public wxPanel {
+  friend class boost::serialization::access;
 public:
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -81,6 +90,7 @@ protected:
 
 private:
 
+  wxSplitterWindow* m_pSplitter;
   wxTreeCtrl* m_pTree;
   WinChartView* m_pWinChartView; // handles drawing the chart
 
@@ -98,7 +108,23 @@ private:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & m_pSplitter->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    int x;
+    ar & x;
+    m_pSplitter->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelFinancialChart, 1)

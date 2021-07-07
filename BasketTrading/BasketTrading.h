@@ -154,7 +154,8 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    //ar & m_enumBuySell;
+    ar & m_enumBuySell;
+    ar & *m_pPanelFinancialChart;
     //ar & m_splitPanels->GetSashPosition();
   }
 
@@ -178,6 +179,9 @@ private:
           break;
       }
     }
+    if ( 4 <= version ) {
+      ar & *m_pPanelFinancialChart;
+    }
     //m_splitPanels->SetSashPosition( x );
   }
 
@@ -185,6 +189,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 3)
+BOOST_CLASS_VERSION(AppBasketTrading, 4)
 DECLARE_APP(AppBasketTrading)
 

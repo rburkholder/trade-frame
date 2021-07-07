@@ -14,8 +14,9 @@
 #include <stdexcept>
 
 #include <wx/icon.h>
+#include <wx/menu.h>
 #include <wx/sizer.h>
-#include <wx/splitter.h>
+#include <wx/treectrl.h>
 
 #include "PanelFinancialChart.h"
 
@@ -81,13 +82,13 @@ void PanelFinancialChart::CreateControls() {
 
   // splitter
   static const int pxLeftPanelSize = 150;
-  wxSplitterWindow* pSplitter = new wxSplitterWindow( this );
-  pSplitter->SetMinimumPaneSize( pxLeftPanelSize );
-  pSplitter->SetSashGravity( 0.0 );
+  m_pSplitter = new wxSplitterWindow( this );
+  m_pSplitter->SetMinimumPaneSize( pxLeftPanelSize );
+  m_pSplitter->SetSashGravity( 0.0 );
 
   // tree
   //wxTreeCtrl* tree;
-  m_pTree = new wxTreeCtrl( pSplitter );
+  m_pTree = new wxTreeCtrl( m_pSplitter );
   m_pTree->ExpandAll();
   //m_eLatestDatumType = CustomItemData::NoDatum;
   //wxTreeItemId idRoot = m_pTree->AddRoot( "Total P/L", -1, -1, new CustomItemData( CustomItemData::PL ) );
@@ -108,11 +109,11 @@ void PanelFinancialChart::CreateControls() {
   //wxPanel* panelSplitterRightPanel;
   //panelSplitterRightPanel = new wxPanel( pSplitter );
 
-  m_pWinChartView = new WinChartView( pSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+  m_pWinChartView = new WinChartView( m_pSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
 
-  pSplitter->SplitVertically( m_pTree, m_pWinChartView, 0 );
-  sizerMain->Add( pSplitter, 1, wxEXPAND|wxALL, 2);
-  pSplitter->SetSashPosition( pxLeftPanelSize );
+  m_pSplitter->SplitVertically( m_pTree, m_pWinChartView, 0 );
+  sizerMain->Add( m_pSplitter, 1, wxEXPAND|wxALL, 2);
+  m_pSplitter->SetSashPosition( pxLeftPanelSize );
 
   // sizer for right side of splitter
   //wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
@@ -178,11 +179,16 @@ void PanelFinancialChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 }
 
 void PanelFinancialChart::HandleTreeEventItemRightClick( wxTreeEvent& event ) {
-  std::cout << "HandleTreeEventItemRightClick" << std::endl;
+  std::cout << "HandleTreeEventItemRightClick: " << event.GetId() << std::endl;
 }
 
 void PanelFinancialChart::HandleTreeEventItemMenu( wxTreeEvent& event ) {
-  std::cout << "HandleTreeEventItemMenu" << std::endl;
+  std::cout << "HandleTreeEventItemMenu: " << event.GetId() << std::endl;
+
+  // Show popupmenu at position
+  wxMenu menu(wxT("Test"));
+  menu.Append( wxID_ABOUT, wxT("&About") );
+  PopupMenu(&menu, event.GetPoint() );
 }
 
 void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
