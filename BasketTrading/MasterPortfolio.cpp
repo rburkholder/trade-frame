@@ -18,6 +18,8 @@
 #include <set>
 #include <algorithm>
 
+#include <wx/menu.h>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFIQFeed/BuildInstrument.h>
@@ -93,10 +95,17 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->Add( 0, &m_cePLRealized );
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
-  m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
 
-  m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr );
-  m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr );
+  // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
+  wxMenuItem* pMenuItem;
+  wxMenu* pMenuPopupUnderlying = new wxMenu( "Underlying" );
+  pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "New Underlying" );
+  int id = pMenuItem->GetId();
+  pMenuPopupUnderlying->Bind( wxEVT_COMMAND_MENU_SELECTED, &MasterPortfolio::HandleNewUnderlying, this, id );
+
+  m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
+  m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr, pMenuPopupUnderlying );
+  m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr, nullptr );
 
   std::stringstream ss;
   //ss.str( "" );
@@ -168,6 +177,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
         // this is the strategy level portfolio
         break;
       case ou::tf::Portfolio::EPortfolioType::Aggregate:
+        break;
       case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
         // this is the combo level portfolio of positions, needs to be associated with owner
         //    which allows it to be submitted to ManageStrategy
@@ -356,7 +366,8 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying->SetChartDataView( pChartDataView );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
-        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView );
+        // add popup menu
+        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView, nullptr );
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -661,7 +672,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               uws.pUnderlying->PopulateChartDataView( pChartDataView );
 
               if ( !strategy.bChartActivated ) {
-                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView );
+                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, nullptr );
                 strategy.bChartActivated = true;
               }
             }
@@ -811,4 +822,8 @@ void MasterPortfolio::TakeProfits() {
     [](mapUnderlyingWithStrategies_t::value_type& uws){
       uws.second.TakeProfits();
     } );
+}
+
+void MasterPortfolio::HandleNewUnderlying( wxCommandEvent& event ) {
+  std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
 }

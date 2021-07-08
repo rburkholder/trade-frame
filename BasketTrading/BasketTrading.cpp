@@ -226,8 +226,8 @@ void AppBasketTrading::BuildMasterPortfolio() {
       return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
     },
     // add ChartDataView to PanelFinancialChart
-    [this]( wxTreeItemId idParent, const std::string& sName,  pChartDataView_t pChartDataView )->wxTreeItemId{
-      return m_pPanelFinancialChart->AppendItem( idParent, sName, pChartDataView );
+    [this]( wxTreeItemId idParent, const std::string& sName,  pChartDataView_t pChartDataView, wxMenu* pMenuPopup )->wxTreeItemId{
+      return m_pPanelFinancialChart->AppendItem( idParent, sName, pChartDataView, pMenuPopup );
     },
     // del ChartDataView from PanelFinancialChart
     [this]( wxTreeItemId id ){

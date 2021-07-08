@@ -23,18 +23,24 @@
 namespace {
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
-  using TreeItemFunctions = ou::tf::PanelFinancialChart::TreeItemFunctions;
 
   class CustomItemData: public wxTreeItemData {
   public:
+    wxMenu* pMenuPopup;
     pChartDataView_t pChartDataView; // contains the various time series
-    TreeItemFunctions tif;
     CustomItemData( pChartDataView_t pChartDataView_ )
-    : pChartDataView( pChartDataView_ )
+    : pChartDataView( pChartDataView_ ), pMenuPopup( nullptr )
     {}
-    CustomItemData( pChartDataView_t pChartDataView_, TreeItemFunctions&& tif_ )
-    : pChartDataView( pChartDataView_ ), tif( std::move( tif_ ) )
+    CustomItemData( pChartDataView_t pChartDataView_, wxMenu* pMenuPopup_ )
+    : pChartDataView( pChartDataView_ ), pMenuPopup( pMenuPopup_ )
     {}
+    ~CustomItemData() {
+      if ( nullptr != pMenuPopup ) {
+        // TODO: maybe determine logic to remove the bind
+        delete pMenuPopup;
+        pMenuPopup = nullptr;
+      }
+    }
   };
 
 }
@@ -93,7 +99,7 @@ void PanelFinancialChart::CreateControls() {
   //m_eLatestDatumType = CustomItemData::NoDatum;
   //wxTreeItemId idRoot = m_pTree->AddRoot( "Total P/L", -1, -1, new CustomItemData( CustomItemData::PL ) );
   m_pTree->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelFinancialChart::HandleTreeEventItemActivated, this, m_pTree->GetId() );
-  m_pTree->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &PanelFinancialChart::HandleTreeEventItemRightClick, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  //m_pTree->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &PanelFinancialChart::HandleTreeEventItemRightClick, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTree->Bind( wxEVT_TREE_ITEM_MENU, &PanelFinancialChart::HandleTreeEventItemMenu, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTree->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelFinancialChart::HandleTreeEventItemGetToolTip, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   //m_pTree->Bind( wxEVT_TREE_DELETE_ITEM, &PanelFinancialChart::HandleTreeEventItemDeleted, this, m_pTree->GetId() );
@@ -126,7 +132,6 @@ void PanelFinancialChart::CreateControls() {
   Bind( wxEVT_CLOSE_WINDOW, &PanelFinancialChart::OnClose, this );  // start close of windows and controls
 }
 
-//wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView, TreeItemFunctions&& tif ) {
   wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
   if ( m_pTree->GetRootItem().IsOk() ) {
     throw std::runtime_error( "root item already exists" );
@@ -137,10 +142,8 @@ void PanelFinancialChart::CreateControls() {
   }
 }
 
-//wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView, TreeItemFunctions&& tif ) {
-  wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView ) {
-//  CustomItemData* cid = new CustomItemData( pChartDataView, std::move( tif ) );
-  CustomItemData* cid = new CustomItemData( pChartDataView );
+  wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView, wxMenu* pMenuPppup ) {
+  CustomItemData* cid = new CustomItemData( pChartDataView, pMenuPppup );
   wxTreeItemId id = m_pTree->AppendItem( parent, sName, -1, 01, cid );
   m_pTree->SortChildren( parent );
   return id;
@@ -154,7 +157,6 @@ void PanelFinancialChart::DeleteItem( wxTreeItemId id ) {
     if ( pCustom->pChartDataView ) {
       m_pWinChartView->SetChartDataView( nullptr );
     }
-    if ( pCustom->tif.fDel ) pCustom->tif.fDel( id );
     m_pTree->Delete( id );
   }
 }
@@ -185,10 +187,28 @@ void PanelFinancialChart::HandleTreeEventItemRightClick( wxTreeEvent& event ) {
 void PanelFinancialChart::HandleTreeEventItemMenu( wxTreeEvent& event ) {
   std::cout << "HandleTreeEventItemMenu: " << event.GetId() << std::endl;
 
-  // Show popupmenu at position
-  wxMenu menu(wxT("Test"));
-  menu.Append( wxID_ABOUT, wxT("&About") );
-  PopupMenu(&menu, event.GetPoint() );
+  wxTreeItemData* pData = m_pTree->GetItemData( event.GetItem() );
+  if ( nullptr != pData ) {
+    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+    if ( pCustom->pMenuPopup ) {
+      PopupMenu( pCustom->pMenuPopup, event.GetPoint() );
+    }
+  }
+  else {
+    std::cout << "no item data" << std::endl;
+  }
+
+
+  // Show popupmenu at position, example to be reworked
+  //wxMenu menu( wxT("Test") );
+  //menu.Append( wxID_ABOUT, wxT("&About") );
+  //menu.Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelFinancialChart::HandlePopUpClick, this );
+  //PopupMenu(&menu, event.GetPoint() );
+  //menu.Unbind( wxEVT_COMMAND_MENU_SELECTED, &PanelFinancialChart::HandlePopUpClick, this );
+}
+
+void PanelFinancialChart::HandlePopUpClick( wxCommandEvent& event ) {
+  std::cout << "HandlePopUpClick: " << event.GetId() << std::endl;
 }
 
 void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {

@@ -26,9 +26,10 @@
 
 #include "WinChartView.h"
 
-class wxTreeItemId;
+class wxMenu;
 class wxTreeCtrl;
 class wxTreeEvent;
+class wxTreeItemId;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -62,25 +63,9 @@ public:
 
   using fAdd_t = std::function<wxTreeItemId()>;
   using fDel_t = std::function<void(wxTreeItemId)>;
-  // using fComposeMenu_t = std::funcion<
 
-  struct TreeItemFunctions {
-    fAdd_t fAdd;
-    fDel_t fDel;
-    TreeItemFunctions() {}
-    TreeItemFunctions( fAdd_t&& fAdd_, fDel_t&& fDel_ )
-    : fAdd( std::move( fAdd_ ) ), fDel( std::move( fDel_ ) )
-    {}
-    TreeItemFunctions( const TreeItemFunctions&& tif )
-    : fAdd( std::move( tif.fAdd ) ), fDel( std::move( tif.fDel ) )
-    {}
-
-  };
-
-//  wxTreeItemId SetRoot(                  const std::string& sName, pChartDataView_t, TreeItemFunctions&& );
-//  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t, TreeItemFunctions&& );
   wxTreeItemId SetRoot(                  const std::string& sName, pChartDataView_t );
-  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t );
+  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t, wxMenu* );
   void DeleteItem( wxTreeItemId );
 
 protected:
@@ -90,8 +75,9 @@ protected:
 
 private:
 
-  wxSplitterWindow* m_pSplitter;
   wxTreeCtrl* m_pTree;
+  wxSplitterWindow* m_pSplitter;
+
   WinChartView* m_pWinChartView; // handles drawing the chart
 
   void Init();
@@ -101,6 +87,8 @@ private:
   void HandleTreeEventItemRightClick( wxTreeEvent& );
   void HandleTreeEventItemMenu( wxTreeEvent& );
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
+
+  void HandlePopUpClick( wxCommandEvent& event );
 
   void OnClose( wxCloseEvent& event );
 

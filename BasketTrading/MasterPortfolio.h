@@ -44,6 +44,8 @@
 #include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
+class wxMenu;
+
 class MasterPortfolio {
   friend class boost::serialization::access;
 public:
@@ -62,7 +64,7 @@ public:
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
   using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
-  using fChartAdd_t = std::function<wxTreeItemId(wxTreeItemId,const std::string&,pChartDataView_t)>;
+  using fChartAdd_t = std::function<wxTreeItemId(wxTreeItemId,const std::string&,pChartDataView_t,wxMenu*)>;
   using fChartDel_t = std::function<void(wxTreeItemId)>;
 
   MasterPortfolio(
@@ -232,6 +234,8 @@ private:
   void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
   void StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
+
+  void HandleNewUnderlying( wxCommandEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
