@@ -101,11 +101,18 @@ MasterPortfolio::MasterPortfolio(
   wxMenu* pMenuPopupUnderlying = new wxMenu( "Underlying" );
   pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "New Underlying" );
   int id = pMenuItem->GetId();
-  pMenuPopupUnderlying->Bind( wxEVT_COMMAND_MENU_SELECTED, &MasterPortfolio::HandleNewUnderlying, this, id );
+  pMenuPopupUnderlying->Bind(
+    wxEVT_COMMAND_MENU_SELECTED,
+    []( wxCommandEvent& event ){
+      std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
+    },
+    id );
 
   m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
   m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr, pMenuPopupUnderlying );
   m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr, nullptr );
+
+  pMenuPopupUnderlying = nullptr;
 
   std::stringstream ss;
   //ss.str( "" );
@@ -366,8 +373,21 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying->SetChartDataView( pChartDataView );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
-        // add popup menu
-        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView, nullptr );
+        // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
+        wxMenuItem* pMenuItem;
+        wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
+        pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
+        int id = pMenuItem->GetId();
+        pMenuPopupUnderlying->Bind(
+          wxEVT_COMMAND_MENU_SELECTED,
+          [sUnderlying]( wxCommandEvent& event ){
+            std::cout << "Add Strategy for: " << sUnderlying << event.GetId() << std::endl;
+          },
+          id );
+
+        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView, pMenuPopupUnderlying );
+
+        pMenuPopupUnderlying = nullptr;
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
@@ -672,8 +692,22 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               uws.pUnderlying->PopulateChartDataView( pChartDataView );
 
               if ( !strategy.bChartActivated ) {
-                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, nullptr );
+
+                // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
+                wxMenuItem* pMenuItem;
+                wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolio );
+                pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
+                int id = pMenuItem->GetId();
+                pMenuPopupStrategy->Bind(
+                  wxEVT_COMMAND_MENU_SELECTED,
+                  [idPortfolio]( wxCommandEvent& event ){
+                    std::cout << "Close: " << idPortfolio << event.GetId() << std::endl;
+                  },
+                  id );
+
+                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
                 strategy.bChartActivated = true;
+                pMenuPopupStrategy = nullptr;
               }
             }
             return bAuthorized;
@@ -822,8 +856,4 @@ void MasterPortfolio::TakeProfits() {
     [](mapUnderlyingWithStrategies_t::value_type& uws){
       uws.second.TakeProfits();
     } );
-}
-
-void MasterPortfolio::HandleNewUnderlying( wxCommandEvent& event ) {
-  std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
 }

@@ -235,8 +235,6 @@ private:
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
   void StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
 
-  void HandleNewUnderlying( wxCommandEvent& event );
-
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
   }
