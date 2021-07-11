@@ -36,7 +36,7 @@ namespace {
     {}
     ~CustomItemData() {
       if ( nullptr != pMenuPopup ) {
-        // TODO: maybe determine logic to remove the bind
+        // assumes binds are cleared as well
         delete pMenuPopup;
         pMenuPopup = nullptr;
       }
@@ -157,7 +157,7 @@ void PanelFinancialChart::DeleteItem( wxTreeItemId id ) {
     if ( pCustom->pChartDataView ) {
       m_pWinChartView->SetChartDataView( nullptr );
     }
-    m_pTree->Delete( id );
+    m_pTree->Delete( id ); // will delete custom data at the same time
   }
 }
 
@@ -185,7 +185,7 @@ void PanelFinancialChart::HandleTreeEventItemRightClick( wxTreeEvent& event ) {
 }
 
 void PanelFinancialChart::HandleTreeEventItemMenu( wxTreeEvent& event ) {
-  std::cout << "HandleTreeEventItemMenu: " << event.GetId() << std::endl;
+  //std::cout << "HandleTreeEventItemMenu: " << event.GetId() << std::endl;
 
   wxTreeItemData* pData = m_pTree->GetItemData( event.GetItem() );
   if ( nullptr != pData ) {
