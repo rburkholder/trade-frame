@@ -122,11 +122,11 @@ private:
     ar & x;
     ar & y;
     wxPoint point( x, y );
-    this->SetPosition( point );
     ar & x;
     ar & y;
     wxSize size( x, y );
     this->SetSize( size );
+    this->SetPosition( point ); // seems to work better with this order
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
