@@ -96,7 +96,6 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
-  // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
   wxMenuItem* pMenuItem;
   wxMenu* pMenuPopupUnderlying = new wxMenu( "Underlying" );
   pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "New Underlying" );
@@ -104,7 +103,7 @@ MasterPortfolio::MasterPortfolio(
   pMenuPopupUnderlying->Bind(
     wxEVT_COMMAND_MENU_SELECTED,
     []( wxCommandEvent& event ){
-      std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
+      //std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
     },
     id );
 
@@ -165,7 +164,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   else {
 
     std::cout
-      << "Add Portfolio: "
+      << "Add Portfolio (Artifact): "
       << "T=" << pPortfolio->GetRow().ePortfolioType
       << ",O=" << pPortfolio->GetRow().idOwner
       << ",ID=" << pPortfolio->Id()
@@ -205,7 +204,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 void MasterPortfolio::Add( pPosition_t pPosition ) {
 
   std::cout
-    << "Add Position: "
+    << "Add Position (Artifact): "
     << pPosition->GetRow().sName
     << ",quan=" << pPosition->GetActiveSize()
     << ",id=" << pPosition->GetRow().idPosition << ","
@@ -373,7 +372,6 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying->SetChartDataView( pChartDataView );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
-        // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
         wxMenuItem* pMenuItem;
         wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
         pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
@@ -693,7 +691,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
               if ( !strategy.bChartActivated ) {
 
-                // TODO: will need to delete the menus in reverse order via m_fChartDel, will need to handle the Unbind?
                 wxMenuItem* pMenuItem;
                 wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolio );
                 pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
@@ -726,10 +723,12 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
 void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying ) {
 
-  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
+  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );  // "portfolio-GLD"
 
   mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
   if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // start empty strategy
+    // FIX: doesn't make any sense any more, as this is simply a cache of portfolios and positions
+    //   the construct strategy needs to performed when no strategies exist in m_mapUnderlyingWithStrategies
     pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, pPortfolioUnderlying ) ); // initial strategy
     pManageStrategy->Run();
   }
