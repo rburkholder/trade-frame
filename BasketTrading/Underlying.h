@@ -27,6 +27,7 @@
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
@@ -52,10 +53,7 @@ public:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
 
-  Underlying(
-    pWatch_t pWatch,
-    pPortfolio_t pPortfolio
-  );
+  Underlying( pWatch_t, pPortfolio_t );
   ~Underlying();
 
   void ReadDailyBars( const std::string& sDailyBarPath );
@@ -63,8 +61,10 @@ public:
   void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptionDefinitions_t& );
 
+  void UpdateChart( boost::posix_time::ptime );
+
   pWatch_t GetWatch() { return m_pWatch; }
-  pPortfolio_t GetPortfolio() { return m_pPortfolioAggregate; }
+  pPortfolio_t GetPortfolio() { return m_pPortfolio; }
   pChartDataView_t GetChartDataView() { return m_pChartDataView; }
 
   void SaveSeries( const std::string& sPrefix );
@@ -81,7 +81,7 @@ private:
   using gex_t = ou::tf::option::Aggregate;
 
   pWatch_t m_pWatch;
-  pPortfolio_t m_pPortfolioAggregate; // aggregates strategies associated with underlying
+  pPortfolio_t m_pPortfolio; // aggregates strategies associated with underlying
 
   gex_t m_GexCalc;
 
@@ -92,6 +92,11 @@ private:
   ou::ChartEntryBars m_cePrice;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryMark m_cePivots;
+
+  ou::ChartEntryIndicator m_cePLCurrent;
+  ou::ChartEntryIndicator m_cePLUnRealized;
+  ou::ChartEntryIndicator m_cePLRealized;
+  ou::ChartEntryIndicator m_ceCommissionPaid;
 
   ou::tf::BollingerTransitions m_BollingerTransitions;
 

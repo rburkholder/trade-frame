@@ -275,18 +275,15 @@ void AppBasketTrading::HandleEmitInfo() {
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   // update portfolio results and tracker timeseries for portfolio value
-  double dblUnRealized {};
-  double dblRealized {};
-  double dblCommissionsPaid {};
+
   double dblCurrent {};
 
   if ( m_pPortfolioStrategyAggregate ) {
-    m_pPortfolioStrategyAggregate->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
-    //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
-    m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
-    m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
-    m_pMasterPortfolio->UpdateChart( dblCurrent, dblUnRealized, dblRealized, dblCommissionsPaid );
+    dblCurrent = m_pMasterPortfolio->UpdateChart();
   }
+
+  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
+  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
 
   size_t nUp {};
   size_t nDown {};

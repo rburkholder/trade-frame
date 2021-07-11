@@ -81,7 +81,7 @@ public:
 
   void Load( ptime dtLatestEod, bool bAddToList );
 
-  void UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid );
+  double UpdateChart();
 
   void ClosePositions( void );
   void SaveSeries( const std::string& sPath );

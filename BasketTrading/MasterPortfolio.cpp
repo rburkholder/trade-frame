@@ -89,7 +89,7 @@ MasterPortfolio::MasterPortfolio(
   m_cePLRealized.SetName( "P/L Realized" );
   m_ceCommissionPaid.SetName( "Commissions Paid" );
 
-  m_pChartDataView.reset( new ou::ChartDataView );
+  m_pChartDataView = std::make_shared<ou::ChartDataView>();
   m_pChartDataView->Add( 0, &m_cePLCurrent );
   m_pChartDataView->Add( 0, &m_cePLUnRealized );
   m_pChartDataView->Add( 0, &m_cePLRealized );
@@ -229,13 +229,29 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   assert( pair.second );
 }
 
-void MasterPortfolio::UpdateChart( double dblPLCurrent, double dblPLUnRealized, double dblPLRealized, double dblCommissionPaid ) {
-  // TODO: use local instance of master portfolio
+double MasterPortfolio::UpdateChart() {
+
+  double dblPLUnRealized {};
+  double dblPLRealized {};
+  double dblCommissionPaid {};
+  double dblPLCurrent {};
+
   boost::posix_time::ptime dt( ou::TimeSource::Instance().External() );
+
+  m_pMasterPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
+  //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+
   m_cePLCurrent.Append( dt, dblPLCurrent );
   m_cePLUnRealized.Append( dt, dblPLUnRealized );
   m_cePLRealized.Append( dt, dblPLRealized );
   m_ceCommissionPaid.Append( dt, dblCommissionPaid );
+
+  for ( mapUnderlyingWithStrategies_t::value_type& vt:m_mapUnderlyingWithStrategies ) {
+    UnderlyingWithStrategies& uws( vt.second );
+    uws.pUnderlying->UpdateChart( dt );
+  }
+
+  return dblPLCurrent;
 }
 
 void MasterPortfolio::Test() {
@@ -377,7 +393,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         pMenuPopupUnderlying->Bind(
           wxEVT_COMMAND_MENU_SELECTED,
           [sUnderlying]( wxCommandEvent& event ){
-            std::cout << "Add Strategy for: " << sUnderlying << event.GetId() << std::endl;
+            std::cout << "Add Strategy for: " << sUnderlying << " (" << event.GetId() << ")" << std::endl;
           },
           id );
 

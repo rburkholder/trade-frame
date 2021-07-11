@@ -23,22 +23,41 @@
 
 Underlying::Underlying(
   pWatch_t pWatch,
-  pPortfolio_t pPortfolioAggregate
+  pPortfolio_t pPortfolio
 )
 :
   m_pWatch( pWatch ),
   m_GexCalc( pWatch ),
-  m_pPortfolioAggregate( pPortfolioAggregate ),
+  m_pPortfolio( pPortfolio ),
   m_bfTrades06Sec( 6 )
 {
   assert( pWatch );
-  assert( pPortfolioAggregate );
+  assert( m_pPortfolio );
+
+  const std::string& sName( m_pWatch->GetInstrument()->GetInstrumentName() );
 
   m_pChartDataView = std::make_shared<ou::ChartDataView>();
-  PopulateChartDataView( m_pChartDataView );
+  m_pChartDataView->SetNames( "Profit / Loss", sName );
 
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
+
+  m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
+  m_cePLUnRealized.SetColour( ou::Colour::DarkCyan );
+  m_cePLRealized.SetColour( ou::Colour::MediumSlateBlue );
+  m_ceCommissionPaid.SetColour( ou::Colour::SteelBlue );
+
+  m_cePLCurrent.SetName( "P/L Current" );
+  m_cePLUnRealized.SetName( "P/L UnRealized" );
+  m_cePLRealized.SetName( "P/L Realized" );
+  m_ceCommissionPaid.SetName( "Commissions Paid" );
+
+  PopulateChartDataView( m_pChartDataView );
+
+  m_pChartDataView->Add( EChartSlot::PL, &m_cePLCurrent );
+  m_pChartDataView->Add( EChartSlot::PL, &m_cePLUnRealized );
+  m_pChartDataView->Add( EChartSlot::PL, &m_cePLRealized );
+  m_pChartDataView->Add( EChartSlot::PL, &m_ceCommissionPaid );
 
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &Underlying::HandleBarTrades06Sec ) );
 
@@ -98,3 +117,19 @@ void Underlying::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 
 }
 
+void Underlying::UpdateChart( boost::posix_time::ptime dt ) {
+
+  double dblPLUnRealized {};
+  double dblPLRealized {};
+  double dblCommissionPaid {};
+  double dblPLCurrent {};
+
+  m_pPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
+  //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+
+  m_cePLCurrent.Append( dt, dblPLCurrent );
+  m_cePLUnRealized.Append( dt, dblPLUnRealized );
+  m_cePLRealized.Append( dt, dblPLRealized );
+  m_ceCommissionPaid.Append( dt, dblCommissionPaid );
+
+}
