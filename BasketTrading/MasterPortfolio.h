@@ -142,6 +142,7 @@ private:
   wxTreeItemId m_idTreeRoot;
   wxTreeItemId m_idTreeUnderlying;
   wxTreeItemId m_idTreeStrategies;
+  //wxTreeItemId m_idTreeOptions;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
@@ -151,15 +152,14 @@ private:
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
     bool bChartActivated;
-    pChartDataView_t pChartDataView;
-    Strategy( pManageStrategy_t pManageStrategy_, pChartDataView_t pChartDataView_ )
+    Strategy( pManageStrategy_t pManageStrategy_ )
     : pManageStrategy( std::move( pManageStrategy_ ) ),
-      bChartActivated( false ), pChartDataView( pChartDataView_ ),
+      bChartActivated( false ),
       priceOpen {}, dblBestProbability {}
     {}
-    Strategy( pChartDataView_t& pChartDataView_ )
+    Strategy()
     :
-      bChartActivated( false ), pChartDataView( pChartDataView_ ),
+      bChartActivated( false ),
       priceOpen {}, dblBestProbability {}
     {}
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }

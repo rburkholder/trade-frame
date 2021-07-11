@@ -105,7 +105,6 @@ public:
     // TODO: convert these to left assign
     pWatch_t, // underlying
     pPortfolio_t, // owning portfolio
-    pChartDataView_t,
     fGatherOptionDefinitions_t&,
     //fConstructWatch_t,
     fConstructOption_t,

@@ -207,7 +207,6 @@ ManageStrategy::ManageStrategy(
   double dblSlope20DayUnderlying,
   pWatch_t pWatchUnderlying,
   pPortfolio_t pPortfolioOwning, // => owning portfolio
-  pChartDataView_t pChartDataView,
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
   fConstructOption_t fConstructOption, // => m_fConstructOption
@@ -229,7 +228,6 @@ ManageStrategy::ManageStrategy(
   //m_barPriorDaily( barPriorDaily ),
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
-  m_pChartDataView( pChartDataView ),
 
   //m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
@@ -274,13 +272,14 @@ ManageStrategy::ManageStrategy(
   assert( nullptr != m_fConstructPortfolio );
   assert( nullptr != m_fFirstTrade );
   assert( nullptr != m_fBar );
-  assert( pChartDataView );
 
   //m_rBarDirection[ 0 ] = EBarDirection::None;
   //m_rBarDirection[ 1 ] = EBarDirection::None;
   //m_rBarDirection[ 2 ] = EBarDirection::None;
 
-  pChartDataView->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+  m_pChartDataView = std::make_shared<ou::ChartDataView>();
+
+  m_pChartDataView->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
   //m_ceUpReturn.SetName( "Up Return" );
   //m_ceDnReturn.SetName( "Dn Return" );
@@ -290,19 +289,19 @@ ManageStrategy::ManageStrategy(
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
   m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
 
-  pChartDataView->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
+  m_pChartDataView->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
 
   //pChartDataView->Add( EChartSlot::Tick, &m_ceTickCount );
 
   //pChartDataView->Add( 4, &m_ceUpReturn );
   //pChartDataView->Add( 4, &m_ceDnReturn );
 
-  pChartDataView->Add( EChartSlot::Price, &m_ceShortEntries );
-  pChartDataView->Add( EChartSlot::Price, &m_ceLongEntries );
-  pChartDataView->Add( EChartSlot::Price, &m_ceShortFills );
-  pChartDataView->Add( EChartSlot::Price, &m_ceLongFills );
-  pChartDataView->Add( EChartSlot::Price, &m_ceShortExits );
-  pChartDataView->Add( EChartSlot::Price, &m_ceLongExits );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceShortEntries );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceLongEntries );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceShortFills );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceLongFills );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceShortExits );
+  m_pChartDataView->Add( EChartSlot::Price, &m_ceLongExits );
 
   m_pOptionRepository = std::make_unique<OptionRepository>(
     std::move( fRegisterOption ),

@@ -110,6 +110,7 @@ MasterPortfolio::MasterPortfolio(
   m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
   m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr, pMenuPopupUnderlying );
   m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr, nullptr );
+  //m_idTreeOptions = m_fChartAdd( m_idTreeRoot, "Options", nullptr, nullptr ); // needs to be within the associated underlying
 
   pMenuPopupUnderlying = nullptr;
 
@@ -218,8 +219,8 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
 
   if ( pPosition->GetRow().idPortfolio != cache.m_pPortfolio->Id() ) {
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
-    idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
-    idPortfolio_t idPortfolio2( cache.m_pPortfolio->Id() );
+    const idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
+    const idPortfolio_t idPortfolio2( cache.m_pPortfolio->Id() );
     assert( false );
   }
 
@@ -452,8 +453,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
   const IIPivot& iip_( uws.iip );
   const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
-  pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
-
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy = std::make_shared<ManageStrategy>(
@@ -462,7 +461,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         uws.pUnderlying->GetWatch(),
         pPortfolioUnderlying,
-        pChartDataView,
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,  // TODO, need to pass in mapChains from Underlying
     // ManageStrategy::fConstructOption_t
@@ -679,7 +677,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               UnderlyingWithStrategies& uws( iterUWS->second );
               assert( uws.pStrategyInWaiting );
 
-              pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pChartDataView;
+              pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pManageStrategy->GetChartDataView();
 
               auto result = uws.mapStrategyActive.emplace(
                 std::make_pair( idPortfolio, std::move( uws.pStrategyInWaiting ) )
@@ -716,7 +714,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           }
       );
 
-  uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ), std::move( pChartDataView ) );
+  uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
   return uws.pStrategyInWaiting->pManageStrategy;
 
 } // ConstructStrategy
