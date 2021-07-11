@@ -60,12 +60,12 @@ public:
 
   void ReadDailyBars( const std::string& sDailyBarPath );
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
-  void SetChartDataView( pChartDataView_t );
   void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptionDefinitions_t& );
 
   pWatch_t GetWatch() { return m_pWatch; }
   pPortfolio_t GetPortfolio() { return m_pPortfolioAggregate; }
+  pChartDataView_t GetChartDataView() { return m_pChartDataView; }
 
   void SaveSeries( const std::string& sPrefix );
 

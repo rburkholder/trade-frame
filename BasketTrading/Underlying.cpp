@@ -34,6 +34,9 @@ Underlying::Underlying(
   assert( pWatch );
   assert( pPortfolioAggregate );
 
+  m_pChartDataView = std::make_shared<ou::ChartDataView>();
+  PopulateChartDataView( m_pChartDataView );
+
   m_cePrice.SetName( "Price" );
   m_ceVolume.SetName( "Volume" );
 
@@ -75,11 +78,6 @@ void Underlying::PopulateChartDataView( pChartDataView_t pChartDataView ) {
   pChartDataView->Add( EChartSlot::Price, &m_cePrice );
   pChartDataView->Add( EChartSlot::Price, &m_cePivots );
   pChartDataView->Add( EChartSlot::Volume, &m_ceVolume );
-}
-
-void Underlying::SetChartDataView( pChartDataView_t pChartDataView ) {
-  m_pChartDataView = pChartDataView;
-  PopulateChartDataView( m_pChartDataView );
 }
 
 void Underlying::PopulateChains( fGatherOptionDefinitions_t& f ) {

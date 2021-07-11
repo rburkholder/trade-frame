@@ -364,13 +364,10 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
           Add( pPortfolioUnderlying );  // update the archive
         }
 
-        pChartDataView_t pChartDataView = std::make_shared<ou::ChartDataView>();
-
         UnderlyingWithStrategies& uws( iter->second );
         const IIPivot& iip( uws.iip );
         uws.pUnderlying = std::make_unique<Underlying>( pWatchUnderlying, pPortfolioUnderlying );
         uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
-        uws.pUnderlying->SetChartDataView( pChartDataView );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
         wxMenuItem* pMenuItem;
@@ -384,7 +381,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
           },
           id );
 
-        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, pChartDataView, pMenuPopupUnderlying );
+        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, uws.pUnderlying->GetChartDataView(), pMenuPopupUnderlying );
 
         pMenuPopupUnderlying = nullptr;
 
