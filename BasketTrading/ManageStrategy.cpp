@@ -410,7 +410,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
     case ou::tf::InstrumentType::Option:
       if ( pPosition->IsActive() ) {
 
-        idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
+        const idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
         combo_t* pCombo;
         if ( m_pCombo ) { // need to construct empty combo when first leg presented
@@ -631,7 +631,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
-              idPortfolio_t idPortfolio
+              const idPortfolio_t idPortfolio
                 = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction );  // "collar-GLD-rise-20210730-165-20210630-167-165"
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
@@ -650,8 +650,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 std::cout << sUnderlying << " construct portfolio: " << m_pPortfolioOwning->Id() << " adds " << idPortfolio << std::endl;
                 combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
 
-                m_pValidateOptions->WhenValidated(
-                  [this,idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
+                m_pValidateOptions->Get(
+                  [this,&idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // need Strategy specific naming
 
                     m_pOptionRepository->Add( pOption );
 

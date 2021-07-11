@@ -69,7 +69,7 @@ public:
   void SetSize( vLegSelected_t::size_type );
 
   bool ValidateBidAsk( boost::gregorian::date, double priceUnderlying, size_t nDuration, fChooseLegs_t&& );
-  void WhenValidated( fValidatedOption_t&& );
+  void Get( fValidatedOption_t&& );
   void ClearValidation();
 
 private:

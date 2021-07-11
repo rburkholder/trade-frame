@@ -160,7 +160,7 @@ bool ValidateOptions::ValidateBidAsk(
   return bValidated;
 }
 
-void ValidateOptions::WhenValidated( fValidatedOption_t&& fValidatedOption ) {
+void ValidateOptions::Get( fValidatedOption_t&& fValidatedOption ) {
   assert( m_SpreadValidation.IsActive() );
   size_t ix {};
   for ( vLegSelected_t::value_type& vt: m_vLegSelected ) {
