@@ -650,7 +650,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 std::cout << sUnderlying << " construct portfolio: " << m_pPortfolioOwning->Id() << " adds " << idPortfolio << std::endl;
                 combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
 
-                m_pValidateOptions->ValidatedOptions(
+                m_pValidateOptions->WhenValidated(
                   [this,idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // reference on idPortfolio?  also, need Strategy specific naming
 
                     m_pOptionRepository->Add( pOption );
