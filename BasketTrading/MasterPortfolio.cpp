@@ -212,17 +212,17 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
     << std::endl;
 
   mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( pPosition->IdPortfolio() );  // need to preload the iterator for random adds
-  if ( m_mapStrategyCache.end() == iterStrategyCache ) {
-    assert( false );
-  }
+  assert( m_mapStrategyCache.end() != iterStrategyCache );
 
   StrategyCache& cache( iterStrategyCache->second );
+
   if ( pPosition->GetRow().idPortfolio != cache.m_pPortfolio->Id() ) {
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
     idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
     idPortfolio_t idPortfolio2( cache.m_pPortfolio->Id() );
     assert( false );
   }
+
   std::pair<mapPosition_t::iterator,bool> pair
     = cache.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
   assert( pair.second );
@@ -725,7 +725,7 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
 
   const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );  // "portfolio-GLD"
 
-  bool bActiveStrategiesFound( false );
+  bool bConstructDefaultStrategy( true );
 
   // look for existing strategies, which means loading from the Strategy cache
   mapStrategyCache_iter iter = m_mapStrategyCache.find( idPortfolioUnderlying );
@@ -754,12 +754,12 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
       cache.m_bAccessed = true;
       if ( bActivated ) {
         pManageStrategy->Run();
-        bActiveStrategiesFound = true;
+        bConstructDefaultStrategy = false;
       }
     }
   }
 
-  if ( !bActiveStrategiesFound) {
+  if ( bConstructDefaultStrategy) {
     // create a new strategy by default
     // TODO: fix calling parameters?, as UnderlyingWithStrategies is already available with undelrying portfolio
     pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, uws.pUnderlying->GetPortfolio() ) );
