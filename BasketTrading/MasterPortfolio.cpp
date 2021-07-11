@@ -190,9 +190,9 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
         { // example: idOwner "portfolio-SPY", idPortfolio "collar-SPY-rise-20210730-427.5-20210706-429-427"
           mapStrategyCache_t::iterator iter = m_mapStrategyCache.find( pPortfolio->GetRow().idOwner );
           assert( m_mapStrategyCache.end() != iter );
-          StrategyCache& saOwner( iter->second );
+          StrategyCache& scOwner( iter->second );
           std::pair<mapPortfolio_iter,bool> pair2 // insert child
-            = saOwner.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
+            = scOwner.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
           assert( pair2.second );
         }
         break;
@@ -389,7 +389,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
-        StartStrategies( sUnderlying, pPortfolioUnderlying );
+        StartStrategies( sUnderlying, uws );
       }
       );
 
@@ -721,30 +721,21 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
 } // ConstructStrategy
 
-void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying ) {
+void MasterPortfolio::StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& uws ) {
 
-  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );  // "portfolio-GLD"
+  const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );  // "portfolio-GLD"
 
-  mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
-  if ( m_mapStrategyCache.end() == iterStrategyCache ) { // start empty strategy
-    // FIX: doesn't make any sense any more, as this is simply a cache of portfolios and positions
-    //   the construct strategy needs to performed when no strategies exist in m_mapUnderlyingWithStrategies
-    pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, pPortfolioUnderlying ) ); // initial strategy
-    pManageStrategy->Run();
-  }
-  else { // process existing strategies
-    StrategyCache& cache( iterStrategyCache->second );
-    assert( cache.m_mapPosition.empty() );  // this works for now, no underlying positions
+  bool bActiveStrategiesFound( false );
 
-    //std::for_each(  // add existing underlying positions to the strategy, active or not
-    //  cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
-    //  [this,&strategy](mapPosition_t::value_type& vt){
-    //    strategy.pManageStrategy->AddPosition( vt.second );
-    //  }
-    //);
-
-    // iterate the portfolioStrategies belonging to the portfolioUnderlying
+  // look for existing strategies, which means loading from the Strategy cache
+  mapStrategyCache_iter iter = m_mapStrategyCache.find( idPortfolioUnderlying );
+  if ( m_mapStrategyCache.end() == iter ) {}
+  else {
+    // iterate the strategy portfolios, load them and get started
+    StrategyCache& cache( iter->second );
+    assert( cache.m_mapPosition.empty() ); // looking at list of strategies, ie, portfolio of the strategy, no positions at this level
     for ( mapPortfolio_t::value_type& vt: cache.m_mapPortfolio ) {
+
       // TODO: need to determine if comboPortfolio is active
       const idPortfolio_t& idPortfolioCombo( vt.second->Id() );
 
@@ -759,13 +750,20 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfoli
           pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
           bActivated = true;
         }
-        if ( bActivated ) {
-          pManageStrategy->Run();
-        }
-
       }
       cache.m_bAccessed = true;
+      if ( bActivated ) {
+        pManageStrategy->Run();
+        bActiveStrategiesFound = true;
+      }
     }
+  }
+
+  if ( !bActiveStrategiesFound) {
+    // create a new strategy by default
+    // TODO: fix calling parameters?, as UnderlyingWithStrategies is already available with undelrying portfolio
+    pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, uws.pUnderlying->GetPortfolio() ) );
+    pManageStrategy->Run();
   }
 
 }

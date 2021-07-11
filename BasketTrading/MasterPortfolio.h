@@ -186,21 +186,21 @@ private:
     void TakeProfits() {}
   };
 
-  using mapUnderlyingWithStrategies_t = std::map<std::string, UnderlyingWithStrategies>;
+  using mapUnderlyingWithStrategies_t = std::map<std::string /* underlying */, UnderlyingWithStrategies>;
   using iterUnderlyingWithStrategies_t = mapUnderlyingWithStrategies_t::iterator;
   mapUnderlyingWithStrategies_t m_mapUnderlyingWithStrategies;
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
   using mapPosition_iter = mapPosition_t::iterator;
-  using mapPortfolio_t = std::map<std::string,pPortfolio_t>;
+  using mapPortfolio_t = std::map<idPortfolio_t,pPortfolio_t>;
   using mapPortfolio_iter = mapPortfolio_t::iterator;
 
   struct StrategyCache {
     // stuff during database load goes here temporarily
     bool m_bAccessed;
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
-    mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup
+    mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup [or could be a set or vector?]
     mapPosition_t m_mapPosition; // positions associated with portfolio
     StrategyCache( pPortfolio_t pPortfolio )
     : m_bAccessed( false ),
@@ -233,7 +233,7 @@ private:
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
-  void StartStrategies( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
+  void StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
