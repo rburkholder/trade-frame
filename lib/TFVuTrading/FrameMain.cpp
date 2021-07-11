@@ -14,9 +14,9 @@
 
 // Generic frame for wx based applications
 
-#include <wx/wx.h>
-#include <wx/window.h>
-#include <wx/frame.h>
+#include <iostream>
+
+#include <wx/menu.h>
 #include <wx/statusbr.h>
 
 #include "FrameMain.h"

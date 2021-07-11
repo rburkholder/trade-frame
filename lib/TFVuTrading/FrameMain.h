@@ -23,6 +23,8 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/frame.h>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -32,7 +34,6 @@ using namespace fastdelegate;
 #define SYMBOL_FRAMEGENERIC_SIZE wxSize(400, 500)
 #define SYMBOL_FRAMEGENERIC_POSITION wxDefaultPosition
 
-class wxFrame;
 class wxMenuBar;
 class wxStatusBar;
 
