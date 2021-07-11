@@ -196,26 +196,26 @@ private:
   using mapPortfolio_t = std::map<std::string,pPortfolio_t>;
   using mapPortfolio_iter = mapPortfolio_t::iterator;
 
-  struct StrategyArtifacts {
+  struct StrategyCache {
     // stuff during database load goes here temporarily
     bool m_bAccessed;
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
     mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup
     mapPosition_t m_mapPosition; // positions associated with portfolio
-    StrategyArtifacts( pPortfolio_t pPortfolio )
+    StrategyCache( pPortfolio_t pPortfolio )
     : m_bAccessed( false ),
       m_pPortfolio( pPortfolio )
     {}
-    StrategyArtifacts( const StrategyArtifacts&& rhs )
+    StrategyCache( const StrategyCache&& rhs )
     : m_bAccessed( rhs.m_bAccessed ),
       m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
       m_mapPosition( std::move( rhs.m_mapPosition ) )
     {}
   };
 
-  using mapStrategyArtifacts_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyArtifacts>;
-  using mapStrategyArtifacts_iter = mapStrategyArtifacts_t::iterator;
-  mapStrategyArtifacts_t m_mapStrategyArtifacts;
+  using mapStrategyCache_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyCache>;
+  using mapStrategyCache_iter = mapStrategyCache_t::iterator;
+  mapStrategyCache_t m_mapStrategyCache;
 
   setSymbols_t m_setSymbols;
 

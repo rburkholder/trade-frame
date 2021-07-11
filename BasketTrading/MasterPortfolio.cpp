@@ -145,35 +145,35 @@ MasterPortfolio::~MasterPortfolio() {
   }
   //TODO: need to wait for m_pOptionEngine to finish
   //m_mapVolatility.clear();
-  m_mapStrategyArtifacts.clear();
+  m_mapStrategyCache.clear();
   m_mapUnderlyingWithStrategies.clear();
   m_pOptionEngine.release();
   m_libor.SetWatchOff();
 }
 
-// auto loading portfolio from database into the mapArtifacts cache
+// auto loading portfolio from database into the map stratetgy cache
 void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 
   // TODO: will need to test that strategy portfolios are active??
 
   // will have a mixture of 'standard' and 'multilegged'
-  mapStrategyArtifacts_t::iterator iterArtifacts = m_mapStrategyArtifacts.find( pPortfolio->Id() );
-  if ( m_mapStrategyArtifacts.end() != iterArtifacts ) {
+  mapStrategyCache_t::iterator iterCache = m_mapStrategyCache.find( pPortfolio->Id() );
+  if ( m_mapStrategyCache.end() != iterCache ) {
     std::cout << "MasterPortfolio::Add already added portfolio " << pPortfolio->Id() << std::endl;
   }
   else {
 
     std::cout
-      << "Add Portfolio (Artifact): "
+      << "Add Portfolio (cache): "
       << "T=" << pPortfolio->GetRow().ePortfolioType
       << ",O=" << pPortfolio->GetRow().idOwner
       << ",ID=" << pPortfolio->Id()
       << std::endl;
 
-    std::pair<mapStrategyArtifacts_t::iterator,bool> pair
-      = m_mapStrategyArtifacts.insert( mapStrategyArtifacts_t::value_type( pPortfolio->Id(), std::move( StrategyArtifacts( pPortfolio ) ) ) );
+    std::pair<mapStrategyCache_t::iterator,bool> pair
+      = m_mapStrategyCache.insert( mapStrategyCache_t::value_type( pPortfolio->Id(), std::move( StrategyCache( pPortfolio ) ) ) );
     assert( pair.second );
-    //m_curStrategyArtifacts = pair.first;
+    //m_curStrategyCache = pair.first;
 
     switch ( pPortfolio->GetRow().ePortfolioType ) {
       case ou::tf::Portfolio::EPortfolioType::Basket:
@@ -188,9 +188,9 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
         // this is the combo level portfolio of positions, needs to be associated with owner
         //    which allows it to be submitted to ManageStrategy
         { // example: idOwner "portfolio-SPY", idPortfolio "collar-SPY-rise-20210730-427.5-20210706-429-427"
-          mapStrategyArtifacts_t::iterator iter = m_mapStrategyArtifacts.find( pPortfolio->GetRow().idOwner );
-          assert( m_mapStrategyArtifacts.end() != iter );
-          StrategyArtifacts& saOwner( iter->second );
+          mapStrategyCache_t::iterator iter = m_mapStrategyCache.find( pPortfolio->GetRow().idOwner );
+          assert( m_mapStrategyCache.end() != iter );
+          StrategyCache& saOwner( iter->second );
           std::pair<mapPortfolio_iter,bool> pair2 // insert child
             = saOwner.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
           assert( pair2.second );
@@ -200,31 +200,31 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
   }
 }
 
-// auto loading position from database into the mapArtifacts cache (and from runtime creations?)
+// auto loading position from database into the mapStrategyCache (and from runtime creations?)
 void MasterPortfolio::Add( pPosition_t pPosition ) {
 
   std::cout
-    << "Add Position (Artifact): "
+    << "Add Position (cache): "
     << pPosition->GetRow().sName
     << ",quan=" << pPosition->GetActiveSize()
     << ",id=" << pPosition->GetRow().idPosition << ","
     << pPosition->Notes()
     << std::endl;
 
-  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( pPosition->IdPortfolio() );  // need to preload the iterator for random adds
-  if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
+  mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( pPosition->IdPortfolio() );  // need to preload the iterator for random adds
+  if ( m_mapStrategyCache.end() == iterStrategyCache ) {
     assert( false );
   }
 
-  StrategyArtifacts& artifact( iterStrategyArtifacts->second );
-  if ( pPosition->GetRow().idPortfolio != artifact.m_pPortfolio->Id() ) {
+  StrategyCache& cache( iterStrategyCache->second );
+  if ( pPosition->GetRow().idPortfolio != cache.m_pPortfolio->Id() ) {
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
     idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
-    idPortfolio_t idPortfolio2( artifact.m_pPortfolio->Id() );
+    idPortfolio_t idPortfolio2( cache.m_pPortfolio->Id() );
     assert( false );
   }
   std::pair<mapPosition_t::iterator,bool> pair
-    = artifact.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
+    = cache.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
   assert( pair.second );
 }
 
@@ -258,10 +258,10 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       [this,dtLatestEod,bAddToList](){
 
         std::for_each( // ensure overnight positions are represented in the new day
-          m_mapStrategyArtifacts.begin(), m_mapStrategyArtifacts.end(),
-          [this](mapStrategyArtifacts_t::value_type& vt){
-            StrategyArtifacts& artifact( vt.second );
-            if ( !artifact.m_bAccessed ) {
+          m_mapStrategyCache.begin(), m_mapStrategyCache.end(),
+          [this](mapStrategyCache_t::value_type& vt){
+            StrategyCache& cache( vt.second );
+            if ( !cache.m_bAccessed ) {
               std::string idPortfolio( vt.first );
               std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
               if ( sTemp == sUnderlyingPortfolioPrefix ) {
@@ -269,7 +269,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
                 std::cout << vt.first << " (" << sUnderlying << ") being examined :";
                 bool bPositionActive( false );
                 std::for_each(
-                  artifact.m_mapPosition.begin(), artifact.m_mapPosition.end(),
+                  cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
                   [&bPositionActive](mapPosition_t::value_type& vt){
                     bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
                   }
@@ -349,9 +349,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         const ou::tf::Portfolio::idPortfolio_t idPortfolioUnderlying( sUnderlyingPortfolioPrefix + sUnderlying );
 
         pPortfolio_t pPortfolioUnderlying;
-        mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
-        if ( m_mapStrategyArtifacts.end() != iterStrategyArtifacts ) { // use existing portfolio
-          StrategyArtifacts& sa( iterStrategyArtifacts->second );
+        mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
+        if ( m_mapStrategyCache.end() != iterStrategyCache ) { // use existing portfolio
+          StrategyCache& sa( iterStrategyCache->second );
           pPortfolioUnderlying = sa.m_pPortfolio;
         }
         else { // create new portfolio
@@ -470,14 +470,14 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
               bool bUseExistingOption( true );
               mapPosition_iter iterPosition;
-              mapStrategyArtifacts_iter iterArtifact = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
-              if ( m_mapStrategyArtifacts.end() == iterArtifact ) {
+              mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
+              if ( m_mapStrategyCache.end() == iterStrategyCache ) {
                 bUseExistingOption = false;
               }
               else {
-                StrategyArtifacts& artifact( iterArtifact->second );
-                iterPosition = artifact.m_mapPosition.find( sIQFeedOptionName );
-                if ( artifact.m_mapPosition.end() == iterPosition ) {
+                StrategyCache& cache( iterStrategyCache->second );
+                iterPosition = cache.m_mapPosition.find( sIQFeedOptionName );
+                if ( cache.m_mapPosition.end() == iterPosition ) {
                   bUseExistingOption = false;
                 }
               }
@@ -541,15 +541,15 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               pPosition_t pPosition;
               bool bUseExistingPosition( true );
               mapPosition_t::iterator iterPosition;
-              mapStrategyArtifacts_iter iter = m_mapStrategyArtifacts.find( idPortfolio );
-              if ( m_mapStrategyArtifacts.end() == iter ) {
+              mapStrategyCache_iter iter = m_mapStrategyCache.find( idPortfolio );
+              if ( m_mapStrategyCache.end() == iter ) {
                 // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
                 bUseExistingPosition = false;
               }
               else {
-                StrategyArtifacts& artifacts( iter->second );
-                iterPosition = artifacts.m_mapPosition.find( pWatch->GetInstrument()->GetInstrumentName() );
-                if ( artifacts.m_mapPosition.end() == iterPosition ) {
+                StrategyCache& cache( iter->second );
+                iterPosition = cache.m_mapPosition.find( pWatch->GetInstrument()->GetInstrumentName() );
+                if ( cache.m_mapPosition.end() == iterPosition ) {
                   bUseExistingPosition = false;
                 }
               }
@@ -578,12 +578,12 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           [this,sUnderlying]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioOwner )->pPortfolio_t {
             pPortfolio_t pPortfolio;
             bool bUseExistingPortfolio( true );
-            mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioNew );
-            if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) {
+            mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioNew );
+            if ( m_mapStrategyCache.end() == iterStrategyCache ) {
               bUseExistingPortfolio = false;
             }
             if ( bUseExistingPortfolio ) {
-              pPortfolio = iterStrategyArtifacts->second.m_pPortfolio;
+              pPortfolio = iterStrategyCache->second.m_pPortfolio;
             }
             else {
               ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
@@ -725,36 +725,36 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfoli
 
   const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );  // "portfolio-GLD"
 
-  mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioUnderlying );
-  if ( m_mapStrategyArtifacts.end() == iterStrategyArtifacts ) { // start empty strategy
+  mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
+  if ( m_mapStrategyCache.end() == iterStrategyCache ) { // start empty strategy
     // FIX: doesn't make any sense any more, as this is simply a cache of portfolios and positions
     //   the construct strategy needs to performed when no strategies exist in m_mapUnderlyingWithStrategies
     pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, pPortfolioUnderlying ) ); // initial strategy
     pManageStrategy->Run();
   }
   else { // process existing strategies
-    StrategyArtifacts& artifacts( iterStrategyArtifacts->second );
-    assert( artifacts.m_mapPosition.empty() );  // this works for now, no underlying positions
+    StrategyCache& cache( iterStrategyCache->second );
+    assert( cache.m_mapPosition.empty() );  // this works for now, no underlying positions
 
     //std::for_each(  // add existing underlying positions to the strategy, active or not
-    //  artifacts.m_mapPosition.begin(), artifacts.m_mapPosition.end(),
+    //  cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
     //  [this,&strategy](mapPosition_t::value_type& vt){
     //    strategy.pManageStrategy->AddPosition( vt.second );
     //  }
     //);
 
     // iterate the portfolioStrategies belonging to the portfolioUnderlying
-    for ( mapPortfolio_t::value_type& vt: artifacts.m_mapPortfolio ) {
+    for ( mapPortfolio_t::value_type& vt: cache.m_mapPortfolio ) {
       // TODO: need to determine if comboPortfolio is active
       const idPortfolio_t& idPortfolioCombo( vt.second->Id() );
 
-      mapStrategyArtifacts_iter iterStrategyArtifacts = m_mapStrategyArtifacts.find( idPortfolioCombo );
-      StrategyArtifacts& artifactsCombo( iterStrategyArtifacts->second );
-      assert( !artifactsCombo.m_mapPosition.empty() );
-      pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, artifactsCombo.m_pPortfolio ) );
+      mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioCombo );
+      StrategyCache& cacheCombo( iterStrategyCache->second );
+      assert( !cacheCombo.m_mapPosition.empty() );
+      pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, cacheCombo.m_pPortfolio ) );
 
       bool bActivated( false );
-      for ( mapPosition_t::value_type& vt: artifacts.m_mapPosition ) {
+      for ( mapPosition_t::value_type& vt: cache.m_mapPosition ) {
         if ( vt.second->IsActive() ) {
           pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
           bActivated = true;
@@ -764,7 +764,7 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, pPortfoli
         }
 
       }
-      artifacts.m_bAccessed = true;
+      cache.m_bAccessed = true;
     }
   }
 
