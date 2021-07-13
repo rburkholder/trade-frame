@@ -248,7 +248,10 @@ double MasterPortfolio::UpdateChart() {
 
   for ( mapUnderlyingWithStrategies_t::value_type& vt:m_mapUnderlyingWithStrategies ) {
     UnderlyingWithStrategies& uws( vt.second );
-    uws.pUnderlying->UpdateChart( dt );
+    // NOTE: this is a background thread
+    if ( !uws.mapStrategyActive.empty() ) {
+      uws.pUnderlying->UpdateChart( dt );
+    }
   }
 
   return dblPLCurrent;
@@ -698,7 +701,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               assert( result.second );
               Strategy& strategy( *result.first->second );
 
-              uws.pUnderlying->PopulateChartDataView( pChartDataView );
+              uws.pUnderlying->PopulateChartDataView( pChartDataView ); // add price & volume
 
               if ( !strategy.bChartActivated ) {
 
@@ -713,7 +716,9 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
                   },
                   id );
 
-                strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
+                // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
+                //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
+                strategy.idTreeItem = m_fChartAdd( uws.idTreeItem, idPortfolio, pChartDataView, pMenuPopupStrategy );
                 strategy.bChartActivated = true;
                 pMenuPopupStrategy = nullptr;
               }

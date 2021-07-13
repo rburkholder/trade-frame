@@ -119,6 +119,8 @@ void Underlying::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
 
 void Underlying::UpdateChart( boost::posix_time::ptime dt ) {
 
+  assert( m_pPortfolio );
+
   double dblPLUnRealized {};
   double dblPLRealized {};
   double dblCommissionPaid {};
