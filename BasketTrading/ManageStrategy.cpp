@@ -212,7 +212,6 @@ ManageStrategy::ManageStrategy(
   fConstructOption_t fConstructOption, // => m_fConstructOption
   fConstructPosition_t fConstructPosition, // => m_fConstructPosition
   fConstructPortfolio_t fConstructPortfolio, // => m_fConstructPortfolio
-  fRegisterWatch_t fRegisterWatch, // => m_fRegisterWatch
   fRegisterOption_t&& fRegisterOption, // => m_fRegisterOption
   fStartCalc_t&& fStartCalc, // => m_fStartCalc
   fStopCalc_t&& fStopCalc, // => m_fStopCalc
@@ -229,12 +228,10 @@ ManageStrategy::ManageStrategy(
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
 
-  //m_fConstructWatch( fConstructWatch ),
   m_fConstructOption( fConstructOption ),
   m_fConstructPosition( fConstructPosition ),
   m_fConstructPortfolio( fConstructPortfolio ),
   m_stateTrading( ETradingState::TSInitializing ),
-  m_fRegisterWatch( fRegisterWatch ),
   m_fFirstTrade( fFirstTrade ),
   m_fAuthorizeUnderlying( fAuthorizeUnderlying ),
   m_fAuthorizeOption( fAuthorizeOption ),
@@ -332,8 +329,6 @@ ManageStrategy::ManageStrategy(
 
     assert( 0 != m_mapChains.size() );
 
-    //m_fRegisterWatch( pWatchUnderlying );  // TODO: ensure this is performed in caller
-
     m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
     m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
@@ -399,12 +394,6 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
       //assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
       //assert( pPosition.get() == m_pPositionUnderlying.get() );
       std::cout << "ManageStrategy::AddPosition adding underlying position, needs additional code: " << pInstrument->GetInstrumentName() << std::endl;
-      try {
-        //m_fRegisterWatch( pWatch );
-      }
-      catch( std::runtime_error& e ) {
-        std::cout << e.what() << std::endl;
-      }
       break;
     case ou::tf::InstrumentType::Option:
       if ( pPosition->IsActive() ) {

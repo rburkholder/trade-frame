@@ -87,7 +87,6 @@ public:
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
   using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
 
-  using fRegisterWatch_t = std::function<void(pWatch_t&)>;
   using fRegisterOption_t = std::function<void(pOption_t&)>;
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
@@ -110,7 +109,6 @@ public:
     fConstructOption_t,
     fConstructPosition_t,
     fConstructPortfolio_t,
-    fRegisterWatch_t,
     fRegisterOption_t&&,
     fStartCalc_t&&,
     fStopCalc_t&&,
@@ -204,8 +202,6 @@ private:
   fConstructOption_t m_fConstructOption;
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
-
-  fRegisterWatch_t m_fRegisterWatch;
 
   fAuthorizeSimple_t m_fAuthorizeSimple;
   fAuthorizeUnderlying_t m_fAuthorizeUnderlying;

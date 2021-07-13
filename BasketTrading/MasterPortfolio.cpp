@@ -389,6 +389,8 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
+        m_pOptionEngine->RegisterWatch( pWatchUnderlying );
+
         wxMenuItem* pMenuItem;
         wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
         pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
@@ -609,8 +611,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
             }
             return pPortfolio;
           },
-    // ManageStrategy::fRegisterWatch_t
-          std::bind( &ou::tf::option::Engine::RegisterWatch, m_pOptionEngine.get(), ph::_1 ),
     // ManageStrategy::fRegisterOption_t
           std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
     // ManageStrategy::fStartCalc_t
