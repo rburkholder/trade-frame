@@ -258,6 +258,7 @@ private:
   // https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
   // http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
   struct EMA {
+
     double dblCoef1; // smaller - used on arriving value
     double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
     double dblEmaLatest;
@@ -271,6 +272,7 @@ private:
     //ou::ChartEntryIndicator m_ceLowerBollinger;
     //ou::ChartEntryIndicator m_ceSD;
     pChartDataView_t pChartDataView;
+
     EMA( unsigned int nIntervals, pChartDataView_t pChartDataView_, ou::Colour::enumColour colour )
     : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same )//, dblSD {}, dblSn {}
     {
@@ -286,6 +288,7 @@ private:
       //m_ceLowerBollinger.SetColour( colour );
       //m_ceSD.SetColour( colour );
     }
+
     EMA( const EMA& rhs )
     : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
       state( rhs.state ),
@@ -294,12 +297,15 @@ private:
       pChartDataView->Add( 0, &m_ceEma ); // TODO: fix classes to handle a std::move
       m_ceEma.SetColour( rhs.m_ceEma.GetColour() );
     }
+
     ~EMA() {
       pChartDataView->Remove( 0, &m_ceEma ); // required when moving EMA into vector
     }
+
     void SetName( const std::string& sName ) {
       m_ceEma.SetName( sName );
     }
+
     double First( boost::posix_time::ptime dt, double value ) {
       dblEmaLatest = value;
       //m_ceUpperBollinger.Append( dt, 0.0 );
@@ -308,6 +314,7 @@ private:
       //m_ceSD.Append( dt, 0.0 );
       return dblEmaLatest;
     }
+
     double Update( boost::posix_time::ptime dt, double value ) {
       double dblPrevious( dblEmaLatest );
       dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
