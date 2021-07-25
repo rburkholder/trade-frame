@@ -807,10 +807,11 @@ void MasterPortfolio::EmitInfo( void ) {
   double dblNet {};
   std::for_each(
     m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
-    [&dblNet](mapUnderlyingWithStrategies_t::value_type& uws){
-      dblNet += uws.second.EmitInfo();
+    [&dblNet](mapUnderlyingWithStrategies_t::value_type& vt){
+      UnderlyingWithStrategies& uws( vt.second );
+      dblNet += uws.EmitInfo();
     } );
-  std::cout << "Portfolio net: " << dblNet << std::endl;
+  std::cout << "Active Portfolios net: " << dblNet << std::endl;
 }
 
 void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {

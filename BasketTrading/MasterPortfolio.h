@@ -179,11 +179,38 @@ private:
     mapStrategy_t mapStrategyClosed;
 
     UnderlyingWithStrategies( const IIPivot&& iip_ ): iip( std::move( iip_ ) ) {}
-    void ClosePositions() {}
-    void SaveSeries( const std::string& sPrefix ) {}
-    double EmitInfo() { return 0.0; }
-    void CloseForProfits() {}
-    void TakeProfits() {}
+    void ClosePositions() {
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        pStrategy->pManageStrategy->ClosePositions();
+      }
+    }
+    void SaveSeries( const std::string& sPrefix ) {
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        pStrategy->pManageStrategy->SaveSeries( sPrefix );
+      }
+    }
+    double EmitInfo() {
+      double sum {};
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        sum += pStrategy->pManageStrategy->EmitInfo();
+      }
+      return sum;
+    }
+    void CloseForProfits() {
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        pStrategy->pManageStrategy->CloseForProfits();
+      }
+    }
+    void TakeProfits() {
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        pStrategy->pManageStrategy->TakeProfits();
+      }
+    }
   };
 
   using mapUnderlyingWithStrategies_t = std::map<std::string /* underlying */, UnderlyingWithStrategies>;
