@@ -276,7 +276,7 @@ ManageStrategy::ManageStrategy(
 
   m_pChartDataView = std::make_shared<ou::ChartDataView>();
 
-  m_pChartDataView->SetNames( "Charts", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+  m_pChartDataView->SetNames( "Unknown Strategy", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
   //m_ceUpReturn.SetName( "Up Return" );
   //m_ceDnReturn.SetName( "Dn Return" );
@@ -412,6 +412,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           assert( pCombo );
 
           pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
+          m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
         }
 
@@ -637,6 +638,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 }
                 std::cout << sUnderlying << " construct portfolio: " << m_pPortfolioOwning->Id() << " adds " << idPortfolio << std::endl;
                 combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
+                m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
                 m_pValidateOptions->Get(
                   [this,&idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // need Strategy specific naming
