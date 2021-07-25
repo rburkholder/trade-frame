@@ -815,6 +815,7 @@ void MasterPortfolio::EmitInfo( void ) {
 }
 
 void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
+  std::cout << "Not Implemented: MasterPortfolio::CloseExpiryItm" << std::endl;
   /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
@@ -826,6 +827,7 @@ void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
 }
 
 void MasterPortfolio::CloseFarItm() {
+  std::cout << "Not Implemented: MasterPortfolio::CloseFarItm" << std::endl;
   /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
@@ -845,6 +847,7 @@ void MasterPortfolio::CloseForProfits() {
 }
 
 void MasterPortfolio::CloseItmLeg() {
+  std::cout << "Not Implemented: MasterPortfolio::CloseItmLeg" << std::endl;
   /*
   std::for_each(
     m_mapStrategy.begin(), m_mapStrategy.end(),
@@ -856,6 +859,7 @@ void MasterPortfolio::CloseItmLeg() {
 }
 
 void MasterPortfolio::AddCombo( bool bForced ) {
+  std::cout << "Not Implemented: MasterPortfolio::AddCombo" << std::endl;
   /*
   for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
     Strategy& strategy( vt.second );
