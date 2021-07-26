@@ -958,14 +958,19 @@ void ManageStrategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void ManageStrategy::HandleBarTrades01Sec( const ou::tf::Bar& bar ) {
 
   if ( 0 == m_vEMA.size() ) {  // issue here is that as vector is updated, memory is moved, using heap instead
-    m_vEMA.push_back( std::make_shared<EMA>(  5, m_pChartDataView, ou::Colour::DarkOrange ) );
+
+    m_vEMA.emplace_back( std::make_shared<EMA>(  5, m_pChartDataView, ou::Colour::DarkOrange ) );
     m_vEMA.back().get()->SetName( "Ema 5s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 13, m_pChartDataView, ou::Colour::MediumTurquoise ) );
+
+    m_vEMA.emplace_back( std::make_shared<EMA>( 13, m_pChartDataView, ou::Colour::MediumTurquoise ) );
     m_vEMA.back().get()->SetName( "Ema 13s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 34, m_pChartDataView, ou::Colour::DarkOrchid ) );
+
+    m_vEMA.emplace_back( std::make_shared<EMA>( 34, m_pChartDataView, ou::Colour::DarkOrchid ) );
     m_vEMA.back().get()->SetName( "Ema 34s" );
-    m_vEMA.push_back( std::make_shared<EMA>( 89, m_pChartDataView, ou::Colour::DarkMagenta ) );
+
+    m_vEMA.emplace_back( std::make_shared<EMA>( 89, m_pChartDataView, ou::Colour::DarkMagenta ) );
     m_vEMA.back().get()->SetName( "Ema 89s" );
+
     std::for_each(
       m_vEMA.begin(), m_vEMA.end(),
       [&bar]( pEMA_t& p ){

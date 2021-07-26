@@ -289,17 +289,8 @@ private:
       //m_ceSD.SetColour( colour );
     }
 
-    EMA( const EMA& rhs )
-    : dblCoef1( rhs.dblCoef1 ), dblCoef2( rhs.dblCoef2 ), dblEmaLatest( rhs.dblEmaLatest ),
-      state( rhs.state ),
-      pChartDataView( rhs.pChartDataView )//, m_ceEma( std::move( rhs.m_ceEma ) )
-    {
-      pChartDataView->Add( 0, &m_ceEma ); // TODO: fix classes to handle a std::move
-      m_ceEma.SetColour( rhs.m_ceEma.GetColour() );
-    }
-
     ~EMA() {
-      pChartDataView->Remove( 0, &m_ceEma ); // required when moving EMA into vector
+      pChartDataView->Remove( 0, &m_ceEma ); // helps with non-deterministic cleanup
     }
 
     void SetName( const std::string& sName ) {
