@@ -593,12 +593,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
     // ManageStrategy::fConstructPortfolio_t
           [this,sUnderlying]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioOwner )->pPortfolio_t {
             pPortfolio_t pPortfolio;
-            bool bUseExistingPortfolio( true );
             mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioNew );
-            if ( m_mapStrategyCache.end() == iterStrategyCache ) {
-              bUseExistingPortfolio = false;
-            }
-            if ( bUseExistingPortfolio ) {
+            if ( m_mapStrategyCache.end() != iterStrategyCache ) {
               pPortfolio = iterStrategyCache->second.m_pPortfolio;
             }
             else {
