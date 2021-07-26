@@ -591,7 +591,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               return pPosition;
           },
     // ManageStrategy::fConstructPortfolio_t
-          [this,sUnderlying]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioOwner )->pPortfolio_t {
+          [this]( const idPortfolio_t& idPortfolioNew, const idPortfolio_t& idPortfolioOwner )->pPortfolio_t {
             pPortfolio_t pPortfolio;
             mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioNew );
             if ( m_mapStrategyCache.end() != iterStrategyCache ) {
@@ -676,8 +676,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           },
     // ManageStrategy::m_fAuthorizeSimple
           [this,sUnderlying]( const idPortfolio_t& idPortfolio, const std::string& sName, bool bExists )->bool{
-
-            // NOTE: at this point, idPortfolio has not yet been transformed into a portfolio instance
+            // generally used to authorize the underlying, irrespective of options in the combo
+            // TODO: create authorization based upon margin requirements of the combo
 
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
@@ -698,6 +698,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
               Strategy& strategy( *result.first->second );
 
               uws.pUnderlying->PopulateChartDataView( pChartDataView ); // add price & volume
+
+              // TODO: will need to move this to ConstructPortfolio, and then add an Authorized/Not-Authorized marker
 
               if ( !strategy.bChartActivated ) {
 

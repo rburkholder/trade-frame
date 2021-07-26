@@ -358,8 +358,21 @@ ManageStrategy::~ManageStrategy( ) {
 
 void ManageStrategy::Run() {
 
-  m_stateTrading = TSWaitForFirstTrade;
-  //std::cout << m_sUnderlying << " loading done." << std::endl;
+  assert( m_pWatchUnderlying );
+
+  pPortfolio_t pPortfolio = m_pCombo->GetPortfolio();
+  assert( pPortfolio );
+
+  // TODO: will need to create algorithm based upon margin requirements for the combo
+  bool bAuthorized = m_fAuthorizeSimple( pPortfolio->Id(), m_pWatchUnderlying->GetInstrument()->GetInstrumentName(), true ); // update count
+
+  if ( bAuthorized ) {
+    m_stateTrading = TSWaitForFirstTrade;
+    //std::cout << pPortfolio->Id() << " authorized and running." << std::endl;
+  }
+  else {
+    std::cout << "Start of " << pPortfolio->Id() << " not authorized." << std::endl;
+  }
 
 }
 
@@ -401,15 +414,21 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         const idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
         combo_t* pCombo;
-        if ( m_pCombo ) { // need to construct empty combo when first leg presented
+        if ( m_pCombo ) {
+          // use existing combo
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
         }
         else {
+           // need to construct empty combo when first leg presented
 
           m_pCombo = std::make_unique<combo_t>();
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
+
+          // NOTE: as portfolios are created only on validation, are all portfolios on the tree, but marked as authorized or not?
+          //    < not quite true, portolios may be loaded from previous session and need to be marked as pre-existing >
+          //   ie, maybe status markers:  loaded, pre-existing, authorized, not-authorized
 
           pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
           m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
@@ -419,16 +438,15 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
         m_pOptionRepository->Add( pOption );
 
-        std::cout << "set combo position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
+        std::cout << "set combo option position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
 
         // TODO: may need special call for colour for non-Open positions
         using LegNote = ou::tf::option::LegNote;
         const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
         if ( LegNote::State::Open == lnValues.m_state ) {
-          m_fAuthorizeSimple( idPortfolio, pInstrument->GetInstrumentName(), true ); // update count
         }
         else {
-          m_ixColour--;
+          m_ixColour--;  // TODO: look at this again, is this proper?
         }
       }
       break;
