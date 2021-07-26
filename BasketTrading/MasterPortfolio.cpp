@@ -746,9 +746,10 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
   if ( m_mapStrategyCache.end() == iter ) {}
   else {
     // iterate the strategy portfolios, load them and get started
-    StrategyCache& cache( iter->second );
-    assert( cache.m_mapPosition.empty() ); // looking at list of strategies, ie, portfolio of the strategy, no positions at this level
-    for ( mapPortfolio_t::value_type& vt: cache.m_mapPortfolio ) {
+    StrategyCache& cacheStrategy( iter->second );
+    assert( cacheStrategy.m_mapPosition.empty() ); // looking at list of strategies, ie, portfolio of the strategy, no positions at this level
+    assert( !cacheStrategy.m_bAccessed );
+    for ( mapPortfolio_t::value_type& vt: cacheStrategy.m_mapPortfolio ) {
 
       // TODO: need to determine if comboPortfolio is active
       const idPortfolio_t& idPortfolioCombo( vt.second->Id() );
@@ -759,16 +760,16 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
       pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, cacheCombo.m_pPortfolio ) );
 
       bool bActivated( false );
-      for ( mapPosition_t::value_type& vt: cache.m_mapPosition ) {
+      for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
         if ( vt.second->IsActive() ) {
           pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
           bActivated = true;
         }
       }
-      cache.m_bAccessed = true;
+      cacheStrategy.m_bAccessed = true;
       if ( bActivated ) {
-        pManageStrategy->Run();
         bConstructDefaultStrategy = false;
+        pManageStrategy->Run();
       }
     }
   }
