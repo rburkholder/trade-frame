@@ -357,23 +357,8 @@ ManageStrategy::~ManageStrategy( ) {
 }
 
 void ManageStrategy::Run() {
-
   assert( m_pWatchUnderlying );
-
-  pPortfolio_t pPortfolio = m_pCombo->GetPortfolio();
-  assert( pPortfolio );
-
-  // TODO: will need to create algorithm based upon margin requirements for the combo
-  bool bAuthorized = m_fAuthorizeSimple( pPortfolio->Id(), m_pWatchUnderlying->GetInstrument()->GetInstrumentName(), true ); // update count
-
-  if ( bAuthorized ) {
-    m_stateTrading = TSWaitForFirstTrade;
-    //std::cout << pPortfolio->Id() << " authorized and running." << std::endl;
-  }
-  else {
-    std::cout << "Start of " << pPortfolio->Id() << " not authorized." << std::endl;
-  }
-
+  m_stateTrading = TSWaitForFirstTrade;
 }
 
 // is this used currently?
@@ -430,8 +415,14 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           //    < not quite true, portolios may be loaded from previous session and need to be marked as pre-existing >
           //   ie, maybe status markers:  loaded, pre-existing, authorized, not-authorized
 
+          pInstrument_t pInstrumentUnderlying = m_pWatchUnderlying->GetInstrument();
+          const std::string& sNameUnderlying( pInstrumentUnderlying->GetInstrumentName() );
+
           pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
-          m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+          m_pChartDataView->SetNames( idPortfolio, sNameUnderlying );
+
+          // authorizes pre-existing strategy
+          bool bAuthorized = m_fAuthorizeSimple( idPortfolio, sNameUnderlying, true );
 
         }
 
