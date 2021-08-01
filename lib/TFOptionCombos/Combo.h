@@ -150,7 +150,7 @@ protected:
   mapLeg_t m_mapLeg;
 
   virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
-  //void OverwritePosition( pPosition_t );
+  virtual void Init( LegNote::Type ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 

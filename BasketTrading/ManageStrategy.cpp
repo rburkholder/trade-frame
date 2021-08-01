@@ -250,7 +250,6 @@ ManageStrategy::ManageStrategy(
   //m_eOptionState( EOptionState::Initial1 ),
 
   m_ixColour {},
-  m_bClosedItmLeg( false ), m_bAllowComboAdd( false ),
   m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
   m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
@@ -408,6 +407,10 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
            // need to construct empty combo when first leg presented
 
           m_pCombo = std::make_unique<combo_t>();
+
+          //const boost::gregorian::date dateBar( bar.DateTime().date() );
+          //ComboPrepare( dateBar );
+
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
 
@@ -496,6 +499,10 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 //      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
 
+      if ( m_pCombo ) { // persisted combo needs a start
+        ComboPrepare( trade.DateTime().date() );
+      }
+
       m_stateTrading = TSOptionEvaluation; // ready to trade
       }
       break;
@@ -579,6 +586,43 @@ void ManageStrategy::BuildPosition(
     });
 }
 
+void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
+
+  const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+  std::cout << "ManageStrategy::ComboPrepare: " << sUnderlying << std::endl;
+
+  m_pCombo->Prepare(
+    date, &m_mapChains,
+    [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
+      // TODO: maintain a local map for quick reference
+      m_fConstructOption(
+        sOptionName,
+        m_pWatchUnderlying->GetInstrument(),
+        [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
+          f( pOption );
+        }
+      );
+    },
+    [this]( pOption_t pOption ) { // fActivateOption_t
+      m_pOptionRepository->Add( pOption );
+    },
+    [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
+      combo_t* pCombo = reinterpret_cast<combo_t*>( p );
+      pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
+      using LegNote = ou::tf::option::LegNote;
+      const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+      pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
+      return pPosition;
+    },
+    [this]( pOption_t pOption ){ // fDeactivateOption
+      //assert( pWatch->GetInstrument()->IsOption() );
+      //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+      m_pOptionRepository->Remove( pOption );
+    }
+    );
+
+}
+
 /*
  * TODO:
  *   split out each option strategy
@@ -603,11 +647,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
       {
 
         if ( !m_pCombo ) {
-          m_bAllowComboAdd = true;
-          // also might see if combo is 'live' or not
-        }
-
-        if ( m_bAllowComboAdd ) {
 
           const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
@@ -631,12 +670,13 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
-                m_bAllowComboAdd = false;
-
                 std::cout << sUnderlying << ": bid/ask spread ok, opening positions (slope=" << m_dblSlope20DayUnderlying << ")" << std::endl;
 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );
+
+                ComboPrepare( dateBar );
+
                 combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
 
                 if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
@@ -661,7 +701,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
                 combo.PlaceOrder( ou::tf::OrderSide::Buy, 1 );
-                m_stateTrading = ETradingState::TSComboPrepare;
+                m_stateTrading = ETradingState::TSComboMonitor;
 
               } // m_fAuthorizeSimple
               else {
@@ -681,48 +721,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           }
         } // m_bAllowedComboAdd
         else {
-          m_stateTrading = ETradingState::TSComboPrepare;  // state machine needs to be confirmed
+          m_stateTrading = ETradingState::TSComboMonitor;  // state machine needs to be confirmed
         }
 
-      }
-      break;
-    case TSComboPrepare:
-      {
-        const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
-
-        std::cout << "TSComboPrepare: " << sUnderlying << std::endl;
-        const boost::gregorian::date dateBar( bar.DateTime().date() );
-
-        m_pCombo->Prepare(
-          dateBar, &m_mapChains,
-          [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
-            // TODO: maintain a local map for quick reference
-            m_fConstructOption(
-              sOptionName,
-              m_pWatchUnderlying->GetInstrument(),
-              [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
-                f( pOption );
-              }
-            );
-          },
-          [this]( pOption_t pOption ) { // fActivateOption_t
-            m_pOptionRepository->Add( pOption );
-          },
-          [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
-            combo_t* pCombo = reinterpret_cast<combo_t*>( p );
-            pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
-            using LegNote = ou::tf::option::LegNote;
-            const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-            pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
-            return pPosition;
-          },
-          [this]( pOption_t pOption ){ // fDeactivateOption
-            //assert( pWatch->GetInstrument()->IsOption() );
-            //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-            m_pOptionRepository->Remove( pOption );
-          }
-          ); // Prepare
-        m_stateTrading = ETradingState::TSComboMonitor;
       }
       break;
 //    case TSWaitForEntry:
@@ -1074,19 +1075,9 @@ void ManageStrategy::CloseItmLeg() {
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
       combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
-      m_bClosedItmLeg |= combo.CloseItmLeg( price );
+      combo.CloseItmLeg( price );
     }
   }
-}
-
-void ManageStrategy::AddCombo( bool bForced ) {
-  if ( bForced ) {
-    m_bAllowComboAdd = true;
-  }
-  else {
-    m_bAllowComboAdd = m_bClosedItmLeg;
-  }
-  m_bClosedItmLeg = false;
 }
 
 void ManageStrategy::CloseForProfits() {

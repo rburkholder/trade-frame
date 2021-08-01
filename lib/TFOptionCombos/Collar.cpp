@@ -60,7 +60,8 @@ Collar::Collar()
 : Combo() {}
 
 Collar::Collar( Collar&& rhs )
-: m_mapCollarLeg( std::move( rhs.m_mapCollarLeg ) )
+: m_mapCollarLeg( std::move( rhs.m_mapCollarLeg ) ),
+  m_mapInitTrackOption( std::move( rhs.m_mapInitTrackOption ) )
 {}
 
 Collar::~Collar() {
@@ -71,31 +72,53 @@ Collar::~Collar() {
 // called from Combo::Prepare
 void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
 
-  // this assert will need to go away if legs are built incrementally
-  assert( 4 == m_mapLeg.size() );  // need to verify this, based upon comment
-
   // TODO: check if position is active prior to Initialize
-  // TODO: call again upon a roll or other adjustment in any of the legs
-  //   therefore fix the leg which had the adjustment
   // TODO: so much happening, almost ready to start firing events on state change
-
-  mapCollarLeg_t::iterator iterMapCollarLeg;
+  // TODO: refactor date, pmapChains
 
   // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  // TODO: check that the leg is active
-  InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, nDaysToExpirySynthetic );
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::SynthLong,
+      [this,date,pmapChains](){
+        // TODO: check that the leg is active
+        InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, nDaysToExpirySynthetic );
+      }
+    )
+  );
 
   // === vertical/diagonal roll for profitable long protective when trend is in wrong direction
-  // TODO: check that the leg is active
-  InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::Protect,
+      [this,date,pmapChains](){
+        // TODO: check that the leg is active
+        InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
+      }
+    )
+  );
 
   // === close out at 0.10
-  // TODO: check that the leg is active
-  InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, nDaysToExpirySynthetic );
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::SynthShort,
+      [this,date,pmapChains](){
+        // TODO: check that the leg is active
+        InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, nDaysToExpirySynthetic );
+      }
+    )
+  );
 
   // === close out at 0.10
-  // TODO: check that the leg is active
-  InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, nDaysToExpiryFront );
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::Cover,
+      [this,date,pmapChains](){
+        // TODO: check that the leg is active
+        InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, nDaysToExpiryFront );
+      }
+    )
+  );
 
 }
 
@@ -193,6 +216,12 @@ void Collar::InitTrackShortOption(
     }
   );
 
+}
+
+void Collar::Init( LegNote::Type type ) {
+  mapInitTrackOption_t::iterator iter = m_mapInitTrackOption.find( type );
+  assert( m_mapInitTrackOption.end() != iter );
+  iter->second();
 }
 
 void Collar::CancelOrders() {

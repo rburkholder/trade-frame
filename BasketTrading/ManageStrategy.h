@@ -141,8 +141,6 @@ public:
   void CloseForProfits(); // sum(positions) > 0.10 profit (slippage, commissions), not CloseFarItm.
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
-  void AddCombo( bool bForced );
-
   double EmitInfo();
 
 protected:
@@ -156,7 +154,6 @@ private:
 //    TSWaitForFundsAllocation,  // flagged, reached only after first trade has arrived
     TSWaitForEntry, // start of equity trading
     TSOptionEvaluation, // start of option trading
-    TSComboPrepare,
     TSComboMonitor,
     TSMonitorLong, TSMonitorShort,
     TSNoMore
@@ -182,9 +179,6 @@ private:
   double m_dblSlope20DayUnderlying;
 
   pWatch_t m_pWatchUnderlying;
-
-  bool m_bClosedItmLeg; // when leg closed, allow new combo upon command
-  bool m_bAllowComboAdd; // allows state machine to open new combo
 
   double m_dblOpen;
 
@@ -339,6 +333,8 @@ private:
     ou::tf::OptionSide::enumOptionSide, double price,
     fBuildPositionCallBack_t&&
   );
+
+  void ComboPrepare( boost::gregorian::date );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

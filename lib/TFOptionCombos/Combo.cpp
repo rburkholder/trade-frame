@@ -95,6 +95,8 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     iter->second.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
+    Init( legValues.m_type );
+
     pWatch_t pWatch = pPositionNew->GetWatch();
     pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
     m_fActivateOption( pOption );
@@ -115,21 +117,6 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   m_fDeactivateOption( pOption );
 }
 
-/*
-void Combo::OverwritePosition( pPosition_t pPosition ) {
-
-  assert( pPosition );
-  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
-  LegNote ln( pPosition->Notes() );
-  LegNote::values_t legValues( ln.Values() );
-  mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
-  assert( m_mapLeg.end() != iter );
-  Leg& leg( iter->second );
-  leg.SetPosition( pPosition );
-  // Note: chart data is cleared
-
-}
-*/
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
