@@ -35,12 +35,16 @@ Combo::Combo( Combo&& rhs )
   m_mapLeg( std::move( rhs.m_mapLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
+  m_fActivateOption( std::move( rhs.m_fActivateOption ) ),
   m_fOpenPosition( std::move( rhs.m_fOpenPosition ) ),
-  m_fRemovePosition( std::move( rhs.m_fRemovePosition ) )
+  m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
 {
 }
 
 Combo::~Combo() {
+  for ( mapLeg_t::value_type& vt: m_mapLeg ) {
+    DeactivatePositionOption( vt.second.GetPosition() );
+  }
   m_mapLeg.clear();
 }
 
@@ -48,12 +52,14 @@ void Combo::Prepare(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
   fConstructOption_t&& fConstructOption,
+  fActivateOption_t&& fActivateOption,
   fOpenPosition_t&& fOpenPosition,
-  fRemovePosition_t&& fRemovePosition
+  fDeactivateOption_t&& fDeactivateOption
 ) {
   m_fConstructOption = std::move( fConstructOption );
+  m_fActivateOption = std::move( fActivateOption );
   m_fOpenPosition = std::move( fOpenPosition );
-  m_fRemovePosition = std::move( fRemovePosition );
+  m_fDeactivateOption = std::move( fDeactivateOption );
   Init( date, pmapChains );
 }
 
@@ -63,14 +69,14 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
 }
 
 // will over-write existing Leg, needs notes field in pPosition
-const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
+const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
 
-  assert( pPosition );
+  assert( pPositionNew );
   assert( pChartData );
-  assert( m_pPortfolio->Id() == pPosition->GetRow().idPortfolio );
+  assert( m_pPortfolio->Id() == pPositionNew->GetRow().idPortfolio );
 
   Leg leg;
-  const LegNote::values_t& legValues( leg.SetPosition( pPosition ) );
+  const LegNote::values_t& legValues( leg.SetPosition( pPositionNew ) );
 
   if ( LegNote::State::Open == legValues.m_state ) {
 
@@ -83,10 +89,15 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
       iter = result.first;
     }
     else {
-      iter->second = std::move( leg );
+      DeactivatePositionOption( iter->second.GetPosition() ); // old position
+      iter->second = std::move( leg ); // overwrite with new leg
     }
 
     iter->second.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
+
+    pWatch_t pWatch = pPositionNew->GetWatch();
+    pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+    m_fActivateOption( pOption );
 
     if ( State::Initializing == m_state ) {
       m_state = State::Positions;
@@ -96,6 +107,14 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPosition, pChartDataV
 
   return legValues;
 }
+
+void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
+  pWatch_t pWatch = pPosition->GetWatch();
+  assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
+  pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+  m_fDeactivateOption( pOption );
+}
+
 /*
 void Combo::OverwritePosition( pPosition_t pPosition ) {
 

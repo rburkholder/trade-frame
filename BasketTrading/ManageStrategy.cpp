@@ -426,9 +426,6 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
         }
 
-        pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-        m_pOptionRepository->Add( pOption );
-
         std::cout << "set combo option position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
 
         // TODO: may need special call for colour for non-Open positions
@@ -652,8 +649,6 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_pValidateOptions->Get(
                   [this,&idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // need Strategy specific naming
 
-                    m_pOptionRepository->Add( pOption );
-
                     ou::tf::option::LegNote::values_t lnValues;
                     combo_t::FillLegNote( ix, direction, lnValues );
                     ou::tf::option::LegNote ln( lnValues );
@@ -698,9 +693,9 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
         std::cout << "TSComboPrepare: " << sUnderlying << std::endl;
         const boost::gregorian::date dateBar( bar.DateTime().date() );
 
-        m_pCombo->Prepare( // fConstructOption_t?
+        m_pCombo->Prepare(
           dateBar, &m_mapChains,
-          [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){
+          [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
             // TODO: maintain a local map for quick reference
             m_fConstructOption(
               sOptionName,
@@ -710,19 +705,20 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               }
             );
           },
+          [this]( pOption_t pOption ) { // fActivateOption_t
+            m_pOptionRepository->Add( pOption );
+          },
           [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
             combo_t* pCombo = reinterpret_cast<combo_t*>( p );
-            m_pOptionRepository->Add( pOption );
             pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
             using LegNote = ou::tf::option::LegNote;
             const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
             pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
             return pPosition;
           },
-          [this]( pPosition_t pPosition ){ // fRemovePosition_t
-            pWatch_t pWatch = pPosition->GetWatch();
-            assert( pWatch->GetInstrument()->IsOption() );
-            pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+          [this]( pOption_t pOption ){ // fDeactivateOption
+            //assert( pWatch->GetInstrument()->IsOption() );
+            //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
             m_pOptionRepository->Remove( pOption );
           }
           ); // Prepare
