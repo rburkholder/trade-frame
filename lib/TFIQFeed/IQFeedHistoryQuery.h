@@ -249,7 +249,7 @@ namespace HistoryStructs {
 } // namespace HistoryStructs
 
 
-// T: CRTP inheriting class, U: type passed in for reference by inheriting class
+// T: CRTP inheriting class
 template <typename T>
 class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
