@@ -104,7 +104,6 @@ namespace HistoryStructs {
     long BidSize;
     long AskSize;
     char BasisForLast;  // 'C' normal, 'E' extended
-    
   };
 
   struct structInterval {
@@ -171,7 +170,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (unsigned short, Day)
   (unsigned short, Hour)
   (unsigned short, Minute)
-  (unsigned short, Second) 
+  (unsigned short, Second)
   (double, High)
   (double, Low)
   (double, Open)
@@ -205,12 +204,12 @@ namespace HistoryStructs {
   template <typename Iterator>
   struct DataPointParser: qi::grammar<Iterator, structTickDataPoint()> {
     DataPointParser(): DataPointParser::base_type(start) {
-      start %= 
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+      start %=
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
         >> ',' >> qi::double_ >> ',' >> qi::long_   >> ',' >> qi::ulong_
         >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::ulong_
-        >> ',' >> qi::long_   >> ',' >> qi::long_   >> ',' >> ascii::char_ 
+        >> ',' >> qi::long_   >> ',' >> qi::long_   >> ',' >> ascii::char_
         >> ','
         ;
     }
@@ -220,12 +219,12 @@ namespace HistoryStructs {
   template <typename Iterator>
   struct IntervalParser: qi::grammar<Iterator, structInterval()> {
     IntervalParser(): IntervalParser::base_type(start) {
-      start %= 
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+      start %=
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_ 
+        >> ',' >> qi::double_ >> ',' >> qi::double_
+        >> ',' >> qi::double_ >> ',' >> qi::double_
+        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_
         >> ','
         ;
     }
@@ -235,12 +234,12 @@ namespace HistoryStructs {
   template <typename Iterator>
   struct SummaryParser: qi::grammar<Iterator, structSummary()> {
     SummaryParser(): SummaryParser::base_type(start) {
-      start %= 
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+      start %=
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_ 
+        >> ',' >> qi::double_ >> ',' >> qi::double_
+        >> ',' >> qi::double_ >> ',' >> qi::double_
+        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_
         >> ','
         ;
     }
@@ -256,11 +255,11 @@ class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
 public:
 
-  typedef typename ou::Network<HistoryQuery<T> > inherited_t;
+  using inherited_t = typename ou::Network<HistoryQuery<T> >;
 
-  typedef typename ou::tf::iqfeed::HistoryStructs::structTickDataPoint structTickDataPoint;
-  typedef typename ou::tf::iqfeed::HistoryStructs::structInterval structInterval;
-  typedef typename ou::tf::iqfeed::HistoryStructs::structSummary structSummary;
+  using structTickDataPoint = ou::tf::iqfeed::HistoryStructs::structTickDataPoint;
+  using structInterval =  ou::tf::iqfeed::HistoryStructs::structInterval;
+  using structSummary =  ou::tf::iqfeed::HistoryStructs::structSummary;
 
   HistoryQuery( void );
   ~HistoryQuery( void );
@@ -282,8 +281,8 @@ public:
 
 protected:
 
-  typedef typename inherited_t::linebuffer_t linebuffer_t;
-  
+  using linebuffer_t = typename inherited_t::linebuffer_t;
+
   enum enumRetrievalState {  // activity in progress on this port
     RETRIEVE_IDLE = 0,  // no retrievals in progress
     RETRIEVE_HISTORY_DATAPOINTS,  // RequestID='D', data points are arriving
@@ -292,26 +291,26 @@ protected:
     RETRIEVE_DONE  // end marker arrived and is awaiting processing
   } m_stateRetrieval;
 
-  // called by CNetwork via CRTP
+  // called by Network via CRTP
   void OnNetworkConnected(void) {
-    //if ( &HistoryQuery<T>::OnHistoryConnected != static_cast<T*>( this )->OnHistoryConnected ) {
+    if ( &HistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
-    //}
+    }
   };
   void OnNetworkDisconnected(void) {
-    //if ( &HistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
+    if ( &HistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
       static_cast<T*>( this )->OnHistoryDisconnected();
-    //}
+    }
   };
   void OnNetworkError( size_t e ) {
-    //if ( &HistoryQuery<T>::OnHistoryError != &T::OnHistoryError ) {
+    if ( &HistoryQuery<T>::OnHistoryError != &T::OnHistoryError ) {
       static_cast<T*>( this )->OnHistoryError(e);
-    //}
+    }
   };
   void OnNetworkSendDone(void) {
-    //if ( &HistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
+    if ( &HistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
       static_cast<T*>( this )->OnHistorySendDone();
-    //}
+    }
   };
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
@@ -327,7 +326,7 @@ protected:
 
 private:
 
-  typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
+  using const_iterator_t = typename inherited_t::linebuffer_t::const_iterator;
 
   static const size_t m_nMillisecondsToSleep;
 
@@ -349,7 +348,7 @@ private:
 };
 
 template <typename T>
-HistoryQuery<T>::HistoryQuery( void ) 
+HistoryQuery<T>::HistoryQuery( void )
 : Network<HistoryQuery<T> >( "127.0.0.1", 9100 ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
@@ -380,7 +379,7 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
     case RETRIEVE_HISTORY_INTERVALS:
     case RETRIEVE_HISTORY_SUMMARY:
       ProcessHistoryRetrieval( buf );
-      //ReturnLineBuffer( wParam ); 
+      //ReturnLineBuffer( wParam );
       break;
     case RETRIEVE_DONE:
       // it is an error to land here
@@ -513,8 +512,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime( 
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
+          pDP->DateTime = ptime(
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
             static_cast<T*>( this )->OnHistoryTickDataPoint( pDP );
@@ -530,8 +529,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structInterval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime( 
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
+          pDP->DateTime = ptime(
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
             static_cast<T*>( this )->OnHistoryIntervalData( pDP );
@@ -547,8 +546,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structSummary* pDP = m_reposSummary.CheckOutL();
         b = parse( bgn, end, m_grammarSummary, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime( 
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
+          pDP->DateTime = ptime(
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
             static_cast<T*>( this )->OnHistorySummaryData( pDP );
