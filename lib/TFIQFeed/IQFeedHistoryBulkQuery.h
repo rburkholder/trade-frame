@@ -160,7 +160,7 @@ public:
     assert( n > 0 );
     m_nMaxSimultaneousQueries = n;
   };
-  size_t GetMaxSimultaneousQueries( void ) { return m_nMaxSimultaneousQueries; };
+  size_t GetMaxSimultaneousQueries( void ) const { return m_nMaxSimultaneousQueries; };
 
   // first of a series of requests to be built
   void DailyBars( size_t n );
@@ -169,7 +169,7 @@ public:
   void ReQueueBars( structResultBar* bars ) { bars->Clear(); m_reposBars.CheckInL( bars ); };
   void ReQueueTicks( structResultTicks* ticks ) { ticks->Clear(); m_reposTicks.CheckInL( ticks ); };
 
-  struct structQueryState;  // empty declaration for circular reference
+  struct structQueryState;  // forward reference
   //typedef typename HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
   typedef HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
 
@@ -297,6 +297,8 @@ when you are out of requests, you will get an error stating too many requests (t
 limit. Also, customers can monitor the limit themselves, and know their real limit without trial and error
 
 With all that said, the new limit for requests is 50/second (with one new credit added each 20ms).
+
+IQFeedHistoryQuery currently has: m_nMillisecondsToSleep = 75
 
 email: 12/23/20, 4:24 PM
 forum: http://forums.iqfeed.net/index.cfm?page=topic&topicID=5832
