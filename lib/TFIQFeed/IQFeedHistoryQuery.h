@@ -319,9 +319,9 @@ protected:
   void OnHistoryDisconnected( void ) {};
   void OnHistoryError( size_t e ) {};
   void OnHistorySendDone( void ) {};
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {};
-  void OnHistoryIntervalData( structInterval* pDP ) {};
-  void OnHistorySummaryData( structSummary* pDP ) {};
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) { ReQueueTickDataPoint( pDP ); };
+  void OnHistoryIntervalData( structInterval* pDP ) { ReQueueInterval( pDP ); };
+  void OnHistorySummaryData( structSummary* pDP ) { ReQueueSummary( pDP ); };
   void OnHistoryRequestDone( void ) {};
 
 private:
@@ -515,9 +515,9 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
+          //if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
             static_cast<T*>( this )->OnHistoryTickDataPoint( pDP );
-          }
+          //}
         }
         else {
           m_reposTickDataPoint.CheckInL( pDP );
@@ -532,9 +532,9 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
+          //if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
             static_cast<T*>( this )->OnHistoryIntervalData( pDP );
-          }
+          //}
         }
         else {
           m_reposInterval.CheckInL( pDP );
@@ -549,9 +549,9 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
+          //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
             static_cast<T*>( this )->OnHistorySummaryData( pDP );
-          }
+          //}
         }
         else {
           m_reposSummary.CheckInL( pDP );
@@ -582,7 +582,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           }
       }
       else {
-        throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval no endmessage");
+        throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval no endmessage");
       }
     }
   }
