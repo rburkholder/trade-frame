@@ -25,8 +25,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
+using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
 
 // day is supplied because IQFeed Market Symbol File doesn't have the day in for futures and futures options
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, boost::uint16_t day = 0 );  // equities and futures
