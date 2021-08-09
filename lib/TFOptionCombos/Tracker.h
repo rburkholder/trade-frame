@@ -19,9 +19,12 @@
  * Created on Novemeber 8, 2020, 11:41 AM
  */
 
- /*
-   Rolls a long call up or a long put down to take profit
-     => as a vertical or as a diagonal based upon chain provided
+/*
+  Rolls a long call up or a long put down to take profit
+    => as a vertical or as a diagonal based upon chain provided
+  On a long option, if it goes down and passes through $0.10, mark that strike.
+    when combo starts moving positive, buy in at $0.10 at a similar difference to see
+    if can make some more on the recovery
  */
 
 #pragma once
