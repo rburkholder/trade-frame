@@ -27,7 +27,10 @@
 #include <TFTrading/InstrumentManager.h>
 
 #include "MoneyManager.h"
+#include "DailyHistory.h"
 #include "MasterPortfolio.h"
+#include "TFIndicators/Pivots.h"
+#include "TFTimeSeries/TimeSeries.h"
 
 namespace {
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
@@ -273,81 +276,83 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
     std::cout << "MasterPortfolio: already loaded." << std::endl;
   }
   else {
-    if ( m_worker.joinable() ) m_worker.join(); // finish existing processing
-    m_worker = std::thread(
-      [this,dtLatestEod,bAddToList](){
 
-        std::for_each( // ensure overnight positions are represented in the new day
-          m_mapStrategyCache.begin(), m_mapStrategyCache.end(),
-          [this](mapStrategyCache_t::value_type& vt){
-            StrategyCache& cache( vt.second );
-            if ( !cache.m_bAccessed ) {
-              std::string idPortfolio( vt.first );
-              std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
-              if ( sTemp == sUnderlyingPortfolioPrefix ) {
-                std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
-                std::cout << vt.first << " (" << sUnderlying << ") being examined :";
-                bool bPositionActive( false );
-                std::for_each(
-                  cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
-                  [&bPositionActive](mapPosition_t::value_type& vt){
-                    bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
-                  }
-                );
-                if ( bPositionActive ) {
-                  std::cout << vt.first << " has position";
-                  m_setSymbols.insert( sUnderlying );
-                }
-                // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
-                //    no, should run this test on the baskets as well, then bring in underlying
-                //    at this point, this test will come up empty, as no positions in the underlying
-                //      just sub-portfolios for the strategies
-                std::cout << std::endl;
+    m_setSymbols.clear();
+
+    std::for_each( // ensure overnight positions are represented in the new day
+      m_mapStrategyCache.begin(), m_mapStrategyCache.end(),
+      [this](mapStrategyCache_t::value_type& vt){
+        StrategyCache& cache( vt.second );
+        if ( !cache.m_bAccessed ) {
+          std::string idPortfolio( vt.first );
+          std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
+          if ( sTemp == sUnderlyingPortfolioPrefix ) {
+            std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
+            std::cout << vt.first << " (" << sUnderlying << ") being examined :";
+            bool bPositionActive( false );
+            std::for_each(
+              cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
+              [&bPositionActive](mapPosition_t::value_type& vt){
+                bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
               }
+            );
+            if ( bPositionActive ) {
+              std::cout << vt.first << " has position";
+              m_setSymbols.insert( sUnderlying );
             }
+            // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
+            //    no, should run this test on the baskets as well, then bring in underlying
+            //    at this point, this test will come up empty, as no positions in the underlying
+            //      just sub-portfolios for the strategies
+            std::cout << std::endl;
           }
-        );
+        }
+      }
+    );
 
-        std::set<std::string> vDesired = { "SPY", "SLV", "GLD" }; // USB, XLP, XBI
+    m_setSymbols.insert( "SPY" );
+    //setSymbols.insert( "SLV" );
+    m_setSymbols.insert( "GLD" );
+    // add?  // USB, XLP, XBI
 
-        SymbolSelection selector(
-          dtLatestEod, m_setSymbols,
-          [this,bAddToList,&vDesired](const IIPivot& iip) {
-            if ( bAddToList ) {
-              if ( vDesired.end() != vDesired.find( iip.sName ) ) {
-                std::cout << "desired: " << iip.sName << std::endl;
-//              if (
-//                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
-//              )
-//              {
-                // see if we get wider swings with this
-//                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
-//                if ( 1.24 < dblSum ) {
-                  AddUnderlyingSymbol( iip );
-//                }
-              }
-            }
-            else { // simply emit statisitcs
-              std::cout
-                << iip.sName
-                << ": " << iip.dblPV
-                << "," << iip.dblProbabilityAboveAndUp
-                << "," << iip.dblProbabilityAboveAndDown
-                << "," << iip.dblProbabilityBelowAndUp
-                << "," << iip.dblProbabilityBelowAndDown
-                << std::endl;
-            }
-          } );
+    m_iterSymbols = m_setSymbols.begin();
 
-        std::cout << "Symbol Load finished, " << m_mapUnderlyingWithStrategies.size() << " symbols chosen" << std::endl;
-    } );
+    m_pHistory = std::make_unique<DailyHistory>(
+      [this](){ // fConnected_t
+        if ( m_setSymbols.end() != m_iterSymbols ) {
+          m_pHistory->Request( *m_iterSymbols, 200 );
+        }
+      },
+      [this]( const ou::tf::Bar& bar ){ // fBar_t
+        m_barsLoaded.Append( bar );
+      },
+      [this](){ // fDone_t
+
+        // TODO: reuse code in SymbolSelection.cpp to perform pivot, volatility summaries
+        const ou::tf::Bar& bar( m_barsLoaded.last() );
+        Statistics statistics;
+        statistics.setPivots.CalcPivots( bar );
+        AddUnderlyingSymbol( *m_iterSymbols, statistics );
+        std::cout << "added " << *m_iterSymbols << std::endl;
+
+        ++m_iterSymbols;
+        if ( m_setSymbols.end() == m_iterSymbols ) { // wrap up
+          m_pHistory->Disconnect();
+          std::cout << "Symbol Load finished, " << m_mapUnderlyingWithStrategies.size() << " symbols chosen" << std::endl;
+        }
+        else {  // onaother one
+          m_barsLoaded.Clear();
+          m_pHistory->Request( *m_iterSymbols, 200 );
+        }
+      }
+    );
+
+    m_pHistory->Connect(); // start the process
 
   }
 }
 
-void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
-
-  const std::string sUnderlying( iip.sName );
+void MasterPortfolio::AddUnderlyingSymbol( const std::string& sUnderlying, const Statistics& statistics ) {
 
   if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sUnderlying ) ) {
     std::cout << "NOTE: underlying " << sUnderlying << " already added" << std::endl;
@@ -355,7 +360,7 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
   else {
 
     auto result
-      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( iip ) ) ) );
+      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( statistics ) ) ) );
     assert( result.second );
 
     ConstructWatchUnderlying(
@@ -384,9 +389,16 @@ void MasterPortfolio::AddUnderlyingSymbol( const IIPivot& iip ) {
         }
 
         UnderlyingWithStrategies& uws( iter->second );
-        const IIPivot& iip( uws.iip );
+        const Statistics& statistics( uws.statistics );
+        using PS = ou::tf::PivotSet;
+        const ou::tf::PivotSet& ps( statistics.setPivots );
+
         uws.pUnderlying = std::make_unique<Underlying>( pWatchUnderlying, pPortfolioUnderlying );
-        uws.pUnderlying->SetPivots( iip.dblR2, iip.dblR1, iip.dblPV, iip.dblS1, iip.dblS2 );
+        uws.pUnderlying->SetPivots(
+          ps.GetPivotValue( PS::R2 ), ps.GetPivotValue( PS::R1 ),
+          ps.GetPivotValue( PS::PV ),
+          ps.GetPivotValue( PS::S1 ), ps.GetPivotValue( PS::S2 )
+          );
         uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
         m_pOptionEngine->RegisterWatch( pWatchUnderlying );
@@ -468,7 +480,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
   UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
   assert( !uws.pStrategyInWaiting );  // need empty location
 
-  const IIPivot& iip_( uws.iip );
+  //const IIPivot& iip_( uws.iip );
   const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
   namespace ph = std::placeholders;

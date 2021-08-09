@@ -1,3 +1,38 @@
+===== old selection method
+
+        SymbolSelection selector(
+          dtLatestEod, m_setSymbols,
+          [this,bAddToList,&vDesired](const IIPivot& iip) {
+            if ( bAddToList ) {
+              if ( vDesired.end() != vDesired.find( iip.sName ) ) {
+                std::cout << "desired: " << iip.sName << std::endl;
+//              if (
+//                   ( "NEM" != iip.sName ) // NEM has a non-standard strike price: 35.12, etc
+//              )
+//              {
+                // see if we get wider swings with this
+//                double dblSum = iip.dblProbabilityAboveAndUp + iip.dblProbabilityBelowAndDown;
+//                if ( 1.24 < dblSum ) {
+                  m_history.Request( iip.sName, 200 );
+                  AddUnderlyingSymbol( iip );
+//                }
+              }
+            }
+            else { // simply emit statisitcs
+              std::cout
+                << iip.sName
+                << ": " << iip.dblPV
+                << "," << iip.dblProbabilityAboveAndUp
+                << "," << iip.dblProbabilityAboveAndDown
+                << "," << iip.dblProbabilityBelowAndUp
+                << "," << iip.dblProbabilityBelowAndDown
+                << std::endl;
+            }
+          } );
+
+
+=====
+
 // misc code from other modules to build a different ManageStrategy
 
 /*

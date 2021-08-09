@@ -36,15 +36,16 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
-#include <TFInteractiveBrokers/IBTWS.h>
+#include <TFIndicators/Pivots.h>
 #include <TFIQFeed/IQFeedProvider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.h>
 
 #include "Underlying.h"
-#include "SymbolSelection.h"
 #include "ManageStrategy.h"
 
 class wxMenu;
+class DailyHistory;
 
 class MasterPortfolio {
   friend class boost::serialization::access;
@@ -144,6 +145,8 @@ private:
   wxTreeItemId m_idTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
 
+  std::unique_ptr<DailyHistory> m_pHistory;
+
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
@@ -165,20 +168,25 @@ private:
     void Set( pManageStrategy_t&& pManageStrategy_ ) { pManageStrategy = std::move( pManageStrategy_ ); }
   };
 
+  struct Statistics {
+    ou::tf::PivotSet setPivots;
+  };
+
   using pUnderlying_t = std::unique_ptr<Underlying>;
   using pStrategy_t = std::unique_ptr<Strategy>;
   using mapStrategy_t = std::map<idPortfolio_t,pStrategy_t>;
   using iterStrategy_t = mapStrategy_t::iterator;
 
   struct UnderlyingWithStrategies {
-    const IIPivot iip;
+    Statistics statistics;
     wxTreeItemId idTreeItem;
     pUnderlying_t pUnderlying;
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
 
-    UnderlyingWithStrategies( const IIPivot&& iip_ ): iip( std::move( iip_ ) ) {}
+    UnderlyingWithStrategies( const Statistics&& statistics_ )
+    : statistics( std::move( statistics_ ) ) {}
     void ClosePositions() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
@@ -244,8 +252,6 @@ private:
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
-  setSymbols_t m_setSymbols;
-
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
@@ -255,7 +261,13 @@ private:
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;
 
-  void AddUnderlyingSymbol( const IIPivot& ); // ManageStrategy, migrate to multiple
+  // used by Load
+  using setSymbols_t = std::set<std::string>;
+  setSymbols_t m_setSymbols;
+  setSymbols_t::const_iterator m_iterSymbols;
+  ou::tf::Bars m_barsLoaded;
+
+  void AddUnderlyingSymbol( const std::string& sUnderlying, const Statistics& );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );

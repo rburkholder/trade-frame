@@ -26,6 +26,7 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 set(
   file_h
     BasketTrading.h
+    DailyHistory.h
     LegSelected.h
     ManagePosition.h
     ManageStrategy.h
@@ -43,6 +44,7 @@ set(
 set(
   file_cpp
     BasketTrading.cpp
+    DailyHistory.cpp
     LegSelected.cpp
     ManagePosition.cpp
     ManageStrategy.cpp
