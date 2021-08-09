@@ -132,17 +132,22 @@ void PanelFinancialChart::CreateControls() {
   Bind( wxEVT_CLOSE_WINDOW, &PanelFinancialChart::OnClose, this );  // start close of windows and controls
 }
 
-  wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
+wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
+
+  wxTreeItemId id;
+
   if ( m_pTree->GetRootItem().IsOk() ) {
     throw std::runtime_error( "root item already exists" );
   }
   else {
     CustomItemData* cid = new CustomItemData( pChartDataView );
-    return m_pTree->AddRoot( sName, -1, -1, cid );
+    id = m_pTree->AddRoot( sName, -1, -1, cid );
+    m_pTree->Expand( id );
   }
+  return id;
 }
 
-  wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView, wxMenu* pMenuPppup ) {
+wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView, wxMenu* pMenuPppup ) {
   CustomItemData* cid = new CustomItemData( pChartDataView, pMenuPppup );
   wxTreeItemId id = m_pTree->AppendItem( parent, sName, -1, 01, cid );
   m_pTree->SortChildren( parent );
