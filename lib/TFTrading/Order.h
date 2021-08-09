@@ -210,7 +210,7 @@ public:
   OrderStatus::enumOrderStatus ReportExecution( const Execution &exec ); // called from OrderManager
   void SetCommission( double dblCommission );
   double GetCommission( void ) const{ return m_row.dblCommission; };
-  void ActOnError( OrderErrors::enumOrderErrors eError );
+  void ActOnError( OrderError::enumOrderError eError );
   boost::uint32_t GetQuanRemaining( void ) const { return m_row.nQuantityRemaining; };
   boost::uint32_t GetQuanOrdered( void ) const { return m_row.nOrderQuantity; };
   boost::uint32_t GetQuanFilled( void ) const { return m_row.nQuantityFilled; };

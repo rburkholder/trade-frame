@@ -183,16 +183,16 @@ OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) {
   return m_row.eOrderStatus;
 }
 
-void Order::ActOnError(OrderErrors::enumOrderErrors eError) {
+void Order::ActOnError(OrderError::enumOrderError eError) {
   switch( eError ) {
-    case OrderErrors::Cancelled:
+    case OrderError::Cancelled:
       m_row.eOrderStatus = OrderStatus::Cancelled;
       break;
-    case OrderErrors::Rejected:
-    case OrderErrors::InstrumentNotFound:
+    case OrderError::Rejected:
+    case OrderError::InstrumentNotFound:
       m_row.eOrderStatus = OrderStatus::Rejected;
       break;
-    case OrderErrors::NotCancellable:
+    case OrderError::NotCancellable:
       break;
   }
 }

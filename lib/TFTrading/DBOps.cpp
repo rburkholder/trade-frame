@@ -76,7 +76,7 @@ struct OptionsQueryParameters {
   }
   const ou::tf::keytypes::idInstrument_t& idInstrument;
   boost::uint16_t nYear, nMonth, nDay;
-  ou::tf::InstrumentType::enumInstrumentTypes eType;
+  ou::tf::InstrumentType::enumInstrumentType eType;
   OptionsQueryParameters( const ou::tf::keytypes::idInstrument_t& id, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
     : idInstrument( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( ou::tf::InstrumentType::Option ) {};
 };

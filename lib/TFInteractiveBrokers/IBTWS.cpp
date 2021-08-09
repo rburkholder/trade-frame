@@ -392,7 +392,7 @@ void IBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base clas
   }
 }
 
-// indexed with InstrumentType::enumInstrumentTypes
+// indexed with InstrumentType::enumInstrumentType
 const char *IBTWS::szSecurityType[] = {
   "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
 const char *IBTWS::szOrderType[] = {
@@ -1091,12 +1091,12 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
     //OutputDebugString( m_ss.str().c_str() );
   }
 
-  InstrumentType::enumInstrumentTypes it;
+  InstrumentType::enumInstrumentType it;
   bool bFound( false );
   // could use keyword lookup here
   for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
     if ( 0 == strcmp( szSecurityType[ ix ], contract.secType.c_str() ) ) {
-      it = static_cast<InstrumentType::enumInstrumentTypes>( ix );
+      it = static_cast<InstrumentType::enumInstrumentType>( ix );
       bFound = true;
       break;
     }

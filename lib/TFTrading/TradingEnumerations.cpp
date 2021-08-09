@@ -11,14 +11,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
 #include "TradingEnumerations.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace InstrumentType {
-  const char* Name[] = { "Unknown", "Stock", "Option", "Future", 
+  const char* Name[] = { "Unknown", "Stock", "Option", "Future",
     "FuturesOption", "Currency", "Index", "ETF", "Bond", "Commodity", "Metal",  };
 }
 

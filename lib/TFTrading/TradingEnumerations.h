@@ -12,15 +12,15 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <string>
-
 #pragma once
+
+#include <string>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
-  enum enumInstrumentTypes { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
+  enum enumInstrumentType { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
   extern const char* Name[];
 }
 
@@ -30,7 +30,7 @@ namespace OrderSide {
 }
 
 namespace OrderStatus {
-  enum enumOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted, 
+  enum enumOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted,
     Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
 }
 
@@ -49,8 +49,8 @@ namespace OrderType { // ib szOrderType depends upon order
   enum enumOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }
 
-namespace OrderErrors {
-  enum enumOrderErrors { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
+namespace OrderError {
+  enum enumOrderError { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
 namespace TimeInForce {
@@ -66,19 +66,12 @@ namespace Currency {
   extern const char* Name[];
 }
 
-namespace Trading {
-  static const std::string DbFileName = "TradeFrame.db4";
-}
-
   // * instrument dialog may be limited to a subset of instruments
   // * menu tree presents certain options depending upon what is allowed
   // * need to get this out of here for more generic use, maybe in the enumerations file
 namespace Allowed {
   enum enumInstrument { All, Basic, Options, FuturesOptions, None };
 }
-  
-  
-
 
 // currency pair    base/quote(aka counter)  - depicts how many units of the counter currency are needed to buy one unit of the base currency.
 // http://en.wikipedia.org/wiki/Currency_pair
@@ -87,4 +80,3 @@ namespace Allowed {
 
 } // namespace tf
 } // namespace ou
-

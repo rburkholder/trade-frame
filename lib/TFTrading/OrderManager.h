@@ -80,7 +80,7 @@ public:
   void ReportCancellation( idOrder_t nOrderId );  // feedback from provider
   void ReportExecution( idOrder_t orderId, const Execution& exec );  // feedback from provider
   void ReportCommission( idOrder_t nOrderId, double dblCommission );  // feedback from provider
-  void ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError );  // feedback from provider
+  void ReportErrors( idOrder_t nOrderId, OrderError::enumOrderError eError );  // feedback from provider
 //  ou::Delegate<const Order &> OnOrderCompleted;
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids

@@ -457,7 +457,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void OrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError) {
+void OrderManager::ReportErrors( idOrder_t nOrderId, OrderError::enumOrderError eError) {
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {

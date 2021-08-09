@@ -40,7 +40,7 @@ HDF5Attributes::HDF5Attributes( HDF5DataManager& dm, const std::string& sPath ):
   OpenDataSet( sPath );
 }
 
-HDF5Attributes::HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, InstrumentType::enumInstrumentTypes typeInst ): m_dm( dm ) {
+HDF5Attributes::HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, InstrumentType::enumInstrumentType typeInst ): m_dm( dm ) {
   OpenDataSet( sPath );
   SetInstrumentType( typeInst );
 }
@@ -70,15 +70,15 @@ void HDF5Attributes::CloseDataSet ( void ) {
   }
 }
 
-void HDF5Attributes::SetInstrumentType( InstrumentType::enumInstrumentTypes typeInstrument ) {
+void HDF5Attributes::SetInstrumentType( InstrumentType::enumInstrumentType typeInstrument ) {
   H5::DataSpace dspace;
   H5::Attribute attribute( m_pDataSet->createAttribute( szInstrumentType, H5::PredType::NATIVE_INT8, dspace ) );
   attribute.write( H5::PredType::NATIVE_INT8, &typeInstrument );
   attribute.close();
 }
 
-InstrumentType::enumInstrumentTypes HDF5Attributes::GetInstrumentType( void ) {
-  InstrumentType::enumInstrumentTypes typeInstrument;
+InstrumentType::enumInstrumentType HDF5Attributes::GetInstrumentType( void ) {
+  InstrumentType::enumInstrumentType typeInstrument;
   H5::Attribute attribute( m_pDataSet->openAttribute( szInstrumentType ) );
   attribute.read(H5::PredType::NATIVE_INT8, &typeInstrument );
   attribute.close();

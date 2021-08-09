@@ -44,7 +44,7 @@ public:
 
   pInstrument_t ConstructInstrument(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
-    InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
+    InstrumentType::enumInstrumentType type = InstrumentType::Unknown );
   pInstrument_t ConstructFuture(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
     boost::uint16_t year, boost::uint16_t month );
