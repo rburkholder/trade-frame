@@ -267,7 +267,7 @@ private:
   setSymbols_t::const_iterator m_iterSymbols;
   ou::tf::Bars m_barsLoaded;
 
-  void AddUnderlyingSymbol( const std::string& sUnderlying, const Statistics& );
+  void AddUnderlyingSymbol( const std::string& sTrdKey, const Statistics&, const ManageStrategy::Specs& );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );

@@ -96,7 +96,47 @@ public:
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;;
+  using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;
+
+  struct Specs {
+  public:
+    // underlying passed in as instrument with contract, as current?
+    //const std::string sTrdKey;
+    const std::string sIB;  // can this be obtained from the underlying via the alternate name?
+    std::uint16_t day;  // trd_t cannot supply this
+    double dblEntrySpreadFront;
+    double dblEntrySpreadBack;
+    int nDaysFront;
+    int nDaysBack;
+    // will need a timeframe ES is different from GC, etc.
+
+    Specs() // default
+    : day {},
+      dblEntrySpreadFront {}, dblEntrySpreadBack {},
+      nDaysFront {}, nDaysBack {}
+    {}
+    Specs( // normal equity
+      //const std::string& sTrdKey_,
+      double dblEntrySpreadFront_, double dblEntrySpreadBack_,
+      int nDaysFront_, int nDaysBack__)
+    : //sTrdKey( sTrdKey_ ),
+      dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
+      nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
+    {}
+    Specs( // future
+      //const std::string& sTrdKey_,
+      const std::string& sIB_,
+      std::uint16_t day_,
+      double dblEntrySpreadFront_, double dblEntrySpreadBack_,
+      int nDaysFront_, int nDaysBack__)
+    : //sTrdKey( sTrdKey_ ),
+      sIB( sIB_ ), day( day_ ),
+      dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
+      nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
+    {}
+  protected:
+  private:
+  };
 
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,

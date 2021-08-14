@@ -33,7 +33,15 @@
 #include "TFTimeSeries/TimeSeries.h"
 
 namespace {
+
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
+
+  using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
+  static const mapSpecs_t mapSpecs = {
+        { "GLD", { 0.10, 0.20, 3, 30 } },
+        { "SPY", { 0.10, 0.20, 3, 30 } }
+      };
+
 }
 
 MasterPortfolio::MasterPortfolio(
@@ -65,6 +73,7 @@ MasterPortfolio::MasterPortfolio(
   assert( pMasterPortfolio );
   assert( pExec );
   assert( pData1 );
+
 
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -310,9 +319,12 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       }
     );
 
+    m_setSymbols.insert( "GLD" );
     m_setSymbols.insert( "SPY" );
     //setSymbols.insert( "SLV" );
-    m_setSymbols.insert( "GLD" );
+    //m_setSymbols.insert( "QGCZ21" );
+    // QGC#    GOLD DECEMBER 2021
+    // QGCZ21  GOLD DECEMBER 2021
     // add?  // USB, XLP, XBI
 
     m_iterSymbols = m_setSymbols.begin();
@@ -328,12 +340,18 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       },
       [this](){ // fDone_t
 
-        // TODO: reuse code in SymbolSelection.cpp to perform pivot, volatility summaries
-        const ou::tf::Bar& bar( m_barsLoaded.last() );
-        Statistics statistics;
-        statistics.setPivots.CalcPivots( bar );
-        AddUnderlyingSymbol( *m_iterSymbols, statistics );
-        std::cout << "added " << *m_iterSymbols << std::endl;
+        mapSpecs_t::const_iterator iterSpecs = mapSpecs.find( *m_iterSymbols );
+        if ( mapSpecs.end() == iterSpecs ) {
+          std::cout << "could not find specs for: " << *m_iterSymbols << std::endl;
+        }
+        else {
+          // TODO: reuse code in SymbolSelection.cpp to perform pivot, volatility summaries
+          const ou::tf::Bar& bar( m_barsLoaded.last() );
+          Statistics statistics;
+          statistics.setPivots.CalcPivots( bar );
+          AddUnderlyingSymbol( *m_iterSymbols, statistics, iterSpecs->second );
+          std::cout << "added " << *m_iterSymbols << std::endl;
+        }
 
         ++m_iterSymbols;
         if ( m_setSymbols.end() == m_iterSymbols ) { // wrap up
@@ -352,19 +370,19 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::AddUnderlyingSymbol( const std::string& sUnderlying, const Statistics& statistics ) {
+void MasterPortfolio::AddUnderlyingSymbol( const std::string& sTrdKey, const Statistics& statistics, const ManageStrategy::Specs& specs ) {
 
-  if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sUnderlying ) ) {
-    std::cout << "NOTE: underlying " << sUnderlying << " already added" << std::endl;
+  if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sTrdKey ) ) {
+    std::cout << "NOTE: underlying " << sTrdKey << " already added" << std::endl;
   }
   else {
 
     auto result
-      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( statistics ) ) ) );
+      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sTrdKey, UnderlyingWithStrategies( std::move( statistics ) ) ) );
     assert( result.second );
 
     ConstructWatchUnderlying(
-      sUnderlying,
+      sTrdKey,
       [this,iter=result.first]( pWatch_t pWatchUnderlying ){
 
         const std::string& sUnderlying( pWatchUnderlying->GetInstrument()->GetInstrumentName() );
