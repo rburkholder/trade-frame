@@ -41,7 +41,7 @@ namespace tf { // TradeFrame
 class Instrument {
 public:
 
-  typedef keytypes::eidProvider_t eidProvider_t;  // from CProviderInterfaceBase in ProviderInterface.h
+  typedef keytypes::eidProvider_t eidProvider_t;  // from ProviderInterfaceBase in ProviderInterface.h
   typedef keytypes::idExchange_t idExchange_t;
   typedef keytypes::idInstrument_t idInstrument_t;
   typedef const idInstrument_t& idInstrument_cref;
@@ -49,8 +49,8 @@ public:
   typedef const pInstrument_t& pInstrument_cref;
 
   static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );
-  static std::string BuildGenericOptionName( const std::string& sUnderlying, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike );
-  static std::string BuildGenericFutureName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day );
+  static std::string BuildGenericOptionName( const std::string& sBaseName, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike );
+  static std::string BuildGenericFutureName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day );
 
   struct TableRowDef {
     template<class A>
