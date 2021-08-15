@@ -38,7 +38,7 @@ class MarketSymbol {
 public:
 
   enum enumSymbolClassifier: boost::uint32_t { // bits in bitmap of stored data record
-    Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
+    Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread,
       IEOption, Index, MktRpt, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
       _Count
   };
@@ -82,7 +82,7 @@ public:
       ou::db::Field( a, "hasoptions", bHasOptions );
     }
 
-    TableRowDef(void): dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), 
+    TableRowDef(void): dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ),
       sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ), nMultiplier( 1 ),
       eOptionSide( ou::tf::OptionSide::Unknown ) {};
 
@@ -91,10 +91,10 @@ public:
     /* serialization support */
 
     friend class boost::serialization::access;
-    
+
     template<class Archive>
     void serialize(Archive& ar,const unsigned int) {
-      ar 
+      ar
         & BOOST_SERIALIZATION_NVP(sSymbol)
         & BOOST_SERIALIZATION_NVP(sDescription)
         & BOOST_SERIALIZATION_NVP(sExchange)
@@ -106,7 +106,7 @@ public:
         & BOOST_SERIALIZATION_NVP(eOptionSide)
         & BOOST_SERIALIZATION_NVP(dblStrike)
         & BOOST_SERIALIZATION_NVP(nYear)
-        & BOOST_SERIALIZATION_NVP(nMonth) 
+        & BOOST_SERIALIZATION_NVP(nMonth)
         & BOOST_SERIALIZATION_NVP(nDay)
         & BOOST_SERIALIZATION_NVP(bFrontMonth)
         & BOOST_SERIALIZATION_NVP(bHasOptions)
@@ -129,10 +129,11 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
+  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, uint16_t day = 0 );
+
 protected:
 private:
   TableRowDef m_row;
-
 };
 
 } // namespace iqfeed
