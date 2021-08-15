@@ -190,7 +190,7 @@ void IBTWS::RequestContractDetails(
 // new and better
 // need fixups for std::move: https://github.com/rburkholder/trade-frame/commit/95aa00c9178467c2bcf53d10358b90a506092440
 void IBTWS::RequestContractDetails(
-                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument,
+                                   const std::string& sSymbolBaseName, const pInstrument_t pInstrument,
                                    fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone
 ) {
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception

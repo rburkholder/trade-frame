@@ -111,7 +111,7 @@ public:
   typedef std::function<void(const ContractDetails&, pInstrument_t&)> fOnContractDetail_t;
   typedef std::function<void(void)> fOnContractDetailDone_t;
 
-  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,
+  void RequestContractDetails( const std::string& sSymbolBaseName, const pInstrument_t,
                                                          fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
   void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
   void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t );
