@@ -50,7 +50,7 @@ bool AppBasketTrading::OnInit() {
   m_sStateFileName = "BasketTrading.state";
 
   // latest daily bar
-  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 7, 9 ), time_duration( 23, 59, 59 ) );
+  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 7, 30 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -168,7 +168,7 @@ bool AppBasketTrading::OnInit() {
   // build menu last
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   FrameMain::vpItems_t vItems;
-  vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  //vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
   vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
   vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
   vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );

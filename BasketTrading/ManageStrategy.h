@@ -100,9 +100,8 @@ public:
 
   struct Specs {
   public:
-    // underlying passed in as instrument with contract, as current?
-    //const std::string sTrdKey;
-    const std::string sIB;  // can this be obtained from the underlying via the alternate name?
+    const std::string sIQFeedBase; // base name for IQFeed to build name
+    const std::string sIB;         // base name for IB
     std::uint16_t day;  // trd_t cannot supply this
     double dblEntrySpreadFront;
     double dblEntrySpreadBack;
@@ -119,18 +118,18 @@ public:
       //const std::string& sTrdKey_,
       double dblEntrySpreadFront_, double dblEntrySpreadBack_,
       int nDaysFront_, int nDaysBack__)
-    : //sTrdKey( sTrdKey_ ),
+    : day {},
       dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
       nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
     {}
     Specs( // future
-      //const std::string& sTrdKey_,
+      const std::string& sIQFeed_,
       const std::string& sIB_,
       std::uint16_t day_,
       double dblEntrySpreadFront_, double dblEntrySpreadBack_,
       int nDaysFront_, int nDaysBack__)
     : //sTrdKey( sTrdKey_ ),
-      sIB( sIB_ ), day( day_ ),
+      sIQFeedBase( sIQFeed_ ), sIB( sIB_ ), day( day_ ),
       dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
       nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
     {}

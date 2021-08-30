@@ -29,20 +29,38 @@
 #include "MoneyManager.h"
 #include "DailyHistory.h"
 #include "MasterPortfolio.h"
+#include "TFIQFeed/MarketSymbol.h"
 #include "TFIndicators/Pivots.h"
 #include "TFTimeSeries/TimeSeries.h"
 
 namespace {
 
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
-
-  using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
-  static const mapSpecs_t mapSpecs = {
-        { "GLD", { 0.10, 0.20, 3, 30 } },
-        { "SPY", { 0.10, 0.20, 3, 30 } }
-      };
-
 }
+
+const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
+//        { "GLD", { 0.10, 0.20, 3, 30 } }
+//      , { "SPY", { 0.10, 0.20, 3, 30 } }
+       { "QGCZ21", { "QGC", "GC", 29, 0.10, 0.20, 5, 32 } }
+//      , { "@ESU21", { "@ES", "ES", 17, 0.10, 0.20, 6, 40 } }
+    };
+
+/*
+@ES#    E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
+
+@ESU21  E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
+@ESZ21  E-MINI S&P 500 DECEMBER 2021    CME     CMEMINI FUTURE
+@ESH22  E-MINI S&P 500 MARCH 2022       CME     CMEMINI FUTURE
+@ESM22  E-MINI S&P 500 JUNE 2022        CME     CMEMINI FUTURE
+@ESU22  E-MINI S&P 500 SEPTEMBER 2022   CME     CMEMINI FUTURE
+@ESZ22  E-MINI S&P 500 DECEMBER 2022    CME     CMEMINI FUTURE
+@ESH23  E-MINI S&P 500 MARCH 2023       CME     CMEMINI FUTURE
+@ESM23  E-MINI S&P 500 JUNE 2023        CME     CMEMINI FUTURE
+@ESU23  E-MINI S&P 500 SEPTEMBER 2023   CME     CMEMINI FUTURE
+@ESZ23  E-MINI S&P 500 DECEMBER 2023    CME     CMEMINI FUTURE
+@ESZ24  E-MINI S&P 500 DECEMBER 2024    CME     CMEMINI FUTURE
+@ESZ25  E-MINI S&P 500 DECEMBER 2025    CME     CMEMINI FUTURE
+*/
 
 MasterPortfolio::MasterPortfolio(
     pPortfolio_t pMasterPortfolio,
@@ -319,10 +337,12 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       }
     );
 
-    m_setSymbols.insert( "GLD" );
-    m_setSymbols.insert( "SPY" );
+    // TODO: need to remove this?  replaced by the statically defined map at the top of this file?
+
+    //m_setSymbols.insert( "GLD" );
+    //m_setSymbols.insert( "SPY" );
     //setSymbols.insert( "SLV" );
-    //m_setSymbols.insert( "QGCZ21" );
+    m_setSymbols.insert( "QGCZ21" );
     // QGC#    GOLD DECEMBER 2021
     // QGCZ21  GOLD DECEMBER 2021
     // add?  // USB, XLP, XBI
@@ -340,17 +360,20 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       },
       [this](){ // fDone_t
 
-        mapSpecs_t::const_iterator iterSpecs = mapSpecs.find( *m_iterSymbols );
-        if ( mapSpecs.end() == iterSpecs ) {
-          std::cout << "could not find specs for: " << *m_iterSymbols << std::endl;
+        const std::string& sIQFeedSymbolName( *m_iterSymbols );
+
+        mapSpecs_t::const_iterator iterSpecs = m_mapSpecs.find( sIQFeedSymbolName );
+
+        if ( m_mapSpecs.end() == iterSpecs ) {
+          std::cout << "could not find specs for: " << sIQFeedSymbolName << std::endl;
         }
         else {
           // TODO: reuse code in SymbolSelection.cpp to perform pivot, volatility summaries
           const ou::tf::Bar& bar( m_barsLoaded.last() );
           Statistics statistics;
           statistics.setPivots.CalcPivots( bar );
-          AddUnderlyingSymbol( *m_iterSymbols, statistics, iterSpecs->second );
-          std::cout << "added " << *m_iterSymbols << std::endl;
+          AddUnderlyingSymbol( *iterSpecs, statistics );
+          std::cout << "added " << sIQFeedSymbolName << std::endl;
         }
 
         ++m_iterSymbols;
@@ -370,19 +393,26 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
   }
 }
 
-void MasterPortfolio::AddUnderlyingSymbol( const std::string& sTrdKey, const Statistics& statistics, const ManageStrategy::Specs& specs ) {
+void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs, const Statistics& statistics ) {
 
-  if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sTrdKey ) ) {
-    std::cout << "NOTE: underlying " << sTrdKey << " already added" << std::endl;
+  const ManageStrategy::Specs& specs( vtSpecs.second );
+
+  const trd_t& trd( m_fGetTableRowDef( vtSpecs.first ) ); // TODO: check for errors
+
+  const std::string sGenericName
+    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( 0 == specs.sIQFeedBase.size() ? vtSpecs.first : specs.sIQFeedBase, trd, specs.day );
+
+  if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sGenericName ) ) {
+    std::cout << "NOTE: underlying " << sGenericName << " already added" << std::endl;
   }
   else {
 
     auto result
-      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sTrdKey, UnderlyingWithStrategies( std::move( statistics ) ) ) );
+      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sGenericName, UnderlyingWithStrategies( std::move( statistics ) ) ) );
     assert( result.second );
 
     ConstructWatchUnderlying(
-      sTrdKey,
+      sGenericName, 0 == specs.sIB.size() ? sGenericName : specs.sIB, trd, specs.day,
       [this,iter=result.first]( pWatch_t pWatchUnderlying ){
 
         const std::string& sUnderlying( pWatchUnderlying->GetInstrument()->GetInstrumentName() );
@@ -445,20 +475,18 @@ void MasterPortfolio::AddUnderlyingSymbol( const std::string& sTrdKey, const Sta
   }
 }
 
-void MasterPortfolio::ConstructWatchUnderlying( const std::string& sIQFeedEquityName, fConstructedWatch_t&& fWatch ) {
-
-  const trd_t& trd( m_fGetTableRowDef( sIQFeedEquityName ) ); // TODO: check for errors
+void MasterPortfolio::ConstructWatchUnderlying( const std::string& sGenericName, const std::string& sIB, const trd_t& trd, std::uint16_t day, fConstructedWatch_t&& fWatch ) {
 
   bool bNeedContract( false );
   pInstrument_t pInstrumentUnderlying;
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
 
-  if ( im.Exists( sIQFeedEquityName, pInstrumentUnderlying ) ) {
-    // pEquityInstrument has been populated
+  // TODO: use the generic name, then alternate names become available
+  if ( im.Exists( sGenericName, pInstrumentUnderlying ) ) {
     assert( 0 != pInstrumentUnderlying->GetContract() );
   }
   else {
-    pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sIQFeedEquityName, trd );  // builds equity option, may not build futures option
+    pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, day );
     bNeedContract = true;
   }
 
@@ -474,7 +502,8 @@ void MasterPortfolio::ConstructWatchUnderlying( const std::string& sIQFeedEquity
     }
     else {
         m_pIB->RequestContractDetails(
-          sIQFeedEquityName, pInstrumentUnderlying,  // TOOD: for futures, may need different name for IB
+          sIB,  // needs to be the IB base name
+          pInstrumentUnderlying,  // this is a filled-in, prepared instrument
           [this,pWatch,fWatch](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
             // the contract details fill in the contract in the instrument, which can then be passed back to the caller
             //   as a fully defined, registered instrument

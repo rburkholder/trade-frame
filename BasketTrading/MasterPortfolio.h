@@ -267,10 +267,13 @@ private:
   setSymbols_t::const_iterator m_iterSymbols;
   ou::tf::Bars m_barsLoaded;
 
-  void AddUnderlyingSymbol( const std::string& sTrdKey, const Statistics&, const ManageStrategy::Specs& );
+  using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
+  static const mapSpecs_t m_mapSpecs;
+
+  void AddUnderlyingSymbol( const mapSpecs_t::value_type&, const Statistics& );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
-  void ConstructWatchUnderlying( const std::string&, fConstructedWatch_t&& );
+  void ConstructWatchUnderlying( const std::string& sGenericName, const std::string& sIB, const trd_t&, std::uint16_t day, fConstructedWatch_t&& );
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
   void StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& );
 
