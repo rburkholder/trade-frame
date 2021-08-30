@@ -33,7 +33,11 @@ Aggregate::Aggregate(
 }
 
 void Aggregate::LoadChains( fGatherOptionDefinitions_t& f ) {
-  ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, m_pWatchUnderlying->GetInstrument()->GetInstrumentName(), f );
+  ou::tf::option::PopulateMap<mapChains_t>(
+    m_mapChains,
+    m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
+    f
+    );
 }
 
 } // namespace option

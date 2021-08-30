@@ -324,7 +324,11 @@ ManageStrategy::ManageStrategy(
 
     // collect option chains for the underlying
     // TODO: this will be passed in
-    ou::tf::option::PopulateMap<mapChains_t>( m_mapChains, pWatchUnderlying->GetInstrument()->GetInstrumentName(), fGatherOptionDefinitions );
+    ou::tf::option::PopulateMap<mapChains_t>(
+      m_mapChains,
+      pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
+      fGatherOptionDefinitions
+      );
 
     assert( 0 != m_mapChains.size() );
 
