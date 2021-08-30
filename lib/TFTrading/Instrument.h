@@ -212,7 +212,7 @@ public:
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
 //  idInstrument_cref GetUnderlyingName( void );
 
-  idInstrument_cref GetInstrumentName( eidProvider_t id );
+  idInstrument_cref GetInstrumentName( eidProvider_t id ) const;
 //  idInstrument_cref GetUnderlyingName( eidProvider_t id );
 
   void SetAlternateName( eidProvider_t, idInstrument_cref );

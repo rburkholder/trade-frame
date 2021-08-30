@@ -243,8 +243,8 @@ void Instrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   }
 }
 
-Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) {
-  mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
+Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) const {
+  mapAlternateNames_t::const_iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() != iter ) {
     //throw std::runtime_error( "Instrument::GetAlternateName no alternate name" );
     return iter->second;
