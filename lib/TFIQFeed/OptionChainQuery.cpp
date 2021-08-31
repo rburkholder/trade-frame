@@ -12,25 +12,137 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <sstream>
+
+#include <boost/spirit/include/qi.hpp>
+
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
 
 #include "OptionChainQuery.h"
 
 // TODO:  use as template:  std::unique_ptr<DailyHistory> m_pHistory;
 
+BOOST_FUSION_ADAPT_STRUCT(
+  ou::tf::iqfeed::OptionChainQuery::OptionChain,
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vPut)
+  )
+
+namespace qi = boost::spirit::qi;
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+namespace {
+
+  using const_iterator_t = ou::Network<OptionChainQuery>::linebuffer_t::const_iterator;
+
+  qi::rule<const_iterator_t> ruleEndMsg { qi::lit( "!ENDMSG!" ) };
+  qi::rule<const_iterator_t> ruleErrorInvalidSymbol { qi::lit( "E,Invalid symbol" ) };
+
+}
+
+using vSymbol_t = OptionChainQuery::vSymbol_t;
+using OptionChain = OptionChainQuery::OptionChain;
+
+template<typename Iterator>
+struct FutureOptionChainParser: qi::grammar<Iterator, OptionChain()> {
+
+  FutureOptionChainParser(): FutureOptionChainParser::base_type( start ) {
+
+    // TODO: need to process !ENDMSG!
+    // TODO: need to process error message
+
+    symbol %= (+(qi::char_ - qi::char_(','))) >> qi::lit(',');
+    options %= +symbol;
+    start %= options >> qi::lit(':') >> options >> qi::eol;
+
+  }
+
+  qi::rule<Iterator, std::string()> symbol;
+  qi::rule<Iterator, vSymbol_t()> options;
+  qi::rule<Iterator, OptionChain()> start;
+
+};
+
 // http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
 
-OptionChainQuery::OptionChainQuery( fSymbol_t&& fSymbol )
+OptionChainQuery::OptionChainQuery(
+  fConnected_t&& fConnected, fOptionChain_t&& fOptionChain, fDone_t&& fDone
+)
 : Network<OptionChainQuery>( "127.0.0.1", 9100 ),
-  m_fSymbol( std::move( fSymbol ) )
+  m_fConnected( std::move( fConnected ) ),
+  m_fOptionChain( std::move( fOptionChain ) ),
+  m_fDone( std::move( fDone ) )
 {
+  assert( m_fConnected );
+  assert( m_fOptionChain );
+  assert( m_fDone );
 }
 
 OptionChainQuery::~OptionChainQuery(void) {
+}
+
+void OptionChainQuery::Connect() {
+  ou::Network<OptionChainQuery>::Connect();
+}
+
+void OptionChainQuery::OnNetworkConnected() {
+  //std::cout << "OnHistoryConnected" << std::endl;
+  m_fConnected();
+};
+
+void OptionChainQuery::Disconnect() {
+  ou::Network<OptionChainQuery>::Disconnect();
+}
+
+void OptionChainQuery::OnNetworkDisconnected() {
+
+}
+
+void OptionChainQuery::OnNetworkError( size_t e ) {
+
+}
+
+void OptionChainQuery::OnNetworkSendDone() {
+
+}
+
+void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
+
+  using const_iterator_t = linebuffer_t::const_iterator;
+
+  const_iterator_t end = (*buffer).end();
+
+  FutureOptionChainParser<const_iterator_t> grammarFutureOptionChain;
+
+  OptionChain chain;
+  bool bOk;
+
+  {
+    const_iterator_t bgn = (*buffer).begin();
+    bOk = parse( bgn, end, grammarFutureOptionChain, chain );
+  }
+
+  if ( bOk ) {
+    m_fOptionChain( chain );
+  }
+  else {
+    const_iterator_t bgn = (*buffer).begin();
+    if ( parse( bgn, end, ruleEndMsg ) ) {
+      m_fDone( true );
+    }
+    else {
+      m_fDone( false );
+      //if ( parse( bgn, end, ruleErrorInvalidSymbol ) ) {
+    }
+  }
+
+  GiveBackBuffer( buffer );
 }
 
 void OptionChainQuery::QueryFutureChain(
@@ -99,55 +211,6 @@ void OptionChainQuery::QueryEquityOptionChain(
     << sRequestId
     << "\n";
   this->Send( ss.str().c_str() );
-}
-
-void OptionChainQuery::AddOptionSymbol( const char* cs, unsigned short cnt ) {
-  const std::string s( cs, cnt );
-  m_fSymbol( s );
-}
-
-void OptionChainQuery::OnNewResponse( const char* szLine ) {
-  if ( !true ) {
-    if ( 0 == strcmp( szLine, "!ENDMSG!" ) ) {
-    }
-  }
-  else {
-    char *szSubStr = (char*) szLine;
-    char *ixLine = (char*) szLine;
-    unsigned short cnt = 0;
-
-    while ( 0 != *ixLine ) {
-      if ( ':' == *ixLine ) {
-        if ( 0 != cnt ) {
-          AddOptionSymbol( szSubStr, cnt );
-          cnt = 0;
-        }
-        // switch from calls to puts
-      }
-      else {
-        if ( ',' == *ixLine ) {
-          if ( 0 != cnt ) {
-            AddOptionSymbol( szSubStr, cnt );
-            cnt = 0;
-          }
-        }
-        else {
-          // add to outstanding string
-          if ( 0 == cnt ) {
-            szSubStr = ixLine;
-          }
-          cnt++;
-        }
-      }
-      ixLine++;
-    }
-    if ( 0 != cnt ) {
-      if ( ' ' != *szSubStr ) {
-        AddOptionSymbol( szSubStr, cnt );
-        cnt = 0;
-      }
-    }
-  }
 }
 
 } // namespace iqfeed
