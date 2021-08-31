@@ -255,8 +255,6 @@ class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
 public:
 
-  using inherited_t = typename ou::Network<HistoryQuery<T> >;
-
   using structTickDataPoint = ou::tf::iqfeed::HistoryStructs::structTickDataPoint;
   using structInterval =  ou::tf::iqfeed::HistoryStructs::structInterval;
   using structSummary =  ou::tf::iqfeed::HistoryStructs::structSummary;
@@ -281,6 +279,7 @@ public:
 
 protected:
 
+  using inherited_t = typename ou::Network<HistoryQuery<T> >;
   using linebuffer_t = typename inherited_t::linebuffer_t;
 
   enum enumRetrievalState {  // activity in progress on this port
