@@ -27,26 +27,26 @@ namespace iqfeed { // IQFeed
 class OptionChainQuery
   : public ou::Network<OptionChainQuery> {
 public:
-  
-  enum Month { jan='F', feb='G', mar='H', apr='J', may='K', jun='M', 
+
+  enum Month { jan='F', feb='G', mar='H', apr='J', may='K', jun='M',
                jul='N', aug='Q', sep='U', oct='V', nov='X', dec='Z' };
   enum Side { put='p', call='c' };
-  
+
   // function will be called within alternate thread
   typedef std::function<void(const std::string&)> fSymbol_t;
 
-  OptionChainQuery( fSymbol_t& );
+  OptionChainQuery( fSymbol_t&& );
   virtual ~OptionChainQuery( void );
 
   void QueryFutureChain(
-    const std::string& sSymbol, 
+    const std::string& sSymbol,
     const std::string& sMonthCodes,  // see above
     const std::string& sYears, // last digit
     const std::string& sNearMonths, // 0..4
     const std::string& sRequestId
     );
   void QueryFutureOptionChain(
-    const std::string& sSymbol, 
+    const std::string& sSymbol,
     const std::string& sSide,
     const std::string& sMonthCodes,  // see above
     const std::string& sYears, // last digit
@@ -54,7 +54,7 @@ public:
     const std::string& sRequestId
     );
   void QueryEquityOptionChain(
-    const std::string& sSymbol, 
+    const std::string& sSymbol,
     const std::string& sSide,
     const std::string& sMonthCodes,  // see above
     const std::string& sNearMonths, // 0..4
@@ -68,7 +68,7 @@ protected:
   virtual void OnNewResponse( const char *szLine );
   void AddOptionSymbol( const char *s, unsigned short cnt );
 private:
-  fSymbol_t& m_fSymbol;
+  fSymbol_t m_fSymbol;
 };
 
 } // namespace iqfeed
