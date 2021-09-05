@@ -306,36 +306,31 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
     m_setSymbols.clear();
 
-    std::for_each( // ensure overnight positions are represented in the new day
-      m_mapStrategyCache.begin(), m_mapStrategyCache.end(),
-      [this](mapStrategyCache_t::value_type& vt){
-        StrategyCache& cache( vt.second );
-        if ( !cache.m_bAccessed ) {
-          std::string idPortfolio( vt.first );
-          std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
-          if ( sTemp == sUnderlyingPortfolioPrefix ) {
-            std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
-            std::cout << vt.first << " (" << sUnderlying << ") being examined :";
-            bool bPositionActive( false );
-            std::for_each(
-              cache.m_mapPosition.begin(), cache.m_mapPosition.end(),
-              [&bPositionActive](mapPosition_t::value_type& vt){
-                bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
-              }
-            );
-            if ( bPositionActive ) {
-              std::cout << vt.first << " has position";
-              m_setSymbols.insert( sUnderlying );
-            }
-            // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
-            //    no, should run this test on the baskets as well, then bring in underlying
-            //    at this point, this test will come up empty, as no positions in the underlying
-            //      just sub-portfolios for the strategies
-            std::cout << std::endl;
+    // ensure overnight positions are represented in the new day
+    for ( const mapStrategyCache_t::value_type& vt: m_mapStrategyCache ) {
+      const StrategyCache& cache( vt.second );
+      if ( !cache.m_bAccessed ) {
+        const std::string idPortfolio( vt.first );
+        const std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
+        if ( sTemp == sUnderlyingPortfolioPrefix ) {
+          const std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
+          std::cout << vt.first << " (" << sUnderlying << ") being examined :";
+          bool bPositionActive( false );
+          for ( const mapPosition_t::value_type& vt: cache.m_mapPosition ) {
+            bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
           }
+          if ( bPositionActive ) {
+            std::cout << vt.first << " has position";
+            m_setSymbols.insert( sUnderlying );
+          }
+          // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
+          //    no, should run this test on the baskets as well, then bring in underlying
+          //    at this point, this test will come up empty, as no positions in the underlying
+          //      just sub-portfolios for the strategies
+          std::cout << std::endl;
         }
       }
-    );
+    }
 
     // TODO: need to remove this?  replaced by the statically defined map at the top of this file?
 
