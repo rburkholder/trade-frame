@@ -42,16 +42,16 @@ void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
 
   Fundamentals& fundamentals( *m_pFundamentals );
 
-  fundamentals.sCompanyName = pMsg->Field( IQFFundamentalMessage::FName );
+  fundamentals.sCompanyName = pMsg->Field( IQFFundamentalMessage::FCompanyName );
   fundamentals.sExchangeRoot = pMsg->Field( IQFFundamentalMessage::FExchangeRoot );
   fundamentals.sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
   fundamentals.nPrecision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
   fundamentals.nContractSize = pMsg->Integer( IQFFundamentalMessage::FContractSize );
   fundamentals.nAverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
-  fundamentals.nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest );
+  //fundamentals.nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest ); // TODO: not in fundamental
   fundamentals.dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
   fundamentals.dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
-  fundamentals.dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPE );
+  fundamentals.dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPriceEarnings );
   fundamentals.dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
   fundamentals.dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
   fundamentals.dblDividendAmount = pMsg->Double( IQFFundamentalMessage::FDivAmt );
