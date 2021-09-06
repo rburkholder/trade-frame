@@ -26,6 +26,7 @@ namespace tf { // TradeFrame
 class AlternateInstrumentName {
 public:
   struct TableRowDef {
+
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "providerid", idProvider ); // part of unique key
@@ -46,12 +47,10 @@ public:
     template<class A>
     void Fields( A& a ) {
       TableRowDef::Fields( a );
-      ou::db::Key( a, "providerid" );  // unique key part
-      //ou::db::Key( a, "instrumentid" );
-      ou::db::Key( a, "alternateid" ); // unique key part
+      ou::db::Key( a, "providerid" );  // unique key part 1
+      ou::db::Key( a, "alternateid" ); // unique key part 2
       ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
-      //ou::db::Constraint( a, "alternateid", tablenames::sInstrument, "instrumentid" );  // don't think this one makes sense
-      // set idInstrument as secondary index
+      // TODO: set idInstrument as secondary index?
     }
   };
 
