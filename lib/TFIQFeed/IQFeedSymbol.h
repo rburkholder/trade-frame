@@ -21,6 +21,7 @@
 
 #include <TFTrading/Symbol.h>
 
+#include "Fundamentals.h"
 #include "IQFeedMessages.h"
 
 namespace ou { // One Unified
@@ -38,38 +39,6 @@ public:
 
   // Public for RowKeyValues.  Pass in a structure sometime.
   // Public for VuChartArmsIntraDay.  Pass in structure sometime.
-  struct Fundamentals {
-    std::string sCompanyName;
-    std::string sExchangeRoot; // usable for IB?
-    std::string sOptionRoots;
-    int nPrecision;
-    int nContractSize;
-    int nAverageVolume;
-    int nShortInterest;
-    double dblHistoricalVolatility;
-    double dblStrikePrice;
-    double dblPriceEarnings;
-    double dbl52WkHi;
-    double dbl52WkLo;
-    double dblDividendAmount;
-    double dblDividendRate;
-    double dblDividendYield;
-    double dblTickSize;
-    date dateExDividend;
-    date dateExpiration;
-    boost::posix_time::time_duration timeSessionOpen; // futures, futures options
-    boost::posix_time::time_duration timeSessionClose; // futures, futures options
-    Fundamentals()
-    : nAverageVolume {}, nPrecision {}, nShortInterest {},
-      dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
-      dbl52WkHi {}, dbl52WkLo {},
-      dblDividendAmount {}, dblDividendRate {}, dblDividendYield {},
-      dblTickSize {},
-      dateExDividend( boost::posix_time::not_a_date_time ),
-      dateExpiration( boost::posix_time::not_a_date_time )
-      {}
-  };
-
   // Update/Summary
   struct Summary {
     ptime dtLastTrade;

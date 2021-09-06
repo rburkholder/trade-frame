@@ -42,7 +42,7 @@ public:
   using pInstrument_t = Instrument::pInstrument_t;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
-  using Fundamentals = ou::tf::IQFeedSymbol::Fundamentals;
+  using Fundamentals = ou::tf::Fundamentals;
 
   struct Summary {
     int nOpenInterest;
