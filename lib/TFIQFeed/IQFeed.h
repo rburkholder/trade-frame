@@ -41,8 +41,8 @@ class IQFeed: public ou::Network<IQFeed<T> > {
   friend ou::Network<IQFeed<T> >;
 public:
 
-  typedef typename ou::Network<IQFeed<T> > inherited_t;
-  typedef typename inherited_t::linebuffer_t linebuffer_t;
+  using inherited_t = typename ou::Network<IQFeed<T> >;
+  using linebuffer_t = typename inherited_t::linebuffer_t;
 
   IQFeed();
   virtual ~IQFeed();
