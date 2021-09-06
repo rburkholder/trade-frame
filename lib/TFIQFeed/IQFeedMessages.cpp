@@ -123,14 +123,14 @@ IQFSummaryMessage::~IQFSummaryMessage() {
 IQFTimeMessage::IQFTimeMessage( void )
 : IQFBaseMessage<IQFTimeMessage>(),
   m_bMarketIsOpen( false ),
-  m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
+  m_timeMarketOpen( time( 9, 30, 0 ) ), m_timeMarketClose( time( 16, 0, 0 ) )
 {
 }
 
 IQFTimeMessage::IQFTimeMessage( iterator_t& current, iterator_t& end )
 : IQFBaseMessage<IQFTimeMessage>(),
   m_bMarketIsOpen( false ),
-  m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
+  m_timeMarketOpen( time( 9, 30, 0 ) ), m_timeMarketClose( time( 16, 0, 0 ) )
 {
   Assign( current, end );
 }
@@ -141,7 +141,7 @@ IQFTimeMessage::~IQFTimeMessage() {
 void IQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
   IQFBaseMessage<IQFTimeMessage>::Assign( current, end );
   std::stringstream ss( Field( 2 ) );
-  time_input_facet *input_facet;
+  boost::posix_time::time_input_facet *input_facet;
   input_facet = new boost::posix_time::time_input_facet();  // input facet stuff needs to be with ss.imbue, can't be reused
   input_facet->format( "%Y%m%d %H:%M:%S" );
   ss.imbue( std::locale( ss.getloc(), input_facet ) );

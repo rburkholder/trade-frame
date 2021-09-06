@@ -14,21 +14,20 @@
 
 #pragma once
 
+// https://github.com/boostorg/spirit/commit/c0537c8251d04773a24bafdab8363b1cba350d07
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <string>
 #include <vector>
-#include <utility>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
-// https://github.com/boostorg/spirit/commit/c0537c8251d04773a24bafdab8363b1cba350d07
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/spirit/include/qi.hpp>
+
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
+//#include <boost/spirit/include/phoenix_stl.hpp>
 
 // will need to use the flex field capability where we get only the fields we need
 // field offsets are 1 based, in order to easily match up with documentation
@@ -38,16 +37,54 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+struct date_values {
+  uint16_t year;
+  uint16_t month;
+  uint16_t day;
+  date_values(): year {}, month {}, day {} {}
+};
+
+struct time_values {
+  uint16_t hours;
+  uint16_t minutes;
+  uint16_t seconds;
+  time_values(): hours {}, minutes {}, seconds {} {}
+};
+
+} // namespace tf
+} // namespace ou
+
+BOOST_FUSION_ADAPT_STRUCT( // iqfeed format mm/dd/yyyy
+  ou::tf::date_values,
+  (uint16_t, month)
+  (uint16_t, day)
+  (uint16_t, year)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  ou::tf::time_values,
+  (uint16_t, hours)
+  (uint16_t, minutes)
+  (uint16_t, seconds)
+  )
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+using date = boost::gregorian::date;
+using time = boost::posix_time::time_duration;
+using ptime = boost::posix_time::ptime;
+
 template <class T, class charT = unsigned char>
 class IQFBaseMessage {
 public:
 
-  // factor this out of here and CNetwork and turn into trait
-  typedef charT bufferelement_t;
-  typedef typename std::vector<bufferelement_t> linebuffer_t;
-  typedef typename linebuffer_t::iterator iterator_t;
-  typedef std::pair<iterator_t, iterator_t> fielddelimiter_t;
-  typedef typename linebuffer_t::size_type ixFields_t;
+  // factor this out of here and Network and turn into trait
+  using bufferelement_t = charT;
+  using linebuffer_t = typename std::vector<bufferelement_t>;
+  using iterator_t = typename linebuffer_t::iterator;  // TODO: need to use const_iterator
+  using fielddelimiter_t = std::pair<iterator_t, iterator_t>;
+  using ixFields_t = typename linebuffer_t::size_type;
 
   IQFBaseMessage( void );
   IQFBaseMessage( iterator_t& current, iterator_t& end );
@@ -59,6 +96,7 @@ public:
   double Double( ixFields_t ) const;  // use boost::spirit?
   int Integer( ixFields_t ) const;  // use boost::spirit?
   date Date( ixFields_t ) const;
+  time Time( ixFields_t ) const;
 
   iterator_t FieldBegin( ixFields_t ) const;
   iterator_t FieldEnd( ixFields_t ) const;
@@ -72,6 +110,11 @@ protected:
   void Tokenize( iterator_t& begin, iterator_t& end );  // scans for ',' and builds the m_vFieldDelimiters vector
 
 private:
+
+  int parse_int( fielddelimiter_t ) const;
+  double parse_double(  fielddelimiter_t ) const;
+  date parse_date( fielddelimiter_t ) const; // MM/DD/YYYY
+  time parse_time( fielddelimiter_t ) const; // HH:mm:SS
 
 };
 
@@ -219,6 +262,19 @@ public:
     FBondCouponRate = 52,
     FExpirationDate = 53,
     FStrikePrice = 54,
+    FNAICS = 55,
+    FExchangeRoot = 56,
+    FOptionsPremiumMult = 57,
+    FOptionsMultipleDeliver = 58,
+    FSessionOpenTime = 59,
+    FSessionCloseTime = 60,
+    FBaseCurrency = 61,
+    FContractSize = 62,
+    FContractMonths = 63,
+    FMinimumTickSize = 64,
+    FFirstDeliveryDate = 65,
+    FFinancialInstrumentGlobalIdentifier = 66,
+    FSecuritySubType = 67,
     _FLastEntry
   };
 
@@ -288,8 +344,8 @@ public:
     _QPLastEntry
   };
 
-  typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::iterator_t iterator_t;
-  typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
+  using iterator_t = typename IQFBaseMessage<IQFPricingMessage<T, charT> >::iterator_t;
+  using fielddelimiter_t = typename IQFBaseMessage<IQFPricingMessage<T, charT> >::fielddelimiter_t;
 
   IQFPricingMessage( void );
   IQFPricingMessage( iterator_t& current, iterator_t& end );
@@ -350,8 +406,8 @@ public:
     _DFLastEntry
   };
 
-  typedef typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::iterator_t iterator_t;
-  typedef typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
+  using iterator_t = typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::iterator_t;
+  using fielddelimiter_t = typename IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >::fielddelimiter_t;
 
   static const std::string selector;
 
@@ -429,8 +485,8 @@ public:
     _DILastEntry
   };
 
-  typedef typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::iterator_t iterator_t;
-  typedef typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
+  using iterator_t = typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::iterator_t;
+  using fielddelimiter_t = typename IQFBaseMessage<IQFDynamicInfoMessage<T, charT> >::fielddelimiter_t;
 
   static const std::string selector;
 
@@ -531,20 +587,13 @@ double IQFBaseMessage<T, charT>::Double( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
-  double dest = 0;
+  double value {};
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
   if ( fielddelimiter.first != fielddelimiter.second ) {
-    namespace qi = boost::spirit::qi;
-	  using namespace boost::phoenix::arg_names;
-
-    using boost::spirit::qi::_1;
-	  using boost::phoenix::ref;
-	  using namespace boost::spirit::qi;
-
-    bool b = qi::parse( fielddelimiter.first, fielddelimiter.second, double_[ref(dest) = _1] );
+    value = parse_double( fielddelimiter );
   }
 
-  return dest;
+  return value;
 }
 
 template <class T, class charT>
@@ -552,56 +601,43 @@ int IQFBaseMessage<T, charT>::Integer( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
-  int dest = 0;
+  int value {};
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
   if ( fielddelimiter.first != fielddelimiter.second ) {
-    namespace qi = boost::spirit::qi;
-	  using namespace boost::phoenix::arg_names;
-
-    using boost::spirit::qi::_1;
-	  using boost::phoenix::ref;
-	  using namespace boost::spirit::qi;
-
-    bool b = qi::parse( fielddelimiter.first, fielddelimiter.second, int_[ref(dest) = _1] );
+    value = parse_int( fielddelimiter );
   }
 
-  return dest;
+  return value;
 }
 
 template <class T, class charT>
 date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
-  int nYear, nMonth, nDay;
-  date d(not_a_date_time);
+
+  date d( boost::posix_time::not_a_date_time );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
   if ( fielddelimiter.first != fielddelimiter.second ) {
     if ( 10 == ( fielddelimiter.second - fielddelimiter.first ) ) {
-      namespace qi = boost::spirit::qi;
-	    using namespace boost::phoenix::arg_names;
-      using boost::spirit::qi::_1;
-      using boost::spirit::qi::lit;
-	    using boost::phoenix::ref;
-	    using namespace boost::spirit::qi;
-
-      bool b;
-      b = qi::parse( fielddelimiter.first + 0, fielddelimiter.first +  2, int_[ref(nMonth) = _1] );
-      b = qi::parse( fielddelimiter.first + 3, fielddelimiter.first +  5, int_[ref(nDay)   = _1] );
-      b = qi::parse( fielddelimiter.first + 6, fielddelimiter.first + 10, int_[ref(nYear)  = _1] );
-      if ( ( 99 == nDay ) || ( 99 == nMonth ) || ( 9999 == nYear ) ) {
-      }
-      else {
-        try {
-          if ( b ) d = date( nYear, nMonth, nDay );
-        }
-        catch (...) {
-          std::string s( fielddelimiter.first, fielddelimiter.second );
-          std::cout << "IQFBaseMessage<T, charT>::Date ill formed date" + s << std::endl;
-        }
-      }
+      d = parse_date( fielddelimiter );
     }
   }
   return d;
+}
+
+template <class T, class charT>
+time IQFBaseMessage<T, charT>::Time( ixFields_t fld ) const {
+  BOOST_ASSERT( 0 != fld );
+  BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
+
+  time t( boost::posix_time::not_a_date_time );
+  fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
+  if ( fielddelimiter.first != fielddelimiter.second ) {
+    if ( 8 == ( fielddelimiter.second - fielddelimiter.first ) ) {
+      t = parse_time( fielddelimiter );
+    }
+  }
+  return t;
 }
 
 template <class T, class charT>
@@ -616,6 +652,100 @@ typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].second;
+}
+
+namespace qi = boost::spirit::qi;
+
+template <class T, class charT>
+int IQFBaseMessage<T, charT>::parse_int( fielddelimiter_t fd ) const {
+
+  using namespace boost::phoenix::arg_names;
+
+  using boost::spirit::qi::_1;
+  using boost::phoenix::ref;
+  using namespace boost::spirit::qi;
+
+  int value {};
+
+  bool b = qi::parse( fd.first, fd.second, int_[ref( value ) = _1] );
+
+  return value;
+}
+
+template <class T, class charT>
+double IQFBaseMessage<T, charT>::parse_double( fielddelimiter_t fd ) const {
+
+  using namespace boost::phoenix::arg_names;
+
+  using boost::spirit::qi::_1;
+  using boost::phoenix::ref;
+  using namespace boost::spirit::qi;
+
+  double value {};
+
+  bool b = qi::parse( fd.first, fd.second, double_[ref( value ) = _1] );
+  return value;
+}
+
+template<typename Iterator>
+struct DateParser: qi::grammar<Iterator, date_values()> {
+
+  DateParser(): DateParser::base_type( start ) {
+
+    value %= qi::uint_;
+    start %= value >> qi::lit( '/') >> value >> qi::lit( '/' ) >> value; // mm/dd/yyyy
+
+  }
+
+  qi::rule<Iterator, uint16_t()> value;
+  qi::rule<Iterator, date_values()> start;
+};
+
+template <class T, class charT>
+date IQFBaseMessage<T, charT>::parse_date( fielddelimiter_t fd ) const {
+
+  date_values values;
+  DateParser<iterator_t> grammarDateParser;
+  date value( boost::posix_time::not_a_date_time );
+
+  bool bOk = parse( fd.first, fd.second, grammarDateParser, values );
+
+  try {
+    if ( bOk ) value = date( values.year, values.month, values.day );
+  }
+  catch (...) {
+    std::string s( fd.first, fd.second );
+    std::cout << "IQFBaseMessage<T, charT>::parse_date ill formed date: " + s << std::endl;
+  }
+
+  return value;
+}
+
+template<typename Iterator>
+struct TimeParser: qi::grammar<Iterator, time_values()> {
+
+  TimeParser(): TimeParser::base_type( start ) {
+
+    value %= qi::uint_;
+    start %= value >> qi::lit( ':') >> value >> qi::lit( ':' ) >> value; // hh:mm:ss
+
+  }
+
+  qi::rule<Iterator, uint16_t()> value;
+  qi::rule<Iterator, time_values()> start;
+};
+
+template <class T, class charT>
+time IQFBaseMessage<T, charT>::parse_time( fielddelimiter_t fd ) const {
+
+  time_values values {};
+  TimeParser<iterator_t> grammarTimeParser;
+  time value( boost::posix_time::not_a_date_time );
+
+  bool bOk = parse( fd.first, fd.second, grammarTimeParser, values );
+  value = time( values.hours, values.minutes, values.seconds );
+
+  return value;
 }
 
 //**** IQFPricingMessage
@@ -640,7 +770,7 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 template <class T, class charT>
 ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) const {
 
-  // TODO: test that the delimiters are available (ie message was truncated)
+  // TODO: test that the delimiters are available (ie message might be truncated?)
   fielddelimiter_t date = this->m_vFieldDelimiters[ QPLastTradeDate ];
   fielddelimiter_t time = this->m_vFieldDelimiters[ QPLastTradeTime ];
 
