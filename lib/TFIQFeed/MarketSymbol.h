@@ -17,6 +17,8 @@
 #include <bitset>
 #include <string>
 
+#include <boost/date_time/gregorian/greg_date.hpp>
+
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
@@ -129,7 +131,12 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
-  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, uint16_t day = 0 );
+  using Date = boost::gregorian::date;
+
+  // equity, ieoption (from trd)
+  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef& );
+  // equity, ieoption, future, futures option (from fundamentals)
+  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, Date );
 
 protected:
 private:

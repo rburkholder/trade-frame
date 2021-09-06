@@ -429,7 +429,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
         }
       }
       else {
-        pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date.day() );
+        pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date );
         ou::tf::IBTWS::Contract contract;
         contract.conId = pUnderlyingInstrument->GetContract();
         // this request uses contract id to obtain basic symbol of the underlying
@@ -528,7 +528,8 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
           break;
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
-          values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, values.day );  // for ib future/fo overrides not supplied by trd
+          // TODO: will need to change this to match what is in BasketTrading for creation from fundamentals
+          values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, boost::gregorian::date( trd.nYear, trd.nMonth, values.day ) );  // for ib future/fo overrides not supplied by trd
           break;
         default:
           throw std::runtime_error( "ppComboTrading::BuildInstrument: can't process the default" );
