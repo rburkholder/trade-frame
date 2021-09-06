@@ -44,6 +44,14 @@
 #include "Underlying.h"
 #include "ManageStrategy.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+class OptionChainQuery;
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou
+
 class wxMenu;
 class DailyHistory;
 
@@ -146,6 +154,7 @@ private:
   //wxTreeItemId m_idTreeOptions;
 
   std::unique_ptr<DailyHistory> m_pHistory;
+  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 

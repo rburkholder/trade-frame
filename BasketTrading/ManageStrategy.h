@@ -98,7 +98,7 @@ public:
 
   using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;
 
-  struct Specs {
+  class Specs {
   public:
     const std::string sIQFeedBase; // base name for IQFeed to build name
     const std::string sIB;         // base name for IB

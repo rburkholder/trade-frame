@@ -23,6 +23,7 @@
 #include <OUCommon/TimeSource.h>
 
 #include <TFIQFeed/BuildInstrument.h>
+#include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFTrading/InstrumentManager.h>
 
@@ -91,7 +92,6 @@ MasterPortfolio::MasterPortfolio(
   assert( pMasterPortfolio );
   assert( pExec );
   assert( pData1 );
-
 
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -342,8 +342,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
     // QGCZ21  GOLD DECEMBER 2021
     // add?  // USB, XLP, XBI
 
-    m_iterSymbols = m_setSymbols.begin();
+    m_iterSymbols = m_setSymbols.begin(); // TODO: add to self-contained structure with DailyHistory
 
+    // obtain daily history for trend, close & stats
     m_pHistory = std::make_unique<DailyHistory>(
       [this](){ // fConnected_t
         if ( m_setSymbols.end() != m_iterSymbols ) {
@@ -353,7 +354,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
       [this]( const ou::tf::Bar& bar ){ // fBar_t
         m_barsLoaded.Append( bar );
       },
-      [this](){ // fDone_t
+      [this,dtLatestEod](){ // fDone_t
 
         const std::string& sIQFeedSymbolName( *m_iterSymbols );
 
@@ -365,6 +366,7 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
         else {
           // TODO: reuse code in SymbolSelection.cpp to perform pivot, volatility summaries
           const ou::tf::Bar& bar( m_barsLoaded.last() );
+          assert( dtLatestEod <= bar.DateTime() );
           Statistics statistics;
           statistics.setPivots.CalcPivots( bar );
           AddUnderlyingSymbol( *iterSpecs, statistics );
@@ -390,9 +392,9 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
 void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs, const Statistics& statistics ) {
 
-  const ManageStrategy::Specs& specs( vtSpecs.second );
-
   const trd_t& trd( m_fGetTableRowDef( vtSpecs.first ) ); // TODO: check for errors
+
+  const ManageStrategy::Specs& specs( vtSpecs.second );
 
   const std::string sGenericName
     = ou::tf::iqfeed::MarketSymbol::BuildGenericName( 0 == specs.sIQFeedBase.size() ? vtSpecs.first : specs.sIQFeedBase, trd, specs.day );
@@ -405,6 +407,8 @@ void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs
     auto result
       = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sGenericName, UnderlyingWithStrategies( std::move( statistics ) ) ) );
     assert( result.second );
+
+    // TODO: perform a watch on the name to extract expiry from fundamental message
 
     ConstructWatchUnderlying(
       sGenericName, 0 == specs.sIB.size() ? sGenericName : specs.sIB, trd, specs.day,
