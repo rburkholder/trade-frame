@@ -23,9 +23,9 @@
 
 #include "KeyTypes.h"
 
+#include "Exchange.h"
 #include "Instrument.h"
 #include "AlternateInstrumentNames.h"
-#include "Exchange.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -47,10 +47,10 @@ public:
     InstrumentType::enumInstrumentType type = InstrumentType::Unknown );
   pInstrument_t ConstructFuture(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
-    boost::uint16_t year, boost::uint16_t month );
-  pInstrument_t ConstructOption(
-    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
-    boost::uint16_t year, boost::uint16_t month,
+    boost::uint16_t year, boost::uint16_t month, boost::uint16_t day );
+  pInstrument_t ConstructFuturesOption(
+    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
+    boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
     OptionSide::enumOptionSide side,
     double strike );
   pInstrument_t ConstructOption(

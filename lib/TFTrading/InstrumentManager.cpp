@@ -44,21 +44,21 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructInstrument(
 
 InstrumentManager::pInstrument_t InstrumentManager::ConstructFuture(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
-  boost::uint16_t year, boost::uint16_t month ) {
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day ) {
   pInstrument_t pInstrument(
-    new Instrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month ) );
+    new Instrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month, day ) );
   Register( pInstrument );
   return pInstrument;
 }
 
-InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
-  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm
-  boost::uint16_t year, boost::uint16_t month,
+InstrumentManager::pInstrument_t InstrumentManager::ConstructFuturesOption(
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
   OptionSide::enumOptionSide side,
   double strike ) {
   pInstrument_t pInstrument(
-    new Instrument( sInstrumentName, InstrumentType::Option, sExchangeName,
-    year, month, side, strike ) );
+    new Instrument( sInstrumentName, InstrumentType::FuturesOption, sExchangeName,
+    year, month, day, side, strike ) );
   Register( pInstrument );
   return pInstrument;
 }
