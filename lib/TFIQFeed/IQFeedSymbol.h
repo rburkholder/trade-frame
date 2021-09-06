@@ -37,49 +37,80 @@ public:
   using symbol_id_t =  std::string;
 
   // Public for RowKeyValues.  Pass in a structure sometime.
-  // Public for CVuChartArmsIntraDay.  Pass in structure sometime.
-  // Fundamentals
-  std::string m_sOptionRoots;
-  int m_AverageVolume;
-  std::string m_sCompanyName;
-  int m_Precision;
-  double m_dblHistoricalVolatility;
-  double m_dblStrikePrice;
-  int m_nShortInterest;
-  double m_dblPriceEarnings;
-  double m_dbl52WkHi;
-  double m_dbl52WkLo;
-  double m_dblDividendAmount;
-  double m_dblDividendRate;
-  double m_dblDividendYield;
-  date m_dateExDividend;
+  // Public for VuChartArmsIntraDay.  Pass in structure sometime.
+  struct Fundamentals {
+    std::string sCompanyName;
+    std::string sExchangeRoot; // usable for IB?
+    std::string sOptionRoots;
+    int nPrecision;
+    int nContractSize;
+    int nAverageVolume;
+    int nShortInterest;
+    double dblHistoricalVolatility;
+    double dblStrikePrice;
+    double dblPriceEarnings;
+    double dbl52WkHi;
+    double dbl52WkLo;
+    double dblDividendAmount;
+    double dblDividendRate;
+    double dblDividendYield;
+    double dblTickSize;
+    date dateExDividend;
+    date dateExpiration;
+    boost::posix_time::time_duration timeSessionOpen; // futures, futures options
+    boost::posix_time::time_duration timeSessionClose; // futures, futures options
+    Fundamentals()
+    : nAverageVolume {}, nPrecision {}, nShortInterest {},
+      dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
+      dbl52WkHi {}, dbl52WkLo {},
+      dblDividendAmount {}, dblDividendRate {}, dblDividendYield {},
+      dblTickSize {},
+      dateExDividend( boost::posix_time::not_a_date_time ),
+      dateExpiration( boost::posix_time::not_a_date_time )
+      {}
+  };
 
   // Update/Summary
-  ptime m_dtLastTrade;
-  double m_dblTrade;
-  double m_dblChange; // last - close
-  int m_nTotalVolume;
-  int m_nTradeSize;
-  double m_dblHigh;
-  double m_dblLow;
-  double m_dblBid;
-  double m_dblAsk;
-  int m_nBidSize;
-  int m_nAskSize;
-  int m_nOpenInterest;
-  double m_dblOpen;
-  double m_dblClose;
-  int m_cntTrades;
-  bool m_bNewTrade;
-  bool m_bNewQuote;
-  bool m_bNewOpen;
+  struct Summary {
+    ptime dtLastTrade;
+    double dblTrade;
+    double dblChange; // last - close
+    int nTotalVolume;
+    int nTradeSize;
+    double dblHigh;
+    double dblLow;
+    double dblBid;
+    double dblAsk;
+    int nBidSize;
+    int nAskSize;
+    int nOpenInterest;
+    double dblOpen;
+    double dblClose;
+    int cntTrades;
+    bool bNewTrade;
+    bool bNewQuote;
+    bool bNewOpen;
+    Summary()
+    : dblTrade {}, dblChange {},
+      nTotalVolume {}, nTradeSize {},
+      dblHigh {}, dblLow {},
+      dblBid {}, dblAsk {}, nBidSize( -1 ), nAskSize( -1 ),
+      nOpenInterest {},
+      dblOpen {}, dblClose {},
+      cntTrades {}, bNewTrade( false ), bNewQuote( false ), bNewOpen( false )
+      {}
+  };
 
   IQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
   virtual ~IQFeedSymbol(void);
 
-  ou::Delegate<IQFeedSymbol&> OnFundamentalMessage;
-  ou::Delegate<IQFeedSymbol&> OnUpdateMessage;
-  ou::Delegate<IQFeedSymbol&> OnSummaryMessage;
+  using pFundamentals_t = std::shared_ptr<Fundamentals>;
+  using pSummary_t = std::shared_ptr<Summary>;
+
+  ou::Delegate<pFundamentals_t> OnFundamentalMessage;
+  ou::Delegate<pSummary_t> OnUpdateMessage;
+  ou::Delegate<pSummary_t> OnSummaryMessage;
+
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
 protected:
@@ -99,24 +130,27 @@ protected:
   bool GetDepthWatchInProgress() const { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
-  void HandleFundamentalMessage( IQFFundamentalMessage *pMsg );
-  void HandleUpdateMessage( IQFUpdateMessage *pMsg );
-  void HandleSummaryMessage( IQFSummaryMessage *pMsg );
-  void HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage *pMsg );
-  void HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage *pMsg );
-  void HandleNewsMessage( IQFNewsMessage *pMsg );
+  void HandleFundamentalMessage( IQFFundamentalMessage* pMsg );
+  void HandleUpdateMessage( IQFUpdateMessage* pMsg );
+  void HandleSummaryMessage( IQFSummaryMessage* pMsg );
+  void HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* pMsg );
+  void HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage* pMsg );
+  void HandleNewsMessage( IQFNewsMessage* pMsg );
 
   template <typename T>
-  void DecodePricingMessage( IQFPricingMessage<T> *pMsg );
+  void DecodePricingMessage( IQFPricingMessage<T>* pMsg );
 
   template <typename T>
-  void DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg );
+  void DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg );
 
 private:
 
   WatchState m_stateWatch;
 
   bool m_bWaitForFirstQuote;
+
+  pFundamentals_t m_pFundamentals;
+  pSummary_t m_pSummary;
 };
 
 } // namespace tf

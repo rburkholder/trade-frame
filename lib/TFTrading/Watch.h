@@ -42,23 +42,13 @@ public:
   using pInstrument_t = Instrument::pInstrument_t;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
-  struct Fundamentals_t {
-    double dblHistoricalVolatility;
-    int nShortInterest;
-    double dblPriceEarnings;
-    double dbl52WkHi;
-    double dbl52WkLo;
-    double dblDividendAmount;
-    double dblDividendRate;
-    double dblDividendYield;
-    boost::gregorian::date dateExDividend;
-  };
+  using Fundamentals = ou::tf::IQFeedSymbol::Fundamentals;
 
-  struct Summary_t {
+  struct Summary {
     int nOpenInterest;
     int nTotalVolume;
     double dblOpen;
-    Summary_t(): nOpenInterest( 0 ), nTotalVolume( 0 ), dblOpen( 0.0 ) {}
+    Summary(): nOpenInterest{}, nTotalVolume{}, dblOpen{} {}
   };
 
   Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );
@@ -81,14 +71,16 @@ public:
   inline const Quote& LastQuote() const { return m_quote; };  // may have thread sync issue
   inline const Trade& LastTrade() const { return m_trade; };  // may have thread sync issue
 
-  const Fundamentals_t& Fundamentals() const { return m_fundamentals; };
-  const Summary_t& Summary() const { return m_summary; };
+  const Fundamentals& GetFundamentals() const { assert( m_pFundamentals ); return *m_pFundamentals; };
+  const Summary& GetSummary() const { return m_summary; };
 
   const Quotes& GetQuotes() const { return m_quotes; };
   const Trades& GetTrades() const { return m_trades; };
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
+  ou::Delegate<const Fundamentals&> OnFundamentals;
+  ou::Delegate<const Summary&> OnSummary;
 
   //typedef std::pair<size_t,size_t> stateTimeSeries_t;
   //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
@@ -132,8 +124,9 @@ private:
   bool m_bWatching; // in/out of connected state
   bool m_bEventsAttached; // code validation
 
-  Fundamentals_t m_fundamentals;
-  Summary_t m_summary;
+  IQFeedSymbol::pFundamentals_t m_pFundamentals;
+
+  Summary m_summary;
 
   ou::tf::Trade::price_t m_PriceMax;
   ou::tf::Trade::price_t m_PriceMin;
@@ -155,8 +148,8 @@ private:
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );
 
-  void HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol );
-  void HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol );
+  void HandleIQFeedFundamentalMessage( IQFeedSymbol::pFundamentals_t );
+  void HandleIQFeedSummaryMessage( IQFeedSymbol::pSummary_t );
 
   void HandleTimeSeriesAllocation( Trades::size_type count );
 

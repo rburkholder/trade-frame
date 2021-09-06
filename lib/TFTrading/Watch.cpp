@@ -231,27 +231,24 @@ void Watch::HandleTrade( const Trade& trade ) {
   OnTrade( trade );
 }
 
-void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
-  m_fundamentals.dblHistoricalVolatility = symbol.m_dblHistoricalVolatility;
-  m_fundamentals.nShortInterest = symbol.m_nShortInterest;
-  m_fundamentals.dblPriceEarnings = symbol.m_dblPriceEarnings;
-  m_fundamentals.dbl52WkHi = symbol.m_dbl52WkHi;
-  m_fundamentals.dbl52WkLo = symbol.m_dbl52WkLo;
-  m_fundamentals.dblDividendAmount = symbol.m_dblDividendAmount;
-  m_fundamentals.dblDividendRate = symbol.m_dblDividendRate;
-  m_fundamentals.dblDividendYield = symbol.m_dblDividendYield;
-  m_fundamentals.dateExDividend = symbol.m_dateExDividend;
+void Watch::HandleIQFeedFundamentalMessage( IQFeedSymbol::pFundamentals_t pFundamentals ) {
+  m_pFundamentals = pFundamentals;
+  OnFundamentals( *m_pFundamentals );
 }
 
-void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
-  m_summary.nOpenInterest = symbol.m_nOpenInterest;
-  m_summary.nTotalVolume = symbol.m_nTotalVolume;
+void Watch::HandleIQFeedSummaryMessage( IQFeedSymbol::pSummary_t pSummary ) {
+
+  const IQFeedSymbol::Summary& summary( *pSummary );
+
+  m_summary.nOpenInterest = summary.nOpenInterest;
+  m_summary.nTotalVolume = summary.nTotalVolume;
   if ( 0.0 == m_summary.dblOpen ) {
-    m_PriceMax = m_PriceMin = symbol.m_dblOpen;
+    m_PriceMax = m_PriceMin = summary.dblOpen;
   }
-  m_summary.dblOpen = symbol.m_dblOpen;
-  m_quote = ou::tf::Quote( ou::TimeSource::Instance().External(), symbol.m_dblBid, 0, symbol.m_dblAsk, 0 );
-  m_trade = ou::tf::Trade( ou::TimeSource::Instance().External(), symbol.m_dblTrade, 0 );
+  m_summary.dblOpen = summary.dblOpen;
+  m_quote = ou::tf::Quote( ou::TimeSource::Instance().External(), summary.dblBid, 0, summary.dblAsk, 0 );
+  m_trade = ou::tf::Trade( ou::TimeSource::Instance().External(), summary.dblTrade, 0 );
+  OnSummary( m_summary );
 }
 
 void Watch::SaveSeries( const std::string& sPrefix ) {

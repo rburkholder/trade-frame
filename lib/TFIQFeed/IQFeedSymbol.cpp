@@ -24,79 +24,88 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument)
-:
-  Symbol<IQFeedSymbol>( pInstrument, sSymbol ),
-  m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
-  m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( -1 ), m_nAskSize( -1 ),
-  m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ),
-  m_nShortInterest( 0 ), m_dblPriceEarnings( 0 ), m_dbl52WkHi( 0 ), m_dbl52WkLo( 0 ), m_dblDividendYield( 0.0 ),
-  m_nOpenInterest( 0 ), m_QStatus( qUnknown ),
+: Symbol<IQFeedSymbol>( pInstrument, sSymbol ),
+  m_cnt( 0 ),
+  m_QStatus( qUnknown ),
   m_stateWatch( WatchState::None ),
   m_bDepthWatchInProgress( false ),
   m_bWaitForFirstQuote( true )
 {
+  m_pFundamentals = std::make_shared<Fundamentals>();
+  m_pSummary = std::make_shared<Summary>();
 }
 
 IQFeedSymbol::~IQFeedSymbol(void) {
 }
 
 void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
-  m_sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
-  m_AverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
-  m_sCompanyName = pMsg->Field( IQFFundamentalMessage::FName );
-  m_Precision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
-  m_dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
-  m_dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
-  m_nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest );
-  m_dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPE );
-  m_dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
-  m_dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
-  m_dblDividendAmount = pMsg->Double( IQFFundamentalMessage::FDivAmt );
-  m_dblDividendRate = pMsg->Double( IQFFundamentalMessage::FDivRate );
-  m_dblDividendYield = pMsg->Double( IQFFundamentalMessage::FDivYld );
-  m_dateExDividend = pMsg->Date( IQFFundamentalMessage::FDivExDate );
 
-  OnFundamentalMessage( *this );
+  Fundamentals& fundamentals( *m_pFundamentals );
+
+  fundamentals.sCompanyName = pMsg->Field( IQFFundamentalMessage::FName );
+  fundamentals.sExchangeRoot = pMsg->Field( IQFFundamentalMessage::FExchangeRoot );
+  fundamentals.sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
+  fundamentals.nPrecision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
+  fundamentals.nContractSize = pMsg->Integer( IQFFundamentalMessage::FContractSize );
+  fundamentals.nAverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
+  fundamentals.nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest );
+  fundamentals.dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
+  fundamentals.dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
+  fundamentals.dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPE );
+  fundamentals.dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
+  fundamentals.dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
+  fundamentals.dblDividendAmount = pMsg->Double( IQFFundamentalMessage::FDivAmt );
+  fundamentals.dblDividendRate = pMsg->Double( IQFFundamentalMessage::FDivRate );
+  fundamentals.dblDividendYield = pMsg->Double( IQFFundamentalMessage::FDivYld );
+  fundamentals.dblTickSize = pMsg->Double( IQFFundamentalMessage::FMinimumTickSize );
+  fundamentals.dateExDividend = pMsg->Date( IQFFundamentalMessage::FDivExDate );
+  fundamentals.dateExpiration = pMsg->Date( IQFFundamentalMessage::FExpirationDate );
+  fundamentals.timeSessionOpen = pMsg->Time( IQFFundamentalMessage::FSessionOpenTime );
+  fundamentals.timeSessionClose = pMsg->Time( IQFFundamentalMessage::FSessionCloseTime );
+
+  OnFundamentalMessage( m_pFundamentals );
 }
 
 template <typename T>
-void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg )  {
+void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
 
   // http://www.iqfeed.net/dev/api/docs/Level1UpdateSummaryMessage.cfm
   double dblOpen, dblBid, dblAsk;
   int nBidSize, nAskSize;
 
-  m_bNewTrade = m_bNewQuote = m_bNewOpen = false;
+  Summary& summary( *m_pSummary );
+
+  summary.bNewTrade = summary.bNewQuote = summary.bNewOpen = false;
 
   std::string content = pMsg->Field( IQFDynamicFeedMessage<T>::DFMessageContents );
   for ( const char id: content ) {
     switch ( id ) {
       case 'C':
-        m_dblTrade = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
-        m_nTradeSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFMostRecentTradeSize );
-        m_cntTrades = pMsg->Integer( IQFDynamicFeedMessage<T>::DFNumTrades );
-        m_nTotalVolume = pMsg->Integer( IQFDynamicFeedMessage<T>::DFTtlVol );
-        m_bNewTrade = true;
+        summary.dblTrade = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
+        summary.nTradeSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFMostRecentTradeSize );
+        summary.cntTrades = pMsg->Integer( IQFDynamicFeedMessage<T>::DFNumTrades );
+        summary.nTotalVolume = pMsg->Integer( IQFDynamicFeedMessage<T>::DFTtlVol );
+        summary.bNewTrade = true;
         break;
       case 'a':
         dblAsk = pMsg->Double( IQFDynamicFeedMessage<T>::DFAsk );
-        if ( m_dblAsk != dblAsk ) { m_dblAsk = dblAsk; m_bNewQuote = true; }
+        if ( summary.dblAsk != dblAsk ) { summary.dblAsk = dblAsk; summary.bNewQuote = true; }
         nAskSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFAskSize );
-        if ( m_nAskSize != nAskSize ) { m_nAskSize = nAskSize; m_bNewQuote = true; }
+        if ( summary.nAskSize != nAskSize ) { summary.nAskSize = nAskSize; summary.bNewQuote = true; }
         break;
       case 'b':
         dblBid = pMsg->Double( IQFDynamicFeedMessage<T>::DFBid );
-        if ( m_dblBid != dblBid ) { m_dblBid = dblBid; m_bNewQuote = true; }
+        if ( summary.dblBid != dblBid ) { summary.dblBid = dblBid; summary.bNewQuote = true; }
         nBidSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFBidSize );
-        if ( m_nBidSize != nBidSize ) { m_nBidSize = nBidSize; m_bNewQuote = true; }
+        if ( summary.nBidSize != nBidSize ) { summary.nBidSize = nBidSize; summary.bNewQuote = true; }
         break;
       case 'o':
         // TODO: may not be using the correct field here.
         dblOpen = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
-        if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
-          m_dblOpen = dblOpen;
-          m_bNewOpen = true;
-          std::cout << "IQF new open: " << GetId() << "=" << m_dblOpen << std::endl;
+        if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
+          summary.dblOpen = dblOpen;
+          summary.bNewOpen = true;
+          std::cout << "IQF new open: " << GetId() << "=" << summary.dblOpen << std::endl;
         };
         break;
       case 'E':
@@ -107,9 +116,9 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg )  {
     }
   }
   if ( m_bWaitForFirstQuote ) {
-    if ( m_bNewQuote ) {
-      if ( ( -1 == m_nBidSize ) || ( -1 == m_nAskSize ) ) {
-        m_bNewQuote = false;
+    if ( summary.bNewQuote ) {
+      if ( ( -1 == summary.nBidSize ) || ( -1 == summary.nAskSize ) ) {
+        summary.bNewQuote = false;
       }
       else {
         m_bWaitForFirstQuote = false;
@@ -120,9 +129,11 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T> *pMsg )  {
 }
 
 template <typename T>
-void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
+void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T>* pMsg ) {
 
-  m_bNewTrade = m_bNewQuote = m_bNewOpen = false;
+  Summary& summary( *m_pSummary );
+
+  summary.bNewTrade = summary.bNewQuote = summary.bNewOpen = false;
 
   char chType;
   ptime dtLastTrade;
@@ -137,40 +148,40 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
     chType = 'q';
   }
 // TODO: test that data file is available
-  m_dtLastTrade = pMsg->LastTradeTime();
+  summary.dtLastTrade = pMsg->LastTradeTime();
   switch ( chType ) {
     case 't':
     case 'T':
-      m_dblTrade = pMsg->Double( IQFPricingMessage<T>::QPLast );
-      m_dblChange = pMsg->Double( IQFPricingMessage<T>::QPChange );
-      m_nTotalVolume = pMsg->Integer( IQFPricingMessage<T>::QPTtlVol );
-      m_nTradeSize = pMsg->Integer( IQFPricingMessage<T>::QPLastVol );
-      m_dblHigh = pMsg->Double( IQFPricingMessage<T>::QPHigh );
-      m_dblLow = pMsg->Double( IQFPricingMessage<T>::QPLow );
-      m_dblClose = pMsg->Double( IQFPricingMessage<T>::QPClose );
-      m_cntTrades = pMsg->Integer( IQFPricingMessage<T>::QPNumTrades );
-      m_bNewTrade = true;
+      summary.dblTrade = pMsg->Double( IQFPricingMessage<T>::QPLast );
+      summary.dblChange = pMsg->Double( IQFPricingMessage<T>::QPChange );
+      summary.nTotalVolume = pMsg->Integer( IQFPricingMessage<T>::QPTtlVol );
+      summary.nTradeSize = pMsg->Integer( IQFPricingMessage<T>::QPLastVol );
+      summary.dblHigh = pMsg->Double( IQFPricingMessage<T>::QPHigh );
+      summary.dblLow = pMsg->Double( IQFPricingMessage<T>::QPLow );
+      summary.dblClose = pMsg->Double( IQFPricingMessage<T>::QPClose );
+      summary.cntTrades = pMsg->Integer( IQFPricingMessage<T>::QPNumTrades );
+      summary.bNewTrade = true;
 
       dblOpen = pMsg->Double( IQFPricingMessage<T>::QPOpen );
-      if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
-        m_dblOpen = dblOpen;
-        m_bNewOpen = true;
-        std::cout << "IQF new open: " << GetId() << "=" << m_dblOpen << std::endl;
+      if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
+        summary.dblOpen = dblOpen;
+        summary.bNewOpen = true;
+        std::cout << "IQF new open: " << GetId() << "=" << summary.dblOpen << std::endl;
       };
-      m_nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
+      summary.nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
       // fall through to processing bid / ask
     case 'q':
     case 'b':
     case 'a':
       dblBid = pMsg->Double( IQFPricingMessage<T>::QPBid );
-      if ( m_dblBid != dblBid ) { m_dblBid = dblBid; m_bNewQuote = true; }
+      if ( summary.dblBid != dblBid ) { summary.dblBid = dblBid; summary.bNewQuote = true; }
       nBidSize = pMsg->Integer( IQFPricingMessage<T>::QPBidSize );
-      if ( m_nBidSize != nBidSize ) { m_nBidSize = nBidSize; m_bNewQuote = true; }
+      if ( summary.nBidSize != nBidSize ) { summary.nBidSize = nBidSize; summary.bNewQuote = true; }
       dblAsk = pMsg->Double( IQFPricingMessage<T>::QPAsk );
-      if ( m_dblAsk != dblAsk ) { m_dblAsk = dblAsk; m_bNewQuote = true; }
+      if ( summary.dblAsk != dblAsk ) { summary.dblAsk = dblAsk; summary.bNewQuote = true; }
       nAskSize = pMsg->Integer( IQFPricingMessage<T>::QPAskSize );
-      if ( m_nAskSize != nAskSize ) { m_nAskSize = nAskSize; m_bNewQuote = true; }
+      if ( summary.nAskSize != nAskSize ) { summary.nAskSize = nAskSize; summary.bNewQuote = true; }
       break;
     case 'o':
       break;
@@ -181,31 +192,34 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
 
   if ( false ) {
     std::cout
-      << this->m_pInstrument->GetInstrumentName()
-      << "," << chType
-      << ",t=" << m_dblTrade
-      << ",oi=" << m_nOpenInterest
-      << ",b=" << m_dblBid
-      << ",a=" << m_dblAsk
-      << ",#=" << m_cntTrades
+      << m_pInstrument->GetInstrumentName()
+      << ","    << chType
+      << ",t="  << summary.dblTrade
+      << ",oi=" << summary.nOpenInterest
+      << ",b="  << summary.dblBid
+      << ",a="  << summary.dblAsk
+      << ",#="  << summary.cntTrades
       << std::endl;
   }
 
 }
 
-void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage *pMsg ) {
-  DecodePricingMessage<IQFSummaryMessage>( pMsg );
-  OnSummaryMessage( *this );
+void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage* pMsg ) {
 
-  if ( m_bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
+  DecodePricingMessage<IQFSummaryMessage>( pMsg );
+  OnSummaryMessage( m_pSummary );
+
+  Summary& summary( *m_pSummary );
+
+  if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
     ptime dt( ou::TimeSource::Instance().External() );
-    Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
     Symbol::m_OnQuote( quote );
   }
 
 }
 
-void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
+void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage* pMsg ) {
 
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( "Not Found" == pMsg->Field( IQFPricingMessage<IQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
@@ -215,38 +229,43 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
   }
   if ( qFound == m_QStatus ) {
     DecodePricingMessage<IQFUpdateMessage>( pMsg );
-    OnUpdateMessage( *this );
+    OnUpdateMessage( m_pSummary );
+
+    Summary& summary( *m_pSummary );
+
     //ptime dt( microsec_clock::local_time() );
     ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade
-    if ( m_bNewQuote ) {
-      const Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    if ( summary.bNewQuote ) {
+      const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
       Symbol::m_OnQuote( quote );
     }
-    if ( m_bNewTrade ) {
-      Trade trade( dt, m_dblTrade, m_nTradeSize );
+    if ( summary.bNewTrade ) {
+      Trade trade( dt, summary.dblTrade, summary.nTradeSize );
       Symbol::m_OnTrade( trade );
-      if ( m_bNewOpen ) {
+      if ( summary.bNewOpen ) {
         Symbol::m_OnOpen( trade );
       }
     }
   }
 }
 
-void IQFeedSymbol::HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage *pMsg ) {
+void IQFeedSymbol::HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage* pMsg ) {
 
   DecodeDynamicFeedMessage<IQFDynamicFeedSummaryMessage>( pMsg );
-  OnSummaryMessage( *this );
+  OnSummaryMessage( m_pSummary );
 
-  if ( m_bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
+  Summary& summary( *m_pSummary );
+
+  if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
     ptime dt( ou::TimeSource::Instance().External() );
-    Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
     Symbol::m_OnQuote( quote );
   }
 
 }
 
-void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage *pMsg ) {
+void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* pMsg ) {
 
 //  if ( qUnknown == m_QStatus ) {
 //    m_QStatus = ( "Not Found" == pMsg->Field( IQFPricingMessage<IQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
@@ -256,25 +275,28 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage *
 //  }
 //  if ( qFound == m_QStatus ) {
     DecodeDynamicFeedMessage<IQFDynamicFeedUpdateMessage>( pMsg );
-    OnUpdateMessage( *this );
+    OnUpdateMessage( m_pSummary );
+
+    Summary& summary( *m_pSummary );
+
     //ptime dt( microsec_clock::local_time() );
     ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade
-    if ( m_bNewQuote ) {
-      const Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    if ( summary.bNewQuote ) {
+      const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
       Symbol::m_OnQuote( quote );
     }
-    if ( m_bNewTrade ) {
-      Trade trade( dt, m_dblTrade, m_nTradeSize );
+    if ( summary.bNewTrade ) {
+      Trade trade( dt, summary.dblTrade, summary.nTradeSize );
       Symbol::m_OnTrade( trade );
-      if ( m_bNewOpen ) {
+      if ( summary.bNewOpen ) {
         Symbol::m_OnOpen( trade );
       }
     }
 //  }
 }
 
-void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage *pMsg ) {
+void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage* pMsg ) {
 }
 
 } // namespace tf

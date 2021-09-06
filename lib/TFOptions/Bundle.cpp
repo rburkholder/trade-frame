@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 ExpiryBundle::ExpiryBundle(void)
-  : m_stateOptionWatch( EOWSNoWatch ), //m_bWatching( false ), 
+  : m_stateOptionWatch( EOWSNoWatch ), //m_bWatching( false ),
   m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 ), m_bfIVUnderlyingCall( 86400 ), m_bfIVUnderlyingPut( 86400 )
 {
 }
@@ -58,7 +58,7 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
     boost::gregorian::date_facet* pFacet( new boost::gregorian::date_facet( "%Y-%m-%d" ) );
     ss.imbue( std::locale( ss.getloc(), pFacet ) );
     ss << m_dtExpiry.date();
-  
+
     sPathName = sPrefix60sec + "/atmiv/" + ss.str();
     HDF5WriteTimeSeries<ou::tf::PriceIVExpirys> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsAtmIv );
@@ -78,7 +78,7 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
         catch (...) {  // may already exist
       }
     }
-  
+
     {
       sPathName = sPrefix86400sec + "/" + ss.str() + "/put";
       ou::tf::Bars bars( 1 );
@@ -93,7 +93,7 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
       }
     }
   }
-  
+
 }
 
 void ExpiryBundle::EmitValues( void ) {
@@ -212,7 +212,7 @@ ExpiryBundle::mapStrikes_iter_t ExpiryBundle::FindStrikeAuto( double strike ) {
 // 2013/09/09 doesn't appear to be called from anywhere
 void ExpiryBundle::FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
 
-  mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblValue ); 
+  mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblValue );
   if ( m_mapStrikes.end() == iter ) {
     throw std::runtime_error( "Bundle::FindAdjacentStrikes: no upper strike available" );
   }
@@ -230,13 +230,13 @@ void ExpiryBundle::FindAdjacentStrikes( double dblValue, double& dblLower, doubl
 }
 
 void ExpiryBundle::RecalcATMWatch( double dblValue ) {
-  // uses a 25% edge hysterisis level to force recalc of three containing options 
+  // uses a 25% edge hysterisis level to force recalc of three containing options
   //   ie when underlying is within 25% of upper strike or within 25% of lower strike
   // uses a 50% hysterisis level to select new set of three containing options
   //   ie underlying has to be within +/- 50% of mid strike to choose midstrike and corresponding upper/lower strikes
   mapStrikes_iter_t iterUpper;
   mapStrikes_iter_t iterLower;
-  iterUpper = m_mapStrikes.lower_bound( dblValue ); 
+  iterUpper = m_mapStrikes.lower_bound( dblValue );
   if ( m_mapStrikes.end() == iterUpper ) {
     std::cout << "Bundle::UpdateATMWatch: no upper strike available" << std::endl; // stay in no watch state
     m_stateOptionWatch = EOWSNoWatch;
@@ -318,7 +318,7 @@ void ExpiryBundle::SetExpiry( ptime dt ) {
   m_dtExpiry = dt;
 }
 
-void ExpiryBundle::CalcGreeksAtStrike( 
+void ExpiryBundle::CalcGreeksAtStrike(
   ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
 
   // use the haskell book to get an estimator
@@ -330,7 +330,7 @@ void ExpiryBundle::CalcGreeksAtStrike(
   input.v = dblVolatilityGuess;
 
 //  std::cout << "Guess " << input.v << std::endl;
-  
+
   if ( 0 != iter->second.Call() ) {
 //    std::cout << "Call @" << input.X << ": ";
     try {
@@ -367,7 +367,7 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
   if ( EOWSNoWatch == m_stateOptionWatch ) return;  // not watching so no active data
 
   ou::tf::option::binomial::structInput input;
-  
+
   // todo: need to check if m_dtExpiry is utc.
   Option::CalcRate( input, libor, now, m_dtExpiry );
 
@@ -395,11 +395,11 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
       double iv1, iv2;
       iv1 = m_iterMid->second.Call()->ImpliedVolatility();
       iv2 = m_iterUpper->second.Call()->ImpliedVolatility();
-      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
 
       iv1 = m_iterMid->second.Put()->ImpliedVolatility();
       iv2 = m_iterUpper->second.Put()->ImpliedVolatility();
-      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
+      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
     }
     else { // linear interpolation
       double ratio = ( dblUnderlying - m_iterLower->first ) / ( m_iterMid->first - m_iterLower->first );
@@ -407,11 +407,11 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
       double iv1, iv2;
       iv1 = m_iterLower->second.Call()->ImpliedVolatility();
       iv2 = m_iterMid->second.Call()->ImpliedVolatility();
-      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
 
       iv1 = m_iterLower->second.Put()->ImpliedVolatility();
       iv2 = m_iterMid->second.Put()->ImpliedVolatility();
-      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
+      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
     }
   }
   PriceIVExpiry atmIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut);
@@ -560,9 +560,9 @@ void MultiExpiryBundle::StopWatch( void ) {
 
 void MultiExpiryBundle::CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor ) {
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
-    iter->second.CalcGreeks( 
-      m_pWatchUnderlying->LastQuote().Midpoint(), 
-      m_pWatchUnderlying->Fundamentals().dblHistoricalVolatility,
+    iter->second.CalcGreeks(
+      m_pWatchUnderlying->LastQuote().Midpoint(),
+      m_pWatchUnderlying->GetFundamentals().dblHistoricalVolatility,
       dtNow, libor );
   }
 }
@@ -585,7 +585,7 @@ void MultiExpiryBundle::AssignOption( pInstrument_t pInstrument, pProvider_t pDa
   case ou::tf::OptionSide::Put:
     eb.SetPut( pInstrument, pDataProvider, pGreekProvider );
     break;
-  default: { 
+  default: {
     assert( 1 == 0 );
     }
   }
