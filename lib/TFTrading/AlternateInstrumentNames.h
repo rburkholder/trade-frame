@@ -17,7 +17,6 @@
 
 #include <OUSQL/Functions.h>
 
-#include "TradingEnumerations.h"
 #include "KeyTypes.h"
 
 namespace ou { // One Unified
