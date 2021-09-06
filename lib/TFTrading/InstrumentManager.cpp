@@ -89,29 +89,44 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency(
 void InstrumentManager::Register( pInstrument_t& pInstrument ) {
   // TODO: validate that IB id, IQF id, and IB contract present? ( or put into separate validator?)
   if ( Exists( pInstrument ) ) {
-    throw std::runtime_error( "InstrumentManager::Construct: instrument already exists" );
+    throw std::runtime_error( "InstrumentManager::Register: instrument already exists" );
   }
   Assign( pInstrument );
-  if ( nullptr != m_pSession ) {
+  if ( nullptr != inherited_t::m_pSession ) {
     ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pQuery
       = m_pSession->Insert<Instrument::TableRowDef>( const_cast<Instrument::TableRowDef&>( pInstrument->GetRow() ) );
     // save alternate instrument names
-    pInstrument->ScanAlternateNames( boost::phoenix::bind(
-      static_cast<void(InstrumentManager::*)(const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t&)>(&InstrumentManager::SaveAlternateInstrumentName),
-        this, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+    pInstrument->ScanAlternateNames(
+      boost::phoenix::bind(
+        static_cast<void(InstrumentManager::*)(const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t&, pInstrument_t)>(&InstrumentManager::SaveAlternateInstrumentName),
+          this, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3, pInstrument
+        ) );
   }
 }
 
 void InstrumentManager::SaveAlternateInstrumentName(
-    const keytypes::eidProvider_t& idProvider, const keytypes::idInstrument_t& idAlternate, const keytypes::idInstrument_t& idInstrument ) {
-  AlternateInstrumentName::TableRowDef row( idProvider, idAlternate, idInstrument );
-  SaveAlternateInstrumentName( row );
-}
-
-void InstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& row ) {
-  if ( nullptr != m_pSession ) {
-    ou::db::QueryFields<AlternateInstrumentName::TableRowDef>::pQueryFields_t pQuery
-      = m_pSession->Insert<AlternateInstrumentName::TableRowDef>( const_cast<AlternateInstrumentName::TableRowDef&>( row ) );
+  const keytypes::eidProvider_t& idProvider,
+  const keytypes::idInstrument_t& idAlternate,
+  const keytypes::idInstrument_t& idInstrument,
+  pInstrument_t pInstrument
+) {
+  // NOTE: this doesn't check if it exists in the database -- todo later?
+  keyAltName_ref_t key( idProvider, idAlternate );
+  mapAltNames_t::const_iterator iter = m_mapAltNames.find( key );
+  if ( m_mapAltNames.end() != iter ) {
+    std::cout
+      << "InstrumentManager::SaveAlternateInstrumentName alt name exists: "
+      << idProvider << "," << idAlternate
+      << " for " << pInstrument->GetInstrumentName()
+      << std::endl;
+  }
+  else {
+    m_mapAltNames.emplace( std::make_pair( key, pInstrument ) );
+    const AlternateInstrumentName::TableRowDef row( idProvider, idAlternate, idInstrument );
+    if ( nullptr != m_pSession ) {
+      ou::db::QueryFields<AlternateInstrumentName::TableRowDef>::pQueryFields_t pQuery
+        = m_pSession->Insert<AlternateInstrumentName::TableRowDef>( const_cast<AlternateInstrumentName::TableRowDef&>( row ) );
+    }
   }
 }
 
@@ -179,16 +194,14 @@ bool InstrumentManager::Exists( idInstrument_cref id, pInstrument_t& pInstrument
   return bFound;
 }
 
-namespace InstrumentManagerQueries {
-  struct InstrumentKey {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "instrumentid", idInstrument );
-    }
-    const ou::tf::keytypes::idInstrument_t& idInstrument;
-    InstrumentKey( const ou::tf::keytypes::idInstrument_t& idInstrument_ ): idInstrument( idInstrument_ ) {};
-  };
-}
+struct InstrumentKey {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "instrumentid", idInstrument );
+  }
+  const ou::tf::keytypes::idInstrument_t& idInstrument;
+  InstrumentKey( const ou::tf::keytypes::idInstrument_t& idInstrument_ ): idInstrument( idInstrument_ ) {};
+};
 
 bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
   std::lock_guard<std::mutex> lock( m_mutexLoadInstrument );
@@ -197,18 +210,18 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   assert( m_mapInstruments.end() == m_mapInstruments.find( id ) );  // ensures we havn't already loaded an instrument
 
   bool bFound = false;
-  InstrumentManagerQueries::InstrumentKey idInstrument( id );
-  ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
+  InstrumentKey idInstrument( id );
+  ou::db::QueryFields<InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = m_pSession->SQL<InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pSession->Bind<InstrumentKey>( pExistsQuery );
   if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     Instrument::TableRowDef instrument;
-    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, Instrument::TableRowDef>( pExistsQuery, instrument );
+    m_pSession->Columns<InstrumentKey, Instrument::TableRowDef>( pExistsQuery, instrument );
 //    assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
 //         || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) )
 //      );
 //    if ( "" == instrument.idUnderlying ) {
-      pInstrument.reset( new Instrument( instrument ) );
+      pInstrument = std::make_shared<Instrument>( instrument );
       Assign( pInstrument );
       LoadAlternateInstrumentNames( pInstrument );  // comes after assign
       bFound = true;
@@ -235,6 +248,46 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   return bFound;
 }
 
+struct AltNameKey {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "providerid", idProvider ); // part of unique key
+    ou::db::Field( a, "alternateid", idAlternate ); // part of unique key
+  }
+  const ou::tf::keytypes::eidProvider_t& idProvider;
+  const ou::tf::keytypes::idInstrument_t& idAlternate;
+  AltNameKey(
+    const ou::tf::keytypes::eidProvider_t& idProvider_,
+    const ou::tf::keytypes::idInstrument_t& idAlternate_
+    ):
+    idProvider( idProvider_ ), idAlternate( idAlternate_ )
+  {};
+};
+
+struct InstrumentName {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "instrumentid", idInstrument );
+  }
+  ou::tf::keytypes::idInstrument_t idInstrument;
+  InstrumentName() {};
+};
+
+InstrumentManager::pInstrument_t InstrumentManager::LoadInstrument( keytypes::eidProvider_t idProvider, const idInstrument_t& idInstrument ) {
+  pInstrument_t pInstrument;
+  AltNameKey key( idProvider, idInstrument );
+  ou::db::QueryFields<AltNameKey>::pQueryFields_t pExistsQuery
+    = m_pSession->SQL<AltNameKey>( "select instrumentid from altinstrumentnames", key )
+        .Where( "providerid = ? and alternateid = ?" ).NoExecute();
+  m_pSession->Bind<AltNameKey>( pExistsQuery );
+  InstrumentName result;
+  if ( m_pSession->Execute( pExistsQuery ) ) { // should only be once
+    m_pSession->Columns<AltNameKey, InstrumentName>( pExistsQuery, result );
+    LoadInstrument( result.idInstrument, pInstrument );
+  }
+  return pInstrument;
+}
+
 void InstrumentManager::Delete( idInstrument_cref idInstrument ) {
   // check if has dependencies first, and exception if there are
   // then delete alternate instrument names
@@ -242,19 +295,23 @@ void InstrumentManager::Delete( idInstrument_cref idInstrument ) {
 }
 
 void InstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument ) {
-  assert( 0 != pInstrument.get() );
-  InstrumentManagerQueries::InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
-   ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-     = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
+  assert( pInstrument );
+  InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
+  ou::db::QueryFields<InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+     = m_pSession->SQL<InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pSession->Bind<InstrumentKey>( pExistsQuery );
   AlternateInstrumentName::TableRowDef altname;
   while ( m_pSession->Execute( pExistsQuery ) ) {
-    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, AlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
+    m_pSession->Columns<InstrumentKey, AlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
     pInstrument->SetAlternateName( altname.idProvider, altname.idAlternate );
   }
 }
 
+// TODO: not functional, fix
+// current reference:  lib/TFTrading/Instrument.cpp:235
 void InstrumentManager::HandleAlternateNameAdded( const Instrument::AlternateNameChangeInfo_t& info ) {
+  // TODO: need name of instrument being changed
+  assert( false ); // TODO: need to fix implementation
   iterInstruments_t iterKey = m_mapInstruments.find( info.s1 );
   iterInstruments_t iterAlt = m_mapInstruments.find( info.s2 );
   if ( m_mapInstruments.end() == iterKey )
@@ -262,10 +319,13 @@ void InstrumentManager::HandleAlternateNameAdded( const Instrument::AlternateNam
   if ( m_mapInstruments.end() != iterAlt )
     throw std::runtime_error( "InstrumentManager::HandleAlternateNameAdded alt exists" );
   m_mapInstruments.insert( mapInstruments_t::value_type( info.s2, iterKey->second ) );
-  SaveAlternateInstrumentName( info.id, info.s2, info.s1 );
+  //SaveAlternateInstrumentName( info.id, info.s2, info.s1 );
 }
 
+// TODO: not functional, fix
 void InstrumentManager::HandleAlternateNameChanged( const Instrument::AlternateNameChangeInfo_t& info ) { // todo: need to update database
+// TODO: need name of instrument being changed
+  assert( false );  // TODO: not a complete implementation
   iterInstruments_t iterOld = m_mapInstruments.find( info.s1 );
   if ( m_mapInstruments.end() == iterOld )
     throw std::runtime_error( "InstrumentManager::HandleAlternateNameChanged old name not found" );
@@ -340,46 +400,43 @@ void InstrumentManager::DetachFromSession( ou::db::Session* pSession ) {
   ManagerBase::DetachFromSession( pSession );
 }
 
-// currently unused
-namespace InstrumentManagerQueries {
-  struct OptionSelection {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "underlyingid", idInstrument );  // 20151227 idUnderlying has been removed, is this variable still useful?
-      ou::db::Field( a, "year", nYear );
-      ou::db::Field( a, "month", nMonth );
-      ou::db::Field( a, "day", nDay );
-    }
-    const ou::tf::keytypes::idInstrument_t& idInstrument;
-    boost::uint16_t nYear; // future, option
-    boost::uint16_t nMonth; // future, option
-    boost::uint16_t nDay; // future, option
-    OptionSelection( const ou::tf::keytypes::idInstrument_t& idInstrument_, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
-      : idInstrument( idInstrument_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ) {};
-  };
+struct OptionSelection {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "underlyingid", idInstrument );  // 20151227 idUnderlying has been removed, is this variable still useful?
+    ou::db::Field( a, "year", nYear );
+    ou::db::Field( a, "month", nMonth );
+    ou::db::Field( a, "day", nDay );
+  }
+  const ou::tf::keytypes::idInstrument_t& idInstrument;
+  boost::uint16_t nYear; // future, option
+  boost::uint16_t nMonth; // future, option
+  boost::uint16_t nDay; // future, option
+  OptionSelection( const ou::tf::keytypes::idInstrument_t& idInstrument_, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
+    : idInstrument( idInstrument_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ) {};
+};
 
-  struct OptionSymbolName {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "instrumentid", idInstrument );
-    }
-    ou::tf::keytypes::idInstrument_t idInstrument;
-    OptionSymbolName( void ) {};
-  };
-}
+struct OptionSymbolName {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "instrumentid", idInstrument );
+  }
+  ou::tf::keytypes::idInstrument_t idInstrument;
+  OptionSymbolName() {};
+};
 
 // currently unused
 template<typename F>
 void InstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
-  InstrumentManagerQueries::OptionSelection idInstrument( id, nYear, nMonth, nDay );
-  ou::db::QueryFields<InstrumentManagerQueries::OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>(
+  OptionSelection idInstrument( id, nYear, nMonth, nDay );
+  ou::db::QueryFields<OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = m_pSession->SQL<OptionSelection>(
       "select instrumentid from instruments", idInstrument ).Where( "underlyingid = ? and year = ? and month = ? and day = ?" ).NoExecute();
-  m_pSession->Bind<InstrumentManagerQueries::OptionSelection>( pExistsQuery );
-  InstrumentManagerQueries::OptionSymbolName name;
+  m_pSession->Bind<OptionSelection>( pExistsQuery );
+  OptionSymbolName name;
   pInstrument_t pInstrument;
   while ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
-    m_pSession->Columns<InstrumentManagerQueries::OptionSelection, InstrumentManagerQueries::OptionSymbolName>( pExistsQuery, name );
+    m_pSession->Columns<OptionSelection, OptionSymbolName>( pExistsQuery, name );
     pInstrument = Get( name.idInstrument );
     f( pInstrument );
   }

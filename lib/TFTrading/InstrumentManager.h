@@ -34,6 +34,8 @@ class InstrumentManager
   : public ou::db::ManagerBase<InstrumentManager> {
 public:
 
+  using inherited_t = ou::db::ManagerBase<InstrumentManager>;
+
   using pInstrument_t = Instrument::pInstrument_t;
   using pInstrument_cref = Instrument::pInstrument_cref;
   using idInstrument_t = Instrument::idInstrument_t;
@@ -72,6 +74,8 @@ public:
   pInstrument_t Get( idInstrument_cref ); // for getting existing associated with id
   void Delete( idInstrument_cref );
 
+  pInstrument_t LoadInstrument( keytypes::eidProvider_t, const idInstrument_t& ); // may have exeption?
+
   template<typename F> void ScanOptions( F f, idInstrument_cref, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day );
 
   virtual void AttachToSession( ou::db::Session* pSession );
@@ -89,11 +93,28 @@ private:
   using iterInstruments_t = mapInstruments_t::iterator;
   mapInstruments_t m_mapInstruments;
 
+  using keyAltName_t = std::pair<keytypes::eidProvider_t, std::string>;
+  using keyAltName_ref_t = std::pair<const keytypes::eidProvider_t&, const std::string&>;
+  struct keyAltName_compare {
+    bool operator()( const keyAltName_t& key1, const keyAltName_t& key2 ) const {
+      if ( key1.first < key2.first ) {
+        return true;
+      }
+      else {
+        return key1.second < key2.second;
+      }
+    }
+  };
+  using mapAltNames_t = std::map<keyAltName_t, pInstrument_t, keyAltName_compare>;
+  mapAltNames_t m_mapAltNames;
+
   std::mutex m_mutexLoadInstrument;
 
-  void SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& );
   void SaveAlternateInstrumentName(
-    const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t& );
+    const keytypes::eidProvider_t&,
+    const keytypes::idInstrument_t&, const keytypes::idInstrument_t&,
+    pInstrument_t
+    );
 
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
