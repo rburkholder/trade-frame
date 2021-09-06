@@ -91,6 +91,52 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
   return pInstrument;
 }
 
+pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, const Fundamentals& fundamentals ) {
+
+  pInstrument_t pInstrument;
+
+  switch ( trd.sc ) {
+    case MarketSymbol::enumSymbolClassifier::Equity:
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, trd.sExchange );
+      if ( "TSE" == trd.sExchange ) {
+        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
+      }
+      else {
+        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case MarketSymbol::enumSymbolClassifier::IEOption: {
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case MarketSymbol::enumSymbolClassifier::Future: { // may need to pull out the prefix
+    auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month(), date.day() );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case MarketSymbol::enumSymbolClassifier::FOption: { // futures option doesn't require underlying?
+    auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case MarketSymbol::enumSymbolClassifier::Index:
+    case MarketSymbol::enumSymbolClassifier::PrecMtl:
+    default:
+      throw std::runtime_error( "BuildInstrument1: no applicable instrument type" );
+  }
+
+  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
+  pInstrument->SetMultiplier( fundamentals.nContractSize );
+  pInstrument->SetMinTick( fundamentals.dblTickSize );
+  pInstrument->SetSignificantDigits( fundamentals.nPrecision );
+
+  return pInstrument;
+}
+
 } // namespace iqfeed
 } // namespace TradeFrame
 } // namespace ou

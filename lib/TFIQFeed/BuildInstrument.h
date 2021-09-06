@@ -19,6 +19,8 @@
 
 #include <TFTrading/Instrument.h>
 
+#include <TFIQFeed/Fundamentals.h>
+
 #include "MarketSymbol.h"
 
 namespace ou { // One Unified
@@ -31,8 +33,10 @@ using date_t = boost::gregorian::date;
 
 // day is supplied because IQFeed Market Symbol File doesn't have the day in for futures and futures options
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd );
-// preferred use:
+// deprecate (uses assumed defaults)
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, date_t );
+// preferred (uses better fundamentals):
+pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, const Fundamentals& );
 
 } // namespace iqfeed
 } // namespace TradeFrame
