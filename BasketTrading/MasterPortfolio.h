@@ -114,7 +114,7 @@ private:
   using pOrder_t = ou::tf::Order::pOrder_t;
 
   using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
-  using pProviderIQFeed_t = ou::tf::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
   using pInstrument_t =ou::tf::IBTWS::pInstrument_t;
@@ -152,6 +152,31 @@ private:
   wxTreeItemId m_idTreeUnderlying;
   wxTreeItemId m_idTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
+
+  struct AcquireFundamentals {
+    // TODO: use as self-referenced shared_ptr instead of map?
+    using fDone_t = std::function<void(pWatch_t)>;
+    pWatch_t pWatch;
+    fDone_t fDone;
+    AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ )
+    : pWatch( std::move( pWatch_ ) ), fDone( std::move( fDone_ ) ) {}
+    void Start() {
+      pWatch->OnFundamentals.Add( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
+      pWatch->OnTrade.Add( MakeDelegate( this, &AcquireFundamentals::HandleTrade ) );
+      pWatch->StartWatch();
+    }
+    void HandleFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
+      pWatch->StopWatch();
+      pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
+      pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
+      fDone( pWatch );  // fundamentals reside in watch
+    }
+    void HandleTrade( const ou::tf::Trade& trade ) {
+      // a watch is required in order to obtain the fundamental
+    }
+  };
+  using mapAcquisition_t = std::map<std::string,AcquireFundamentals>;
+  mapAcquisition_t m_mapAcquisition;
 
   std::unique_ptr<DailyHistory> m_pHistory;
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery;
@@ -279,6 +304,7 @@ private:
   using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
   static const mapSpecs_t m_mapSpecs;
 
+  void AcquireHistory(  ptime dtLatestEod, const std::string& sSymbol );
   void AddUnderlyingSymbol( const mapSpecs_t::value_type&, const Statistics& );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;

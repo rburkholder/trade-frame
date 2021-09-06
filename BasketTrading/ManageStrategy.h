@@ -100,37 +100,20 @@ public:
 
   class Specs {
   public:
-    const std::string sIQFeedBase; // base name for IQFeed to build name
-    const std::string sIB;         // base name for IB
-    std::uint16_t day;  // trd_t cannot supply this
     double dblEntrySpreadFront;
     double dblEntrySpreadBack;
     int nDaysFront;
     int nDaysBack;
-    // will need a timeframe ES is different from GC, etc.
+    // will need a timeframe ES is different from GC, etc, may get from fundamentals
 
     Specs() // default
-    : day {},
-      dblEntrySpreadFront {}, dblEntrySpreadBack {},
+    : dblEntrySpreadFront {}, dblEntrySpreadBack {},
       nDaysFront {}, nDaysBack {}
     {}
-    Specs( // normal equity
-      //const std::string& sTrdKey_,
+    Specs(
       double dblEntrySpreadFront_, double dblEntrySpreadBack_,
       int nDaysFront_, int nDaysBack__)
-    : day {},
-      dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
-      nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
-    {}
-    Specs( // future
-      const std::string& sIQFeed_,
-      const std::string& sIB_,
-      std::uint16_t day_,
-      double dblEntrySpreadFront_, double dblEntrySpreadBack_,
-      int nDaysFront_, int nDaysBack__)
-    : //sTrdKey( sTrdKey_ ),
-      sIQFeedBase( sIQFeed_ ), sIB( sIB_ ), day( day_ ),
-      dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
+    : dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
       nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
     {}
   protected:

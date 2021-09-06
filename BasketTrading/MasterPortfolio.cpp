@@ -30,8 +30,9 @@
 #include "MoneyManager.h"
 #include "DailyHistory.h"
 #include "MasterPortfolio.h"
-#include "TFIQFeed/MarketSymbol.h"
+#include "TFTrading/KeyTypes.h"
 #include "TFIndicators/Pivots.h"
+#include "TFIQFeed/MarketSymbol.h"
 #include "TFTimeSeries/TimeSeries.h"
 
 namespace {
@@ -42,8 +43,8 @@ namespace {
 const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
-       { "QGCZ21", { "QGC", "GC", 29, 0.10, 0.20, 5, 32 } }
-//      , { "@ESU21", { "@ES", "ES", 17, 0.10, 0.20, 6, 40 } }
+       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
+//      , { "@ESU21", { "@ES", "ES", 0.10, 0.20, 6, 40 } }
     };
 
 /*
@@ -103,7 +104,7 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pData1->ID() ) {
     case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = boost::dynamic_pointer_cast<ou::tf::IQFeedProvider>( pData1 );  // TODO: convert to boost:: to std::
+      m_pIQ = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( pData1 );  // TODO: convert to boost:: to std::
       break;
     default:
       assert( false ); // need the iqfeed provider
@@ -342,6 +343,72 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
     // QGCZ21  GOLD DECEMBER 2021
     // add?  // USB, XLP, XBI
 
+    // TODO: perform a watch on the name to extract expiry from fundamental message
+
+    // TODO: check if instrument already exists prior to building a new one
+
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+
+    for ( const std::string& sSymbol: m_setSymbols ) {
+
+      pInstrument_t pInstrument;
+
+      pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sSymbol );
+      if ( pInstrument ) { // skip the build
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+        std::cout << "already have: " << pInstrument->GetInstrumentName() << std::endl;
+      }
+      else { // bulid a new instrument
+        const trd_t& trd( m_fGetTableRowDef( sSymbol ) ); // TODO: check for errors
+
+        pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sSymbol, trd );
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+
+        auto pair
+          = m_mapAcquisition.emplace( std::make_pair(
+            sSymbol,
+            AcquireFundamentals(
+              std::move( pWatch ),
+              [this,&sSymbol,&trd]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
+
+                const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
+                const std::string sGenericName
+                  = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals.dateExpiration );
+                pInstrument_t pInstrument
+                  = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, fundamentals );
+                pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
+
+                m_pIB->RequestContractDetails(
+                  fundamentals.sExchangeRoot,  // needs to be the IB base name
+                  pInstrument,  // this is a filled-in, prepared instrument
+                  [this,pWatch,sSymbol]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                    // the contract details fill in the contract in the instrument, which can then be passed back to the caller
+                    //   as a fully defined, registered instrument
+                    assert( 0 != pInstrument->GetContract() );
+                    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+                    im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                    // TODO: test that the instument is the same as in the watch?
+                    //fWatch( pWatch );
+                    m_mapAcquisition.erase( sSymbol ); // last to execute
+                    std::cout << "done part 2 of m_mapAcquisition: " << sSymbol << std::endl;
+                  },
+                  nullptr  // request complete doesn't need a function
+                  );
+                std::cout << "done part 1 of m_mapAcquisition: " << sSymbol << std::endl;
+              }
+            )
+          ) ) ;
+        assert( pair.second );
+        AcquireFundamentals& af( pair.first->second );
+        af.Start();
+      }
+    }
+  }
+}
+
+// temporary placeholder until Fundamentals arrive
+void MasterPortfolio::AcquireHistory(  ptime dtLatestEod, const std::string& sSymbol ) {
+
     m_iterSymbols = m_setSymbols.begin(); // TODO: add to self-contained structure with DailyHistory
 
     // obtain daily history for trend, close & stats
@@ -387,7 +454,6 @@ void MasterPortfolio::Load( ptime dtLatestEod, bool bAddToList ) {
 
     m_pHistory->Connect(); // start the process
 
-  }
 }
 
 void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs, const Statistics& statistics ) {
@@ -396,8 +462,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs
 
   const ManageStrategy::Specs& specs( vtSpecs.second );
 
-  const std::string sGenericName
-    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( 0 == specs.sIQFeedBase.size() ? vtSpecs.first : specs.sIQFeedBase, trd, specs.day );
+  assert( false ); // need to fix this
+  const std::string sGenericName;
+  //  = ou::tf::iqfeed::MarketSymbol::BuildGenericName( 0 == specs.sIQFeedBase.size() ? vtSpecs.first : specs.sIQFeedBase, trd, /* specs.day */ 0 );
 
   if ( m_mapUnderlyingWithStrategies.end() != m_mapUnderlyingWithStrategies.find( sGenericName ) ) {
     std::cout << "NOTE: underlying " << sGenericName << " already added" << std::endl;
@@ -408,10 +475,9 @@ void MasterPortfolio::AddUnderlyingSymbol( const mapSpecs_t::value_type& vtSpecs
       = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sGenericName, UnderlyingWithStrategies( std::move( statistics ) ) ) );
     assert( result.second );
 
-    // TODO: perform a watch on the name to extract expiry from fundamental message
-
+    assert( false ); // need to fix the day
     ConstructWatchUnderlying(
-      sGenericName, 0 == specs.sIB.size() ? sGenericName : specs.sIB, trd, specs.day,
+      sGenericName, sGenericName, trd, /* specs.day */ 0,   // TODO: this stuff goes away
       [this,iter=result.first]( pWatch_t pWatchUnderlying ){
 
         const std::string& sUnderlying( pWatchUnderlying->GetInstrument()->GetInstrumentName() );
@@ -485,7 +551,8 @@ void MasterPortfolio::ConstructWatchUnderlying( const std::string& sGenericName,
     assert( 0 != pInstrumentUnderlying->GetContract() );
   }
   else {
-    pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, day );
+    assert( false );  // fix this
+    pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sGenericName, trd );
     bNeedContract = true;
   }
 
