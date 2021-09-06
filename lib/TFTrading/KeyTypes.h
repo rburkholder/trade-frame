@@ -24,28 +24,28 @@ namespace tf { // TradeFrame
 namespace keytypes { // KeyTypes
 
 // InstrumentManager
-typedef std::string idInstrument_t;
-typedef std::string idExchange_t;
+using idInstrument_t = std::string;
+using idExchange_t = std::string;
 // AccountManager
-typedef std::string idAccountAdvisor_t;
-typedef std::string idAccountOwner_t;
-typedef std::string idAccount_t;
+using idAccountAdvisor_t = std::string;
+using idAccountOwner_t = std::string;
+using idAccount_t = std::string;
 // CashManager
 //typedef Currency::type idCashAccount_t;
-typedef boost::int64_t idCashTransaction_t;
-typedef std::string idCurrency_t;  // three character designation
+using idCashTransaction_t = boost::int64_t;
+using idCurrency_t = std::string;  // three character designation
 // ProviderManager
 //typedef boost::uint16_t idProvider_t;  // identifies instance of a provider
-typedef idAccount_t idProvider_t;
+using idProvider_t = idAccount_t;
 enum eidProvider_t {
   EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderCalc,
   EProviderUserBase=900/*, _EProviderCount*/ };
 // PortfolioManager
-typedef std::string idPortfolio_t;
-typedef boost::int64_t idPosition_t;  // auto increment
+using idPortfolio_t = std::string;
+using idPosition_t = boost::int64_t;  // auto increment
 // OrderManager
-typedef boost::int64_t idOrder_t;  // supplied/sync'd with execution provider
-typedef boost::int64_t idExecution_t; // auto increment
+using idOrder_t = boost::int64_t;  // supplied/sync'd with execution provider
+using idExecution_t = boost::int64_t; // auto increment
 
 } // namespace keytypes
 
