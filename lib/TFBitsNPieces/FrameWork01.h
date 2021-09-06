@@ -44,13 +44,13 @@ public:
 
 protected:
 
-  typedef ou::tf::ProviderManager ProviderManager;
-  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef ou::tf::eProviderState_t eProviderState_t;
+  using ProviderManager = ou::tf::ProviderManager;
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
+  using eProviderState_t = ou::tf::eProviderState_t;
 
-  typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::iqfeed::IQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
+  using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
 
   std::string m_sTSDataStreamStarted;
 
