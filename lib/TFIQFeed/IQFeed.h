@@ -35,6 +35,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 template <typename T>
 class IQFeed: public ou::Network<IQFeed<T> > {
@@ -341,5 +342,6 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

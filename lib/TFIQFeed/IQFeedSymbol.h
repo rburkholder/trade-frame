@@ -26,6 +26,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 class IQFeedProvider;
 
@@ -122,5 +123,6 @@ private:
   pSummary_t m_pSummary;
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

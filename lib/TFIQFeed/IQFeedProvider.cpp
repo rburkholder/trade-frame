@@ -22,6 +22,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 IQFeedProvider::IQFeedProvider( void )
 : ProviderInterface<IQFeedProvider,IQFeedSymbol>(),
@@ -312,5 +313,6 @@ void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   pInstrument->SetAlternateName( ID(), sName );
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

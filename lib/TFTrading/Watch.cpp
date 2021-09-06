@@ -134,9 +134,9 @@ void Watch::EnableWatch() {
 
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) { // hook up prior to watch start
       // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
-      ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider
-        = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
-      ou::tf::IQFeedProvider::pSymbol_t pSymbol
+      ou::tf::iqfeed::IQFeedProvider::pProvider_t pIQFeedProvider
+        = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( m_pDataProvider );
+      ou::tf::iqfeed::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument );
       pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
@@ -168,10 +168,10 @@ void Watch::DisableWatch() {
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_bWatching = false;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
-      ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
+      ou::tf::iqfeed::IQFeedProvider::pProvider_t pIQFeedProvider;
       // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
-      pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
-      ou::tf::IQFeedProvider::pSymbol_t pSymbol
+      pIQFeedProvider = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( m_pDataProvider );
+      ou::tf::iqfeed::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument );
       pSymbol->OnSummaryMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
       pSymbol->OnFundamentalMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
@@ -231,14 +231,14 @@ void Watch::HandleTrade( const Trade& trade ) {
   OnTrade( trade );
 }
 
-void Watch::HandleIQFeedFundamentalMessage( IQFeedSymbol::pFundamentals_t pFundamentals ) {
+void Watch::HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t pFundamentals ) {
   m_pFundamentals = pFundamentals;
   OnFundamentals( *m_pFundamentals );
 }
 
-void Watch::HandleIQFeedSummaryMessage( IQFeedSymbol::pSummary_t pSummary ) {
+void Watch::HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t pSummary ) {
 
-  const IQFeedSymbol::Summary& summary( *pSummary );
+  const ou::tf::iqfeed::IQFeedSymbol::Summary& summary( *pSummary );
 
   m_summary.nOpenInterest = summary.nOpenInterest;
   m_summary.nTotalVolume = summary.nTotalVolume;

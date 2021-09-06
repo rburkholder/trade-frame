@@ -12,17 +12,17 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   AppIntervalTrader.cpp
  * Author: raymond@burkholder.net
  * Project: IntervalTrader
  * Created on October 6, 2019, 1:44 PM
  */
 
-/* As an example, perhaps one where you take the stock that had the 
- * highest total dollar volume (volume * (open+close)/2) since the last iteration 
- * (volume and open and close being for that iteration), 
- * and also a BidPrice/AskPrice difference of less than 10 cents, 
+/* As an example, perhaps one where you take the stock that had the
+ * highest total dollar volume (volume * (open+close)/2) since the last iteration
+ * (volume and open and close being for that iteration),
+ * and also a BidPrice/AskPrice difference of less than 10 cents,
  * and buy that, and sell it the next iteration.
  */
 
@@ -147,14 +147,14 @@ bool AppIntervalTrader::OnInit() {
           "trader", "self", "aggregate", ou::tf::Portfolio::EPortfolioType::Basket, "USD", "aggregate" );
 
       m_bIQFeedConnected = false;
-      m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
+      m_pIQFeed = boost::make_shared<ou::tf::iqfeed::IQFeedProvider>();
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnecting ) );
       m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnected ) );
       m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnecting ) );
       m_pIQFeed->OnDisconnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnected ) );
       m_pIQFeed->OnError.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedError ) );
       m_pIQFeed->Connect();
-      
+
       m_bIBConnected = false;
       m_pIB = boost::make_shared<ou::tf::IBTWS>();
       m_pIB->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnecting ) );

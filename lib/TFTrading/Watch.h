@@ -42,7 +42,7 @@ public:
   using pInstrument_t = Instrument::pInstrument_t;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
-  using Fundamentals = ou::tf::Fundamentals;
+  using Fundamentals = ou::tf::iqfeed::Fundamentals;
 
   struct Summary {
     int nOpenInterest;
@@ -124,7 +124,7 @@ private:
   bool m_bWatching; // in/out of connected state
   bool m_bEventsAttached; // code validation
 
-  IQFeedSymbol::pFundamentals_t m_pFundamentals;
+  ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t m_pFundamentals;
 
   Summary m_summary;
 
@@ -148,8 +148,8 @@ private:
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );
 
-  void HandleIQFeedFundamentalMessage( IQFeedSymbol::pFundamentals_t );
-  void HandleIQFeedSummaryMessage( IQFeedSymbol::pSummary_t );
+  void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );
+  void HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t );
 
   void HandleTimeSeriesAllocation( Trades::size_type count );
 

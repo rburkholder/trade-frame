@@ -69,7 +69,7 @@ bool AppIntervalSampler::OnInit() {
   static const std::string sConfigFileName( "../IntervalSampler.cfg" );
 
   m_sStateFileName = "IntervalSampler.state";
-  
+
   m_eCollectionMethod = ECollectionMethod::unknown;
   m_eDefaultContent   = EDefaultContent::unknown;
 
@@ -94,7 +94,7 @@ bool AppIntervalSampler::OnInit() {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
     }
-    
+
     if ( 0 < vm.count( sNameCollectAt ) ) {
       std::cout << "collect_at entries: " << vm[sNameCollectAt].as<std::vector<std::string> >().size() << std::endl;
     }
@@ -115,14 +115,14 @@ bool AppIntervalSampler::OnInit() {
       cnt++;
       std::cout << "filler: " << vm[sNameFiller].as<std::string>() << std::endl;
     }
-    
+
     if ( 0 == vm.count( sNameMethod ) ) {
       throw std::runtime_error( "please define collection method" );
     }
     else {
       std::string sMethod = vm[sNameMethod].as<std::string>();
       if ( "interval" == sMethod ) {
-        
+
         if ( 3 != cnt ) {
           throw std::runtime_error( "incorrect number of interval parameters" );
         }
@@ -147,7 +147,7 @@ bool AppIntervalSampler::OnInit() {
         if ( 0 >= m_nIntervalSeconds ) {
           throw std::runtime_error( sConfigFileName + ": interval needs to be greater than 0, is " + boost::lexical_cast<std::string>( m_nIntervalSeconds ) );
         }
-        
+
         m_eCollectionMethod = ECollectionMethod::interval;
 
       }
@@ -232,7 +232,7 @@ bool AppIntervalSampler::OnInit() {
     }
 
     if ( bOk ) {
-      m_pIQFeed = boost::make_shared<ou::tf::IQFeedProvider>();
+      m_pIQFeed = boost::make_shared<ou::tf::iqfeed::IQFeedProvider>();
       m_bIQFeedConnected = false;
 
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );

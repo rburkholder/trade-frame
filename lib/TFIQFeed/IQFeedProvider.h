@@ -23,6 +23,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 class IQFeedProvider :
   public ProviderInterface<IQFeedProvider,IQFeedSymbol>,
@@ -80,5 +81,6 @@ private:
 
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

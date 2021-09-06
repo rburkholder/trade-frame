@@ -36,6 +36,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 struct date_values {
   uint16_t year;
@@ -51,18 +52,19 @@ struct time_values {
   time_values(): hours {}, minutes {}, seconds {} {}
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou
 
 BOOST_FUSION_ADAPT_STRUCT( // iqfeed format mm/dd/yyyy
-  ou::tf::date_values,
+  ou::tf::iqfeed::date_values,
   (uint16_t, month)
   (uint16_t, day)
   (uint16_t, year)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::time_values,
+  ou::tf::iqfeed::time_values,
   (uint16_t, hours)
   (uint16_t, minutes)
   (uint16_t, seconds)
@@ -70,6 +72,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 using date = boost::gregorian::date;
 using time = boost::posix_time::time_duration;
@@ -810,6 +813,7 @@ ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) const {
   }
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou
 

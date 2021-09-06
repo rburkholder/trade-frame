@@ -22,6 +22,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 //**** IQFBaseMessage
 
@@ -149,5 +150,6 @@ void IQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
   m_bMarketIsOpen = ( ( m_dt.time_of_day() >= m_timeMarketOpen ) && ( m_dt.time_of_day() < m_timeMarketClose ) );
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

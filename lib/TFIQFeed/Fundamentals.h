@@ -23,6 +23,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 struct Fundamentals {
   std::string sCompanyName;
@@ -56,5 +57,6 @@ struct Fundamentals {
     {}
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

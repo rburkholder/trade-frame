@@ -22,6 +22,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument)
 : Symbol<IQFeedSymbol>( pInstrument, sSymbol ),
@@ -299,5 +300,6 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
 void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage* pMsg ) {
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

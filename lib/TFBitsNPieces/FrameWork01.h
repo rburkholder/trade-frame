@@ -49,7 +49,7 @@ protected:
   typedef ou::tf::eProviderState_t eProviderState_t;
 
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::iqfeed::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   std::string m_sTSDataStreamStarted;
@@ -164,7 +164,7 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
   m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ),
-  m_iqfeed( new ou::tf::IQFeedProvider() ), m_bIQFeedConnected( false ),
+  m_iqfeed( new ou::tf::iqfeed::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
   m_bData1Connected( false ), m_bData2Connected( false ), m_bExecConnected( false )
 
