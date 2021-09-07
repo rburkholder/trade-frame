@@ -317,7 +317,7 @@ void AppBasketTrading::HandleButtonLoad() {
         // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
         //m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
-        m_pMasterPortfolio->Load( m_dtLatestEod, true );
+        m_pMasterPortfolio->Load( m_dtLatestEod );
       //}
       //std::cout << "AppBasketTrading::HandleLoadButton: need database and then start MasterPortfolio" << std::endl;
     }
@@ -327,8 +327,8 @@ void AppBasketTrading::HandleButtonLoad() {
 void AppBasketTrading::HandleMenuActionTestSelection( void ) {
   CallAfter(
     [this](){
-      std::cout << "Starting Symbol Test ... " << std::endl;
-      m_pMasterPortfolio->Load( m_dtLatestEod, false );
+      std::cout << "Starting Symbol Test ... nothing to do" << std::endl;
+//      m_pMasterPortfolio->Load( m_dtLatestEod );
     });
 }
 

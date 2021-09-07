@@ -16,7 +16,6 @@
 
 #include <map>
 #include <string>
-#include <thread>
 #include <functional>
 
 #include <boost/serialization/version.hpp>
@@ -27,19 +26,14 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <TFIQFeed/MarketSymbol.h>
-
-#include <TFOptions/Option.h>
-#include <TFOptions/Engine.h>
-#include <TFOptions/NoRiskInterestRateSeries.h>
-
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
 #include <TFIndicators/Pivots.h>
+
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
-#include <TFSimulation/SimulationProvider.h>
+//#include <TFSimulation/SimulationProvider.h>
 
 #include "Underlying.h"
 #include "ManageStrategy.h"
@@ -49,11 +43,14 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 class OptionChainQuery;
 } // namespace iqfeed
+namespace option {
+class Engine;
+} // namespace option
 } // namespace tf
 } // namespace ou
 
 class wxMenu;
-class DailyHistory;
+class HistoryRequest;
 
 class MasterPortfolio {
   friend class boost::serialization::access;
@@ -88,7 +85,7 @@ public:
   void Add( pPortfolio_t ); // from database load
   void Add( pPosition_t );  // from database load
 
-  void Load( ptime dtLatestEod, bool bAddToList );
+  void Load( ptime dtLatestEod );
 
   double UpdateChart();
 
@@ -115,13 +112,15 @@ private:
 
   using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
-  using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
+  //using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
   using pInstrument_t =ou::tf::IBTWS::pInstrument_t;
 
   std::string m_sTSDataStreamStarted;
 
   bool m_bStarted;
+
+  ptime m_dtLatestEod;
 
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
 
@@ -133,7 +132,7 @@ private:
 
   pProviderIBTWS_t m_pIB;
   pProviderIQFeed_t m_pIQ;
-  pProviderSim_t n_pSim;
+  //pProviderSim_t n_pSim;
 
   pPortfolio_t m_pMasterPortfolio;
 
@@ -178,7 +177,6 @@ private:
   using mapAcquisition_t = std::map<std::string,AcquireFundamentals>;
   mapAcquisition_t m_mapAcquisition;
 
-  std::unique_ptr<DailyHistory> m_pHistory;
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
@@ -212,15 +210,18 @@ private:
   using iterStrategy_t = mapStrategy_t::iterator;
 
   struct UnderlyingWithStrategies {
-    Statistics statistics;
     wxTreeItemId idTreeItem;
     pUnderlying_t pUnderlying;
+    Statistics statistics;
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
+    ou::tf::Bars m_barsHistory;
 
-    UnderlyingWithStrategies( const Statistics&& statistics_ )
-    : statistics( std::move( statistics_ ) ) {}
+    UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
+    : pUnderlying( std::move( pUnderlying_ ) ) {}
+    //UnderlyingWithStrategies( const Statistics&& statistics_ )
+    //: statistics( std::move( statistics_ ) ) {}
     void ClosePositions() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
@@ -299,16 +300,16 @@ private:
   using setSymbols_t = std::set<std::string>;
   setSymbols_t m_setSymbols;
   setSymbols_t::const_iterator m_iterSymbols;
-  ou::tf::Bars m_barsLoaded;
 
   using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
   static const mapSpecs_t m_mapSpecs;
 
-  void AcquireHistory(  ptime dtLatestEod, const std::string& sSymbol );
-  void AddUnderlyingSymbol( const mapSpecs_t::value_type&, const Statistics& );
+  std::unique_ptr<HistoryRequest> m_pHistoryRequest;
+
+  void ProcessSymbolList();
+  void AddUnderlying( pWatch_t );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
-  void ConstructWatchUnderlying( const std::string& sGenericName, const std::string& sIB, const trd_t&, std::uint16_t day, fConstructedWatch_t&& );
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
   void StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& );
 
