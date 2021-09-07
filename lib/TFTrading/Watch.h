@@ -39,6 +39,7 @@ class Watch {
 public:
 
   using pWatch_t = std::shared_ptr<Watch>;
+  using idInstrument_t = Instrument::idInstrument_t;
   using pInstrument_t = Instrument::pInstrument_t;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
@@ -60,7 +61,8 @@ public:
   bool operator< ( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <  rhs.m_pInstrument->GetInstrumentName(); };
   bool operator<=( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <= rhs.m_pInstrument->GetInstrumentName(); };
 
-  pInstrument_t GetInstrument() { return m_pInstrument; };
+  pInstrument_t GetInstrument() { return m_pInstrument; }
+  const idInstrument_t& GetInstrumentName() const { return m_pInstrument->GetInstrumentName(); }
 
   void SetProvider( pProvider_t pDataProvider );
   pProvider_t GetProvider() { return m_pDataProvider; };
