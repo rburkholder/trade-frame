@@ -83,6 +83,9 @@ void Underlying::SetPivots( double dblR2, double dblR1, double dblPV, double dbl
   m_cePivots.AddMark( dblPV, ou::Colour::Green, "PV" );
   m_cePivots.AddMark( dblS1, ou::Colour::Blue, "S1" );
   m_cePivots.AddMark( dblS2, ou::Colour::Blue, "S2" );
+  std::cout << m_pWatch->GetInstrumentName() << " pivots: "
+    << dblR2 << "," << dblR1 << "," << dblPV << "," << dblS1 << "," << dblS2
+    << std::endl;
 }
 
 void Underlying::SaveSeries( const std::string& sPrefix ) {
