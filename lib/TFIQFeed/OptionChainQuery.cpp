@@ -27,6 +27,7 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::OptionChainQuery::OptionChain,
+  (std::string, sKey)
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vPut)
   )
@@ -41,7 +42,6 @@ namespace {
 
   using const_iterator_t = ou::Network<OptionChainQuery>::linebuffer_t::const_iterator;
 
-  qi::rule<const_iterator_t> ruleEndMsg { qi::lit( "!ENDMSG!" ) };
   qi::rule<const_iterator_t> ruleErrorInvalidSymbol { qi::lit( "E,Invalid symbol" ) };
 
 }
@@ -54,12 +54,9 @@ struct FutureOptionChainParser: qi::grammar<Iterator, OptionChain()> {
 
   FutureOptionChainParser(): FutureOptionChainParser::base_type( start ) {
 
-    // TODO: need to process !ENDMSG!
-    // TODO: need to process error message
-
-    symbol %= (+(qi::char_ - qi::char_(','))) >> qi::lit(',');
+    symbol %= (+(qi::char_ - qi::char_(",:"))) >> qi::lit(',');
     options %= +symbol;
-    start %= options >> qi::lit(':') >> options >> qi::eol;
+    start %= symbol >> options >> qi::lit(':') >> qi::lit(',') >> options >> qi::eoi;
 
   }
 
@@ -69,19 +66,32 @@ struct FutureOptionChainParser: qi::grammar<Iterator, OptionChain()> {
 
 };
 
+template<typename Iterator>
+struct EndMessageParser: qi::grammar<Iterator, std::string()> {
+
+  EndMessageParser(): EndMessageParser::base_type( start ) {
+
+    // TODO: need to process !ENDMSG!
+    // TODO: need to process error message
+
+    start %= (+(qi::char_ - qi::char_(","))) >> qi::lit( ",!ENDMSG!," );
+
+  }
+
+  qi::rule<Iterator, std::string()> start;
+
+};
+
 // http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
 
 OptionChainQuery::OptionChainQuery(
-  fConnected_t&& fConnected, fOptionChain_t&& fOptionChain, fDone_t&& fDone
+  fConnected_t&& fConnected
 )
 : Network<OptionChainQuery>( "127.0.0.1", 9100 ),
   m_fConnected( std::move( fConnected ) ),
-  m_fOptionChain( std::move( fOptionChain ) ),
-  m_fDone( std::move( fDone ) )
+  m_state( EState::quiescent )
 {
   assert( m_fConnected );
-  assert( m_fOptionChain );
-  assert( m_fDone );
 }
 
 OptionChainQuery::~OptionChainQuery(void) {
@@ -101,15 +111,12 @@ void OptionChainQuery::Disconnect() {
 }
 
 void OptionChainQuery::OnNetworkDisconnected() {
-
 }
 
 void OptionChainQuery::OnNetworkError( size_t e ) {
-
 }
 
 void OptionChainQuery::OnNetworkSendDone() {
-
 }
 
 void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
@@ -118,28 +125,82 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
   const_iterator_t end = (*buffer).end();
 
-  FutureOptionChainParser<const_iterator_t> grammarFutureOptionChain;
-
   OptionChain chain;
   bool bOk;
 
-  {
-    const_iterator_t bgn = (*buffer).begin();
-    bOk = parse( bgn, end, grammarFutureOptionChain, chain );
-  }
+  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
 
-  if ( bOk ) {
-    m_fOptionChain( chain );
-  }
-  else {
-    const_iterator_t bgn = (*buffer).begin();
-    if ( parse( bgn, end, ruleEndMsg ) ) {
-      m_fDone( true );
-    }
-    else {
-      m_fDone( false );
-      //if ( parse( bgn, end, ruleErrorInvalidSymbol ) ) {
-    }
+  switch ( m_state ) {
+    case EState::quiescent:
+      //std::cout << "EState::quiescent" << std::endl;
+      break;
+    case EState::reply:
+      {
+        //std::cout << "EState::reply" << std::endl;
+        FutureOptionChainParser<const_iterator_t> grammarFutureOptionChain;
+        const_iterator_t bgn = (*buffer).begin();
+        bOk = parse( bgn, end, grammarFutureOptionChain, chain );
+
+        if ( bOk ) {
+          //std::cout << "bOk true" << std::endl;
+          assert( 0 < chain.sKey.size() );
+        }
+        else {
+          std::cout
+            << "OptionChainQuery::OnNetworkLineBuffer parse error: "
+            << chain.sKey
+            << "'," << chain.vCall.size()
+            << "," << chain.vPut.size()
+            << std::endl;
+          const_iterator_t bgn = (*buffer).begin();
+          const std::string sContent( bgn, end ); // debug statement
+          std::cout << sContent << std::endl;
+          // TODO: match the error message
+          //   but we are parsing errors at this point
+        }
+
+        if ( 0 < chain.sKey.size() ) {
+          mapRequest_t::const_iterator iter = m_mapRequest.find( chain.sKey );
+          if ( m_mapRequest.end() == iter ) {
+            std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find key " << chain.sKey << std::endl;
+          }
+          else {
+            iter->second( chain );
+          }
+        }
+
+        //if ( parse( bgn, end, ruleErrorInvalidSymbol ) ) {}
+
+        m_state = EState::done;
+      }
+      break;
+    case EState::done:
+      {
+        //std::cout << "EState::done" << std::endl;
+        const_iterator_t bgn = (*buffer).begin();
+        std::string sKey;
+        EndMessageParser<const_iterator_t> grammarEndMsg;
+        if ( parse( bgn, end, grammarEndMsg, sKey ) ) { // 'QGCZ21,!ENDMSG!,'
+          std::cout << "parsed for key: " << sKey << std::endl;
+          mapRequest_t::const_iterator iter = m_mapRequest.find( sKey );
+          if ( m_mapRequest.end() == iter ) {
+            const_iterator_t bgn = (*buffer).begin();
+            const std::string sContent( bgn, end ); // debug statement
+            std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find ending key '" << sKey << "' in '" << sContent << "'" << std::endl;
+          }
+          else {
+            m_mapRequest.erase( iter );  // may need to do this on endmsg only
+          }
+        }
+        else {
+          const_iterator_t bgn = (*buffer).begin();
+          const std::string sContent( bgn, end ); // debug statement
+          std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't parse: '" << sContent << "'" << std::endl;
+        }
+
+        m_state = EState::quiescent;
+      }
+      break;
   }
 
   GiveBackBuffer( buffer );
@@ -159,7 +220,7 @@ void OptionChainQuery::QueryFutureChain(
     << sMonthCodes << ","
     << sYears << ","
     << sNearMonths << ","
-    << sRequestId
+    << ( 0 == sRequestId.size() ? sSymbol : sRequestId )
     << "\n";
   this->Send( ss.str().c_str() );
 }
@@ -170,10 +231,12 @@ void OptionChainQuery::QueryFutureOptionChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    const std::string& sRequestId
+    const std::string& sRequestId,
+    fOptionChain_t&& fOptionChain
     ) {
+  assert( 0 < sSymbol.size() );
+  const std::string sMapKey(0 == sRequestId.size() ? sSymbol : sRequestId );
   std::stringstream ss;
-  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
   ss
     << "CFO,"
     << sSymbol << ","
@@ -181,8 +244,11 @@ void OptionChainQuery::QueryFutureOptionChain(
     << sMonthCodes << ","
     << sYears << ","
     << sNearMonths << ","
-    << sRequestId
+    << sMapKey
     << "\n";
+  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
+  m_mapRequest.emplace( mapRequest_t::value_type( sMapKey, std::move( fOptionChain ) ) );
+  m_state = EState::reply;
   this->Send( ss.str().c_str() );
 }
 
@@ -197,7 +263,6 @@ void OptionChainQuery::QueryEquityOptionChain(
     const std::string& sRequestId
     ) {
   std::stringstream ss;
-  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
   ss
     << "CEO,"
     << sSymbol << ","
@@ -208,7 +273,7 @@ void OptionChainQuery::QueryEquityOptionChain(
     << sFilterType << ","
     << sFilterOne << ","
     << sFilterTwo << ","
-    << sRequestId
+    << ( 0 == sRequestId.size() ? sSymbol : sRequestId )
     << "\n";
   this->Send( ss.str().c_str() );
 }

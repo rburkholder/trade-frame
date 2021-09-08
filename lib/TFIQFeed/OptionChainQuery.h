@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <functional>
@@ -34,6 +35,7 @@ public:
 
   using vSymbol_t = std::vector<std::string>;
   struct OptionChain {
+    std::string sKey;
     vSymbol_t vCall;
     vSymbol_t vPut;
   };
@@ -42,7 +44,8 @@ public:
   using fOptionChain_t = std::function<void(const OptionChain&)>;
   using fDone_t = std::function<void(bool)>; // TRUE == ok
 
-  OptionChainQuery( fConnected_t&&, fOptionChain_t&&, fDone_t&& );
+  //OptionChainQuery( fConnected_t&&, fOptionChain_t&&, fDone_t&& );
+  OptionChainQuery( fConnected_t&& );
   ~OptionChainQuery( void );
 
   void Connect();
@@ -62,7 +65,8 @@ public:
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
     const std::string& sNearMonths, // 0..4
-    const std::string& sRequestId   // not implemented
+    const std::string& sRequestId,
+    fOptionChain_t&&
     );
 
   void QueryEquityOptionChain(
@@ -92,9 +96,18 @@ protected:
 
 private:
 
+  // NOTE: this isn't going to work with concurrent requests
+  //   may need to store state in the map entry
+
+  enum class EState { quiescent, reply, done };
+  EState m_state;
+
+  std::mutex m_mutexMapRequest;
+
   fConnected_t m_fConnected;
-  fOptionChain_t m_fOptionChain;
-  fDone_t m_fDone;
+
+  using mapRequest_t = std::map<std::string,fOptionChain_t>;
+  mapRequest_t m_mapRequest;
 
 };
 
