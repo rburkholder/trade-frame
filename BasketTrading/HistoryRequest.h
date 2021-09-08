@@ -69,6 +69,11 @@ private:
     Entry( const std::string&& sSymbol_, uint16_t nBar_, fBar_t&& fBar_, fDone_t&& fDone_ )
     : sSymbol( std::move( sSymbol_ ) ), nBar( nBar_ ),
       fBar( std::move( fBar_ ) ), fDone( std::move( fDone_ ) ) {}
+    void Clear() {
+      sSymbol.clear();
+      fBar = nullptr;
+      fDone = nullptr;
+    }
   };
 
   using vEntry_t = std::vector<Entry>;

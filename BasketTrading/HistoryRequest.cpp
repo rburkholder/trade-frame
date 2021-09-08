@@ -45,6 +45,7 @@ HistoryRequest::HistoryRequest(
       }
       else {
         m_bInProcess = false;
+        m_entryCurrent.Clear();
       }
     }
   );
