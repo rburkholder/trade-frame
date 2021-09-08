@@ -177,8 +177,6 @@ private:
   using mapAcquisition_t = std::map<std::string,AcquireFundamentals>;
   mapAcquisition_t m_mapAcquisition;
 
-  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery;
-
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
@@ -304,7 +302,8 @@ private:
   using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
   static const mapSpecs_t m_mapSpecs;
 
-  std::unique_ptr<HistoryRequest> m_pHistoryRequest;
+  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+  std::unique_ptr<HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect
 
   void ProcessSymbolList();
   void AddUnderlying( pWatch_t );

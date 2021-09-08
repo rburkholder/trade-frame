@@ -350,11 +350,16 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
 
     // TODO: check if instrument already exists prior to building a new one
 
-    m_pHistoryRequest = std::make_unique<HistoryRequest>(
-      [this](){ // fConnected_t
-        ProcessSymbolList();
+    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+      [this](){
+        m_pHistoryRequest = std::make_unique<HistoryRequest>(
+          [this](){ // fConnected_t
+            ProcessSymbolList();
+          }
+        );
       }
     );
+    m_pOptionChainQuery->Connect();
 
   }
 }
@@ -454,13 +459,15 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
     assert( result.second );
     UnderlyingWithStrategies& uws( result.first->second );
 
+    const std::string& sIqfSymbol( pWatch->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+
     m_pHistoryRequest->Request(
-      pWatch->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ),
+      sIqfSymbol,
       200,
       [&uws]( const ou::tf::Bar& bar ) { // fBar_t
         uws.m_barsHistory.Append( bar );
       },
-      [this,&uws,sUnderlying](){ // fDone_t
+      [this,&uws,sUnderlying,&sIqfSymbol](){ // fDone_t
         const ou::tf::Bar& bar( uws.m_barsHistory.last() );
         assert( m_dtLatestEod <= bar.DateTime() );
         uws.statistics.setPivots.CalcPivots( bar );
@@ -474,6 +481,13 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           ps.GetPivotValue( PS::S1 ), ps.GetPivotValue( PS::S2 )
           );
 
+        m_pOptionChainQuery->QueryFutureOptionChain(
+          sIqfSymbol,
+          "", "", "", "", sIqfSymbol,
+          [this]( const ou::tf::iqfeed::OptionChainQuery::OptionChain& chain ){
+            std::cout << "chain request for " << chain.sKey << std::endl;
+          }
+          );
 //        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
 
         m_pOptionEngine->RegisterWatch( uws.pUnderlying->GetWatch() );
