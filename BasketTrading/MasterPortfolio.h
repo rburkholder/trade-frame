@@ -176,6 +176,8 @@ private:
   };
   using mapAcquisition_t = std::map<std::string,AcquireFundamentals>;
   mapAcquisition_t m_mapAcquisition;
+  using fInstrument_t = std::function<void(pInstrument_t)>;
+  void BuildInstrument( const std::string& sIQFeedSymbol, fInstrument_t&& );
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
@@ -284,6 +286,20 @@ private:
   using mapStrategyCache_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyCache>;
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
+
+  // ---
+  struct DetailsRequest {
+    std::string sFiller;
+  };
+
+  using mapDetailsRequest_t = std::map<std::string,DetailsRequest>;
+
+  mapDetailsRequest_t m_mapDetailsRequest_ToDo;
+  mapDetailsRequest_t m_mapDetailsRequest_InProgress;
+  mapDetailsRequest_t m_mapDetailsRequest_Results;
+
+  void ProcessOptionChainList();
+  // ---
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
