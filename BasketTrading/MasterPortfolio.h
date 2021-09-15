@@ -174,6 +174,7 @@ private:
       // a watch is required in order to obtain the fundamental
     }
   };
+  std::mutex m_mutexAcquireFundamentals;
   using mapAcquisition_t = std::map<std::string,AcquireFundamentals>;
   mapAcquisition_t m_mapAcquisition;
   using fInstrument_t = std::function<void(pInstrument_t)>;
@@ -294,9 +295,9 @@ private:
 
   using mapDetailsRequest_t = std::map<std::string,DetailsRequest>;
 
-  mapDetailsRequest_t m_mapDetailsRequest_ToDo;
-  mapDetailsRequest_t m_mapDetailsRequest_InProgress;
-  mapDetailsRequest_t m_mapDetailsRequest_Results;
+  mapDetailsRequest_t m_mapDetailsRequest_ToDo; // might be a set
+  mapDetailsRequest_t m_mapDetailsRequest_InProgress; // might be a set
+  mapDetailsRequest_t m_mapDetailsRequest_Results; // holds instrument?
 
   void ProcessOptionChainList();
   // ---

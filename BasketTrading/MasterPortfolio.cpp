@@ -398,6 +398,10 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
     pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
+    // TODO: need to factor out m_mapAcquisition for better generalization,
+    //   that is, use a self referenced shared_ptr like asio to maintain self
+    //   release self when done.
+    std::lock_guard<std::mutex> lock( m_mutexAcquireFundamentals );
     auto pair
       = m_mapAcquisition.emplace( std::make_pair(
         sIQFeedSymbol,
@@ -415,18 +419,17 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
             m_pIB->RequestContractDetails(
               fundamentals.sExchangeRoot,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
-              [this,pWatch,sIQFeedSymbol,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                // the contract details fill in the contract in the instrument, which can then be passed back to the caller
-                //   as a fully defined, registered instrument
+              [this,pWatch,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
                 assert( 0 != pInstrument->GetContract() );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                // TODO: test that the instument is the same as in the watch?
                 fInstrument__( pInstrument );
-                std::cout << "done part 2 of m_mapAcquisition: " << sIQFeedSymbol << std::endl;
-                m_mapAcquisition.erase( sIQFeedSymbol ); // last to execute
               },
-              nullptr  // request complete doesn't need a function
+              [this,sIQFeedSymbol](){
+                std::cout << "done part 2 of m_mapAcquisition: " << sIQFeedSymbol << std::endl;
+                std::lock_guard<std::mutex> lock( m_mutexAcquireFundamentals );
+                m_mapAcquisition.erase( sIQFeedSymbol ); // last to execute
+              }
               );
             std::cout << "done part 1 of m_mapAcquisition: " << sIQFeedSymbol << std::endl;
           }
@@ -863,6 +866,13 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
 }
 
 void MasterPortfolio::ProcessOptionChainList() {
+
+//  BuildInstrument(
+//    sSymbol,
+//    [this](pInstrument_t pInstrument){
+//      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+//      AddUnderlying( pWatch );
+//    } );
 /*
   re-use some of the preceeding instrument construction code
   check if instrument exists, load if it does
