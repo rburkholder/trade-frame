@@ -395,8 +395,6 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
 
     const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
-    // TODO: if trd has day code for option, then skip the query for fundamentals
-
     pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 

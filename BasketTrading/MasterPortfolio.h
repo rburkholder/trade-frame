@@ -169,13 +169,20 @@ private:
     }
 
     void Start() {
-      self = this->shared_from_this();
+      self = this->shared_from_this(); // update the reference counter for self-retention
       pWatch->OnFundamentals.Add( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
       pWatch->OnTrade.Add( MakeDelegate( this, &AcquireFundamentals::HandleTrade ) );
       pWatch->StartWatch();
     }
 
+  private:
+
+    pAcquireFundamentals_t self;
+    pWatch_t pWatch;
+    fDone_t fDone;
+
     void HandleFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
+      // the watch will retain variables from the fundamentals message
       pWatch->StopWatch();
       pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
       pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
@@ -185,14 +192,9 @@ private:
 
     void HandleTrade( const ou::tf::Trade& trade ) {
       // a watch is required in order to obtain the fundamental
+      // no action required, just a placeholder
     }
 
-    //pAcquireFundamentals_t getptr() { return shared_from_this(); }
-
-  private:
-    pAcquireFundamentals_t self;
-    pWatch_t pWatch;
-    fDone_t fDone;
   };
 
   using fInstrument_t = std::function<void(pInstrument_t)>;
