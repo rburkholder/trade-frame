@@ -395,17 +395,13 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
 
     const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
+    // TODO: if trd has day code for option, then skip the query for fundamentals
+
     pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
-    // TODO: need to factor out m_mapAcquisition for better generalization,
-    //   that is, use a self referenced shared_ptr like asio to maintain self
-    //   release self when done.
-    std::lock_guard<std::mutex> lock( m_mutexAcquireFundamentals );
-    auto pair
-      = m_mapAcquisition.emplace( std::make_pair(
-        sIQFeedSymbol,
-        AcquireFundamentals(
+    AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
+      = std::make_shared<AcquireFundamentals>(
           std::move( pWatch ),
           [this,sIQFeedSymbol,&trd,fInstrument_=std::move(fInstrument)]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
@@ -419,25 +415,21 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
             m_pIB->RequestContractDetails(
               fundamentals.sExchangeRoot,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
-              [this,pWatch,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+              [pWatch,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
                 assert( 0 != pInstrument->GetContract() );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 fInstrument__( pInstrument );
               },
-              [this,sIQFeedSymbol](){
-                std::cout << "done part 2 of m_mapAcquisition: " << sIQFeedSymbol << std::endl;
-                std::lock_guard<std::mutex> lock( m_mutexAcquireFundamentals );
-                m_mapAcquisition.erase( sIQFeedSymbol ); // last to execute
+              [sIQFeedSymbol](){
+                // TODO: how to test for incomplete done?
+                std::cout << "MasterPortfolio::BuildInstrument end: " << sIQFeedSymbol << std::endl;
               }
               );
-            std::cout << "done part 1 of m_mapAcquisition: " << sIQFeedSymbol << std::endl;
+            std::cout << "MasterPortfolio::BuildInstrument begin: " << sIQFeedSymbol << std::endl;
           }
-        )
-      ) ) ;
-    assert( pair.second );
-    AcquireFundamentals& af( pair.first->second );
-    af.Start();
+        );
+    pAcquireFundamentals->Start();
   }
 }
 
