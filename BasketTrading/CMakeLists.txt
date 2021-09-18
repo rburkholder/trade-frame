@@ -25,6 +25,7 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 
 set(
   file_h
+    AcquireFundamentals.h
     BasketTrading.h
     DailyHistory.h
     HistoryRequest.h
@@ -44,6 +45,7 @@ set(
 
 set(
   file_cpp
+    AcquireFundamentals.cpp
     BasketTrading.cpp
     DailyHistory.cpp
     HistoryRequest.cpp

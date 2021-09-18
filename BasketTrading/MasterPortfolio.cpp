@@ -35,6 +35,7 @@
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
 #include "MasterPortfolio.h"
+#include "AcquireFundamentals.h"
 
 namespace {
 

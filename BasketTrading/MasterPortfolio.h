@@ -152,51 +152,6 @@ private:
   wxTreeItemId m_idTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
 
-  class AcquireFundamentals: public std::enable_shared_from_this<AcquireFundamentals> {
-  public:
-
-    using pAcquireFundamentals_t = std::shared_ptr<AcquireFundamentals>;
-    using fDone_t = std::function<void(pWatch_t)>;
-
-    AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ )
-    : pWatch( std::move( pWatch_ ) ), fDone( std::move( fDone_ ) ) {
-      assert( ou::tf::keytypes::EProviderIQF == pWatch->GetProvider()->ID() );
-      std::cout << "AcquireFundamentals::AcquireFundamentals(): " << pWatch->GetInstrumentName() << std::endl;
-    }
-
-    ~AcquireFundamentals() {
-      std::cout << "AcquireFundamentals::~AcquireFundamentals(): " << pWatch->GetInstrumentName() << std::endl;
-    }
-
-    void Start() {
-      self = this->shared_from_this(); // update the reference counter for self-retention
-      pWatch->OnFundamentals.Add( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
-      pWatch->OnTrade.Add( MakeDelegate( this, &AcquireFundamentals::HandleTrade ) );
-      pWatch->StartWatch();
-    }
-
-  private:
-
-    pAcquireFundamentals_t self;
-    pWatch_t pWatch;
-    fDone_t fDone;
-
-    void HandleFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
-      // the watch will retain variables from the fundamentals message
-      pWatch->StopWatch();
-      pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
-      pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
-      fDone( pWatch );  // fundamentals reside in watch
-      self.reset();
-    }
-
-    void HandleTrade( const ou::tf::Trade& trade ) {
-      // a watch is required in order to obtain the fundamental
-      // no action required, just a placeholder
-    }
-
-  };
-
   using fInstrument_t = std::function<void(pInstrument_t)>;
   void BuildInstrument( const std::string& sIQFeedSymbol, fInstrument_t&& );
 
