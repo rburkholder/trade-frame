@@ -544,12 +544,18 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
             // TODO: will have to do this during/after chains for all underlyings are retrieved
             // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
-            for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+            for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
+              //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
               m_pDetailsOptions->Add( std::move( value ) );
             }
-            for ( const query_t::vSymbol_t::value_type& value: chains.vPut ) {
-              m_pDetailsOptions->Add( std::move( value ) );
-            }
+            //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+            //  std::cout << "MasterPortfolio::AddUnderlying call: " << value << std::endl;
+            //  m_pDetailsOptions->Add( std::move( value ) );
+            //}
+            //for ( const query_t::vSymbol_t::value_type& value: chains.vPut ) {
+            //  std::cout << "MasterPortfolio::AddUnderlying put: " << value << std::endl;
+            //  m_pDetailsOptions->Add( std::move( value ) );
+            //}
           }
           );
 //        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );

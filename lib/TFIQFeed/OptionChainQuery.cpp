@@ -28,8 +28,9 @@
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::OptionChainQuery::OptionChain,
   (std::string, sKey)
-  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
-  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vPut)
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption)
+  //(ou::tf::iqfeed::OptionChainQuery::vCall_t, vCall)
+  //(ou::tf::iqfeed::OptionChainQuery::vPut_t, vPut)
   )
 
 namespace qi = boost::spirit::qi;
@@ -46,7 +47,6 @@ namespace {
 
 }
 
-using vSymbol_t = OptionChainQuery::vSymbol_t;
 using OptionChain = OptionChainQuery::OptionChain;
 
 template<typename Iterator>
@@ -55,13 +55,18 @@ struct FutureOptionChainParser: qi::grammar<Iterator, OptionChain()> {
   FutureOptionChainParser(): FutureOptionChainParser::base_type( start ) {
 
     symbol %= (+(qi::char_ - qi::char_(",:"))) >> qi::lit(',');
+    //calls %= +symbol;
+    //puts %= +symbol;
     options %= +symbol;
+    //start %= symbol >> calls >> qi::lit(':') >> qi::lit(',') >> puts >> qi::eoi;
     start %= symbol >> options >> qi::lit(':') >> qi::lit(',') >> options >> qi::eoi;
 
   }
 
   qi::rule<Iterator, std::string()> symbol;
-  qi::rule<Iterator, vSymbol_t()> options;
+  //qi::rule<Iterator, OptionChainQuery::vCall_t()> calls;
+  //qi::rule<Iterator, OptionChainQuery::vPut_t()> puts;
+  qi::rule<Iterator, OptionChainQuery::vSymbol_t()> options;
   qi::rule<Iterator, OptionChain()> start;
 
 };
@@ -119,6 +124,10 @@ void OptionChainQuery::OnNetworkError( size_t e ) {
 void OptionChainQuery::OnNetworkSendDone() {
 }
 
+// TODO: will need to perform a pre-parse to obtain the key
+//   then lookup in map for state
+//   then full parse for appropriate result
+
 void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
   using const_iterator_t = linebuffer_t::const_iterator;
@@ -149,8 +158,9 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
           std::cout
             << "OptionChainQuery::OnNetworkLineBuffer parse error: "
             << chain.sKey
-            << "'," << chain.vCall.size()
-            << "," << chain.vPut.size()
+            << "'," << chain.vOption.size()
+            //<< "'," << chain.vCall.size()
+            //<< "," << chain.vPut.size()
             << std::endl;
           const_iterator_t bgn = (*buffer).begin();
           const std::string sContent( bgn, end ); // debug statement
@@ -181,7 +191,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         std::string sKey;
         EndMessageParser<const_iterator_t> grammarEndMsg;
         if ( parse( bgn, end, grammarEndMsg, sKey ) ) { // 'QGCZ21,!ENDMSG!,'
-          std::cout << "parsed for key: " << sKey << std::endl;
+          //std::cout << "parsed for key: " << sKey << std::endl;
           mapRequest_t::const_iterator iter = m_mapRequest.find( sKey );
           if ( m_mapRequest.end() == iter ) {
             const_iterator_t bgn = (*buffer).begin();

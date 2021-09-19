@@ -34,10 +34,13 @@ public:
   enum Side { put='p', call='c' };
 
   using vSymbol_t = std::vector<std::string>;
+  using vCall_t = vSymbol_t;
+  using vPut_t = vSymbol_t;
   struct OptionChain {
     std::string sKey;
-    vSymbol_t vCall;
-    vSymbol_t vPut;
+    //vCall_t vCall;
+    //vPut_t vPut;
+    vSymbol_t vOption;
   };
 
   using fConnected_t = std::function<void(void)>;
