@@ -219,11 +219,13 @@ void IBTWS::RequestContractDetails(
     break;
   case InstrumentType::Future:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
+    contract.tradingClass = sSymbolBaseName;
     if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
     if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options, IQFeed supplied
     break;
   case InstrumentType::FuturesOption:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
+    contract.tradingClass = sSymbolBaseName;
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
     if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
@@ -741,7 +743,7 @@ void IBTWS::error(const int id, const int errorCode, const std::string errorStri
 //      m_ss.str("");
 //      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
 //      OutputDebugString( m_ss.str().c_str() );
-      std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "status " << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
   }
 }
@@ -881,8 +883,8 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     << contractDetails.summary.strike << ", "
     << contractDetails.summary.right  << ", "
     << contractDetails.summary.expiry
-    << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+    ;
+  std::cout << m_ss.str() << std::endl;
 #endif
 
   assert( 0 < contractDetails.summary.conId );
@@ -932,7 +934,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   using tzATL_t = boost::date_time::local_adjustor<ptime, -4, us_dst>;
 
   if ( ( "EST" != contractDetails.timeZoneId ) && ( "EST5EDT" != contractDetails.timeZoneId ) ) {
-    std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
+    //std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
   }
   else {
     // use for time zone conversion to UTC in the next part if not EST
@@ -1140,17 +1142,19 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
         if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
         if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
       }
-      try {
-        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date(
-          boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
-          boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
-          boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
-          ) );
-      }
-      catch ( std::exception e ) {
-        std::cout << "IB option contract expiry is funny: " << e.what() << " -- " << contract.localSymbol << std::endl;
-      }
-      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
+//      try {
+//        futures option looks like '"OG2V1 C1590"'
+//        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date(
+//          boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
+//          boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
+//          boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
+//          ) );
+//      }
+//      catch ( std::exception e ) {
+//        std::cout << "IB option contract expiry is funny: " << e.what() << " -- " << contract.localSymbol << std::endl;
+//      }
+//      SetCommonCalcExpiry probaby no longer required
+//      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
       if ( 0 == pInstrument.get() ) {
