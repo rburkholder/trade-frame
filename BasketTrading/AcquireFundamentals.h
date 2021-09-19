@@ -21,10 +21,9 @@
 
  #include <TFTrading/Watch.h>
 
- #include <memory>
  #include <functional>
 
-class AcquireFundamentals: public std::enable_shared_from_this<AcquireFundamentals> {
+class AcquireFundamentals {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -39,7 +38,6 @@ public:
 
 private:
 
-  pAcquireFundamentals_t self;
   pWatch_t pWatch;
   fDone_t fDone;
 
