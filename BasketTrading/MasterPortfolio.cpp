@@ -35,7 +35,6 @@
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
 #include "MasterPortfolio.h"
-#include "AcquireFundamentals.h"
 
 namespace {
 
@@ -369,19 +368,56 @@ void MasterPortfolio::ProcessSymbolList() {
 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
 
-  for ( const std::string& sSymbol: m_setSymbols ) {
+  if ( !m_pDetailsOptions ) {
+    m_pDetailsOptions = std::make_unique<Details>(
+      [this](const std::string& sSymbol, Details& details, fInstrument_t&& fInstrument, fInstrumentDone_t&& fDone ){
+        BuildInstrument(
+          sSymbol,
+          details,
+          [this,fInstrument_=std::move(fInstrument)]( pInstrument_t pInstrument ){
+            //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+            ProcessOptionChainElement( pInstrument );
+            fInstrument_( pInstrument );
+          },
+          [fDone_=std::move(fDone)](const std::string& sSymbol){
+            fDone_( sSymbol );
+          }
+          );
+      }
+    );
+  }
 
-    BuildInstrument(
-      sSymbol,
-      [this](pInstrument_t pInstrument){
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
-        AddUnderlying( pWatch );
-      } );
+  if ( !m_pDetailsUnderlying ) {
+    m_pDetailsUnderlying = std::make_unique<Details>(
+      [this](const std::string& sSymbol, Details& details, fInstrument_t&& fInstrument, fInstrumentDone_t&& fDone ){
+        BuildInstrument(
+          sSymbol,
+          details,
+          [this,fInstrument_=std::move(fInstrument)]( pInstrument_t pInstrument ){
+            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+            AddUnderlying( pWatch );
+            fInstrument_( pInstrument );
+          },
+          [fDone_=std::move(fDone)](const std::string& sSymbol){
+            fDone_( sSymbol );
+          }
+          );
+      }
+    );
+  }
+
+  for ( const std::string& sSymbol: m_setSymbols ) {
+    m_pDetailsUnderlying->Add( std::move( sSymbol ) );
   }
 
 }
 
-void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
+void MasterPortfolio::BuildInstrument(
+  const std::string& sIQFeedSymbol,
+  Details& details,
+  fInstrument_t&& fInstrument,
+  fInstrumentDone_t&& fDone
+  ) {
 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
 
@@ -389,7 +425,7 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
 
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
-    std::cout << "already have: " << pInstrument->GetInstrumentName() << std::endl;
+    std::cout << "MasterPortfolio::BuildInstrument existing: " << pInstrument->GetInstrumentName() << std::endl;
     fInstrument( pInstrument );
   }
   else { // bulid a new instrument
@@ -402,7 +438,7 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
     AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
       = std::make_shared<AcquireFundamentals>(
           std::move( pWatch ),
-          [this,sIQFeedSymbol,&trd,fInstrument_=std::move(fInstrument)]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
+          [this,sIQFeedSymbol,&trd,fInstrument_=std::move(fInstrument),fDone_=std::move(fDone)]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
             const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
             const std::string sGenericName
@@ -411,23 +447,35 @@ void MasterPortfolio::BuildInstrument( const std::string& sIQFeedSymbol, fInstru
               = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, fundamentals );
             pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
+            std::cout
+              << "MasterPortfolio::BuildInstrument build: "
+              << sIQFeedSymbol << ","
+              << sGenericName << ","
+              << fundamentals.sExchangeRoot
+              << std::endl;
+
             m_pIB->RequestContractDetails(
               fundamentals.sExchangeRoot,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
               [pWatch,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                //std::cout << "MasterPortfolio::BuildInstrument contract: " << pInstrument->GetInstrumentName() << std::endl;
                 assert( 0 != pInstrument->GetContract() );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 fInstrument__( pInstrument );
               },
-              [sIQFeedSymbol](){
+              [sIQFeedSymbol,fDone__=std::move(fDone_)](){
                 // TODO: how to test for incomplete done?
-                std::cout << "MasterPortfolio::BuildInstrument end: " << sIQFeedSymbol << std::endl;
+                //std::cout << "MasterPortfolio::BuildInstrument done: " << sIQFeedSymbol << std::endl;
+                if ( nullptr != fDone__ ) {
+                  fDone__( sIQFeedSymbol );
+                }
               }
               );
-            std::cout << "MasterPortfolio::BuildInstrument begin: " << sIQFeedSymbol << std::endl;
+            //std::cout << "MasterPortfolio::BuildInstrument begin: " << sIQFeedSymbol << std::endl;
           }
         );
+    details.Add( sIQFeedSymbol, pAcquireFundamentals );
     pAcquireFundamentals->Start();
   }
 }
@@ -493,16 +541,15 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           "", "", "", "", sIqfSymbol,
           [this]( const query_t::OptionChain& chains ){
             std::cout << "chain request for " << chains.sKey << std::endl;
-            assert( 0 == m_mapDetailsRequest_ToDo.size() );
-            assert( 0 == m_mapDetailsRequest_InProgress.size() );
-            assert( 0 == m_mapDetailsRequest_Results.size() );
+
+            // TODO: will have to do this during/after chains for all underlyings are retrieved
+            // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
             for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-              m_mapDetailsRequest_ToDo.emplace( std::pair( std::move( value ), DetailsRequest() ) );
+              m_pDetailsOptions->Add( std::move( value ) );
             }
             for ( const query_t::vSymbol_t::value_type& value: chains.vPut ) {
-              m_mapDetailsRequest_ToDo.emplace( std::pair( std::move( value ), DetailsRequest() ) );
+              m_pDetailsOptions->Add( std::move( value ) );
             }
-            ProcessOptionChainList();
           }
           );
 //        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
@@ -856,7 +903,9 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
 
 }
 
-void MasterPortfolio::ProcessOptionChainList() {
+void MasterPortfolio::ProcessOptionChainElement( pInstrument_t pInstrument ) {
+
+  std::cout << "ProcessOptionChainElement: " << pInstrument->GetInstrumentName() << std::endl;
 
 //  BuildInstrument(
 //    sSymbol,
@@ -864,17 +913,6 @@ void MasterPortfolio::ProcessOptionChainList() {
 //      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 //      AddUnderlying( pWatch );
 //    } );
-/*
-  re-use some of the preceeding instrument construction code
-  check if instrument exists, load if it does
-  otherwise:
-    submit a watch request with a call back on the fundamental
-    once fundamental arrives
-      build instrument
-      register instrument
-  in both cases:
-    add to chain for the underlying
-*/
 }
 
 void MasterPortfolio::ClosePositions( void ) {

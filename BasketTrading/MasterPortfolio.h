@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <set>
 #include <map>
 #include <string>
 #include <functional>
@@ -37,6 +38,7 @@
 
 #include "Underlying.h"
 #include "ManageStrategy.h"
+#include "AcquireFundamentals.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -51,6 +53,7 @@ class Engine;
 
 class wxMenu;
 class HistoryRequest;
+
 
 class MasterPortfolio {
   friend class boost::serialization::access;
@@ -151,9 +154,6 @@ private:
   wxTreeItemId m_idTreeUnderlying;
   wxTreeItemId m_idTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
-
-  using fInstrument_t = std::function<void(pInstrument_t)>;
-  void BuildInstrument( const std::string& sIQFeedSymbol, fInstrument_t&& );
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
@@ -263,18 +263,104 @@ private:
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
-  // ---
-  struct DetailsRequest {
-    std::string sFiller;
+  using fInstrument_t = std::function<void(pInstrument_t)>;
+  using fInstrumentDone_t = std::function<void(const std::string&)>;
+
+  class Details { // redo with enable_shared_from_this ?
+  public:
+
+    using pAcquireFundamentals_t = AcquireFundamentals::pAcquireFundamentals_t;
+    using fBuildInstrument_t = std::function<void(const std::string&, Details&, fInstrument_t&&, fInstrumentDone_t&& )>;
+
+    Details( fBuildInstrument_t&& fBuildInstrument )
+    : m_fBuildInstrument( std::move( fBuildInstrument ) )
+    {
+      assert( nullptr != m_fBuildInstrument );
+    }
+
+    void Add( const std::string&& sSymbol ) {
+      std::lock_guard<std::mutex> lock( m_mutexDetails );
+      //std::cout << "Details::Add " << sSymbol << "," << m_setSymbol.size() << std::endl;
+      setSymbol_t::const_iterator iter = m_setSymbolWO.find( sSymbol );
+      if ( m_setSymbolWO.end() == iter ) {
+        m_setSymbolWO.emplace( sSymbol );
+        m_setSymbol.emplace( std::move( sSymbol ) );
+      }
+      else {
+        std::cout << "Details::Add " << sSymbol << " exists in m_setSymbolWO" << std::endl;
+      }
+      Update();
+    }
+
+    void Add( const std::string& sSymbol, pAcquireFundamentals_t& pAcquireFundamentals ) {
+      //std::lock_guard<std::mutex> lock( m_mutexDetails );
+      //assert( !m_mutexDetails.try_lock() ); // lock needs to be already in place
+      m_mapAcquisition.emplace( std::make_pair( sSymbol, pAcquireFundamentals ) );
+    }
+
+    void Clear() {
+      std::lock_guard<std::mutex> lock( m_mutexDetails );
+      assert( 0 == m_mapAcquisition.size() );
+      m_setSymbol.clear();
+      //m_mapDetail.clear();
+    }
+
+    // TOOD: add a done item to move to next underlying
+
+  private:
+
+    using setSymbol_t = std::set<std::string>;
+    using mapAcquisition_t = std::map<std::string,pAcquireFundamentals_t>;
+
+    setSymbol_t m_setSymbolWO;
+    setSymbol_t m_setSymbol;
+    mapAcquisition_t m_mapAcquisition;
+
+    fBuildInstrument_t m_fBuildInstrument;
+
+    std::mutex m_mutexDetails;
+
+    void Update() { // prerequisite: lock is set, can this be asserted?
+      //assert( !m_mutexDetails.try_lock() ); // lock needs to be already in place
+      if ( 5 > m_mapAcquisition.size() ) {
+        if ( 0 != m_setSymbol.size() ) {
+          setSymbol_t::iterator iter = m_setSymbol.begin();
+          const std::string sSymbol = std::move( *iter );
+          m_setSymbol.erase( iter );
+          //std::cout << "Details::Update::BuildInstrument " << sSymbol << std::endl;
+          m_fBuildInstrument(
+            sSymbol,
+            *this,
+            [sSymbol](pInstrument_t pInstrument){
+              //std::cout << "Details::Update instrument " << sSymbol << std::endl;
+              //std::lock_guard<std::mutex> lock( m_mutexDetails );
+              //m_mapDetail.emplace(
+              //  std::make_pair( sSymbol, pInstrument )
+              //);
+            },
+            [this](const std::string& sSymbol){
+              //std::cout << "Details::Update done " << sSymbol << std::endl;
+              std::lock_guard<std::mutex> lock( m_mutexDetails );
+              mapAcquisition_t::const_iterator iter = m_mapAcquisition.find( sSymbol );
+              if ( m_mapAcquisition.end() != iter ) {
+                m_mapAcquisition.erase( iter );
+              }
+              Update();
+            });
+        }
+      }
+    }
+
   };
 
-  using mapDetailsRequest_t = std::map<std::string,DetailsRequest>;
+  void BuildInstrument( const std::string& sIQFeedSymbol, Details&, fInstrument_t&&, fInstrumentDone_t&& );
 
-  mapDetailsRequest_t m_mapDetailsRequest_ToDo; // might be a set
-  mapDetailsRequest_t m_mapDetailsRequest_InProgress; // might be a set
-  mapDetailsRequest_t m_mapDetailsRequest_Results; // holds instrument?
+  std::unique_ptr<Details> m_pDetailsUnderlying;
+  std::unique_ptr<Details> m_pDetailsOptions;
 
-  void ProcessOptionChainList();
+  // ---
+
+  void ProcessOptionChainElement( pInstrument_t );
   // ---
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
