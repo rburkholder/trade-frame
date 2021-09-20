@@ -38,7 +38,7 @@
 
 #include "Underlying.h"
 #include "ManageStrategy.h"
-#include "AcquireFundamentals.h"
+#include "BuildInstrument.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -54,20 +54,20 @@ class Engine;
 class wxMenu;
 class HistoryRequest;
 
-
 class MasterPortfolio {
   friend class boost::serialization::access;
 public:
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
-  using pPortfolio_t =  ou::tf::PortfolioManager::pPortfolio_t;
+  using pPortfolio_t = ou::tf::PortfolioManager::pPortfolio_t;
   using pPosition_t = ou::tf::PortfolioManager::pPosition_t;
   using idPortfolio_t = ou::tf::PortfolioManager::idPortfolio_t;
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
-  using fGetTableRowDef_t = std::function<const trd_t&(const std::string& sIQFeedSymbolName)>;
+  using trd_t = BuildInstrument::trd_t;
+  using fGetTableRowDef_t = BuildInstrument::fGetTableRowDef_t;
+
   using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
   using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
@@ -117,7 +117,7 @@ private:
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   //using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
-  using pInstrument_t =ou::tf::IBTWS::pInstrument_t;
+  using pInstrument_t = ou::tf::IBTWS::pInstrument_t;
 
   std::string m_sTSDataStreamStarted;
 
@@ -186,12 +186,12 @@ private:
   using iterStrategy_t = mapStrategy_t::iterator;
 
   struct UnderlyingWithStrategies {
-    wxTreeItemId idTreeItem;
     pUnderlying_t pUnderlying;
-    Statistics statistics;
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
+    wxTreeItemId idTreeItem;
+    Statistics statistics;
     ou::tf::Bars m_barsHistory;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
@@ -263,111 +263,12 @@ private:
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
-  using fInstrument_t = std::function<void(pInstrument_t)>;
-  using fInstrumentDone_t = std::function<void(const std::string&)>;
-
-  class Details { // redo with enable_shared_from_this ?
-  public:
-
-    using pAcquireFundamentals_t = AcquireFundamentals::pAcquireFundamentals_t;
-    using fBuildInstrument_t = std::function<void(const std::string&, Details&, fInstrument_t&&, fInstrumentDone_t&& )>;
-
-    Details( fBuildInstrument_t&& fBuildInstrument )
-    : m_fBuildInstrument( std::move( fBuildInstrument ) )
-    {
-      assert( nullptr != m_fBuildInstrument );
-    }
-
-    void Add( const std::string&& sSymbol ) {
-      std::lock_guard<std::mutex> lock( m_mutexDetails );
-      //std::cout << "Details::Add " << sSymbol << "," << m_setSymbol.size() << std::endl;
-      setSymbol_t::const_iterator iter = m_setSymbolWO.find( sSymbol );
-      if ( m_setSymbolWO.end() == iter ) {
-        m_setSymbolWO.emplace( sSymbol );
-        m_setSymbol.emplace( std::move( sSymbol ) );
-      }
-      else {
-        std::cout << "Details::Add " << sSymbol << " exists in m_setSymbolWO" << std::endl;
-      }
-      Update();
-    }
-
-    void Add( const std::string& sSymbol, pAcquireFundamentals_t& pAcquireFundamentals ) {
-      //std::lock_guard<std::mutex> lock( m_mutexDetails );
-      //assert( !m_mutexDetails.try_lock() ); // lock needs to be already in place
-      m_mapAcquisition.emplace( std::make_pair( sSymbol, pAcquireFundamentals ) );
-    }
-
-    void Clear() {
-      std::lock_guard<std::mutex> lock( m_mutexDetails );
-      assert( 0 == m_mapAcquisition.size() );
-      m_setSymbol.clear();
-      //m_mapDetail.clear();
-    }
-
-    // TOOD: add a done item to move to next underlying
-
-  private:
-
-    using setSymbol_t = std::set<std::string>;
-    using mapAcquisition_t = std::map<std::string,pAcquireFundamentals_t>;
-
-    setSymbol_t m_setSymbolWO;
-    setSymbol_t m_setSymbol;
-    mapAcquisition_t m_mapAcquisition;
-
-    fBuildInstrument_t m_fBuildInstrument;
-
-    std::mutex m_mutexDetails;
-
-    void Update() { // prerequisite: lock is set, can this be asserted?
-      //assert( !m_mutexDetails.try_lock() ); // lock needs to be already in place
-      if ( 5 > m_mapAcquisition.size() ) {
-        if ( 0 != m_setSymbol.size() ) {
-          setSymbol_t::iterator iter = m_setSymbol.begin();
-          const std::string sSymbol = std::move( *iter );
-          m_setSymbol.erase( iter );
-          //std::cout << "Details::Update::BuildInstrument " << sSymbol << std::endl;
-          m_fBuildInstrument(
-            sSymbol,
-            *this,
-            [sSymbol](pInstrument_t pInstrument){
-              //std::cout << "Details::Update instrument " << sSymbol << std::endl;
-              //std::lock_guard<std::mutex> lock( m_mutexDetails );
-              //m_mapDetail.emplace(
-              //  std::make_pair( sSymbol, pInstrument )
-              //);
-            },
-            [this](const std::string& sSymbol){
-              //std::cout << "Details::Update done " << sSymbol << std::endl;
-              std::lock_guard<std::mutex> lock( m_mutexDetails );
-              mapAcquisition_t::const_iterator iter = m_mapAcquisition.find( sSymbol );
-              if ( m_mapAcquisition.end() != iter ) {
-                m_mapAcquisition.erase( iter );
-              }
-              Update();
-            });
-        }
-      }
-    }
-
-  };
-
-  void BuildInstrument( const std::string& sIQFeedSymbol, Details&, fInstrument_t&&, fInstrumentDone_t&& );
-
-  std::unique_ptr<Details> m_pDetailsUnderlying;
-  std::unique_ptr<Details> m_pDetailsOptions;
-
-  // ---
-
-  void ProcessOptionChainElement( pInstrument_t );
-  // ---
+  std::unique_ptr<BuildInstrument> m_pBuildInstrument;
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
   fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
-  fGetTableRowDef_t m_fGetTableRowDef;
   fChartRoot_t m_fChartRoot;
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;

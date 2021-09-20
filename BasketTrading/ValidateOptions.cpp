@@ -131,7 +131,7 @@ bool ValidateOptions::ValidateBidAsk(
               std::cout << '+';
               m_SpreadValidation.ClearWatch( ix );  // IsActive becomes false
               m_fConstructOption(
-                leg.IQFeedOptionName(), pInstrumentUnderlying,
+                leg.IQFeedOptionName(),
                 [this,&leg,ix]( pOption_t pOption ) {
                   leg.Option() = pOption;
                   m_SpreadValidation.SetWatch( ix, pOption, leg.Spread() );

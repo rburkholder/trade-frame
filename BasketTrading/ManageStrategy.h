@@ -77,7 +77,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
 
   //using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
-  using fConstructOption_t = std::function<void(const std::string&, const pInstrument_t, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
+  using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
   using fConstructPosition_t = std::function<pPosition_t( const ou::tf::Portfolio::idPortfolio_t&, pWatch_t, const std::string& )>; // string used for "leg=x" for second day
 
@@ -128,9 +128,9 @@ public:
     pPortfolio_t, // owning portfolio
     fGatherOptionDefinitions_t&,
     //fConstructWatch_t,
-    fConstructOption_t,
-    fConstructPosition_t,
-    fConstructPortfolio_t,
+    fConstructOption_t &&,
+    fConstructPosition_t&&,
+    fConstructPortfolio_t&&,
     fRegisterOption_t&&,
     fStartCalc_t&&,
     fStopCalc_t&&,

@@ -27,6 +27,7 @@ set(
   file_h
     AcquireFundamentals.h
     BasketTrading.h
+    BuildInstrument.h
     DailyHistory.h
     HistoryRequest.h
     LegSelected.h
@@ -47,6 +48,7 @@ set(
   file_cpp
     AcquireFundamentals.cpp
     BasketTrading.cpp
+    BuildInstrument.cpp
     DailyHistory.cpp
     HistoryRequest.cpp
     LegSelected.cpp

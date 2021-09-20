@@ -209,9 +209,9 @@ ManageStrategy::ManageStrategy(
   pPortfolio_t pPortfolioOwning, // => owning portfolio
   fGatherOptionDefinitions_t& fGatherOptionDefinitions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
-  fConstructOption_t fConstructOption, // => m_fConstructOption
-  fConstructPosition_t fConstructPosition, // => m_fConstructPosition
-  fConstructPortfolio_t fConstructPortfolio, // => m_fConstructPortfolio
+  fConstructOption_t&& fConstructOption, // => m_fConstructOption
+  fConstructPosition_t&& fConstructPosition, // => m_fConstructPosition
+  fConstructPortfolio_t&& fConstructPortfolio, // => m_fConstructPortfolio
   fRegisterOption_t&& fRegisterOption, // => m_fRegisterOption
   fStartCalc_t&& fStartCalc, // => m_fStartCalc
   fStopCalc_t&& fStopCalc, // => m_fStopCalc
@@ -228,9 +228,9 @@ ManageStrategy::ManageStrategy(
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
 
-  m_fConstructOption( fConstructOption ),
-  m_fConstructPosition( fConstructPosition ),
-  m_fConstructPortfolio( fConstructPortfolio ),
+  m_fConstructOption( std::move( fConstructOption ) ),
+  m_fConstructPosition( std::move( fConstructPosition ) ),
+  m_fConstructPortfolio( std::move( fConstructPortfolio ) ),
   m_stateTrading( ETradingState::TSInitializing ),
   m_fFirstTrade( fFirstTrade ),
   m_fAuthorizeUnderlying( fAuthorizeUnderlying ),
@@ -582,7 +582,6 @@ void ManageStrategy::BuildPosition(
 
   m_fConstructOption(
     sIQFeedOptionCode,
-    m_pWatchUnderlying->GetInstrument(),
     [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
       m_pOptionRepository->Add( pOption );
       pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, "" );
@@ -601,7 +600,6 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       // TODO: maintain a local map for quick reference
       m_fConstructOption(
         sOptionName,
-        m_pWatchUnderlying->GetInstrument(),
         [ f=std::move( fConstructedOption ) ]( pOption_t pOption ){
           f( pOption );
         }

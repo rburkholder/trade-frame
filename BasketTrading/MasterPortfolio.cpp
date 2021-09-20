@@ -22,7 +22,6 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include <TFIQFeed/BuildInstrument.h>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -30,7 +29,6 @@
 #include <TFOptions/Engine.h>
 
 #include "TFTrading/KeyTypes.h"
-#include "TFIQFeed/MarketSymbol.h"
 
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
@@ -75,7 +73,6 @@ MasterPortfolio::MasterPortfolio(
   : m_bStarted( false ),
     m_nSharesTrading( 0 ),
     m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
-    m_fGetTableRowDef( std::move( fGetTableRowDef ) ),
     m_fChartRoot( std::move( fChartRoot ) ),
     m_fChartAdd( std::move( fChartAdd ) ),
     m_fChartDel( std::move( fChartDel ) ),
@@ -86,7 +83,6 @@ MasterPortfolio::MasterPortfolio(
     //m_eAllocate( EAllocate::Waiting )
 {
   assert( m_fOptionNamesByUnderlying );
-  assert( m_fGetTableRowDef );
   assert( m_fChartRoot );
   assert( m_fChartAdd );
   assert( m_fChartDel );
@@ -169,6 +165,10 @@ MasterPortfolio::MasterPortfolio(
       };
 
   m_libor.SetWatchOn( m_pIQ );
+
+  m_pBuildInstrument = std::make_unique<BuildInstrument>(
+    m_pIQ, m_pIB, std::move( fGetTableRowDef )
+  );
 
 }
 
@@ -368,116 +368,15 @@ void MasterPortfolio::ProcessSymbolList() {
 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
 
-  if ( !m_pDetailsOptions ) {
-    m_pDetailsOptions = std::make_unique<Details>(
-      [this](const std::string& sSymbol, Details& details, fInstrument_t&& fInstrument, fInstrumentDone_t&& fDone ){
-        BuildInstrument(
-          sSymbol,
-          details,
-          [this,fInstrument_=std::move(fInstrument)]( pInstrument_t pInstrument ){
-            //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
-            ProcessOptionChainElement( pInstrument );
-            fInstrument_( pInstrument );
-          },
-          [fDone_=std::move(fDone)](const std::string& sSymbol){
-            fDone_( sSymbol );
-          }
-          );
-      }
-    );
-  }
-
-  if ( !m_pDetailsUnderlying ) {
-    m_pDetailsUnderlying = std::make_unique<Details>(
-      [this](const std::string& sSymbol, Details& details, fInstrument_t&& fInstrument, fInstrumentDone_t&& fDone ){
-        BuildInstrument(
-          sSymbol,
-          details,
-          [this,fInstrument_=std::move(fInstrument)]( pInstrument_t pInstrument ){
-            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
-            AddUnderlying( pWatch );
-            fInstrument_( pInstrument );
-          },
-          [fDone_=std::move(fDone)](const std::string& sSymbol){
-            fDone_( sSymbol );
-          }
-          );
-      }
-    );
-  }
-
   for ( const std::string& sSymbol: m_setSymbols ) {
-    m_pDetailsUnderlying->Add( std::move( sSymbol ) );
+    m_pBuildInstrument->Add(
+      sSymbol,
+      [this]( pInstrument_t pInstrument ){
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+        AddUnderlying( pWatch );
+      } );
   }
 
-}
-
-void MasterPortfolio::BuildInstrument(
-  const std::string& sIQFeedSymbol,
-  Details& details,
-  fInstrument_t&& fInstrument,
-  fInstrumentDone_t&& fDone
-  ) {
-
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-
-  pInstrument_t pInstrument;
-
-  pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
-  if ( pInstrument ) { // skip the build
-    std::cout << "MasterPortfolio::BuildInstrument existing: " << pInstrument->GetInstrumentName() << std::endl;
-    fInstrument( pInstrument );
-  }
-  else { // bulid a new instrument
-
-    const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
-
-    pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
-
-    AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
-      = std::make_shared<AcquireFundamentals>(
-          std::move( pWatch ),
-          [this,sIQFeedSymbol,&trd,fInstrument_=std::move(fInstrument),fDone_=std::move(fDone)]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
-
-            const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
-            const std::string sGenericName
-              = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals.dateExpiration );
-            pInstrument_t pInstrument
-              = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, fundamentals );
-            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
-
-            std::cout
-              << "MasterPortfolio::BuildInstrument build: "
-              << sIQFeedSymbol << ","
-              << sGenericName << ","
-              << fundamentals.sExchangeRoot
-              << std::endl;
-
-            m_pIB->RequestContractDetails(
-              fundamentals.sExchangeRoot,  // needs to be the IB base name
-              pInstrument,  // this is a filled-in, prepared instrument
-              [pWatch,fInstrument__=std::move(fInstrument_)]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                //std::cout << "MasterPortfolio::BuildInstrument contract: " << pInstrument->GetInstrumentName() << std::endl;
-                assert( 0 != pInstrument->GetContract() );
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                fInstrument__( pInstrument );
-              },
-              [sIQFeedSymbol,fDone__=std::move(fDone_)](){
-                // TODO: how to test for incomplete done?
-                //std::cout << "MasterPortfolio::BuildInstrument done: " << sIQFeedSymbol << std::endl;
-                if ( nullptr != fDone__ ) {
-                  fDone__( sIQFeedSymbol );
-                }
-              }
-              );
-            //std::cout << "MasterPortfolio::BuildInstrument begin: " << sIQFeedSymbol << std::endl;
-          }
-        );
-    details.Add( sIQFeedSymbol, pAcquireFundamentals );
-    pAcquireFundamentals->Start();
-  }
 }
 
 void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
@@ -546,7 +445,11 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
             // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
             for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
               //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
-              m_pDetailsOptions->Add( std::move( value ) );
+              m_pBuildInstrument->Add(
+                value,
+                [this]( pInstrument_t pInstrument ){
+                  std::cout << "Option Name: " << pInstrument->GetInstrumentName() << std::endl;
+                } );
             }
             //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
             //  std::cout << "MasterPortfolio::AddUnderlying call: " << value << std::endl;
@@ -608,7 +511,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
     // ManageStrategy::fGatherOptionDefinitions_t
         m_fOptionNamesByUnderlying,  // TODO, need to pass in mapChains from Underlying
     // ManageStrategy::fConstructOption_t
-        [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, const pInstrument_t pUnderlyingInstrument, ManageStrategy::fConstructedOption_t fOption){
+        [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
 
               bool bUseExistingOption( true );
               mapPosition_iter iterPosition;
@@ -630,53 +533,14 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
                 fOption( pOption );
               }
               else {
-                const trd_t& trd( m_fGetTableRowDef( sIQFeedOptionName ) ); // TODO: check for errors
-
-                std::string sGenericOptionName
-                  = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), trd.eOptionSide, trd.nYear, trd.nMonth, trd.nDay, trd.dblStrike );
-                bool bNeedContract( false );
-                pInstrument_t pOptionInstrument;
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-
-                if ( im.Exists( sGenericOptionName, pOptionInstrument ) ) {
-                  // pOptionInstrument has been populated
-                  assert( 0 != pOptionInstrument->GetContract() );
-                }
-                else {
-                  pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd );  // builds equity option, may not build futures option
-                  bNeedContract = true;
-                }
-
-                //pOption_t pOption = m_pOptionEngine->m_fBuildOption( pOptionInstrument );
-                pOption_t pOption( new ou::tf::option::Option( pOptionInstrument, m_pData1 ) );
-                //pOption_t pOption;
-                //m_pOptionEngine->Find( pOptionInstrument, pOption );
-
-                if ( bNeedContract ) {
-                  if ( nullptr == m_pIB.get() ) {
-                    throw std::runtime_error( "MasterPortfolio::AddSymbol fConstructOption_t: IB provider unavailable for contract");
-                  }
-                  else {
-                      m_pIB->RequestContractDetails(
-                        pUnderlyingInstrument->GetInstrumentName(), pOptionInstrument,
-                        [this,pOption,fOption](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
-                          // the contract details fill in the contract in the instrument, which can then be passed back to the caller
-                          //   as a fully defined, registered instrument
-                          assert( 0 != pInstrument->GetContract() );
-                          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-                          if ( !im.Exists( pInstrument ) ) {
-                            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                          }
-                          fOption( pOption );
-                        },
-                        nullptr  // request complete doesn't need a function
-                        );
-                  }
-                }
-                else {
-                  fOption( pOption );
-                }
+                m_pBuildInstrument->Add(
+                  sIQFeedOptionName,
+                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument){
+                    pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
+                    fOption_( pOption );
+                  } );
               }
+
         },
     // ManageStrategy::fConstructPosition_t
         [this]( const idPortfolio_t& idPortfolio, pWatch_t pWatch, const std::string& sNote )->ManageStrategy::pPosition_t{
@@ -907,18 +771,6 @@ void MasterPortfolio::StartStrategies( const std::string& sUnderlying, Underlyin
     pManageStrategy->Run();
   }
 
-}
-
-void MasterPortfolio::ProcessOptionChainElement( pInstrument_t pInstrument ) {
-
-  std::cout << "ProcessOptionChainElement: " << pInstrument->GetInstrumentName() << std::endl;
-
-//  BuildInstrument(
-//    sSymbol,
-//    [this](pInstrument_t pInstrument){
-//      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
-//      AddUnderlying( pWatch );
-//    } );
 }
 
 void MasterPortfolio::ClosePositions( void ) {
