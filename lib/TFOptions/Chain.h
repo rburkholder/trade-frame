@@ -40,16 +40,16 @@ namespace option { // options
 namespace chain {
 
   struct OptionName { // inherit to add addtiional fields
-    std::string sName;
+    std::string sIQFeedSymbolName;
     OptionName() {}
     OptionName( const std::string& sName_ )
-    : sName( sName_ ) {}
+    : sIQFeedSymbolName( sName_ ) {}
     OptionName( const std::string&& sName_ )
-    : sName( std::move( sName_ ) ) {}
+    : sIQFeedSymbolName( std::move( sName_ ) ) {}
     OptionName( const OptionName& rhs )
-    : sName( rhs.sName ) {}
+    : sIQFeedSymbolName( rhs.sIQFeedSymbolName ) {}
     OptionName( const OptionName&& rhs )
-    : sName( std::move( rhs.sName ) ) {}
+    : sIQFeedSymbolName( std::move( rhs.sIQFeedSymbolName ) ) {}
   };
 
   template<typename Option>
@@ -320,8 +320,8 @@ void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQF
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( iter->second.call.sName.empty() );
-  iter->second.call.sName = sIQFeedSymbolName;
+  assert( iter->second.call.sIQFeedSymbolName.empty() );
+  iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
 }
 
 template<typename Option>
@@ -330,20 +330,20 @@ void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFe
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( iter->second.put.sName.empty() );
-  iter->second.put.sName = sIQFeedSymbolName;
+  assert( iter->second.put.sIQFeedSymbolName.empty() );
+  iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
 }
 
 template<typename Option>
 const std::string Chain<Option>::GetIQFeedNameCall( double dblStrike ) const {
   typename mapChain_t::const_iterator iter = FindStrike( dblStrike );
-  return iter->second.call.sName;
+  return iter->second.call.sIQFeedSymbolName;
 }
 
 template<typename Option>
 const std::string Chain<Option>::GetIQFeedNamePut( double dblStrike ) const {
   typename mapChain_t::const_iterator iter = FindStrike( dblStrike );
-  return iter->second.put.sName;
+  return iter->second.put.sIQFeedSymbolName;
 }
 
 // const iterator
@@ -374,7 +374,12 @@ typename Chain<Option>::mapChain_t::iterator Chain<Option>::FindStrike( const do
 template<typename Option>
 void Chain<Option>::EmitValues( void ) const { // TODO: supply output stream
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [](const typename mapChain_t::value_type& vt){
-    std::cout << vt.first << ": " << vt.second.call.sName << ", " << vt.second.put.sName << std::endl;
+    std::cout
+      << vt.first << ": "
+      << vt.second.call.sIQFeedSymbolName
+      << ", "
+      << vt.second.put.sIQFeedSymbolName
+      << std::endl;
   });
 }
 
