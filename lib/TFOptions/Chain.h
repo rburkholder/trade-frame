@@ -320,7 +320,7 @@ void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQF
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( 0 == iter->second.call.sName.size() );
+  assert( iter->second.call.sName.empty() );
   iter->second.call.sName = sIQFeedSymbolName;
 }
 
@@ -330,7 +330,7 @@ void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFe
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( 0 == iter->second.put.sName.size() );
+  assert( iter->second.put.sName.empty() );
   iter->second.put.sName = sIQFeedSymbolName;
 }
 
