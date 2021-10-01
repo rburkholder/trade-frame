@@ -54,7 +54,7 @@ public:
   void Connect();
 
   // not implemented properly
-  void QueryFutureChain(
+  void QueryFuturesChain(
     const std::string& sSymbol,
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
@@ -62,7 +62,7 @@ public:
     const std::string& sRequestId   // not implemented
     );
 
-  void QueryFutureOptionChain(
+  void QueryFuturesOptionChain(
     const std::string& sSymbol,
     const std::string& sSide,
     const std::string& sMonthCodes, // see above

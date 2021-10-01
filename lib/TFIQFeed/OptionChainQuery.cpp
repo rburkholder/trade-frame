@@ -216,7 +216,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
   GiveBackBuffer( buffer );
 }
 
-void OptionChainQuery::QueryFutureChain(
+void OptionChainQuery::QueryFuturesChain(
     const std::string& sSymbol,
     const std::string& sMonthCodes,
     const std::string& sYears,
@@ -235,7 +235,7 @@ void OptionChainQuery::QueryFutureChain(
   this->Send( ss.str().c_str() );
 }
 
-void OptionChainQuery::QueryFutureOptionChain(
+void OptionChainQuery::QueryFuturesOptionChain(
     const std::string& sSymbol,
     const std::string& sSide,
     const std::string& sMonthCodes,

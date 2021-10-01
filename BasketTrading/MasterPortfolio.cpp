@@ -350,6 +350,7 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
 
     // TODO: check if instrument already exists prior to building a new one
 
+    // 1) connect OptionChainQuery, 2) connect HistoryRequest, 3) start symbol processing
     m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
       [this](){
         m_pHistoryRequest = std::make_unique<HistoryRequest>(
@@ -434,12 +435,32 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           ps.GetPivotValue( PS::S1 ), ps.GetPivotValue( PS::S2 )
           );
 
+        m_pOptionEngine->RegisterWatch( uws.pUnderlying->GetWatch() );
+
+        wxMenuItem* pMenuItem;
+        wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
+        pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
+        int id = pMenuItem->GetId();
+        pMenuPopupUnderlying->Bind(
+          wxEVT_COMMAND_MENU_SELECTED,
+          [sUnderlying]( wxCommandEvent& event ){
+            std::cout << "Add Strategy for: " << sUnderlying << " (" << event.GetId() << ")" << std::endl;
+          },
+          id );
+
+        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, uws.pUnderlying->GetChartDataView(), pMenuPopupUnderlying );
+
+        pMenuPopupUnderlying = nullptr;
+
         using query_t = ou::tf::iqfeed::OptionChainQuery;
-        m_pOptionChainQuery->QueryFutureOptionChain(
+        m_pOptionChainQuery->QueryFuturesOptionChain(
           sIqfSymbol,
           "", "", "", "", sIqfSymbol,
           [this]( const query_t::OptionChain& chains ){
-            std::cout << "chain request for " << chains.sKey << std::endl;
+            std::cout
+              << "chain request " << chains.sKey
+              << " has " << chains.vOption.size() << " options"
+              << std::endl;
 
             // TODO: will have to do this during/after chains for all underlyings are retrieved
             // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
@@ -462,23 +483,6 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           }
           );
 //        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
-
-        m_pOptionEngine->RegisterWatch( uws.pUnderlying->GetWatch() );
-
-        wxMenuItem* pMenuItem;
-        wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
-        pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
-        int id = pMenuItem->GetId();
-        pMenuPopupUnderlying->Bind(
-          wxEVT_COMMAND_MENU_SELECTED,
-          [sUnderlying]( wxCommandEvent& event ){
-            std::cout << "Add Strategy for: " << sUnderlying << " (" << event.GetId() << ")" << std::endl;
-          },
-          id );
-
-        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, uws.pUnderlying->GetChartDataView(), pMenuPopupUnderlying );
-
-        pMenuPopupUnderlying = nullptr;
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 
