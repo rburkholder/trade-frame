@@ -591,7 +591,7 @@ void ManageStrategy::BuildPosition(
 
 void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
 
-  const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
+  const std::string& sUnderlying( m_pWatchUnderlying->GetInstrumentName() );
   std::cout << "ManageStrategy::ComboPrepare: " << sUnderlying << std::endl;
 
   m_pCombo->Prepare(
