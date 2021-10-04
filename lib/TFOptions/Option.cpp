@@ -30,8 +30,7 @@ namespace option { // options
 Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )
 : Watch( pInstrument, pDataProvider ),
   m_pGreekProvider( pGreekProvider ),
-  m_dblStrike( pInstrument->GetStrike() ),
-  m_sSide( "-" )
+  m_dblStrike( pInstrument->GetStrike() )
 {
   //std::cout << "Option::Option construction 1: " << pInstrument->GetInstrumentName() << std::endl;
   Initialize();
@@ -39,8 +38,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
 
 Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider )
 : Watch( pInstrument, pDataProvider ),
-  m_dblStrike( pInstrument->GetStrike() ),
-  m_sSide( "-" )
+  m_dblStrike( pInstrument->GetStrike() )
 {
   //std::cout << "Option::Option construction 2: " << pInstrument->GetInstrumentName() << std::endl;
   Initialize();
@@ -50,7 +48,6 @@ Option::Option( const Option& rhs ) :
   Watch( rhs ),
   m_dblStrike( rhs.m_dblStrike ),
   m_greek( rhs.m_greek ),
-  m_sSide( rhs.m_sSide ),
   m_pGreekProvider( rhs.m_pGreekProvider )
 {
   //std::cout << "Option::Option construction 3: " << m_pInstrument->GetInstrumentName() << std::endl;
@@ -66,7 +63,6 @@ Option& Option::operator=( const Option& rhs ) {
   Watch::operator=( rhs );
   m_dblStrike = rhs.m_dblStrike;
   m_greek = rhs.m_greek;
-  m_sSide = rhs.m_sSide;
   m_pGreekProvider = rhs.m_pGreekProvider;
   Initialize();
   return *this;
@@ -255,7 +251,6 @@ Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pG
 {
   // assert instrument is a call
   assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-  m_sSide = "C";
 }
 
 Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider )
@@ -263,7 +258,6 @@ Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider )
 {
   // assert instrument is a call
   assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-  m_sSide = "C";
 }
 
 //
@@ -275,7 +269,6 @@ Put::Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGre
 {
   // assert instrument is a put
   assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-  m_sSide = "P";
 }
 
 Put::Put( pInstrument_t pInstrument, pProvider_t pDataProvider )
@@ -283,7 +276,6 @@ Put::Put( pInstrument_t pInstrument, pProvider_t pDataProvider )
 {
   // assert instrument is a put
   assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-  m_sSide = "P";
 }
 
 

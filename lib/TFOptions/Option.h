@@ -46,7 +46,9 @@ public:
   bool virtual operator< ( const Option& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
   bool virtual operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
-  double GetStrike() const { return m_dblStrike; };
+  double GetStrike() const { return m_dblStrike; }
+  boost::gregorian::date GetExpiry() const { return m_pInstrument->GetExpiry(); }
+  ou::tf::OptionSide::enumOptionSide GetOptionSide() const { return m_pInstrument->GetOptionSide(); }
 
   static void CalcRate( // basic libor calcs
     ou::tf::option::binomial::structInput& input,
@@ -80,9 +82,7 @@ public:
 
 protected:
 
-  std::string m_sSide; // is this used?
-
-  double m_dblStrike; // is this used?
+  double m_dblStrike;
   Greek m_greek;
 
   ou::tf::Greeks m_greeks;
