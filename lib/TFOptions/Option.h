@@ -30,23 +30,23 @@ namespace option { // options
 class Option: public ou::tf::Watch {
 public:
 
-  typedef std::shared_ptr<Option> pOption_t;
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  using pOption_t = std::shared_ptr<Option>;
+  using pInstrument_t = Instrument::pInstrument_t;
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
-  typedef std::function<void(const Greek&)> fCallbackWithGreek_t;
+  using fCallbackWithGreek_t = std::function<void(const Greek&)>;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
   explicit Option( const Option& rhs );
-  virtual ~Option( void );
+  virtual ~Option();
 
   Option& operator=( const Option& rhs );
 
   bool virtual operator< ( const Option& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
   bool virtual operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
-  double GetStrike( void ) const { return m_dblStrike; };
+  double GetStrike() const { return m_dblStrike; };
 
   static void CalcRate( // basic libor calcs
     ou::tf::option::binomial::structInput& input,
@@ -57,22 +57,22 @@ public:
   // caller needs to have updated input with CalcRate
   void CalcGreeks( ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess = true ); // Calc and Append
 
-  double ImpliedVolatility( void ) const { return m_greek.ImpliedVolatility(); };
-  double Delta( void ) const { return m_greek.Delta(); }
-  double Gamma( void ) const { return m_greek.Gamma(); }
-  double Theta( void ) const { return m_greek.Theta(); }
-  double Vega( void ) const { return m_greek.Vega(); }
-  double Rho( void ) const { return m_greek.Rho(); }
+  double ImpliedVolatility() const { return m_greek.ImpliedVolatility(); };
+  double Delta() const { return m_greek.Delta(); }
+  double Gamma() const { return m_greek.Gamma(); }
+  double Theta() const { return m_greek.Theta(); }
+  double Vega() const { return m_greek.Vega(); }
+  double Rho() const { return m_greek.Rho(); }
 
-  ou::tf::Greeks* Greeks( void ) { return &m_greeks; };
+  ou::tf::Greeks* Greeks() { return &m_greeks; };
 
-  virtual bool StartWatch( void );
-  virtual bool StopWatch( void );
+  virtual bool StartWatch();
+  virtual bool StopWatch();
 
   virtual void EmitValues( bool bEmitName = true );
 
   // TODO: needs spinlock
-  inline const Greek& LastGreek( void ) const { return m_greek; };
+  inline const Greek& LastGreek() const { return m_greek; };
 
   ou::Delegate<const Greek&> OnGreek;
 
@@ -80,9 +80,9 @@ public:
 
 protected:
 
-  std::string m_sSide;
+  std::string m_sSide; // is this used?
 
-  double m_dblStrike;
+  double m_dblStrike; // is this used?
   Greek m_greek;
 
   ou::tf::Greeks m_greeks;
@@ -91,7 +91,7 @@ protected:
 
 private:
 
-  void Initialize( void );
+  void Initialize();
 
   void HandleGreek( const Greek& greek );
   void AppendGreek( const ou::tf::Greek& greek );
@@ -106,7 +106,7 @@ class Call: public Option {
 public:
   Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Call( pInstrument_t pInstrument, pProvider_t pDataProvider );
-  virtual ~Call( void ) {};
+  virtual ~Call() {};
 protected:
 private:
 };
@@ -119,7 +119,7 @@ class Put: public Option {
 public:
   Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Put( pInstrument_t pInstrument, pProvider_t pDataProvider );
-  virtual ~Put( void ) {};
+  virtual ~Put() {};
 protected:
 private:
 };

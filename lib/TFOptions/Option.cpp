@@ -57,7 +57,7 @@ Option::Option( const Option& rhs ) :
   Initialize();
 }
 
-Option::~Option( void ) {
+Option::~Option() {
   //std::cout << "Option::~Option destruction: " << m_pInstrument->GetInstrumentName() << std::endl;
 //  StopWatch();  // issues here
 }
@@ -72,14 +72,14 @@ Option& Option::operator=( const Option& rhs ) {
   return *this;
 }
 
-void Option::Initialize( void ) {
+void Option::Initialize() {
   assert( Watch::m_pInstrument->IsOption() || Watch::m_pInstrument->IsFuturesOption() );
   if ( m_pGreekProvider )
     assert( m_pGreekProvider->ProvidesGreeks() );
   m_greeks.Reserve( 1024 );  // reduce startup allocations
 }
 
-bool Option::StartWatch( void ) {
+bool Option::StartWatch() {
   bool b = Watch::StartWatch();
   if ( b ) {
     if ( m_pGreekProvider )
@@ -173,7 +173,7 @@ void Option::CalcGreeks(
   }
 }
 
-bool Option::StopWatch( void ) {
+bool Option::StopWatch() {
   bool b = Watch::StopWatch();
   if ( b ) {
     if ( m_pGreekProvider )
