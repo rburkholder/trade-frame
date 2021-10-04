@@ -23,15 +23,14 @@
 #define CHAIN_H
 
 #include <cassert>
-#include <algorithm>
 #include <iostream>
+#include <algorithm>
 
 #include <map>
 #include <string>
 #include <stdexcept>
 
 // use this for light weight strike calculations and name lookups
-// use Bundle for for full Strike/Call/Put watch
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -42,6 +41,7 @@ namespace chain {
   struct OptionName { // inherit to add addtiional fields
     std::string sIQFeedSymbolName;
     OptionName() {}
+    virtual ~OptionName() {}
     OptionName( const std::string& sName_ )
     : sIQFeedSymbolName( sName_ ) {}
     OptionName( const std::string&& sName_ )
@@ -75,6 +75,10 @@ namespace chain {
 template<typename Option>
 class Chain {
 public:
+
+  using option_t = Option;
+  using strike_t = chain::Strike<option_t>;
+
   Chain() {}
   Chain( const Chain&& rhs ) {
     m_mapChain = std::move( rhs.m_mapChain );
@@ -88,11 +92,14 @@ public:
     exception_at_start_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
   };
 
-  void SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName );
-  void SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName );
+  void SetIQFeedNameCall( double strike, const std::string& sIQFeedSymbolName );
+  void SetIQFeedNamePut( double strike, const std::string& sIQFeedSymbolName );
 
-  const std::string GetIQFeedNameCall( double dblStrike ) const;
-  const std::string GetIQFeedNamePut( double dblStrike ) const;
+  const std::string GetIQFeedNameCall( double strike ) const;
+  const std::string GetIQFeedNamePut( double strike ) const;
+
+  const chain::Strike<Option>& GetStrike( double strike ) const;
+  chain::Strike<Option>& GetStrike( double strike );
 
   double Put_Itm( double ) const ;
   double Put_ItmAtm( double ) const;
@@ -110,15 +117,13 @@ public:
   // needs exact match on strikeSource
   int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
 
-  void EmitValues( void ) const;
+  void EmitValues() const;
 
   void Test( double price );
 
 protected:
 private:
 
-  using option_t = Option;
-  using strike_t = chain::Strike<option_t>;
   using mapChain_t = std::map<double, strike_t>;
 
   mapChain_t m_mapChain;
@@ -344,6 +349,24 @@ template<typename Option>
 const std::string Chain<Option>::GetIQFeedNamePut( double dblStrike ) const {
   typename mapChain_t::const_iterator iter = FindStrike( dblStrike );
   return iter->second.put.sIQFeedSymbolName;
+}
+
+template<typename Option>
+const chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) const {
+  typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
+  if ( m_mapChain.end() == iter ) {
+    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+  }
+  return iter->second;
+}
+
+template<typename Option>
+chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) {
+  typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
+  if ( m_mapChain.end() == iter ) {
+    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+  }
+  return iter->second;
 }
 
 // const iterator
