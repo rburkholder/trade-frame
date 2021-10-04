@@ -96,10 +96,11 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
   pInstrument_t pInstrument;
 
-  // TODO: will probably need to fix this call, as it has an exemption on already loaded symbols
+  // TODO: will probably need to fix this call, as it has an assert on already loaded symbols
+  //       perform an exists first
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
-    std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
+    //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
     ip.fInstrument( pInstrument );
 
     std::lock_guard<std::mutex> lock( m_mutexMap );
