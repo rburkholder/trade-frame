@@ -51,7 +51,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
-  using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
+  using fGatherOptions_t = ou::tf::option::Aggregate::fGatherOptions_t;
 
   Underlying( pWatch_t, pPortfolio_t );
   ~Underlying();
@@ -59,7 +59,7 @@ public:
   void ReadDailyBars( const std::string& sDailyBarPath );
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void PopulateChartDataView( pChartDataView_t ); // share data sets
-  void PopulateChains( fGatherOptionDefinitions_t& );
+  void PopulateChains( fGatherOptions_t&& );
 
   void UpdateChart( boost::posix_time::ptime );
 

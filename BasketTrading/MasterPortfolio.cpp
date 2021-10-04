@@ -27,8 +27,7 @@
 #include <TFTrading/InstrumentManager.h>
 
 #include <TFOptions/Engine.h>
-
-#include "TFTrading/KeyTypes.h"
+#include "TFOptions/Aggregate.h"
 
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
@@ -452,37 +451,31 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
         pMenuPopupUnderlying = nullptr;
 
-        using query_t = ou::tf::iqfeed::OptionChainQuery;
-        m_pOptionChainQuery->QueryFuturesOptionChain(
-          sIqfSymbol,
-          "", "", "", "", sIqfSymbol,
-          [this]( const query_t::OptionChain& chains ){
-            std::cout
-              << "chain request " << chains.sKey
-              << " has " << chains.vOption.size() << " options"
-              << std::endl;
+        uws.pUnderlying->PopulateChains(
+          [this](const std::string& sIQFeedUnderlying, ou::tf::option::Aggregate::fOption_t&& fOption ){
+            using query_t = ou::tf::iqfeed::OptionChainQuery;
+            m_pOptionChainQuery->QueryFuturesOptionChain(
+              sIQFeedUnderlying,
+              "", "", "", "", sIQFeedUnderlying,
+              [this,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
+                std::cout
+                  << "chain request " << chains.sKey
+                  << " has " << chains.vOption.size() << " options"
+                  << std::endl;
 
-            // TODO: will have to do this during/after chains for all underlyings are retrieved
-            // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
-            for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
-              //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
-              m_pBuildInstrument->Add(
-                value,
-                [this]( pInstrument_t pInstrument ){
-                  std::cout << "Option Name: " << pInstrument->GetInstrumentName() << std::endl;
-                } );
-            }
-            //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-            //  std::cout << "MasterPortfolio::AddUnderlying call: " << value << std::endl;
-            //  m_pDetailsOptions->Add( std::move( value ) );
-            //}
-            //for ( const query_t::vSymbol_t::value_type& value: chains.vPut ) {
-            //  std::cout << "MasterPortfolio::AddUnderlying put: " << value << std::endl;
-            //  m_pDetailsOptions->Add( std::move( value ) );
-            //}
-          }
-          );
-//        uws.pUnderlying->PopulateChains( m_fOptionNamesByUnderlying );
+                // TODO: will have to do this during/after chains for all underlyings are retrieved
+                // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
+                for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
+                  //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
+                  m_pBuildInstrument->Add(
+                    value,
+                    [this,fOption_]( pInstrument_t pInstrument ){
+                      //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
+                      fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
+                    } );
+                }
+              });
+          } );
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
 

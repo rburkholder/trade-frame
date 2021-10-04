@@ -102,8 +102,8 @@ void Underlying::PopulateChartDataView( pChartDataView_t pChartDataView ) {
   pChartDataView->Add( EChartSlot::Volume, &m_ceVolume );
 }
 
-void Underlying::PopulateChains( fGatherOptionDefinitions_t& f ) {
-  m_GexCalc.LoadChains( f );  // is currently unpopulated
+void Underlying::PopulateChains( fGatherOptions_t&& f ) {
+  m_GexCalc.LoadChains( std::move( f ) );
 }
 
 void Underlying::HandleQuote( const ou::tf::Quote& quote ) {

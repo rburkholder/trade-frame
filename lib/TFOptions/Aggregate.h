@@ -31,9 +31,7 @@
 #include <TFTimeSeries/DatedDatum.h>
 #include <TFTimeSeries/TimeSeries.h>
 
-#include <TFTrading/Watch.h>
-
-#include "Chains.h"
+#include <TFOptions/Option.h>
 
 #include "Chain.h"
 
@@ -42,38 +40,45 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 class Aggregate {
-  using volume_t = ou::tf::DatedDatum::volume_t;
-  using pWatch_t = ou::tf::Watch::pWatch_t;
 public:
-  //Aggregate() {}
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
+  using fOption_t = std::function<void(pOption_t)>; // incrementally obtain built options
+  using fGatherOptions_t = std::function<void(const std::string&, fOption_t&&)>; // request by IQFeed Symbol Name
+
   Aggregate(
     pWatch_t pWatchUnderlying
   );
 
-  void LoadChains( fGatherOptionDefinitions_t& );
+  void LoadChains( fGatherOptions_t&& ); // start in constructor?
 
   // TODO:
-  //   constructor needs engine add/remove, underlying, option construction (no IB contract, no registration)
-  //   iqfeed sybmol will require trade-only watch request
+  //   constructor needs engine add/remove
   //   will require registration to P message for current quote
 
 protected:
 private:
 
+  using volume_t = ou::tf::DatedDatum::volume_t;
+
   pWatch_t m_pWatchUnderlying;
 
-  struct OptionStats: public ou::tf::option::chain::OptionName {
+  struct OptionWithStats: public ou::tf::option::chain::OptionName {
     // should volumes net out?  seems they will monotonically increase
     //   without input from open interest numbers.  does it matter?
-    volume_t sell;
-    volume_t buy;
-    ou::tf::Quotes quotes;
-    ou::tf::Trades trades;
-    ou::tf::Greeks greeks;
+    // gamma calculation, serialize buy/sell for inter-session updates
+    volume_t sell; // total sell side options for gex calc
+    volume_t buy;  // total buy side options for gex calc
+    pOption_t pOption; // might as well keep the fully decorated option around as well
+    OptionWithStats()
+    : sell {}, buy {} {}
   };
 
-  using chain_t = ou::tf::option::Chain<OptionStats>;
+  using chain_t = ou::tf::option::Chain<OptionWithStats>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  using mapChains_iterator_t = mapChains_t::iterator;
   mapChains_t m_mapChains;
 
 };
