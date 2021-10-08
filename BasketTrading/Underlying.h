@@ -32,6 +32,7 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFOptions/Aggregate.h>
+#include <TFOptions/GatherOptions.h>
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Portfolio.h>
@@ -51,7 +52,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
-  using fGatherOptions_t = ou::tf::option::Aggregate::fGatherOptions_t;
+  using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
 
   Underlying( pWatch_t, pPortfolio_t );
   ~Underlying();

@@ -452,9 +452,9 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         pMenuPopupUnderlying = nullptr;
 
         uws.pUnderlying->PopulateChains(
-          [this](const std::string& sIQFeedUnderlying, ou::tf::option::Aggregate::fOption_t&& fOption ){
+          [this](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
             using query_t = ou::tf::iqfeed::OptionChainQuery;
-            m_pOptionChainQuery->QueryFuturesOptionChain(
+            m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
               sIQFeedUnderlying,
               "", "", "", "", sIQFeedUnderlying,
               [this,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){

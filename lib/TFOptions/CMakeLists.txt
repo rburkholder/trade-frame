@@ -18,6 +18,7 @@ set(
     Chains.h
     Engine.h
     Formula.h
+    GatherOptions.h
     IvAtm.h
     Margin.h
     NoRiskInterestRateSeries.h

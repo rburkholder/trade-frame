@@ -32,6 +32,7 @@
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <TFOptions/Option.h>
+#include <TFOptions/GatherOptions.h>
 
 #include "Chain.h"
 
@@ -44,9 +45,6 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
-
-  using fOption_t = std::function<void(pOption_t)>; // incrementally obtain built options
-  using fGatherOptions_t = std::function<void(const std::string&, fOption_t&&)>; // request by IQFeed Symbol Name
 
   Aggregate(
     pWatch_t pWatchUnderlying
