@@ -20,6 +20,7 @@
  */
 
 #include "Aggregate.h"
+#include <stdexcept>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -86,6 +87,32 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
     }
   );
 }
+
+void Aggregate::WalkChains( fOption_t&& fOption ) const {
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    const chain_t& chain( vt.second );
+    chain.Strikes(
+      [ fOption ]( const chain_t::strike_t& strike ){
+        fOption( strike.call.pOption );
+        fOption( strike.put.pOption );
+      });
+  }
+}
+
+void Aggregate::WalkChain( boost::gregorian::date date, fOption_t&& fOption ) const {
+  mapChains_t::const_iterator iter = m_mapChains.find( date );
+  if ( m_mapChains.end() == iter ) {
+    throw std::runtime_error( "Aggregate::WalkChain: date not found" );
+  }
+  else {
+    iter->second.Strikes(
+      [ fOption = std::move( fOption ) ]( const chain_t::strike_t& strike ){
+        fOption( strike.call.pOption );
+        fOption( strike.put.pOption );
+      } );
+  }
+}
+
 
 } // namespace option
 } // namespace tf

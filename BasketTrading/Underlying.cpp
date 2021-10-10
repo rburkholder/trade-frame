@@ -106,6 +106,14 @@ void Underlying::PopulateChains( fGatherOptions_t&& f ) {
   m_GexCalc.LoadChains( std::move( f ) );
 }
 
+void Underlying::WalkChains( fOption_t&& fOption ) const {
+  m_GexCalc.WalkChains( std::move( fOption ) );
+}
+
+void Underlying::WalkChain( boost::gregorian::date date, fOption_t&& fOption  ) const {
+  m_GexCalc.WalkChain( date, std::move( fOption ) );
+}
+
 void Underlying::HandleQuote( const ou::tf::Quote& quote ) {
 }
 

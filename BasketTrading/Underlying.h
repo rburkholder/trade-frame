@@ -52,6 +52,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+  using fOption_t = ou::tf::option::fOption_t;
   using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
 
   Underlying( pWatch_t, pPortfolio_t );
@@ -61,6 +62,8 @@ public:
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptions_t&& );
+  void WalkChains( fOption_t&& ) const;
+  void WalkChain( boost::gregorian::date, fOption_t&& ) const;
 
   void UpdateChart( boost::posix_time::ptime );
 

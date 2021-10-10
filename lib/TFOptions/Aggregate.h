@@ -51,6 +51,8 @@ public:
   );
 
   void LoadChains( fGatherOptions_t&& ); // start in constructor?
+  void WalkChains( fOption_t&& ) const;
+  void WalkChain( boost::gregorian::date, fOption_t&& ) const;
 
   // TODO:
   //   constructor needs engine add/remove
