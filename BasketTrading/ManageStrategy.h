@@ -70,8 +70,7 @@ public:
 
   using pOrder_t = ou::tf::Position::pOrder_t;
 
-  using fOptionDefinition_t        = ou::tf::option::fOptionDefinition_t;
-  using fGatherOptionDefinitions_t = ou::tf::option::fGatherOptionDefinitions_t;
+  using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
 
   //using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   using fConstructedOption_t = std::function<void(pOption_t)>;
@@ -126,7 +125,7 @@ public:
     // TODO: convert these to left assign
     pWatch_t, // underlying
     pPortfolio_t, // owning portfolio
-    fGatherOptionDefinitions_t&,
+    fGatherOptions_t&&,
     //fConstructWatch_t,
     fConstructOption_t &&,
     fConstructPosition_t&&,

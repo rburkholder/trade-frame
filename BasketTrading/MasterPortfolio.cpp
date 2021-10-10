@@ -65,13 +65,11 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 MasterPortfolio::MasterPortfolio(
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGatherOptionDefinitions_t&& fGatherOptionDefinitions,
     fGetTableRowDef_t&& fGetTableRowDef,
     fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel
     )
   : m_bStarted( false ),
     m_nSharesTrading( 0 ),
-    m_fOptionNamesByUnderlying( std::move( fGatherOptionDefinitions ) ),
     m_fChartRoot( std::move( fChartRoot ) ),
     m_fChartAdd( std::move( fChartAdd ) ),
     m_fChartDel( std::move( fChartDel ) ),
@@ -81,7 +79,6 @@ MasterPortfolio::MasterPortfolio(
     m_pData2( pData2 )
     //m_eAllocate( EAllocate::Waiting )
 {
-  assert( m_fOptionNamesByUnderlying );
   assert( m_fChartRoot );
   assert( m_fChartAdd );
   assert( m_fChartDel );
@@ -505,8 +502,18 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         uws.pUnderlying->GetWatch(),
         pPortfolioUnderlying,
-    // ManageStrategy::fGatherOptionDefinitions_t
-        m_fOptionNamesByUnderlying,  // TODO, need to pass in mapChains from Underlying
+    // ManageStrategy::fGatherOptions_t
+        [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){
+          mapUnderlyingWithStrategies_t::const_iterator iter = m_mapUnderlyingWithStrategies.find( sIQFeedUnderlyingName );
+          if ( m_mapUnderlyingWithStrategies.end() == iter ) {
+            std::cout << "** can't find Underlying: " << sIQFeedUnderlyingName << std::endl;
+            assert( false );
+          }
+          else {
+            const Underlying& underlying( *iter->second.pUnderlying );
+            underlying.WalkChains( std::move( fOption ) );
+          }
+        },
     // ManageStrategy::fConstructOption_t
         [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
 

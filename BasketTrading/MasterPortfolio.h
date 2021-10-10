@@ -14,6 +14,8 @@
 
 #pragma once
 
+// TODO: refactor into UnderlyingPortfolio
+
 #include <set>
 #include <map>
 #include <string>
@@ -68,8 +70,7 @@ public:
   using trd_t = BuildInstrument::trd_t;
   using fGetTableRowDef_t = BuildInstrument::fGetTableRowDef_t;
 
-  using fOptionDefinition_t = ManageStrategy::fOptionDefinition_t;
-  using fGatherOptionDefinitions_t = ManageStrategy::fGatherOptionDefinitions_t;
+//  using fGatherOptions_t = ManageStrategy::fGatherOptions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
   using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
@@ -79,7 +80,7 @@ public:
   MasterPortfolio(
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGatherOptionDefinitions_t &&,
+//    fGatherOptions_t &&,
     fGetTableRowDef_t &&,
     fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&
     );
@@ -186,6 +187,7 @@ private:
   using iterStrategy_t = mapStrategy_t::iterator;
 
   struct UnderlyingWithStrategies {
+
     pUnderlying_t pUnderlying;
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
@@ -268,7 +270,6 @@ private:
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
-  fGatherOptionDefinitions_t m_fOptionNamesByUnderlying;
   fChartRoot_t m_fChartRoot;
   fChartAdd_t m_fChartAdd;
   fChartDel_t m_fChartDel;

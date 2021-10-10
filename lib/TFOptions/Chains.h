@@ -23,31 +23,25 @@
 
 #include <string>
 #include <iostream>
-#include <functional>
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 
-#include <TFIQFeed/MarketSymbol.h>
+#include "GatherOptions.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-using fOptionDefinition_t        = std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)>;
-using fGatherOptionDefinitions_t = std::function<void(const std::string&, fOptionDefinition_t&&)>;
-
 template<typename mapChains_t>
-void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptionDefinitions_t& f ) {
+void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t& f ) {
   f(
     sUnderlying,
-    [&map](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row){  // these are iqfeed based symbol names
-
-      if ( ou::tf::iqfeed::MarketSymbol::IEOption == row.sc ) {
+    [&map](pOption_t pOption){  // these are iqfeed based symbol names
 
         using chain_t = typename mapChains_t::mapped_type;
         using iterator_t = typename mapChains_t::iterator;
 
-        const boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
+        const boost::gregorian::date date( pOption->GetExpiry() );
 
         iterator_t iterChains;
 
@@ -56,7 +50,13 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
 
           iterChains = map.find( date ); // see if expiry date exists
           if ( map.end() == iterChains ) { // insert new expiry set if not
-            std::cout << "Add chain: " << row.sSymbol << "-" << row.nYear << "/" << row.nMonth << "/" << row.nDay << std::endl;
+            std::cout
+              << "Add chain: "
+              << pOption->GetInstrumentName() << "-"
+              << date.year() << "/"
+              << date.month() << "/"
+              << date.day()
+              << std::endl;
             iterChains = map.insert(
               map.begin(),
               typename mapChains_t::value_type( date, std::move( chain ) )
@@ -65,17 +65,18 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
         }
 
         { // populate new call or put, no test for pre-existance
+
           chain_t& chain( iterChains->second );
 
           //std::cout << "  option: " << row.sSymbol << std::endl;
 
           try {
-            switch ( row.eOptionSide ) {
+            switch ( pOption->GetOptionSide() ) {
               case ou::tf::OptionSide::Call:
-                chain.SetIQFeedNameCall( row.dblStrike, row.sSymbol );
+                chain.SetIQFeedNameCall( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
                 break;
               case ou::tf::OptionSide::Put:
-                chain.SetIQFeedNamePut( row.dblStrike, row.sSymbol );
+                chain.SetIQFeedNamePut( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
                 break;
             }
           }
@@ -83,7 +84,6 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
             std::cout << "PopulateMap::fGatherOptionDefinitions error" << std::endl;
           }
         }
-      }
   });
 }
 

@@ -213,10 +213,6 @@ void AppBasketTrading::BuildMasterPortfolio() {
     m_pPortfolioStrategyAggregate,
     // providers
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
-    // obtain option chains for underlying:
-    [this](const std::string& sUnderlying, MasterPortfolio::fOptionDefinition_t&& f){
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( sUnderlying, f );
-    },
     // obtain instrument details given instrument name:
     [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
       return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );

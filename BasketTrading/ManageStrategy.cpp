@@ -207,7 +207,7 @@ ManageStrategy::ManageStrategy(
   double dblSlope20DayUnderlying,
   pWatch_t pWatchUnderlying,
   pPortfolio_t pPortfolioOwning, // => owning portfolio
-  fGatherOptionDefinitions_t& fGatherOptionDefinitions,
+  fGatherOptions_t&& fGatherOptions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
   fConstructOption_t&& fConstructOption, // => m_fConstructOption
   fConstructPosition_t&& fConstructPosition, // => m_fConstructPosition
@@ -261,7 +261,7 @@ ManageStrategy::ManageStrategy(
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
 
-  assert( nullptr != fGatherOptionDefinitions );
+  assert( nullptr != fGatherOptions );
   //assert( nullptr != m_fConstructWatch );
   assert( nullptr != m_fConstructOption );
   assert( nullptr != m_fConstructPosition );
@@ -327,7 +327,7 @@ ManageStrategy::ManageStrategy(
     ou::tf::option::PopulateMap<mapChains_t>(
       m_mapChains,
       pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
-      fGatherOptionDefinitions
+      fGatherOptions
       );
 
     assert( 0 != m_mapChains.size() );
