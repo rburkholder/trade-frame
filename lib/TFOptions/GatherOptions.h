@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <TFOptions/Option.h>
 
 namespace ou { // One Unified

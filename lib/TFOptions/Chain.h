@@ -25,6 +25,7 @@
 #include <cassert>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 #include <map>
 #include <string>
@@ -79,6 +80,8 @@ public:
   using option_t = Option;
   using strike_t = chain::Strike<option_t>;
 
+  using fStrike_t = std::function<void( const strike_t& )>;
+
   Chain() {}
   Chain( const Chain&& rhs ) {
     m_mapChain = std::move( rhs.m_mapChain );
@@ -117,6 +120,12 @@ public:
   // needs exact match on strikeSource
   int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
 
+  void Strikes( fStrike_t&& fStrike ) const {
+    for ( const typename mapChain_t::value_type& vt: m_mapChain ) {
+      fStrike( vt.second );
+    }
+  }
+
   void EmitValues() const;
 
   void Test( double price );
@@ -132,6 +141,8 @@ private:
   typename mapChain_t::iterator FindStrike( const double strike );
 
 };
+
+// methods:
 
 template<typename Option>
 double Chain<Option>::Put_Itm( double value ) const { // price < strike
