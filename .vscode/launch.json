@@ -10,6 +10,152 @@
   },
   "configurations": [
 
+    {
+      "name": "(gdb) AppDoM",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/DepthOfMarket/DepthOfMarket",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) IQFeedMarketSymbols",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/IQFeedMarketSymbols/IQFeedMarketSymbols",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
 
     {
       "name": "(gdb) IQFeedMarketSymbols",
