@@ -19,7 +19,7 @@
 #include "TFTrading/ProviderInterface.h"
 
 #include "IQFeed.h"
-#include "IQFeedSymbol.h"
+#include "Symbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

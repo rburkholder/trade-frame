@@ -26,7 +26,7 @@
 #include <TFTrading/Instrument.h>
 #include <TFTrading/ProviderInterface.h>
 
-#include <TFIQFeed/IQFeedSymbol.h>
+#include <TFIQFeed/Symbol.h>
 
 // 20151228 convert the delegate to a signal?  a little slower maybe.
 

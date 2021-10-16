@@ -18,7 +18,7 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include "IQFeedSymbol.h"
+#include "Symbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
