@@ -147,7 +147,7 @@ private:
   typename ou::BufferRepository<IQFSystemMessage> m_reposSystemMessages;
   typename ou::BufferRepository<IQFErrorMessage> m_reposErrorMessages;
 
-  enum Version { v49, v61 };
+  enum Version { v49, v62 };
   Version m_version;
 
 };
@@ -209,7 +209,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             }
             }
             break;
-          case v61: {
+          case v62: {
             IQFDynamicFeedUpdateMessage* msg = m_reposDynamicFeedUpdateMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedDynamicFeedUpdateMessage != &T::OnIQFeedDynamicFeedUpdateMessage ) {
@@ -237,7 +237,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             }
             }
             break;
-          case v61: {
+          case v62: {
             IQFDynamicFeedSummaryMessage* msg = m_reposDynamicFeedSummaryMessages.CheckOutL();
             msg->Assign( iter, end );
             if ( &IQFeed<T>::OnIQFeedDynamicFeedSummaryMessage != &T::OnIQFeedDynamicFeedSummaryMessage ) {
@@ -301,14 +301,14 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
           ou::Network<IQFeed<T> >::Send( "S,TIMESTAMPSOFF\n" );  // TODO: maybe send on S,KEYOK, check that there are no listeners to the event
         }
         if ( "CUST" == msg->Field( 2 ) ) {
-          if ( "6.1.0.20" > msg->Field( 7 ) ) {
-            std::cout << "Need IQFeed version of 6.1.0.20 or greater (" << msg->Field( 7 ) << ")" << std::endl;
+          if ( "6.2.0.23" > msg->Field( 7 ) ) {
+            std::cout << "Need IQFeed version of 6.2.0.23 or greater (" << msg->Field( 7 ) << ")" << std::endl;
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
           else {
-            if ( v61 != m_version ) { // TODO: need to do better job of this when more versions added
-              m_version = v61;
-              ou::Network<IQFeed<T> >::Send( "S,SET PROTOCOL,6.1\n" );
+            if ( v62 != m_version ) { // TODO: need to do better job of this when more versions added
+              m_version = v62;
+              ou::Network<IQFeed<T> >::Send( "S,SET PROTOCOL,6.2\n" );
               std::string sFieldRequest( "S,SELECT UPDATE FIELDS," );
               sFieldRequest += IQFDynamicFeedMessage<T>::selector;
               sFieldRequest += "\n";
