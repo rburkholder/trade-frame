@@ -19,7 +19,7 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include <TFIQFeed/IQFeedProvider.h>
+#include <TFIQFeed/Provider.h>
 
 #include "Watch.h"
 

@@ -18,7 +18,7 @@
 
 #include <TFTrading/KeyTypes.h>
 
-#include "IQFeedProvider.h"
+#include "Provider.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

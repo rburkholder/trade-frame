@@ -18,8 +18,8 @@
 
 #include <TFTrading/ProviderManager.h>
 
+#include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
-#include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
 
 #include <TFVuTrading/PanelProviderControl.h>

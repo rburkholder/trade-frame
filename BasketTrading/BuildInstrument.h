@@ -23,8 +23,8 @@
 #include <map>
 #include <functional>
 
+#include <TFIQFeed/Provider.h>
 #include <TFIQFeed/MarketSymbol.h>
-#include <TFIQFeed/IQFeedProvider.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 

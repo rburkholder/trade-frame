@@ -17,7 +17,7 @@
 
 #include "ProviderManager.h"
 
-#include <TFIQFeed/IQFeedProvider.h>
+#include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.h>
 

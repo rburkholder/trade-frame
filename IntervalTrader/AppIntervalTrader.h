@@ -33,7 +33,7 @@
 
 #include <wx/wx.h>
 
-#include <TFIQFeed/IQFeedProvider.h>
+#include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFTrading/Portfolio.h>

@@ -25,7 +25,7 @@ set(
     IQFeedMsgShim.h
     IQFeedNewsQuery.h
     IQFeedNewsQueryMsgShim.h
-    IQFeedProvider.h
+    Provider.h
 #    IQFeedSymbolFile.h
     Symbol.h
     LoadMktSymbols.h
@@ -52,7 +52,7 @@ set(
 #    IQFeedHistoryCollector.cpp
 #    IQFeedInstrumentFile.cpp
     Messages.cpp
-    IQFeedProvider.cpp
+    Provider.cpp
     Symbol.cpp
 #    IQFeedSymbolFile.cpp
     LoadMktSymbols.cpp

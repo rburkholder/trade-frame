@@ -38,7 +38,7 @@
 
 #include <wx/wx.h>
 
-#include <TFIQFeed/IQFeedProvider.h>
+#include <TFIQFeed/Provider.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
