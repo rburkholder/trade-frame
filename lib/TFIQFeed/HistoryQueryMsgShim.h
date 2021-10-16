@@ -16,7 +16,7 @@
 
 // 2010/05/30 translates IQFeedHistoryQuery events to Win API Messages for cross thread consumption
 
-#include "IQFeedHistoryQuery.h"
+#include "HistoryQuery.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -44,26 +44,26 @@ public:
 
     structMessageDestinations( void )
       : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
-        msgHistoryTickDataPoint( 0 ), msgHistoryIntervalData( 0 ), msgHistorySummaryData( 0 ), 
+        msgHistoryTickDataPoint( 0 ), msgHistoryIntervalData( 0 ), msgHistorySummaryData( 0 ),
         msgHistoryRequestDone( 0 )
     {};
     structMessageDestinations(
-      T* owner_, 
+      T* owner_,
       UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
-      UINT msgHistoryTickDataPoint_, UINT msgHistoryIntervalData_, UINT msgHistorySummaryData_, 
+      UINT msgHistoryTickDataPoint_, UINT msgHistoryIntervalData_, UINT msgHistorySummaryData_,
       UINT msgHistoryRequestDone_
-      ) 
-    : owner( owner_ ), 
+      )
+    : owner( owner_ ),
       msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
       msgHistoryTickDataPoint( msgHistoryTickDataPoint_ ),
-      msgHistoryIntervalData( msgHistoryIntervalData_ ), msgHistorySummaryData( msgHistorySummaryData_ ), 
+      msgHistoryIntervalData( msgHistoryIntervalData_ ), msgHistorySummaryData( msgHistorySummaryData_ ),
       msgHistoryRequestDone( msgHistoryRequestDone_ )
     {
       assert( NULL != owner_ );
     };
   };
 
-  HistoryQueryMsgShim( const structMessageDestinations& MessageDestinations) 
+  HistoryQueryMsgShim( const structMessageDestinations& MessageDestinations)
     : m_structMessageDestinations( MessageDestinations ) {
       assert( NULL != MessageDestinations.owner );
   };
@@ -99,28 +99,28 @@ protected:
 
   void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistoryTickDataPoint ) {
-      m_structMessageDestinations.owner->PostMessage( 
+      m_structMessageDestinations.owner->PostMessage(
         m_structMessageDestinations.msgHistoryTickDataPoint, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
   void OnHistoryIntervalData( structInterval* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistoryIntervalData ) {
-      m_structMessageDestinations.owner->PostMessage( 
+      m_structMessageDestinations.owner->PostMessage(
         m_structMessageDestinations.msgHistoryIntervalData, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
   void OnHistorySummaryData( structSummary* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
-      m_structMessageDestinations.owner->PostMessage( 
+      m_structMessageDestinations.owner->PostMessage(
         m_structMessageDestinations.msgHistorySummaryData, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
   void OnHistoryRequestDone( void ) {
     if ( 0 != m_structMessageDestinations.msgHistoryRequestDone ) {
-      m_structMessageDestinations.owner->PostMessage( 
+      m_structMessageDestinations.owner->PostMessage(
         m_structMessageDestinations.msgHistoryRequestDone, 0 );
       }
   }
