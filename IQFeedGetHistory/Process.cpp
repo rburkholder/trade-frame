@@ -17,7 +17,6 @@
 
 #include <boost/foreach.hpp>
 
-#include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFIQFeed/LoadMktSymbols.h>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>

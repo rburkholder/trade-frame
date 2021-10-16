@@ -17,7 +17,7 @@
   handles the various messages for:
   * scanning a list of symbols from an exchange from the CInstrumentFile
   * obtaining history from IQFeed for each symbol
-  * creating the appropriate structures 
+  * creating the appropriate structures
   * processing the structures looking for promising trades
 */
 
@@ -27,10 +27,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
+#include <TFIQFeed/HistoryBulkQuery.h>
 #include <TFIQFeed/InMemoryMktSymbolList.h>
-#include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 
-class Process: 
+class Process:
   public ou::tf::iqfeed::HistoryBulkQuery<Process>
 {
   friend ou::tf::iqfeed::HistoryBulkQuery<Process>;
@@ -38,9 +38,9 @@ public:
 
   typedef ou::tf::iqfeed::HistoryBulkQuery<Process> inherited_t;
 
-  Process( 
+  Process(
     ou::tf::iqfeed::InMemoryMktSymbolList&,
-    const std::string& sPrefixPath, 
+    const std::string& sPrefixPath,
     size_t nDatums
   );
   ~Process(void);
@@ -64,7 +64,7 @@ protected:
   //void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structInterval* pDP ); // for per bar processing
   //void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP ); // for per bar processing
   //void OnHistoryRequestDone( structQueryState* pqs ); // for processing finished ticks, bars
-  
+
 private:
 
   ou::tf::iqfeed::InMemoryMktSymbolList& m_list;
@@ -74,7 +74,7 @@ private:
   std::string m_sPrefixPath;
   const size_t m_nDatums;
 
-  std::set<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
+  std::set<std::string> m_vExchanges;  // list of exchanges to be scanned to create:
   std::set<std::string> m_vSymbols;  // list of symbols to be scanned
 
   static const size_t m_BarWindow = 20;  // number of bars to examine

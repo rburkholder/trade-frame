@@ -23,7 +23,7 @@
 #include <string>
 #include <functional>
 
-#include <TFIQFeed/IQFeedHistoryQuery.h>
+#include <TFIQFeed/HistoryQuery.h>
 
 #include <TFTimeSeries/DatedDatum.h>
 

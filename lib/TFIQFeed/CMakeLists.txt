@@ -15,11 +15,11 @@ set(
     CurlGetMktSymbols.h
     InMemoryMktSymbolList.h
     IQFeed.h
-    IQFeedHistoryBulkQuery.h
-    IQFeedHistoryBulkQueryMsgShim.h
+    HistoryBulkQuery.h
+    HistoryBulkQueryMsgShim.h
 #    IQFeedHistoryCollector.h
-    IQFeedHistoryQuery.h
-    IQFeedHistoryQueryMsgShim.h
+    HistoryQuery.h
+    HistoryQueryMsgShim.h
 #    IQFeedInstrumentFile.h
     Messages.h
     MsgShim.h

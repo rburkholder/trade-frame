@@ -32,7 +32,7 @@
 #include <OUCommon/ReusableBuffers.h>
 #include <TFTimeSeries/TimeSeries.h>
 
-#include "IQFeedHistoryQuery.h"
+#include "HistoryQuery.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
