@@ -5,7 +5,8 @@
 This is an application I use for automated trading securities.  
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
-A C++17 compiler is used to build the libraries and code. It used to build on Windows a number of years ago, but the focus recently has been in a Linux environment.
+A C++17 compiler is used to build the libraries and code. It was built on Windows a number of years ago, 
+but the focus recently has been in a Linux environment.  Some work will be needed to make it build on Windows again.
 
 CMake is used for build management.
 
@@ -19,14 +20,18 @@ More pictures under ![ComboTrading](ComboTrading)
 
 ## Building
 
-Scripts are library version specific. I use Debian Buster x64.  Build notes are as of 2016/09/25.
+Scripts are library version specific. I use Debian Buster/Bullseye x64.  Build notes are as of 2016/09/25.
 There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
 
-You'll need to have about 10G drive space free to build the project, the related libraries, as well as the installs (from my libs-build repository).
+You'll need to have about 10G drive space free to build the project, the related libraries, 
+as well as the installs (from my libs-build repository).
 
 Debian Buster/Bullseye netinst (daily snapshot usually works):
 * https://www.debian.org/devel/debian-installer/
 * http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
+
+DTN/IQFeed requires wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.  
+The installation of wine may generate some wine32 messages and errors, but they can be ignored.
 
 
 ```
@@ -36,15 +41,15 @@ mkdir rburkholder
 cd rburkholder
 # git for latest code, wine for IQFeed daemon
 sudo apt-get update && apt-get install git wine wget
-sudo dpkg --add-architecture i386 && apt-get install wine32
-wget http://www.iqfeed.net/iqfeed_client_5_2_5_0.exe
-wine iqfeed_client_5_2_5_0.exe
+# sudo dpkg --add-architecture i386 && apt-get install wine32 
+wget http://www.iqfeed.net/iqfeed_client_6_2_0_23.exe
+wine iqfeed_client_6_2_0_23.exe
 
 # interactive brokers Java for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
 
-# install and build initial build environment and libraries
+# install and build initial environment and libraries
 git clone https://github.com/rburkholder/libs-build.git
 cd libs-build
 ./build.sh tradeframe
@@ -53,36 +58,23 @@ cd ..
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
 
-# NOTE:  these build notes are incorrect, CMAKE is now used to maintain builds,
-#        these build notes need to be updated
-# pre-build some of the example apps 
-# (first example built will take a while as most support libraries are built as well)
-pushd trade-frame
-cd ArmsIndex
-make
-cd IQFeedMarketSymbols
-make
-cd ../IQFeedGetHistory
-make
-cd ../Hdf5Chart
-make
-cd ../LiveChart
-make
-cd ../ComboTrading
-make
-#cd ../StickShift2 <-- does not currently build
-#make
-cd ../HedgedBollinger
-make
-cd ../BasketTrading
-make
-cd ../Weeklies
-make
-cd ../Scanner
-make
-popd
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Debug
+# cmake --build . --config Release   # alternate build flavour
 
 ```
+
+I use Visual Studio Code as my IDE.  I have the following extensions installed:
+* C/C++ [Microsoft]
+* clangd [LLVM Extensions]
+* CMake [twxs]
+* CMake Tools [Microsoft]
+
+I have notes for this combination at 
+  ![Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
+
 
 ## Starting Up
 
