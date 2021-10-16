@@ -17,16 +17,16 @@ set(
     IQFeed.h
     HistoryBulkQuery.h
     HistoryBulkQueryMsgShim.h
-#    IQFeedHistoryCollector.h
+#    HistoryCollector.h
     HistoryQuery.h
     HistoryQueryMsgShim.h
-#    IQFeedInstrumentFile.h
+#    InstrumentFile.h
     Messages.h
     MsgShim.h
     NewsQuery.h
     NewsQueryMsgShim.h
     Provider.h
-#    IQFeedSymbolFile.h
+#    SymbolFile.h
     Symbol.h
     LoadMktSymbols.h
     MarketSymbol.h
@@ -49,12 +49,12 @@ set(
     CurlGetMktSymbols.cpp
     InMemoryMktSymbolList.cpp
     IQFeed.cpp
-#    IQFeedHistoryCollector.cpp
-#    IQFeedInstrumentFile.cpp
+#    HistoryCollector.cpp
+#    InstrumentFile.cpp
     Messages.cpp
     Provider.cpp
     Symbol.cpp
-#    IQFeedSymbolFile.cpp
+#    SymbolFile.cpp
     LoadMktSymbols.cpp
     MarketSymbol.cpp
     MarketSymbols.cpp
