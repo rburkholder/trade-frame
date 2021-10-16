@@ -73,7 +73,7 @@ I use Visual Studio Code as my IDE.  I have the following extensions installed:
 * CMake Tools [Microsoft]
 
 I have notes for this combination at 
-  ![Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
+  [Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
 
 
 ## Starting Up
