@@ -22,7 +22,7 @@
 #include <TFTrading/Symbol.h>
 
 #include "Fundamentals.h"
-#include "IQFeedMessages.h"
+#include "Messages.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

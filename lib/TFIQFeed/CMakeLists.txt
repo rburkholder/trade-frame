@@ -21,7 +21,7 @@ set(
     IQFeedHistoryQuery.h
     IQFeedHistoryQueryMsgShim.h
 #    IQFeedInstrumentFile.h
-    IQFeedMessages.h
+    Messages.h
     IQFeedMsgShim.h
     IQFeedNewsQuery.h
     IQFeedNewsQueryMsgShim.h
@@ -51,7 +51,7 @@ set(
     IQFeed.cpp
 #    IQFeedHistoryCollector.cpp
 #    IQFeedInstrumentFile.cpp
-    IQFeedMessages.cpp
+    Messages.cpp
     IQFeedProvider.cpp
     IQFeedSymbol.cpp
 #    IQFeedSymbolFile.cpp

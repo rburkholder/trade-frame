@@ -14,7 +14,7 @@
 
 #include <sstream>
 
-#include "IQFeedMessages.h"
+#include "Messages.h"
 
 // News Message: This does appear to be an error in the documentation.
 // "SNT:AAPL::1:20070901:;"

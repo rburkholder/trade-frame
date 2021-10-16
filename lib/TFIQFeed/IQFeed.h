@@ -25,7 +25,7 @@
 #include <OUCommon/Network.h>
 #include <OUCommon/ReusableBuffers.h>
 
-#include "IQFeedMessages.h"
+#include "Messages.h"
 
 // In the future, for auxilliary routines making use of IQFeed,
 //   think about incorporating the following concept:
