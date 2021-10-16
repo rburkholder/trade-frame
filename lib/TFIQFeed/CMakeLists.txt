@@ -23,8 +23,8 @@ set(
 #    IQFeedInstrumentFile.h
     Messages.h
     MsgShim.h
-    IQFeedNewsQuery.h
-    IQFeedNewsQueryMsgShim.h
+    NewsQuery.h
+    NewsQueryMsgShim.h
     Provider.h
 #    IQFeedSymbolFile.h
     Symbol.h
