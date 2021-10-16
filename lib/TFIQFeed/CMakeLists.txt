@@ -22,7 +22,7 @@ set(
     IQFeedHistoryQueryMsgShim.h
 #    IQFeedInstrumentFile.h
     Messages.h
-    IQFeedMsgShim.h
+    MsgShim.h
     IQFeedNewsQuery.h
     IQFeedNewsQueryMsgShim.h
     Provider.h
