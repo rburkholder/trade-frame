@@ -72,6 +72,8 @@ add_library(
   ${file_cpp}
   )
 
+add_subdirectory(Level2)
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 
 target_include_directories(
