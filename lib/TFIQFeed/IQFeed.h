@@ -97,7 +97,7 @@ protected:
     NEWSISOFF
   } m_stateNews;
 
-  // called by CNetwork via CRTP
+  // called by Network via CRTP
   void OnNetworkConnected(void) {
     if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
       static_cast<T*>( this )->OnIQFeedConnected();
