@@ -28,6 +28,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "DoMDispatch.h"
+
 class AppDoM:
   public wxApp,
   public ou::tf::FrameWork01<AppDoM>
@@ -42,6 +44,7 @@ private:
 
   wxMenu* m_pMenuLoadDays;
 
+  DoMDispatch m_dispatch;  // one per symbol
 
   virtual bool OnInit();
   virtual int OnExit();

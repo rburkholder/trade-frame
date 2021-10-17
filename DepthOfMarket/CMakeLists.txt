@@ -26,11 +26,13 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS system date_time program_options t
 set(
   file_h
     AppDoM.h
+    DoMDispatch.h
   )
 
 set(
   file_cpp
     AppDoM.cpp
+    DoMDispatch.cpp
   )
 
 add_executable(
