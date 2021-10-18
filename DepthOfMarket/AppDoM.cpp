@@ -83,9 +83,14 @@ int AppDoM::OnExit() {
 }
 
 void AppDoM::OnData1Connected( int ) {
-  std::cout << "History connection connected" << std::endl;
+  std::cout << "Depth of Market connected" << std::endl;
+  m_dispatch.Connect();
+}
+
+void AppDoM::OnData1Disconnecting( int ) {
+  m_dispatch.Disconnect();
 }
 
 void AppDoM::OnData1Disconnected( int ) {
-  std::cout << "History connection disconnected" << std::endl;
+  std::cout << "Depth of Market disconnected" << std::endl;
 }

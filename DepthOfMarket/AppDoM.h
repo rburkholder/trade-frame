@@ -42,7 +42,7 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  wxMenu* m_pMenuLoadDays;
+  //wxMenu* m_pMenuLoadDays;
 
   DoMDispatch m_dispatch;  // one per symbol
 
@@ -50,6 +50,7 @@ private:
   virtual int OnExit();
 
   void OnData1Connected( int );
+  void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
 
 };
