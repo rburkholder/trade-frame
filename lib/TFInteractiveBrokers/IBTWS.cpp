@@ -944,7 +944,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
 
   if ( 0 == contractDetails.tradingHours.size() ) {
-    std::cout << "IBTWS::contractDetails tradingHours is zero length" << std::endl;
+    std::cout << "IBTWS tradingHours is zero length" << std::endl;
   }
   else {
     try {
@@ -958,11 +958,16 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
         );
     }
     catch ( std::runtime_error& e ) {
-      std::cout << "IBTWS::contractDetails tradingHours runtime error: " << e.what() << std::endl;
-      std::cout << "  " << contractDetails.tradingHours << std::endl;
+      std::cout
+        << "IBTWS tradingHours runtime error: " << e.what()
+        << " [" << contractDetails.tradingHours << "]"
+        << std::endl;
     }
     catch ( std::exception& e ) {
-      std::cout << "IBTWS::contractDetails tradingHours exception: " << e.what() << std::endl;
+      std::cout
+        << "IBTWS tradingHours exception: "
+        << e.what()
+        << " [" << contractDetails.tradingHours << "]" << std::endl;
     }
   }
 
@@ -983,7 +988,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
         );
     }
     catch ( std::runtime_error& e ) {
-      std::cout << "IBTWS::contractDetails liquidHours error: " << e.what() << std::endl;
+      std::cout << "IBTWS liquidHours error: " << e.what() << std::endl;
     }
   }
 
@@ -1000,7 +1005,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     std::cout << "IBTWS::contractDetails exception: " << e.what() << std::endl;
   }
   catch (...) {
-    std::cout << "IBTWS::contractDetails unknown error when delegating contractDetails" << std::endl;
+    std::cout << "IBTWS unknown error when delegating contractDetails" << std::endl;
   }
 
 }
