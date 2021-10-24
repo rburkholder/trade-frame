@@ -41,8 +41,8 @@ namespace {
 const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
-       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
-//      , { "@ESU21", { "@ES", "ES", 0.10, 0.20, 6, 40 } }
+//       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
+        { "@ESZ21", {  0.10, 0.20, 6, 40 } }
     };
 
 /*
@@ -337,7 +337,9 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
     //m_setSymbols.insert( "GLD" );
     //m_setSymbols.insert( "SPY" );
     //setSymbols.insert( "SLV" );
-    m_setSymbols.insert( "QGCZ21" );
+    //m_setSymbols.insert( "QGCZ21" );
+    m_setSymbols.insert( "@ESZ21" );
+
     // QGC#    GOLD DECEMBER 2021
     // QGCZ21  GOLD DECEMBER 2021
     // add?  // USB, XLP, XBI
@@ -419,7 +421,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
       },
       [this,&uws,sUnderlying,&sIqfSymbol](){ // fDone_t
         const ou::tf::Bar& bar( uws.m_barsHistory.last() );
-        assert( m_dtLatestEod <= bar.DateTime() );
+        std::stringstream ss;
+        //ss << m_dtLatestEod << "," << bar.DateTime() << std::endl;
+        //std::string s( ss.str() );
+        assert( m_dtLatestEod >= bar.DateTime() ); // what condition does this test satisfy?
         uws.statistics.setPivots.CalcPivots( bar );
 
         const Statistics& statistics( uws.statistics );
@@ -461,7 +466,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   << std::endl;
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
-                // TODO: provide a fDone_t function to StartStrategies ne StartUndelrying?
+                // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
                 for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_pBuildInstrument->Add(
