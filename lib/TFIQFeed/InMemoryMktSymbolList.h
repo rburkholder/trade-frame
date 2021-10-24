@@ -39,8 +39,8 @@ public:
   struct ixSymbol{};
   struct ixExchange{};
   struct ixSymbolClass{};
-  struct ixSic{};
-  struct ixNaics{};
+  //struct ixSic{};
+  //struct ixNaics{};
   struct ixUnderlying{};
 
   typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
@@ -54,12 +54,12 @@ public:
         boost::multi_index::tag<ixExchange>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sExchange)>,
       boost::multi_index::ordered_non_unique<
         boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::enumSymbolClassifier,sc)>,
-      boost::multi_index::ordered_non_unique<
-        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
-      boost::multi_index::ordered_non_unique<
-        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
+//      boost::multi_index::ordered_non_unique<
+//        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
+//      boost::multi_index::ordered_non_unique<
+//        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
       boost::multi_index::ordered_non_unique<  // IQFeed file doesn't provide good info, and option symbology sucks
-        boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
+        boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)>
     >
   > symbols_t;
 
@@ -69,7 +69,7 @@ public:
   iterator end(){return m_symbols.end();}
 
   symbols_t::size_type Size( void ) const { return m_symbols.size(); }
-  
+
   bool Exists( const std::string& sName ) {
     typedef symbols_t::index<ixSymbol>::type ixSymbol_t;
     ixSymbol_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
@@ -144,7 +144,7 @@ public:
       f( *iter );
     }
   }
-  
+
   template<typename ExchangeIterator, typename Function>
   void SelectSymbolsByExchange( ExchangeIterator beginExchange, ExchangeIterator endExchange, Function f ) const {
     typedef symbols_t::index<ixExchange>::type SymbolsByExchange_t;
@@ -189,12 +189,12 @@ private:
   /* serialization support */
 
   friend class boost::serialization::access;
-    
+
   template<class Archive>
   void serialize(Archive& ar,const unsigned int) {
     ar&BOOST_SERIALIZATION_NVP(m_symbols);
   }
-}; 
+};
 
 } // namespace iqfeed
 } // namespace tf
