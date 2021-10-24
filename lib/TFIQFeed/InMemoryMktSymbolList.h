@@ -170,7 +170,10 @@ public:
   }
 
   void InsertParsedStructure( const trd_t& trd ) {
-    m_symbols.insert( trd );
+    auto result = m_symbols.insert( trd );
+    if ( !result.second ) {
+      assert( result.second );
+    }
   }
 
   void operator()( const trd_t& trd ) {
