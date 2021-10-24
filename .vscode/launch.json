@@ -182,7 +182,7 @@
       "name": "(gdb) IQFeedGetHistory/",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/IQFeedGetHistory//IQFeedGetHistory/",
+      "program": "${workspaceFolder}/build/IQFeedGetHistory//IQFeedGetHistory",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",
