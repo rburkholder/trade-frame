@@ -92,10 +92,11 @@ struct FOptionDescriptionParser: qi::grammar<Iterator, adapted_foption_t()> {
       ;
 
     // define option processing rules
-    //ruleString %= +(qi::char_ - qi::char_(' '));
-    //ruleUnderlyingSymbol %= ruleString;
     ruleMonth %= symMonths;
-    ruleUnderlyingSymbol %= +(-qi::lit(' ') >> ((+(qi::char_ - qi::char_(' '))) - symMonths));
+    ruleNoSpaceString = +(qi::char_ - qi::char_(' '));
+    ruleNotAMonth = ruleNoSpaceString - symMonths;
+    ruleUnderlyingSymbol %= +(*qi::char_(' ') >> ruleNotAMonth);
+    //ruleUnderlyingSymbol %= +(-qi::lit(' ') >> ((+(qi::char_ - qi::char_(' '))) - symMonths));
     ruleYear %= qi::uint_;
     ruleStrike %= qi::float_;
     ruleOptionSide %= symOptionSide;
@@ -111,7 +112,8 @@ struct FOptionDescriptionParser: qi::grammar<Iterator, adapted_foption_t()> {
   qi::symbols<char, boost::uint8_t> symMonths;
   qi::symbols<char, ou::tf::OptionSide::enumOptionSide> symOptionSide;
 
-  qi::rule<Iterator, std::string()> ruleString;
+  qi::rule<Iterator, std::string()> ruleNoSpaceString;
+  qi::rule<Iterator, std::string()> ruleNotAMonth;
   qi::rule<Iterator, std::string()> ruleUnderlyingSymbol;
   qi::rule<Iterator, boost::uint8_t()> ruleMonth;
   qi::rule<Iterator, boost::uint16_t()> ruleYear;
