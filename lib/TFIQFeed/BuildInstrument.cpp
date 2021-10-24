@@ -37,7 +37,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     case MarketSymbol::enumSymbolClassifier::Index:
     case MarketSymbol::enumSymbolClassifier::PrecMtl:
     default:
-      throw std::runtime_error( "BuildInstrument1: no applicable instrument type" );
+      throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }
   return pInstrument;
 }
@@ -86,7 +86,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     case MarketSymbol::enumSymbolClassifier::Index:
     case MarketSymbol::enumSymbolClassifier::PrecMtl:
     default:
-      throw std::runtime_error( "BuildInstrument1: no applicable instrument type" );
+      throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }
   return pInstrument;
 }
@@ -95,6 +95,9 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
 
   const std::string sGenericName
     = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals );
+
+  // to remove trd, will need a) security type lookup, b) listed market lookup
+  //   http://www.iqfeed.net/dev/api/docs//SymbolLookupviaTCPIP.cfm
 
   pInstrument_t pInstrument;
 
@@ -129,7 +132,7 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
     case MarketSymbol::enumSymbolClassifier::Index:
     case MarketSymbol::enumSymbolClassifier::PrecMtl:
     default:
-      throw std::runtime_error( "BuildInstrument1: no applicable instrument type" );
+      throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }
 
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
