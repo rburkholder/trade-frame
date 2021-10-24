@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   IQFeedInstrumentBuild.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on August 19, 2017, 7:12 PM
  */
 
@@ -28,36 +28,36 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 IQFeedInstrumentBuild::IQFeedInstrumentBuild( wxWindow* pParentForDialog ) {
-  
+
   assert( 0 != pParentForDialog );
   m_pParentForDialog = pParentForDialog;
-  
+
   m_pDialogPickSymbol = 0;
-  
+
   namespace ph = std::placeholders;
   m_de.fLookupIQFeedDescription = std::bind( &IQFeedInstrumentBuild::HandleLookUpDescription, this, ph::_1, ph::_2 );
   m_de.fComposeIQFeedFullName = std::bind( &IQFeedInstrumentBuild::HandleComposeIQFeedFullName, this, ph::_1 );
-  
+
 }
 
 IQFeedInstrumentBuild::~IQFeedInstrumentBuild() {
 }
 
-IQFeedInstrumentBuild::pInstrument_t 
-  IQFeedInstrumentBuild::HandleNewInstrumentRequest( 
+IQFeedInstrumentBuild::pInstrument_t
+  IQFeedInstrumentBuild::HandleNewInstrumentRequest(
     const ou::tf::Allowed::enumInstrument selector,
     const wxString& wxsUnderlying // optional
 ) {
-  
+
   assert( 0 == m_pDialogPickSymbol );
-  
+
   m_pDialogPickSymbolCreatedInstrument.reset();
-  
+
   m_de.sIQFSymbolName = wxsUnderlying;
-  
+
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( m_pParentForDialog );
   m_pDialogPickSymbol->SetDataExchange( &m_de );
-  
+
   switch ( selector ) {
     case ou::tf::Allowed::All:
       m_pDialogPickSymbol->SetAll();
@@ -76,9 +76,9 @@ IQFeedInstrumentBuild::pInstrument_t
       assert( 0 );
       break;
   }
-  
+
   int status = m_pDialogPickSymbol->ShowModal();
-  
+
   //std::cout << "IQFeedInstrumentBuild::HandleNewInstrumentRequest status " << status << std::endl;
   switch ( status ) {
     case wxID_CANCEL:
@@ -91,10 +91,10 @@ IQFeedInstrumentBuild::pInstrument_t
       }
       break;
   }
-  
+
   m_pDialogPickSymbol->Destroy();
   m_pDialogPickSymbol = 0;
-  
+
   return m_pDialogPickSymbolCreatedInstrument;
 }
 
@@ -102,7 +102,7 @@ IQFeedInstrumentBuild::pInstrument_t
 void IQFeedInstrumentBuild::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument ) {
   std::string sGenericName( pde.sIQFSymbolName );
   switch ( pde.it ) {
-    case InstrumentType::Stock: 
+    case InstrumentType::Stock:
     {
       ValuesForBuildInstrument values( sGenericName, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, 0 );
       fBuildInstrument( values );
@@ -111,7 +111,7 @@ void IQFeedInstrumentBuild::BuildInstrument( const DialogPickSymbol::DataExchang
     case InstrumentType::Option:
     case InstrumentType::FuturesOption:
     {
-      sGenericName = Instrument::BuildGenericOptionName( sGenericName, pde.os, pde.year, pde.month + 1, pde.day, pde.dblStrike );
+      sGenericName = Instrument::BuildGenericOptionName( sGenericName, pde.year, pde.month + 1, pde.day, pde.os, pde.dblStrike );
       ValuesForBuildInstrument values( sGenericName, pde.sIQFeedFullName, pde.sIBSymbolName, pInstrument, pde.day );
       fBuildInstrument( values );
     }
@@ -134,8 +134,8 @@ void IQFeedInstrumentBuild::HandleComposeIQFeedFullName( DialogPickSymbol::DataE
   pde->sIQFeedFullName = "";
   pde->sIQFeedDescription = "";
   try {
-    pde->sIQFeedFullName 
-        = ou::tf::iqfeed::BuildName( 
+    pde->sIQFeedFullName
+        = ou::tf::iqfeed::BuildName(
             ou::tf::iqfeed::NameParts( pde->it, pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os ) );
     if ( "" != pde->sIQFeedFullName ) {
       fLookupIQFeedDescription( pde->sIQFeedFullName, pde->sIQFeedDescription );
@@ -156,7 +156,7 @@ void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
   //std::cout << "IQFeedInstrumentBuild::InstrumentUpdated ..." << std::endl;
   if ( 0 == m_pDialogPickSymbol ) {
     std::cout << "IQFeedInstrumentBuild::InstrumentUpdated warning:  no DialogPickSymbol to accept instrument" << std::endl;
-  } 
+  }
   else {
     if ( pInstrument.get() == m_pDialogPickSymbolCreatedInstrument.get() ) {
       // expecting contract id to already exist in instrument
@@ -168,7 +168,7 @@ void IQFeedInstrumentBuild::InstrumentUpdated( pInstrument_t pInstrument ) {
       else {
         m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
       }
-      
+
     }
     else {
       std::cout << "IQFeedInstrumentBuild::InstrumentUpdated warning:  not expected instrument" << std::endl;

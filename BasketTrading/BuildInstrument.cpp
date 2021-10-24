@@ -108,8 +108,10 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   }
   else { // bulid a new instrument
 
+    // TODO: need to check that trd is a long lasting structure
     const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
+    // temporary instrument solely for obtaining fundamental data with which to build real instrument
     pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
@@ -120,13 +122,13 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
             const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
             const std::string sGenericName
-              = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals.dateExpiration );
+              = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals );
             pInstrument_t pInstrument
               = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, fundamentals );
             pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
             std::cout
-              << "MasterPortfolio::BuildInstrument build: "
+              << "BuildInstrument::Build: "
               << iterInProgress->first << ","
               << sGenericName << ","
               << fundamentals.sExchangeRoot

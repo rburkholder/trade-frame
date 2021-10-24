@@ -34,7 +34,7 @@ const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, 
       // uses base name
       break;
     case enumSymbolClassifier::IEOption:
-      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, trd.eOptionSide, trd.nYear, trd.nMonth, trd.nDay, trd.dblStrike );
+      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, trd.nYear, trd.nMonth, trd.nDay, trd.eOptionSide, trd.dblStrike );
       break;
     default:
       assert( false );
@@ -55,7 +55,28 @@ const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, 
       break;
     case enumSymbolClassifier::IEOption:
     case enumSymbolClassifier::FOption:
-      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, trd.eOptionSide, date.year(), date.month(), date.day(), trd.dblStrike );
+      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+  return sName;
+}
+
+// improved improved version
+const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, const TableRowDef& trd, const Fundamentals& fundamentals ) {
+  std::string sName( sBaseName );
+  switch( trd.sc ) {
+    case enumSymbolClassifier::Equity:
+      // uses base name
+      break;
+    case enumSymbolClassifier::Future:
+      sName = ou::tf::Instrument::BuildGenericFutureName( sBaseName, fundamentals.dateExpiration );
+      break;
+    case enumSymbolClassifier::IEOption:
+    case enumSymbolClassifier::FOption:
+      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, fundamentals.dateExpiration, trd.eOptionSide, fundamentals.dblStrikePrice );
       break;
     default:
       assert( false );

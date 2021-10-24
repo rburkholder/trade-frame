@@ -24,9 +24,11 @@
 
 #include <boost/cstdint.hpp>
 
+#include <OUSQL/Functions.h>
+
 #include <TFTrading/TradingEnumerations.h>
 
-#include <OUSQL/Functions.h>
+#include "Fundamentals.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -137,6 +139,8 @@ public:
   const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef& );
   // equity, ieoption, future, futures option (from fundamentals)
   const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, Date );
+  // use fundamentals directly
+  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, const Fundamentals& );
 
 protected:
 private:

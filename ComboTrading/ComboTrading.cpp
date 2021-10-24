@@ -419,7 +419,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
     // can this use the code from m_fBuildInstrumentFromIqfeed above?
     [this](pInstrument_t pUnderlyingInstrument, const std::string& sIQFeedOptionName, boost::gregorian::date date, double strike, ou::tf::PanelCharts::fBuildOptionInstrumentComplete_t f){
       ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) ); // TODO: check for errors
-      std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), trd.eOptionSide, date.year(), date.month(), date.day(), strike );
+      std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), date.year(), date.month(), date.day(), trd.eOptionSide, strike );
 
       ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
       pInstrument_t pOptionInstrument;

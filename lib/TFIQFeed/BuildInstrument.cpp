@@ -107,19 +107,19 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       break;
     case MarketSymbol::enumSymbolClassifier::IEOption: {
       auto date( fundamentals.dateExpiration );
-      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
     case MarketSymbol::enumSymbolClassifier::Future: { // may need to pull out the prefix
-    auto date( fundamentals.dateExpiration );
-      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month(), date.day() );
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number() );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
     case MarketSymbol::enumSymbolClassifier::FOption: { // futures option doesn't require underlying?
-    auto date( fundamentals.dateExpiration );
-      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;

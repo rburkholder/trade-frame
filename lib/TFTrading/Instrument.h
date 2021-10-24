@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <boost-1_69/boost/date_time/gregorian/greg_date.hpp>
 #include <map>
 #include <memory>
 #include <string>
@@ -48,9 +49,12 @@ public:
   typedef std::shared_ptr<Instrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
 
+  static std::string BuildDate( boost::gregorian::date );
   static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );
-  static std::string BuildGenericOptionName( const std::string& sBaseName, OptionSide::enumOptionSide side, uint16_t year, uint16_t month, uint16_t day, double strike );
+  static std::string BuildGenericOptionName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day, OptionSide::enumOptionSide side, double strike );
+  static std::string BuildGenericOptionName( const std::string& sBaseName, boost::gregorian::date, OptionSide::enumOptionSide side, double strike );
   static std::string BuildGenericFutureName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day );
+  static std::string BuildGenericFutureName( const std::string& sBaseName, boost::gregorian::date );
 
   struct TableRowDef {
     template<class A>
