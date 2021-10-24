@@ -33,6 +33,7 @@ struct Fundamentals {
   int nContractSize;
   int nAverageVolume;
   int nShortInterest;
+  int nSecurityType;
   double dblHistoricalVolatility;
   double dblStrikePrice;
   double dblPriceEarnings;
@@ -47,7 +48,7 @@ struct Fundamentals {
   boost::posix_time::time_duration timeSessionOpen; // futures, futures options
   boost::posix_time::time_duration timeSessionClose; // futures, futures options
   Fundamentals()
-  : nAverageVolume {}, nPrecision {}, nShortInterest {},
+  : nAverageVolume {}, nPrecision {}, nShortInterest {}, nSecurityType {},
     dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
     dbl52WkHi {}, dbl52WkLo {},
     dblDividendAmount {}, dblDividendRate {}, dblDividendYield {},
