@@ -23,7 +23,9 @@
 
 using inherited_t = ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>;
 
-DoMDispatch::DoMDispatch() {
+DoMDispatch::DoMDispatch( const std::string& sWatch )
+: m_sWatch( sWatch )
+{
 }
 
 DoMDispatch::~DoMDispatch() {
@@ -35,6 +37,13 @@ void DoMDispatch::Connect() {
 
 void DoMDispatch::Disconnect() {
   inherited_t::Disconnect();
+}
+
+void DoMDispatch::OnNetworkConnected() {
+  StartMarketByOrder( m_sWatch );
+}
+
+void DoMDispatch::OnNetworkDisconnected() {
 }
 
 void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {

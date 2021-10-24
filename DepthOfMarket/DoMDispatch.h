@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 
 #include <TFIQFeed/Level2/Dispatcher.h>
 
@@ -35,7 +36,7 @@ class DoMDispatch
 
 public:
 
-  DoMDispatch();
+  DoMDispatch( const std::string& sWatch );
   virtual ~DoMDispatch();
 
   void Connect();
@@ -44,8 +45,8 @@ public:
 protected:
 
   // called by Network via CRTP
-  //void OnNetworkConnected();
-  //void OnNetworkDisconnected();
+  void OnNetworkConnected();
+  void OnNetworkDisconnected();
   //void OnNetworkError( size_t e );
 
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
@@ -54,6 +55,8 @@ protected:
   void OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& );
 
 private:
+
+  std::string m_sWatch;
 
   struct Order {
     std::string sMarketMaker;
@@ -71,6 +74,7 @@ private:
   };
 
   struct Auction {
+    // maintain set of orders?
     uint32_t nQuantity;
     Auction( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
     : nQuantity( msg.nQuantity )

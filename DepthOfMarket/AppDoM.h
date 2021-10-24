@@ -21,7 +21,9 @@
  * Created on October 12, 2021, 23:04
  */
 
- #include <wx/app.h>
+#include <memory>
+
+#include <wx/app.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -44,9 +46,10 @@ private:
 
   //wxMenu* m_pMenuLoadDays;
 
-  DoMDispatch m_dispatch;  // one per symbol
+  std::unique_ptr<DoMDispatch> m_pDispatch;  // one per symbol
 
   virtual bool OnInit();
+  void OnClose( wxCloseEvent& event );
   virtual int OnExit();
 
   void OnData1Connected( int );

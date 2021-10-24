@@ -19,9 +19,22 @@
  * Created on October 12, 2021, 23:04
  */
 
+/*
+TODO:
+  * select symbol
+  * start watch:
+      obtain trades, match against orders
+      obtain quotes, match against top of each book
+  * start Market Depth
+      validate against trade stream for actual orders (limits vs market)
+*/
+
 #include <algorithm>
 
+#include <memory>
 #include <wx/sizer.h>
+
+#include "Config.h"
 
 #include "AppDoM.h"
 
@@ -29,53 +42,84 @@ IMPLEMENT_APP(AppDoM)
 
 bool AppDoM::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Depth of Market" );
-  wxWindowID idFrameMain = m_pFrameMain->GetId();
-  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
-  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
-  //m_pFrameMain->Center();
-//  m_pFrameMain->Move( -2500, 50 );
-  m_pFrameMain->SetSize( 500, 600 );
-  SetTopWindow( m_pFrameMain );
+  int code = 1;
 
-  wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(m_sizerMain);
+  config::Options options;
 
-  wxBoxSizer* m_sizerControls;
-  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+  if ( !Load( options ) ) {
+    code = 0;
+  }
+  else {
 
-  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelProviderControl->Show( true );
+    m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
 
-  LinkToPanelProviderControl();
+    m_pFrameMain = new FrameMain( 0, wxID_ANY, "Depth of Market" );
+    wxWindowID idFrameMain = m_pFrameMain->GetId();
+    //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
+    //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+    //m_pFrameMain->Center();
+  //  m_pFrameMain->Move( -2500, 50 );
+    m_pFrameMain->SetSize( 500, 600 );
+    SetTopWindow( m_pFrameMain );
 
-  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+    wxBoxSizer* m_sizerMain;
+    m_sizerMain = new wxBoxSizer(wxVERTICAL);
+    m_pFrameMain->SetSizer(m_sizerMain);
 
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-  m_pPanelLogging->Show( true );
+    wxBoxSizer* m_sizerControls;
+    m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
+    m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
-  m_pFrameMain->Show( true );
+    m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
+    m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+    m_pPanelProviderControl->Show( true );
 
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+    LinkToPanelProviderControl();
 
-//  FrameMain::vpItems_t vItemsLoadSymbols;
-//  vItemsLoadSymbols.push_back( new mi( "New Symbol List Remote", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListRemote ) ) );
-//  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
-//  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
-//  wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
+    wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+    m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
-  return 1;
+    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
+    m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+    m_pPanelLogging->Show( true );
 
+    m_pFrameMain->Show( true );
+
+    std::cout << "watching " << options.sSymbolName << std::endl;
+
+    using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
+  //  FrameMain::vpItems_t vItemsLoadSymbols;
+  //  vItemsLoadSymbols.push_back( new mi( "New Symbol List Remote", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListRemote ) ) );
+  //  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
+  //  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
+  //  wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
+
+  }
+
+  return code;
+}
+
+void AppDoM::OnClose( wxCloseEvent& event ) {
+
+  if ( m_bData1Connected ) {
+    m_pDispatch->Disconnect();
+  }
+
+  //if ( m_worker.joinable() ) m_worker.join();
+  //m_timerGuiRefresh.Stop();
+  DelinkFromPanelProviderControl();
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a
+
+  //SaveState();
+
+  //if ( m_db.IsOpen() ) m_db.Close();
+  event.Skip();  // auto followed by Destroy();
 }
 
 int AppDoM::OnExit() {
-
-//  DelinkFromPanelProviderControl();  generates stack errors
 
 //  if ( m_db.IsOpen() ) m_db.Close();
 
@@ -84,11 +128,11 @@ int AppDoM::OnExit() {
 
 void AppDoM::OnData1Connected( int ) {
   std::cout << "Depth of Market connected" << std::endl;
-  m_dispatch.Connect();
+  m_pDispatch->Connect();
 }
 
 void AppDoM::OnData1Disconnecting( int ) {
-  m_dispatch.Disconnect();
+  m_pDispatch->Disconnect();
 }
 
 void AppDoM::OnData1Disconnected( int ) {
