@@ -121,16 +121,14 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           [this,iterInProgress,&trd]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
             const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
-            const std::string sGenericName
-              = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals );
             pInstrument_t pInstrument
-              = ou::tf::iqfeed::BuildInstrument( sGenericName, trd, fundamentals );
+              = ou::tf::iqfeed::BuildInstrument( trd, fundamentals );
             pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
             std::cout
               << "BuildInstrument::Build: "
               << iterInProgress->first << ","
-              << sGenericName << ","
+              << pInstrument->GetInstrumentName() << ","
               << fundamentals.sExchangeRoot
               << std::endl;
 

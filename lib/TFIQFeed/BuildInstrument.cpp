@@ -91,7 +91,10 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
   return pInstrument;
 }
 
-pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, const Fundamentals& fundamentals ) {
+pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamentals ) {
+
+  const std::string sGenericName
+    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals );
 
   pInstrument_t pInstrument;
 
