@@ -140,7 +140,7 @@ public:
   // equity, ieoption, future, futures option (from fundamentals)
   const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, Date );
   // use fundamentals directly
-  const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, const Fundamentals& );
+  const std::string static BuildGenericName( const TableRowDef&, const Fundamentals& );
 
 protected:
 private:

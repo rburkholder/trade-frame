@@ -15,6 +15,7 @@
 #include <TFTrading/Instrument.h>
 
 #include "MarketSymbol.h"
+#include "TFIQFeed/Fundamentals.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -65,18 +66,18 @@ const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, 
 }
 
 // improved improved version
-const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, const TableRowDef& trd, const Fundamentals& fundamentals ) {
-  std::string sName( sBaseName );
+const std::string MarketSymbol::BuildGenericName( const TableRowDef& trd, const Fundamentals& fundamentals ) {
+  std::string sName( fundamentals.sExchangeRoot );
   switch( trd.sc ) {
     case enumSymbolClassifier::Equity:
       // uses base name
       break;
     case enumSymbolClassifier::Future:
-      sName = ou::tf::Instrument::BuildGenericFutureName( sBaseName, fundamentals.dateExpiration );
+      sName = ou::tf::Instrument::BuildGenericFutureName( sName, fundamentals.dateExpiration );
       break;
     case enumSymbolClassifier::IEOption:
     case enumSymbolClassifier::FOption:
-      sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, fundamentals.dateExpiration, trd.eOptionSide, fundamentals.dblStrikePrice );
+      sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, trd.eOptionSide, fundamentals.dblStrikePrice );
       break;
     default:
       assert( false );

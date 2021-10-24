@@ -94,7 +94,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
 pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamentals ) {
 
   const std::string sGenericName
-    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals.sExchangeRoot, trd, fundamentals );
+    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( trd, fundamentals );
 
   // to remove trd, will need a) security type lookup, b) listed market lookup
   //   http://www.iqfeed.net/dev/api/docs//SymbolLookupviaTCPIP.cfm
