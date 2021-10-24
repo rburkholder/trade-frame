@@ -27,8 +27,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 //  FUTURE MONTH CODES
-//  Jan-F    Feb-G    Mar-H    Apr-J    May-K    Jun-M   
-//  Jul-N    Aug-Q    Sep-U    Oct-V    Nov-X    Dec-Z 
+//  Jan-F    Feb-G    Mar-H    Apr-J    May-K    Jun-M
+//  Jul-N    Aug-Q    Sep-U    Oct-V    Nov-X    Dec-Z
 boost::uint8_t rFutureMonth[] = {
     0,  // A
     0,  // B
@@ -57,7 +57,7 @@ boost::uint8_t rFutureMonth[] = {
     0,  // Y
      12  // Z
   };
- 
+
 
 ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
   kwmExchanges( 0, 200 ), // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
@@ -138,8 +138,8 @@ void ValidateMktSymbolLine::Summary( void ) {
   std::cout << "Symbol List Complete" << std::endl;
 
 #ifdef _DEBUG
-  DEBUGOUT( 
-  "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl 
+  DEBUGOUT(
+  "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl
   )
 #endif
 }
@@ -186,7 +186,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
             trd.nMultiplier = 10;
             // fall through next stuff
           case '1':  // adjusted option (usually due to a split/merger of the company)
-          case '2':  // numbers themselves are irrelevant 
+          case '2':  // numbers themselves are irrelevant
           case '3':  // option is adjusted "in some way"
           case '4':  // 2013/09/03 dtniq forum response
             pos1.sText += ch;
@@ -219,7 +219,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           trd.nDay = ymd.day;
         }
         else {
-          if ( 5 /* friday */ == date.day_of_week() ) { 
+          if ( 5 /* friday */ == date.day_of_week() ) {
             // expected for weeklies and soon to be converted older ones
           }
           else {
@@ -228,15 +228,15 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           }
         }
       }
-            
+
       std::string sTmp = structOption.sUnderlying;
       std::string::size_type ixDot = sTmp.find( "." );
       if ( std::string::npos != ixDot ) {  // remove dot as option symbol does not have '.' in it
         sTmp.erase( ixDot, 1 );
       }
       if ( pos1.sText != sTmp ) {  // check against modified underlying
-        std::cout 
-          << "Option Symbol Decode: changing underlying on " 
+        std::cout
+          << "Option Symbol Decode: changing underlying on "
           << trd.sSymbol << " from "
           << structOption.sUnderlying << " to " << pos1.sText << std::endl;
         trd.sUnderlying = pos1.sText;
@@ -245,7 +245,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
       if ( pos1.dblStrike != structOption.dblStrike ) {
         //assert( false );
         std::cout
-          << "option Symbol Decode, strike and comment do not match: " 
+          << "option Symbol Decode, strike and comment do not match: "
           << trd.sSymbol << " - "
           << pos1.dblStrike
           << ","
@@ -268,8 +268,11 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
   ou::tf::iqfeed::structParsedFOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
   std::string::const_iterator sb( trd.sDescription.begin() );
   std::string::const_iterator se( trd.sDescription.end() );
-  bool b = parse( sb, se, parserFOptionDescription, structOption );
-  if ( b && ( sb == se ) ) {
+
+  bool bParsed = false;
+  bParsed = parse( sb, se, parserFOptionDescription, structOption );
+
+  if ( bParsed && ( sb == se ) ) {
     if ( 0 == trd.sUnderlying.length() ) {
       std::cout << "FOption Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
     }
@@ -286,8 +289,8 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
     std::string::const_iterator ixb( trd.sSymbol.begin() );
     std::string::const_iterator ixe( trd.sSymbol.end() );
     //b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserFOptionSymbol1, pos1 );
-    b = parse( ixb, ixe, parserFOptionSymbol3, pos3 );
-    if ( b ) {
+    bParsed = parse( ixb, ixe, parserFOptionSymbol3, pos3 );
+    if ( bParsed ) {
 //      if ( 2 != pos1.sDigits.length() ) {  // looking for yy
 //        std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
 //      }
@@ -296,19 +299,20 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
         trd.nDay = 0;
 //        trd.nYear = 2000 + boost::lexical_cast<uint16_t>( pos1.sDigits );
         trd.nYear = 2000 + pos3.nYear;
-            
+
 //        char c = pos1.sText.back();
 //        assert( ( 'F' <= c ) && ( c <= 'Z' ) );
 //        trd.nMonth = rFutureMonth[ c - 'A' ];
         trd.nMonth = rFutureMonth[ pos3.sMonth.front() - 'A' ];
 
 	// check that the date calculation is correct... expiry day for current month
-        boost::gregorian::date date( trd.nYear, trd.nMonth, 1 );
-        date = ou::tf::option::FuturesOptionExpiry( date );
-        boost::gregorian::date::ymd_type ymd = date.year_month_day();
-        trd.nYear = ymd.year;
-        trd.nMonth = ymd.month;
-        trd.nDay = ymd.day;
+  // no, don't do this, it uses a day of 1, which breaks the month on count back
+        //boost::gregorian::date date( trd.nYear, trd.nMonth, 1 );
+        //date = ou::tf::option::FuturesOptionExpiry( date );
+        //boost::gregorian::date::ymd_type ymd = date.year_month_day();
+        //trd.nYear = ymd.year;
+        //trd.nMonth = ymd.month;
+        //trd.nDay = ymd.day;
 
 //        pos1.sText = pos1.sText.substr( 0, pos1.sText.length() - 1 );
 
@@ -316,8 +320,8 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
 
 //        if ( pos1.sText != sTmp ) {  // check against modified underlying
         if ( pos3.sText != sTmp ) {  // check against modified underlying
-//          std::cout 
-//            << "Option Symbol Decode: changing underlying on " 
+//          std::cout
+//            << "Option Symbol Decode: changing underlying on "
 //            << trd.sSymbol << " from "
 //            << structOption.sUnderlying << " to " << pos1.sText << std::endl;
 //          trd.sUnderlying = pos1.sText;

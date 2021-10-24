@@ -82,7 +82,7 @@ private:
     structCountPerString( void ) : cnt( 0 ) {};
     bool operator<(const structCountPerString& rhs) { return (s < rhs.s); };
   };
- 
+
   ou::KeyWordMatch<size_t> kwmExchanges;
   std::vector<structCountPerString> vSymbolsPerExchange;
   typedef std::map<std::string,std::string> mapUnderlying_t;  // option name, underlying name
@@ -183,7 +183,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
         // � For combined session symbols, the first character is "+".
         //� For Night/Electronic sessions, the first character is "@".
         // � Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
-        // � NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
+        // � NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10).
         // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
         bDecode = true;
   //          if ( '+' == sSymbol[0] ) {
@@ -218,7 +218,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
         std::cout << trd.sSymbol << ": missing description" << std::endl;
       }
 
-      if ( 0 != m_OnProcessLine ) m_OnProcessLine( trd );
+      if ( nullptr != m_OnProcessLine ) m_OnProcessLine( trd );
 //      if ( &ValidateMktSymbolLine<CRTP,IteratorLines>::InsertParsedStructure != &CRTP::InsertParsedStructure ) {
 //        static_cast<CRTP*>( this )->InsertParsedStructure( trd );
 //      }
