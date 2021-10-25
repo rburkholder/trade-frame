@@ -58,7 +58,7 @@ void BuildInstrument::Add( const std::string& sIQFeedSymbol, fInstrument_t&& fIn
 
 void BuildInstrument::Update() {
 
-  bool bProceed( false );
+  bool bDoBuild( false );
   mapInProgress_t::iterator iterInProgress;
 
   {
@@ -68,23 +68,25 @@ void BuildInstrument::Update() {
       if ( 0 != m_mapSymbol.size() ) {
 
         mapSymbol_t::iterator iterSymbol = m_mapSymbol.begin();
-        auto& [ sIQFeedSymbol_, fInstrument_ ] = *iterSymbol;
-        const std::string sIQFeedSymbol( sIQFeedSymbol_ );
 
-        auto result = m_mapInProgress.emplace( std::make_pair( sIQFeedSymbol, InProgress( std::move( fInstrument_ ) ) ) );
-        assert( result.second );
+        {
+          auto& [ sIQFeedSymbol_, fInstrument_ ] = *iterSymbol;
+          const std::string sIQFeedSymbol( sIQFeedSymbol_ );
+
+          auto result = m_mapInProgress.emplace( std::make_pair( sIQFeedSymbol, InProgress( std::move( fInstrument_ ) ) ) );
+          assert( result.second );
+          iterInProgress = result.first;
+          bDoBuild = true;
+        }
 
         m_mapSymbol.erase( iterSymbol );
-
-        iterInProgress = result.first;
-        bProceed = true;
 
         //std::cout << "BuildInstrument::Update " << sSymbol << std::endl;
       }
     }
   }
 
-  if ( bProceed ) Build( iterInProgress );
+  if ( bDoBuild ) Build( iterInProgress );
 
 }
 
@@ -101,7 +103,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
     //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
-    ip.fInstrument( pInstrument );
+    ip.fInstrument( pInstrument, m_mapSymbol.size(), m_mapInProgress.size() );
 
     std::lock_guard<std::mutex> lock( m_mutexMap );
     m_mapInProgress.erase( iterInProgress );
@@ -127,20 +129,22 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
             std::cout
               << "BuildInstrument::Build: "
+              << m_mapSymbol.size() << ","
+              << m_mapInProgress.size() << ","
+              << fundamentals.sExchangeRoot << ","
               << iterInProgress->first << ","
-              << pInstrument->GetInstrumentName() << ","
-              << fundamentals.sExchangeRoot
+              << pInstrument->GetInstrumentName()
               << std::endl;
 
             m_pIB->RequestContractDetails(
               fundamentals.sExchangeRoot,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
-              [pWatch,iterInProgress]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+              [this,pWatch,iterInProgress]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
                 //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
                 assert( 0 != pInstrument->GetContract() );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                iterInProgress->second.fInstrument( pInstrument );
+                iterInProgress->second.fInstrument( pInstrument, m_mapSymbol.size(), m_mapInProgress.size() );
               },
               [this,iterInProgress](){
                 // TODO: how to test for incomplete done?

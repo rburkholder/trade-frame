@@ -367,12 +367,10 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
 
 void MasterPortfolio::ProcessSymbolList() {
 
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-
   for ( const std::string& sSymbol: m_setSymbols ) {
     m_pBuildInstrument->Add(
       sSymbol,
-      [this]( pInstrument_t pInstrument ){
+      [this]( pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess ){
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
         AddUnderlying( pWatch );
       } );
@@ -473,7 +471,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_pBuildInstrument->Add(
                     value,
-                    [this,fOption_]( pInstrument_t pInstrument ){
+                    [this,fOption_]( pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess ){
                       //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
                       fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
                     } );
@@ -482,7 +480,9 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           } );
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
-
+// TODO this once the chain acquisition process is complete
+//   chains need to be complete as ManageStrategy looks to populate it's own chains
+//
 //        StartStrategies( sUnderlying, uws );
 
       }
@@ -544,9 +544,10 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
                 fOption( pOption );
               }
               else {
+                // TODO: there is an assert inside the call which will need to be remedied
                 m_pBuildInstrument->Add(
                   sIQFeedOptionName,
-                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument){
+                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess){
                     pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
                     fOption_( pOption );
                   } );

@@ -40,7 +40,7 @@ public:
   using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
-  using fInstrument_t = std::function<void(pInstrument_t)>;
+  using fInstrument_t = std::function<void(pInstrument_t,size_t,size_t)>;
 
   using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
   using fGetTableRowDef_t = std::function<const trd_t&(const std::string& sIQFeedSymbolName)>;
@@ -59,6 +59,7 @@ private:
 
   using mapSymbol_t = std::map<std::string,fInstrument_t>;
 
+  // TODO: need a completion function?
   struct InProgress {
     pAcquireFundamentals_t pAcquireFundamentals;
     fInstrument_t fInstrument;
@@ -72,9 +73,9 @@ private:
 
   std::mutex m_mutexMap;
 
-  setSymbol_t m_setSymbolUnique;
-  mapSymbol_t m_mapSymbol;
-  mapInProgress_t m_mapInProgress;
+  setSymbol_t m_setSymbolUnique; // safety check that symbol is processed only once
+  mapSymbol_t m_mapSymbol;  // contains symbols waiting to be built
+  mapInProgress_t m_mapInProgress; // waiting for fundamentals, contract
 
   pProviderIQFeed_t m_pIQ;
   pProviderIBTWS_t m_pIB;
