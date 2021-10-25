@@ -28,6 +28,7 @@ set(
     AcquireFundamentals.h
     BasketTrading.h
     BuildInstrument.h
+    Config.h
     DailyHistory.h
     HistoryRequest.h
     LegSelected.h
@@ -49,6 +50,7 @@ set(
     AcquireFundamentals.cpp
     BasketTrading.cpp
     BuildInstrument.cpp
+    Config.cpp
     DailyHistory.cpp
     HistoryRequest.cpp
     LegSelected.cpp

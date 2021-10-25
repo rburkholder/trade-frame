@@ -102,8 +102,10 @@ private:
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
 
   virtual bool OnInit();
-  virtual int OnExit();
   void OnClose( wxCloseEvent& event );
+  virtual int OnExit();
+
+  void Init();
 
   void OnData1Connected( int );
 //  void OnData2Connected( int ) {};

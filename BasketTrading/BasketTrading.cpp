@@ -31,6 +31,7 @@
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include "Config.h"
 #include "BasketTrading.h"
 
 IMPLEMENT_APP(AppBasketTrading)
@@ -46,11 +47,28 @@ bool AppBasketTrading::OnInit() {
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c) 2021 One Unified Net Limited" );
 
+  int code = 1;
+
+  config::Options options;
+
+  if ( Load( options ) ) {
+
+    // latest daily bar
+    m_dtLatestEod = boost::posix_time::ptime( options.dateHistory, time_duration( 23, 59, 59 ) );
+    Init();
+
+  }
+  else {
+    code = 0;
+  }
+
+  return code;
+}
+
+void AppBasketTrading::Init() {
+
   m_sDbName = "BasketTrading.db";
   m_sStateFileName = "BasketTrading.state";
-
-  // latest daily bar
-  m_dtLatestEod = boost::posix_time::ptime( date( 2021, 7, 30 ), time_duration( 23, 59, 59 ) );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -199,7 +217,6 @@ bool AppBasketTrading::OnInit() {
     }
   );
 
-  return true;
 }
 
 void AppBasketTrading::BuildMasterPortfolio() {
