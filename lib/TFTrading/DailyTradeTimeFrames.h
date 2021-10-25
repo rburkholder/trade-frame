@@ -35,9 +35,9 @@ template<class T> // CRTP type call for the overrides
 class DailyTradeTimeFrame {
 public:
 
-  DailyTradeTimeFrame(void); // uses today's date
+  DailyTradeTimeFrame(); // uses today's date
   DailyTradeTimeFrame( boost::gregorian::date );  // simulation date
-  virtual ~DailyTradeTimeFrame(void) {};
+  virtual ~DailyTradeTimeFrame() {};
 
   template<typename DD>  // DD is DatedDatum construct
   void TimeTick( const DD& dd );
@@ -47,6 +47,7 @@ public:
     return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
   }
 
+  // used to override default InitForUSEquityExchanges
   void InitForUS24HourFutures( boost::gregorian::date date );
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; };
@@ -82,11 +83,13 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {};
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
   template<typename DD> void HandleMarketClosed( const DD& dd ) {};
+
   // event change one shots
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {}
+
 private:
   boost::posix_time::ptime m_dtMarketOpen;
   boost::posix_time::ptime m_dtRHOpen;
@@ -99,12 +102,13 @@ private:
 
   TimeFrame m_stateTimeFrame;
 
+  // used by default
   void InitForUSEquityExchanges( boost::gregorian::date );
 
 };
 
 template<class T>
-DailyTradeTimeFrame<T>::DailyTradeTimeFrame( void )
+DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
   : m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {

@@ -78,6 +78,7 @@ public:
   using fChartDel_t = std::function<void(wxTreeItemId)>;
 
   MasterPortfolio(
+    boost::gregorian::date dateTrading,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
 //    fGatherOptions_t &&,
@@ -124,6 +125,7 @@ private:
 
   bool m_bStarted;
 
+  boost::gregorian::date m_dateTrading;  // for use in DailyTradeTimeFrame
   ptime m_dtLatestEod;
 
   ou::tf::DatedDatum::volume_t m_nSharesTrading;

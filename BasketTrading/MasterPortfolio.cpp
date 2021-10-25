@@ -63,6 +63,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 */
 
 MasterPortfolio::MasterPortfolio(
+    boost::gregorian::date dateTrading,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGetTableRowDef_t&& fGetTableRowDef,
@@ -70,6 +71,7 @@ MasterPortfolio::MasterPortfolio(
     )
   : m_bStarted( false ),
     m_nSharesTrading( 0 ),
+    m_dateTrading( dateTrading ),
     m_fChartRoot( std::move( fChartRoot ) ),
     m_fChartAdd( std::move( fChartAdd ) ),
     m_fChartDel( std::move( fChartDel ) ),
@@ -729,6 +731,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           }
       );
 
+  pManageStrategy->InitForUS24HourFutures( m_dateTrading );;
   uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
   return uws.pStrategyInWaiting->pManageStrategy;
 

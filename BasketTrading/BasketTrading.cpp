@@ -53,7 +53,7 @@ bool AppBasketTrading::OnInit() {
 
   if ( Load( options ) ) {
 
-    // latest daily bar
+    m_dateTrading = options.dateTrading;
     m_dtLatestEod = boost::posix_time::ptime( options.dateHistory, time_duration( 23, 59, 59 ) );
     Init();
 
@@ -226,6 +226,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
+    m_dateTrading,
     // aggregation portfolio
     m_pPortfolioStrategyAggregate,
     // providers
