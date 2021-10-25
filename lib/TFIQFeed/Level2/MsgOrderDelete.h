@@ -107,8 +107,9 @@ namespace OrderDelete {
           qi::char_( '5' ) // Order Delete
         ;
 
+      ruleUint32 %= qi::ulong_;
+      ruleUint64 %= qi::ulong_long;
       ruleString %= *( qi::char_ - qi::char_( ',' ) );
-      ruleUint64 %= qi::ulong_;
 
       ruleOrderSide %=
           qi::char_( 'A' ) // Sell
@@ -129,11 +130,11 @@ namespace OrderDelete {
         ;
 */
       start %=
-          ruleMsgType > qi::lit( ',' ) // cMsgType
-        > ruleString > qi::lit( ',' ) // sSymbolName
-        > ruleUint64 > qi::lit( ',' ) // nOrderId
-        > /* reserved */ qi::lit( ',' ) // reserved
-        > ruleOrderSide > qi::lit( ',' ) // ruleOrderSide
+           ruleMsgType >> qi::lit( ',' ) // cMsgType
+        >> ruleString >> qi::lit( ',' ) // sSymbolName
+        >> ruleUint64 >> qi::lit( ',' ) // nOrderId
+        >> /* reserved */ qi::lit( ',' ) // reserved
+        >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
         >> ruleUint32 >> qi::lit( ':' ) // hours
         >> ruleUint32 >> qi::lit( ':' ) // minutes
         >> ruleUint32 >> qi::lit( '.' ) // seconds
@@ -141,6 +142,7 @@ namespace OrderDelete {
         >> ruleUint32 >> qi::lit( '-' ) // year
         >> ruleUint32 >> qi::lit( '-' ) // month
         >> ruleUint32 // day
+        >> qi::lit( ',' )
         ;
 
     }
@@ -162,6 +164,7 @@ namespace OrderDelete {
 
     static parser_decoded<T> parser;
 
+    // "5,@ESZ21,648907593934,,A,20:32:47.333543,2021-10-24,"
     bool bOk = parse( begin, end, parser, out );
 
     return bOk;

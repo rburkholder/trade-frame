@@ -63,6 +63,8 @@ protected:
   void OnNetworkSendDone();
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
+  void Initialized();
+
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
   void OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
   void OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
@@ -94,10 +96,16 @@ void Dispatcher<T>::Disconnect() {
 
 template <typename T>
 void Dispatcher<T>::OnNetworkConnected() {
+  if ( &Dispatcher<T>::OnNetworkConnected != &T::OnNetworkConnected ) {
+    static_cast<T*>( this )->OnNetworkConnected();
+  }
 }
 
 template <typename T>
 void Dispatcher<T>::OnNetworkDisconnected() {
+  if ( &Dispatcher<T>::OnNetworkDisconnected != &T::OnNetworkDisconnected ) {
+    static_cast<T*>( this )->OnNetworkDisconnected();
+  }
   std::cout << "Dispatcher<T>::OnNetworkDisconnected()" << std::endl;
   m_bInitialized = false;
 }
@@ -109,6 +117,14 @@ void Dispatcher<T>::OnNetworkError( size_t e ) {
 template <typename T>
 void Dispatcher<T>::OnNetworkSendDone() {
 }
+
+template <typename T>
+void Dispatcher<T>::Initialized() {
+  if ( &Dispatcher<T>::Initialized != &T::Initialized ) {
+    static_cast<T*>( this )->Initialized();
+  }
+}
+
 
 template <typename T>
 void Dispatcher<T>::StartMarketByOrder( const std::string& sName ) {
@@ -181,7 +197,13 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
           }
         }
         else {
-          std::cout << "MarketDepth Order Delete error" << std::endl;
+          std::string str( iter, end );
+          std::cout
+            << "MarketDepth Order Delete error: '"
+            << str
+            << "'"
+            << "|" << ( end - iter )
+            << std::endl;
         }
       }
       break;
@@ -217,6 +239,12 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         // TODO: for field comparisons, use spirit or the trie method
         ou::Network<Dispatcher<T> >::Send( "S,TIMESTAMPSOFF\n" );  // TODO: maybe send on S,KEYOK, check that there are no listeners to the event
         ou::Network<Dispatcher<T> >::Send( "S,SET PROTOCOL,6.2\n" );
+      }
+      else {
+        std::string str( iter, end );
+        if ( "S,CURRENT PROTOCOL,6.2," == str ) {
+          Initialized();
+        }
       }
       break;
     case 'n':

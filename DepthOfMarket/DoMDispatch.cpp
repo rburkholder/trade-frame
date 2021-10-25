@@ -39,16 +39,13 @@ void DoMDispatch::Disconnect() {
   inherited_t::Disconnect();
 }
 
-void DoMDispatch::OnNetworkConnected() {
+void DoMDispatch::Initialized() {
   StartMarketByOrder( m_sWatch );
-}
-
-void DoMDispatch::OnNetworkDisconnected() {
 }
 
 void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
-  assert( '3' == msg.chMsgType );
+  assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
 
   mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
   if ( m_mapOrder.end() != iter ) {

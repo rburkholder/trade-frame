@@ -45,9 +45,11 @@ public:
 protected:
 
   // called by Network via CRTP
-  void OnNetworkConnected();
-  void OnNetworkDisconnected();
+  //void OnNetworkConnected();
+  //void OnNetworkDisconnected();
   //void OnNetworkError( size_t e );
+
+  void Initialized();
 
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
   void OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );

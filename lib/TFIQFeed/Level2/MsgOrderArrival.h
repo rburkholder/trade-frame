@@ -118,10 +118,10 @@ namespace OrderArrival {
         | qi::char_( '0' ) // Price Level Order
         ;
 
-      ruleString %= *( qi::char_ - qi::char_( ',' ) );
-      ruleUint64 %= qi::ulong_;
-      ruleUint32 %= qi::uint_;
       ruleUint8  %= qi::ushort_;
+      ruleUint32 %= qi::ulong_;
+      ruleUint64 %= qi::ulong_long;
+      ruleString %= *( qi::char_ - qi::char_( ',' ) );
 
       ruleOrderSide %=
           qi::char_( 'A' ) // Sell
