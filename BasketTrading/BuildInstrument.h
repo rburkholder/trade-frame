@@ -73,7 +73,6 @@ private:
 
   std::mutex m_mutexMap;
 
-  setSymbol_t m_setSymbolUnique; // safety check that symbol is processed only once
   mapSymbol_t m_mapSymbol;  // contains symbols waiting to be built
   mapInProgress_t m_mapInProgress; // waiting for fundamentals, contract
 

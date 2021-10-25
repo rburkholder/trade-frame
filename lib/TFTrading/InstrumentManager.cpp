@@ -283,7 +283,8 @@ InstrumentManager::pInstrument_t InstrumentManager::LoadInstrument( keytypes::ei
   InstrumentName result;
   if ( m_pSession->Execute( pExistsQuery ) ) { // should only be once
     m_pSession->Columns<AltNameKey, InstrumentName>( pExistsQuery, result );
-    LoadInstrument( result.idInstrument, pInstrument );
+    //LoadInstrument( result.idInstrument, pInstrument );
+    bool bFound = Exists( result.idInstrument, pInstrument );
   }
   return pInstrument;
 }

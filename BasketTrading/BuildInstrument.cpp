@@ -40,19 +40,24 @@ BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pI
 
 void BuildInstrument::Add( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
 
-  {
-    std::lock_guard<std::mutex> lock( m_mutexMap );
-    setSymbol_t::const_iterator iter = m_setSymbolUnique.find( sIQFeedSymbol );
-    if ( m_setSymbolUnique.end() == iter ) {
-      m_setSymbolUnique.emplace( sIQFeedSymbol );
+  pInstrument_t pInstrument;
+
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+
+  pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
+  if ( pInstrument ) { // skip the build
+    //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
+    fInstrument( pInstrument );
+  }
+  else { // bulid a new instrument
+
+    {
+      std::lock_guard<std::mutex> lock( m_mutexMap );
       m_mapSymbol.emplace( std::make_pair( sIQFeedSymbol, std::move( fInstrument ) ) );
     }
-    else {
-      std::cout << "BuildInstrument::Add: " << sIQFeedSymbol << " duplicate request" << std::endl;
-    }
-  }
 
-  Update();
+    Update();
+  }
 
 }
 
@@ -94,75 +99,60 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
   auto& [ sIQFeedSymbol, ip ] = *iterInProgress;
 
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-
   pInstrument_t pInstrument;
 
-  // TODO: will probably need to fix this call, as it has an assert on already loaded symbols
-  //       perform an exists first
-  pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
-  if ( pInstrument ) { // skip the build
-    //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
-    ip.fInstrument( pInstrument );
+  // TODO: need to check that trd is a long lasting structure
+  const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
-    std::lock_guard<std::mutex> lock( m_mutexMap );
-    m_mapInProgress.erase( iterInProgress );
-  }
-  else { // bulid a new instrument
+  // temporary instrument solely for obtaining fundamental data with which to build real instrument
+  pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
-    // TODO: need to check that trd is a long lasting structure
-    const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
+  AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
+    = std::make_shared<AcquireFundamentals>(
+        std::move( pWatch ),
+        [this,iterInProgress,&trd]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
-    // temporary instrument solely for obtaining fundamental data with which to build real instrument
-    pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
+          const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
+          pInstrument_t pInstrument
+            = ou::tf::iqfeed::BuildInstrument( trd, fundamentals );
+          pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
-    AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
-      = std::make_shared<AcquireFundamentals>(
-          std::move( pWatch ),
-          [this,iterInProgress,&trd]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
+          std::cout
+            << "BuildInstrument::Build: "
+            << m_mapSymbol.size() << ","
+            << m_mapInProgress.size() << ","
+            << fundamentals.sExchangeRoot << ","
+            << iterInProgress->first << ","
+            << pInstrument->GetInstrumentName()
+            << std::endl;
 
-            const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
-            pInstrument_t pInstrument
-              = ou::tf::iqfeed::BuildInstrument( trd, fundamentals );
-            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
-
-            std::cout
-              << "BuildInstrument::Build: "
-              << m_mapSymbol.size() << ","
-              << m_mapInProgress.size() << ","
-              << fundamentals.sExchangeRoot << ","
-              << iterInProgress->first << ","
-              << pInstrument->GetInstrumentName()
-              << std::endl;
-
-            m_pIB->RequestContractDetails(
-              fundamentals.sExchangeRoot,  // needs to be the IB base name
-              pInstrument,  // this is a filled-in, prepared instrument
-              [this,pWatch,iterInProgress]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
-                assert( 0 != pInstrument->GetContract() );
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                iterInProgress->second.fInstrument( pInstrument );
-              },
-              [this,iterInProgress](){
-                // TODO: how to test for incomplete done?
-                //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
-                {
-                  std::lock_guard<std::mutex> lock( m_mutexMap );
-                  m_mapInProgress.erase( iterInProgress );
-                }
-                Update();
+          m_pIB->RequestContractDetails(
+            fundamentals.sExchangeRoot,  // needs to be the IB base name
+            pInstrument,  // this is a filled-in, prepared instrument
+            [this,pWatch,iterInProgress]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+              //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
+              assert( 0 != pInstrument->GetContract() );
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              iterInProgress->second.fInstrument( pInstrument );
+            },
+            [this,iterInProgress](){
+              // TODO: how to test for incomplete done?
+              //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
+              {
+                std::lock_guard<std::mutex> lock( m_mutexMap );
+                m_mapInProgress.erase( iterInProgress );
               }
-              );
-            //std::cout << "BuildInstrument::Build begin: " << iterInProgress->first << std::endl;
-          }
-        );
+              Update();
+            }
+            );
+          //std::cout << "BuildInstrument::Build begin: " << iterInProgress->first << std::endl;
+        }
+      );
 
-    iterInProgress->second.pAcquireFundamentals = pAcquireFundamentals;
-    pAcquireFundamentals->Start();
-  }
+  iterInProgress->second.pAcquireFundamentals = pAcquireFundamentals;
+  pAcquireFundamentals->Start();
 }
 
 void BuildInstrument::Clear() {
