@@ -34,15 +34,15 @@
 #include "MasterPortfolio.h"
 
 namespace {
-
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
 }
 
+// this does not appear to be used?
 const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
-        { "@ESZ21", {  0.10, 0.20, 6, 40 } }
+        { "@ESZ21", {  0.75, 1.0, 6, 40 } }
     };
 
 /*
@@ -70,6 +70,7 @@ MasterPortfolio::MasterPortfolio(
     fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel
     )
   : m_bStarted( false ),
+    m_nQuery {},
     m_nSharesTrading( 0 ),
     m_dateTrading( dateTrading ),
     m_fChartRoot( std::move( fChartRoot ) ),
@@ -355,27 +356,33 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
       [this](){
         m_pHistoryRequest = std::make_unique<HistoryRequest>(
           [this](){ // fConnected_t
-            ProcessSymbolList();
+            ProcessSeedList();
           }
         );
       }
     );
-    m_pOptionChainQuery->Connect();
+    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
 
   }
 }
 
-void MasterPortfolio::ProcessSymbolList() {
+void MasterPortfolio::ProcessSeedList() {
 
-  for ( const std::string& sSymbol: m_setSymbols ) {
+  if ( 0 == m_setSymbols.size() ) {
+    // TODO: when m_setSymbols is empty, disconnect m_pHistoryRequest, m_pOptionChainQuery?
+  }
+  else {
+    setSymbols_t::iterator iterSetSymbols = m_setSymbols.begin();
+    const std::string sSymbol( *iterSetSymbols );
+    m_setSymbols.erase( iterSetSymbols );
+
     m_pBuildInstrument->Add(
       sSymbol,
-      [this]( pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess ){
+      [this]( pInstrument_t pInstrument ){
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
         AddUnderlying( pWatch );
       } );
   }
-
 }
 
 void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
@@ -424,7 +431,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         std::stringstream ss;
         //ss << m_dtLatestEod << "," << bar.DateTime() << std::endl;
         //std::string s( ss.str() );
-        assert( m_dtLatestEod >= bar.DateTime() ); // what condition does this test satisfy?
+        assert( m_dtLatestEod <= bar.DateTime() ); // what condition does this test satisfy?
         uws.statistics.setPivots.CalcPivots( bar );
 
         const Statistics& statistics( uws.statistics );
@@ -454,12 +461,12 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         pMenuPopupUnderlying = nullptr;
 
         uws.pUnderlying->PopulateChains(
-          [this](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
+          [this,&uws](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
             using query_t = ou::tf::iqfeed::OptionChainQuery;
             m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
               sIQFeedUnderlying,
               "", "", "", "", sIQFeedUnderlying,
-              [this,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
+              [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
                 std::cout
                   << "chain request " << chains.sKey
                   << " has " << chains.vOption.size() << " options"
@@ -467,23 +474,31 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
+                m_nQuery = 1; // intial lock of the loop
                 for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
+                  m_nQuery++;
                   m_pBuildInstrument->Add(
                     value,
-                    [this,fOption_]( pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess ){
+                    [this,&uws,fOption_]( pInstrument_t pInstrument ) {
                       //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
                       fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
+                      auto previous = m_nQuery.fetch_sub( 1 );
+                      if ( 1 == previous ) {
+                        StartUnderlying( uws );
+                        ProcessSeedList();
+                      }
                     } );
+                }
+                auto previous = m_nQuery.fetch_sub( 1 );
+                if ( 1 == previous ) {
+                  StartUnderlying( uws );
+                  ProcessSeedList();
                 }
               });
           } );
 
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
-// TODO this once the chain acquisition process is complete
-//   chains need to be complete as ManageStrategy looks to populate it's own chains
-//
-//        StartStrategies( sUnderlying, uws );
 
       }
     );
@@ -547,7 +562,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
                 // TODO: there is an assert inside the call which will need to be remedied
                 m_pBuildInstrument->Add(
                   sIQFeedOptionName,
-                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument, size_t nSymbolsRemaing, size_t nSymbolsInProcess){
+                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
                     pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
                     fOption_( pOption );
                   } );
@@ -738,9 +753,12 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
 
 } // ConstructStrategy
 
-void MasterPortfolio::StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& uws ) {
+void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
+  const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );  // "portfolio-GLD"
+
+  std::cout << "StartUnderlying " << sUnderlying << std::endl;
 
   bool bConstructDefaultStrategy( true );
 

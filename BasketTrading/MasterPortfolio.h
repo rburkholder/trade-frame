@@ -267,6 +267,7 @@ private:
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
+  std::atomic_uint32_t m_nQuery;
   std::unique_ptr<BuildInstrument> m_pBuildInstrument;
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
@@ -287,12 +288,12 @@ private:
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
   std::unique_ptr<HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect
 
-  void ProcessSymbolList();
+  void ProcessSeedList();
   void AddUnderlying( pWatch_t );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
-  void StartStrategies( const std::string& sUnderlying, UnderlyingWithStrategies& );
+  void StartUnderlying( UnderlyingWithStrategies& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

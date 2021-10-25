@@ -99,7 +99,7 @@ OptionChainQuery::OptionChainQuery(
   assert( m_fConnected );
 }
 
-OptionChainQuery::~OptionChainQuery(void) {
+OptionChainQuery::~OptionChainQuery() {
 }
 
 void OptionChainQuery::Connect() {

@@ -40,7 +40,7 @@ public:
   using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
-  using fInstrument_t = std::function<void(pInstrument_t,size_t,size_t)>;
+  using fInstrument_t = std::function<void(pInstrument_t)>;
 
   using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
   using fGetTableRowDef_t = std::function<const trd_t&(const std::string& sIQFeedSymbolName)>;

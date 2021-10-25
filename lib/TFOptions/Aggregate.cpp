@@ -20,7 +20,6 @@
  */
 
 #include "Aggregate.h"
-#include <stdexcept>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -50,7 +49,12 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
 
         iterChains = m_mapChains.find( expiry ); // see if expiry date exists
         if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
-          std::cout << "Add chain: " << sIQFeedSymbolName << "-" << expiry.year() << "/" << expiry.month() << "/" << expiry.day() << std::endl;
+          std::cout
+            << "Aggregate chain: " << sIQFeedSymbolName
+            << "," << expiry.year()
+            << "/" << expiry.month().as_number()
+            << "/" << expiry.day()
+            << std::endl;
           iterChains = m_mapChains.insert(
             m_mapChains.begin(),
              mapChains_t::value_type( expiry, std::move( chain ) )
@@ -93,8 +97,8 @@ void Aggregate::WalkChains( fOption_t&& fOption ) const {
     const chain_t& chain( vt.second );
     chain.Strikes(
       [ fOption ]( const chain_t::strike_t& strike ){
-        fOption( strike.call.pOption );
-        fOption( strike.put.pOption );
+        if ( strike.call.pOption ) fOption( strike.call.pOption );
+        if ( strike.put.pOption ) fOption( strike.put.pOption );
       });
   }
 }

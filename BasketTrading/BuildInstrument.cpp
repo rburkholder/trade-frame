@@ -103,7 +103,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
     //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
-    ip.fInstrument( pInstrument, m_mapSymbol.size(), m_mapInProgress.size() );
+    ip.fInstrument( pInstrument );
 
     std::lock_guard<std::mutex> lock( m_mutexMap );
     m_mapInProgress.erase( iterInProgress );
@@ -144,7 +144,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 assert( 0 != pInstrument->GetContract() );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                iterInProgress->second.fInstrument( pInstrument, m_mapSymbol.size(), m_mapInProgress.size() );
+                iterInProgress->second.fInstrument( pInstrument );
               },
               [this,iterInProgress](){
                 // TODO: how to test for incomplete done?

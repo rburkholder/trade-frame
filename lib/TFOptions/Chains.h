@@ -51,10 +51,10 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
           iterChains = map.find( date ); // see if expiry date exists
           if ( map.end() == iterChains ) { // insert new expiry set if not
             std::cout
-              << "Add chain: "
-              << pOption->GetInstrumentName() << "-"
+              << "PopulateMap chain: "
+              << pOption->GetInstrumentName() << ","
               << date.year() << "/"
-              << date.month() << "/"
+              << date.month().as_number() << "/"
               << date.day()
               << std::endl;
             iterChains = map.insert(
