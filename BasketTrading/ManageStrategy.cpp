@@ -553,42 +553,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   RHOption( bar );
 }
 
-// turn into a template if needed for other combo types
-// Not used at this point
-void ManageStrategy::BuildPosition(
-  const idPortfolio_t& idPortfolio,
-  boost::gregorian::date date,
-  ou::tf::OptionSide::enumOptionSide side, double price,
-  fBuildPositionCallBack_t&& fBuildPositionCallBack
-) {
-
-  mapChains_t::const_iterator iter = std::find_if( m_mapChains.begin(), m_mapChains.end(),
-    [this,date](const mapChains_t::value_type& vt)->bool{
-      return m_daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
-  } );
-
-  const chain_t& chain( iter->second );
-
-  std::string sIQFeedOptionCode;
-
-  switch ( side ) { // should this be here or in the caller?
-    case ou::tf::OptionSide::Call:
-      sIQFeedOptionCode = chain.GetIQFeedNameCall( chain.Call_Otm( price ) );
-      break;
-    case ou::tf::OptionSide::Put:
-      sIQFeedOptionCode = chain.GetIQFeedNamePut( chain.Put_Otm( price ) );
-      break;
-  }
-
-  m_fConstructOption(
-    sIQFeedOptionCode,
-    [this,f=std::move(fBuildPositionCallBack),&idPortfolio]( pOption_t pOption ){
-      m_pOptionRepository->Add( pOption );
-      pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, "" );
-      f( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-    });
-}
-
 void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
 
   const std::string& sUnderlying( m_pWatchUnderlying->GetInstrumentName() );

@@ -95,8 +95,6 @@ public:
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  using fBuildPositionCallBack_t = ou::tf::option::Combo::fBuildPositionCallBack_t;
-
   class Specs {
   public:
     double dblEntrySpreadFront;
@@ -347,13 +345,6 @@ private:
   using pEMA_t = std::shared_ptr<EMA>;
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
-
-  void BuildPosition(
-    const idPortfolio_t&,
-    boost::gregorian::date,
-    ou::tf::OptionSide::enumOptionSide, double price,
-    fBuildPositionCallBack_t&&
-  );
 
   void ComboPrepare( boost::gregorian::date );
 
