@@ -119,7 +119,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
           std::cout
-            << "BuildInstrument::Build: "
+            << "BuildInstrument: "
             << m_mapSymbol.size() << ","
             << m_mapInProgress.size() << ","
             << fundamentals.sExchangeRoot << ","
