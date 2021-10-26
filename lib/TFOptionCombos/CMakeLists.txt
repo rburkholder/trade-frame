@@ -20,6 +20,7 @@ set(
     Leg.h
     LegDef.h
     LegNote.h
+    SpreadSpecs.h
 #    PutBackSpread.h
 #    Straddle.h
 #    Strangle.h
@@ -39,6 +40,7 @@ set(
 #    Condor.cpp
     Leg.cpp
     LegNote.cpp
+    SpreadSpecs.cpp
 #    PutBackSpread.cpp
 #    Straddle.cpp
 #    Strangle.cpp

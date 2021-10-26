@@ -95,28 +95,6 @@ public:
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  class Specs {
-  public:
-    double dblEntrySpreadFront;
-    double dblEntrySpreadBack;
-    int nDaysFront;
-    int nDaysBack;
-    // will need a timeframe ES is different from GC, etc, may get from fundamentals
-
-    Specs() // default
-    : dblEntrySpreadFront {}, dblEntrySpreadBack {},
-      nDaysFront {}, nDaysBack {}
-    {}
-    Specs(
-      double dblEntrySpreadFront_, double dblEntrySpreadBack_,
-      int nDaysFront_, int nDaysBack__)
-    : dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
-      nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack__ )
-    {}
-  protected:
-  private:
-  };
-
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,
     double dblSlopeUnderlying,

@@ -38,6 +38,8 @@
 #include <TFInteractiveBrokers/IBTWS.h>
 //#include <TFSimulation/SimulationProvider.h>
 
+#include <TFOptionCombos/SpreadSpecs.h>
+
 #include "Underlying.h"
 #include "ManageStrategy.h"
 #include "BuildInstrument.h"
@@ -282,7 +284,7 @@ private:
   setSymbols_t m_setSymbols;
   setSymbols_t::const_iterator m_iterSymbols;
 
-  using mapSpecs_t = std::map<std::string,ManageStrategy::Specs>;
+  using mapSpecs_t = std::map<std::string,ou::tf::option::SpreadSpecs>;
   static const mapSpecs_t m_mapSpecs;
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
