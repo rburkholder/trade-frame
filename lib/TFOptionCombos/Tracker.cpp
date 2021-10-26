@@ -101,7 +101,7 @@ void Tracker::Initialize( pPosition_t pPosition ) {
   m_pPosition = pPosition;
 
   pInstrument_t pInstrument = m_pPosition->GetWatch()->GetInstrument();
-  assert( pInstrument->IsOption() );
+  assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
 
   m_dblStrikePosition = pInstrument->GetStrike();
   m_sidePosition = pInstrument->GetOptionSide();

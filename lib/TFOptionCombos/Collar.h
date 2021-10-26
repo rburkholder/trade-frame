@@ -26,6 +26,7 @@
 
 #include "Combo.h"
 #include "Tracker.h"
+#include "SpreadSpecs.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -47,11 +48,19 @@ public:
     const mapChains_t& chains,
     boost::gregorian::date,
     double priceUnderlying,
+    const SpreadSpecs&,
     const fLegSelected_t& );
 
   static void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
 
-  static const std::string Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection );
+  static const std::string Name(
+    const std::string& sUnderlying,
+    const mapChains_t& chains,
+    boost::gregorian::date date,
+    double price,
+    Combo::E20DayDirection,
+    const SpreadSpecs&
+    );
 
   virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
@@ -64,7 +73,7 @@ public:
   virtual void AtClose();
 
 protected:
-  virtual void Init( boost::gregorian::date, const mapChains_t* );
+  virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
   virtual void Init( LegNote::Type );
 private:
 

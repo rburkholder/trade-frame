@@ -34,24 +34,20 @@ namespace {
 
   static const size_t nLegs( 4 );
 
-  // assuming weekly options
-  static const boost::gregorian::days nDaysToExpiryFront( 5 );
-  static const boost::gregorian::days nDaysToExpirySynthetic( 30 );
-
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,nLegs>;
 
   static const rLegDef_t m_rLegDefRise = { // rising momentum
-    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call, 0.20 ), // synthetic long
-    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put,  0.20 ), // synthetic long
-    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call, 0.10 ), // covered
-    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put,  0.10 )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ), // synthetic long
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  )  // protective
   };
   static const rLegDef_t m_rLegDefFall = { // falling momentum
-    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put,  0.20 ), // synthetic short
-    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call, 0.20 ), // synthetic short
-    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put,  0.10 ), // covered
-    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call, 0.10 )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ), // synthetic short
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ), // synthetic short
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call )  // protective
   };
 
 } // namespace anon
@@ -70,7 +66,7 @@ Collar::~Collar() {
 
 // needs to happen after all Legs have been created
 // called from Combo::Prepare
-void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) {
+void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, const SpreadSpecs& specs ) {
 
   // TODO: check if position is active prior to Initialize
   // TODO: so much happening, almost ready to start firing events on state change
@@ -80,9 +76,9 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthLong,
-      [this,date,pmapChains](){
+      [this,date,pmapChains,days=specs.nDaysBack](){
         // TODO: check that the leg is active
-        InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, nDaysToExpirySynthetic );
+        InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, days );
       }
     )
   );
@@ -91,9 +87,9 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Protect,
-      [this,date,pmapChains](){
+      [this,date,pmapChains,days=specs.nDaysFront](){
         // TODO: check that the leg is active
-        InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, nDaysToExpiryFront );
+        InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, days );
       }
     )
   );
@@ -102,9 +98,9 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
-      [this,date,pmapChains](){
+      [this,date,pmapChains,days= specs.nDaysBack](){
         // TODO: check that the leg is active
-        InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, nDaysToExpirySynthetic );
+        InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, days );
       }
     )
   );
@@ -113,9 +109,9 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains ) 
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
-      [this,date,pmapChains](){
+      [this,date,pmapChains,days=specs.nDaysFront](){
         // TODO: check that the leg is active
-        InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, nDaysToExpiryFront );
+        InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, days );
       }
     )
   );
@@ -297,14 +293,15 @@ size_t /* static */ Collar::LegCount() {
     const mapChains_t& chains,
     boost::gregorian::date date,
     double priceUnderlying,
+    const SpreadSpecs& specs,
     const fLegSelected_t& fLegSelected
 )
 {
 
-  citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, nDaysToExpirySynthetic );
+  citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainSynthetic( citerChainSynthetic->second );
 
-  citerChain_t citerChainFront = Combo::SelectChain( chains, date, nDaysToExpiryFront );
+  citerChain_t citerChainFront = Combo::SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
 
   switch ( direction ) {
@@ -319,10 +316,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( m_rLegDefRise[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefRise[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefRise[2].dblSpread, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
-        fLegSelected( m_rLegDefRise[3].dblSpread, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
+        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( specs.dblEntrySpreadFront, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
+        fLegSelected( specs.dblEntrySpreadFront, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
       }
       break;
     case E20DayDirection::Falling:
@@ -334,10 +331,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( m_rLegDefFall[0].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefFall[1].dblSpread, strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( m_rLegDefFall[2].dblSpread, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
-        fLegSelected( m_rLegDefFall[3].dblSpread, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
+        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( specs.dblEntrySpreadFront, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
+        fLegSelected( specs.dblEntrySpreadFront, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
       }
       break;
   }
@@ -369,7 +366,14 @@ size_t /* static */ Collar::LegCount() {
 
 }
 
-/* static */ const std::string Collar::Name( const std::string& sUnderlying, const mapChains_t& chains, boost::gregorian::date date, double price, Combo::E20DayDirection direction ) {
+/* static */ const std::string Collar::Name(
+     const std::string& sUnderlying,
+     const mapChains_t& chains,
+     boost::gregorian::date date,
+     double price,
+     Combo::E20DayDirection direction,
+     const SpreadSpecs& specs
+     ) {
 
   std::string sName( "collar-" + sUnderlying );
   size_t ix {};
@@ -384,7 +388,7 @@ size_t /* static */ Collar::LegCount() {
   }
 
   ChooseLegs(
-    direction, chains, date, price,
+    direction, chains, date, price, specs,
     [&sName,&ix]( double spread, double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       switch ( ix ) {
         case 0:

@@ -207,6 +207,7 @@ ManageStrategy::ManageStrategy(
   double dblSlope20DayUnderlying,
   pWatch_t pWatchUnderlying,
   pPortfolio_t pPortfolioOwning, // => owning portfolio
+  const ou::tf::option::SpreadSpecs& specSpread,
   fGatherOptions_t&& fGatherOptions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
   fConstructOption_t&& fConstructOption, // => m_fConstructOption
@@ -256,7 +257,7 @@ ManageStrategy::ManageStrategy(
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
   m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_daysToExpiry( 1 ) // will be different for each strategy, to be deprecated
+  m_specsSpread( specSpread )
 {
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
@@ -559,7 +560,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
   std::cout << "ManageStrategy::ComboPrepare: " << sUnderlying << std::endl;
 
   m_pCombo->Prepare(
-    date, &m_mapChains,
+    date, &m_mapChains, m_specsSpread,
     [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
       // TODO: maintain a local map for quick reference
       m_fConstructOption(
@@ -624,15 +625,15 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             const boost::gregorian::date dateBar( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
-              [mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( direction, chains, date, mid, fLegSelected );
+              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
+                combo_t::ChooseLegs( direction, chains, date, mid, m_specsSpread, fLegSelected );
               }
             ) ) {
 
               // for a collar, always enter long, composition of legs indicates rising or falling momentum
 
               const idPortfolio_t idPortfolio
-                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction );  // "collar-GLD-rise-20210730-165-20210630-167-165"
+                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction, m_specsSpread );  // "collar-GLD-rise-20210730-165-20210630-167-165"
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 

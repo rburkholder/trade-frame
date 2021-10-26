@@ -51,6 +51,7 @@ Combo::~Combo() {
 void Combo::Prepare(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
+  const SpreadSpecs& specs,
   fConstructOption_t&& fConstructOption,
   fActivateOption_t&& fActivateOption,
   fOpenPosition_t&& fOpenPosition,
@@ -60,7 +61,7 @@ void Combo::Prepare(
   m_fActivateOption = std::move( fActivateOption );
   m_fOpenPosition = std::move( fOpenPosition );
   m_fDeactivateOption = std::move( fDeactivateOption );
-  Init( date, pmapChains );
+  Init( date, pmapChains, specs );
 }
 
 void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
@@ -112,7 +113,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
 void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   pWatch_t pWatch = pPosition->GetWatch();
-  assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
+  //assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
   pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
   m_fDeactivateOption( pOption );
 }

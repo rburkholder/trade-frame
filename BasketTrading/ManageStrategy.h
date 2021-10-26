@@ -42,7 +42,9 @@
 #include <TFOptions/Chain.h>
 #include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
-#include <TFOptionCombos/Combo.h>
+
+#include <TFOptionCombos/Collar.h>
+#include <TFOptionCombos/SpreadSpecs.h>
 
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
@@ -101,6 +103,7 @@ public:
     // TODO: convert these to left assign
     pWatch_t, // underlying
     pPortfolio_t, // owning portfolio
+    const ou::tf::option::SpreadSpecs&,
     fGatherOptions_t&&,
     //fConstructWatch_t,
     fConstructOption_t &&,
@@ -168,7 +171,7 @@ private:
 
   size_t m_nConfirmationIntervals;
 
-  boost::gregorian::days m_daysToExpiry;
+  const ou::tf::option::SpreadSpecs& m_specsSpread;
 
   using volume_t = ou::tf::DatedDatum::volume_t;
 

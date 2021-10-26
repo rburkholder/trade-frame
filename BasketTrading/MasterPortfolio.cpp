@@ -42,7 +42,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
-        { "@ESZ21", {  0.75, 1.0, 6, 40 } }
+        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
     };
 
 /*
@@ -341,7 +341,7 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
     //m_setSymbols.insert( "SPY" );
     //setSymbols.insert( "SLV" );
     //m_setSymbols.insert( "QGCZ21" );
-    m_setSymbols.insert( "@ESZ21" );
+    m_setSymbols.insert( "@ESZ21" );  // TODO: need to use m_mapSpecs
 
     // QGC#    GOLD DECEMBER 2021
     // QGCZ21  GOLD DECEMBER 2021
@@ -427,11 +427,17 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         uws.m_barsHistory.Append( bar );
       },
       [this,&uws,sUnderlying,&sIqfSymbol](){ // fDone_t
+
         const ou::tf::Bar& bar( uws.m_barsHistory.last() );
         std::stringstream ss;
-        //ss << m_dtLatestEod << "," << bar.DateTime() << std::endl;
-        //std::string s( ss.str() );
+        ss
+          << sUnderlying << " bar dates: "
+          << m_dtLatestEod << ","
+          << bar.DateTime()
+          << std::endl;
+        std::string s( ss.str() );
         assert( m_dtLatestEod <= bar.DateTime() ); // what condition does this test satisfy?
+
         uws.statistics.setPivots.CalcPivots( bar );
 
         const Statistics& statistics( uws.statistics );
@@ -516,6 +522,9 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
   //const IIPivot& iip_( uws.iip );
   const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
+  // TODO: need to fix this and use proper underlying name
+  mapSpecs_t::const_iterator iterSpreadSpecs = m_mapSpecs.find( "@ESZ21" );
+
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy = std::make_shared<ManageStrategy>(
@@ -524,6 +533,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         uws.pUnderlying->GetWatch(),
         pPortfolioUnderlying,
+        iterSpreadSpecs->second,
     // ManageStrategy::fGatherOptions_t
         [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){
           mapUnderlyingWithStrategies_t::const_iterator iter = m_mapUnderlyingWithStrategies.find( sIQFeedUnderlyingName );

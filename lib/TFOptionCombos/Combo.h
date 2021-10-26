@@ -29,11 +29,11 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
 
-
 #include <TFOptions/Chain.h>
 
 #include "Leg.h"
 #include "LegNote.h"
+#include "SpreadSpecs.h"
 #include "Exceptions.h"
 
 namespace ou { // One Unified
@@ -97,6 +97,7 @@ public:
   void Prepare(
     boost::gregorian::date date,
     const mapChains_t*,
+    const SpreadSpecs&,
     fConstructOption_t&&,
     fActivateOption_t&&,
     fOpenPosition_t&&,
@@ -149,7 +150,7 @@ protected:
   using mapLeg_t = std::map<LegNote::Type,ou::tf::Leg>;
   mapLeg_t m_mapLeg;
 
-  virtual void Init( boost::gregorian::date date, const mapChains_t* ) = 0;
+  virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
 
   void DeactivatePositionOption( pPosition_t );

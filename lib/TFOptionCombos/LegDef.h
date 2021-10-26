@@ -34,13 +34,10 @@ struct LegDef { // generic definition of each leg of the combo
   LegNote::Side side;
   LegNote::Option option;
   uint32_t quantity;
-  double dblSpread;
 
   LegDef( uint32_t quantity_, LegNote::Type type_, LegNote::Side side_, LegNote::Option option_ )
-  : quantity( quantity_ ), type( type_ ), side( side_ ), option( option_ ), dblSpread( 0.10 ) {}
+  : quantity( quantity_ ), type( type_ ), side( side_ ), option( option_ ) {}
 
-  LegDef( uint32_t quantity_, LegNote::Type type_, LegNote::Side side_, LegNote::Option option_, double dblSpread_ )
-  : quantity( quantity_ ), type( type_ ), side( side_ ), option( option_ ), dblSpread( dblSpread_) {}
 };
 
 } // namespace option
