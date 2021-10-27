@@ -90,7 +90,7 @@ private:
 
   void HandlePopUpClick( wxCommandEvent& event );
 
-  void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );

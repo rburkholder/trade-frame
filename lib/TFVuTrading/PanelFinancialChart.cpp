@@ -129,7 +129,7 @@ void PanelFinancialChart::CreateControls() {
 
   //pSplitter->SetSashPosition()
 
-  Bind( wxEVT_CLOSE_WINDOW, &PanelFinancialChart::OnClose, this );  // start close of windows and controls
+  Bind( wxEVT_DESTROY, &PanelFinancialChart::OnDestroy, this );
 }
 
 wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
@@ -227,7 +227,7 @@ void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.Skip();
 }
 
-void PanelFinancialChart::OnClose( wxCloseEvent& event ) {
+void PanelFinancialChart::OnDestroy( wxWindowDestroyEvent& event ) {
   m_pTree->Unbind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelFinancialChart::HandleTreeEventItemActivated, this, m_pTree->GetId() );
   m_pTree->Unbind( wxEVT_TREE_ITEM_RIGHT_CLICK, &PanelFinancialChart::HandleTreeEventItemRightClick, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTree->Unbind( wxEVT_TREE_ITEM_MENU, &PanelFinancialChart::HandleTreeEventItemMenu, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP

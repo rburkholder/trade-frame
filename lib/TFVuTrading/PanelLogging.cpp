@@ -48,7 +48,7 @@ bool PanelLogging::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
     return true;
 }
 
-void PanelLogging::CreateControls() {    
+void PanelLogging::CreateControls() {
 
     PanelLogging* itemPanel1 = this;
 
@@ -63,9 +63,11 @@ void PanelLogging::CreateControls() {
     m_pOldStreamBuf = std::cout.rdbuf();
     //std::cout.rdbuf(m_txtLogging);
     std::cout.rdbuf( &m_csb );
-    Bind( wxEVT_CLOSE_WINDOW, &PanelLogging::OnClose, this );
 
+    Bind( wxEVT_DESTROY, &PanelLogging::OnDestroy, this );
+    //Bind( wxEVT_CLOSE_WINDOW, &PanelLogging::OnClose, this );
     Bind( EVT_ConsoleString, &PanelLogging::HandleConsoleLine1, this );
+
     m_csb.SetOnEmitString( MakeDelegate( this, &PanelLogging::HandleConsoleLine0 ) );
 }
 
@@ -90,11 +92,20 @@ void PanelLogging::HandleConsoleLine1( ConsoleStringEvent& event ) {
   m_csb.ReturnBuffer( event.GetBuf() );
 }
 
-void PanelLogging::OnClose( wxCloseEvent& event ) {
+void PanelLogging::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  Unbind( EVT_ConsoleString, &PanelLogging::HandleConsoleLine1, this );
+  //Unbind( wxEVT_CLOSE_WINDOW, &PanelLogging::OnClose, this );
+  Unbind( wxEVT_DESTROY, &PanelLogging::OnDestroy, this );
+
   if ( nullptr != m_pOldStreamBuf ) {
     std::cout.rdbuf( m_pOldStreamBuf );
     m_pOldStreamBuf = nullptr;
   }
+
+  //std::cout << "PanelLogging::OnDestroy" << std::endl;
+
+  event.Skip();  // auto followed by Destroy();
 }
 
 } // namespace tf

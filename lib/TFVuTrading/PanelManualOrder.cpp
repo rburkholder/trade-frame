@@ -173,7 +173,7 @@ void PanelManualOrder::CreateControls( void ) {
 
   // Connect events and objects
 
-  Bind( wxEVT_CLOSE_WINDOW, &PanelManualOrder::OnClose, this );
+  Bind( wxEVT_DESTROY, &PanelManualOrder::OnDestroy, this );
 
   Bind( wxEVT_SET_FOCUS, &PanelManualOrder::OnFocusChange, this );
   Bind( wxEVT_KILL_FOCUS, &PanelManualOrder::OnFocusChange, this );
@@ -192,7 +192,7 @@ void PanelManualOrder::CreateControls( void ) {
   Bind( EVT_UpdateInstrumentDesc, &PanelManualOrder::OnUpdateInstrumentDesc, this );
 }
 
-void PanelManualOrder::OnClose( wxCloseEvent& event ) {
+void PanelManualOrder::OnDestroy( wxWindowDestroyEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
   event.Skip();  // auto followed by Destroy();

@@ -76,7 +76,9 @@ private:
 
   void HandleConsoleLine0( csb_t::Buf* pBuf );
   void HandleConsoleLine1( ConsoleStringEvent& event );
-  void OnClose( wxCloseEvent& event );
+
+  //void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
 };
 
 } // namespace tf

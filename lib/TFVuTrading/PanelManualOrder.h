@@ -132,7 +132,7 @@ private:
 
   void EmitOrder( void );
 
-  void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
   void OnBtnMarket( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Market; };
   void OnBtnLimit( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Limit; };
   void OnBtnStop( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Stop; };

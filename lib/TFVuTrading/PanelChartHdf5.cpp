@@ -124,11 +124,11 @@ void PanelChartHdf5::CreateControls() {
     boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 )
     );
 
-  Bind( wxEVT_CLOSE_WINDOW, &PanelChartHdf5::OnClose, this );  // start close of windows and controls
+  Bind( wxEVT_DESTROY, &PanelChartHdf5::OnDestroy, this );  // start close of windows and controls
 
 }
 
-void PanelChartHdf5::OnClose( wxCloseEvent& event ) {
+void PanelChartHdf5::OnDestroy( wxWindowDestroyEvent& event ) {
 
   delete m_pdm;
   m_pdm = nullptr;

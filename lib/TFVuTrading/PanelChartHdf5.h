@@ -86,7 +86,7 @@ private:
 
   wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
-  void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
 
   size_t LoadDataAndGenerateChart( CustomItemData::enumDatumType, const std::string& sPath );
 
