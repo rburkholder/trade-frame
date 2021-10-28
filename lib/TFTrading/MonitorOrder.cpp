@@ -185,12 +185,12 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
       switch ( m_pOrder->GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
           // TODO: maximum number of increments? aka don't chase too far?
-          m_pOrder->SetPrice1( m_pOrder->GetPrice1() + 0.01 );
+          m_pOrder->SetPrice1( m_pOrder->GetPrice1() + m_pPosition->GetInstrument()->GetMinTick() );
           bUpdateOrder = true;
           break;
         case ou::tf::OrderSide::Sell:
           if ( 0.03 < m_pOrder->GetPrice1() ) {
-            m_pOrder->SetPrice1( m_pOrder->GetPrice1() - 0.01 );
+            m_pOrder->SetPrice1( m_pOrder->GetPrice1() - m_pPosition->GetInstrument()->GetMinTick() );
             bUpdateOrder = true;
           }
           else {
