@@ -238,6 +238,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
             pOption_t pOption( std::move( m_pOption ) );
             std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
             m_fCloseLeg( m_pPosition );
+            // TODO: on opening a position, will need to extend states to handle order with errors
             Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position
             m_transition = ETransition::Track;  // start all over again
           }
