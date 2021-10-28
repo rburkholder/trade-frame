@@ -429,13 +429,11 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
       [this,&uws,sUnderlying,&sIqfSymbol](){ // fDone_t
 
         const ou::tf::Bar& bar( uws.m_barsHistory.last() );
-        std::stringstream ss;
-        ss
+        std::cout
           << sUnderlying << " bar dates: "
           << m_dtLatestEod << ","
           << bar.DateTime()
           << std::endl;
-        std::string s( ss.str() );
         assert( m_dtLatestEod <= bar.DateTime() ); // what condition does this test satisfy?
 
         uws.statistics.setPivots.CalcPivots( bar );
