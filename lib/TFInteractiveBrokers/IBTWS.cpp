@@ -731,6 +731,15 @@ IBTWS::pSymbol_t IBTWS::GetSymbol( pInstrument_t instrument ) {
 
 void IBTWS::error(const int id, const int errorCode, const std::string errorString) {
   switch ( errorCode ) {
+    case 103: // Duplicate order id
+        // id is the order number
+      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      break;
+    case 110: // The price does not conform to the minimum price variation for this contract.
+        // id is the order number
+        // TODO something like:  OrderManager::Instance().ReportCancellation( orderId );
+      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      break;
     case 1102: // Connectivity has been restored
       pTWS->reqAccountUpdates( true, "" );
       break;
@@ -743,7 +752,7 @@ void IBTWS::error(const int id, const int errorCode, const std::string errorStri
 //      m_ss.str("");
 //      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
 //      OutputDebugString( m_ss.str().c_str() );
-      std::cout << "status " << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
   }
 }
