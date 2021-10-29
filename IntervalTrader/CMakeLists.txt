@@ -65,6 +65,8 @@ target_link_libraries(
       TFBitsNPieces
       TFIQFeed
       TFInteractiveBrokers
+      ib_client
+      bid
       TFVuTrading
       TFOptions
       TFTrading

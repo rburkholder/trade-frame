@@ -58,7 +58,7 @@ public:
 protected:
 private:
 
-  using pIB_t = ou::tf::IBTWS::pProvider_t;
+  using pIB_t = ou::tf::ib::TWS::pProvider_t;
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;

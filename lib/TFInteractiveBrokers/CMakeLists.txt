@@ -8,36 +8,18 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+add_subdirectory(client)
+
 set(
   file_h
     IBTWS.h
-    EventIBInstrument.h
     IBSymbol.h
-    linux/EPosixClientSocket.h
-    linux/EPosixClientSocketPlatform.h
-    Shared/CommissionReport.h
-    Shared/CommonDefs.h
-    Shared/Contract.h
-    Shared/EClient.h
-    Shared/EClientSocketBase.h
-    Shared/EClientSocketBaseImpl.h
-    Shared/EWrapper.h
-    Shared/Execution.h
-    Shared/Order.h
-    Shared/OrderState.h
-    Shared/ScannerSubscription.h
-    Shared/shared_ptr.h
-    Shared/TagValue.h
-    Shared/TwsSocketClientErrors.h
   )
 
 set(
   file_cpp
     IBTWS.cpp
-    EventIBInstrument.cpp
     IBSymbol.cpp
-    linux/EClientSocketBase.cpp
-    linux/EPosixClientSocket.cpp
   )
 
 add_library(

@@ -48,7 +48,7 @@ struct GridIBAccountValues_impl {
   GridIBAccountValues_impl( GridIBAccountValues& );
   virtual ~GridIBAccountValues_impl();
 //private:
-  
+
 // for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 4
@@ -79,7 +79,7 @@ struct GridIBAccountValues_impl {
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
-    void UpdateAccountValue( const ou::tf::IBTWS::AccountValue& av ) {
+    void UpdateAccountValue( const ou::tf::ib::TWS::AccountValue& av ) {
       boost::fusion::at_c<COL_Key>( m_vModelCells ).SetValue( av.sKey );
       boost::fusion::at_c<COL_Value>( m_vModelCells ).SetValue( av.sVal );
       boost::fusion::at_c<COL_Currency>( m_vModelCells ).SetValue( av.sCurrency );
@@ -90,24 +90,24 @@ struct GridIBAccountValues_impl {
     wxGrid& m_grid;
     int m_nRow;
     vModelCells_t m_vModelCells;
-    
+
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
     }
   };
-  
-  GridIBAccountValues& m_pav; // passed in on construction 
-  
+
+  GridIBAccountValues& m_pav; // passed in on construction
+
   typedef std::map<std::string,AccountValueRow> mapAccountValueRow_t;
   mapAccountValueRow_t m_mapAccountValueRow;
 
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
   void DestroyControls();
-  
-  void UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av );
-  
+
+  void UpdateAccountValueRow( const ou::tf::ib::TWS::AccountValue& av );
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     int cnt = m_pav.GetCols();
@@ -121,7 +121,7 @@ struct GridIBAccountValues_impl {
   void load( Archive& ar, const unsigned int version ) {
     int cnt;
     ar & cnt;
-    assert( cnt == m_pav.GetCols() ); 
+    assert( cnt == m_pav.GetCols() );
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
@@ -135,7 +135,7 @@ struct GridIBAccountValues_impl {
 template<class Archive>
 void GridIBAccountValues::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
-}  
+}
 
 } // namespace tf
 } // namespace ou

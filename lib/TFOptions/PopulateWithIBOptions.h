@@ -17,7 +17,7 @@
 //
 // Ensure that the underlying contract has been built with IB first.
 //
- 
+
 #include <string>
 #include <sstream>
 #include <stdexcept>
@@ -40,8 +40,8 @@ namespace option {  // Option
 class PopulateOptions {
 public:
 
-  typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
-  typedef ou::tf::IBTWS::pProvider_t pProvider_t;
+  typedef ou::tf::ib::TWS::pInstrument_t pInstrument_t;
+  typedef ou::tf::ib::TWS::pProvider_t pProvider_t;
 
   PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider );
   ~PopulateOptions( void );

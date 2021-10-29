@@ -20,69 +20,67 @@
 #include <sstream>
 #include <functional>
 
-#ifndef IB_USE_STD_STRING
-#define IB_USE_STD_STRING
-#endif
-
 #include <boost/shared_ptr.hpp>
+
 #include "boost/date_time/posix_time/posix_time.hpp"
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-#include <boost/thread.hpp>
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
+
 #include <boost/bind.hpp>
+
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
-//#include <OUCommon/MSWindows.h>   // commented out 2015/02/22 not needed in linux, required in msw?
 
 #include <TFTrading/TradingEnumerations.h>
 #include <TFTrading/Instrument.h>
 #include <TFTrading/ProviderInterface.h>
 #include <TFTrading/Order.h>
 
+#include "client/EWrapper.h"
+#include "client/EReaderOSSignal.h"
+#include "client/EReader.h"
+
+#include "client/Contract.h"
+#include "client/Order.h"
+#include "client/OrderState.h"
+#include "client/Execution.h"
+
 #include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
 
-#ifndef TWSAPIDLLEXP
-#define TWSAPIDLLEXP
-#endif
-
-#ifdef _WIN32
-#include "win/EPosixClientSocket.h"
-#else
-#include "linux/EPosixClientSocket.h"
-#endif
-#include "Shared/EWrapper.h"
-
-#include "Shared/Contract.h"
-#include "Shared/Order.h"
-#include "Shared/OrderState.h"
-#include "Shared/Execution.h"
+class EClientSocket;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace ib { // Interactive Brokers
 
-class IBTWS :
-  public ProviderInterface<IBTWS, IBSymbol>,
+class TWS :
+  public ProviderInterface<TWS, Symbol>,
   public EWrapper
 {
 public:
 
-  typedef boost::shared_ptr<IBTWS> pProvider_t;
-  typedef ProviderInterface<IBTWS, IBSymbol> ProviderInterface_t;
-  typedef IBSymbol::pSymbol_t pSymbol_t;
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef Order::pOrder_t pOrder_t;
-  typedef int reqId_t;  // request id type
-  typedef ::Contract Contract;
-  typedef ::ContractDetails ContractDetails;
+  using pProvider_t = boost::shared_ptr<TWS>;
+  using ProviderInterface_t = ProviderInterface<TWS, Symbol>;
+  using pSymbol_t = Symbol::pSymbol_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pOrder_t = ou::tf::Order::pOrder_t;
+  using reqId_t = int;  // request id type
 
-  IBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
-  virtual ~IBTWS(void);
+  using Bar = ::Bar;
+  using Order = ::Order;
+  using Contract = ::Contract;
+  using ContractDetails = ::ContractDetails;
+  using Execution = ::Execution;
+
+  TWS( const std::string& acctCode = "", const std::string& address = "127.0.0.1", unsigned int port = 7496 );
+  virtual ~TWS();
 
   // From ProviderInterface:
-  void Connect( void );
-  void Disconnect( void );
+  void Connect();
+  void Disconnect();
 
   void SetClientId( int idClient ) { m_idClient = idClient; }
 
@@ -98,8 +96,8 @@ public:
 
   // old, deprecated set of event based handling, these are forwarded to the new set of handlers
 
-  typedef FastDelegate2<const ContractDetails&, pInstrument_t&> OnContractDetailsHandler_t;
-  typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
+  using OnContractDetailsHandler_t = FastDelegate2<const ContractDetails&, pInstrument_t&>;
+  using OnContractDetailsDoneHandler_t = FastDelegate0<void> ;
 
   void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,
                                                          OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
@@ -108,8 +106,8 @@ public:
 
   // new set of event based handling
 
-  typedef std::function<void(const ContractDetails&, pInstrument_t&)> fOnContractDetail_t;
-  typedef std::function<void(void)> fOnContractDetailDone_t;
+  using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
+  using fOnContractDetailDone_t = std::function<void(void)>;
 
   void RequestContractDetails( const std::string& sSymbolBaseName, const pInstrument_t,
                                                          fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
@@ -171,73 +169,9 @@ public:
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
   void BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument );
-  //pInstrument_t BuildInstrumentFromContract( const Contract& contract );
-  //pInstrument_t BuildInstrumentFromContract( pInstrument_t pInstrument, const Contract& contract ); // unregistered pre-existing instrument
 
   // TWS Specific events
-  // From TWS Wrapper:
-  void connectionClosed();
-  void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
-  void tickSize( TickerId tickerId, TickType field, int size);
-  void tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
-	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice);
-  void tickGeneric(TickerId tickerId, TickType tickType, double value);
-  void tickString(TickerId tickerId, TickType tickType, const std::string& value);
-  void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const std::string& formattedBasisPoints,
-	   double totalDividends, int holdDays, const std::string& futureExpiry, double dividendImpact, double dividendsToExpiry);
-  void orderStatus( OrderId orderId, const std::string &status, int filled,
-	   int remaining, double avgFillPrice, int permId, int parentId,
-	   double lastFillPrice, int clientId, const std::string& whyHeld);
-  void openOrder( OrderId orderId, const Contract&, const ::Order&, const OrderState&);
-  void openOrderEnd() {};  // **
-  void execDetails( int reqId, const Contract& contract, const ::Execution& execution );
-  void execDetailsEnd( int reqId) {};  // **
-  void error(const int id, const int errorCode, const std::string errorString);
-  void winError( const std::string& str, int lastError);
-  void updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch);
-  void currentTime(long time);
-  void contractDetails( int reqId, const ContractDetails& contractDetails );
-  void contractDetailsEnd( int reqId );
-  void bondContractDetails( int reqId, const ContractDetails& contractDetails );
-  void nextValidId( OrderId orderId);
-  void updatePortfolio( const Contract& contract, int position,
-      double marketPrice, double marketValue, double averageCost,
-      double unrealizedPNL, double realizedPNL, const std::string& accountName);
-  void updateAccountValue(const std::string& key, const std::string& val,
-   const std::string& currency, const std::string& accountName);
-  void updateAccountTime(const std::string& timeStamp);
-  void accountDownloadEnd(const std::string& accountName) {};  // **
-  void updateMktDepth(TickerId id, int position, int operation, int side,
-      double price, int size);
-  void updateMktDepthL2(TickerId id, int position, std::string marketMaker, int operation,
-      int side, double price, int size);
-  void managedAccounts( const std::string& accountsList);
-     virtual void receiveFA(faDataType pFaDataType, const std::string& cxml);
-  void historicalData(TickerId reqId, const std::string& date, double open, double high,
-	   double low, double close, int volume, int barCount, double WAP, int hasGaps);
-  void scannerParameters(const std::string& xml);
-  void scannerData(int reqId, int rank, const ContractDetails &contractDetails,
-	   const std::string& distance, const std::string& benchmark, const std::string& projection,
-	   const std::string& legsStr);
-  void scannerDataEnd(int reqId);
-  void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
-	   long volume, double wap, int count);
-  void fundamentalData(TickerId reqId, const std::string& data) {};  // **
-  void deltaNeutralValidation(int reqId, const UnderComp& underComp) {};  // **
-  void tickSnapshotEnd( int reqId) {};  // **
-
-  void marketDataType(TickerId,int);
-  void commissionReport(const CommissionReport &);
-  void position(const std::string &,const Contract &,int,double);
-  void positionEnd(void);
-  void accountSummary(int,const std::string &,const std::string &,const std::string &,const std::string &);
-  void accountSummaryEnd(int);
-  void verifyMessageAPI(const std::string &);
-  void verifyCompleted(bool,const std::string &);
-  void displayGroupList(int,const std::string &) {};
-  void displayGroupUpdated(int,const std::string &) {};
-  void verifyAndAuthMessageAPI(const std::string&, const std::string&) {};
-  void verifyAndAuthCompleted(bool, const std::string&) {};
+  #include "client/EWrapper_prototypes.h"
 
 protected:
 
@@ -273,7 +207,11 @@ protected:
   void  StopGreekWatch( pSymbol_t pSymbol );
 
 private:
-  EPosixClientSocket *pTWS;
+
+  EReaderOSSignal m_osSignal;
+  std::unique_ptr<EClientSocket> m_pTWS;
+	std::unique_ptr<EReader> m_pReader;
+
   long m_time;
   int m_idClient; // for session uniqueness when multiple applications are connected to TWS
 
@@ -299,7 +237,8 @@ private:
 
   boost::thread m_thrdIBMessages;
 
-  void ProcessMessages( void );
+  void ConnectOptions( const std::string& );
+  void processMessages();
 
   void DecodeMarketHours( const std::string&, ptime& dtOpen, ptime& dtClose );
 
@@ -317,14 +256,19 @@ private:
   };
 
   reqId_t m_nxtReqId;
-  std::vector<structRequest_t*> m_vInActiveRequestId;  // can this be re-written with lockless structure?
-  typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
+
+  using vInActiveRequest_t = std::vector<structRequest_t*>;
+  vInActiveRequest_t m_vInActiveRequestId;  // used for recycling requests
+
+  using mapActiveRequestId_t = std::map<reqId_t, structRequest_t*>;
   mapActiveRequestId_t m_mapActiveRequestId;
+
   boost::mutex m_mutexContractRequest;
 
   void DisconnectCommon( bool bSignalEnd );
 
 };
 
+} // namespace ib
 } // namespace tf
 } // namespace ou

@@ -42,7 +42,8 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
-        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
+//        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
+        { "@ESZ21", {  1.00, 2.00, 6, 30 } }
     };
 
 /*
@@ -92,7 +93,7 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
-      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );  // TODO: convert to boost:: to std::
+      m_pIB = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( pExec );  // TODO: convert to boost:: to std::
       break;
     default:
       assert( false ); // need the IB provider, or at least some provider
@@ -463,6 +464,8 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, uws.pUnderlying->GetChartDataView(), pMenuPopupUnderlying );
 
         pMenuPopupUnderlying = nullptr;
+
+        // TODO: run this in a thread, takes a while to process large option lists
 
         uws.pUnderlying->PopulateChains(
           [this,&uws](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){

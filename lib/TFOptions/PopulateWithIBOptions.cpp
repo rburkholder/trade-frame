@@ -20,7 +20,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option {  // Option
 
-PopulateOptions::PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider ) 
+PopulateOptions::PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider )
   : m_pProvider( pProvider ), m_session( session ), m_bActive( false ), m_cntInstruments( 0 )
 {
   // assert( session active? );
@@ -37,7 +37,7 @@ PopulateOptions::PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider 
 PopulateOptions::~PopulateOptions( void ) {
   m_pProvider->SetOnSecurityDefinitionNotFoundHandler( NULL );
 }
-  
+
 void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date dateExpiry, bool bCall, bool bPut ) {
 
   if ( m_bActive ) {
@@ -57,19 +57,19 @@ void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian
     if ( bCall ) m_contract.right = "CALL";
     if ( bPut  ) m_contract.right = "PUT";
   }
-  m_contract.expiry = boost::gregorian::to_iso_string( dateExpiry );
+  m_contract.lastTradeDateOrContractMonth = boost::gregorian::to_iso_string( dateExpiry );
 
   // delete any pre-existing first?
-  m_pProvider->RequestContractDetails( 
-    m_contract, 
-    MakeDelegate( this, &PopulateOptions::HandleOptionContractDetails ), 
+  m_pProvider->RequestContractDetails(
+    m_contract,
+    MakeDelegate( this, &PopulateOptions::HandleOptionContractDetails ),
     MakeDelegate( this, &PopulateOptions::HandleOptionContractDetailsDone )
   );
 }
 
 void PopulateOptions::HandleOptionContractDetails( const ContractDetails& details, pInstrument_t& pInstrument ) {
 //  pInstrument_t pInstrument = m_pProvider->BuildInstrumentFromContract( details.summary );
-//  ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pInsert 
+//  ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pInsert
 //    = m_session.Insert<Instrument::TableRowDef>( pInstrument->GetRow() );
   ++m_cntInstruments;
   if ( 0 != OnInstrumentBuilt ) OnInstrumentBuilt( pInstrument );

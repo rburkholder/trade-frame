@@ -105,7 +105,7 @@ bool AppMultipleFutures::OnInit() {
   m_nbStrategy->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &AppMultipleFutures::OnNotebookPageChanged, this );
 
   m_bIBConnected = false;
-  m_pIB = boost::make_shared<ou::tf::IBTWS>();
+  m_pIB = boost::make_shared<ou::tf::ib::TWS>();
   m_pIB->SetClientId( 6 );
   m_pIB->OnConnecting.Add( MakeDelegate( this, &AppMultipleFutures::HandleIBConnecting ) );
   m_pIB->OnConnected.Add( MakeDelegate( this, &AppMultipleFutures::HandleIBConnected ) );
@@ -177,9 +177,9 @@ void AppMultipleFutures::ConstructInstance( boost::uint16_t nSecPerBar, boost::u
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIB );
   m_pIB->RequestContractDetails(
     sBaseName, pInstrument,
-    [this,pWatch,nSecPerBar]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+    [this,pWatch,nSecPerBar]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
       namespace ph = std::placeholders;
-      std::cout << details.marketName << "," << details.summary.conId << std::endl;
+      std::cout << details.marketName << "," << details.contract.conId << std::endl;
       pStrategy_t pStrategy = std::make_unique<Strategy>( pWatch, nSecPerBar );
 //      m_pFrameOrderEntry->SetButtons(
 //        std::bind( &Strategy::HandleButtonUpdate, m_pStrategy.get() ),

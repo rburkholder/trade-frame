@@ -353,7 +353,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
     itemBoxSizer2->Add(m_splitPanels, 1, wxGROW|wxALL, 2);
 
   if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
-    ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
+    ou::tf::ib::TWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pExecutionProvider );
     pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::GridIBPositionDetails::UpdatePositionDetailRow );
     pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::GridIBAccountValues::UpdateAccountValueRow );
   }
@@ -430,18 +430,18 @@ void AppComboTrading::BuildFrameCharts( void ) {
       }
       else {
         pOptionInstrument = ou::tf::iqfeed::BuildInstrument( sGenericOptionName, trd, date );
-        ou::tf::IBTWS::Contract contract;
+        ou::tf::ib::TWS::Contract contract;
         contract.conId = pUnderlyingInstrument->GetContract();
         // this request uses contract id to obtain basic symbol of the underlying
         // TODO: 2018/09/08 this double lookup shouldn't be required, the underlying IB name should be already be stored as an alternate name
         m_tws->RequestContractDetails(
           contract,
-          [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+          [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
             // the resulting symbol can then be used to plug into the final option request to obtain
             //   the contract details for the option
             m_tws->RequestContractDetails(
-              details.summary.symbol, pOptionInstrument,
-              [this, pUnderlyingInstrument, f](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+              details.contract.symbol, pOptionInstrument,
+              [this, pUnderlyingInstrument, f](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
                 // the contract details fill in the contract in the instrument, which can then be passed back to the caller
                 //   as a fully defined, registered instrument
                 RegisterInstrument( pInstrument );  // TODO: does the instrument need to be registered?  Is this the best place for this?
@@ -899,7 +899,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
   if ( m_bIBConnected ) {
     m_tws->RequestContractDetails(
       sBaseName, pInstrument,
-      [this, callback]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+      [this, callback]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
         CallAfter([callback, pInstrument](){ // put into GUI thread
           callback( pInstrument );
         });
@@ -1315,7 +1315,7 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
   // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
   // 2014/09/30 maybe need to disable this panel, as the order doesn't land in an appropriate portfolio or position.
   if ( m_bIBConnected ) {
-    ou::tf::IBTWS::Contract contract;
+    ou::tf::ib::TWS::Contract contract;
     contract.currency = "USD";
     contract.exchange = "SMART";
     contract.secType = "STK";
@@ -1327,7 +1327,7 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
     //  MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
     //m_tws->RequestContractDetails(
     //  contract,
-    //  [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);},
+    //  [this](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){HandleIBContractDetails(details, pInstrument);},
     //  [this](void){HandleIBContractDetailsDone();}
     //  );
 

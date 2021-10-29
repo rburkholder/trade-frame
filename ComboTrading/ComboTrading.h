@@ -91,7 +91,7 @@ private:
 
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
-    ou::tf::IBTWS::ContractDetails details;
+    ou::tf::ib::TWS::ContractDetails details;
     pInstrument_t pInstrument;
   } m_IBInstrumentInfo;
 

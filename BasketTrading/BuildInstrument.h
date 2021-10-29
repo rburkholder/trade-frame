@@ -35,9 +35,9 @@
 class BuildInstrument {
 public:
 
-  using pInstrument_t = ou::tf::IBTWS::pInstrument_t;
+  using pInstrument_t = ou::tf::ib::TWS::pInstrument_t;
 
-  using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
+  using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
   using fInstrument_t = std::function<void(pInstrument_t)>;

@@ -35,15 +35,15 @@ namespace tf { // TradeFrame
 
 class IBPositionDetailEvent: public wxEvent {
 public:
-  IBPositionDetailEvent( wxEventType eventType, const ou::tf::IBTWS::PositionDetail& pd )
+  IBPositionDetailEvent( wxEventType eventType, const ou::tf::ib::TWS::PositionDetail& pd )
   : wxEvent( 0, eventType ), m_pd( pd ) {}
   IBPositionDetailEvent( const IBPositionDetailEvent& event ): wxEvent( event ), m_pd( event.m_pd ) {}
   ~IBPositionDetailEvent( void ) {}
   IBPositionDetailEvent* Clone( void ) const { return new IBPositionDetailEvent( *this ); }
-  const ou::tf::IBTWS::PositionDetail& GetIBPositionDetail( void ) const { return m_pd; }
+  const ou::tf::ib::TWS::PositionDetail& GetIBPositionDetail( void ) const { return m_pd; }
 protected:
 private:
-  const ou::tf::IBTWS::PositionDetail m_pd;
+  const ou::tf::ib::TWS::PositionDetail m_pd;
 };
 
 class GridIBPositionDetails_impl;  // Forward declaration
@@ -53,40 +53,40 @@ class GridIBPositionDetails: public wxGrid {
     friend class boost::serialization::access;
 public:
   GridIBPositionDetails(void);
-  GridIBPositionDetails( 
-    wxWindow* parent, wxWindowID id = GRID_PositionDetails_IDNAME, 
-    const wxPoint& pos = GRID_PositionDetails_POSITION, 
-    const wxSize& size = GRID_PositionDetails_SIZE, 
+  GridIBPositionDetails(
+    wxWindow* parent, wxWindowID id = GRID_PositionDetails_IDNAME,
+    const wxPoint& pos = GRID_PositionDetails_POSITION,
+    const wxSize& size = GRID_PositionDetails_SIZE,
     long style = GRID_PositionDetails_STYLE,
     const wxString& = GRID_PositionDetails_TITLE );
   ~GridIBPositionDetails(void);
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id = GRID_PositionDetails_IDNAME, 
-    const wxPoint& pos = GRID_PositionDetails_POSITION, 
-    const wxSize& size = GRID_PositionDetails_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id = GRID_PositionDetails_IDNAME,
+    const wxPoint& pos = GRID_PositionDetails_POSITION,
+    const wxSize& size = GRID_PositionDetails_SIZE,
     long style = GRID_PositionDetails_STYLE,
     const wxString& = GRID_PositionDetails_TITLE );
-  
-  void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
+
+  void UpdatePositionDetailRow( const ou::tf::ib::TWS::PositionDetail& ad );
 
 protected:
     void Init();
     void CreateControls();
 private:
-  
+
   enum { ID_Null=wxID_HIGHEST, ID_GRID_IB_POSITION_DETAILS
   };
-  
+
   std::unique_ptr<GridIBPositionDetails_impl> m_pimpl;
-  
+
   void HandleIBPositionDetail( IBPositionDetailEvent& event );
 
   void OnDestroy( wxWindowDestroyEvent& event );
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
-  
+
     template<class Archive>
     void serialize(Archive & ar, const unsigned int file_version);
 };

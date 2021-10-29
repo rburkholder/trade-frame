@@ -48,7 +48,7 @@ protected:
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using eProviderState_t = ou::tf::eProviderState_t;
 
-  using pProviderIBTWS_t = ou::tf::IBTWS::pProvider_t;
+  using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
 
@@ -163,7 +163,7 @@ template<typename CRTP>
 FrameWork01<CRTP>::FrameWork01( void ) :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
-  m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ),
+  m_tws( new ou::tf::ib::TWS( "U000000" ) ), m_bIBConnected( false ),
   m_iqfeed( new ou::tf::iqfeed::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
   m_bData1Connected( false ), m_bData2Connected( false ), m_bExecConnected( false )

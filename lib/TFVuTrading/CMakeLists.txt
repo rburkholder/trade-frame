@@ -8,6 +8,8 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+add_subdirectory(MarketDepth)
+
 set(
   file_h
     ControllerPortfolioPositionOrderExecution.h

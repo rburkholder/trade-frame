@@ -50,7 +50,7 @@ private:
   using pPosition_t   = ou::tf::Position::pPosition_t;
   using pPortfolio_t  = ou::tf::Portfolio::pPortfolio_t;
 
-  using pProviderIB_t = ou::tf::IBTWS::pProvider_t;
+  using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
 
   std::string m_sStateFileName;
 

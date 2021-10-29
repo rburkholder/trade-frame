@@ -102,7 +102,7 @@ bool AppESBracketOrder::OnInit() {
   Bind( wxEVT_TIMER, &AppESBracketOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_bIBConnected = false;
-  m_pIB = boost::make_shared<ou::tf::IBTWS>();
+  m_pIB = boost::make_shared<ou::tf::ib::TWS>();
   m_pIB->SetClientId( 6 );
   m_pIB->OnConnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnecting ) );
   m_pIB->OnConnected.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnected ) );
@@ -161,8 +161,8 @@ void AppESBracketOrder::HandleIBConnected( int ) {
 
     m_pIB->RequestContractDetails(
       sBaseName, pInstrument,
-      [this]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
-        std::cout << details.marketName << "," << details.summary.conId << std::endl;
+      [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+        std::cout << details.marketName << "," << details.contract.conId << std::endl;
         m_pStrategy = std::make_unique<Strategy>( m_pWatch );
         namespace ph = std::placeholders;
         m_pFrameOrderEntry->SetButtons(

@@ -136,7 +136,7 @@ private:
   void HandleMenuActionStopChart( void );
   void HandleMenuActionEmitStrategyValues( void );
 
-  void HandleIBUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& );
+  void HandleIBUnderlyingContractDetails( const ou::tf::ib::TWS::ContractDetails&, pInstrument_t& );
   void HandleIBUnderlyingContractDetailsDone( void );
   void FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying );
 

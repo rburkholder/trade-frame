@@ -130,7 +130,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           m_pIB->RequestContractDetails(
             fundamentals.sExchangeRoot,  // needs to be the IB base name
             pInstrument,  // this is a filled-in, prepared instrument
-            [this,pWatch,iterInProgress]( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ){
+            [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
               //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
               assert( 0 != pInstrument->GetContract() );
               ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );

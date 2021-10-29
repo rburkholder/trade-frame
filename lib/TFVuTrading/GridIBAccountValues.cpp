@@ -42,27 +42,27 @@ void GridIBAccountValues::Init() {
 }
 
 bool GridIBAccountValues::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
-  
+
   wxGrid::Create(parent, id, pos, size, style, sTitle );
-  m_pimpl.reset( new GridIBAccountValues_impl( *this ) ); 
+  m_pimpl.reset( new GridIBAccountValues_impl( *this ) );
 
   CreateControls();
-    
+
   return true;
 }
 
-void GridIBAccountValues::CreateControls() {    
-  
+void GridIBAccountValues::CreateControls() {
+
   Bind( EVT_IBAccountValue, &GridIBAccountValues::HandleIBAccountValue, this );
   Bind( wxEVT_DESTROY, &GridIBAccountValues::OnDestroy, this );
-  
+
   m_pimpl->CreateControls();
-  
+
 }
 
 // need to cross a thread boundary here
 // TODO: need to check that ad is valid through the event transition
-void GridIBAccountValues::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad ) {
+void GridIBAccountValues::UpdateAccountValueRow( const ou::tf::ib::TWS::AccountValue& ad ) {
   auto p( new IBAccountValueEvent( EVT_IBAccountValue, ad ) );
   this->QueueEvent( p );
 }
@@ -72,19 +72,19 @@ void GridIBAccountValues::HandleIBAccountValue( IBAccountValueEvent& event ) {
 }
 
 void GridIBAccountValues::OnDestroy( wxWindowDestroyEvent& event ) {
-  
+
   //m_pimpl->DestroyControls();
   //m_timerGuiRefresh.Stop();
   //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  
+
   Unbind( wxEVT_DESTROY, &GridIBAccountValues::OnDestroy, this );
-  
+
   //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
-  
+
   //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
   //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
   //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
   event.Skip();  // auto followed by Destroy();
@@ -101,12 +101,12 @@ wxIcon GridIBAccountValues::GetIconResource( const wxString& name ) {
 }
 
 template void GridIBAccountValues::serialize<boost::archive::text_iarchive>(
-    boost::archive::text_iarchive & ar, 
+    boost::archive::text_iarchive & ar,
     const unsigned int file_version
 );
 
 template void GridIBAccountValues::serialize<boost::archive::text_oarchive>(
-    boost::archive::text_oarchive & ar, 
+    boost::archive::text_oarchive & ar,
     const unsigned int file_version
 );
 

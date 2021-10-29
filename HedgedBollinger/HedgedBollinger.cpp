@@ -336,7 +336,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
           FinishStrategyInitialization( pInstrumentUnderlying );
           break;
         case EProviderUsageReadTrade:
-          ou::tf::IBTWS::Contract contract;
+          ou::tf::ib::TWS::Contract contract;
           contract.symbol = m_sNameUnderlying;
           //contract.exchange = "SMART";
           contract.exchange = "NYMEX";
@@ -363,7 +363,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
   }
 }
 
-void AppHedgedBollinger::HandleIBUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrumentUnderlying ) {
+void AppHedgedBollinger::HandleIBUnderlyingContractDetails( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrumentUnderlying ) {
   // should only be one symbol arriving
   pInstrumentUnderlying->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, m_sNameUnderlyingIQFeed );
   FinishStrategyInitialization( pInstrumentUnderlying );

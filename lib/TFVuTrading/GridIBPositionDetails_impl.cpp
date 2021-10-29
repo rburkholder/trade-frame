@@ -35,29 +35,29 @@ void GridIBPositionDetails_impl::CreateControls() {
     m_pad.SetRowLabelSize(50);
     //m_pGrid->CreateGrid(5, 5, wxGrid::wxGridSelectCells);
     //itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
-    
+
   m_pad.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
-// found in ModelCell_macros.h  
+// found in ModelCell_macros.h
 #ifdef GRID_EMIT_SetColSettings
 #undef GRID_EMIT_SetColSettings
 #endif
-  
+
 #define GRID_EMIT_SetColSettings( z, n, VAR ) \
   m_pad.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
   m_pad.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
-  
+
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
-      
+
   //m_pad.Bind( wxEVT_CLOSE_WINDOW, &GridIBPositionDetails_impl::OnClose, this );  // start close of windows and controls
 }
 
 GridIBPositionDetails_impl::~GridIBPositionDetails_impl() {
 }
 
-void GridIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& pd ) {
-  
+void GridIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::ib::TWS::PositionDetail& pd ) {
+
   mapPositionDetailRow_t::iterator iter = m_mapPositionDetailRow.find( pd.sLocalSymbol );
   if ( m_mapPositionDetailRow.end() == iter ) {
     iter = m_mapPositionDetailRow.insert( m_mapPositionDetailRow.end(),
@@ -74,11 +74,11 @@ void GridIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::P
   iter->second.UpdateGui();
 }
 
-void GridIBPositionDetails_impl::DestroyControls() { 
-  
+void GridIBPositionDetails_impl::DestroyControls() {
+
   //m_timerGuiRefresh.Stop();
   //m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  
+
   //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 

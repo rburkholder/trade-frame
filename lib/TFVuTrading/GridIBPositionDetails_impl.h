@@ -52,7 +52,7 @@ struct GridIBPositionDetails_impl {
   GridIBPositionDetails_impl( GridIBPositionDetails& );
   virtual ~GridIBPositionDetails_impl();
 //private:
-  
+
 // for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 12
@@ -91,7 +91,7 @@ struct GridIBPositionDetails_impl {
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_row ) );
     }
-    void UpdatePositionDetail( const ou::tf::IBTWS::PositionDetail& pd ) {
+    void UpdatePositionDetail( const ou::tf::ib::TWS::PositionDetail& pd ) {
       boost::fusion::at_c<COL_Symbol1>( m_vModelCells ).SetValue( pd.sSymbol );
       boost::fusion::at_c<COL_Symbol2>( m_vModelCells ).SetValue( pd.sLocalSymbol );
       boost::fusion::at_c<COL_Expiry>( m_vModelCells ).SetValue( pd.sExpiry );
@@ -112,26 +112,26 @@ struct GridIBPositionDetails_impl {
     wxGrid& m_grid;
     int m_row;
     vModelCells_t m_vModelCells;
-    
+
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
-      
+
     }
   };
-  
-  GridIBPositionDetails& m_pad; // passed in on construction 
-  
+
+  GridIBPositionDetails& m_pad; // passed in on construction
+
   typedef std::map<std::string,PositionDetailRow> mapPositionDetailRow_t;
   mapPositionDetailRow_t m_mapPositionDetailRow;
 
   void CreateControls();
   void DestroyControls();
-  
-  void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
-  
+
+  void UpdatePositionDetailRow( const ou::tf::ib::TWS::PositionDetail& ad );
+
   void OnClose( wxCloseEvent& event );
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);
@@ -147,7 +147,7 @@ struct GridIBPositionDetails_impl {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
     int cnt;
     ar & cnt;
-    assert( cnt == m_pad.GetCols() ); 
+    assert( cnt == m_pad.GetCols() );
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
@@ -161,11 +161,11 @@ struct GridIBPositionDetails_impl {
 template<class Archive>
 void GridIBPositionDetails::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
-}  
+}
 
 } // namespace tf
 } // namespace ou
 
 BOOST_CLASS_VERSION(ou::tf::GridIBPositionDetails_impl, 1)
-  
+
 

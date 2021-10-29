@@ -97,6 +97,8 @@ target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
       TFInteractiveBrokers
+      ib_client
+      bid
       TFIQFeed
       TFSimulation
       TFStatistics

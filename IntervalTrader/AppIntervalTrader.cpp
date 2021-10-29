@@ -156,7 +156,7 @@ bool AppIntervalTrader::OnInit() {
       m_pIQFeed->Connect();
 
       m_bIBConnected = false;
-      m_pIB = boost::make_shared<ou::tf::IBTWS>();
+      m_pIB = boost::make_shared<ou::tf::ib::TWS>();
       m_pIB->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnecting ) );
       m_pIB->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnected ) );
       m_pIB->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBDisconnecting ) );
@@ -319,7 +319,7 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
           m_pIB->RequestContractDetails(
             m_pActivePosition->GetInstrument()->GetInstrumentName(),
             m_pActivePosition->GetInstrument(),
-            [this](const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument){
+            [this](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
               assert( 0 != pInstrument->GetContract() );
               // TODO: refactor the common bits out - see below
               pOrder_t pOrder = m_pActivePosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );

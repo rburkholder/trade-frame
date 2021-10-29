@@ -28,7 +28,7 @@ ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key
   pProvider_t pProvider;
   switch ( type ) {
   case keytypes::EProviderIB:
-    pProvider = Construct<IBTWS>( key );
+    pProvider = Construct<ou::tf::ib::TWS>( key );
     break;
   case keytypes::EProviderIQF:
     pProvider = Construct<ou::tf::iqfeed::IQFeedProvider>( key );

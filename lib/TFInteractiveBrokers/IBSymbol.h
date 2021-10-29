@@ -14,36 +14,34 @@
 
 #pragma once
 
-#include <stdexcept>
+//#include <stdexcept>
+
+#include "client/EWrapper.h"
 
 #include <TFTimeSeries/DatedDatum.h>
+
 #include <TFTrading/Symbol.h>
-
-#ifndef IB_USE_STD_STRING
-#define IB_USE_STD_STRING
-#endif
-
-#include "Shared/EWrapper.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace ib { // Interactive Brokers
 
-class IBSymbol : public Symbol<IBSymbol> {
-  friend class IBTWS;
+class Symbol : public ou::tf::Symbol<Symbol> {
+  friend class TWS;
 public:
 
-  typedef Symbol<IBSymbol> inherited_t;
-  typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef inherited_t::pSymbol_t pSymbol_t;
+  using inherited_t = ou::tf::Symbol<Symbol>;
+  using pInstrument_t = inherited_t::pInstrument_t;
+  using pSymbol_t = inherited_t::pSymbol_t;
 
   //IBSymbol( TickerId id, pInstrument_t pInstrument );
-  IBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
-  IBSymbol( pInstrument_t pInstrument, TickerId id );
-  virtual ~IBSymbol(void);
+  Symbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
+  Symbol( pInstrument_t pInstrument, TickerId id );
+  virtual ~Symbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };
 
-  void Greeks( double optPrice, double undPrice, double pvDividend, 
+  void Greeks( double optPrice, double undPrice, double pvDividend,
     double impliedVol, double delta, double gamma, double vega, double theta );
 
   double OptionPrice( void ) { return m_dblOptionPrice; };
@@ -89,7 +87,7 @@ protected:
   bool m_bDepthWatchInProgress;
 
   void AcceptTickPrice( TickType tickType, double price );
-  void AcceptTickSize( TickType tickType, int size );
+  void AcceptTickSize( TickType tickType, Decimal size );
   void AcceptTickString( TickType tickType, const std::string& value );
 
   void BuildQuote( void );
@@ -101,5 +99,6 @@ private:
 
 };
 
+} // namespace ib
 } // namespace tf
 } // namespace ou
