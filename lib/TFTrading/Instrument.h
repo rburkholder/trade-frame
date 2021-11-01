@@ -20,14 +20,12 @@
 
 #pragma once
 
-#include <boost-1_69/boost/date_time/gregorian/greg_date.hpp>
 #include <map>
 #include <memory>
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian_calendar.hpp>
-//using namespace boost::posix_time;
 
 #include <OUCommon/Delegate.h>
 
@@ -42,12 +40,14 @@ namespace tf { // TradeFrame
 class Instrument {
 public:
 
-  typedef keytypes::eidProvider_t eidProvider_t;  // from ProviderInterfaceBase in ProviderInterface.h
-  typedef keytypes::idExchange_t idExchange_t;
-  typedef keytypes::idInstrument_t idInstrument_t;
-  typedef const idInstrument_t& idInstrument_cref;
-  typedef std::shared_ptr<Instrument> pInstrument_t;
-  typedef const pInstrument_t& pInstrument_cref;
+  using eidProvider_t = keytypes::eidProvider_t;  // from ProviderInterfaceBase in ProviderInterface.h
+  using idExchange_t = keytypes::idExchange_t;
+  using idInstrument_t = keytypes::idInstrument_t;
+  using idInstrument_cref = const idInstrument_t&;
+  using pInstrument_t = std::shared_ptr<Instrument>;
+  using pInstrument_cref = const pInstrument_t&;
+
+  using mapExchangeRule_t = std::map<std::string,int>; // pair<exchange,ruleid>
 
   static std::string BuildDate( boost::gregorian::date );
   static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );
@@ -55,6 +55,9 @@ public:
   static std::string BuildGenericOptionName( const std::string& sBaseName, boost::gregorian::date, OptionSide::enumOptionSide side, double strike );
   static std::string BuildGenericFutureName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day );
   static std::string BuildGenericFutureName( const std::string& sBaseName, boost::gregorian::date );
+
+  // To consider: use boost::gregorian::date or use a date_t(year,month,day) structure?
+  //   then conversion in and out of boost::gregorian::date is not required
 
   struct TableRowDef {
     template<class A>
@@ -75,6 +78,7 @@ public:
       ou::db::Field( a, "multiplier", nMultiplier );
       ou::db::Field( a, "mintick", dblMinTick );
       ou::db::Field( a, "sigdigits", nSignificantDigits );
+      ou::db::Field( a, "exchange_rules", sExchangeRules ); // comma separated names
     }
 
     idInstrument_t idInstrument; // main name
@@ -93,12 +97,7 @@ public:
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
     double dblMinTick;
     boost::uint8_t nSignificantDigits;
-
-//  m_eUnderlyingStatus = EUnderlyingNotSettable;
-//  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
-//  if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
-//  if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
-    // see more in cpp file
+    std::string sExchangeRules;  // from ib, one or more exchange:ruleid
 
     TableRowDef( void ) // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -124,7 +123,7 @@ public:
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );
     };
-    TableRowDef( // option/futuresoption with yymm
+    TableRowDef( // option/futuresoption with yymm [TODO with day available now, remove this?]
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_,
 //      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_,
@@ -211,7 +210,7 @@ public:
     InstrumentType::enumInstrumentType eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
-  virtual ~Instrument(void);
+  virtual ~Instrument();
 
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
 //  idInstrument_cref GetUnderlyingName( void );
@@ -226,7 +225,7 @@ public:
     const std::string& s1;
     const std::string& s2;
     AlternateNameChangeInfo_t( eidProvider_t id_, const std::string& s1_, const std::string& s2_ ):
-      id( id ), s1( s1_ ), s2( s2_ ) {};
+      id( id_ ), s1( s1_ ), s2( s2_ ) {};
   };
   ou::Delegate<const AlternateNameChangeInfo_t&> OnAlternateNameAdded;  // idProvider, key, alt
   ou::Delegate<const AlternateNameChangeInfo_t&> OnAlternateNameChanged;  // idProvider, old, new
@@ -273,6 +272,7 @@ public:
   void SetMinTick( double dblMinTick ) { m_row.dblMinTick = dblMinTick; };
   double GetMinTick( void ) const { return m_row.dblMinTick; };
   double NormalizeOrderPrice( double price ) const;
+  static double NormalizeOrderPrice( double price, double interval );
 
   void SetSignificantDigits( boost::uint8_t nSignificantDigits ) { m_row.nSignificantDigits = nSignificantDigits; };
   boost::uint8_t GetSignificantDigits( void ) const { return m_row.nSignificantDigits; };
@@ -284,35 +284,31 @@ public:
   void SetTimeTrading( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
   const dtrMarketOpenClose_t& GetTimeTrading( void ) const { return m_dtrTimeTrading; };
 
+  void SetExchangeRules( const std::string& sExchangeRules ) { m_row.sExchangeRules = sExchangeRules; }
+  int GetExchangeRule();
+
   bool operator==( const Instrument& rhs ) const;
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
 protected:
-
-//  pInstrument_t m_pUnderlying;  // for the time being only used for obtaining underlying instrument alternate name
-
 private:
-
-  typedef std::map<eidProvider_t, idInstrument_t> mapAlternateNames_t;
-  typedef std::pair<eidProvider_t, idInstrument_t> mapAlternateNames_pair_t;
-  mapAlternateNames_t m_mapAlternateNames;
-
-//  enum enunUnderlyingStatus { // when should each be used?
-//    EUnderlyingNotSettable, // when instrument has no underlying?
-//    EUnderlyingNotSet, // when instrument does have underlying, but hasn't been set
-//    EUnderlyingSet // when instrument does have underlying, and has been set
-//  } m_eUnderlyingStatus;
 
   TableRowDef m_row;
 
+  using mapAlternateNames_t = std::map<eidProvider_t, idInstrument_t>;
+  mapAlternateNames_t m_mapAlternateNames;
+
   boost::gregorian::date m_dateCommonCalc;
+
+  mapExchangeRule_t m_mapExchangeRule;
 
   dtrMarketOpenClose_t m_dtrTimeLiquid;
   dtrMarketOpenClose_t m_dtrTimeTrading;
 
   Instrument( const Instrument& );  // copy ctor
   Instrument& operator=( const Instrument& ); // assignement
+
 };
 
 } // namespace tf

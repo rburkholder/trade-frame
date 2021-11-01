@@ -246,7 +246,7 @@ void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime d
 
   for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
     CollarLeg& cleg( entry.second );
-    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
+    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt, dblUnderlyingPrice );
 
     for ( vfTest_t::value_type& fTest: cleg.vfTest ) {
       fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );

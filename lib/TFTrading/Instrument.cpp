@@ -11,40 +11,52 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <cassert>
 #include <stdexcept>
+
+#include <boost/fusion/include/std_pair.hpp>
+
+#include <boost/spirit/include/qi.hpp>
 
 #include <OUCommon/TimeSource.h>
 
 #include "Instrument.h"
 
+using mapExchangeRule_t = ou::tf::Instrument::mapExchangeRule_t;
+
+namespace qi = boost::spirit::qi;
+
+// http://boost-spirit.com/home/articles/qi-example/parsing-a-list-of-key-value-pairs-using-spirit-qi/
+
+template<typename Iterator>
+struct ParseMarketRules: qi::grammar<Iterator, mapExchangeRule_t()> {
+
+  ParseMarketRules(): ParseMarketRules::base_type( start ) {
+
+    ruleExchange = ( +( qi::char_ - qi::char_(",=") ) );
+    ruleMarketRuleId = qi::int_;
+    ruleExchangeRule = ruleExchange >> qi::lit('=') >> ruleMarketRuleId;
+    start = ruleExchangeRule >> *( qi::lit(",") >> ruleExchangeRule );
+
+  }
+
+  qi::rule<Iterator, std::string()> ruleExchange;
+  qi::rule<Iterator, int()> ruleMarketRuleId;
+  qi::rule<Iterator, std::pair<std::string,int>()> ruleExchangeRule;
+  //qi::rule<Iterator, mapExchangeRule_t::value_type()> ruleExchangeRule;
+  qi::rule<Iterator, mapExchangeRule_t()> start;
+
+};
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-/*
-  if ( NULL != m_pUnderlying.get() ) {
-    rtn += sqlite3_bind_text(
-      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
-  }
-  else {
-    rtn += sqlite3_bind_text(
-      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), "", -1, SQLITE_STATIC );
-  }
-*/
-
-//static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
 static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
 
 std::string Instrument::BuildDate( boost::gregorian::date date ) {
-  auto month( date.month().as_number() );
-  auto day( date.day().as_number() );
-  return
-    boost::lexical_cast<std::string>( date.year() )
-    + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
-    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
-    ;
+  return BuildDate( date.year(), date.month().as_number(), date.day().as_number() );
 }
 
 std::string Instrument::BuildDate( uint16_t year, uint16_t month, uint16_t day ) {
@@ -107,7 +119,8 @@ std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, 
 Instrument::Instrument( const TableRowDef& row )
   : m_row( row ),
 //  m_eUnderlyingStatus( EUnderlyingNotSettable ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dtrTimeLiquid( dtDefault, dtDefault ),
+  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   switch ( row.eType ) {
@@ -126,29 +139,21 @@ Instrument::Instrument( const TableRowDef& row )
   }
 }
 
-//Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying )
-//  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ),
-//  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-//  m_dateCommonCalc( boost::gregorian::not_a_date_time )
-//{
-//  assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
-//}
-
 // equity / generic creation
 Instrument::Instrument(
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentType eType,
+  idInstrument_cref idInstrument,
+  InstrumentType::enumInstrumentType eType,
   const idExchange_t &idExchange
-                         )
+)
 : m_row( idInstrument, eType, idExchange ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
-{
-}
+{}
 
  // future
 Instrument::Instrument(
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentType eType,
+  idInstrument_cref idInstrument,
+  InstrumentType::enumInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day )
 : m_row( idInstrument, eType, idExchange, year, month, day ),
@@ -160,9 +165,10 @@ Instrument::Instrument(
   //assert( 0 < m_sExchange.size() );
 }
 
- // option yymm
+ // option yymm // TODO: get this removed
 Instrument::Instrument(
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentType eType,
+  idInstrument_cref idInstrument,
+  InstrumentType::enumInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
 //  pInstrument_t pUnderlying,
@@ -227,44 +233,25 @@ Instrument::Instrument(
 
 }
 
-/*
-  m_eUnderlyingStatus = EUnderlyingNotSet;
-  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
-  if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
-  if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
-  if ( EUnderlyingNotSet == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "Instrument::Instrument: underlying not accepted" );
-  }
-  if ( NULL == pUnderlying.get() ) {
-    throw std::runtime_error( "Instrument::Instrument: non null underlying required" );
-  }
-  if ( m_sUnderlying != pUnderlying->GetInstrumentName() ) {
-    throw std::runtime_error( "Instrument::Instrument: underlying name does not match expected name" );
-  }
-}
-*/
-
-Instrument::Instrument(const Instrument& instrument)
+Instrument::Instrument( const Instrument& instrument )
 :
   m_row( instrument.m_row ),
-//  m_pUnderlying( instrument.m_pUnderlying ),
-//  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dtrTimeLiquid( dtDefault, dtDefault ), m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
   while ( instrument.m_mapAlternateNames.end() != iter ) {
-    m_mapAlternateNames.insert( mapAlternateNames_pair_t( iter->first, iter->second ) );
+    m_mapAlternateNames.insert( mapAlternateNames_t::value_type( iter->first, iter->second ) );
   }
 }
 
-Instrument::~Instrument(void) {
+Instrument::~Instrument() {
 }
 
 void Instrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
-    m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
+    m_mapAlternateNames.insert( mapAlternateNames_t::value_type( id, name ) );
 //    OnAlternateNameAdded( AlternateNameChangeInfo_t( id, m_row.idInstrument, name ) );  // 2012/02/05  this creates a loop when loading alt names in instrument manager
   }
   else {
@@ -284,20 +271,6 @@ Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) 
   }
   return m_row.idInstrument;
 }
-
-//Instrument::idInstrument_cref Instrument::GetUnderlyingName( void ) {
-//  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-//    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
-//  }
-//  return m_pUnderlying->GetInstrumentName();
-//}
-
-//Instrument::idInstrument_cref Instrument::GetUnderlyingName( eidProvider_t id ) {
-//  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-//    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
-//  }
-//  return m_pUnderlying->GetInstrumentName(id);
-//}
 
 bool Instrument::operator==( const Instrument& rhs ) const {
   return (
@@ -332,29 +305,46 @@ boost::posix_time::ptime Instrument::GetExpiryUtc( void ) const {
 }
 
 double Instrument::NormalizeOrderPrice( double price ) const {
-  assert( 0.0 <= price );
-  assert( 0.0 < m_row.dblMinTick );
-  const double round = m_row.dblMinTick / 2.0;
-  const double multiple_rough = price / m_row.dblMinTick;
-  const double multiple_floor = std::floor( multiple_rough );
-  const double lower = multiple_floor * m_row.dblMinTick;
-  return ( price < ( lower + round ) ) ? lower : ( lower + m_row.dblMinTick );
+  return NormalizeOrderPrice( price, m_row.dblMinTick );
 }
 
-/*
-void Instrument::SetUnderlying( pInstrument_t pUnderlying ) {
-  if ( EUnderlyingNotSettable == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "Instrument::SetUnderlying: can not set underlying" );
-  }
-  if ( EUnderlyingSet == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "Instrument::SetUnderlying: underlying already set" );
-  }
-  if ( m_row.idUnderlying != pUnderlying->GetInstrumentName() ) {
-    throw std::runtime_error( "Instrument::SetUnderlying: underlying name does not match expected name" );
-  }
-  m_pUnderlying = pUnderlying;
-  m_eUnderlyingStatus = EUnderlyingSet;
+double Instrument::NormalizeOrderPrice( double price, double interval ) {
+  assert( 0.0 <= price );
+  assert( 0.0 < interval );
+  const double round = interval / 2.0;
+  const double multiple_rough = price / interval;
+  const double multiple_floor = std::floor( multiple_rough );
+  const double lower = multiple_floor * interval;
+  double dblResult = ( price < ( lower + round ) ) ? lower : ( lower + interval );
+  std::cout
+    << "Instrument::NormalizeOrderPrice: "
+    << "interval=" << interval << ","
+    << "price=" << price << ","
+    << "result=" << dblResult
+    << std::endl;
+  return dblResult;
 }
-*/
+
+int Instrument::GetExchangeRule() {
+
+  if ( 0 == m_mapExchangeRule.size() ) {
+
+    using const_string_iter = std::string::const_iterator;
+    ParseMarketRules<const_string_iter> grammarParseMarketRules;
+
+    const_string_iter bgn( m_row.sExchangeRules.begin() );
+    const_string_iter end( m_row.sExchangeRules.end() );
+
+    bool bOk = parse( bgn, end, grammarParseMarketRules, m_mapExchangeRule );
+    assert( bOk );
+
+  }
+
+  mapExchangeRule_t::const_iterator iter = m_mapExchangeRule.find( m_row.idExchange );
+  assert( m_mapExchangeRule.end() != iter );
+  return iter->second;
+
+}
+
 } // namespace tf
 } // namespace ou

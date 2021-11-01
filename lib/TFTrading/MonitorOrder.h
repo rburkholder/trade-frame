@@ -48,7 +48,7 @@ public:
   void CancelOrder();
   void ClosePosition();
 
-  void Tick( ptime dt );
+  void Tick( ptime dt, double price );
 
   bool IsOrderActive() const;
 
@@ -62,7 +62,10 @@ private:
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;
 
-  void UpdateOrder( ptime dt );
+  double PriceInterval( double price ) const;
+  double NormalizePrice( double price ) const;
+
+  void UpdateOrder( ptime dt, double price );
 
   void OrderCancelled( const ou::tf::Order& order );
   void OrderFilled( const ou::tf::Order& order );

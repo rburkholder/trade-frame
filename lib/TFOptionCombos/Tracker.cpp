@@ -170,6 +170,7 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
 
         double diff = m_pPosition->GetUnRealizedPL();
 
+        // close out when value close to zero
         if ( 0.101 >= m_pPosition->GetWatch()->LastQuote().Ask() ) {
           m_transition = ETransition::Fill;
           m_fCloseLeg( m_pPosition );

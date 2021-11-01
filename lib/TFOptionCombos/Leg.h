@@ -53,7 +53,7 @@ public:
   const option::LegNote::values_t& SetPosition( pPosition_t pPosition );
   pPosition_t GetPosition() const;
 
-  void Tick( ptime dt );
+  void Tick( ptime dt, double price );
 
   void PlaceOrder( ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
   void CancelOrder();

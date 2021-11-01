@@ -19,6 +19,8 @@
  * Created on May 25, 2019, 1:44 PM
  */
 
+ #include <TFInteractiveBrokers/IBTWS.h>
+
 #include "MonitorOrder.h"
 
 namespace ou {
@@ -66,6 +68,17 @@ void MonitorOrder::SetPosition( pPosition_t pPosition ) {
   m_state = State::NoOrder;
 }
 
+double MonitorOrder::NormalizePrice( double price ) const {
+  double interval = PriceInterval( price );
+  return m_pPosition->GetInstrument()->NormalizeOrderPrice( price, interval );
+}
+
+double MonitorOrder::PriceInterval( double price ) const {
+  auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
+  double interval = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+  return interval;
+}
+
 // can only work on one order at a time
 bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::enumOrderSide side ) {
   bool bOk( false );
@@ -75,7 +88,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
     case State::Filled:     // can overwrite?
       {
         double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-        double dblNormalizedPrice = m_pPosition->GetInstrument()->NormalizeOrderPrice( mid );
+        double dblNormalizedPrice = NormalizePrice( mid );
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
         if ( m_pOrder ) {
           m_state = State::Active;
@@ -151,10 +164,10 @@ void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Orde
   }
 }
 
-void MonitorOrder::Tick( ptime dt ) {
+void MonitorOrder::Tick( ptime dt, double price ) {
   switch ( m_state ) {
     case State::Active:
-      UpdateOrder( dt );
+      UpdateOrder( dt, price );
       break;
     case State::Cancelled:
     case State::Filled:
@@ -170,9 +183,7 @@ void MonitorOrder::Tick( ptime dt ) {
 
 bool MonitorOrder::IsOrderActive() const { return ( State::Active == m_state ); }
 
-void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
-
-  auto tod = dt.time_of_day();
+void MonitorOrder::UpdateOrder( ptime dt, double price ) { // true when order has been filled
 
   if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
     // TODO: generate message? error on filled, but may be present on cancel
@@ -182,26 +193,42 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
     m_CountDownToAdjustment--;
     bool bUpdateOrder( false );
     if ( 0 == m_CountDownToAdjustment ) {
+      // TODO: need logic if order was rejected
       switch ( m_pOrder->GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
           // TODO: maximum number of increments? aka don't chase too far?
-          m_pOrder->SetPrice1( m_pOrder->GetPrice1() + m_pPosition->GetInstrument()->GetMinTick() );
-          bUpdateOrder = true;
-          break;
-        case ou::tf::OrderSide::Sell:
-          if ( 0.03 < m_pOrder->GetPrice1() ) {
-            m_pOrder->SetPrice1( m_pOrder->GetPrice1() - m_pPosition->GetInstrument()->GetMinTick() );
+          if ( price > m_pOrder->GetPrice1() ) {
+            m_pOrder->SetPrice1( m_pOrder->GetPrice1() + PriceInterval( price ) );
             bUpdateOrder = true;
           }
-          else {
+          else {  // need to wait for execution
+            // TODO: need to expire this after a while
             m_CountDownToAdjustment = nAdjustmentPeriods;
           }
+          break;
+        case ou::tf::OrderSide::Sell:
+          {
+            double interval = PriceInterval( price );
+            if ( ( 2.0 * interval ) < m_pOrder->GetPrice1() ) {
+              m_pOrder->SetPrice1( m_pOrder->GetPrice1() - interval );
+              bUpdateOrder = true;
+            }
+            else {
+              m_CountDownToAdjustment = nAdjustmentPeriods;
+            }
+          }
+          break;
+        default:
+          assert( 0 );
           break;
       }
       // TODO: need to cancel both legs if spread is not < 0.10
       if ( bUpdateOrder ) {
+
         const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-        double spread = quote.Spread();
+        //double spread = quote.Spread();
+        auto tod = dt.time_of_day();
+
         std::cout
           << tod << " "
           << m_pOrder->GetOrderId() << " "

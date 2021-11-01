@@ -122,7 +122,7 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
-    leg.Tick( dt );
+    leg.Tick( dt, dblUnderlyingPrice );
   }
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
     case State::Executing:

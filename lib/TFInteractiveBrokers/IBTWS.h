@@ -170,6 +170,8 @@ public:
 
   void BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument );
 
+  double GetInterval( double price, int rule );
+
   // TWS Specific events
   #include "client/EWrapper_prototypes.h"
 
@@ -225,15 +227,8 @@ private:
   std::vector<pSymbol_t> m_vTickerToSymbol;
 
   // given a contract id, see if we have a symbol assigned
-  typedef std::map<long, pSymbol_t> mapContractToSymbol_t;
-  typedef std::pair<long, pSymbol_t> pair_mapContractToSymbol_t;
+  using mapContractToSymbol_t = std::map<long, pSymbol_t>;
   mapContractToSymbol_t m_mapContractToSymbol;
-
-  // do we actually need this anymore given that we have the above vector?
-  // given a ticker id, see if we have a symbol assigned
-//  typedef std::map<TickerId, pSymbol_t> mapTickerIdToSymbol_t;
-//  typedef std::pair<TickerId, pSymbol_t> pair_mapContractToSymbol_t;
-//  pair_mapContractToSymbol_t m_mapContractToSymbol;
 
   boost::thread m_thrdIBMessages;
 
@@ -264,6 +259,13 @@ private:
   mapActiveRequestId_t m_mapActiveRequestId;
 
   boost::mutex m_mutexContractRequest;
+
+  using mapExchangeMarketRule_t = std::map<std::string,std::string>;  // exchange name, rule id -- needs to be changed to reflect retrieval
+  mapExchangeMarketRule_t m_mapExchangeMarketRule;
+
+  using vPriceIncrement_t = std::vector<PriceIncrement>;
+  using mapMarketRule_t = std::map<int,vPriceIncrement_t>;
+  mapMarketRule_t m_mapMarketRule;
 
   void DisconnectCommon( bool bSignalEnd );
 
