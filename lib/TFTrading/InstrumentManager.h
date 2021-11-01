@@ -41,8 +41,8 @@ public:
   using idInstrument_t = Instrument::idInstrument_t;
   using idInstrument_cref = Instrument::idInstrument_cref;
 
-  InstrumentManager(void);
-  virtual ~InstrumentManager(void);
+  InstrumentManager();
+  virtual ~InstrumentManager();
 
   pInstrument_t ConstructInstrument(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic

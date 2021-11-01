@@ -23,10 +23,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-InstrumentManager::InstrumentManager(void) {
+InstrumentManager::InstrumentManager() {
 }
 
-InstrumentManager::~InstrumentManager(void) {
+InstrumentManager::~InstrumentManager() {
   for ( iterInstruments_t iter = m_mapInstruments.begin(); iter != m_mapInstruments.end(); ++iter ) {
     iter->second->OnAlternateNameAdded.Remove( MakeDelegate( this, &InstrumentManager::HandleAlternateNameAdded ) );
     iter->second->OnAlternateNameChanged.Remove( MakeDelegate( this, &InstrumentManager::HandleAlternateNameChanged ) );
@@ -205,7 +205,7 @@ struct InstrumentKey {
 
 bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
   std::lock_guard<std::mutex> lock( m_mutexLoadInstrument );
-      // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
+      // TODO: need transaction when writing instrument, underlying, and alternate names to database to ensure consistency
   assert( nullptr != m_pSession );
   assert( m_mapInstruments.end() == m_mapInstruments.find( id ) );  // ensures we havn't already loaded an instrument
 
@@ -217,33 +217,10 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     Instrument::TableRowDef instrument;
     m_pSession->Columns<InstrumentKey, Instrument::TableRowDef>( pExistsQuery, instrument );
-//    assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
-//         || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) )
-//      );
-//    if ( "" == instrument.idUnderlying ) {
       pInstrument = std::make_shared<Instrument>( instrument );
       Assign( pInstrument );
       LoadAlternateInstrumentNames( pInstrument );  // comes after assign
       bFound = true;
-//    }
-//    else {
-//      pInstrument_t pUnderlying;
-//      iterInstruments_t iter = m_mapInstruments.find( instrument.idUnderlying );
-//      if ( m_mapInstruments.end() != iter ) {
-//        pUnderlying = iter->second;
-//        bFound = true;
-//      }
-//      else {
-//        bFound = LoadInstrument( instrument.idUnderlying, pUnderlying );
-//        if ( !bFound ) {
-//          throw std::runtime_error( "LoadInstrument: underlying does not exist in database" );
-//        }
-//      }
-//      assert( ( InstrumentType::Stock == pUnderlying->GetInstrumentType() ) || ( InstrumentType::Future == pUnderlying->GetInstrumentType() ) );
-//      pInstrument.reset( new Instrument( instrument, pUnderlying ) );
-//      Assign( pInstrument );
-//      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
-//    }
   }
   return bFound;
 }
@@ -354,6 +331,7 @@ void InstrumentManager::HandleRegisterRows( ou::db::Session& session ) {
 
 void InstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
 
+  // TODO: need to add IB COMEX, CME, CME_MINI?
   std::vector<std::string> vsExchangesPreload {
     "NYSE", "New York Stock Exchange",
     "CBOT", "Chicago Board of Trade",
@@ -442,31 +420,6 @@ void InstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t 
     f( pInstrument );
   }
 }
-
-/*
-Instrument::pInstrument_t InstrumentManager::GetIQFeedInstrument(const std::string &sName) {
-//  return GetIQFeedInstrument( sName, sName );
-  try {
-    Instrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName ) );  // todo:  need to verify proper symbol usage
-    return pInstrument;
-  }
-  catch (...) {
-    throw std::runtime_error( "InstrumentManager::GetIQFeedInstrument problems" );
-  }
-}
-*/
-/*
-Instrument::pInstrument_t InstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
-  try {
-    Instrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
-    return pInstrument;
-  }
-  catch (...) {
-    throw std::runtime_error( "CBasketTradeSymbolInfo::Initialize problems" );
-  }
-  //return pInstrument;
-}
-*/
 
 } // namespace tf
 } // namespace ou
