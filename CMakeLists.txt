@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.13)
 
 project(trade-frame)
 
+add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+
 add_subdirectory(lib)
 add_subdirectory(ArmsIndex)
 add_subdirectory(IQFeedMarketSymbols)
