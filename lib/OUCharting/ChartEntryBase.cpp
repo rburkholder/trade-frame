@@ -11,6 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <iostream>
 #include <algorithm>
 
 #include <boost/phoenix/core.hpp>
