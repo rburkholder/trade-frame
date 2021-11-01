@@ -43,6 +43,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
 //        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
+// TODO: use trading hours, liquid trading hours for different ranges
         { "@ESZ21", {  1.00, 2.00, 6, 30 } }
     };
 
@@ -432,10 +433,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         const ou::tf::Bar& bar( uws.m_barsHistory.last() );
         std::cout
           << sUnderlying << " bar dates: "
-          << m_dtLatestEod << ","
-          << bar.DateTime()
+          << "eod=" << m_dtLatestEod << ","
+          << "bar=" << bar.DateTime()
           << std::endl;
-        assert( m_dtLatestEod <= bar.DateTime() ); // what condition does this test satisfy?
+        assert( m_dtLatestEod.date() <= bar.DateTime().date() ); // what condition does this test satisfy?
 
         uws.statistics.setPivots.CalcPivots( bar );
 
