@@ -17,9 +17,7 @@
 
 #include <vector>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 #include "boost/date_time/local_time/local_time.hpp"
 
 #include <boost/thread/mutex.hpp>
@@ -102,7 +100,7 @@ public:
   }
 
   static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }
-  
+
   boost::local_time::time_zone_ptr LoadTimeZone( const std::string& sRegion );
 
 protected:
