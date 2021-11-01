@@ -501,7 +501,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrading ) {
     case TSWaitForFirstTrade: {
       m_dblOpen = trade.Price();
-//      std::cout << m_sUnderlying << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
+      //std::cout << m_pWatchUnderlying->GetInstrumentName() << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
 
       if ( m_pCombo ) { // persisted combo needs a start
