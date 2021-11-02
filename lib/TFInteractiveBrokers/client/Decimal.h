@@ -40,7 +40,7 @@ static Decimal div(Decimal decimal1, Decimal decimal2) {
 }
 
 static Decimal stringToDecimal(std::string str) {
-    unsigned int flags;
+    unsigned int flags {};
     if (str.compare(std::string{ "2147483647" }) == 0 || str.compare(std::string{ "9223372036854775807" }) == 0 || str.compare(std::string{ "1.7976931348623157E308" }) == 0) {
         str.clear();
     }
@@ -49,7 +49,7 @@ static Decimal stringToDecimal(std::string str) {
 
 static std::string decimalToString(Decimal value) {
     char buf[64];
-    unsigned int flags;
+    unsigned int flags {};
     __bid64_to_string(buf, value, &flags); // convert Decimal value to string using bid64_to_string function
     return buf;
 }

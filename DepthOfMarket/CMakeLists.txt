@@ -68,7 +68,7 @@ target_link_libraries(
       TFBitsNPieces
       TFInteractiveBrokers
       ib_client
-      bid
+      bidgcc000
       TFIQFeed
       TFSimulation
       TFStatistics

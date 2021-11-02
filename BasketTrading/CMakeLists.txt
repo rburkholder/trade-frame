@@ -98,7 +98,9 @@ target_link_libraries(
       TFBitsNPieces
       TFInteractiveBrokers
       ib_client
-      bid
+#      bid
+#      /usr/lib/x86_64-linux-gnu/libbidgcc100.a
+      bidgcc000
       TFIQFeed
       TFSimulation
       TFStatistics

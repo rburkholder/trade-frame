@@ -241,13 +241,16 @@ void TWS::processMessages() {
             << ",connected=" << m_pTWS->isConnected()
             << std::endl;
       }
+      if ( 0 != errno ) errno = 0;
     }
 
   }
   catch(...) {
     std::cout << "TWS socket failure, need to disconnect and restart ..." << std::endl;;
     // probably need to run Disconnect or DisconnectCommon
+    bOK = false;
   }
+
   m_bConnected = false;  // placeholder for debug
 
   // need to deal with pre=mature exit so that flags get reset
@@ -530,7 +533,7 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       break;
   }
   twsorder.action = pOrder->GetOrderSideName();
-  twsorder.totalQuantity = pOrder->GetQuantity();
+  twsorder.totalQuantity = stringToDecimal( boost::lexical_cast<std::string>( pOrder->GetQuantity() ) );
   twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
   twsorder.tif = "DAY";
   //twsorder.goodAfterTime = "20080625 09:30:00";
@@ -1566,7 +1569,7 @@ void TWS::marketRule( int marketRuleId, const vPriceIncrement_t& priceIncrements
 double TWS::GetInterval( double price, int rule ) {
   double interval( 0.01 );
   mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
-  if ( m_mapMarketRule.end() != iter ) {
+  if ( m_mapMarketRule.end() == iter ) {
     std::cout
     << "IB Price interval not found: " << rule
     << ", default to " << interval
