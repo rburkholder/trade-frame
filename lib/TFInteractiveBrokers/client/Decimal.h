@@ -10,6 +10,8 @@
 // Decimal type
 typedef unsigned long long Decimal;
 
+// https://github.com/gcc-mirror/gcc/tree/master/libgcc/config/libbid
+
 // external functions
 extern "C" Decimal __bid64_add(Decimal, Decimal, unsigned int, unsigned int*);
 extern "C" Decimal __bid64_sub(Decimal, Decimal, unsigned int, unsigned int*);
