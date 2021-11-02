@@ -19,12 +19,12 @@
 #include <exception>
 
 #include <boost/assert.hpp>
-#include <boost/foreach.hpp>
 
 #include <OUCommon/Debug.h>
 #include <OUCommon/Network.h>
 #include <OUCommon/ReusableBuffers.h>
 
+#include "SymbolLookup.h"
 #include "Messages.h"
 
 // In the future, for auxilliary routines making use of IQFeed,
@@ -38,7 +38,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 template <typename T>
-class IQFeed: public ou::Network<IQFeed<T> > {
+class IQFeed:
+  public ou::Network<IQFeed<T> > {
   friend ou::Network<IQFeed<T> >;
 public:
 
@@ -99,6 +100,18 @@ protected:
 
   // called by Network via CRTP
   void OnNetworkConnected(void) {
+    // TODO: offer up connected after lookup tables retreived?
+    m_pSymbolLookup = std::make_unique<SymbolLookup>(
+      m_mapListedMarket,
+      m_mapSecurityType,
+      [this](){
+        std::cout << "SymbolLookup Results: " << m_mapListedMarket.size() << "," << m_mapSecurityType.size() << std::endl;
+        //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
+        //m_pSymbolLookup.reset();
+      }
+    );
+    m_pSymbolLookup->Connect();
+
     if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
       static_cast<T*>( this )->OnIQFeedConnected();
     }
@@ -149,6 +162,11 @@ private:
 
   enum Version { v49, v61, v62 };
   Version m_version;
+
+  std::unique_ptr<SymbolLookup> m_pSymbolLookup;
+
+  SymbolLookup::mapListedMarket_t m_mapListedMarket;
+  SymbolLookup::mapSecurityType_t m_mapSecurityType;
 
 };
 
@@ -291,6 +309,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'S':
       {
+        // TODO: use SymbolLookup as a template for Spirit parsing
         IQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
         //std::string s( msg->Field( 2 ) );

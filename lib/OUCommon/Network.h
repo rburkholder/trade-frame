@@ -87,8 +87,8 @@ public:
 
 #define NETWORK_INPUT_BUF_SIZE 2048
 
-  typedef unsigned short port_t;
-  typedef std::string ipaddress_t;
+  using port_t = unsigned short;
+  using ipaddress_t =  std::string;
 
   struct structConnection {
     ipaddress_t sAddress;
@@ -99,11 +99,11 @@ public:
   };
 
   // factor a couple of these out as traits for here and for IQFeedMessages.
-  typedef charT bufferelement_t;
-  typedef boost::array<bufferelement_t, NETWORK_INPUT_BUF_SIZE> inputbuffer_t; // bulk input buffer via asio
-  typedef BufferRepository<inputbuffer_t> inputrepository_t;
-  typedef std::vector<bufferelement_t> linebuffer_t;  // used for composing lines of data for processing
-  typedef BufferRepository<linebuffer_t> linerepository_t;
+  using bufferelement_t = charT;
+  using inputbuffer_t = boost::array<bufferelement_t, NETWORK_INPUT_BUF_SIZE>; // bulk input buffer via asio
+  using inputrepository_t = BufferRepository<inputbuffer_t>;
+  using linebuffer_t = std::vector<bufferelement_t>;  // used for composing lines of data for processing
+  using linerepository_t = BufferRepository<linebuffer_t>;
 
   Network( void );
   Network( const structConnection& connection );

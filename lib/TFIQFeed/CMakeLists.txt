@@ -38,6 +38,7 @@ set(
     ParseMktSymbolLine.h
     ParseOptionDescription.h
     ParseOptionSymbol.h
+    SymbolLookup.h
     UnzipMktSymbols.h
     ValidateMktSymbolLine.h
   )
@@ -62,6 +63,7 @@ set(
     Option.cpp
     ParseMktSymbolDiskFile.cpp
     ParseMktSymbolLine.cpp
+    SymbolLookup.cpp
     UnzipMktSymbols.cpp
     ValidateMktSymbolLine.cpp
   )
