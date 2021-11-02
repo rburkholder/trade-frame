@@ -128,6 +128,9 @@ void OptionChainQuery::OnNetworkSendDone() {
 //   then lookup in map for state
 //   then full parse for appropriate result
 
+// 2021/10/29 - amusing response to a query via the new servers:
+// "@ESZ21,grep: /data/online/data/commodities/options/underlying/@ESZ21: No such file or directory"
+
 void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
   using const_iterator_t = linebuffer_t::const_iterator;
@@ -148,6 +151,10 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         //std::cout << "EState::reply" << std::endl;
         FutureOptionChainParser<const_iterator_t> grammarFutureOptionChain;
         const_iterator_t bgn = (*buffer).begin();
+
+        //std::string buf( bgn, end );
+        //std::cout << "buf: '" << buf << "'" << std::endl;
+
         bOk = parse( bgn, end, grammarFutureOptionChain, chain );
 
         if ( bOk ) {
