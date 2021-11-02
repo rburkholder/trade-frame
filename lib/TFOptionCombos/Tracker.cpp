@@ -240,8 +240,9 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
             std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
             m_fCloseLeg( m_pPosition );
             // TODO: on opening a position, will need to extend states to handle order with errors
+            m_transition = ETransition::Initial;  // this is going to recurse back in here (TODO: think about kill & rebuild?)
             Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position
-            m_transition = ETransition::Track;  // start all over again
+            //m_transition = ETransition::Track;  // start all over again - this will get set in Initialize [TODO: how or why did this work before?]
           }
         }
       }
