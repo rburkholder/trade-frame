@@ -59,10 +59,10 @@ protected:
   bool m_bLastFound;
   bool m_bLastSizeFound;
 
-  int m_nAskSize;
-  int m_nBidSize;
-  int m_nLastSize;
-  int m_nVolume;
+  uint32_t m_nAskSize;
+  uint32_t m_nBidSize;
+  uint32_t m_nLastSize;
+  uint32_t m_nVolume;
 
   double m_dblAsk;
   double m_dblBid;

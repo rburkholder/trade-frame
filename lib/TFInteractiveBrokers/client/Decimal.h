@@ -18,6 +18,9 @@ extern "C" Decimal __bid64_div(Decimal, Decimal, unsigned int, unsigned int*);
 extern "C" Decimal __bid64_from_string(char*, unsigned int, unsigned int*);
 extern "C" void __bid64_to_string(char*, Decimal, unsigned int*);
 
+extern "C" Decimal __bid64_from_uint32( uint32_t );
+extern "C" uint32_t __bid64_to_uint32_rnint( Decimal );
+
 // static functions
 static Decimal add(Decimal decimal1, Decimal decimal2) {
     unsigned int flags;

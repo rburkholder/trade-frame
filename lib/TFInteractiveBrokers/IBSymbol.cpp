@@ -92,7 +92,10 @@ void Symbol::AcceptTickPrice(TickType tickType, double price) {
   }
 }
 
-void Symbol::AcceptTickSize(TickType tickType, Decimal size) {
+void Symbol::AcceptTickSize(TickType tickType, Decimal size_decimal) {
+
+  // go native at some point?  [high conversion overhead]
+  uint32_t size = __bid64_to_uint32_rnint( size_decimal );
 
   switch ( m_pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:

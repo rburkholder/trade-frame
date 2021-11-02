@@ -1,3 +1,16 @@
+2021/11/01
+
+ib has changed their api to use Decimal for certain fields 
+  (quantity fields rather than price fields, sounds silly to me)
+this library is required to link:
+  https://packages.debian.org/bullseye/libintelrdfpmath-dev
+IEEE 754-2008 Decimal Floating-Point Arithmetic specification
+
+For api reference:
+https://github.com/gcc-mirror/gcc/tree/master/libgcc/config/libbid
+
+I wonder when prices get converted over, they would be better use
+
 2019/08/07
 on LXDE installs:
 $ sudo apt install at-spi2-core

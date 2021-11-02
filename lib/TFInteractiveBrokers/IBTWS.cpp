@@ -533,7 +533,7 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       break;
   }
   twsorder.action = pOrder->GetOrderSideName();
-  twsorder.totalQuantity = stringToDecimal( boost::lexical_cast<std::string>( pOrder->GetQuantity() ) );
+  twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuantity() );
   twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
   twsorder.tif = "DAY";
   //twsorder.goodAfterTime = "20080625 09:30:00";
@@ -724,8 +724,8 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
     m_ss
       << "OrderStatus: ordid=" << orderId
       << ", stat=" << status
-      << ", filled=" << filled
-      << ", rem=" << remaining
+      << ", filled=" << decimalStringToDisplay( filled )
+      << ", rem=" << decimalStringToDisplay( remaining )
       << ", avgfillprc=" << avgFillPrice
       << ", permid=" << permId
       //<< ", parentid=" << parentId
@@ -1466,7 +1466,7 @@ void TWS::updatePortfolio( const Contract& contract, Decimal position,
       << ", strike=" << contract.strike // double
 //      << ", expire=" << iter->second.dtExpiry
 //      << ", right=" << OptionSide::Name[ iter->second.os ]
-      << ", pos=" << position // int
+      << ", pos=" << decimalStringToDisplay( position ) // int
       << ", price=" << marketPrice // double
       << ", val=" << marketValue // double
       << ", cost=" << averageCost // double
@@ -1488,7 +1488,7 @@ void TWS::updatePortfolio( const Contract& contract, Decimal position,
 //      << "," << contract.secId  // empty
       << "," << contract.multiplier
 //      << ", type=" << InstrumentType::Name[ pInstrument->GetInstrumentType() ]
-      << "," << position // int
+      << "," << decimalStringToDisplay( position ) // int
       << "," << marketPrice // double
       << "," << marketValue // double
       << "," << averageCost // double
