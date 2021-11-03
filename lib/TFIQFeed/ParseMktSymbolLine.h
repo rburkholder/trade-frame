@@ -28,8 +28,8 @@ namespace ascii = boost::spirit::ascii;
 
 #include "MarketSymbol.h"
 
-typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
-typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc_t;
+using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
+using sc_t  = ou::tf::iqfeed::MarketSymbol::ESecurityType;
 
 BOOST_FUSION_ADAPT_STRUCT(
   trd_t,
@@ -56,8 +56,8 @@ void doout( const std::string& s );
 template<typename Iterator>
 struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
   MktSymbolLineParser( void ): MktSymbolLineParser::base_type(start) {
-    
-    symTypes.add 
+
+    symTypes.add
       ( "BONDS", sc_t::Bonds )
       ( "CALC", sc_t::Calc )
       ( "EQUITY", sc_t::Equity )
@@ -89,29 +89,29 @@ struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
     rDescription  %= rNotATab;
     rExchange     %= rNotATab;
     rListedMarket %= rNotATab;
-    rSymbolClassifier %= ( symTypes | rDefaultSymType ); 
+    rSymbolClassifier %= ( symTypes | rDefaultSymType );
     rSic          %= qi::lexeme[ qi::uint_ ];
     //rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = qi::true_ ] | qi::eps );
     rFrontMonth   %= ( qi::matches[ qi::char_( 'Y' ) ] | qi::eps );
     rNaics        %= qi::lexeme[ qi::uint_ ];
 
     start %=               rSymbol
-      > qi::lit( '\t' ) > -rDescription 
-      > qi::lit( '\t' ) >  rExchange   
-      > qi::lit( '\t' ) >  rListedMarket 
+      > qi::lit( '\t' ) > -rDescription
+      > qi::lit( '\t' ) >  rExchange
+      > qi::lit( '\t' ) >  rListedMarket
       > qi::lit( '\t' ) >  rSymbolClassifier
-      > qi::lit( '\t' ) > -rSic 
-      > qi::lit( '\t' ) > -rFrontMonth 
-      > qi::lit( '\t' ) > -rNaics 
+      > qi::lit( '\t' ) > -rSic
+      > qi::lit( '\t' ) > -rFrontMonth
+      > qi::lit( '\t' ) > -rNaics
       > ( qi::eol | qi::eps );
 /*
     qi::on_error<qi::fail>(
       start,
-      std::cout 
-      << phoenix::val( "unknown symbol type: " ) 
-      << qi::_4 
-      << "," 
-      << phoenix::construct<std::string>( qi::_1, qi::_3 ) 
+      std::cout
+      << phoenix::val( "unknown symbol type: " )
+      << qi::_4
+      << ","
+      << phoenix::construct<std::string>( qi::_1, qi::_3 )
       << std::endl
       );
    */

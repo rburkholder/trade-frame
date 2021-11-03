@@ -53,7 +53,7 @@ public:
       boost::multi_index::ordered_non_unique<
         boost::multi_index::tag<ixExchange>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sExchange)>,
       boost::multi_index::ordered_non_unique<
-        boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::enumSymbolClassifier,sc)>,
+        boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::ESecurityType,sc)>,
 //      boost::multi_index::ordered_non_unique<
 //        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
 //      boost::multi_index::ordered_non_unique<
@@ -127,7 +127,7 @@ public:
     typedef symbols_t::index<ixSymbol>::type ixSymbol_t;
     ixSymbol_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
     for ( ixSymbol_t::const_iterator iter = m_symbols.get<ixSymbol>().find( sUnderlying ); endSymbols != iter; ++iter ) {
-      if ( ou::tf::iqfeed::MarketSymbol::IEOption == iter->sc ) {
+      if ( ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption == iter->sc ) {
         if ( iter->sUnderlying != sUnderlying ) break;
         f( *iter );
       }

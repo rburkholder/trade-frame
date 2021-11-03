@@ -37,6 +37,8 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, date_t );
 // preferred (uses better fundamentals):
 pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& );
+// best (uses fundamentals only):
+pInstrument_t BuildInstrument( const Fundamentals& );
 
 } // namespace iqfeed
 } // namespace TradeFrame

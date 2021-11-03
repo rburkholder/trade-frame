@@ -31,10 +31,10 @@ MarketSymbol::~MarketSymbol(void) {
 const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, const TableRowDef& trd ) {
   std::string sName( sBaseName );
   switch( trd.sc ) {
-    case enumSymbolClassifier::Equity:
+    case ESecurityType::Equity:
       // uses base name
       break;
-    case enumSymbolClassifier::IEOption:
+    case ESecurityType::IEOption:
       sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, trd.nYear, trd.nMonth, trd.nDay, trd.eOptionSide, trd.dblStrike );
       break;
     default:
@@ -48,14 +48,14 @@ const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, 
 const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, const TableRowDef& trd, Date date ) {
   std::string sName( sBaseName );
   switch( trd.sc ) {
-    case enumSymbolClassifier::Equity:
+    case ESecurityType::Equity:
       // uses base name
       break;
-    case enumSymbolClassifier::Future:
+    case ESecurityType::Future:
       sName = ou::tf::Instrument::BuildGenericFutureName( sBaseName, date.year(), date.month(), date.day() );
       break;
-    case enumSymbolClassifier::IEOption:
-    case enumSymbolClassifier::FOption:
+    case ESecurityType::IEOption:
+    case ESecurityType::FOption:
       sName = ou::tf::Instrument::BuildGenericOptionName( sBaseName, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
       break;
     default:
@@ -69,14 +69,14 @@ const std::string MarketSymbol::BuildGenericName( const std::string& sBaseName, 
 const std::string MarketSymbol::BuildGenericName( const TableRowDef& trd, const Fundamentals& fundamentals ) {
   std::string sName( fundamentals.sExchangeRoot );
   switch( trd.sc ) {
-    case enumSymbolClassifier::Equity:
+    case ESecurityType::Equity:
       // uses base name
       break;
-    case enumSymbolClassifier::Future:
+    case ESecurityType::Future:
       sName = ou::tf::Instrument::BuildGenericFutureName( sName, fundamentals.dateExpiration );
       break;
-    case enumSymbolClassifier::IEOption:
-    case enumSymbolClassifier::FOption:
+    case ESecurityType::IEOption:
+    case ESecurityType::FOption:
       sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, trd.eOptionSide, fundamentals.dblStrikePrice );
       break;
     default:

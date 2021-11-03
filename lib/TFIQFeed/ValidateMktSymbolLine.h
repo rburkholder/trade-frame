@@ -70,7 +70,7 @@ public:
 protected:
 private:
 
-  typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc_t;
+  using sc_t = ou::tf::iqfeed::MarketSymbol::ESecurityType;
 
   OnProcessLine_t m_OnProcessLine;
   OnProcessHasOption_t m_OnProcessHasOption;
@@ -140,7 +140,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
       size_t ix;
 
-      vSymbolTypeStats[ trd.sc ]++;
+      vSymbolTypeStats[ (size_t)trd.sc ]++;
       if ( sc_t::Unknown == trd.sc ) {
         // set marker not to save record?
         std::cout << "Unknown symbol type for:  " << trd.sSymbol << std::endl;
@@ -174,11 +174,11 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
       bool bDecode( true );
       switch ( trd.sc ) {
-      case ou::tf::iqfeed::MarketSymbol::Equity:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
         if ( 0 != trd.nSIC ) cntSIC++;
         if ( 0 != trd.nNAICS ) cntNAICS++;
         break;
-      case ou::tf::iqfeed::MarketSymbol::Future:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::Future:
         // parse out contract expiry information
         // � For combined session symbols, the first character is "+".
         //� For Night/Electronic sessions, the first character is "@".
@@ -205,10 +205,10 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
           }
         }
         break;
-      case ou::tf::iqfeed::MarketSymbol::FOption:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
         ParseFOptionContractInformation( trd );
         break;
-      case ou::tf::iqfeed::MarketSymbol::IEOption:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
         ParseOptionContractInformation( trd );
         break;
       } // switch( trd.sc )

@@ -63,7 +63,7 @@ ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
   kwmExchanges( 0, 200 ), // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
   vSymbolsPerExchange( 1 ), nUnderlyingSize( 0 ),
   cntLinesTotal( 0 ), cntLinesParsed( 0 ), cntSIC( 0 ), cntNAICS( 0 ),
-  vSymbolTypeStats( sc_t::_Count )
+  vSymbolTypeStats( (size_t)sc_t::_Count )
 {
     kwmExchanges.AddPattern( "Unknown", 0 );
     vSymbolsPerExchange[ 0 ].s = "UNKNOWN";
@@ -105,8 +105,8 @@ void ValidateMktSymbolLine::Summary( void ) {
   std::cout << "== Market Symbol Type and Count ==" << std::endl;
 
   struct processSymbols {
-    void operator()( const std::string& s, ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc ) {
-      std::cout << s << "=" << v[ sc ] << std::endl;
+    void operator()( const std::string& s, ou::tf::iqfeed::MarketSymbol::ESecurityType sc ) {
+      std::cout << s << "=" << v[ (size_t)sc ] << std::endl;
     }
     explicit processSymbols( std::vector<size_t>& v_ ): v(v_) {};
     std::vector<size_t>& v;

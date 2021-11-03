@@ -219,8 +219,8 @@ struct PopulateMultiExpiryBundle {
 
   void operator()( const ou::tf::iqfeed::MarketSymbol::TableRowDef& trd ) {
     //assert( trd.sUnderlying == meb.Name() );
-    assert( ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc )
-         || ( ou::tf::iqfeed::MarketSymbol::FOption == trd.sc )
+    assert( ( ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption == trd.sc )
+         || ( ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption == trd.sc )
       );
 
     // to trade, when is the IB contract number acquired?
@@ -236,7 +236,7 @@ struct PopulateMultiExpiryBundle {
       std::stringstream ss;
       ss << trd.sUnderlying << " " << dateTrdExpiry << " " << side << " " << trd.dblStrike;
       switch ( trd.sc ) {
-      case ou::tf::iqfeed::MarketSymbol::IEOption:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
         pInstrument.reset(
           new ou::tf::Instrument(
             ss.str(), ou::tf::InstrumentType::Option, "SMART",
@@ -244,7 +244,7 @@ struct PopulateMultiExpiryBundle {
 //            meb.GetWatchUnderlying()->GetInstrument(),
 	    trd.eOptionSide, trd.dblStrike ) );
         break;
-      case ou::tf::iqfeed::MarketSymbol::FOption:
+      case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
         pInstrument.reset(
           new ou::tf::Instrument(
             ss.str(), ou::tf::InstrumentType::FuturesOption, "SMART",

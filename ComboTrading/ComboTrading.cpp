@@ -522,12 +522,12 @@ void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForB
       typedef list_t::trd_t trd_t;
       const trd_t& trd( m_listIQFeedSymbols.GetTrd( values.sIQF ) );
       switch ( trd.sc ) {
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
           values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd );
           break;
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::Future:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
           // TODO: will need to change this to match what is in BasketTrading for creation from fundamentals
           values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, boost::gregorian::date( trd.nYear, trd.nMonth, values.day ) );  // for ib future/fo overrides not supplied by trd
           break;
@@ -838,17 +838,17 @@ void AppComboTrading::TestSymbols( void ) {
             pInstrument_t pInstrument;
             const trd_t& trd( list.GetTrd( u.sIq ) );
             switch ( trd.sc ) {
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
+              case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
+              case ou::tf::iqfeed::MarketSymbol::ESecurityType::Future:
                 pInstrument = ou::tf::iqfeed::BuildInstrument( u.sName, trd );
                 // now hand it off to the IB for contract insertion
                 f( pInstrument );
                 break;
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
+              case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
                 // will need to check that Symbol is registered and available in order to build
                 throw std::runtime_error( "can't process the BuildInstrument IEOption" );
                 break;
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+              case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
                 throw std::runtime_error( "can't process the BuildInstrument FOption" );
                 break;
               default:
@@ -1078,12 +1078,12 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
       const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sName ) );
 
       switch ( trd.sc ) {
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::Future:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
       //	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
       	  break;
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
+        case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
         {
           ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
           if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) { // change called name to IfExistsSupplyInstrument
@@ -1092,7 +1092,7 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
             // otherwise build instrument
             const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
             switch (trdUnderlying.sc ) {
-              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+              case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
       //		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
           im.Register( pInstrumentUnderlying );
           // 20151115 this instrument should also obtain ib contract details, as it will land in multi-expiry bundle and be used in various option delta scenarios

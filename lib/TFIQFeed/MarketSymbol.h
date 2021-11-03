@@ -41,7 +41,7 @@ namespace iqfeed { // IQFeed
 class MarketSymbol {
 public:
 
-  enum enumSymbolClassifier: boost::uint32_t { // bits in bitmap of stored data record
+  enum class ESecurityType: boost::uint32_t { // bits in bitmap of stored data record
     Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread,
       IEOption, Index, MktRpt, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
       _Count
@@ -53,7 +53,7 @@ public:
     std::string sDescription;
     std::string sExchange;
     std::string sListedMarket;
-    enumSymbolClassifier sc;
+    ESecurityType sc;
     boost::uint16_t nMultiplier;
     boost::uint32_t nSIC;
     boost::uint32_t nNAICS;
@@ -87,7 +87,7 @@ public:
     }
 
     TableRowDef(void): dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ),
-      sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ), nMultiplier( 1 ),
+      sc( ESecurityType::Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ), nMultiplier( 1 ),
       eOptionSide( ou::tf::OptionSide::Unknown ) {};
 
   private:
