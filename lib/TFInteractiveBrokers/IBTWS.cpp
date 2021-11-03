@@ -906,6 +906,7 @@ void TWS::commissionReport( const CommissionReport& cr ) {
 }
 
 // convert to boost::spirit?
+// 2021/11/02: 20211102:1700-20211103:1500
 void TWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
   //static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
   static const boost::regex rxRange( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);" );
@@ -1090,7 +1091,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   }
 
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
-
+/*
   if ( 0 == contractDetails.tradingHours.size() ) {
     //std::cout << "TWS::contractDetails tradingHours is zero length" << std::endl;
   }
@@ -1118,9 +1119,9 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
         << " [" << contractDetails.tradingHours << "]" << std::endl;
     }
   }
-
+*/
 //    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
-
+/*
   if ( 0 == contractDetails.liquidHours.size() ) {
     //std::cout << "TWS::contractDetails liquidHours is zero length" << std::endl;
   }
@@ -1139,7 +1140,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
       std::cout << "IBTWS liquidHours error: " << e.what() << std::endl;
     }
   }
-
+*/
 //    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
 
   if ( m_mapContractToSymbol.end() == iterMap ) {  // create new symbol from contract
