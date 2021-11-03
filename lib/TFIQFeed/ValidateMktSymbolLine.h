@@ -24,6 +24,7 @@ using namespace fastdelegate;
 
 #include <OUCommon/KeyWordMatch.h>
 
+#include "SecurityType.h"
 #include "ParseMktSymbolLine.h"
 #include "ParseOptionDescription.h"
 #include "ParseFOptionDescription.h"
@@ -70,7 +71,7 @@ public:
 protected:
 private:
 
-  using sc_t = ou::tf::iqfeed::MarketSymbol::ESecurityType;
+  using sc_t = ou::tf::iqfeed::ESecurityType;
 
   OnProcessLine_t m_OnProcessLine;
   OnProcessHasOption_t m_OnProcessHasOption;
@@ -174,11 +175,11 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
       bool bDecode( true );
       switch ( trd.sc ) {
-      case ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity:
+      case ou::tf::iqfeed::ESecurityType::Equity:
         if ( 0 != trd.nSIC ) cntSIC++;
         if ( 0 != trd.nNAICS ) cntNAICS++;
         break;
-      case ou::tf::iqfeed::MarketSymbol::ESecurityType::Future:
+      case ou::tf::iqfeed::ESecurityType::Future:
         // parse out contract expiry information
         // � For combined session symbols, the first character is "+".
         //� For Night/Electronic sessions, the first character is "@".
@@ -205,10 +206,10 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
           }
         }
         break;
-      case ou::tf::iqfeed::MarketSymbol::ESecurityType::FOption:
+      case ou::tf::iqfeed::ESecurityType::FOption:
         ParseFOptionContractInformation( trd );
         break;
-      case ou::tf::iqfeed::MarketSymbol::ESecurityType::IEOption:
+      case ou::tf::iqfeed::ESecurityType::IEOption:
         ParseOptionContractInformation( trd );
         break;
       } // switch( trd.sc )

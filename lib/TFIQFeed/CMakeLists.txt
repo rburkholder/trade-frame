@@ -38,6 +38,7 @@ set(
     ParseMktSymbolLine.h
     ParseOptionDescription.h
     ParseOptionSymbol.h
+    SecurityType.h
     SymbolLookup.h
     UnzipMktSymbols.h
     ValidateMktSymbolLine.h

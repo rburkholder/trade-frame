@@ -26,10 +26,11 @@
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
+#include "SecurityType.h"
 #include "MarketSymbol.h"
 
 using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
-using sc_t  = ou::tf::iqfeed::MarketSymbol::ESecurityType;
+using sc_t  = ou::tf::iqfeed::ESecurityType;
 
 BOOST_FUSION_ADAPT_STRUCT(
   trd_t,

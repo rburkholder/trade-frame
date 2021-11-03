@@ -28,6 +28,7 @@
 
 #include <TFTrading/TradingEnumerations.h>
 
+#include "SecurityType.h"
 #include "Fundamentals.h"
 
 namespace ou { // One Unified
@@ -40,12 +41,6 @@ namespace iqfeed { // IQFeed
 
 class MarketSymbol {
 public:
-
-  enum class ESecurityType: boost::uint32_t { // bits in bitmap of stored data record
-    Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread,
-      IEOption, Index, MktRpt, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
-      _Count
-  };
 
   struct TableRowDef {
 
@@ -127,9 +122,9 @@ public:
     }
   };
 
-  MarketSymbol(void);
+  MarketSymbol();
   MarketSymbol( const TableRowDef& row ) : m_row( row ) {};
-  ~MarketSymbol(void);
+  ~MarketSymbol();
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

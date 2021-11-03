@@ -22,20 +22,20 @@ namespace iqfeed { // IQFeed
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd ){
   pInstrument_t pInstrument;
   switch ( trd.sc ) {
-    case MarketSymbol::ESecurityType::Equity:
+    case ESecurityType::Equity:
       pInstrument = BuildInstrument( sGenericName, trd, date_t( 1400, 1, 1 ) );
       break;
-    case MarketSymbol::ESecurityType::IEOption:
+    case ESecurityType::IEOption:
       pInstrument = BuildInstrument( sGenericName, trd, date_t( trd.nYear, trd.nMonth, trd.nDay ) );
       break;
-    case MarketSymbol::ESecurityType::Future:  // may need to pull out the prefix
+    case ESecurityType::Future:  // may need to pull out the prefix
       pInstrument = BuildInstrument( sGenericName, trd, date_t( trd.nYear, trd.nMonth, 1 ) );
       break;
-    case MarketSymbol::ESecurityType::FOption:
+    case ESecurityType::FOption:
       pInstrument = BuildInstrument( sGenericName, trd, date_t( trd.nYear, trd.nMonth, 1 ) );
       break;
-    case MarketSymbol::ESecurityType::Index:
-    case MarketSymbol::ESecurityType::PrecMtl:
+    case ESecurityType::Index:
+    case ESecurityType::PrecMtl:
     default:
       throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }
@@ -46,7 +46,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
 pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd, date_t date ) {
   pInstrument_t pInstrument;
   switch ( trd.sc ) {
-    case MarketSymbol::ESecurityType::Equity:
+    case ESecurityType::Equity:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, trd.sExchange );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       if ( "TSE" == trd.sExchange ) {
@@ -59,7 +59,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       pInstrument->SetMinTick( 0.01 );
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
       break;
-    case MarketSymbol::ESecurityType::IEOption:
+    case ESecurityType::IEOption:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -67,7 +67,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       pInstrument->SetMinTick( 0.01 );
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
       break;
-    case MarketSymbol::ESecurityType::Future:  // may need to pull out the prefix
+    case ESecurityType::Future:  // may need to pull out the prefix
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month(), date.day() );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -75,7 +75,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       pInstrument->SetMinTick( 0.05 );  // this may vary depending upon future type
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
       break;
-    case MarketSymbol::ESecurityType::FOption:  // futures option doesn't require underlying?
+    case ESecurityType::FOption:  // futures option doesn't require underlying?
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -83,8 +83,8 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       pInstrument->SetMinTick( 0.01 );  // varies
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
       break;
-    case MarketSymbol::ESecurityType::Index:
-    case MarketSymbol::ESecurityType::PrecMtl:
+    case ESecurityType::Index:
+    case ESecurityType::PrecMtl:
     default:
       throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }
@@ -102,7 +102,7 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
   pInstrument_t pInstrument;
 
   switch ( trd.sc ) {
-    case MarketSymbol::ESecurityType::Equity:
+    case ESecurityType::Equity:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, trd.sExchange );
       if ( "TSE" == trd.sExchange ) {
         pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
@@ -111,26 +111,26 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
         pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
-    case MarketSymbol::ESecurityType::IEOption: {
+    case ESecurityType::IEOption: {
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
-    case MarketSymbol::ESecurityType::Future: { // may need to pull out the prefix
+    case ESecurityType::Future: { // may need to pull out the prefix
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number() );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
-    case MarketSymbol::ESecurityType::FOption: { // futures option doesn't require underlying?
+    case ESecurityType::FOption: { // futures option doesn't require underlying?
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
       }
       break;
-    case MarketSymbol::ESecurityType::Index:
-    case MarketSymbol::ESecurityType::PrecMtl:
+    case ESecurityType::Index:
+    case ESecurityType::PrecMtl:
     default:
       throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
   }

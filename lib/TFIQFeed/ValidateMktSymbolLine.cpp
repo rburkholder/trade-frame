@@ -105,7 +105,7 @@ void ValidateMktSymbolLine::Summary( void ) {
   std::cout << "== Market Symbol Type and Count ==" << std::endl;
 
   struct processSymbols {
-    void operator()( const std::string& s, ou::tf::iqfeed::MarketSymbol::ESecurityType sc ) {
+    void operator()( const std::string& s, ou::tf::iqfeed::ESecurityType sc ) {
       std::cout << s << "=" << v[ (size_t)sc ] << std::endl;
     }
     explicit processSymbols( std::vector<size_t>& v_ ): v(v_) {};

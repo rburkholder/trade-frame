@@ -33,7 +33,7 @@ public:
 
   using vExchanges_t = std::set<std::string>;
   using vSymbolList_t = std::set<std::string>;
-  using classifier_t =  ou::tf::iqfeed::MarketSymbol::ESecurityType;
+  using classifier_t =  ou::tf::iqfeed::ESecurityType;
   using vClassifiers_t = std::set<classifier_t>;
   using trd_t = ou::tf::iqfeed::InMemoryMktSymbolList::trd_t;
 

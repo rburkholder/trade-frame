@@ -21,10 +21,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-MarketSymbol::MarketSymbol(void) {
+MarketSymbol::MarketSymbol() {
 }
 
-MarketSymbol::~MarketSymbol(void) {
+MarketSymbol::~MarketSymbol() {
 }
 
 // deprecating?

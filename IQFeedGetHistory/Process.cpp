@@ -84,7 +84,7 @@ void Process::Start( void ) {
     SelectSymbols( SymbolList_t& set ): m_selected( set ) {  };
     SymbolList_t& m_selected;
     void operator() ( const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd ) {
-      if ( ou::tf::iqfeed::MarketSymbol::ESecurityType::Equity == trd.sc ) {
+      if ( ou::tf::iqfeed::ESecurityType::Equity == trd.sc ) {
         if ( trd.bHasOptions ) {
           m_selected.insert( trd.sSymbol );
         }
