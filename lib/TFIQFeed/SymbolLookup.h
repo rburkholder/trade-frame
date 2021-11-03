@@ -26,6 +26,8 @@
 
 #include <OUCommon/Network.h>
 
+#include "SecurityType.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
@@ -50,11 +52,12 @@ public:
 
   struct SecurityType {
     //uint16_t idSecurityType;
+    ESecurityType eSecurityType;
     std::string sShortName;
     std::string sLongName;
   };
 
-  using mapSecurityType_t = std::map<uint16_t,SecurityType>; // key = idSecurityType
+  using mapSecurityType_t = std::map<int,SecurityType>; // key = idSecurityType
 
   using fDone_t = std::function<void()>;
 
@@ -83,6 +86,8 @@ private:
   mapSecurityType_t& m_mapSecurityType;
 
   fDone_t m_fDone;
+
+  void MapSecurityTypes();
 
 };
 

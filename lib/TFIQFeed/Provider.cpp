@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include <boost/lexical_cast.hpp>
 
 #include <TFTrading/KeyTypes.h>
@@ -229,7 +227,33 @@ void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFunda
   pSymbol_t pSym;
   if ( m_mapSymbols.end() != mapSymbols_iter ) {
     pSym = mapSymbols_iter -> second;
-    pSym ->HandleFundamentalMessage( pMsg );
+    pSym ->HandleFundamentalMessage(
+      pMsg,
+      [this](int nSecurityType )->ESecurityType { return LookupSecurityType( nSecurityType ); },
+      [this](std::string sExchangeId)->std::string{ // supplied string is in hex
+        int n {};
+        int t {};
+        for ( std::string::const_reverse_iterator iter = sExchangeId.rbegin(); iter != sExchangeId.rend(); iter++ ) {
+          n = n << 4;
+          char cur = *iter;
+          if ( ( 'A' <= cur ) && ( 'F' >= cur ) ) {
+            t = cur - 'A' + 10;
+          }
+          else {
+            if ( ( 'a' <= cur ) && ( 'f' >= cur ) ) {
+              t = cur - 'a' + 10;
+            }
+            else {
+              if ( ( '0' <= cur ) && ( '9' >= cur ) ) {
+                t = cur - '0';
+              }
+            }
+          }
+          n += t;
+        }
+        return LookupListedMarket( n );
+      }
+      );
   }
   this->FundamentalDone( pBuffer, pMsg );
 }

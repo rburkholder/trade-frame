@@ -103,6 +103,16 @@ public:
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
+    TableRowDef( // strictly for obtaining fundamentals
+      idInstrument_t idInstrument_)
+      : idInstrument( idInstrument_ ), eType( InstrumentType::enumInstrumentType::Unknown ), idExchange( "" ),
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
+      nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
+        //assert( eType < InstrumentType::_Count );
+        //assert( eType > InstrumentType::Unknown );
+        assert( 0 < idInstrument.size() );
+    };
     TableRowDef( // equity / generic creation
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
@@ -179,9 +189,9 @@ public:
 //      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );  // what happens with empty string?
     }
   };
-
   Instrument( const TableRowDef& row );  // regular instruments
 //  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
+  Instrument( idInstrument_cref idInstrument ); // just enough to obtain more info via fundamentals
   Instrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentType type,
     const idExchange_t& sExchangeName

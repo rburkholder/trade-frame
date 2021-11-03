@@ -145,7 +145,54 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
 
 pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
 
+  const std::string sGenericName
+    = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals );
+
+  // to remove trd, will need a) security type lookup, b) listed market lookup
+  //   http://www.iqfeed.net/dev/api/docs//SymbolLookupviaTCPIP.cfm
+
   pInstrument_t pInstrument;
+
+  const std::string& sExchange( fundamentals.sExchange );
+
+  switch ( fundamentals.eSecurityType ) {
+    case ESecurityType::Equity:
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, sExchange );
+      if ( "TSE" == sExchange ) {
+        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
+      }
+      else {
+        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case ESecurityType::IEOption: {
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case ESecurityType::Future: { // may need to pull out the prefix
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, sExchange, date.year(), date.month().as_number(), date.day().as_number() );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case ESecurityType::FOption: { // futures option doesn't require underlying?
+      auto date( fundamentals.dateExpiration );
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
+      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      }
+      break;
+    case ESecurityType::Index:
+    case ESecurityType::PrecMtl:
+    default:
+      throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
+  }
+
+  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, fundamentals.sSymbolName );
+  pInstrument->SetMultiplier( fundamentals.nContractSize );
+  pInstrument->SetMinTick( fundamentals.dblTickSize );
+  pInstrument->SetSignificantDigits( fundamentals.nPrecision );
 
   return pInstrument;
 }

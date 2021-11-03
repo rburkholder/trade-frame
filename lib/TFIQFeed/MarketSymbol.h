@@ -134,6 +134,8 @@ public:
   const std::string static BuildGenericName( const std::string& sBaseName, const TableRowDef&, Date );
   // use fundamentals directly
   const std::string static BuildGenericName( const TableRowDef&, const Fundamentals& );
+  // use fundamentals only
+  const std::string static BuildGenericName( const Fundamentals& );
 
 protected:
 private:

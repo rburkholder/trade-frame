@@ -96,7 +96,7 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
 
   SecurityTypeParser(): SecurityTypeParser::base_type( start ) {
 
-    id = qi::uint_;
+    id = qi::int_;
     name %= ( +( qi::char_ - qi::char_(",") ) );
 
     structure %=
@@ -110,10 +110,10 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
 
   }
 
-  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, int()> id;
   qi::rule<Iterator, std::string()> name;
   qi::rule<Iterator, SymbolLookup::SecurityType()> structure;
-  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::SecurityType>()> pair;
+  qi::rule<Iterator, std::pair<int,SymbolLookup::SecurityType>()> pair;
   qi::rule<Iterator, SymbolLookup::mapSecurityType_t()> start;
 
 };
@@ -232,11 +232,63 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
       Send( "SST,ST\n" );
       break;
     case ECommand::end_st:
+      MapSecurityTypes();
       m_fDone();
       break;
   }
 
   GiveBackBuffer( buffer );
+}
+
+void SymbolLookup::MapSecurityTypes() {
+
+  qi::symbols<char, ESecurityType> types;
+  types.add
+    ("EQUITY", ESecurityType::Equity )
+    ("IEOPTION", ESecurityType::IEOption )
+    ("MUTUAL", ESecurityType::Mutual )
+    ("MONEY", ESecurityType::Money )
+    ("BONDS", ESecurityType::Bonds )
+    ("INDEX", ESecurityType::Index )
+    ("MKTSTATS", ESecurityType::MktStats )
+    ("FUTURE", ESecurityType::Future )
+    ("FOPTION", ESecurityType::FOption )
+    ("SPREAD", ESecurityType::Spread )
+    ("SPOT", ESecurityType::Spot )
+    ("FORWARD", ESecurityType::Forward )
+    ("CALC", ESecurityType::Calc )
+    ("STRIP", ESecurityType::Unknown )
+    ("FOREX", ESecurityType::Forex )
+    ("ARGUS", ESecurityType::Unknown )
+    ("PRECMTL", ESecurityType::PrecMtl )
+    ("RACKS", ESecurityType::Unknown )
+    ("RFSPOT", ESecurityType::Unknown )
+    ("ICSPREAD", ESecurityType::ICSpread )
+    ("STRATSPREAD", ESecurityType::StratSpread )
+    ("TREASURIES", ESecurityType::Treasuries )
+    ("SWAPS", ESecurityType::Swaps )
+    ("MKTRPT", ESecurityType::MktRpt )
+    ("SNL_NG", ESecurityType::Unknown )
+    ("SNL_ELEC", ESecurityType::Unknown )
+    ("NP_CAPACITY", ESecurityType::Unknown )
+    ("NP_FLOW", ESecurityType::Unknown )
+    ("NP_POWER", ESecurityType::Unknown )
+    ("COMM3", ESecurityType::Unknown )
+    ("JACOBSEN", ESecurityType::Unknown )
+    ("ISO", ESecurityType::Unknown )
+    ("FAST_RACKS", ESecurityType::Unknown )
+    ("COMBINED_FUTURE", ESecurityType::Unknown )
+    ("COMBINED_FOPTION", ESecurityType::Unknown )
+    ("ARGUSFC", ESecurityType::Unknown )
+    ("PETROCHEMWIRE", ESecurityType::Unknown )
+    ("FOPTION_IV", ESecurityType::Unknown )
+    ("GENERICRPT", ESecurityType::Unknown )
+    ("DAILY_FUTURE", ESecurityType::Unknown )
+  ;
+
+  for ( mapSecurityType_t::value_type& vt: m_mapSecurityType ) {
+    parse( vt.second.sShortName.begin(), vt.second.sShortName.end(), types, vt.second.eSecurityType );
+  }
 }
 
 } // namespace iqfeed

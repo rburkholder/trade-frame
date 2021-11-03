@@ -101,20 +101,22 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   pInstrument_t pInstrument;
 
   // TODO: need to check that trd is a long lasting structure
-  const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
+  //const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
   // temporary instrument solely for obtaining fundamental data with which to build real instrument
-  pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
+  //pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );
+  pInstrument = std::make_shared<ou::tf::Instrument>( "Acquire-" + sIQFeedSymbol ); // just enough to obtain fundamentals
+  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sIQFeedSymbol );
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
   AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
     = std::make_shared<AcquireFundamentals>(
         std::move( pWatch ),
-        [this,iterInProgress,&trd]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
+        [this,iterInProgress]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
           const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
           pInstrument_t pInstrument
-            = ou::tf::iqfeed::BuildInstrument( trd, fundamentals );
+            = ou::tf::iqfeed::BuildInstrument( fundamentals );
           pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
           std::cout

@@ -41,6 +41,7 @@ template <typename T>
 class IQFeed:
   public ou::Network<IQFeed<T> > {
   friend ou::Network<IQFeed<T> >;
+  friend T;
 public:
 
   using inherited_t = typename ou::Network<IQFeed<T> >;
@@ -132,6 +133,18 @@ protected:
     }
   };
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+
+  ESecurityType LookupSecurityType( int nSecurityType ) const {
+    SymbolLookup::mapSecurityType_t::const_iterator iter = m_mapSecurityType.find( nSecurityType );
+    assert( m_mapSecurityType.end() != iter );
+    return iter->second.eSecurityType;
+  }
+
+  std::string LookupListedMarket( int nListedMarket ) const {
+    SymbolLookup::mapListedMarket_t::const_iterator iter = m_mapListedMarket.find( nListedMarket );
+    assert( m_mapListedMarket.end() != iter );
+    return iter->second.sShortName;
+  }
 
   // CRTP based dummy callbacks
   void OnIQFeedError( size_t ) {};

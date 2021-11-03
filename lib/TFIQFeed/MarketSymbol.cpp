@@ -86,6 +86,27 @@ const std::string MarketSymbol::BuildGenericName( const TableRowDef& trd, const 
   return sName;
 }
 
+// improved improved improved version
+const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamentals ) {
+  std::string sName( fundamentals.sExchangeRoot );
+  switch( fundamentals.eSecurityType ) {
+    case ESecurityType::Equity:
+      // uses base name
+      break;
+    case ESecurityType::Future:
+      sName = ou::tf::Instrument::BuildGenericFutureName( sName, fundamentals.dateExpiration );
+      break;
+    case ESecurityType::IEOption:
+    case ESecurityType::FOption:
+      sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+  return sName;
+}
+
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou

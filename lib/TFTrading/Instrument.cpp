@@ -139,6 +139,13 @@ Instrument::Instrument( const TableRowDef& row )
   }
 }
 
+// just enough to obtain fundamentals
+Instrument::Instrument( idInstrument_cref idInstrument )
+: m_row( idInstrument ),
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+{}
+
 // equity / generic creation
 Instrument::Instrument(
   idInstrument_cref idInstrument,

@@ -100,7 +100,14 @@ protected:
   bool GetDepthWatchInProgress() const { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
-  void HandleFundamentalMessage( IQFFundamentalMessage* pMsg );
+  using fLookupSecurityType_t = std::function<ESecurityType(int)>;
+  using fLookupListedMarket_t = std::function<std::string(std::string)>;
+
+  void HandleFundamentalMessage(
+    IQFFundamentalMessage* pMsg,
+    fLookupSecurityType_t&&,
+    fLookupListedMarket_t&&
+    );
   void HandleUpdateMessage( IQFUpdateMessage* pMsg );
   void HandleSummaryMessage( IQFSummaryMessage* pMsg );
   void HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* pMsg );

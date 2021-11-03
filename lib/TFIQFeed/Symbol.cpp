@@ -39,17 +39,23 @@ IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument
 IQFeedSymbol::~IQFeedSymbol(void) {
 }
 
-void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
+void IQFeedSymbol::HandleFundamentalMessage(
+  IQFFundamentalMessage *pMsg,
+  fLookupSecurityType_t&& fLookupSecurityType,
+  fLookupListedMarket_t&& fLookupListedMarket
+) {
 
   Fundamentals& fundamentals( *m_pFundamentals );
 
+  fundamentals.sSymbolName = pMsg->Field( IQFFundamentalMessage::FSymbol );
   fundamentals.sCompanyName = pMsg->Field( IQFFundamentalMessage::FCompanyName );
   fundamentals.sExchangeRoot = pMsg->Field( IQFFundamentalMessage::FExchangeRoot );
   fundamentals.sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
+  fundamentals.sExchange = fLookupListedMarket( pMsg->Field( IQFFundamentalMessage::fExchangeID ) );
   fundamentals.nPrecision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
   fundamentals.nContractSize = pMsg->Integer( IQFFundamentalMessage::FContractSize );
   fundamentals.nAverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
-  fundamentals.nSecurityType = pMsg->Integer( IQFFundamentalMessage::FSecurityType );
+  fundamentals.eSecurityType = fLookupSecurityType( pMsg->Integer( IQFFundamentalMessage::FSecurityType ) );
   //fundamentals.nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest ); // TODO: not in fundamental
   fundamentals.dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
   fundamentals.dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
@@ -64,6 +70,25 @@ void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
   fundamentals.dateExpiration = pMsg->Date( IQFFundamentalMessage::FExpirationDate );
   fundamentals.timeSessionOpen = pMsg->Time( IQFFundamentalMessage::FSessionOpenTime );
   fundamentals.timeSessionClose = pMsg->Time( IQFFundamentalMessage::FSessionCloseTime );
+
+  switch ( fundamentals.eSecurityType ) {
+    case ESecurityType::IEOption:
+    case ESecurityType::FOption:
+      {
+        const std::string& symbol( fundamentals.sSymbolName );
+        // assumes strike is last part of name
+        for ( std::string::const_reverse_iterator iter = symbol.rbegin(); iter != symbol.rend(); iter++ ) {
+          if ( ( '.' == *iter ) || ( ('0' <= *iter ) && ( '9' >= *iter ) ) ) {}
+          else {
+            if ( 'L' >= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Call;
+            if ( 'M' <= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Put;
+            break;
+          }
+        }
+      }
+      break;
+    default: {}
+  }
 
   OnFundamentalMessage( m_pFundamentals );
 }

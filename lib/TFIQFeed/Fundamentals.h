@@ -21,19 +21,26 @@
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <TFTrading/TradingEnumerations.h>
+
+#include "SecurityType.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 struct Fundamentals {
+  std::string sSymbolName;
   std::string sCompanyName;
   std::string sExchangeRoot; // usable for IB?
   std::string sOptionRoots;
+  std::string sExchange;
   int nPrecision;
   int nContractSize;
   int nAverageVolume;
   int nShortInterest;
-  int nSecurityType;
+  ESecurityType eSecurityType;
+  ou::tf::OptionSide::enumOptionSide eOptionSide;
   double dblHistoricalVolatility;
   double dblStrikePrice;
   double dblPriceEarnings;
@@ -48,7 +55,8 @@ struct Fundamentals {
   boost::posix_time::time_duration timeSessionOpen; // futures, futures options
   boost::posix_time::time_duration timeSessionClose; // futures, futures options
   Fundamentals()
-  : nAverageVolume {}, nPrecision {}, nShortInterest {}, nSecurityType {},
+  : nAverageVolume {}, nPrecision {}, nShortInterest {},
+    eSecurityType( ESecurityType::Unknown ),
     dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
     dbl52WkHi {}, dbl52WkLo {},
     dblDividendAmount {}, dblDividendRate {}, dblDividendYield {},
