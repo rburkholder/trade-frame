@@ -56,7 +56,8 @@ namespace tf { // TradeFrame
 static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
 
 std::string Instrument::BuildDate( boost::gregorian::date date ) {
-  return BuildDate( date.year(), date.month().as_number(), date.day().as_number() );
+  auto ymd = date.year_month_day();
+  return BuildDate( ymd.year, ymd.month.as_number(), ymd.day.as_number() );
 }
 
 std::string Instrument::BuildDate( uint16_t year, uint16_t month, uint16_t day ) {

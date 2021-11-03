@@ -145,7 +145,13 @@ MasterPortfolio::MasterPortfolio(
 
   std::stringstream ss;
   //ss.str( "" );
-  ss << ou::TimeSource::Instance().External();
+  auto dt = ou::TimeSource::Instance().External();
+  ss
+    << ou::tf::Instrument::BuildDate( dt.date() )
+    << " "
+    << dt.time_of_day()
+    ;
+  //ss << ou::TimeSource::Instance().External();
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
