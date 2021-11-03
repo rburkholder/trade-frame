@@ -96,9 +96,6 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
   const std::string sGenericName
     = ou::tf::iqfeed::MarketSymbol::BuildGenericName( trd, fundamentals );
 
-  // to remove trd, will need a) security type lookup, b) listed market lookup
-  //   http://www.iqfeed.net/dev/api/docs//SymbolLookupviaTCPIP.cfm
-
   pInstrument_t pInstrument;
 
   switch ( trd.sc ) {
@@ -148,9 +145,6 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
   const std::string sGenericName
     = ou::tf::iqfeed::MarketSymbol::BuildGenericName( fundamentals );
 
-  // to remove trd, will need a) security type lookup, b) listed market lookup
-  //   http://www.iqfeed.net/dev/api/docs//SymbolLookupviaTCPIP.cfm
-
   pInstrument_t pInstrument;
 
   const std::string& sExchange( fundamentals.sExchange );
@@ -190,9 +184,9 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
   }
 
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, fundamentals.sSymbolName );
-  pInstrument->SetMultiplier( fundamentals.nContractSize );
-  pInstrument->SetMinTick( fundamentals.dblTickSize );
-  pInstrument->SetSignificantDigits( fundamentals.nPrecision );
+  if ( 0 != fundamentals.nContractSize ) pInstrument->SetMultiplier( fundamentals.nContractSize );
+  if ( 0 != fundamentals.dblTickSize ) pInstrument->SetMinTick( fundamentals.dblTickSize );
+  if ( 0 != fundamentals.nPrecision ) pInstrument->SetSignificantDigits( fundamentals.nPrecision );
 
   return pInstrument;
 }
