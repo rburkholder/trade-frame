@@ -211,6 +211,7 @@ private:
       }
     }
     void SaveSeries( const std::string& sPrefix ) {
+      pUnderlying->SaveSeries( sPrefix );
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
         pStrategy->pManageStrategy->SaveSeries( sPrefix );
