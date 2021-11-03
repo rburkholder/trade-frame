@@ -106,7 +106,11 @@ protected:
       m_mapListedMarket,
       m_mapSecurityType,
       [this](){
-        std::cout << "SymbolLookup Results: " << m_mapListedMarket.size() << "," << m_mapSecurityType.size() << std::endl;
+        std::cout
+          << "SymbolLookup Results: "
+          << "ListedMarkets=" << m_mapListedMarket.size()
+          << ",SecurityTypes=" << m_mapSecurityType.size()
+          << std::endl;
         //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
         //m_pSymbolLookup.reset();
       }
