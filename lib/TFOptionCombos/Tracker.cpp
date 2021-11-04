@@ -171,6 +171,7 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
         double diff = m_pPosition->GetUnRealizedPL();
 
         // close out when value close to zero
+        // TODO: need to check that there is an ask to buy against
         if ( 0.101 >= m_pPosition->GetWatch()->LastQuote().Ask() ) {
           m_transition = ETransition::Fill;
           m_fCloseLeg( m_pPosition );
@@ -220,29 +221,35 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
         else {
           // test if roll will be profitable for long option
           //double diff = m_pPosition->GetUnRealizedPL() - quote.Ask();  // buy new at the ask
-          double diff = m_pPosition->GetUnRealizedPL();
-          diff -= quote.Spread();  // subtract exit spread for extra margin?
-          diff -= 0.10;  // subtract commissions and such plus some spare change
+          double diff = m_pPosition->GetUnRealizedPL() /  // calc per share
+            ( m_pPosition->GetActiveSize() * m_pPosition->GetInstrument()->GetMultiplier() );
+          diff -= quote.Spread();  // unrealized p/l incorporates entry spread, this calculates exit spread
+          diff -= 0.10;  // subtract estimated commissions plus some spare change
           if ( 0.10 < diff ) { // desire at least 10 cents on the roll
-            std::cout
-              << quote.DateTime().time_of_day() << " "
-              << m_pOption->GetInstrument()->GetInstrumentName()
-              << " roll on diff=" << diff
-              << ",underlying=" << m_dblUnderlyingPrice
-              << ",slope=" << m_dblUnderlyingSlope
-              << std::endl;
-            m_transition = ETransition::Roll;
-            m_pOption->StopWatch();
-            m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
-            m_compare = nullptr;
-            m_luStrike = nullptr;
-            pOption_t pOption( std::move( m_pOption ) );
-            std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-            m_fCloseLeg( m_pPosition );
-            // TODO: on opening a position, will need to extend states to handle order with errors
-            m_transition = ETransition::Initial;  // this is going to recurse back in here (TODO: think about kill & rebuild?)
-            Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position
-            //m_transition = ETransition::Track;  // start all over again - this will get set in Initialize [TODO: how or why did this work before?]
+            if ( ( 0 == quote.BidSize() ) || ( 0.0 == quote.Bid() ) ) {
+              // no one will buy our stuff
+            }
+            else {
+              std::cout
+                << quote.DateTime().time_of_day() << " "
+                << m_pOption->GetInstrument()->GetInstrumentName()
+                << " roll on per-share diff=" << diff
+                << ",underlying=" << m_dblUnderlyingPrice
+                << ",slope=" << m_dblUnderlyingSlope
+                << std::endl;
+              m_transition = ETransition::Roll;
+              m_pOption->StopWatch();
+              m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
+              m_compare = nullptr;
+              m_luStrike = nullptr;
+              pOption_t pOption( std::move( m_pOption ) );
+              std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+              m_fCloseLeg( m_pPosition );
+              // TODO: on opening a position, will need to extend states to handle order with errors
+              m_transition = ETransition::Initial;  // this is going to recurse back in here (TODO: think about kill & rebuild?)
+              Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position
+              //m_transition = ETransition::Track;  // start all over again - this will get set in Initialize [TODO: how or why did this work before?]
+            }
           }
         }
       }
