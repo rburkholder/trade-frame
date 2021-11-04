@@ -12,18 +12,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   Engine.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on July 19, 2018, 9:02 PM
  */
 
-/* 
+/*
  * set watch on option, set watch on underlying
  * as each changes, recalculate option greeks
  * but set a limit of once a second?  or a when a large move hits
- * 
+ *
  */
 
 // old way: https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/reference/io_service.html
@@ -65,7 +65,7 @@ OptionEntry::OptionEntry( OptionEntry&& rhs ) {
 //}  // can't start with out an underlying
 
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWithGreek_t&& fGreek_ ):
-  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), m_fGreek( std::move( fGreek_ ) ), 
+  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), m_fGreek( std::move( fGreek_ ) ),
   //m_bStartedWatch( false ),
   m_cntInstances( 0 ) // handled by Inc, Dec
 {
@@ -76,9 +76,9 @@ OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWi
   //m_bStartedWatch = true;
   //PrintState( "OptionEntry::OptionEntry(2)" );
 }
-  
+
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ ):
-  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), 
+  m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ),
   //m_bStartedWatch( false ),
   m_cntInstances( 0 )
 {
@@ -89,13 +89,13 @@ OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ ):
   //m_bStartedWatch = true;
   //PrintState( "OptionEntry::OptionEntry(3)" );
 }
-  
+
 // need to properly work with m_bStartedWatch and cntInstances
 OptionEntry::~OptionEntry() {
   //pOption->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleOptionQuote ) );
   //PrintState( "OptionEntry::~OptionEntry" );
   //if ( m_bStartedWatch ) {
-  
+
   if ( 0 < m_cntInstances ) {
     std::cout << "OptionEntry::~OptionEntry m_cntInstances was not zero: " << m_cntInstances << "," << m_pOption->GetInstrument()->GetInstrumentName() << std::endl;
     m_cntInstances = 1;
@@ -120,22 +120,22 @@ void OptionEntry::PrintState( const std::string id ) {
   std::cout << id << ": U(" << sUnderlying << "),O(" << sOption /* << "), B(" << m_bStartedWatch */ << ")" << std::endl;
 }
 
-void OptionEntry::Inc() { 
+void OptionEntry::Inc() {
   if ( 0 == m_cntInstances ) {
     m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
     m_pUnderlying->StartWatch();
     m_pOption->StartWatch();  }
-  m_cntInstances++; 
+  m_cntInstances++;
 }
-size_t OptionEntry::Dec() { 
+size_t OptionEntry::Dec() {
   assert( 0 < m_cntInstances );
-  m_cntInstances--; 
+  m_cntInstances--;
   if ( 0 == m_cntInstances ) {
     m_pUnderlying->StopWatch();
     m_pOption->StopWatch();
     m_pUnderlying->OnQuote.Remove( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote ) );
   }
-  return m_cntInstances; 
+  return m_cntInstances;
 }
 
 
@@ -156,12 +156,12 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 
 // ====================
 
-Engine::Engine( const ou::tf::LiborFromIQFeed& feed ): 
-  m_InterestRateFeed( feed ), 
+Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
+  m_InterestRateFeed( feed ),
   m_srvcWork(boost::asio::make_work_guard( m_srvc )),
   m_timerScan( m_srvc )
 {
-  
+
   for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change the final value to add threads, and fix the TODO further down
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
 
@@ -170,13 +170,13 @@ Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
 //      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fGreek){
 //    };
   }
-  
+
   m_timerScan.expires_after( boost::asio::chrono::milliseconds(1000) );
   m_timerScan.async_wait(
-    boost::bind( 
-      &Engine::HandleTimerScan, this, 
-      boost::asio::placeholders::error 
-      ) 
+    boost::bind(
+      &Engine::HandleTimerScan, this,
+      boost::asio::placeholders::error
+      )
     );
 }
 
@@ -192,12 +192,12 @@ Engine::~Engine( ) {
     std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.clear();
   }
-  
+
   m_srvcWork.reset();
   m_threads.join_all();
-  
+
   m_mapOptionEntry.clear();
-  
+
   m_mapKnownOptions.clear();
   m_mapKnownWatches.clear();
 }
@@ -319,14 +319,14 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
       catch (...) {
         std::cout << "Engine::HandleTimerScan exception: unknown" << std::endl;
       }
-      
+
     // other ways:
       //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
       m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(750) );
       m_timerScan.async_wait(
-        boost::bind( 
-          &Engine::HandleTimerScan, this, 
+        boost::bind(
+          &Engine::HandleTimerScan, this,
           boost::asio::placeholders::error
           )
         );
@@ -341,11 +341,11 @@ void Engine::ProcessOptionEntryOperationQueue() {
     const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
     const std::string& sOption( oe.m_oe.OptionName() );
     std::string MapKey( sUnderlying + "_" + sOption );
-    
+
     switch( oe.m_action ) {
       case Action::AddOption: {
           //std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
-          
+
           mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
           if ( m_mapKnownWatches.end() == iterWatches ) {
             //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
@@ -370,7 +370,7 @@ void Engine::ProcessOptionEntryOperationQueue() {
         }
         break;
       case Action::RemoveOption: {
-          // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?  
+          // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?
           // if so, then maps require counters, or use the pOption_t use_count?
           std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
@@ -399,47 +399,53 @@ void Engine::ProcessOptionEntryOperationQueue() {
 void Engine::ScanOptionEntryQueue() {
 
   ProcessOptionEntryOperationQueue();
-  
+
   // dtUtcNow needs to be passed by value
   boost::posix_time::ptime dtUtcNow = ou::TimeSource::GlobalInstance().External();
-  
+
   // TODO:  process only those being watched
-  
+
   // three step lambda call:
   //  1) lambda for each active mapOptionEntry
   //  2) capture private values from the OptionEntry
   //  3) use the values in a background thread for calculations via post to io_service
-  std::for_each( m_mapOptionEntry.begin(), m_mapOptionEntry.end(), 
-                [this, dtUtcNow](mapOptionEntry_t::value_type& vt){
-                  //std::cout << "for each " << vt.second.GetUnderlying()->GetInstrument()->GetInstrumentName() << std::endl;
-                  //std::cout << "         " << vt.second.GetOption()->GetInstrument()->GetInstrumentName() << std::endl;
-                  vt.second.Calc( 
-                    [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fCallbackWithGreek ){
-                      double midpointUnderlying( quoteUnderlying.Midpoint() );
-                      if ( 0.0 < midpointUnderlying ) {  // only start calculations once underlying has quotes
-                        // TODO: add flag to start calculation only after previous calculation is complete
-                        boost::asio::post( m_srvc, 
-                          [this, dtUtcNow, pOption, midpointUnderlying, fCallbackWithGreek](){
-                            try {
-                              //boost::timer::auto_cpu_timer t;
-                              ou::tf::option::binomial::structInput input;
-                              input.S = midpointUnderlying;
-                              pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
-                              pOption->CalcGreeks( input, dtUtcNow, true );
-                              if ( nullptr != fCallbackWithGreek ) {
-                                fCallbackWithGreek( pOption->LastGreek() ); // need to create the method
-                              }
-                            }
-                            catch ( std::runtime_error& e ) {
-                              std::cout << "Engine::ScanOptionEntryQueue runtime: " << e.what() << std::endl;
-                            }
-                            catch (...) {
-                              std::cout << "Engine::ScanOptionEntryQueue exception: unknown" << std::endl;
-                            }                            
-                        });
-                      }
-                  });
-                });
+  std::for_each(
+    m_mapOptionEntry.begin(), m_mapOptionEntry.end(),
+    [this, dtUtcNow](mapOptionEntry_t::value_type& vt){
+      //std::cout << "for each " << vt.second.GetUnderlying()->GetInstrument()->GetInstrumentName() << std::endl;
+      //std::cout << "         " << vt.second.GetOption()->GetInstrument()->GetInstrumentName() << std::endl;
+      vt.second.Calc(
+        [this, dtUtcNow](OptionEntry::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fCallbackWithGreek ){
+          if ( !quoteUnderlying.IsNonZero() ) {
+            // underlying is unstable
+          }
+          else {
+            double midpointUnderlying( quoteUnderlying.Midpoint() );
+            if ( 0.0 < midpointUnderlying ) {  // only start calculations once underlying has quotes
+              // TODO: add flag to start calculation only after previous calculation is complete
+              boost::asio::post( m_srvc,
+                [this, dtUtcNow, pOption, midpointUnderlying, fCallbackWithGreek](){
+                  try {
+                    //boost::timer::auto_cpu_timer t;
+                    ou::tf::option::binomial::structInput input;
+                    input.S = midpointUnderlying;
+                    pOption->CalcRate( input, dtUtcNow, m_InterestRateFeed );
+                    pOption->CalcGreeks( input, dtUtcNow, true ); // TODO, don't proceed if option quote is bad (test on exit)
+                    if ( nullptr != fCallbackWithGreek ) {
+                      fCallbackWithGreek( pOption->LastGreek() ); // need to create the method
+                    }
+                  }
+                  catch ( std::runtime_error& e ) {
+                    std::cout << "Engine::ScanOptionEntryQueue runtime: " << e.what() << std::endl;
+                  }
+                  catch (...) {
+                    std::cout << "Engine::ScanOptionEntryQueue exception: unknown" << std::endl;
+                  }
+              });
+            }
+          }
+      });
+    });
 }
 
 } // namespace option
