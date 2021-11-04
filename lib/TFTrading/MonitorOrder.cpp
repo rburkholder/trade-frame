@@ -87,8 +87,8 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
     case State::Cancelled:  // can overwrite?
     case State::Filled:     // can overwrite?
       {
-        double mid = m_pPosition->GetWatch()->LastQuote().Midpoint();
-        double dblNormalizedPrice = NormalizePrice( mid );
+        const double midQuote = m_pPosition->GetWatch()->LastQuote().Midpoint();
+        const double dblNormalizedPrice = NormalizePrice( midQuote );
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
         if ( m_pOrder ) {
           m_state = State::Active;
@@ -100,6 +100,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           std::cout
             << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
             << m_pOrder->GetOrderId() << " "
+            << ou::tf::OrderSide::Name[ side ] << " "
             << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
             << m_pOrder->GetOrderSideName()
             << " limit submitted at " << dblNormalizedPrice
@@ -164,10 +165,10 @@ void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Orde
   }
 }
 
-void MonitorOrder::Tick( ptime dt, double price ) {
+void MonitorOrder::Tick( ptime dt ) {
   switch ( m_state ) {
     case State::Active:
-      UpdateOrder( dt, price );
+      UpdateOrder( dt );
       break;
     case State::Cancelled:
     case State::Filled:
@@ -183,7 +184,7 @@ void MonitorOrder::Tick( ptime dt, double price ) {
 
 bool MonitorOrder::IsOrderActive() const { return ( State::Active == m_state ); }
 
-void MonitorOrder::UpdateOrder( ptime dt, double price ) { // true when order has been filled
+void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
 
   if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
     // TODO: generate message? error on filled, but may be present on cancel
@@ -194,27 +195,44 @@ void MonitorOrder::UpdateOrder( ptime dt, double price ) { // true when order ha
     bool bUpdateOrder( false );
     if ( 0 == m_CountDownToAdjustment ) {
       // TODO: need logic if order was rejected
+      const double priceOrder = m_pOrder->GetPrice1();
+      const Quote& quote( m_pPosition->GetWatch()->LastQuote() );
       switch ( m_pOrder->GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
-          // TODO: maximum number of increments? aka don't chase too far?
-          if ( price > m_pOrder->GetPrice1() ) {
-            m_pOrder->SetPrice1( m_pOrder->GetPrice1() + PriceInterval( price ) );
-            bUpdateOrder = true;
-          }
-          else {  // need to wait for execution
-            // TODO: need to expire this after a while
-            m_CountDownToAdjustment = nAdjustmentPeriods;
+          {
+            // TODO: maximum number of increments? aka don't chase too far?
+            const double normalizedBid = NormalizePrice( quote.Bid() );
+            if ( normalizedBid > priceOrder ) { // adjust bid with fast moving quote
+              m_pOrder->SetPrice1( normalizedBid );
+              bUpdateOrder = true;
+            }
+            else { // increment bid on slow moving quote
+              if ( quote.Ask() > priceOrder ) {
+                m_pOrder->SetPrice1( NormalizePrice( priceOrder + PriceInterval( quote.Ask() ) ) );
+                bUpdateOrder = true;
+              }
+              else {  // need to wait for execution
+                // TODO: need to expire this after a while
+              }
+            }
           }
           break;
         case ou::tf::OrderSide::Sell:
           {
-            double interval = PriceInterval( price );
-            if ( ( 2.0 * interval ) < m_pOrder->GetPrice1() ) {
-              m_pOrder->SetPrice1( m_pOrder->GetPrice1() - interval );
+            // TODO: maximum number of increments? aka don't chase too far?
+            const double normalizedAsk = NormalizePrice( quote.Ask() );
+            if ( normalizedAsk < priceOrder ) { // adjust bid with fast moving quote
+              m_pOrder->SetPrice1( normalizedAsk );
               bUpdateOrder = true;
             }
-            else {
-              m_CountDownToAdjustment = nAdjustmentPeriods;
+            else { // increment ask on slow moving quote
+              if ( quote.Bid() < priceOrder ) {
+                m_pOrder->SetPrice1( NormalizePrice( priceOrder - PriceInterval( quote.Bid() ) ) );
+                bUpdateOrder = true;
+              }
+              else {  // need to wait for execution
+                // TODO: need to expire this after a while
+              }
             }
           }
           break;
@@ -225,22 +243,23 @@ void MonitorOrder::UpdateOrder( ptime dt, double price ) { // true when order ha
       // TODO: need to cancel both legs if spread is not < 0.10
       if ( bUpdateOrder ) {
 
-        const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-        //double spread = quote.Spread();
         auto tod = dt.time_of_day();
 
         std::cout
           << tod << " "
           << m_pOrder->GetOrderId() << " "
           << m_pPosition->GetInstrument()->GetInstrumentName()
-          << ": update order to " << m_pOrder->GetPrice1()
+          << ": update "
+          << ou::tf::OrderSide::Name[ m_pOrder->GetOrderSide() ]
+          << " order to " << m_pOrder->GetPrice1()
           //<< " on " << dblNormalizedPrice
           << ", bid=" << quote.Bid()
           << ", ask=" << quote.Ask()
           << std::endl;
         m_pPosition->UpdateOrder( m_pOrder );
-        m_CountDownToAdjustment = nAdjustmentPeriods;
+
       }
+      m_CountDownToAdjustment = nAdjustmentPeriods;
     }
   }
 }

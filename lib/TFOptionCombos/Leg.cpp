@@ -116,8 +116,8 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
 
 Leg::pPosition_t Leg::GetPosition() const { return m_pPosition; }
 
-void Leg::Tick( ptime dt, double price ) {
-  m_monitor.Tick( dt, price );
+void Leg::Tick( ptime dt, double dblUnderlyingPrice ) {
+  m_monitor.Tick( dt );
   if ( m_pPosition ) {
     double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
     m_ceProfitLoss.Append( dt, dblPL );
