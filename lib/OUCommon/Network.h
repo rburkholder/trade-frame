@@ -105,27 +105,27 @@ public:
   using linebuffer_t = std::vector<bufferelement_t>;  // used for composing lines of data for processing
   using linerepository_t = BufferRepository<linebuffer_t>;
 
-  Network( void );
+  Network();
   Network( const structConnection& connection );
   Network( const ipaddress_t& sAddress, port_t nPort );
   virtual ~Network( void );
 
   void SetPort( port_t port ) { m_Connection.nPort = port; };
   void SetAddress( const ipaddress_t& ipaddress ) { m_Connection.sAddress = ipaddress; };
-  void Connect( void );
+  void Connect();
   void Connect( const structConnection& connection );
-  void Disconnect( void );
+  void Disconnect();
   void Send( const std::string&, bool bNotifyOnDone = false ); // string being sent out to network
   void GiveBackBuffer( linebuffer_t* p ) { m_reposLineBuffers.CheckInL( p ); };  // parsed buffer being given back to accept more parsed network traffic
 
 protected:
 
   // CRTP based dummy callbacks
-  void OnNetworkConnected(void) {};
-  void OnNetworkDisconnected(void) {};
+  void OnNetworkConnected() {};
+  void OnNetworkDisconnected() {};
   void OnNetworkError( size_t ) {;};
   void OnNetworkLineBuffer( linebuffer_t* ) {};  // new line available for processing
-  void OnNetworkSendDone(void) {};
+  void OnNetworkSendDone() {};
 
 private:
 
@@ -185,7 +185,7 @@ private:
 //
 
 template <typename ownerT, typename charT>
-Network<ownerT,charT>::Network( void )
+Network<ownerT,charT>::Network()
 :
   m_stateNetwork( NS_INITIALIZING ),
   m_psocket( NULL ),
@@ -242,7 +242,7 @@ Network<ownerT,charT>::Network( const ipaddress_t& sAddress, port_t nPort )
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::CommonConstruction( void ) {
+void Network<ownerT,charT>::CommonConstruction() {
   m_pline = m_reposLineBuffers.CheckOutL();  // have a receiving line ready
   m_pline->clear();
   m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running
@@ -255,7 +255,9 @@ void Network<ownerT,charT>::CommonConstruction( void ) {
 //
 
 template <typename ownerT, typename charT>
-Network<ownerT,charT>::~Network(void) {
+Network<ownerT,charT>::~Network() {
+
+  m_timer.cancel();
 
   if ( NS_CONNECTED == m_stateNetwork ) {
     Disconnect();
@@ -307,7 +309,7 @@ Network<ownerT,charT>::~Network(void) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::AsioThread( void ) {
+void Network<ownerT,charT>::AsioThread() {
 
   m_io.run();  // handles async socket
 
@@ -321,7 +323,7 @@ void Network<ownerT,charT>::AsioThread( void ) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::Connect( void ) {
+void Network<ownerT,charT>::Connect() {
 
 #ifdef _DEBUG
   if ( NULL != m_psocket ) {
@@ -392,7 +394,7 @@ void Network<ownerT,charT>::OnConnectDone( const boost::system::error_code& erro
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::Disconnect( void ) {
+void Network<ownerT,charT>::Disconnect() {
 
   if ( NS_DISCONNECTED != m_stateNetwork ) {
     //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
@@ -419,7 +421,7 @@ void Network<ownerT,charT>::Disconnect( void ) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnNetDisconnecting( void ) {
+void Network<ownerT,charT>::OnNetDisconnecting() {
   if ( ( 0 == m_cntActiveSends ) // there are no active sends
     && ( 0 == m_lReadProgress )  // no reads in progress
 //    && ( !m_reposLineBuffers.Outstanding() )  // all clients buffers have been returned. [ can't as destroy doesn't clean up]
@@ -445,7 +447,7 @@ void Network<ownerT,charT>::OnNetDisconnecting( void ) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::AsyncRead( void ) {
+void Network<ownerT,charT>::AsyncRead() {
 
   if ( NS_DISCONNECTING == m_stateNetwork ) {
     //bool i = true;  // break point, waiting for network stuff to clear out
