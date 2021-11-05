@@ -211,8 +211,9 @@ void TWS::processMessages() {
 
   bool bOK = true;
 
-  m_pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
-  m_pReader->start();
+  std::unique_ptr<EReader> pReader;
+  pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
+  pReader->start();
 
   try {
     while ( bOK && m_bConnected ) {
@@ -222,21 +223,23 @@ void TWS::processMessages() {
       // TODO: convert the custom bit into the new code - should be ok, new code uses EMutexGuard in EReader.cpp
       //bOK = pTWS->checkMessages();  // code in EClientSocketBaseImpl.h has code change on linux for select()
 
-      m_osSignal.waitForSignal();
       errno = 0;
-      m_pReader->processMsgs();
+      m_osSignal.waitForSignal();
+      pReader->processMsgs();
 
       switch ( errno ) {
         case 0:  // ignore
+          break;
         case 2:  // ignore
+          errno = 0;
           break;
         default:
           std::cout
             << "IB errno=" << errno << " [" << strerror(errno) << "]"
             << ",connected=" << m_pTWS->isConnected()
             << std::endl;
+          errno = 0;
       }
-      if ( 0 != errno ) errno = 0;
     }
 
   }
@@ -246,7 +249,7 @@ void TWS::processMessages() {
     bOK = false;
   }
 
-  m_pReader.reset();
+  pReader.reset();
 
   m_bConnected = false;  // placeholder for debug
 

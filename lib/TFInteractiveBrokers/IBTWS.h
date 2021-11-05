@@ -212,7 +212,6 @@ private:
 
   EReaderOSSignal m_osSignal;
   std::unique_ptr<EClientSocket> m_pTWS;
-	std::unique_ptr<EReader> m_pReader;
 
   long m_time;
   int m_idClient; // for session uniqueness when multiple applications are connected to TWS
