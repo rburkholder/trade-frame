@@ -107,14 +107,6 @@ TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int 
 
 TWS::~TWS() {
 
-  Disconnect();
-
-  if ( m_pReader ) {
-    m_pReader.reset();
-  }
-
-  m_pTWS.reset();
-
   for ( vInActiveRequest_t::value_type& vt: m_vInActiveRequestId ) {
     delete vt;
     vt = nullptr;
@@ -123,6 +115,9 @@ TWS::~TWS() {
 
   m_vTickerToSymbol.clear();
   m_mapContractToSymbol.clear();
+
+  Disconnect();
+
 }
 
 void TWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth ) {
@@ -160,8 +155,6 @@ void TWS::Connect() {
 
       m_bConnected = true;
 
-      m_pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
-
       m_thrdIBMessages = boost::thread( boost::bind( &TWS::processMessages, this ) );
 
       m_pTWS->reqCurrentTime();
@@ -182,15 +175,17 @@ void TWS::Connect() {
     }
     else {
       // need to integrate common stuff from Disconnect, most everything but the thread bit
-      DisconnectCommon( false );
+      std::cout << "TWS::Connect fail" << std::endl;
+      Disconnect();
     }
   }
 }
 
 void TWS::Disconnect() {
   // check to see if there are any watches happening, and get them disconnected
-  if ( NULL != m_pTWS ) {
+  if ( m_pTWS ) {
     DisconnectCommon( true );
+    m_pTWS.reset();
   }
 }
 
@@ -204,11 +199,10 @@ void TWS::DisconnectCommon( bool bSignalEnd ){
       m_thrdIBMessages.join();  // wait for message processing to exit
     }
 
-    //m_pTWS.reset();
     OnDisconnected( 0 );
     m_ss.str("");
     m_ss << "IB Disconnected " << std::endl;
-//    OutputDebugString( m_ss.str().c_str() );
+
 }
 
 // this is executed in non-main thread, and the events below will be called from the processing here
@@ -217,6 +211,7 @@ void TWS::processMessages() {
 
   bool bOK = true;
 
+  m_pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
   m_pReader->start();
 
   try {
@@ -250,6 +245,8 @@ void TWS::processMessages() {
     // probably need to run Disconnect or DisconnectCommon
     bOK = false;
   }
+
+  m_pReader.reset();
 
   m_bConnected = false;  // placeholder for debug
 
