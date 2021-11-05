@@ -473,7 +473,7 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "CurrencySummary of USD Portfolios" );
 
   m_pPortfolioStrategyAggregate
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(  // TODO: change from MultiLeggedPosition to Basket
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Underlying Instances" );
 
 }
@@ -500,7 +500,7 @@ void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
       m_pPortfolioStrategyAggregate = pPortfolio;
       BuildMasterPortfolio();
       break;
-    case ou::tf::Portfolio::EPortfolioType::Standard:
+    case ou::tf::Portfolio::EPortfolioType::Standard: // not used
       assert( m_pMasterPortfolio );
       m_pMasterPortfolio->Add( pPortfolio );
       break;

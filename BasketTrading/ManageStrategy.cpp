@@ -207,6 +207,7 @@ ManageStrategy::ManageStrategy(
   double dblSlope20DayUnderlying,
   pWatch_t pWatchUnderlying,
   pPortfolio_t pPortfolioOwning, // => owning portfolio
+  boost::gregorian::date dateTrading,
   const ou::tf::option::SpreadSpecs& specSpread,
   fGatherOptions_t&& fGatherOptions,
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
@@ -228,6 +229,9 @@ ManageStrategy::ManageStrategy(
   //m_barPriorDaily( barPriorDaily ),
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
+
+  m_dateTrading( dateTrading ),
+  m_specsSpread( specSpread ),
 
   m_fConstructOption( std::move( fConstructOption ) ),
   m_fConstructPosition( std::move( fConstructPosition ) ),
@@ -256,8 +260,7 @@ ManageStrategy::ManageStrategy(
   m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
   m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
   m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
-  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue ),
-  m_specsSpread( specSpread )
+  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 {
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
@@ -362,7 +365,9 @@ ManageStrategy::~ManageStrategy( ) {
 
 void ManageStrategy::Run() {
   assert( m_pWatchUnderlying );
-  m_stateTrading = TSWaitForFirstTrade;
+  if ( ETradingState::TSInitializing == m_stateTrading ) {
+    m_stateTrading = TSWaitForFirstTrade;
+  }
 }
 
 // is this used currently?
@@ -392,12 +397,14 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
   pWatch_t pWatch = pPosition->GetWatch();
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Stock:
+    case ou::tf::InstrumentType::Future:
       //assert( m_pPositionUnderlying );
       //assert( pPosition->GetInstrument()->GetInstrumentName() == m_pPositionUnderlying->GetInstrument()->GetInstrumentName() );
       //assert( pPosition.get() == m_pPositionUnderlying.get() );
       std::cout << "ManageStrategy::AddPosition adding underlying position, needs additional code: " << pInstrument->GetInstrumentName() << std::endl;
       break;
     case ou::tf::InstrumentType::Option:
+    case ou::tf::InstrumentType::FuturesOption:
       if ( pPosition->IsActive() ) {
 
         const idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
@@ -413,8 +420,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
           m_pCombo = std::make_unique<combo_t>();
 
-          //const boost::gregorian::date dateBar( bar.DateTime().date() );
-          //ComboPrepare( dateBar );
+          ComboPrepare( m_dateTrading );
 
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
@@ -430,7 +436,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           m_pChartDataView->SetNames( idPortfolio, sNameUnderlying );
 
           // authorizes pre-existing strategy
-          bool bAuthorized = m_fAuthorizeSimple( idPortfolio, sNameUnderlying, true );
+          //bool bAuthorized = m_fAuthorizeSimple( idPortfolio, sNameUnderlying, true );
 
         }
 
@@ -446,6 +452,8 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         }
       }
       break;
+    default:
+      assert( false );
   }
 }
 
@@ -503,11 +511,6 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       m_dblOpen = trade.Price();
       //std::cout << m_pWatchUnderlying->GetInstrumentName() << " " << trade.DateTime() << ": First Price: " << trade.Price() << std::endl;
       m_fFirstTrade( *this, trade );
-
-      if ( m_pCombo ) { // persisted combo needs a start
-        ComboPrepare( trade.DateTime().date() );
-      }
-
       m_stateTrading = TSOptionEvaluation; // ready to trade
       }
       break;
@@ -642,7 +645,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );
 
-                ComboPrepare( dateBar );
+                ComboPrepare( m_dateTrading );
 
                 combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
 

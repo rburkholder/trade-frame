@@ -239,13 +239,14 @@ private:
     }
   };
 
-  using mapUnderlyingWithStrategies_t = std::map<std::string /* underlying */, UnderlyingWithStrategies>;
+  using mapUnderlyingWithStrategies_t = std::map<std::string /* sUGenericUnderlying */, UnderlyingWithStrategies>;
   using iterUnderlyingWithStrategies_t = mapUnderlyingWithStrategies_t::iterator;
   mapUnderlyingWithStrategies_t m_mapUnderlyingWithStrategies;
 
   // cache of portfolios and positions for use when building strategy instances
   using mapPosition_t = std::map<std::string,pPosition_t>;
   using mapPosition_iter = mapPosition_t::iterator;
+
   using mapPortfolio_t = std::map<idPortfolio_t,pPortfolio_t>;
   using mapPortfolio_iter = mapPortfolio_t::iterator;
 
@@ -266,7 +267,7 @@ private:
     {}
   };
 
-  using mapStrategyCache_t = std::map<ou::tf::Portfolio::idPortfolio_t,StrategyCache>;
+  using mapStrategyCache_t = std::map<ou::tf::Portfolio::idPortfolio_t /* owner */, StrategyCache>;
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
@@ -295,8 +296,9 @@ private:
   void AddUnderlying( pWatch_t );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
-  pManageStrategy_t ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying );
+  pManageStrategy_t ConstructStrategy( UnderlyingWithStrategies& uws );
   void StartUnderlying( UnderlyingWithStrategies& );
+  void AddAsActiveStrategy( UnderlyingWithStrategies&, pStrategy_t&&, const idPortfolio_t& idPortfolioStrategy );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

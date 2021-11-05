@@ -64,7 +64,7 @@ Collar::~Collar() {
   m_mapCollarLeg.clear();
 }
 
-// needs to happen after all Legs have been created
+// needs to happen before all Legs have been created
 // called from Combo::Prepare
 void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, const SpreadSpecs& specs ) {
 

@@ -189,6 +189,13 @@ MasterPortfolio::~MasterPortfolio() {
   m_mapUnderlyingWithStrategies.clear();
   m_pOptionEngine.release();
   m_libor.SetWatchOff();
+
+  m_pOptionChainQuery->Disconnect();
+  m_pOptionChainQuery.reset();
+
+  m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
+
+  m_pBuildInstrument.reset();
 }
 
 // auto loading portfolio from database into the map stratetgy cache
@@ -196,7 +203,7 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 
   // TODO: will need to test that strategy portfolios are active??
 
-  // will have a mixture of 'standard' and 'multilegged'
+  // will have a mixture of 'aggregate' and 'multilegged'
   mapStrategyCache_t::iterator iterCache = m_mapStrategyCache.find( pPortfolio->Id() );
   if ( m_mapStrategyCache.end() != iterCache ) {
     std::cout << "MasterPortfolio::Add already added portfolio " << pPortfolio->Id() << std::endl;
@@ -217,25 +224,31 @@ void MasterPortfolio::Add( pPortfolio_t pPortfolio ) {
 
     switch ( pPortfolio->GetRow().ePortfolioType ) {
       case ou::tf::Portfolio::EPortfolioType::Basket:
-        // no need to do anything with the basket
+        // NOTE: no need to do anything with the basket, instances by underlying, created in caller
+        std::cout << "MasterPortfolio Add Basket: should not arrive here" << std::endl;
         break;
       case ou::tf::Portfolio::EPortfolioType::Standard:
-        // this is the strategy level portfolio
+        // NOTE: not in use
+        assert( false );
         break;
-      case ou::tf::Portfolio::EPortfolioType::Aggregate:
+      case ou::tf::Portfolio::EPortfolioType::Aggregate: // aka underlying
+        // NOTE: one aggregate per underlying, generic instrument name
+        //std::cout << "MasterPortfolio Add Portfolio for Underlying (fix): " << pPortfolio->Id() << std::endl;
         break;
-      case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition:
-        // this is the combo level portfolio of positions, needs to be associated with owner
-        //    which allows it to be submitted to ManageStrategy
+      case ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition: // aka collar strategy
+        // NOTE: this is the combo level portfolio of positions, needs to be associated with owner
+        //    which allows it to be submitted to ManageStrategy - for now each is a collar portfolio
+        //std::cout << "MasterPortfolio Add Portfolio for Strategy: " << pPortfolio->Id() << "," << pPortfolio->GetRow().idOwner << std::endl;
         { // example: idOwner "portfolio-SPY", idPortfolio "collar-SPY-rise-20210730-427.5-20210706-429-427"
-          mapStrategyCache_t::iterator iter = m_mapStrategyCache.find( pPortfolio->GetRow().idOwner );
+          mapStrategyCache_t::iterator iter = m_mapStrategyCache.find( pPortfolio->GetRow().idOwner ); // look for  owner (underlying)
           assert( m_mapStrategyCache.end() != iter );
-          StrategyCache& scOwner( iter->second );
+          StrategyCache& cacheOwning( iter->second );
           std::pair<mapPortfolio_iter,bool> pair2 // insert child
-            = scOwner.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
+            = cacheOwning.m_mapPortfolio.insert( mapPortfolio_t::value_type( pPortfolio->Id(), pPortfolio ) );
           assert( pair2.second );
         }
         break;
+      default: assert( false );
     } // switch
   }
 }
@@ -257,6 +270,7 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
   StrategyCache& cache( iterStrategyCache->second );
 
   if ( pPosition->GetRow().idPortfolio != cache.m_pPortfolio->Id() ) {
+    // diagnostics, then fail
     std::string idInstrument( pPosition->GetInstrument()->GetInstrumentName() );
     const idPortfolio_t idPortfolio1( pPosition->IdPortfolio() );
     const idPortfolio_t idPortfolio2( cache.m_pPortfolio->Id() );
@@ -321,20 +335,24 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
     for ( const mapStrategyCache_t::value_type& vt: m_mapStrategyCache ) {
       const StrategyCache& cache( vt.second );
       if ( !cache.m_bAccessed ) {
-        const std::string idPortfolio( vt.first );
+        const std::string& idPortfolio( vt.first );
         const std::string sTemp( idPortfolio.substr( 0, sUnderlyingPortfolioPrefix.size() ) ); // some are strategy-, some are 'strangle-'
         if ( sTemp == sUnderlyingPortfolioPrefix ) {
           const std::string sUnderlying( idPortfolio.substr( sUnderlyingPortfolioPrefix.size() ) );
-          std::cout << vt.first << " (" << sUnderlying << ") being examined :";
+          std::cout << vt.first << " (" << sUnderlying << ") being examined:";
+
+          // there are no positions in the underlying, need to drill down to the strategy
+          // where are the existing strategies brought in?
           bool bPositionActive( false );
           for ( const mapPosition_t::value_type& vt: cache.m_mapPosition ) {
             bPositionActive |= ( 0 != vt.second->GetRow().nPositionActive );
           }
           if ( bPositionActive ) {
-            std::cout << vt.first << " has position";
+            std::cout << "cached strategy " << vt.first << " has active positions for " << sUnderlying;
             m_setSymbols.insert( sUnderlying );
           }
-          // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?  then will need to recurse the test?
+          // TODO: is a test required for active sub-portfolios?  ie, strategy portfolios?
+          //       then will need to recurse the test?
           //    no, should run this test on the baskets as well, then bring in underlying
           //    at this point, this test will come up empty, as no positions in the underlying
           //      just sub-portfolios for the strategies
@@ -407,8 +425,8 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
     pPortfolio_t pPortfolioUnderlying;
     mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
     if ( m_mapStrategyCache.end() != iterStrategyCache ) { // use existing portfolio
-      StrategyCache& sa( iterStrategyCache->second );
-      pPortfolioUnderlying = sa.m_pPortfolio;
+      StrategyCache& cache( iterStrategyCache->second );
+      pPortfolioUnderlying = cache.m_pPortfolio;
     }
     else { // create new portfolio
       ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "aoRay" );  // TODO: need bring account owner from caller
@@ -488,7 +506,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
-                m_nQuery = 1; // intial lock of the loop
+                m_nQuery = 1; // intial lock of the loop, process each option, sync or async dependin gif cached
                 for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_nQuery++;
@@ -500,14 +518,14 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                       auto previous = m_nQuery.fetch_sub( 1 );
                       if ( 1 == previous ) {
                         StartUnderlying( uws );
-                        ProcessSeedList();
+                        ProcessSeedList();  // continue processing list of underlying
                       }
                     } );
                 }
                 auto previous = m_nQuery.fetch_sub( 1 );
                 if ( 1 == previous ) {
                   StartUnderlying( uws );
-                  ProcessSeedList();
+                  ProcessSeedList();  // continue processing list of underlying
                 }
               });
           } );
@@ -519,19 +537,16 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
   }
 }
 
-MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std::string& sUnderlying, pPortfolio_t pPortfolioUnderlying ) {
-
-  iterUnderlyingWithStrategies_t iterUnderlyingWithStrategies
-    = m_mapUnderlyingWithStrategies.find( sUnderlying );
-  assert( m_mapUnderlyingWithStrategies.end() != iterUnderlyingWithStrategies );
-  UnderlyingWithStrategies& uws( iterUnderlyingWithStrategies->second );
-  assert( !uws.pStrategyInWaiting );  // need empty location
+MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws ) {
 
   //const IIPivot& iip_( uws.iip );
-  const idPortfolio_t& idPortfolioUnderlying( pPortfolioUnderlying->Id() );
 
-  // TODO: need to fix this and use proper underlying name
-  mapSpecs_t::const_iterator iterSpreadSpecs = m_mapSpecs.find( "@ESZ21" );
+  const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
+
+  const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );
+
+  mapSpecs_t::const_iterator iterSpreadSpecs
+    = m_mapSpecs.find( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
   namespace ph = std::placeholders;
 
@@ -540,7 +555,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
         //iip_.bar,
         1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         uws.pUnderlying->GetWatch(),
-        pPortfolioUnderlying,
+        uws.pUnderlying->GetPortfolio(),
+        m_dateTrading,
         iterSpreadSpecs->second,
     // ManageStrategy::fGatherOptions_t
         [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){
@@ -710,50 +726,26 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
             return true;
           },
     // ManageStrategy::m_fAuthorizeSimple
-          [this,sUnderlying]( const idPortfolio_t& idPortfolio, const std::string& sName, bool bExists )->bool{
+          [this,sUnderlying,&uws]( const idPortfolio_t& idPortfolio, const std::string& sName, bool bExists )->bool{
             // generally used to authorize the underlying, irrespective of options in the combo
             // TODO: create authorization based upon margin requirements of the combo
 
+            // can be called with StrategyInWaiting or pre-existing ManageStrategy
+
             ou::tf::MoneyManager& mm( ou::tf::MoneyManager::GlobalInstance() );
             bool bAuthorized = mm.Authorize( sName );
-            if ( bAuthorized || bExists ) {
+            if ( bAuthorized ) {
+              if ( bExists ) {
+                // nothing to do
+              }
+              else {
+                // move from pStrategyInWaiting to mapStrategyActive
+                iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
+                assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
+                UnderlyingWithStrategies& uws( iterUWS->second );
+                assert( uws.pStrategyInWaiting );
 
-              // move from pStrategyInWaiting to mapStrategyActive
-              iterUnderlyingWithStrategies_t iterUWS = m_mapUnderlyingWithStrategies.find( sUnderlying );
-              assert( m_mapUnderlyingWithStrategies.end() != iterUWS );
-              UnderlyingWithStrategies& uws( iterUWS->second );
-              assert( uws.pStrategyInWaiting );
-
-              pChartDataView_t pChartDataView = uws.pStrategyInWaiting->pManageStrategy->GetChartDataView();
-
-              auto result = uws.mapStrategyActive.emplace(
-                std::make_pair( idPortfolio, std::move( uws.pStrategyInWaiting ) )
-                );
-              assert( result.second );
-              Strategy& strategy( *result.first->second );
-
-              uws.pUnderlying->PopulateChartDataView( pChartDataView ); // add price & volume
-
-              // TODO: will need to move this to ConstructPortfolio, and then add an Authorized/Not-Authorized marker
-
-              if ( !strategy.bChartActivated ) {
-
-                wxMenuItem* pMenuItem;
-                wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolio );
-                pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
-                int id = pMenuItem->GetId();
-                pMenuPopupStrategy->Bind(
-                  wxEVT_COMMAND_MENU_SELECTED,
-                  [idPortfolio]( wxCommandEvent& event ){
-                    std::cout << "Close: " << idPortfolio << event.GetId() << std::endl;
-                  },
-                  id );
-
-                // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
-                //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
-                strategy.idTreeItem = m_fChartAdd( uws.idTreeItem, idPortfolio, pChartDataView, pMenuPopupStrategy );
-                strategy.bChartActivated = true;
-                pMenuPopupStrategy = nullptr;
+                AddAsActiveStrategy( uws, std::move( uws.pStrategyInWaiting ), idPortfolio );
               }
             }
             return bAuthorized;
@@ -765,9 +757,9 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( const std
           }
       );
 
+  // TODO: will need this generic for equities and futures
   pManageStrategy->InitForUS24HourFutures( m_dateTrading );;
-  uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
-  return uws.pStrategyInWaiting->pManageStrategy;
+  return pManageStrategy;
 
 } // ConstructStrategy
 
@@ -785,18 +777,18 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   if ( m_mapStrategyCache.end() == iter ) {}
   else {
     // iterate the strategy portfolios, load them and get started
-    StrategyCache& cacheStrategy( iter->second );
-    assert( cacheStrategy.m_mapPosition.empty() ); // looking at list of strategies, ie, portfolio of the strategy, no positions at this level
-    assert( !cacheStrategy.m_bAccessed );
-    for ( mapPortfolio_t::value_type& vt: cacheStrategy.m_mapPortfolio ) {
+    StrategyCache& cacheUnderlying( iter->second );
+    assert( cacheUnderlying.m_mapPosition.empty() ); // looking at list of strategies, ie, portfolio of the strategy, no positions at this level
+    assert( !cacheUnderlying.m_bAccessed );
+    for ( mapPortfolio_t::value_type& vt: cacheUnderlying.m_mapPortfolio ) { // cycle strategy portfolios
 
       // TODO: need to determine if comboPortfolio is active
-      const idPortfolio_t& idPortfolioCombo( vt.second->Id() );
+      const idPortfolio_t& idPortfolioStrategy( vt.second->Id() );
 
-      mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioCombo );
+      mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioStrategy );
       StrategyCache& cacheCombo( iterStrategyCache->second );
       assert( !cacheCombo.m_mapPosition.empty() );
-      pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, cacheCombo.m_pPortfolio ) );
+      pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
 
       bool bActivated( false );
       for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
@@ -805,20 +797,59 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
           bActivated = true;
         }
       }
-      cacheStrategy.m_bAccessed = true;
+      cacheUnderlying.m_bAccessed = true;
       if ( bActivated ) {
         bConstructDefaultStrategy = false;
-        pManageStrategy->Run();
+        AddAsActiveStrategy( uws, std::make_unique<Strategy>( std::move( pManageStrategy ) ), idPortfolioStrategy );
       }
     }
   }
 
-  if ( bConstructDefaultStrategy) {
-    // create a new strategy by default
-    // TODO: fix calling parameters?, as UnderlyingWithStrategies is already available with undelrying portfolio
-    pManageStrategy_t pManageStrategy( ConstructStrategy( sUnderlying, uws.pUnderlying->GetPortfolio() ) );
-    pManageStrategy->Run();
+  if ( bConstructDefaultStrategy) { // create a new strategy by default
+
+    assert( !uws.pStrategyInWaiting );  // need empty location
+
+    pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
+    uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
+    uws.pStrategyInWaiting->pManageStrategy->Run();
   }
+}
+
+void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrategy_t&& pStrategy, const idPortfolio_t& idPortfolioStrategy ) {
+
+  pChartDataView_t pChartDataView = pStrategy->pManageStrategy->GetChartDataView();
+
+  auto result = uws.mapStrategyActive.emplace(
+    std::make_pair( idPortfolioStrategy, std::move( pStrategy ) )
+    );
+  assert( result.second );
+  Strategy& strategy( *result.first->second );
+
+  uws.pUnderlying->PopulateChartDataView( pChartDataView ); // add price & volume
+
+  // TODO: will need to move this to ConstructPortfolio, and then add an Authorized/Not-Authorized marker
+
+  if ( !strategy.bChartActivated ) {
+
+    wxMenuItem* pMenuItem;
+    wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolioStrategy );
+    pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
+    int id = pMenuItem->GetId();
+    pMenuPopupStrategy->Bind(
+      wxEVT_COMMAND_MENU_SELECTED,
+      [idPortfolioStrategy]( wxCommandEvent& event ){
+        std::cout << "Close: " << idPortfolioStrategy << event.GetId() << std::endl;
+      },
+      id );
+
+    // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
+    //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
+    strategy.idTreeItem = m_fChartAdd( uws.idTreeItem, idPortfolioStrategy, pChartDataView, pMenuPopupStrategy );
+    strategy.bChartActivated = true;
+    pMenuPopupStrategy = nullptr;
+  }
+
+  strategy.pManageStrategy->Run();
 
 }
 
