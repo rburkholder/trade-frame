@@ -19,7 +19,7 @@
  * Created: Novemeber 8, 2020, 11:41 AM
  */
 
- #include "Tracker.h"
+#include "Tracker.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -171,11 +171,13 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
         double diff = m_pPosition->GetUnRealizedPL();
 
         // close out when value close to zero
-        // TODO: need to check that there is an ask to buy against
-        if ( 0.101 >= m_pPosition->GetWatch()->LastQuote().Ask() ) {
-          m_transition = ETransition::Fill;
-          m_fCloseLeg( m_pPosition );
-          m_transition = ETransition::Initial;
+        const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
+        if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
+          if ( 0.101 >= m_pPosition->GetWatch()->LastQuote().Ask() ) {
+            m_transition = ETransition::Fill;
+            m_fCloseLeg( m_pPosition );
+            m_transition = ETransition::Initial;
+          }
         }
       }
       break;
