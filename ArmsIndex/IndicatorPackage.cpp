@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <OUCommon/TimeSource.h>
 
 #include "IndicatorPackage.h"
@@ -205,7 +203,7 @@ void IndicatorPackage::DrawChart( BarDoubles& bd, const std::string& sName ) {
       bd.High(), bd.Low(), bd.Open(), bd.Close(), 0x0000ff00, 0x00ff0000, 0xFFFF0001 );  // 0xff000000
     candle->setXData( bd.Time() );
     chart.xAxis()->setDateScale( m_ctViewBegin, m_ctViewEnd, 0, 0 );
-    MemBlock m = chart.makeChart( BMP );
+    MemBlock m = chart.makeChart( Chart::BMP );
     if ( 0 != bd.m_cb ) bd.m_cb( m );
     bd.PopBack();
   }
@@ -267,7 +265,7 @@ void IndicatorPackage::DrawChartArms( void ) {
     if ( m_vColours.end() == iterc ) --iterc;
   }
 
-  MemBlock m = chart.makeChart( BMP );
+  MemBlock m = chart.makeChart( Chart::BMP );
   if ( 0 != m_OnDrawChartArms ) m_OnDrawChartArms( m );
 
   m_vTrin.pop_back();

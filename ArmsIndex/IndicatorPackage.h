@@ -19,11 +19,7 @@
 
 #include <boost/lockfree/spsc_queue.hpp>
 
-#ifdef _M_X64
-#include <OUCharting/ChartDirector64/chartdir.h>
-#else
-#include <OUCharting/ChartDirector/chartdir.h>
-#endif
+#include <chartdir/chartdir.h>
 
 #include <OUCharting/ChartMaster.h>
 

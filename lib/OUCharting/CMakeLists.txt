@@ -30,10 +30,6 @@ set(
 #    ChartRealTimeTreeView.h
 #    ChartRealTimeView.h
 #    ChartViewPort.h
-    ChartDirector64/bchartdir.h
-    ChartDirector64/chartdir.h
-    ChartDirector64/FinanceChart.h
-    ChartDirector64/memblock.h
   )
 
 set(

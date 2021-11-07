@@ -33,13 +33,7 @@
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 #include <OUCommon/Colour.h>
 
-#if defined(__x86_64__)
-#include "ChartDirector64/chartdir.h"
-#elif defined(_M_X64)
-#include "ChartDirector64/chartdir.h"
-#else
-#include "ChartDirector/chartdir.h"
-#endif
+#include <chartdir/chartdir.h>
 
 #include <TFTimeSeries/DoubleBuffer.h>
 
