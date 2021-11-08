@@ -21,6 +21,7 @@
 
 #include <wx/sizer.h>
 
+#include "WinElement.h"
 #include "PanelTrade.h"
 
 namespace ou { // One Unified
@@ -33,8 +34,7 @@ PanelTrade::PanelTrade( void ) {
 
 PanelTrade::PanelTrade( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-  )
- {
+) {
   Init();
   Create(parent, id, pos, size, style);
 }
@@ -48,7 +48,7 @@ void PanelTrade::Init( void ) {
 
 bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-  ) {
+) {
 
     SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
     wxPanel::Create( parent, id, pos, size, style );
@@ -64,8 +64,10 @@ bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoin
 }
 
 void PanelTrade::CreateControls( void ) {
+  PanelTrade* itemPanel1 = this;
 
-    PanelTrade* itemPanel1 = this;
+  WinElement* element1 = new WinElement( this, wxID_ANY, wxPoint(  5,  5 ), wxSize( 100, 20 ) );
+  WinElement* element2 = new WinElement( this, wxID_ANY, wxPoint(  5, 25 ), wxSize( 100, 20 ) );
 }
 
 } // market depth

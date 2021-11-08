@@ -37,6 +37,8 @@ TODO:
 #include "Config.h"
 
 #include "AppDoM.h"
+#include "TFVuTrading/MarketDepth/PanelTrade.h"
+#include "wx/defs.h"
 
 IMPLEMENT_APP(AppDoM)
 
@@ -74,11 +76,17 @@ bool AppDoM::OnInit() {
 
     LinkToPanelProviderControl();
 
-    wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-    m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+    wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
+    m_sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 5 );
+
+    m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain, wxID_ANY );
+    sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+
+    wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+    m_sizerMain->Add( sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
     m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-    m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
     m_pPanelLogging->Show( true );
 
     m_pFrameMain->Show( true );

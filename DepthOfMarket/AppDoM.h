@@ -30,7 +30,10 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include <TFVuTrading/MarketDepth/PanelTrade.h>
+
 #include "DoMDispatch.h"
+#include "TFVuTrading/MarketDepth/PanelTrade.h"
 
 class AppDoM:
   public wxApp,
@@ -43,6 +46,8 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+
+  ou::tf::l2::PanelTrade* m_pPanelTrade;
 
   //wxMenu* m_pMenuLoadDays;
 

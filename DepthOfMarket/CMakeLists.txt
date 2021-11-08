@@ -74,6 +74,7 @@ target_link_libraries(
       TFStatistics
       TFIndicators
       TFVuTrading
+      MarketDepth
       TFTrading
       TFTimeSeries
       TFHDF5TimeSeries
