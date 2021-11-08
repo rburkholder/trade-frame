@@ -51,9 +51,7 @@ bool AppDoM::OnInit() {
   }
   else {
 
-    m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
-
-    m_pFrameMain = new FrameMain( 0, wxID_ANY, "Depth of Market" );
+    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, "Depth of Market" );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
     //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -85,6 +83,8 @@ bool AppDoM::OnInit() {
 
     m_pFrameMain->Show( true );
 
+    m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
+
     std::cout << "watching " << options.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
@@ -101,6 +101,8 @@ bool AppDoM::OnInit() {
 }
 
 void AppDoM::OnClose( wxCloseEvent& event ) {
+
+  m_pDispatch.reset();
 
   if ( m_bData1Connected ) {
     m_pDispatch->Disconnect();
