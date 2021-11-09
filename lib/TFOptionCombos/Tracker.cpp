@@ -232,10 +232,16 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
               // no one will buy our stuff
             }
             else {
+              auto pOld = m_pPosition->GetWatch();
               std::cout
-                << quote.DateTime().time_of_day() << " "
-                << m_pOption->GetInstrument()->GetInstrumentName()
-                << " roll on per-share diff=" << diff
+                << quote.DateTime().time_of_day()
+                << ",old=" << pOld->GetInstrumentName()
+                << ",b=" << pOld->LastQuote().Bid()
+                << ",a=" << pOld->LastQuote().Ask()
+                << ",new=" << m_pOption->GetInstrument()->GetInstrumentName()
+                << ",b=" << m_pOption->LastQuote().Bid()
+                << ",a=" << m_pOption->LastQuote().Ask()
+                << ",roll,per-share-diff=" << diff
                 << ",underlying=" << m_dblUnderlyingPrice
                 << ",slope=" << m_dblUnderlyingSlope
                 << std::endl;
