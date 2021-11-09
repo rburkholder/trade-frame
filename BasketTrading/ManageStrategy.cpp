@@ -657,8 +657,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
                 m_pValidateOptions->Get(
-                  [this,&idPortfolio,&combo,direction](size_t ix,pOption_t pOption){  // need Strategy specific naming
-
+                  [this,&idPortfolio,&combo,direction]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
+                    // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
                     combo_t::FillLegNote( ix, direction, lnValues );
                     ou::tf::option::LegNote ln( lnValues );
