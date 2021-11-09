@@ -145,10 +145,18 @@ void Leg::CancelOrder() {
   }
 }
 
-void Leg::ClosePosition() {
+Leg::pPosition_t Leg::ClosePosition() {
   if ( m_pPosition ) {
+    // m_legNote.Decode( m_pPosition->Notes() ); // TODO: validate legn notes are undisturbed
+    //option::LegNote::values_t values = m_legNote.Values();
+    //values.m_state = option::LegNote::State::Closed;
+    //m_legNote.Assign( values );
+    assert ( option::LegNote::State::Closed != m_legNote.GetState() );
+    m_legNote.SetState( option::LegNote::State::Closed );
+    m_pPosition->SetNotes( m_legNote.Encode() );
     m_monitor.ClosePosition();
   }
+  return m_pPosition;
 }
 
 bool Leg::IsActive() const {

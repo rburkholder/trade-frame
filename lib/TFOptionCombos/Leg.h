@@ -57,7 +57,7 @@ public:
 
   void PlaceOrder( ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
   void CancelOrder();
-  void ClosePosition();
+  pPosition_t ClosePosition();
   bool IsActive() const;
   bool IsOrderActive() const;
 

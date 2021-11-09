@@ -64,6 +64,9 @@ public:
 
   void Assign( const values_t& );
 
+  State GetState() const { return m_values.m_state; }
+  void  SetState( State state ) { m_values.m_state = state; }
+
 protected:
 private:
 

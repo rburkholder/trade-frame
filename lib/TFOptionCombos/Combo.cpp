@@ -19,6 +19,8 @@
  * Created on June 7, 2019, 5:08 PM
  */
 
+ #include <TFTrading/PortfolioManager.h>
+
 #include "Combo.h"
 
 namespace ou { // One Unified
@@ -211,7 +213,9 @@ void Combo::ClosePositions() {
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
     if ( leg.IsActive() ) {
-      leg.ClosePosition();
+      pPosition_t pPosition = leg.ClosePosition();
+      auto& instance( ou::tf::PortfolioManager::Instance() ); // NOTE this direct call!!
+      instance.PositionUpdateNotes( pPosition );
     }
   }
 }
