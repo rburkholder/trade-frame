@@ -831,14 +831,17 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
 
   if ( !strategy.bChartActivated ) {
 
+    pManageStrategy_t pManageStrategy = strategy.pManageStrategy;
+
     wxMenuItem* pMenuItem;
     wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolioStrategy );
     pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
     int id = pMenuItem->GetId();
     pMenuPopupStrategy->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
-      [idPortfolioStrategy]( wxCommandEvent& event ){
-        std::cout << "Close: " << idPortfolioStrategy << event.GetId() << std::endl;
+      [idPortfolioStrategy,pManageStrategy]( wxCommandEvent& event ){
+        std::cout << "Closing: " << idPortfolioStrategy << event.GetId() << std::endl;
+        pManageStrategy->ClosePositions();
       },
       id );
 
