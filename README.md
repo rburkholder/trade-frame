@@ -78,7 +78,7 @@ I have notes for this combination at
 
 ## Starting Up
 
-* Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> IQWatchQuote (may need to start twice, and then watch a symbol) [or from the command line: IQConnect.exe ... -autoconnect & ]
+* Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> Watchlist [or from the command line: wine ~/.wine/drive_c/Program\ Files/DTN/IQFeed/iqconnect.exe -autoconnect & ] Login with your credentials and checkbox the Save Username/Password and Autoconnect the first time
 * Start Interactive Brokers TWS and connect to a paper trading account 
 .* do not use an active account for testing
 .* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
@@ -171,5 +171,4 @@ Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index
 ## Testing
 
 * IQFeed testing: you can utilize the symbol TST$Y, this symbol sends a loop of data 24/7. (2019/03/12)
-* Interactive Brokers: use edemo/demouser as a signin - random data on many symbols 24/7.
 
