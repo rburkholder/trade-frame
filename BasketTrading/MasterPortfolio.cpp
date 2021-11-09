@@ -27,7 +27,6 @@
 #include <TFTrading/InstrumentManager.h>
 
 #include <TFOptions/Engine.h>
-#include "TFOptions/Aggregate.h"
 
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
@@ -277,9 +276,13 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
     assert( false );
   }
 
-  std::pair<mapPosition_t::iterator,bool> pair
+  std::pair<mapPosition_t::iterator,bool> pairPosition
     = cache.m_mapPosition.insert( mapPosition_t::value_type( pPosition->GetRow().sName, pPosition ) );
-  assert( pair.second );
+  assert( pairPosition.second );
+
+  // NOTE: don't make an iqfeedname to position map as same instrument can be used
+  //   in positions across portfolios (key = idPortfolio,idPosition)
+
 }
 
 double MasterPortfolio::UpdateChart() {
@@ -572,72 +575,48 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         },
     // ManageStrategy::fConstructOption_t
         [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
-
-              bool bUseExistingOption( true );
-              mapPosition_iter iterPosition;
-              mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioUnderlying );
-              if ( m_mapStrategyCache.end() == iterStrategyCache ) {
-                bUseExistingOption = false;
-              }
-              else {
-                StrategyCache& cache( iterStrategyCache->second );
-                iterPosition = cache.m_mapPosition.find( sIQFeedOptionName );
-                if ( cache.m_mapPosition.end() == iterPosition ) {
-                  bUseExistingOption = false;
-                }
-              }
-
-              if ( bUseExistingOption ) {
-                // option should exist given code at line 118 Position.cpp ConstructWatch
-                pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( iterPosition->second->GetWatch() );
-                fOption( pOption );
-              }
-              else {
-                // TODO: there is an assert inside the call which will need to be remedied
-                m_pBuildInstrument->Add(
-                  sIQFeedOptionName,
-                  [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
-                    pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
-                    fOption_( pOption );
-                  } );
-              }
-
+          // NOTE: once considered use of the position caches, but won't work as, at this point,
+          //   idPortfolio is not known, and positions are dependent on the portfolio
+          // TODO: there is an assert inside the call which will need to be remedied
+          m_pBuildInstrument->Add(
+            sIQFeedOptionName,
+            [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
+              pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
+              fOption_( pOption );
+            } );
         },
     // ManageStrategy::fConstructPosition_t
         [this]( const idPortfolio_t& idPortfolio, pWatch_t pWatch, const std::string& sNote )->ManageStrategy::pPosition_t{
+
               pPosition_t pPosition;
-              bool bUseExistingPosition( true );
-              mapPosition_t::iterator iterPosition;
+
               mapStrategyCache_iter iter = m_mapStrategyCache.find( idPortfolio );
-              if ( m_mapStrategyCache.end() == iter ) {
-                // maybe BasketTrading.cpp needs to do the construction, to keep the id's proper?
-                bUseExistingPosition = false;
-              }
-              else {
+              if ( m_mapStrategyCache.end() != iter ) {
                 StrategyCache& cache( iter->second );
-                iterPosition = cache.m_mapPosition.find( pWatch->GetInstrument()->GetInstrumentName() );
-                if ( cache.m_mapPosition.end() == iterPosition ) {
-                  bUseExistingPosition = false;
+                mapPosition_t::iterator iterPosition = cache.m_mapPosition.find( pWatch->GetInstrumentName() );
+                if ( cache.m_mapPosition.end() != iterPosition ) {
+                  // NOTE: this is using a different watch than what was passed in
+                  pPosition = iterPosition->second;
+                  if ( pPosition->IsActive() ) {
+                    std::cout << "NOTE: re-use of active position: " << pPosition->GetRow().sName << std::endl;
+                  }
                 }
               }
 
-              if ( bUseExistingPosition ) {
-                pPosition = iterPosition->second;
-                if ( pWatch != pPosition->GetWatch() ) {
-                  std::cout << "** duplicate watch for " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-                }
-              }
-              else {
-                auto& instance( ou::tf::PortfolioManager::Instance() );
-                const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
-                pPosition = instance.ConstructPosition(
+              auto& manager( ou::tf::PortfolioManager::Instance() );
+              if ( !pPosition ) {
+                const std::string& sInstrumentName( pWatch->GetInstrumentName() );
+                pPosition = manager.ConstructPosition(
                   idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
-                if ( 0 != sNote.size() ) {
-                  pPosition->SetNotes( sNote );
-                  instance.PositionUpdateNotes( pPosition );
-                }
                 Add( pPosition );  // update the archive
               }
+
+              assert( pPosition );
+
+              //if ( 0 != sNote.size() ) {
+                pPosition->SetNotes( sNote );
+                manager.PositionUpdateNotes( pPosition );
+              //}
 
               return pPosition;
           },
