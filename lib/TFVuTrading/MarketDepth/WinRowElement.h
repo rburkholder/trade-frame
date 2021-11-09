@@ -37,12 +37,12 @@ namespace l2 { // market depth
 #define SYMBOL_WINELEMENT_SIZE wxSize(100, 20)
 #define SYMBOL_WINELEMENT_POSITION wxDefaultPosition
 
-class WinMDRowElement: public wxWindow {
+class WinRowElement: public wxWindow {
 public:
 
-  WinMDRowElement();
+  WinRowElement();
 
-  WinMDRowElement(
+  WinRowElement(
     wxWindow* parent,
     wxWindowID id = SYMBOL_WINELEMENT_IDNAME,
     const wxPoint& pos = SYMBOL_WINELEMENT_POSITION,
@@ -50,7 +50,7 @@ public:
     long style = SYMBOL_WINELEMENT_STYLE
     );
 
-  virtual ~WinMDRowElement();
+  virtual ~WinRowElement();
 
   bool Create(
     wxWindow* parent,

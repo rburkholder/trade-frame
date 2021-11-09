@@ -21,7 +21,7 @@
 
 #include <wx/sizer.h>
 
-#include "WinMDRowElement.h"
+#include "WinRowElement.h"
 #include "PanelTrade.h"
 
 namespace ou { // One Unified
@@ -66,8 +66,8 @@ bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoin
 void PanelTrade::CreateControls( void ) {
   PanelTrade* itemPanel1 = this;
 
-  WinMDRowElement* element1 = new WinMDRowElement( this, wxID_ANY, wxPoint(  5,  5 ), wxSize( 100, 20 ) );
-  WinMDRowElement* element2 = new WinMDRowElement( this, wxID_ANY, wxPoint(  5, 25 ), wxSize( 100, 20 ) );
+  WinRowElement* element1 = new WinRowElement( this, wxID_ANY, wxPoint(  5,  5 ), wxSize( 100, 20 ) );
+  WinRowElement* element2 = new WinRowElement( this, wxID_ANY, wxPoint(  5, 25 ), wxSize( 100, 20 ) );
 }
 
 } // market depth
