@@ -26,6 +26,7 @@
 #include <wx/dcclient.h>
 
 #include "WinRowElement.h"
+#include "wx/settings.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -65,6 +66,8 @@ bool WinRowElement::Create(
 void WinRowElement::Init() {
   m_bFocusSet = false;
   m_bCanHaveFocus = false;
+  //m_ColourBackground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOW ).GetRGB();
+  //m_ColourForeground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOWTEXT ).GetRGB();
 }
 
 void WinRowElement::CreateControls() {

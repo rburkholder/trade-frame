@@ -19,7 +19,9 @@
  * Created: November 9, 2021 16:53
  */
 
- #include "RowElements.h"
+#include <OUCommon/Colour.h>
+
+#include "RowElements.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -32,19 +34,23 @@ namespace { // local variables
     RowElements::Field field;
     int width;
     std::string title;
+    ou::Colour::enumColour colour;
   };
+
+  // crColumnHeader = Colour::LightGoldenrodYellow;
 
   using vElementTrait_t = std::vector<ElementTrait>;
   const vElementTrait_t vElementTrait = {
-    { Field::SellVol,  60, "BidVol" },
-    { Field::Bid,      60, "Bid" },
-    { Field::Price,    60, "Price" },
-    { Field::Ask,      60, "Ask" },
-    { Field::BuyVol,   60, "AskVol" },
-    { Field::Ticks,    50, "Ticks" },
-    { Field::Volume,   60, "Volume" },
-    { Field::Volume,   80, "Static" },
-    { Field::Dynamic, 100, "Dynamic" }
+    { Field::AcctPL,   60, "AccPL",   ou::Colour::LightSeaGreen },
+    { Field::SellVol,  60, "BidVol",  ou::Colour::LightSlateGray },
+    { Field::Bid,      60, "Bid",     ou::Colour::DodgerBlue },
+    { Field::Price,    60, "Price",   ou::Colour::LightSteelBlue },
+    { Field::Ask,      60, "Ask",     ou::Colour::Magenta },
+    { Field::BuyVol,   60, "AskVol",  ou::Colour::LightSlateGray },
+    { Field::Ticks,    50, "Ticks",   ou::Colour::LightSlateGray },
+    { Field::Volume,   60, "Volume",  ou::Colour::LightSlateGray },
+    { Field::Volume,   80, "Static",  ou::Colour::LightSlateGray },
+    { Field::Dynamic, 100, "Dynamic", ou::Colour::LightSlateGray }
   };
 }; // namespace anonymmous
 
