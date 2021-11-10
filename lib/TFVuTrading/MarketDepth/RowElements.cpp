@@ -19,7 +19,7 @@
  * Created: November 9, 2021 16:53
  */
 
-#include <OUCommon/Colour.h>
+//#include <OUCommon/Colour.h>
 
 #include "RowElements.h"
 
@@ -34,23 +34,23 @@ namespace { // local variables
     RowElements::Field field;
     int width;
     std::string title;
-    ou::Colour::enumColour colour;
+    //ou::Colour::enumColour colour;
   };
 
   // crColumnHeader = Colour::LightGoldenrodYellow;
 
   using vElementTrait_t = std::vector<ElementTrait>;
   const vElementTrait_t vElementTrait = {
-    { Field::AcctPL,   60, "AccPL",   ou::Colour::LightSeaGreen },
-    { Field::SellVol,  60, "BidVol",  ou::Colour::LightSlateGray },
-    { Field::Bid,      60, "Bid",     ou::Colour::DodgerBlue },
-    { Field::Price,    60, "Price",   ou::Colour::LightSteelBlue },
-    { Field::Ask,      60, "Ask",     ou::Colour::Magenta },
-    { Field::BuyVol,   60, "AskVol",  ou::Colour::LightSlateGray },
-    { Field::Ticks,    50, "Ticks",   ou::Colour::LightSlateGray },
-    { Field::Volume,   60, "Volume",  ou::Colour::LightSlateGray },
-    { Field::Volume,   80, "Static",  ou::Colour::LightSlateGray },
-    { Field::Dynamic, 100, "Dynamic", ou::Colour::LightSlateGray }
+    { Field::AcctPL,   60, "AccPL",   /* ou::Colour::LightSeaGreen */ },
+    { Field::SellVol,  60, "BidVol",  /* ou::Colour::LightSlateGray */ },
+    { Field::Bid,      60, "Bid",     /* ou::Colour::DodgerBlue */ },
+    { Field::Price,    60, "Price",   /* ou::Colour::LightSteelBlue */ },
+    { Field::Ask,      60, "Ask",     /* ou::Colour::Magenta */ },
+    { Field::BuyVol,   60, "AskVol",  /* ou::Colour::LightSlateGray */ },
+    { Field::Ticks,    50, "Ticks",   /* ou::Colour::LightSlateGray */ },
+    { Field::Volume,   60, "Volume",  /* ou::Colour::LightSlateGray */ },
+    { Field::Volume,   80, "Static",  /* ou::Colour::LightSlateGray */ },
+    { Field::Dynamic, 100, "Dynamic", /*ou::Colour::LightSlateGray */ }
   };
 }; // namespace anonymmous
 

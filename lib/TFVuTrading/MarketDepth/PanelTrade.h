@@ -21,7 +21,11 @@
 
 #pragma once
 
+#include <vector>
+
 #include <wx/panel.h>
+
+#include "RowElements.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -61,13 +65,24 @@ private:
     ID_Null=wxID_HIGHEST, ID_PANELTRADE
   };
 
-  static const int FontHeight = 15;
-  static const int RowHeight = 20;
-  static const int BorderWidth = 5;
+  static const unsigned int FontHeight = 15;
+  static const unsigned int RowHeight = 20;
+  static const unsigned int BorderWidth = 5;
+  static const unsigned int FramedRows = 10; // when to move into frame then recenter
+
+  unsigned int m_nRowCount;
+  unsigned int m_nVisibleRows;
+  unsigned int m_nFramedRows;
+  unsigned int m_nCenteredRows;
+
+  using vRowElements_t = std::vector<RowElements*>;
+  vRowElements_t m_vRowElements;
 
   void Init( void );
   void CreateControls( void );
   bool ShowToolTips( void ) { return true; };
+
+  void DrawRows();
 
 };
 

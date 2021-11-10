@@ -72,10 +72,10 @@ void WinRowElement::Init() {
 
 void WinRowElement::CreateControls() {
 
-  Bind( wxEVT_PAINT, &WinRowElement::OnPaint, this, this->GetId() );
-  Bind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, this->GetId() );
-  Bind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, this->GetId() );
-  Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, this->GetId() );
+  Bind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
+  Bind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
+  Bind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
+  Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, GetId() );
   Bind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this );
   Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
@@ -146,9 +146,9 @@ void WinRowElement::OnContextMenu( wxContextMenuEvent& event ) {
 
 void WinRowElement::OnDestroy( wxWindowDestroyEvent& event ) {
 
-  Unbind( wxEVT_PAINT, &WinRowElement::OnPaint, this, this->GetId() );
-  Unbind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, this->GetId() );
-  Unbind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, this->GetId() );
+  Unbind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
+  Unbind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
+  Unbind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
   Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Unbind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
   Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );

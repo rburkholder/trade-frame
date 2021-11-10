@@ -27,7 +27,7 @@
 #include "wx/event.h"
 #include <wx/window.h>
 
-#include <OUCommon/Colour.h>
+//#include <OUCommon/Colour.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -64,8 +64,8 @@ public:
 
   void SetText( const std::string& );
   void SetCanHaveFocus( bool );
-  void SetColourBackground( ou::Colour::enumColour ); // convert to wxColour
-  void SetColourForeground( ou::Colour::enumColour ); // convert to wxColour
+  //void SetColourBackground( ou::Colour::enumColour ); // convert to wxColour
+  //void SetColourForeground( ou::Colour::enumColour ); // convert to wxColour
 
 protected:
 private:
@@ -77,8 +77,8 @@ private:
   bool m_bFocusSet;
   std::string m_sText;
 
-  ou::Colour::enumColour m_ColourBackground;
-  ou::Colour::enumColour m_ColourForeground;
+  //ou::Colour::enumColour m_ColourBackground;
+  //ou::Colour::enumColour m_ColourForeground;
 
   void Init();
   void CreateControls();
