@@ -64,6 +64,7 @@ bool WinRowElement::Create(
 
 void WinRowElement::Init() {
   m_bFocusSet = false;
+  m_bCanHaveFocus = false;
 }
 
 void WinRowElement::CreateControls() {
@@ -77,6 +78,10 @@ void WinRowElement::CreateControls() {
   Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
   Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
 
+}
+
+void WinRowElement::SetCanHaveFocus( bool bCanHaveFocus ) {
+  m_bCanHaveFocus = bCanHaveFocus;
 }
 
 void WinRowElement::SetText( const std::string& sText ) {
@@ -117,14 +122,18 @@ void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
 }
 
 void WinRowElement::OnMouseEnterWindow( wxMouseEvent& event ) {
-  m_bFocusSet = true;
-  Refresh();
+  if ( m_bCanHaveFocus ) {
+    m_bFocusSet = true;
+    Refresh();
+  }
   //event.Skip();
 }
 
 void WinRowElement::OnMouseLLeaveWindow( wxMouseEvent& event ) {
-  m_bFocusSet = false;
-  Refresh();
+  if ( m_bCanHaveFocus ) {
+    m_bFocusSet = false;
+    Refresh();
+  }
   //event.Skip();
 }
 

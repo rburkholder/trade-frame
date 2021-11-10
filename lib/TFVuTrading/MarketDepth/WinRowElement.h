@@ -61,6 +61,7 @@ public:
     );
 
   void SetText( const std::string& );
+  void SetCanHaveFocus( bool );
 
 protected:
 private:
@@ -68,6 +69,7 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_WINELEMENT
   };
 
+  bool m_bCanHaveFocus;
   bool m_bFocusSet;
   std::string m_sText;
 

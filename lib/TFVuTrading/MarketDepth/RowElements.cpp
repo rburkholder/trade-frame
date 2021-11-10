@@ -87,6 +87,7 @@ void RowElements::Create( const wxPoint& origin, int nRowHeight, bool bIsHeader 
     if ( bIsHeader ) {
       pWinRowElement->SetText( trait.title );
     }
+    pWinRowElement->SetCanHaveFocus( !bIsHeader );
     m_vElements[ (size_t)trait.field ] = pWinRowElement;
     location.x += trait.width;
   }
