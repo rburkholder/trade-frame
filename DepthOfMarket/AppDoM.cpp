@@ -59,7 +59,7 @@ bool AppDoM::OnInit() {
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
     //m_pFrameMain->Center();
   //  m_pFrameMain->Move( -2500, 50 );
-    m_pFrameMain->SetSize( 500, 600 );
+    m_pFrameMain->SetSize( 800, 500 );
     SetTopWindow( m_pFrameMain );
 
     wxBoxSizer* m_sizerMain;

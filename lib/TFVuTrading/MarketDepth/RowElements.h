@@ -13,61 +13,42 @@
  ************************************************************************/
 
 /*
- * File:    PanelTrade.h
+ * File:    RowElements.h
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created on October 28, 2021, 15:55
+ * Created: November 9, 2021 16:53
  */
 
-#pragma once
+#include <vector>
 
-#include <wx/panel.h>
+#include <wx/window.h>
+
+#include "WinRowElement.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-#define SYMBOL_PANELTRADE_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANELTRADE_TITLE _("Trade Market Depth")
-#define SYMBOL_PANELTRADE_IDNAME ID_PANELTRADE
-#define SYMBOL_PANELTRADE_SIZE wxSize(400, 300)
-#define SYMBOL_PANELTRADE_POSITION wxDefaultPosition
-
-class PanelTrade: public wxPanel {
+class RowElements {
 public:
 
-  PanelTrade();
-  PanelTrade(
-   wxWindow* parent,
-   wxWindowID id = SYMBOL_PANELTRADE_IDNAME,
-   const wxPoint& pos = SYMBOL_PANELTRADE_POSITION,
-   const wxSize& size = SYMBOL_PANELTRADE_SIZE,
-   long style = SYMBOL_PANELTRADE_STYLE
-   );
-  ~PanelTrade(void);
+  enum class Field { SellVol = 0, Bid, Price, Ask, BuyVol, Ticks, Volume, Static, Dynamic };
 
-  bool Create(
-   wxWindow* parent,
-   wxWindowID id = SYMBOL_PANELTRADE_IDNAME,
-   const wxPoint& pos = SYMBOL_PANELTRADE_POSITION,
-   const wxSize& size = SYMBOL_PANELTRADE_SIZE,
-   long style = SYMBOL_PANELTRADE_STYLE
-   );
+  RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeight, bool bIsHeader );
+  ~RowElements();
+
+  static int RowWidth();
 
 protected:
 private:
 
-  enum {
-    ID_Null=wxID_HIGHEST, ID_PANELTRADE
-  };
+  wxWindow* m_pParentWindow;
 
-  static const int FontHeight = 15;
-  static const int RowHeight = 20;
-  static const int BorderWidth = 5;
+  using vElements_t = std::vector<WinRowElement*>;
+  vElements_t m_vElements;
 
-  void Init( void );
-  void CreateControls( void );
-  bool ShowToolTips( void ) { return true; };
+  void Clear();
+  void Create( const wxPoint& origin, int nRowHeight, bool bIsHeader );
 
 };
 

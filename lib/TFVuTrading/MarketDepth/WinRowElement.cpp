@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    WinElement.cpp
+ * File:    WinRowElement.cpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
  * Created on October 28, 2021, 16:29
@@ -92,10 +92,10 @@ void WinRowElement::OnPaint( wxPaintEvent& event ) {
     wxSize size = dc.GetSize();
     size.DecBy( 2, 2 );
     dc.DrawRectangle( wxPoint( 1, 1 ), size );
-    dc.DrawText( "in focus", wxPoint( 4,4 ) );
+    dc.DrawText( m_sText, wxPoint( 1, 1 ) );
   }
   else {
-    dc.DrawText( "no focus", wxPoint( 4,4 ) );
+    dc.DrawText( m_sText, wxPoint( 1, 1 ) );
   }
   //dc.DrawText( m_sText, wxPoint( 4,4 ) );
   //event.Skip();

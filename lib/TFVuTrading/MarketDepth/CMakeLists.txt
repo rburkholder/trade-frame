@@ -11,12 +11,14 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 set(
   file_h
     PanelTrade.h
+    RowElements.h
     WinRowElement.h
   )
 
 set(
   file_cpp
     PanelTrade.cpp
+    RowElements.cpp
     WinRowElement.cpp
   )
 

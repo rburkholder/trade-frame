@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    WinElement.h
+ * File:    WinRowElement.h
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
  * Created on October 28, 2021, 16:29
