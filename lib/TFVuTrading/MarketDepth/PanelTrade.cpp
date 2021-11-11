@@ -88,7 +88,7 @@ void PanelTrade::DrawRows() {
   m_nFramedRows = m_nVisibleRows / FramedRows;
   m_nCenteredRows = ( ( m_nVisibleRows - m_nFramedRows ) /2 ) - 1; // eliminates up/down jitter
 
-  std::cout << sizeClient.GetHeight() << "," << m_nRowCount << "," << m_nFramedRows << "," << m_nCenteredRows << std::endl;
+  //std::cout << sizeClient.GetHeight() << "," << m_nRowCount << "," << m_nFramedRows << "," << m_nCenteredRows << std::endl;
 
   int yOffset = BorderWidth; // start offset with border
 
