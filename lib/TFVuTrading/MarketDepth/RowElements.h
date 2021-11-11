@@ -32,7 +32,7 @@ namespace l2 { // market depth
 class RowElements {
 public:
 
-  enum class Field { AcctPL = 0, SellVol, Bid, Price, Ask, BuyVol, Ticks, Volume, Static, Dynamic };
+  enum class Field { AcctPL = 0, BidVol, Bid, Price, Ask, AskVol, Ticks, Volume, Static, Dynamic };
 
   RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeight, bool bIsHeader );
   ~RowElements();
