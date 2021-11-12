@@ -31,22 +31,22 @@ namespace l2 { // market depth
 class DataRow {
 public:
 
-  DataRow( size_t ix, double price );
+  DataRow( int ix, double price );
   ~DataRow();
 
-  void SetRowElements( RowElements* );
+  void SetRowElements( RowElements& );
   void Refresh();
   void DelRowElements();
 
 protected:
 private:
 
-  size_t m_ix;
+  int m_ix;
   double m_price;
 
   bool m_bChanged;
 
-  // TODO: boost::fusion?
+  // TODO: boost::fusion?  std::tuple?
   DataRowElement<double>         m_dreAcctPl;
   DataRowElement<unsigned int>   m_dreBidVolume;
   DataRowElement<double>         m_dreBid;
@@ -58,7 +58,7 @@ private:
   DataRowElementIndicatorStatic  m_dreIndicatorStatic;
   DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
 
-  RowElements* m_pRowElements;  // shared_ptr ?
+  //RowElements* m_pRowElements;  // shared_ptr ?
 
 };
 

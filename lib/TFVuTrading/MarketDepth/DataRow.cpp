@@ -33,9 +33,9 @@ namespace {
   const std::string sFmtString( "%s%" );
 }
 
-DataRow::DataRow( size_t ix, double price )
+DataRow::DataRow( int ix, double price )
 : m_bChanged( false ),
-  m_pRowElements( nullptr ),
+  //m_pRowElements( nullptr ),
   m_price( price ), m_ix( ix ),
   m_dreAcctPl( sFmtPrice, m_bChanged ),
   m_dreBidVolume( sFmtInteger, m_bChanged ),
@@ -50,22 +50,58 @@ DataRow::DataRow( size_t ix, double price )
 {}
 
 DataRow::~DataRow() {
+  DelRowElements();
 }
 
-void DataRow::SetRowElements( RowElements* re ) {
-  if ( nullptr != m_pRowElements ) {
+// TODO: convert to;
+//   https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
+
+void DataRow::SetRowElements( RowElements& re ) {
+  //if ( nullptr != m_pRowElements ) {
     DelRowElements();
-  }
-  m_pRowElements = re;
+  //}
+  //m_pRowElements = re;
+
+  using Field = RowElements::Field;
+
+  m_dreAcctPl.SetWinRowElement( re[ Field::AcctPL ] );
+  m_dreBidVolume.SetWinRowElement( re[ Field::BidVol ] );
+  m_dreBid.SetWinRowElement( re[ Field::Bid ] );
+  m_drePrice.SetWinRowElement( re[ Field::Price ] );
+  m_dreAsk.SetWinRowElement( re[ Field::Ask ] );
+  m_dreAskVolume.SetWinRowElement( re[ Field::AskVol ] );
+  m_dreTicks.SetWinRowElement( re[ Field::Ticks ] );
+  m_dreVolume.SetWinRowElement( re[ Field::Volume ] );
+  m_dreIndicatorStatic.SetWinRowElement( re[ Field::Static ] );
+  m_dreIndicatorDynamic.SetWinRowElement( re[ Field::Dynamic ] );
 
 }
 
 void DataRow::Refresh() {
-
+  m_dreAcctPl.UpdateWinRowElement();
+  m_dreBidVolume.UpdateWinRowElement();
+  m_dreBid.UpdateWinRowElement();
+  m_drePrice.UpdateWinRowElement();
+  m_dreAsk.UpdateWinRowElement();
+  m_dreAskVolume.UpdateWinRowElement();
+  m_dreTicks.UpdateWinRowElement();
+  m_dreVolume.UpdateWinRowElement();
+  m_dreIndicatorStatic.UpdateWinRowElement();
+  m_dreIndicatorDynamic.UpdateWinRowElement();
 }
 
 void DataRow::DelRowElements() {
-  m_pRowElements = nullptr;
+  //m_pRowElements = nullptr;
+  m_dreAcctPl.SetWinRowElement( nullptr );
+  m_dreBidVolume.SetWinRowElement( nullptr );
+  m_dreBid.SetWinRowElement( nullptr );
+  m_drePrice.SetWinRowElement( nullptr );
+  m_dreAsk.SetWinRowElement( nullptr );
+  m_dreAskVolume.SetWinRowElement( nullptr );
+  m_dreTicks.SetWinRowElement( nullptr );
+  m_dreVolume.SetWinRowElement( nullptr );
+  m_dreIndicatorStatic.SetWinRowElement( nullptr );
+  m_dreIndicatorDynamic.SetWinRowElement( nullptr );
 }
 
 

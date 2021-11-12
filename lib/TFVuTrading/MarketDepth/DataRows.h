@@ -13,44 +13,43 @@
  ************************************************************************/
 
 /*
- * File:    RowElements.h
+ * File:    DataRows.h
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: November 9, 2021 16:53
+ * Created: November 11, 2021 16:46
  */
 
-#include <vector>
+#pragma once
 
-#include <wx/window.h>
+#include <map>
 
-#include "WinRowElement.h"
+#include "DataRow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-class RowElements {
+class DataRows {
 public:
 
-  enum class Field { AcctPL = 0, BidVol, Bid, Price, Ask, AskVol, Ticks, Volume, Static, Dynamic };
+  DataRows( double interval );
+  ~DataRows();
 
-  RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeight, bool bIsHeader );
-  ~RowElements();
-
-  static int RowWidth();
-
-  WinRowElement* operator[]( Field );
+  DataRow& operator[]( double );
 
 protected:
 private:
 
-  wxWindow* m_pParentWindow;
+  // TODO: may need mutex
 
-  using vElements_t = std::vector<WinRowElement*>;
-  vElements_t m_vElements;
+  using mapRow_t = std::map<int,DataRow>;
 
-  void Clear();
-  void Create( const wxPoint& origin, int nRowHeight, bool bIsHeader );
+  double m_interval;
+  double m_intervalby2;
+
+  mapRow_t m_mapRow;
+
+  int Cast( double price );
 
 };
 

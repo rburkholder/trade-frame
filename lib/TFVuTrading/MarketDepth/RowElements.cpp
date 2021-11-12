@@ -99,6 +99,10 @@ void RowElements::Create( const wxPoint& origin, int nRowHeight, bool bIsHeader 
   }
 }
 
+WinRowElement* RowElements::operator[]( Field ix ) {
+  return m_vElements[ (size_t)ix ];
+}
+
 } // market depth
 } // namespace tf
 } // namespace ou

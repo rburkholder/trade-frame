@@ -13,46 +13,42 @@
  ************************************************************************/
 
 /*
- * File:    RowElements.h
+ * File:    DataRows.cpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: November 9, 2021 16:53
+ * Created: November 11, 2021 16:46
  */
 
-#include <vector>
-
-#include <wx/window.h>
-
-#include "WinRowElement.h"
+#include "DataRows.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-class RowElements {
-public:
+DataRows::DataRows( double interval )
+: m_interval( interval ),
+  m_intervalby2( interval / 2.0 )
+{
+  assert( 0 != interval );
+}
 
-  enum class Field { AcctPL = 0, BidVol, Bid, Price, Ask, AskVol, Ticks, Volume, Static, Dynamic };
+DataRows::~DataRows() {
+}
 
-  RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeight, bool bIsHeader );
-  ~RowElements();
+int DataRows::Cast( double price ) {
+  return std::floor( ( price + m_intervalby2 ) / m_interval );
+}
 
-  static int RowWidth();
-
-  WinRowElement* operator[]( Field );
-
-protected:
-private:
-
-  wxWindow* m_pParentWindow;
-
-  using vElements_t = std::vector<WinRowElement*>;
-  vElements_t m_vElements;
-
-  void Clear();
-  void Create( const wxPoint& origin, int nRowHeight, bool bIsHeader );
-
-};
+DataRow& DataRows::operator[]( double price ) {
+  int ix = Cast( price );
+  mapRow_t::iterator iter = m_mapRow.find( ix );
+  if ( m_mapRow.end() == iter ) {
+    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, price ) ) );
+    assert( pair.second );
+    iter = pair.first;
+  }
+  return iter->second;
+}
 
 } // market depth
 } // namespace tf

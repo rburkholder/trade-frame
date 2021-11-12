@@ -12,6 +12,7 @@ set(
   file_h
     DataRowElement.h
     DataRow.h
+    DataRows.h
     PanelTrade.h
     RowElements.h
     WinRowElement.h
@@ -21,6 +22,7 @@ set(
   file_cpp
     DataRowElement.cpp
     DataRow.cpp
+    DataRows.cpp
     PanelTrade.cpp
     RowElements.cpp
     WinRowElement.cpp
