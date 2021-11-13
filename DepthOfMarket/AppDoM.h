@@ -33,7 +33,6 @@
 #include <TFVuTrading/MarketDepth/PanelTrade.h>
 
 #include "DoMDispatch.h"
-#include "TFVuTrading/MarketDepth/PanelTrade.h"
 
 class AppDoM:
   public wxApp,

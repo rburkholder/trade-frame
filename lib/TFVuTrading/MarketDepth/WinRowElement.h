@@ -84,6 +84,9 @@ private:
   void CreateControls();
   bool ShowToolTips() { return true; };
 
+  void Paint();
+  void Render( wxDC& );
+
   void OnFocusSet( wxFocusEvent& );
   void OnFocusKill( wxFocusEvent& );
   void OnMouseLeftUp( wxMouseEvent& );

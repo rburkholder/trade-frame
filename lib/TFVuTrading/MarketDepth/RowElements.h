@@ -20,6 +20,7 @@
  */
 
 #include <vector>
+#include <memory>
 
 #include <wx/window.h>
 
@@ -31,6 +32,8 @@ namespace l2 { // market depth
 
 class RowElements {
 public:
+
+  using pRowElements_t = std::shared_ptr<RowElements>;
 
   enum class Field { AcctPL = 0, BidVol, Bid, Price, Ask, AskVol, Ticks, Volume, Static, Dynamic };
 

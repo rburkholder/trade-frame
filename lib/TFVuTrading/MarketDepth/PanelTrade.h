@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include <wx/panel.h>
+#include <wx/window.h>
 
 #include "RowElements.h"
 
@@ -34,10 +34,10 @@ namespace l2 { // market depth
 #define SYMBOL_PANELTRADE_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELTRADE_TITLE _("Trade Market Depth")
 #define SYMBOL_PANELTRADE_IDNAME ID_PANELTRADE
-#define SYMBOL_PANELTRADE_SIZE wxSize(400, 300)
+#define SYMBOL_PANELTRADE_SIZE wxDefaultSize
 #define SYMBOL_PANELTRADE_POSITION wxDefaultPosition
 
-class PanelTrade: public wxPanel {
+class PanelTrade: public wxWindow {
 public:
 
   PanelTrade();
@@ -65,24 +65,29 @@ private:
     ID_Null=wxID_HIGHEST, ID_PANELTRADE
   };
 
-  static const unsigned int FontHeight = 15;
-  static const unsigned int RowHeight = 20;
-  static const unsigned int BorderWidth = 5;
-  static const unsigned int FramedRows = 10; // when to move into frame then recenter
+  using pRowElements_t = RowElements::pRowElements_t;
 
-  unsigned int m_nRowCount;
+  unsigned int m_nRowCount; // use m_vRowElements.size() instead?
   unsigned int m_nVisibleRows;
   unsigned int m_nFramedRows;
   unsigned int m_nCenteredRows;
 
-  using vRowElements_t = std::vector<RowElements*>;
+  pRowElements_t m_pRowElements_Header;
+
+  using vRowElements_t = std::vector<pRowElements_t>;
   vRowElements_t m_vRowElements;
 
-  void Init( void );
-  void CreateControls( void );
-  bool ShowToolTips( void ) { return true; };
+  void Init();
+  void CreateControls();
+  bool ShowToolTips() { return true; };
 
   void DrawRows();
+
+  void OnPaint( wxPaintEvent& );
+
+  void OnResize( wxSizeEvent& );
+  void OnResizing( wxSizeEvent& );
+  void OnDestroy( wxWindowDestroyEvent& );
 
 };
 

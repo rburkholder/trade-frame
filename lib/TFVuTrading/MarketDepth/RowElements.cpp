@@ -26,6 +26,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
+
 namespace { // local variables
 
   using Field = RowElements::Field;
@@ -65,6 +66,7 @@ RowElements::RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeig
 
 RowElements::~RowElements() {
   Clear();
+  m_vElements.clear(); // wxWindows destroys children
 }
 
 int RowElements::RowWidth() { // TODO: constexpr?
@@ -79,13 +81,14 @@ void RowElements::Clear() {
   for ( vElements_t::value_type& element: m_vElements ) {
     if ( nullptr != element ) {
       bool bOk = element->Destroy();
+      assert( bOk );
       element = nullptr;
     }
   }
 }
 
 void RowElements::Create( const wxPoint& origin, int nRowHeight, bool bIsHeader ) {
-  Clear();
+  //Clear();
   wxPoint location( origin );
   for ( const vElementTrait_t::value_type& trait: vElementTrait ) {
     WinRowElement* pWinRowElement

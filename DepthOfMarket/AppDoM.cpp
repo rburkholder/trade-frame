@@ -29,16 +29,12 @@ TODO:
       validate against trade stream for actual orders (limits vs market)
 */
 
-#include <algorithm>
-
-#include <memory>
+#include <wx/defs.h>
 #include <wx/sizer.h>
 
 #include "Config.h"
 
 #include "AppDoM.h"
-#include "TFVuTrading/MarketDepth/PanelTrade.h"
-#include "wx/defs.h"
 
 IMPLEMENT_APP(AppDoM)
 
@@ -59,7 +55,11 @@ bool AppDoM::OnInit() {
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
     //m_pFrameMain->Center();
   //  m_pFrameMain->Move( -2500, 50 );
-    m_pFrameMain->SetSize( 675, 700 );
+
+    wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+    m_pFrameMain->SetSizer( sizerMain );
+
+    m_pFrameMain->SetSize( 675, 800 );
     SetTopWindow( m_pFrameMain );
 
     //Bind(
@@ -71,34 +71,34 @@ bool AppDoM::OnInit() {
     //  //idFrameMain
     //  );
 
-    wxBoxSizer* m_sizerMain;
-    m_sizerMain = new wxBoxSizer(wxVERTICAL);
-    m_pFrameMain->SetSizer(m_sizerMain);
+    wxSize size;
 
-    wxBoxSizer* m_sizerControls;
-    m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-    m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+    wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
+    sizerMain->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 4 );
 
     m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-    m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+    sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 4);
     m_pPanelProviderControl->Show( true );
+
+    size = sizerMain->GetSize();
 
     LinkToPanelProviderControl();
 
-    wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
-    m_sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 5 );
-
-    m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain, wxID_ANY );
-    sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-
-    wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-    m_sizerMain->Add( sizerStatus, 1, wxEXPAND|wxALL, 5 );
-
-    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-    m_pPanelLogging->Show( true );
-
     m_pFrameMain->Show( true );
+
+    wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
+    sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 4 );
+
+    m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain );
+    sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND, 4 );
+    m_pPanelTrade->Show( true );
+
+    //wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+    //sizerMain->Add( sizerStatus, 1, wxEXPAND|wxALL, 5 );
+
+//    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
+//    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+//    m_pPanelLogging->Show( true );
 
     m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
 
@@ -119,11 +119,11 @@ bool AppDoM::OnInit() {
 
 void AppDoM::OnClose( wxCloseEvent& event ) {
 
-  m_pDispatch.reset();
-
   if ( m_bData1Connected ) {
     m_pDispatch->Disconnect();
   }
+
+  m_pDispatch.reset();
 
   //if ( m_worker.joinable() ) m_worker.join();
   //m_timerGuiRefresh.Stop();

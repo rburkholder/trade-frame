@@ -19,34 +19,38 @@
  * Created on October 28, 2021, 15:55
  */
 
-#include <iostream>
-
 #include <wx/sizer.h>
-#include <wx/window.h>
+#include <wx/dcclient.h>
 
 #include "PanelTrade.h"
-#include "wx/gdicmn.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-PanelTrade::PanelTrade( void ) {
+namespace {
+  const unsigned int FontHeight = 15;
+  const unsigned int RowHeight = 20;
+  const unsigned int BorderWidth = 5;
+  const unsigned int FramedRows = 10; // when to move into frame then recenter
+}
+
+PanelTrade::PanelTrade(): wxWindow()
+{
   Init();
 };
 
 PanelTrade::PanelTrade( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-) {
+)
+{
   Init();
-  Create(parent, id, pos, size, style);
+  Create( parent, id, pos, size, style );
 }
 
-PanelTrade::~PanelTrade(void) {
-  // test for open and then close?
-}
+PanelTrade::~PanelTrade() {}
 
-void PanelTrade::Init( void ) {
+void PanelTrade::Init() {
   m_nRowCount = 0;
   m_nVisibleRows = 0;
   m_nFramedRows = 0;
@@ -57,17 +61,15 @@ bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoin
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
 ) {
 
-    SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
-    wxPanel::Create( parent, id, pos, size, style );
+  SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
+  wxWindow::Create( parent, id, pos, size, style );
 
-    CreateControls();
-    if (GetSizer())
-    {
-        GetSizer()->SetSizeHints(this);
-    }
-    Centre();
-    return true;
+  CreateControls();
+  if ( GetSizer() ) {
+    GetSizer()->SetSizeHints( this );
+  }
 
+  return true;
 }
 
 void PanelTrade::CreateControls( void ) {
@@ -75,39 +77,103 @@ void PanelTrade::CreateControls( void ) {
   //PanelTrade* itemPanel1 = this;
   DrawRows();
 
+  //Bind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
+
+  Bind( wxEVT_SIZE, &PanelTrade::OnResize, this, GetId() );
+  Bind( wxEVT_SIZING, &PanelTrade::OnResizing, this, GetId() );
+  Bind( wxEVT_DESTROY, &PanelTrade::OnDestroy, this, GetId() );
+
+}
+
+void PanelTrade::OnPaint( wxPaintEvent& event ) {
+  wxPaintDC dc( this );
 }
 
 void PanelTrade::DrawRows() {
 
-  wxSize sizeClient = GetClientSize();
+  wxSize sizeClient = wxWindow::GetClientSize();
 
-  assert( 0 == m_nRowCount );
-  m_nRowCount = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
+  auto BorderWidthTimes2 = 2 * BorderWidth;
+  auto Height = sizeClient.GetHeight();
 
-  m_nVisibleRows = m_nRowCount - 1; // first row is header row
-  m_nFramedRows = m_nVisibleRows / FramedRows;
-  m_nCenteredRows = ( ( m_nVisibleRows - m_nFramedRows ) /2 ) - 1; // eliminates up/down jitter
+  if ( Height > BorderWidthTimes2 ) {
 
-  //std::cout << sizeClient.GetHeight() << "," << m_nRowCount << "," << m_nFramedRows << "," << m_nCenteredRows << std::endl;
+    //assert( 0 == m_nRowCount );
+    m_nRowCount = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
 
-  int yOffset = BorderWidth; // start offset with border
+    if ( 1 < m_nRowCount ) {
 
-  int ixRowElements = 0;
-  m_vRowElements.resize( m_nRowCount );
+      m_nVisibleRows = m_nRowCount - 1; // first row is header row
+      m_nFramedRows = m_nVisibleRows / FramedRows;
+      m_nCenteredRows = ( ( m_nVisibleRows - m_nFramedRows ) / 2 ) - 1; // eliminates up/down jitter
 
-  RowElements* pRow = new RowElements( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
-  m_vRowElements[ ixRowElements ] = pRow;
-  yOffset += RowHeight;
-  ixRowElements++;
+      int yOffset = BorderWidth; // start offset with border
 
-  while ( ixRowElements < m_nRowCount ) {
-    RowElements* pRow = new RowElements( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
-    m_vRowElements[ ixRowElements ] = pRow;
-    yOffset += RowHeight;
-    ixRowElements++;
+      int ixRowElements = 0;
+      m_vRowElements.resize( m_nRowCount );
+
+      if ( 1 < m_nRowCount ) {
+
+        // should this go into the vector?
+        m_pRowElements_Header.reset();
+        m_pRowElements_Header = std::make_shared<RowElements>( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+        //m_vRowElements[ ixRowElements ] = pRow;
+        yOffset += RowHeight;
+        //ixRowElements++;
+
+        while ( ixRowElements < m_nRowCount ) {
+          pRowElements_t pRow = std::make_shared<RowElements>( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+          m_vRowElements[ ixRowElements ] = pRow;
+          yOffset += RowHeight;
+          ixRowElements++;
+        }
+
+      }
+
+    }
+    else {
+      m_nRowCount = 0;
+    }
   }
 
-  // resize panel?
+}
+
+void PanelTrade::OnResize( wxSizeEvent& event ) {
+  CallAfter(
+    [this](){
+      if ( 0 != m_nRowCount ) {
+        m_pRowElements_Header.reset();
+        m_vRowElements.clear();
+        m_nRowCount = 0;
+      }
+      DrawRows();
+    });
+  event.Skip(); // required when working with sizers
+}
+
+void PanelTrade::OnResizing( wxSizeEvent& event ) {
+  m_pRowElements_Header.reset();
+  m_vRowElements.clear();
+  m_nRowCount = 0;
+  event.Skip(); // required when working with sizers
+}
+
+void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  if ( event.GetId() == GetId() ) {
+
+    m_pRowElements_Header.reset();
+    m_vRowElements.clear();
+
+    //Unbind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
+
+    Unbind( wxEVT_SIZE, &PanelTrade::OnResize, this, GetId() );
+    Unbind( wxEVT_SIZING, &PanelTrade::OnResizing, this, GetId() );
+    Unbind( wxEVT_DESTROY, &PanelTrade::OnDestroy, this, GetId() );
+
+    //event.Skip();  // do not put this in
+  }
+
 }
 
 } // market depth

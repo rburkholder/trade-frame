@@ -19,8 +19,6 @@
  * Created on October 28, 2021, 16:29
  */
 
-#include <iostream>
-
 #include <wx/sizer.h>
 #include <wx/event.h>
 #include <wx/dcclient.h>
@@ -42,7 +40,8 @@ WinRowElement::WinRowElement(
   Create(parent, id, pos, size, style);
 }
 
-WinRowElement::~WinRowElement() {}
+WinRowElement::~WinRowElement() {
+}
 
 bool WinRowElement::Create(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
@@ -52,14 +51,13 @@ bool WinRowElement::Create(
   wxWindow::Create( parent, id, pos, size, style );
 
   CreateControls();
-  if (GetSizer())
-  {
-      GetSizer()->SetSizeHints(this);
+  if ( GetSizer() ) {
+    GetSizer()->SetSizeHints( this );
   }
-  //Centre();
+
+  Paint();
 
   return true;
-
 }
 
 void WinRowElement::Init() {
@@ -71,14 +69,14 @@ void WinRowElement::Init() {
 
 void WinRowElement::CreateControls() {
 
-  Bind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
-  Bind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
-  Bind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
-  Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, GetId() );
-  Bind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this );
-  Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
   Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
+  Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Bind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
+  Bind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
+  //Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, GetId() );
+  //Bind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
+  //Bind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
 
 }
 
@@ -88,15 +86,18 @@ void WinRowElement::SetCanHaveFocus( bool bCanHaveFocus ) {
 
 void WinRowElement::SetText( const std::string& sText ) {
   m_sText = sText;
-  Refresh();
+  Paint();
 }
 
-void WinRowElement::OnPaint( wxPaintEvent& event ) {
-  //std::cout << "OnPaint" << std::endl;
-  wxPaintDC dc(this);
+void WinRowElement::Paint() {
+  wxWindowDC dc( this );
+  Render( dc );
+}
+
+void WinRowElement::Render( wxDC& dc ) {
+  wxSize size = dc.GetSize();
   dc.Clear();
   if ( m_bFocusSet ) {
-    wxSize size = dc.GetSize();
     size.DecBy( 2, 2 );
     dc.DrawRectangle( wxPoint( 1, 1 ), size );
     dc.DrawText( m_sText, wxPoint( 1, 1 ) );
@@ -104,19 +105,22 @@ void WinRowElement::OnPaint( wxPaintEvent& event ) {
   else {
     dc.DrawText( m_sText, wxPoint( 1, 1 ) );
   }
-  //dc.DrawText( m_sText, wxPoint( 4,4 ) );
-  //event.Skip();
+}
+
+void WinRowElement::OnPaint( wxPaintEvent& event ) {
+  wxPaintDC dc( this );
+  Render( dc );
 }
 
 // requires a click
 void WinRowElement::OnFocusSet( wxFocusEvent& event ) {
   //std::cout << "OnFocusSet" << std::endl;
-  event.Skip();
+  //event.Skip();
 }
 
 void WinRowElement::OnFocusKill( wxFocusEvent& event ) {
-  std::cout << "OnFocusKill" << std::endl;
-  event.Skip();
+  //std::cout << "OnFocusKill" << std::endl;
+  //event.Skip();
 }
 
 void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
@@ -126,17 +130,17 @@ void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
 void WinRowElement::OnMouseEnterWindow( wxMouseEvent& event ) {
   if ( m_bCanHaveFocus ) {
     m_bFocusSet = true;
-    Refresh();
+    Paint();
   }
-  //event.Skip();
+  event.Skip();
 }
 
 void WinRowElement::OnMouseLLeaveWindow( wxMouseEvent& event ) {
   if ( m_bCanHaveFocus ) {
     m_bFocusSet = false;
-    Refresh();
+    Paint();
   }
-  //event.Skip();
+  event.Skip();
 }
 
 void WinRowElement::OnContextMenu( wxContextMenuEvent& event ) {
@@ -145,18 +149,17 @@ void WinRowElement::OnContextMenu( wxContextMenuEvent& event ) {
 
 void WinRowElement::OnDestroy( wxWindowDestroyEvent& event ) {
 
-  Unbind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
-  Unbind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
-  Unbind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
-  Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Unbind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
   Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
-  Unbind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, this->GetId() );
-  Unbind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this );
+  Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Unbind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
+  Unbind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
+  //Unbind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, this->GetId() );
+  //Unbind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
+  //Unbind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
 
-  event.Skip();  // auto followed by Destroy();
+  //event.Skip();  // no skip
 }
-
 
 } // market depth
 } // namespace tf
