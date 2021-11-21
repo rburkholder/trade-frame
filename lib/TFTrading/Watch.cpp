@@ -204,16 +204,33 @@ void Watch::EmitValues( bool bEmitName ) const {
 }
 
 void Watch::HandleQuote( const Quote& quote ) {
-  m_quote = quote;
-  //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
-  {
-    //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-    if ( m_bRecordSeries ) m_quotes.Append( quote );
+  // TODO: create a wrapper for this, and migrate functions to tracker and monitor
+  //   ie, used conditionally for certain instruments.
+  // TODO: mean, median, mode on spread to determine 'normal' spread for actionable events
+  //   * sliding window for n quotes or n seconds?
+  //   * need to filter quotes when value is at zero as end of life otm
+  //   * build map for mean/median/mode to filter, emit values for review
+  if ( !quote.IsNonZero() ) {
+//    std::cout
+//      << quote.DateTime().time_of_day() << ","
+//      << m_pInstrument->GetInstrumentName()
+//      << " zero quote "
+//      << "b=" << quote.Bid() << "x" << quote.BidSize() << ","
+//      << "a=" << quote.Ask() << "x" << quote.AskSize()
+//      << std::endl;
   }
+  else {
+    m_quote = quote;
+    //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+    {
+      //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+      if ( m_bRecordSeries ) m_quotes.Append( quote );
+    }
 
-  //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
-  //if ( 0 != m_OnQuote ) m_OnQuote( quote );
-  OnQuote( quote );
+    //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+    //if ( 0 != m_OnQuote ) m_OnQuote( quote );
+    OnQuote( quote );
+  }
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
