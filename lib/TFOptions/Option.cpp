@@ -133,7 +133,7 @@ void Option::CalcRate( // version 2, calls version 1, uses instrument expiry dat
   CalcRate( input, libor, dtUtcNow, dtUtcExpiry );
 }
 
-void Option::CalcGreeks(
+void Option::CalcGreeks( // TODO: need to not calc if quote is bad
   ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess ) {
   // example caller: void ExpiryBundle::CalcGreeksAtStrike
 

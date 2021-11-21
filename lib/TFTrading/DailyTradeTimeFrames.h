@@ -151,6 +151,10 @@ boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_tim
 
 // TODO: based upon interior notes below, may need to instance this per future
 //   override this initializer, or create a specific one
+// (contractDetails).tradingHours ";20211031:1700-20211101:1500"
+// (contractDetails).liquidHours  "20211031:CLOSED;20211101:0830-20211101:1500"
+// (contractDetails).timeZoneId   "US/Central"
+
 template<class T>
 void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );

@@ -18,9 +18,6 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-
 #include "OptionChainQuery.h"
 
 // TODO:  use as template:  std::unique_ptr<DailyHistory> m_pHistory;

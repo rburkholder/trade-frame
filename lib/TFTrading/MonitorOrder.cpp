@@ -201,6 +201,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
         case ou::tf::OrderSide::Buy:
           {
             // TODO: maximum number of increments? aka don't chase too far?
+            // TODO: check that bid is non-zero
             const double normalizedBid = NormalizePrice( quote.Bid() );
             if ( normalizedBid > priceOrder ) { // adjust bid with fast moving quote
               m_pOrder->SetPrice1( normalizedBid );
@@ -220,6 +221,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
         case ou::tf::OrderSide::Sell:
           {
             // TODO: maximum number of increments? aka don't chase too far?
+            // TODO: check that ask is non-zero
             const double normalizedAsk = NormalizePrice( quote.Ask() );
             if ( normalizedAsk < priceOrder ) { // adjust bid with fast moving quote
               m_pOrder->SetPrice1( normalizedAsk );
