@@ -6,7 +6,7 @@ This is an application I use for automated trading securities.
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
 A C++17 compiler is used to build the libraries and code. It was built on Windows a number of years ago, 
-but the focus recently has been in a Linux environment.  Some work will be needed to make it build on Windows again.
+but the focus changed towards supporting a Linux environment.  Some work will be needed to make it build on Windows again.
 
 CMake is used for build management.
 
@@ -20,17 +20,16 @@ More pictures under ![ComboTrading](ComboTrading)
 
 ## Building
 
-Scripts are library version specific. I use Debian Buster/Bullseye x64.  Build notes are as of 2016/09/25.
+Scripts are library version specific.  Build notes are as of 2021/11/22.
 There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
 
 You'll need to have about 10G drive space free to build the project, the related libraries, 
 as well as the installs (from my libs-build repository).
 
-Debian Buster/Bullseye netinst (daily snapshot usually works):
-* https://www.debian.org/devel/debian-installer/
-* http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
+Debian Bullseye is used as the platform.  The library installer is specific to this distribution.  The installer may or may not work with other 
+distributions or flavours.
 
-DTN/IQFeed requires wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.  
+DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.  
 The installation of wine may generate some wine32 messages and errors, but they can be ignored.
 
 
@@ -41,9 +40,8 @@ mkdir rburkholder
 cd rburkholder
 # git for latest code, wine for IQFeed daemon
 sudo apt-get update && apt-get install git wine wget
-# sudo dpkg --add-architecture i386 && apt-get install wine32 
-wget http://www.iqfeed.net/iqfeed_client_6_2_0_23.exe
-wine iqfeed_client_6_2_0_23.exe
+wget http://www.iqfeed.net/iqfeed_client_6_2_0_25.exe
+wine iqfeed_client_6_2_0_25.exe
 
 # interactive brokers Java for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
@@ -57,7 +55,11 @@ cd ..
 
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
+# if you have access to the up-to-date private library:
+# git clone https://github.com/rburkholder/tf2.git
 
+# if you build manually (this is not required if you load the folder into vscode):
+cd trade-frame
 mkdir build
 cd build
 cmake ..
@@ -132,8 +134,6 @@ Libraries used (use my lib-build respository to download and build the various d
 * sqlite (included in source)
 * exelformat (included in source)
 
-The libraries are cross platform capable: Linux and Windows
-
 The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
 to port back to Windows.
 
@@ -147,8 +147,9 @@ The lib directory has a series of libraries I use throughout the various applica
 * TFHDF5TimeSeries - wraps the HDF5 library for storing time series
 * TFOptions - options calculations
 * TFTrading - manages orders, executions, portfolios, positions, accounts, 
+* TFVuTrading - provides a number of forms, panels, and related user-interface elements
 * OUCharting - wrapper around ChartDirector for plots and charts
-* OUSqlite - database for maintaining trading records
+* OUSQL - which is an ORM wrapper around a sqlite database for maintaining trading records
 
 During its infancy, the code used MFC (Microsoft Foundation Classes), some Berkeley DB code, and various other modules, 
 which I now no longer support.  The code remains in the repository for historical value, and for the time it might be 
