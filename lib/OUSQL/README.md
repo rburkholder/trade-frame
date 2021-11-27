@@ -1,6 +1,6 @@
 # OUSQL - ORM (Object Relationship Manager)
 
-This is a simple wrapper around a sqlite database (code resides id lib/OUSqlite) to provide native conversions between sqlite field types and C++ plain old datatypes as well as std::string.
+This is a simple wrapper around a sqlite database (code resides in lib/OUSqlite) to provide native conversions between sqlite field types and C++ plain old datatypes plud std::string.
 
 A number of basic functions are provided:
 + define tables based upon a record layout
@@ -9,13 +9,14 @@ A number of basic functions are provided:
 + create tables based upon the defined structure
 + methods are provided for adding, inserting, updating, and deleting table records
 
-These techniques are represented extensively in the lib/TFTrading/*Manager.h and lib/TFTrading/*Manager.cpp files.
+These techniques are represented extensively in the lib/TFTrading/*Manager.[h
+|cpp] files.
 
 By way of working through an example of an implementation, it will be easier to understand the usage.
 
-The following code hasn't been tested, but is designed to provide guidance to usage.  There are references to actual code file to see the code in action.
+The following code hasn't been compiletested, but is designed to provide guidance to usage.  See actual code in the suggested files for reference.
 
-To define the schema of a row in a table, a structure is created.  lib/TFTrading/Instrument.h supplies a specific example for the Instrument representation on disk.  For consistency, the structure is named TableRowDef:
+To define the schema of a row in a table, a structure is created.  lib/TFTrading/Instrument.h supplies a specific example for the Instrument record representation on disk.  For consistency for definitions for various table types, the structure is named TableRowDef:
 
 ```
 struct TableRowDef {
@@ -48,12 +49,12 @@ struct TableRowDef {
 };
 
 // For records with keys, create a structure which inherits TableRowDef.  This segregation
-// allows TableRowDef to be used for updates, and TableCreateDef for record creation.
+// allows TableRowDef to be used for updates, and TableCreateDef for record creation with a few extra schema descriptions.
 
 struct TableCreateDef: TableRowDef {
 
   template<class Action>
-  void Fields( Aciont& action ) {
+  void Fields( Action& action ) {
     // include TableRowDef with basic field definitions
     TableRowDef::Fields( action );
     // designate one or more fields for the key
@@ -81,14 +82,16 @@ db.SetOnLoadDatabaseHandler( MakeDelegate( this, &App::HandleLoadDatabase ) );
 db.Open( sDbName );
 ```
 
-As there is simple table management and caching in place, tables need to be registered as well as their row definitions.
+As there is simple table management and caching in place for auto-creation, tables need to be registered along with their row definitions.
 
 ```
 void App::HandleRegisterTables( ou::db::Session& session ) {
+  // note: this uses the TableCreateDef (table creation definition)
   session.RegisterTable<TableCreateDef>( "table1" );
 }
 
 void App::HandleRegisterRows( ou::db::Session& session ) {
+  // note: this uses the regular field definition
   session.MapRowDefToTableName<TableRowDef>( "table1" );
 }
 ```
