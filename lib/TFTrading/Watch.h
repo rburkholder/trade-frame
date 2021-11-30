@@ -134,6 +134,10 @@ private:
   ou::tf::Trade::price_t m_PriceMin;
   ou::tf::Trade::volume_t m_VolumeTotal;
 
+  // number of quotes at spread
+  using mapQuoteDistribution_t = std::map<double,size_t>;
+  mapQuoteDistribution_t m_mapQuoteDistribution;
+
   void Initialize();
 
   void AddEvents();
@@ -147,8 +151,9 @@ private:
   void EnableWatch();
   void DisableWatch();
 
-  void HandleQuote( const Quote& quote );
-  void HandleTrade( const Trade& trade );
+  void HandleQuote( const Quote& );
+  void HandleQuoteStats( const Quote& );
+  void HandleTrade( const Trade& );
 
   void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );
   void HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t );

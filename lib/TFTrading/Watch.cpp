@@ -203,6 +203,29 @@ void Watch::EmitValues( bool bEmitName ) const {
     ;
 }
 
+void Watch::HandleQuoteStats( const Quote& quote ) {
+
+  double spread = quote.Spread();
+
+  // TODO: need a periodic sampler to evaluate median
+  //   Them implement a query call to go/no-go value usage for ordering
+  mapQuoteDistribution_t::iterator iterMapQuoteDistribution = m_mapQuoteDistribution.find( spread );
+  if ( m_mapQuoteDistribution.end() == iterMapQuoteDistribution ) {
+    m_mapQuoteDistribution.emplace( std::make_pair( spread, 1 ) );
+  }
+  else {
+    iterMapQuoteDistribution->second++;
+  }
+
+  {
+    //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+    m_quote = quote;
+    if ( m_bRecordSeries ) m_quotes.Append( quote );
+  }
+
+  OnQuote( quote );
+}
+
 void Watch::HandleQuote( const Quote& quote ) {
   // TODO: create a wrapper for this, and migrate functions to tracker and monitor
   //   ie, used conditionally for certain instruments.
