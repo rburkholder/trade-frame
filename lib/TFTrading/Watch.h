@@ -91,6 +91,9 @@ public:
   virtual bool StartWatch();
   virtual bool StopWatch();
 
+  void EnableStatsAdd();
+  void EnableStatsRemove();
+
   virtual void EmitValues( bool bEmitName = true ) const;
 
   void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; }
@@ -100,6 +103,11 @@ public:
   virtual void SaveSeries( const std::string& sPrefix, const std::string& sDaily );
 
   virtual void ClearSeries();
+
+  using pairSpreadStats_t = std::pair<size_t,double>;
+  pairSpreadStats_t SpreadStats() const {
+    return std::make_pair( m_cntBestSpread, m_dblBestSpread );
+  }
 
 protected:
 
@@ -118,13 +126,14 @@ protected:
 
   pProvider_t m_pDataProvider;
 
-  unsigned int m_cntWatching;
-
 private:
 
   bool m_bWatchingEnabled;
   bool m_bWatching; // in/out of connected state
   bool m_bEventsAttached; // code validation
+
+  size_t m_cntWatching;
+  size_t m_nEnableStats;
 
   ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t m_pFundamentals;
 
@@ -137,6 +146,9 @@ private:
   // number of quotes at spread
   using mapQuoteDistribution_t = std::map<double,size_t>;
   mapQuoteDistribution_t m_mapQuoteDistribution;
+
+  size_t m_cntBestSpread;
+  double m_dblBestSpread;
 
   void Initialize();
 
@@ -152,7 +164,6 @@ private:
   void DisableWatch();
 
   void HandleQuote( const Quote& );
-  void HandleQuoteStats( const Quote& );
   void HandleTrade( const Trade& );
 
   void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );

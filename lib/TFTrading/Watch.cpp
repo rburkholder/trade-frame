@@ -30,7 +30,9 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ),
   m_pDataProvider( pDataProvider ),
   m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true ),
+  m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true ),
+  m_cntWatching {}, m_nEnableStats {},
+  m_cntBestSpread {}, m_dblBestSpread {},
   m_bEventsAttached( false )
 {
   assert( 0 != pInstrument.get() );
@@ -43,10 +45,13 @@ Watch::Watch( const Watch& rhs ) :
   m_pDataProvider( rhs.m_pDataProvider ),
   m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal ),
   m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
-  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries ),
+  m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries ),
+  m_cntWatching {}, m_nEnableStats {},
+  m_cntBestSpread {}, m_dblBestSpread {},
   m_bEventsAttached( false )
 {
   assert( 0 == rhs.m_cntWatching );
+  assert( 0 == rhs.m_nEnableStats );
   assert( !rhs.m_bWatching );
   Initialize();
 }
@@ -107,6 +112,15 @@ void Watch::SetProvider( pProvider_t pDataProvider ) {
   m_pDataProvider = pDataProvider;
   AddEvents();
   EnableWatch();
+}
+
+void Watch::EnableStatsAdd() {
+  m_nEnableStats++;
+}
+
+void Watch::EnableStatsRemove() {
+  assert( 0 != m_nEnableStats );
+  m_nEnableStats--;
 }
 
 // non gui thread
@@ -203,56 +217,62 @@ void Watch::EmitValues( bool bEmitName ) const {
     ;
 }
 
-void Watch::HandleQuoteStats( const Quote& quote ) {
-
-  double spread = quote.Spread();
-
-  // TODO: need a periodic sampler to evaluate median
-  //   Them implement a query call to go/no-go value usage for ordering
-  mapQuoteDistribution_t::iterator iterMapQuoteDistribution = m_mapQuoteDistribution.find( spread );
-  if ( m_mapQuoteDistribution.end() == iterMapQuoteDistribution ) {
-    m_mapQuoteDistribution.emplace( std::make_pair( spread, 1 ) );
-  }
-  else {
-    iterMapQuoteDistribution->second++;
-  }
-
-  {
-    //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-    m_quote = quote;
-    if ( m_bRecordSeries ) m_quotes.Append( quote );
-  }
-
-  OnQuote( quote );
-}
-
 void Watch::HandleQuote( const Quote& quote ) {
-  // TODO: create a wrapper for this, and migrate functions to tracker and monitor
-  //   ie, used conditionally for certain instruments.
+
   // TODO: mean, median, mode on spread to determine 'normal' spread for actionable events
   //   * sliding window for n quotes or n seconds?
   //   * need to filter quotes when value is at zero as end of life otm
   //   * build map for mean/median/mode to filter, emit values for review
-  if ( !quote.IsNonZero() ) {
-//    std::cout
-//      << quote.DateTime().time_of_day() << ","
-//      << m_pInstrument->GetInstrumentName()
-//      << " zero quote "
-//      << "b=" << quote.Bid() << "x" << quote.BidSize() << ","
-//      << "a=" << quote.Ask() << "x" << quote.AskSize()
-//      << std::endl;
-  }
-  else {
-    m_quote = quote;
-    //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
-    {
-      //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-      if ( m_bRecordSeries ) m_quotes.Append( quote );
+  if ( 0 < m_nEnableStats ) {
+
+    double spread = quote.Spread();
+
+    // TODO: need a periodic sampler to evaluate median
+    //   Them implement a query call to go/no-go value usage for ordering
+    // NOTE: spread may change in and out of regular trading hours
+    //   may require a reset on the calcuation
+
+    mapQuoteDistribution_t::iterator iterMapQuoteDistribution = m_mapQuoteDistribution.find( spread );
+    if ( m_mapQuoteDistribution.end() == iterMapQuoteDistribution ) {
+      auto pair = m_mapQuoteDistribution.emplace( std::make_pair( spread, 1 ) );
+      assert( pair.second );
+      iterMapQuoteDistribution = pair.first;
+    }
+    else {
+      iterMapQuoteDistribution->second++;
     }
 
-    //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
-    //if ( 0 != m_OnQuote ) m_OnQuote( quote );
+    if ( m_cntBestSpread < iterMapQuoteDistribution->second ) {
+      m_cntBestSpread = iterMapQuoteDistribution->second;
+      m_dblBestSpread    = iterMapQuoteDistribution->first;
+    }
+
+    m_quote = quote;
+    if ( m_bRecordSeries ) m_quotes.Append( quote );
+
     OnQuote( quote );
+  }
+  else {
+    if ( quote.IsNonZero() ) {
+      m_quote = quote;
+      //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+      {
+        //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+        if ( m_bRecordSeries ) m_quotes.Append( quote );
+      }
+
+      //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+      OnQuote( quote );
+    }
+    else {
+      //    std::cout
+      //      << quote.DateTime().time_of_day() << ","
+      //      << m_pInstrument->GetInstrumentName()
+      //      << " zero quote "
+      //      << "b=" << quote.Bid() << "x" << quote.BidSize() << ","
+      //      << "a=" << quote.Ask() << "x" << quote.AskSize()
+      //      << std::endl;
+    }
   }
 }
 
