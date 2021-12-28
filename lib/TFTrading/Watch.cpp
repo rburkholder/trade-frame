@@ -32,7 +32,7 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
   m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true ),
   m_cntWatching {}, m_nEnableStats {},
-  m_cntBestSpread {}, m_dblBestSpread {},
+  m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {},
   m_bEventsAttached( false )
 {
   assert( 0 != pInstrument.get() );
@@ -47,7 +47,7 @@ Watch::Watch( const Watch& rhs ) :
   m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
   m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries ),
   m_cntWatching {}, m_nEnableStats {},
-  m_cntBestSpread {}, m_dblBestSpread {},
+  m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {},
   m_bEventsAttached( false )
 {
   assert( 0 == rhs.m_cntWatching );
@@ -121,6 +121,10 @@ void Watch::EnableStatsAdd() {
 void Watch::EnableStatsRemove() {
   assert( 0 != m_nEnableStats );
   m_nEnableStats--;
+  if ( 0 == m_nEnableStats ) {
+    m_cntTotalSpread = m_cntBestSpread = 0;
+    m_dblBestSpread = 0.0;
+  }
 }
 
 // non gui thread
@@ -241,14 +245,25 @@ void Watch::HandleQuote( const Quote& quote ) {
     else {
       iterMapQuoteDistribution->second++;
     }
+    m_cntTotalSpread++;
 
     if ( m_cntBestSpread < iterMapQuoteDistribution->second ) {
       m_cntBestSpread = iterMapQuoteDistribution->second;
-      m_dblBestSpread    = iterMapQuoteDistribution->first;
+      m_dblBestSpread = iterMapQuoteDistribution->first;
+    }
+    else {
+      if ( m_cntBestSpread == iterMapQuoteDistribution->second ) {
+        if ( spread < m_dblBestSpread ) {
+          m_cntBestSpread = iterMapQuoteDistribution->second;
+          m_dblBestSpread = iterMapQuoteDistribution->first;
+        }
+      }
     }
 
     m_quote = quote;
-    if ( m_bRecordSeries ) m_quotes.Append( quote );
+    if ( m_bRecordSeries ) {
+      m_quotes.Append( quote );
+    }
 
     OnQuote( quote );
   }

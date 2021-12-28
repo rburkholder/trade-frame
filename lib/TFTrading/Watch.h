@@ -104,9 +104,9 @@ public:
 
   virtual void ClearSeries();
 
-  using pairSpreadStats_t = std::pair<size_t,double>;
-  pairSpreadStats_t SpreadStats() const {
-    return std::make_pair( m_cntBestSpread, m_dblBestSpread );
+  using tupleSpreadStats_t = std::tuple<bool, size_t,double>;
+  tupleSpreadStats_t SpreadStats() const {
+    return std::make_tuple( m_cntBestSpread > ( m_cntTotalSpread / 5 ), m_cntBestSpread, m_dblBestSpread );
   }
 
 protected:
@@ -147,6 +147,7 @@ private:
   using mapQuoteDistribution_t = std::map<double,size_t>;
   mapQuoteDistribution_t m_mapQuoteDistribution;
 
+  size_t m_cntTotalSpread;
   size_t m_cntBestSpread;
   double m_dblBestSpread;
 
