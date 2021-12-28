@@ -184,7 +184,7 @@ void MonitorOrder::Tick( ptime dt ) {
 
 bool MonitorOrder::IsOrderActive() const { return ( State::Active == m_state ); }
 
-void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
+void MonitorOrder::UpdateOrder( ptime dt ) {
 
   if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
     // TODO: generate message? error on filled, but may be present on cancel
@@ -202,12 +202,13 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
           {
             // TODO: maximum number of increments? aka don't chase too far?
             // TODO: check that bid is non-zero
-            const double normalizedBid = NormalizePrice( quote.Bid() );
-            if ( normalizedBid > priceOrder ) { // adjust bid with fast moving quote
-              m_pOrder->SetPrice1( normalizedBid );
-              bUpdateOrder = true;
-            }
-            else { // increment bid on slow moving quote
+            //const double normalizedBid = NormalizePrice( quote.Bid() );
+            //if ( normalizedBid > priceOrder ) { // adjust bid with fast moving quote
+              // don't chase
+              //m_pOrder->SetPrice1( normalizedBid );
+              //bUpdateOrder = true;
+            //}
+            //else { // increment bid on slow moving quote
               if ( quote.Ask() > priceOrder ) {
                 m_pOrder->SetPrice1( NormalizePrice( priceOrder + PriceInterval( quote.Ask() ) ) );
                 bUpdateOrder = true;
@@ -215,19 +216,20 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
               else {  // need to wait for execution
                 // TODO: need to expire this after a while
               }
-            }
+            //}
           }
           break;
         case ou::tf::OrderSide::Sell:
           {
             // TODO: maximum number of increments? aka don't chase too far?
             // TODO: check that ask is non-zero
-            const double normalizedAsk = NormalizePrice( quote.Ask() );
-            if ( normalizedAsk < priceOrder ) { // adjust bid with fast moving quote
-              m_pOrder->SetPrice1( normalizedAsk );
-              bUpdateOrder = true;
-            }
-            else { // increment ask on slow moving quote
+            //const double normalizedAsk = NormalizePrice( quote.Ask() );
+            //if ( normalizedAsk < priceOrder ) { // adjust bid with fast moving quote
+              // don't chase
+              //m_pOrder->SetPrice1( normalizedAsk );
+              //bUpdateOrder = true;
+            //}
+            //else { // increment ask on slow moving quote
               if ( quote.Bid() < priceOrder ) {
                 m_pOrder->SetPrice1( NormalizePrice( priceOrder - PriceInterval( quote.Bid() ) ) );
                 bUpdateOrder = true;
@@ -235,7 +237,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) { // true when order has been filled
               else {  // need to wait for execution
                 // TODO: need to expire this after a while
               }
-            }
+            //}
           }
           break;
         default:
