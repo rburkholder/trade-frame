@@ -316,10 +316,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( specs.dblEntrySpreadFront, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
-        fLegSelected( specs.dblEntrySpreadFront, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
+        fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
       }
       break;
     case E20DayDirection::Falling:
@@ -331,10 +331,10 @@ size_t /* static */ Collar::LegCount() {
 
         double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( specs.dblEntrySpreadBack,  strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( specs.dblEntrySpreadFront, strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
-        fLegSelected( specs.dblEntrySpreadFront, strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+        fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
+        fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
       }
       break;
   }
@@ -389,7 +389,7 @@ size_t /* static */ Collar::LegCount() {
 
   ChooseLegs(
     direction, chains, date, price, specs,
-    [&sName,&ix]( double spread, double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+    [&sName,&ix]( double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       switch ( ix ) {
         case 0:
           sName
@@ -425,16 +425,16 @@ void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, uint32_t nOrderQ
     case State::Watching:
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
-          m_mapLeg[LegNote::Type::SynthLong].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[LegNote::Type::SynthShort].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[LegNote::Type::Cover].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[LegNote::Type::Protect].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::SynthLong ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::SynthShort ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::Cover ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::Protect ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
           break;
         case ou::tf::OrderSide::Sell:
-          m_mapLeg[LegNote::Type::SynthLong].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[LegNote::Type::SynthShort].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[LegNote::Type::Cover].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[LegNote::Type::Protect].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::SynthLong ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::SynthShort ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::Cover ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          m_mapLeg[ LegNote::Type::Protect ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           break;
       }
       m_state = State::Executing;

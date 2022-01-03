@@ -32,21 +32,16 @@ public:
 
   using days_t = boost::gregorian::days;
 
-  double dblEntrySpreadFront;
-  double dblEntrySpreadBack;
   boost::gregorian::days nDaysFront;
   boost::gregorian::days nDaysBack;
 
   SpreadSpecs() // default
-  : dblEntrySpreadFront {}, dblEntrySpreadBack {},
-    nDaysFront {}, nDaysBack {}
+  : nDaysFront {}, nDaysBack {}
   {}
 
-  SpreadSpecs(
-    double dblEntrySpreadFront_, double dblEntrySpreadBack_,
-    int nDaysFront_, int nDaysBack__)
-  : dblEntrySpreadFront( dblEntrySpreadFront_ ), dblEntrySpreadBack( dblEntrySpreadBack_ ),
-    nDaysFront( days_t( nDaysFront_ ) ), nDaysBack( days_t( nDaysBack__ ) )
+  // 2022/01/03 spreads are supplied dynamically via watch stats
+  SpreadSpecs( int nDaysFront_, int nDaysBack_ )
+  : nDaysFront( days_t( nDaysFront_ ) ), nDaysBack( days_t( nDaysBack_ ) )
   {}
 
 protected:

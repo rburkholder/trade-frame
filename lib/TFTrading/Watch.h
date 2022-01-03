@@ -91,9 +91,6 @@ public:
   virtual bool StartWatch();
   virtual bool StopWatch();
 
-  void EnableStatsAdd();
-  void EnableStatsRemove();
-
   virtual void EmitValues( bool bEmitName = true ) const;
 
   void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; }
@@ -103,6 +100,9 @@ public:
   virtual void SaveSeries( const std::string& sPrefix, const std::string& sDaily );
 
   virtual void ClearSeries();
+
+  void EnableStatsAdd();
+  void EnableStatsRemove();
 
   using tupleSpreadStats_t = std::tuple<bool, size_t,double>;
   tupleSpreadStats_t SpreadStats() const {

@@ -35,8 +35,10 @@ LegSelected::LegSelected( const LegSelected&& rhs )
 {
 }
 
-unsigned int LegSelected::Update( double spread, double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName ) {
-  if ( sIQFeedOptionName.empty() ) {
+// may need to change the semantics of this whole class, or document it better
+bool LegSelected::Update( double strike, boost::gregorian::date dateExpiry, const std::string& sIQFeedOptionName ) {
+  assert( !sIQFeedOptionName.empty() || !m_sIQFeedOptionName.empty() );
+  if ( sIQFeedOptionName.empty() ) { // when is sIQFeedOptionName empty?
     m_bChanged = true;
   }
   else {
@@ -44,18 +46,16 @@ unsigned int LegSelected::Update( double spread, double strike, boost::gregorian
   }
 
   if ( m_bChanged ) {
-    m_dblSpread = spread;
     m_dblStrike = strike;
     m_dateExpiry = dateExpiry;
     m_sIQFeedOptionName = sIQFeedOptionName;
   }
 
-  return ( m_bChanged ? 1 : 0 );
+  return m_bChanged;
 }
 
 void LegSelected::Clear() {
   m_bChanged = false;
-  m_dblSpread = 0.0;
   m_dblStrike = 0.0;
   m_sIQFeedOptionName.clear();
   m_pOption.reset();

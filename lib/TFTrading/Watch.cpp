@@ -247,15 +247,17 @@ void Watch::HandleQuote( const Quote& quote ) {
     }
     m_cntTotalSpread++;
 
+    // keep track of most used spread
     if ( m_cntBestSpread < iterMapQuoteDistribution->second ) {
-      m_cntBestSpread = iterMapQuoteDistribution->second;
       m_dblBestSpread = iterMapQuoteDistribution->first;
+      m_cntBestSpread = iterMapQuoteDistribution->second;
     }
     else {
       if ( m_cntBestSpread == iterMapQuoteDistribution->second ) {
         if ( spread < m_dblBestSpread ) {
-          m_cntBestSpread = iterMapQuoteDistribution->second;
+          // use smaller spread when count is same as larger spread
           m_dblBestSpread = iterMapQuoteDistribution->first;
+          m_cntBestSpread = iterMapQuoteDistribution->second;
         }
       }
     }

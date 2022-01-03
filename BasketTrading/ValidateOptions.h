@@ -48,7 +48,7 @@ public:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
 
   using fStrikeSelected_t
-    = std::function<void(double,double, boost::gregorian::date, const std::string&)>;
+    = std::function<void(double, boost::gregorian::date, const std::string&)>;
   using fChooseLegs_t
     = std::function<void(const mapChains_t&, boost::gregorian::date, double, fStrikeSelected_t&&)>; // double is current price
 

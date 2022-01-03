@@ -37,14 +37,15 @@ public:
   SpreadCandidate( const SpreadCandidate& );
   SpreadCandidate( const SpreadCandidate&& );
   SpreadCandidate( pWatch_t pWatch );
-  SpreadCandidate( pWatch_t pWatch, double dblSpread );
   ~SpreadCandidate();
 
-  void Clear();
-  void SetWatch( pWatch_t pWatch, double dblSpread );
+  void SetWatch( pWatch_t pWatch );
   pWatch_t GetWatch();
+
   bool Validate( size_t nDuration );
   bool IsActive() const { return 0 != m_pWatch.use_count(); };
+
+  void Clear();
 
 private:
 
@@ -52,12 +53,10 @@ private:
   size_t m_nUnDesired;
   size_t m_nConsecutiveSpreadOk;
 
-  double m_dblSpread;
   const double m_dblMinimum;
 
   pWatch_t m_pWatch;
 
-  void SetWatch( pWatch_t pWatch );
   void UpdateQuote( const ou::tf::Quote& quote );
 };
 

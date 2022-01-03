@@ -65,7 +65,7 @@ public:
   using fBuildLeg_t
     = std::function<void(const idPortfolio_t&, EOptionSide, double, fBuildPositionCallBack_t&&)>;
 
-  using fLegSelected_t = std::function<void(double /* spread */, double /* strike */, boost::gregorian::date, const std::string&)>;
+  using fLegSelected_t = std::function<void( double /* strike */, boost::gregorian::date, const std::string&)>;
 
   using pWatch_t      = ou::tf::option::Option::pWatch_t;
   using pOption_t     = ou::tf::option::Option::pOption_t;

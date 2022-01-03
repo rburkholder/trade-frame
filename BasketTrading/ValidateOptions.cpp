@@ -62,7 +62,8 @@ void ValidateOptions::SetSize( vLegSelected_t::size_type size ) {
 }
 
 bool ValidateOptions::ValidateBidAsk(
-  boost::gregorian::date dateToday, double priceUnderlying, size_t nDuration, fChooseLegs_t&& fChooseLegs
+  boost::gregorian::date dateToday, double priceUnderlying, size_t nDuration,
+  fChooseLegs_t&& fChooseLegs
 ) {
 
   bool bValidated( false );
@@ -81,8 +82,8 @@ bool ValidateOptions::ValidateBidAsk(
           try {
             fChooseLegs(
               m_mapChains, dateToday, priceUnderlying,
-              [this,&ixLeg,&nChanged](double spread, double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedOptionName){
-                nChanged += m_vLegSelected.at( ixLeg ).Update( spread, strike, dateStrike, sIQFeedOptionName );
+              [this,&ixLeg,&nChanged]( double strike, boost::gregorian::date dateStrike, const std::string& sIQFeedOptionName ){
+                nChanged += m_vLegSelected.at( ixLeg ).Update( strike, dateStrike, sIQFeedOptionName );
                 ixLeg++;
               } );
             if ( 0 == nChanged ) {
@@ -134,7 +135,7 @@ bool ValidateOptions::ValidateBidAsk(
                 leg.IQFeedOptionName(),
                 [this,&leg,ix]( pOption_t pOption ) {
                   leg.Option() = pOption;
-                  m_SpreadValidation.SetWatch( ix, pOption, leg.Spread() );
+                  m_SpreadValidation.SetWatch( ix, pOption );
                 }
                 );
             }

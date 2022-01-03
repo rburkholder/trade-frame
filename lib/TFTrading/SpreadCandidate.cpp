@@ -26,17 +26,12 @@ namespace tf {
 
 SpreadCandidate::SpreadCandidate()
 : m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {},
-  m_dblSpread {}, m_dblMinimum( 0.10 )
+  m_dblMinimum( 0.10 )
 {}
 
 SpreadCandidate::SpreadCandidate( pWatch_t pWatch )
-: SpreadCandidate( pWatch, 0.10 )
-{
-}
-
-SpreadCandidate::SpreadCandidate( pWatch_t pWatch, double dblSpread )
 : m_nUnDesired {}, m_nDesired {}, m_nConsecutiveSpreadOk {},
-  m_dblSpread( dblSpread ), m_dblMinimum( 0.10 )
+  m_dblMinimum( 0.10 )
 {
   SetWatch( pWatch );
 }
@@ -44,14 +39,14 @@ SpreadCandidate::SpreadCandidate( pWatch_t pWatch, double dblSpread )
 SpreadCandidate::SpreadCandidate( const SpreadCandidate& rhs )
 : m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
   m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
-  m_dblSpread( rhs.m_dblSpread ), m_dblMinimum( rhs.m_dblMinimum ),
+  m_dblMinimum( rhs.m_dblMinimum ),
   m_pWatch( rhs.m_pWatch )
 {}
 
 SpreadCandidate::SpreadCandidate( const SpreadCandidate&& rhs )
 : m_nUnDesired( rhs.m_nUnDesired ), m_nDesired( rhs.m_nDesired ),
   m_nConsecutiveSpreadOk( rhs.m_nConsecutiveSpreadOk ),
-  m_dblSpread( rhs.m_dblSpread ), m_dblMinimum( rhs.m_dblMinimum ),
+  m_dblMinimum( rhs.m_dblMinimum ),
   m_pWatch( std::move( rhs.m_pWatch ) )
 {}
 
@@ -62,14 +57,10 @@ SpreadCandidate::~SpreadCandidate() {
 void SpreadCandidate::Clear() {
   if ( m_pWatch ) {
     m_pWatch->StopWatch();
+    m_pWatch->EnableStatsRemove();
     m_pWatch->OnQuote.Remove( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
     m_pWatch.reset();
   }
-}
-
-void SpreadCandidate::SetWatch( pWatch_t pWatch, double dblSpread ) {
-  m_dblSpread = dblSpread;
-  SetWatch( pWatch );
 }
 
 void SpreadCandidate::SetWatch( pWatch_t pWatch ) {
@@ -79,6 +70,7 @@ void SpreadCandidate::SetWatch( pWatch_t pWatch ) {
   if ( m_pWatch ) {
     m_nDesired = m_nUnDesired = m_nConsecutiveSpreadOk = 0;
     m_pWatch->OnQuote.Add( MakeDelegate( this, &SpreadCandidate::UpdateQuote ) );
+    m_pWatch->EnableStatsAdd();
     m_pWatch->StartWatch();
   }
 }
@@ -107,13 +99,26 @@ void SpreadCandidate::UpdateQuote( const ou::tf::Quote& quote ) {
     // ignore crossed/crossing quote
   }
   else {
-    if ( ( 0.005 <= spread ) && ( spread < m_dblSpread )
-      && ( m_dblMinimum < quote.Ask() ) && ( m_dblMinimum < quote.Bid() ) ) {
-      m_nDesired++;
+
+    bool bOk;
+    size_t best_count;
+    double best_spread;
+
+    std::tie( bOk, best_count, best_spread ) = m_pWatch->SpreadStats();
+    if ( bOk ) {
+      if ( 10 < best_count ) {
+        if ( spread <= best_spread ) {
+          if ( ( 0.005 <= spread ) // && ( spread < m_dblSpread )
+            && ( m_dblMinimum < quote.Ask() ) && ( m_dblMinimum < quote.Bid() ) ) {
+            m_nDesired++;
+          }
+          else {
+            m_nUnDesired++;
+          }
+        }
+      }
     }
-    else {
-      m_nUnDesired++;
-    }
+
   }
 }
 
