@@ -19,15 +19,19 @@
  * Created: October 24, 2021 21:25
  */
 
- #include <string>
+#include <string>
+#include <vector>
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 namespace config {
 
+using vSymbol_t = std::vector<std::string>;
+
 struct Options {
   boost::gregorian::date dateHistory;
   boost::gregorian::date dateTrading;
+  vSymbol_t vSymbol;
 };
 
 bool Load( Options& );

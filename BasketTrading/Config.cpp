@@ -19,7 +19,6 @@
  * Created: October 24, 2021 21:25
  */
 
-#include <string>
 #include <fstream>
 #include <exception>
 
@@ -42,14 +41,17 @@ bool Load( Options& options ) {
 
     static const std::string sOption_DateHistory( "date_history" );
     static const std::string sOption_DateTrading( "date_trading" );
+    static const std::string sOption_Symbol( "symbol" );
 
     std::string sDateHistory;
     std::string sDateTrading;
+    vSymbol_t vSymbol;
 
     po::options_description config( "BasketTrading Config" );
     config.add_options()
       ( sOption_DateHistory.c_str(), po::value<std::string>(&sDateHistory), "history date")
       ( sOption_DateTrading.c_str(), po::value<std::string>(&sDateTrading), "trading date")
+      ( sOption_Symbol.c_str(), po::value<vSymbol_t>(&vSymbol), "symbol" );
       ;
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
@@ -79,6 +81,18 @@ bool Load( Options& options ) {
     }
     else {
       BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DateTrading << "='";
+      bOk = false;
+    }
+
+    if ( 0 < vm.count( sOption_Symbol ) ) {
+      options.vSymbol = std::move( vm[sOption_Symbol].as<vSymbol_t>() );
+      for ( vSymbol_t::value_type& value: options.vSymbol ) {
+        BOOST_LOG_TRIVIAL(info) << "symbol " << value;
+      }
+
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_Symbol << "='";
       bOk = false;
     }
 

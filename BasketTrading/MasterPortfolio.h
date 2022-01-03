@@ -18,6 +18,7 @@
 
 #include <set>
 #include <map>
+#include <vector>
 #include <string>
 #include <functional>
 
@@ -69,6 +70,8 @@ public:
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
+  using vSymbol_t = std::vector<std::string>;
+
   using trd_t = BuildInstrument::trd_t;
   using fGetTableRowDef_t = BuildInstrument::fGetTableRowDef_t;
 
@@ -81,6 +84,7 @@ public:
 
   MasterPortfolio(
     boost::gregorian::date dateTrading,
+    vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
 //    fGatherOptions_t &&,
@@ -129,6 +133,9 @@ private:
 
   boost::gregorian::date m_dateTrading;  // for use in DailyTradeTimeFrame
   ptime m_dtLatestEod;
+
+  // need to unify this with m_setSymbol;
+  vSymbol_t m_vSymbol;
 
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
 

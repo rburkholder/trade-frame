@@ -43,7 +43,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
 //        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
 // TODO: use trading hours, liquid trading hours for different ranges
-        { "@ESZ21", {  1.00, 2.00, 6, 30 } }
+        { "@ESH22", {  1.00, 2.00, 6, 30 } } // NOTE: this needs to be replicated below, TODO fix the duplication requirements
     };
 
 /*
@@ -65,6 +65,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 
 MasterPortfolio::MasterPortfolio(
     boost::gregorian::date dateTrading,
+    vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fGetTableRowDef_t&& fGetTableRowDef,
@@ -74,6 +75,7 @@ MasterPortfolio::MasterPortfolio(
     m_nQuery {},
     m_nSharesTrading( 0 ),
     m_dateTrading( dateTrading ),
+    m_vSymbol( std::move( vSymbol ) ),
     m_fChartRoot( std::move( fChartRoot ) ),
     m_fChartAdd( std::move( fChartAdd ) ),
     m_fChartDel( std::move( fChartDel ) ),
@@ -83,6 +85,8 @@ MasterPortfolio::MasterPortfolio(
     m_pData2( pData2 )
     //m_eAllocate( EAllocate::Waiting )
 {
+  assert( 0 < m_vSymbol.size() );
+
   assert( m_fChartRoot );
   assert( m_fChartAdd );
   assert( m_fChartDel );
@@ -370,7 +374,11 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
     //m_setSymbols.insert( "SPY" );
     //setSymbols.insert( "SLV" );
     //m_setSymbols.insert( "QGCZ21" );
-    m_setSymbols.insert( "@ESZ21" );  // TODO: need to use m_mapSpecs
+    //m_setSymbols.insert( "@ESH22" );  // TODO: need to use m_mapSpecs
+    for ( vSymbol_t::value_type& value: m_vSymbol ) {
+      std::cout << "MasterPortfolio load symbol: " << value << std::endl;
+      m_setSymbols.insert( value );
+    }
 
     // QGC#    GOLD DECEMBER 2021
     // QGCZ21  GOLD DECEMBER 2021

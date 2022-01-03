@@ -45,9 +45,9 @@ bool AppBasketTrading::OnInit() {
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Basket Trading" );
   wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c) 2021 One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2022 One Unified Net Limited" );
 
-  int code = 1;
+  bool code = true;
 
   config::Options options;
 
@@ -55,11 +55,12 @@ bool AppBasketTrading::OnInit() {
 
     m_dateTrading = options.dateTrading;
     m_dtLatestEod = boost::posix_time::ptime( options.dateHistory, time_duration( 23, 59, 59 ) );
+    m_vSymbol = std::move( options.vSymbol );
     Init();
 
   }
   else {
-    code = 0;
+    code = false;
   }
 
   return code;
@@ -227,6 +228,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
     m_dateTrading,
+    std::move( m_vSymbol ),
     // aggregation portfolio
     m_pPortfolioStrategyAggregate,
     // providers

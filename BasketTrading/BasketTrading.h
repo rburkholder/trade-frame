@@ -60,11 +60,14 @@ public:
 protected:
 private:
 
+  using vSymbol_t = std::vector<std::string>;
+
   using pPortfolio_t = ou::tf::PortfolioManager::pPortfolio_t;
   using pPosition_t  = ou::tf::PortfolioManager::pPosition_t;
 
   boost::gregorian::date m_dateTrading;
   ptime m_dtLatestEod;
+  vSymbol_t m_vSymbol;
 
   std::thread m_worker;
 
