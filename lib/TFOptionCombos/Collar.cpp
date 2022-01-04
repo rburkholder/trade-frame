@@ -297,7 +297,18 @@ size_t /* static */ Collar::LegCount() {
     const fLegSelected_t& fLegSelected
 )
 {
-
+/*
+  size_t sum {};
+  for ( const mapChains_t::value_type& vt: chains ) {
+    sum += vt.second.Size();
+    std::cout
+      << "chain: "
+      << vt.first << " "
+      << vt.second.Size()
+      << std::endl;
+  }
+  std::cout << "  sum: " << sum << std::endl;
+*/
   citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainSynthetic( citerChainSynthetic->second );
 

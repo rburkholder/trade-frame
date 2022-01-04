@@ -126,14 +126,15 @@ public:
     }
   }
 
+  using mapChain_t = std::map<double, strike_t>;
+
+  typename mapChain_t::size_type Size() const { return m_mapChain.size(); }
   void EmitValues() const;
 
   void Test( double price );
 
 protected:
 private:
-
-  using mapChain_t = std::map<double, strike_t>;
 
   mapChain_t m_mapChain;
 

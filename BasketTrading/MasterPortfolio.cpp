@@ -44,7 +44,7 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
 // TODO: use trading hours, liquid trading hours for different ranges
 //        { "@ESH22", {  1.00, 2.00, 6, 30 } } // NOTE: this needs to be replicated below, TODO fix the duplication requirements
-        { "@ESH22", {  6, 30 } } // TODO fix the duplication requirements
+        { "@ESH22", {  3, 35 } } // TODO fix the duplication requirements
     };
 
 /*
