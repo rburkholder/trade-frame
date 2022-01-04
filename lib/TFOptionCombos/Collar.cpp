@@ -297,57 +297,87 @@ size_t /* static */ Collar::LegCount() {
     const fLegSelected_t& fLegSelected
 )
 {
-/*
-  size_t sum {};
-  for ( const mapChains_t::value_type& vt: chains ) {
-    sum += vt.second.Size();
-    std::cout
-      << "chain: "
-      << vt.first << " "
-      << vt.second.Size()
-      << std::endl;
-  }
-  std::cout << "  sum: " << sum << std::endl;
-*/
+
   citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainSynthetic( citerChainSynthetic->second );
 
   citerChain_t citerChainFront = Combo::SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
 
+  bool bOk( true );
+
   switch ( direction ) {
     case E20DayDirection::Unknown:
       break;
     case E20DayDirection::Rising:
       {
-        double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
+        const double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
 
         double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
         strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
 
-        double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
+        const double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
-        fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
+        if ( strikeCovered > priceUnderlying ) {
+          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+          fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
+          fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
+        }
+        else {
+          bOk = false;
+          std::cout
+            << "Collar::ChooseLegs rising mismatch: "
+            << priceUnderlying << ","
+            << strikeSyntheticItm << ","
+            << strikeCovered << ","
+            << strikeProtective
+            << std::endl;
+        }
+
       }
       break;
     case E20DayDirection::Falling:
       {
-        double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
+        const double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
 
         double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
         strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
 
-        double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
+        const double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-        fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-        fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
-        fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
+        if ( strikeCovered > priceUnderlying ) {
+          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
+          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
+          fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
+          fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
+        }
+        else {
+          bOk = false;
+          std::cout
+            << "Collar::ChooseLegs falling mismatch: "
+            << priceUnderlying << ","
+            << strikeSyntheticItm << ","
+            << strikeCovered << ","
+            << strikeProtective
+            << std::endl;
+        }
+
       }
       break;
+  }
+
+  if ( !bOk ) {
+    size_t sum {};
+    for ( const mapChains_t::value_type& vt: chains ) {
+      sum += vt.second.Size();
+      std::cout
+        << "chain: "
+        << vt.first << " "
+        << vt.second.Size()
+        << std::endl;
+    }
+    std::cout << "  sum: " << sum << std::endl;
   }
 }
 
