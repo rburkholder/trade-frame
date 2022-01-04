@@ -46,9 +46,10 @@ void BuildInstrument::Add( const std::string& sIQFeedSymbol, fInstrument_t&& fIn
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
     //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
+    m_pIB->Sync( pInstrument );
     fInstrument( pInstrument );
   }
-  else { // bulid a new instrument
+  else { // build a new instrument
 
     {
       std::lock_guard<std::mutex> lock( m_mutexMap );
@@ -134,6 +135,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
               //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
               assert( 0 != pInstrument->GetContract() );
+              m_pIB->Sync( pInstrument );
               ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
               im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               iterInProgress->second.fInstrument( pInstrument );

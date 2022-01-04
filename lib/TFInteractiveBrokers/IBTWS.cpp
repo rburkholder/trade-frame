@@ -80,8 +80,6 @@ struct ParseStrings: qi::grammar<Iterator, vString_t()> {
 
 } // namespace anonymous
 
-
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace ib { // Interactive Brokers
@@ -163,12 +161,6 @@ void TWS::Connect() {
       //ExecutionFilter filter;
       //pTWS->reqExecutions( filter );
       m_pTWS->reqAccountUpdates( true, "" );
-
-      using vMarketRuleId_t = std::vector<int>;
-      vMarketRuleId_t vMarketRuleId = { 67, 362 };
-      for ( vMarketRuleId_t::value_type n: vMarketRuleId ) {
-        m_pTWS->reqMarketRule( n );
-      }
 
       OnConnected( 0 );
 
@@ -1080,7 +1072,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   ptime dtOpen;
   ptime dtClose;
   using tzEST_t = boost::date_time::local_adjustor<ptime, -5, us_dst>;
-  using tzATL_t = boost::date_time::local_adjustor<ptime, -4, us_dst>;
+  //using tzATL_t = boost::date_time::local_adjustor<ptime, -4, us_dst>;
 
   if ( ( "EST" != contractDetails.timeZoneId ) && ( "EST5EDT" != contractDetails.timeZoneId ) ) {
     //std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
@@ -1562,12 +1554,39 @@ void TWS::marketRule( int marketRuleId, const vPriceIncrement_t& priceIncrements
 
   mapMarketRule_t::iterator iter = m_mapMarketRule.find( marketRuleId );
   if ( m_mapMarketRule.end() == iter ) {
-    m_mapMarketRule.insert( std::make_pair( marketRuleId, priceIncrements ) );
+    m_mapMarketRule.emplace( std::make_pair( marketRuleId, priceIncrements ) );
+  }
+  else {
+    iter->second = priceIncrements; // over-write a default
   }
 
 }
 
-double TWS::GetInterval( double price, int rule ) {
+void TWS::Sync( pInstrument_t pInstrument ) {
+  int rule = pInstrument->GetExchangeRule();
+  MarketRuleExists( rule );
+}
+
+bool TWS::MarketRuleExists( const int rule ) {
+
+  bool bExists( true );
+
+  mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
+  if ( m_mapMarketRule.end() == iter ) {
+    bExists = false;
+    PriceIncrement pi;
+    pi.lowEdge = 0.0;
+    pi.increment = 0.01;
+    vPriceIncrement_t vPriceIncrement;
+    vPriceIncrement.push_back( pi );
+    m_mapMarketRule.emplace( std::make_pair( rule, std::move( vPriceIncrement ) ) );
+    m_pTWS->reqMarketRule( rule );
+  }
+
+  return bExists;
+}
+
+double TWS::GetInterval( const double price, const int rule ) {
   double interval( 0.01 );
   mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
   if ( m_mapMarketRule.end() == iter ) {

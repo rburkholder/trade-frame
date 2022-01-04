@@ -170,7 +170,8 @@ public:
 
   void BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument );
 
-  double GetInterval( double price, int rule );
+  void Sync( pInstrument_t ); // for now, ensures we have relevant market rules
+  double GetInterval( const double price, const int rule );
 
   // TWS Specific events
   #include "client/EWrapper_prototypes.h"
@@ -265,6 +266,8 @@ private:
   using vPriceIncrement_t = std::vector<PriceIncrement>;
   using mapMarketRule_t = std::map<int,vPriceIncrement_t>;
   mapMarketRule_t m_mapMarketRule;
+
+  bool MarketRuleExists( const int );
 
   void DisconnectCommon( bool bSignalEnd );
 

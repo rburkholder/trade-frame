@@ -586,7 +586,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
           // NOTE: once considered use of the position caches, but won't work as, at this point,
           //   idPortfolio is not known, and positions are dependent on the portfolio
-          // TODO: there is an assert inside the call which will need to be remedied
+          // TODO: there is an assert inside the method which will need to be remedied
           m_pBuildInstrument->Add(
             sIQFeedOptionName,
             [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
