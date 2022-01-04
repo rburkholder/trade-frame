@@ -26,7 +26,10 @@
 
 #include "BuildInstrument.h"
 
-using pWatch_t = ou::tf::Watch::pWatch_t;
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+using pWatch_t = Watch::pWatch_t;
 
 BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB, fGetTableRowDef_t&& fGetTableRowDef )
 : m_pIQ( std::move( pIQFeed ) ), m_pIB( std::move( pIB ) ),
@@ -164,3 +167,5 @@ void BuildInstrument::Clear() {
   m_mapSymbol.clear();
 }
 
+} // namespace tf
+} // namespace ou

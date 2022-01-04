@@ -32,6 +32,7 @@
 
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/PortfolioManager.h>
+#include <TFTrading/BuildInstrument.h>
 
 #include <TFIndicators/Pivots.h>
 
@@ -43,7 +44,6 @@
 
 #include "Underlying.h"
 #include "ManageStrategy.h"
-#include "BuildInstrument.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -72,8 +72,8 @@ public:
 
   using vSymbol_t = std::vector<std::string>;
 
-  using trd_t = BuildInstrument::trd_t;
-  using fGetTableRowDef_t = BuildInstrument::fGetTableRowDef_t;
+  using trd_t = ou::tf::BuildInstrument::trd_t;
+  using fGetTableRowDef_t = ou::tf::BuildInstrument::fGetTableRowDef_t;
 
 //  using fGatherOptions_t = ManageStrategy::fGatherOptions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
@@ -279,7 +279,7 @@ private:
   mapStrategyCache_t m_mapStrategyCache;
 
   std::atomic_uint32_t m_nQuery;
-  std::unique_ptr<BuildInstrument> m_pBuildInstrument;
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;

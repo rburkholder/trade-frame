@@ -19,14 +19,17 @@
  * Created on September 18, 2021, 14:21
  */
 
- #include <TFTrading/Watch.h>
+#include <functional>
 
- #include <functional>
+#include <TFTrading/Watch.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class AcquireFundamentals {
 public:
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pWatch_t = Watch::pWatch_t;
 
   using pAcquireFundamentals_t = std::shared_ptr<AcquireFundamentals>;
   using fDone_t = std::function<void(pWatch_t)>;
@@ -41,8 +44,10 @@ private:
   pWatch_t pWatch;
   fDone_t fDone;
 
-  void HandleFundamentals( const ou::tf::Watch::Fundamentals& fundamentals );
-  void HandleTrade( const ou::tf::Trade& trade );
+  void HandleFundamentals( const Watch::Fundamentals& fundamentals );
+  void HandleTrade( const Trade& trade );
 
 };
 
+} // namespace tf
+} // namespace ou

@@ -21,6 +21,9 @@
 
  #include "AcquireFundamentals.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 AcquireFundamentals::AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ )
 : pWatch( std::move( pWatch_ ) ), fDone( std::move( fDone_ ) ) {
   assert( ou::tf::keytypes::EProviderIQF == pWatch->GetProvider()->ID() );
@@ -51,3 +54,6 @@ void AcquireFundamentals::HandleTrade( const ou::tf::Trade& trade ) {
   // a watch is required in order to obtain the fundamental
   // no action required, just a placeholder
 }
+
+} // namespace tf
+} // namespace ou

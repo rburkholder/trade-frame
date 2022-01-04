@@ -14,7 +14,9 @@ set(
     Account.h
     AccountManager.h
     AccountOwner.h
+    AcquireFundamentals.h
     AlternateInstrumentNames.h
+    BuildInstrument.h
     CashAccount.h
     CashManager.h
     CashTransaction.h
@@ -56,7 +58,9 @@ set(
     Account.cpp
     AccountManager.cpp
     AccountOwner.cpp
+    AcquireFundamentals.cpp
     AlternateInstrumentNames.cpp
+    BuildInstrument.cpp
     CashAccount.cpp
     CashManager.cpp
     CashTransaction.cpp

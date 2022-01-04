@@ -177,7 +177,7 @@ MasterPortfolio::MasterPortfolio(
 
   m_libor.SetWatchOn( m_pIQ );
 
-  m_pBuildInstrument = std::make_unique<BuildInstrument>(
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>(
     m_pIQ, m_pIB, std::move( fGetTableRowDef )
   );
 

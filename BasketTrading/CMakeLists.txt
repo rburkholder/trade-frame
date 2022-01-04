@@ -25,9 +25,7 @@ find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options t
 
 set(
   file_h
-    AcquireFundamentals.h
     BasketTrading.h
-    BuildInstrument.h
     Config.h
     DailyHistory.h
     HistoryRequest.h
@@ -47,9 +45,7 @@ set(
 
 set(
   file_cpp
-    AcquireFundamentals.cpp
     BasketTrading.cpp
-    BuildInstrument.cpp
     Config.cpp
     DailyHistory.cpp
     HistoryRequest.cpp
@@ -101,7 +97,6 @@ target_link_libraries(
 #      bid
 #      /usr/lib/x86_64-linux-gnu/libbidgcc100.a
       bidgcc000
-      TFIQFeed
       TFSimulation
       TFStatistics
       TFIndicators
@@ -109,6 +104,7 @@ target_link_libraries(
       TFOptionCombos
       TFVuTrading
       TFTrading
+      TFIQFeed
       TFTimeSeries
       TFHDF5TimeSeries
       OUStatistics

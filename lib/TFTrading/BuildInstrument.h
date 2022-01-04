@@ -32,6 +32,9 @@
 
 #pragma once
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class BuildInstrument {
 public:
 
@@ -86,3 +89,5 @@ private:
   void Build( mapInProgress_t::iterator );
 };
 
+} // namespace tf
+} // namespace ou
