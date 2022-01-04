@@ -346,7 +346,7 @@ size_t /* static */ Collar::LegCount() {
 
         const double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
 
-        if ( strikeCovered > priceUnderlying ) {
+        if ( strikeCovered < priceUnderlying ) {
           fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
           fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
           fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
