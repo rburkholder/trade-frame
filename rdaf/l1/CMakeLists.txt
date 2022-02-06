@@ -26,11 +26,13 @@ find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options t
 set(
   file_h
     l1.h
+    Config.h
   )
 
 set(
   file_cpp
     l1.cpp
+    Config.cpp
   )
 
 add_executable(

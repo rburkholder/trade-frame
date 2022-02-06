@@ -43,6 +43,8 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
+  std::string m_sSymbol;
+
   ou::ChartMaster m_chart;
   ou::tf::WinChartView* m_pWinChartView;
 

@@ -22,11 +22,25 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 
+#include "Config.h"
 #include "l1.h"
 
 IMPLEMENT_APP(AppRdafL1)
 
 bool AppRdafL1::OnInit() {
+
+  wxApp::OnInit();
+  wxApp::SetAppDisplayName( "rdaf l1" );
+  wxApp::SetVendorName( "One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2022 One Unified Net Limited" );
+
+  config::Options options;
+
+  if ( Load( options ) ) {
+
+    m_sSymbol = options.sSymbol;
+
+  }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "rdaf l1" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
