@@ -16,6 +16,11 @@
 
 // Started 2022/02/06
 
+#include <string>
+
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/app.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -34,6 +39,7 @@ class AppRdafL1:
   public wxApp,
   public ou::tf::FrameWork01<AppRdafL1> {
   friend ou::tf::FrameWork01<AppRdafL1>;
+  friend class boost::serialization::access;
 public:
 protected:
 private:
@@ -42,6 +48,8 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+
+  std::string m_sStateFileName;
 
   std::string m_sSymbol;
 
@@ -78,8 +86,26 @@ private:
   void HandleSize( wxSizeEvent& event );
   void HandleMouse( wxMouseEvent& event );
 
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+    //ar & m_splitPanels->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+    //m_splitPanels->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
-// Implements MyApp& wxGetApp()
+BOOST_CLASS_VERSION(AppRdafL1, 1)
+
 DECLARE_APP(AppRdafL1)
 

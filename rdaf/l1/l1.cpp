@@ -15,6 +15,10 @@
 // Started 2022/02/06
 
 #include <boost/timer/timer.hpp>
+#include <boost/filesystem.hpp>
+
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 #include <wx/sizer.h>
 #include <wx/panel.h>
@@ -33,6 +37,8 @@ bool AppRdafL1::OnInit() {
   wxApp::SetAppDisplayName( "rdaf l1" );
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c) 2022 One Unified Net Limited" );
+
+  m_sStateFileName = "rdaf_l1.state";
 
   config::Options options;
 
@@ -125,6 +131,12 @@ bool AppRdafL1::OnInit() {
   vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
   return 1;
 
 }
@@ -208,6 +220,7 @@ void AppRdafL1::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
+  SaveState();
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -245,3 +258,25 @@ void AppRdafL1::OnData2Disconnected( int ) {
 void AppRdafL1::OnExecDisconnected( int ) {
   m_bExecConnected = false;
 }
+
+void AppRdafL1::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( m_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppRdafL1::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( m_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
+}
+
