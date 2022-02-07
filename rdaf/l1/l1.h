@@ -22,12 +22,12 @@
 #pragma once
 
 #include <string>
+#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
-#include <wx/sizer.h>
 #include <wx/splitter.h>
 
 //#include <OUCharting/ChartDataView.h>
@@ -42,7 +42,7 @@
 
 #include "ChartData.h"
 
-class wxTimer;
+class wxBoxSizer;
 class wxTreeCtrl;
 
 class AppRdafL1:
@@ -68,6 +68,8 @@ private:
 
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
+
+  std::thread m_threadRdaf;
 
   virtual bool OnInit();
   virtual int OnExit();

@@ -26,8 +26,13 @@
 #include <boost/archive/text_iarchive.hpp>
 
 #include <wx/panel.h>
-//#include <wx/timer.h>
+#include <wx/sizer.h>
 #include <wx/treectrl.h>
+
+#include <rdaf/TF1.h>
+#include <rdaf/TApplication.h>
+#include <rdaf/TCanvas.h>
+#include <rdaf/TRootCanvas.h>
 
 #include "Config.h"
 #include "l1.h"
@@ -135,17 +140,30 @@ bool AppRdafL1::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
+  m_threadRdaf = std::move( std::thread(
+    [this](){
+      TApplication app("app", &argc, argv);
+      TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
+      TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
+      f1->SetLineColor(kBlue+1);
+      f1->SetTitle("My graph;x; sin(x)");
+      f1->Draw();
+      c->Modified(); c->Update();
+      TRootCanvas *rc = (TRootCanvas *)c->GetCanvasImp();
+      //rc->Connect("CloseWindow()", "TApplication", gApplication, "Terminate()");
+      app.Run();
+    } ) );
+
   CallAfter(
     [this](){
       LoadState();
-      m_splitterRow->Layout();
+      m_splitterRow->Layout(); // the sash does not appear to update
       m_pFrameMain->Layout();
       m_sizerFrame->Layout();
     }
   );
 
   return 1;
-
 }
 
 void AppRdafL1::HandleMenuActionStartChart( void ) {

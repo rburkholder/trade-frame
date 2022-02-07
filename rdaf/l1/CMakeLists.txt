@@ -57,11 +57,13 @@ target_include_directories(
     "../lib"
     "/usr/local/lib/wx/include/gtk3-unicode-3.0"
     "/usr/local/include/wx-3.0"
+    "/usr/local/include/rdaf"
   )
 
 target_link_directories(
   ${PROJECT_NAME} PUBLIC
     /usr/local/lib
+    /usr/local/lib/rdaf
   )
 
 target_link_libraries(
@@ -99,5 +101,9 @@ target_link_libraries(
 #      wx_baseu_net-3.0
       wx_baseu-3.0
       pthread
+# rdaf components:
+      Core
+      Gpad
+      Hist
   )
 
