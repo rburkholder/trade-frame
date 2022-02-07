@@ -44,10 +44,10 @@ namespace ou { // One Unified
 class ChartDVBasics {
 public:
 
-  ChartDVBasics(void);
-  virtual ~ChartDVBasics(void);
+  ChartDVBasics();
+  virtual ~ChartDVBasics();
 
-  ou::ChartDataView* GetChartDataView( void ) { return &m_dvChart; };
+  ou::ChartDataView* GetChartDataView() { return &m_dvChart; };
 
 //  void HandleFirstQuote( const ou::tf::Quote& quote );
 //  void HandleFirstTrade( const ou::tf::Trade& trade );
@@ -138,7 +138,7 @@ protected:
         m_statsSlopeBy3( m_tsStatsSlopeBy2, boost::posix_time::time_duration( 0, 0, 15 ) )
     {
     }
-    infoBollinger( const infoBollinger& rhs ) 
+    infoBollinger( const infoBollinger& rhs )
       : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ), m_dblBollingerWidth( rhs.m_dblBollingerWidth ),
       m_ema( m_quotes, m_td ), m_stats( m_quotes, m_td ),
       m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),

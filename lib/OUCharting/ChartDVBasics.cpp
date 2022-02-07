@@ -24,7 +24,7 @@ namespace ou { // One Unified
 // 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765   - fibonacci numbers (seconds)
 // .91 1.5 2.4  3.9, 6.3, 10.2 16.5 26.6  54.0  69.7  112.8  - ratio to 60 seconds (1 minute)
 
-ChartDVBasics::ChartDVBasics(void)
+ChartDVBasics::ChartDVBasics()
   : m_dvChart()
   , m_bfTrades( 10 )
   , m_bfBuys( 10 )
@@ -129,7 +129,7 @@ ChartDVBasics::ChartDVBasics(void)
   m_zigzagPrice.SetDnDecisionPointFound( MakeDelegate( this, &ChartDVBasics::HandleZigZagDnDp ) );
 }
 
-ChartDVBasics::~ChartDVBasics(void) {
+ChartDVBasics::~ChartDVBasics() {
   m_bfTrades.SetOnBarComplete( nullptr );
   m_bfBuys.SetOnBarComplete( nullptr );
   m_bfSells.SetOnBarComplete( nullptr );
