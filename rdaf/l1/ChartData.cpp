@@ -47,5 +47,3 @@ ChartData::~ChartData(void) {
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
 }
-
-// C:\Data\Projects\VSC++\TradeFrame\LiveChart\Chart.cpp
