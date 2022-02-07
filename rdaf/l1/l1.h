@@ -30,8 +30,8 @@
 #include <wx/app.h>
 #include <wx/splitter.h>
 
-//#include <OUCharting/ChartDataView.h>
-//#include <OUCharting/ChartMaster.h>
+#include <rdaf/TRint.h>
+#include <rdaf/TH3.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFVuTrading/WinChartView.h>
@@ -44,6 +44,10 @@
 
 class wxBoxSizer;
 class wxTreeCtrl;
+
+namespace config {
+  class Options;
+}
 
 class AppRdafL1:
   public wxApp,
@@ -69,7 +73,12 @@ private:
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
 
+  using pTH3D_t = std::shared_ptr<TH3D>;
+
   std::thread m_threadRdaf;
+  std::unique_ptr<TRint> m_prdafApp;
+  pTH3D_t m_pHistDelta;
+  pTH3D_t m_pHistVolume;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -94,6 +103,8 @@ private:
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
   void HandleMouse( wxMouseEvent& event );
+
+  void StartRdaf( const config::Options& );
 
   void SaveState();
   void LoadState();
