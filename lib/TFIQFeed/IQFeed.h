@@ -374,7 +374,10 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       }
       break;
     default:
-      throw "Unknown message type in IQFeed"; // unknown message type
+      {
+        std::string str( iter, end );
+        std::cout << "Unknown message type in IQFeed: '" << str << "'" << std::endl;
+      }
       break;
   }
 
