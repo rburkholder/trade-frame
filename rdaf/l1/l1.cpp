@@ -19,9 +19,6 @@
  * Created: February 6, 2022 12:40
  */
 
-#include <boost/timer/timer.hpp>
-#include <boost/filesystem.hpp>
-
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -29,8 +26,10 @@
 #include <wx/sizer.h>
 #include <wx/treectrl.h>
 
-#include <rdaf/TF1.h>
-#include <rdaf/TCanvas.h>
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "Config.h"
 #include "l1.h"
@@ -127,9 +126,9 @@ bool AppRdafL1::OnInit() {
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartWatch ) ) );
-  //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopWatch ) ) );
-  vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
+  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartWatch ) ) );
+  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopWatch ) ) );
+  //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
   //vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
@@ -138,7 +137,10 @@ bool AppRdafL1::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  StartRdaf( options );
+  if ( nullptr == m_pChartData ) {
+    m_pChartData = new ChartData( m_pData1Provider, m_sSymbol, options );
+    m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
+  }
 
   CallAfter(
     [this](){
@@ -152,43 +154,7 @@ bool AppRdafL1::OnInit() {
   return 1;
 }
 
-void AppRdafL1::StartRdaf( const config::Options& options ) {
-
-  m_prdafApp = std::make_unique<TRint>( "rdaf_l1", &argc, argv );
-
-  m_pHistDelta = std::make_shared<TH3D>(
-    "h1", ( options.sSymbol + "-Delta" ).c_str(),
-    options.nTimeBins, options.dblTimeLower, options.dblTimeUpper,
-    options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
-    options.nVolumeSideBins, options.dblVolumeSideLower, options.dblVolumeSideUpper
-  );
-
-  m_pHistVolume = std::make_shared<TH3D>(
-    "h2", ( options.sSymbol + "Volume" ).c_str(),
-    options.nTimeBins, options.dblTimeLower, options.dblTimeUpper,
-    options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
-    options.nVolumeTotalBins, options.dblVolumeTotalLower, options.dblVolumeTotalUpper
-  );
-
-  m_threadRdaf = std::move( std::thread(
-    [this](){
-      TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
-      TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
-      f1->SetLineColor(kBlue+1);
-      f1->SetTitle("My graph;x; sin(x)");
-      f1->Draw();
-      c->Modified(); c->Update();
-      m_prdafApp->Run();
-    } )
-    );
-
-}
-
 void AppRdafL1::HandleMenuActionStartChart( void ) {
-  if ( nullptr == m_pChartData ) {
-    m_pChartData = new ChartData( m_pData1Provider, m_sSymbol ); // TODO: pass in instrument or watch for re-use elsewhere
-    m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
-  }
 }
 
 void AppRdafL1::HandleMenuActionStopChart( void ) {
@@ -215,9 +181,11 @@ void AppRdafL1::HandlePaint( wxPaintEvent& event ) {
 }
 
 void AppRdafL1::HandleMenuActionStartWatch( void ) {
+  m_pChartData->StartWatch();
 }
 
 void AppRdafL1::HandleMenuActionStopWatch( void ) {
+  m_pChartData->StopWatch();
 }
 
 void AppRdafL1::HandleMenuActionSaveValues( void ) {
@@ -248,8 +216,9 @@ int AppRdafL1::OnExit() {
 void AppRdafL1::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  m_prdafApp->SetReturnFromRun( true );
-  m_threadRdaf.join();
+  m_pWinChartView->SetChartDataView( nullptr, false );
+  delete m_pChartData;
+  m_pChartData = nullptr;
 
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();

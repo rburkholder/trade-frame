@@ -22,7 +22,6 @@
 #pragma once
 
 #include <string>
-#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -30,23 +29,21 @@
 #include <wx/app.h>
 #include <wx/splitter.h>
 
-#include <rdaf/TRint.h>
-#include <rdaf/TH3.h>
-
 #include <TFBitsNPieces/FrameWork01.h>
-#include <TFVuTrading/WinChartView.h>
-
-#include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/PanelLogging.h>
-#include <TFVuTrading/WinChartView.h>
 
 #include "ChartData.h"
 
 class wxBoxSizer;
 class wxTreeCtrl;
 
-namespace config {
-  class Options;
+class FrameMain;
+
+namespace ou {
+namespace tf {
+  class ChartData;
+  class WinChartView;
+  class PanelLogging;
+}
 }
 
 class AppRdafL1:
@@ -73,13 +70,6 @@ private:
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
 
-  using pTH3D_t = std::shared_ptr<TH3D>;
-
-  std::thread m_threadRdaf;
-  std::unique_ptr<TRint> m_prdafApp;
-  pTH3D_t m_pHistDelta;
-  pTH3D_t m_pHistVolume;
-
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
@@ -103,8 +93,6 @@ private:
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
   void HandleMouse( wxMouseEvent& event );
-
-  void StartRdaf( const config::Options& );
 
   void SaveState();
   void LoadState();
