@@ -12,9 +12,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+/*
+ * File:    l1.h
+ * Author:  raymond@burkholder.net
+ * Project: rdaf/l1
+ * Created: February 6, 2022 12:40
+ */
 
-// Started 2022/02/06
+#pragma once
 
 #include <string>
 
@@ -22,15 +27,20 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
+#include <wx/sizer.h>
+#include <wx/splitter.h>
 
-#include <OUCharting/ChartDataView.h>
-#include <OUCharting/ChartMaster.h>
+//#include <OUCharting/ChartDataView.h>
+//#include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
+
+#include "ChartData.h"
 
 class wxTimer;
 class wxTreeCtrl;
@@ -49,22 +59,19 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  std::string m_sStateFileName;
-
   std::string m_sSymbol;
 
-  ou::ChartMaster m_chart;
+  ChartData* m_pChartData;
   ou::tf::WinChartView* m_pWinChartView;
 
-  wxTimer m_timerGuiRefresh;
-
   wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
+
+  wxBoxSizer* m_sizerFrame;
+  wxSplitterWindow* m_splitterRow;
 
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
-
-  void HandleGuiRefresh( wxTimerEvent& event );
 
   void OnData1Connected( int );
   void OnData2Connected( int );
@@ -92,13 +99,15 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    //ar & m_splitPanels->GetSashPosition();
+    ar & m_splitterRow->GetSashPosition();
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    //m_splitPanels->SetSashPosition( x );
+    int x;
+    ar & x;
+    m_splitterRow->SetSashPosition( x );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

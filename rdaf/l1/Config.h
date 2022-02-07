@@ -27,6 +27,6 @@ struct Options {
   std::string sSymbol;
 };
 
-bool Load( Options& );
+bool Load( const std::string& sFileName, Options& );
 
 } // namespace config

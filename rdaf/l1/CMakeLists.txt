@@ -1,7 +1,7 @@
 # trade-frame/rdaf/l1
 cmake_minimum_required (VERSION 3.13)
 
-PROJECT(rdaf_li)
+PROJECT(rdaf_l1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
@@ -27,12 +27,14 @@ set(
   file_h
     l1.h
     Config.h
+    ChartData.h
   )
 
 set(
   file_cpp
     l1.cpp
     Config.cpp
+    ChartData.cpp
   )
 
 add_executable(
@@ -74,12 +76,12 @@ target_link_libraries(
       TFTrading
       TFOptions
       TFHDF5TimeSeries
-      TFTimeSeries
       OUCommon
       OUSQL
       OUSqlite
       OUCharting
       TFIndicators
+      TFTimeSeries
       hdf5_cpp
       hdf5
       sz

@@ -31,11 +31,9 @@ namespace po = boost::program_options;
 
 namespace config {
 
-bool Load( Options& options ) {
+bool Load( const std::string& sFileName, Options& options ) {
 
   bool bOk( true );
-
-  static const std::string sFilename( "rdaf_l1.cfg" );
 
   try {
 
@@ -50,10 +48,10 @@ bool Load( Options& options ) {
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
 
-    std::ifstream ifs( sFilename.c_str() );
+    std::ifstream ifs( sFileName.c_str() );
 
     if ( !ifs ) {
-      BOOST_LOG_TRIVIAL(error) << "rdaf_l1 config file " << sFilename << " does not exist";
+      BOOST_LOG_TRIVIAL(error) << "rdaf_l1 config file " << sFileName << " does not exist";
       bOk = false;
     }
     else {
@@ -65,13 +63,13 @@ bool Load( Options& options ) {
       BOOST_LOG_TRIVIAL(info) << "symbol " << options.sSymbol;
     }
     else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_Symbol << "='";
+      BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sOption_Symbol << "='";
       bOk = false;
     }
 
   }
   catch( std::exception& e ) {
-    BOOST_LOG_TRIVIAL(error) << sFilename << " parse error: " << e.what();
+    BOOST_LOG_TRIVIAL(error) << sFileName << " parse error: " << e.what();
     bOk = false;
   }
 
