@@ -47,9 +47,9 @@ bool AppLiveChart::OnInit() {
   SetTopWindow( m_pFrameMain );
 
   // Sizer for FrameMain
-  wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(m_sizerMain);
+  wxBoxSizer* sizerFrame;
+  sizerFrame = new wxBoxSizer(wxVERTICAL);
+  m_pFrameMain->SetSizer( sizerFrame );
 
   // splitter
   wxSplitterWindow* splitter;
@@ -81,38 +81,34 @@ bool AppLiveChart::OnInit() {
   panelSplitterRightPanel->SetSizer( sizerRight );
 
   // Sizer for Controls
-  wxBoxSizer* m_sizerControls;
-  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
+  wxBoxSizer* sizerControls;
+  sizerControls = new wxBoxSizer( wxHORIZONTAL );
   //m_sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
   //panelSplitterRight->SetSizer( m_sizerControls );
-  sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
+  sizerRight->Add( sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( panelSplitterRightPanel, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT|wxRIGHT, 5);
+  sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT|wxRIGHT, 5);
 //  m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
 
   m_pPanelLogging = new ou::tf::PanelLogging( panelSplitterRightPanel, wxID_ANY );
-  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 //  m_pPanelLogging->Show( true );
 
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
-  m_sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
+  sizerFrame->Add( splitter, 1, wxGROW|wxALL, 5 );
 
   m_pWinChartView = new ou::tf::WinChartView( panelSplitterRightPanel, wxID_ANY );
 
   sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+  sizerFrame->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pFrameMain->Show( true );
-
-  m_bData1Connected = false;
-  m_bData2Connected = false;
-  m_bExecConnected = false;
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppLiveChart::OnClose, this );  // start close of windows and controls
 
