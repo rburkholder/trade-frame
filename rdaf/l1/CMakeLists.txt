@@ -105,5 +105,6 @@ target_link_libraries(
       Core
       Gpad
       Hist
+      Rint
   )
 
