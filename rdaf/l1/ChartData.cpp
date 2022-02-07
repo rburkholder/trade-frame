@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <boost/date_time/posix_time/conversion.hpp>
+
 #include <rdaf/TRint.h>
 #include <rdaf/TH3.h>
 #include <rdaf/TF1.h>
@@ -89,8 +91,8 @@ void ChartData::StartRdaf( const config::Options& options ) {
 void ChartData::StartWatch() {
   if ( !m_bWatching ) {
     m_bWatching = true;
-    m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
-    m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
+    m_pWatch->OnQuote.Add( MakeDelegate( this, &ChartData::HandleQuote ) );
+    m_pWatch->OnTrade.Add( MakeDelegate( this, &ChartData::HandleTrade ) );
     m_pWatch->StartWatch();
   }
 }
@@ -99,8 +101,24 @@ void ChartData::StopWatch() {
   if ( m_bWatching ) {
     m_bWatching = false;
     m_pWatch->StopWatch();
-    m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
-    m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
+    m_pWatch->OnQuote.Remove( MakeDelegate( this, &ChartData::HandleQuote ) );
+    m_pWatch->OnTrade.Remove( MakeDelegate( this, &ChartData::HandleTrade ) );
   }
 }
 
+void ChartData::HandleQuote( const ou::tf::Quote& quote ) {
+  ou::ChartDVBasics::HandleQuote( quote );
+  m_quote = quote;
+}
+
+void ChartData::HandleTrade( const ou::tf::Trade& trade ) {
+
+  ou::ChartDVBasics::HandleTrade( trade );
+
+  double mid = m_quote.Midpoint();
+  std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
+  double dblTime( nTime );
+
+  m_pHistDelta->Fill( dblTime, trade.Price(), trade.Price() >= mid ? trade.Volume() : -trade.Volume() );
+  m_pHistVolume->Fill( dblTime, trade.Price(), trade.Volume() );
+}

@@ -65,7 +65,12 @@ private:
   pTH3D_t m_pHistDelta;
   pTH3D_t m_pHistVolume;
 
+  ou::tf::Quote m_quote;
+
   void StartRdaf( const config::Options& );
+
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
 
 };
 
