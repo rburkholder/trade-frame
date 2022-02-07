@@ -29,6 +29,36 @@ namespace po = boost::program_options;
 
 #include "Config.h"
 
+namespace {
+  static const std::string sOption_Symbol( "symbol" );
+  static const std::string sOption_TimeBinsCount( "time_bins" );
+  static const std::string sOption_TimeBinsUpper( "time_upper" );
+  static const std::string sOption_TimeBinsLower( "time_lower" );
+  static const std::string sOption_PriceBinsCount( "price_bins" );
+  static const std::string sOption_PriceBinsUpper( "price_upper" );
+  static const std::string sOption_PriceBinsLower( "price_lower" );
+  static const std::string sOption_VolDltaBinsCount( "vol_side_bins" );
+  static const std::string sOption_VolDltaBinsUpper( "vol_side_upper" );
+  static const std::string sOption_VolDltaBinsLower( "vol_side_lower" );
+  static const std::string sOption_VolTtlBinsCount( "vol_ttl_bins" );
+  static const std::string sOption_VolTtlBinsUpper( "vol_ttl_upper" );
+  static const std::string sOption_VolTtlBinsLower( "vol_ttl_lower" );
+
+  template<typename T>
+  bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
+    bool bOk = true;
+    if ( 0 < vm.count( name ) ) {
+      dest = vm[name].as<T>();
+      BOOST_LOG_TRIVIAL(info) << "symbol " << dest;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
+      bOk = false;
+    }
+  return bOk;
+  }
+}
+
 namespace config {
 
 bool Load( const std::string& sFileName, Options& options ) {
@@ -37,16 +67,27 @@ bool Load( const std::string& sFileName, Options& options ) {
 
   try {
 
-    static const std::string sOption_Symbol( "symbol" );
-
-    std::string sSymbol;
-
     po::options_description config( "rdaf_l1 Config" );
     config.add_options()
-      ( sOption_Symbol.c_str(), po::value<std::string>(&sSymbol), "symbol")
+      ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
+
+      ( sOption_TimeBinsCount.c_str(), po::value<int>( &options.nTimeBins), "#time bins" )
+      ( sOption_TimeBinsUpper.c_str(), po::value<double>( &options.dblTimeUpper), "time upper" )
+      ( sOption_TimeBinsLower.c_str(), po::value<double>( &options.dblTimeLower), "time lower" )
+
+      ( sOption_PriceBinsCount.c_str(), po::value<int>( &options.nPriceBins), "#rpice bins" )
+      ( sOption_PriceBinsUpper.c_str(), po::value<double>( &options.dblPriceUpper), "price upper" )
+      ( sOption_PriceBinsLower.c_str(), po::value<double>( &options.dblPriceLower), "price lower" )
+
+      ( sOption_VolDltaBinsCount.c_str(), po::value<int>( &options.nVolumeSideBins), "#volume side bins" )
+      ( sOption_VolDltaBinsUpper.c_str(), po::value<double>( &options.dblVolumeSideUpper), "volume side upper" )
+      ( sOption_VolDltaBinsLower.c_str(), po::value<double>( &options.dblVolumeSideLower), "volume side lower" )
+
+      ( sOption_VolTtlBinsCount.c_str(), po::value<int>( &options.nVolumeTotalBins), "#volume total bins" )
+      ( sOption_VolTtlBinsUpper.c_str(), po::value<double>( &options.dblVolumeTotalUpper), "volume total upper" )
+      ( sOption_VolTtlBinsLower.c_str(), po::value<double>( &options.dblVolumeTotalLower), "volume total lower" )
       ;
     po::variables_map vm;
-    //po::store( po::parse_command_line( argc, argv, config ), vm );
 
     std::ifstream ifs( sFileName.c_str() );
 
@@ -56,15 +97,24 @@ bool Load( const std::string& sFileName, Options& options ) {
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
-    }
 
-    if ( 0 < vm.count( sOption_Symbol ) ) {
-      options.sSymbol = vm[sOption_Symbol].as<std::string>();
-      BOOST_LOG_TRIVIAL(info) << "symbol " << options.sSymbol;
-    }
-    else {
-      BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sOption_Symbol << "='";
-      bOk = false;
+      bOk |= parse<std::string>( sFileName, vm, sOption_Symbol, options.sSymbol );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_TimeBinsCount, options.nTimeBins );
+      bOk |= parse<double>( sFileName, vm, sOption_TimeBinsUpper, options.dblTimeUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_TimeBinsLower, options.dblTimeLower );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_PriceBinsCount, options.nPriceBins );
+      bOk |= parse<double>( sFileName, vm, sOption_PriceBinsUpper, options.dblPriceUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_PriceBinsLower, options.dblPriceLower );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_VolDltaBinsCount, options.nVolumeSideBins );
+      bOk |= parse<double>( sFileName, vm, sOption_VolDltaBinsUpper, options.dblVolumeSideUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_VolDltaBinsLower, options.dblVolumeSideLower );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_VolTtlBinsCount, options.nVolumeTotalBins );
+      bOk |= parse<double>( sFileName, vm, sOption_VolTtlBinsUpper, options.dblVolumeTotalUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_VolTtlBinsLower, options.dblVolumeTotalLower );
     }
 
   }

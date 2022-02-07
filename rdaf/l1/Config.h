@@ -25,6 +25,22 @@ namespace config {
 
 struct Options {
   std::string sSymbol;
+
+  int nTimeBins;
+  double dblTimeUpper;
+  double dblTimeLower;
+
+  int nPriceBins;
+  double dblPriceUpper;
+  double dblPriceLower;
+
+  int nVolumeSideBins;
+  double dblVolumeSideUpper;
+  double dblVolumeSideLower;
+
+  int nVolumeTotalBins;
+  double dblVolumeTotalUpper;
+  double dblVolumeTotalLower;
 };
 
 bool Load( const std::string& sFileName, Options& );
