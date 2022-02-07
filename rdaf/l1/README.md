@@ -1,6 +1,6 @@
 # ROOT Data Analysis Framework to review Level I Market Data
 
-Example configuration file in x64/debug called x64/debug/rdaf_l1.cfg
+Example configuration file called x64/debug/rdaf_l1.cfg
 ```
 symbol=SPY
 time_bins=50000
@@ -25,5 +25,5 @@ vol_ttl_lower=0
   * h1 is Histogram Delta
   * h2 is Histogram Total
 
-* ChartData.cpp contains is where ROOT is populated
+* ChartData.cpp is where ROOT is populated
 
