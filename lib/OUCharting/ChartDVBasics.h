@@ -19,6 +19,13 @@
 
 #pragma once
 
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+#include <OUCharting/ChartEntryShape.h>
+#include <OUCharting/ChartEntryMark.h>
+
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 //#include <TFTimeSeries/Adapters.h>
@@ -31,13 +38,6 @@
 #include <TFIndicators/TSSWRunningTally.h>
 #include <TFIndicators/TSSWRateOfChange.h>
 #include <TFIndicators/TSSWStats.h>
-
-#include <OUCharting/ChartDataView.h>
-#include <OUCharting/ChartEntryBars.h>
-#include <OUCharting/ChartEntryVolume.h>
-#include <OUCharting/ChartEntryIndicator.h>
-#include <OUCharting/ChartEntryShape.h>
-#include <OUCharting/ChartEntryMark.h>
 
 namespace ou { // One Unified
 
