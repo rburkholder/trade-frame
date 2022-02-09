@@ -37,8 +37,8 @@ public:
   void Reset();
 
 protected:
-  void UpdateMax( const value_t& ) {} // CRTP callback
-  void UpdateMin( const value_t& ) {} // CRTP callback
+  void UpdateOnAdd( const value_t min, const value_t max ) {} // CRTP callback
+  void UpdateOnDel( const value_t min, const value_t max ) {} // CRTP callback
 private:
   using mapValueCount_t = std::map<value_t,unsigned int>;
   mapValueCount_t m_mapValueCount;
@@ -70,8 +70,7 @@ void RunningMinMax<CRTP,value_t>::Add(const value_t& value) {
   typename mapValueCount_t::iterator iter = m_mapValueCount.find( value );
   if ( m_mapValueCount.end() == iter ) {
     m_mapValueCount.insert( typename mapValueCount_t::value_type( value, 1 ) );
-    static_cast<CRTP*>(this)->UpdateMax( m_mapValueCount.rbegin()->first );
-    static_cast<CRTP*>(this)->UpdateMin( m_mapValueCount.begin()->first );
+    static_cast<CRTP*>(this)->UpdateOnAdd( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
   }
   else {
     (iter->second)++;
@@ -90,8 +89,7 @@ void RunningMinMax<CRTP,value_t>::Remove( const value_t& value ) {
     if ( 0 == iter->second ) {
       m_mapValueCount.erase( iter );
       if ( !m_mapValueCount.empty() ) {
-        static_cast<CRTP*>(this)->UpdateMax( m_mapValueCount.rbegin()->first );
-        static_cast<CRTP*>(this)->UpdateMin( m_mapValueCount.begin()->first );
+        static_cast<CRTP*>(this)->UpdateOnDel( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
       }
     }
   }
