@@ -52,23 +52,19 @@ private:
 class ChartDataView {
 public:
 
-  // TODO: won't need these once converted to lambda
-  using const_iterator = std::vector<ChartEntryCarrier>::const_iterator;
-  using       iterator = std::vector<ChartEntryCarrier>::iterator;
-
   using pChartDataView_t = std::shared_ptr<ChartDataView>;
 
   using ViewPort_t = ChartEntryTime::range_t;
 
-  ChartDataView( void );
-  virtual ~ChartDataView(void);
+  ChartDataView();
+  virtual ~ChartDataView();
 
   void Add( size_t nChart, ChartEntryBase* pEntry );  // could try boost::fusion here?  some crtp stuff?
   void Remove( size_t nChart, ChartEntryBase* pEntry );
-  void Clear( void );  // remove stuff in order to reuse.
+  void Clear();  // remove stuff in order to reuse.
 
-  void SetChanged(void);
-  bool GetChanged(void); // resets flag on read
+  void SetChanged();
+  bool GetChanged(); // resets flag on read
 
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
@@ -79,14 +75,14 @@ public:
     m_sDescription = sDescription;
     m_sName = sName;
   }
-  const std::string& GetName( void ) const { return m_sName; };
-  const std::string& GetDescription( void ) const { return m_sDescription; };
+  const std::string& GetName() const { return m_sName; };
+  const std::string& GetDescription() const { return m_sDescription; };
 
   ViewPort_t GetExtents() const;
   boost::posix_time::ptime GetExtentBegin() const;
   boost::posix_time::ptime GetExtentEnd() const;
 
-  size_t GetChartCount( void ) const { return m_mapCntChartIndexes.size(); };
+  size_t GetChartCount() const { return m_mapCntChartIndexes.size(); };
 
   using fEachChartEntryCarrier_t = std::function<void( ChartEntryCarrier& )>;
   void EachChartEntryCarrier( fEachChartEntryCarrier_t&& f ) {
@@ -96,7 +92,6 @@ public:
   }
 
 protected:
-
 private:
 
   // chart# from ChartEntry may not be monotonically increasing, ixActualChartId is forced to be so

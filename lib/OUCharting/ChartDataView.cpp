@@ -52,23 +52,23 @@ ChartEntryCarrier::~ChartEntryCarrier() {
 // ChartDataView
 //
 
-ChartDataView::ChartDataView( void )
+ChartDataView::ChartDataView()
   : m_bChanged( false ),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
     m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
 }
 
-ChartDataView::~ChartDataView( void ) {
+ChartDataView::~ChartDataView() {
 //  assert( m_bClosed );
   Clear();
 }
 
-void ChartDataView::SetChanged(void) {
+void ChartDataView::SetChanged() {
   m_bChanged = true;
 }
 
-bool ChartDataView::GetChanged(void) {
+bool ChartDataView::GetChanged() {
   bool b = m_bChanged;
   if ( b ) {
     m_bChanged = false;
@@ -132,7 +132,7 @@ void ChartDataView::Remove( size_t nChart, ChartEntryBase* pEntry ) {
   }
 }
 
-void ChartDataView::Clear( void ) {
+void ChartDataView::Clear() {
   m_mapCntChartIndexes.clear();
   m_vChartEntryCarrier.clear();
 }
