@@ -81,11 +81,16 @@ private:
 
   pPosition_t m_pPosition;
 
-  ou::tf::BarFactory m_bfTrades;
+  ou::tf::BarFactory m_bfPrice;
+  ou::tf::BarFactory m_bfPriceUp;
+  ou::tf::BarFactory m_bfPriceDn;
 
   ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryBars m_cePriceBars;
 
-  ou::ChartEntryBars m_ceBars;
+  ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryVolume m_ceVolumeUp;
+  ou::ChartEntryVolume m_ceVolumeDn;
 
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
@@ -98,12 +103,16 @@ private:
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
 
+  ou::tf::Quote m_quote;
+
   void Init();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  void HandleBarCompletionTrades( const ou::tf::Bar& );
+  void HandleBarCompletionPrice( const ou::tf::Bar& );
+  void HandleBarCompletionPriceUp( const ou::tf::Bar& );
+  void HandleBarCompletionPriceDn( const ou::tf::Bar& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
