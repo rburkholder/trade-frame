@@ -76,8 +76,8 @@ public:
   const Fundamentals& GetFundamentals() const { assert( m_pFundamentals ); return *m_pFundamentals; };
   const Summary& GetSummary() const { return m_summary; };
 
-  const Quotes& GetQuotes() const { return m_quotes; };
-  const Trades& GetTrades() const { return m_trades; };
+  Quotes& GetQuotes() { return m_quotes; }; // not const so can delegate
+  Trades& GetTrades() { return m_trades; }; // not const so can delegate
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
