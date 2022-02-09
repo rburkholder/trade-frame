@@ -37,8 +37,7 @@ public:
   using fK_t = std::function<void(const ou::tf::Price&)>;
   TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration tdPeriodWidth, fK_t&& );
-  TSSWStochastic( const TSSWStochastic& );
-  ~TSSWStochastic(void);
+  virtual ~TSSWStochastic(void);
   double K( void ) const { return m_k; };
   double Size( void ) const;
   void Reset( void );
@@ -53,6 +52,8 @@ private:
   double m_k;
   ptime m_dtLatest;
   fK_t m_fK;
+
+  void UpdateOnAdd( double min, double max );
 };
 
 } // namespace tf

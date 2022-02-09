@@ -31,13 +31,6 @@ TSSWStochastic::TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration t
 {
 }
 
-TSSWStochastic::TSSWStochastic( const TSSWStochastic& rhs)
-  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( rhs ),
-  m_lastAdd( rhs.m_lastAdd ), m_lastExpire( rhs.m_lastExpire ), m_k( rhs.m_k ), m_bAvailable( false ),
-  minmax( rhs )
-{
-}
-
 TSSWStochastic::~TSSWStochastic(void) {
 }
 
@@ -74,8 +67,15 @@ void TSSWStochastic::Expire( const Quote& quote ) {
 
 void TSSWStochastic::PostUpdate( void ) {
   if ( m_bAvailable ) {
-    double max( minmax::Max() );
-    double min( minmax::Min() );
+    //double max( minmax::Max() );
+    //double min( minmax::Min() );
+    //m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
+    //if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
+  }
+}
+
+void TSSWStochastic::UpdateOnAdd( double min, double max ) {
+  if ( m_bAvailable ) {
     m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
     if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
   }
