@@ -96,11 +96,24 @@ void InteractiveChart::Init() {
   SetChartDataView( &m_dvChart );
 }
 
+void InteractiveChart::Connect() {
+
+  if ( m_pPosition ) {
+    if ( !m_bConnected ) {
+      pWatch_t pWatch = m_pPosition->GetWatch();
+      m_bConnected = true;
+      pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
+      pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
+    }
+  }
+
+}
+
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   if ( m_pPosition ) {
     if ( m_bConnected ) {
-      m_bConnected = false;
       pWatch_t pWatch = m_pPosition->GetWatch();
+      m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -109,14 +122,13 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
 
 void InteractiveChart::SetPosition( pPosition_t pPosition ) {
 
-  m_pPosition = pPosition;
-  pWatch_t pWatch = m_pPosition->GetWatch();
-
+  bool bConnected = m_bConnected;
   Disconnect();
+  m_pPosition = pPosition;
+  if ( bConnected ) {
+    Connect();
+  }
 
-  m_bConnected = true;
-  pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
-  pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
 }
 
 void InteractiveChart::HandleQuote( const ou::tf::Quote& quote ) {

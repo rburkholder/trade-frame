@@ -66,6 +66,9 @@ public:
 
   void SetPosition( pPosition_t );
 
+  void Connect();
+  void Disconnect();
+
 protected:
 private:
 
@@ -96,7 +99,6 @@ private:
   ou::ChartEntryShape m_ceLongExits;
 
   void Init();
-  void Disconnect();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

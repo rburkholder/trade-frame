@@ -248,6 +248,9 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 void AppIndicatorTrading::OnData1Connected( int ) {
   m_bData1Connected = true;
 //  AutoStartCollection();
+  if ( nullptr != m_pInteractiveChart ) {
+    m_pInteractiveChart->Connect();
+  }
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
   }
@@ -274,6 +277,9 @@ void AppIndicatorTrading::OnExecConnected( int ) {
 
 void AppIndicatorTrading::OnData1Disconnected( int ) {
   m_bData1Connected = false;
+  if ( nullptr != m_pInteractiveChart ) {
+    m_pInteractiveChart->Disconnect();
+  }
 }
 
 void AppIndicatorTrading::OnData2Disconnected( int ) {
