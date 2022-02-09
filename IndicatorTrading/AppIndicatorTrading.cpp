@@ -28,10 +28,13 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-//#include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "Config.h"
+#include "InteractiveChart.h"
 #include "AppIndicatorTrading.h"
+#include "TFTrading/Position.h"
+#include "TFTrading/Watch.h"
 
 namespace {
   static const std::string sAppName( "IndicatorTrading" );
@@ -118,6 +121,20 @@ bool AppIndicatorTrading::OnInit() {
   //m_pWinChartView = new ou::tf::WinChartView( panelSplitterRight, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   //sizerSplitterRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 3);
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  ou::tf::Instrument::pInstrument_t pInstrument;
+  pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbol ); // simple for an iqfeed watch
+  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, options.sSymbol );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, this->m_pData1Provider ); // will need to be iqfeed provider, check?
+  pPosition_t pPosition = boost::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+
+  m_pInteractiveChart = new InteractiveChart( panelSplitterRight, wxID_ANY );
+  m_pInteractiveChart->SetPosition( pPosition );
+
+  sizerSplitterRight->Add( m_pInteractiveChart, 1, wxEXPAND | wxALL, 2 );
+
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
@@ -126,12 +143,12 @@ bool AppIndicatorTrading::OnInit() {
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
-  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
+  //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
+  //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
   //vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  //m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;

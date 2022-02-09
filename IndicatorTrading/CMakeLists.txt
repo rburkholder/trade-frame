@@ -27,12 +27,14 @@ set(
   file_h
     AppIndicatorTrading.h
     Config.h
+    InteractiveChart.h
   )
 
 set(
   file_cpp
     AppIndicatorTrading.cpp
     Config.cpp
+    InteractiveChart.cpp
   )
 
 add_executable(
@@ -72,6 +74,7 @@ target_link_libraries(
       TFVuTrading
       TFTrading
       TFOptions
+      TFTrading
       TFHDF5TimeSeries
       OUCommon
       OUSQL

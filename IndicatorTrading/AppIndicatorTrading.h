@@ -34,12 +34,11 @@
 class wxBoxSizer;
 class wxTreeCtrl;
 
+class InteractiveChart;
 class FrameMain;
 
 namespace ou {
 namespace tf {
-  class ChartData;
-  class WinChartView;
   class PanelLogging;
 }
 }
@@ -67,6 +66,8 @@ private:
 
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
+
+  InteractiveChart* m_pInteractiveChart;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -99,6 +100,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & m_splitterRow->GetSashPosition();
+    //ar & *m_pWinChartView;
   }
 
   template<typename Archive>
@@ -107,13 +109,16 @@ private:
     int x;
     ar & x;
     m_splitterRow->SetSashPosition( x );
+    if ( 2 <= version ) {
+      //ar & *m_pWinChartView;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 1)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 2)
 
 DECLARE_APP(AppIndicatorTrading)
 
