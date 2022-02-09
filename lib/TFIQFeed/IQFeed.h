@@ -113,13 +113,17 @@ protected:
           << std::endl;
         //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
         //m_pSymbolLookup.reset();
+
+        if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
+          static_cast<T*>( this )->OnIQFeedConnected();
+        }
       }
     );
     m_pSymbolLookup->Connect();
 
-    if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
-      static_cast<T*>( this )->OnIQFeedConnected();
-    }
+    //if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
+    //  static_cast<T*>( this )->OnIQFeedConnected();
+    //}
   };
   void OnNetworkDisconnected(void) {
     if ( &IQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
