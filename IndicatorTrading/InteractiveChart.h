@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include "TFTimeSeries/DatedDatum.h"
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -39,6 +38,12 @@
 #include <TFTrading/Position.h>
 
 #include <TFVuTrading/WinChartView.h>
+
+namespace ou {
+namespace tf {
+  class TSSWStochastic;
+}
+}
 
 class InteractiveChart:
   public ou::tf::WinChartView
@@ -103,7 +108,12 @@ private:
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
 
+  ou::ChartEntryIndicator m_ceStochastic;
+
   ou::tf::Quote m_quote;
+
+  using pTSSWStochastic_t = std::shared_ptr<ou::tf::TSSWStochastic>;
+  pTSSWStochastic_t m_pIndicatorStochastic;
 
   void Init();
 

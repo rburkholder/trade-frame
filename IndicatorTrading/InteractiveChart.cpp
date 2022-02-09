@@ -21,10 +21,13 @@
 
 #include <memory>
 
+#include <TFIndicators/TSSWStochastic.h>
+
 #include "InteractiveChart.h"
 
 namespace {
   static const size_t nBarSeconds = 3;
+  static const size_t nPeriods = 14;
 }
 
 InteractiveChart::InteractiveChart()
@@ -76,8 +79,8 @@ InteractiveChart::~InteractiveChart() {
 }
 
 void InteractiveChart::Init() {
-  m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 0, &m_ceQuoteAsk );
+  m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 0, &m_ceQuoteBid );
 
   m_dvChart.Add( 0, &m_cePriceBars );
@@ -95,6 +98,8 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
+  m_dvChart.Add( 3, &m_ceStochastic );
+
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
@@ -104,10 +109,20 @@ void InteractiveChart::Init() {
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteSpread.SetColour( ou::Colour::Black );
 
+  m_ceQuoteAsk.SetName( "Ask" );
+  m_ceTrade.SetName( "Tick" );
+  m_ceQuoteBid.SetName( "Bid" );
+
   m_ceQuoteSpread.SetName( "Spread" );
 
   m_ceVolumeUp.SetColour( ou::Colour::Green );
+  m_ceVolumeUp.SetName( "Volume Up" );
   m_ceVolumeDn.SetColour( ou::Colour::Red );
+  m_ceVolumeDn.SetName( "Volume Down" );
+
+  m_ceVolume.SetName( "Volume" );
+
+  m_ceStochastic.SetName( "Stochastic" );
 
   SetChartDataView( &m_dvChart );
 }
@@ -117,6 +132,12 @@ void InteractiveChart::Connect() {
   if ( m_pPosition ) {
     if ( !m_bConnected ) {
       pWatch_t pWatch = m_pPosition->GetWatch();
+      m_pIndicatorStochastic = std::make_shared<ou::tf::TSSWStochastic>(
+        pWatch->GetQuotes(), 14, time_duration( 0, 0, 1 ),
+        [this]( const ou::tf::Price& price ){
+          m_ceStochastic.Append( price.DateTime(), price.Value() );
+        }
+      );
       m_bConnected = true;
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
@@ -128,6 +149,7 @@ void InteractiveChart::Connect() {
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   if ( m_pPosition ) {
     if ( m_bConnected ) {
+      m_pIndicatorStochastic.reset();
       pWatch_t pWatch = m_pPosition->GetWatch();
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
