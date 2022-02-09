@@ -70,14 +70,11 @@ public:
     m_fRefreshData = std::move( f );
   }
 
-  // really don't want these here, but necessary to deal with searchdynamiceventtable issues
-  virtual void BindEvents();
-  virtual void UnbindEvents();
-
 protected:
 
-  void Init();
-  void CreateControls();
+  enum {
+    ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
+  };
 
   void DrawChart( void );
 
@@ -85,10 +82,6 @@ private:
 
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
   using ViewPort_t = ChartEntryTime::range_t;
-
-  enum {
-    ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
-  };
 
   boost::posix_time::time_duration m_tdViewPortWidth;
 
@@ -133,6 +126,12 @@ private:
   void OnDestroy( wxWindowDestroyEvent& event );
 
   void HandleGuiRefresh( wxTimerEvent& event );
+
+  void Init();
+  void CreateControls();
+
+  virtual void BindEvents();
+  virtual void UnbindEvents();
 
 };
 

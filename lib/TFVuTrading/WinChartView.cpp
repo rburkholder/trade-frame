@@ -144,6 +144,7 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
 //  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
   // 0,120,-120
   m_chartMaster.CrossHairPosition( x, y );
+  // TODO: translate into a price
   //event.Skip();
 }
 
