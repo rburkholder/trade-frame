@@ -108,12 +108,18 @@ private:
   ou::ChartEntryShape m_ceShortExits;
   ou::ChartEntryShape m_ceLongExits;
 
-  ou::ChartEntryIndicator m_ceStochastic;
+  ou::ChartEntryMark m_cemStochastic;
+
+  ou::ChartEntryIndicator m_ceStochastic1;
+  ou::ChartEntryIndicator m_ceStochastic2;
+  ou::ChartEntryIndicator m_ceStochastic3;
 
   ou::tf::Quote m_quote;
 
   using pTSSWStochastic_t = std::shared_ptr<ou::tf::TSSWStochastic>;
-  pTSSWStochastic_t m_pIndicatorStochastic;
+  pTSSWStochastic_t m_pIndicatorStochastic1;
+  pTSSWStochastic_t m_pIndicatorStochastic2;
+  pTSSWStochastic_t m_pIndicatorStochastic3;
 
   void Init();
 

@@ -18,26 +18,26 @@
 
 namespace ou { // One Unified
 
-int ChartEntryShape::m_rShapes[] = { 
+int ChartEntryShape::m_rShapes[] = {
   Chart::DiamondShape,
-  Chart::TriangleShape, Chart::InvertedTriangleShape, 
-  Chart::PolygonShape( 5 ), Chart::PolygonShape( 5 ), 
-  Chart::Polygon2Shape( 6 ), Chart::Polygon2Shape( 6 ) 
+  Chart::TriangleShape, Chart::InvertedTriangleShape,
+  Chart::PolygonShape( 5 ), Chart::PolygonShape( 5 ),
+  Chart::Polygon2Shape( 6 ), Chart::Polygon2Shape( 6 )
 };
 
-ChartEntryShape::ChartEntryShape( void )
+ChartEntryShape::ChartEntryShape()
 : ChartEntryPrice(), m_eShape( EDefault )
 {
 }
 
-ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour ) 
+ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour )
 : ChartEntryPrice(), m_eShape( eShape )
 {
   ChartEntryBase::SetColour( colour );
 }
 
 // destructor needs to clear out queue first
-ChartEntryShape::~ChartEntryShape(void) {
+ChartEntryShape::~ChartEntryShape() {
   if ( !m_vpChar.empty() ) {
     for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;
@@ -50,7 +50,7 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   char *pszLabel = new char[ sText.size() + 1 ];
   strcpy( pszLabel, sText.c_str() );
   m_queueLabel.Append( Entry( ou::tf::Price( dt, price ), pszLabel ) );
-  
+
   //ChartEntryPrice::Append( dt, price );
   //m_vLabel.push_back( sText );
   //const std::string &s = m_vLabel.back();
@@ -62,7 +62,7 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   //}
 }
 
-void ChartEntryShape::ClearQueue( void ) {  
+void ChartEntryShape::ClearQueue() {
   namespace args = boost::phoenix::placeholders;
   m_queueLabel.Sync( boost::phoenix::bind( &ChartEntryShape::Pop, this, args::arg1 ) );
 }
@@ -72,19 +72,19 @@ void ChartEntryShape::Pop( const Entry& entry ) {
   m_vpChar.push_back( entry.pLabel );
 }
 
-bool ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
 
   bool bAdded( false );
-  
+
   ClearQueue();
 
   if ( 0 < ChartEntryPrice::Size() ) {
     DoubleArray daXData = ChartEntryPrice::GetDateTimes();
     if ( 0 != daXData.len ) {
-      ScatterLayer *layer 
-        = pXY->addScatterLayer( 
+      ScatterLayer *layer
+        = pXY->addScatterLayer(
           GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
-    
+
       layer->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
       pAttributes->dblXMax = daXData[ daXData.len - 1 ];
@@ -101,7 +101,7 @@ bool ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttr
   return bAdded;
 }
 
-void ChartEntryShape::Clear( void ) {
+void ChartEntryShape::Clear() {
   if ( !m_vpChar.empty() ) {
     for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;

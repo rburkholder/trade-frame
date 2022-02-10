@@ -20,12 +20,12 @@
 
 namespace ou { // One Unified
 
-ChartEntryMark::ChartEntryMark(void)
+ChartEntryMark::ChartEntryMark()
 : ChartEntryBase()
 {
 }
 
-ChartEntryMark::~ChartEntryMark(void) {
+ChartEntryMark::~ChartEntryMark() {
 }
 
 // used in background thread
@@ -53,7 +53,7 @@ void ChartEntryMark::Pop( const Mark_t& mark ) {
   m_vName.push_back( mark.m_sName );
 }
 
-bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+bool ChartEntryMark::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
 
   bool bAdded( false );
 
@@ -63,8 +63,8 @@ bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {
-      int i = m_vColour[ ix ];
-      Mark *pmk = pXY->yAxis()->addMark( m_vPrice[ ix ], m_vColour[ ix ], m_vName[ ix ].c_str() );
+      Mark* pmk = pXY->yAxis()->addMark( m_vPrice[ ix ], m_vColour[ ix ], m_vName[ ix ].c_str() );
+      pmk->setLineWidth( 1 );
       pmk->setAlignment( Chart::Left );
       pmk->setDrawOnTop( false );
     }
@@ -73,7 +73,7 @@ bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
   return bAdded;
 }
 
-void ChartEntryMark::Clear( void ) {
+void ChartEntryMark::Clear() {
   ChartEntryBase::Clear();
   m_vPrice.clear();
   m_vColour.clear();

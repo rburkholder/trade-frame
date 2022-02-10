@@ -27,36 +27,36 @@ class ChartEntryShape :
   public ChartEntryPrice {
 public:
   enum enumShape { EDefault, ELong, EShort, EFillLong, EFillShort, ELongStop, EShortStop };
-  ChartEntryShape( void );
+  ChartEntryShape();
   ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
   void SetShape( enumShape shape ) { m_eShape = shape; };
-  enumShape GetShape( void ) const { return m_eShape; };
+  enumShape GetShape() const { return m_eShape; };
   virtual ~ChartEntryShape(void);
   void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  virtual void Clear( void );
-  void ClearQueue( void );
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
+  virtual void Clear();
+  void ClearQueue();
 protected:
-  
+
   struct Entry {
     const ou::tf::Price price;
     const char* pLabel;
-    Entry( void ): pLabel( 0 ) {}
+    Entry(): pLabel( 0 ) {}
     Entry( const ou::tf::Price& price_, const char* pLabel_ ): price( price_ ), pLabel( pLabel_ ) {}
   };
 
-  typedef std::vector<const char*> vpChar_t;
+  using vpChar_t = std::vector<const char*>;
   vpChar_t m_vpChar;
 
   static int m_rShapes[];  // constants
   enumShape m_eShape;
-  StringArray GetLabels( void ) const {
+  StringArray GetLabels() const {
     //std::vector<const char *>::const_iterator iter = m_vpChar.begin();
     //return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );
     return StringArray( &m_vpChar[ m_ixStart ],  m_nElements );
   }
 private:
-  typedef ou::tf::Queue<Entry> queueLabel_t;
+  using queueLabel_t = ou::tf::Queue<Entry>;
   queueLabel_t m_queueLabel;
   //boost::lockfree::spsc_queue<char*, boost::lockfree::capacity<lockfreesize> > m_lfShape;
   void Pop( const Entry& );

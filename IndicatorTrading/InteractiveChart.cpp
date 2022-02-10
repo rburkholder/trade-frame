@@ -98,7 +98,9 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
-  m_dvChart.Add( 3, &m_ceStochastic );
+  m_dvChart.Add( 3, &m_ceStochastic1 );
+  m_dvChart.Add( 3, &m_ceStochastic2 );
+  m_dvChart.Add( 3, &m_ceStochastic3 );
 
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
@@ -122,7 +124,17 @@ void InteractiveChart::Init() {
 
   m_ceVolume.SetName( "Volume" );
 
-  m_ceStochastic.SetName( "Stochastic" );
+  m_ceStochastic1.SetName( "Stochastic 14x20s" );
+  m_ceStochastic1.SetColour( ou::Colour::Red );
+  m_ceStochastic2.SetName( "Stochastic 14x60s" );
+  m_ceStochastic2.SetColour( ou::Colour::Green );
+  m_ceStochastic3.SetName( "Stochastic 14x180s" );
+  m_ceStochastic3.SetColour( ou::Colour::Blue );
+
+  //m_cemStochastic.AddMark( 80, ou::Colour::Red, "80%" );
+  //m_cemStochastic.AddMark( 50, ou::Colour::Green, "50%" );
+  //m_cemStochastic.AddMark( 20, ou::Colour::Blue, "20%" );
+  m_dvChart.Add( 3, &m_cemStochastic );
 
   SetChartDataView( &m_dvChart );
 }
@@ -132,10 +144,22 @@ void InteractiveChart::Connect() {
   if ( m_pPosition ) {
     if ( !m_bConnected ) {
       pWatch_t pWatch = m_pPosition->GetWatch();
-      m_pIndicatorStochastic = std::make_shared<ou::tf::TSSWStochastic>(
-        pWatch->GetQuotes(), 14, time_duration( 0, 0, 1 ),
+      m_pIndicatorStochastic1 = std::make_shared<ou::tf::TSSWStochastic>(
+        pWatch->GetQuotes(), 14, time_duration( 0, 0, 20 ),
         [this]( const ou::tf::Price& price ){
-          m_ceStochastic.Append( price );
+          m_ceStochastic1.Append( price );
+        }
+      );
+      m_pIndicatorStochastic2 = std::make_shared<ou::tf::TSSWStochastic>(
+        pWatch->GetQuotes(), 14, time_duration( 0, 0, 60 ),
+        [this]( const ou::tf::Price& price ){
+          m_ceStochastic2.Append( price );
+        }
+      );
+      m_pIndicatorStochastic3 = std::make_shared<ou::tf::TSSWStochastic>(
+        pWatch->GetQuotes(), 14, time_duration( 0, 0, 180 ),
+        [this]( const ou::tf::Price& price ){
+          m_ceStochastic3.Append( price );
         }
       );
       m_bConnected = true;
@@ -149,7 +173,9 @@ void InteractiveChart::Connect() {
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   if ( m_pPosition ) {
     if ( m_bConnected ) {
-      m_pIndicatorStochastic.reset();
+      m_pIndicatorStochastic1.reset();
+      m_pIndicatorStochastic2.reset();
+      m_pIndicatorStochastic3.reset();
       pWatch_t pWatch = m_pPosition->GetWatch();
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );

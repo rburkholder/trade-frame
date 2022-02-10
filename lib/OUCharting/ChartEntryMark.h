@@ -38,18 +38,18 @@ public:
       : m_dblPrice( price ), m_colour( colour ), m_sName( name ) {};
   };
 
-  ChartEntryMark(void);
-  virtual ~ChartEntryMark(void);
+  ChartEntryMark();
+  virtual ~ChartEntryMark();
   void AddMark( double price, ou::Colour::enumColour colour, const std::string &name ); // bg thread
   void AddMark( const Mark_t& mark ); // bg thread
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  virtual void Clear( void );
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
+  virtual void Clear();
 protected:
   std::vector<double> m_vPrice;
   std::vector<ou::Colour::enumColour> m_vColour;
   std::vector<std::string> m_vName;
 private:
-  typedef ou::tf::Queue<Mark_t> queueMark_t;
+  using queueMark_t = ou::tf::Queue<Mark_t>;
   queueMark_t m_queue;
   void Pop( const Mark_t& );
 //  boost::lockfree::spsc_queue<Mark_t, boost::lockfree::capacity<lockfreesize> > m_lfMark;
