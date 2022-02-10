@@ -13,7 +13,6 @@
 
 #pragma once
 
-//#include <map>
 #include <set>
 
 #include <TFTrading/PortfolioManager.h>
@@ -28,9 +27,9 @@ namespace tf { // TradeFrame
 class ModelPortfolio: public ModelBase<ModelPortfolio> {
 public:
 
-  typedef ou::tf::PortfolioManager PortfolioManager;
-  typedef PortfolioManager::idPortfolio_t idPortfolio_t;
-  typedef PortfolioManager::pPortfolio_t pPortfolio_t;
+  using PortfolioManager = ou::tf::PortfolioManager;
+  using idPortfolio_t = PortfolioManager::idPortfolio_t;
+  using pPortfolio_t = PortfolioManager::pPortfolio_t;
 
   struct DataViewItemPortfolio: public DataViewItem<pPortfolio_t::element_type> {
     DataViewItemPortfolio( shared_ptr& ptr )
@@ -41,10 +40,10 @@ public:
       variant = GetPtr()->GetRow().idPortfolio;
     }
   };
-  
+
   struct wxDataViewItem_Portfolio: public wxDataViewItem_typed<DataViewItemPortfolio> {};
 
-  typedef std::set<DataViewItemPortfolio*> setItems_t;
+  using setItems_t = std::set<DataViewItemPortfolio*>;
 
   ModelPortfolio(void);
   ~ModelPortfolio(void);
@@ -57,7 +56,7 @@ private:
 
 //  typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
   //typedef mapItems_t::const_iterator mapItems_citer_t;
-  typedef setItems_t::const_iterator setItems_citer_t;
+  using setItems_citer_t = setItems_t::const_iterator;
   setItems_t m_setItems;
 
   // refactor this to the inherited class

@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   PositionGreek.h
  * Author: raymond@burkholder.net
  *
@@ -35,41 +35,41 @@ namespace tf { // TradeFrame
 class PositionGreek: public Position {
   friend class boost::serialization::access;
 public:
-  
+
   friend std::ostream& operator<<( std::ostream& os, const PositionGreek& );
-  
-  typedef boost::shared_ptr<PositionGreek> pPositionGreek_t;
-  
-  typedef ou::tf::Watch::pWatch_t pUnderlying_t;;
-  typedef ou::tf::option::Option::pOption_t pOption_t;
-  
+
+  using pPositionGreek_t = std::shared_ptr<PositionGreek>;
+
+  using pUnderlying_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
-  
+
   PositionGreek( pOption_t&, pUnderlying_t& );
   virtual ~PositionGreek( );
-  
+
   pOption_t GetOption() { return m_pOption; }
   pUnderlying_t GetUnderlying() { return m_pUnderlying; }
-  
+
   ou::Delegate<const ou::tf::Greek&> OnGreek; // need to fire this on option updates
-  
+
   void PositionPendingDelta( int n );  // -1 or +1
-  
+
 protected:
-  
-  typedef SymbolBase::greek_t greek_t;
+
+  using greek_t = SymbolBase::greek_t;
 
 private:
-  
+
   pOption_t m_pOption;
   pUnderlying_t m_pUnderlying;
-  
+
   int m_nQuantity;  // number of contracts
-  
+
   void Construction();
 
   void HandleGreek( greek_t );
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const Position>(*this);
@@ -91,6 +91,6 @@ std::ostream& operator<<( std::ostream& os, const PositionGreek& );
 } // namespace ou
 
 BOOST_CLASS_VERSION(ou::tf::PositionGreek, 1)
-  
+
 #endif /* POSITIONGREEK_H */
 

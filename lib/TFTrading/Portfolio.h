@@ -15,8 +15,6 @@
 #include <string>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include <OUCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
@@ -44,19 +42,19 @@ public:
 
   friend std::ostream& operator<<( std::ostream& os, const Portfolio& );
 
-  typedef Position::pPosition_t pPosition_t;
+  using pPosition_t = Position::pPosition_t;
 
-  typedef boost::shared_ptr<Portfolio> pPortfolio_t;
+  using pPortfolio_t = std::shared_ptr<Portfolio>;
 
-  typedef Position::execution_delegate_t execution_delegate_t;
-  typedef Position::PositionDelta_delegate_t PositionDelta_delegate_t;
+  using execution_delegate_t = Position::execution_delegate_t;
+  using PositionDelta_delegate_t = Position::PositionDelta_delegate_t;
 
-  typedef keytypes::idPosition_t idPosition_t;
-  typedef keytypes::idPortfolio_t idPortfolio_t;
-  typedef keytypes::idAccountOwner_t idAccountOwner_t;
+  using idPosition_t = keytypes::idPosition_t;
+  using idPortfolio_t = keytypes::idPortfolio_t;
+  using idAccountOwner_t = keytypes::idAccountOwner_t;
 
   //typedef ou::tf::Currency::enumCurrency currency_t;
-  typedef Currency::type currency_t;
+  using currency_t = Currency::type;
 
   enum EPortfolioType { Master=1, CurrencySummary=2, Standard=10, MultiLeggedPosition, Basket, Aggregate };
   // only one Master, can only have AlternateCurrency at next level below

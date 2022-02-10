@@ -143,7 +143,7 @@ bool AppIntervalTrader::OnInit() {
 
     if ( bOk ) {
       m_pPortfolio
-        = boost::make_shared<ou::tf::Portfolio>(
+        = std::make_shared<ou::tf::Portfolio>(
           "trader", "self", "aggregate", ou::tf::Portfolio::EPortfolioType::Basket, "USD", "aggregate" );
 
       m_bIQFeedConnected = false;
@@ -204,7 +204,7 @@ void AppIntervalTrader::HandleIQFeedConnected( int e ) {  // cross thread event
     pInstrument->SetSignificantDigits( 2 );
 
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
-    pPosition_t pPosition = boost::make_shared<ou::tf::Position>( pWatch, m_pIB );
+    pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pIB );
     m_pPortfolio->AddPosition( sSymbol, pPosition );
     m_vInstance.emplace_back( Instance( pPosition ) );
   }

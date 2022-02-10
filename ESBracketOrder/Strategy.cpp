@@ -71,7 +71,7 @@ Strategy::Strategy( pWatch_t pWatch )
   m_pWatch = pWatch;
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
-  m_pPosition = boost::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
+  m_pPosition = std::make_shared<ou::tf::Position>( m_pWatch, m_pIB );
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
 

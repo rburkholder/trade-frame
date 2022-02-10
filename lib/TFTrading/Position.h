@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <memory>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <boost/serialization/version.hpp>
@@ -57,7 +57,7 @@ class Position {
   friend std::ostream& operator<<( std::ostream& os, const Position& );
 public:
 
-  using pPosition_t = boost::shared_ptr<Position>;
+  using pPosition_t = std::shared_ptr<Position>;
 
   using pProvider_t = ProviderInterfaceBase::pProvider_t;
 

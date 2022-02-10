@@ -128,7 +128,7 @@ bool AppIndicatorTrading::OnInit() {
   pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbol ); // simple for an iqfeed watch
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, options.sSymbol );
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, this->m_pData1Provider ); // will need to be iqfeed provider, check?
-  pPosition_t pPosition = boost::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+  pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
 
   m_pInteractiveChart = new InteractiveChart( panelSplitterRight, wxID_ANY );
   m_pInteractiveChart->SetPosition( pPosition );
@@ -142,7 +142,7 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIndicatorTrading::OnClose, this );  // start close of windows and controls
 
   FrameMain::vpItems_t vItems;
-  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
   //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );

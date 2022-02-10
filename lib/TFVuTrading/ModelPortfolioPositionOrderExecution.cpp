@@ -11,10 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/phoenix/bind.hpp> 
+#include <boost/phoenix/bind.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
 #include <boost/assign/std/vector.hpp>
@@ -29,8 +27,8 @@ using namespace boost::assign;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void) 
-  : ModelBase<ModelPortfolioPositionOrderExecution>(), 
+ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
+  : ModelBase<ModelPortfolioPositionOrderExecution>(),
   m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() ),
   m_pItemPortfolioMaster( 0 )
 {
@@ -71,7 +69,7 @@ ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void
 void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
   // load the portfolio with "" as id
 //  ItemChanged( m_itemNull );  // if this works, then the scan can happen during the resulting event of GetChildren/GetValue
-//  m_PortfolioManager.ScanPortfolios( 
+//  m_PortfolioManager.ScanPortfolios(
 //    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
 //  Cleared();
   // portfolio may not be loaded yet, as ScanPortfolios works off of the map
@@ -125,7 +123,7 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( pPortfolio_t&
 
 void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( void ) {
   bool bTreeUpdated;
-  do { // process map multiple times 
+  do { // process map multiple times
     bTreeUpdated = false;
     // the for loop may require rework, iter1 is invalidated at loop end, so may cause issue in for loop
     // or restart map when an entry is erased
@@ -151,12 +149,12 @@ void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( voi
             dynamic_cast<ItemPortfolio*>( iter2->second )
               ->setItemPortfolio.insert( setItemsPortfolio_t::value_type( dvib ) );
             break;
-          default: 
+          default:
             throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
         }
         //ItemChanged( dv2 );
         ItemChanged( wxDataViewItem( dvib ) );
-        //ItemAdded( dv2, dv1 ); 
+        //ItemAdded( dv2, dv1 );
         //ItemAdded( wxDataViewItem( iter2->second ), wxDataViewItem( dvib ) ); // <-- 20170910 issues here: segfault -- need to redo code: wxDataViewItem( pPortfolioInfo )
         //ItemAdded( m_itemNull, *iter1->second );
         //m_mapUnattachedTreeItems.erase( iter1 );

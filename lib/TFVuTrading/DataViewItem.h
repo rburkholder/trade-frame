@@ -15,15 +15,15 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <wx/dataview.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-enum EModelType { EMTUnknown=0, 
-  EMTPortfolioMaster, EMTPortfolioCurrency, EMTPortfolio, 
+enum EModelType { EMTUnknown=0,
+  EMTPortfolioMaster, EMTPortfolioCurrency, EMTPortfolio,
   EMTPosition, EMTOrder, EMTExecution, EMTModelTypeCount };
 
 // 2017/09/17: built a typed version, various flavours of DataVierwItemBase* will be placed here
@@ -42,11 +42,11 @@ public:
   DataViewItemBase( const DataViewItemBase& rhs )
     : m_EModelType( rhs.m_EModelType ), m_pParent( rhs.m_pParent ) {};
   virtual ~DataViewItemBase( void ) {};
-  
+
   // get the const back again?
   virtual void AssignFirstColumn( wxVariant& variant ) /* const */ {};  // for getting polymorphic stuff for the tree
-  virtual bool IsContainer( void ) const { 
-    return false; 
+  virtual bool IsContainer( void ) const {
+    return false;
   };
   EModelType GetModelType() const { return m_EModelType; }
   DataViewItemBase* GetParent() const { return m_pParent; }
@@ -57,24 +57,24 @@ private:
   DataViewItemBase* m_pParent; // should try to make this a shared_ptr, but may have issues with 'type'
 };
 
-template<class T> 
+template<class T>
 class DataViewItem: public DataViewItemBase {
 public:
-  
-  typedef boost::shared_ptr<T> shared_ptr;
-  
+
+  using shared_ptr = std::shared_ptr<T>;
+
   DataViewItem( EModelType eModelType, shared_ptr& ptr, DataViewItemBase* pParent = nullptr )
     : DataViewItemBase( eModelType, pParent ), m_ptr( ptr ) {};
   DataViewItem( const DataViewItem& rhs )
     : DataViewItemBase( rhs ), m_ptr( rhs.m_ptr ) {};
   virtual ~DataViewItem( void ) {};
-  
+
   shared_ptr GetPtr() { return m_ptr; };
-  
+
   //virtual void AssignFirstColumn( wxVariant& variant ) const {};
-  
+
   //T* Value( void ) const { return reinterpret_cast<T*>( wxDataViewItem::GetID() ); };
-  
+
 private:
   shared_ptr m_ptr;
 };
