@@ -51,6 +51,8 @@ sh tws-stable-linux-x64.sh
 git clone https://github.com/rburkholder/libs-build.git
 cd libs-build
 ./build.sh tradeframe
+# rdaf is required for the project in the rdaf subdirectory
+./build.sh rdaf
 cd ..
 
 # main trade-frame code
