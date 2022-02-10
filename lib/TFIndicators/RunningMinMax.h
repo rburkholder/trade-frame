@@ -70,15 +70,17 @@ void RunningMinMax<CRTP,value_t>::Add(const value_t& value) {
   typename mapValueCount_t::iterator iter = m_mapValueCount.find( value );
   if ( m_mapValueCount.end() == iter ) {
     m_mapValueCount.insert( typename mapValueCount_t::value_type( value, 1 ) );
-    static_cast<CRTP*>(this)->UpdateOnAdd( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
   }
   else {
     (iter->second)++;
   }
+  static_cast<CRTP*>(this)->UpdateOnAdd( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
 }
 
 template<typename CRTP, typename value_t>
 void RunningMinMax<CRTP,value_t>::Remove( const value_t& value ) {
+
+  static_cast<CRTP*>(this)->UpdateOnDel( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
 
   typename mapValueCount_t::iterator iter = m_mapValueCount.find( value );
   if ( (m_mapValueCount.end() == iter) ) {
@@ -89,7 +91,7 @@ void RunningMinMax<CRTP,value_t>::Remove( const value_t& value ) {
     if ( 0 == iter->second ) {
       m_mapValueCount.erase( iter );
       if ( !m_mapValueCount.empty() ) {
-        static_cast<CRTP*>(this)->UpdateOnDel( m_mapValueCount.begin()->first, m_mapValueCount.rbegin()->first );
+
       }
     }
   }
