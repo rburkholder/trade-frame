@@ -135,7 +135,7 @@ void InteractiveChart::Connect() {
       m_pIndicatorStochastic = std::make_shared<ou::tf::TSSWStochastic>(
         pWatch->GetQuotes(), 14, time_duration( 0, 0, 1 ),
         [this]( const ou::tf::Price& price ){
-          m_ceStochastic.Append( price.DateTime(), price.Value() );
+          m_ceStochastic.Append( price );
         }
       );
       m_bConnected = true;

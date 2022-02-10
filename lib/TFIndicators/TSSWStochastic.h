@@ -34,13 +34,17 @@ class TSSWStochastic:
   friend RunningMinMax<TSSWStochastic,double>;
   friend TimeSeriesSlidingWindow<TSSWStochastic, Quote>;
 public:
+
   using fK_t = std::function<void(const ou::tf::Price&)>;
+
   TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration tdPeriodWidth, fK_t&& );
   virtual ~TSSWStochastic(void);
+
   double K( void ) const { return m_k; };
   double Size( void ) const;
   void Reset( void );
+
 protected:
   void Add( const Quote& quote );
   void Expire( const Quote& quote );
