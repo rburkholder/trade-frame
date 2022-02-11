@@ -18,8 +18,9 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
-#include <wx/mstream.h>
 #include <wx/bitmap.h>
+#include <wx/cursor.h>
+#include <wx/mstream.h>
 #include <wx/dcclient.h>
 
 #include <OUCommon/TimeSource.h>
@@ -277,15 +278,23 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
 
   m_chartMaster.SetOnDrawChart(
-    [this]( const MemBlock& m ){ // in background thread to draw composed chart into memory, and send to gui thread
+    [this]( bool bCursor, const MemBlock& m ){ // in background thread to draw composed chart into memory, and send to gui thread
       wxMemoryInputStream in( m.data, m.len );  // need this
       pwxBitmap_t p( new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
 
-      CallAfter([this,p](){ // perform draw in gui thread
+      CallAfter([this,p,bCursor](){ // perform draw in gui thread
         if ( 0 != m_pChartBitmap.use_count() ) m_pChartBitmap.reset();
         m_pChartBitmap = p;  //  bit map remains for use in HandlePaint
         wxClientDC dc( this );
         dc.DrawBitmap( *m_pChartBitmap, 0, 0);
+
+        if ( bCursor ) {
+          SetCursor( wxStockCursor( wxCURSOR_ARROW ) );
+        }
+        else {
+          SetCursor( wxStockCursor( wxCURSOR_BLANK ) );
+        }
+
         m_bInDrawChart = false;
       });
     });

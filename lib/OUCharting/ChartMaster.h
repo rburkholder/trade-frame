@@ -43,7 +43,7 @@ public:
   void SetChartDimensions( unsigned int width, unsigned int height);
   void DrawChart();
 
-  using fOnDrawChart_t = std::function<void( const MemBlock& )>;
+  using fOnDrawChart_t = std::function<void( bool bCursor, const MemBlock& )>;
   void SetOnDrawChart( fOnDrawChart_t&& function ) {
     m_fOnDrawChart = std::move( function );
   }

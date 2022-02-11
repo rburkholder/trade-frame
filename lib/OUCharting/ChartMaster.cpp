@@ -219,9 +219,12 @@ void ChartMaster::DrawChart() {
 
 void ChartMaster::RenderChart() {
   if ( m_bHasData ) {
-    if ( m_bCrossHair ) DrawDynamicLayer();
+    bool bCursor( true );
+    if ( m_bCrossHair ) {
+      bCursor = DrawDynamicLayer();
+    }
     MemBlock m = m_pChart->makeChart( Chart::BMP );
-    if ( m_fOnDrawChart ) m_fOnDrawChart( m );
+    if ( m_fOnDrawChart ) m_fOnDrawChart( bCursor, m );
   }
 }
 
@@ -315,7 +318,7 @@ bool ChartMaster::DrawDynamicLayer() {
     }
 
   }
-  return bCrossHairs;
+  return !bCrossHairs; // caller shows cursor when no crosshairs
 }
 
 } // namespace ou
