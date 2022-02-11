@@ -98,6 +98,12 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
+  // need to present the marks prior to presenting the data
+  m_cemStochastic.AddMark( 80, ou::Colour::Red, "80%" );
+  m_cemStochastic.AddMark( 50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark( 20, ou::Colour::Blue, "20%" );
+  m_dvChart.Add( 3, &m_cemStochastic );
+
   m_dvChart.Add( 3, &m_ceStochastic1 );
   m_dvChart.Add( 3, &m_ceStochastic2 );
   m_dvChart.Add( 3, &m_ceStochastic3 );
@@ -130,11 +136,6 @@ void InteractiveChart::Init() {
   m_ceStochastic2.SetColour( ou::Colour::Green );
   m_ceStochastic3.SetName( "Stochastic 14x180s" );
   m_ceStochastic3.SetColour( ou::Colour::Blue );
-
-  //m_cemStochastic.AddMark( 80, ou::Colour::Red, "80%" );
-  //m_cemStochastic.AddMark( 50, ou::Colour::Green, "50%" );
-  //m_cemStochastic.AddMark( 20, ou::Colour::Blue, "20%" );
-  m_dvChart.Add( 3, &m_cemStochastic );
 
   SetChartDataView( &m_dvChart );
 }
