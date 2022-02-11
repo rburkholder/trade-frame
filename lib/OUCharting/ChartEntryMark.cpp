@@ -63,11 +63,7 @@ bool ChartEntryMark::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttr
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {
-      char sz[ 200 ];
-      const std::string& s( m_vName[ ix ] );
-      memcpy( sz, s.c_str(), s.size() );
-      sz[ s.size() ] = 0;
-      Mark* pmk = pXY->yAxis()->addMark( m_vPrice[ ix ], m_vColour[ ix ], sz );
+      Mark* pmk = pXY->yAxis()->addMark( m_vPrice[ ix ], m_vColour[ ix ], m_vName[ ix ].c_str() );
       pmk->setLineWidth( 1 );
       pmk->setAlignment( Chart::Left );
       pmk->setDrawOnTop( false );
