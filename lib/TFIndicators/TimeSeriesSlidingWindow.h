@@ -33,18 +33,18 @@ public:
   TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount = 0 );
   TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, size_t nPeriods, time_duration tdPeriodWidth, size_type WindowSizeCount = 0 );
   TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );  // Delegate is not copied, other values may need some tuning
-  virtual ~TimeSeriesSlidingWindow<T,D>(void);
-  virtual void Reset( void );
+  virtual ~TimeSeriesSlidingWindow<T,D>();
+  virtual void Reset();
   ou::Delegate<const D&> OnAppend;
 protected:
   ptime m_dtZero;  // datetime of first element, used as offset
-  time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
+  time_duration WindowWidth() const { return m_tdWindowWidth; };
 
   void Update( void );
 
   void Add( const D& datum ) {}; // CRTP override to process elements passing into window scope
   void Expire( const D& datum ) {};  // CRTP override to process elements passing out of window scope
-  void PostUpdate( void ) {};  // CRTP override to do final calcs
+  void PostUpdate() {};  // CRTP override to do final calcs
 private:
   TimeSeries<D>& m_Series;
   time_duration m_tdWindowWidth;
@@ -55,7 +55,7 @@ private:
   bool m_bFirstDatumFound;
   bool m_bAutoUpdate; // use the OnAppend event to update stuff, else use the Update method to process
 
-  void Init( void );  // called in constructors
+  void Init();  // called in constructors
   void HandleDatum( const D& );
 };
 

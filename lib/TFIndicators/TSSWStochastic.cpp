@@ -31,10 +31,10 @@ TSSWStochastic::TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration t
 {
 }
 
-TSSWStochastic::~TSSWStochastic(void) {
+TSSWStochastic::~TSSWStochastic() {
 }
 
-double TSSWStochastic::Size( void ) const {
+double TSSWStochastic::Size() const {
   return ( minmax::Max() - minmax::Min() );
 }
 
@@ -65,14 +65,14 @@ void TSSWStochastic::Expire( const Quote& quote ) {
   // false
 }
 
-void TSSWStochastic::PostUpdate( void ) {
-  if ( m_bAvailable ) {
+//void TSSWStochastic::PostUpdate() {
+//  if ( m_bAvailable ) {
     //double max( minmax::Max() );
     //double min( minmax::Min() );
     //m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
     //if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
-  }
-}
+//  }
+//}
 
 void TSSWStochastic::UpdateOnAdd( double min, double max ) {
   if ( m_bAvailable ) {
@@ -81,7 +81,7 @@ void TSSWStochastic::UpdateOnAdd( double min, double max ) {
   }
 }
 
-void TSSWStochastic::Reset( void ) {
+void TSSWStochastic::Reset() {
   m_lastAdd = m_lastExpire = m_k = 0;
   minmax::Reset();
 }

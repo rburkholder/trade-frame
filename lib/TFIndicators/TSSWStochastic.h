@@ -39,16 +39,16 @@ public:
 
   TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration tdPeriodWidth, fK_t&& );
-  virtual ~TSSWStochastic(void);
+  virtual ~TSSWStochastic();
 
-  double K( void ) const { return m_k; };
-  double Size( void ) const;
-  void Reset( void );
+  double K() const { return m_k; };
+  double Size() const;
+  void Reset();
 
 protected:
   void Add( const Quote& quote );
   void Expire( const Quote& quote );
-  void PostUpdate( void );
+  //void PostUpdate();
 private:
   bool m_bAvailable;
   double m_lastAdd;
