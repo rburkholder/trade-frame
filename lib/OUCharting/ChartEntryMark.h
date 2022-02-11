@@ -21,8 +21,7 @@
 #include "ChartEntryBase.h"
 
 // level markers (horizontal lines at a price level)
-
-// 2020/03/24 - seems to lock up data presentation
+// 2022/02/10 - needs to be drawn prior to presenting the data
 
 namespace ou { // One Unified
 
