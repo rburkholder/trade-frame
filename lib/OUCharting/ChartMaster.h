@@ -83,7 +83,7 @@ private:
   void ChartStructure();
   void ChartData( XYChart* );
 
-  void DrawDynamicLayer();
+  bool DrawDynamicLayer(); // true if cross hairs
 
   void RenderChart();
 

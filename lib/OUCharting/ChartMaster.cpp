@@ -11,8 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include <boost/lexical_cast.hpp>
-#include <sstream>
+//#include <sstream>
+#include <boost/format.hpp>
 
 #include "ChartDataView.h"
 #include "ChartMaster.h"
@@ -244,46 +244,78 @@ void ChartMaster::CrossHairDraw( bool bDraw ) {
   m_bCrossHair = bDraw;
 }
 
-void ChartMaster::DrawDynamicLayer() {
+bool ChartMaster::DrawDynamicLayer() {
   // TODO: maybe trigger more often than data update happens?
   //   trigger a call back for sync?
+
+  bool bCrossHairs( false );
+
   if ( m_pChart ) {
 
     m_pDA = m_pChart->initDynamicLayer(); // new/clear
 
+    // this however, does work, not like the one below
     //std::stringstream ss;
     //ss << "x=" << m_intCrossHairX << ",y=" << m_intCrossHairY;
     //m_pDA->text( ss.str().c_str(), "normal", 10, 10, 10, Colour::Black );
 
-    int n = m_pChart->getChartCount();
+    const int n = m_pChart->getChartCount();
     assert( 0 < n );
 
     BaseChart* p;
+    int top, left, right, bottom;
 
-    p = m_pChart->getChart( 0 );
-    XYChart* pChart0 = dynamic_cast<XYChart*>( p );
-    PlotArea* pArea0 = pChart0->getPlotArea();
+    XYChart* pChartFocus;
 
-    p = m_pChart->getChart( n - 1 );
-    XYChart* pChartN = dynamic_cast<XYChart*>( p );
-    PlotArea* pAreaN = pChartN->getPlotArea();
+    for ( int ix = 0; ix < n; ix++ ) {
 
-    const int top    = pChart0->getAbsOffsetY() + pArea0->getTopY();
-    const int bottom = pChartN->getAbsOffsetY() + pAreaN->getBottomY();
-    const int left   = pChart0->getAbsOffsetX() + pArea0->getLeftX();
-    const int right  = pChart0->getAbsOffsetX() + pArea0->getRightX();
+      p = m_pChart->getChart( ix );
+      XYChart* pChart = dynamic_cast<XYChart*>( p );
+      PlotArea* pArea = pChart->getPlotArea();
+
+      int pxChartTop = pChart->getAbsOffsetY() + pArea->getTopY();
+
+      if ( 0 == ix ) {
+        top    = pxChartTop;
+        left   = pChart->getAbsOffsetX() + pArea->getLeftX();
+        right  = pChart->getAbsOffsetX() + pArea->getRightX();
+      }
+
+      bottom = pChart->getAbsOffsetY() + pArea->getBottomY();
+
+      if ( pxChartTop < m_intCrossHairY ) {
+        pChartFocus = pChart;
+      }
+
+    } // end for ix
 
     if (
-      ( top <= m_intCrossHairY  ) &&
-      ( bottom >= m_intCrossHairY ) &&
-      ( left <= m_intCrossHairX ) &&
-      ( right >= m_intCrossHairX )
+      ( top < m_intCrossHairY  ) &&
+      ( bottom > m_intCrossHairY ) &&
+      ( left < m_intCrossHairX ) &&
+      ( right > m_intCrossHairX )
     ) {
+
+      bCrossHairs = true;
+
+      assert( nullptr != pChartFocus );
+      double value = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
+      static boost::format fmter( "%.2f" );
+      std::string sValue = ( fmter % value ).str();
+
+      // chartdir does not like taking a c_str() of anything, so need to perform a copy
+      char sz[100];
+      memcpy( sz, sValue.c_str(), sValue.size() );
+      sz[ sValue.size() ] = 0;
+
       m_pDA->hline( left, right, m_intCrossHairY, Colour::Gray );
       m_pDA->vline( top, bottom, m_intCrossHairX, Colour::Gray );
+      m_pDA->text( sz, "normal", 10, m_intCrossHairX + 1, m_intCrossHairY - 14, Colour::Black );
+
     }
 
   }
+  return bCrossHairs;
 }
 
 } // namespace ou
