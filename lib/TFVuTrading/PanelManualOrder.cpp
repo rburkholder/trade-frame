@@ -30,10 +30,10 @@ namespace tf { // TradeFrame
 
 wxDEFINE_EVENT( EVT_UpdateInstrumentDesc, UpdateInstrumentDescEvent );
 
-PanelManualOrder::PanelManualOrder( void ): m_ixStruct( 0 ) {
+PanelManualOrder::PanelManualOrder(): m_ixStruct( 0 ) {
   Init();
 };
-  
+
 PanelManualOrder::PanelManualOrder( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
   )
@@ -43,11 +43,11 @@ PanelManualOrder::PanelManualOrder( /*wxWindow* parent, const wxString& title, c
   Create(parent, id, pos, size, style);
 }
 
-PanelManualOrder::~PanelManualOrder(void) {
+PanelManualOrder::~PanelManualOrder() {
   // test for open and then close?
 }
 
-void PanelManualOrder::Init( void ) {
+void PanelManualOrder::Init() {
 }
 
 bool PanelManualOrder::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
@@ -67,7 +67,7 @@ bool PanelManualOrder::Create( /*wxWindow* parent, const wxString& title, const 
 
 }
 
-void PanelManualOrder::CreateControls( void ) {
+void PanelManualOrder::CreateControls() {
 
     PanelManualOrder* itemPanel1 = this;
 
@@ -194,7 +194,7 @@ void PanelManualOrder::CreateControls( void ) {
 
 void PanelManualOrder::OnDestroy( wxWindowDestroyEvent& event ) {
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -238,7 +238,7 @@ void PanelManualOrder::OnFocusChange( wxFocusEvent& event ) {
 
 // need to set state on buttons sometime to make validations below unneeded
 
-void PanelManualOrder::EmitOrder( void ) {
+void PanelManualOrder::EmitOrder() {
   m_txtStatus->SetLabelText( "" );
   if ( Validate() && TransferDataFromWindow() ) {
     bool bOk = true;
@@ -248,7 +248,7 @@ void PanelManualOrder::EmitOrder( void ) {
       if ( 0.0 == m_order.dblPrice1 ) bOk = false;
     }
     if ( bOk ) {
-      if ( 0 != OnNewOrder ) 
+      if ( 0 != OnNewOrder )
         m_txtInstrumentSymbol->Enable( false ); // so we can keep the Instrument fixed.
         OnNewOrder( m_order );
     }
@@ -267,18 +267,18 @@ void PanelManualOrder::OnUpdateInstrumentDesc( UpdateInstrumentDescEvent& event 
   0 == event.InstrumentName().size() ? DisableButtons() : EnableButtons();
 }
 
-void PanelManualOrder::EnableButtons( void ) {
+void PanelManualOrder::EnableButtons() {
   m_btnBuy->Enable(true);
   m_btnSell->Enable(true);
 }
 
-void PanelManualOrder::DisableButtons( void ) {
+void PanelManualOrder::DisableButtons() {
   m_btnBuy->Enable(false);
   m_btnSell->Enable(false);
 }
 
 void PanelManualOrder::SetInstrumentDescription( const std::string& sDescription ) {
-  //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
+  //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) );
   QueueEvent( new UpdateInstrumentDescEvent( EVT_UpdateInstrumentDesc, sDescription ) );
   //wxQueueEvent( this, new UpdateInstrumentDescEvent( EVT_UpdateInstrumentDesc, sDescription ) );
 }

@@ -30,7 +30,7 @@ class UpdateInstrumentDescEvent: public wxEvent {
 public:
   UpdateInstrumentDescEvent( wxEventType eventType, const std::string& s ): wxEvent( 0, eventType ), m_sName( s ) {};
   UpdateInstrumentDescEvent( const UpdateInstrumentDescEvent& event ): wxEvent( *this ), m_sName( event.m_sName ) {};
-  ~UpdateInstrumentDescEvent( void ) {};
+  ~UpdateInstrumentDescEvent() {};
   UpdateInstrumentDescEvent* Clone( void ) const { return new UpdateInstrumentDescEvent( *this ); }
   const std::string& InstrumentName( void ) { return m_sName; };
 protected:
@@ -74,21 +74,21 @@ public:
     OnFocusPropogate = function;
   }
 
-  PanelManualOrder( void );
+  PanelManualOrder();
   PanelManualOrder(
-   wxWindow* parent, 
-   wxWindowID id = SYMBOL_PANELMANUALORDER_IDNAME, 
-   const wxPoint& pos = SYMBOL_PANELMANUALORDER_POSITION, 
-   const wxSize& size = SYMBOL_PANELMANUALORDER_SIZE, 
-   long style = SYMBOL_PANELMANUALORDER_STYLE 
+   wxWindow* parent,
+   wxWindowID id = SYMBOL_PANELMANUALORDER_IDNAME,
+   const wxPoint& pos = SYMBOL_PANELMANUALORDER_POSITION,
+   const wxSize& size = SYMBOL_PANELMANUALORDER_SIZE,
+   long style = SYMBOL_PANELMANUALORDER_STYLE
    );
-  ~PanelManualOrder(void);
+  ~PanelManualOrder();
 
   bool Create(
-   wxWindow* parent, 
-   wxWindowID id = SYMBOL_PANELMANUALORDER_IDNAME, 
-   const wxPoint& pos = SYMBOL_PANELMANUALORDER_POSITION, 
-   const wxSize& size = SYMBOL_PANELMANUALORDER_SIZE, 
+   wxWindow* parent,
+   wxWindowID id = SYMBOL_PANELMANUALORDER_IDNAME,
+   const wxPoint& pos = SYMBOL_PANELMANUALORDER_POSITION,
+   const wxSize& size = SYMBOL_PANELMANUALORDER_SIZE,
    long style = SYMBOL_PANELMANUALORDER_STYLE
    );
 
@@ -121,16 +121,16 @@ private:
   wxButton* m_btnCancel;
   wxStaticText* m_txtStatus;
 
-  void Init( void );
-  void CreateControls( void );
-  bool ShowToolTips( void ) { return true; };
+  void Init();
+  void CreateControls();
+  bool ShowToolTips() { return true; };
 
-  void EnableButtons( void );
-  void DisableButtons( void );
+  void EnableButtons();
+  void DisableButtons();
 
   void OnFocusChange( wxFocusEvent& event );
 
-  void EmitOrder( void );
+  void EmitOrder();
 
   void OnDestroy( wxWindowDestroyEvent& event );
   void OnBtnMarket( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Market; };
