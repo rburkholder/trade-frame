@@ -21,7 +21,7 @@
 
 #include "FrameMain.h"
 
-FrameMain::FrameMain(void) {
+FrameMain::FrameMain() {
   Init();
 }
 
@@ -30,8 +30,8 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& caption, 
   Create( parent, id, caption, pos, size, style );
 }
 
-FrameMain::~FrameMain(void) {
-  std::cout << "FrameMain::~FrameMain" << this->GetName() << std::endl;
+FrameMain::~FrameMain() {
+  //std::cout << "FrameMain::~FrameMain" << this->GetName() << std::endl;
 }
 
 bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
@@ -46,11 +46,11 @@ bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption
 void FrameMain::Init() {
   m_ixDynamicMenuItem = ID_DYNAMIC_MENU_ACTIONS;
   m_menuFile = 0;
-  m_menuBar = NULL;
-  m_statusBar = NULL;
+  m_menuBar = nullptr;
+  m_statusBar = nullptr;
 }
 
-void FrameMain::CreateControls( void ) {
+void FrameMain::CreateControls() {
 
     FrameMain* itemFrame1 = this;
 

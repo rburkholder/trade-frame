@@ -26,18 +26,21 @@
 #include <wx/sizer.h>
 #include <wx/treectrl.h>
 
+#include <TFTrading/Watch.h>
+#include <TFTrading/Position.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/FrameControls.h>
+#include <TFVuTrading/PanelOrderButtons.h>
 
 #include "Config.h"
 #include "InteractiveChart.h"
 #include "AppIndicatorTrading.h"
-#include "TFTrading/Position.h"
-#include "TFTrading/Watch.h"
 
 namespace {
-  static const std::string sAppName( "IndicatorTrading" );
+  static const std::string sAppName( "Indicator Trading" );
   static const std::string sConfigFilename( "IndicatorTrading.cfg" );
   static const std::string sStateFileName( "IndicatorTrading.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
@@ -59,6 +62,9 @@ bool AppIndicatorTrading::OnInit() {
 
   if ( Load( sConfigFilename, options ) ) {
     m_sSymbol = options.sSymbol;
+  }
+  else {
+    return 0;
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
@@ -138,6 +144,14 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
+
+  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Controls", wxPoint( 10, 10 ) );
+  m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameControls );
+  m_pFrameControls->Attach( m_pPanelOrderButtons );
+
+  m_pFrameControls->SetAutoLayout( true );
+  m_pFrameControls->Layout();
+  m_pFrameControls->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIndicatorTrading::OnClose, this );  // start close of windows and controls
 
@@ -236,6 +250,8 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   //m_pWinChartView->SetChartDataView( nullptr, false );
   //delete m_pChartData;
   //m_pChartData = nullptr;
+
+  //m_pFrameControls->Close();
 
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();

@@ -34,28 +34,31 @@
 class wxBoxSizer;
 class wxTreeCtrl;
 
-class InteractiveChart;
 class FrameMain;
+class InteractiveChart;
 
 namespace ou {
 namespace tf {
   class PanelLogging;
+  class FrameControls;
+  class PanelOrderButtons;
 }
 }
 
 class AppIndicatorTrading:
   public wxApp,
-  public ou::tf::FrameWork01<AppIndicatorTrading> {
+  public ou::tf::FrameWork01<AppIndicatorTrading>
+{
   friend ou::tf::FrameWork01<AppIndicatorTrading>;
   friend class boost::serialization::access;
 public:
 protected:
 private:
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::FrameControls* m_pFrameControls;
+  ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
 
   std::string m_sSymbol;
 
@@ -100,6 +103,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & m_splitterRow->GetSashPosition();
+    ar & *m_pFrameControls;
     //ar & *m_pWinChartView;
   }
 
@@ -112,13 +116,16 @@ private:
     if ( 2 <= version ) {
       //ar & *m_pWinChartView;
     }
+    if ( 3 <= version ) {
+      ar & *m_pFrameControls;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 2)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 3)
 
 DECLARE_APP(AppIndicatorTrading)
 

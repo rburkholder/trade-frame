@@ -22,6 +22,7 @@ set(
     DragDropInstrument.h
     DragDropInstrumentTarget.h
     EventDrawChart.h
+    FrameControls.h
     FrameMain.h
     FrameOrderEntry.h
     GridIBAccountValues.h
@@ -48,6 +49,7 @@ set(
     PanelManualOrder.h
     PanelOptionCombo.h
     PanelOptionCombo_impl.h
+    PanelOrderButtons.h
     PanelPortfolioPosition.h
     PanelPortfolioPosition_impl.h
     PanelPortfolioPositionOrderExecution.h
@@ -76,6 +78,7 @@ set(
     DragDropInstrument.cpp
     DragDropInstrumentTarget.cpp
     EventDrawChart.cpp
+    FrameControls.cpp
     FrameMain.cpp
     FrameOrderEntry.cpp
     GridIBAccountValues.cpp
@@ -100,6 +103,7 @@ set(
     PanelManualOrder.cpp
     PanelOptionCombo.cpp
     PanelOptionCombo_impl.cpp
+    PanelOrderButtons.cpp
     PanelPortfolioPosition.cpp
     PanelPortfolioPosition_impl.cpp
     PanelPortfolioPositionOrderExecution.cpp
