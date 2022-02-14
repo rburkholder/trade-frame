@@ -78,7 +78,7 @@ void PanelOrderButtons::CreateControls() {
     itemPanel1->SetSizer(sizerPanel);
 
     sizerBtnOrderType = new wxBoxSizer(wxVERTICAL);
-    sizerPanel->Add(sizerBtnOrderType, 0, wxALIGN_TOP, 2);
+    sizerPanel->Add(sizerBtnOrderType, 0, wxALIGN_TOP|wxADJUST_MINSIZE, 2);
 
     m_btnMarket = new wxRadioButton( itemPanel1, ID_BtnMarket, _("Market"), wxDefaultPosition, wxDefaultSize, 0 );
     m_btnMarket->SetValue(false);
@@ -93,7 +93,7 @@ void PanelOrderButtons::CreateControls() {
     sizerBtnOrderType->Add(m_btnBracket, 0, wxALIGN_LEFT|wxALL, 2);
 
     sizerButtons = new wxBoxSizer(wxVERTICAL);
-    sizerPanel->Add(sizerButtons, 0, wxALIGN_TOP|wxALL|wxADJUST_MINSIZE, 1);
+    sizerPanel->Add(sizerButtons, 0, wxALIGN_TOP|wxADJUST_MINSIZE, 1);
 
     wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(itemBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxADJUST_MINSIZE, 2);
