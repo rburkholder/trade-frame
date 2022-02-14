@@ -61,9 +61,7 @@ private:
   ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
 
   std::string m_sSymbol;
-
-  //ChartData* m_pChartData;
-  //ou::tf::WinChartView* m_pWinChartView;
+  std::string m_sTSDataStreamStarted;
 
   wxTreeCtrl* m_ptreeTradables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
@@ -88,8 +86,6 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
-
-  void HandleSaveValues( void );
 
   void SaveState();
   void LoadState();

@@ -242,3 +242,6 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
   m_ceVolumeDn.Append( bar );
 }
 
+void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
+  m_pPosition->GetWatch()->SaveSeries( sPrefix );
+}

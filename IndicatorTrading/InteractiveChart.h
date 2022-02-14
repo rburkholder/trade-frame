@@ -71,6 +71,8 @@ public:
 
   void SetPosition( pPosition_t );
 
+  void SaveWatch( const std::string& );
+
   void Connect();
   void Disconnect();
 

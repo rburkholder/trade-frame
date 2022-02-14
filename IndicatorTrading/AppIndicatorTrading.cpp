@@ -65,6 +65,17 @@ bool AppIndicatorTrading::OnInit() {
     return 0;
   }
 
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::Instance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << " "
+      << dt.time_of_day()
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+  }
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -148,8 +159,8 @@ bool AppIndicatorTrading::OnInit() {
   //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
-  //vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
-  //m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
@@ -183,21 +194,13 @@ void AppIndicatorTrading::HandleMenuActionStopWatch( void ) {
 }
 
 void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
-  //m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleSaveValues ) );
-}
-
-void AppIndicatorTrading::HandleSaveValues( void ) {
   std::cout << "Saving collected values ... " << std::endl;
-  try {
-//    std::string sPrefixSession( "/app/AppRdafL1/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
-    //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
-//    std::string sPrefix86400sec( "/app/AppRdafL1/AtmIV/" + m_pBundle->Name() );
-//    m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
-  }
-  catch(...) {
-    std::cout << " ... issues with saving ... " << std::endl;
-  }
-  std::cout << "  ... Done " << std::endl;
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->SaveWatch( "/app/InddicatorTrading/" + m_sTSDataStreamStarted );
+      std::cout << "  ... Done " << std::endl;
+    }
+  );
 }
 
 int AppIndicatorTrading::OnExit() {
