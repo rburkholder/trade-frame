@@ -107,9 +107,9 @@ protected:
       m_mapSecurityType,
       [this](){
         std::cout
-          << "SymbolLookup Results: "
+          << "IQFeed Lookup Tables: "
           << "ListedMarkets=" << m_mapListedMarket.size()
-          << ",SecurityTypes=" << m_mapSecurityType.size()
+          << " ,SecurityTypes=" << m_mapSecurityType.size()
           << std::endl;
         //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
         //m_pSymbolLookup.reset();
