@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Chart.cpp
+ * File:    InteractiveChart.cpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: February 8, 2022 13:38
