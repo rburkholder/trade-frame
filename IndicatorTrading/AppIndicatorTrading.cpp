@@ -182,6 +182,8 @@ bool AppIndicatorTrading::OnInit() {
     }
   );
 
+  std::cout << "symbol: " << m_sSymbol << std::endl;
+
   return 1;
 }
 
