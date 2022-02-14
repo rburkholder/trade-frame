@@ -22,13 +22,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T, class D> 
+template<class T, class D>
 class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
 public:
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, size_t nPeriods, time_duration tdPeriodWidth, size_t WindowSizeCount = 0 );
   TimeSeriesSlidingWindowStats<T,D>( const TimeSeriesSlidingWindowStats<T,D>& rhs );
-  virtual ~TimeSeriesSlidingWindowStats<T,D>( void );
+  virtual ~TimeSeriesSlidingWindowStats<T,D>();
 //  double Accel( void ) const { return m_stats.B2(); };
   double Slope( void ) const { return m_stats.Slope(); };
   double Offset( void ) const { return m_stats.Offset(); };
@@ -44,28 +45,35 @@ public:
   void Reset( void ) { TimeSeriesSlidingWindow<T,D>::Reset(); m_stats.Reset(); };
 protected:
 //  void Add( const T &datum ) {}; // override to process elements passing into window scope
-//  void Expire( const T &datum ) {};  // override to process elements passing out of window scope 
+//  void Expire( const T &datum ) {};  // override to process elements passing out of window scope
   void PostUpdate( void ) { m_stats.CalcStats(); };  // CRTP based call
   RunningStats m_stats;
 private:
 };
 
 // constructor
-template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats( 
-  TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats(
+  TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount )
 : TimeSeriesSlidingWindow<T,D>( Series, tdWindowWidth, WindowSizeCount )
 {
   m_stats.SetBBMultiplier( 2.0 );
 }
 
-template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats( 
-  const TimeSeriesSlidingWindowStats<T,D>& rhs ) 
-  : TimeSeriesSlidingWindow<T,D>( rhs ), m_stats( rhs.m_stats )
+template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats(
+  TimeSeries<D>& Series, size_t nPeriods, time_duration tdPeriodWidth, size_t WindowSizeCount )
+: TimeSeriesSlidingWindow<T,D>( Series, nPeriods, tdPeriodWidth, WindowSizeCount )
 {
-  
+  m_stats.SetBBMultiplier( 2.0 );
 }
 
-template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::~TimeSeriesSlidingWindowStats(void) {
+template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats(
+  const TimeSeriesSlidingWindowStats<T,D>& rhs )
+  : TimeSeriesSlidingWindow<T,D>( rhs ), m_stats( rhs.m_stats )
+{
+
+}
+
+template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::~TimeSeriesSlidingWindowStats() {
 }
 
 // Convert the following flavours into template based actors so can be used among different indicators
@@ -80,10 +88,10 @@ class TSSWStatsTrade: public TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>
 public:
   TSSWStatsTrade( TimeSeries<Trade>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   TSSWStatsTrade( const TSSWStatsTrade& rhs );
-  ~TSSWStatsTrade( void );
+  virtual ~TSSWStatsTrade();
 protected:
   void Add( const Trade &trade ); // override to process elements passing into window scope
-  void Expire( const Trade &trade );  // override to process elements passing out of window scope 
+  void Expire( const Trade &trade );  // override to process elements passing out of window scope
 private:
 };
 
@@ -97,10 +105,10 @@ class TSSWStatsQuote: public TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>
 public:
   TSSWStatsQuote( TimeSeries<Quote>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   TSSWStatsQuote( const TSSWStatsQuote& rhs );
-  ~TSSWStatsQuote( void );
+  virtual ~TSSWStatsQuote();
 protected:
   void Add( const Quote &quote ); // override to process elements passing into window scope
-  void Expire( const Quote &quote );  // override to process elements passing out of window scope 
+  void Expire( const Quote &quote );  // override to process elements passing out of window scope
 private:
 };
 
@@ -113,11 +121,12 @@ class TSSWStatsMidQuote: public TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, 
   friend TimeSeriesSlidingWindow<TSSWStatsMidQuote, Quote>;
 public:
   TSSWStatsMidQuote( Quotes& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsMidQuote( Quotes& series, size_t nPeriods, time_duration tdPeriodWidth, size_type WindowSizeCount = 0 );
   TSSWStatsMidQuote( const TSSWStatsMidQuote& rhs );
-  ~TSSWStatsMidQuote( void );
+  virtual ~TSSWStatsMidQuote();
 protected:
   void Add( const Quote &quote ); // override to process elements passing into window scope
-  void Expire( const Quote &quote );  // override to process elements passing out of window scope 
+  void Expire( const Quote &quote );  // override to process elements passing out of window scope
 private:
 };
 
@@ -131,10 +140,10 @@ class TSSWStatsPrice: public TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>
 public:
   TSSWStatsPrice( TimeSeries<Price>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   TSSWStatsPrice( const TSSWStatsPrice& rhs );
-  ~TSSWStatsPrice( void );
+  virtual ~TSSWStatsPrice();
 protected:
   void Add( const Price &price ); // override to process elements passing into window scope
-  void Expire( const Price &price );  // override to process elements passing out of window scope 
+  void Expire( const Price &price );  // override to process elements passing out of window scope
 private:
 };
 

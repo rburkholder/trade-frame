@@ -23,7 +23,7 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-TSSWStatsTrade::TSSWStatsTrade(TimeSeries<Trade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+TSSWStatsTrade::TSSWStatsTrade(TimeSeries<Trade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount )
 : TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
@@ -52,7 +52,7 @@ void TSSWStatsTrade::Expire( const Trade &trade ) {
 // Quote
 //
 
-TSSWStatsQuote::TSSWStatsQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+TSSWStatsQuote::TSSWStatsQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount )
 : TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
@@ -83,13 +83,16 @@ void TSSWStatsQuote::Expire( const Quote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(Quotes& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+TSSWStatsMidQuote::TSSWStatsMidQuote(Quotes& Series, time_duration tdWindowWidth, size_t WindowSizeCount )
 : TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
-{
-}
+{}
+
+TSSWStatsMidQuote::TSSWStatsMidQuote( Quotes& series, size_t nPeriods, time_duration tdPeriodWidth, size_type WindowSizeCount )
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( series, nPeriods, tdPeriodWidth, WindowSizeCount )
+{}
 
 TSSWStatsMidQuote::TSSWStatsMidQuote( const TSSWStatsMidQuote& rhs )
-  : TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( rhs )
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( rhs )
 {
 }
 
@@ -112,7 +115,7 @@ void TSSWStatsMidQuote::Expire( const Quote &quote ) {
 // Price
 //
 
-TSSWStatsPrice::TSSWStatsPrice(TimeSeries<Price>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+TSSWStatsPrice::TSSWStatsPrice(TimeSeries<Price>& Series, time_duration tdWindowWidth, size_t WindowSizeCount )
 : TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
