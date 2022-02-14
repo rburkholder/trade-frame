@@ -92,9 +92,9 @@ void InteractiveChart::Init() {
   m_dvChart.Add( 0, &m_ceShortExits );
   m_dvChart.Add( 0, &m_ceLongExits );
 
-  m_dvChart.Add( 1, &m_ceVolume );
-  //m_dvChart.Add( 1, &m_ceVolumeUp );
-  //m_dvChart.Add( 1, &m_ceVolumeDn );
+  //m_dvChart.Add( 1, &m_ceVolume );
+  m_dvChart.Add( 1, &m_ceVolumeUp );
+  m_dvChart.Add( 1, &m_ceVolumeDn );
 
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
@@ -221,24 +221,24 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
 
   double mid = m_quote.Midpoint();
 
-  m_bfPrice.Add( dt, price, trade.Volume() );
-  //if ( price >= mid ) {
-  //  m_bfPriceUp.Add( dt, price, trade.Volume() );
-  //}
-  //else {
-  //  m_bfPriceDn.Add( dt, price, -trade.Volume() );
-  //}
+  //m_bfPrice.Add( dt, price, trade.Volume() );
+  if ( price >= mid ) {
+    m_bfPriceUp.Add( dt, price, trade.Volume() );
+  }
+  else {
+    m_bfPriceDn.Add( dt, price, -trade.Volume() );
+  }
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
-  m_ceVolume.Append( bar.DateTime(), bar.Volume() );
+  m_ceVolume.Append( bar );
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
-  m_ceVolumeUp.Append( bar.DateTime(), bar.Volume() );
+  m_ceVolumeUp.Append( bar );
 }
 
 void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
-  m_ceVolumeDn.Append( bar.DateTime(), bar.Volume() );
+  m_ceVolumeDn.Append( bar );
 }
 
