@@ -91,11 +91,6 @@ private:
 
   void HandleSaveValues( void );
 
-//  void HandleDrawChart( const MemBlock& );
-  void HandlePaint( wxPaintEvent& event );
-  void HandleSize( wxSizeEvent& event );
-  void HandleMouse( wxMouseEvent& event );
-
   void SaveState();
   void LoadState();
 

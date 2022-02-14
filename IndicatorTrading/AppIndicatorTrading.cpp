@@ -50,8 +50,6 @@ IMPLEMENT_APP(AppIndicatorTrading)
 
 bool AppIndicatorTrading::OnInit() {
 
-  //m_pChartData = nullptr;
-
   wxApp::SetAppDisplayName( sAppName );
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
@@ -69,10 +67,7 @@ bool AppIndicatorTrading::OnInit() {
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
-  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
-  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
-  //m_pFrameMain->Center();
-//  m_pFrameMain->Move( -2500, 50 );
+
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
@@ -101,8 +96,6 @@ bool AppIndicatorTrading::OnInit() {
   // Sizer for Controls
   wxBoxSizer* sizerControls;
   sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  //m_sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
-  //panelSplitterRight->SetSizer( m_sizerControls );
   sizerSplitterRight->Add( sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   // m_pPanelProviderControl
@@ -119,13 +112,7 @@ bool AppIndicatorTrading::OnInit() {
 
   LinkToPanelProviderControl();
 
-//  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-//  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
-
-  //m_pWinChartView = new ou::tf::WinChartView( panelSplitterRightPanel, wxID_ANY );
-  //sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
-  //m_pWinChartView = new ou::tf::WinChartView( panelSplitterRight, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  //sizerSplitterRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 3);
+  std::cout << "symbol: " << m_sSymbol << std::endl;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
@@ -168,11 +155,6 @@ bool AppIndicatorTrading::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  //if ( nullptr == m_pChartData ) {
-  //  m_pChartData = new ChartData( m_pData1Provider, m_sSymbol, options );
-  //  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
-  //}
-
   CallAfter(
     [this](){
       LoadState();
@@ -182,8 +164,6 @@ bool AppIndicatorTrading::OnInit() {
     }
   );
 
-  std::cout << "symbol: " << m_sSymbol << std::endl;
-
   return 1;
 }
 
@@ -192,25 +172,6 @@ void AppIndicatorTrading::HandleMenuActionStartChart( void ) {
 
 void AppIndicatorTrading::HandleMenuActionStopChart( void ) {
   //m_pWinChartView->SetChartDataView( nullptr );
-}
-
-void AppIndicatorTrading::HandleSize( wxSizeEvent& event ) {
-  //m_winChartView->DrawChart();
-  //StartDrawChart();
-}
-
-void AppIndicatorTrading::HandleMouse( wxMouseEvent& event ) {
-  event.Skip();
-}
-
-void AppIndicatorTrading::HandlePaint( wxPaintEvent& event ) {
-//  if ( event.GetId() == m_winChart->GetId() ) {
-//    wxPaintDC dc( m_winChart );
-//    dc.DrawBitmap( *m_pChartBitmap, 0, 0);
-//    m_bInDrawChart = false;
-//  }
-  //else
-  event.Skip();
 }
 
 void AppIndicatorTrading::HandleMenuActionStartWatch( void ) {
