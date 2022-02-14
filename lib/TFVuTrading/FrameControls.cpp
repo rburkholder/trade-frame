@@ -72,7 +72,7 @@ bool FrameControls::ShowToolTips() {
 }
 
 void FrameControls::Attach( wxWindow* pWindow ) {
-  m_sizerFrame->Add( pWindow, 1, wxStretch::wxEXPAND|wxALL, 1 );
+  m_sizerFrame->Add( pWindow, 1 );
   m_sizerFrame->Layout();
   pWindow->Show();
 }
