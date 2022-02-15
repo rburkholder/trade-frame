@@ -22,7 +22,6 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-#include <wx/panel.h>
 #include <wx/sizer.h>
 
 #include <TFTrading/Watch.h>
@@ -31,14 +30,16 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "Config.h"
+#include "Strategy.h"
 #include "AppAutoTrade.h"
 
 namespace {
-  static const std::string sAppName( "Auto Trading Example" );
-  static const std::string sConfigFilename( "AutoTrading.cfg" );
-  static const std::string sStateFileName( "AutoTrading.state" );
+  static const std::string sAppName( "Auto Trade Example" );
+  static const std::string sConfigFilename( "AutoTrade.cfg" );
+  static const std::string sStateFileName( "AutoTrade.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
 
@@ -78,21 +79,35 @@ bool AppAutoTrade::OnInit() {
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
+    wxBoxSizer* sizerFrame;
+    wxBoxSizer* sizerLeft;
+    wxBoxSizer* sizerRight;
+
   // Sizer for FrameMain
-  m_sizerFrame = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer( m_sizerFrame );
+    sizerFrame = new wxBoxSizer(wxHORIZONTAL);
+    m_pFrameMain->SetSizer(sizerFrame);
 
-  // Sizer for Controls
-  wxBoxSizer* sizerControls;
-  sizerControls = new wxBoxSizer( wxHORIZONTAL );
+  // Sizer for Controls, Logging
+    sizerLeft = new wxBoxSizer(wxVERTICAL);
+    sizerFrame->Add(sizerLeft, 0, wxGROW, 2);
 
-  // m_pPanelProviderControl
-  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 1);
+    // m_pPanelProviderControl
+    m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    sizerLeft->Add(m_pPanelProviderControl, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
-  // m_pPanelLogging
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
+    // m_pPanelLogging
+    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    sizerLeft->Add(m_pPanelLogging, 1, wxGROW, 2);
+
+    sizerRight = new wxBoxSizer(wxHORIZONTAL);
+    sizerFrame->Add(sizerRight, 1, wxGROW, 2);
+
+    // m_pPanelChart
+    m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    sizerRight->Add(m_pWinChartView, 1, wxGROW, 2);
 
   LinkToPanelProviderControl();
 
@@ -106,6 +121,9 @@ bool AppAutoTrade::OnInit() {
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, options.sSymbol );
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, this->m_pData1Provider ); // will need to be iqfeed provider, check?
   pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+
+  m_pWinChartView->SetChartDataView( &m_ChartDataView );
+  m_pStrategy = std::make_unique<Strategy>( pPosition, m_ChartDataView, options );
 
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();

@@ -22,21 +22,24 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
 
+#include <OUCharting/ChartDataView.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
-class wxBoxSizer;
-
 class FrameMain;
+class Strategy;
 
 namespace ou {
 namespace tf {
   class PanelLogging;
+  class WinChartView;
 }
 }
 
@@ -52,11 +55,14 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::WinChartView* m_pWinChartView;
 
   std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
 
-  wxBoxSizer* m_sizerFrame;
+  ou::ChartDataView m_ChartDataView;
+
+  std::unique_ptr<Strategy> m_pStrategy;
 
   virtual bool OnInit();
   virtual int OnExit();
