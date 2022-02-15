@@ -17,8 +17,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// RunningStats has no events
+//   CalcStats could be inherited, and called, then event processed in higher levels
+
 class RunningStats {
 public:
+
   RunningStats();
   RunningStats( double BBMultiplier );
   RunningStats( const RunningStats& );
@@ -26,7 +30,7 @@ public:
   virtual ~RunningStats();
 
   void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
-  double GetBBMultiplier( void ) const { return m_BBMultiplier; };
+  double GetBBMultiplier() const { return m_BBMultiplier; };
 
   void Add( double, double );
   void Remove( double, double );
@@ -49,6 +53,7 @@ public:
   double BBLower() const { return  meanY - sd * m_BBMultiplier; };
 
 protected:
+private:
 
 //  double b2; // acceleration
   double b1; // slope
@@ -66,7 +71,6 @@ protected:
   unsigned int nX, nY;
   double SumXX, SumX, SumXY, SumY, SumYY;
   double m_BBMultiplier;
-private:
 };
 
 } // namespace tf

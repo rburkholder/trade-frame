@@ -72,7 +72,8 @@ RunningStats::~RunningStats() {
 }
 
 void RunningStats::Reset() {
-  /*b2 = */ b1 = b0
+  /*b2 = */
+      b1 = b0
     = meanY
     = rr = r
     = sd /*= bbUpper = bbLower */
