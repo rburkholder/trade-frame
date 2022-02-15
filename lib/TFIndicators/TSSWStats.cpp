@@ -33,7 +33,7 @@ TSSWStatsTrade::TSSWStatsTrade( const TSSWStatsTrade& rhs )
 {
 }
 
-TSSWStatsTrade::~TSSWStatsTrade( void ) {
+TSSWStatsTrade::~TSSWStatsTrade() {
 }
 
 void TSSWStatsTrade::Add( const Trade &trade ) {
@@ -101,7 +101,7 @@ TSSWStatsMidQuote::TSSWStatsMidQuote( TSSWStatsMidQuote&& rhs )
 {
 }
 
-TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
+TSSWStatsMidQuote::~TSSWStatsMidQuote() {
 }
 
 void TSSWStatsMidQuote::Add( const Quote &quote ) {
@@ -130,7 +130,7 @@ TSSWStatsPrice::TSSWStatsPrice( const TSSWStatsPrice& rhs )
 {
 }
 
-TSSWStatsPrice::~TSSWStatsPrice( void ) {
+TSSWStatsPrice::~TSSWStatsPrice() {
 }
 
 void TSSWStatsPrice::Add( const Price& price ) {

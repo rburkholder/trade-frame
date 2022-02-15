@@ -26,29 +26,37 @@ template<class T, class D>
 class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
 public:
+
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, size_t nPeriods, time_duration tdPeriodWidth, size_t WindowSizeCount = 0 );
   TimeSeriesSlidingWindowStats<T,D>( const TimeSeriesSlidingWindowStats<T,D>& rhs );
   TimeSeriesSlidingWindowStats<T,D>( TimeSeriesSlidingWindowStats<T,D>&& rhs );
   virtual ~TimeSeriesSlidingWindowStats<T,D>();
+
 //  double Accel( void ) const { return m_stats.B2(); };
-  double Slope( void ) const { return m_stats.Slope(); };
-  double Offset( void ) const { return m_stats.Offset(); };
-  double MeanY( void ) const { return m_stats.MeanY(); };
-  double RR( void ) const { return m_stats.RR(); };
-  double R( void ) const { return m_stats.R(); };
-  double SD( void ) const { return m_stats.SD(); };
-  double BBOffset( void ) const { return m_stats.BBOffset(); };
-  double BBUpper( void ) const { return m_stats.BBUpper(); };
-  double BBLower( void ) const { return m_stats.BBLower(); };
+  double Slope() const { return m_stats.Slope(); };
+  double Offset() const { return m_stats.Offset(); };
+  double MeanY() const { return m_stats.MeanY(); };
+  double RR() const { return m_stats.RR(); };
+  double R() const { return m_stats.R(); };
+  double SD() const { return m_stats.SD(); };
+  double BBOffset() const { return m_stats.BBOffset(); };
+  double BBUpper() const { return m_stats.BBUpper(); };
+  double BBLower() const { return m_stats.BBLower(); };
+
   void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); };
-  double GetBBMultiplier( void ) const { return m_stats.GetBBMultiplier(); };
-  void Reset( void ) { TimeSeriesSlidingWindow<T,D>::Reset(); m_stats.Reset(); };
+  double GetBBMultiplier() const { return m_stats.GetBBMultiplier(); };
+
+  void Reset() {
+    TimeSeriesSlidingWindow<T,D>::Reset();
+    m_stats.Reset();
+    };
+
 protected:
 //  void Add( const T &datum ) {}; // override to process elements passing into window scope
 //  void Expire( const T &datum ) {};  // override to process elements passing out of window scope
-  void PostUpdate( void ) { m_stats.CalcStats(); };  // CRTP based call
   RunningStats m_stats;
+  void PostUpdate() { m_stats.CalcStats(); };  // CRTP based call
 private:
 };
 
@@ -90,7 +98,6 @@ template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::~TimeSeriesSliding
 //
 
 class TSSWStatsTrade: public TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade> {
-//  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>;
   friend TimeSeriesSlidingWindow<TSSWStatsTrade, Trade>;
 public:
   TSSWStatsTrade( TimeSeries<Trade>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
@@ -107,7 +114,6 @@ private:
 //
 
 class TSSWStatsQuote: public TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote> {
-//  friend TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>;
   friend TimeSeriesSlidingWindow<TSSWStatsQuote, Quote>;
 public:
   TSSWStatsQuote( TimeSeries<Quote>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
@@ -124,7 +130,6 @@ private:
 //
 
 class TSSWStatsMidQuote: public TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote> {
-//  friend TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>;
   friend TimeSeriesSlidingWindow<TSSWStatsMidQuote, Quote>;
 public:
   TSSWStatsMidQuote( Quotes& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
@@ -143,7 +148,6 @@ private:
 //
 
 class TSSWStatsPrice: public TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price> {
-//  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>;
   friend TimeSeriesSlidingWindow<TSSWStatsPrice, Price>;
 public:
   TSSWStatsPrice( TimeSeries<Price>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
