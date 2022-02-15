@@ -63,7 +63,7 @@ public:
   virtual ~WinChartView();
 
   void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true );
-  ou::ChartDataView* GetChartDataView( void ) const { return m_pChartDataView; }
+  ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
   using fOnRefreshData_t = std::function<void()>;
   void SetOnRefreshData( fOnRefreshData_t && f ) {
