@@ -213,9 +213,10 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       boost::posix_time::time_duration time( dt.time_of_day() );
       static_cast<T*>(this)->HandleGoNeutral( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
-//      if ( &DailyTradeTimeFrame<T>::HandleGoingNeutral<DD> != &T::HandleGoingNeutral ) { // need to figure out comparison to bar|quote|trade|etc (DD)
+      // https://gcc.gnu.org/legacy-ml/gcc-help/2006-04/msg00023.html doesn't fix this
+      //if ( &DailyTradeTimeFrame<T>::template HandleGoingNeutral<DD> != &T::template HandleGoingNeutral<DD> ) { // need to figure out comparison to bar|quote|trade|etc (DD)
         static_cast<T*>(this)->HandleGoingNeutral( dd );
-//      }
+      //}
 
     }
     else {
