@@ -26,36 +26,62 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-RunningStats::RunningStats(void) : 
-  /*b2( 0 ),*/ b1( 0 ), b0( 0 ), 
-  SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
-  rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
-  nX( 0 ), m_BBMultiplier( 2.0 )
-{
+RunningStats::RunningStats()
+: /*b2( 0 ),*/
+  b1( 0 ), b0( 0 ),
+  SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 )
+, rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 )
+, nX( 0 ), m_BBMultiplier( 2.0 )
+{}
+
+RunningStats::RunningStats( double BBMultiplier )
+: /*b2( 0 ),*/
+  b1( 0 ), b0( 0 )
+, SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 )
+, rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 )
+, nX( 0 ), m_BBMultiplier( BBMultiplier )
+{}
+
+RunningStats::RunningStats( const RunningStats& rhs )
+:
+  b1( rhs.b1 ), b0( rhs.b1 )
+, SumXX( rhs.SumXX ), SumX( rhs.SumX )
+, SumYY( rhs.SumYY ), SumY( rhs.SumY )
+, SumXY( rhs.SumXY )
+, rr( rhs.rr ), r( rhs.r )
+, meanY( rhs.meanY ), sd( rhs.sd )
+, nX( rhs.nX ), nY( rhs.nY )
+, m_BBMultiplier( rhs.m_BBMultiplier )
+{}
+
+
+RunningStats::RunningStats( const RunningStats&& rhs )
+:
+  b1( rhs.b1 ), b0( rhs.b1 )
+, SumXX( rhs.SumXX ), SumX( rhs.SumX )
+, SumYY( rhs.SumYY ), SumY( rhs.SumY )
+, SumXY( rhs.SumXY )
+, rr( rhs.rr ), r( rhs.r )
+, meanY( rhs.meanY ), sd( rhs.sd )
+, nX( rhs.nX ), nY( rhs.nY )
+, m_BBMultiplier( rhs.m_BBMultiplier )
+{}
+
+
+RunningStats::~RunningStats() {
 }
 
-RunningStats::RunningStats( double BBMultiplier ) : 
-  /*b2( 0 ),*/ b1( 0 ), b0( 0 ), 
-  SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
-  rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
-  nX( 0 ), m_BBMultiplier( BBMultiplier )
-{
-}
-
-RunningStats::~RunningStats(void) {
-}
-
-void RunningStats::Reset( void ) {
-  /*b2 = */ b1 = b0 
-    = meanY 
-    = rr = r 
+void RunningStats::Reset() {
+  /*b2 = */ b1 = b0
+    = meanY
+    = rr = r
     = sd /*= bbUpper = bbLower */
-    = nX = nY 
+    = nX = nY
     = SumXX = SumX = SumXY = SumY = SumYY
     = 0;
 }
 
-void RunningStats::Add(double x, double y) {
+void RunningStats::Add( double x, double y ) {
   SumXX += x * x;
   SumX += x;
   SumXY += x * y;
@@ -64,7 +90,7 @@ void RunningStats::Add(double x, double y) {
   nX++;
 }
 
-void RunningStats::Remove(double x, double y) {
+void RunningStats::Remove( double x, double y ) {
   SumXX -= x * x;
   SumX -= x;
   SumXY -= x * y;

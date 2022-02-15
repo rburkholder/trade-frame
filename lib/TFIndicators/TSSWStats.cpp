@@ -96,6 +96,11 @@ TSSWStatsMidQuote::TSSWStatsMidQuote( const TSSWStatsMidQuote& rhs )
 {
 }
 
+TSSWStatsMidQuote::TSSWStatsMidQuote( TSSWStatsMidQuote&& rhs )
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( std::move( rhs ) )
+{
+}
+
 TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
 }
 

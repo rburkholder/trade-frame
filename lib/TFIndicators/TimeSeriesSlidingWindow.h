@@ -33,6 +33,7 @@ public:
   TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount = 0 );
   TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, size_t nPeriods, time_duration tdPeriodWidth, size_type WindowSizeCount = 0 );
   TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );  // Delegate is not copied, other values may need some tuning
+  TimeSeriesSlidingWindow<T,D>( TimeSeriesSlidingWindow<T,D>&& ); // limited to the initial emplace operations
   virtual ~TimeSeriesSlidingWindow<T,D>();
   virtual void Reset();
   ou::Delegate<const D&> OnAppend;
@@ -98,6 +99,18 @@ TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( const TimeSeriesSlidingWi
   m_tdWindowWidth( rhs.m_tdWindowWidth ), m_nWindowSizeCount( rhs.m_nWindowSizeCount ),
   m_ixTrailing( rhs.m_ixTrailing ), m_ixLeading( rhs.m_ixLeading ), m_dtLeading( rhs.m_dtLeading ),
   m_bFirstDatumFound( rhs.m_bFirstDatumFound ), m_dtZero( rhs.m_dtZero ), m_bAutoUpdate( true )
+{
+  // best used when originating timeseries is empty
+  Init();
+}
+
+template<class T, class D>
+TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( TimeSeriesSlidingWindow<T,D>&& rhs )
+: m_Series( std::move( rhs.m_Series ) )
+, m_tdWindowWidth( rhs.m_tdWindowWidth ), m_nWindowSizeCount( rhs.m_nWindowSizeCount )
+, m_ixTrailing( rhs.m_ixTrailing ), m_ixLeading( rhs.m_ixLeading ), m_dtLeading( rhs.m_dtLeading )
+, m_bFirstDatumFound( rhs.m_bFirstDatumFound ), m_dtZero( rhs.m_dtZero ), m_bAutoUpdate( true )
+, OnAppend( std::move( rhs.OnAppend ) )
 {
   // best used when originating timeseries is empty
   Init();
