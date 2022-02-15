@@ -56,9 +56,8 @@ class Strategy:
 public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
-  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  Strategy( pPosition_t, pChartDataView_t, const config::Options& );
+  Strategy( pPosition_t, ou::ChartDataView&, const config::Options& );
   virtual ~Strategy();
 
 protected:
@@ -67,7 +66,6 @@ private:
   enum EChartSlot { Price, Volume, PL }; // IndMA = moving averate indicator
 
   pPosition_t m_pPosition;
-  pChartDataView_t m_pChartDataView;
 
   struct MA {
 
@@ -84,18 +82,23 @@ private:
     MA( MA&& rhs )
     : m_statsMA( std::move( rhs.m_statsMA ) ) {}
 
-    void AddToView( pChartDataView_t pChartDataView ) {
-      pChartDataView->Add( EChartSlot::Price, &m_ceMA );
+    void AddToView( ou::ChartDataView& cdv ) {
+      cdv.Add( EChartSlot::Price, &m_ceMA );
+    }
+
+    void Update( ptime dt ) {
+      m_ceMA.Append( dt, m_statsMA.MeanY() );
     }
   };
 
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
-  ou::ChartEntryVolume m_ceVolume;
-
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
+
+  ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryVolume m_ceVolume;
 
   ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongEntries;
