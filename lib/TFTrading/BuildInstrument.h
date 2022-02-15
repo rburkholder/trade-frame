@@ -24,7 +24,6 @@
 #include <functional>
 
 #include <TFIQFeed/Provider.h>
-#include <TFIQFeed/MarketSymbol.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
@@ -45,10 +44,7 @@ public:
 
   using fInstrument_t = std::function<void(pInstrument_t)>;
 
-  using trd_t = ou::tf::iqfeed::MarketSymbol::TableRowDef;
-  using fGetTableRowDef_t = std::function<const trd_t&(const std::string& sIQFeedSymbolName)>;
-
-  BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t, fGetTableRowDef_t&& );
+  BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );
 
   void Add( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();
@@ -81,8 +77,6 @@ private:
 
   pProviderIQFeed_t m_pIQ;
   pProviderIBTWS_t m_pIB;
-
-  fGetTableRowDef_t m_fGetTableRowDef;
 
   void Update();
 

@@ -233,10 +233,6 @@ void AppBasketTrading::BuildMasterPortfolio() {
     m_pPortfolioStrategyAggregate,
     // providers
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
-    // obtain instrument details given instrument name:
-    [this](const std::string& sIQFeedSymbolName)->const MasterPortfolio::trd_t& {
-      return m_listIQFeedSymbols.GetTrd( sIQFeedSymbolName );
-    },
     // root ChartDataView to PanelFinancialChart
     [this]( const std::string& sName,  pChartDataView_t pChartDataView )->wxTreeItemId{
       return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );

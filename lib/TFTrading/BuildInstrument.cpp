@@ -31,13 +31,11 @@ namespace tf { // TradeFrame
 
 using pWatch_t = Watch::pWatch_t;
 
-BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB, fGetTableRowDef_t&& fGetTableRowDef )
-: m_pIQ( std::move( pIQFeed ) ), m_pIB( std::move( pIB ) ),
-  m_fGetTableRowDef( std::move( fGetTableRowDef ) )
+BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB )
+: m_pIQ( std::move( pIQFeed ) ), m_pIB( std::move( pIB ) )
 {
   assert( m_pIQ );
   assert( m_pIB );
-  assert( m_fGetTableRowDef );
 }
 
 void BuildInstrument::Add( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
@@ -103,9 +101,6 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   auto& [ sIQFeedSymbol, ip ] = *iterInProgress;
 
   pInstrument_t pInstrument;
-
-  // TODO: need to check that trd is a long lasting structure
-  //const trd_t& trd( m_fGetTableRowDef( sIQFeedSymbol ) ); // TODO: check for errors
 
   // temporary instrument solely for obtaining fundamental data with which to build real instrument
   //pInstrument = ou::tf::iqfeed::BuildInstrument( "Acquire-" + sIQFeedSymbol, trd );

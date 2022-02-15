@@ -72,10 +72,6 @@ public:
 
   using vSymbol_t = std::vector<std::string>;
 
-  using trd_t = ou::tf::BuildInstrument::trd_t;
-  using fGetTableRowDef_t = ou::tf::BuildInstrument::fGetTableRowDef_t;
-
-//  using fGatherOptions_t = ManageStrategy::fGatherOptions_t;
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
   using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
@@ -87,8 +83,6 @@ public:
     vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-//    fGatherOptions_t &&,
-    fGetTableRowDef_t &&,
     fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&
     );
   ~MasterPortfolio();

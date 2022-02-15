@@ -69,7 +69,6 @@ MasterPortfolio::MasterPortfolio(
     vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fGetTableRowDef_t&& fGetTableRowDef,
     fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel
     )
   : m_bStarted( false ),
@@ -177,9 +176,7 @@ MasterPortfolio::MasterPortfolio(
 
   m_libor.SetWatchOn( m_pIQ );
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>(
-    m_pIQ, m_pIB, std::move( fGetTableRowDef )
-  );
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ, m_pIB );
 
 }
 
@@ -592,6 +589,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
             [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
               pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
               fOption_( pOption );
+              // TODO: cache the option for SaveSeries?
             } );
         },
     // ManageStrategy::fConstructPosition_t
@@ -627,6 +625,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
                 manager.PositionUpdateNotes( pPosition );
               //}
 
+              // TODO: cache the watch for SaveSeries?
               return pPosition;
           },
     // ManageStrategy::fConstructPortfolio_t
