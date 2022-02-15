@@ -6,6 +6,7 @@ project(trade-frame)
 add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 add_subdirectory(ArmsIndex)
+add_subdirectory(AutoTrade)
 add_subdirectory(BasketTrading)
 #add_subdirectory(BookTrader)
 add_subdirectory(ComboTrading)
@@ -25,4 +26,4 @@ add_subdirectory(Weeklies)
 
 add_subdirectory(lib)
 
-add_subdirectory(rdaf/l1)
+#add_subdirectory(rdaf/l1)
