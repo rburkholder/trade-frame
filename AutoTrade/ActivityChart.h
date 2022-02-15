@@ -24,16 +24,6 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <OUCharting/ChartEntryBars.h>
-#include <OUCharting/ChartEntryMark.h>
-#include <OUCharting/ChartEntryShape.h>
-#include <OUCharting/ChartEntryVolume.h>
-#include <OUCharting/ChartEntryIndicator.h>
-
-#include <TFTimeSeries/TimeSeries.h>
-#include <TFTimeSeries/BarFactory.h>
-
-#include <TFVuTrading/WinChartView.h>
 
 namespace ou {
   class ChartDataView;
@@ -69,27 +59,7 @@ private:
 
   //ou::ChartDataView m_dvChart; // the data, use shared_ptr
 
-  ou::ChartEntryIndicator m_ceTrade;
-  ou::ChartEntryBars m_cePriceBars;
-
-  ou::ChartEntryVolume m_ceVolume;
-
-  ou::ChartEntryIndicator m_ceQuoteAsk;
-  ou::ChartEntryIndicator m_ceQuoteBid;
-
-  ou::ChartEntryShape m_ceShortEntries;
-  ou::ChartEntryShape m_ceLongEntries;
-  ou::ChartEntryShape m_ceShortFills;
-  ou::ChartEntryShape m_ceLongFills;
-  ou::ChartEntryShape m_ceShortExits;
-  ou::ChartEntryShape m_ceLongExits;
-
-  ou::tf::Quote m_quote;
-
   void Init();
-
-  void HandleQuote( const ou::tf::Quote& );
-  void HandleTrade( const ou::tf::Trade& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
