@@ -11,7 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+#include <wx/icon.h>
+#include <wx/sizer.h>
+#include <wx/textctrl.h>
 
 #include "PanelLogging.h"
 
@@ -20,7 +22,7 @@ namespace tf { // TradeFrame
 
 wxDEFINE_EVENT( EVT_ConsoleString, ConsoleStringEvent );
 
-PanelLogging::PanelLogging(void) {
+PanelLogging::PanelLogging() {
   Init();
 }
 
@@ -29,7 +31,7 @@ PanelLogging::PanelLogging( wxWindow* parent, wxWindowID id, const wxPoint& pos,
   Create(parent, id, pos, size, style);
 }
 
-PanelLogging::~PanelLogging(void) {
+PanelLogging::~PanelLogging() {
 }
 
 void PanelLogging::Init() {
