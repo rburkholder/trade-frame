@@ -149,7 +149,7 @@ protected:
     ~infoBollinger( void ) {};
   };
 
-  typedef std::vector<infoBollinger> vInfoBollinger_t;
+  using vInfoBollinger_t = std::vector<infoBollinger>;
   vInfoBollinger_t m_vInfoBollinger;
 
   ou::ChartEntryIndicator m_ceTrade;
