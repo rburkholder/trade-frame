@@ -69,12 +69,12 @@ target_link_libraries(
       TFInteractiveBrokers
       ib_client
       bidgcc000
-      TFIQFeed
       TFSimulation
       TFVuTrading
       TFTrading
       TFOptions
       TFTrading
+      TFIQFeed
       TFHDF5TimeSeries
       OUCommon
       OUSQL

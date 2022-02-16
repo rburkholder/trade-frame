@@ -27,6 +27,7 @@
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
+#include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -83,11 +84,11 @@ bool AppAutoTrade::OnInit() {
     wxBoxSizer* sizerLeft;
     wxBoxSizer* sizerRight;
 
-  // Sizer for FrameMain
+    // Sizer for FrameMain
     sizerFrame = new wxBoxSizer(wxHORIZONTAL);
     m_pFrameMain->SetSizer(sizerFrame);
 
-  // Sizer for Controls, Logging
+    // Sizer for Controls, Logging
     sizerLeft = new wxBoxSizer(wxVERTICAL);
     sizerFrame->Add(sizerLeft, 0, wxGROW, 2);
 
@@ -113,17 +114,8 @@ bool AppAutoTrade::OnInit() {
 
   std::cout << "symbol: " << m_sSymbol << std::endl;
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
-
-  ou::tf::Instrument::pInstrument_t pInstrument;
-  pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbol ); // simple for an iqfeed watch
-  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, options.sSymbol );
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, this->m_pData1Provider ); // will need to be iqfeed provider, check?
-  pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( pPosition, m_ChartDataView, options );
+  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, options );
 
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
@@ -163,6 +155,23 @@ void AppAutoTrade::HandleMenuActionSaveValues( void ) {
   );
 }
 
+void AppAutoTrade::ConstructInstrument() {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  m_pBuildInstrument->Add(
+    m_sSymbol,
+    [this]( pInstrument_t pInstrument ){
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+      m_pStrategy->SetPosition( pPosition );
+    } );
+
+}
+
 int AppAutoTrade::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
@@ -192,6 +201,7 @@ void AppAutoTrade::OnData1Connected( int ) {
 //  AutoStartCollection();
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
+    ConstructInstrument();
   }
 
   // ** Note:  turn on iqfeed only, symbols not set for IB yet
@@ -211,6 +221,7 @@ void AppAutoTrade::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
+    ConstructInstrument();
   }
 }
 

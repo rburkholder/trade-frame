@@ -37,8 +37,8 @@
 
 #include <TFIndicators/TSSWStats.h>
 
-#include <TFTrading/DailyTradeTimeFrames.h>
 #include <TFTrading/Position.h>
+#include <TFTrading/DailyTradeTimeFrames.h>
 
 namespace config {
   class Options;
@@ -57,8 +57,10 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  Strategy( pPosition_t, ou::ChartDataView&, const config::Options& );
+  Strategy( ou::ChartDataView&, const config::Options& );
   virtual ~Strategy();
+
+  void SetPosition( pPosition_t );
 
 protected:
 private:
@@ -66,6 +68,11 @@ private:
   enum EChartSlot { Price, Volume, PL }; // IndMA = moving averate indicator
 
   pPosition_t m_pPosition;
+
+  int m_nPeriodWidth;
+
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t m_vMAPeriods;
 
   struct MA {
 
@@ -94,6 +101,8 @@ private:
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
+  ou::ChartDataView& m_cdv;
+
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
 
@@ -111,5 +120,8 @@ private:
   void HandleTrade( const ou::tf::Trade& );
 
   void HandleRHTrading( const ou::tf::Quote& );
+
+  void Clear();
+  void SetupChart();
 
 };

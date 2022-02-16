@@ -40,6 +40,7 @@ namespace ou {
 namespace tf {
   class PanelLogging;
   class WinChartView;
+  class BuildInstrument;
 }
 }
 
@@ -62,6 +63,7 @@ private:
 
   ou::ChartDataView m_ChartDataView;
 
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
   std::unique_ptr<Strategy> m_pStrategy;
 
   virtual bool OnInit();
@@ -76,6 +78,8 @@ private:
   void OnExecDisconnected( int );
 
   void HandleMenuActionSaveValues();
+
+  void ConstructInstrument();
 
   void SaveState();
   void LoadState();
