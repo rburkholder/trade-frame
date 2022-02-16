@@ -26,7 +26,6 @@
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
-#include <TFTrading/Portfolio.h>
 #include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
@@ -125,11 +124,8 @@ bool AppAutoTrade::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
-  //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
-  //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
-  //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
-  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "a1 Close&Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
+  vItems.push_back( new mi( "b1 Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -145,11 +141,16 @@ bool AppAutoTrade::OnInit() {
   return 1;
 }
 
-void AppAutoTrade::HandleMenuActionSaveValues( void ) {
+void AppAutoTrade::HandleMenuActionCloseAndDone() {
+  std::cout << "Closing & Done" << std::endl;
+  m_pStrategy->CloseAndDone();
+}
+
+void AppAutoTrade::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
-      //m_pInteractiveChart->SaveWatch( "/app/AutoTrade/" + m_sTSDataStreamStarted );
+      m_pStrategy->SaveWatch( "/app/AutoTrade/" + m_sTSDataStreamStarted );
       std::cout << "  ... Done " << std::endl;
     }
   );

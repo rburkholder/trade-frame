@@ -21,9 +21,6 @@
 
 #include <vector>
 
-#include "TFTrading/Position.h"
-#include <memory>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -33,10 +30,11 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <OUCharting/ChartDataView.h>
-
 #include <TFIndicators/TSSWStats.h>
 
+#include <TFTimeSeries/BarFactory.h>
+
+#include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
@@ -55,6 +53,7 @@ class Strategy:
   friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
+  using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   Strategy( ou::ChartDataView&, const config::Options& );
@@ -62,10 +61,26 @@ public:
 
   void SetPosition( pPosition_t );
 
+  void SaveWatch( const std::string& );
+
+  void CloseAndDone();
+
 protected:
 private:
 
   enum EChartSlot { Price, Volume, PL }; // IndMA = moving averate indicator
+  enum class ETradeState {
+    Init,  // initiaize state in current market
+    Search,  // looking for long or short enter
+    LongSubmitted, // order has been submitted, waiting for confirmation
+    LongExit,  // position exists, looking for exit
+    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
+    ShortExit,  // position exists, looking for exit
+    ExitSubmitted, // wait for exit to complete
+    Done // no more action
+    };
+
+  ETradeState m_stateTrade;
 
   pPosition_t m_pPosition;
 
@@ -78,6 +93,7 @@ private:
 
     ou::tf::TSSWStatsMidQuote m_statsMA;
     ou::ChartEntryIndicator m_ceMA;
+    double m_dblPrice {};
 
     MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::enumColour colour, const std::string& sName )
     : m_statsMA( quotes, nPeriods, tdPeriod )
@@ -96,12 +112,17 @@ private:
     }
 
     void Update( ptime dt ) {
-      m_ceMA.Append( dt, m_statsMA.MeanY() );
+      m_dblPrice = m_statsMA.MeanY(); // this is SMA, maybe use EMA
+      m_ceMA.Append( dt, m_dblPrice );
     }
   };
 
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
+
+  double m_dblMid;
+
+  pOrder_t m_pOrder;
 
   ou::ChartDataView& m_cdv;
 
@@ -111,17 +132,28 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
 
-  ou::ChartEntryShape m_ceShortEntries;
-  ou::ChartEntryShape m_ceLongEntries;
-  ou::ChartEntryShape m_ceShortFills;
-  ou::ChartEntryShape m_ceLongFills;
-  ou::ChartEntryShape m_ceShortExits;
-  ou::ChartEntryShape m_ceLongExits;
+  ou::ChartEntryShape m_ceLongEntry;
+  ou::ChartEntryShape m_ceLongFill;
+  ou::ChartEntryShape m_ceLongExit;
+  ou::ChartEntryShape m_ceShortEntry;
+  ou::ChartEntryShape m_ceShortFill;
+  ou::ChartEntryShape m_ceShortExit;
+
+  ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::tf::BarFactory m_bfQuotes01Sec;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  void HandleRHTrading( const ou::tf::Quote& );
+  void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
+
+  void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void HandleOrderCancelled( const ou::tf::Order& );
+  void HandleOrderFilled( const ou::tf::Order& );
 
   void Clear();
   void SetupChart();

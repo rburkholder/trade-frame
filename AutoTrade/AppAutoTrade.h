@@ -77,6 +77,7 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
+  void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
   void ConstructInstrument();
