@@ -127,8 +127,11 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             << pInstrument->GetInstrumentName()
             << std::endl;
 
+          std::string sName =
+            0 == fundamentals.sExchangeRoot.size() ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
+
           m_pIB->RequestContractDetails(
-            fundamentals.sExchangeRoot,  // needs to be the IB base name
+            sName,  // needs to be the IB base name
             pInstrument,  // this is a filled-in, prepared instrument
             [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
               //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;

@@ -88,7 +88,13 @@ const std::string MarketSymbol::BuildGenericName( const TableRowDef& trd, const 
 
 // improved improved improved version
 const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamentals ) {
-  std::string sName( fundamentals.sExchangeRoot );
+  std::string sName;
+  if ( 0 == fundamentals.sExchangeRoot.size() ) {
+    sName = fundamentals.sSymbolName;
+  }
+  else {
+    sName = fundamentals.sExchangeRoot;
+  }
   switch( fundamentals.eSecurityType ) {
     case ESecurityType::Equity:
       // uses base name
