@@ -128,9 +128,9 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
   m_dtMarketOpen          = Normalize( date, boost::posix_time::time_duration(  7,  0,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date, boost::posix_time::time_duration(  9, 30,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date, boost::posix_time::time_duration(  9, 30, 30 ), "America/New_York" );
-  m_dtTimeForCancellation = Normalize( date, boost::posix_time::time_duration( 15, 56,  0 ), "America/New_York" );
-  m_dtGoNeutral           = Normalize( date, boost::posix_time::time_duration( 15, 56, 15 ), "America/New_York" );
-  m_dtWaitForRHClose      = Normalize( date, boost::posix_time::time_duration( 15, 58,  0 ), "America/New_York" );
+  m_dtTimeForCancellation = Normalize( date, boost::posix_time::time_duration( 15, 58,  0 ), "America/New_York" );
+  m_dtGoNeutral           = Normalize( date, boost::posix_time::time_duration( 15, 58, 15 ), "America/New_York" );
+  m_dtWaitForRHClose      = Normalize( date, boost::posix_time::time_duration( 15, 59,  0 ), "America/New_York" );
   m_dtRHClose             = Normalize( date, boost::posix_time::time_duration( 16,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date, boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
 }
