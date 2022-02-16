@@ -256,12 +256,14 @@ InstrumentManager::pInstrument_t InstrumentManager::LoadInstrument( keytypes::ei
   ou::db::QueryFields<AltNameKey>::pQueryFields_t pExistsQuery
     = m_pSession->SQL<AltNameKey>( "select instrumentid from altinstrumentnames", key )
         .Where( "providerid = ? and alternateid = ?" ).NoExecute();
-  m_pSession->Bind<AltNameKey>( pExistsQuery );
-  InstrumentName result;
-  if ( m_pSession->Execute( pExistsQuery ) ) { // should only be once
-    m_pSession->Columns<AltNameKey, InstrumentName>( pExistsQuery, result );
-    //LoadInstrument( result.idInstrument, pInstrument );
-    bool bFound = Exists( result.idInstrument, pInstrument );
+  if ( m_pSession ) {
+    m_pSession->Bind<AltNameKey>( pExistsQuery );
+    InstrumentName result;
+    if ( m_pSession->Execute( pExistsQuery ) ) { // should only be once
+      m_pSession->Columns<AltNameKey, InstrumentName>( pExistsQuery, result );
+      //LoadInstrument( result.idInstrument, pInstrument );
+      bool bFound = Exists( result.idInstrument, pInstrument );
+    }
   }
   return pInstrument;
 }
