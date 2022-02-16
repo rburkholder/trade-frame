@@ -43,28 +43,25 @@ class ChartEntryBase {  // maintains chart information for a set of prices
 public:
 
   using pChartEntryBase_t = std::shared_ptr<ChartEntryBase>;
-  //typedef std::vector<double> vdouble_t;
-  //typedef vdouble_t::size_type size_type;
-  //typedef ou::tf::DoubleBuffer<double> bufferedPrice_t;
-  //typedef bufferedPrice_t::size_type size_type;
 
   struct structChartAttributes {
     double dblXMin;
     double dblXMax;
     double dblYMin;
     double dblYMax;
-    structChartAttributes( void ) : dblXMin( 0 ), dblXMax( 0 ), dblYMin( 0 ), dblYMax( 0 ) {};
+    structChartAttributes() : dblXMin( 0 ), dblXMax( 0 ), dblYMin( 0 ), dblYMax( 0 ) {};
   };
 
-  ChartEntryBase( void );
-  //ChartEntryBase( size_type nSize );
-  virtual ~ChartEntryBase( void );
+  ChartEntryBase();
+  ChartEntryBase( const ChartEntryBase& );
+  ChartEntryBase( ChartEntryBase&& );
+  virtual ~ChartEntryBase();
 
-  ou::Colour::enumColour GetColour( void ) const { return m_eColour; };
+  ou::Colour::enumColour GetColour() const { return m_eColour; };
   virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
 
   void SetName( const std::string& name ) { m_sName = name; };
-  const std::string& GetName( void ) const { return m_sName; };
+  const std::string& GetName() const { return m_sName; };
 
   //void Sync( void ); // should call other registered distribution functions
   //void Clear( void );  // should call other registered distribution functions
@@ -72,7 +69,7 @@ public:
 
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) { return false; }
 
-  virtual void Clear( void ) {}
+  virtual void Clear() {}
 
 protected:
 
@@ -103,20 +100,32 @@ public:
     : dtBegin( boost::posix_time::not_a_date_time ), dtEnd( boost::posix_time::not_a_date_time ) {}
     range_t( boost::posix_time::ptime dtBegin_, boost::posix_time::ptime dtEnd_ )
     : dtBegin( dtBegin_ ), dtEnd( dtEnd_ ) {}
+    range_t( const range_t& rhs )
+    : dtBegin( rhs.dtBegin ), dtEnd( rhs.dtEnd ) {}
+    range_t( range_t&& rhs )
+    : dtBegin( rhs.dtBegin ), dtEnd( rhs.dtEnd ) {}
+    const range_t& operator=( const range_t& rhs ) {
+      if ( &rhs != this ) {
+        dtBegin = rhs.dtBegin;
+        dtEnd = rhs.dtEnd;
+      }
+      return *this;
+    }
     inline bool HasBegin() const { return boost::posix_time::not_a_date_time != dtBegin; }
     inline bool HasEnd() const { return boost::posix_time::not_a_date_time != dtEnd; }
     inline bool HasBoth() const { return HasBegin() && HasEnd(); }
   };
 
-  ChartEntryTime( void );
-  virtual ~ChartEntryTime( void );
+  ChartEntryTime();
+  ChartEntryTime( ChartEntryTime&& );
+  virtual ~ChartEntryTime();
 
   void Append( boost::posix_time::ptime dt ); // background append
 
-  virtual void Clear( void );
+  virtual void Clear();
   virtual void Reserve( size_type );
 
-  virtual void ClearQueue( void );
+  virtual void ClearQueue();
 
   void SetViewPort( const range_t& );
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
@@ -132,7 +141,7 @@ protected:
   void AppendFg( boost::posix_time::ptime dt ); // foreground append
 
   // need to get to top of call hierarchy and only call when m_nElements is non-zero
-  DoubleArray GetDateTimes( void ) const {
+  DoubleArray GetDateTimes() const {
     // 2017/05/06 this should be cleaned up:
 //    if ( ( 2 <= m_vChartTime.size() ) && ( 2 <= m_nElements ) ) {
 //      double diff = m_vChartTime[ m_ixStart + m_nElements - 1 ] - m_vChartTime[ m_ixStart ];
@@ -144,7 +153,7 @@ protected:
     return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
   }
 
-  size_type Size( void ) const { return m_vDateTime.size(); }
+  size_type Size() const { return m_vDateTime.size(); }
 
 private:
 

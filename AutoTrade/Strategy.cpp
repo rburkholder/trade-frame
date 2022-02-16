@@ -100,9 +100,9 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   time_duration td = time_duration( 0, 0, m_nPeriodWidth );
 
-  m_vMA.push_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Coral, "ma1" ) );
-  m_vMA.push_back( MA( pWatch->GetQuotes(), m_vMAPeriods[1], td, ou::Colour::Brown, "ma2" ) );
-  m_vMA.push_back( MA( pWatch->GetQuotes(), m_vMAPeriods[2], td, ou::Colour::Gold, "ma3" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Gold, "ma1" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
 
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_cdv );

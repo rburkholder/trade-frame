@@ -146,9 +146,11 @@ void DoubleBuffer<datum_t>::Reserve( size_type nSize ) {
 
 template<typename datum_t>
 class Queue {
-  typedef std::queue<datum_t> qDatum_t;
+  using qDatum_t = std::queue<datum_t>;
 public:
-  Queue( void ) {}
+  Queue() {}
+  Queue( Queue&& rhs )
+  : m_qDatum( std::move( rhs.m_qDatum ) ) {}
   virtual ~Queue() {}
 
   void Append( const datum_t& datum ) {
@@ -164,6 +166,8 @@ public:
       m_qDatum.pop();
     }
   }
+
+  typename qDatum_t::size_type Size() const { return m_qDatum.size(); }
 
 protected:
 private:

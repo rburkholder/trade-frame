@@ -20,9 +20,10 @@ namespace ou { // One Unified
 class ChartEntryIndicator :
   public ChartEntryPrice {
 public:
-  ChartEntryIndicator(void);
+  ChartEntryIndicator();
+  ChartEntryIndicator( ChartEntryIndicator&& );
   //ChartEntryIndicator( size_type nSize );
-  virtual ~ChartEntryIndicator(void);
+  virtual ~ChartEntryIndicator();
 protected:
 private:
 };

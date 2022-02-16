@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   ChartEntryPrice.h
  * Author: rpb
  *
@@ -31,34 +31,35 @@ namespace ou { // One Unified
 class ChartEntryPrice: public ChartEntryTime {  // maintains chart information for a set of prices
 public:
 
-  typedef std::vector<double> vDouble_t;
-  typedef vDouble_t::size_type size_type;
-  
-  ChartEntryPrice( void );
-  virtual ~ChartEntryPrice( void );
+  using vDouble_t = std::vector<double>;
+  using size_type = vDouble_t::size_type;
+
+  ChartEntryPrice();
+  ChartEntryPrice( ChartEntryPrice&& );
+  virtual ~ChartEntryPrice();
 
   void Append( const ou::tf::Price& );
   void Append( const boost::posix_time::ptime &dt, double price );
-  size_type Size( void ) const { return m_vDouble.size(); }
-  virtual void Clear( void );
+  size_type Size() const { return m_vDouble.size(); }
+  virtual void Clear();
   virtual void Reserve( size_type );
-  
-  void ClearQueue( void );
+
+  void ClearQueue();
 
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
 
 protected:
-  
+
   void Pop( const ou::tf::Price& );
-  
-  DoubleArray GetPrices( void ) const {  // prices which are visible in viewport
+
+  DoubleArray GetPrices() const {  // prices which are visible in viewport
     return DoubleArray( &m_vDouble[ m_ixStart ], m_nElements );
   }
 
 private:
-  
+
   vDouble_t m_vDouble;
-  
+
   ou::tf::Queue<ou::tf::Price> m_queue;
 
 };

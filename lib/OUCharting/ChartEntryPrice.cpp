@@ -25,17 +25,24 @@
 
 namespace ou { // One Unified
 
-ChartEntryPrice::ChartEntryPrice( void ): ChartEntryTime() {
+ChartEntryPrice::ChartEntryPrice()
+: ChartEntryTime() {
 }
 
-ChartEntryPrice::~ChartEntryPrice( void ) {
+ChartEntryPrice::ChartEntryPrice( ChartEntryPrice&& rhs )
+: ChartEntryTime( std::move( rhs ) )
+, m_vDouble( std::move( rhs.m_vDouble ) )
+, m_queue( std::move( rhs.m_queue ) )
+{}
+
+ChartEntryPrice::~ChartEntryPrice() {
 }
 
 void ChartEntryPrice::Reserve( size_type nSize ) {
   m_vDouble.reserve( nSize );
 }
 
-void ChartEntryPrice::Clear( void ) {
+void ChartEntryPrice::Clear() {
   m_vDouble.clear();
   ChartEntryTime::Clear();
 }
@@ -48,7 +55,7 @@ void ChartEntryPrice::Append( const boost::posix_time::ptime &dt, double price )
   Append( ou::tf::Price( dt, price ) );
 }
 
-void ChartEntryPrice::ClearQueue( void ) {
+void ChartEntryPrice::ClearQueue() {
   namespace args = boost::phoenix::placeholders;
   m_queue.Sync( boost::phoenix::bind( &ChartEntryPrice::Pop, this, args::arg1 ) );
 }

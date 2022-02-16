@@ -11,24 +11,24 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include "ChartEntryIndicator.h"
 
 namespace ou { // One Unified
 
-ChartEntryIndicator::ChartEntryIndicator(void) 
-: ChartEntryPrice() 
-{
-}
+ChartEntryIndicator::ChartEntryIndicator()
+: ChartEntryPrice()
+{}
 
-//ChartEntryIndicator::ChartEntryIndicator( size_type nSize ) 
+ChartEntryIndicator::ChartEntryIndicator( ChartEntryIndicator&& rhs )
+: ChartEntryPrice( std::move( rhs ) )
+{}
+
+//ChartEntryIndicator::ChartEntryIndicator( size_type nSize )
 //: ChartEntryBaseWithTime( nSize )
 //{
 //}
 
-ChartEntryIndicator::~ChartEntryIndicator(void) {
+ChartEntryIndicator::~ChartEntryIndicator() {
 }
-
 
 } // namespace ou

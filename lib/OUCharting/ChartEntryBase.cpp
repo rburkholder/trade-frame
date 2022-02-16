@@ -29,6 +29,18 @@ ChartEntryBase::ChartEntryBase()
 : m_ixStart( 0 ), m_nElements( 0 ), m_eColour( ou::Colour::Black ) {
 }
 
+ChartEntryBase::ChartEntryBase( const ChartEntryBase& rhs )
+: m_ixStart( rhs.m_ixStart ), m_nElements( rhs.m_nElements ), m_eColour( rhs.m_eColour )
+, m_sName( rhs.m_sName )
+{
+}
+
+ChartEntryBase::ChartEntryBase( ChartEntryBase&& rhs )
+: m_ixStart( rhs.m_ixStart ), m_nElements( rhs.m_nElements ), m_eColour( rhs.m_eColour )
+, m_sName( std::move( rhs.m_sName ) )
+{
+}
+
 ChartEntryBase::~ChartEntryBase() {
 }
 
@@ -60,6 +72,15 @@ ChartEntryTime::ChartEntryTime() :
 
 ChartEntryTime::~ChartEntryTime() {
   Clear();
+}
+
+ChartEntryTime::ChartEntryTime( ChartEntryTime&& rhs )
+: ChartEntryBase( std::move( rhs ) )
+, m_rangeViewPort( std::move( rhs.m_rangeViewPort ) )
+, m_vDateTime( std::move( rhs.m_vDateTime ) )
+, m_vChartTime( std::move( rhs.m_vChartTime ) )
+, m_queue( std::move( rhs.m_queue ) )
+{
 }
 
 void ChartEntryTime::Reserve( size_type nSize ) {

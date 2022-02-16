@@ -87,7 +87,9 @@ private:
     }
 
     MA( MA&& rhs )
-    : m_statsMA( std::move( rhs.m_statsMA ) ) {}
+    : m_statsMA( std::move( rhs.m_statsMA ) )
+    , m_ceMA( std::move( rhs.m_ceMA ) )
+    {}
 
     void AddToView( ou::ChartDataView& cdv ) {
       cdv.Add( EChartSlot::Price, &m_ceMA );
