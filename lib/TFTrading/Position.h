@@ -14,8 +14,8 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
 #include <memory>
+#include <sstream>
 
 #include <boost/tuple/tuple.hpp>
 
@@ -24,10 +24,8 @@
 
 #include <OUCommon/Delegate.h>
 
-#include "TradingEnumerations.h"
 #include "KeyTypes.h"
 
-#include "Instrument.h"
 #include "Watch.h"
 #include "Order.h"
 #include "ProviderInterface.h"
@@ -126,7 +124,7 @@ public:
     double dblCommissionPaid; // contains total commissions
 
     // account and instrument objects need to be manually asssigned in a second step
-    TableRowDefNoKey( void )
+    TableRowDefNoKey()
       : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ),
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
@@ -155,7 +153,7 @@ public:
     }
     idPosition_t idPosition;
 
-    TableRowDef( void ) : idPosition( 0 ), TableRowDefNoKey() {};
+    TableRowDef() : idPosition( 0 ), TableRowDefNoKey() {};
     TableRowDef( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
       const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ )
       : idPosition( 0 ),
@@ -186,21 +184,21 @@ public:
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
   Position( const TableRowDef& row );
-  Position( void );
-  virtual ~Position(void);
+  Position();
+  virtual ~Position();
 
-  const std::string& Notes( void ) const { return m_row.sNotes; };
+  const std::string& Notes() const { return m_row.sNotes; };
   void SetNotes( const std::string& sNote ) { m_row.sNotes = sNote; }
   void AppendNotes( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
-  pInstrument_t GetInstrument( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
-  pWatch_t GetWatch( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
+  pInstrument_t GetInstrument() { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetInstrument(); }
+  pWatch_t GetWatch() { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
 
   size_t GetActiveSize() const { return m_row.nPositionActive; }
 
-  double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
-  double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
-  double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
+  double GetUnRealizedPL() const { return m_row.dblUnRealizedPL; };
+  double GetRealizedPL() const { return m_row.dblRealizedPL; };
+  double GetCommissionPaid() const { return m_row.dblCommissionPaid; };
   void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid, double& dblTotal ) const {
     dblTotal  = ( dblUnRealized = m_row.dblUnRealizedPL );
     dblTotal += ( dblRealized = m_row.dblRealizedPL );
@@ -212,9 +210,9 @@ public:
 
   bool IsActive() const { return ( 0 != m_row.nPositionActive ); }
 
-  bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
-  bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
-  bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
+  bool OrdersPending() const { return ( 0 != m_row.nPositionPending ); };
+  bool BuyOrdersPending() const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
+  bool SellOrdersPending() const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
 
   Order::pOrder_t ConstructOrder( // market
     OrderType::enumOrderType eOrderType,
@@ -258,7 +256,7 @@ public:
   void UpdateOrder( pOrder_t pOrder );
 
   void CancelOrder( idOrder_t idOrder );
-  void CancelOrders( void );
+  void CancelOrders();
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
   ou::Delegate<const ou::tf::Trade&> OnTrade;
@@ -281,10 +279,10 @@ public:
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
   void Set( const std::string& sName ) { m_row.sName = sName; }
 
-  const TableRowDef& GetRow( void ) const { return m_row; };
+  const TableRowDef& GetRow() const { return m_row; };
 
-  pProvider_t GetExecutionProvider( void ) { return m_pExecutionProvider; };
-  pProvider_t GetDataProvider( void ) { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetProvider(); };
+  pProvider_t GetExecutionProvider() { return m_pExecutionProvider; };
+  pProvider_t GetDataProvider() { assert( nullptr != m_pWatch.get() ); return m_pWatch->GetProvider(); };
 
 protected:
 
@@ -307,7 +305,7 @@ private:
   double m_dblMultiplier;
 
   void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
-  void Construction( void );
+  void Construction();
 
   void Register( pOrder_t pOrder );
 

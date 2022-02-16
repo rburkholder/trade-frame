@@ -18,19 +18,18 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <stdexcept>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
 #include <OUCommon/Delegate.h>
 
-#include "TradingEnumerations.h"
 #include "KeyTypes.h"
-#include "Instrument.h"
 #include "Execution.h"
+#include "Instrument.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -41,12 +40,12 @@ class Order {
   friend class OrderManager;
 public:
 
-  typedef keytypes::idOrder_t idOrder_t;
-  typedef keytypes::idPosition_t idPosition_t;
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef keytypes::idInstrument_t idInstrument_t;
-  typedef boost::shared_ptr<Order> pOrder_t;
-  typedef const pOrder_t& pOrder_ref;
+  using idOrder_t = keytypes::idOrder_t;
+  using idPosition_t = keytypes::idPosition_t;
+  using pInstrument_t = Instrument::pInstrument_t;
+  using idInstrument_t = keytypes::idInstrument_t;
+  using pOrder_t = std::shared_ptr<Order>;
+  using pOrder_ref = const pOrder_t&;
 
   struct TableRowDef {
     template<class A>
@@ -93,7 +92,7 @@ public:
     ptime dtOrderSubmitted;
     ptime dtOrderClosed;
 
-    TableRowDef( void ) // default constructor
+    TableRowDef() // default constructor
       : idOrder( 0 ), idPosition( 0 ),
         eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ),
         dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
@@ -176,10 +175,10 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   Order( const TableRowDef& row, pInstrument_t& pInstrument );
-  ~Order(void);
+  ~Order();
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
-  bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
+  bool GetOutsideRTH() const { return m_bOutsideRTH; };
   void SetInstrument( Instrument::pInstrument_cref pInstrument ) {  // used only when class created from database
     if ( NULL != m_pInstrument.get() ) {
       throw std::runtime_error( "Corder::SetInstrument: instrument already assigned" );
@@ -189,45 +188,45 @@ public:
     }
     m_pInstrument = pInstrument;
   }
-  Instrument::pInstrument_t GetInstrument( void ) const {
+  Instrument::pInstrument_t GetInstrument() const {
     if ( NULL == m_pInstrument.get() ) {
       throw std::runtime_error( "Order::GetInstrument:  no instrument defined" );
     }
     return m_pInstrument;
   };
-  const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_row.eOrderSide ]; };
-  boost::uint32_t GetQuantity( void ) const { return m_row.nOrderQuantity; };
-  OrderType::enumOrderType GetOrderType( void ) const { return m_row.eOrderType; };
-  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_row.eOrderSide; };
-  double GetPrice1( void ) const { return m_row.dblPrice1; };  // need to validate this on creation
+  const char *GetOrderSideName() const { return OrderSide::Name[ m_row.eOrderSide ]; };
+  boost::uint32_t GetQuantity() const { return m_row.nOrderQuantity; };
+  OrderType::enumOrderType GetOrderType() const { return m_row.eOrderType; };
+  OrderSide::enumOrderSide GetOrderSide() const { return m_row.eOrderSide; };
+  double GetPrice1() const { return m_row.dblPrice1; };  // need to validate this on creation
   void SetPrice1( double dblPrice ) { m_row.dblPrice1 = dblPrice; } // prepares for UpdatePrice
-  double GetPrice2( void ) const { return m_row.dblPrice2; };
+  double GetPrice2() const { return m_row.dblPrice2; };
   void SetPrice2( double dblPrice ) { m_row.dblPrice2 = dblPrice; } // prepares for UpdatePrice
-  double GetAverageFillPrice( void ) const { return m_row.dblAverageFillPrice; };
-  idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
-  boost::uint32_t GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
-  void SetSendingToProvider( void );
+  double GetAverageFillPrice() const { return m_row.dblAverageFillPrice; };
+  idOrder_t GetOrderId() const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
+  boost::uint32_t GetNextExecutionId() { return ++m_nNextExecutionId; };
+  void SetSendingToProvider();
   OrderStatus::enumOrderStatus ReportExecution( const Execution &exec ); // called from OrderManager
   void SetCommission( double dblCommission );
-  double GetCommission( void ) const{ return m_row.dblCommission; };
+  double GetCommission() const{ return m_row.dblCommission; };
   void ActOnError( OrderError::enumOrderError eError );
-  boost::uint32_t GetQuanRemaining( void ) const { return m_row.nQuantityRemaining; };
-  boost::uint32_t GetQuanOrdered( void ) const { return m_row.nOrderQuantity; };
-  boost::uint32_t GetQuanFilled( void ) const { return m_row.nQuantityFilled; };
+  boost::uint32_t GetQuanRemaining() const { return m_row.nQuantityRemaining; };
+  boost::uint32_t GetQuanOrdered() const { return m_row.nOrderQuantity; };
+  boost::uint32_t GetQuanFilled() const { return m_row.nQuantityFilled; };
   void SetSignalPrice( double dblSignalPrice ) { m_row.dblSignalPrice = dblSignalPrice; };
-  double GetSignalPrice( void ) const { return m_row.dblSignalPrice; };
+  double GetSignalPrice() const { return m_row.dblSignalPrice; };
   void SetDescription( const std::string& sDescription ) { m_row.sDescription = sDescription; }
-  const std::string& GetDescription( void ) const { return m_row.sDescription; }
-  const ptime &GetDateTimeOrderSubmitted( void ) const {
+  const std::string& GetDescription() const { return m_row.sDescription; }
+  const ptime &GetDateTimeOrderSubmitted() const {
     assert( not_a_date_time != m_row.dtOrderSubmitted ); // is this a valid test?
     return m_row.dtOrderSubmitted;
   };
-  const ptime &GetDateTimeOrderFilled( void ) const {
+  const ptime &GetDateTimeOrderFilled() const {
     assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
     return m_row.dtOrderClosed;
   };
-  double GetIncrementalCommission( void ) const { return m_dblIncrementalCommission; };
-  void MarkAsCancelled( void );  // called from OrderManager
+  double GetIncrementalCommission() const { return m_dblIncrementalCommission; };
+  void MarkAsCancelled();  // called from OrderManager
 
   ou::Delegate<const std::pair<const Order&, const Execution&>& > OnExecution;
   ou::Delegate<const Order&> OnOrderCancelled;
@@ -235,7 +234,7 @@ public:
   ou::Delegate<const Order&> OnOrderFilled; // on final fill
   ou::Delegate<const Order&> OnCommission;
 
-  const TableRowDef& GetRow( void ) const { return m_row; };
+  const TableRowDef& GetRow() const { return m_row; };
 
 protected:
 
@@ -249,7 +248,7 @@ protected:
   // statistics and status
   double m_dblPriceXQuantity; // used for calculating average price
 
-  void ConstructOrder( void );
+  void ConstructOrder();
   void SetOrderId( idOrder_t );  // use OrderManager to construct orders
 
 private:
@@ -258,7 +257,7 @@ private:
 
   double m_dblIncrementalCommission; // Something for the Position Manager as commission is updated for the order.
 
-  Order(void);  // no default constructor
+  Order();  // no default constructor
 
 };
 

@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <stdexcept>
 
 #include <OUCommon/TimeSource.h>
@@ -22,11 +20,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Execution::Execution( 
+Execution::Execution(
   idExecution_t idExecution, idOrder_t idOrder,
   double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
-: 
+:
   m_row( idExecution, idOrder, nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )
 {
   assert( 0 < dblPrice );
@@ -34,11 +32,11 @@ Execution::Execution(
   m_row.dtExecutionTimeStamp = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-Execution::Execution( 
+Execution::Execution(
 /*  idExecution_t idExecution, idOrder_t idOrder, */
   double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
-: 
+:
   m_row( nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )
 {
   assert( 0 < dblPrice );
@@ -46,7 +44,7 @@ Execution::Execution(
   m_row.dtExecutionTimeStamp = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-Execution::~Execution(void) {
+Execution::~Execution() {
 }
 
 } // namespace tf
