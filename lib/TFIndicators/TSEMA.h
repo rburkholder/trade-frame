@@ -27,12 +27,17 @@ namespace hf { // high frequency
 template<class D> // D => type derived from DatedDatum
 class TSEMA: public Prices {  // new time series built up from linked time series
 public:
-  TSEMA( TimeSeries<D>& series, time_duration td );
-  TSEMA( const TSEMA& rhs );
-  virtual ~TSEMA(void);
-  double GetEMA( void ) { return m_dblRecentEMA; };
+
+  TSEMA( TimeSeries<D>& series, time_duration );
+  TSEMA<D>( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth );
+  TSEMA( const TSEMA& );
+  TSEMA( TSEMA&& );
+  virtual ~TSEMA();
+
+  double GetEMA() { return m_dblRecentEMA; };
 protected:
 private:
+
   time_duration m_tdTimeRange;
   double m_dblTimeRange;
   TimeSeries<D>& m_seriesSource;
@@ -41,8 +46,8 @@ private:
 
   double EMA( ptime t, double XatT );
 
-  void HandleAppend( const D& datum ) { 
-    EMA( datum.DateTime(), GetPrice( datum ) ); 
+  void HandleAppend( const D& datum ) {
+    EMA( datum.DateTime(), GetPrice( datum ) );
   }
 
   double GetPrice( const Price& price ) const {
@@ -64,17 +69,17 @@ private:
     static void calc( T& t, const D& ) { throw std::logic_error( "no specialization" ); };
   };
   template<class T> struct EMA_impl<Price,T> {
-    static void calc( T& t, const Price& price ) { 
+    static void calc( T& t, const Price& price ) {
       t.EMA( price.DateTime(), price.Price() );
     };
   };
   template<class T> struct EMA_impl<Quote,T> {
-    static void calc( T& t, const Quote& quote ) { 
+    static void calc( T& t, const Quote& quote ) {
       t.EMA( quote.DateTime(), quote.LogarithmicMidPointA() );
     };
   };
   template<class T> struct EMA_impl<Trade,T> {
-    static void calc( T& t, const Trade& trade ) { 
+    static void calc( T& t, const Trade& trade ) {
       t.EMA( trade.DateTime(), trade.Trade() );
     };
   };
@@ -83,7 +88,7 @@ private:
 
 template<class D>
 TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
-  : Prices(), m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+: Prices(), m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
   assert( 0 < td.total_seconds() );
   m_dblTimeRange = (double) td.total_microseconds();
@@ -91,41 +96,66 @@ TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
 }
 
 template<class D>
-TSEMA<D>::TSEMA( const TSEMA<D>& rhs ) 
-  : Prices(), m_tdTimeRange( rhs.m_tdTimeRange ), m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
+TSEMA<D>::TSEMA( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth )
+: Prices(), m_seriesSource( series ),  m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+{
+  assert( 0 < nPeriods );
+  assert( 0 < tdPeriodWidth.total_seconds() );
+  time_duration tdSum {};
+  while ( 0 != nPeriods ) {
+    tdSum += tdPeriodWidth;
+    nPeriods--;
+  }
+  m_tdTimeRange = tdSum;
+  m_dblTimeRange = (double) m_tdTimeRange.total_microseconds();
+}
+
+template<class D>
+TSEMA<D>::TSEMA( const TSEMA<D>& rhs )
+: Prices(), m_tdTimeRange( rhs.m_tdTimeRange ), m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
   m_XatTminus1( rhs.m_XatTminus1 ), m_dblRecentEMA( rhs.m_dblRecentEMA )
 {
   m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
 template<class D>
-TSEMA<D>::~TSEMA( void ) {
+TSEMA<D>::TSEMA( TSEMA<D>&& rhs )
+: Prices(), m_tdTimeRange( rhs.m_tdTimeRange ),
+  m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
+  m_XatTminus1( rhs.m_XatTminus1 ), m_dblRecentEMA( rhs.m_dblRecentEMA )
+{
+  //m_seriesSource.OnAppend.Remove( MakeDelegate( &rhs, &TSEMA<D>::HandleAppend ) ); // proper but causes problems
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
+}
+
+template<class D>
+TSEMA<D>::~TSEMA() {
   m_seriesSource.OnAppend.Remove( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
 // refer to paper : "Specially Weighted Movng Averages With Repeated Application of the EMA Operator"
 // Intro to HF Finance, pg 59, has further variation
 template<class D>
-double TSEMA<D>::EMA( ptime t, double XatT ) {
+double TSEMA<D>::EMA( ptime dt, double XatT ) {
   static const time_duration tdOne( microseconds( 1 ) );
   if ( 0 == Prices::Size() ) {
     m_dblRecentEMA = XatT;
     m_XatTminus1 = XatT;
-    Prices::Append( Price( t, XatT ) );  // initialize first element of series
+    Prices::Append( Price( dt, XatT ) );  // initialize first element of series
   }
-  else { 
+  else {
     const Price& prvEMA( Prices::Ago( 0 ) );
     ptime dtPrv = prvEMA.DateTime();
-    time_duration tdDif = t == dtPrv ? tdOne : t - dtPrv;
+    time_duration tdDif = dt == dtPrv ? tdOne : dt - dtPrv;
     double alpha = ( (double) tdDif.total_microseconds() ) / m_dblTimeRange;
     double mu = std::exp( -alpha );  // used with any form of interpolation
     double v = ( 1.0 - mu ) / alpha;  // linear interpolation
-    //double v = 1.0;  // previous point 
+    //double v = 1.0;  // previous point
     //double v = std::exp( -alpha / 2.0 ); // or std::sqrt( mu );  // nearest value
     //double v = mu;  // next point
     m_dblRecentEMA = mu * prvEMA.Value() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
     m_XatTminus1 = XatT;
-    Prices::Append( Price( t, m_dblRecentEMA ) );
+    Prices::Append( Price( dt, m_dblRecentEMA ) );
   }
   return m_dblRecentEMA;
 
