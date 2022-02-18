@@ -99,6 +99,7 @@ bool Load( const std::string& sFileName, Options& options ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk |= parse<std::string>( sFileName, vm, sOption_Symbol, options.sSymbol );
+      std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
       bOk |= parse<int>(    sFileName, vm, sOption_TimeBinsCount, options.nTimeBins );
       bOk |= parse<double>( sFileName, vm, sOption_TimeBinsUpper, options.dblTimeUpper );
