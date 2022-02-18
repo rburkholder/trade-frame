@@ -106,5 +106,6 @@ target_link_libraries(
       Gpad
       Hist
       Rint
+      Thread
   )
 

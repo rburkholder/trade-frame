@@ -31,6 +31,7 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
+#include "Config.h"
 #include "ChartData.h"
 
 class wxBoxSizer;
@@ -54,6 +55,8 @@ class AppRdafL1:
 public:
 protected:
 private:
+
+  config::Options m_options;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 

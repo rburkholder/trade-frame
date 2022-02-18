@@ -31,7 +31,6 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
-#include "Config.h"
 #include "l1.h"
 
 namespace {
@@ -52,10 +51,8 @@ bool AppRdafL1::OnInit() {
 
   wxApp::OnInit();
 
-  config::Options options;
-
-  if ( Load( sConfigFilename, options ) ) {
-    m_sSymbol = options.sSymbol;
+  if ( Load( sConfigFilename, m_options ) ) {
+    m_sSymbol = m_options.sSymbol;
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "rdaf l1" );
@@ -138,7 +135,7 @@ bool AppRdafL1::OnInit() {
   }
 
   if ( nullptr == m_pChartData ) {
-    m_pChartData = new ChartData( m_pData1Provider, m_sSymbol, options );
+    m_pChartData = new ChartData( m_pData1Provider, m_sSymbol, m_options );
     m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
   }
 

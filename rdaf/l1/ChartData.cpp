@@ -28,6 +28,8 @@
 #include <rdaf/TH3.h>
 #include <rdaf/TF1.h>
 #include <rdaf/TCanvas.h>
+#include <rdaf/TROOT.h>
+#include <rdaf/TThread.h>
 
 #include <TFTrading/Instrument.h>
 
@@ -35,7 +37,7 @@
 #include "ChartData.h"
 
 ChartData::ChartData( pProvider_t pProvider, const std::string& sIQFeedSymbol, const config::Options& options )
-: ou::ChartDVBasics(), m_bWatching( false )
+: m_options( options ), ou::ChartDVBasics(), m_bWatching( false )
 {
   GetChartDataView()->SetNames( "ChartData", sIQFeedSymbol );
 
@@ -44,22 +46,19 @@ ChartData::ChartData( pProvider_t pProvider, const std::string& sIQFeedSymbol, c
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sIQFeedSymbol );
   m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pProvider ); // will need to be iqfeed provider, check?
 
-  StartRdaf( options );
+  StartRdaf();
 }
 
 ChartData::~ChartData(void) {
   StopWatch();
   m_prdafApp->SetReturnFromRun( true );
-  m_threadRdaf.join();
+  //m_threadRdaf.join();
 
 }
 
-void ChartData::StartRdaf( const config::Options& options ) {
+void ChartData::ThreadRdaf() { // TThread has this populated
 
-  int argc {};
-  char** argv = nullptr;
-
-  m_prdafApp = std::make_unique<TRint>( "rdaf_l1", &argc, argv );
+  const config::Options& options( m_options );
 
   m_pHistDelta = std::make_shared<TH3D>(
     "h1", ( options.sSymbol + "-Delta" ).c_str(),
@@ -75,17 +74,26 @@ void ChartData::StartRdaf( const config::Options& options ) {
     options.nVolumeTotalBins, options.dblVolumeTotalLower, options.dblVolumeTotalUpper
   );
 
-  m_threadRdaf = std::move( std::thread(
-    [this](){
-      TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
-      TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
-      f1->SetLineColor(kBlue+1);
-      f1->SetTitle("My graph;x; sin(x)");
-      f1->Draw();
-      c->Modified(); c->Update();
-      m_prdafApp->Run();
-    } )
-    );
+  //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
+  //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
+  //f1->SetLineColor(kBlue+1);
+  //f1->SetTitle("My graph;x; sin(x)");
+  //f1->Draw();
+  //c->Modified(); c->Update();
+  m_prdafApp->Run();
+}
+
+void ChartData::StartRdaf() {
+
+  int argc {};
+  char** argv = nullptr;
+
+  m_prdafApp = std::make_unique<TRint>( "rdaf_l1", &argc, argv );
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT();
+
+  m_prdafThread = std::make_unique<TThread>( (void (*)(void*)) &ChartData::ThreadRdaf, this );
+  m_prdafThread->Run();
 }
 
 void ChartData::StartWatch() {
@@ -118,7 +126,12 @@ void ChartData::HandleTrade( const ou::tf::Trade& trade ) {
   double mid = m_quote.Midpoint();
   std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
   double dblTime( nTime );
+  dblTime = dblTime / 1000.0;
 
-  m_pHistDelta->Fill( dblTime, trade.Price(), trade.Price() >= mid ? trade.Volume() : -trade.Volume() );
+  std::cout << "values: " << dblTime << "," << trade.Price() << "," << trade.Volume() << std::endl;
+
+  TThread::Lock();
+  m_pHistDelta ->Fill( dblTime, trade.Price(), trade.Price() >= mid ? trade.Volume() : -trade.Volume() );
   m_pHistVolume->Fill( dblTime, trade.Price(), trade.Volume() );
+  TThread::UnLock();
 }
