@@ -30,7 +30,8 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <TFIndicators/TSSWStats.h>
+//#include <TFIndicators/TSSWStats.h>
+#include <TFIndicators/TSEMA.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
@@ -91,19 +92,22 @@ private:
 
   struct MA {
 
-    ou::tf::TSSWStatsMidQuote m_statsMA;
+    //ou::tf::TSSWStatsMidQuote m_statsMA;
+    ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
     ou::ChartEntryIndicator m_ceMA;
     double m_dblPrice {};
 
     MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::enumColour colour, const std::string& sName )
-    : m_statsMA( quotes, nPeriods, tdPeriod )
+    //: m_statsMA( quotes, nPeriods, tdPeriod )
+    : m_ema( quotes, nPeriods, tdPeriod )
     {
       m_ceMA.SetName( sName );
       m_ceMA.SetColour( colour );
     }
 
     MA( MA&& rhs )
-    : m_statsMA( std::move( rhs.m_statsMA ) )
+    //: m_statsMA( std::move( rhs.m_statsMA ) )
+    : m_ema(  std::move( rhs.m_ema ) )
     , m_ceMA( std::move( rhs.m_ceMA ) )
     {}
 
@@ -112,8 +116,8 @@ private:
     }
 
     void Update( ptime dt ) {
-      m_dblPrice = m_statsMA.MeanY(); // this is SMA, maybe use EMA
-      m_ceMA.Append( dt, m_dblPrice );
+      //m_dblPrice = m_statsMA.MeanY(); // this is SMA, maybe use EMA
+      m_ceMA.Append( dt, m_ema.GetEMA() );
     }
   };
 
