@@ -78,8 +78,8 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
 
       ( sOption_TimeBinsCount.c_str(), po::value<int>( &options.nTimeBins), "#time bins" )
-      ( sOption_TimeBinsUpper.c_str(), po::value<std::string>( &sDateTimeUpper), "time upper yyyy-mm-dd hh:mm:ss.ddd" )
-      ( sOption_TimeBinsLower.c_str(), po::value<std::string>( &sDateTimeLower), "time lower yyyy-mm-dd hh:mm:ss.ddd" )
+      ( sOption_TimeBinsUpper.c_str(), po::value<std::string>( &sDateTimeUpper), "time upper yyyymmddThhmmss" )
+      ( sOption_TimeBinsLower.c_str(), po::value<std::string>( &sDateTimeLower), "time lower yyyymmddThhmmss" )
 
       ( sOption_PriceBinsCount.c_str(), po::value<int>( &options.nPriceBins), "#price bins" )
       ( sOption_PriceBinsUpper.c_str(), po::value<double>( &options.dblPriceUpper), "price upper" )

@@ -4,9 +4,9 @@ Example configuration file called x64/debug/rdaf_l1.cfg
 ```
 symbol=TST$Y
 time_bins=3600
-#          yyyymmdd hhmmss
+#          yyyymmddThhmmss
 time_upper=20220228T000000
-time_lower=20220201T000000
+time_lower=20220301T000000
 price_bins=200
 price_upper=3000
 price_lower=2000
@@ -30,6 +30,8 @@ vol_ttl_lower=0
 Some Document references:
 * https://root.cern/about/
 * https://root.cern/install/
+* https://root.cern/install/build_from_source/
+  * note the drop-down 'build options for ROOT 6.24' with build variables
 * https://root.cern/cling/
 * https://root.cern/manual/first_steps_with_root/
 * https://root.cern/manual/integrate_root_into_my_cmake_project/
@@ -38,4 +40,6 @@ Some Document references:
 * https://root.cern/manual/embed_root_in_gui/
 * https://root.cern/doc/master/index.html
 * https://root.cern/doc/master/classTRint.html
+* https://root.cern/root/htmldoc/guides/users-guide/Threads.html
+* https://root.cern/manual/multi_threading/
 
