@@ -23,7 +23,7 @@
 #pragma once
 
 #include <memory>
-//#include <thread>
+#include <thread>
 
 #include <OUCharting/ChartDVBasics.h>
 
@@ -32,7 +32,6 @@
 
 class TRint;
 class TH3D;
-class TThread;
 
 namespace config {
   class Options;
@@ -63,15 +62,14 @@ private:
 
   using pTH3D_t = std::shared_ptr<TH3D>;
 
-  //std::thread m_threadRdaf;
-  std::unique_ptr<TThread> m_prdafThread;
+  std::thread m_threadRdaf;
   std::unique_ptr<TRint> m_prdafApp;
   pTH3D_t m_pHistDelta;
   pTH3D_t m_pHistVolume;
 
   ou::tf::Quote m_quote;
 
-  void ThreadRdaf();
+  static void ThreadRdaf( ChartData* );
   void StartRdaf();
 
   void HandleQuote( const ou::tf::Quote& quote );
