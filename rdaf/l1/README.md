@@ -4,6 +4,7 @@ Example configuration file called x64/debug/rdaf_l1.cfg
 ```
 symbol=TST$Y
 time_bins=3600
+#          yyyymmdd hhmmss
 time_upper=20220228T000000
 time_lower=20220201T000000
 price_bins=200
