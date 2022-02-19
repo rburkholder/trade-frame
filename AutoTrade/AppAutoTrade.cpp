@@ -124,8 +124,8 @@ bool AppAutoTrade::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "a1 Close&Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
-  vItems.push_back( new mi( "b1 Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Close & Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
+  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
