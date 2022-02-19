@@ -21,14 +21,16 @@
 
 #include <string>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 namespace config {
 
 struct Options {
   std::string sSymbol;
 
   int nTimeBins;
-  double dblTimeUpper;
-  double dblTimeLower;
+  boost::posix_time::ptime dtTimeUpper;
+  boost::posix_time::ptime dtTimeLower;
 
   int nPriceBins;
   double dblPriceUpper;

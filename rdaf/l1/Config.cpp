@@ -19,8 +19,11 @@
  * Created: February 6, 2022 14:22
  */
 
+
 #include <fstream>
 #include <exception>
+
+#include <boost/date_time/posix_time/time_parsers.hpp>
 
 #include <boost/log/trivial.hpp>
 
@@ -65,6 +68,9 @@ bool Load( const std::string& sFileName, Options& options ) {
 
   bool bOk( true );
 
+  std::string sDateTimeUpper;
+  std::string sDateTimeLower;
+
   try {
 
     po::options_description config( "rdaf_l1 Config" );
@@ -72,10 +78,10 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
 
       ( sOption_TimeBinsCount.c_str(), po::value<int>( &options.nTimeBins), "#time bins" )
-      ( sOption_TimeBinsUpper.c_str(), po::value<double>( &options.dblTimeUpper), "time upper" )
-      ( sOption_TimeBinsLower.c_str(), po::value<double>( &options.dblTimeLower), "time lower" )
+      ( sOption_TimeBinsUpper.c_str(), po::value<std::string>( &sDateTimeUpper), "time upper yyyy-mm-dd hh:mm:ss.ddd" )
+      ( sOption_TimeBinsLower.c_str(), po::value<std::string>( &sDateTimeLower), "time lower yyyy-mm-dd hh:mm:ss.ddd" )
 
-      ( sOption_PriceBinsCount.c_str(), po::value<int>( &options.nPriceBins), "#rpice bins" )
+      ( sOption_PriceBinsCount.c_str(), po::value<int>( &options.nPriceBins), "#price bins" )
       ( sOption_PriceBinsUpper.c_str(), po::value<double>( &options.dblPriceUpper), "price upper" )
       ( sOption_PriceBinsLower.c_str(), po::value<double>( &options.dblPriceLower), "price lower" )
 
@@ -102,8 +108,10 @@ bool Load( const std::string& sFileName, Options& options ) {
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
       bOk |= parse<int>(    sFileName, vm, sOption_TimeBinsCount, options.nTimeBins );
-      bOk |= parse<double>( sFileName, vm, sOption_TimeBinsUpper, options.dblTimeUpper );
-      bOk |= parse<double>( sFileName, vm, sOption_TimeBinsLower, options.dblTimeLower );
+      bOk |= parse<std::string>( sFileName, vm, sOption_TimeBinsUpper, sDateTimeUpper );
+      options.dtTimeUpper = boost::posix_time::from_iso_string( sDateTimeUpper );
+      bOk |= parse<std::string>( sFileName, vm, sOption_TimeBinsLower, sDateTimeLower );
+      options.dtTimeLower = boost::posix_time::from_iso_string( sDateTimeLower );
 
       bOk |= parse<int>(    sFileName, vm, sOption_PriceBinsCount, options.nPriceBins );
       bOk |= parse<double>( sFileName, vm, sOption_PriceBinsUpper, options.dblPriceUpper );

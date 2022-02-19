@@ -22,8 +22,6 @@
 
 #include <memory>
 
-#include <boost/date_time/posix_time/conversion.hpp>
-
 #include <rdaf/TRint.h>
 #include <rdaf/TH3.h>
 #include <rdaf/TF1.h>
@@ -61,9 +59,20 @@ void ChartData::ThreadRdaf( ChartData* p ) {
 
   const config::Options& options( self->m_options );
 
+  double dblDateTimeUpper;
+  double dblDateTimeLower;
+
+  std::time_t nTime;
+  nTime = boost::posix_time::to_time_t( options.dtTimeUpper );
+  dblDateTimeUpper = (double) nTime / 1000.0;
+  nTime = boost::posix_time::to_time_t( options.dtTimeLower );
+  dblDateTimeLower = (double) nTime / 1000.0;
+
+  //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
+
   self->m_pHistDelta = std::make_shared<TH3D>(
     "h1", ( options.sSymbol + "Delta" ).c_str(),
-    options.nTimeBins, options.dblTimeLower, options.dblTimeUpper,
+    options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
     options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
     options.nVolumeSideBins, options.dblVolumeSideLower, options.dblVolumeSideUpper
   );
@@ -73,7 +82,7 @@ void ChartData::ThreadRdaf( ChartData* p ) {
 
   self->m_pHistVolume = std::make_shared<TH3D>(
     "h2", ( options.sSymbol + "Volume" ).c_str(),
-    options.nTimeBins, options.dblTimeLower, options.dblTimeUpper,
+    options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
     options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
     options.nVolumeTotalBins, options.dblVolumeTotalLower, options.dblVolumeTotalUpper
   );
@@ -137,7 +146,7 @@ void ChartData::HandleTrade( const ou::tf::Trade& trade ) {
   double dblTime( nTime );
   dblTime = dblTime / 1000.0;
 
-  std::cout << "values: " << dblTime << "," << trade.Price() << "," << trade.Volume() << std::endl;
+  // std::cout << "values: " << dblTime << "," << trade.Price() << "," << trade.Volume() << std::endl;
 
   m_pHistDelta ->Fill( dblTime, trade.Price(), trade.Price() >= mid ? trade.Volume() : -trade.Volume() );
   m_pHistVolume->Fill( dblTime, trade.Price(), trade.Volume() );
