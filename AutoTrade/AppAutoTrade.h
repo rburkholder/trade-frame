@@ -33,6 +33,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
+#include "db.h"
+
 class FrameMain;
 class Strategy;
 
@@ -65,6 +67,8 @@ private:
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
   std::unique_ptr<Strategy> m_pStrategy;
+
+  db m_db;
 
   virtual bool OnInit();
   virtual int OnExit();
