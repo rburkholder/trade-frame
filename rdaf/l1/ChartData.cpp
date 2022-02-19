@@ -108,10 +108,7 @@ void ChartData::StartRdaf() {
   ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
 
-  m_threadRdaf = std::move( std::thread(
-    [this](){
-      ThreadRdaf( this );
-    }));
+  m_threadRdaf = std::move( std::thread( ThreadRdaf, this ) );
 }
 
 void ChartData::StartWatch() {
