@@ -30,13 +30,13 @@ template<class S, class T> // S Session variable (ou::db::CSession), T class for
 class SessionBase {
 public:
 
-  SessionBase(void);
-  virtual ~SessionBase(void);
+  SessionBase();
+  virtual ~SessionBase();
 
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
-  void Close( void );
+  void Close();
 
-  bool IsOpen( void ) { return m_bOpened; }
+  bool IsOpen() const { return m_bOpened; }
 
 protected:
 
@@ -44,23 +44,23 @@ protected:
 
   std::string m_sDbFileName;
 
-  void InitializeManagers( void ) {}; // null placeholder
-  void RegisterRowDefinitions( void ) {}; // null placeholder
-  void RegisterTablesForCreation( void ) {}; // null placeholder
-  void PopulateTables( void ) {}; // null placeholder
-  void DenitializeManagers( void ) {}; // null placeholder
+  void InitializeManagers() {}; // null placeholder
+  void RegisterRowDefinitions() {}; // null placeholder
+  void RegisterTablesForCreation() {}; // null placeholder
+  void PopulateTables() {}; // null placeholder
+  void DenitializeManagers() {}; // null placeholder
 private:
 };
 
 template<class S, class T>
-SessionBase<S,T>::SessionBase(void) 
+SessionBase<S,T>::SessionBase()
   : m_bOpened( false )
 {
 //  static_cast<T*>( this )->Initialize();
 }
 
 template<class S, class T>
-SessionBase<S,T>::~SessionBase(void) {
+SessionBase<S,T>::~SessionBase() {
   Close();
 //  static_cast<T*>( this )->Denitialize();
 }
@@ -91,7 +91,7 @@ void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags
 }
 
 template<class S, class T>
-void SessionBase<S,T>::Close( void ) {
+void SessionBase<S,T>::Close() {
   if ( m_bOpened ) {
     m_bOpened = false;
     static_cast<T*>( this )->DenitializeManagers();
