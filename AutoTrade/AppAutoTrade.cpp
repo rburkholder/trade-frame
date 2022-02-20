@@ -73,6 +73,8 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
+  m_pdb = std::make_unique<db>();
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -124,7 +126,7 @@ bool AppAutoTrade::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "Close & Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
+  vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
@@ -166,8 +168,20 @@ void AppAutoTrade::ConstructInstrument() {
   m_pBuildInstrument->Add(
     m_sSymbol,
     [this]( pInstrument_t pInstrument ){
-      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+      const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+      pPosition_t pPosition;
+      if ( pm.PositionExists( "USD", idInstrument ) ) {
+        pPosition = pm.GetPosition( "USD", idInstrument );
+      }
+      else {
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+        pPosition = pm.ConstructPosition(
+          "USD", idInstrument, "ema",
+          "ib01", "iq01", m_pExecutionProvider,
+          pWatch
+        );
+      }
       m_pStrategy->SetPosition( pPosition );
     } );
 

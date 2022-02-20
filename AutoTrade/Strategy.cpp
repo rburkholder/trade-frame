@@ -174,6 +174,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+
   // DailyTradeTimeFrame: Trading during regular active equity market hours
   // https://learnpriceaction.com/3-moving-average-crossover-strategy/
 
