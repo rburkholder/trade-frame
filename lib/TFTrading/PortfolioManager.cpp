@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "PortfolioManager.h"
 
 // todo:  need to store the prepared queries for re-use
@@ -33,9 +31,9 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
     throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
 
-  pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, idOwner, ePortfolioType, eCurrency, sDescription ) );
+  pPortfolio = std::make_shared<ou::tf::Portfolio>( idPortfolio, idAccountOwner, idOwner, ePortfolioType, eCurrency, sDescription );
   m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     ou::db::QueryFields<Portfolio::TableRowDef>::pQueryFields_t pQuery
       = m_pSession->Insert<Portfolio::TableRowDef>( const_cast<Portfolio::TableRowDef&>( pPortfolio->GetRow() ) );
   }
@@ -83,7 +81,7 @@ namespace PortfolioManagerQueries {
 }
 
 void PortfolioManager::HandlePositionOnExecution( const Position& position ) {
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
       row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblUnRealizedPL, row.dblRealizedPL );
@@ -110,7 +108,7 @@ namespace PortfolioManagerQueries {
 }
 
 void PortfolioManager::HandlePositionOnCommission( const Position& position ) {
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
@@ -136,7 +134,7 @@ namespace PortfolioManagerQueries {
 }
 
 void PortfolioManager::HandlePortfolioOnExecution( const Portfolio& portfolio ) {
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
@@ -161,7 +159,7 @@ namespace PortfolioManagerQueries {
 }
 
 void PortfolioManager::HandlePortfolioOnCommission( const Portfolio& portfolio ) {
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
@@ -200,7 +198,7 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       Portfolio::TableRowDef rowPortfolio;
       m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, Portfolio::TableRowDef>( pExistsQuery, rowPortfolio );
-      pPortfolio.reset( new Portfolio( rowPortfolio ) );
+      pPortfolio = std::make_shared<ou::tf::Portfolio>( rowPortfolio );
 
       std::pair<mapPortfolios_iter_t, bool> response;
       response = m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, structPortfolio( pPortfolio ) ) );
@@ -238,7 +236,7 @@ namespace PortfolioManagerQueries {
 }
 
 void PortfolioManager::PositionUpdateNotes( pPosition_t pPosition ) {
-  if ( 0 != m_pSession ) {
+  if ( nullptr != m_pSession ) {
     const Position::TableRowDef& row( pPosition->GetRow() );
     PortfolioManagerQueries::UpdatePositionNotes update( row.idPosition, row.sNotes );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionNotes>::pQueryFields_t pQuery
@@ -320,7 +318,7 @@ void PortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfo
   iter->second.insert( iter->second.begin(), idReporting );
 }
 
-void PortfolioManager::LoadActivePortfolios( void ) {
+void PortfolioManager::LoadActivePortfolios() {
   // todo:  work with sub-portfolios, and get them attached properly
 
   PortfolioManagerQueries::ActivePortfolios parameter( true );
@@ -334,7 +332,7 @@ void PortfolioManager::LoadActivePortfolios( void ) {
     // following portfolio / position code is shared with GetPortfolio and could be factored out
     Portfolio::TableRowDef rowPortfolio;
     m_pSession->Columns<PortfolioManagerQueries::ActivePortfolios, Portfolio::TableRowDef>( pQuery, rowPortfolio );
-    pPortfolio.reset( new Portfolio( rowPortfolio ) );
+    pPortfolio = std::make_shared<ou::tf::Portfolio>( rowPortfolio );
 
     std::pair<mapPortfolios_iter_t, bool> response;
     response = m_mapPortfolios.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
@@ -442,7 +440,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
   ConstructPosition(
     idPortfolio, sName,
     [&,pInstrument,pExecutionProvider, pDataProvider]()->pPosition_t{
-      pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+      pPosition = std::make_shared<ou::tf::Position>( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm );
       return pPosition;
     } );
 
@@ -460,7 +458,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
   ConstructPosition(
     idPortfolio, sName,
     [&,pWatch,pExecutionProvider]()->pPosition_t{
-      pPosition.reset( new Position( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+      pPosition = std::make_shared<ou::tf::Position>( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm );
       return pPosition;
     } );
 
@@ -495,7 +493,7 @@ void PortfolioManager::ConstructPosition( // re-factored code
 
   portfolio.mapPosition.insert( mapPosition_pair_t( sName, pPosition ) );
 
-  if ( 0 == m_pSession ) {
+  if ( nullptr == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
   }
 
@@ -514,13 +512,37 @@ void PortfolioManager::ConstructPosition( // re-factored code
 
 }
 
+bool PortfolioManager::PositionExists( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+
+  assert( 0 != idPortfolio.size() );
+
+  mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() == iterPortfolio ) {
+    return false;
+  }
+
+  assert( 0 != sName.size() );
+
+  auto& [id,portfolio] = *iterPortfolio;
+
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  if ( portfolio.mapPosition.end() == iterPosition ) {
+    return false;
+  }
+
+  return true;
+}
+
 PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+
+  assert( 0 != idPortfolio.size() );
 
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() == iterPortfolio ) {
     throw std::runtime_error( "GetPosition:  idPortfolio does not exist" );
   }
-  assert( "" != sName );
+
+  assert( 0 != sName.size() );
 
   auto& [id,portfolio] = *iterPortfolio;
 

@@ -38,30 +38,30 @@ namespace tf { // TradeFrame
 class PortfolioManager: public ou::db::ManagerBase<PortfolioManager> {
 public:
 
-  typedef Portfolio::pPortfolio_t pPortfolio_t;
-  typedef keytypes::idPortfolio_t idPortfolio_t;
-  typedef std::set<idPortfolio_t> setPortfolioId_t;
+  using pPortfolio_t = Portfolio::pPortfolio_t;
+  using idPortfolio_t = keytypes::idPortfolio_t;
+  using setPortfolioId_t = std::set<idPortfolio_t>;
 
-  typedef Portfolio::EPortfolioType EPortfolioType;
-  typedef Portfolio::currency_t currency_t;
+  using EPortfolioType = Portfolio::EPortfolioType;
+  using currency_t = Portfolio::currency_t;
 
-  typedef Position::pPosition_t pPosition_t;
-  typedef keytypes::idPosition_t idPosition_t;
-  typedef keytypes::idAccount_t idAccount_t;
-  typedef keytypes::idInstrument_t idInstrument_t;
+  using pPosition_t = Position::pPosition_t;
+  using idPosition_t = keytypes::idPosition_t;
+  using idAccount_t = keytypes::idAccount_t;
+  using idInstrument_t = keytypes::idInstrument_t;
 
-  typedef keytypes::idAccountOwner_t idAccountOwner_t;
+  using idAccountOwner_t = keytypes::idAccountOwner_t;
 
-  typedef Instrument::pInstrument_cref pInstrument_cref;
-  typedef Position::pWatch_t pWatch_t;
-  typedef Position::pProvider_t pProvider_t;
+  using pInstrument_cref = Instrument::pInstrument_cref;
+  using pWatch_t = Position::pWatch_t;
+  using pProvider_t = Position::pProvider_t;
 
-  typedef std::pair<const Position&, const Execution&> execution_pair_t;
-  typedef const execution_pair_t& execution_delegate_t;
+  using execution_pair_t = std::pair<const Position&, const Execution&>;
+  using execution_delegate_t = const execution_pair_t&;
 
-  typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
-  typedef std::map<std::string, pPosition_t> mapPosition_t;
-  typedef mapPosition_t::iterator mapPosition_iter_t;
+  using mapPosition_pair_t = std::pair<std::string, pPosition_t>;
+  using mapPosition_t = std::map<std::string, pPosition_t>;
+  using mapPosition_iter_t = mapPosition_t::iterator;
 
   struct structPortfolio {
     pPortfolio_t pPortfolio;
@@ -69,10 +69,11 @@ public:
     structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
   };
 
-  PortfolioManager(void) {};
-  ~PortfolioManager(void) {};
+  PortfolioManager() {};
+  ~PortfolioManager() {};
 
   bool PortfolioExists( const idPortfolio_t& idPortfolio );
+  bool PositionExists( const idPortfolio_t& idPortfolio, const std::string& sName );
 
   pPortfolio_t ConstructPortfolio(
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
@@ -99,7 +100,7 @@ public:
   void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ); // TODO: may not be funcfional
   void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
 
-  typedef FastDelegate1<pPosition_t&> OnPositionNeedsDetailsHandler;
+  using OnPositionNeedsDetailsHandler = FastDelegate1<pPosition_t&>;
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
     OnPositionNeedsDetails = function;
   }
@@ -122,7 +123,7 @@ public:
   template<class F> void ScanPositions( mapPosition_t&, F );
   template<class F> void ScanPositions( const idPortfolio_t&, F );
 
-  void LoadActivePortfolios( void );
+  void LoadActivePortfolios();
 
   void AttachToSession( ou::db::Session* pSession );
   void DetachFromSession( ou::db::Session* pSession );
@@ -131,24 +132,24 @@ protected:
 
 private:
 
-  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
-  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolios_t;
-  typedef mapPortfolios_t::iterator mapPortfolios_iter_t;
+  using mapPortfolio_pair_t = std::pair<idPortfolio_t, structPortfolio>;
+  using mapPortfolios_t = std::map<idPortfolio_t, structPortfolio>;
+  using mapPortfolios_iter_t = mapPortfolios_t::iterator;
 
   mapPortfolios_t m_mapPortfolios;
 
   // method for getting at child portfolios
   // portfolio id "" is root where all top level portfolios are linked
-  typedef std::map<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_t;
-  typedef std::pair<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_pair_t;
+  using mapReportingPortfolios_t = std::map<idPortfolio_t,setPortfolioId_t>;
+  using mapReportingPortfolios_pair_t = std::pair<idPortfolio_t,setPortfolioId_t>;
   mapReportingPortfolios_t m_mapReportingPortfolios;
-  typedef mapReportingPortfolios_t::iterator iterReportingPortfolios_t;
+  using iterReportingPortfolios_t = mapReportingPortfolios_t::iterator;
 
   void UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting );
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
 
-  typedef std::function<pPosition_t()> fConstructPosition_t;
+  using fConstructPosition_t = std::function<pPosition_t()>;
 
   void ConstructPosition( // re-factored code
     const idPortfolio_t& idPortfolio, const std::string& sName,
