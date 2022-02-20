@@ -1,4 +1,27 @@
-* x64/debug/AutoTrade.cfg:
+## AutoTrade 
+
+This sample project is composed of current best practicies for building an
+automated trading application.  Some of the features and functions represented:
+
+* parameters supplied by a configuration file
+* live chart being update with quotes, ticks, volume, and trade results
+* state machine to process entries and exits
+* portfolios, positions, instruments, orders and executions are recorded in a sqlite3 database
+* live data is sourced from IQFeed
+* orders are executed at Interactive Brokers (run this as a paper trading example)
+* trading is automatically limited to North America trading hours
+* quotes and ticks can be manually saved to an HDF5 based timeseries database at end of session
+
+This project can be used as a template to try out your own high-frequency trading ideas.
+
+Quotes are used to supply the trading signals in a high-frequency fashion.
+
+### x64/debug/AutoTrade.cfg
+
+This example uses a three time period exponential moving average to generate the entry/exit signals.  
+The parameters are sourced in the configuration file (as an example):
+
+x64/debug/AutoTrade.cfg:
 
 ```
 symbol=SPY
@@ -8,3 +31,20 @@ ma2_periods=13
 ma3_periods=21
 ```
 
+### x64/debug/AutoTrade.db
+
+The database has a number of tables, and can be accessed in a manner similar to this example:
+
+```
+$ sqlite3 x64/debug/AutoTrade.db
+SQLite version 3.34.1 2021-01-20 14:10:07
+Enter ".help" for usage hints.
+sqlite> select * from portfolios;
+Master|aoTF||1|1|USD|Master of all Portfolios|0.0|0.0
+USD|aoTF|Master|2|1|USD|CurrencySummary of USD Portfolios|0.0|0.0
+sqlite> select * from positions;
+1|USD|SPY||ib01|iq01|SPY|ema|0|0|0|0|0.0|0.0|0.0|0.0
+sqlite> .quit
+```
+
+For testing purposes, delete or rename the database to start fresh.

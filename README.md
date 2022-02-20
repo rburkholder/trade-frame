@@ -18,6 +18,10 @@ Picture from the ComboTrading project showing an instrument list, with a chart f
 
 More pictures under ![ComboTrading](ComboTrading)
 
+## Template
+
+The AutoTrade project can be used as a template to building your own automated high-frequency trading application.
+
 ## Building
 
 Scripts are library version specific.  Build notes are as of 2021/11/22.
@@ -43,7 +47,7 @@ sudo apt-get update && apt-get install git wine wget
 wget http://www.iqfeed.net/iqfeed_client_6_2_0_25.exe
 wine iqfeed_client_6_2_0_25.exe
 
-# interactive brokers Java for linux
+# interactive brokers TWS for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
 
@@ -76,6 +80,8 @@ I use Visual Studio Code as my IDE.  I have the following extensions installed:
 * CMake [twxs]
 * CMake Tools [Microsoft]
 
+The clangd extenstion provides the language library to provide symbol lookup and cross-referencing.
+
 I have notes for this combination at 
   [Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
 
@@ -107,9 +113,6 @@ I have notes for this combination at
       * once the message 'Process Complete' shows, the download is complete
     * 'turn off' IQF
     * File -> Exit 
-* BasketTrading project:
-  * runs a Darvas selection process on daily bars retrieved by IQFeedGetHistory
-  * runs an automated buy/sell/stop process from market open to market close on a basket of instruments
 * more apps to be described here ...
 
 ## Background
@@ -135,9 +138,10 @@ Libraries used (use my lib-build respository to download and build the various d
 * hdf5
 * sqlite (included in source)
 * exelformat (included in source)
+* rdaf aka ROOT - library from CERN providing the cling C++ interpreter
 
-The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
-to port back to Windows.
+NOTE: The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
+to port back to Windows.  There are various Windows based artifacts in various directories.  They are not fully functional at the moment.
 
 The lib directory has a series of libraries I use throughout the various applications.  Primary libraries include:
 
@@ -153,10 +157,6 @@ The lib directory has a series of libraries I use throughout the various applica
 * OUCharting - wrapper around ChartDirector for plots and charts
 * OUSQL - which is an ORM wrapper around a sqlite database for maintaining trading records
 
-During its infancy, the code used MFC (Microsoft Foundation Classes), some Berkeley DB code, and various other modules, 
-which I now no longer support.  The code remains in the repository for historical value, and for the time it might be 
-re-written for current use.
-
 These are some of the currently supported applications:
 
 * IQFeedMarketSymbols - automatically download and decompress the latest mkt_symbol.txt file from dtn,iq
@@ -170,6 +170,10 @@ These are some of the currently supported applications:
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 
 Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index.php?/categories/23-Trading
+
+NOTE: During its infancy, the code used MFC (Microsoft Foundation Classes), some Berkeley DB code, and various other modules, 
+which I now no longer support.  The code remains in the repository for historical value, and for the time it might be 
+re-written for current use.
 
 ## Testing
 
