@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "Managers.h"
 
 #include "ProviderManager.h"
@@ -30,7 +28,7 @@ void HandlePositionDetails( Position::pPosition_t& pPosition ) {
   Instrument::pInstrument_t pInstrument = InstrumentManager::Instance().Get( row.idInstrument );
   Position::pProvider_t pExecutionProvider = ProviderManager::Instance().Get( row.idExecutionAccount );
   Position::pProvider_t pDataProvider = ProviderManager::Instance().Get( row.idDataAccount );
-  pPosition->Set( pInstrument, pExecutionProvider, pDataProvider ); 
+  pPosition->Set( pInstrument, pExecutionProvider, pDataProvider );
 }
 
 void HandleOrderDetails( Instrument::idInstrument_t idInstrument, Instrument::pInstrument_t& pInstrument ) {
