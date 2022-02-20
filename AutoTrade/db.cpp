@@ -19,7 +19,7 @@
  * Created: February 19, 2022 13:04
  */
 
- #include <TFTrading/AccountManager.h>
+#include <TFTrading/AccountManager.h>
 
 #include "db.h"
 
@@ -28,9 +28,6 @@ namespace {
 }
 
 db::db() {
-
-  // TODO: need to test if this works properly, and is created fresh on a day by day basis
-  m_sPortfolioStrategyAggregate = "started-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &db::HandlePortfolioLoad ) );
@@ -109,10 +106,6 @@ void db::HandlePopulateDatabase() {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "USD", "aoTF", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "CurrencySummary of USD Portfolios" );
 
-  m_pPortfolioStrategyAggregate  // owning portfolio: USD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    m_sPortfolioStrategyAggregate, "aoTF", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Underlying Instances" );
-
 }
 
 void db::HandleDbOnPopulate(  ou::db::Session& session ) {
@@ -134,7 +127,6 @@ void db::HandleDbOnLoad(  ou::db::Session& session ) {
 void db::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   switch ( pPortfolio->GetRow().ePortfolioType ) {
     case ou::tf::Portfolio::EPortfolioType::Basket:
-      m_pPortfolioStrategyAggregate = pPortfolio;
       //BuildMasterPortfolio();
       break;
     case ou::tf::Portfolio::EPortfolioType::Standard: // not used

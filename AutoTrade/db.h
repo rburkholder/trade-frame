@@ -27,8 +27,10 @@
 
 class db {
 public:
+
   db();
   ~db();
+
 protected:
 private:
 
@@ -40,7 +42,6 @@ private:
 
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
-  pPortfolio_t m_pPortfolioStrategyAggregate;
 
   void HandlePopulateDatabase();
   void HandleLoadDatabase();
