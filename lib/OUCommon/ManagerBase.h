@@ -40,11 +40,11 @@ template<class T>
 class ManagerBase: public ou::Singleton<T> {
 public:
 
-  ManagerBase( void ): m_pSession( nullptr ) {};
-  virtual ~ManagerBase( void ) {};
+  ManagerBase(): m_pSession( nullptr ) {};
+  virtual ~ManagerBase() {};
 
   virtual void AttachToSession( ou::db::Session* pSession ) { m_pSession = pSession; };
-  virtual void DetachFromSession( ou::db::Session* pSession ) { m_pSession = 0; };
+  virtual void DetachFromSession( ou::db::Session* pSession ) { m_pSession = nullptr; };
 
 protected:
 
