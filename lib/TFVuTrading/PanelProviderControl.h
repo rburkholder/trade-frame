@@ -88,6 +88,8 @@ public:
     const wxSize& size = SYMBOL_PANELPROVIDERCONTROL_SIZE,
     long style = SYMBOL_PANELPROVIDERCONTROL_STYLE );
 
+  void SetProvider( Provider_t d1, Provider_t d2, Provider_t x );
+
   void SetIQFeedState( eProviderState_t state );
   void SetIBState( eProviderState_t state );
   void SetSimulatorState( eProviderState_t state );
@@ -120,7 +122,7 @@ public:
     OnProviderSelectX = function;
   }
 
-  void SyncInitialState( void );
+  void SyncInitialState();
 
   using OnPanelClosing_t = FastDelegate0<>;
   void SetOnPanelClosingHandler( OnPanelClosing_t function ) {

@@ -36,6 +36,8 @@ namespace {
   static const std::string sOption_MA2Periods( "ma2_periods" );
   static const std::string sOption_MA3Periods( "ma3_periods" );
   static const std::string sOption_GroupDirectory( "group_directory" );
+  static const std::string sOption_SimStart( "sim_start" );
+  static const std::string sOption_IbInstance( "ib_instance" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -69,7 +71,10 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
 
-      ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory), "hdf5 group directory" )
+      ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory)->default_value( "" ), "hdf5 group directory" )
+
+      ( sOption_SimStart.c_str(), po::value<bool>( &options.bSimStart)->default_value( false ), "auto start simulation" )
+      ( sOption_IbInstance.c_str(), po::value<int>( &options.nIbInstance)->default_value( 1 ), "IB instance" )
       ;
 
     po::variables_map vm;
@@ -93,6 +98,9 @@ bool Load( const std::string& sFileName, Options& options ) {
 
       // TODO: need to make this optional?
       bOk |= parse<std::string>( sFileName, vm, sOption_GroupDirectory, options.sGroupDirectory );
+
+      bOk |= parse<bool>( sFileName, vm, sOption_SimStart, options.bSimStart );
+      bOk |= parse<int>( sFileName, vm, sOption_IbInstance, options.nIbInstance );
     }
 
   }

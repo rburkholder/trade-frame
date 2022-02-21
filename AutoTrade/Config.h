@@ -43,6 +43,18 @@ struct Options {
 
   // group directory for simulator - obtain from Hdf5Chart
   std::string sGroupDirectory;
+
+  // force a simulation run
+  bool bSimStart;
+
+  // Interactive Brokers api instance
+  int nIbInstance;
+
+  Options()
+  : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
+  , bSimStart( false )
+  , nIbInstance( 1 )
+  {}
 };
 
 bool Load( const std::string& sFileName, Options& );

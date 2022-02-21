@@ -86,6 +86,8 @@ bool AppAutoTrade::OnInit() {
     m_sim->SetGroupDirectory( options.sGroupDirectory );
   }
 
+  m_tws->SetClientId( options.nIbInstance );
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -150,6 +152,18 @@ bool AppAutoTrade::OnInit() {
       LoadState();
     }
   );
+
+  if ( options.bSimStart ) {
+    CallAfter(
+      [this](){
+        using Provider_t = ou::tf::PanelProviderControl::Provider_t;
+        m_pPanelProviderControl->SetProvider( Provider_t::ESim, Provider_t::ESim, Provider_t::ESim );
+        m_pPanelProviderControl->SetSimulatorState( ou::tf::ProviderOn );
+        m_sim->Connect();
+        m_sim->Run();
+      }
+    );
+  }
 
   return 1;
 }

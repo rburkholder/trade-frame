@@ -176,6 +176,47 @@ void PanelProviderControl::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
+void PanelProviderControl::SetProvider( Provider_t d1, Provider_t d2, Provider_t x ) {
+
+  wxCommandEvent event;  // dummy construct for the call
+
+  switch (d1) {
+    case EIQFeed:
+      OnBtnD1IQFeed( event );
+      break;
+    case EIB:
+      OnBtnD1IB( event );
+      break;
+    case ESim:
+      OnBtnD1Sim( event );
+      break;
+  }
+
+  switch (d2) {
+    case EIQFeed:
+      OnBtnD2IQFeed( event );
+      break;
+    case EIB:
+      OnBtnD2IB( event );
+      break;
+    case ESim:
+      OnBtnD2Sim( event );
+      break;
+  }
+
+  switch (x) {
+    case EIQFeed:
+      OnBtnXIQFeed( event );
+      break;
+    case EIB:
+      OnBtnXIB( event );
+      break;
+    case ESim:
+      OnBtnXSim( event );
+      break;
+  }
+}
+
 void PanelProviderControl::UpdateProviderButtons() {
   m_btnIQFeed->Enable(    m_cbIQFeedD1->IsChecked() || m_cbIQFeedD2->IsChecked() || m_cbIQFeedX->IsChecked() );
   m_btnIB->Enable(        m_cbIBD1->IsChecked()     || m_cbIBD2->IsChecked()     || m_cbIBX->IsChecked() );
