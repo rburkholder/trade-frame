@@ -25,11 +25,14 @@
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 
+namespace ou {
+namespace tf {
+
 class db {
 public:
 
   db( const std::string& sFileName );
-  ~db();
+  virtual ~db();
 
 protected:
 private:
@@ -54,3 +57,6 @@ private:
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
 };
+
+} // namespace tf
+} // namespace ou

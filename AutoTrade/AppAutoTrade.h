@@ -68,7 +68,7 @@ private:
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
   std::unique_ptr<Strategy> m_pStrategy;
 
-  std::unique_ptr<db> m_pdb;
+  std::unique_ptr<ou::tf::db> m_pdb;
 
   virtual bool OnInit();
   virtual int OnExit();

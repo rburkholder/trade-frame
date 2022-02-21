@@ -23,6 +23,9 @@
 
 #include "db.h"
 
+namespace ou {
+namespace tf {
+
 db::db( const std::string& sFileName ) {
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
@@ -144,3 +147,5 @@ void db::HandlePositionLoad( pPosition_t& pPosition ) {
   //m_pMasterPortfolio->Add( pPosition );
 }
 
+} // namespace tf
+} // namespace ou

@@ -74,7 +74,7 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  m_pdb = std::make_unique<db>( sDbName );
+  m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
