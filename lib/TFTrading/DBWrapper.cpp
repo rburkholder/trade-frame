@@ -13,15 +13,15 @@
  ************************************************************************/
 
 /*
- * File:    db.cpp
+ * File:    DBWrapper.cpp
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
+ * Project: lib/TFTrading
  * Created: February 19, 2022 13:04
  */
 
 #include <TFTrading/AccountManager.h>
 
-#include "db.h"
+#include "DBWrapper.h"
 
 namespace ou {
 namespace tf {

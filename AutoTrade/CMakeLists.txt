@@ -27,7 +27,6 @@ set(
   file_h
     AppAutoTrade.h
     Config.h
-    db.h
     Strategy.h
   )
 
@@ -35,7 +34,6 @@ set(
   file_cpp
     AppAutoTrade.cpp
     Config.cpp
-    db.cpp
     Strategy.cpp
   )
 

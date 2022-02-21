@@ -31,9 +31,9 @@
 
 #include <OUCharting/ChartDataView.h>
 
-#include <TFBitsNPieces/FrameWork01.h>
+#include <TFTrading/DBWrapper.h>
 
-#include "db.h"
+#include <TFBitsNPieces/FrameWork01.h>
 
 class FrameMain;
 class Strategy;

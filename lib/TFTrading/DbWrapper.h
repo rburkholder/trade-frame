@@ -13,9 +13,9 @@
  ************************************************************************/
 
 /*
- * File:    db.h
+ * File:    DBWrapper.h
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
+ * Project: lib/TFTrading
  * Created: February 19, 2022 13:04
  */
 

@@ -24,6 +24,7 @@ set(
     DailyTradeTimeFrames.h
     Database.h
     DBOps.h
+    DBWrapper.h
     Exchange.h
     Execution.h
     InstrumentData.h
@@ -68,6 +69,7 @@ set(
     DailyTradeTimeFrames.cpp
     Database.cpp
     DBOps.cpp
+    DBWrapper.cpp
     Exchange.cpp
     Execution.cpp
     Instrument.cpp
