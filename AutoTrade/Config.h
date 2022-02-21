@@ -40,6 +40,9 @@ struct Options {
 
   // longest SMA/EMA
   int nMA3Periods;
+
+  // group directory for simulator - obtain from Hdf5Chart
+  std::string sGroupDirectory;
 };
 
 bool Load( const std::string& sFileName, Options& );

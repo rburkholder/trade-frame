@@ -19,6 +19,8 @@
  * Created: February 14, 2022 10:06
  */
 
+#include <sstream>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -79,6 +81,10 @@ bool AppAutoTrade::OnInit() {
   }
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
+
+  if ( 0 < options.sGroupDirectory.size() ) {
+    m_sim->SetGroupDirectory( options.sGroupDirectory );
+  }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -167,7 +173,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructInstrument() {
+void AppAutoTrade::ConstructIBInstrument() {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -182,6 +188,7 @@ void AppAutoTrade::ConstructInstrument() {
       pPosition_t pPosition;
       if ( pm.PositionExists( "USD", idInstrument ) ) {
         pPosition = pm.GetPosition( "USD", idInstrument );
+        std::cout << "loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
@@ -190,10 +197,49 @@ void AppAutoTrade::ConstructInstrument() {
           "ib01", "iq01", m_pExecutionProvider,
           pWatch
         );
+        std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       m_pStrategy->SetPosition( pPosition );
     } );
 
+}
+
+void AppAutoTrade::ConstructSimInstrument() {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  ou::tf::Instrument::pInstrument_t pInstrument;
+  pInstrument = std::make_shared<ou::tf::Instrument>( m_sSymbol );
+  // TODO: will need to turn off database here?
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+  pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+  // TODO: check that both providers are the sim providers
+  std::cout << "Constructed simulation " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  m_pStrategy->SetPosition( pPosition );
+
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStart ) ) );
+  vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
+  vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
+  m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+
+}
+
+void AppAutoTrade::HandleMenuActionSimStart() {
+  m_sim->Run();
+}
+
+void AppAutoTrade::HandleMenuActionSimStop() {
+  m_sim->Stop();
+}
+
+void AppAutoTrade::HandleMenuActionSimEmitStats() {
+  std::stringstream ss;
+  m_sim->EmitStats( ss );
+  std::cout << "Stats: " << ss.str() << std::endl;
 }
 
 int AppAutoTrade::OnExit() {
@@ -221,44 +267,53 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 }
 
 void AppAutoTrade::OnData1Connected( int ) {
-  m_bData1Connected = true;
-//  AutoStartCollection();
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-    ConstructInstrument();
-  }
-
-  // ** Note:  turn on iqfeed only, symbols not set for IB yet
-  // TODO: need to fix this with start / stop
-
+  //m_bData1Connected = true;
+  ConfirmProviders();
 }
 
 void AppAutoTrade::OnData2Connected( int ) {
-  m_bData2Connected = true;
-//  AutoStartCollection();
-  if ( m_bData2Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
+  //m_bData2Connected = true;
+  // Data2 Connection not used
 }
 
 void AppAutoTrade::OnExecConnected( int ) {
-  m_bExecConnected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-    ConstructInstrument();
-  }
+  //m_bExecConnected = true;
+  ConfirmProviders();
 }
 
 void AppAutoTrade::OnData1Disconnected( int ) {
-  m_bData1Connected = false;
+  //m_bData1Connected = false;
 }
 
 void AppAutoTrade::OnData2Disconnected( int ) {
-  m_bData2Connected = false;
+  //m_bData2Connected = false;
 }
 
 void AppAutoTrade::OnExecDisconnected( int ) {
-  m_bExecConnected = false;
+  //m_bExecConnected = false;
+}
+
+void AppAutoTrade::ConfirmProviders() {
+  if ( m_bData1Connected && m_bExecConnected ) {
+    bool bValidCombo( false );
+    if (
+         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
+      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
+    ) {
+      bValidCombo = true;
+      ConstructIBInstrument();
+    }
+    if (
+         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
+      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
+    ) {
+      bValidCombo = true;
+      ConstructSimInstrument();
+    }
+    if ( !bValidCombo ) {
+      std::cout << "invalid combo of data and execution providers" << std::endl;
+    }
+  }
 }
 
 void AppAutoTrade::SaveState() {

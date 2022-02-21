@@ -29,7 +29,10 @@ period_width=10 # seconds
 ma1_periods=8
 ma2_periods=13
 ma3_periods=21
+group_directory=/app/AutoTrade/20220218 19:23:05.489488/
 ```
+
+When there is no data available, set the group directory such nothing follows the '='
 
 ### x64/debug/AutoTrade.db
 
@@ -48,3 +51,14 @@ sqlite> .quit
 ```
 
 For testing purposes, delete or rename the database to start fresh.
+
+### Simulation
+
+NOTE: I have to test this yet
+
+* collect data during a live session, and at the end of the session, use the Save Values menu item
+* restart the application, and set D1 & X to Sim, and turn on
+* a Simulation menu will appear
+* Simulation->Run to start the simulation
+  * trades should show up in similar time frames
+

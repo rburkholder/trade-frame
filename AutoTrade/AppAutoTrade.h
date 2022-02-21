@@ -85,7 +85,14 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void ConstructInstrument();
+  void ConstructIBInstrument();
+  void ConstructSimInstrument();
+
+  void ConfirmProviders();
+
+  void HandleMenuActionSimStart();
+  void HandleMenuActionSimStop();
+  void HandleMenuActionSimEmitStats();
 
   void SaveState();
   void LoadState();

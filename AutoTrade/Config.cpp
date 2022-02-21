@@ -35,6 +35,7 @@ namespace {
   static const std::string sOption_MA1Periods( "ma1_periods" );
   static const std::string sOption_MA2Periods( "ma2_periods" );
   static const std::string sOption_MA3Periods( "ma3_periods" );
+  static const std::string sOption_GroupDirectory( "group_directory" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -67,6 +68,8 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods), "ma1 (#periods)" )
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
+
+      ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory), "hdf5 group directory" )
       ;
 
     po::variables_map vm;
@@ -87,6 +90,9 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk |= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
+
+      // TODO: need to make this optional?
+      bOk |= parse<std::string>( sFileName, vm, sOption_GroupDirectory, options.sGroupDirectory );
     }
 
   }
