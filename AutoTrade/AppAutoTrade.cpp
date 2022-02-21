@@ -39,6 +39,7 @@
 namespace {
   static const std::string sAppName( "Auto Trade Example" );
   static const std::string sConfigFilename( "AutoTrade.cfg" );
+  static const std::string sDbName( "AutoTrade.db" );
   static const std::string sStateFileName( "AutoTrade.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
@@ -73,7 +74,7 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  m_pdb = std::make_unique<db>();
+  m_pdb = std::make_unique<db>( sDbName );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();

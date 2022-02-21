@@ -28,7 +28,7 @@
 class db {
 public:
 
-  db();
+  db( const std::string& sFileName );
   ~db();
 
 protected:

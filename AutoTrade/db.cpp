@@ -23,11 +23,7 @@
 
 #include "db.h"
 
-namespace {
-  const std::string sDbName = "AutoTrade.db";
-}
-
-db::db() {
+db::db( const std::string& sFileName ) {
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &db::HandlePortfolioLoad ) );
@@ -46,10 +42,10 @@ db::db() {
     m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &db::HandlePopulateDatabase ) );
     m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &db::HandleLoadDatabase ) );
 
-    m_db.Open( sDbName );
+    m_db.Open( sFileName );
   }
   catch(...) {
-    std::cout << "database fault on " << sDbName << std::endl;
+    std::cout << "database fault on " << sFileName << std::endl;
   }
 
 }
