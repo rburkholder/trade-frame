@@ -40,7 +40,7 @@ public:
   FrameWork01();
   virtual ~FrameWork01();
 
-  Mode_t Mode( void ) const { return m_mode; };
+  Mode_t Mode() const { return m_mode; };
 
 protected:
 
@@ -155,7 +155,7 @@ private:
   void HandleProviderSelectD2( ou::tf::PanelProviderControl::Provider_t );
   void HandleProviderSelectX( ou::tf::PanelProviderControl::Provider_t );
 
-  void HandlePanelClosing( void );
+  void HandlePanelClosing();
 
 };
 
@@ -262,7 +262,7 @@ void FrameWork01<CRTP>::LinkToPanelProviderControl() {
 
 template<typename CRTP>
 void FrameWork01<CRTP>::DelinkFromPanelProviderControl() {
-  if ( 0 != m_pPanelProviderControl ) {
+  if ( nullptr != m_pPanelProviderControl ) {
     m_pPanelProviderControl->SetOnProviderSelectD1Handler( 0 );
     m_pPanelProviderControl->SetOnProviderSelectD2Handler( 0 );
     m_pPanelProviderControl->SetOnProviderSelectXHandler( 0 );
@@ -318,21 +318,21 @@ void FrameWork01<CRTP>::HandleStateChangeRequest( eProviderState_t state, bool b
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIQFeedConnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderGoingOn ) );
   static_cast<CRTP*>(this)->OnIQFeedConnecting( e );
 }
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIBConnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderGoingOn ) );
   static_cast<CRTP*>(this)->OnIBConnecting( e );
 }
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleSimulatorConnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderGoingOn ) );
   static_cast<CRTP*>(this)->OnSimulatorConnecting( e );
 }
@@ -340,7 +340,7 @@ void FrameWork01<CRTP>::HandleSimulatorConnecting( int e ) {  // cross thread ev
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIQFeedConnected( int e ) {  // cross thread event
   m_bIQFeedConnected = true;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOn ) );
   static_cast<CRTP*>(this)->OnIQFeedConnected( e );
 }
@@ -348,7 +348,7 @@ void FrameWork01<CRTP>::HandleIQFeedConnected( int e ) {  // cross thread event
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIBConnected( int e ) { // cross thread event
   m_bIBConnected = true;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderOn ) );
   static_cast<CRTP*>(this)->OnIBConnected( e );
 }
@@ -356,28 +356,28 @@ void FrameWork01<CRTP>::HandleIBConnected( int e ) { // cross thread event
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleSimulatorConnected( int e ) { // cross thread event
   m_bSimConnected = true;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderOn ) );
   static_cast<CRTP*>(this)->OnSimulatorConnected( e );
 }
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIQFeedDisconnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderGoingOff ) );
   static_cast<CRTP*>(this)->OnIQFeedDisconnecting( e );
 }
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIBDisconnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderGoingOff ) );
   static_cast<CRTP*>(this)->OnIBDisconnecting( e );
 }
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleSimulatorDisconnecting( int e ) {  // cross thread event
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderGoingOff ) );
   static_cast<CRTP*>(this)->OnSimulatorDisconnecting( e );
 }
@@ -385,7 +385,7 @@ void FrameWork01<CRTP>::HandleSimulatorDisconnecting( int e ) {  // cross thread
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIQFeedDisconnected( int e ) { // cross thread event
   m_bIQFeedConnected = false;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOff ) );
   static_cast<CRTP*>(this)->OnIQFeedDisconnected( e );
 }
@@ -393,7 +393,7 @@ void FrameWork01<CRTP>::HandleIQFeedDisconnected( int e ) { // cross thread even
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleIBDisconnected( int e ) {  // cross thread event
   m_bIBConnected = false;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderOff ) );
   static_cast<CRTP*>(this)->OnIBDisconnected( e );
 }
@@ -401,7 +401,7 @@ void FrameWork01<CRTP>::HandleIBDisconnected( int e ) {  // cross thread event
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleSimulatorDisconnected( int e ) {  // cross thread event
   m_bSimConnected = false;
-  if ( 0 != m_pPanelProviderControl )
+  if ( nullptr != m_pPanelProviderControl )
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderOff ) );
   static_cast<CRTP*>(this)->OnSimulatorDisconnected( e );
 }
