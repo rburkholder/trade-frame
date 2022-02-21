@@ -37,8 +37,8 @@ public:
     EModeLive
   } m_eMode;
 
-  FrameWork01(void);
-  ~FrameWork01(void);
+  FrameWork01();
+  virtual ~FrameWork01();
 
   Mode_t Mode( void ) const { return m_mode; };
 
@@ -105,12 +105,12 @@ protected:
   void OnData2Disconnected( int ) {};
   void  OnExecDisconnected( int ) {};
 
-  void LinkToPanelProviderControl( void );
-  void DelinkFromPanelProviderControl( void );
+  void LinkToPanelProviderControl();
+  void DelinkFromPanelProviderControl();
 
 private:
 
-  void SetMode( void );
+  void SetMode();
 
   void HandleStateChangeRequest( ou::tf::eProviderState_t, bool bConnected, pProvider_t );
 
@@ -160,7 +160,7 @@ private:
 };
 
 template<typename CRTP>
-FrameWork01<CRTP>::FrameWork01( void ) :
+FrameWork01<CRTP>::FrameWork01() :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
   m_tws( new ou::tf::ib::TWS( "U000000" ) ), m_bIBConnected( false ),
@@ -221,7 +221,7 @@ FrameWork01<CRTP>::FrameWork01( void ) :
 }
 
 template<typename CRTP>
-FrameWork01<CRTP>::~FrameWork01( void ) {
+FrameWork01<CRTP>::~FrameWork01() {
 
   m_iqfeed->OnConnecting.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedConnecting ) );
   m_iqfeed->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
@@ -248,7 +248,7 @@ FrameWork01<CRTP>::~FrameWork01( void ) {
 }
 
 template<typename CRTP>
-void FrameWork01<CRTP>::LinkToPanelProviderControl( void ) {
+void FrameWork01<CRTP>::LinkToPanelProviderControl() {
   m_pPanelProviderControl->SetOnIQFeedStateChangeHandler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderStateChangeIQFeed ) );
   m_pPanelProviderControl->SetOnIBStateChangeHandler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderStateChangeIB ) );
   m_pPanelProviderControl->SetOnSimulatorStateChangeHandler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderStateChangeSimulation ) );
@@ -261,7 +261,7 @@ void FrameWork01<CRTP>::LinkToPanelProviderControl( void ) {
 }
 
 template<typename CRTP>
-void FrameWork01<CRTP>::DelinkFromPanelProviderControl( void ) {
+void FrameWork01<CRTP>::DelinkFromPanelProviderControl() {
   if ( 0 != m_pPanelProviderControl ) {
     m_pPanelProviderControl->SetOnProviderSelectD1Handler( 0 );
     m_pPanelProviderControl->SetOnProviderSelectD2Handler( 0 );
@@ -566,7 +566,7 @@ void FrameWork01<CRTP>::HandleProviderSelectX( ou::tf::PanelProviderControl::Pro
 }
 
 template<typename CRTP>
-void FrameWork01<CRTP>::SetMode( void ) {
+void FrameWork01<CRTP>::SetMode() {
   m_mode = EModeUnknown;
   if ( ( 0 != m_pData1Provider.use_count() ) && ( 0 != m_pExecutionProvider.use_count() ) ) {
     if ( ( ou::tf::keytypes::EProviderSimulator == m_pData1Provider->ID() ) && ( ou::tf::keytypes::EProviderSimulator == m_pExecutionProvider->ID() ) ) {
@@ -582,7 +582,7 @@ void FrameWork01<CRTP>::SetMode( void ) {
 }
 
 template<typename CRTP>
-void FrameWork01<CRTP>::HandlePanelClosing( void ) {
+void FrameWork01<CRTP>::HandlePanelClosing() {
   DelinkFromPanelProviderControl();
 }
 
