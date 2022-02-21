@@ -22,6 +22,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <wx/sizer.h>
 
 #include <TFTrading/Watch.h>
@@ -53,6 +55,8 @@ bool AppAutoTrade::OnInit() {
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
 
   wxApp::OnInit();
+
+  m_nTSDataStreamSequence = 0;
 
   config::Options options;
 
@@ -153,7 +157,11 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
-      m_pStrategy->SaveWatch( "/app/AutoTrade/" + m_sTSDataStreamStarted );
+      m_nTSDataStreamSequence++;
+      m_pStrategy->SaveWatch(
+        "/app/AutoTrade/" +
+        m_sTSDataStreamStarted + "-" +
+        boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
       std::cout << "  ... Done " << std::endl;
     }
   );

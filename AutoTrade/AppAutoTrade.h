@@ -62,6 +62,7 @@ private:
 
   std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
+  int m_nTSDataStreamSequence;
 
   ou::ChartDataView m_ChartDataView;
 
