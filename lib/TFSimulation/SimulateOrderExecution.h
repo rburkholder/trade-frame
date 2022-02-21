@@ -39,24 +39,24 @@ namespace tf { // TradeFrame
 class SimulateOrderExecution {  // one object per symbol
 public:
 
-  typedef Order::pOrder_t pOrder_t;
+  using pOrder_t = Order::pOrder_t;
 
   SimulateOrderExecution(void);
   ~SimulateOrderExecution(void);
 
-  typedef FastDelegate1<Order::idOrder_t> OnOrderCancelledHandler;
+  using OnOrderCancelledHandler = FastDelegate1<Order::idOrder_t>;
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
     OnOrderCancelled = function;
   }
-  typedef FastDelegate2<Order::idOrder_t, const Execution&> OnOrderFillHandler;
+  using OnOrderFillHandler = FastDelegate2<Order::idOrder_t, const Execution&>;
   void SetOnOrderFill( OnOrderFillHandler function ) {
     OnOrderFill = function;
   }
-  typedef FastDelegate1<Order::idOrder_t> OnNoOrderFoundHandler;  // cancelling a non existant order
+  using OnNoOrderFoundHandler = FastDelegate1<Order::idOrder_t>;  // cancelling a non existant order
   void SetOnNoOrderFound( OnNoOrderFoundHandler function ) {
     OnNoOrderFound = function;
   }
-  typedef FastDelegate2<Order::idOrder_t, double> OnCommissionHandler;  // calculated once order filled
+  using OnCommissionHandler = FastDelegate2<Order::idOrder_t, double>;  // calculated once order filled
   void SetOnCommission( OnCommissionHandler function ) {
     OnCommission = function;
   }
@@ -75,7 +75,7 @@ protected:
   struct structCancelOrder {
     ptime dtCancellation;
     Order::idOrder_t nOrderId;
-    structCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ ) 
+    structCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ )
       : dtCancellation( dtCancellation_ ), nOrderId( nOrderId_ ) {};
   };
   boost::posix_time::time_duration m_dtQueueDelay; // used to simulate network / handling delays
@@ -88,15 +88,15 @@ protected:
   OnNoOrderFoundHandler OnNoOrderFound;
   OnCommissionHandler OnCommission;
 
-  typedef std::list<pOrder_t> lOrderQueue_t;
-  typedef lOrderQueue_t::iterator lOrderQueue_iter_t;
+  using lOrderQueue_t = std::list<pOrder_t>;
+  using lOrderQueue_iter_t = lOrderQueue_t::iterator;
   std::list<structCancelOrder> m_lCancelDelay; // separate structure for the cancellations, since not an order
   lOrderQueue_t m_lOrderDelay;  // all orders put in delay queue, taken out then processed as limit or market or stop
   lOrderQueue_t m_lOrderMarket;  // market orders to be processed
 
-  typedef std::multimap<double,pOrder_t> mapOrderBook_t;
-  typedef mapOrderBook_t::iterator mapOrderBook_iter_t;
-  typedef std::pair<double,pOrder_t> mapOrderBook_pair_t;
+  using mapOrderBook_t = std::multimap<double,pOrder_t>;
+  using mapOrderBook_iter_t = mapOrderBook_t::iterator;
+  using mapOrderBook_pair_t = std::pair<double,pOrder_t>;
   mapOrderBook_t m_mapAsks; // lowest at beginning
   mapOrderBook_t m_mapBids; // highest at end
   mapOrderBook_t m_mapSellStops;  // pending sell stops, turned into market order when touched
@@ -112,7 +112,7 @@ protected:
   bool ProcessLimitOrders( const Trade& trade );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
-  void GetExecId( std::string* sId ) { 
+  void GetExecId( std::string* sId ) {
     *sId = boost::lexical_cast<std::string>( m_nExecId++ );
     assert( 0 != sId->length() );
     return;

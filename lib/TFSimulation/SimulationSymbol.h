@@ -19,6 +19,7 @@
 #include <boost/detail/atomic_count.hpp>
 
 #include "TFTimeSeries/TimeSeries.h"
+
 #include "TFTrading/Symbol.h"
 
 #include "SimulateOrderExecution.h"
@@ -30,28 +31,28 @@ class SimulationSymbol: public Symbol<SimulationSymbol> {
   friend class SimulationProvider;
 public:
 
-  typedef Symbol<SimulationSymbol> inherited_t;
-  typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef inherited_t::pInstrument_cref pInstrument_cref;
-  typedef inherited_t::trade_t trade_t;
-  typedef inherited_t::quote_t quote_t;
-  typedef inherited_t::greek_t greek_t;
-  
-  SimulationSymbol( const std::string& sSymbol, 
-                     pInstrument_cref pInstrument, 
+  using inherited_t = Symbol<SimulationSymbol>;
+  using pInstrument_t = inherited_t::pInstrument_t;
+  using pInstrument_cref = inherited_t::pInstrument_cref;
+  using trade_t = inherited_t::trade_t;
+  using quote_t = inherited_t::quote_t;
+  using greek_t = inherited_t::greek_t;
+
+  SimulationSymbol( const std::string& sSymbol,
+                     pInstrument_cref pInstrument,
                      const std::string& sGroup ); // base with trades/ quotes/, greeks/
-  ~SimulationSymbol(void);
+  virtual ~SimulationSymbol();
 
 protected:
 
-  void StartTradeWatch( void );
-  void StopTradeWatch( void );
-  void StartQuoteWatch( void );
-  void StopQuoteWatch( void );
-  void StartDepthWatch( void );
-  void StopDepthWatch( void );
-  void StartGreekWatch( void );
-  void StopGreekWatch( void );
+  void StartTradeWatch();
+  void StopTradeWatch();
+  void StartQuoteWatch();
+  void StopQuoteWatch();
+  void StartDepthWatch();
+  void StopDepthWatch();
+  void StartGreekWatch();
+  void StopGreekWatch();
 
   void HandleTradeEvent( const DatedDatum &datum );
   void HandleQuoteEvent( const DatedDatum &datum );

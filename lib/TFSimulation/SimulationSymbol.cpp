@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "SimulationSymbol.h"
 
 #include "TFHDF5TimeSeries/HDF5TimeSeriesContainer.h"
@@ -23,24 +21,24 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // sDirectory needs to be available on instantiation to enable signal availability
-SimulationSymbol::SimulationSymbol( 
-  const std::string &sSymbol, 
-  pInstrument_cref pInstrument, 
+SimulationSymbol::SimulationSymbol(
+  const std::string &sSymbol,
+  pInstrument_cref pInstrument,
   const std::string &sGroup
-  ) 
+  )
 : Symbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
-SimulationSymbol::~SimulationSymbol(void) {
+SimulationSymbol::~SimulationSymbol() {
   // we don't yet have a .Remove for this in SimulationProvider yet.
   //m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 
 }
 
-void SimulationSymbol::StartTradeWatch( void ) {
+void SimulationSymbol::StartTradeWatch() {
   if ( 0 == m_trades.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/trades/" + GetId() );
@@ -58,10 +56,10 @@ void SimulationSymbol::StartTradeWatch( void ) {
   }
 }
 
-void SimulationSymbol::StopTradeWatch( void ) {
+void SimulationSymbol::StopTradeWatch() {
 }
 
-void SimulationSymbol::StartQuoteWatch( void ) {
+void SimulationSymbol::StartQuoteWatch() {
   if ( 0 == m_quotes.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/quotes/" + GetId() );
@@ -79,10 +77,10 @@ void SimulationSymbol::StartQuoteWatch( void ) {
   }
 }
 
-void SimulationSymbol::StopQuoteWatch( void ) {
+void SimulationSymbol::StopQuoteWatch() {
 }
 
-void SimulationSymbol::StartGreekWatch( void ) {
+void SimulationSymbol::StartGreekWatch() {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
       std::string sPath( m_sDirectory + "/greeks/" + GetId() );
@@ -100,25 +98,25 @@ void SimulationSymbol::StartGreekWatch( void ) {
   }
 }
 
-void SimulationSymbol::StopGreekWatch( void ) {
+void SimulationSymbol::StopGreekWatch() {
 }
 
-void SimulationSymbol::StartDepthWatch( void ) {
+void SimulationSymbol::StartDepthWatch() {
 }
 
-void SimulationSymbol::StopDepthWatch( void ) {
+void SimulationSymbol::StopDepthWatch() {
 }
 
 void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
-  m_OnQuote( dynamic_cast<const Quote &>( datum ) ); 
+  m_OnQuote( dynamic_cast<const Quote &>( datum ) );
 }
 
 void SimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
-  m_OnTrade( dynamic_cast<const Trade &>( datum ) );  
+  m_OnTrade( dynamic_cast<const Trade &>( datum ) );
 }
 
 void SimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
-  m_OnGreek( dynamic_cast<const Greek &>( datum ) );  
+  m_OnGreek( dynamic_cast<const Greek &>( datum ) );
 }
 
 } // namespace tf

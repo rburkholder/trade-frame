@@ -39,7 +39,7 @@ namespace tf { // TradeFrame
 // looks like MergeDatedDatums will need an OnOpen event simulated
 
 // 20100821:  todo: provide cache mechanism for multiple runs
-//    first time through, use the minheap, 
+//    first time through, use the minheap,
 //    subsequent times through, scan a vector
 
 class SimulationProvider
@@ -47,23 +47,24 @@ class SimulationProvider
 {
 public:
 
-  typedef boost::shared_ptr<SimulationProvider> pProvider_t;
-  typedef ProviderInterface<SimulationProvider,SimulationSymbol> inherited_t;
-  typedef Instrument::pInstrument_t pInstrument_t;
-  typedef Instrument::pInstrument_cref pInstrument_cref;
-  typedef Order::pOrder_t pOrder_t;
-  typedef inherited_t::pSymbol_t pSymbol_t;
+  using pProvider_t = boost::shared_ptr<SimulationProvider>;
+  using inherited_t = ProviderInterface<SimulationProvider,SimulationSymbol>;
+  using pInstrument_t = Instrument::pInstrument_t;
+  using pInstrument_cref = Instrument::pInstrument_cref;
+  using pOrder_t = Order::pOrder_t;
+  using pSymbol_t = inherited_t::pSymbol_t;
 
-  SimulationProvider(void);
-  virtual ~SimulationProvider(void);
-  virtual void Connect( void );
-  virtual void Disconnect( void );
+  SimulationProvider();
+  virtual ~SimulationProvider();
+
+  virtual void Connect();
+  virtual void Disconnect();
 
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
-  const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
+  const std::string& GetGroupDirectory() const { return m_sGroupDirectory; };
 
   void Run( bool bAsync = true );
-  void Stop( void );
+  void Stop();
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
 
@@ -74,16 +75,16 @@ public:
 
   void EmitStats( std::stringstream& ss );
 
-  typedef FastDelegate0<> OnSimulationThreadStarted_t; // Allows Singleton LocalCommonInstances to be set, called within new thread
+  using OnSimulationThreadStarted_t = FastDelegate0<>; // Allows Singleton LocalCommonInstances to be set, called within new thread
   void SetOnSimulationThreadStarted( OnSimulationThreadStarted_t function ) {
     m_OnSimulationThreadStarted = function;
   }
-  typedef FastDelegate0<> OnSimulationThreadEnded_t; // Allows Singleton LocalCommonInstances to be reset
+  using OnSimulationThreadEnded_t = FastDelegate0<>; // Allows Singleton LocalCommonInstances to be reset
   void SetOnSimulationThreadEnded( OnSimulationThreadEnded_t function ) {
     m_OnSimulationThreadEnded = function;
   }
 
-  typedef FastDelegate0<> OnSimulationComplete_t;
+  using OnSimulationComplete_t = FastDelegate0<>;
   void SetOnSimulationComplete( OnSimulationComplete_t function ) {
     m_OnSimulationComplete = function;
   }
@@ -108,7 +109,7 @@ protected:
   OnSimulationThreadEnded_t m_OnSimulationThreadEnded;
   OnSimulationComplete_t m_OnSimulationComplete;
 
-  void Merge( void );  // the background thread
+  void Merge();  // the background thread
 
   void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
   void HandleCommission( Order::idOrder_t orderId, double commission );

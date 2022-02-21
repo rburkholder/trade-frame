@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <OUCommon/TimeSource.h>
 
 #include "SimulateOrderExecution.h"
@@ -23,12 +21,12 @@ namespace tf { // TradeFrame
 
 int SimulateOrderExecution::m_nExecId( 1000 );
 
-SimulateOrderExecution::SimulateOrderExecution(void)
+SimulateOrderExecution::SimulateOrderExecution()
 : m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 )//, m_ea( EAQuotes )
 {
 }
 
-SimulateOrderExecution::~SimulateOrderExecution(void) {
+SimulateOrderExecution::~SimulateOrderExecution() {
 }
 
 void SimulateOrderExecution::NewTrade( const Trade& trade ) {
@@ -143,7 +141,7 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
       int i = 1;  // we have a problem as nOrderQuanRemaining won't be updated for the next pass through on partial orders
       throw std::runtime_error( "no onorderfill to keep housekeeping in place" );
     }
-        
+
     nOrderQuanRemaining -= quanAvail;
 
     // when order done, commission and toss away
@@ -165,7 +163,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
   // todo: what about self's own crossing orders, could fill with out qoute
 
   if ( !m_mapAsks.empty() ) {
-    if ( quote.Bid() >= m_mapAsks.begin()->first ) { 
+    if ( quote.Bid() >= m_mapAsks.begin()->first ) {
       bProcessed = true;
       pOrderFrontOfQueue = m_mapAsks.begin()->second;
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
@@ -253,7 +251,7 @@ void SimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
               if ( 0 != OnOrderCancelled ) OnOrderCancelled( pOrderFrontOfQueue->GetOrderId() );
             }
           }
-          
+
           break;
         case OrderType::Limit:
           // place into limit book
@@ -331,7 +329,7 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       }
 
       // need to check orders in ask limit list
-      if ( !bOrderFound ) { 
+      if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
           if ( co.nOrderId == iter->second->GetOrderId() ) {
             if ( co.nOrderId == m_mapAsks.begin()->second->GetOrderId() ) {
@@ -348,7 +346,7 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       }
 
       // need to check orders in bid limit list
-      if ( !bOrderFound ) { 
+      if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
           if ( co.nOrderId == iter->second->GetOrderId() ) {
             if ( co.nOrderId == m_mapBids.rbegin()->second->GetOrderId() ) {
@@ -365,7 +363,7 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       }
 
       // need to check orders in stop list sells
-      if ( !bOrderFound ) { 
+      if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapSellStops.begin(); iter != m_mapSellStops.end(); ++iter ) {
           if ( co.nOrderId == iter->second->GetOrderId() ) {
             m_mapSellStops.erase( iter );
@@ -376,7 +374,7 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       }
 
       // need to check orders in stop list buys
-      if ( !bOrderFound ) { 
+      if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapBuyStops.begin(); iter != m_mapBuyStops.end(); ++iter ) {
           if ( co.nOrderId == iter->second->GetOrderId() ) {
             m_mapBuyStops.erase( iter );
@@ -389,7 +387,7 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
 //        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
         // todo:  propogate this into the OrderManager
-        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );   
+        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
       }
       else {
         if ( 0 != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );

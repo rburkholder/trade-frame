@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <stdexcept>
 #include <cassert>
 
@@ -25,9 +23,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-SimulationProvider::SimulationProvider(void)
-: ProviderInterface<SimulationProvider,SimulationSymbol>(), 
-  m_pMerge( 0 )
+SimulationProvider::SimulationProvider()
+: ProviderInterface<SimulationProvider,SimulationSymbol>(),
+  m_pMerge( nullptr )
 {
   m_sName = "Simulator";
   m_nID = keytypes::EProviderSimulator;
@@ -38,24 +36,24 @@ SimulationProvider::SimulationProvider(void)
   m_pProvidesBrokerInterface = true;
 }
 
-SimulationProvider::~SimulationProvider(void) {
+SimulationProvider::~SimulationProvider() {
 
   if ( 0 != m_pMerge ) {
     delete m_pMerge;
-    m_pMerge = NULL;
+    m_pMerge = nullptr;
   }
 }
 
 void SimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
   HDF5DataManager dm( HDF5DataManager::RO );
   std::string s;
-  if( !dm.GroupExists( sGroupDirectory ) ) 
+  if( !dm.GroupExists( sGroupDirectory ) )
     throw std::invalid_argument( "Could not find: " + sGroupDirectory );
   s = sGroupDirectory + "/trades";
-  if( !dm.GroupExists( s ) ) 
+  if( !dm.GroupExists( s ) )
     throw std::invalid_argument( "Could not find: " + s );
   s = sGroupDirectory + "/quotes";
-  if( !dm.GroupExists( s ) ) 
+  if( !dm.GroupExists( s ) )
     throw std::invalid_argument( "Could not find: " + s );
   m_sGroupDirectory = sGroupDirectory;
 }
@@ -173,7 +171,7 @@ void SimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
 }
 
 // root of background simulation thread, thread is started from Run.
-void SimulationProvider::Merge( void ) {
+void SimulationProvider::Merge() {
 
   if ( 0 != m_OnSimulationThreadStarted ) m_OnSimulationThreadStarted();
 
@@ -187,15 +185,15 @@ void SimulationProvider::Merge( void ) {
 
       Quotes& quotes( sym->m_quotes );
       if ( 0 != quotes.Size() ) {
-        m_pMerge -> Add( 
-          quotes, 
+        m_pMerge -> Add(
+          quotes,
           MakeDelegate( iter->second.get(), &SimulationSymbol::HandleQuoteEvent ) );
       }
 
       Trades& trades( sym->m_trades );
       if ( 0 != trades.Size() ) {
-        m_pMerge -> Add( 
-          trades, 
+        m_pMerge -> Add(
+          trades,
           MakeDelegate( iter->second.get(), &SimulationSymbol::HandleTradeEvent ) );
       }
 

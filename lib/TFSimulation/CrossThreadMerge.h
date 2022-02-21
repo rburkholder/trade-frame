@@ -22,15 +22,15 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class CCrossThreadMerge:
-  public CMergeDatedDatums, 
+  public CMergeDatedDatums,
   public CThreadCrossingMessage<CCrossThreadMerge>
 {
 public:
 
-  typedef CThreadCrossingMessage<CCrossThreadMerge> inherited_t;
+  using inherited_t = CThreadCrossingMessage<CCrossThreadMerge>;
 
-  CCrossThreadMerge( void );
-  ~CCrossThreadMerge( void );
+  CCrossThreadMerge();
+  ~CCrossThreadMerge();
 
 protected:
 
