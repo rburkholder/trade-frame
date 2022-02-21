@@ -12,7 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+#include <wx/sizer.h>
+#include <wx/button.h>
+#include <wx/checkbox.h>
+#include <wx/stattext.h>
 
 #include "PanelProviderControl.h"
 
@@ -23,7 +26,7 @@ wxDEFINE_EVENT( EVT_ProviderIB, UpdateProviderStatusEvent );
 wxDEFINE_EVENT( EVT_ProviderIQFeed, UpdateProviderStatusEvent );
 wxDEFINE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
 
-PanelProviderControl::PanelProviderControl(void) {
+PanelProviderControl::PanelProviderControl() {
   Init();
 }
 
@@ -32,7 +35,7 @@ PanelProviderControl::PanelProviderControl( wxWindow* parent, wxWindowID id, con
   Create(parent, id, pos, size, style);
 }
 
-PanelProviderControl::~PanelProviderControl(void) {
+PanelProviderControl::~PanelProviderControl() {
 }
 
 bool PanelProviderControl::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -49,7 +52,7 @@ bool PanelProviderControl::Create( wxWindow* parent, wxWindowID id, const wxPoin
   return true;
 }
 
-void PanelProviderControl::Init( void ) {
+void PanelProviderControl::Init() {
 //  m_nProvidersOn = 0;
 //  m_bDisabling = false;
     m_cbIQFeedD2 = NULL;
@@ -68,7 +71,7 @@ void PanelProviderControl::Init( void ) {
   m_stateSimulator = ProviderOff;
 }
 
-void PanelProviderControl::CreateControls( void ) {
+void PanelProviderControl::CreateControls() {
 
   // radio buttons could be auto-enabled based upon how provider indicates data, execution capability flags
 
@@ -169,17 +172,17 @@ void PanelProviderControl::CreateControls( void ) {
 void PanelProviderControl::OnClose( wxCloseEvent& event ) {
   if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
-void PanelProviderControl::UpdateProviderButtons( void ) {
-  m_btnIQFeed->Enable( m_cbIQFeedD1->IsChecked() || m_cbIQFeedD2->IsChecked() || m_cbIQFeedX->IsChecked() );
-  m_btnIB->Enable( m_cbIBD1->IsChecked() || m_cbIBD2->IsChecked() || m_cbIBX->IsChecked() );
-  m_btnSimulator->Enable( m_cbSimD1->IsChecked() || m_cbSimD2->IsChecked() || m_cbSimX->IsChecked() );
+void PanelProviderControl::UpdateProviderButtons() {
+  m_btnIQFeed->Enable(    m_cbIQFeedD1->IsChecked() || m_cbIQFeedD2->IsChecked() || m_cbIQFeedX->IsChecked() );
+  m_btnIB->Enable(        m_cbIBD1->IsChecked()     || m_cbIBD2->IsChecked()     || m_cbIBX->IsChecked() );
+  m_btnSimulator->Enable( m_cbSimD1->IsChecked()    || m_cbSimD2->IsChecked()    || m_cbSimX->IsChecked() );
 }
 
-void PanelProviderControl::SyncInitialState( void ) {
+void PanelProviderControl::SyncInitialState() {
   if ( m_cbIQFeedD1->IsChecked() ) if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
   if ( m_cbIQFeedD2->IsChecked() ) if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
   if ( m_cbIQFeedX->IsChecked() ) if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIQFeed );
@@ -211,21 +214,21 @@ void PanelProviderControl::OnBtnCommon( wxCommandEvent& event, eProviderState_t&
 void PanelProviderControl::OnBtnIQFeed( wxCommandEvent& event ) {
   OnBtnCommon( event, m_stateIQFeed );
   SetIQFeedState( m_stateIQFeed );
-  if ( 0 != OnIQFeedStateChange ) 
+  if ( 0 != OnIQFeedStateChange )
     OnIQFeedStateChange( m_stateIQFeed );
 }
 
 void PanelProviderControl::OnBtnIB( wxCommandEvent& event ) {
   OnBtnCommon( event, m_stateIB );
   SetIBState( m_stateIB );
-  if ( 0 != OnIBStateChange ) 
+  if ( 0 != OnIBStateChange )
     OnIBStateChange( m_stateIB );
 }
 
 void PanelProviderControl::OnBtnSimulation( wxCommandEvent& event ) {
   OnBtnCommon( event, m_stateSimulator );
   SetSimulatorState( m_stateSimulator );
-  if ( 0 != OnSimulatorStateChange ) 
+  if ( 0 != OnSimulatorStateChange )
     OnSimulatorStateChange( m_stateSimulator );
 }
 
@@ -346,25 +349,25 @@ void PanelProviderControl::OnBtnXSim( wxCommandEvent& event ) {
   if ( 0 != OnProviderSelectX ) OnProviderSelectX( ESim );
 }
 
-void PanelProviderControl::ResetAllRadioData1( void ) {
+void PanelProviderControl::ResetAllRadioData1() {
   m_cbIQFeedD1->SetValue( false );
   m_cbIBD1->SetValue( false );
   m_cbSimD1->SetValue( false );
 }
 
-void PanelProviderControl::ResetAllRadioData2( void ) {
+void PanelProviderControl::ResetAllRadioData2() {
   m_cbIQFeedD2->SetValue( false );
   m_cbIBD2->SetValue( false );
   m_cbSimD2->SetValue( false );
 }
 
-void PanelProviderControl::ResetAllRadioExec( void ) {
+void PanelProviderControl::ResetAllRadioExec() {
   m_cbIQFeedX->SetValue( false );
   m_cbIBX->SetValue( false );
   m_cbSimX->SetValue( false );
 }
 
-void PanelProviderControl::EnableAllRadio( void ) {
+void PanelProviderControl::EnableAllRadio() {
   m_cbIQFeedD1->Enable();
   m_cbIQFeedD2->Enable();
   //m_cbIQFeedX->Enable();  // IQFeed does not have execution ability
@@ -376,7 +379,7 @@ void PanelProviderControl::EnableAllRadio( void ) {
   m_cbSimX->Enable();
 }
 
-void PanelProviderControl::DisableAllRadio( void ) {
+void PanelProviderControl::DisableAllRadio() {
   m_cbIQFeedD1->Disable();
   m_cbIQFeedD2->Disable();
 //  m_cbIQFeedX->Disable();
