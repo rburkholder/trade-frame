@@ -160,7 +160,6 @@ bool AppAutoTrade::OnInit() {
         m_pPanelProviderControl->SetProvider( Provider_t::ESim, Provider_t::ESim, Provider_t::ESim );
         m_pPanelProviderControl->SetSimulatorState( ou::tf::ProviderOn );
         m_sim->Connect();
-        m_sim->Run();
       }
     );
   }
@@ -202,7 +201,7 @@ void AppAutoTrade::ConstructIBInstrument() {
       pPosition_t pPosition;
       if ( pm.PositionExists( "USD", idInstrument ) ) {
         pPosition = pm.GetPosition( "USD", idInstrument );
-        std::cout << "loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+        std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
@@ -211,7 +210,7 @@ void AppAutoTrade::ConstructIBInstrument() {
           "ib01", "iq01", m_pExecutionProvider,
           pWatch
         );
-        std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+        std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       m_pStrategy->SetPosition( pPosition );
     } );
@@ -224,13 +223,27 @@ void AppAutoTrade::ConstructSimInstrument() {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  ou::tf::Instrument::pInstrument_t pInstrument;
-  pInstrument = std::make_shared<ou::tf::Instrument>( m_sSymbol );
-  // TODO: will need to turn off database here?
+  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_sSymbol );
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
-  pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-  // TODO: check that both providers are the sim providers
-  std::cout << "Constructed simulation " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pPosition_t pPosition;
+  if ( pm.PositionExists( "USD", idInstrument ) ) {
+    pPosition = pm.GetPosition( "USD", idInstrument );
+    std::cout << "sim: probably should delete database first" << std::endl;
+    std::cout << "sim: position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+  else {
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+    pPosition = pm.ConstructPosition(
+      "USD", idInstrument, "ema",
+      "sim01", "sim01", m_pExecutionProvider,
+      pWatch
+    );
+    std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
   m_pStrategy->SetPosition( pPosition );
 
   FrameMain::vpItems_t vItems;
@@ -239,6 +252,8 @@ void AppAutoTrade::ConstructSimInstrument() {
   vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
   vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
   m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+
+  m_sim->Run( true );
 
 }
 
