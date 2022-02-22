@@ -149,8 +149,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     ma.Update( dt );
   }
 
-  // feed the quote into DailyTradeTimeFrame for proper processing of the trading day
-  m_bfQuotes01Sec.Add( dt, quote.Spread(), 1 ); // provides a 1 sec pulse for checking the alogorithm (ignores the spread)
+  m_bfQuotes01Sec.Add( dt, m_dblMid, 1 ); // provides a 1 sec pulse for checking the alogorithm
 
 }
 
@@ -210,7 +209,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      if ( ma1 < ma3 ) {
+      if ( bar.Close() < ma2 ) {
         // exit long
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -224,7 +223,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::ShortExit:
-      if ( ma1 > ma3 ) {
+      if ( bar.Close() > ma2 ) {
         // exit short
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -275,6 +274,8 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       break;
     case ETradeState::ExitSubmitted:
       m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::Done:
       break;
     default:
       assert( false ); // TODO: unravel the state mess if we get here

@@ -25,11 +25,13 @@ x64/debug/AutoTrade.cfg:
 
 ```
 symbol=SPY
-period_width=10 # seconds
-ma1_periods=8
-ma2_periods=13
-ma3_periods=21
-group_directory=/app/AutoTrade/20220218 19:23:05.489488/
+#symbol=@ES~
+period_width=5 # seconds
+ma1_periods=5
+ma2_periods=8
+ma3_periods=12
+group_directory=/app/AutoTrade/20220218 19:23:05.489488
+sim_start=off
 ```
 
 When there is no data available, set the group directory such nothing follows the '='
