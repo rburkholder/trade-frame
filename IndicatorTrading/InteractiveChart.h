@@ -88,12 +88,17 @@ private:
 
   pPosition_t m_pPosition;
 
+  double m_dblSumVolumePrice; // part of vwap
+  double m_dblSumVolume; // part of vwap
+
   ou::tf::BarFactory m_bfPrice;
   ou::tf::BarFactory m_bfPriceUp;
   ou::tf::BarFactory m_bfPriceDn;
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryBars m_cePriceBars;
+
+  ou::ChartEntryIndicator m_ceVWAP;
 
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryVolume m_ceVolumeUp;

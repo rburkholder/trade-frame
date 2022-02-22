@@ -42,6 +42,7 @@ InteractiveChart::InteractiveChart()
 , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
@@ -61,6 +62,7 @@ InteractiveChart::InteractiveChart(
 , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
@@ -79,9 +81,12 @@ InteractiveChart::~InteractiveChart() {
 }
 
 void InteractiveChart::Init() {
+
   m_dvChart.Add( 0, &m_ceQuoteAsk );
   m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 0, &m_ceQuoteBid );
+
+  m_dvChart.Add( 0, &m_ceVWAP );
 
   m_dvChart.Add( 0, &m_cePriceBars );
 
@@ -113,6 +118,9 @@ void InteractiveChart::Init() {
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
+
+  m_ceVWAP.SetColour( ou::Colour::OrangeRed );
+  m_ceVWAP.SetName( "VWAP" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -219,11 +227,15 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
   ptime dt( trade.DateTime() );
   ou::tf::Trade::price_t price = trade.Price();
 
+  double volume = trade.Volume();
+  m_dblSumVolume += volume;
+  m_dblSumVolumePrice += volume * trade.Price();
+
   m_ceTrade.Append( dt, price );
 
   double mid = m_quote.Midpoint();
 
-  //m_bfPrice.Add( dt, price, trade.Volume() );
+  m_bfPrice.Add( dt, price, trade.Volume() );
   if ( price >= mid ) {
     m_bfPriceUp.Add( dt, price, trade.Volume() );
   }
@@ -233,7 +245,8 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
-  m_ceVolume.Append( bar );
+  //m_ceVolume.Append( bar );
+  m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
