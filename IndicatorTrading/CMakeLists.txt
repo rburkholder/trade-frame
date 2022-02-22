@@ -69,7 +69,6 @@ target_link_libraries(
       TFInteractiveBrokers
       ib_client
       bidgcc000
-      TFIQFeed
       TFSimulation
       TFVuTrading
       TFTrading
@@ -82,6 +81,7 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
+      TFIQFeed
       hdf5_cpp
       hdf5
       sz

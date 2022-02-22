@@ -28,6 +28,7 @@
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
+#include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -125,17 +126,7 @@ bool AppIndicatorTrading::OnInit() {
 
   std::cout << "symbol: " << m_sSymbol << std::endl;
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
-
-  ou::tf::Instrument::pInstrument_t pInstrument;
-  pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbol ); // simple for an iqfeed watch
-  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, options.sSymbol );
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, this->m_pData1Provider ); // will need to be iqfeed provider, check?
-  pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-
   m_pInteractiveChart = new InteractiveChart( panelSplitterRight, wxID_ANY );
-  m_pInteractiveChart->SetPosition( pPosition );
 
   sizerSplitterRight->Add( m_pInteractiveChart, 1, wxEXPAND | wxALL, 2 );
 
@@ -176,6 +167,24 @@ bool AppIndicatorTrading::OnInit() {
   );
 
   return 1;
+}
+
+void AppIndicatorTrading::ConstructInstrument() {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  m_pBuildInstrument->Add(
+    m_sSymbol,
+    [this]( pInstrument_t pInstrument ){
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
+      m_pInteractiveChart->SetPosition( pPosition );
+      m_pInteractiveChart->Connect();
+    } );
+
 }
 
 void AppIndicatorTrading::HandleMenuActionStartChart( void ) {
@@ -229,31 +238,21 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
 void AppIndicatorTrading::OnData1Connected( int ) {
   m_bData1Connected = true;
-//  AutoStartCollection();
-  if ( nullptr != m_pInteractiveChart ) {
-    m_pInteractiveChart->Connect();
-  }
   if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
+    ConstructInstrument();
   }
-
-  // ** Note:  turn on iqfeed only, symbols not set for IB yet
-  // TODO: need to fix this with start / stop
-
 }
 
 void AppIndicatorTrading::OnData2Connected( int ) {
   m_bData2Connected = true;
-//  AutoStartCollection();
   if ( m_bData2Connected & m_bExecConnected ) {
-    // set start to enabled
   }
 }
 
 void AppIndicatorTrading::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
+    ConstructInstrument();
   }
 }
 

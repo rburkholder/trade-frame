@@ -41,6 +41,7 @@ namespace ou {
 namespace tf {
   class PanelLogging;
   class FrameControls;
+  class BuildInstrument;
   class PanelOrderButtons;
 }
 }
@@ -70,6 +71,8 @@ private:
 
   InteractiveChart* m_pInteractiveChart;
 
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
@@ -86,6 +89,8 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
+
+  void ConstructInstrument();
 
   void SaveState();
   void LoadState();
