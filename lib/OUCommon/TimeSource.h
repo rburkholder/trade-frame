@@ -33,22 +33,22 @@ public:
   struct SimulationContext {
     boost::posix_time::ptime m_dtSimulationTime;
     bool m_bInSimulation;
-    SimulationContext( void ) : m_bInSimulation( false ), m_dtSimulationTime( boost::date_time::not_a_date_time ) {};
+    SimulationContext() : m_bInSimulation( false ), m_dtSimulationTime( boost::date_time::not_a_date_time ) {};
   };
 
-  TimeSource(void);
-  ~TimeSource(void) {};
+  TimeSource();
+  ~TimeSource() {};
 
   boost::posix_time::ptime External( boost::posix_time::ptime* dt );  // provides time in universal time (converted from local time zone)
 
-  boost::posix_time::ptime Local( void );  // provides time in local time, local time zone
+  boost::posix_time::ptime Local();  // provides time in local time, local time zone
 
-  inline boost::posix_time::ptime External( void ) {
+  inline boost::posix_time::ptime External() {
     boost::posix_time::ptime dt;
     return External( &dt );
   };
 
-  inline boost::posix_time::ptime Internal( void ) {
+  inline boost::posix_time::ptime Internal() {
     return Internal( &m_contextCommon );
   };
 
@@ -60,9 +60,9 @@ public:
   boost::posix_time::ptime Internal( SimulationContext* );
 
   void SetSimulationMode( bool bMode = true ) { m_contextCommon.m_bInSimulation = bMode; m_contextCommon.m_dtSimulationTime = boost::date_time::not_a_date_time; };
-  void ResetSimulationMode( void ) { m_contextCommon.m_bInSimulation = false; };
-  bool GetSimulationMode( void ) { return m_contextCommon.m_bInSimulation; };
-  void SetSimulationTime(const boost::posix_time::ptime &dt) {
+  void ResetSimulationMode() { m_contextCommon.m_bInSimulation = false; };
+  bool GetSimulationMode() { return m_contextCommon.m_bInSimulation; };
+  void SetSimulationTime( const boost::posix_time::ptime &dt ) {
 #ifdef _DEBUG
     if ( boost::date_time::not_a_date_time != m_contextCommon.m_dtSimulationTime ) {
       assert( m_contextCommon.m_dtSimulationTime <= dt );
@@ -72,21 +72,21 @@ public:
   }
   void ForceSimulationTime( const boost::posix_time::ptime &dt ) { m_contextCommon.m_bInSimulation = true; m_contextCommon.m_dtSimulationTime = dt; };
 
-  SimulationContext* AcquireSimulationContext( void );
+  SimulationContext* AcquireSimulationContext();
   void ReleaseSimulationContext( SimulationContext* );
 
-  boost::posix_time::ptime ConvertEasternToUtc( boost::posix_time::ptime dt ) {
+  static boost::posix_time::ptime ConvertEasternToUtc( boost::posix_time::ptime dt ) {
     boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), m_tzNewYork, false );
     return lt.utc_time();
   }
 
-  boost::posix_time::ptime ConvertRegionalToUtc( boost::posix_time::ptime dt, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
+  static boost::posix_time::ptime ConvertRegionalToUtc( boost::posix_time::ptime dt, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
     boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), tz, bDst );
     return lt.utc_time();
   }
 
-  boost::posix_time::ptime ConvertRegionalToUtc(
+  static boost::posix_time::ptime ConvertRegionalToUtc(
           boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
     try {
