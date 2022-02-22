@@ -76,7 +76,7 @@ protected:
     ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
   };
 
-  void DrawChart( void );
+  void DrawChart();
 
 private:
 
@@ -107,11 +107,11 @@ private:
 
   bool m_bBound;
 
-  void ThreadDrawChart( void );  // thread starts here
-  void StartThread( void );
-  void StopThread( void );
+  void ThreadDrawChart();  // thread starts here
+  void StartThread();
+  void StopThread();
 
-  void RescaleViewPort( void );
+  void RescaleViewPort();
 
   void UpdateChartMaster();
 

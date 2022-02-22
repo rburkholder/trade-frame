@@ -49,7 +49,7 @@ WinChartView::WinChartView(
 WinChartView::~WinChartView() {
 }
 
-void WinChartView::Init( void ) {
+void WinChartView::Init() {
 
   m_bBound = false;
   m_bInDrawChart = false;
@@ -107,7 +107,7 @@ void WinChartView::CreateControls() {
 
 }
 
-void WinChartView::StartThread( void ) {
+void WinChartView::StartThread() {
   m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart, this );
 }
 
@@ -237,7 +237,7 @@ void WinChartView::DrawChart( void ) {
 }
 
 // could change this into a worker future/promise solution, or use asio to submit jobs or packages
-void WinChartView::ThreadDrawChart( void ) {
+void WinChartView::ThreadDrawChart() {
   m_bThreadDrawChartActive = true;
   boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
   while ( m_bThreadDrawChartActive ) {
@@ -302,7 +302,7 @@ void WinChartView::UpdateChartMaster() {
   m_chartMaster.DrawChart( );
 }
 
-void WinChartView::UnbindEvents( void ) {
+void WinChartView::UnbindEvents() {
 
   if ( m_bBound ) {
 
