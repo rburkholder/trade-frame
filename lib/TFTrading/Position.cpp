@@ -93,7 +93,7 @@ Position::Position( const TableRowDef& row )
 {
 }
 
-Position::Position( void )
+Position::Position()
 : m_dblMultiplier( 1 )
 {
 }
@@ -120,7 +120,7 @@ void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataPr
   }
 }
 
-void Position::Construction( void ) {
+void Position::Construction() {
   assert( nullptr != m_pWatch.get() );
   assert( nullptr != m_pWatch->GetProvider().get() );  // new validation, and could trip up some code
   m_dblMultiplier = m_pWatch->GetInstrument()->GetMultiplier();
@@ -139,7 +139,7 @@ void Position::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvide
 
 }
 
-Position::~Position(void) {
+Position::~Position() {
 
   if ( nullptr != m_pWatch.get() ) {
     m_pWatch->StopWatch();
@@ -326,7 +326,7 @@ void Position::UpdateOrder( pOrder_t pOrder ) {
   //OnPositionChanged( *this );  // TODO: should this be invoked?
 }
 
-void Position::CancelOrders( void ) {
+void Position::CancelOrders() {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
   // todo:  on power up, need to relink these active orders back in with the position
   // or only use DAY orders
