@@ -178,9 +178,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   // DailyTradeTimeFrame: Trading during regular active equity market hours
   // https://learnpriceaction.com/3-moving-average-crossover-strategy/
 
-  double ma1 = m_vMA[0].m_dblPrice;
-  double ma2 = m_vMA[1].m_dblPrice;
-  double ma3 = m_vMA[2].m_dblPrice;
+  double ma1 = m_vMA[0].Latest();
+  double ma2 = m_vMA[1].Latest();
+  double ma3 = m_vMA[2].Latest();
 
   switch ( m_stateTrade ) {
     case ETradeState::Search:

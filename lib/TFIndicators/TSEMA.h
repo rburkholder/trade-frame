@@ -34,7 +34,7 @@ public:
   TSEMA( TSEMA&& );
   virtual ~TSEMA();
 
-  double GetEMA() { return m_dblRecentEMA; };
+  double GetEMA() const { return m_dblRecentEMA; };
 protected:
 private:
 
