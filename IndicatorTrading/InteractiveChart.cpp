@@ -86,7 +86,7 @@ void InteractiveChart::Init() {
   m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 0, &m_ceQuoteBid );
 
-  m_dvChart.Add( 0, &m_ceVWAP );
+  //m_dvChart.Add( 0, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
 
   m_dvChart.Add( 0, &m_cePriceBars );
 
@@ -119,8 +119,8 @@ void InteractiveChart::Init() {
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
 
-  m_ceVWAP.SetColour( ou::Colour::OrangeRed );
-  m_ceVWAP.SetName( "VWAP" );
+  //m_ceVWAP.SetColour( ou::Colour::OrangeRed );
+  //m_ceVWAP.SetName( "VWAP" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -246,7 +246,7 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   //m_ceVolume.Append( bar );
-  m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+  //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
