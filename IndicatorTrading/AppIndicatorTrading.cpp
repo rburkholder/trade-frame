@@ -33,6 +33,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
+
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
 
@@ -156,6 +157,19 @@ bool AppIndicatorTrading::OnInit() {
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
+
+  m_pPanelOrderButtons->Set(
+    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+    },
+    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+    },
+    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderStopLong
+    },
+    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderStopShort
+    },
+    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderCancelAll
+    }
+  );
 
   CallAfter(
     [this](){

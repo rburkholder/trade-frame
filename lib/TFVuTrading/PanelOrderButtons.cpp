@@ -133,37 +133,110 @@ void PanelOrderButtons::CreateControls() {
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOrderButtons::OnBtnStopLongClick, this, ID_BtnStopLong );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOrderButtons::OnBtnStopShortClick, this, ID_BtnStopShort );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOrderButtons::OnBtnCancelAllClick, this, ID_BtnCancelAll );
+
+  m_OrderType = EOrderType::Limit;
+}
+
+void PanelOrderButtons::Set(
+  fBtnOrder_t&& fBtnOrderBuy, // Buy
+  fBtnOrder_t&& fBtnOrderSell, // Sell
+  fBtnOrder_t&& fBtnOrderStopLong, // StopLong
+  fBtnOrder_t&& fBtnOrderStopShort,  // StopShort
+  fBtnOrder_t&& fBtnOrderCancelAll  // CancelAll
+) {
+  m_fBtnOrderBuy = std::move( fBtnOrderBuy );
+  m_fBtnOrderSell = std::move( fBtnOrderSell );
+  m_fBtnOrderStopLong = std::move( fBtnOrderStopLong );
+  m_fBtnOrderStopShort = std::move( fBtnOrderStopShort );
+  m_fBtnOrderCancelAll = std::move( fBtnOrderCancelAll );
 }
 
 void PanelOrderButtons::OnBtnMarketSelected( wxCommandEvent& event ) {
+  m_btnMarket->SetValue( true );
+  m_btnLimit->SetValue( false );
+  m_btnBracket->SetValue( false );
+  m_OrderType = EOrderType::Market;
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnLimitSelected( wxCommandEvent& event ) {
+  m_btnMarket->SetValue( false );
+  m_btnLimit->SetValue( true );
+  m_btnBracket->SetValue( false );
+  m_OrderType = EOrderType::Limit;
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnBracketSelected( wxCommandEvent& event ) {
+  m_btnMarket->SetValue( false );
+  m_btnLimit->SetValue( false );
+  m_btnBracket->SetValue( true );
+  m_OrderType = EOrderType::Bracket;
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
+  if ( m_fBtnOrderBuy ) {
+    wxColour colour = m_btnBuy->GetForegroundColour();
+    m_btnBuy->SetForegroundColour( *wxGREEN );
+    m_fBtnOrderBuy(
+      m_OrderType,
+      [this,colour](){ // fBtnDone_t
+        m_btnBuy->SetForegroundColour( colour );
+      } );
+  }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
+  if ( m_fBtnOrderSell ) {
+    wxColour colour = m_btnSell->GetForegroundColour();
+    m_btnSell->SetForegroundColour( *wxGREEN );
+    m_fBtnOrderSell(
+      m_OrderType,
+      [this,colour](){ // fBtnDone_t
+        m_btnSell->SetForegroundColour( colour );
+      } );
+  }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnStopLongClick( wxCommandEvent& event ) {
+  if ( m_fBtnOrderStopLong ) {
+    wxColour colour = m_btnStopLong->GetForegroundColour();
+    m_btnStopLong->SetForegroundColour( *wxGREEN );
+    m_fBtnOrderStopLong(
+      m_OrderType,
+      [this,colour](){ // fBtnDone_t
+        m_btnStopLong->SetForegroundColour( colour );
+      } );
+  }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnStopShortClick( wxCommandEvent& event ) {
+  if ( m_fBtnOrderStopShort ) {
+    wxColour colour = m_btnStopShort->GetForegroundColour();
+    m_btnStopShort->SetForegroundColour( *wxGREEN );
+    m_fBtnOrderStopShort(
+      m_OrderType,
+      [this,colour](){ // fBtnDone_t
+        m_btnStopShort->SetForegroundColour( colour );
+      } );
+  }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnCancelAllClick( wxCommandEvent& event ) {
+  if ( m_fBtnOrderCancelAll ) {
+    wxColour colour = m_btnCancelAll->GetForegroundColour();
+    m_btnCancelAll->SetForegroundColour( *wxGREEN );
+    m_fBtnOrderCancelAll(
+      m_OrderType,
+      [this,colour](){ // fBtnDone_t
+        m_btnCancelAll->SetForegroundColour( colour );
+      } );
+  }
   event.Skip();
 }
 

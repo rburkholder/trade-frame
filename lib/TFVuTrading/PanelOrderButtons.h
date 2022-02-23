@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -59,6 +61,19 @@ public:
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
 
+   enum class EOrderType { Market, Limit, Bracket };
+
+   using fBtnDone_t = std::function<void()>; // undo state set for the button while 'latched'
+   using fBtnOrder_t = std::function<void(EOrderType, fBtnDone_t&&)>;
+
+   void Set(
+     fBtnOrder_t&&, // Buy
+     fBtnOrder_t&&, // Sell
+     fBtnOrder_t&&, // StopLong
+     fBtnOrder_t&&, // StopShort
+     fBtnOrder_t&&  // CancelAll
+   );
+
 protected:
 private:
 
@@ -78,6 +93,14 @@ private:
     wxButton* m_btnStopLong;
     wxButton* m_btnStopShort;
     wxButton* m_btnCancelAll;
+
+  EOrderType m_OrderType;
+
+  fBtnOrder_t m_fBtnOrderBuy;
+  fBtnOrder_t m_fBtnOrderSell;
+  fBtnOrder_t m_fBtnOrderStopLong;
+  fBtnOrder_t m_fBtnOrderStopShort;
+  fBtnOrder_t m_fBtnOrderCancelAll;
 
   void Init();
   void CreateControls();
