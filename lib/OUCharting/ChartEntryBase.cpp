@@ -151,7 +151,7 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
       SetIxStart( iterBegin - m_vDateTime.begin() );
       SetCntElements( iterEnd - iterBegin );
     }
-    else {
+/*    else { // need to fix this for simulation viewport
       if ( 0 != m_vDateTime.size() ) {
         iterBegin = m_vDateTime.begin();
         iterEnd = m_vDateTime.end();
@@ -159,7 +159,7 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
         SetCntElements( iterEnd - iterBegin );
       }
     }
-  }
+*/  }
 }
 
 ChartEntryTime::range_t ChartEntryTime::GetExtents() const {
