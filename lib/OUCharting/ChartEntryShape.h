@@ -53,7 +53,7 @@ protected:
   StringArray GetLabels() const {
     //std::vector<const char *>::const_iterator iter = m_vpChar.begin();
     //return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );
-    return StringArray( &m_vpChar[ m_ixStart ],  m_nElements );
+    return StringArray( &m_vpChar[ IxStart() ],  CntElements() );
   }
 private:
   using queueLabel_t = ou::tf::Queue<Entry>;

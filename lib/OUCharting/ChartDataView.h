@@ -29,12 +29,12 @@ public:
   ChartEntryCarrier( size_t nChart, ChartEntryBase* pChartEntry );
   ChartEntryCarrier( const ChartEntryCarrier& carrier );
   ChartEntryCarrier( const ChartEntryCarrier&& carrier );
-  ~ChartEntryCarrier( void );
+  ~ChartEntryCarrier();
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
-  size_t GetLogicalChartId( void ) const { return m_nLogicalChart; };
-  size_t GetActualChartId( void ) const { return m_nActualChart; };
-  ChartEntryBase* GetChartEntry( void ) { return m_pChartEntry; };
-  const ChartEntryBase* GetChartEntry( void ) const { return m_pChartEntry; };
+  size_t GetLogicalChartId() const { return m_nLogicalChart; };
+  size_t GetActualChartId() const { return m_nActualChart; };
+  ChartEntryBase* GetChartEntry() { return m_pChartEntry; };
+  const ChartEntryBase* GetChartEntry() const { return m_pChartEntry; };
 protected:
 private:
   size_t m_nLogicalChart;  // as supplied by trading rules

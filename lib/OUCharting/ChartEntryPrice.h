@@ -53,7 +53,7 @@ protected:
   void Pop( const ou::tf::Price& );
 
   DoubleArray GetPrices() const {  // prices which are visible in viewport
-    return DoubleArray( &m_vDouble[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vDouble[ IxStart() ], CntElements() );
   }
 
 private:

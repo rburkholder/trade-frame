@@ -69,20 +69,30 @@ public:
 
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) { return false; }
 
-  virtual void Clear() {}
+  virtual void Clear() {
+    m_ixStart = 0;
+    m_nElements = 0;
+  }
 
 protected:
 
-  size_t m_ixStart; // starting point into viewport
-  int m_nElements;  // number of elements in the viewport
-
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
+
+  size_t IxStart() const { return m_ixStart; }
+  int CntElements() const { return m_nElements; }
+
+  void SetIxStart( size_t n ) { m_ixStart = n; }
+  void SetCntElements( int n ) { m_nElements = n; }
+
+  void IncCntElements() { m_nElements++; }
 
   //bool m_bUseThreadSafety;
   //static const unsigned int lockfreesize = 4096;
 
 private:
+  size_t m_ixStart; // starting point into viewport
+  int m_nElements;  // number of elements in the viewport
 };
 
 // **********
@@ -150,7 +160,7 @@ protected:
 //        change = diff;
 //      }
 //    }
-    return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vChartTime[ IxStart() ], CntElements() );
   }
 
   size_type Size() const { return m_vDateTime.size(); }

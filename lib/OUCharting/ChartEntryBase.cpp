@@ -107,7 +107,7 @@ void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
       // don't append any more values to visible area
     }
     else {
-      ++m_nElements;
+     IncCntElements();
     }
   }
   catch(...) {
@@ -126,8 +126,8 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
   m_rangeViewPort = range;
 
   // initialize viewport values
-  m_ixStart = 0;
-  m_nElements = 0;
+  SetIxStart( 0 );
+  SetCntElements( 0 );
 
   // calculate new viewport values
   // todo: what happens when nothing is within the range, should have zero elements listed
@@ -148,8 +148,16 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
       if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) {
         iterEnd = std::upper_bound( iterBegin, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
       }
-      m_ixStart = iterBegin - m_vDateTime.begin();
-      m_nElements = iterEnd - iterBegin;
+      SetIxStart( iterBegin - m_vDateTime.begin() );
+      SetCntElements( iterEnd - iterBegin );
+    }
+    else {
+      if ( 0 != m_vDateTime.size() ) {
+        iterBegin = m_vDateTime.begin();
+        iterEnd = m_vDateTime.end();
+        SetIxStart( iterBegin - m_vDateTime.begin() );
+        SetCntElements( iterEnd - iterBegin );
+      }
     }
   }
 }
@@ -178,7 +186,7 @@ void ChartEntryTime::ClearQueue( void ) {
 }
 
 void ChartEntryTime::Clear( void ) {
-  m_nElements = 0;
+  ChartEntryBase::Clear();
   m_vDateTime.clear();
   m_vChartTime.clear();
   ChartEntryBase::Clear();

@@ -92,6 +92,7 @@ public:
 protected:
 
   pSymbol_t NewCSymbol( SimulationSymbol::pInstrument_t pInstrument );
+
   void StartQuoteWatch( pSymbol_t pSymbol );
   void StopQuoteWatch( pSymbol_t Symbol );
   void StartTradeWatch( pSymbol_t pSymbol );

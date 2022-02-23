@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 
 class ChartEntryBars :
-  public ChartEntryTime {  
+  public ChartEntryTime {
 public:
   ChartEntryBars(void);
   //ChartEntryBars(size_type nSize);
@@ -37,33 +37,33 @@ protected:
   DoubleArray GetOpen( void ) const {
 //    vdouble_t::const_iterator iter = m_vOpen.begin();
 //    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
-    return DoubleArray( &m_vOpen[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vOpen[ IxStart() ], CntElements() );
   }
   DoubleArray GetHigh( void ) const {
     //vdouble_t::const_iterator iter = m_vHigh.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vHigh.size() ) );
-    return DoubleArray( &m_vHigh[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vHigh[ IxStart() ], CntElements() );
   }
   DoubleArray GetLow( void ) const {
     //vdouble_t::const_iterator iter = m_vLow.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vLow.size() ) );
-    return DoubleArray( &m_vLow[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vLow[ IxStart() ], CntElements() );
   }
   DoubleArray GetClose( void ) const {
     //vdouble_t::const_iterator iter = m_vClose.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
-    return DoubleArray( &m_vClose[ m_ixStart ], m_nElements );
+    return DoubleArray( &m_vClose[ IxStart() ], CntElements() );
   }
 private:
   //boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
-  
+
   std::vector<double> m_vOpen;
   std::vector<double> m_vHigh;
   std::vector<double> m_vLow;
   std::vector<double> m_vClose;
-  
+
   ou::tf::Queue<ou::tf::Bar> m_queueBars;
-  
+
   void ClearQueue( void );
   void Pop( const ou::tf::Bar& bar );
 };
