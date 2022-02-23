@@ -47,8 +47,8 @@ public:
     return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
   }
 
-  // used to override default InitForUSEquityExchanges
-  void InitForUS24HourFutures( boost::gregorian::date date );
+  void InitForUSEquityExchanges( boost::gregorian::date ); // can be used by simulation
+  void InitForUS24HourFutures( boost::gregorian::date );
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; };
   void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; };
@@ -102,8 +102,6 @@ private:
 
   TimeFrame m_stateTimeFrame;
 
-  // used by default
-  void InitForUSEquityExchanges( boost::gregorian::date );
 
 };
 

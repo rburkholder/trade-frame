@@ -24,6 +24,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
@@ -80,6 +81,13 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
+  //if ( options.bSimStart ) {
+    // just always delete it
+    if ( boost::filesystem::exists( sDbName ) ) {
+    boost::filesystem::remove( sDbName );
+    }
+  //}
+
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
   if ( 0 < options.sGroupDirectory.size() ) {
@@ -130,6 +138,16 @@ bool AppAutoTrade::OnInit() {
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
   m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, options );
+
+  if ( options.bSimStart ) {
+    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    boost::smatch what;
+    if ( boost::regex_search( options.sGroupDirectory, what, expr ) ) {
+      boost::gregorian::date date( boost::gregorian::from_undelimited_string( what[ 0 ] ) );
+      std::cout << "date " << date << std::endl;
+      m_pStrategy->InitForUSEquityExchanges( date );
+    }
+  }
 
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
@@ -253,16 +271,24 @@ void AppAutoTrade::ConstructSimInstrument() {
   vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
   m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
-  m_sim->Run( true );
+  m_sim->Run();
 
 }
 
 void AppAutoTrade::HandleMenuActionSimStart() {
-  m_sim->Run();
+  CallAfter(
+    [this](){
+      m_sim->Run();
+    }
+  );
 }
 
 void AppAutoTrade::HandleMenuActionSimStop() {
-  m_sim->Stop();
+  CallAfter(
+    [this](){
+      m_sim->Stop();
+    }
+  );
 }
 
 void AppAutoTrade::HandleMenuActionSimEmitStats() {
