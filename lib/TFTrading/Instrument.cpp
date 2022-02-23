@@ -136,7 +136,7 @@ Instrument::Instrument( const TableRowDef& row )
     case InstrumentType::Future:
       break;
     default:
-      assert( 0 );
+      assert( false );
   }
 }
 
