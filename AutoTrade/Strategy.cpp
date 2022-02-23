@@ -176,14 +176,23 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   // DailyTradeTimeFrame: Trading during regular active equity market hours
   // https://learnpriceaction.com/3-moving-average-crossover-strategy/
+  // TODO: include the marketRule price difference here?
 
   double ma1 = m_vMA[0].Latest();
   double ma2 = m_vMA[1].Latest();
   double ma3 = m_vMA[2].Latest();
 
+  double hi = ma1;
+  if ( ma2 > hi ) hi = ma2;
+  if ( ma3 > hi ) hi = ma3;
+
+  double lo = ma1;
+  if ( ma2 < lo ) lo = ma2;
+  if ( ma3 < lo ) lo = ma3;
+
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      // TODO: include the marketRule price difference here?
+
       if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
         // enter long
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
