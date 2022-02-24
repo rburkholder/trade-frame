@@ -135,6 +135,9 @@ private:
   pTSSWStochastic_t m_pIndicatorStochastic2;
   pTSSWStochastic_t m_pIndicatorStochastic3;
 
+  ou::ChartEntryIndicator m_ceStochasticMax;
+  ou::ChartEntryIndicator m_ceStochasticMin;
+
   struct MA {
 
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;

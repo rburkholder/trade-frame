@@ -116,6 +116,9 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic2 );
   m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic3 );
 
+  m_dvChart.Add( EChartSlot::Price, &m_ceStochasticMax );
+  m_dvChart.Add( EChartSlot::Price, &m_ceStochasticMin );
+
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
@@ -148,6 +151,11 @@ void InteractiveChart::Init() {
   m_ceStochastic3.SetName( "Stochastic 14x180s" );
   m_ceStochastic3.SetColour( ou::Colour::Blue );
 
+  m_ceStochasticMax.SetName( "Stoch Max" );
+  m_ceStochasticMax.SetColour( ou::Colour::ForestGreen );
+  m_ceStochasticMin.SetName( "Stoch Min" );
+  m_ceStochasticMin.SetColour( ou::Colour::ForestGreen );
+
   SetChartDataView( &m_dvChart );
 }
 
@@ -158,20 +166,22 @@ void InteractiveChart::Connect() {
       pWatch_t pWatch = m_pPosition->GetWatch();
       m_pIndicatorStochastic1 = std::make_shared<ou::tf::TSSWStochastic>(
         pWatch->GetQuotes(), 14, time_duration( 0, 0, 20 ),
-        [this]( const ou::tf::Price& price ){
-          m_ceStochastic1.Append( price );
+        [this]( ptime dt, double k, double min, double max ){
+          m_ceStochastic1.Append( dt, k );
+          m_ceStochasticMax.Append( dt, max );
+          m_ceStochasticMin.Append( dt, min );
         }
       );
       m_pIndicatorStochastic2 = std::make_shared<ou::tf::TSSWStochastic>(
         pWatch->GetQuotes(), 14, time_duration( 0, 0, 60 ),
-        [this]( const ou::tf::Price& price ){
-          m_ceStochastic2.Append( price );
+        [this]( ptime dt, double k, double min, double max ){
+          m_ceStochastic2.Append( dt, k );
         }
       );
       m_pIndicatorStochastic3 = std::make_shared<ou::tf::TSSWStochastic>(
         pWatch->GetQuotes(), 14, time_duration( 0, 0, 180 ),
-        [this]( const ou::tf::Price& price ){
-          m_ceStochastic3.Append( price );
+        [this]( ptime dt, double k, double min, double max ){
+          m_ceStochastic3.Append( dt, k );
         }
       );
       m_bConnected = true;

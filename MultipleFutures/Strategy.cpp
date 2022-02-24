@@ -51,9 +51,9 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
 , m_stochastic(
     const_cast<ou::tf::Quotes&>( pWatch->GetQuotes() ),
     14, seconds( nSecondsPerBar ),
-    [this]( const ou::tf::Price& k ){
-      m_ceStochastic.Append( k );
-      m_tsK.Append( k );
+    [this]( ptime dt, double k, double min, double max ){
+      m_ceStochastic.Append( dt, k );
+      m_tsK.Append( ou::tf::Price( dt, k ) );
     }
     )
 , m_stateStochastic1( EStateStochastic1::Quiesced )

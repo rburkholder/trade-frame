@@ -35,7 +35,7 @@ class TSSWStochastic:
   friend TimeSeriesSlidingWindow<TSSWStochastic, Quote>;
 public:
 
-  using fK_t = std::function<void(const ou::tf::Price&)>;
+  using fK_t = std::function<void( ptime, double ,double, double)>; // ptime, indicator, min, max
 
   TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( Quotes& quotes, size_t nPeriods, time_duration tdPeriodWidth, fK_t&& );
