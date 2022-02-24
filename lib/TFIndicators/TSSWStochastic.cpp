@@ -77,7 +77,7 @@ void TSSWStochastic::Expire( const Quote& quote ) {
 void TSSWStochastic::UpdateOnAdd( double min, double max ) {
   if ( m_bAvailable ) {
     m_k = ( max == min ) ? 0 : ( ( ( m_lastAdd - min ) / ( max - min ) ) * 100.0 );
-    if ( m_fK ) m_fK( ou::tf::Price( m_dtLatest, m_k ) );
+    if ( m_fK ) m_fK( m_dtLatest, m_k, min, max );
   }
 }
 
