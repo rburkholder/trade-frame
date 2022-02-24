@@ -24,7 +24,6 @@
 #include <functional>
 
 #include <TFIQFeed/Provider.h>
-
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include "AcquireFundamentals.h"
@@ -37,16 +36,16 @@ namespace tf { // TradeFrame
 class BuildInstrument {
 public:
 
-  using pInstrument_t = ou::tf::ib::TWS::pInstrument_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  using fInstrument_t = std::function<void(pInstrument_t)>;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
-  using fInstrument_t = std::function<void(pInstrument_t)>;
-
   BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );
 
-  void Add( const std::string& sIQFeedSymbol, fInstrument_t&& );
+  void Queue( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();
 
 protected:

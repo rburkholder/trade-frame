@@ -411,7 +411,7 @@ void MasterPortfolio::ProcessSeedList() {
     const std::string sSymbol( *iterSetSymbols );
     m_setSymbols.erase( iterSetSymbols );
 
-    m_pBuildInstrument->Add(
+    m_pBuildInstrument->Queue(
       sSymbol,
       [this]( pInstrument_t pInstrument ){
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
@@ -509,17 +509,19 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
               "", "", "", "", sIQFeedUnderlying,
               [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
                 std::cout
-                  << "chain request " << chains.sKey
-                  << " has " << chains.vOption.size() << " options"
+                  << "chain request " << chains.sKey << " has "
+                  //<< chains.vCall.size() << " calls, "
+                  //<< chains.vPut.size() << " puts"
+                  << chains.vOption.size() << " options"
                   << std::endl;
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
-                m_nQuery = 1; // intial lock of the loop, process each option, sync or async dependin gif cached
+                m_nQuery = 1; // iniial lock of the loop, process each option, sync or async dependin gif cached
                 for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_nQuery++;
-                  m_pBuildInstrument->Add(
+                  m_pBuildInstrument->Queue(
                     value,
                     [this,&uws,fOption_]( pInstrument_t pInstrument ) {
                       //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
@@ -584,7 +586,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           // NOTE: once considered use of the position caches, but won't work as, at this point,
           //   idPortfolio is not known, and positions are dependent on the portfolio
           // TODO: there is an assert inside the method which will need to be remedied
-          m_pBuildInstrument->Add(
+          m_pBuildInstrument->Queue(
             sIQFeedOptionName,
             [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
               pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );

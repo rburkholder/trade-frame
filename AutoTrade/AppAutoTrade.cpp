@@ -211,7 +211,7 @@ void AppAutoTrade::ConstructIBInstrument() {
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-  m_pBuildInstrument->Add(
+  m_pBuildInstrument->Queue(
     m_sSymbol,
     [this]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );

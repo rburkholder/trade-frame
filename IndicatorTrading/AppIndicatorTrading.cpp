@@ -191,7 +191,7 @@ void AppIndicatorTrading::ConstructInstrument() {
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-  m_pBuildInstrument->Add(
+  m_pBuildInstrument->Queue(
     m_config.sSymbol,
     [this]( pInstrument_t pInstrument ){
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );

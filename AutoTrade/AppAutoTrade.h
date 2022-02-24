@@ -35,8 +35,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-class FrameMain;
 class Strategy;
+class FrameMain;
 
 namespace ou {
 namespace tf {
@@ -52,6 +52,7 @@ class AppAutoTrade:
 {
   friend ou::tf::FrameWork01<AppAutoTrade>;
   friend class boost::serialization::access;
+
 public:
 protected:
 private:

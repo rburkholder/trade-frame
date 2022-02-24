@@ -38,7 +38,7 @@ BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pI
   assert( m_pIB );
 }
 
-void BuildInstrument::Add( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
+void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
 
   pInstrument_t pInstrument;
 
