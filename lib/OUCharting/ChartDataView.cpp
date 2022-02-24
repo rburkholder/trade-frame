@@ -194,8 +194,11 @@ ChartDataView::ViewPort_t ChartDataView::GetExtents() const {
         }
 
       }
-      catch (... ) {
+      catch ( const std::bad_cast& ) {
         // just ignore classes without ChartEntryTime
+      }
+      catch ( ... ) {
+        assert( false );
       }
     });
   return view;
