@@ -58,7 +58,7 @@ bool AppIndicatorTrading::OnInit() {
 
   wxApp::OnInit();
 
-  if ( Load( sConfigFilename, m_options ) ) {
+  if ( Load( sConfigFilename, m_config ) ) {
   }
   else {
     return 0;
@@ -77,7 +77,7 @@ bool AppIndicatorTrading::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  m_tws->SetClientId( m_options.nIbInstance );
+  m_tws->SetClientId( m_config.nIbInstance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -126,7 +126,7 @@ bool AppIndicatorTrading::OnInit() {
 
   LinkToPanelProviderControl();
 
-  std::cout << "symbol: " << m_options.sSymbol << std::endl;
+  std::cout << "symbol: " << m_config.sSymbol << std::endl;
 
   m_pInteractiveChart = new InteractiveChart( panelSplitterRight, wxID_ANY );
 
@@ -192,11 +192,11 @@ void AppIndicatorTrading::ConstructInstrument() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Add(
-    m_options.sSymbol,
+    m_config.sSymbol,
     [this]( pInstrument_t pInstrument ){
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
       pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-      m_pInteractiveChart->SetPosition( pPosition, m_options );
+      m_pInteractiveChart->SetPosition( pPosition, m_config );
       m_pInteractiveChart->Connect();
     } );
 

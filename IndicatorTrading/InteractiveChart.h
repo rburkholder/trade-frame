@@ -40,11 +40,19 @@
 
 #include <TFVuTrading/WinChartView.h>
 
-namespace ou {
-namespace tf {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
   class TSSWStochastic;
-}
-}
+namespace iqfeed { // IQFeed
+  class OptionChainQuery;
+} // namespace iqfeed
+namespace option {
+  class Engine;
+} // namespace option
+} // namespace tf
+} // namespace ou
+
+
 
 namespace config {
   class Options;

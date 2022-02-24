@@ -206,7 +206,7 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   }
 }
 
-void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& options ) {
+void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& config ) {
 
   bool bConnected = m_bConnected;
   Disconnect();
@@ -219,18 +219,18 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
 
-  assert( 0 < options.nPeriodWidth );
+  assert( 0 < config.nPeriodWidth );
 
-  vMAPeriods.push_back( options.nMA1Periods );
-  vMAPeriods.push_back( options.nMA2Periods );
-  vMAPeriods.push_back( options.nMA3Periods );
+  vMAPeriods.push_back( config.nMA1Periods );
+  vMAPeriods.push_back( config.nMA2Periods );
+  vMAPeriods.push_back( config.nMA3Periods );
 
   assert( 3 == vMAPeriods.size() );
   for ( vMAPeriods_t::value_type value: vMAPeriods ) {
     assert( 0 < value );
   }
 
-  time_duration td = time_duration( 0, 0, options.nPeriodWidth );
+  time_duration td = time_duration( 0, 0, config.nPeriodWidth );
 
   m_vMA.clear();
 

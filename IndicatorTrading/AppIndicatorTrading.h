@@ -78,7 +78,7 @@ private:
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
-  config::Options m_options;
+  config::Options m_config;
 
   virtual bool OnInit();
   virtual int OnExit();
