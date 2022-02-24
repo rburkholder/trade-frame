@@ -11,11 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+//#include <sstream>
 #include <iostream>
 #include <algorithm>
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
+
+//#include <boost/date_time/posix_time/posix_time_io.hpp>
 
 #include "ChartEntryBase.h"
 
@@ -88,12 +91,13 @@ void ChartEntryTime::Reserve( size_type nSize ) {
   m_vChartTime.reserve( nSize );
 }
 
-void ChartEntryTime::Append(boost::posix_time::ptime dt) {
+void ChartEntryTime::Append( boost::posix_time::ptime dt ) {
   m_queue.Append( dt );
 }
 
 // runs in thread of main
-void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
+void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
+
   m_vDateTime.push_back( dt );
 
   // this is maybe done on the fly and not correct here.
@@ -138,28 +142,33 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
   // TODO: why would there be not_a_date_time in the vector?
   //   need to test for insertions like this?
   if ( 0 != m_vDateTime.size() ) {
-    vDateTime_t::const_iterator iterBegin( m_vDateTime.begin() );
-    vDateTime_t::const_iterator iterEnd( m_vDateTime.end() );
+
+    vDateTime_t::const_iterator citerBegin( m_vDateTime.begin() );
+    vDateTime_t::const_iterator citerEnd( m_vDateTime.end() );
 
     if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtBegin ) {
-      iterBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), m_rangeViewPort.dtBegin );
+      citerBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), m_rangeViewPort.dtBegin );
     }
-    if ( m_vDateTime.end() != iterBegin ) {
+
+    if ( m_vDateTime.end() != citerBegin ) {
       if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) {
-        iterEnd = std::upper_bound( iterBegin, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
-      }
-      SetIxStart( iterBegin - m_vDateTime.begin() );
-      SetCntElements( iterEnd - iterBegin );
-    }
-/*    else { // need to fix this for simulation viewport
-      if ( 0 != m_vDateTime.size() ) {
-        iterBegin = m_vDateTime.begin();
-        iterEnd = m_vDateTime.end();
-        SetIxStart( iterBegin - m_vDateTime.begin() );
-        SetCntElements( iterEnd - iterBegin );
+        citerEnd = std::upper_bound( citerBegin, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
       }
     }
-*/  }
+
+    SetIxStart( citerBegin - m_vDateTime.begin() );
+    SetCntElements( citerEnd - citerBegin );
+
+    if ( m_vDateTime.end() == citerBegin ) {
+      //std::stringstream ssbegin;
+      //ssbegin << range.dtBegin << "," << range.dtEnd;
+      //std::string sbegin = ssbegin.str();
+      //iterBegin = m_vDateTime.begin();
+      //iterEnd = m_vDateTime.end();
+      //SetIxStart( iterBegin - m_vDateTime.begin() );
+      //SetCntElements( iterEnd - iterBegin );
+    }
+  }
 }
 
 ChartEntryTime::range_t ChartEntryTime::GetExtents() const {
