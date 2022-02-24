@@ -32,13 +32,13 @@ struct Options {
   // nPeriodWidth * nPeriods => moving average time range
   // common: 10/21/50, or 8/13/21
 
-  // shortest SMA/EMA
+  // shortest EMA
   int nMA1Periods;
 
-  // shortest SMA/EMA
+  // shortest EMA
   int nMA2Periods;
 
-  // longest SMA/EMA
+  // longest EMA
   int nMA3Periods;
 
   // group directory for simulator - obtain from Hdf5Chart
