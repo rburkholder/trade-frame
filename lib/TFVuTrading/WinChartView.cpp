@@ -60,8 +60,7 @@ void WinChartView::Init() {
   m_dblViewPortRatio = 1.0;
   m_bBeginExtentFound = false;
 
-  // TODO: convert to minimum width?
-  m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
+  m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // default viewport width to 10 minutes
 
 }
 
@@ -93,7 +92,7 @@ void WinChartView::BindEvents() {
     // this GuiRefresh initialization should come after all else
     m_timerGuiRefresh.SetOwner( this );
     Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    m_timerGuiRefresh.Start( 250 );
+    m_timerGuiRefresh.Start( 200 );
 
   }
 }
@@ -170,7 +169,9 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   //    << bShift << bControl << bAlt
   //    << std::endl;
 
-  // TODO: will need to keep to within a min/max
+  static const boost::posix_time::time_duration tdTenSeconds( 0, 0, 10 );
+  boost::posix_time::time_duration tdCurrent( m_tdViewPortWidth );
+
   if ( 0 > rotation ) {
     m_tdViewPortWidth *= 12;
     m_tdViewPortWidth /= 10;
@@ -179,6 +180,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     m_tdViewPortWidth *= 10;
     m_tdViewPortWidth /= 12;
   }
+
+  if ( m_tdViewPortWidth < tdTenSeconds ) m_tdViewPortWidth = tdCurrent;
+
+  //std::cout << "m_tdViewPortWidth=" << m_tdViewPortWidth << std::endl;
 
   m_bReCalcViewPort = true;
 
@@ -246,20 +251,26 @@ void WinChartView::ThreadDrawChart() {
     assert( nullptr != m_pChartDataView );
 
     if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
-      // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
       //if ( m_bReCalcViewPort ) {
-        boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+        boost::posix_time::ptime now = ou::TimeSource::Instance().Internal(); // works with real vs simulation time
 
-        // chart moves at 1s step - not sure if this is trader friendly though
         static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
         auto now_ = now;
-        boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
-        boost::posix_time::ptime dtEnd = now_ + td;
+        boost::posix_time::ptime dtEnd = now_;
+        if ( false ) {
+          // chart moves at 1s step - not sure if this is trader friendly though
+          boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
+          dtEnd = now_ + td;
+        }
 
         boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-        //std::stringstream ss;
-        //ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+        if ( false ) {
+          std::stringstream ss;
+          ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+          std::string s( ss.str() );
+          std::cout << s << std::endl;
+        }
 
         m_pChartDataView->SetViewPort( dtBegin, dtEnd );
 
