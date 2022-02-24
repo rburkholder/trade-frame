@@ -24,7 +24,27 @@
 namespace config {
 
 struct Options {
+
   std::string sSymbol;
+
+  int nPeriodWidth;  // units:  seconds
+
+  // shortest EMA
+  int nMA1Periods;
+
+  // shortest EMA
+  int nMA2Periods;
+
+  // longest EMA
+  int nMA3Periods;
+
+  // Interactive Brokers api instance
+  int nIbInstance;
+
+  Options()
+  : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
+  , nIbInstance( 2 )
+  {}
 };
 
 bool Load( const std::string& sFileName, Options& );

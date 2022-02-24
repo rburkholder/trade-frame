@@ -37,12 +37,12 @@
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
 
-#include "Config.h"
 #include "InteractiveChart.h"
 #include "AppIndicatorTrading.h"
 
 namespace {
   static const std::string sAppName( "Indicator Trading" );
+  static const std::string sDbName( "IndicatorTrading.db" );
   static const std::string sConfigFilename( "IndicatorTrading.cfg" );
   static const std::string sStateFileName( "IndicatorTrading.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
@@ -58,10 +58,7 @@ bool AppIndicatorTrading::OnInit() {
 
   wxApp::OnInit();
 
-  config::Options options;
-
-  if ( Load( sConfigFilename, options ) ) {
-    m_sSymbol = options.sSymbol;
+  if ( Load( sConfigFilename, m_options ) ) {
   }
   else {
     return 0;
@@ -77,6 +74,10 @@ bool AppIndicatorTrading::OnInit() {
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
+
+  m_pdb = std::make_unique<ou::tf::db>( sDbName );
+
+  m_tws->SetClientId( m_options.nIbInstance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -125,7 +126,7 @@ bool AppIndicatorTrading::OnInit() {
 
   LinkToPanelProviderControl();
 
-  std::cout << "symbol: " << m_sSymbol << std::endl;
+  std::cout << "symbol: " << m_options.sSymbol << std::endl;
 
   m_pInteractiveChart = new InteractiveChart( panelSplitterRight, wxID_ANY );
 
@@ -191,11 +192,11 @@ void AppIndicatorTrading::ConstructInstrument() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Add(
-    m_sSymbol,
+    m_options.sSymbol,
     [this]( pInstrument_t pInstrument ){
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
       pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-      m_pInteractiveChart->SetPosition( pPosition );
+      m_pInteractiveChart->SetPosition( pPosition, m_options );
       m_pInteractiveChart->Connect();
     } );
 

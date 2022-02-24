@@ -23,6 +23,7 @@
 
 #include <TFIndicators/TSSWStochastic.h>
 
+#include "Config.h"
 #include "InteractiveChart.h"
 
 namespace {
@@ -82,26 +83,26 @@ InteractiveChart::~InteractiveChart() {
 
 void InteractiveChart::Init() {
 
-  m_dvChart.Add( 0, &m_ceQuoteAsk );
-  m_dvChart.Add( 0, &m_ceTrade );
-  m_dvChart.Add( 0, &m_ceQuoteBid );
+  m_dvChart.Add( EChartSlot::Price, &m_ceQuoteAsk );
+  m_dvChart.Add( EChartSlot::Price, &m_ceTrade );
+  m_dvChart.Add( EChartSlot::Price, &m_ceQuoteBid );
 
-  //m_dvChart.Add( 0, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
+  //m_dvChart.Add( EChartSlot::Price, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
 
-  m_dvChart.Add( 0, &m_cePriceBars );
+  m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
-  m_dvChart.Add( 0, &m_ceShortEntries );
-  m_dvChart.Add( 0, &m_ceLongEntries );
-  m_dvChart.Add( 0, &m_ceShortFills );
-  m_dvChart.Add( 0, &m_ceLongFills );
-  m_dvChart.Add( 0, &m_ceShortExits );
-  m_dvChart.Add( 0, &m_ceLongExits );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortEntries );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongEntries );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortFills );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongFills );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortExits );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongExits );
 
   //m_dvChart.Add( 1, &m_ceVolume );
-  m_dvChart.Add( 1, &m_ceVolumeUp );
-  m_dvChart.Add( 1, &m_ceVolumeDn );
+  m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
+  m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
 
-  m_dvChart.Add( 2, &m_ceQuoteSpread );
+  m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
   // need to present the marks prior to presenting the data
   m_cemStochastic.AddMark( 100, ou::Colour::Black,    "" ); // hidden by legend
@@ -109,11 +110,11 @@ void InteractiveChart::Init() {
   m_cemStochastic.AddMark(  50, ou::Colour::Green, "50%" );
   m_cemStochastic.AddMark(  20, ou::Colour::Blue,  "20%" );
   m_cemStochastic.AddMark(   0, ou::Colour::Black,  "0%" );
-  m_dvChart.Add( 3, &m_cemStochastic );
+  m_dvChart.Add( EChartSlot::Stochastic, &m_cemStochastic );
 
-  m_dvChart.Add( 3, &m_ceStochastic1 );
-  m_dvChart.Add( 3, &m_ceStochastic2 );
-  m_dvChart.Add( 3, &m_ceStochastic3 );
+  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic1 );
+  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic2 );
+  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic3 );
 
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
@@ -195,11 +196,44 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   }
 }
 
-void InteractiveChart::SetPosition( pPosition_t pPosition ) {
+void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& options ) {
 
   bool bConnected = m_bConnected;
   Disconnect();
+
+  // --
+
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t vMAPeriods;
+
   m_pPosition = pPosition;
+  pWatch_t pWatch = m_pPosition->GetWatch();
+
+  assert( 0 < options.nPeriodWidth );
+
+  vMAPeriods.push_back( options.nMA1Periods );
+  vMAPeriods.push_back( options.nMA2Periods );
+  vMAPeriods.push_back( options.nMA3Periods );
+
+  assert( 3 == vMAPeriods.size() );
+  for ( vMAPeriods_t::value_type value: vMAPeriods ) {
+    assert( 0 < value );
+  }
+
+  time_duration td = time_duration( 0, 0, options.nPeriodWidth );
+
+  m_vMA.clear();
+
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Gold, "ma1" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
+
+  for ( vMA_t::value_type& ma: m_vMA ) {
+    ma.AddToView( m_dvChart );
+  }
+
+  // --
+
   if ( bConnected ) {
     Connect();
   }
@@ -219,6 +253,10 @@ void InteractiveChart::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceQuoteSpread.Append( dt, quote.Ask() - quote.Bid() );
 
   m_quote = quote;
+
+  for ( vMA_t::value_type& ma: m_vMA ) {
+    ma.Update( dt );
+  }
 
 }
 

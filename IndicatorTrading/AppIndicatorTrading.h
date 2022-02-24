@@ -29,7 +29,11 @@
 #include <wx/app.h>
 #include <wx/splitter.h>
 
+#include <TFTrading/DBWrapper.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
+
+#include "Config.h"
 
 class wxBoxSizer;
 class wxTreeCtrl;
@@ -61,7 +65,6 @@ private:
   ou::tf::FrameControls* m_pFrameControls;
   ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
 
-  std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
 
   wxTreeCtrl* m_ptreeTradables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
@@ -72,6 +75,10 @@ private:
   InteractiveChart* m_pInteractiveChart;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+
+  std::unique_ptr<ou::tf::db> m_pdb;
+
+  config::Options m_options;
 
   virtual bool OnInit();
   virtual int OnExit();

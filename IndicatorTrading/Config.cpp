@@ -20,7 +20,6 @@
  */
 
 #include <fstream>
-#include <algorithm>
 #include <exception>
 
 #include <boost/log/trivial.hpp>
@@ -32,6 +31,11 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sOption_Symbol( "symbol" );
+  static const std::string sOption_PeriodWidth( "period_width" );
+  static const std::string sOption_MA1Periods( "ma1_periods" );
+  static const std::string sOption_MA2Periods( "ma2_periods" );
+  static const std::string sOption_MA3Periods( "ma3_periods" );
+  static const std::string sOption_IbInstance( "ib_instance" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -59,6 +63,13 @@ bool Load( const std::string& sFileName, Options& options ) {
     po::options_description config( "AppIndicatorTrading Config" );
     config.add_options()
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
+
+      ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth), "period width (sec)" )
+      ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods), "ma1 (#periods)" )
+      ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
+      ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
+
+      ( sOption_IbInstance.c_str(), po::value<int>( &options.nIbInstance)->default_value( 1 ), "IB instance" )
       ;
     po::variables_map vm;
 
@@ -72,9 +83,14 @@ bool Load( const std::string& sFileName, Options& options ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk |= parse<std::string>( sFileName, vm, sOption_Symbol, options.sSymbol );
-
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
+      bOk |= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
+      bOk |= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
+      bOk |= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
+      bOk |= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
+
+      bOk |= parse<int>( sFileName, vm, sOption_IbInstance, options.nIbInstance );
     }
 
   }

@@ -32,7 +32,8 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <TFTimeSeries/TimeSeries.h>
+#include <TFIndicators/TSEMA.h>
+
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Position.h>
@@ -43,6 +44,10 @@ namespace ou {
 namespace tf {
   class TSSWStochastic;
 }
+}
+
+namespace config {
+  class Options;
 }
 
 class InteractiveChart:
@@ -69,7 +74,7 @@ public:
 
   virtual ~InteractiveChart();
 
-  void SetPosition( pPosition_t );
+  void SetPosition( pPosition_t, const config::Options& );
 
   void SaveWatch( const std::string& );
 
@@ -78,6 +83,8 @@ public:
 
 protected:
 private:
+
+  enum EChartSlot { Price, Volume, Spread, Stochastic, PL }; // IndMA = moving averate indicator
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -127,6 +134,37 @@ private:
   pTSSWStochastic_t m_pIndicatorStochastic1;
   pTSSWStochastic_t m_pIndicatorStochastic2;
   pTSSWStochastic_t m_pIndicatorStochastic3;
+
+  struct MA {
+
+    ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
+    ou::ChartEntryIndicator m_ceMA;
+
+    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::enumColour colour, const std::string& sName )
+    : m_ema( quotes, nPeriods, tdPeriod )
+    {
+      m_ceMA.SetName( sName );
+      m_ceMA.SetColour( colour );
+    }
+
+    MA( MA&& rhs )
+    : m_ema(  std::move( rhs.m_ema ) )
+    , m_ceMA( std::move( rhs.m_ceMA ) )
+    {}
+
+    void AddToView( ou::ChartDataView& cdv ) {
+      cdv.Add( EChartSlot::Price, &m_ceMA );
+    }
+
+    void Update( ptime dt ) {
+      m_ceMA.Append( dt, m_ema.GetEMA() );
+    }
+
+    double Latest() const { return m_ema.GetEMA(); }
+  };
+
+  using vMA_t = std::vector<MA>;
+  vMA_t m_vMA;
 
   void Init();
 
