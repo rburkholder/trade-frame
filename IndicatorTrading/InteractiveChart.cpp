@@ -273,12 +273,10 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
         sIQFeedUnderlying,
-        "", "", "", "", sIQFeedUnderlying,
+        "pc", "", "", "4", sIQFeedUnderlying,
         [this]( const query_t::OptionChain& chains ){
           std::cout
             << "chain request " << chains.sKey << " has "
-            //<< chains.vCall.size() << " calls, "
-            //<< chains.vPut.size() << " puts"
             << chains.vOption.size() << " options"
             << std::endl;
 
@@ -300,11 +298,8 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
             //    }
             //  } );
           //}
-          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-          //  std::cout << "chain put: " << value << std::endl;
-          //}
           for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
-            std::cout << "chain option: " << value << std::endl;
+            //std::cout << "chain option: " << value << std::endl;
           }
           //auto previous = nQuery.fetch_sub( 1 );
           //if ( 1 == previous ) {
@@ -316,22 +311,14 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Stock:
       m_pOptionChainQuery->QueryEquityOptionChain(
         sIQFeedUnderlying,
-        "pc", "", "3", "2", "8", "8", sIQFeedUnderlying,
+        "pc", "", "4", "0", "", "", sIQFeedUnderlying, // four months, all strikes
         [this]( const query_t::OptionChain& chains ){
           std::cout
             << "chain request " << chains.sKey << " has "
-            //<< chains.vCall.size() << " calls, "
-            //<< chains.vPut.size() << " puts"
             << chains.vOption.size() << " options"
             << std::endl;
-          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-          //  std::cout << "chain call: " << value << std::endl;
-          //}
-          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-          //  std::cout << "chain put: " << value << std::endl;
-          //}
           for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
-            std::cout << "chain option: " << value << std::endl;
+            //std::cout << "chain option: " << value << std::endl;
           }
         }
         );
