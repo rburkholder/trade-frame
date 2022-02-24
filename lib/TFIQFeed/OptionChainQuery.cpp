@@ -303,7 +303,7 @@ void OptionChainQuery::QueryEquityOptionChain(
     << sFilterOne << ","
     << sFilterTwo << ","
     << sMapKey << ","
-    << "1" // 0 = defualt, exclude non-standard options, 1 = include
+    << "1" // 0 = default, exclude non-standard options, 1 = include
     << "\n";
   //std::cout << "request: '" << ss.str() << "'" << std::endl;
   std::lock_guard<std::mutex> lock( m_mutexMapRequest );
@@ -316,10 +316,10 @@ void OptionChainQuery::QueryEquityOptionChain(
     const std::string& sSymbol,
     const std::string& sSide,
     const std::string& sMonthCodes,
-    const std::string& sNearMonths,
-    const std::string& sFilterType,
-    const std::string& sFilterOne,
-    const std::string& sFilterTwo,
+    const std::string& sNearMonths, // number of near contracts to display: values 0 through 4
+    const std::string& sFilterType, // Optional - "0" (default) = no filter or "1" = filter on a strike range or "2" = filter on the number of In/Out Of The Money contracts
+    const std::string& sFilterOne,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price or if [Filter Type] = "2" then the number of contracts in the money
+    const std::string& sFilterTwo,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or if [Filter Type] = "2" then the number of contracts out of the money
     const std::string& sRequestId
     ) {
   std::stringstream ss;
