@@ -305,6 +305,7 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
+  std::cout << "Sending Close & Done" << std::endl;
   m_pPosition->ClosePosition();
   m_stateTrade = ETradeState::Done;
 }
