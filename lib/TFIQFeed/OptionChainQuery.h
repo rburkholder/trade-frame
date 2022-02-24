@@ -80,6 +80,18 @@ public:
     const std::string& sFilterType, // 0 no filter, 1 filter on strike range, 2 filter on #contracts in/out money
     const std::string& sFilterOne,  // 0 ignored, 1 begin strike, 2 #contracts in the money
     const std::string& sFilterTwo,  // 0 ignored, 1 end strike, 2 #contracts out of the money
+    const std::string& sRequestId,
+    fOptionChain_t&&
+    );
+
+  void QueryEquityOptionChain(
+    const std::string& sSymbol,
+    const std::string& sSide,
+    const std::string& sMonthCodes, // see above
+    const std::string& sNearMonths, // 0..4
+    const std::string& sFilterType, // 0 no filter, 1 filter on strike range, 2 filter on #contracts in/out money
+    const std::string& sFilterOne,  // 0 ignored, 1 begin strike, 2 #contracts in the money
+    const std::string& sFilterTwo,  // 0 ignored, 1 end strike, 2 #contracts out of the money
     const std::string& sRequestId   // not implemented
     );
 

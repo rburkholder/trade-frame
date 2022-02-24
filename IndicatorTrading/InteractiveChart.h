@@ -52,8 +52,6 @@ namespace option {
 } // namespace tf
 } // namespace ou
 
-
-
 namespace config {
   class Options;
 }
@@ -177,6 +175,8 @@ private:
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
+  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
   void Init();
 
   void HandleQuote( const ou::tf::Quote& );
@@ -185,6 +185,8 @@ private:
   void HandleBarCompletionPrice( const ou::tf::Bar& );
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
+
+  void OptionChainQuery( const std::string& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

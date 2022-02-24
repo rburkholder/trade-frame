@@ -23,6 +23,11 @@
 
 #include <TFIndicators/TSSWStochastic.h>
 
+#include <TFIQFeed/OptionChainQuery.h>
+
+#include <TFOptions/Engine.h>
+#include <TFOptions/GatherOptions.h>
+
 #include "Config.h"
 #include "InteractiveChart.h"
 
@@ -79,6 +84,8 @@ bool InteractiveChart::Create(
 
 InteractiveChart::~InteractiveChart() {
   m_bfPrice.SetOnBarComplete( nullptr );
+  m_pOptionChainQuery->Disconnect();
+  m_pOptionChainQuery.reset();
 }
 
 void InteractiveChart::Init() {
@@ -157,6 +164,13 @@ void InteractiveChart::Init() {
   m_ceStochasticMin.SetColour( ou::Colour::ForestGreen );
 
   SetChartDataView( &m_dvChart );
+
+  m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+    [this](){
+    }
+  );
+  m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+
 }
 
 void InteractiveChart::Connect() {
@@ -242,12 +256,90 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
     ma.AddToView( m_dvChart );
   }
 
+  OptionChainQuery( config.sSymbol );
+
   // --
 
   if ( bConnected ) {
     Connect();
   }
 
+}
+
+void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) {
+  using query_t = ou::tf::iqfeed::OptionChainQuery;
+  using fOption_t = ou::tf::option::fOption_t;
+  switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Future:
+      m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
+        sIQFeedUnderlying,
+        "", "", "", "", sIQFeedUnderlying,
+        [this]( const query_t::OptionChain& chains ){
+          std::cout
+            << "chain request " << chains.sKey << " has "
+            //<< chains.vCall.size() << " calls, "
+            //<< chains.vPut.size() << " puts"
+            << chains.vOption.size() << " options"
+            << std::endl;
+
+          // TODO: will have to do this during/after chains for all underlyings are retrieved
+          // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
+          // atomic int nQuery = 1; // intial lock of the loop, process each option, sync or async dependin gif cached
+          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+          //  std::cout << "chain call: " << value << std::endl;
+            //nQuery++;
+            //m_pBuildInstrument->Add(
+            //  value,
+            //  [this,&uws,fOption_]( pInstrument_t pInstrument ) {
+            //    //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
+            //    fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
+            //    auto previous = m_nQuery.fetch_sub( 1 );
+            //    if ( 1 == previous ) {
+            //      StartUnderlying( uws );
+            //      ProcessSeedList();  // continue processing list of underlying
+            //    }
+            //  } );
+          //}
+          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+          //  std::cout << "chain put: " << value << std::endl;
+          //}
+          for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
+            std::cout << "chain option: " << value << std::endl;
+          }
+          //auto previous = nQuery.fetch_sub( 1 );
+          //if ( 1 == previous ) {
+          //  StartUnderlying( uws );
+          //  ProcessSeedList();  // continue processing list of underlying
+          //}
+        });
+      break;
+    case ou::tf::InstrumentType::Stock:
+      m_pOptionChainQuery->QueryEquityOptionChain(
+        sIQFeedUnderlying,
+        "pc", "", "3", "2", "8", "8", sIQFeedUnderlying,
+        [this]( const query_t::OptionChain& chains ){
+          std::cout
+            << "chain request " << chains.sKey << " has "
+            //<< chains.vCall.size() << " calls, "
+            //<< chains.vPut.size() << " puts"
+            << chains.vOption.size() << " options"
+            << std::endl;
+          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+          //  std::cout << "chain call: " << value << std::endl;
+          //}
+          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
+          //  std::cout << "chain put: " << value << std::endl;
+          //}
+          for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
+            std::cout << "chain option: " << value << std::endl;
+          }
+        }
+        );
+      break;
+    default:
+      assert( false );
+      break;
+  }
 }
 
 void InteractiveChart::HandleQuote( const ou::tf::Quote& quote ) {

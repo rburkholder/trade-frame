@@ -25,9 +25,10 @@
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::OptionChainQuery::OptionChain,
   (std::string, sKey)
-  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption)
-  //(ou::tf::iqfeed::OptionChainQuery::vCall_t, vCall)
-  //(ou::tf::iqfeed::OptionChainQuery::vPut_t, vPut)
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // calls first
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // puts appended
+  //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
+  //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vPut)
   )
 
 namespace qi = boost::spirit::qi;
@@ -47,23 +48,27 @@ namespace {
 using OptionChain = OptionChainQuery::OptionChain;
 
 template<typename Iterator>
-struct FutureOptionChainParser: qi::grammar<Iterator, OptionChain()> {
+struct OptionChainParser: qi::grammar<Iterator, OptionChain()> {
 
-  FutureOptionChainParser(): FutureOptionChainParser::base_type( start ) {
+  OptionChainParser(): OptionChainParser::base_type( start ) {
 
     symbol %= (+(qi::char_ - qi::char_(",:"))) >> qi::lit(',');
-    //calls %= +symbol;
-    //puts %= +symbol;
-    options %= +symbol;
-    //start %= symbol >> calls >> qi::lit(':') >> qi::lit(',') >> puts >> qi::eoi;
-    start %= symbol >> options >> qi::lit(':') >> qi::lit(',') >> options >> qi::eoi;
+    calls %= +symbol;
+    puts %= +symbol;
+    start
+      %= symbol
+      >> qi::lit( 'L' ) >> qi::lit( 'C' ) >> qi::lit( ',' )
+      >> calls
+      >> -(qi::lit(',')) >> qi::lit(':') >> qi::lit(',')
+      >> puts
+      //>> qi::eoi
+      ;
 
   }
 
   qi::rule<Iterator, std::string()> symbol;
-  //qi::rule<Iterator, OptionChainQuery::vCall_t()> calls;
-  //qi::rule<Iterator, OptionChainQuery::vPut_t()> puts;
-  qi::rule<Iterator, OptionChainQuery::vSymbol_t()> options;
+  qi::rule<Iterator, OptionChainQuery::vSymbol_t()> calls;
+  qi::rule<Iterator, OptionChainQuery::vSymbol_t()> puts;
   qi::rule<Iterator, OptionChain()> start;
 
 };
@@ -105,6 +110,7 @@ void OptionChainQuery::Connect() {
 
 void OptionChainQuery::OnNetworkConnected() {
   //std::cout << "OnHistoryConnected" << std::endl;
+  this->Send( "S,SET PROTOCOL,6.2\n" );
   m_fConnected();
 };
 
@@ -132,10 +138,14 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
   using const_iterator_t = linebuffer_t::const_iterator;
 
+  const_iterator_t iter = (*buffer).begin();
   const_iterator_t end = (*buffer).end();
 
-  OptionChain chain;
+  //std::string s( iter, end );
+  //std::cout << "chain response: " << s << std::endl;
+
   bool bOk;
+  OptionChain chain;
 
   std::lock_guard<std::mutex> lock( m_mutexMapRequest );
 
@@ -146,13 +156,13 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
     case EState::reply:
       {
         //std::cout << "EState::reply" << std::endl;
-        FutureOptionChainParser<const_iterator_t> grammarFutureOptionChain;
+        OptionChainParser<const_iterator_t> grammarOptionChain;
         const_iterator_t bgn = (*buffer).begin();
 
         //std::string buf( bgn, end );
         //std::cout << "buf: '" << buf << "'" << std::endl;
 
-        bOk = parse( bgn, end, grammarFutureOptionChain, chain );
+        bOk = parse( bgn, end, grammarOptionChain, chain );
 
         if ( bOk ) {
           //std::cout << "bOk true" << std::endl;
@@ -161,6 +171,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         else {
           std::cout
             << "OptionChainQuery::OnNetworkLineBuffer parse error: "
+            << end - bgn << ","
             << chain.sKey
             << "'," << chain.vOption.size()
             //<< "'," << chain.vCall.size()
@@ -249,7 +260,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
     fOptionChain_t&& fOptionChain
     ) {
   assert( 0 < sSymbol.size() );
-  const std::string sMapKey(0 == sRequestId.size() ? sSymbol : sRequestId );
+  const std::string sMapKey( 0 == sRequestId.size() ? sSymbol : sRequestId );
   std::stringstream ss;
   ss
     << "CFO,"
@@ -260,6 +271,41 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << sNearMonths << ","
     << sMapKey
     << "\n";
+  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
+  m_mapRequest.emplace( mapRequest_t::value_type( sMapKey, std::move( fOptionChain ) ) );
+  m_state = EState::reply;
+  this->Send( ss.str().c_str() );
+}
+
+void OptionChainQuery::QueryEquityOptionChain(
+  const std::string& sSymbol,
+  const std::string& sSide,
+  const std::string& sMonthCodes, // see above
+  const std::string& sNearMonths, // 0..4
+  const std::string& sFilterType,  // suggest 2
+  const std::string& sFilterOne,   // suggest 12
+  const std::string& sFilterTwo,   // suggest 12
+  const std::string& sRequestId,
+  fOptionChain_t&& fOptionChain
+  ) {
+
+  assert( 0 < sSymbol.size() );
+  const std::string sMapKey( 0 == sRequestId.size() ? sSymbol : sRequestId );
+
+  std::stringstream ss;
+  ss
+    << "CEO,"
+    << sSymbol << ","
+    << sSide << ","
+    << sMonthCodes << ","
+    << sNearMonths << ","
+    << sFilterType << ","
+    << sFilterOne << ","
+    << sFilterTwo << ","
+    << sMapKey << ","
+    << "1" // 0 = defualt, exclude non-standard options, 1 = include
+    << "\n";
+  //std::cout << "request: '" << ss.str() << "'" << std::endl;
   std::lock_guard<std::mutex> lock( m_mutexMapRequest );
   m_mapRequest.emplace( mapRequest_t::value_type( sMapKey, std::move( fOptionChain ) ) );
   m_state = EState::reply;
