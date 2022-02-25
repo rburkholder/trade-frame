@@ -135,7 +135,6 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             << pInstrument->GetInstrumentName()
             << std::endl;
 
-
           if ( m_pIB ) {
 
             std::string sName;
@@ -145,7 +144,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 sName = ou::tf::iqfeed::MarketSymbol::OptionBaseName( fundamentals );
                 break;
               default:
-                sName = 0 == fundamentals.sExchangeRoot.size() ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
+                sName = ( 0 == fundamentals.sExchangeRoot.size() ) ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
                 break;
             };
 
