@@ -25,7 +25,7 @@ public:
 
   RunningMinMax();
   RunningMinMax( const RunningMinMax& );
-  RunningMinMax( const RunningMinMax&& );
+  RunningMinMax( RunningMinMax&& );
   virtual ~RunningMinMax();
 
   void Add( const value_t& );
@@ -54,7 +54,7 @@ RunningMinMax<CRTP,value_t>::RunningMinMax( const RunningMinMax& rhs )
 }
 
 template<typename CRTP, typename value_t>
-RunningMinMax<CRTP,value_t>::RunningMinMax( const RunningMinMax&& rhs )
+RunningMinMax<CRTP,value_t>::RunningMinMax( RunningMinMax&& rhs )
   : m_mapValueCount( std::move( rhs.m_mapValueCount ) )
 {
 }
