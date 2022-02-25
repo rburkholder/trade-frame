@@ -44,6 +44,7 @@ public:
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
   BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );
+  BuildInstrument( pProviderIQFeed_t );
 
   void Queue( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();

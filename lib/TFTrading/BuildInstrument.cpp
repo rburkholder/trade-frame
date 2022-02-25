@@ -38,6 +38,12 @@ BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pI
   assert( m_pIB );
 }
 
+BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed )
+: m_pIQ( std::move( pIQFeed ) )
+{
+  assert( m_pIQ );
+}
+
 void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
 
   pInstrument_t pInstrument;
@@ -47,7 +53,9 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
     //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
-    m_pIB->Sync( pInstrument );
+    if ( m_pIB ) {
+      m_pIB->Sync( pInstrument );
+    }
     fInstrument( pInstrument );
   }
   else { // build a new instrument
@@ -127,30 +135,42 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             << pInstrument->GetInstrumentName()
             << std::endl;
 
-          std::string sName =
-            0 == fundamentals.sExchangeRoot.size() ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
 
-          m_pIB->RequestContractDetails(
-            sName,  // needs to be the IB base name
-            pInstrument,  // this is a filled-in, prepared instrument
-            [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
-              //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
-              assert( 0 != pInstrument->GetContract() );
-              m_pIB->Sync( pInstrument );
-              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-              iterInProgress->second.fInstrument( pInstrument );
-            },
-            [this,iterInProgress](){
-              // TODO: how to test for incomplete done?
-              //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
-              {
-                std::lock_guard<std::mutex> lock( m_mutexMap );
-                m_mapInProgress.erase( iterInProgress );
+          if ( m_pIB ) {
+
+            std::string sName;
+
+            switch ( pInstrument->GetInstrumentType() ) {
+              case InstrumentType::Option:
+                sName = ou::tf::iqfeed::MarketSymbol::OptionBaseName( fundamentals );
+                break;
+              default:
+                sName = 0 == fundamentals.sExchangeRoot.size() ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
+                break;
+            };
+
+            m_pIB->RequestContractDetails(
+              sName,  // needs to be the IB base name
+              pInstrument,  // this is a filled-in, prepared instrument
+              [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
+                assert( 0 != pInstrument->GetContract() );
+                m_pIB->Sync( pInstrument );
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                iterInProgress->second.fInstrument( pInstrument );
+              },
+              [this,iterInProgress](){
+                // TODO: how to test for incomplete done?
+                //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
+                {
+                  std::lock_guard<std::mutex> lock( m_mutexMap );
+                  m_mapInProgress.erase( iterInProgress );
+                }
+                Update();
               }
-              Update();
-            }
-            );
+              );
+          }
           //std::cout << "BuildInstrument::Build begin: " << iterInProgress->first << std::endl;
         }
       );

@@ -15,7 +15,7 @@
 #include <TFTrading/Instrument.h>
 
 #include "MarketSymbol.h"
-#include "TFIQFeed/Fundamentals.h"
+#include "ParseOptionSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -103,6 +103,8 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
       sName = ou::tf::Instrument::BuildGenericFutureName( sName, fundamentals.dateExpiration );
       break;
     case ESecurityType::IEOption:
+      sName = ou::tf::Instrument::BuildGenericOptionName( OptionBaseName( fundamentals ), fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
+      break;
     case ESecurityType::FOption:
       sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       break;
@@ -111,6 +113,15 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
       break;
   }
   return sName;
+}
+
+const std::string MarketSymbol::OptionBaseName( const Fundamentals& fundamentals ) {
+  const std::string& sName( fundamentals.sSymbolName );
+  ou::tf::iqfeed::structParsedOptionSymbol1 parsed;
+  ou::tf::iqfeed::OptionSymbolParser1<std::string::const_iterator> parserOptionSymbol1;
+  bool bOk = parse( sName.cbegin(), sName.cend(), parserOptionSymbol1, parsed );
+  assert( bOk );
+  return parsed.sText;
 }
 
 } // namespace iqfeed

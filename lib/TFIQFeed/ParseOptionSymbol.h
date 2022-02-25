@@ -61,7 +61,7 @@ struct structParsedOptionSymbol3 {
 } // namespace tf
 } // namespace ou
 
-typedef ou::tf::iqfeed::structParsedOptionSymbol1 pos1_t;
+using pos1_t = ou::tf::iqfeed::structParsedOptionSymbol1;
 
 BOOST_FUSION_ADAPT_STRUCT(
   pos1_t,
@@ -71,7 +71,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, dblStrike)
   )
 
-typedef ou::tf::iqfeed::structParsedOptionSymbol2 pos2_t;
+using pos2_t = ou::tf::iqfeed::structParsedOptionSymbol2;
 
 BOOST_FUSION_ADAPT_STRUCT(
   pos2_t,
@@ -79,7 +79,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (boost::uint8_t, nDay)
   )
 
-typedef ou::tf::iqfeed::structParsedOptionSymbol3 pos3_t;
+using pos3_t = ou::tf::iqfeed::structParsedOptionSymbol3; // Future Options
 
 BOOST_FUSION_ADAPT_STRUCT(
   pos3_t,
@@ -90,7 +90,6 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, dblStrike)
   )
 
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
@@ -99,7 +98,7 @@ namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace ascii = boost::spirit::ascii;
 
-typedef qi::uint_parser<unsigned, 10, 2, 2> uint2_p;
+using uint2_p = qi::uint_parser<unsigned, 10, 2, 2>;
 
 template<typename Iterator>
 struct OptionSymbolParser1: qi::grammar<Iterator, pos1_t()> {

@@ -137,6 +137,8 @@ public:
   // use fundamentals only
   const std::string static BuildGenericName( const Fundamentals& );
 
+  const std::string static OptionBaseName( const Fundamentals& );
+
 protected:
 private:
   TableRowDef m_row;
