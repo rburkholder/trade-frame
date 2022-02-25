@@ -337,8 +337,12 @@ void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQF
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( iter->second.call.sIQFeedSymbolName.empty() );
-  iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
+  if ( !iter->second.call.sIQFeedSymbolName.empty() ) {
+    assert( iter->second.call.sIQFeedSymbolName == sIQFeedSymbolName );
+  }
+  else {
+    iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
+  }
 }
 
 template<typename Option>
@@ -347,8 +351,12 @@ void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFe
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
-  assert( iter->second.put.sIQFeedSymbolName.empty() );
-  iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
+  if ( !iter->second.put.sIQFeedSymbolName.empty() ) {
+    assert( iter->second.put.sIQFeedSymbolName == sIQFeedSymbolName );
+  }
+  else {
+    iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
+  }
 }
 
 template<typename Option>
