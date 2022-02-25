@@ -80,7 +80,7 @@ public:
   using option_t = Option;
   using strike_t = chain::Strike<option_t>;
 
-  using fStrike_t = std::function<void( const strike_t& )>;
+  using fStrike_t = std::function<void( double, const strike_t& )>;
 
   Chain() {}
   Chain( const Chain&& rhs ) {
@@ -122,7 +122,7 @@ public:
 
   void Strikes( fStrike_t&& fStrike ) const {
     for ( const typename mapChain_t::value_type& vt: m_mapChain ) {
-      fStrike( vt.second );
+      fStrike( vt.first, vt.second );
     }
   }
 

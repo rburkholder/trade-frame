@@ -101,6 +101,8 @@ public:
     }
   }
 
+  void ProcessChains();
+
   void SaveWatch( const std::string& );
 
   void Connect();
@@ -199,6 +201,9 @@ private:
   mapChains_t m_mapChains;
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
+  using vChains_t = std::vector<boost::gregorian::date>;
+  vChains_t m_vChains;
 
   void Init();
 

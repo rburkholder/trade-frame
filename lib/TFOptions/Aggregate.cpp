@@ -96,9 +96,9 @@ void Aggregate::WalkChains( fOption_t&& fOption ) const {
   for ( const mapChains_t::value_type& vt: m_mapChains ) {
     const chain_t& chain( vt.second );
     chain.Strikes(
-      [ fOption ]( const chain_t::strike_t& strike ){
-        if ( strike.call.pOption ) fOption( strike.call.pOption );
-        if ( strike.put.pOption ) fOption( strike.put.pOption );
+      [ fOption ]( double strike, const chain_t::strike_t& options ){
+        if ( options.call.pOption ) fOption( options.call.pOption );
+        if ( options.put.pOption ) fOption( options.put.pOption );
       });
   }
 }
@@ -110,9 +110,9 @@ void Aggregate::WalkChain( boost::gregorian::date date, fOption_t&& fOption ) co
   }
   else {
     iter->second.Strikes(
-      [ fOption = std::move( fOption ) ]( const chain_t::strike_t& strike ){
-        fOption( strike.call.pOption );
-        fOption( strike.put.pOption );
+      [ fOption = std::move( fOption ) ]( double strike, const chain_t::strike_t& options ){
+        fOption( options.call.pOption );
+        fOption( options.put.pOption );
       } );
   }
 }

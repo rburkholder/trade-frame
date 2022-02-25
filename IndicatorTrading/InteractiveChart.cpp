@@ -295,7 +295,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
                 fBuildOption__(
                   sSymbol,
                   [this, fOption_ ]( pOption_t pOption ){
-                    fOption_( pOption );
+                    fOption_( pOption ); // places into chain
                   });
               }
             });
@@ -320,7 +320,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
                 fBuildOption__(
                   sSymbol,
                   [this, fOption_]( pOption_t pOption ){
-                    fOption_( pOption );
+                    fOption_( pOption ); // places into chain
                   });
               }
             });
@@ -330,6 +330,21 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
     default:
       assert( false );
       break;
+  }
+}
+
+void InteractiveChart::ProcessChains() {
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    size_t nStrikes {};
+    vt.second.Strikes(
+      [&nStrikes]( double strike, const chain_t::strike_t& options ){
+        if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
+          nStrikes++;
+        }
+    } );
+    if ( 50 < nStrikes ) {
+      m_vChains.emplace_back( vt.first );
+    }
   }
 }
 

@@ -154,6 +154,7 @@ bool AppIndicatorTrading::OnInit() {
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChains ) ) );
+  vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -248,6 +249,13 @@ void AppIndicatorTrading::HandleMenuActionEmitChains( void ) {
   );
 }
 
+void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->ProcessChains();
+    }
+  );
+}
 
 int AppIndicatorTrading::OnExit() {
   // Exit Steps: #4
