@@ -17,11 +17,9 @@
 #ifndef DOUBLEBUFFER_H
 #define DOUBLEBUFFER_H
 
-#include <vector>
+#include <mutex>
 #include <queue>
-
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
+#include <vector>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -36,7 +34,7 @@ public:
   void Sync( void );
 protected:
 private:
-  boost::mutex m_mutex;
+  std::mutex m_mutex;
   TS& m_tsInbound; // inbound time series via background thread
   TS& m_tsBatched; // syncs to inbound when needed and used in other foreground threads
 };
@@ -49,13 +47,13 @@ DoubleBufferRef<TS>::DoubleBufferRef( TS& tsBackground, TS& tsForeground )
 
 template<typename TS>
 void DoubleBufferRef<TS>::Append( const datum_t& datum ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   m_tsInbound.Append( datum );
 }
 
 template<typename TS>
 void DoubleBufferRef<TS>::Sync( void ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   while ( m_tsInbound.Size() > m_tsBatched.Size() ) {
     m_tsBatched.Append( m_tsInbound[ m_tsBatched.Size() ] );
   }
@@ -84,7 +82,7 @@ public:
   const vDatum_t& GetVector( void ) const { return m_tsBatched; } // not sync'd
 protected:
 private:
-  boost::mutex m_mutex;
+  std::mutex m_mutex;
   vDatum_t m_tsInbound; // inbound time series via background thread
   vDatum_t m_tsBatched; // syncs to inbound when needed and used in other foreground threads
 };
@@ -94,20 +92,20 @@ DoubleBuffer<datum_t>::DoubleBuffer( void ) {}
 
 template<typename datum_t>
 void DoubleBuffer<datum_t>::Append( const datum_t& datum ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   m_tsInbound.push_back( datum );
 }
 
 template<typename datum_t>
 void DoubleBuffer<datum_t>::Clear( void ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   m_tsInbound.clear();
   m_tsBatched.clear();
 }
 
 template<typename datum_t>
 typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Sync( void ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   while ( m_tsInbound.size() > m_tsBatched.size() ) {
     m_tsBatched.push_back( m_tsInbound[ m_tsBatched.size() ] );
   }
@@ -133,7 +131,7 @@ const datum_t* DoubleBuffer<datum_t>::operator[]( size_type ix ) const {
 
 template<typename datum_t>
 void DoubleBuffer<datum_t>::Reserve( size_type nSize ) {
-  boost::lock_guard<boost::mutex> guard(m_mutex);
+  std::scoped_lock<std::mutex> guard(m_mutex);
   assert( nSize >= m_tsInbound.size() );
   assert( nSize >= m_tsBatched.size() );
   m_tsInbound.reserve( nSize );
@@ -150,17 +148,19 @@ class Queue {
 public:
   Queue() {}
   Queue( Queue&& rhs )
-  : m_qDatum( std::move( rhs.m_qDatum ) ) {}
+  : m_qDatum( std::move( rhs.m_qDatum ) )
+  //, m_mutex( std::move( rhs.m_mutex ) )
+  {}
   virtual ~Queue() {}
 
   void Append( const datum_t& datum ) {
-    boost::lock_guard<boost::mutex> guard(m_mutex);
+    std::scoped_lock<std::mutex> guard(m_mutex);
     m_qDatum.push( datum );
   }
 
   template<typename Function>
   void Sync( Function f ) {
-    boost::lock_guard<boost::mutex> guard(m_mutex);
+    std::scoped_lock<std::mutex> guard(m_mutex);
     while ( !m_qDatum.empty() ) {
       f( m_qDatum.front() );
       m_qDatum.pop();
@@ -171,7 +171,7 @@ public:
 
 protected:
 private:
-  boost::mutex m_mutex;
+  std::mutex m_mutex;
   qDatum_t m_qDatum;
 };
 
