@@ -96,7 +96,8 @@ public:
   void EmitChainInfo() const {
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
-      vt.second.EmitValues();
+      //vt.second.EmitValues();
+      vt.second.EmitSummary();
     }
   }
 

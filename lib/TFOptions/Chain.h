@@ -130,6 +130,7 @@ public:
 
   typename mapChain_t::size_type Size() const { return m_mapChain.size(); }
   void EmitValues() const;
+  void EmitSummary() const;
 
   void Test( double price );
 
@@ -415,7 +416,7 @@ typename Chain<Option>::mapChain_t::iterator Chain<Option>::FindStrike( const do
 }
 
 template<typename Option>
-void Chain<Option>::EmitValues( void ) const { // TODO: supply output stream
+void Chain<Option>::EmitValues() const { // TODO: supply output stream
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [](const typename mapChain_t::value_type& vt){
     std::cout
       << vt.first << ": "
@@ -424,6 +425,23 @@ void Chain<Option>::EmitValues( void ) const { // TODO: supply output stream
       << vt.second.put.sIQFeedSymbolName
       << std::endl;
   });
+}
+
+template<typename Option>
+void Chain<Option>::EmitSummary() const { // TODO: supply output stream
+  size_t nStrikes {};
+  size_t nCalls {};
+  size_t nPuts {};
+  std::for_each( m_mapChain.begin(), m_mapChain.end(), [ &nStrikes, &nCalls, &nPuts](const typename mapChain_t::value_type& vt){
+    nStrikes++;
+    if ( 0 != vt.second.call.sIQFeedSymbolName.size() ) nCalls++;
+    if ( 0 != vt.second.put.sIQFeedSymbolName.size() ) nPuts++;
+  });
+    std::cout
+      << "  #strikes=" << nStrikes
+      << ", #calls=" << nCalls
+      << ", #puts=" << nPuts
+      << std::endl;
 }
 
 template<typename Option>
