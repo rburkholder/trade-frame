@@ -36,6 +36,9 @@ namespace {
   static const std::string sOption_MA2Periods( "ma2_periods" );
   static const std::string sOption_MA3Periods( "ma3_periods" );
   static const std::string sOption_IbInstance( "ib_instance" );
+  static const std::string sOption_Stochastic1Periods( "stochastic1_periods" );
+  static const std::string sOption_Stochastic2Periods( "stochastic2_periods" );
+  static const std::string sOption_Stochastic3Periods( "stochastic3_periods" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -62,14 +65,19 @@ bool Load( const std::string& sFileName, Options& options ) {
 
     po::options_description config( "AppIndicatorTrading Config" );
     config.add_options()
-      ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
+      ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol ), "symbol" )
 
-      ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth), "period width (sec)" )
-      ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods), "ma1 (#periods)" )
-      ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
-      ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
+      ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
 
-      ( sOption_IbInstance.c_str(), po::value<int>( &options.nIbInstance)->default_value( 1 ), "IB instance" )
+      ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods ), "ma1 (#periods)" )
+      ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods ), "ma2 (#periods)" )
+      ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods ), "ma3 (#periods)" )
+
+      ( sOption_IbInstance.c_str(), po::value<int>( &options.nIbInstance )->default_value( 1 ), "IB instance" )
+
+      ( sOption_Stochastic1Periods.c_str(), po::value<int>( &options.nStochastic1Periods ), "stochastic1 (#periods)" )
+      ( sOption_Stochastic2Periods.c_str(), po::value<int>( &options.nStochastic2Periods ), "stochastic2 (#periods)" )
+      ( sOption_Stochastic3Periods.c_str(), po::value<int>( &options.nStochastic3Periods ), "stochastic3 (#periods)" )
       ;
     po::variables_map vm;
 
@@ -86,11 +94,16 @@ bool Load( const std::string& sFileName, Options& options ) {
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
       bOk |= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
+
       bOk |= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
 
       bOk |= parse<int>( sFileName, vm, sOption_IbInstance, options.nIbInstance );
+
+      bOk |= parse<int>( sFileName, vm, sOption_Stochastic1Periods, options.nStochastic1Periods );
+      bOk |= parse<int>( sFileName, vm, sOption_Stochastic2Periods, options.nStochastic2Periods );
+      bOk |= parse<int>( sFileName, vm, sOption_Stochastic3Periods, options.nStochastic3Periods );
     }
 
   }

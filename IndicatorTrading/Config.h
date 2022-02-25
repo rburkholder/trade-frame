@@ -41,6 +41,10 @@ struct Options {
   // Interactive Brokers api instance
   int nIbInstance;
 
+  int nStochastic1Periods;
+  int nStochastic2Periods;
+  int nStochastic3Periods;
+
   Options()
   : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
   , nIbInstance( 2 )

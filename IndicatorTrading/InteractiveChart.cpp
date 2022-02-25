@@ -177,28 +177,8 @@ void InteractiveChart::Connect() {
 
   if ( m_pPosition ) {
     if ( !m_bConnected ) {
-      pWatch_t pWatch = m_pPosition->GetWatch();
-      m_pIndicatorStochastic1 = std::make_shared<ou::tf::TSSWStochastic>(
-        pWatch->GetQuotes(), 14, time_duration( 0, 0, 20 ),
-        [this]( ptime dt, double k, double min, double max ){
-          m_ceStochastic1.Append( dt, k );
-          m_ceStochasticMax.Append( dt, max );
-          m_ceStochasticMin.Append( dt, min );
-        }
-      );
-      m_pIndicatorStochastic2 = std::make_shared<ou::tf::TSSWStochastic>(
-        pWatch->GetQuotes(), 14, time_duration( 0, 0, 60 ),
-        [this]( ptime dt, double k, double min, double max ){
-          m_ceStochastic2.Append( dt, k );
-        }
-      );
-      m_pIndicatorStochastic3 = std::make_shared<ou::tf::TSSWStochastic>(
-        pWatch->GetQuotes(), 14, time_duration( 0, 0, 180 ),
-        [this]( ptime dt, double k, double min, double max ){
-          m_ceStochastic3.Append( dt, k );
-        }
-      );
       m_bConnected = true;
+      pWatch_t pWatch = m_pPosition->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -233,6 +213,8 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
 
+  time_duration td = time_duration( 0, 0, config.nPeriodWidth );
+
   assert( 0 < config.nPeriodWidth );
 
   vMAPeriods.push_back( config.nMA1Periods );
@@ -244,7 +226,26 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
     assert( 0 < value );
   }
 
-  time_duration td = time_duration( 0, 0, config.nPeriodWidth );
+  m_pIndicatorStochastic1 = std::make_shared<ou::tf::TSSWStochastic>(
+    pWatch->GetQuotes(), config.nStochastic1Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_ceStochastic1.Append( dt, k );
+      m_ceStochasticMax.Append( dt, max );
+      m_ceStochasticMin.Append( dt, min );
+    }
+  );
+  m_pIndicatorStochastic2 = std::make_shared<ou::tf::TSSWStochastic>(
+    pWatch->GetQuotes(), config.nStochastic2Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_ceStochastic2.Append( dt, k );
+    }
+  );
+  m_pIndicatorStochastic3 = std::make_shared<ou::tf::TSSWStochastic>(
+    pWatch->GetQuotes(), config.nStochastic3Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_ceStochastic3.Append( dt, k );
+    }
+  );
 
   m_vMA.clear();
 
