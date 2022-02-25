@@ -35,6 +35,7 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFIndicators/TSEMA.h>
+#include <TFIndicators/TSSWStochastic.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
@@ -48,7 +49,6 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-  class TSSWStochastic;
 namespace iqfeed { // IQFeed
   class OptionChainQuery;
 } // namespace iqfeed
@@ -111,7 +111,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Spread, Stochastic, PL }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, Spread, StochInd, PL }; // IndMA = moving averate indicator
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -151,19 +151,59 @@ private:
 
   ou::ChartEntryMark m_cemStochastic;
 
-  ou::ChartEntryIndicator m_ceStochastic1;
-  ou::ChartEntryIndicator m_ceStochastic2;
-  ou::ChartEntryIndicator m_ceStochastic3;
-
   ou::tf::Quote m_quote;
 
-  using pTSSWStochastic_t = std::shared_ptr<ou::tf::TSSWStochastic>;
-  pTSSWStochastic_t m_pIndicatorStochastic1;
-  pTSSWStochastic_t m_pIndicatorStochastic2;
-  pTSSWStochastic_t m_pIndicatorStochastic3;
+  struct Stochastic {
 
-  ou::ChartEntryIndicator m_ceStochasticMax;
-  ou::ChartEntryIndicator m_ceStochasticMin;
+    using pTSSWStochastic_t = std::unique_ptr<ou::tf::TSSWStochastic>;
+
+    pTSSWStochastic_t m_pIndicatorStochastic;
+    ou::ChartEntryIndicator m_ceStochastic;
+    ou::ChartEntryIndicator m_ceStochasticMax;
+    ou::ChartEntryIndicator m_ceStochasticMin;
+
+    Stochastic( const std::string sIx, ou::tf::Quotes& quotes, int nPeriods, time_duration td, ou::Colour::enumColour colour ) {
+
+      m_ceStochastic.SetColour( colour );
+      m_ceStochasticMax.SetColour( colour );
+      m_ceStochasticMin.SetColour( colour );
+
+      m_ceStochastic.SetName( "Stoch" + sIx );
+      m_ceStochasticMax.SetName( "Stoch" + sIx + " Max" );
+      m_ceStochasticMin.SetName( "Stoch" + sIx + " Min" );
+
+      m_pIndicatorStochastic = std::make_unique<ou::tf::TSSWStochastic>(
+        quotes, nPeriods, td,
+        [this,sIx]( ptime dt, double k, double min, double max ){
+          //std::cout << sIx << " is " << k << "," << max << "," << min << std::endl;
+          m_ceStochastic.Append( dt, k );
+          m_ceStochasticMax.Append( dt, max );
+          m_ceStochasticMin.Append( dt, min );
+        }
+      );
+    }
+
+    Stochastic( const Stochastic& ) = delete;
+    Stochastic( Stochastic&& rhs ) = delete;
+
+    void AddToChart( ou::ChartDataView& cdv ) {
+      cdv.Add( EChartSlot::Price, &m_ceStochasticMax );
+      cdv.Add( EChartSlot::Price, &m_ceStochasticMin );
+      cdv.Add( EChartSlot::StochInd, &m_ceStochastic );
+    }
+
+    ~Stochastic() {
+      m_pIndicatorStochastic.reset();
+      m_ceStochastic.Clear();
+      m_ceStochasticMax.Clear();
+      m_ceStochasticMin.Clear();
+    }
+
+  };
+
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  using vStochastic_t = std::vector<pStochastic_t>;
+  vStochastic_t m_vStochastic;
 
   struct MA {
 

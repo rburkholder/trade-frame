@@ -21,8 +21,6 @@
 
 #include <memory>
 
-#include <TFIndicators/TSSWStochastic.h>
-
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFOptions/Engine.h>
@@ -117,14 +115,7 @@ void InteractiveChart::Init() {
   m_cemStochastic.AddMark(  50, ou::Colour::Green, "50%" );
   m_cemStochastic.AddMark(  20, ou::Colour::Blue,  "20%" );
   m_cemStochastic.AddMark(   0, ou::Colour::Black,  "0%" );
-  m_dvChart.Add( EChartSlot::Stochastic, &m_cemStochastic );
-
-  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic1 );
-  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic2 );
-  m_dvChart.Add( EChartSlot::Stochastic, &m_ceStochastic3 );
-
-  m_dvChart.Add( EChartSlot::Price, &m_ceStochasticMax );
-  m_dvChart.Add( EChartSlot::Price, &m_ceStochasticMin );
+  m_dvChart.Add( EChartSlot::StochInd, &m_cemStochastic );
 
   m_bfPrice.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPrice ) );
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
@@ -150,18 +141,6 @@ void InteractiveChart::Init() {
   m_ceVolumeDn.SetName( "Volume Down" );
 
   m_ceVolume.SetName( "Volume" );
-
-  m_ceStochastic1.SetName( "Stochastic 14x20s" );
-  m_ceStochastic1.SetColour( ou::Colour::Red );
-  m_ceStochastic2.SetName( "Stochastic 14x60s" );
-  m_ceStochastic2.SetColour( ou::Colour::Green );
-  m_ceStochastic3.SetName( "Stochastic 14x180s" );
-  m_ceStochastic3.SetColour( ou::Colour::Blue );
-
-  m_ceStochasticMax.SetName( "Stoch Max" );
-  m_ceStochasticMax.SetColour( ou::Colour::ForestGreen );
-  m_ceStochasticMin.SetName( "Stoch Min" );
-  m_ceStochasticMin.SetColour( ou::Colour::ForestGreen );
 
   SetChartDataView( &m_dvChart );
 
@@ -189,9 +168,6 @@ void InteractiveChart::Connect() {
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   if ( m_pPosition ) {
     if ( m_bConnected ) {
-      m_pIndicatorStochastic1.reset();
-      m_pIndicatorStochastic2.reset();
-      m_pIndicatorStochastic3.reset();
       pWatch_t pWatch = m_pPosition->GetWatch();
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
@@ -226,26 +202,15 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
     assert( 0 < value );
   }
 
-  m_pIndicatorStochastic1 = std::make_shared<ou::tf::TSSWStochastic>(
-    pWatch->GetQuotes(), config.nStochastic1Periods, td,
-    [this]( ptime dt, double k, double min, double max ){
-      m_ceStochastic1.Append( dt, k );
-      m_ceStochasticMax.Append( dt, max );
-      m_ceStochasticMin.Append( dt, min );
-    }
-  );
-  m_pIndicatorStochastic2 = std::make_shared<ou::tf::TSSWStochastic>(
-    pWatch->GetQuotes(), config.nStochastic2Periods, td,
-    [this]( ptime dt, double k, double min, double max ){
-      m_ceStochastic2.Append( dt, k );
-    }
-  );
-  m_pIndicatorStochastic3 = std::make_shared<ou::tf::TSSWStochastic>(
-    pWatch->GetQuotes(), config.nStochastic3Periods, td,
-    [this]( ptime dt, double k, double min, double max ){
-      m_ceStochastic3.Append( dt, k );
-    }
-  );
+  m_vStochastic.clear();
+
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), config.nStochastic1Periods, td, ou::Colour::Aquamarine ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DeepPink ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::Fuchsia ) );
+
+  m_vStochastic[0]->AddToChart( m_dvChart );
+  m_vStochastic[1]->AddToChart( m_dvChart );
+  m_vStochastic[2]->AddToChart( m_dvChart );
 
   m_vMA.clear();
 
