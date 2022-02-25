@@ -32,9 +32,12 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// for reference:
+//    using fGatherOptions_t = std::function<void(const std::string& sUnderlying, fOption_t&&)>;
+
 template<typename mapChains_t>
-void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t& f ) {
-  f(
+void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t&& fGatherOptions ) {
+  fGatherOptions(
     sUnderlying,
     [&map](pOption_t pOption){  // these are iqfeed based symbol names
 

@@ -328,10 +328,11 @@ ManageStrategy::ManageStrategy(
 
     // collect option chains for the underlying
     // TODO: this will be passed in
+    auto fGatherOptions_ = fGatherOptions;
     ou::tf::option::PopulateMap<mapChains_t>(
       m_mapChains,
       pWatchUnderlying->GetInstrument()->GetInstrumentName(),
-      fGatherOptions
+      std::move( fGatherOptions_ )
       );
 
     assert( 0 != m_mapChains.size() );

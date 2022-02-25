@@ -220,7 +220,7 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   }
 }
 
-void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& config ) {
+void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& config, fBuildOption_t&& fBuildOption ) {
 
   bool bConnected = m_bConnected;
   Disconnect();
@@ -248,7 +248,7 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
 
   m_vMA.clear();
 
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Gold, "ma1" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Gold,  "ma1" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
 
@@ -256,7 +256,11 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
     ma.AddToView( m_dvChart );
   }
 
-  OptionChainQuery( config.sSymbol );
+  OptionChainQuery(
+    pPosition->GetInstrument()->GetInstrumentName(
+      ou::tf::Instrument::eidProvider_t::EProviderIQF),
+    std::move( fBuildOption )
+    );
 
   // --
 
@@ -266,62 +270,61 @@ void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options
 
 }
 
-void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) {
+void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, fBuildOption_t&& fBuildOption ) {
+
   using query_t = ou::tf::iqfeed::OptionChainQuery;
   using fOption_t = ou::tf::option::fOption_t;
+
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
-      m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
+      ou::tf::option::PopulateMap<mapChains_t>(
+        m_mapChains,
         sIQFeedUnderlying,
-        "pc", "", "", "4", sIQFeedUnderlying,
-        [this]( const query_t::OptionChain& chains ){
-          std::cout
-            << "chain request " << chains.sKey << " has "
-            << chains.vOption.size() << " options"
-            << std::endl;
+        [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
+          m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
+            sIQFeedUnderlying,
+            "pc", "", "", "4", sIQFeedUnderlying,
+            [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
+              std::cout
+                << "chain request " << chains.sKey << " has "
+                << chains.vOption.size() << " options"
+                << std::endl;
 
-          // TODO: will have to do this during/after chains for all underlyings are retrieved
-          // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
-          // atomic int nQuery = 1; // intial lock of the loop, process each option, sync or async dependin gif cached
-          //for ( const query_t::vSymbol_t::value_type& value: chains.vCall ) {
-          //  std::cout << "chain call: " << value << std::endl;
-            //nQuery++;
-            //m_pBuildInstrument->Add(
-            //  value,
-            //  [this,&uws,fOption_]( pInstrument_t pInstrument ) {
-            //    //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
-            //    fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
-            //    auto previous = m_nQuery.fetch_sub( 1 );
-            //    if ( 1 == previous ) {
-            //      StartUnderlying( uws );
-            //      ProcessSeedList();  // continue processing list of underlying
-            //    }
-            //  } );
-          //}
-          for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
-            //std::cout << "chain option: " << value << std::endl;
-          }
-          //auto previous = nQuery.fetch_sub( 1 );
-          //if ( 1 == previous ) {
-          //  StartUnderlying( uws );
-          //  ProcessSeedList();  // continue processing list of underlying
-          //}
-        });
+              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vOption ) {
+                fBuildOption__(
+                  sSymbol,
+                  [this, fOption_ ]( pOption_t pOption ){
+                    fOption_( pOption );
+                  });
+              }
+            });
+        }
+      );
       break;
     case ou::tf::InstrumentType::Stock:
-      m_pOptionChainQuery->QueryEquityOptionChain(
+      ou::tf::option::PopulateMap<mapChains_t>(
+        m_mapChains,
         sIQFeedUnderlying,
-        "pc", "", "4", "0", "", "", sIQFeedUnderlying, // four months, all strikes
-        [this]( const query_t::OptionChain& chains ){
-          std::cout
-            << "chain request " << chains.sKey << " has "
-            << chains.vOption.size() << " options"
-            << std::endl;
-          for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
-            //std::cout << "chain option: " << value << std::endl;
-          }
+        [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
+          m_pOptionChainQuery->QueryEquityOptionChain(
+            sIQFeedUnderlying,
+            "pc", "", "4", "0", "", "", sIQFeedUnderlying, // four months, all strikes
+            [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
+              std::cout
+                << "chain request " << chains.sKey << " has "
+                << chains.vOption.size() << " options"
+                << std::endl;
+
+              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vOption ) {
+                fBuildOption__(
+                  sSymbol,
+                  [this, fOption_]( pOption_t pOption ){
+                    fOption_( pOption );
+                  });
+              }
+            });
         }
-        );
+      );
       break;
     default:
       assert( false );

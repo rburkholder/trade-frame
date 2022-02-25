@@ -94,6 +94,7 @@ private:
   void HandleMenuActionStartWatch();
   void HandleMenuActionStopWatch();
   void HandleMenuActionSaveValues();
+  void HandleMenuActionEmitChains();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
 

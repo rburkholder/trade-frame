@@ -152,7 +152,8 @@ bool AppIndicatorTrading::OnInit() {
   //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
-  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Emit Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -194,9 +195,21 @@ void AppIndicatorTrading::ConstructInstrument() {
   m_pBuildInstrument->Queue(
     m_config.sSymbol,
     [this]( pInstrument_t pInstrument ){
+
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
       pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
-      m_pInteractiveChart->SetPosition( pPosition, m_config );
+
+      m_pInteractiveChart->SetPosition(
+        pPosition, m_config,
+        [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
+          m_pBuildInstrument->Queue(
+            sIQFeedOptionSymbol,
+            [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
+              fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+            }
+          );
+        }
+        );
       m_pInteractiveChart->Connect();
     } );
 
@@ -226,6 +239,15 @@ void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
     }
   );
 }
+
+void AppIndicatorTrading::HandleMenuActionEmitChains( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->EmitChainInfo();
+    }
+  );
+}
+
 
 int AppIndicatorTrading::OnExit() {
   // Exit Steps: #4

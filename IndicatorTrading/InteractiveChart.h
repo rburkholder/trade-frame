@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -37,6 +39,10 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Position.h>
+
+#include <TFOptions/Chain.h>
+#include <TFOptions/Chains.h>
+#include <TFOptions/Option.h>
 
 #include <TFVuTrading/WinChartView.h>
 
@@ -61,7 +67,12 @@ class InteractiveChart:
 {
 public:
 
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  //using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+
+  using fOption_t = std::function<void(pOption_t)>;
+  using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
   InteractiveChart();
   InteractiveChart(
@@ -80,7 +91,14 @@ public:
 
   virtual ~InteractiveChart();
 
-  void SetPosition( pPosition_t, const config::Options& );
+  void SetPosition( pPosition_t, const config::Options&, fBuildOption_t&& );
+
+  void EmitChainInfo() const {
+    for ( const mapChains_t::value_type& vt: m_mapChains ) {
+      std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
+      vt.second.EmitValues();
+    }
+  }
 
   void SaveWatch( const std::string& );
 
@@ -175,6 +193,10 @@ private:
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  mapChains_t m_mapChains;
+
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
 
   void Init();
@@ -186,7 +208,7 @@ private:
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
 
-  void OptionChainQuery( const std::string& );
+  void OptionChainQuery( const std::string&, fBuildOption_t&& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
