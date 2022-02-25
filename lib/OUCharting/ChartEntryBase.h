@@ -26,6 +26,8 @@
 #include <string>
 #include <memory>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #ifdef RGB
 #undef RGB
 // windows COLORREF is backwards from what ChartDir is expecting
