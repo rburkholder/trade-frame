@@ -44,11 +44,11 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider )
   Initialize();
 }
 
-Option::Option( const Option& rhs ) :
-  Watch( rhs ),
-  m_dblStrike( rhs.m_dblStrike ),
-  m_greek( rhs.m_greek ),
-  m_pGreekProvider( rhs.m_pGreekProvider )
+Option::Option( const Option& rhs )
+: Watch( rhs )
+, m_dblStrike( rhs.m_dblStrike )
+, m_greek( rhs.m_greek )
+, m_pGreekProvider( rhs.m_pGreekProvider )
 {
   //std::cout << "Option::Option construction 3: " << m_pInstrument->GetInstrumentName() << std::endl;
   Initialize();

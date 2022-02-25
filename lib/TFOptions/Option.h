@@ -38,7 +38,7 @@ public:
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
-  explicit Option( const Option& rhs );
+  Option( const Option& );
   virtual ~Option();
 
   Option& operator=( const Option& rhs );
@@ -94,7 +94,7 @@ private:
   void Initialize();
 
   void HandleGreek( const Greek& greek );
-  void AppendGreek( const ou::tf::Greek& greek );
+  void AppendGreek( const Greek& greek );
 
 };
 
