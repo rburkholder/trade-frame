@@ -506,10 +506,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
             using query_t = ou::tf::iqfeed::OptionChainQuery;
             m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
               sIQFeedUnderlying,
-              "", "", "", "", sIQFeedUnderlying,
+              "pc", "", "", "",
               [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
                 std::cout
-                  << "chain request " << chains.sKey << " has "
+                  << "chain request " << chains.sSymbol << " has "
                   //<< chains.vCall.size() << " calls, "
                   //<< chains.vPut.size() << " puts"
                   << chains.vOption.size() << " options"

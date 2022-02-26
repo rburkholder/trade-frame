@@ -249,10 +249,10 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
         [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
           m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
             sIQFeedUnderlying,
-            "pc", "", "", "4", sIQFeedUnderlying,
+            "pc", "", "", "1",
             [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
-                << "chain request " << chains.sKey << " has "
+                << "chain request " << chains.sSymbol << " has "
                 << chains.vOption.size() << " options"
                 << std::endl;
 
@@ -274,10 +274,10 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
         [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
           m_pOptionChainQuery->QueryEquityOptionChain(
             sIQFeedUnderlying,
-            "pc", "", "4", "0", "", "", sIQFeedUnderlying, // four months, all strikes
+            "pc", "", "1", "2", "3", "3", // four months, all strikes
             [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
-                << "chain request " << chains.sKey << " has "
+                << "chain request " << chains.sSymbol << " has "
                 << chains.vOption.size() << " options"
                 << std::endl;
 
@@ -307,7 +307,9 @@ void InteractiveChart::ProcessChains() {
           nStrikes++;
         }
     } );
-    if ( 50 < nStrikes ) {
+    std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
+    if ( 10 < nStrikes ) {
+      std::cout << "chain " << vt.first << " marked" << std::endl;
       m_vChains.emplace_back( vt.first );
     }
   }

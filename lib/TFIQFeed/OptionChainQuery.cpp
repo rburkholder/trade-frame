@@ -17,14 +17,28 @@
 #include <sstream>
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_symbols.hpp>
 
 #include "OptionChainQuery.h"
 
-// TODO:  use as template:  std::unique_ptr<DailyHistory> m_pHistory;
+struct PreRoll {
+  enum class ECmd { CFU, CFO, CEO };
+  enum class EExtra { LC, ENDMSG, BADSYM, ERROR };
+  ECmd cmd;
+  std::string sSymbol;
+  EExtra extra;
+};
+
+BOOST_FUSION_ADAPT_STRUCT(
+  PreRoll,
+  (PreRoll::ECmd, cmd)
+  (std::string, sSymbol)
+  (PreRoll::EExtra, extra)
+)
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::OptionChainQuery::OptionChain,
-  (std::string, sKey)
+  //(std::string, sKey)
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // calls first
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // puts appended
   //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
@@ -37,13 +51,45 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-namespace {
+// ==
 
-  using const_iterator_t = ou::Network<OptionChainQuery>::linebuffer_t::const_iterator;
+template<typename Iterator>
+struct PreRollParser: qi::grammar<Iterator, PreRoll()> {
 
-  qi::rule<const_iterator_t> ruleErrorInvalidSymbol { qi::lit( "E,Invalid symbol" ) };
+  PreRollParser(): PreRollParser::base_type( start ) {
 
-}
+    cmd.add
+      ( "CFU", PreRoll::ECmd::CFU )
+      ( "CFO", PreRoll::ECmd::CFO )
+      ( "CEO", PreRoll::ECmd::CEO )
+      ;
+
+    extra.add
+      ( "LC", PreRoll::EExtra::LC )
+      ( "n", PreRoll::EExtra::BADSYM )
+      ( "E", PreRoll::EExtra::ERROR )
+      ( "!ENDMSG!", PreRoll::EExtra::ENDMSG )
+      ;
+
+    ruleCmd = cmd;
+    ruleExtra = extra;
+    ruleSymbol = +( qi::char_ - qi::char_( ',' ) );
+
+    start
+      %= ruleCmd >> qi::lit( '-' ) >> ruleSymbol >> qi::lit( ',' ) >> ruleExtra >> qi::lit( ',' )
+      ;
+  }
+
+  qi::symbols<char,PreRoll::ECmd> cmd;
+  qi::symbols<char,PreRoll::EExtra> extra;
+
+  qi::rule<Iterator, PreRoll::ECmd()> ruleCmd;
+  qi::rule<Iterator, std::string()> ruleSymbol;
+  qi::rule<Iterator, PreRoll::EExtra()> ruleExtra;
+  qi::rule<Iterator, PreRoll()> start;
+};
+
+// ===
 
 using OptionChain = OptionChainQuery::OptionChain;
 
@@ -56,9 +102,7 @@ struct OptionChainParser: qi::grammar<Iterator, OptionChain()> {
     calls %= +symbol;
     puts %= +symbol;
     start
-      %= symbol
-      >> qi::lit( 'L' ) >> qi::lit( 'C' ) >> qi::lit( ',' )
-      >> calls
+      %= calls
       >> -(qi::lit(',')) >> qi::lit(':') >> qi::lit(',')
       >> puts
       //>> qi::eoi
@@ -73,21 +117,7 @@ struct OptionChainParser: qi::grammar<Iterator, OptionChain()> {
 
 };
 
-template<typename Iterator>
-struct EndMessageParser: qi::grammar<Iterator, std::string()> {
-
-  EndMessageParser(): EndMessageParser::base_type( start ) {
-
-    // TODO: need to process !ENDMSG!
-    // TODO: need to process error message
-
-    start %= (+(qi::char_ - qi::char_(","))) >> qi::lit( ",!ENDMSG!," );
-
-  }
-
-  qi::rule<Iterator, std::string()> start;
-
-};
+// ==
 
 // http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
 
@@ -127,10 +157,6 @@ void OptionChainQuery::OnNetworkError( size_t e ) {
 void OptionChainQuery::OnNetworkSendDone() {
 }
 
-// TODO: will need to perform a pre-parse to obtain the key
-//   then lookup in map for state
-//   then full parse for appropriate result
-
 // 2021/10/29 - amusing response to a query via the new servers:
 // "@ESZ21,grep: /data/online/data/commodities/options/underlying/@ESZ21: No such file or directory"
 
@@ -145,84 +171,106 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
   //std::cout << "chain response: " << s << std::endl;
 
   bool bOk;
-  OptionChain chain;
-
-  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
 
   switch ( m_state ) {
     case EState::quiescent:
       //std::cout << "EState::quiescent" << std::endl;
       break;
-    case EState::reply:
+    case EState::response:
       {
-        //std::cout << "EState::reply" << std::endl;
-        OptionChainParser<const_iterator_t> grammarOptionChain;
-        const_iterator_t bgn = (*buffer).begin();
 
-        //std::string buf( bgn, end );
-        //std::cout << "buf: '" << buf << "'" << std::endl;
-
-        bOk = parse( bgn, end, grammarOptionChain, chain );
+        PreRoll preroll;
+        PreRollParser<const_iterator_t> grammarPreRoll;
+        iter = (*buffer).begin();
+        bOk = parse( iter, end, grammarPreRoll,preroll );
 
         if ( bOk ) {
-          //std::cout << "bOk true" << std::endl;
-          assert( 0 < chain.sKey.size() );
+          switch ( preroll.extra ) {
+            case PreRoll::EExtra::LC:
+              switch ( preroll.cmd ) {
+                case PreRoll::ECmd::CFU:
+                  m_state = EState::done;
+                  break;
+                case PreRoll::ECmd::CEO:
+                case PreRoll::ECmd::CFO:
+                  {
+
+                    OptionChain chain;
+
+                    //std::cout << "EState::reply" << std::endl;
+                    OptionChainParser<const_iterator_t> grammarOptionChain;
+                    //const_iterator_t bgn = (*buffer).begin();
+
+                    //std::string buf( iter, end );
+                    //std::cout << "buf: '" << buf << "'" << std::endl;
+
+                    bOk = parse( iter, end, grammarOptionChain, chain );
+
+                    if ( bOk ) {
+                      //std::cout << "bOk true" << std::endl;
+                      assert( 0 < preroll.sSymbol.size() );
+                      chain.sSymbol = std::move( preroll.sSymbol );
+                    }
+                    else {
+                      std::cout
+                        << "OptionChainQuery::OnNetworkLineBuffer parse error: "
+                        << end - iter << ","
+                        << preroll.sSymbol
+                        << "'," << chain.vOption.size()
+                        //<< "'," << chain.vCall.size()
+                        //<< "," << chain.vPut.size()
+                        << std::endl;
+                      const_iterator_t bgn = (*buffer).begin();
+                      const std::string sContent( bgn, end ); // debug statement
+                      std::cout << sContent << std::endl;
+                      // TODO: match the error message
+                      //   but we are parsing errors at this point
+                    }
+
+                    std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+
+                    if ( 0 < chain.sSymbol.size() ) {
+                      mapRequest_t::const_iterator iter = m_mapRequest.find( chain.sSymbol );
+                      if ( m_mapRequest.end() == iter ) {
+                        std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find key " << chain.sSymbol << std::endl;
+                      }
+                      else {
+                        iter->second( chain );
+                      }
+                    }
+
+                    mapRequest_t::const_iterator iter = m_mapRequest.find( chain.sSymbol );
+                    if ( m_mapRequest.end() == iter ) {
+                      const_iterator_t bgn = (*buffer).begin();
+                      const std::string sContent( bgn, end ); // debug statement
+                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find ending key '" << chain.sSymbol << "' in '" << sContent << "'" << std::endl;
+                    }
+                    else {
+                      m_mapRequest.erase( iter );  // may need to do this on endmsg only
+                    }
+
+                  }
+                  break;
+              }
+              break;
+            case PreRoll::EExtra::ENDMSG:
+              break;
+            case PreRoll::EExtra::BADSYM:
+              std::cout << "OptionChainQuery::OnNetworkLineBuffer badsym: " << preroll.sSymbol << std::endl;
+              break;
+            case PreRoll::EExtra::ERROR:
+              std::cout << "OptionChainQuery::OnNetworkLineBuffer error: " << std::string( (*buffer).begin(), (*buffer).end() ) << std::endl;
+              break;
+          }
         }
         else {
-          std::cout
-            << "OptionChainQuery::OnNetworkLineBuffer parse error: "
-            << end - bgn << ","
-            << chain.sKey
-            << "'," << chain.vOption.size()
-            //<< "'," << chain.vCall.size()
-            //<< "," << chain.vPut.size()
-            << std::endl;
-          const_iterator_t bgn = (*buffer).begin();
-          const std::string sContent( bgn, end ); // debug statement
-          std::cout << sContent << std::endl;
-          // TODO: match the error message
-          //   but we are parsing errors at this point
+          std::cout << "OptionChainQuery::OnNetworkLineBuffer error: unknown response: " << std::string( (*buffer).begin(), (*buffer).end() ) << std::endl;
         }
 
-        if ( 0 < chain.sKey.size() ) {
-          mapRequest_t::const_iterator iter = m_mapRequest.find( chain.sKey );
-          if ( m_mapRequest.end() == iter ) {
-            std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find key " << chain.sKey << std::endl;
-          }
-          else {
-            iter->second( chain );
-          }
-        }
-
-        //if ( parse( bgn, end, ruleErrorInvalidSymbol ) ) {}
-
-        m_state = EState::done;
       }
       break;
     case EState::done:
       {
-        //std::cout << "EState::done" << std::endl;
-        const_iterator_t bgn = (*buffer).begin();
-        std::string sKey;
-        EndMessageParser<const_iterator_t> grammarEndMsg;
-        if ( parse( bgn, end, grammarEndMsg, sKey ) ) { // 'QGCZ21,!ENDMSG!,'
-          //std::cout << "parsed for key: " << sKey << std::endl;
-          mapRequest_t::const_iterator iter = m_mapRequest.find( sKey );
-          if ( m_mapRequest.end() == iter ) {
-            const_iterator_t bgn = (*buffer).begin();
-            const std::string sContent( bgn, end ); // debug statement
-            std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find ending key '" << sKey << "' in '" << sContent << "'" << std::endl;
-          }
-          else {
-            m_mapRequest.erase( iter );  // may need to do this on endmsg only
-          }
-        }
-        else {
-          const_iterator_t bgn = (*buffer).begin();
-          const std::string sContent( bgn, end ); // debug statement
-          std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't parse: '" << sContent << "'" << std::endl;
-        }
-
         m_state = EState::quiescent;
       }
       break;
@@ -236,8 +284,10 @@ void OptionChainQuery::QueryFuturesChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    const std::string& sRequestId
-    ) {
+    fFutureChain_t&&
+) {
+  assert( 0 < sSymbol.size() );
+  assert( std::string::npos == sSymbol.find( ',' ) );
   std::stringstream ss;
   ss
     << "CFU,"
@@ -245,8 +295,10 @@ void OptionChainQuery::QueryFuturesChain(
     << sMonthCodes << ","
     << sYears << ","
     << sNearMonths << ","
-    << ( 0 == sRequestId.size() ? sSymbol : sRequestId )
+    << "CFU-" << sSymbol
     << "\n";
+  m_state = EState::response;
+  // TODO: create map for processing
   this->Send( ss.str().c_str() );
 }
 
@@ -256,11 +308,10 @@ void OptionChainQuery::QueryFuturesOptionChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    const std::string& sRequestId,
     fOptionChain_t&& fOptionChain
-    ) {
+) {
   assert( 0 < sSymbol.size() );
-  const std::string sMapKey( 0 == sRequestId.size() ? sSymbol : sRequestId );
+  assert( std::string::npos == sSymbol.find( ',' ) );
   std::stringstream ss;
   ss
     << "CFO,"
@@ -269,11 +320,11 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << sMonthCodes << ","
     << sYears << ","
     << sNearMonths << ","
-    << sMapKey
+    << "CFO-" << sSymbol
     << "\n";
-  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
-  m_mapRequest.emplace( mapRequest_t::value_type( sMapKey, std::move( fOptionChain ) ) );
-  m_state = EState::reply;
+  std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  m_mapRequest.emplace( mapRequest_t::value_type( sSymbol, std::move( fOptionChain ) ) );
+  m_state = EState::response;
   this->Send( ss.str().c_str() );
 }
 
@@ -281,17 +332,15 @@ void OptionChainQuery::QueryEquityOptionChain(
   const std::string& sSymbol,
   const std::string& sSide,
   const std::string& sMonthCodes, // see above
-  const std::string& sNearMonths, // 0..4
-  const std::string& sFilterType,  // suggest 2
-  const std::string& sFilterOne,   // suggest 12
-  const std::string& sFilterTwo,   // suggest 12
-  const std::string& sRequestId,
+  const std::string& sNearMonths, // number of near contracts to display: values 0 through 4
+  const std::string& sFilterType, // Optional - "0" (default) = no filter or "1" = filter on a strike range or "2" = filter on the number of In/Out Of The Money contracts
+  const std::string& sFilterOne,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price or if [Filter Type] = "2" then the number of contracts in the money
+  const std::string& sFilterTwo,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or if [Filter Type] = "2" then the number of contracts out of the money   // suggest 12
   fOptionChain_t&& fOptionChain
-  ) {
+) {
 
   assert( 0 < sSymbol.size() );
-  const std::string sMapKey( 0 == sRequestId.size() ? sSymbol : sRequestId );
-
+  assert( std::string::npos == sSymbol.find( ',' ) );
   std::stringstream ss;
   ss
     << "CEO,"
@@ -302,41 +351,16 @@ void OptionChainQuery::QueryEquityOptionChain(
     << sFilterType << ","
     << sFilterOne << ","
     << sFilterTwo << ","
-    << sMapKey << ","
+    << "CEO-" << sSymbol << ","
     << "1" // 0 = default, exclude non-standard options, 1 = include
     << "\n";
   //std::cout << "request: '" << ss.str() << "'" << std::endl;
-  std::lock_guard<std::mutex> lock( m_mutexMapRequest );
-  m_mapRequest.emplace( mapRequest_t::value_type( sMapKey, std::move( fOptionChain ) ) );
-  m_state = EState::reply;
+  std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  m_mapRequest.emplace( mapRequest_t::value_type( sSymbol, std::move( fOptionChain ) ) );
+  m_state = EState::response;
   this->Send( ss.str().c_str() );
 }
 
-void OptionChainQuery::QueryEquityOptionChain(
-    const std::string& sSymbol,
-    const std::string& sSide,
-    const std::string& sMonthCodes,
-    const std::string& sNearMonths, // number of near contracts to display: values 0 through 4
-    const std::string& sFilterType, // Optional - "0" (default) = no filter or "1" = filter on a strike range or "2" = filter on the number of In/Out Of The Money contracts
-    const std::string& sFilterOne,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price or if [Filter Type] = "2" then the number of contracts in the money
-    const std::string& sFilterTwo,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or if [Filter Type] = "2" then the number of contracts out of the money
-    const std::string& sRequestId
-    ) {
-  std::stringstream ss;
-  ss
-    << "CEO,"
-    << sSymbol << ","
-    << sSide << ","
-    << sMonthCodes << ","
-    << sNearMonths << ","
-    << "1" << "," // exclude binary
-    << sFilterType << ","
-    << sFilterOne << ","
-    << sFilterTwo << ","
-    << ( 0 == sRequestId.size() ? sSymbol : sRequestId )
-    << "\n";
-  this->Send( ss.str().c_str() );
-}
 
 } // namespace iqfeed
 } // namespace tf
