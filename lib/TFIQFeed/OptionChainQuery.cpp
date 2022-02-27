@@ -251,17 +251,26 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                         << std::endl;
                     }
 
-                    std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                    bool bProcess( false );
+                    mapFutures_t::const_iterator citer;
+                    {
+                      std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                      citer = m_mapFutures.find( preroll.sSymbol );
+                      if ( m_mapFutures.end() == citer ) {
+                      }
+                      else {
+                        bProcess = true;
+                      }
+                    }
 
-                    mapFutures_t::const_iterator iter = m_mapFutures.find( preroll.sSymbol );
-                    if ( m_mapFutures.end() == iter ) {
-                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CFU key " << preroll.sSymbol << std::endl;
+                    if ( bProcess ) {
+                      citer->second( chain ); // this needs to be outside of lock
+                      std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                      m_mapFutures.erase( citer );
                     }
                     else {
-                      iter->second( chain );
-                      m_mapFutures.erase( iter );  // may need to do this on endmsg only
+                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CFU key " << preroll.sSymbol << std::endl;
                     }
-
                   }
                   break;
                 case PreRoll::ECmd::CEO:
@@ -294,15 +303,25 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                         << std::endl;
                     }
 
-                    std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                    bool bProcess( false );
+                    mapOptions_t::const_iterator citer;
+                    {
+                      std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                      citer = m_mapOptions.find( chain.sSymbol );
+                      if ( m_mapOptions.end() == citer ) {
+                      }
+                      else {
+                        bProcess = true;
+                      }
+                    }
 
-                    mapOptions_t::const_iterator iter = m_mapOptions.find( chain.sSymbol );
-                    if ( m_mapOptions.end() == iter ) {
-                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << chain.sSymbol << std::endl;
+                    if ( bProcess ) {
+                      citer->second( chain );  // this needs to be outside of lock
+                      std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+                      m_mapOptions.erase( citer );
                     }
                     else {
-                      iter->second( chain );
-                      m_mapOptions.erase( iter );  // may need to do this on endmsg only
+                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << chain.sSymbol << std::endl;
                     }
 
                   }
