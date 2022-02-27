@@ -155,7 +155,8 @@ bool AppIndicatorTrading::OnInit() {
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
-  vItems.push_back( new mi( "Emit Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChains ) ) );
+  vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
+  vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
   vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
@@ -210,15 +211,18 @@ void AppIndicatorTrading::ConstructInstrument() {
     m_pBuildInstrumentIQFeed->Queue(
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
+
         boost::gregorian::date expiry( pInstrument->GetExpiry() );
         using OptionChainQuery = ou::tf::iqfeed::OptionChainQuery;
         std::string sBase( m_config.sSymbol.substr( 0, m_config.sSymbol.size() - 1 ) );
         m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
           sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
           [this,expiry]( const OptionChainQuery::FutureChain& chain ){
+
             for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: chain.vSymbol ) {
               m_pBuildInstrument->Queue( sSymbol,
               [this,expiry]( pInstrument_t pInstrument ){
+
                 std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                 if ( expiry == pInstrument->GetExpiry() ) {
                   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -293,10 +297,18 @@ void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionEmitChains( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitChainsSummary( void ) {
   CallAfter(
     [this](){
-      m_pInteractiveChart->EmitChainInfo();
+      m_pInteractiveChart->EmitChainSummary();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionEmitChainsFull( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->EmitChainFull();
     }
   );
 }

@@ -103,7 +103,8 @@ private:
   void HandleMenuActionStartWatch();
   void HandleMenuActionStopWatch();
   void HandleMenuActionSaveValues();
-  void HandleMenuActionEmitChains();
+  void HandleMenuActionEmitChainsSummary();
+  void HandleMenuActionEmitChainsFull();
   void HandleMenuActionProcessChains();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();

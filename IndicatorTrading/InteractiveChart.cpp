@@ -207,9 +207,9 @@ void InteractiveChart::SetPosition(
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DeepPink ) );
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::Fuchsia ) );
 
-  m_vStochastic[0]->AddToChart( m_dvChart );
-  m_vStochastic[1]->AddToChart( m_dvChart );
-  m_vStochastic[2]->AddToChart( m_dvChart );
+  for ( vStochastic_t::value_type& vt: m_vStochastic ) {
+    vt->AddToChart( m_dvChart );
+  }
 
   m_vMA.clear();
 

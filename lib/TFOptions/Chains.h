@@ -37,9 +37,12 @@ namespace option { // options
 
 template<typename mapChains_t>
 void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t&& fGatherOptions ) {
+  size_t cnt {};
   fGatherOptions(
     sUnderlying,
-    [&map](pOption_t pOption){  // these are iqfeed based symbol names
+    [&map,&cnt](pOption_t pOption){  // these are iqfeed based symbol names
+
+        cnt++;
 
         using chain_t = typename mapChains_t::mapped_type;
         using iterator_t = typename mapChains_t::iterator;
@@ -80,6 +83,9 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
                 break;
               case ou::tf::OptionSide::Put:
                 chain.SetIQFeedNamePut( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+                break;
+              default:
+                assert( false );
                 break;
             }
           }

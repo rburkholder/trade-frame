@@ -129,8 +129,8 @@ public:
   using mapChain_t = std::map<double, strike_t>;
 
   typename mapChain_t::size_type Size() const { return m_mapChain.size(); }
-  void EmitValues() const;
-  void EmitSummary() const;
+  size_t EmitValues() const;
+  size_t EmitSummary() const;
 
   void Test( double price );
 
@@ -339,6 +339,7 @@ void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQF
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
   if ( !iter->second.call.sIQFeedSymbolName.empty() ) {
+    //std::cout << "duplicate call: " << sIQFeedSymbolName << std::endl;
     assert( iter->second.call.sIQFeedSymbolName == sIQFeedSymbolName );
   }
   else {
@@ -353,6 +354,7 @@ void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFe
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
   }
   if ( !iter->second.put.sIQFeedSymbolName.empty() ) {
+    //std::cout << "duplicate put: " << sIQFeedSymbolName << std::endl;
     assert( iter->second.put.sIQFeedSymbolName == sIQFeedSymbolName );
   }
   else {
@@ -416,8 +418,10 @@ typename Chain<Option>::mapChain_t::iterator Chain<Option>::FindStrike( const do
 }
 
 template<typename Option>
-void Chain<Option>::EmitValues() const { // TODO: supply output stream
-  std::for_each( m_mapChain.begin(), m_mapChain.end(), [](const typename mapChain_t::value_type& vt){
+size_t Chain<Option>::EmitValues() const { // TODO: supply output stream
+  size_t cnt {};
+  std::for_each( m_mapChain.begin(), m_mapChain.end(), [&cnt](const typename mapChain_t::value_type& vt){
+    cnt++;
     std::cout
       << vt.first << ": "
       << vt.second.call.sIQFeedSymbolName
@@ -425,10 +429,11 @@ void Chain<Option>::EmitValues() const { // TODO: supply output stream
       << vt.second.put.sIQFeedSymbolName
       << std::endl;
   });
+  return cnt;
 }
 
 template<typename Option>
-void Chain<Option>::EmitSummary() const { // TODO: supply output stream
+size_t Chain<Option>::EmitSummary() const { // TODO: supply output stream
   size_t nStrikes {};
   size_t nCalls {};
   size_t nPuts {};
@@ -442,6 +447,7 @@ void Chain<Option>::EmitSummary() const { // TODO: supply output stream
       << ", #calls=" << nCalls
       << ", #puts=" << nPuts
       << std::endl;
+  return ( nCalls + nPuts );
 }
 
 template<typename Option>
