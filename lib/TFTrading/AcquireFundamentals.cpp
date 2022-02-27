@@ -31,8 +31,8 @@ AcquireFundamentals::AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ )
 }
 
 AcquireFundamentals::~AcquireFundamentals() {
-    //std::cout << "AcquireFundamentals::~AcquireFundamentals(): " << pWatch->GetInstrumentName() << std::endl;
-  }
+  //std::cout << "AcquireFundamentals::~AcquireFundamentals(): " << pWatch->GetInstrumentName() << std::endl;
+}
 
 void AcquireFundamentals::Start() {
   //std::cout << "AcquireFundamentals::Start(): " << pWatch->GetInstrumentName() << std::endl;
@@ -45,8 +45,8 @@ void AcquireFundamentals::HandleFundamentals( const ou::tf::Watch::Fundamentals&
   // the watch will retain variables from the fundamentals message
   //std::cout << "AcquireFundamentals::HandleFundamentals(): " << pWatch->GetInstrumentName() << std::endl;
   pWatch->StopWatch();
-  pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
   pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
+  pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
   fDone( pWatch );  // fundamentals reside in watch
 }
 

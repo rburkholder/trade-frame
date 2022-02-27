@@ -78,6 +78,7 @@ private:
   InteractiveChart* m_pInteractiveChart;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 

@@ -33,6 +33,7 @@ using pWatch_t = Watch::pWatch_t;
 
 BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB )
 : m_pIQ( std::move( pIQFeed ) ), m_pIB( std::move( pIB ) )
+, m_bDeleteIterator( false )
 {
   assert( m_pIQ );
   assert( m_pIB );
@@ -40,6 +41,7 @@ BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pI
 
 BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed )
 : m_pIQ( std::move( pIQFeed ) )
+, m_bDeleteIterator( false )
 {
   assert( m_pIQ );
 }
@@ -70,6 +72,16 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
 
 }
 
+ // queue this to be deleted on next run through
+ // prevents a deadlock on delete of watch as the deletion of AcquireFundamentals
+ //   happens within the HandleFundamentals delegate
+void BuildInstrument::Update( mapInProgress_t::iterator iter ) {
+  Update();
+  std::lock_guard<std::mutex> lock( m_mutexMap );
+  m_bDeleteIterator = true;
+  m_iterToDelete = iter;
+}
+
 void BuildInstrument::Update() {
 
   bool bDoBuild( false );
@@ -77,6 +89,11 @@ void BuildInstrument::Update() {
 
   {
     std::lock_guard<std::mutex> lock( m_mutexMap );
+
+    if ( m_bDeleteIterator ) {
+      m_bDeleteIterator = false;
+      m_mapInProgress.erase( m_iterToDelete );
+    }
 
     if ( 5 > m_mapInProgress.size() ) { // 5 is set in m_pIB
       if ( 0 != m_mapSymbol.size() ) {
@@ -124,7 +141,6 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
           pInstrument_t pInstrument
             = ou::tf::iqfeed::BuildInstrument( fundamentals );
-          pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pWatchOld->GetProvider() );
 
           std::cout
             << "BuildInstrument: "
@@ -151,7 +167,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             m_pIB->RequestContractDetails(
               sName,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
-              [this,pWatch,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+              [this,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
                 //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
                 assert( 0 != pInstrument->GetContract() );
                 m_pIB->Sync( pInstrument );
@@ -169,6 +185,13 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 Update();
               }
               );
+          }
+          else {
+            //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+            //im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            iterInProgress->second.fInstrument( pInstrument );
+            pInstrument.reset();
+            Update( iterInProgress );
           }
           //std::cout << "BuildInstrument::Build begin: " << iterInProgress->first << std::endl;
         }

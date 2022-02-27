@@ -203,44 +203,48 @@ void AppIndicatorTrading::ConstructInstrument() {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-  m_pBuildInstrument->Queue(
-    m_config.sSymbol,
-    [this]( pInstrument_t pInstrument ){
 
-      using pWatch_t = ou::tf::Watch::pWatch_t;
-      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+  if ( '#' == m_config.sSymbol.back() ) {
+    m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
+    m_pBuildInstrumentIQFeed->Queue(
+      m_config.sSymbol,
+      [this]( pInstrument_t pInstrument ){
+        boost::gregorian::date expiry( pInstrument->GetExpiry() );
+        using OptionChainQuery = ou::tf::iqfeed::OptionChainQuery;
+        std::string sBase( m_config.sSymbol.substr( 0, m_config.sSymbol.size() - 1 ) );
+        m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
+          sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
+          [this,expiry]( const OptionChainQuery::FutureChain& chain ){
+            for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: chain.vSymbol ) {
+              m_pBuildInstrument->Queue( sSymbol,
+              [this,expiry]( pInstrument_t pInstrument ){
+                std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
+                if ( expiry == pInstrument->GetExpiry() ) {
+                  using pWatch_t = ou::tf::Watch::pWatch_t;
+                  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
 
-      switch ( pWatch->GetInstrument()->GetInstrumentType() ) {
-        case ou::tf::InstrumentType::Future:
-          {
-            // if @ES# or similar, need to determine real instrument
-            const std::string& sInstrumentName( pWatch->GetInstrumentName() );
-            if ( '#' == sInstrumentName.back() ) {
-              std::string sBase( sInstrumentName.substr( 0, sInstrumentName.size() - 1 ) );
-              m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of
-                sBase, "", "234", "4",
-                [this]( const ou::tf::iqfeed::OptionChainQuery::OptionChain& chain ){
-
+                  SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
                 }
-                );
-
-            }
-            else {
-              SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+              } );
             }
           }
-          break;
-        case ou::tf::InstrumentType::Stock:
-          // no special requriements
-          SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
-          break;
-        default:
-          assert( false );
+          );
       }
+    );
+  }
+  else {
+    m_pBuildInstrument->Queue(
+      m_config.sSymbol,
+      [this]( pInstrument_t pInstrument ){
 
-    } );
+        using pWatch_t = ou::tf::Watch::pWatch_t;
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+
+        SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+
+      } );
+  }
 
 }
 

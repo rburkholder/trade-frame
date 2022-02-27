@@ -40,7 +40,12 @@ public:
     vSymbol_t vSymbol;
   };
 
+  struct FutureChain {
+    vSymbol_t vSymbol;
+  };
+
   using fConnected_t = std::function<void(void)>;
+  using fFutureChain_t = std::function<void(const FutureChain&)>;
   using fOptionChain_t = std::function<void(const OptionChain&)>;
 
   OptionChainQuery( fConnected_t&& );
@@ -54,7 +59,7 @@ public:
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
     const std::string& sNearMonths, // 0..4
-    fOptionChain_t&&
+    fFutureChain_t&&
     );
 
   void QueryFuturesOptionChain(
@@ -103,8 +108,11 @@ private:
 
   fConnected_t m_fConnected;
 
-  using mapRequest_t = std::map<std::string,fOptionChain_t>;
-  mapRequest_t m_mapRequest;
+  using mapOptions_t = std::map<std::string,fOptionChain_t>;
+  mapOptions_t m_mapOptions;
+
+  using mapFutures_t = std::map<std::string,fFutureChain_t>;
+  mapFutures_t m_mapFutures;
 
 };
 

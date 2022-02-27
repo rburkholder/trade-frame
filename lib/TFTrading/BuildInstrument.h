@@ -75,10 +75,14 @@ private:
   mapSymbol_t m_mapSymbol;  // contains symbols waiting to be built
   mapInProgress_t m_mapInProgress; // waiting for fundamentals, contract
 
+  bool m_bDeleteIterator;
+  mapInProgress_t::iterator m_iterToDelete; // used to break the recursive problem when only iqf is available
+
   pProviderIQFeed_t m_pIQ;
   pProviderIBTWS_t m_pIB;
 
   void Update();
+  void Update( mapInProgress_t::iterator );
 
   void Build( mapInProgress_t::iterator );
 };
