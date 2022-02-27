@@ -82,8 +82,6 @@ bool InteractiveChart::Create(
 
 InteractiveChart::~InteractiveChart() {
   m_bfPrice.SetOnBarComplete( nullptr );
-  m_pOptionChainQuery->Disconnect();
-  m_pOptionChainQuery.reset();
 }
 
 void InteractiveChart::Init() {
@@ -144,12 +142,6 @@ void InteractiveChart::Init() {
 
   SetChartDataView( &m_dvChart );
 
-  m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
-    [this](){
-    }
-  );
-  m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
-
 }
 
 void InteractiveChart::Connect() {
@@ -176,12 +168,19 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
   }
 }
 
-void InteractiveChart::SetPosition( pPosition_t pPosition, const config::Options& config, fBuildOption_t&& fBuildOption ) {
+void InteractiveChart::SetPosition(
+  pPosition_t pPosition,
+  const config::Options& config,
+  pOptionChainQuery_t pOptionChainQuery,
+  fBuildOption_t&& fBuildOption
+) {
 
   bool bConnected = m_bConnected;
   Disconnect();
 
   // --
+
+  m_pOptionChainQuery = pOptionChainQuery;
 
   using vMAPeriods_t = std::vector<int>;
   vMAPeriods_t vMAPeriods;
@@ -253,10 +252,10 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
             [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
                 << "chain request " << chains.sSymbol << " has "
-                << chains.vOption.size() << " options"
+                << chains.vSymbol.size() << " options"
                 << std::endl;
 
-              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vOption ) {
+              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
                 fBuildOption__(
                   sSymbol,
                   [this, fOption_ ]( pOption_t pOption ){
@@ -278,10 +277,10 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
             [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
                 << "chain request " << chains.sSymbol << " has "
-                << chains.vOption.size() << " options"
+                << chains.vSymbol.size() << " options"
                 << std::endl;
 
-              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vOption ) {
+              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
                 fBuildOption__(
                   sSymbol,
                   [this, fOption_]( pOption_t pOption ){

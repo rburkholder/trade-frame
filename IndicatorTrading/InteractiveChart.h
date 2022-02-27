@@ -74,6 +74,8 @@ public:
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
+  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
+
   InteractiveChart();
   InteractiveChart(
     wxWindow* parent,
@@ -91,7 +93,11 @@ public:
 
   virtual ~InteractiveChart();
 
-  void SetPosition( pPosition_t, const config::Options&, fBuildOption_t&& );
+  void SetPosition(
+    pPosition_t,
+    const config::Options&,
+    pOptionChainQuery_t,
+    fBuildOption_t&& );
 
   void EmitChainInfo() const {
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
@@ -240,7 +246,7 @@ private:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
-  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+  pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   using vChains_t = std::vector<boost::gregorian::date>;
   vChains_t m_vChains;

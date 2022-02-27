@@ -34,21 +34,15 @@ public:
   enum Side { put='p', call='c' };
 
   using vSymbol_t = std::vector<std::string>;
-  using vCall_t = vSymbol_t;
-  using vPut_t = vSymbol_t;
+
   struct OptionChain {
     std::string sSymbol;
-    //vCall_t vCall;
-    //vPut_t vPut;
-    vSymbol_t vOption;
+    vSymbol_t vSymbol;
   };
 
   using fConnected_t = std::function<void(void)>;
-  using fFutureChain_t = std::function<void(vSymbol_t&)>;
   using fOptionChain_t = std::function<void(const OptionChain&)>;
-  //using fDone_t = std::function<void(bool)>; // TRUE == ok
 
-  //OptionChainQuery( fConnected_t&&, fOptionChain_t&&, fDone_t&& );
   OptionChainQuery( fConnected_t&& );
   ~OptionChainQuery( void );
 
@@ -60,7 +54,7 @@ public:
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
     const std::string& sNearMonths, // 0..4
-    fFutureChain_t&&
+    fOptionChain_t&&
     );
 
   void QueryFuturesOptionChain(

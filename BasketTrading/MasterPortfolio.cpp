@@ -512,13 +512,13 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   << "chain request " << chains.sSymbol << " has "
                   //<< chains.vCall.size() << " calls, "
                   //<< chains.vPut.size() << " puts"
-                  << chains.vOption.size() << " options"
+                  << chains.vSymbol.size() << " options"
                   << std::endl;
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
                 m_nQuery = 1; // iniial lock of the loop, process each option, sync or async dependin gif cached
-                for ( const query_t::vSymbol_t::value_type& value: chains.vOption ) {
+                for ( const query_t::vSymbol_t::value_type& value: chains.vSymbol ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_nQuery++;
                   m_pBuildInstrument->Queue(

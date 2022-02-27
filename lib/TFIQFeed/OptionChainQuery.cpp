@@ -39,8 +39,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::OptionChainQuery::OptionChain,
   //(std::string, sKey)
-  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // calls first
-  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vOption) // puts appended
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vSymbol) // calls first
+  (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vSymbol) // puts appended
   //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
   //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vPut)
   )
@@ -189,8 +189,6 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
             case PreRoll::EExtra::LC:
               switch ( preroll.cmd ) {
                 case PreRoll::ECmd::CFU:
-                  m_state = EState::done;
-                  break;
                 case PreRoll::ECmd::CEO:
                 case PreRoll::ECmd::CFO:
                   {
@@ -216,7 +214,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                         << "OptionChainQuery::OnNetworkLineBuffer parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
-                        << "'," << chain.vOption.size()
+                        << "'," << chain.vSymbol.size()
                         //<< "'," << chain.vCall.size()
                         //<< "," << chain.vPut.size()
                         << std::endl;
@@ -284,7 +282,7 @@ void OptionChainQuery::QueryFuturesChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    fFutureChain_t&&
+    fOptionChain_t&& fOptionChain
 ) {
   assert( 0 < sSymbol.size() );
   assert( std::string::npos == sSymbol.find( ',' ) );
@@ -297,8 +295,9 @@ void OptionChainQuery::QueryFuturesChain(
     << sNearMonths << ","
     << "CFU-" << sSymbol
     << "\n";
+  std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  m_mapRequest.emplace( mapRequest_t::value_type( sSymbol, std::move( fOptionChain ) ) );
   m_state = EState::response;
-  // TODO: create map for processing
   this->Send( ss.str().c_str() );
 }
 

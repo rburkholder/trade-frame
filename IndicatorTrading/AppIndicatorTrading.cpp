@@ -26,6 +26,8 @@
 #include <wx/sizer.h>
 #include <wx/treectrl.h>
 
+#include <TFIQFeed/OptionChainQuery.h>
+
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/BuildInstrument.h>
@@ -186,34 +188,80 @@ bool AppIndicatorTrading::OnInit() {
   return 1;
 }
 
+void AppIndicatorTrading::StartChainQuery() {
+
+  m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+    [this](){
+      ConstructInstrument();
+    }
+  );
+  m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+
+}
+
 void AppIndicatorTrading::ConstructInstrument() {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
+
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Queue(
     m_config.sSymbol,
     [this]( pInstrument_t pInstrument ){
 
+      using pWatch_t = ou::tf::Watch::pWatch_t;
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider );
 
-      m_pInteractiveChart->SetPosition(
-        pPosition, m_config,
-        [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
-          m_pBuildInstrument->Queue(
-            sIQFeedOptionSymbol,
-            [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
-              fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+      switch ( pWatch->GetInstrument()->GetInstrumentType() ) {
+        case ou::tf::InstrumentType::Future:
+          {
+            // if @ES# or similar, need to determine real instrument
+            const std::string& sInstrumentName( pWatch->GetInstrumentName() );
+            if ( '#' == sInstrumentName.back() ) {
+              std::string sBase( sInstrumentName.substr( 0, sInstrumentName.size() - 1 ) );
+              m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of
+                sBase, "", "234", "4",
+                [this]( const ou::tf::iqfeed::OptionChainQuery::OptionChain& chain ){
+
+                }
+                );
+
             }
-          );
-        }
-        );
-      m_pInteractiveChart->Connect();
+            else {
+              SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+            }
+          }
+          break;
+        case ou::tf::InstrumentType::Stock:
+          // no special requriements
+          SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+          break;
+        default:
+          assert( false );
+      }
+
     } );
 
+}
+
+void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  m_pInteractiveChart->SetPosition(
+    pPosition,
+    m_config,
+    m_pOptionChainQuery,
+    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
+      m_pBuildInstrument->Queue(
+        sIQFeedOptionSymbol,
+        [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
+          fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+        }
+      );
+    }
+    );
+  m_pInteractiveChart->Connect();
 }
 
 void AppIndicatorTrading::HandleMenuActionStartChart( void ) {
@@ -274,6 +322,10 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   //m_pFrameControls->Close();
 
   DelinkFromPanelProviderControl();
+
+  m_pOptionChainQuery->Disconnect();
+  m_pOptionChainQuery.reset();
+
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
@@ -284,7 +336,7 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 void AppIndicatorTrading::OnData1Connected( int ) {
   m_bData1Connected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
-    ConstructInstrument();
+    StartChainQuery();
   }
 }
 
@@ -297,7 +349,7 @@ void AppIndicatorTrading::OnData2Connected( int ) {
 void AppIndicatorTrading::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
-    ConstructInstrument();
+    StartChainQuery();
   }
 }
 

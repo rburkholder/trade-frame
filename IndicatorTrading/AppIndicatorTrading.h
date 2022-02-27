@@ -47,6 +47,9 @@ namespace tf {
   class FrameControls;
   class BuildInstrument;
   class PanelOrderButtons;
+namespace iqfeed { // IQFeed
+  class OptionChainQuery;
+} // namespace iqfeed
 }
 }
 
@@ -80,6 +83,11 @@ private:
 
   config::Options m_config;
 
+  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
+  pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
+
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
@@ -99,7 +107,9 @@ private:
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
 
+  void StartChainQuery();
   void ConstructInstrument();
+  void SetInteractiveChart( pPosition_t );
 
   void SaveState();
   void LoadState();
