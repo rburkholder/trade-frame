@@ -507,18 +507,18 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
             m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
               sIQFeedUnderlying,
               "pc", "", "", "",
-              [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionChain& chains ){
+              [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionList& list ){
                 std::cout
-                  << "chain request " << chains.sSymbol << " has "
+                  << "chain request " << list.sUnderlying << " has "
                   //<< chains.vCall.size() << " calls, "
                   //<< chains.vPut.size() << " puts"
-                  << chains.vSymbol.size() << " options"
+                  << list.vSymbol.size() << " options"
                   << std::endl;
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
                 m_nQuery = 1; // iniial lock of the loop, process each option, sync or async dependin gif cached
-                for ( const query_t::vSymbol_t::value_type& value: chains.vSymbol ) {
+                for ( const query_t::vSymbol_t::value_type& value: list.vSymbol ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
                   m_nQuery++;
                   m_pBuildInstrument->Queue(

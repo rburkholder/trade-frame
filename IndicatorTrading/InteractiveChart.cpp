@@ -245,13 +245,13 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
       m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
         sIQFeedUnderlying,
         "cp", "", "234", "1",
-        [ this ] ( const query_t::OptionChain& chains ){
+        [ this ] ( const query_t::OptionList& list ){
           std::cout
-            << "chain request " << chains.sSymbol << " has "
-            << chains.vSymbol.size() << " options"
+            << "chain request " << list.sUnderlying << " has "
+            << list.vSymbol.size() << " options"
             << std::endl;
 
-          for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
+          for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
             m_fBuildOption(
               sSymbol,
               [this]( pOption_t pOption ){
@@ -274,13 +274,13 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
           m_pOptionChainQuery->QueryEquityOptionChain(
             sIQFeedUnderlying,
             "cp", "", "1", "2", "3", "3", // four months, all strikes
-            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
+            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionList& list ){
               std::cout
-                << "chain request " << chains.sSymbol << " has "
-                << chains.vSymbol.size() << " options"
+                << "chain request " << list.sUnderlying << " has "
+                << list.vSymbol.size() << " options"
                 << std::endl;
 
-              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
+              for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
                 m_fBuildOption(
                   sSymbol,
                   [this, fOption_]( pOption_t pOption ){

@@ -29,8 +29,8 @@ struct PreRoll {
   EExtra extra;
 };
 
-using FutureChain = ou::tf::iqfeed::OptionChainQuery::FutureChain;
-using OptionChain = ou::tf::iqfeed::OptionChainQuery::OptionChain;
+using FuturesList = ou::tf::iqfeed::OptionChainQuery::FuturesList;
+using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
 
 BOOST_FUSION_ADAPT_STRUCT(
   PreRoll,
@@ -40,7 +40,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  FutureChain,
+  FuturesList,
   //(std::string, sKey)
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vSymbol)
   //(ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vCall)
@@ -48,7 +48,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  OptionChain,
+  OptionList,
   //(std::string, sKey)
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vSymbol) // calls first
   (ou::tf::iqfeed::OptionChainQuery::vSymbol_t, vSymbol) // puts appended
@@ -107,7 +107,7 @@ struct PreRollParser: qi::grammar<Iterator, PreRoll()> {
 // ===
 
 template<typename Iterator>
-struct FutureChainParser: qi::grammar<Iterator, FutureChain()> {
+struct FutureChainParser: qi::grammar<Iterator, FuturesList()> {
 
   FutureChainParser(): FutureChainParser::base_type( start ) {
 
@@ -122,14 +122,14 @@ struct FutureChainParser: qi::grammar<Iterator, FutureChain()> {
 
   qi::rule<Iterator, std::string()> symbol;
   qi::rule<Iterator, OptionChainQuery::vSymbol_t()> symbols;
-  qi::rule<Iterator, FutureChain()> start;
+  qi::rule<Iterator, FuturesList()> start;
 
 };
 
 // ===
 
 template<typename Iterator>
-struct OptionChainParser: qi::grammar<Iterator, OptionChain()> {
+struct OptionChainParser: qi::grammar<Iterator, OptionList()> {
 
   OptionChainParser(): OptionChainParser::base_type( start ) {
 
@@ -148,7 +148,7 @@ struct OptionChainParser: qi::grammar<Iterator, OptionChain()> {
   qi::rule<Iterator, std::string()> symbol;
   qi::rule<Iterator, OptionChainQuery::vSymbol_t()> calls;
   qi::rule<Iterator, OptionChainQuery::vSymbol_t()> puts;
-  qi::rule<Iterator, OptionChain()> start;
+  qi::rule<Iterator, OptionList()> start;
 
 };
 
@@ -226,7 +226,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                 case PreRoll::ECmd::CFU:
                   {
 
-                    FutureChain chain;
+                    FuturesList list;
 
                     //std::cout << "EState::reply" << std::endl;
                     FutureChainParser<const_iterator_t> grammarFutureChain;
@@ -235,7 +235,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     //std::string buf( iter, end );
                     //std::cout << "buf: '" << buf << "'" << std::endl;
 
-                    bOk = parse( iter, end, grammarFutureChain, chain );
+                    bOk = parse( iter, end, grammarFutureChain, list );
 
                     assert( 0 < preroll.sSymbol.size() );
 
@@ -247,7 +247,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                         << "OptionChainQuery::OnNetworkLineBuffer CFU parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
-                        << "'," << chain.vSymbol.size()
+                        << "'," << list.vSymbol.size()
                         << std::endl;
                     }
 
@@ -264,7 +264,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     }
 
                     if ( bProcess ) {
-                      citer->second( chain ); // this needs to be outside of lock
+                      citer->second( list ); // this needs to be outside of lock
                       std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
                       m_mapFutures.erase( citer );
                     }
@@ -277,7 +277,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                 case PreRoll::ECmd::CFO:
                   {
 
-                    OptionChain chain;
+                    OptionList list;
 
                     //std::cout << "EState::reply" << std::endl;
                     OptionChainParser<const_iterator_t> grammarOptionChain;
@@ -286,20 +286,20 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     //std::string buf( iter, end );
                     //std::cout << "buf: '" << buf << "'" << std::endl;
 
-                    bOk = parse( iter, end, grammarOptionChain, chain );
+                    bOk = parse( iter, end, grammarOptionChain, list );
 
                     assert( 0 < preroll.sSymbol.size() );
 
                     if ( bOk ) {
                       assert( 0 < preroll.sSymbol.size() );
-                      chain.sSymbol = std::move( preroll.sSymbol );
+                      list.sUnderlying = std::move( preroll.sSymbol );
                     }
                     else {
                       std::cout
                         << "OptionChainQuery::OnNetworkLineBuffer CEO/CFO parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
-                        << "'," << chain.vSymbol.size()
+                        << "'," << list.vSymbol.size()
                         << std::endl;
                     }
 
@@ -307,7 +307,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     mapOptions_t::const_iterator citer;
                     {
                       std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
-                      citer = m_mapOptions.find( chain.sSymbol );
+                      citer = m_mapOptions.find( list.sUnderlying );
                       if ( m_mapOptions.end() == citer ) {
                       }
                       else {
@@ -316,12 +316,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     }
 
                     if ( bProcess ) {
-                      citer->second( chain );  // this needs to be outside of lock
+                      citer->second( list );  // this needs to be outside of lock
                       std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
                       m_mapOptions.erase( citer );
                     }
                     else {
-                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << chain.sSymbol << std::endl;
+                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << list.sUnderlying << std::endl;
                     }
 
                   }
@@ -367,7 +367,7 @@ void OptionChainQuery::QueryFuturesChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    fFutureChain_t&& fFutureChain
+    fFuturesList_t&& fFuturesList
 ) {
   assert( 0 < sSymbol.size() );
   assert( std::string::npos == sSymbol.find( ',' ) );
@@ -381,7 +381,7 @@ void OptionChainQuery::QueryFuturesChain(
     << "CFU-" << sSymbol
     << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
-  m_mapFutures.emplace( mapFutures_t::value_type( sSymbol, std::move( fFutureChain ) ) );
+  m_mapFutures.emplace( mapFutures_t::value_type( sSymbol, std::move( fFuturesList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
 }
@@ -392,7 +392,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
     const std::string& sMonthCodes,
     const std::string& sYears,
     const std::string& sNearMonths,
-    fOptionChain_t&& fOptionChain
+    fOptionList_t&& fOptionList
 ) {
   assert( 0 < sSymbol.size() );
   assert( std::string::npos == sSymbol.find( ',' ) );
@@ -407,7 +407,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << "CFO-" << sSymbol
     << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
-  m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionChain ) ) );
+  m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
 }
@@ -420,7 +420,7 @@ void OptionChainQuery::QueryEquityOptionChain(
   const std::string& sFilterType, // Optional - "0" (default) = no filter or "1" = filter on a strike range or "2" = filter on the number of In/Out Of The Money contracts
   const std::string& sFilterOne,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then beginning strike price or if [Filter Type] = "2" then the number of contracts in the money
   const std::string& sFilterTwo,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or if [Filter Type] = "2" then the number of contracts out of the money   // suggest 12
-  fOptionChain_t&& fOptionChain
+  fOptionList_t&& fOptionList
 ) {
 
   assert( 0 < sSymbol.size() );
@@ -440,7 +440,7 @@ void OptionChainQuery::QueryEquityOptionChain(
     << "\n";
   //std::cout << "request: '" << ss.str() << "'" << std::endl;
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
-  m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionChain ) ) );
+  m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
 }

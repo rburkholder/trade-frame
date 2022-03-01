@@ -217,9 +217,9 @@ void AppIndicatorTrading::ConstructInstrument() {
         std::string sBase( m_config.sSymbol.substr( 0, m_config.sSymbol.size() - 1 ) );
         m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
           sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
-          [this,expiry]( const OptionChainQuery::FutureChain& chain ){
+          [this,expiry]( const OptionChainQuery::FuturesList& list ){
 
-            for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: chain.vSymbol ) {
+            for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: list.vSymbol ) {
               m_pBuildInstrument->Queue(
                 sSymbol,
                 [this,expiry]( pInstrument_t pInstrument ){

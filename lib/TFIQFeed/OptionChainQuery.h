@@ -35,18 +35,18 @@ public:
 
   using vSymbol_t = std::vector<std::string>;
 
-  struct OptionChain {
-    std::string sSymbol;
+  struct FuturesList {
     vSymbol_t vSymbol;
   };
 
-  struct FutureChain {
+  struct OptionList {
+    std::string sUnderlying;
     vSymbol_t vSymbol;
   };
 
   using fConnected_t = std::function<void(void)>;
-  using fFutureChain_t = std::function<void(const FutureChain&)>;
-  using fOptionChain_t = std::function<void(const OptionChain&)>;
+  using fFuturesList_t = std::function<void(const FuturesList&)>;
+  using fOptionList_t = std::function<void(const OptionList&)>;
 
   OptionChainQuery( fConnected_t&& );
   ~OptionChainQuery( void );
@@ -59,7 +59,7 @@ public:
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
     const std::string& sNearMonths, // 0..4
-    fFutureChain_t&&
+    fFuturesList_t&&
     );
 
   void QueryFuturesOptionChain(
@@ -68,7 +68,7 @@ public:
     const std::string& sMonthCodes, // see above
     const std::string& sYears,      // last digit
     const std::string& sNearMonths, // 0..4
-    fOptionChain_t&&
+    fOptionList_t&&
     );
 
   void QueryEquityOptionChain(
@@ -79,7 +79,7 @@ public:
     const std::string& sFilterType, // 0 no filter, 1 filter on strike range, 2 filter on #contracts in/out money
     const std::string& sFilterOne,  // 0 ignored, 1 begin strike, 2 #contracts in the money
     const std::string& sFilterTwo,  // 0 ignored, 1 end strike, 2 #contracts out of the money
-    fOptionChain_t&&
+    fOptionList_t&&
     );
 
   void Disconnect();
@@ -108,11 +108,11 @@ private:
 
   fConnected_t m_fConnected;
 
-  using mapOptions_t = std::map<std::string,fOptionChain_t>;
-  mapOptions_t m_mapOptions;
-
-  using mapFutures_t = std::map<std::string,fFutureChain_t>;
+  using mapFutures_t = std::map<std::string,fFuturesList_t>;
   mapFutures_t m_mapFutures;
+
+  using mapOptions_t = std::map<std::string,fOptionList_t>;
+  mapOptions_t m_mapOptions;
 
 };
 
