@@ -296,7 +296,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                     }
                     else {
                       std::cout
-                        << "OptionChainQuery::OnNetworkLineBuffer CEO parse error: "
+                        << "OptionChainQuery::OnNetworkLineBuffer CEO/CFO parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
                         << "'," << chain.vSymbol.size()
