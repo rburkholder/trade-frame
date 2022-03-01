@@ -36,63 +36,78 @@ namespace option { // options
 //    using fGatherOptions_t = std::function<void(const std::string& sUnderlying, fOption_t&&)>;
 
 template<typename mapChains_t>
+typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) { // find existing expiry, or create new one
+
+  using chain_t = typename mapChains_t::mapped_type;
+  using iterator_t = typename mapChains_t::iterator;
+
+  chain_t chain; // default chain for insertion into new entry
+
+  const boost::gregorian::date date( pOption->GetExpiry() );
+
+  iterator_t iterChains = map.find( date ); // see if expiry date exists
+  if ( map.end() == iterChains ) { // insert new expiry set if not
+    std::cout
+      << "GetChain created chain: "
+      << pOption->GetInstrumentName() << ","
+      << date.year() << "/"
+      << date.month().as_number() << "/"
+      << date.day()
+      << std::endl;
+    iterChains = map.insert(
+      map.begin(),
+      typename mapChains_t::value_type( date, std::move( chain ) )
+      );
+  }
+  return iterChains;
+}
+
+template<typename chain_t, typename OptionEntry>
+OptionEntry* PopulateOption( chain_t& chain, pOption_t pOption ) {
+
+  // populate new call or put, no test for pre-existance
+  //std::cout << "  option: " << row.sSymbol << std::endl;
+
+  OptionEntry* pOptionEntry {};
+
+  try {
+    switch ( pOption->GetOptionSide() ) {
+      case ou::tf::OptionSide::Call:
+        {
+          OptionEntry& entry( chain.SetIQFeedNameCall( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) ) );
+          pOptionEntry = &entry;
+        }
+        break;
+      case ou::tf::OptionSide::Put:
+        {
+          OptionEntry& entry( chain.SetIQFeedNamePut( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) ) );
+          pOptionEntry = &entry;
+        }
+        break;
+      default:
+        assert( false );
+        break;
+    }
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout << "PopulateOption error" << std::endl;
+  }
+  return pOptionEntry;
+}
+
+template<typename mapChains_t> // used for populating option names into a default chain
 void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t&& fGatherOptions ) {
-  size_t cnt {};
   fGatherOptions(
     sUnderlying,
-    [&map,&cnt](pOption_t pOption){  // these are iqfeed based symbol names
-
-        cnt++;
+    [&map](pOption_t pOption){  // these are iqfeed based symbol names
 
         using chain_t = typename mapChains_t::mapped_type;
         using iterator_t = typename mapChains_t::iterator;
+        using OptionEntry = typename chain_t::option_t;
 
-        const boost::gregorian::date date( pOption->GetExpiry() );
+        iterator_t iterChains = GetChain( map, pOption );
+        PopulateOption<chain_t,OptionEntry>( iterChains->second, pOption );
 
-        iterator_t iterChains;
-
-        { // find existing expiry, or create new one
-          chain_t chain;
-
-          iterChains = map.find( date ); // see if expiry date exists
-          if ( map.end() == iterChains ) { // insert new expiry set if not
-            std::cout
-              << "PopulateMap chain: "
-              << pOption->GetInstrumentName() << ","
-              << date.year() << "/"
-              << date.month().as_number() << "/"
-              << date.day()
-              << std::endl;
-            iterChains = map.insert(
-              map.begin(),
-              typename mapChains_t::value_type( date, std::move( chain ) )
-              );
-          }
-        }
-
-        { // populate new call or put, no test for pre-existance
-
-          chain_t& chain( iterChains->second );
-
-          //std::cout << "  option: " << row.sSymbol << std::endl;
-
-          try {
-            switch ( pOption->GetOptionSide() ) {
-              case ou::tf::OptionSide::Call:
-                chain.SetIQFeedNameCall( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-                break;
-              case ou::tf::OptionSide::Put:
-                chain.SetIQFeedNamePut( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-                break;
-              default:
-                assert( false );
-                break;
-            }
-          }
-          catch ( std::runtime_error& e ) {
-            std::cout << "PopulateMap::fGatherOptionDefinitions error" << std::endl;
-          }
-        }
   });
 }
 

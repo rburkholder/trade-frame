@@ -220,17 +220,18 @@ void AppIndicatorTrading::ConstructInstrument() {
           [this,expiry]( const OptionChainQuery::FutureChain& chain ){
 
             for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: chain.vSymbol ) {
-              m_pBuildInstrument->Queue( sSymbol,
-              [this,expiry]( pInstrument_t pInstrument ){
+              m_pBuildInstrument->Queue(
+                sSymbol,
+                [this,expiry]( pInstrument_t pInstrument ){
 
-                std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
-                if ( expiry == pInstrument->GetExpiry() ) {
-                  using pWatch_t = ou::tf::Watch::pWatch_t;
-                  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+                  std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
+                  if ( expiry == pInstrument->GetExpiry() ) {
+                    using pWatch_t = ou::tf::Watch::pWatch_t;
+                    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
 
-                  SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
-                }
-              } );
+                    SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+                  }
+                } );
             }
           }
           );
@@ -246,7 +247,6 @@ void AppIndicatorTrading::ConstructInstrument() {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
 
         SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
-
       } );
   }
 

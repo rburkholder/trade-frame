@@ -180,6 +180,7 @@ void InteractiveChart::SetPosition(
 
   // --
 
+  m_fBuildOption = std::move( fBuildOption );
   m_pOptionChainQuery = pOptionChainQuery;
 
   using vMAPeriods_t = std::vector<int>;
@@ -203,9 +204,9 @@ void InteractiveChart::SetPosition(
 
   m_vStochastic.clear();
 
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), config.nStochastic1Periods, td, ou::Colour::Aquamarine ) );
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DeepPink ) );
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::Fuchsia ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
 
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
     vt->AddToChart( m_dvChart );
@@ -223,8 +224,7 @@ void InteractiveChart::SetPosition(
 
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName(
-      ou::tf::Instrument::eidProvider_t::EProviderIQF),
-    std::move( fBuildOption )
+      ou::tf::Instrument::eidProvider_t::EProviderIQF)
     );
 
   // --
@@ -235,31 +235,46 @@ void InteractiveChart::SetPosition(
 
 }
 
-void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, fBuildOption_t&& fBuildOption ) {
+void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) {
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
   using fOption_t = ou::tf::option::fOption_t;
 
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
-      ou::tf::option::PopulateMap<mapChains_t>(
+      ou::tf::option::PopulateMap<mapChains_t>( // TODO: simplify this, mayb merge the chains.h code into here
         m_mapChains,
         sIQFeedUnderlying,
-        [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
+        [ this ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
           m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
             sIQFeedUnderlying,
-            "pc", "", "", "1",
-            [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
+            "cp", "", "234", "1",
+            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
                 << "chain request " << chains.sSymbol << " has "
                 << chains.vSymbol.size() << " options"
                 << std::endl;
 
               for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
-                fBuildOption__(
+                m_fBuildOption(
                   sSymbol,
                   [this, fOption_ ]( pOption_t pOption ){
-                    fOption_( pOption ); // places into chain
+                    fOption_( pOption ); // place name of option into chain
+                    auto expiry = pOption->GetExpiry();
+                    mapChains_t::iterator iter = m_mapChains.find( expiry );
+                    assert( m_mapChains.end() != iter ); // was already just inserted
+                    chain_t& chain( iter->second );
+                    switch ( pOption->GetOptionSide() ) {
+                      case ou::tf::OptionSide::Call:
+                        chain.GetStrike( pOption->GetStrike() ).call.pOption = pOption;
+                        break;
+                      case ou::tf::OptionSide::Put:
+                        chain.GetStrike( pOption->GetStrike() ).put.pOption = pOption;
+                        break;
+                      default:
+                        assert( false );
+                        break;
+                    }
                   });
               }
             });
@@ -270,21 +285,22 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
       ou::tf::option::PopulateMap<mapChains_t>(
         m_mapChains,
         sIQFeedUnderlying,
-        [ this, fBuildOption_=std::move( fBuildOption ) ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
+        [ this ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
           m_pOptionChainQuery->QueryEquityOptionChain(
             sIQFeedUnderlying,
-            "pc", "", "1", "2", "3", "3", // four months, all strikes
-            [ this, &sIQFeedUnderlying, fBuildOption__=std::move( fBuildOption_ ), fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
+            "cp", "", "1", "2", "3", "3", // four months, all strikes
+            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
               std::cout
                 << "chain request " << chains.sSymbol << " has "
                 << chains.vSymbol.size() << " options"
                 << std::endl;
 
               for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
-                fBuildOption__(
+                m_fBuildOption(
                   sSymbol,
                   [this, fOption_]( pOption_t pOption ){
                     fOption_( pOption ); // places into chain
+                    // TODO: this needs to match the section from the futures above
                   });
               }
             });
@@ -298,18 +314,32 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying, f
 }
 
 void InteractiveChart::ProcessChains() {
-  for ( const mapChains_t::value_type& vt: m_mapChains ) {
-    size_t nStrikes {};
-    vt.second.Strikes(
-      [&nStrikes]( double strike, const chain_t::strike_t& options ){
-        if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
-          nStrikes++;
-        }
-    } );
-    std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
-    if ( 10 < nStrikes ) {
-      std::cout << "chain " << vt.first << " marked" << std::endl;
-      m_vChains.emplace_back( vt.first );
+
+  if ( 0 == m_vChains.size() ) {
+
+    for ( const mapChains_t::value_type& vt: m_mapChains ) {
+      size_t nStrikes {};
+      vt.second.Strikes(
+        [&nStrikes]( double strike, const chain_t::strike_t& options ){
+          if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
+            nStrikes++;
+          }
+      } );
+
+      std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
+      if ( 10 < nStrikes ) {
+        std::cout << "chain " << vt.first << " marked" << std::endl;
+        m_vChains.emplace_back( vt.first );
+      }
+    }
+
+    if ( m_quote.IsValid() ) {
+      double mid( m_quote.Midpoint() );
+      for ( const vChains_t::value_type& expiry :m_vChains ) {
+        mapChains_t::const_iterator citer = m_mapChains.find( expiry );
+        assert( m_mapChains.end() != citer );
+        // look for a range of options
+      }
     }
   }
 }

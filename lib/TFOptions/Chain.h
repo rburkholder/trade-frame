@@ -83,7 +83,7 @@ public:
   using fStrike_t = std::function<void( double, const strike_t& )>;
 
   Chain() {}
-  Chain( const Chain&& rhs ) {
+  Chain( Chain&& rhs ) {
     m_mapChain = std::move( rhs.m_mapChain );
   }
   virtual ~Chain() {};
@@ -95,11 +95,11 @@ public:
     exception_at_start_of_chain( const char* ch ): exception_strike_not_found( ch ) {}
   };
 
-  void SetIQFeedNameCall( double strike, const std::string& sIQFeedSymbolName );
-  void SetIQFeedNamePut( double strike, const std::string& sIQFeedSymbolName );
+  Option& SetIQFeedNameCall( double strike, const std::string& sIQFeedSymbolName );
+  Option& SetIQFeedNamePut(  double strike, const std::string& sIQFeedSymbolName );
 
   const std::string GetIQFeedNameCall( double strike ) const;
-  const std::string GetIQFeedNamePut( double strike ) const;
+  const std::string GetIQFeedNamePut(  double strike ) const;
 
   const chain::Strike<Option>& GetStrike( double strike ) const;
   chain::Strike<Option>& GetStrike( double strike );
@@ -333,7 +333,7 @@ int Chain<Option>::AdjacentStrikes( double strikeSource, double& strikeLower, do
 }
 
 template<typename Option>
-void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
+Option& Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
   typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
@@ -345,10 +345,11 @@ void Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQF
   else {
     iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
   }
+  return iter->second.call;
 }
 
 template<typename Option>
-void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
+Option& Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
   typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
     iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
@@ -360,6 +361,7 @@ void Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFe
   else {
     iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
   }
+  return iter->second.put;
 }
 
 template<typename Option>

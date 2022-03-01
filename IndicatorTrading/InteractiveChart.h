@@ -254,7 +254,13 @@ private:
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
-  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
+  fBuildOption_t m_fBuildOption;
+
+  struct BuiltOption: public ou::tf::option::chain::OptionName {
+    pOption_t pOption;
+  };
+
+  using chain_t = ou::tf::option::Chain<BuiltOption>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
@@ -272,7 +278,7 @@ private:
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
 
-  void OptionChainQuery( const std::string&, fBuildOption_t&& );
+  void OptionChainQuery( const std::string& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
