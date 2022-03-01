@@ -361,6 +361,14 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
         if ( "KEYOK" == msg->Field( 2 ) ) {
         }
+
+        if ( "SERVER DISCONNECTED" == msg->Field( 2 ) ) {
+          std::cout << "IQFeed status: disconnected" << std::endl;
+        }
+        if ( "SERVER CONNECTED" == msg->Field( 2 ) ) {
+          std::cout << "IQFeed status: connected" << std::endl;
+        }
+
         if ( &IQFeed<T>::OnIQFeedSystemMessage != &T::OnIQFeedSystemMessage ) {
           static_cast<T*>( this )->OnIQFeedSystemMessage( pBuffer, msg);
         }
