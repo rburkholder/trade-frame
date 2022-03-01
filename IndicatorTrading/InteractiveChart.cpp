@@ -21,8 +21,6 @@
 
 #include <memory>
 
-#include <TFIQFeed/OptionChainQuery.h>
-
 #include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
 
@@ -237,7 +235,8 @@ void InteractiveChart::SetPosition(
 
 void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) {
 
-  using query_t = ou::tf::iqfeed::OptionChainQuery;
+  namespace ph = std::placeholders;
+
   using fOption_t = ou::tf::option::fOption_t;
 
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
@@ -245,56 +244,40 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
       m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
         sIQFeedUnderlying,
         "cp", "", "234", "1",
-        [ this ] ( const query_t::OptionList& list ){
-          std::cout
-            << "chain request " << list.sUnderlying << " has "
-            << list.vSymbol.size() << " options"
-            << std::endl;
-
-          for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
-            m_fBuildOption(
-              sSymbol,
-              [this]( pOption_t pOption ){
-
-                mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
-                BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
-                assert( pBuiltOption );
-
-                pBuiltOption->pOption = pOption;
-
-              });
-          }
-        });
+        std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
+        );
       break;
     case ou::tf::InstrumentType::Stock:
-      ou::tf::option::PopulateMap<mapChains_t>(
-        m_mapChains,
+      m_pOptionChainQuery->QueryEquityOptionChain(
         sIQFeedUnderlying,
-        [ this ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
-          m_pOptionChainQuery->QueryEquityOptionChain(
-            sIQFeedUnderlying,
-            "cp", "", "1", "2", "3", "3", // four months, all strikes
-            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionList& list ){
-              std::cout
-                << "chain request " << list.sUnderlying << " has "
-                << list.vSymbol.size() << " options"
-                << std::endl;
-
-              for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
-                m_fBuildOption(
-                  sSymbol,
-                  [this, fOption_]( pOption_t pOption ){
-                    fOption_( pOption ); // places into chain
-                    // TODO: this needs to match the section from the futures above
-                  });
-              }
-            });
-        }
-      );
+        "cp", "", "1", "2", "3", "3", // four months, all strikes
+        std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
+        );
       break;
     default:
       assert( false );
       break;
+  }
+}
+
+void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
+  std::cout
+    << "chain request " << list.sUnderlying << " has "
+    << list.vSymbol.size() << " options"
+    << std::endl;
+
+  for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
+    m_fBuildOption(
+      sSymbol,
+      [this]( pOption_t pOption ){
+
+        mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
+        BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+        assert( pBuiltOption );
+
+        pBuiltOption->pOption = pOption;
+
+      });
   }
 }
 

@@ -39,6 +39,8 @@
 
 #include <TFTimeSeries/BarFactory.h>
 
+#include <TFIQFeed/OptionChainQuery.h>
+
 #include <TFTrading/Position.h>
 
 #include <TFOptions/Chain.h>
@@ -269,6 +271,8 @@ private:
   using vChains_t = std::vector<boost::gregorian::date>;
   vChains_t m_vChains;
 
+  using query_t = ou::tf::iqfeed::OptionChainQuery;
+
   void Init();
 
   void HandleQuote( const ou::tf::Quote& );
@@ -279,6 +283,7 @@ private:
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
 
   void OptionChainQuery( const std::string& );
+  void PopulateChains( const query_t::OptionList& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
