@@ -242,44 +242,29 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
 
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
-      ou::tf::option::PopulateMap<mapChains_t>( // TODO: simplify this, mayb merge the chains.h code into here
-        m_mapChains,
+      m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
         sIQFeedUnderlying,
-        [ this ](const std::string& sIQFeedUnderlying, fOption_t&& fOption ) {
-          m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
-            sIQFeedUnderlying,
-            "cp", "", "234", "1",
-            [ this, &sIQFeedUnderlying, fOption_ = std::move( fOption ) ] ( const query_t::OptionChain& chains ){
-              std::cout
-                << "chain request " << chains.sSymbol << " has "
-                << chains.vSymbol.size() << " options"
-                << std::endl;
+        "cp", "", "234", "1",
+        [ this ] ( const query_t::OptionChain& chains ){
+          std::cout
+            << "chain request " << chains.sSymbol << " has "
+            << chains.vSymbol.size() << " options"
+            << std::endl;
 
-              for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
-                m_fBuildOption(
-                  sSymbol,
-                  [this, fOption_ ]( pOption_t pOption ){
-                    fOption_( pOption ); // place name of option into chain
-                    auto expiry = pOption->GetExpiry();
-                    mapChains_t::iterator iter = m_mapChains.find( expiry );
-                    assert( m_mapChains.end() != iter ); // was already just inserted
-                    chain_t& chain( iter->second );
-                    switch ( pOption->GetOptionSide() ) {
-                      case ou::tf::OptionSide::Call:
-                        chain.GetStrike( pOption->GetStrike() ).call.pOption = pOption;
-                        break;
-                      case ou::tf::OptionSide::Put:
-                        chain.GetStrike( pOption->GetStrike() ).put.pOption = pOption;
-                        break;
-                      default:
-                        assert( false );
-                        break;
-                    }
-                  });
-              }
-            });
-        }
-      );
+          for ( const query_t::vSymbol_t::value_type& sSymbol: chains.vSymbol ) {
+            m_fBuildOption(
+              sSymbol,
+              [this]( pOption_t pOption ){
+
+                mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
+                BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+                assert( pBuiltOption );
+
+                pBuiltOption->pOption = pOption;
+
+              });
+          }
+        });
       break;
     case ou::tf::InstrumentType::Stock:
       ou::tf::option::PopulateMap<mapChains_t>(

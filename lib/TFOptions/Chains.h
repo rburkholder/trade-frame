@@ -48,11 +48,12 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
   iterator_t iterChains = map.find( date ); // see if expiry date exists
   if ( map.end() == iterChains ) { // insert new expiry set if not
     std::cout
-      << "GetChain created chain: "
-      << pOption->GetInstrumentName() << ","
+      << "GetChain created: "
       << date.year() << "/"
       << date.month().as_number() << "/"
       << date.day()
+      << " with "
+      << pOption->GetInstrumentName()
       << std::endl;
     iterChains = map.insert(
       map.begin(),
@@ -63,7 +64,7 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
 }
 
 template<typename chain_t, typename OptionEntry>
-OptionEntry* PopulateOption( chain_t& chain, pOption_t pOption ) {
+OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
 
   // populate new call or put, no test for pre-existance
   //std::cout << "  option: " << row.sSymbol << std::endl;
@@ -106,7 +107,7 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
         using OptionEntry = typename chain_t::option_t;
 
         iterator_t iterChains = GetChain( map, pOption );
-        PopulateOption<chain_t,OptionEntry>( iterChains->second, pOption );
+        UpdateOption<chain_t,OptionEntry>( iterChains->second, pOption );
 
   });
 }
