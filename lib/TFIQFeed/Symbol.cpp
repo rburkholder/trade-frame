@@ -132,7 +132,7 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
         if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
           summary.dblOpen = dblOpen;
           summary.bNewOpen = true;
-          std::cout << "IQF new open: " << GetId() << "=" << summary.dblOpen << std::endl;
+          std::cout << "IQF new open 1: " << GetId() << "=" << summary.dblOpen << std::endl;
         };
         break;
       case 'E':
@@ -193,7 +193,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T>* pMsg ) {
       if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
         summary.dblOpen = dblOpen;
         summary.bNewOpen = true;
-        std::cout << "IQF new open: " << GetId() << "=" << summary.dblOpen << std::endl;
+        std::cout << "IQF new open 2: " << GetId() << "=" << summary.dblOpen << std::endl;
       };
       summary.nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
