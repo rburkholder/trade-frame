@@ -103,6 +103,7 @@ public:
 
   void EmitChainFull() const {
     size_t cnt {};
+    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       cnt += vt.second.EmitValues();
@@ -113,6 +114,7 @@ public:
 
   void EmitChainSummary() const {
     size_t cnt {};
+    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       //vt.second.EmitValues();
@@ -268,8 +270,69 @@ private:
 
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
-  using vChains_t = std::vector<boost::gregorian::date>;
-  vChains_t m_vChains;
+  using vExpiries_t = std::vector<boost::gregorian::date>; // usable chains
+  vExpiries_t m_vExpiries; // possibly change this to a map of iterators
+
+  struct OptionTracker {
+
+    bool bActive;
+    pOption_t pOption;
+
+    void Add() {
+      if ( !bActive ) {
+        bActive = true;
+        pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTrade ) );
+        //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+        pOption->StartWatch();
+      }
+    }
+    void Del() {
+      if ( bActive ) {
+        pOption->StopWatch();
+        pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTrade ) );
+        //pOption->OnQuote.Remove( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+        bActive = false;
+      }
+    }
+
+    OptionTracker( pOption_t pOption_ )
+    : bActive( false ), pOption( pOption_ )
+    {
+      Add();
+      std::cout << "option " << pOption->GetInstrumentName() << " added" << std::endl;
+    }
+
+    OptionTracker( OptionTracker& rhs )
+    : bActive( false ), pOption( rhs.pOption )
+    {
+      Add();
+    }
+
+    OptionTracker( OptionTracker&& rhs )
+    : bActive( false )
+    {
+      rhs.Del();
+      pOption = std::move( rhs.pOption );
+      Add();
+    };
+
+    ~OptionTracker() {
+      Del();
+      pOption.reset();
+    }
+
+    void HandleQuote( const ou::tf::Quote& quote ) {
+    }
+
+    void HandleTrade( const ou::tf::Trade& trade ) {
+      std::cout << pOption->GetInstrumentName() << ": " << trade.Volume() << "@" << trade.Price() << std::endl;
+    }
+  };
+
+  bool bOptionsReady;
+  using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
+  using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
+  mapStrikes_t m_mapStrikes;
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
@@ -284,6 +347,9 @@ private:
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );
+
+  void CheckOptions();
+  void AddOptionTracker( chain_t& chain, double strike );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
