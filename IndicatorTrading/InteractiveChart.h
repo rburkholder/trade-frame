@@ -281,16 +281,32 @@ private:
     void Add() {
       if ( !bActive ) {
         bActive = true;
-        pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTrade ) );
-        //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+        switch ( pOption->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
+            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            break;
+          case ou::tf::OptionSide::Put:
+            pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
+            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            break;
+        }
         pOption->StartWatch();
       }
     }
     void Del() {
       if ( bActive ) {
         pOption->StopWatch();
-        pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTrade ) );
-        //pOption->OnQuote.Remove( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+        switch ( pOption->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
+            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            break;
+          case ou::tf::OptionSide::Put:
+            pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
+            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            break;
+        }
         bActive = false;
       }
     }
@@ -324,8 +340,56 @@ private:
     void HandleQuote( const ou::tf::Quote& quote ) {
     }
 
-    void HandleTrade( const ou::tf::Trade& trade ) {
-      std::cout << pOption->GetInstrumentName() << ": " << trade.Volume() << "@" << trade.Price() << std::endl;
+    void HandleTradeCall( const ou::tf::Trade& trade ) {
+      double price = trade.Price();
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      std::string s;
+      if ( quote.Bid() == quote.Ask() ) {
+        // can't really say, will need to check if bid came to ask or ask came to bid
+        s = "??";
+      }
+      else {
+        double mid = quote.Midpoint();
+        if ( price >= mid ) {
+          s = "bu";
+        }
+        else {
+          s = "be";
+        }
+      }
+      std::cout <<
+           pOption->GetInstrumentName() << ": "
+        << s << " "
+        << quote.Bid() << ","
+        << trade.Volume() << "@" << price << ","
+        << quote.Ask()
+        << std::endl;
+    }
+
+    void HandleTradePut( const ou::tf::Trade& trade ) {
+      double price = trade.Price();
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      std::string s;
+      if ( quote.Bid() == quote.Ask() ) {
+        // can't really say, will need to check if bid came to ask or ask came to bid
+        s = "??";
+      }
+      else {
+        double mid = quote.Midpoint();
+        if ( price >= mid ) {
+          s = "be";
+        }
+        else {
+          s = "bu";
+        }
+      }
+      std::cout <<
+           pOption->GetInstrumentName() << ": "
+        << s << " "
+        << quote.Bid() << ","
+        << trade.Volume() << "@" << price << ","
+        << quote.Ask()
+        << std::endl;
     }
   };
 

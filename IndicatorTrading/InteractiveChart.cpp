@@ -281,6 +281,7 @@ void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
 
       });
   }
+  std::cout << " .. option chains built." << std::endl;
 }
 
 void InteractiveChart::ProcessChains() {
