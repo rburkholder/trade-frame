@@ -358,61 +358,61 @@ void InteractiveChart::CheckOptions() {
     double mid( m_quote.Midpoint() );
     for ( const vExpiries_t::value_type& expiry : m_vExpiries ) {
 
-      mapChains_t::iterator iterChain = m_mapChains.find( expiry );
-      assert( m_mapChains.end() != iterChain );
-      chain_t& chain( iterChain->second );
+      mapChains_t::iterator iterChains = m_mapChains.find( expiry );
+      assert( m_mapChains.end() != iterChains );
+      chain_t& chain( iterChains->second );
 
-      mapStrikes_t::iterator iterStrike;
       double strike;
+      pOption_t pOption;
 
-      { // call
-        strike = chain.Call_Atm( mid );
-        pOption_t pOption = chain.GetStrike( strike ).call.pOption;
-        const std::string& sOptionName( pOption->GetInstrumentName() );
+      // call
+      strike = chain.Call_Itm( mid );
+      pOption = chain.GetStrike( strike ).call.pOption;
+      AddOptionTracker( strike, pOption );
 
-        iterStrike = m_mapStrikes.find( strike );
-        if ( m_mapStrikes.end() == iterStrike ) {
-          std::pair<mapStrikes_t::iterator,bool> pair = m_mapStrikes.emplace( mapStrikes_t::value_type( strike, mapOptionTracker_t() ) );
-          assert( pair.second );
-          iterStrike = std::move( pair.first );
-        };
+      strike = chain.Call_Atm( mid );
+      pOption = chain.GetStrike( strike ).call.pOption;
+      AddOptionTracker( strike, pOption );
 
-        mapOptionTracker_t& mapOptionTracker( iterStrike->second );
-        mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
+      strike = chain.Call_Otm( mid );
+      pOption = chain.GetStrike( strike ).call.pOption;
+      AddOptionTracker( strike, pOption );
 
-        if ( mapOptionTracker.end() == iterOptionTracker ) {
-          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
-        }
+      // put
+      strike = chain.Put_Itm( mid );
+      pOption = chain.GetStrike( strike ).put.pOption;
+      AddOptionTracker( strike, pOption );
 
-      }
+      strike = chain.Put_Atm( mid );
+      pOption = chain.GetStrike( strike ).put.pOption;
+      AddOptionTracker( strike, pOption );
 
-      { // put
-        strike = chain.Put_Atm( mid );
-        pOption_t pOption = chain.GetStrike( strike ).put.pOption;
-        const std::string& sOptionName( pOption->GetInstrumentName() );
-
-        iterStrike = m_mapStrikes.find( strike );
-        if ( m_mapStrikes.end() == iterStrike ) {
-          std::pair<mapStrikes_t::iterator,bool> pair = m_mapStrikes.emplace( mapStrikes_t::value_type( strike, mapOptionTracker_t() ) );
-          assert( pair.second );
-          iterStrike = std::move( pair.first );
-        };
-
-        mapOptionTracker_t& mapOptionTracker( iterStrike->second );
-        mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
-
-        if ( mapOptionTracker.end() == iterOptionTracker ) {
-          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
-        }
-
-      }
+      strike = chain.Put_Otm( mid );
+      pOption = chain.GetStrike( strike ).put.pOption;
+      AddOptionTracker( strike, pOption );
 
     }
   }
 }
 
-void InteractiveChart::AddOptionTracker( chain_t& chain, double strike ) {
-  // needs to be refactored from above
+void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+
+  const std::string& sOptionName( pOption->GetInstrumentName() );
+
+  mapStrikes_t::iterator iterStrike;
+  iterStrike = m_mapStrikes.find( strike );
+  if ( m_mapStrikes.end() == iterStrike ) {
+    std::pair<mapStrikes_t::iterator,bool> pair = m_mapStrikes.emplace( mapStrikes_t::value_type( strike, mapOptionTracker_t() ) );
+    assert( pair.second );
+    iterStrike = std::move( pair.first );
+  };
+
+  mapOptionTracker_t& mapOptionTracker( iterStrike->second );
+
+  mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
+  if ( mapOptionTracker.end() == iterOptionTracker ) {
+    mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
+  }
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {

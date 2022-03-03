@@ -429,7 +429,7 @@ bool bOptionsReady;
   void PopulateChains( const query_t::OptionList& );
 
   void CheckOptions();
-  void AddOptionTracker( chain_t& chain, double strike );
+  void AddOptionTracker( double strike, pOption_t );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
