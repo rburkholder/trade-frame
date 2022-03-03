@@ -349,7 +349,6 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
     m_bfPriceDn.Add( dt, price, -trade.Volume() );
   }
 
-  CheckOptions();
 }
 
 void InteractiveChart::CheckOptions() {
@@ -382,7 +381,7 @@ void InteractiveChart::CheckOptions() {
         mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
 
         if ( mapOptionTracker.end() == iterOptionTracker ) {
-          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, pOption ) );
+          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
         }
 
       }
@@ -403,7 +402,7 @@ void InteractiveChart::CheckOptions() {
         mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
 
         if ( mapOptionTracker.end() == iterOptionTracker ) {
-          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, pOption ) );
+          mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
         }
 
       }
@@ -419,6 +418,7 @@ void InteractiveChart::AddOptionTracker( chain_t& chain, double strike ) {
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   //m_ceVolume.Append( bar );
   //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+  CheckOptions();
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {

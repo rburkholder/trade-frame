@@ -164,12 +164,12 @@ private:
   ou::ChartEntryIndicator m_ceQuoteBid;
   ou::ChartEntryIndicator m_ceQuoteSpread;
 
-  ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongEntries;
-  ou::ChartEntryShape m_ceShortFills;
+  ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongFills;
-  ou::ChartEntryShape m_ceShortExits;
+  ou::ChartEntryShape m_ceShortFills;
   ou::ChartEntryShape m_ceLongExits;
+  ou::ChartEntryShape m_ceShortExits;
 
   ou::ChartEntryMark m_cemStochastic;
 
@@ -273,92 +273,104 @@ private:
   using vExpiries_t = std::vector<boost::gregorian::date>; // usable chains
   vExpiries_t m_vExpiries; // possibly change this to a map of iterators
 
+  // ==
+
   struct OptionTracker {
 
-    bool bActive;
-    pOption_t pOption;
+    bool m_bActive;
+    pOption_t m_pOption;
+
+    ou::ChartEntryShape& m_ceBull;
+    ou::ChartEntryShape& m_ceBear;
 
     void Add() {
-      if ( !bActive ) {
-        bActive = true;
-        switch ( pOption->GetOptionSide() ) {
+      if ( !m_bActive ) {
+        m_bActive = true;
+        switch ( m_pOption->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
-            pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
-            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            m_pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
             break;
           case ou::tf::OptionSide::Put:
-            pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
-            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            m_pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
+            break;
+          default:
+            assert( false );
             break;
         }
-        pOption->StartWatch();
+        m_pOption->StartWatch();
       }
     }
     void Del() {
-      if ( bActive ) {
-        pOption->StopWatch();
-        switch ( pOption->GetOptionSide() ) {
+      if ( m_bActive ) {
+        m_pOption->StopWatch();
+        switch ( m_pOption->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
-            pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
-            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
             break;
           case ou::tf::OptionSide::Put:
-            pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
-            //pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
+            m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
+            break;
+          default:
+            assert( false );
             break;
         }
-        bActive = false;
+        m_bActive = false;
       }
     }
 
-    OptionTracker( pOption_t pOption_ )
-    : bActive( false ), pOption( pOption_ )
+    OptionTracker( pOption_t pOption_, ou::ChartEntryShape& ceBull, ou::ChartEntryShape& ceBear )
+    : m_bActive( false ), m_pOption( pOption_ )
+    , m_ceBull( ceBull ), m_ceBear( ceBear )
     {
       Add();
-      std::cout << "option " << pOption->GetInstrumentName() << " added" << std::endl;
+      std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
     }
 
     OptionTracker( OptionTracker& rhs )
-    : bActive( false ), pOption( rhs.pOption )
+    : m_bActive( false ), m_pOption( rhs.m_pOption )
+    , m_ceBull( rhs.m_ceBull ), m_ceBear( rhs.m_ceBear )
     {
       Add();
     }
 
     OptionTracker( OptionTracker&& rhs )
-    : bActive( false )
+    : m_bActive( false )
+    , m_ceBull( rhs.m_ceBull ), m_ceBear( rhs.m_ceBear )
     {
       rhs.Del();
-      pOption = std::move( rhs.pOption );
+      m_pOption = std::move( rhs.m_pOption );
       Add();
     };
 
     ~OptionTracker() {
       Del();
-      pOption.reset();
+      m_pOption.reset();
     }
 
     void HandleQuote( const ou::tf::Quote& quote ) {
     }
 
     void HandleTradeCall( const ou::tf::Trade& trade ) {
-      double price = trade.Price();
-      const ou::tf::Quote& quote( pOption->LastQuote() );
+      const double price = trade.Price();
+      const ou::tf::Quote& quote( m_pOption->LastQuote() );
+      const double mid = quote.Midpoint();
       std::string s;
-      if ( quote.Bid() == quote.Ask() ) {
+      if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
         s = "??";
       }
       else {
-        double mid = quote.Midpoint();
-        if ( price >= mid ) {
+        if ( price > mid ) {
           s = "bu";
+          m_ceBull.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
         else {
           s = "be";
+          m_ceBear.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
       }
       std::cout <<
-           pOption->GetInstrumentName() << ": "
+           m_pOption->GetInstrumentName() << ": "
         << s << " "
         << quote.Bid() << ","
         << trade.Volume() << "@" << price << ","
@@ -367,24 +379,26 @@ private:
     }
 
     void HandleTradePut( const ou::tf::Trade& trade ) {
-      double price = trade.Price();
-      const ou::tf::Quote& quote( pOption->LastQuote() );
+      const double price = trade.Price();
+      const ou::tf::Quote& quote( m_pOption->LastQuote() );
+      const double mid = quote.Midpoint();
       std::string s;
-      if ( quote.Bid() == quote.Ask() ) {
+      if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
         s = "??";
       }
       else {
-        double mid = quote.Midpoint();
-        if ( price >= mid ) {
+        if ( price > mid ) {
           s = "be";
+          m_ceBear.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
         else {
           s = "bu";
+          m_ceBull.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
       }
       std::cout <<
-           pOption->GetInstrumentName() << ": "
+           m_pOption->GetInstrumentName() << ": "
         << s << " "
         << quote.Bid() << ","
         << trade.Volume() << "@" << price << ","
@@ -393,7 +407,9 @@ private:
     }
   };
 
-  bool bOptionsReady;
+    // ==
+
+bool bOptionsReady;
   using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
   mapStrikes_t m_mapStrikes;
