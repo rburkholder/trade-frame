@@ -44,6 +44,8 @@ InteractiveChart::InteractiveChart()
 , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
 , bOptionsReady( false )
 {
@@ -65,6 +67,8 @@ InteractiveChart::InteractiveChart(
 , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
 , bOptionsReady( false )
 {
@@ -104,6 +108,9 @@ void InteractiveChart::Init() {
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
+
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBull );
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBear );
 
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
@@ -413,7 +420,7 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
   mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
   if ( mapOptionTracker.end() == iterOptionTracker ) {
-    mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceLongEntries, m_ceShortEntries ) ) );
+    mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceBull, m_ceBear ) ) );
   }
 }
 

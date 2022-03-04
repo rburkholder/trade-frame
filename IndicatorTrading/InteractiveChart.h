@@ -132,7 +132,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Spread, StochInd, PL }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, StochInd, Sentiment, PL, Spread }; // IndMA = moving averate indicator
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -169,6 +169,9 @@ private:
   ou::ChartEntryShape m_ceShortFills;
   ou::ChartEntryShape m_ceLongExits;
   ou::ChartEntryShape m_ceShortExits;
+
+  ou::ChartEntryShape m_ceBull;
+  ou::ChartEntryShape m_ceBear;
 
   ou::ChartEntryMark m_cemStochastic;
 
