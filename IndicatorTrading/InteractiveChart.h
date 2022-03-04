@@ -41,6 +41,7 @@
 
 #include <TFIQFeed/OptionChainQuery.h>
 
+#include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
 #include <TFOptions/Chain.h>
@@ -69,6 +70,7 @@ class InteractiveChart:
 {
 public:
 
+  using pOrder_t = ou::tf::Order::pOrder_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
@@ -133,6 +135,9 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, StochInd, Sentiment, PL, Spread }; // IndMA = moving averate indicator
+  enum class EPositionState { Looking, GoingLong, Long, GoingShort, Short };
+
+  EPositionState m_statePosition;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -141,6 +146,7 @@ private:
 
   ou::ChartDataView m_dvChart; // the data
 
+  pOrder_t m_pOrder;
   pPosition_t m_pPosition;
 
   double m_dblSumVolumePrice; // part of vwap
@@ -163,15 +169,17 @@ private:
   ou::ChartEntryIndicator m_ceQuoteBid;
   ou::ChartEntryIndicator m_ceQuoteSpread;
 
-  ou::ChartEntryShape m_ceLongEntries;
-  ou::ChartEntryShape m_ceShortEntries;
-  ou::ChartEntryShape m_ceLongFills;
-  ou::ChartEntryShape m_ceShortFills;
-  ou::ChartEntryShape m_ceLongExits;
-  ou::ChartEntryShape m_ceShortExits;
+  ou::ChartEntryShape m_ceLongEntry;
+  ou::ChartEntryShape m_ceShortEntry;
+  ou::ChartEntryShape m_ceLongFill;
+  ou::ChartEntryShape m_ceShortFill;
+  ou::ChartEntryShape m_ceLongExit;
+  ou::ChartEntryShape m_ceShortExit;
 
   ou::ChartEntryShape m_ceBull;
   ou::ChartEntryShape m_ceBear;
+
+  ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::ChartEntryMark m_cemStochastic;
 
@@ -248,6 +256,10 @@ private:
 
     void AddToView( ou::ChartDataView& cdv ) {
       cdv.Add( EChartSlot::Price, &m_ceMA );
+    }
+
+    void AddToView( ou::ChartDataView& cdv, EChartSlot slot ) {
+      cdv.Add( slot, &m_ceMA );
     }
 
     void Update( ptime dt ) {
@@ -371,13 +383,13 @@ private:
           m_ceBear.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
       }
-      std::cout <<
-           m_pOption->GetInstrumentName() << ": "
-        << s << " "
-        << quote.Bid() << ","
-        << trade.Volume() << "@" << price << ","
-        << quote.Ask()
-        << std::endl;
+      //std::cout <<
+      //     m_pOption->GetInstrumentName() << ": "
+      //  << s << " "
+      //  << quote.Bid() << ","
+      //  << trade.Volume() << "@" << price << ","
+      //  << quote.Ask()
+      //  << std::endl;
     }
 
     void HandleTradePut( const ou::tf::Trade& trade ) {
@@ -399,13 +411,13 @@ private:
           m_ceBull.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
       }
-      std::cout <<
-           m_pOption->GetInstrumentName() << ": "
-        << s << " "
-        << quote.Bid() << ","
-        << trade.Volume() << "@" << price << ","
-        << quote.Ask()
-        << std::endl;
+      //std::cout <<
+      //     m_pOption->GetInstrumentName() << ": "
+      //  << s << " "
+      //  << quote.Bid() << ","
+      //  << trade.Volume() << "@" << price << ","
+      //  << quote.Ask()
+      //  << std::endl;
     }
   };
 
@@ -433,6 +445,9 @@ bool bOptionsReady;
   void HandleBarCompletionPrice( const ou::tf::Bar& );
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
+
+  void HandleOrderCancelled( const ou::tf::Order& );
+  void HandleOrderFilled( const ou::tf::Order& );
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );

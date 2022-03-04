@@ -38,16 +38,17 @@ InteractiveChart::InteractiveChart()
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
+, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 , m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
 , bOptionsReady( false )
+, m_statePosition( EPositionState::Looking )
 {
   Init();
 }
@@ -61,16 +62,17 @@ InteractiveChart::InteractiveChart(
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
+, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 , m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
 , bOptionsReady( false )
+, m_statePosition( EPositionState::Looking )
 {
   Init();
 }
@@ -98,12 +100,12 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortEntries );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongEntries );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortFills );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongFills );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortExits );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongExits );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortEntry );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongEntry );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceShortExit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceLongExit );
 
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
@@ -146,6 +148,9 @@ void InteractiveChart::Init() {
   m_ceVolumeDn.SetName( "Volume Down" );
 
   m_ceVolume.SetName( "Volume" );
+
+  m_ceProfitLoss.SetName( "P/L" );
+  m_dvChart.Add( EChartSlot::PL, &m_ceProfitLoss );
 
   BindEvents();
 
@@ -230,6 +235,7 @@ void InteractiveChart::SetPosition(
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_dvChart );
   }
+  m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
 
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName(
@@ -425,8 +431,14 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
+
   //m_ceVolume.Append( bar );
   //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+
+  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
+  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+
   CheckOptions();
 }
 
@@ -468,14 +480,47 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   //std::cout << "OnChar=" << event.GetKeyCode() << std::endl;
   switch ( event.GetKeyCode() ) {
     case 'l':
-      std::cout << "char: go long" << std::endl;
+      std::cout << "going long" << std::endl;
+      m_statePosition = EPositionState::GoingLong;
+      m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+      //m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
+      m_ceLongEntry.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Long Submit" );
+      //m_stateTrade = ETradeState::LongSubmitted;
+      m_pPosition->PlaceOrder( m_pOrder );
       break;
     case 's':
-      std::cout << "char: go short" << std::endl;
+      std::cout << "going short" << std::endl;
+      m_statePosition = EPositionState::GoingShort;
+      m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+      //m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
+      m_ceShortEntry.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Short Submit" );
+      //m_stateTrade = ETradeState::LongSubmitted;
+      m_pPosition->PlaceOrder( m_pOrder );
       break;
     case 'x':
-      std::cout << "char: exit" << std::endl;
+      std::cout << "close out" << std::endl;
+      m_statePosition = EPositionState::Looking;
+      m_pPosition->ClosePosition();
       break;
   }
   event.Skip();
 }
+
+void InteractiveChart::HandleOrderCancelled( const ou::tf::Order& ) {
+}
+
+void InteractiveChart::HandleOrderFilled( const ou::tf::Order& ) {
+  switch ( m_statePosition ) {
+    case EPositionState::GoingLong:
+      m_statePosition = EPositionState::Looking;
+      m_ceLongFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Long Fill" );
+      break;
+    case EPositionState::GoingShort:
+      m_statePosition = EPositionState::Looking;
+      m_ceShortFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Short Fill" );
+      break;
+  }
+}
+
