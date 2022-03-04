@@ -140,6 +140,8 @@ void InteractiveChart::Init() {
 
   m_ceVolume.SetName( "Volume" );
 
+  BindEvents();
+
   SetChartDataView( &m_dvChart );
 
 }
@@ -431,4 +433,42 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
 
 void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
+}
+
+void InteractiveChart::BindEvents() {
+  Bind( wxEVT_DESTROY, &InteractiveChart::OnDestroy, this );
+  Bind( wxEVT_KEY_UP, &InteractiveChart::OnKey, this );
+  Bind( wxEVT_CHAR, &InteractiveChart::OnChar, this );
+}
+
+void InteractiveChart::UnBindEvents() {
+  Unbind( wxEVT_DESTROY, &InteractiveChart::OnDestroy, this );
+  Unbind( wxEVT_KEY_UP, &InteractiveChart::OnKey, this );
+  Unbind( wxEVT_CHAR, &InteractiveChart::OnChar, this );
+}
+
+void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
+  UnBindEvents();
+  event.Skip();  // auto followed by Destroy();
+}
+
+void InteractiveChart::OnKey( wxKeyEvent& event ) {
+  //std::cout << "OnKey=" << event.GetKeyCode() << std::endl;
+  event.Skip();
+}
+
+void InteractiveChart::OnChar( wxKeyEvent& event ) {
+  //std::cout << "OnChar=" << event.GetKeyCode() << std::endl;
+  switch ( event.GetKeyCode() ) {
+    case 'l':
+      std::cout << "char: go long" << std::endl;
+      break;
+    case 's':
+      std::cout << "char: go short" << std::endl;
+      break;
+    case 'x':
+      std::cout << "char: exit" << std::endl;
+      break;
+  }
+  event.Skip();
 }

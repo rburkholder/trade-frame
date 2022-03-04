@@ -70,7 +70,6 @@ class InteractiveChart:
 public:
 
   using pOption_t = ou::tf::option::Option::pOption_t;
-  //using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fOption_t = std::function<void(pOption_t)>;
@@ -417,6 +416,13 @@ bool bOptionsReady;
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
   void Init();
+
+  void BindEvents();
+  void UnBindEvents();
+
+  void OnKey( wxKeyEvent& );
+  void OnChar( wxKeyEvent& );
+  void OnDestroy( wxWindowDestroyEvent& );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
