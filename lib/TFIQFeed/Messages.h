@@ -620,7 +620,7 @@ date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) const {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
-  date d( boost::posix_time::not_a_date_time );
+  date d( 9999, 9, 9 );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
   if ( fielddelimiter.first != fielddelimiter.second ) {
     auto diff = fielddelimiter.second - fielddelimiter.first ;
