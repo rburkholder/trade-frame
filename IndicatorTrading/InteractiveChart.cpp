@@ -452,6 +452,11 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
 
 void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
+    for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
+      tracker.second.SaveWatch( sPrefix );
+    }
+  }
 }
 
 void InteractiveChart::BindEvents() {

@@ -419,11 +419,16 @@ private:
       //  << quote.Ask()
       //  << std::endl;
     }
+
+    void SaveWatch( const std::string& sPrefix ) {
+      m_pOption->SaveSeries( sPrefix );
+    }
   };
 
     // ==
 
-bool bOptionsReady;
+  bool bOptionsReady;
+
   using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
   mapStrikes_t m_mapStrikes;
