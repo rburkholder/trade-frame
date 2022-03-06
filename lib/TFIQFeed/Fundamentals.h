@@ -38,7 +38,7 @@ struct Fundamentals {
   int nPrecision;
   int nContractSize;
   int nAverageVolume;
-  int nShortInterest;
+  int nOpenInterest; // from Update message, not set currently
   ESecurityType eSecurityType;
   ou::tf::OptionSide::enumOptionSide eOptionSide;
   double dblHistoricalVolatility;
@@ -55,7 +55,7 @@ struct Fundamentals {
   boost::posix_time::time_duration timeSessionOpen; // futures, futures options
   boost::posix_time::time_duration timeSessionClose; // futures, futures options
   Fundamentals()
-  : nAverageVolume {}, nPrecision {}, nShortInterest {},
+  : nAverageVolume {}, nPrecision {}, nOpenInterest {},
     eSecurityType( ESecurityType::Unknown ),
     dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
     dbl52WkHi {}, dbl52WkLo {},
