@@ -529,3 +529,66 @@ void InteractiveChart::HandleOrderFilled( const ou::tf::Order& ) {
   }
 }
 
+void InteractiveChart::OptionWatchStart() {
+  if ( bOptionsReady ) {
+    if ( 0 != m_vOptionForQuote.size() ) {
+      std::cout << "OptionForQuote: stop watch first" << std::endl;
+    }
+    else {
+      double mid = m_quote.Midpoint();
+      for ( mapChains_t::value_type& vt: m_mapChains ) {
+        chain_t& chain( vt.second );
+
+        double strike;
+        pOption_t pOption;
+
+        strike = chain.Call_Itm( mid );
+        pOption = chain.GetStrike( strike ).call.pOption;
+        m_vOptionForQuote.push_back( pOption );
+        pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
+        pOption->StartWatch();
+
+        strike = chain.Put_Itm( mid );
+        pOption = chain.GetStrike( strike ).put.pOption;
+        m_vOptionForQuote.push_back( pOption );
+        pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
+        pOption->StartWatch();
+
+      }
+    }
+  }
+}
+
+void InteractiveChart::OptionQuoteShow() {
+  // used to determine low premium/low spread option to trade
+  if ( bOptionsReady ) {
+    if ( 0 == m_vOptionForQuote.size() ) {
+      std::cout << "optionForQuote: no options running" << std::endl;
+    }
+    else {
+      for ( pOption_t pOption: m_vOptionForQuote ) {
+        ou::tf::Quote quote( pOption->LastQuote() );
+        std::cout
+          << pOption->GetInstrumentName()
+          << ": "
+          << "b=" << quote.Bid()
+          << ",a=" << quote.Ask()
+          << ",spread=" << quote.Spread()
+          << std::endl;
+      }
+    }
+  }
+}
+
+void InteractiveChart::OptionWatchStop() {
+  if ( bOptionsReady ) {
+    if ( 0 == m_vOptionForQuote.size() ) {
+      std::cout << "OptionForQuote: start watch first" << std::endl;
+      for ( pOption_t pOption: m_vOptionForQuote ) {
+        pOption->StopWatch();
+        pOption->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
+      }
+      m_vOptionForQuote.clear();
+    }
+  }
+}

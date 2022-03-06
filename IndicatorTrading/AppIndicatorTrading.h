@@ -109,6 +109,10 @@ private:
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
 
+  void HandleMenuActionOptionWatchStart();
+  void HandleMenuActionOptionQuoteShow();
+  void HandleMenuActionOptionWatchStop();
+
   void StartChainQuery();
   void ConstructInstrument();
   void SetInteractiveChart( pPosition_t );

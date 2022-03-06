@@ -128,6 +128,10 @@ public:
 
   void SaveWatch( const std::string& );
 
+  void OptionWatchStart();
+  void OptionQuoteShow();
+  void OptionWatchStop();
+
   void Connect();
   void Disconnect();
 
@@ -433,6 +437,9 @@ private:
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
   mapStrikes_t m_mapStrikes;
 
+  using vOptionForQuote_t = std::vector<pOption_t>;
+  vOptionForQuote_t m_vOptionForQuote;
+
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
   void Init();
@@ -446,6 +453,8 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleOptionWatchQuote( const ou::tf::Quote& ) {}
 
   void HandleBarCompletionPrice( const ou::tf::Bar& );
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );

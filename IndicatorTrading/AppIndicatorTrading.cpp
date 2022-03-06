@@ -160,6 +160,12 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  vItems.clear();
+  vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStart ) ) );
+  vItems.push_back( new mi( "Show Quotes", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionQuoteShow ) ) );
+  vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
+  m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
+
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
@@ -317,6 +323,30 @@ void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
   CallAfter(
     [this](){
       m_pInteractiveChart->ProcessChains();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionWatchStart( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->OptionWatchStart();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionQuoteShow( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->OptionQuoteShow();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->OptionWatchStop();
     }
   );
 }
