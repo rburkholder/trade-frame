@@ -131,6 +131,7 @@ public:
   void OptionWatchStart();
   void OptionQuoteShow();
   void OptionWatchStop();
+  void OptionEmit();
 
   void Connect();
   void Disconnect();

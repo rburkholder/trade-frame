@@ -46,7 +46,7 @@ InteractiveChart::InteractiveChart()
 , m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBullPut( ou::ChartEntryShape::EShort, ou::Colour::LightBlue )
+, m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
@@ -72,7 +72,7 @@ InteractiveChart::InteractiveChart(
 , m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBullPut( ou::ChartEntryShape::EShort, ou::Colour::LightBlue )
+, m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
@@ -266,7 +266,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "234", "1",
+        "cp", "", "234", "3",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
@@ -612,4 +612,7 @@ void InteractiveChart::OptionWatchStop() {
       m_vOptionForQuote.clear();
     }
   }
+}
+
+void InteractiveChart::OptionEmit() {
 }
