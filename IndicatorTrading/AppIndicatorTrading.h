@@ -67,6 +67,7 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::FrameControls* m_pFrameControls;
   ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
+  InteractiveChart* m_pInteractiveChart;
 
   std::string m_sTSDataStreamStarted;
 
@@ -74,8 +75,6 @@ private:
 
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
-
-  InteractiveChart* m_pInteractiveChart;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;

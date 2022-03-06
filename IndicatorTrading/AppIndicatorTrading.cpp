@@ -367,15 +367,18 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
-  DelinkFromPanelProviderControl();
+  SaveState();
 
-  m_pOptionChainQuery->Disconnect();
-  m_pOptionChainQuery.reset();
+  if ( m_pOptionChainQuery ) {
+    m_pOptionChainQuery->Disconnect();
+    m_pOptionChainQuery.reset();
+  }
+
+  DelinkFromPanelProviderControl();
 
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
-  SaveState();
   event.Skip();  // auto followed by Destroy();
 }
 
