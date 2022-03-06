@@ -35,6 +35,7 @@ namespace {
 InteractiveChart::InteractiveChart()
 : WinChartView::WinChartView()
 , m_bConnected( false )
+, m_bOptionsReady( false )
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
@@ -44,10 +45,11 @@ InteractiveChart::InteractiveChart()
 , m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
-, m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBullPut( ou::ChartEntryShape::EShort, ou::Colour::LightBlue )
+, m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
+, m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
-, bOptionsReady( false )
 , m_statePosition( EPositionState::Looking )
 {
   Init();
@@ -59,6 +61,7 @@ InteractiveChart::InteractiveChart(
   )
 : WinChartView::WinChartView( parent, id, pos, size, style )
 , m_bConnected( false )
+, m_bOptionsReady( false )
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
@@ -68,10 +71,11 @@ InteractiveChart::InteractiveChart(
 , m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
-, m_ceBear( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceBull( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBullPut( ou::ChartEntryShape::EShort, ou::Colour::LightBlue )
+, m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
+, m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_dblSumVolume {}, m_dblSumVolumePrice {}
-, bOptionsReady( false )
 , m_statePosition( EPositionState::Looking )
 {
   Init();
@@ -111,8 +115,10 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
 
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBull );
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBear );
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearPut );
 
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
@@ -319,7 +325,7 @@ void InteractiveChart::ProcessChains() {
       }
     }
 
-    bOptionsReady = true;
+    m_bOptionsReady = true;
   }
 }
 
@@ -368,7 +374,7 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
 
 void InteractiveChart::CheckOptions() {
 
-  if ( bOptionsReady ) {
+  if ( m_bOptionsReady ) {
 
     double mid( m_quote.Midpoint() );
     for ( const vExpiries_t::value_type& expiry : m_vExpiries ) {
@@ -426,7 +432,14 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
   mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
   if ( mapOptionTracker.end() == iterOptionTracker ) {
-    mapOptionTracker.emplace( mapOptionTracker_t::value_type( sOptionName, OptionTracker( pOption, m_ceBull, m_ceBear ) ) );
+    mapOptionTracker.emplace(
+      mapOptionTracker_t::value_type(
+        sOptionName,
+        OptionTracker(
+          pOption,
+          m_ceBullCall, m_ceBullPut,
+          m_ceBearCall, m_ceBearPut
+          ) ) );
   }
 }
 
@@ -530,7 +543,7 @@ void InteractiveChart::HandleOrderFilled( const ou::tf::Order& ) {
 }
 
 void InteractiveChart::OptionWatchStart() {
-  if ( bOptionsReady ) {
+  if ( m_bOptionsReady ) {
     if ( 0 != m_vOptionForQuote.size() ) {
       std::cout << "OptionForQuote: stop watch first" << std::endl;
     }
@@ -563,7 +576,7 @@ void InteractiveChart::OptionWatchStart() {
 
 void InteractiveChart::OptionQuoteShow() {
   // used to determine low premium/low spread option to trade
-  if ( bOptionsReady ) {
+  if ( m_bOptionsReady ) {
     if ( 0 == m_vOptionForQuote.size() ) {
       std::cout << "optionForQuote: no options running" << std::endl;
     }
@@ -588,7 +601,7 @@ void InteractiveChart::OptionQuoteShow() {
 }
 
 void InteractiveChart::OptionWatchStop() {
-  if ( bOptionsReady ) {
+  if ( m_bOptionsReady ) {
     if ( 0 == m_vOptionForQuote.size() ) {
       std::cout << "OptionForQuote: start watch first" << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {

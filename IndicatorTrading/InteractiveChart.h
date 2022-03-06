@@ -180,8 +180,10 @@ private:
   ou::ChartEntryShape m_ceLongExit;
   ou::ChartEntryShape m_ceShortExit;
 
-  ou::ChartEntryShape m_ceBull;
-  ou::ChartEntryShape m_ceBear;
+  ou::ChartEntryShape m_ceBullCall;
+  ou::ChartEntryShape m_ceBullPut;
+  ou::ChartEntryShape m_ceBearCall;
+  ou::ChartEntryShape m_ceBearPut;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
@@ -298,8 +300,10 @@ private:
     bool m_bActive;
     pOption_t m_pOption;
 
-    ou::ChartEntryShape& m_ceBull;
-    ou::ChartEntryShape& m_ceBear;
+    ou::ChartEntryShape& m_ceBullCall;
+    ou::ChartEntryShape& m_ceBullPut;
+    ou::ChartEntryShape& m_ceBearCall;
+    ou::ChartEntryShape& m_ceBearPut;
 
     void Add() {
       if ( !m_bActive ) {
@@ -336,9 +340,14 @@ private:
       }
     }
 
-    OptionTracker( pOption_t pOption_, ou::ChartEntryShape& ceBull, ou::ChartEntryShape& ceBear )
+    OptionTracker(
+      pOption_t pOption_
+    , ou::ChartEntryShape& ceBullCall, ou::ChartEntryShape& ceBullPut
+    , ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
+    )
     : m_bActive( false ), m_pOption( pOption_ )
-    , m_ceBull( ceBull ), m_ceBear( ceBear )
+    , m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
+    , m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
     {
       Add();
       std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
@@ -346,14 +355,16 @@ private:
 
     OptionTracker( OptionTracker& rhs )
     : m_bActive( false ), m_pOption( rhs.m_pOption )
-    , m_ceBull( rhs.m_ceBull ), m_ceBear( rhs.m_ceBear )
+    , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
+    , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
       Add();
     }
 
     OptionTracker( OptionTracker&& rhs )
     : m_bActive( false )
-    , m_ceBull( rhs.m_ceBull ), m_ceBear( rhs.m_ceBear )
+    , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
+    , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
       rhs.Del();
       m_pOption = std::move( rhs.m_pOption );
@@ -380,11 +391,11 @@ private:
       else {
         if ( price > mid ) {
           s = "bu";
-          m_ceBull.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
+          m_ceBullCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
         else {
           s = "be";
-          m_ceBear.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
+          m_ceBearCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
       }
       //std::cout <<
@@ -408,11 +419,11 @@ private:
       else {
         if ( price > mid ) {
           s = "be";
-          m_ceBear.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
+          m_ceBearPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
         else {
           s = "bu";
-          m_ceBull.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
+          m_ceBullPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
       }
       //std::cout <<
@@ -431,7 +442,7 @@ private:
 
     // ==
 
-  bool bOptionsReady;
+  bool m_bOptionsReady;
 
   using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
