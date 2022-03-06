@@ -546,12 +546,14 @@ void InteractiveChart::OptionWatchStart() {
         pOption = chain.GetStrike( strike ).call.pOption;
         m_vOptionForQuote.push_back( pOption );
         pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
+        pOption->EnableStatsAdd();
         pOption->StartWatch();
 
         strike = chain.Put_Itm( mid );
         pOption = chain.GetStrike( strike ).put.pOption;
         m_vOptionForQuote.push_back( pOption );
         pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
+        pOption->EnableStatsAdd();
         pOption->StartWatch();
 
       }
@@ -566,14 +568,19 @@ void InteractiveChart::OptionQuoteShow() {
       std::cout << "optionForQuote: no options running" << std::endl;
     }
     else {
+      bool bOk;
+      size_t best_count;
+      double best_spread;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         ou::tf::Quote quote( pOption->LastQuote() );
+        std::tie( bOk, best_count, best_spread ) = pOption->SpreadStats();
         std::cout
           << pOption->GetInstrumentName()
           << ": "
           << "b=" << quote.Bid()
           << ",a=" << quote.Ask()
-          << ",spread=" << quote.Spread()
+          << ",cnt=" << best_count
+          << ",spread=" << best_spread
           << std::endl;
       }
     }
@@ -586,6 +593,7 @@ void InteractiveChart::OptionWatchStop() {
       std::cout << "OptionForQuote: start watch first" << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         pOption->StopWatch();
+        pOption->EnableStatsRemove();
         pOption->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
       }
       m_vOptionForQuote.clear();
