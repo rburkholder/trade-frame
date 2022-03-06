@@ -299,6 +299,8 @@ private:
 
     bool m_bActive;
     pOption_t m_pOption;
+    size_t m_volBuy;
+    size_t m_volSell;
 
     ou::ChartEntryShape& m_ceBullCall;
     ou::ChartEntryShape& m_ceBullPut;
@@ -346,6 +348,7 @@ private:
     , ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
     )
     : m_bActive( false ), m_pOption( pOption_ )
+    , m_volBuy {}, m_volSell {}
     , m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
     , m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
     {
@@ -355,6 +358,7 @@ private:
 
     OptionTracker( OptionTracker& rhs )
     : m_bActive( false ), m_pOption( rhs.m_pOption )
+    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
     , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
     , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
@@ -363,6 +367,7 @@ private:
 
     OptionTracker( OptionTracker&& rhs )
     : m_bActive( false )
+    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
     , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
     , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
@@ -383,64 +388,73 @@ private:
       const double price = trade.Price();
       const ou::tf::Quote& quote( m_pOption->LastQuote() );
       const double mid = quote.Midpoint();
-      std::string s;
       if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
-        s = "??";
       }
       else {
         if ( price > mid ) {
-          s = "bu";
+          m_volBuy += trade.Volume();
           m_ceBullCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
         else {
-          s = "be";
+          m_volSell += trade.Volume();
           m_ceBearCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
         }
       }
-      //std::cout <<
-      //     m_pOption->GetInstrumentName() << ": "
-      //  << s << " "
-      //  << quote.Bid() << ","
-      //  << trade.Volume() << "@" << price << ","
-      //  << quote.Ask()
-      //  << std::endl;
     }
 
     void HandleTradePut( const ou::tf::Trade& trade ) {
       const double price = trade.Price();
       const ou::tf::Quote& quote( m_pOption->LastQuote() );
       const double mid = quote.Midpoint();
-      std::string s;
       if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
-        s = "??";
       }
       else {
         if ( price > mid ) {
-          s = "be";
+          m_volBuy += trade.Volume();
           m_ceBearPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
         else {
-          s = "bu";
+          m_volSell += trade.Volume();
           m_ceBullPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
         }
       }
-      //std::cout <<
-      //     m_pOption->GetInstrumentName() << ": "
-      //  << s << " "
-      //  << quote.Bid() << ","
-      //  << trade.Volume() << "@" << price << ","
-      //  << quote.Ask()
-      //  << std::endl;
     }
 
     void SaveWatch( const std::string& sPrefix ) {
       m_pOption->SaveSeries( sPrefix );
     }
+
+    void Emit() {
+      ou::tf::Quote quote( m_pOption->LastQuote() );
+      std::cout <<
+           m_pOption->GetInstrumentName()
+        << ": b=" << quote.Bid()
+        << ",a=" << quote.Ask()
+        //<< ",oi=" << m_pOption->GetFundamentals().nOpenInterest // not available
+        << ",bv=" << m_volBuy
+        << ",sv=" << m_volSell
+        << std::endl;
+    }
+
+    template<typename Archive>
+    void save( Archive& ar, const unsigned int version ) const {
+      ar & m_volBuy;
+      ar & m_volSell;
+    }
+
+    template<typename Archive>
+    void load( Archive& ar, const unsigned int version ) {
+      ar & m_volBuy;
+      ar & m_volSell;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
   };
 
-    // ==
+  // ==
 
   bool m_bOptionsReady;
 
