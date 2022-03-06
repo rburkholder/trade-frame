@@ -28,8 +28,9 @@
 
 #include <wx/wx.h>
 
-class wxRadioButton;
 class wxButton;
+class wxListCtrl;
+class wxListEvent;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -79,20 +80,18 @@ private:
 
   enum { ID_Null=wxID_HIGHEST,
     ID_PanelOrderButtons,
-    ID_BtnMarket, ID_BtnLimit, ID_BtnBracket,
-    ID_BtnBuy, ID_BtnSell,
-    ID_BtnStopLong, ID_BtnStopShort,
-    ID_BtnCancelAll
+    ID_RadioOrderType, ID_RadioInstrument,
+    ID_BtnBuy, ID_BtnSell, ID_BtnCancelAll,
+    ID_ListPositions, ID_ListOrders
   };
 
-    wxRadioButton* m_btnMarket;
-    wxRadioButton* m_btnLimit;
-    wxRadioButton* m_btnBracket;
+    wxRadioBox* m_radioOrderType;
+    wxRadioBox* m_radioInstrument;
     wxButton* m_btnBuy;
     wxButton* m_btnSell;
-    wxButton* m_btnStopLong;
-    wxButton* m_btnStopShort;
     wxButton* m_btnCancelAll;
+    wxListCtrl* m_listPositions;
+    wxListCtrl* m_listOrders;
 
   EOrderType m_OrderType;
 
@@ -113,14 +112,41 @@ private:
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
-    void OnBtnMarketSelected( wxCommandEvent& event );
-    void OnBtnLimitSelected( wxCommandEvent& event );
-    void OnBtnBracketSelected( wxCommandEvent& event );
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RadioOrderType
+    void OnRadioOrderTypeSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RadioInstrument
+    void OnRadioInstrumentSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnBuy
     void OnBtnBuyClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnSell
     void OnBtnSellClick( wxCommandEvent& event );
-    void OnBtnStopLongClick( wxCommandEvent& event );
-    void OnBtnStopShortClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnCancelAll
     void OnBtnCancelAllClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_SELECTED event handler for ID_ListPositions
+    void OnListPositionsSelected( wxListEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_DESELECTED event handler for ID_ListPositions
+    void OnListPositionsDeselected( wxListEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK event handler for ID_ListPositions
+    void OnListPositionsRightClick( wxListEvent& event );
+
+    /// wxEVT_CONTEXT_MENU event handler for ID_ListPositions
+    void OnContextMenu( wxContextMenuEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_SELECTED event handler for ID_ListOrders
+    void OnListOrdersSelected( wxListEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_DESELECTED event handler for ID_ListOrders
+    void OnListOrdersDeselected( wxListEvent& event );
+
+    /// wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK event handler for ID_ListOrders
+    void OnListOrdersRightClick( wxListEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
