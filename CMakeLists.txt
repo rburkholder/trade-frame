@@ -26,4 +26,6 @@ add_subdirectory(Weeklies)
 
 add_subdirectory(lib)
 
-add_subdirectory(rdaf/l1)
+if(EXISTS /usr/local/lib/rdaf)
+  add_subdirectory(rdaf)
+endif()
