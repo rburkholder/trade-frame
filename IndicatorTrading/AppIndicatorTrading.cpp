@@ -164,7 +164,7 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStart ) ) );
   vItems.push_back( new mi( "Show Quotes", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionQuoteShow ) ) );
   vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
-  vItems.push_back( new mi( "Emit Options", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionEmit ) ) );
+  //vItems.push_back( new mi( "Emit Options", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionEmit ) ) );
   m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -230,10 +230,28 @@ void AppIndicatorTrading::ConstructInstrument() {
 
                   std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                   if ( expiry == pInstrument->GetExpiry() ) {
-                    using pWatch_t = ou::tf::Watch::pWatch_t;
-                    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
 
-                    SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+                    pPosition_t pPosition;
+
+                    const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+                    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+                    if ( pm.PositionExists( "USD", idInstrument ) ) {
+                      pPosition = pm.GetPosition( "USD", idInstrument );
+                      std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+                    }
+                    else {
+                      using pWatch_t = ou::tf::Watch::pWatch_t;
+                      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+                      pPosition = pm.ConstructPosition(
+                        "USD", idInstrument, "manual",
+                        "ib01", "iq01", m_pExecutionProvider,
+                        pWatch
+                      );
+                      std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+                    }
+
+                    SetInteractiveChart( pPosition );
                   }
                 } );
             }
