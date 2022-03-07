@@ -569,9 +569,9 @@ void TWS::PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop ) {
 }
 
 void TWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop ) {
-  PlaceOrder( pOrderEntry, 0, false );
-  PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );
-  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
+  PlaceOrder( pOrderEntry, 0, false );                           // limit or market
+  PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
+  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
 }
 
 void TWS::CancelOrder( pOrder_t pOrder ) {
