@@ -28,6 +28,8 @@
 
 #include <wx/wx.h>
 
+#include <TFTrading/TradingEnumerations.h>
+
 class wxButton;
 class wxListCtrl;
 class wxListEvent;
@@ -62,11 +64,10 @@ public:
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
 
-   enum class EOrderType { Market, Limit, Bracket, Stop };
-   enum class EInstrument { Underlying, Call, Put };
+   enum class EInstrumentType { Underlying=0, Call=1, Put=2 };
 
    using fBtnDone_t = std::function<void()>; // undo state set for the button while 'latched'
-   using fBtnOrder_t = std::function<void( EOrderType, EInstrument, fBtnDone_t&& )>;
+   using fBtnOrder_t = std::function<void( ou::tf::OrderType::enumOrderType, EInstrumentType, fBtnDone_t&& )>;
 
    void Set(
      fBtnOrder_t&&, // Buy
@@ -92,8 +93,6 @@ private:
     wxButton* m_btnCancelAll;
     wxListCtrl* m_listPositions;
     wxListCtrl* m_listOrders;
-
-  EOrderType m_OrderType;
 
   fBtnOrder_t m_fBtnOrderBuy;
   fBtnOrder_t m_fBtnOrderSell;
@@ -147,6 +146,9 @@ private:
 
     /// wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK event handler for ID_ListOrders
     void OnListOrdersRightClick( wxListEvent& event );
+
+    void OnRadioOrderTypeClick( wxCommandEvent& event );
+    void OnRadioInstrumentClick( wxCommandEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

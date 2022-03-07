@@ -23,6 +23,32 @@
 
 #include "PanelOrderButtons.h"
 
+enum class EOrderType { Market=0, Limit=1, Bracket=2, Stop=3 };
+
+namespace {
+  ou::tf::OrderType::enumOrderType LUOrderType( int id ) {
+    EOrderType ot = (EOrderType) id;
+    switch ( ot ) {
+      case EOrderType::Bracket:
+        return ou::tf::OrderType::Scale;
+        break;
+      case EOrderType::Limit:
+        return ou::tf::OrderType::Limit;
+        break;
+      case EOrderType::Market:
+        return ou::tf::OrderType::Market;
+        break;
+      case EOrderType::Stop:
+        return ou::tf::OrderType::Stop;
+        break;
+      default:
+        return ou::tf::OrderType::Unknown;
+        break;
+    }
+  }
+
+}
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -146,7 +172,9 @@ void PanelOrderButtons::CreateControls() {
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOrderButtons::OnBtnSellClick, this, ID_BtnSell );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOrderButtons::OnBtnCancelAllClick, this, ID_BtnCancelAll );
 
-  m_OrderType = EOrderType::Limit;
+  Bind( wxEVT_RADIOBOX, &PanelOrderButtons::OnRadioOrderTypeClick, this, ID_RadioOrderType );
+  Bind( wxEVT_RADIOBOX, &PanelOrderButtons::OnRadioInstrumentClick, this, ID_RadioInstrument );
+
 }
 
 void PanelOrderButtons::Set(
@@ -159,13 +187,24 @@ void PanelOrderButtons::Set(
   m_fBtnOrderCancelAll = std::move( fBtnOrderCancelAll );
 }
 
+void PanelOrderButtons::OnRadioOrderTypeClick( wxCommandEvent& event ) {
+  std::string s( event.GetString() );
+  std::cout << "order: " << s << "," << event.GetSelection() << std::endl;
+}
+
+void PanelOrderButtons::OnRadioInstrumentClick( wxCommandEvent& event ) {
+  std::string s( event.GetString() );
+  std::cout << "instrument: " << s << "," << event.GetSelection() << std::endl;
+}
+
+
 void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
   if ( m_fBtnOrderBuy ) {
     wxColour colour = m_btnBuy->GetForegroundColour();
     m_btnBuy->SetForegroundColour( *wxGREEN );
     m_fBtnOrderBuy(
-      m_OrderType,
-      EInstrument::Underlying,
+      LUOrderType( m_radioOrderType->GetSelection() ),
+      (EInstrumentType)m_radioInstrument->GetSelection(),
       [this,colour](){ // fBtnDone_t
         m_btnBuy->SetForegroundColour( colour );
       } );
@@ -178,8 +217,8 @@ void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
     wxColour colour = m_btnSell->GetForegroundColour();
     m_btnSell->SetForegroundColour( *wxGREEN );
     m_fBtnOrderSell(
-      m_OrderType,
-      EInstrument::Underlying,
+      LUOrderType( m_radioOrderType->GetSelection() ),
+      (EInstrumentType)m_radioInstrument->GetSelection(),
       [this,colour](){ // fBtnDone_t
         m_btnSell->SetForegroundColour( colour );
       } );
@@ -192,8 +231,8 @@ void PanelOrderButtons::OnBtnCancelAllClick( wxCommandEvent& event ) {
     wxColour colour = m_btnCancelAll->GetForegroundColour();
     m_btnCancelAll->SetForegroundColour( *wxGREEN );
     m_fBtnOrderCancelAll(
-      m_OrderType,
-      EInstrument::Underlying,
+      LUOrderType( m_radioOrderType->GetSelection() ),
+      (EInstrumentType)m_radioInstrument->GetSelection(),
       [this,colour](){ // fBtnDone_t
         m_btnCancelAll->SetForegroundColour( colour );
       } );
