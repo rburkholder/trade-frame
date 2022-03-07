@@ -62,23 +62,23 @@ public:
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
 
-   enum class EOrderType { Market, Limit, Bracket };
+   enum class EOrderType { Market, Limit, Bracket, Stop };
+   enum class EInstrument { Underlying, Call, Put };
 
    using fBtnDone_t = std::function<void()>; // undo state set for the button while 'latched'
-   using fBtnOrder_t = std::function<void(EOrderType, fBtnDone_t&&)>;
+   using fBtnOrder_t = std::function<void( EOrderType, EInstrument, fBtnDone_t&& )>;
 
    void Set(
      fBtnOrder_t&&, // Buy
      fBtnOrder_t&&, // Sell
-     fBtnOrder_t&&, // StopLong
-     fBtnOrder_t&&, // StopShort
      fBtnOrder_t&&  // CancelAll
    );
 
 protected:
 private:
 
-  enum { ID_Null=wxID_HIGHEST,
+  enum {
+    ID_Null=wxID_HIGHEST,
     ID_PanelOrderButtons,
     ID_RadioOrderType, ID_RadioInstrument,
     ID_BtnBuy, ID_BtnSell, ID_BtnCancelAll,

@@ -548,6 +548,7 @@ void InteractiveChart::OptionWatchStart() {
       std::cout << "OptionForQuote: stop watch first" << std::endl;
     }
     else {
+      std::cout << "OptionForQuote: enabling" << std::endl;
       double mid = m_quote.Midpoint();
       for ( mapChains_t::value_type& vt: m_mapChains ) {
         chain_t& chain( vt.second );
@@ -584,6 +585,10 @@ void InteractiveChart::OptionQuoteShow() {
       bool bOk;
       size_t best_count;
       double best_spread;
+      std::cout
+        << m_pPosition->GetInstrument()->GetInstrumentName()
+        << " @ " << m_pPosition->GetWatch()->LastTrade().Price()
+        << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         ou::tf::Quote quote( pOption->LastQuote() );
         std::tie( bOk, best_count, best_spread ) = pOption->SpreadStats();
@@ -602,7 +607,7 @@ void InteractiveChart::OptionQuoteShow() {
 
 void InteractiveChart::OptionWatchStop() {
   if ( m_bOptionsReady ) {
-    if ( 0 == m_vOptionForQuote.size() ) {
+    if ( 0 != m_vOptionForQuote.size() ) {
       std::cout << "OptionForQuote: start watch first" << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         pOption->StopWatch();

@@ -164,22 +164,20 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStart ) ) );
   vItems.push_back( new mi( "Show Quotes", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionQuoteShow ) ) );
   vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
+  vItems.push_back( new mi( "Emit Options", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionEmit ) ) );
   m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
+  using pob = ou::tf::PanelOrderButtons;
   m_pPanelOrderButtons->Set(
-    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+    []( pob::EOrderType ot, pob::EInstrument instrument, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
     },
-    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+    []( pob::EOrderType ot, pob::EInstrument instrument, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
     },
-    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderStopLong
-    },
-    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderStopShort
-    },
-    []( ou::tf::PanelOrderButtons::EOrderType ot, ou::tf::PanelOrderButtons::fBtnDone_t&& fDone ){ // m_fBtnOrderCancelAll
+    []( pob::EOrderType ot, pob::EInstrument instrument, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderCancelAll
     }
   );
 
@@ -347,6 +345,14 @@ void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionWatchStop();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionEmit( void ) {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->OptionEmit();
     }
   );
 }

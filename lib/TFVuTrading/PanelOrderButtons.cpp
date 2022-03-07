@@ -152,14 +152,10 @@ void PanelOrderButtons::CreateControls() {
 void PanelOrderButtons::Set(
   fBtnOrder_t&& fBtnOrderBuy, // Buy
   fBtnOrder_t&& fBtnOrderSell, // Sell
-  fBtnOrder_t&& fBtnOrderStopLong, // StopLong
-  fBtnOrder_t&& fBtnOrderStopShort,  // StopShort
   fBtnOrder_t&& fBtnOrderCancelAll  // CancelAll
 ) {
   m_fBtnOrderBuy = std::move( fBtnOrderBuy );
   m_fBtnOrderSell = std::move( fBtnOrderSell );
-  m_fBtnOrderStopLong = std::move( fBtnOrderStopLong );
-  m_fBtnOrderStopShort = std::move( fBtnOrderStopShort );
   m_fBtnOrderCancelAll = std::move( fBtnOrderCancelAll );
 }
 
@@ -169,6 +165,7 @@ void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
     m_btnBuy->SetForegroundColour( *wxGREEN );
     m_fBtnOrderBuy(
       m_OrderType,
+      EInstrument::Underlying,
       [this,colour](){ // fBtnDone_t
         m_btnBuy->SetForegroundColour( colour );
       } );
@@ -182,6 +179,7 @@ void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
     m_btnSell->SetForegroundColour( *wxGREEN );
     m_fBtnOrderSell(
       m_OrderType,
+      EInstrument::Underlying,
       [this,colour](){ // fBtnDone_t
         m_btnSell->SetForegroundColour( colour );
       } );
@@ -195,6 +193,7 @@ void PanelOrderButtons::OnBtnCancelAllClick( wxCommandEvent& event ) {
     m_btnCancelAll->SetForegroundColour( *wxGREEN );
     m_fBtnOrderCancelAll(
       m_OrderType,
+      EInstrument::Underlying,
       [this,colour](){ // fBtnDone_t
         m_btnCancelAll->SetForegroundColour( colour );
       } );

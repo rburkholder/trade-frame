@@ -111,6 +111,7 @@ private:
   void HandleMenuActionOptionWatchStart();
   void HandleMenuActionOptionQuoteShow();
   void HandleMenuActionOptionWatchStop();
+  void HandleMenuActionOptionEmit();
 
   void StartChainQuery();
   void ConstructInstrument();
