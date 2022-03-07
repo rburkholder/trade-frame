@@ -23,17 +23,22 @@
 #include <memory>
 
 #include <rdaf/TRint.h>
-#include <rdaf/TH3.h>
-#include <rdaf/TF1.h>
-#include <rdaf/TCanvas.h>
 #include <rdaf/TROOT.h>
+#include <rdaf/TFile.h>
+#include <rdaf/TTree.h>
+//#include <rdaf/TCanvas.h>
 
 #include <TFTrading/Instrument.h>
 
 #include "Config.h"
 #include "ChartData.h"
 
-ChartData::ChartData( pProvider_t pProvider, const std::string& sIQFeedSymbol, const config::Options& options )
+ChartData::ChartData(
+    const std::string& sFilePrefix,
+    const std::string& sIQFeedSymbol,
+    const config::Options& options,
+    pProvider_t pProvider
+)
 : m_options( options ), ou::ChartDVBasics(), m_bWatching( false )
 {
   GetChartDataView()->SetNames( "ChartData", sIQFeedSymbol );
@@ -43,51 +48,55 @@ ChartData::ChartData( pProvider_t pProvider, const std::string& sIQFeedSymbol, c
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sIQFeedSymbol );
   m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pProvider ); // will need to be iqfeed provider, check?
 
-  StartRdaf();
+  StartRdaf( sFilePrefix );
 }
 
 ChartData::~ChartData(void) {
   StopWatch();
+  m_pFile->Flush();
+  m_pFile->Close();
   m_prdafApp->SetReturnFromRun( true );
   m_threadRdaf.join();
 
 }
 
-void ChartData::ThreadRdaf( ChartData* p ) {
+void ChartData::ThreadRdaf( ChartData* p, const std::string& sFilePrefix ) {
 
   ChartData* self = reinterpret_cast<ChartData*>( p );
 
   const config::Options& options( self->m_options );
 
-  double dblDateTimeUpper;
-  double dblDateTimeLower;
+  if ( false ) { // diagnostics
+    //double dblDateTimeUpper;
+    //double dblDateTimeLower;
 
-  std::time_t nTime;
-  nTime = boost::posix_time::to_time_t( options.dtTimeUpper );
-  dblDateTimeUpper = (double) nTime / 1000.0;
-  nTime = boost::posix_time::to_time_t( options.dtTimeLower );
-  dblDateTimeLower = (double) nTime / 1000.0;
+    //std::time_t nTime;
+    //nTime = boost::posix_time::to_time_t( options.dtTimeUpper );
+    //dblDateTimeUpper = (double) nTime / 1000.0;
+    //nTime = boost::posix_time::to_time_t( options.dtTimeLower );
+    //dblDateTimeLower = (double) nTime / 1000.0;
 
-  //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
-
-  self->m_pHistDelta = std::make_shared<TH3D>(
-    "h1", ( options.sSymbol + "Delta" ).c_str(),
-    options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
-    options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
-    options.nVolumeSideBins, options.dblVolumeSideLower, options.dblVolumeSideUpper
-  );
-  if ( !self->m_pHistDelta ) {
-    std::cout << "problems delta" << std::endl;
+    //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
   }
 
-  self->m_pHistVolume = std::make_shared<TH3D>(
-    "h2", ( options.sSymbol + "Volume" ).c_str(),
-    options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
-    options.nPriceBins, options.dblPriceLower, options.dblPriceUpper,
-    options.nVolumeTotalBins, options.dblVolumeTotalLower, options.dblVolumeTotalUpper
+  self->m_pFile = std::make_unique<TFile>(
+    ( sFilePrefix + ".root" ).c_str(), "RECREATE", "tradeframe rdaf/l1 based data, quotes & trades"
   );
-  if ( !self->m_pHistVolume ) {
-    std::cout << "problems history" << std::endl;
+
+  self->m_pTreeQuote = std::make_shared<TTree>(
+    "quotes", ( self->m_pWatch->GetInstrumentName() + " quotes" ).c_str()
+  );
+  self->m_pTreeQuote->Branch( "quote", &self->m_pTreeQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+  if ( !self->m_pTreeQuote ) {
+    std::cout << "problems m_pTreeQuote" << std::endl;
+  }
+
+  self->m_pTreeTrade = std::make_shared<TTree>(
+    "trades", ( self->m_pWatch->GetInstrumentName() + " trades" ).c_str()
+  );
+  self->m_pTreeTrade->Branch( "trade", &self->m_pTreeTrade, "time/D:price/D:vol/l:direction/L" );
+  if ( !self->m_pTreeTrade ) {
+    std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
   //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
@@ -99,7 +108,7 @@ void ChartData::ThreadRdaf( ChartData* p ) {
   self->m_prdafApp->Run();
 }
 
-void ChartData::StartRdaf() {
+void ChartData::StartRdaf( const std::string& sFileName ) {
 
   int argc {};
   char** argv = nullptr;
@@ -108,7 +117,7 @@ void ChartData::StartRdaf() {
   ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
 
-  m_threadRdaf = std::move( std::thread( ThreadRdaf, this ) );
+  m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
 }
 
 void ChartData::StartWatch() {
@@ -130,21 +139,49 @@ void ChartData::StopWatch() {
 }
 
 void ChartData::HandleQuote( const ou::tf::Quote& quote ) {
-  ou::ChartDVBasics::HandleQuote( quote );
+
   m_quote = quote;
+  ou::ChartDVBasics::HandleQuote( quote );
+
+  std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
+  m_treeQuote.time = (double)nTime / 1000.0;
+  m_treeQuote.ask = quote.Ask();
+  m_treeQuote.askvol = quote.AskSize();
+  m_treeQuote.bid = quote.Bid();
+  m_treeQuote.bidvol = quote.BidSize();
+
+  m_pTreeQuote->Fill();
+
 }
 
 void ChartData::HandleTrade( const ou::tf::Trade& trade ) {
 
   ou::ChartDVBasics::HandleTrade( trade );
 
-  double mid = m_quote.Midpoint();
+  const double mid = m_quote.Midpoint();
+  const double price = trade.Price();
+  const uint64_t volume = trade.Volume();
+
   std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
-  double dblTime( nTime );
-  dblTime = dblTime / 1000.0;
+  m_treeTrade.time = (double)nTime / 1000.0;
+  m_treeTrade.price = price;
+  m_treeTrade.vol = volume;
+  if ( mid == price ) {
+    m_treeTrade.direction = 0;
+  }
+  else {
+    m_treeTrade.direction = ( mid < price ) ? volume : -volume;
+  }
+
+  m_pTreeTrade->Fill();
 
   // std::cout << "values: " << dblTime << "," << trade.Price() << "," << trade.Volume() << std::endl;
 
-  m_pHistDelta ->Fill( dblTime, trade.Price(), trade.Price() >= mid ? trade.Volume() : -trade.Volume() );
-  m_pHistVolume->Fill( dblTime, trade.Price(), trade.Volume() );
+}
+
+void ChartData::SaveValues( const std::string& sPrefix ) {
+  m_pWatch->SaveSeries( sPrefix );
+  m_pTreeQuote->Print();
+  m_pTreeTrade->Print();
+  m_pFile->Write();
 }

@@ -43,3 +43,5 @@ Some Document references:
 * https://root.cern/root/htmldoc/guides/users-guide/Threads.html
 * https://root.cern/manual/multi_threading/
 
+Some contrary comments on ROOT (with some fixes over time):
+* http://insectnation.org/articles/problems-with-root.html

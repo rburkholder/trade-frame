@@ -64,6 +64,8 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 
   std::string m_sSymbol;
+  std::string m_sTSDataStreamStarted;
+  int m_nTSDataStreamSequence;
 
   ChartData* m_pChartData;
   ou::tf::WinChartView* m_pWinChartView;
@@ -89,8 +91,6 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
-
-  void HandleSaveValues( void );
 
 //  void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );

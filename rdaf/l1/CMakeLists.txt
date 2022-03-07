@@ -107,5 +107,7 @@ target_link_libraries(
       Hist
       Rint
       Thread
+      Tree
+      RIO
   )
 

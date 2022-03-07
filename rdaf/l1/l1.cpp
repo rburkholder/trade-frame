@@ -51,6 +51,18 @@ bool AppRdafL1::OnInit() {
 
   wxApp::OnInit();
 
+  m_nTSDataStreamSequence = 0;
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::Instance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << "-"
+      << dt.time_of_day()
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+  }
+
   if ( Load( sConfigFilename, m_options ) ) {
     m_sSymbol = m_options.sSymbol;
   }
@@ -127,7 +139,7 @@ bool AppRdafL1::OnInit() {
   vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
-  //vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -135,7 +147,7 @@ bool AppRdafL1::OnInit() {
   }
 
   if ( nullptr == m_pChartData ) {
-    m_pChartData = new ChartData( m_pData1Provider, m_sSymbol, m_options );
+    m_pChartData = new ChartData( m_sTSDataStreamStarted, m_sSymbol, m_options, m_pData1Provider );
     m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
   }
 
@@ -185,22 +197,18 @@ void AppRdafL1::HandleMenuActionStopWatch( void ) {
   m_pChartData->StopWatch();
 }
 
-void AppRdafL1::HandleMenuActionSaveValues( void ) {
-  //m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleSaveValues ) );
-}
-
-void AppRdafL1::HandleSaveValues( void ) {
+void AppRdafL1::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
-  try {
-//    std::string sPrefixSession( "/app/AppRdafL1/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
-    //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
-//    std::string sPrefix86400sec( "/app/AppRdafL1/AtmIV/" + m_pBundle->Name() );
-//    m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
-  }
-  catch(...) {
-    std::cout << " ... issues with saving ... " << std::endl;
-  }
-  std::cout << "  ... Done " << std::endl;
+  CallAfter(
+    [this](){
+      m_nTSDataStreamSequence++;
+      m_pChartData->SaveValues(
+        "/app/rdaf_l1/" +
+        m_sTSDataStreamStarted + "-" +
+        boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      std::cout << "  ... Done " << std::endl;
+    }
+  );
 }
 
 int AppRdafL1::OnExit() {

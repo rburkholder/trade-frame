@@ -31,7 +31,8 @@
 #include <TFTrading/ProviderManager.h>
 
 class TRint;
-class TH3D;
+class TFile;
+class TTree;
 
 namespace config {
   class Options;
@@ -43,13 +44,20 @@ public:
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pWatch_t    = ou::tf::Watch::pWatch_t;
 
-  ChartData( pProvider_t, const std::string& sIQFeedSymbol, const config::Options& );
+  ChartData(
+    const std::string& sFileName,
+    const std::string& sIQFeedSymbol,
+    const config::Options&,
+    pProvider_t
+    );
   virtual ~ChartData();
 
   pWatch_t GetWatch( void ) { return m_pWatch; };
 
   void StartWatch();
   void StopWatch();
+
+  void SaveValues( const std::string& sPrefix );
 
 protected:
 private:
@@ -60,17 +68,38 @@ private:
 
   pWatch_t m_pWatch;
 
-  using pTH3D_t = std::shared_ptr<TH3D>;
+  ou::tf::Quote m_quote;
+
+  struct TreeQuote {
+    double time;
+    double ask;
+    uint64_t askvol;
+    double bid;
+    uint64_t bidvol;
+  };
+
+  struct TreeTrade {
+    double time;
+    double price;
+    uint64_t vol;
+    int64_t direction;
+  };
 
   std::thread m_threadRdaf;
   std::unique_ptr<TRint> m_prdafApp;
-  pTH3D_t m_pHistDelta;
-  pTH3D_t m_pHistVolume;
 
-  ou::tf::Quote m_quote;
+  std::unique_ptr<TFile> m_pFile;
 
-  static void ThreadRdaf( ChartData* );
-  void StartRdaf();
+  TreeQuote m_treeQuote;
+  TreeTrade m_treeTrade;
+
+  // https://root.cern/doc/master/classTTree.html
+  using pTTree_t = std::shared_ptr<TTree>;
+  pTTree_t m_pTreeQuote;
+  pTTree_t m_pTreeTrade;
+
+  void StartRdaf( const std::string& sFilePrefix );
+  static void ThreadRdaf( ChartData*, const std::string& sFilePrefix );
 
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
