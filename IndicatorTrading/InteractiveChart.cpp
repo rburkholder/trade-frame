@@ -548,7 +548,6 @@ void InteractiveChart::OptionWatchStart() {
       std::cout << "OptionForQuote: stop watch first" << std::endl;
     }
     else {
-      std::cout << "OptionForQuote: enabling" << std::endl;
       double mid = m_quote.Midpoint();
       for ( mapChains_t::value_type& vt: m_mapChains ) {
         chain_t& chain( vt.second );
@@ -571,6 +570,7 @@ void InteractiveChart::OptionWatchStart() {
         pOption->StartWatch();
 
       }
+      std::cout << "OptionForQuote: started" << std::endl;
     }
   }
 }
@@ -607,14 +607,17 @@ void InteractiveChart::OptionQuoteShow() {
 
 void InteractiveChart::OptionWatchStop() {
   if ( m_bOptionsReady ) {
-    if ( 0 != m_vOptionForQuote.size() ) {
+    if ( 0 == m_vOptionForQuote.size() ) {
       std::cout << "OptionForQuote: start watch first" << std::endl;
+    }
+    else {
       for ( pOption_t pOption: m_vOptionForQuote ) {
         pOption->StopWatch();
         pOption->EnableStatsRemove();
         pOption->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
       }
       m_vOptionForQuote.clear();
+      std::cout << "OptionForQuote: stopped" << std::endl;
     }
   }
 }
