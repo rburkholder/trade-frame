@@ -15,8 +15,8 @@
 /*
  * File:    AppAutoTrade.cpp
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
- * Created: February 14, 2022 10:06
+ * Project: rdaf/at
+ * Created: March 7, 2022 14:35
  */
 
 #include <sstream>
@@ -42,10 +42,10 @@
 #include "AppAutoTrade.h"
 
 namespace {
-  static const std::string sAppName( "Auto Trade Example" );
-  static const std::string sConfigFilename( "AutoTrade.cfg" );
-  static const std::string sDbName( "AutoTrade.db" );
-  static const std::string sStateFileName( "AutoTrade.state" );
+  static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
+  static const std::string sConfigFilename( "rdaf_at.cfg" );
+  static const std::string sDbName( "rdaf_at.db" );
+  static const std::string sStateFileName( "rdaf_at.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
 
@@ -60,6 +60,16 @@ bool AppAutoTrade::OnInit() {
   wxApp::OnInit();
 
   m_nTSDataStreamSequence = 0;
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::Instance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << "-"
+      << dt.time_of_day()
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+  }
 
   config::Options options;
 
@@ -68,17 +78,6 @@ bool AppAutoTrade::OnInit() {
   }
   else {
     return 0;
-  }
-
-  {
-    std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
-    ss
-      << ou::tf::Instrument::BuildDate( dt.date() )
-      << " "
-      << dt.time_of_day()
-      ;
-    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
   //if ( options.bSimStart ) {

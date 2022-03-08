@@ -15,11 +15,13 @@
 /*
  * File:    Strategy.h
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
- * Created: February 14, 2022 10:59
+ * Project: rdaf/at
+ * Created: March 7, 2022 14:35
  */
 
+#include "TFTimeSeries/DatedDatum.h"
 #include <vector>
+#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -30,13 +32,15 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <TFIndicators/TSEMA.h>
-
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
+
+class TRint;
+class TFile;
+class TTree;
 
 namespace config {
   class Options;
@@ -89,38 +93,7 @@ private:
   using vMAPeriods_t = std::vector<int>;
   vMAPeriods_t m_vMAPeriods;
 
-  struct MA {
-
-    ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
-    ou::ChartEntryIndicator m_ceMA;
-
-    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::enumColour colour, const std::string& sName )
-    : m_ema( quotes, nPeriods, tdPeriod )
-    {
-      m_ceMA.SetName( sName );
-      m_ceMA.SetColour( colour );
-    }
-
-    MA( MA&& rhs )
-    : m_ema(  std::move( rhs.m_ema ) )
-    , m_ceMA( std::move( rhs.m_ceMA ) )
-    {}
-
-    void AddToView( ou::ChartDataView& cdv ) {
-      cdv.Add( EChartSlot::Price, &m_ceMA );
-    }
-
-    void Update( ptime dt ) {
-      m_ceMA.Append( dt, m_ema.GetEMA() );
-    }
-
-    double Latest() const { return m_ema.GetEMA(); }
-  };
-
-  using vMA_t = std::vector<MA>;
-  vMA_t m_vMA;
-
-  double m_dblMid;
+  ou::tf::Quote m_quote;
 
   pOrder_t m_pOrder;
 
@@ -142,6 +115,40 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
+
+  // ==
+  struct TreeQuote {
+    double time;
+    double ask;
+    uint64_t askvol;
+    double bid;
+    uint64_t bidvol;
+  };
+
+  struct TreeTrade {
+    double time;
+    double price;
+    uint64_t vol;
+    int64_t direction;
+  };
+
+  std::thread m_threadRdaf;
+  std::unique_ptr<TRint> m_prdafApp;
+
+  std::unique_ptr<TFile> m_pFile;
+
+  TreeQuote m_treeQuote;
+  TreeTrade m_treeTrade;
+
+  // https://root.cern/doc/master/classTTree.html
+  using pTTree_t = std::shared_ptr<TTree>;
+  pTTree_t m_pTreeQuote;
+  pTTree_t m_pTreeTrade;
+
+  void StartRdaf( const std::string& sFilePrefix );
+  static void ThreadRdaf( Strategy* p, const std::string& sFilePrefix );
+
+  // ==
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

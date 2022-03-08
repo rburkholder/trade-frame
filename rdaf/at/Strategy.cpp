@@ -15,9 +15,15 @@
 /*
  * File:    Strategy.cpp
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
- * Created: February 14, 2022 10:59
+ * Project: rdaf/at
+ * Created: March 7, 2022 14:35
  */
+
+#include <rdaf/TRint.h>
+#include <rdaf/TROOT.h>
+#include <rdaf/TFile.h>
+#include <rdaf/TTree.h>
+//#include <rdaf/TCanvas.h>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -100,19 +106,11 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
 
-  m_cdv.SetNames( "Moving Average Strategy", pWatch->GetInstrument()->GetInstrumentName() );
+  m_cdv.SetNames( "rdaf TMacro test", pWatch->GetInstrument()->GetInstrumentName() );
 
   SetupChart();
 
   time_duration td = time_duration( 0, 0, m_nPeriodWidth );
-
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Gold, "ma1" ) );
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
-
-  for ( vMA_t::value_type& ma: m_vMA ) {
-    ma.AddToView( m_cdv );
-  }
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -125,9 +123,71 @@ void Strategy::Clear() {
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
     m_cdv.Clear();
-    m_vMA.clear();
     m_pPosition.reset();
   }
+}
+
+void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
+
+  Strategy* self = reinterpret_cast<Strategy*>( p );
+
+  //const config::Options& options( self->m_options );
+
+  if ( false ) { // diagnostics
+    //double dblDateTimeUpper;
+    //double dblDateTimeLower;
+
+    //std::time_t nTime;
+    //nTime = boost::posix_time::to_time_t( options.dtTimeUpper );
+    //dblDateTimeUpper = (double) nTime / 1000.0;
+    //nTime = boost::posix_time::to_time_t( options.dtTimeLower );
+    //dblDateTimeLower = (double) nTime / 1000.0;
+
+    //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
+  }
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t pWatch = self->m_pPosition->GetWatch();
+
+  self->m_pFile = std::make_unique<TFile>(
+    ( sFilePrefix + ".root" ).c_str(), "RECREATE", "tradeframe rdaf/at based data, quotes & trades"
+  );
+
+  self->m_pTreeQuote = std::make_shared<TTree>(
+    "quotes", ( pWatch->GetInstrumentName() + " quotes" ).c_str()
+  );
+  self->m_pTreeQuote->Branch( "quote", &self->m_pTreeQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+  if ( !self->m_pTreeQuote ) {
+    std::cout << "problems m_pTreeQuote" << std::endl;
+  }
+
+  self->m_pTreeTrade = std::make_shared<TTree>(
+    "trades", ( pWatch->GetInstrumentName() + " trades" ).c_str()
+  );
+  self->m_pTreeTrade->Branch( "trade", &self->m_pTreeTrade, "time/D:price/D:vol/l:direction/L" );
+  if ( !self->m_pTreeTrade ) {
+    std::cout << "problems m_pTreeTrade" << std::endl;
+  }
+
+  //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
+  //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
+  //f1->SetLineColor(kBlue+1);
+  //f1->SetTitle("My graph;x; sin(x)");
+  //f1->Draw();
+  //c->Modified(); c->Update();
+  self->m_prdafApp->Run();
+}
+
+void Strategy::StartRdaf( const std::string& sFileName ) {
+
+  int argc {};
+  char** argv = nullptr;
+
+  m_prdafApp = std::make_unique<TRint>( "rdaf_l1", &argc, argv );
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT();
+
+  m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -143,13 +203,18 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceQuoteAsk.Append( dt, quote.Ask() );
   m_ceQuoteBid.Append( dt, quote.Bid() );
 
-  m_dblMid = quote.Midpoint();
+  m_quote = quote;
 
-  for ( vMA_t::value_type& ma: m_vMA ) {
-    ma.Update( dt );
-  }
+  std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
+  m_treeQuote.time = (double)nTime / 1000.0;
+  m_treeQuote.ask = quote.Ask();
+  m_treeQuote.askvol = quote.AskSize();
+  m_treeQuote.bid = quote.Bid();
+  m_treeQuote.bidvol = quote.BidSize();
 
-  m_bfQuotes01Sec.Add( dt, m_dblMid, 1 ); // provides a 1 sec pulse for checking the alogorithm
+  m_pTreeQuote->Fill();
+
+  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the alogorithm
 
 }
 
@@ -159,6 +224,23 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   m_ceTrade.Append( dt, trade.Price() );
   m_ceVolume.Append( dt, trade.Volume() );
+
+  const double mid = m_quote.Midpoint();
+  const double price = trade.Price();
+  const uint64_t volume = trade.Volume();
+
+  std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
+  m_treeTrade.time = (double)nTime / 1000.0;
+  m_treeTrade.price = price;
+  m_treeTrade.vol = volume;
+  if ( mid == price ) {
+    m_treeTrade.direction = 0;
+  }
+  else {
+    m_treeTrade.direction = ( mid < price ) ? volume : -volume;
+  }
+
+  m_pTreeTrade->Fill();
 
 }
 
@@ -178,21 +260,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   // https://learnpriceaction.com/3-moving-average-crossover-strategy/
   // TODO: include the marketRule price difference here?
 
-  double ma1 = m_vMA[0].Latest();
-  double ma2 = m_vMA[1].Latest();
-  double ma3 = m_vMA[2].Latest();
-
-  double hi = ma1;
-  if ( ma2 > hi ) hi = ma2;
-  if ( ma3 > hi ) hi = ma3;
-
-  double lo = ma1;
-  if ( ma2 < lo ) lo = ma2;
-  if ( ma3 < lo ) lo = ma3;
-
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-
+/*
       if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
         // enter long
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
@@ -212,13 +282,13 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           m_stateTrade = ETradeState::ShortSubmitted;
           m_pPosition->PlaceOrder( m_pOrder );
         }
-      }
+      } */
       break;
     case ETradeState::LongSubmitted:
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      if ( bar.Close() < ma2 ) {
+/*      if ( bar.Close() < ma2 ) {
         // exit long
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -226,13 +296,13 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         m_ceLongExit.AddLabel( bar.DateTime(), m_dblMid, "Long Exit" );
         m_stateTrade = ETradeState::ExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
-      }
+      }*/
       break;
     case ETradeState::ShortSubmitted:
       // wait for order to execute
       break;
     case ETradeState::ShortExit:
-      if ( bar.Close() > ma2 ) {
+/*      if ( bar.Close() > ma2 ) {
         // exit short
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -240,7 +310,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         m_ceShortExit.AddLabel( bar.DateTime(), m_dblMid, "Short Exit" );
         m_stateTrade = ETradeState::ExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
-      }
+      } */
       break;
     case ETradeState::ExitSubmitted:
       // wait for order to execute
@@ -274,11 +344,11 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
     case ETradeState::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), m_dblMid, "Long Fill" );
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Long Fill" );
       m_stateTrade = ETradeState::LongExit;
       break;
     case ETradeState::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), m_dblMid, "Short Fill" );
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Short Fill" );
       m_stateTrade = ETradeState::ShortExit;
       break;
     case ETradeState::ExitSubmitted:

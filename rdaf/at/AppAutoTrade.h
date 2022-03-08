@@ -15,8 +15,8 @@
 /*
  * File:    AppAutoTrade.h
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
- * Created: February 14, 2022 10:06
+ * Project: rdaf/at
+ * Created: March 7, 2022 14:35
  */
 
 #pragma once

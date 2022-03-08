@@ -15,8 +15,8 @@
 /*
  * File:    Config.cpp
  * Author:  raymond@burkholder.net
- * Project: AutoTrade
- * Created: February 14, 2022 10:29
+ * Project: rdaf/at
+ * Created: March 7, 2022 14:35
  */
 
 #include <fstream>
