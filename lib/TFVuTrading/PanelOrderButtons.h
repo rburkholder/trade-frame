@@ -79,20 +79,60 @@ protected:
 private:
 
   enum {
-    ID_Null=wxID_HIGHEST,
-    ID_PanelOrderButtons,
-    ID_RadioOrderType, ID_RadioInstrument,
-    ID_BtnBuy, ID_BtnSell, ID_BtnCancelAll,
-    ID_ListPositions, ID_ListOrders
+    ID_Null=wxID_HIGHEST
+  , ID_PanelOrderButtons
+  , ID_BtnBuy, ID_BtnSell, ID_BtnCancelAll
+  , ID_CB_CockForCursor
+  , ID_CB_PositionEntry
+  , ID_CB_PositionExitProfit
+  , ID_CB_PositionExitStop
+  , ID_TXT_PositionEntry
+  , ID_TXT_PositionExitProfit
+  , ID_TXT_PositionExitStop
+  , ID_RADIO_PositionEntry
+  , ID_RADIO_PositionExitProfit
+  , ID_RADIO_PositionExitTop
+  , ID_RADIO_Instrument
+  , ID_TXT_Base, ID_TXT_BaseAsk, ID_TXT_BaseBid
+  , ID_TXT_Call1, ID_TXT_Call1Ask, ID_TXT_Call1Bid
+  , ID_TXT_Put1, ID_TXT_Put1Ask, ID_TXT_Put1Bid
+  , ID_TXT_Call2, ID_TXT_Call2Ask, ID_TXT_Call2Bid
+  , ID_TXT_Put2, ID_TXT_Put2Ask, ID_TXT_Put2Bid
+  , ID_CB_Stoch1, ID_CB_Stoch2, ID_CB_Stoch3
   };
 
-    wxRadioBox* m_radioOrderType;
-    wxRadioBox* m_radioInstrument;
+    wxCheckBox* m_cbCockForCursor;
+    wxCheckBox* m_cbEnablePositionEntry;
+    wxTextCtrl* m_txtPricePositionEntry;
+    wxRadioBox* m_radioPositionEntry;
+    wxCheckBox* m_cbEnableProfitExit;
+    wxTextCtrl* m_txtPriceProfitExit;
+    wxRadioBox* m_radioExitProfit;
+    wxCheckBox* m_cbEnableStopExit;
+    wxTextCtrl* m_txtPriceStopExit;
+    wxRadioBox* m_radioExitStop;
     wxButton* m_btnBuy;
     wxButton* m_btnSell;
     wxButton* m_btnCancelAll;
-    wxListCtrl* m_listPositions;
-    wxListCtrl* m_listOrders;
+    wxRadioBox* m_radioInstrument;
+    wxStaticText* m_txtBase;
+    wxStaticText* m_txtBaseAsk;
+    wxStaticText* m_txtBaseBid;
+    wxStaticText* m_txtCall1;
+    wxStaticText* m_txtCall1Ask;
+    wxStaticText* m_txtCall1Bid;
+    wxStaticText* m_txtPut1;
+    wxStaticText* m_txtPut1Ask;
+    wxStaticText* m_txtPut1Bid;
+    wxStaticText* m_txtCall2;
+    wxStaticText* m_txtCall2Ask;
+    wxStaticText* m_txtCall2Bid;
+    wxStaticText* m_txtPut2;
+    wxStaticText* m_txtPut2Ask;
+    wxStaticText* m_txtPut2Bid;
+    wxCheckBox* m_cbEnableStoch1;
+    wxCheckBox* m_cbEnableStoch2;
+    wxCheckBox* m_cbEnableStoch3;
 
   fBtnOrder_t m_fBtnOrderBuy;
   fBtnOrder_t m_fBtnOrderSell;
@@ -111,11 +151,26 @@ private:
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
-    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RadioOrderType
-    void OnRadioOrderTypeSelected( wxCommandEvent& event );
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_CockForCursor
+    void OnCBCockForCursorClick( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RadioInstrument
-    void OnRadioInstrumentSelected( wxCommandEvent& event );
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionEntry
+    void OnCBPositionEntryClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionEntry
+    void OnRADIOPositionEntrySelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionExitProfit
+    void OnCBPositionExitProfitClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitProfit
+    void OnRADIOPositionExitProfitSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionExitStop
+    void OnCBPositionExitStopClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitTop
+    void OnRADIOPositionExitTopSelected( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnBuy
     void OnBtnBuyClick( wxCommandEvent& event );
@@ -126,29 +181,17 @@ private:
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnCancelAll
     void OnBtnCancelAllClick( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_LIST_ITEM_SELECTED event handler for ID_ListPositions
-    void OnListPositionsSelected( wxListEvent& event );
+    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_Instrument
+    void OnRADIOInstrumentSelected( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_LIST_ITEM_DESELECTED event handler for ID_ListPositions
-    void OnListPositionsDeselected( wxListEvent& event );
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch1
+    void OnCBStoch1Click( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK event handler for ID_ListPositions
-    void OnListPositionsRightClick( wxListEvent& event );
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch2
+    void OnCBStoch2Click( wxCommandEvent& event );
 
-    /// wxEVT_CONTEXT_MENU event handler for ID_ListPositions
-    void OnContextMenu( wxContextMenuEvent& event );
-
-    /// wxEVT_COMMAND_LIST_ITEM_SELECTED event handler for ID_ListOrders
-    void OnListOrdersSelected( wxListEvent& event );
-
-    /// wxEVT_COMMAND_LIST_ITEM_DESELECTED event handler for ID_ListOrders
-    void OnListOrdersDeselected( wxListEvent& event );
-
-    /// wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK event handler for ID_ListOrders
-    void OnListOrdersRightClick( wxListEvent& event );
-
-    void OnRadioOrderTypeClick( wxCommandEvent& event );
-    void OnRadioInstrumentClick( wxCommandEvent& event );
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch3
+    void OnCBStoch3Click( wxCommandEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
