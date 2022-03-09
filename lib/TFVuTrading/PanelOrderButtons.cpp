@@ -99,7 +99,7 @@ void PanelOrderButtons::CreateControls() {
     sizerPositionEntry->Add(m_cbEnablePositionEntry, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     m_txtPricePositionEntry = new wxTextCtrl( itemPanel1, ID_TXT_PositionEntry, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    sizerPositionEntry->Add(m_txtPricePositionEntry, 0, wxALIGN_CENTER_VERTICAL, 2);
+    sizerPositionEntry->Add(m_txtPricePositionEntry, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     wxArrayString m_radioPositionEntryStrings;
     m_radioPositionEntryStrings.Add(_("&Market"));
@@ -119,7 +119,7 @@ void PanelOrderButtons::CreateControls() {
     sizerPositionExitProfit->Add(m_cbEnableProfitExit, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     m_txtPriceProfitExit = new wxTextCtrl( itemPanel1, ID_TXT_PositionExitProfit, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    sizerPositionExitProfit->Add(m_txtPriceProfitExit, 0, wxALIGN_CENTER_VERTICAL, 2);
+    sizerPositionExitProfit->Add(m_txtPriceProfitExit, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     wxArrayString m_radioExitProfitStrings;
     m_radioExitProfitStrings.Add(_("&Rel"));
@@ -139,7 +139,7 @@ void PanelOrderButtons::CreateControls() {
     sizerPositionExitStop->Add(m_cbEnableStopExit, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     m_txtPriceStopExit = new wxTextCtrl( itemPanel1, ID_TXT_PositionExitStop, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    sizerPositionExitStop->Add(m_txtPriceStopExit, 0, wxALIGN_CENTER_VERTICAL, 2);
+    sizerPositionExitStop->Add(m_txtPriceStopExit, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 2);
 
     wxArrayString m_radioExitStopStrings;
     m_radioExitStopStrings.Add(_("Tr&l"));
@@ -189,7 +189,6 @@ void PanelOrderButtons::CreateControls() {
     sizerMDBase->Add(m_txtBaseAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
     m_txtBaseBid = new wxStaticText( itemPanel1, ID_TXT_BaseBid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_txtBaseBid->SetBackgroundColour(wxColour(173, 216, 230));
     sizerMDBase->Add(m_txtBaseBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
     sizerMDCall1 = new wxBoxSizer(wxVERTICAL);

@@ -24,12 +24,31 @@
 #include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
 
+#include <TFVuTrading/PanelOrderButtons_structs.h>
+
 #include "Config.h"
 #include "InteractiveChart.h"
 
 namespace {
   static const size_t nBarSeconds = 3;
   static const size_t nPeriods = 14;
+
+ou::tf::OrderType::enumOrderType XlateOrderType( ou::tf::PanelOrderButtons_Order::EPositionEntryMethod method ) {
+  ou::tf::OrderType::enumOrderType eOrderType;
+  switch ( method ) {
+    case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Market:
+      eOrderType = ou::tf::OrderType::Market;
+      break;
+    case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Limit:
+      eOrderType = ou::tf::OrderType::Limit;
+      break;
+    default:
+      eOrderType = ou::tf::OrderType::Market;
+      break;
+  }
+  return eOrderType;
+}
+
 }
 
 InteractiveChart::InteractiveChart()
@@ -425,7 +444,7 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
   if ( m_mapStrikes.end() == iterStrike ) {
     std::pair<mapStrikes_t::iterator,bool> pair = m_mapStrikes.emplace( mapStrikes_t::value_type( strike, mapOptionTracker_t() ) );
     assert( pair.second );
-    iterStrike = std::move( pair.first );
+    iterStrike = pair.first;
   };
 
   mapOptionTracker_t& mapOptionTracker( iterStrike->second );
@@ -499,7 +518,7 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   switch ( event.GetKeyCode() ) {
     case 'l':
       std::cout << "going long" << std::endl;
-      m_statePosition = EPositionState::GoingLong;
+      m_statePosition = EPositionState::Buying;
       m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
       //m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
       m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
@@ -509,7 +528,7 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
       break;
     case 's':
       std::cout << "going short" << std::endl;
-      m_statePosition = EPositionState::GoingShort;
+      m_statePosition = EPositionState::Selling;
       m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
       //m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
       m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
@@ -526,18 +545,70 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   event.Skip();
 }
 
-void InteractiveChart::HandleOrderCancelled( const ou::tf::Order& ) {
+void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& order ) {
+  switch ( m_statePosition ) {
+    case EPositionState::Looking:
+      std::cout << "buying" << std::endl;
+      m_statePosition = EPositionState::Buying;
+      m_pOrder = m_pPosition->ConstructOrder( XlateOrderType( order.m_ePositionEntryMethod ), ou::tf::OrderSide::Buy, 1 );
+      m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
+      m_ceLongEntry.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Buy Submit" );
+      m_pPosition->PlaceOrder( m_pOrder );
+      break;
+    default:
+      std::cout << "OrderBuy: not sent, not looking" << std::endl;
+      break;
+  }
+}
+
+void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& order ) {
+  switch ( m_statePosition ) {
+    case EPositionState::Looking:
+      std::cout << "selling" << std::endl;
+      m_statePosition = EPositionState::Selling;
+      m_pOrder = m_pPosition->ConstructOrder( XlateOrderType( order.m_ePositionEntryMethod ), ou::tf::OrderSide::Sell, 1 );
+      m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &InteractiveChart::HandleOrderFilled ) );
+      m_ceLongEntry.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Sell Submit" );
+      m_pPosition->PlaceOrder( m_pOrder );
+      break;
+    default:
+      std::cout << "OrderSell: not sent, not looking" << std::endl;
+      break;
+  }
+}
+
+void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& order ) {
+}
+
+void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& order ) {
+}
+
+void InteractiveChart::HandleOrderCancelled( const ou::tf::Order& order ) {
+  switch ( m_statePosition ) {
+    case EPositionState::Looking:
+      break;
+    case EPositionState::Buying:
+      break;
+    case EPositionState::Long:
+      break;
+    case EPositionState::Selling:
+      break;
+    case EPositionState::Short:
+      break;
+  }
 }
 
 void InteractiveChart::HandleOrderFilled( const ou::tf::Order& ) {
   switch ( m_statePosition ) {
-    case EPositionState::GoingLong:
+    case EPositionState::Buying:
       m_statePosition = EPositionState::Looking;
-      m_ceLongFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Long Fill" );
+      m_ceLongFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Buy Fill" );
       break;
-    case EPositionState::GoingShort:
+    case EPositionState::Selling:
       m_statePosition = EPositionState::Looking;
-      m_ceShortFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Short Fill" );
+      m_ceShortFill.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), "Sell Fill" );
       break;
   }
 }

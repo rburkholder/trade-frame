@@ -58,6 +58,8 @@ namespace iqfeed { // IQFeed
 namespace option {
   class Engine;
 } // namespace option
+  struct PanelOrderButtons_Order;
+  struct PanelOrderButtons_MarketData;
 } // namespace tf
 } // namespace ou
 
@@ -133,6 +135,11 @@ public:
   void OptionWatchStop();
   void OptionEmit();
 
+  void OrderBuy( const ou::tf::PanelOrderButtons_Order& );
+  void OrderSell( const ou::tf::PanelOrderButtons_Order& );
+  void OrderClose( const ou::tf::PanelOrderButtons_Order& );
+  void OrderCancel( const ou::tf::PanelOrderButtons_Order& );
+
   void Connect();
   void Disconnect();
 
@@ -140,7 +147,7 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, StochInd, Sentiment, PL, Spread }; // IndMA = moving averate indicator
-  enum class EPositionState { Looking, GoingLong, Long, GoingShort, Short };
+  enum class EPositionState { Looking, Buying, Long, Selling, Short };
 
   EPositionState m_statePosition;
 
@@ -357,7 +364,7 @@ private:
       std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
     }
 
-    OptionTracker( OptionTracker& rhs )
+    OptionTracker( const OptionTracker& rhs )
     : m_bActive( false ), m_pOption( rhs.m_pOption )
     , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
     , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )

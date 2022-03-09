@@ -173,16 +173,20 @@ bool AppIndicatorTrading::OnInit() {
 
   using pob = ou::tf::PanelOrderButtons;
   m_pPanelOrderButtons->Set(
-    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+    [this]( const ou::tf::PanelOrderButtons_Order& order, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+      m_pInteractiveChart->OrderBuy( order );
       fDone();
     },
-    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+    [this]( const ou::tf::PanelOrderButtons_Order& order, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+      m_pInteractiveChart->OrderSell( order );
       fDone();
     },
-    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderClose
+    [this]( const ou::tf::PanelOrderButtons_Order& order, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderClose
+      m_pInteractiveChart->OrderClose( order );
       fDone();
     },
-    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderCancel
+    [this]( const ou::tf::PanelOrderButtons_Order& order, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderCancel
+      m_pInteractiveChart->OrderCancel( order );
       fDone();
     }
   );

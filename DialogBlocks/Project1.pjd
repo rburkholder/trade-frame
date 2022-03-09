@@ -20302,7 +20302,7 @@
                 <bool name="proxy-wxFIXED_MINSIZE">0</bool>
                 <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxHSCROLL">0</bool>
-                <bool name="proxy-wxLEFT">0</bool>
+                <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxNO_BORDER">0</bool>
                 <bool name="proxy-wxNO_FULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxRAISED_BORDER">0</bool>
@@ -20548,7 +20548,7 @@ Stochastic"</string>
                 <bool name="proxy-wxFIXED_MINSIZE">0</bool>
                 <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxHSCROLL">0</bool>
-                <bool name="proxy-wxLEFT">0</bool>
+                <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxNO_BORDER">0</bool>
                 <bool name="proxy-wxNO_FULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxRAISED_BORDER">0</bool>
@@ -20794,7 +20794,7 @@ Stochastic"</string>
                 <bool name="proxy-wxFIXED_MINSIZE">0</bool>
                 <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxHSCROLL">0</bool>
-                <bool name="proxy-wxLEFT">0</bool>
+                <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxNO_BORDER">0</bool>
                 <bool name="proxy-wxNO_FULL_REPAINT_ON_RESIZE">0</bool>
                 <bool name="proxy-wxRAISED_BORDER">0</bool>
@@ -21467,7 +21467,7 @@ Stop"</string>
                   <long name="owns-file">1</long>
                   <string name="proxy-AlignH">"Right"</string>
                   <string name="proxy-AlignV">"Centre"</string>
-                  <string name="proxy-Background colour">"ADD8E6"</string>
+                  <string name="proxy-Background colour">""</string>
                   <string name="proxy-Base class">"wxStaticText"</string>
                   <long name="proxy-Border">2</long>
                   <string name="proxy-Class">"wxStaticText"</string>
