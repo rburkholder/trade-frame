@@ -61,6 +61,10 @@ struct PanelOrderButtons_Order {
   , m_eInstrument( EInstrument::Underlying )
   , m_bStochastic1( false ), m_bStochastic2( false ), m_bStochastic3( false )
   {}
+
+  double PositionEntryValue();
+  double PositionExitProfitValue();
+  double PositionExitStopValue();
 };
 
 struct PanelOrderButtons_MarketData {

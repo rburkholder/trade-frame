@@ -50,6 +50,7 @@ set(
     PanelOptionCombo.h
     PanelOptionCombo_impl.h
     PanelOrderButtons.h
+    PanelOrderButtons_structs.h
     PanelPortfolioPosition.h
     PanelPortfolioPosition_impl.h
     PanelPortfolioPositionOrderExecution.h
@@ -104,6 +105,7 @@ set(
     PanelOptionCombo.cpp
     PanelOptionCombo_impl.cpp
     PanelOrderButtons.cpp
+    PanelOrderButtons_structs.cpp
     PanelPortfolioPosition.cpp
     PanelPortfolioPosition_impl.cpp
     PanelPortfolioPositionOrderExecution.cpp
