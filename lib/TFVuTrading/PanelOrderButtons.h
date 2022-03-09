@@ -28,7 +28,7 @@
 
 #include <wx/wx.h>
 
-#include <TFTrading/TradingEnumerations.h>
+#include "PanelOrderButtons_structs.h"
 
 class wxButton;
 class wxListCtrl;
@@ -64,16 +64,19 @@ public:
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
 
-   enum class EInstrumentType { Underlying=0, Call=1, Put=2 };
+   enum class EInstrumentType { Underlying=0, Call1=1, Put1=2, Call2=3, Put3=4 };
 
    using fBtnDone_t = std::function<void()>; // undo state set for the button while 'latched'
-   using fBtnOrder_t = std::function<void( ou::tf::OrderType::enumOrderType, EInstrumentType, fBtnDone_t&& )>;
+   using fBtnOrder_t = std::function<void( const PanelOrderButtons_Order&, fBtnDone_t&& )>;
 
    void Set(
      fBtnOrder_t&&, // Buy
      fBtnOrder_t&&, // Sell
-     fBtnOrder_t&&  // CancelAll
+     fBtnOrder_t&&, // Close
+     fBtnOrder_t&&  // Cancel
    );
+
+   void Update( const PanelOrderButtons_MarketData& );
 
 protected:
 private:
@@ -81,7 +84,7 @@ private:
   enum {
     ID_Null=wxID_HIGHEST
   , ID_PanelOrderButtons
-  , ID_BtnBuy, ID_BtnSell, ID_BtnCancelAll
+  , ID_BtnBuy, ID_BtnSell, ID_BtnClose, ID_BtnCancel
   , ID_CB_CockForCursor
   , ID_CB_PositionEntry
   , ID_CB_PositionExitProfit
@@ -101,6 +104,9 @@ private:
   , ID_CB_Stoch1, ID_CB_Stoch2, ID_CB_Stoch3
   };
 
+  PanelOrderButtons_Order m_order;
+  PanelOrderButtons_MarketData m_data;
+
     wxCheckBox* m_cbCockForCursor;
     wxCheckBox* m_cbEnablePositionEntry;
     wxTextCtrl* m_txtPricePositionEntry;
@@ -113,7 +119,8 @@ private:
     wxRadioBox* m_radioExitStop;
     wxButton* m_btnBuy;
     wxButton* m_btnSell;
-    wxButton* m_btnCancelAll;
+    wxButton* m_btnClose;
+    wxButton* m_btnCancel;
     wxRadioBox* m_radioInstrument;
     wxStaticText* m_txtBase;
     wxStaticText* m_txtBaseAsk;
@@ -136,9 +143,8 @@ private:
 
   fBtnOrder_t m_fBtnOrderBuy;
   fBtnOrder_t m_fBtnOrderSell;
-  fBtnOrder_t m_fBtnOrderStopLong;
-  fBtnOrder_t m_fBtnOrderStopShort;
-  fBtnOrder_t m_fBtnOrderCancelAll;
+  fBtnOrder_t m_fBtnOrderClose;
+  fBtnOrder_t m_fBtnOrderCancel;
 
   void Init();
   void CreateControls();
@@ -157,17 +163,26 @@ private:
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionEntry
     void OnCBPositionEntryClick( wxCommandEvent& event );
 
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionEntry
+    void OnTXTPositionEntryTextUpdated( wxCommandEvent& event );
+
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionEntry
     void OnRADIOPositionEntrySelected( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionExitProfit
     void OnCBPositionExitProfitClick( wxCommandEvent& event );
 
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionExitProfit
+    void OnTXTPositionExitProfitTextUpdated( wxCommandEvent& event );
+
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitProfit
     void OnRADIOPositionExitProfitSelected( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionExitStop
     void OnCBPositionExitStopClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionExitStop
+    void OnTXTPositionExitStopTextUpdated( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitTop
     void OnRADIOPositionExitTopSelected( wxCommandEvent& event );
@@ -178,8 +193,11 @@ private:
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnSell
     void OnBtnSellClick( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnCancelAll
-    void OnBtnCancelAllClick( wxCommandEvent& event );
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnClose
+    void OnBtnCloseClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnCancel
+    void OnBtnCancelClick( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_Instrument
     void OnRADIOInstrumentSelected( wxCommandEvent& event );

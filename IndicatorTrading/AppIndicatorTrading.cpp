@@ -173,11 +173,17 @@ bool AppIndicatorTrading::OnInit() {
 
   using pob = ou::tf::PanelOrderButtons;
   m_pPanelOrderButtons->Set(
-    []( ou::tf::OrderType::enumOrderType ot, pob::EInstrumentType type, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderBuy
+      fDone();
     },
-    []( ou::tf::OrderType::enumOrderType ot, pob::EInstrumentType type, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderSell
+      fDone();
     },
-    []( ou::tf::OrderType::enumOrderType ot, pob::EInstrumentType type, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderCancelAll
+    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderClose
+      fDone();
+    },
+    []( const ou::tf::PanelOrderButtons_Order&, pob::fBtnDone_t&& fDone ){ // m_fBtnOrderCancel
+      fDone();
     }
   );
 
