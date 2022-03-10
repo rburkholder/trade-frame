@@ -315,42 +315,95 @@ void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
 }
 
+bool PanelOrderButtons::ValidateFields() {
+  bool bOk( true );
+  if ( m_order.m_bPositionEntryEnable ) {
+    if ( PanelOrderButtons_Order::EPositionEntryMethod::Limit == m_order.m_ePositionEntryMethod ) {
+      if ( 0 == m_order.m_sPositionEntryValue.size() ) {
+        std::cout << "position entry: requires value" << std::endl;
+        bOk = false;
+      }
+    }
+  }
+  if ( m_order.m_bPositionExitProfitEnable ) {
+    if ( PanelOrderButtons_Order::EPositionExitProfitMethod::Absolute == m_order.m_ePositionExitProfitMethod ) {
+      if ( 0 == m_order.m_sPositionExitProfitValue.size() ) {
+        std::cout << "position exit profit (abs): requires value" << std::endl;
+        bOk = false;
+      }
+    }
+    if ( PanelOrderButtons_Order::EPositionExitProfitMethod::Relative == m_order.m_ePositionExitProfitMethod ) {
+      if ( 0 == m_order.m_sPositionExitProfitValue.size() ) {
+        std::cout << "position exit profit (rel): requires value" << std::endl;
+        bOk = false;
+      }
+    }
+  }
+  if ( m_order.m_bPositionExitStopEnable ) {
+    if ( 0 == m_order.m_sPositionExitStopValue.size() ) {
+      std::cout << "position exit stop: requires value" << std::endl;
+      bOk = false;
+    }
+  }
+  if ( PanelOrderButtons_Order::EPositionEntryMethod::Stoch == m_order.m_ePositionEntryMethod ) {
+    if ( m_order.m_bStochastic1 | m_order.m_bStochastic2 | m_order.m_bStochastic3 ) {}
+    else {
+      std::cout << "position entry (stochastic): requires at least one" << std::endl;
+      bOk = false;
+    }
+  }
+  if ( PanelOrderButtons_Order::EPositionExitProfitMethod::Stoch == m_order.m_ePositionExitProfitMethod ) {
+    if ( m_order.m_bStochastic1 | m_order.m_bStochastic2 | m_order.m_bStochastic3 ) {}
+    else {
+      std::cout << "position exit profit (stochastic): requires at least one" << std::endl;
+      bOk = false;
+    }
+  }
+  return bOk;
+}
+
 void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
-  if ( m_fBtnOrderBuy ) {
-    wxColour colour = m_btnBuy->GetForegroundColour();
-    m_btnBuy->SetForegroundColour( *wxGREEN );
-    m_fBtnOrderBuy(
-      m_order,
-      [this,colour](){ // fBtnDone_t
-        m_btnBuy->SetForegroundColour( colour );
-      } );
+  if ( ValidateFields() ) {
+    if ( m_fBtnOrderBuy ) {
+      wxColour colour = m_btnBuy->GetForegroundColour();
+      m_btnBuy->SetForegroundColour( *wxGREEN );
+      m_fBtnOrderBuy(
+        m_order,
+        [this,colour](){ // fBtnDone_t
+          m_btnBuy->SetForegroundColour( colour );
+        } );
+    }
   }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
-  if ( m_fBtnOrderSell ) {
-    wxColour colour = m_btnSell->GetForegroundColour();
-    m_btnSell->SetForegroundColour( *wxGREEN );
-    m_fBtnOrderSell(
-      m_order,
-      [this,colour](){ // fBtnDone_t
-        m_btnSell->SetForegroundColour( colour );
-      } );
+  if ( ValidateFields() ) {
+    if ( m_fBtnOrderSell ) {
+      wxColour colour = m_btnSell->GetForegroundColour();
+      m_btnSell->SetForegroundColour( *wxGREEN );
+      m_fBtnOrderSell(
+        m_order,
+        [this,colour](){ // fBtnDone_t
+          m_btnSell->SetForegroundColour( colour );
+        } );
+    }
   }
   event.Skip();
 }
 
 void PanelOrderButtons::OnBtnCloseClick( wxCommandEvent& event ) {
-  if ( m_fBtnOrderClose ) {
-    wxColour colour = m_btnClose->GetForegroundColour();
-    m_btnClose->SetForegroundColour( *wxGREEN );
-    m_fBtnOrderClose(
-      m_order,
-      [this,colour](){ // fBtnDone_t
-        m_btnClose->SetForegroundColour( colour );
-      } );
-  }
+  //if ( ValidateFields() ) { // need this?
+    if ( m_fBtnOrderClose ) {
+      wxColour colour = m_btnClose->GetForegroundColour();
+      m_btnClose->SetForegroundColour( *wxGREEN );
+      m_fBtnOrderClose(
+        m_order,
+        [this,colour](){ // fBtnDone_t
+          m_btnClose->SetForegroundColour( colour );
+        } );
+    }
+  //}
   event.Skip();
 }
 

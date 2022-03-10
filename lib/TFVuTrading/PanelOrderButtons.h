@@ -150,8 +150,7 @@ private:
   void CreateControls();
   bool ShowToolTips() { return true; };
 
-  void EnableButtons();
-  void DisableButtons();
+  bool ValidateFields();
 
   void OnFocusChange( wxFocusEvent& event );
 
