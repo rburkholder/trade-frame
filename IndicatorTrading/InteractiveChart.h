@@ -67,6 +67,8 @@ namespace config {
   class Options;
 }
 
+class TradeLifeTime;
+
 class InteractiveChart:
   public ou::tf::WinChartView
 {
@@ -147,9 +149,6 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, StochInd, Sentiment, PL, Spread }; // IndMA = moving averate indicator
-  enum class EPositionState { Looking, Buying, Long, Selling, Short };
-
-  EPositionState m_statePosition;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -475,6 +474,9 @@ private:
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
+  using vTradeLifeTime_t = std::vector<TradeLifeTime>;
+  vTradeLifeTime_t m_vTradeLifeTime;
+
   void Init();
 
   void BindEvents();
@@ -492,9 +494,6 @@ private:
   void HandleBarCompletionPrice( const ou::tf::Bar& );
   void HandleBarCompletionPriceUp( const ou::tf::Bar& );
   void HandleBarCompletionPriceDn( const ou::tf::Bar& );
-
-  void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );

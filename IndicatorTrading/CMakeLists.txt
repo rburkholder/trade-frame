@@ -28,6 +28,7 @@ set(
     AppIndicatorTrading.h
     Config.h
     InteractiveChart.h
+    TradeLifeTime.h
   )
 
 set(
@@ -35,6 +36,7 @@ set(
     AppIndicatorTrading.cpp
     Config.cpp
     InteractiveChart.cpp
+    TradeLifeTime.cpp
   )
 
 add_executable(
