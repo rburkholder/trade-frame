@@ -62,9 +62,9 @@ struct PanelOrderButtons_Order {
   , m_bStochastic1( false ), m_bStochastic2( false ), m_bStochastic3( false )
   {}
 
-  double PositionEntryValue();
-  double PositionExitProfitValue();
-  double PositionExitStopValue();
+  double PositionEntryValue() const;
+  double PositionExitProfitValue() const;
+  double PositionExitStopValue() const;
 };
 
 struct PanelOrderButtons_MarketData {

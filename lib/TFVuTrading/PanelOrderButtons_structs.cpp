@@ -26,15 +26,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-double PanelOrderButtons_Order::PositionEntryValue() {
+double PanelOrderButtons_Order::PositionEntryValue() const {
   return boost::lexical_cast<double>( m_sPositionEntryValue );
 }
 
-double PanelOrderButtons_Order::PositionExitProfitValue() {
+double PanelOrderButtons_Order::PositionExitProfitValue() const {
   return boost::lexical_cast<double>( m_sPositionExitProfitValue );
 }
 
-double PanelOrderButtons_Order::PositionExitStopValue() {
+double PanelOrderButtons_Order::PositionExitStopValue() const {
   return boost::lexical_cast<double>( m_sPositionExitStopValue );
 }
 
