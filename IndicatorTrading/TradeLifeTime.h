@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <OUCharting/ChartEntryShape.h>
+
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
@@ -35,27 +37,78 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  TradeLifeTime( pPosition_t, const ou::tf::PanelOrderButtons_Order& );
+  struct Indicators {
+    ou::ChartEntryShape& ceBuySubmit;
+    ou::ChartEntryShape& ceBuyFill;
+    ou::ChartEntryShape& ceSellSubmit;
+    ou::ChartEntryShape& ceSellFill;
+    Indicators(
+        ou::ChartEntryShape& ceBuySubmit_
+      , ou::ChartEntryShape& ceBuyFill_
+      , ou::ChartEntryShape& ceSellSubmit_
+      , ou::ChartEntryShape& ceSellFill_
+    )
+    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ ),
+      ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
+    {}
+  };
+
+  TradeLifeTime( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
   virtual ~TradeLifeTime();
 
 protected:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
-  enum class EPositionState { Looking, Entering, Entered, Buying, Long, Selling, Short };
+  enum class EPositionState {
+    InitializeEntry
+  , EnteringPosition // sent order, waiting for fill
+  , EnteredPosition  // filled, determine safety exit strategy
+  , EnteringStop     // sent order, waiting for fill
+  , EnteringProfit   // sent profit order, (stop & profit will co-exist)
+  , Watching         // actively maintaining stop & profit monitoring
+  , Finish           // clean up
+  , Done
+  };
 
   EPositionState m_statePosition;
 
   pPosition_t m_pPosition;
 
-  pOrder_t m_pOrderEntry;
+  ou::tf::Quote m_quote;
+
   pOrder_t m_pOrderProfit;
+  pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderStop;
+
+  ou::ChartEntryShape& m_ceBuySubmit;
+  ou::ChartEntryShape& m_ceBuyFill;
+  ou::ChartEntryShape& m_ceSellSubmit;
+  ou::ChartEntryShape& m_ceSellFill;
+
+  bool m_bWatching;
+  bool m_bWatchStop;
+
+  double m_dblStopTrailDelta;
+  double m_dblStopCurrent;
+
+  void StartWatch();
+  void StopWatch();
+
+  virtual void HandleQuote( const ou::tf::Quote& );
+
+  double PriceInterval( double price ) const;
+  double NormalizePrice( double price ) const;
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 
+  virtual void Cancel() {}
+  virtual void Close() {}
+
 private:
+
+  void ClearOrders();
 
 };
 
@@ -63,20 +116,53 @@ private:
 
 class TradeWithABuy: public TradeLifeTime {
 public:
-  TradeWithABuy( pPosition_t, const ou::tf::PanelOrderButtons_Order& );
+  TradeWithABuy( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  virtual ~TradeWithABuy();
+
+  virtual void Cancel();
+  virtual void Close();
 protected:
+
+  virtual void HandleQuote( const ou::tf::Quote& );
+
 private:
-  void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
+  void HandleEntryOrderCancelled( const ou::tf::Order& );
+  void HandleEntryOrderFilled( const ou::tf::Order& );
+
+  void HandleProfitOrderCancelled( const ou::tf::Order& );
+  void HandleProfitOrderFilled( const ou::tf::Order& );
+
+  void HandleStopOrderCancelled( const ou::tf::Order& );
+  void HandleStopOrderFilled( const ou::tf::Order& );
 };
 
 // =====
 
 class TradeWithASell: public TradeLifeTime {
 public:
-  TradeWithASell( pPosition_t, const ou::tf::PanelOrderButtons_Order& );
+  TradeWithASell( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  virtual ~TradeWithASell();
+
+  virtual void Cancel();
+  virtual void Close();
 protected:
+
+  virtual void HandleQuote( const ou::tf::Quote& );
+
 private:
-  void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
+  void HandleEntryOrderCancelled( const ou::tf::Order& );
+  void HandleEntryOrderFilled( const ou::tf::Order& );
+
+  void HandleProfitOrderCancelled( const ou::tf::Order& );
+  void HandleProfitOrderFilled( const ou::tf::Order& );
+
+  void HandleStopOrderCancelled( const ou::tf::Order& );
+  void HandleStopOrderFilled( const ou::tf::Order& );
 };
+
+// use bracket or parts of of - Position doesn't know how to handle conditional legs
+// manually run bracket
+// after entry fill, submit the stop and profit
+//  if the profit exit met, then cancel the stop, and enter the profit exit
+
+// to check: position may handle the two sides of the bracket closing (both are sells)

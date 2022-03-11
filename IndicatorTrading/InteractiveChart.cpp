@@ -19,6 +19,9 @@
  * Created: February 8, 2022 13:38
  */
 
+ // 2022/03/09 can use stochastic to feed a zigzag indicator, which can be used to
+ //   indicate support/resistance as the day progresses
+
 #include <memory>
 
 #include <TFOptions/Engine.h>
@@ -93,6 +96,7 @@ bool InteractiveChart::Create(
 
 InteractiveChart::~InteractiveChart() {
   m_bfPrice.SetOnBarComplete( nullptr );
+  m_vTradeLifeTime.clear();
 }
 
 void InteractiveChart::Init() {
@@ -235,14 +239,15 @@ void InteractiveChart::SetPosition(
 
   m_vMA.clear();
 
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Gold,  "ma1" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_dvChart );
   }
   m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
+  // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
 
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName(
@@ -498,11 +503,18 @@ void InteractiveChart::OnKey( wxKeyEvent& event ) {
 void InteractiveChart::OnChar( wxKeyEvent& event ) {
   //std::cout << "OnChar=" << event.GetKeyCode() << std::endl;
   switch ( event.GetKeyCode() ) {
-    case 'b':
-      m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, ou::tf::PanelOrderButtons_Order() ) );
+    case 'l': // long
+    case 'b': // buy
+      {
+        TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+        m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
+      }
       break;
-    case 's':
-      m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, ou::tf::PanelOrderButtons_Order() ) );
+    case 's': // sell/short
+      {
+        TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+        m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
+      }
       break;
     case 'x':
       std::cout << "close out" << std::endl;
@@ -513,11 +525,13 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 }
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& order ) {
-  m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, order ) );
+  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+  m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, order, indicators ) );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& order ) {
-  m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, order ) );
+  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+  m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, order, indicators ) );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& order ) {
