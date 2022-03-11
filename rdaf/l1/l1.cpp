@@ -203,7 +203,7 @@ void AppRdafL1::HandleMenuActionSaveValues() {
     [this](){
       m_nTSDataStreamSequence++;
       m_pChartData->SaveValues(
-        "/app/rdaf_l1/" +
+        "/app/rdaf/l1/" +
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
       std::cout << "  ... Done " << std::endl;
