@@ -12,11 +12,33 @@
 
 
 
+
     {
       "name": "(gdb) AutoTrade",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/AutoTrade/AutoTrade",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) rdaf/at",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/rdaf/at/rdaf_at",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",

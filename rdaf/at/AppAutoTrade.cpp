@@ -43,9 +43,9 @@
 
 namespace {
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
-  static const std::string sConfigFilename( "rdaf_at.cfg" );
-  static const std::string sDbName( "rdaf_at.db" );
-  static const std::string sStateFileName( "rdaf_at.state" );
+  static const std::string sConfigFilename( "rdaf/at/example.cfg" );
+  static const std::string sDbName( "rdaf/at/example.db" );
+  static const std::string sStateFileName( "rdaf/at/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
 
@@ -136,7 +136,7 @@ bool AppAutoTrade::OnInit() {
   std::cout << "symbol: " << m_sSymbol << std::endl;
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, options );
+  m_pStrategy = std::make_unique<Strategy>( m_sTSDataStreamStarted, m_ChartDataView, options );
 
   if ( options.bSimStart ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
@@ -195,7 +195,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
     [this](){
       m_nTSDataStreamSequence++;
       m_pStrategy->SaveWatch(
-        "/app/AutoTrade/" +
+        "/app/rdaf/at/" +
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
       std::cout << "  ... Done " << std::endl;

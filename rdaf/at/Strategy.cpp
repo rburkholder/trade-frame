@@ -23,6 +23,7 @@
 #include <rdaf/TROOT.h>
 #include <rdaf/TFile.h>
 #include <rdaf/TTree.h>
+#include <rdaf//TMacro.h>
 //#include <rdaf/TCanvas.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -34,8 +35,9 @@
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
-Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
+Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, const config::Options& options )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_sFilePrefix( sFilePrefix )
 , m_cdv( cdv )
 , m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
@@ -72,6 +74,7 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
   m_ceProfitLoss.SetName( "P/L" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
+
 }
 
 Strategy::~Strategy() {
@@ -110,7 +113,9 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   SetupChart();
 
-  time_duration td = time_duration( 0, 0, m_nPeriodWidth );
+  StartRdaf( m_sFilePrefix );
+
+  //time_duration td = time_duration( 0, 0, m_nPeriodWidth );
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -169,6 +174,9 @@ void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
+  TMacro macroInitial( "../rdaf/at/macro_initial.cpp", "initialization" );
+  auto result = macroInitial.Exec();
+
   //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
   //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
   //f1->SetLineColor(kBlue+1);
@@ -205,14 +213,17 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   m_quote = quote;
 
-  std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
-  m_treeQuote.time = (double)nTime / 1000.0;
-  m_treeQuote.ask = quote.Ask();
-  m_treeQuote.askvol = quote.AskSize();
-  m_treeQuote.bid = quote.Bid();
-  m_treeQuote.bidvol = quote.BidSize();
+  if ( m_pTreeQuote ) { // wait for initialization in thread to start
+    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
 
-  m_pTreeQuote->Fill();
+    m_treeQuote.time = (double)nTime / 1000.0;
+    m_treeQuote.ask = quote.Ask();
+    m_treeQuote.askvol = quote.AskSize();
+    m_treeQuote.bid = quote.Bid();
+    m_treeQuote.bidvol = quote.BidSize();
+
+    m_pTreeQuote->Fill();
+}
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the alogorithm
 
@@ -229,18 +240,21 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const double price = trade.Price();
   const uint64_t volume = trade.Volume();
 
-  std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
-  m_treeTrade.time = (double)nTime / 1000.0;
-  m_treeTrade.price = price;
-  m_treeTrade.vol = volume;
-  if ( mid == price ) {
-    m_treeTrade.direction = 0;
-  }
-  else {
-    m_treeTrade.direction = ( mid < price ) ? volume : -volume;
+  if ( m_pTreeTrade ) { // wait for initialization in thread to start
+    std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
+    m_treeTrade.time = (double)nTime / 1000.0;
+    m_treeTrade.price = price;
+    m_treeTrade.vol = volume;
+    if ( mid == price ) {
+      m_treeTrade.direction = 0;
+    }
+    else {
+      m_treeTrade.direction = ( mid < price ) ? volume : -volume;
+    }
+
+    m_pTreeTrade->Fill();
   }
 
-  m_pTreeTrade->Fill();
 
 }
 
