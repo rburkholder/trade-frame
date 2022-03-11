@@ -86,7 +86,7 @@ void ChartData::ThreadRdaf( ChartData* p, const std::string& sFilePrefix ) {
   self->m_pTreeQuote = std::make_shared<TTree>(
     "quotes", ( self->m_pWatch->GetInstrumentName() + " quotes" ).c_str()
   );
-  self->m_pTreeQuote->Branch( "quote", &self->m_pTreeQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+  self->m_pTreeQuote->Branch( "quote", &self->m_treeQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !self->m_pTreeQuote ) {
     std::cout << "problems m_pTreeQuote" << std::endl;
   }
@@ -94,7 +94,7 @@ void ChartData::ThreadRdaf( ChartData* p, const std::string& sFilePrefix ) {
   self->m_pTreeTrade = std::make_shared<TTree>(
     "trades", ( self->m_pWatch->GetInstrumentName() + " trades" ).c_str()
   );
-  self->m_pTreeTrade->Branch( "trade", &self->m_pTreeTrade, "time/D:price/D:vol/l:direction/L" );
+  self->m_pTreeTrade->Branch( "trade", &self->m_treeTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !self->m_pTreeTrade ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
