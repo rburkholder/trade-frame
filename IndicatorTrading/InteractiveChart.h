@@ -474,7 +474,7 @@ private:
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
-  using vTradeLifeTime_t = std::vector<TradeLifeTime>;
+  using vTradeLifeTime_t = std::vector<std::unique_ptr<TradeLifeTime> >;
   vTradeLifeTime_t m_vTradeLifeTime;
 
   void Init();

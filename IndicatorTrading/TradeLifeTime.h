@@ -54,6 +54,8 @@ public:
   };
 
   TradeLifeTime( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeLifeTime( TradeLifeTime&& ) = delete;
+  TradeLifeTime( const TradeLifeTime& ) = delete;
   virtual ~TradeLifeTime();
 
 protected:

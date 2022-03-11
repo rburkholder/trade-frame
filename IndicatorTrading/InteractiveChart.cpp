@@ -507,13 +507,16 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
     case 'b': // buy
       {
         TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-        m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
+        m_vTradeLifeTime.emplace_back(
+          std::make_unique<TradeWithABuy>( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators )
+          );
       }
       break;
     case 's': // sell/short
       {
         TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-        m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
+        m_vTradeLifeTime.emplace_back(
+          std::make_unique<TradeWithASell>( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
       }
       break;
     case 'x':
@@ -526,12 +529,14 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& order ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  m_vTradeLifeTime.emplace_back( TradeWithABuy( m_pPosition, order, indicators ) );
+  m_vTradeLifeTime.emplace_back(
+    std::make_unique<TradeWithABuy>( m_pPosition, order, indicators ) );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& order ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  m_vTradeLifeTime.emplace_back( TradeWithASell( m_pPosition, order, indicators ) );
+  m_vTradeLifeTime.emplace_back(
+    std::make_unique<TradeWithASell>( m_pPosition, order, indicators ) );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& order ) {
