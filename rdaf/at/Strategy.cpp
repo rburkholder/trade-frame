@@ -25,6 +25,7 @@
 #include <rdaf/TTree.h>
 #include <rdaf//TMacro.h>
 //#include <rdaf/TCanvas.h>
+#include <rdaf/TDirectory.h>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -78,6 +79,8 @@ Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, cons
 }
 
 Strategy::~Strategy() {
+  m_prdafApp->SetReturnFromRun( true );
+  m_threadRdaf.join(); // returns after .quit at command line
   Clear();
 }
 
@@ -128,7 +131,7 @@ void Strategy::Clear() {
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
     m_cdv.Clear();
-    m_pPosition.reset();
+    //m_pPosition.reset(); // need to fix relative to thread
   }
 }
 
@@ -174,8 +177,50 @@ void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
-  TMacro macroInitial( "../rdaf/at/macro_initial.cpp", "initialization" );
-  auto result = macroInitial.Exec();
+  self->m_pMacroInitial = std::make_unique<TMacro>( "../rdaf/at/macro_initial.cpp", "initialization" );
+  auto result = self->m_pMacroInitial->Exec();
+
+  // needs to come afterwards?
+  self->m_pMacroSignal = std::make_unique<TMacro>(  "../rdaf/at/macro_signal.cpp", "signal generation" );
+
+  TList* pList = gDirectory->GetList();
+  auto n = pList->GetEntries();
+
+  TTree* pTreeQuotes {};
+  TTree* pTreeTrades {};
+
+  for(const auto&& obj: *pList ) {
+    TNamed* name = (TNamed*) obj;
+    TDictionary* dict = (TDictionary*) obj;
+    TClass* class_ = (TClass*) obj;
+
+    std::cout
+      << "name=" << name->GetName()
+      << ",title=" << name->GetTitle()
+      << ",class" << dict->ClassName()
+      << std::endl;
+
+
+    if ( 0 == strcmp( "quotes", class_->GetName() ) ) {
+      pTreeQuotes = (TTree*)obj;
+    }
+
+    if ( 0 == strcmp( "trades", class_->GetName() ) ) {
+      pTreeTrades = (TTree*)obj;
+    }
+
+    //class_->Dump();
+  }
+
+  TBranch* branchTrade;
+  //treeTrade->SetBranchAddress( "trade", &trade, &branchTrade );
+  branchTrade = pTreeTrades->GetBranch( "trade" );
+
+
+
+  //TCollection* pCol = pList->GetCurrentCollection();
+  //pCol->Dump();
+
 
   //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
   //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
@@ -264,6 +309,11 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+
+  if ( m_pMacroSignal ) {
+    int result = m_pMacroSignal->Exec();
+  }
+
 
   TimeTick( bar );
 }

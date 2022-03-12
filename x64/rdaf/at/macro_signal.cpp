@@ -1,13 +1,63 @@
 
+//#include <iostream>
+
 #include <rdaf/TH2.h>
+#include <rdaf/TTree.h>
+
 #include <rdaf/TDirectory.h>
 
 //function to run to get trading signal, 1 means go long.
-int macro_signal( double time, double price ) {
+//int macro_signal( double time, double price ) {
+int macro_signal() {
+
+  TH2F* pHisto2;
+  TTree* pTreeQuotes;
+  TTree* pTreeTrades;
+
+  TList* pList = gDirectory->GetList();
+
+  for( const auto&& obj: *pList ) {
+
+    TClass* class_ = (TClass*) obj;
+
+    //std::cout
+    //  << "name=" << class_->GetName()
+    //  << ",title=" << class_->GetTitle()
+    //  << ",class" << class_->ClassName()
+    //  << std::endl;
+
+    //class_->Dump();
+
+    if ( 0 == strcmp( "quotes", class_->GetName() ) ) {
+      pTreeQuotes = (TTree*)obj;
+    }
+
+    if ( 0 == strcmp( "trades", class_->GetName() ) ) {
+      pTreeTrades = (TTree*)obj;
+    }
+
+    if ( 0 == strcmp( "h2", class_->GetName() ) ) {
+      pHisto2 = (TH2F*)obj;
+    }
+
+  }
 
   // attach to historgram created in macro_initial
-  TH2F* h2 = (TH2F*)gDirectory->GetList()->FindObject( "h2" );
+  if ( nullptr != pHisto2 ) {
+    //std::cout << "found h2" << std::endl;
+  }
 
+  TBranch* pTrades;
+
+  if ( nullptr != pTreeTrades ) {
+    //std::cout << "have a branch" << std::endl;
+    //treeTrade->SetBranchAddress( "trade", &trade, &branchTrade );
+    pTrades = pTreeTrades->GetBranch( "trade" );
+  }
+
+  //std::cout << "in macro_signal: " << pTreeTrades->GetEntries() << std::endl;
+
+/*
   //input of this function is the time, which is the current time
   //therefore we need to find a suitable range of bins along Y-axis (remember time is stored in y-axis)
   // and find the projection of h2. the result is a 1-D hist with x-axis being price
@@ -30,7 +80,8 @@ int macro_signal( double time, double price ) {
 
   //finally, if price is within 1 sigma from the mean, it's a good signal and go long:
   if (abs( price - b->Parameter(1)) < b->Parameter(2)) return 1;
+*/
 
-  return -1;
+  return 0;
 
 }

@@ -41,6 +41,7 @@
 class TRint;
 class TFile;
 class TTree;
+class TMacro;
 
 namespace config {
   class Options;
@@ -146,6 +147,10 @@ private:
   using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
   pTTree_t m_pTreeTrade;
+
+  using pMacro_t = std::unique_ptr<TMacro>;
+  pMacro_t m_pMacroInitial;
+  pMacro_t m_pMacroSignal;
 
   void StartRdaf( const std::string& sFilePrefix );
   static void ThreadRdaf( Strategy* p, const std::string& sFilePrefix );
