@@ -150,6 +150,7 @@ private:
 
   using pMacro_t = std::unique_ptr<TMacro>;
   pMacro_t m_pMacroInitial;
+  pMacro_t m_pMacroTrade;
   pMacro_t m_pMacroSignal;
 
   void StartRdaf( const std::string& sFilePrefix );

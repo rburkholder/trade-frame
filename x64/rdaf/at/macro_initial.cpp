@@ -1,3 +1,10 @@
+//
+// macro_initial.cpp
+// run by rdaf/at/Strategy.cpp to construct structures used in the variuous macros
+//
+// Supplied by Andrew Ross, March 2022
+//
+
 
 #include <rdaf/TH2.h>
 

@@ -1,4 +1,14 @@
 
+//
+// macro_trade.cpp
+// run by rdaf/at/Strategy.cpp once a second to generate trading signal
+//  -1: invalid data
+//   0: no change
+//   1: enter/stay long
+//
+// Supplied by Andrew Ross, March 2022
+//
+
 //#include <iostream>
 
 #include <rdaf/TH2.h>
@@ -47,7 +57,7 @@ int macro_signal() {
     //std::cout << "found h2" << std::endl;
   }
 
-  TBranch* pTrades;
+  TBranch* pTrades {};
 
   if ( nullptr != pTreeTrades ) {
     //std::cout << "have a branch" << std::endl;
