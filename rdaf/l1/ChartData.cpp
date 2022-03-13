@@ -57,12 +57,9 @@ ChartData::~ChartData(void) {
   m_pFile->Close();
   m_prdafApp->SetReturnFromRun( true );
   m_threadRdaf.join();
-
 }
 
-void ChartData::ThreadRdaf( ChartData* p, const std::string& sFilePrefix ) {
-
-  ChartData* self = reinterpret_cast<ChartData*>( p );
+void ChartData::ThreadRdaf( ChartData* self, const std::string& sFilePrefix ) {
 
   const config::Options& options( self->m_options );
 
@@ -99,13 +96,16 @@ void ChartData::ThreadRdaf( ChartData* p, const std::string& sFilePrefix ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
+  // example chart
   //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
   //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
   //f1->SetLineColor(kBlue+1);
   //f1->SetTitle("My graph;x; sin(x)");
   //f1->Draw();
   //c->Modified(); c->Update();
-  self->m_prdafApp->Run();
+
+  // uncomment when live analysis is desired
+  //self->m_prdafApp->Run();
 }
 
 void ChartData::StartRdaf( const std::string& sFileName ) {

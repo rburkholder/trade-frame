@@ -64,7 +64,6 @@ bool AppRdafL1::OnInit() {
   }
 
   if ( Load( sConfigFilename, m_options ) ) {
-    m_sSymbol = m_options.sSymbol;
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "rdaf l1" );
@@ -134,12 +133,12 @@ bool AppRdafL1::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppRdafL1::OnClose, this );  // start close of windows and controls
 
   FrameMain::vpItems_t vItems;
-  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartWatch ) ) );
-  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopWatch ) ) );
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartWatch ) ) );
   //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
   //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
-  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppRdafL1::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopWatch ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -147,7 +146,7 @@ bool AppRdafL1::OnInit() {
   }
 
   if ( nullptr == m_pChartData ) {
-    m_pChartData = new ChartData( m_sTSDataStreamStarted, m_sSymbol, m_options, m_pData1Provider );
+    m_pChartData = new ChartData( m_sTSDataStreamStarted, m_options.sSymbol, m_options, m_pData1Provider );
     m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
   }
 

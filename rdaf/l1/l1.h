@@ -49,7 +49,8 @@ namespace tf {
 
 class AppRdafL1:
   public wxApp,
-  public ou::tf::FrameWork01<AppRdafL1> {
+  public ou::tf::FrameWork01<AppRdafL1>
+{
   friend ou::tf::FrameWork01<AppRdafL1>;
   friend class boost::serialization::access;
 public:
@@ -63,7 +64,6 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 

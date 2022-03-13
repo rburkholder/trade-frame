@@ -21,28 +21,10 @@
 
 #include <string>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 namespace config {
 
 struct Options {
   std::string sSymbol;
-
-  int nTimeBins;
-  boost::posix_time::ptime dtTimeUpper;
-  boost::posix_time::ptime dtTimeLower;
-
-  int nPriceBins;
-  double dblPriceUpper;
-  double dblPriceLower;
-
-  int nVolumeSideBins;
-  double dblVolumeSideUpper;
-  double dblVolumeSideLower;
-
-  int nVolumeTotalBins;
-  double dblVolumeTotalUpper;
-  double dblVolumeTotalLower;
 };
 
 bool Load( const std::string& sFileName, Options& );
