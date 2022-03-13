@@ -14,7 +14,7 @@ automated trading application.  Some of the features and functions represented:
 
 This project can be used as a template to try out your own high-frequency trading ideas.
 
-### x64/debug/AutoTrade.cfg
+### x64/debug/rdaf/at/example.cfg
 
 This is a specialization of the AutoTrade project.  This project uses CERN's rdaf (ROOT Data Analysis Framework)
 libraries for analysing live data as it arrives.
@@ -38,13 +38,13 @@ volume_upper=1000
 volume_lower=0
 
 # uncomment group_directory when a legal one is available
-#group_directory=/app/AutoTrade/20220223 20:05:28.214488-1
+#group_directory=/app/rdaf/at/20220223 20:05:28.214488-1
 sim_start=off
 ```
 
 When there is no data available, set the group directory such nothing follows the '='
 
-### x64/debug/rdaf/at/eample.db
+### x64/debug/rdaf/at/example.db
 
 The database has a number of tables, and can be accessed in a manner similar to this example:
 
