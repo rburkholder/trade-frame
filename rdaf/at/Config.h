@@ -21,25 +21,25 @@
 
 #include <string>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 namespace config {
 
 struct Options {
 
   std::string sSymbol;
 
-  int nPeriodWidth;  // units:  seconds
+  int nTimeBins;
+  boost::posix_time::ptime dtTimeUpper;
+  boost::posix_time::ptime dtTimeLower;
 
-  // nPeriodWidth * nPeriods => moving average time range
-  // common: 10/21/50, or 8/13/21
+  int nPriceBins;
+  double dblPriceUpper;
+  double dblPriceLower;
 
-  // shortest EMA
-  int nMA1Periods;
-
-  // shortest EMA
-  int nMA2Periods;
-
-  // longest EMA
-  int nMA3Periods;
+  int nVolumeBins;
+  double dblVolumeUpper;
+  double dblVolumeLower;
 
   // group directory for simulator - obtain from Hdf5Chart
   std::string sGroupDirectory;
@@ -51,8 +51,7 @@ struct Options {
   int nIbInstance;
 
   Options()
-  : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
-  , bSimStart( false )
+  :  bSimStart( false )
   , nIbInstance( 1 )
   {}
 };

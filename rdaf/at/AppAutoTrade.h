@@ -35,6 +35,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
+#include "Config.h"
+
 class Strategy;
 class FrameMain;
 
@@ -64,6 +66,8 @@ private:
   std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
+
+  config::Options m_options;
 
   ou::ChartDataView m_ChartDataView;
 

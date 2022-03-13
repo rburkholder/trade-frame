@@ -19,12 +19,14 @@
  * Created: March 7, 2022 14:35
  */
 
+#include <rdaf/TH3.h>
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
 #include <rdaf/TFile.h>
 #include <rdaf/TTree.h>
 #include <rdaf//TMacro.h>
 //#include <rdaf/TCanvas.h>
+#include <rdaf/TFitResult.h>
 #include <rdaf/TDirectory.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -38,6 +40,7 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, const config::Options& options )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_options( options )
 , m_sFilePrefix( sFilePrefix )
 , m_cdv( cdv )
 , m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
@@ -49,18 +52,6 @@ Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, cons
 , m_bfQuotes01Sec( 1 )
 , m_stateTrade( ETradeState::Init )
 {
-
-  assert( 0 < options.nPeriodWidth );
-
-  m_nPeriodWidth = options.nPeriodWidth;
-  m_vMAPeriods.push_back( options.nMA1Periods );
-  m_vMAPeriods.push_back( options.nMA2Periods );
-  m_vMAPeriods.push_back( options.nMA3Periods );
-
-  assert( 3 == m_vMAPeriods.size() );
-  for ( vMAPeriods_t::value_type value: m_vMAPeriods ) {
-    assert( 0 < value );
-  }
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -135,24 +126,20 @@ void Strategy::Clear() {
   }
 }
 
-void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
-
-  Strategy* self = reinterpret_cast<Strategy*>( p );
+void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
 
   //const config::Options& options( self->m_options );
 
-  if ( false ) { // diagnostics
-    //double dblDateTimeUpper;
-    //double dblDateTimeLower;
+  double dblDateTimeUpper;
+  double dblDateTimeLower;
 
-    //std::time_t nTime;
-    //nTime = boost::posix_time::to_time_t( options.dtTimeUpper );
-    //dblDateTimeUpper = (double) nTime / 1000.0;
-    //nTime = boost::posix_time::to_time_t( options.dtTimeLower );
-    //dblDateTimeLower = (double) nTime / 1000.0;
+  std::time_t nTime;
+  nTime = boost::posix_time::to_time_t( self->m_options.dtTimeUpper );
+  dblDateTimeUpper = (double) nTime / 1000.0;
+  nTime = boost::posix_time::to_time_t( self->m_options.dtTimeLower );
+  dblDateTimeLower = (double) nTime / 1000.0;
 
-    //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
-  }
+  //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t pWatch = self->m_pPosition->GetWatch();
@@ -164,7 +151,7 @@ void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
   self->m_pTreeQuote = std::make_shared<TTree>(
     "quotes", ( pWatch->GetInstrumentName() + " quotes" ).c_str()
   );
-  self->m_pTreeQuote->Branch( "quote", &self->m_treeQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+  self->m_pTreeQuote->Branch( "quote", &self->m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !self->m_pTreeQuote ) {
     std::cout << "problems m_pTreeQuote" << std::endl;
   }
@@ -172,26 +159,31 @@ void Strategy::ThreadRdaf( Strategy* p, const std::string& sFilePrefix ) {
   self->m_pTreeTrade = std::make_shared<TTree>(
     "trades", ( pWatch->GetInstrumentName() + " trades" ).c_str()
   );
-  self->m_pTreeTrade->Branch( "trade", &self->m_treeTrade, "time/D:price/D:vol/l:direction/L" );
+  self->m_pTreeTrade->Branch( "trade", &self->m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !self->m_pTreeTrade ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
-  self->m_pMacroInitial = std::make_unique<TMacro>( "../rdaf/at/macro_initial.cpp", "initialization" );
-  auto result = self->m_pMacroInitial->Exec();
+  self->m_pHistVolume = std::make_shared<TH3D>(
+    "h1", ( self->m_options.sSymbol + "Volume" ).c_str(),
+    self->m_options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
+    self->m_options.nPriceBins, self->m_options.dblPriceLower, self->m_options.dblPriceUpper,
+    self->m_options.nVolumeBins, self->m_options.dblVolumeLower, self->m_options.dblVolumeUpper
+  );
+  if ( !self->m_pHistVolume ) {
+    std::cout << "problems history" << std::endl;
+  }
 
-  self->m_pMacroTrade = std::make_unique<TMacro>( "../rdaf/at/macro_trade.cpp", "each trade" );
-
-  // needs to come afterwards?
-  self->m_pMacroSignal = std::make_unique<TMacro>(  "../rdaf/at/macro_signal.cpp", "signal generation" );
-
+  // example charting code in live analysis mode
   //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
   //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
   //f1->SetLineColor(kBlue+1);
   //f1->SetTitle("My graph;x; sin(x)");
   //f1->Draw();
   //c->Modified(); c->Update();
-  self->m_prdafApp->Run();
+
+  // un-comment if you want the prompt for live analysis
+  //self->m_prdafApp->Run();
 }
 
 void Strategy::StartRdaf( const std::string& sFileName ) {
@@ -224,11 +216,11 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   if ( m_pTreeQuote ) { // wait for initialization in thread to start
     std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
 
-    m_treeQuote.time = (double)nTime / 1000.0;
-    m_treeQuote.ask = quote.Ask();
-    m_treeQuote.askvol = quote.AskSize();
-    m_treeQuote.bid = quote.Bid();
-    m_treeQuote.bidvol = quote.BidSize();
+    m_branchQuote.time = (double)nTime / 1000.0;
+    m_branchQuote.ask = quote.Ask();
+    m_branchQuote.askvol = quote.AskSize();
+    m_branchQuote.bid = quote.Bid();
+    m_branchQuote.bidvol = quote.BidSize();
 
     m_pTreeQuote->Fill();
 }
@@ -250,22 +242,20 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   if ( m_pTreeTrade ) { // wait for initialization in thread to start
     std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
-    m_treeTrade.time = (double)nTime / 1000.0;
-    m_treeTrade.price = price;
-    m_treeTrade.vol = volume;
+    m_branchTrade.time = (double)nTime / 1000.0;
+    m_branchTrade.price = price;
+    m_branchTrade.vol = volume;
     if ( mid == price ) {
-      m_treeTrade.direction = 0;
+      m_branchTrade.direction = 0;
     }
     else {
-      m_treeTrade.direction = ( mid < price ) ? volume : -volume;
+      m_branchTrade.direction = ( mid < price ) ? volume : -volume;
     }
 
     m_pTreeTrade->Fill();
   }
 
-  if ( m_pMacroTrade ) {
-    m_pMacroTrade->Exec();
-  }
+  m_pHistVolume->Fill( m_branchTrade.time, trade.Price(), trade.Volume() );
 
 }
 
@@ -276,12 +266,25 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
-  if ( m_pMacroSignal ) {
-    int result = m_pMacroSignal->Exec();
-  }
-
-
   TimeTick( bar );
+}
+
+void Strategy::EnterLong( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
+  m_stateTrade = ETradeState::LongSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
+}
+
+void Strategy::EnterShort( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
+  m_stateTrade = ETradeState::ShortSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
@@ -292,27 +295,39 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-/*
-      if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
-        // enter long
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceLongEntry.AddLabel( bar.DateTime(), m_dblMid, "Long Submit" );
-        m_stateTrade = ETradeState::LongSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
-      }
-      else {
-        if ( ( ma1 < ma3 ) && ( ma2 < ma3 ) && ( m_dblMid < ma1 ) ) {
-          // enter short
-          m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
-          m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-          m_ceShortEntry.AddLabel( bar.DateTime(), m_dblMid, "Short Submit" );
-          m_stateTrade = ETradeState::ShortSubmitted;
-          m_pPosition->PlaceOrder( m_pOrder );
+      if ( m_pHistVolume ) {
+        //input of this function is the time, which is the current time
+        //therefore we need to find a suitable range of bins along Y-axis (remember time is stored in y-axis)
+        // and find the projection of h2. the result is a 1-D hist with x-axis being price
+        // and value being volume
+
+        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+        nTime = (double)nTime / 1000.0;
+
+        //find the bin that the time given belongs to:
+        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
+
+        //if bin_y is valid and larger than 1 then proceed, else abort (since there is not enought data)
+        if ( bin_y < 1 ) {
         }
-      } */
+        else {
+          //now find projection of h2 from the beginning till now:
+          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+
+          // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
+          auto b = h2_x->Fit( "gauss", "S" );
+
+          //if fit is valid proceed, else abort
+          if ( !b->IsValid() ) {
+          }
+          else {
+            //finally, if price is within 1 sigma from the mean, it's a good signal and go long:
+            if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
+              EnterLong( bar );
+            }
+          }
+        }
+      }
       break;
     case ETradeState::LongSubmitted:
       // wait for order to execute

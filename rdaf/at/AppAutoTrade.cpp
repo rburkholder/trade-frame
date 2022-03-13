@@ -37,7 +37,6 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
-#include "Config.h"
 #include "Strategy.h"
 #include "AppAutoTrade.h"
 
@@ -71,16 +70,13 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  config::Options options;
-
-  if ( Load( sConfigFilename, options ) ) {
-    m_sSymbol = options.sSymbol;
+  if ( Load( sConfigFilename, m_options ) ) {
   }
   else {
     return 0;
   }
 
-  //if ( options.bSimStart ) {
+  //if ( m_options.bSimStart ) {
     // just always delete it
     if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
@@ -89,11 +85,11 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  if ( 0 < options.sGroupDirectory.size() ) {
-    m_sim->SetGroupDirectory( options.sGroupDirectory );
+  if ( 0 < m_options.sGroupDirectory.size() ) {
+    m_sim->SetGroupDirectory( m_options.sGroupDirectory );
   }
 
-  m_tws->SetClientId( options.nIbInstance );
+  m_tws->SetClientId( m_options.nIbInstance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -133,15 +129,15 @@ bool AppAutoTrade::OnInit() {
 
   LinkToPanelProviderControl();
 
-  std::cout << "symbol: " << m_sSymbol << std::endl;
+  std::cout << "symbol: " << m_options.sSymbol << std::endl;
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( m_sTSDataStreamStarted, m_ChartDataView, options );
+  m_pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, m_ChartDataView, m_options );
 
-  if ( options.bSimStart ) {
+  if ( m_options.bSimStart ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
-    if ( boost::regex_search( options.sGroupDirectory, what, expr ) ) {
+    if ( boost::regex_search( m_options.sGroupDirectory, what, expr ) ) {
       boost::gregorian::date date( boost::gregorian::from_undelimited_string( what[ 0 ] ) );
       std::cout << "date " << date << std::endl;
       m_pStrategy->InitForUSEquityExchanges( date );
@@ -170,7 +166,7 @@ bool AppAutoTrade::OnInit() {
     }
   );
 
-  if ( options.bSimStart ) {
+  if ( m_options.bSimStart ) {
     CallAfter(
       [this](){
         using Provider_t = ou::tf::PanelProviderControl::Provider_t;
@@ -211,7 +207,7 @@ void AppAutoTrade::ConstructIBInstrument() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Queue(
-    m_sSymbol,
+    m_options.sSymbol,
     [this]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
@@ -240,7 +236,7 @@ void AppAutoTrade::ConstructSimInstrument() {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_sSymbol );
+  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_options.sSymbol );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?

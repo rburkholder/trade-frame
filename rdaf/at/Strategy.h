@@ -38,6 +38,7 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+class TH3D;
 class TRint;
 class TFile;
 class TTree;
@@ -87,14 +88,11 @@ private:
 
   ETradeState m_stateTrade;
 
+  const config::Options& m_options;
+
   const std::string& m_sFilePrefix;
 
   pPosition_t m_pPosition;
-
-  int m_nPeriodWidth;
-
-  using vMAPeriods_t = std::vector<int>;
-  vMAPeriods_t m_vMAPeriods;
 
   ou::tf::Quote m_quote;
 
@@ -120,38 +118,33 @@ private:
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   // ==
-  struct TreeQuote {
+  struct QuoteForBranch {
     double time;
     double ask;
     uint64_t askvol;
     double bid;
     uint64_t bidvol;
-  };
+  } m_branchQuote;
 
-  struct TreeTrade {
+  struct TradeForBranch {
     double time;
     double price;
     uint64_t vol;
     int64_t direction;
-  };
+  } m_branchTrade;
 
   std::thread m_threadRdaf;
   std::unique_ptr<TRint> m_prdafApp;
 
   std::unique_ptr<TFile> m_pFile;
 
-  TreeQuote m_treeQuote;
-  TreeTrade m_treeTrade;
-
   // https://root.cern/doc/master/classTTree.html
   using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
   pTTree_t m_pTreeTrade;
 
-  using pMacro_t = std::unique_ptr<TMacro>;
-  pMacro_t m_pMacroInitial;
-  pMacro_t m_pMacroTrade;
-  pMacro_t m_pMacroSignal;
+  using pTH3D_t = std::shared_ptr<TH3D>;
+  pTH3D_t m_pHistVolume;
 
   void StartRdaf( const std::string& sFilePrefix );
   static void ThreadRdaf( Strategy* p, const std::string& sFilePrefix );
@@ -166,6 +159,9 @@ private:
   void HandleRHTrading( const ou::tf::Bar& bar );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void EnterLong( const ou::tf::Bar& );
+  void EnterShort( const ou::tf::Bar& );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

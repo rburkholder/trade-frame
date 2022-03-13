@@ -22,6 +22,8 @@
 #include <fstream>
 #include <exception>
 
+#include <boost/date_time/posix_time/time_parsers.hpp>
+
 #include <boost/log/trivial.hpp>
 
 #include <boost/program_options.hpp>
@@ -31,10 +33,15 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sOption_Symbol( "symbol" );
-  static const std::string sOption_PeriodWidth( "period_width" );
-  static const std::string sOption_MA1Periods( "ma1_periods" );
-  static const std::string sOption_MA2Periods( "ma2_periods" );
-  static const std::string sOption_MA3Periods( "ma3_periods" );
+  static const std::string sOption_TimeBinsCount( "time_bins" );
+  static const std::string sOption_TimeBinsUpper( "time_upper" );
+  static const std::string sOption_TimeBinsLower( "time_lower" );
+  static const std::string sOption_PriceBinsCount( "price_bins" );
+  static const std::string sOption_PriceBinsUpper( "price_upper" );
+  static const std::string sOption_PriceBinsLower( "price_lower" );
+  static const std::string sOption_VolumeBinsCount( "volume_bins" );
+  static const std::string sOption_VolumeBinsUpper( "volume_upper" );
+  static const std::string sOption_VolumeBinsLower( "volume_lower" );
   static const std::string sOption_GroupDirectory( "group_directory" );
   static const std::string sOption_SimStart( "sim_start" );
   static const std::string sOption_IbInstance( "ib_instance" );
@@ -60,16 +67,26 @@ bool Load( const std::string& sFileName, Options& options ) {
 
   bool bOk( true );
 
+  std::string sDateTimeUpper;
+  std::string sDateTimeLower;
+
   try {
 
     po::options_description config( "AutoTrade Config" );
     config.add_options()
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol), "symbol" )
 
-      ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth), "period width (sec)" )
-      ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods), "ma1 (#periods)" )
-      ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
-      ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
+      ( sOption_TimeBinsCount.c_str(), po::value<int>( &options.nTimeBins), "#time bins" )
+      ( sOption_TimeBinsUpper.c_str(), po::value<std::string>( &sDateTimeUpper), "time upper yyyymmddThhmmss" )
+      ( sOption_TimeBinsLower.c_str(), po::value<std::string>( &sDateTimeLower), "time lower yyyymmddThhmmss" )
+
+      ( sOption_PriceBinsCount.c_str(), po::value<int>( &options.nPriceBins), "#price bins" )
+      ( sOption_PriceBinsUpper.c_str(), po::value<double>( &options.dblPriceUpper), "price upper" )
+      ( sOption_PriceBinsLower.c_str(), po::value<double>( &options.dblPriceLower), "price lower" )
+
+      ( sOption_VolumeBinsCount.c_str(), po::value<int>( &options.nVolumeBins), "#volume bins" )
+      ( sOption_VolumeBinsUpper.c_str(), po::value<double>( &options.dblVolumeUpper), "volume upper" )
+      ( sOption_VolumeBinsLower.c_str(), po::value<double>( &options.dblVolumeLower), "volume lower" )
 
       ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory)->default_value( "" ), "hdf5 group directory" )
 
@@ -91,10 +108,19 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk |= parse<std::string>( sFileName, vm, sOption_Symbol, options.sSymbol );
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
-      bOk |= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
-      bOk |= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
-      bOk |= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
-      bOk |= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
+      bOk |= parse<int>(    sFileName, vm, sOption_TimeBinsCount, options.nTimeBins );
+      bOk |= parse<std::string>( sFileName, vm, sOption_TimeBinsUpper, sDateTimeUpper );
+      options.dtTimeUpper = boost::posix_time::from_iso_string( sDateTimeUpper );
+      bOk |= parse<std::string>( sFileName, vm, sOption_TimeBinsLower, sDateTimeLower );
+      options.dtTimeLower = boost::posix_time::from_iso_string( sDateTimeLower );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_PriceBinsCount, options.nPriceBins );
+      bOk |= parse<double>( sFileName, vm, sOption_PriceBinsUpper, options.dblPriceUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_PriceBinsLower, options.dblPriceLower );
+
+      bOk |= parse<int>(    sFileName, vm, sOption_VolumeBinsCount, options.nVolumeBins );
+      bOk |= parse<double>( sFileName, vm, sOption_VolumeBinsUpper, options.dblVolumeUpper );
+      bOk |= parse<double>( sFileName, vm, sOption_VolumeBinsLower, options.dblVolumeLower );
 
       // TODO: need to make this optional?
       bOk |= parse<std::string>( sFileName, vm, sOption_GroupDirectory, options.sGroupDirectory );
