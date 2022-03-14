@@ -505,19 +505,10 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   switch ( event.GetKeyCode() ) {
     case 'l': // long
     case 'b': // buy
-      {
-        TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-        m_vTradeLifeTime.emplace_back(
-          std::make_unique<TradeWithABuy>( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators )
-          );
-      }
+      OrderBuy( ou::tf::PanelOrderButtons_Order() );
       break;
     case 's': // sell/short
-      {
-        TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-        m_vTradeLifeTime.emplace_back(
-          std::make_unique<TradeWithASell>( m_pPosition, ou::tf::PanelOrderButtons_Order(), indicators ) );
-      }
+      OrderSell( ou::tf::PanelOrderButtons_Order() );
       break;
     case 'x':
       std::cout << "close out" << std::endl;
@@ -527,22 +518,22 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   event.Skip();
 }
 
-void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& order ) {
+void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
   m_vTradeLifeTime.emplace_back(
-    std::make_unique<TradeWithABuy>( m_pPosition, order, indicators ) );
+    std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators ) );
 }
 
-void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& order ) {
+void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
   m_vTradeLifeTime.emplace_back(
-    std::make_unique<TradeWithASell>( m_pPosition, order, indicators ) );
+    std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators ) );
 }
 
-void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& order ) {
+void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
 }
 
-void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& order ) {
+void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& buttons ) {
 }
 
 void InteractiveChart::OptionWatchStart() {
