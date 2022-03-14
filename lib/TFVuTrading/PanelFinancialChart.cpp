@@ -149,7 +149,7 @@ wxTreeItemId PanelFinancialChart::SetRoot( const std::string& sName, pChartDataV
 
 wxTreeItemId PanelFinancialChart::AppendItem( wxTreeItemId parent, const std::string& sName, pChartDataView_t pChartDataView, wxMenu* pMenuPppup ) {
   CustomItemData* cid = new CustomItemData( pChartDataView, pMenuPppup );
-  wxTreeItemId id = m_pTree->AppendItem( parent, sName, -1, 01, cid );
+  wxTreeItemId id = m_pTree->AppendItem( parent, sName, -1, -1, cid );
   m_pTree->SortChildren( parent );
   return id;
 }
