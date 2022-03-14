@@ -19,6 +19,8 @@
  * Created: February 8, 2022 00:12
  */
 
+#include <boost/lexical_cast.hpp>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -49,6 +51,25 @@ namespace {
   static const std::string sStateFileName( "IndicatorTrading.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
+
+namespace {
+
+  class CustomItemData: public wxTreeItemData {
+  public:
+    wxMenu* pMenuPopup;
+    CustomItemData(  wxMenu* pMenuPopup_ )
+    : pMenuPopup( pMenuPopup_ )
+    {}
+    ~CustomItemData() {
+      if ( nullptr != pMenuPopup ) {
+        // assumes binds are cleared as well
+        delete pMenuPopup;
+        pMenuPopup = nullptr;
+      }
+    }
+  };
+}
+
 
 IMPLEMENT_APP(AppIndicatorTrading)
 
@@ -99,6 +120,8 @@ bool AppIndicatorTrading::OnInit() {
   // tree for viewed symbols
   m_ptreeTradables = new wxTreeCtrl( m_splitterRow );
   wxTreeItemId idRoot = m_ptreeTradables->AddRoot( "/", -1, -1, 0 );
+  m_ptreeTradables->Bind( wxEVT_TREE_ITEM_MENU, &AppIndicatorTrading::HandleTreeEventItemMenu, this, m_ptreeTradables->GetId() );
+
 
   // panel for right side of splitter
   wxPanel* panelSplitterRight;
@@ -299,6 +322,42 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
           fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
         }
       );
+    },
+    [this]( ou::tf::Order::idOrder_t id ){
+
+      std::string sId( boost::lexical_cast<std::string>( id ) );
+      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
+
+      wxMenu* pMenuPopup = new wxMenu();
+
+      wxMenuItem* pMenuItem;
+
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Close" );
+      int idPopUpClose = pMenuItem->GetId();
+      pMenuPopup->Bind(
+        wxEVT_COMMAND_MENU_SELECTED,
+        [this, id]( wxCommandEvent& event ){
+          std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
+          m_pInteractiveChart->OrderClose( id );
+        },
+        idPopUpClose
+        );
+
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel" );
+      int idPopUpCancel = pMenuItem->GetId();
+      pMenuPopup->Bind(
+        wxEVT_COMMAND_MENU_SELECTED,
+        [this,id]( wxCommandEvent& event ){
+          std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::cout << "Cancel: " << sId << "," << event.GetId() << std::endl;
+          m_pInteractiveChart->OrderCancel( id );
+        },
+        idPopUpCancel
+        );
+
+      wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( idRoot, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+
     }
     );
   m_pInteractiveChart->Connect();
@@ -383,6 +442,19 @@ void AppIndicatorTrading::HandleMenuActionOptionEmit( void ) {
       m_pInteractiveChart->OptionEmit();
     }
   );
+}
+
+void AppIndicatorTrading::HandleTreeEventItemMenu( wxTreeEvent& event ) {
+  wxTreeItemData* pData = m_ptreeTradables->GetItemData( event.GetItem() );
+  if ( nullptr != pData ) {
+    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+    if ( pCustom->pMenuPopup ) {
+      m_pFrameMain->PopupMenu( pCustom->pMenuPopup, event.GetPoint() );
+    }
+  }
+  else {
+    std::cout << "no item data" << std::endl;
+  }
 }
 
 int AppIndicatorTrading::OnExit() {

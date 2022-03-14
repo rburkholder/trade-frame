@@ -37,6 +37,7 @@
 
 class wxBoxSizer;
 class wxTreeCtrl;
+class wxTreeEvent;
 
 class FrameMain;
 class InteractiveChart;
@@ -112,6 +113,8 @@ private:
   void HandleMenuActionOptionQuoteShow();
   void HandleMenuActionOptionWatchStop();
   void HandleMenuActionOptionEmit();
+
+  void HandleTreeEventItemMenu( wxTreeEvent& );
 
   void StartChainQuery();
   void ConstructInstrument();

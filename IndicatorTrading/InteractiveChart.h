@@ -74,12 +74,16 @@ class InteractiveChart:
 {
 public:
 
+  using idOrder_t = ou::tf::Order::idOrder_t;
+
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
+
+  using fAddLifeCycle_t = std::function<void(idOrder_t)>;
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
@@ -101,10 +105,12 @@ public:
   virtual ~InteractiveChart();
 
   void SetPosition(
-    pPosition_t,
-    const config::Options&,
-    pOptionChainQuery_t,
-    fBuildOption_t&& );
+    pPosition_t
+   , const config::Options&
+   , pOptionChainQuery_t
+   , fBuildOption_t&&
+   , fAddLifeCycle_t&&
+    );
 
   void EmitChainFull() const {
     size_t cnt {};
@@ -141,6 +147,9 @@ public:
   void OrderSell( const ou::tf::PanelOrderButtons_Order& );
   void OrderClose( const ou::tf::PanelOrderButtons_Order& );
   void OrderCancel( const ou::tf::PanelOrderButtons_Order& );
+
+  void OrderClose( idOrder_t );
+  void OrderCancel( idOrder_t );
 
   void Connect();
   void Disconnect();
@@ -286,6 +295,7 @@ private:
   vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
+  fAddLifeCycle_t m_fAddLifeCycle;
 
   struct BuiltOption: public ou::tf::option::chain::OptionName {
     pOption_t pOption;
@@ -473,8 +483,6 @@ private:
   vOptionForQuote_t m_vOptionForQuote;
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
-
-  using idOrder_t = ou::tf::Order::idOrder_t;
 
   using pTradeLifeTime_t = std::unique_ptr<TradeLifeTime>;
   using mapTradeLifeTime_t = std::map<idOrder_t,pTradeLifeTime_t>;

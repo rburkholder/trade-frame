@@ -95,6 +95,7 @@ bool InteractiveChart::Create(
 }
 
 InteractiveChart::~InteractiveChart() {
+  Disconnect();
   m_bfPrice.SetOnBarComplete( nullptr );
   m_mapTradeLifeTime.clear();
 }
@@ -194,10 +195,11 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
 }
 
 void InteractiveChart::SetPosition(
-  pPosition_t pPosition,
-  const config::Options& config,
-  pOptionChainQuery_t pOptionChainQuery,
-  fBuildOption_t&& fBuildOption
+  pPosition_t pPosition
+, const config::Options& config
+, pOptionChainQuery_t pOptionChainQuery
+, fBuildOption_t&& fBuildOption
+, fAddLifeCycle_t&& fAddLifeCycle
 ) {
 
   bool bConnected = m_bConnected;
@@ -206,6 +208,8 @@ void InteractiveChart::SetPosition(
   // --
 
   m_fBuildOption = std::move( fBuildOption );
+  m_fAddLifeCycle = std::move( fAddLifeCycle );
+
   m_pOptionChainQuery = pOptionChainQuery;
 
   using vMAPeriods_t = std::vector<int>;
@@ -523,6 +527,7 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
+  m_fAddLifeCycle( id );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
@@ -530,12 +535,21 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
+  m_fAddLifeCycle( id );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
 }
 
 void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& buttons ) {
+}
+
+void InteractiveChart::OrderClose( idOrder_t id ) {
+  std::cout << "need to close " << id << std::endl;
+}
+
+void InteractiveChart::OrderCancel( idOrder_t id ) {
+  std::cout << "need to cancel " << id << std::endl;
 }
 
 void InteractiveChart::OptionWatchStart() {
