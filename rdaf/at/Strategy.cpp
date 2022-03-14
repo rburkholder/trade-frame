@@ -193,7 +193,7 @@ void Strategy::StartRdaf( const std::string& sFileName ) {
   int argc {};
   char** argv = nullptr;
 
-  m_prdafApp = std::make_unique<TRint>( "rdaf_l1", &argc, argv );
+  m_prdafApp = std::make_unique<TRint>( "rdaf_at", &argc, argv );
   ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
 
@@ -257,7 +257,9 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_pTreeTrade->Fill();
   }
 
-  m_pHistVolume->Fill( m_branchTrade.time, trade.Price(), trade.Volume() );
+  if ( m_pHistVolume ) {
+    m_pHistVolume->Fill( m_branchTrade.time, trade.Price(), trade.Volume() );
+  }
 
 }
 
@@ -317,17 +319,17 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
 
           // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
-          auto b = h2_x->Fit( "gauss", "S" );
+          auto b = h2_x->Fit( "gaus", "S" );
 
           //if fit is valid proceed, else abort
-          if ( !b->IsValid() ) {
-          }
-          else {
+//          if ( !b->IsValid() ) {
+//          }
+//          else {
             //finally, if price is within 1 sigma from the mean, it's a good signal and go long:
-            if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
-              EnterLong( bar );
-            }
-          }
+//            if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
+//              EnterLong( bar );
+//            }
+//          }
         }
       }
       break;
