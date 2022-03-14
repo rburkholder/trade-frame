@@ -1160,6 +1160,7 @@ void TWS::contractDetailsEnd( int reqId ) {
 
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
+
     mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
     if ( m_mapActiveRequestId.end() == iterRequest ) {
       throw std::runtime_error( "contractDetailsEnd out of sync" );
@@ -1177,12 +1178,14 @@ void TWS::contractDetailsEnd( int reqId ) {
     for ( mapActiveRequestId_t::value_type& vt: m_mapActiveRequestId ) {
       if ( vt.first < reqId ) {
         if ( !vt.second->bResubmitContract ) {
+          // TODO: look into this, this was tripped once, and created an exception
           std::cout << "IB details retry on " << vt.second->pInstrument->GetInstrumentName() << "?" << std::endl;
           //vt.second->bResubmitContract = true; // perform a retry on a symbol
         }
       }
     }
 
+    // TODO: put a count on the re-request, and knock out if too many
     for ( mapActiveRequestId_t::value_type& vt: m_mapActiveRequestId ) {
       // find first available contract to submit, should be first come first served
       auto [key, request ] = vt;
