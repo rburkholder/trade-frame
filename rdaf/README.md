@@ -16,5 +16,39 @@ Some Document references:
 * https://root.cern/root/htmldoc/guides/users-guide/Threads.html
 * https://root.cern/manual/multi_threading/
 
-Some contrary comments on ROOT (with some fixes over time):
+* https://root.cern/root/htmldoc/guides/users-guide/
+
+Some contrary comments on ROOT (from the cint days, not the recent cling):
+* http://insectnation.org/articles/basic-root.html
 * http://insectnation.org/articles/problems-with-root.html
+
+# TMacro association of structures created elsewhere:
+
+```
+  TList* pList = gDirectory->GetList();
+  for( const auto&& obj: *pList ) {
+
+    TClass* class_ = (TClass*) obj;
+
+    //class_->Dump();
+
+    //std::cout
+    //  << "name=" << class_->GetName()
+    //  << ",title=" << class_->GetTitle()
+    //  << ",class" << class_->ClassName()
+    //  << std::endl;
+
+    if ( 0 == strcmp( "quotes", class_->GetName() ) ) {
+      pTreeQuotes = (TTree*)obj;
+    }
+
+    if ( 0 == strcmp( "trades", class_->GetName() ) ) {
+      pTreeTrades = (TTree*)obj;
+    }
+
+    if ( 0 == strcmp( "h2", class_->GetName() ) ) {
+      pHisto2 = (TH2F*)obj;
+    }
+
+  }
+```
