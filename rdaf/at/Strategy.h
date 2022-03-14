@@ -90,7 +90,7 @@ private:
 
   const config::Options& m_options;
 
-  const std::string& m_sFilePrefix;
+  const std::string m_sFilePrefix;
 
   pPosition_t m_pPosition;
 
