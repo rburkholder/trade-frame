@@ -58,6 +58,8 @@ public:
   TradeLifeTime( const TradeLifeTime& ) = delete;
   virtual ~TradeLifeTime();
 
+  ou::tf::Order::idOrder_t Id() const { return m_pOrderEntry->GetOrderId(); }
+
 protected:
 
   using pOrder_t = ou::tf::Order::pOrder_t;

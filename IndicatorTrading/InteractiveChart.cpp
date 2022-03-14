@@ -96,7 +96,7 @@ bool InteractiveChart::Create(
 
 InteractiveChart::~InteractiveChart() {
   m_bfPrice.SetOnBarComplete( nullptr );
-  m_vTradeLifeTime.clear();
+  m_mapTradeLifeTime.clear();
 }
 
 void InteractiveChart::Init() {
@@ -520,14 +520,16 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  m_vTradeLifeTime.emplace_back(
-    std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators ) );
+  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
+  ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
+  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  m_vTradeLifeTime.emplace_back(
-    std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators ) );
+  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
+  ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
+  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
