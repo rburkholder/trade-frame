@@ -70,8 +70,10 @@ Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, cons
 }
 
 Strategy::~Strategy() {
-  m_prdafApp->SetReturnFromRun( true );
-  m_threadRdaf.join(); // returns after .quit at command line
+  if ( m_threadRdaf.joinable() ) {
+    m_prdafApp->SetReturnFromRun( true );
+    m_threadRdaf.join(); // returns after .quit at command line
+  }
   Clear();
 }
 

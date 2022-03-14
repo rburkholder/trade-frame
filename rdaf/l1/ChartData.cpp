@@ -55,8 +55,10 @@ ChartData::~ChartData(void) {
   StopWatch();
   m_pFile->Flush();
   m_pFile->Close();
-  m_prdafApp->SetReturnFromRun( true );
-  m_threadRdaf.join();
+  if ( m_threadRdaf.joinable() ) {
+    m_prdafApp->SetReturnFromRun( true );
+    m_threadRdaf.join(); // returns after .quit at command line
+  }
 }
 
 void ChartData::ThreadRdaf( ChartData* self, const std::string& sFilePrefix ) {
