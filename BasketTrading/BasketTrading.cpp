@@ -33,6 +33,7 @@
 
 #include "Config.h"
 #include "BasketTrading.h"
+#include "PanelPortfolioStats.h"
 
 IMPLEMENT_APP(AppBasketTrading)
 
@@ -131,8 +132,6 @@ void AppBasketTrading::Init() {
 //  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
 //  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
-  m_pFrameMain->Show( true );
-
   m_bData1Connected = false;
   m_bExecConnected = false;
 
@@ -215,7 +214,8 @@ void AppBasketTrading::Init() {
   CallAfter(
     [this](){
       LoadState();
-    }
+      m_pFrameMain->Show( true );
+     }
   );
 
 }
@@ -425,6 +425,7 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
   SaveState();
 
   if ( m_db.IsOpen() ) m_db.Close();
+
   event.Skip();  // auto followed by Destroy();
 }
 

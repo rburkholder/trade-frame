@@ -48,9 +48,9 @@
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 #include "MasterPortfolio.h"
-#include "PanelPortfolioStats.h"
 
 class wxRadioButton;
+class PanelPortfolioStats;
 
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
