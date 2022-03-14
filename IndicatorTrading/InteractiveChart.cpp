@@ -283,7 +283,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Stock:
       m_pOptionChainQuery->QueryEquityOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "1", "2", "3", "3",
+        "cp", "", "1", "0", "", "",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
@@ -546,10 +546,21 @@ void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& butto
 
 void InteractiveChart::OrderClose( idOrder_t id ) {
   std::cout << "need to close " << id << std::endl;
+  // determine direction, then do:
+  // OrderBuy( ou::tf::PanelOrderButtons_Order() );
+  // OrderSell( ou::tf::PanelOrderButtons_Order() );
+  // and delete menu item
+  // need to check the other orders, cancel if exists
+  // no close if entry has't been established
 }
 
 void InteractiveChart::OrderCancel( idOrder_t id ) {
   std::cout << "need to cancel " << id << std::endl;
+  // will need to determine when a cancel is a good idea
+  // =>  when limit based entry has been established.
+  //     only cancel if entry hasn't bee established
+  //     don't cancel if waiting for one of the exits
+  //     the close, will need to perform the cancel, then the close
 }
 
 void InteractiveChart::OptionWatchStart() {
