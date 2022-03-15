@@ -51,6 +51,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::choices_t,
+  (size_t, ib_instance)
   (bool, bStartSimulator)
   (std::string, sGroupDirectory)
   (size_t, nTimeBins)
@@ -89,6 +90,11 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> qi::char_("0-9") >> qi::char_("0-9") // SS
       ;
 
+    ruleIbInstance
+      %= qi::lit("ib_instance")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::uint_
+      >> *qi::lit(' ') >> qi::eol;
     ruleStartSimulator
       %= qi::lit("sim_start")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -172,7 +178,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleMap %= +ruleMapEntry;
 
     start
-      %= ruleStartSimulator
+      %= ruleIbInstance
+      >> ruleStartSimulator
       >> -ruleGroupDirectory
       >> ruleTimeBins
       >> ruleTimeUpper
@@ -197,6 +204,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
   qi::symbols<char, bool> boolValue;
 
+  qi::rule<Iterator, size_t()> ruleIbInstance;
   qi::rule<Iterator, bool()> ruleStartSimulator;
   //qi::rule<Iterator, ()> ruleSeparator;
   qi::rule<Iterator, std::string()> ruleGroupDirectory;
