@@ -27,6 +27,7 @@ set(
   file_h
     AppAutoTrade.h
     Config.h
+    ConfigParser.hpp
     Strategy.h
   )
 
@@ -34,6 +35,7 @@ set(
   file_cpp
     AppAutoTrade.cpp
     Config.cpp
+    ConfigParser.cpp
     Strategy.cpp
   )
 

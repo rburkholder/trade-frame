@@ -43,6 +43,7 @@
 namespace {
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
   static const std::string sConfigFilename( "rdaf/at/example.cfg" );
+  static const std::string sChoicesFilename( "rdaf/at/choices.cfg" );
   static const std::string sDbName( "rdaf/at/example.db" );
   static const std::string sStateFileName( "rdaf/at/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
@@ -69,6 +70,8 @@ bool AppAutoTrade::OnInit() {
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
+
+  ou::tf::config::Load( sChoicesFilename, m_choices );
 
   if ( Load( sConfigFilename, m_options ) ) {
   }
@@ -132,7 +135,7 @@ bool AppAutoTrade::OnInit() {
   std::cout << "symbol: " << m_options.sSymbol << std::endl;
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, m_ChartDataView, m_options );
+  m_pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, m_options, m_ChartDataView );
 
   if ( m_options.bSimStart ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };

@@ -32,6 +32,7 @@ namespace po = boost::program_options;
 #include "Config.h"
 
 namespace {
+  // program option key names
   static const std::string sOption_Symbol( "symbol" );
   static const std::string sOption_TimeBinsCount( "time_bins" );
   static const std::string sOption_TimeBinsUpper( "time_upper" );

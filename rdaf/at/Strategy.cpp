@@ -38,7 +38,11 @@
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
-Strategy::Strategy( const std::string& sFilePrefix, ou::ChartDataView& cdv, const config::Options& options )
+Strategy::Strategy(
+  const std::string& sFilePrefix
+, const config::Options& options
+, ou::ChartDataView& cdv
+)
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_options( options )
 , m_sFilePrefix( sFilePrefix )

@@ -62,7 +62,11 @@ public:
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  Strategy( const std::string& filename, ou::ChartDataView&, const config::Options& );
+  Strategy(
+    const std::string& filename,
+    const config::Options&,
+    ou::ChartDataView&
+    );
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );

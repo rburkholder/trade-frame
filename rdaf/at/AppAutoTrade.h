@@ -36,6 +36,7 @@
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include "Config.h"
+#include "ConfigParser.hpp"
 
 class Strategy;
 class FrameMain;
@@ -68,6 +69,7 @@ private:
   int m_nTSDataStreamSequence;
 
   config::Options m_options;
+  ou::tf::config::choices_t m_choices;
 
   ou::ChartDataView m_ChartDataView;
 
