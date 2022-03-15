@@ -19,15 +19,20 @@
  * Created: March 15, 2022 12:56
  */
 
-#include <boost/spirit/home/qi/auxiliary/eol.hpp>
-#include <boost/spirit/home/support/common_terminals.hpp>
 #define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
+#include <iostream>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_uint.hpp>
 #include <boost/spirit/include/qi_real.hpp>
-#include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
+
+#include <boost/fusion/include/std_pair.hpp>
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/object.hpp>
+#include <boost/phoenix/operator.hpp>
 
 //https://www.boost.org/doc/libs/1_75_0/libs/spirit/classic/example/fundamental/file_parser.cpp
 #include <boost/spirit/include/classic_file_iterator.hpp>
@@ -56,6 +61,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
+namespace phoenix = boost::phoenix;
 
 template<typename Iterator>
 struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
@@ -174,6 +180,19 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> +ruleMapEntry
       ;
 
+    start.name( "parser start" );
+
+    qi::on_error<qi::fail>( // doesn't seem to emit
+        start
+      , std::cout
+          << phoenix::val( "error, expecting " )
+          << qi::labels::_4
+          << phoenix::val(" here: \"")
+          << phoenix::construct<std::string>( qi::labels::_3, qi::labels::_2 )
+          << phoenix::val("\"")
+          << std::endl
+    );
+
   }
 
   qi::symbols<char, bool> boolValue;
@@ -208,19 +227,21 @@ bool Load( const std::string& sFileName, choices_t& choices ) {
 
   using file_iterator_t = boost::spirit::classic::file_iterator<char>;
 
-  ChoicesParser<file_iterator_t> parserConfigChoices;
+  ChoicesParser<file_iterator_t> grammarConfigChoices;
 
   file_iterator_t begin( sFileName );
 
   if ( !begin ) {
-    throw std::runtime_error( "Error opening " + sFileName );
+    std::cout << "ou::tf::config::Load cold not open " << sFileName << std::endl;
+    return false;
   }
 
   file_iterator_t end = begin.make_end();
 
-  auto prior = end - begin;
-  bool b = qi::parse( begin, end, parserConfigChoices, choices );
-  auto after = end - begin;
+  bool b = qi::parse( begin, end, grammarConfigChoices, choices );
+  if ( !b ) {
+    std::cout << "ou::tf::config::Load cold not parse " << sFileName << std::endl;
+  }
 
   return b;
 

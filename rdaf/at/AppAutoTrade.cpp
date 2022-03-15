@@ -71,7 +71,9 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  ou::tf::config::Load( sChoicesFilename, m_choices );
+  if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
+    return 0;
+  }
 
   if ( Load( sConfigFilename, m_options ) ) {
   }
