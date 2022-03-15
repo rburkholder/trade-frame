@@ -32,10 +32,6 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 
-//#include <boost-1_69/boost/spirit/home/qi/numeric/int.hpp>
-//#include <boost-1_69/boost/spirit/home/qi/numeric/real.hpp>
-//#include <boost-1_69/boost/spirit/home/qi/numeric/uint.hpp>
-
 #include "MsgPriceLevelDelete.h"
 
 using date_t = boost::gregorian::date;
