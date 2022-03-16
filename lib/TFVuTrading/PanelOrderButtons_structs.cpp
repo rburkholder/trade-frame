@@ -38,5 +38,17 @@ double PanelOrderButtons_Order::PositionExitStopValue() const {
   return boost::lexical_cast<double>( m_sPositionExitStopValue );
 }
 
+size_t PanelOrderButtons_Order::QuanStock() const {
+  return boost::lexical_cast<size_t>( m_sQuanStock );
+}
+
+size_t PanelOrderButtons_Order::QuanFuture() const {
+  return boost::lexical_cast<size_t>( m_sQuanFuture );
+}
+
+size_t PanelOrderButtons_Order::QuanOption() const {
+  return boost::lexical_cast<size_t>( m_sQuanOption );
+}
+
 } // namespace tf
 } // namespace ou

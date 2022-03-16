@@ -35,6 +35,10 @@ struct PanelOrderButtons_Order {
 
   bool m_bCockForCursor;
 
+  std::string m_sQuanStock;
+  std::string m_sQuanFuture;
+  std::string m_sQuanOption;
+
   bool m_bPositionEntryEnable;
   std::string m_sPositionEntryValue;
   EPositionEntryMethod m_ePositionEntryMethod;
@@ -65,6 +69,10 @@ struct PanelOrderButtons_Order {
   double PositionEntryValue() const;
   double PositionExitProfitValue() const;
   double PositionExitStopValue() const;
+
+  size_t QuanStock() const;
+  size_t QuanFuture() const;
+  size_t QuanOption() const;
 };
 
 struct PanelOrderButtons_MarketData {
