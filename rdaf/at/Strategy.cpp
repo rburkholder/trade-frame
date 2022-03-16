@@ -24,7 +24,7 @@
 #include <rdaf/TROOT.h>
 #include <rdaf/TFile.h>
 #include <rdaf/TTree.h>
-#include <rdaf//TMacro.h>
+//#include <rdaf//TMacro.h>
 //#include <rdaf/TCanvas.h>
 #include <rdaf/TFitResult.h>
 #include <rdaf/TDirectory.h>
@@ -107,7 +107,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
 
-  m_cdv.SetNames( "rdaf TMacro test", pWatch->GetInstrument()->GetInstrumentName() );
+  m_cdv.SetNames( "AutoTrade", pWatch->GetInstrument()->GetInstrumentName() );
 
   SetupChart();
 
@@ -134,13 +134,14 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t pWatch = self->m_pPosition->GetWatch();
+  const std::string& sSymbol( pWatch->GetInstrumentName() );
 
-  self->m_pFile = std::make_unique<TFile>(
-    ( sFilePrefix + ".root" ).c_str(), "RECREATE", "tradeframe rdaf/at based data, quotes & trades"
-  );
+  //self->m_pFile = std::make_unique<TFile>(
+  //  ( sFilePrefix + ".root" ).c_str(), "RECREATE", "tradeframe rdaf/at based data, quotes & trades"
+  //);
 
   self->m_pTreeQuote = std::make_shared<TTree>(
-    "quotes", ( pWatch->GetInstrumentName() + " quotes" ).c_str()
+    ( sSymbol + "-quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
   );
   self->m_pTreeQuote->Branch( "quote", &self->m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !self->m_pTreeQuote ) {
@@ -148,7 +149,7 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   }
 
   self->m_pTreeTrade = std::make_shared<TTree>(
-    "trades", ( pWatch->GetInstrumentName() + " trades" ).c_str()
+    ( sSymbol + "-trades" ).c_str(), ( sSymbol + " trades" ).c_str()
   );
   self->m_pTreeTrade->Branch( "trade", &self->m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !self->m_pTreeTrade ) {
@@ -156,7 +157,7 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   }
 
   self->m_pHistVolume = std::make_shared<TH3D>(
-    "h1", ( self->m_config.sSymbol + "Volume" ).c_str(),
+    ( sSymbol + "-h1" ).c_str(), ( self->m_config.sSymbol + "Volume" ).c_str(),
     self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper,
     self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
     self->m_config.nVolumeBins, self->m_config.nVolumeLower, self->m_config.nVolumeUpper

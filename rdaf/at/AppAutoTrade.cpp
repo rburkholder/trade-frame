@@ -27,6 +27,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <wx/menu.h>
 #include <wx/sizer.h>
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
@@ -44,11 +45,32 @@
 
 namespace {
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
-  static const std::string sConfigFilename( "rdaf/at/example.cfg" );
   static const std::string sChoicesFilename( "rdaf/at/choices.cfg" );
   static const std::string sDbName( "rdaf/at/example.db" );
   static const std::string sStateFileName( "rdaf/at/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+}
+
+namespace {
+
+  class CustomItemData: public wxTreeItemData {
+  public:
+    std::string sSymbol;
+    wxMenu* pMenuPopup;
+    CustomItemData( wxMenu* pMenuPopup_ )
+    : pMenuPopup( pMenuPopup_ )
+    {}
+    CustomItemData( const std::string& sSymbol_ )
+    : sSymbol( sSymbol_ ), pMenuPopup( nullptr )
+    {}
+    virtual ~CustomItemData() {
+      if ( nullptr != pMenuPopup ) {
+        // assumes binds are cleared as well
+        delete pMenuPopup;
+        pMenuPopup = nullptr;
+      }
+    }
+  };
 }
 
 IMPLEMENT_APP(AppAutoTrade)
@@ -132,6 +154,11 @@ bool AppAutoTrade::OnInit() {
 
   LinkToPanelProviderControl();
 
+  wxTreeItemId idRoot = m_treeSymbols->AddRoot( "/", -1, -1, nullptr );
+  //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
+  //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
+  m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
+
   boost::gregorian::date date;
   if ( m_choices.bStartSimulator ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
@@ -143,12 +170,10 @@ bool AppAutoTrade::OnInit() {
     }
   }
 
-  assert( 1 == m_choices.mapInstance.size() ); // for now, need to arrange gui for more
-
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol, choices] = vt;
-    std::cout << "building symbol: " << sSymbol << std::endl;
+    std::cout << "creating strategy for: " << sSymbol << std::endl;
 
     Strategy::config_t config(
       sSymbol,
@@ -166,7 +191,11 @@ bool AppAutoTrade::OnInit() {
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
 
+    wxTreeItemId idSymbol = m_treeSymbols->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
+
   }
+
+  m_treeSymbols->ExpandAll();
 
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
@@ -183,6 +212,8 @@ bool AppAutoTrade::OnInit() {
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
+
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 
   CallAfter(
     [this](){
@@ -202,6 +233,34 @@ bool AppAutoTrade::OnInit() {
   }
 
   return 1;
+}
+
+void AppAutoTrade::HandleTreeEventItemMenu( wxTreeEvent& event ) {
+  wxTreeItemData* pData = m_treeSymbols->GetItemData( event.GetItem() );
+  //if ( nullptr != pData ) {
+  //  CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+  //  if ( pCustom->pMenuPopup ) {
+  //    m_pFrameMain->PopupMenu( pCustom->pMenuPopup, event.GetPoint() );
+  //  }
+  //}
+  //else {
+  //  std::cout << "no item data" << std::endl;
+  //}
+  event.Skip();
+}
+
+void AppAutoTrade::HandleTreeEventItemChanged( wxTreeEvent& event ) {
+  wxTreeItemData* pData = m_treeSymbols->GetItemData( event.GetItem() );
+  if ( nullptr != pData ) {
+    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+    assert( 0 < pCustom->sSymbol.size() );
+
+    mapStrategy_t::iterator iter = m_mapStrategy.find( pCustom->sSymbol );
+    assert( m_mapStrategy.end() != iter );
+    m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+  }
+
+  event.Skip();
 }
 
 void AppAutoTrade::HandleMenuActionCloseAndDone() {
@@ -233,7 +292,6 @@ void AppAutoTrade::ConstructIBInstrument( const std::string& sSymbol ) {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Queue(
     sSymbol,
     [this,&sSymbol]( pInstrument_t pInstrument ){

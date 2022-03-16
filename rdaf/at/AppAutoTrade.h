@@ -95,6 +95,9 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
+  void HandleTreeEventItemMenu( wxTreeEvent& );
+  void HandleTreeEventItemChanged( wxTreeEvent& );
+
   void ConstructIBInstrument( const std::string& sSymbol );
   void ConstructSimInstrument( const std::string& sSymbol );
 
