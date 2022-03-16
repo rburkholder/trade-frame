@@ -59,6 +59,18 @@ struct choices_t {
   using mapInstance_t = std::map<std::string,per_symbol_choices_t>; // std::string = symbol
   mapInstance_t mapInstance;
 
+  void Update() {
+    std::time_t nTime;
+
+    dtUpper = boost::posix_time::from_iso_string( sTimeUpper );
+    nTime = boost::posix_time::to_time_t( dtUpper );
+    dblTimeUpper = (double) nTime / 1000.0;
+
+    dtLower = boost::posix_time::from_iso_string( sTimeLower );
+    nTime = boost::posix_time::to_time_t( dtLower );
+    dblTimeLower = (double) nTime / 1000.0;
+  }
+
 };
 
 bool Load( const std::string&, choices_t& );

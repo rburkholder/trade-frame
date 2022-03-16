@@ -240,15 +240,55 @@ bool Load( const std::string& sFileName, choices_t& choices ) {
   file_iterator_t begin( sFileName );
 
   if ( !begin ) {
-    std::cout << "ou::tf::config::Load cold not open " << sFileName << std::endl;
+    std::cout << "ou::tf::config::Load could not open " << sFileName << std::endl;
     return false;
   }
 
   file_iterator_t end = begin.make_end();
 
   bool b = qi::parse( begin, end, grammarConfigChoices, choices );
-  if ( !b ) {
-    std::cout << "ou::tf::config::Load cold not parse " << sFileName << std::endl;
+
+  if ( b ) {
+    choices.Update();
+    if ( 0 == choices.nTimeBins ) {
+      std::cout << "ou::tf::config::Load time: nbins is 0" << std::endl;
+      b = false;
+    }
+    if ( choices.dblTimeLower >= choices.dblTimeUpper ) {
+      std::cout << "ou::tf::config::Load time: lower is >= upper" << std::endl;
+      b = false;
+    }
+    for ( const choices_t::mapInstance_t::value_type& vt: choices.mapInstance ) {
+      const auto& [sSymbol, per] = vt;
+
+      if ( 0 == per.nPriceBins ) {
+        std::cout << "ou::tf::config::Load price: nbins is 0" << std::endl;
+        b = false;
+      }
+      if ( per.dblPriceLower >= per.dblPriceUpper ) {
+        std::cout << "ou::tf::config::Load " << sSymbol << " price: lower is >= upper"  << std::endl;
+        b = false;
+      }
+
+      if ( 0 == per.nVolumeBins ) {
+        std::cout << "ou::tf::config::Load volume: nbins is 0" << std::endl;
+        b = false;
+      }
+      if ( per.nVolumeLower >= per.nVolumeUpper ) {
+        std::cout << "ou::tf::config::Load " << sSymbol << " volume: lower is >= upper"  << std::endl;
+        b = false;
+      }
+
+      if ( choices.bStartSimulator ) {
+        if ( 0 == choices.sGroupDirectory.size() ) {
+          std::cout << "ou::tf::config::Load simulator: group_directory is required" << std::endl;
+          b = false;
+        }
+      }
+    }
+  }
+  else {
+    std::cout << "ou::tf::config::Load could not parse " << sFileName << std::endl;
   }
 
   return b;
