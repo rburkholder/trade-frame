@@ -28,6 +28,8 @@
 #include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
+#include <wx/splitter.h>
+#include <wx/treectrl.h>
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
@@ -97,34 +99,36 @@ bool AppAutoTrade::OnInit() {
   SetTopWindow( m_pFrameMain );
 
     wxBoxSizer* sizerFrame;
-    wxBoxSizer* sizerLeft;
-    wxBoxSizer* sizerRight;
+    wxBoxSizer* sizerUpper;
+    wxBoxSizer* sizerLower;
 
-    // Sizer for FrameMain
-    sizerFrame = new wxBoxSizer(wxHORIZONTAL);
+    sizerFrame = new wxBoxSizer(wxVERTICAL);
     m_pFrameMain->SetSizer(sizerFrame);
 
-    // Sizer for Controls, Logging
-    sizerLeft = new wxBoxSizer(wxVERTICAL);
-    sizerFrame->Add(sizerLeft, 0, wxGROW, 2);
+    sizerUpper = new wxBoxSizer(wxHORIZONTAL);
+    sizerFrame->Add(sizerUpper, 0, wxGROW, 2);
 
-    // m_pPanelProviderControl
     m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    sizerLeft->Add(m_pPanelProviderControl, 0, wxALIGN_CENTER_HORIZONTAL, 2);
+    sizerUpper->Add(m_pPanelProviderControl, 0, wxALIGN_CENTER_VERTICAL, 2);
 
-    // m_pPanelLogging
     m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    sizerLeft->Add(m_pPanelLogging, 1, wxGROW, 2);
+    sizerUpper->Add(m_pPanelLogging, 1, wxGROW, 2);
 
-    sizerRight = new wxBoxSizer(wxHORIZONTAL);
-    sizerFrame->Add(sizerRight, 1, wxGROW, 2);
+    sizerLower = new wxBoxSizer(wxVERTICAL);
+    sizerFrame->Add(sizerLower, 1, wxGROW, 2);
 
-    // m_pPanelChart
-    m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_splitterData = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
+    m_splitterData->SetMinimumPaneSize(20);
+
+    m_treeSymbols = new wxTreeCtrl( m_splitterData, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_SINGLE );
+
+    m_pWinChartView = new ou::tf::WinChartView( m_splitterData, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    sizerRight->Add(m_pWinChartView, 1, wxGROW, 2);
+
+    m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
+    sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
   LinkToPanelProviderControl();
 

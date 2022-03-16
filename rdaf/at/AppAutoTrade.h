@@ -38,6 +38,9 @@
 class Strategy;
 class FrameMain;
 
+class wxTreeCtrl;
+class wxSplitterWindow;
+
 namespace ou {
 namespace tf {
   class PanelLogging;
@@ -60,6 +63,9 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
+
+  wxSplitterWindow* m_splitterData;
+  wxTreeCtrl* m_treeSymbols;
 
   std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
