@@ -136,9 +136,11 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   pWatch_t pWatch = self->m_pPosition->GetWatch();
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
-  //self->m_pFile = std::make_unique<TFile>(
-  //  ( sFilePrefix + ".root" ).c_str(), "RECREATE", "tradeframe rdaf/at based data, quotes & trades"
-  //);
+  self->m_pFile = std::make_unique<TFile>(
+    ( sFilePrefix + "-" + sSymbol + ".root" ).c_str(),
+    "RECREATE",
+    ( "tradeframe (" + sSymbol + ") rdaf/at quotes, trades & histogram" ).c_str()
+  );
 
   self->m_pTreeQuote = std::make_shared<TTree>(
     ( sSymbol + "-quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
@@ -157,7 +159,7 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   }
 
   self->m_pHistVolume = std::make_shared<TH3D>(
-    ( sSymbol + "-h1" ).c_str(), ( self->m_config.sSymbol + "Volume" ).c_str(),
+    ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
     self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper,
     self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
     self->m_config.nVolumeBins, self->m_config.nVolumeLower, self->m_config.nVolumeUpper
