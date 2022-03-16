@@ -33,20 +33,18 @@
 
 #include <TFTrading/Watch.h>
 
-#include "Config.h"
+#include "ConfigParser.hpp"
 #include "Strategy.h"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy(
   const std::string& sFilePrefix
-, const config::Options& options
-, ou::ChartDataView& cdv
+, const config_t config
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
-, m_options( options )
+, m_config( config )
 , m_sFilePrefix( sFilePrefix )
-, m_cdv( cdv )
 , m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
@@ -134,19 +132,6 @@ void Strategy::Clear() {
 
 void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
 
-  //const config::Options& options( self->m_options );
-
-  double dblDateTimeUpper;
-  double dblDateTimeLower;
-
-  std::time_t nTime;
-  nTime = boost::posix_time::to_time_t( self->m_options.dtTimeUpper );
-  dblDateTimeUpper = (double) nTime / 1000.0;
-  nTime = boost::posix_time::to_time_t( self->m_options.dtTimeLower );
-  dblDateTimeLower = (double) nTime / 1000.0;
-
-  //std::cout << "date range: " << dblDateTimeLower << " ... " << dblDateTimeUpper << std::endl;
-
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t pWatch = self->m_pPosition->GetWatch();
 
@@ -171,10 +156,10 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   }
 
   self->m_pHistVolume = std::make_shared<TH3D>(
-    "h1", ( self->m_options.sSymbol + "Volume" ).c_str(),
-    self->m_options.nTimeBins, dblDateTimeLower, dblDateTimeUpper,
-    self->m_options.nPriceBins, self->m_options.dblPriceLower, self->m_options.dblPriceUpper,
-    self->m_options.nVolumeBins, self->m_options.dblVolumeLower, self->m_options.dblVolumeUpper
+    "h1", ( self->m_config.sSymbol + "Volume" ).c_str(),
+    self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper,
+    self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
+    self->m_config.nVolumeBins, self->m_config.nVolumeLower, self->m_config.nVolumeUpper
   );
   if ( !self->m_pHistVolume ) {
     std::cout << "problems history" << std::endl;

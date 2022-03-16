@@ -75,12 +75,6 @@ bool AppAutoTrade::OnInit() {
     return 0;
   }
 
-  if ( Load( sConfigFilename, m_options ) ) {
-  }
-  else {
-    return 0;
-  }
-
   //if ( m_options.bSimStart ) {
     // just always delete it
     if ( boost::filesystem::exists( sDbName ) ) {
@@ -90,11 +84,11 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  if ( 0 < m_options.sGroupDirectory.size() ) {
-    m_sim->SetGroupDirectory( m_options.sGroupDirectory );
+  if ( 0 < m_choices.sGroupDirectory.size() ) {
+    m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
   }
 
-  m_tws->SetClientId( m_options.nIbInstance );
+  m_tws->SetClientId( m_choices.ib_instance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -134,19 +128,40 @@ bool AppAutoTrade::OnInit() {
 
   LinkToPanelProviderControl();
 
-  std::cout << "symbol: " << m_options.sSymbol << std::endl;
-
-  m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, m_options, m_ChartDataView );
-
-  if ( m_options.bSimStart ) {
+  boost::gregorian::date date;
+  if ( m_choices.bStartSimulator ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
-    if ( boost::regex_search( m_options.sGroupDirectory, what, expr ) ) {
-      boost::gregorian::date date( boost::gregorian::from_undelimited_string( what[ 0 ] ) );
-      std::cout << "date " << date << std::endl;
-      m_pStrategy->InitForUSEquityExchanges( date );
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
+      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      std::cout << "simulation date " << date << std::endl;
+
     }
+  }
+
+  assert( 1 == m_choices.mapInstance.size() ); // for now, need to arrange gui for more
+
+  for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
+
+    auto& [sSymbol, choices] = vt;
+    std::cout << "building symbol: " << sSymbol << std::endl;
+
+    Strategy::config_t config(
+      sSymbol,
+      m_choices.nTimeBins, m_choices.dblTimeUpper, m_choices.dblTimeLower,
+      choices.nPriceBins, choices.dblPriceUpper, choices.dblPriceLower,
+      choices.nVolumeBins, choices.nVolumeUpper, choices.nVolumeLower
+      );
+
+    pStrategy_t pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, config );
+    m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
+
+    if ( m_choices.bStartSimulator ) {
+      pStrategy->InitForUSEquityExchanges( date );
+    }
+
+    m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
+
   }
 
   m_pFrameMain->SetAutoLayout( true );
@@ -171,7 +186,7 @@ bool AppAutoTrade::OnInit() {
     }
   );
 
-  if ( m_options.bSimStart ) {
+  if ( m_choices.bStartSimulator ) {
     CallAfter(
       [this](){
         using Provider_t = ou::tf::PanelProviderControl::Provider_t;
@@ -187,7 +202,9 @@ bool AppAutoTrade::OnInit() {
 
 void AppAutoTrade::HandleMenuActionCloseAndDone() {
   std::cout << "Closing & Done" << std::endl;
-  m_pStrategy->CloseAndDone();
+  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+    vt.second->CloseAndDone();
+  }
 }
 
 void AppAutoTrade::HandleMenuActionSaveValues() {
@@ -195,16 +212,18 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   CallAfter(
     [this](){
       m_nTSDataStreamSequence++;
-      m_pStrategy->SaveWatch(
-        "/app/rdaf/at/" +
-        m_sTSDataStreamStarted + "-" +
-        boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+        vt.second->SaveWatch(
+          "/app/rdaf/at/" +
+          m_sTSDataStreamStarted + "-" +
+          boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      }
       std::cout << "  ... Done " << std::endl;
     }
   );
 }
 
-void AppAutoTrade::ConstructIBInstrument() {
+void AppAutoTrade::ConstructIBInstrument( const std::string& sSymbol ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -212,8 +231,8 @@ void AppAutoTrade::ConstructIBInstrument() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Queue(
-    m_options.sSymbol,
-    [this]( pInstrument_t pInstrument ){
+    sSymbol,
+    [this,&sSymbol]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       pPosition_t pPosition;
@@ -230,18 +249,20 @@ void AppAutoTrade::ConstructIBInstrument() {
         );
         std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
-      m_pStrategy->SetPosition( pPosition );
+      mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
+      assert( m_mapStrategy.end() != iterStrategy );
+      iterStrategy->second->SetPosition( pPosition );
     } );
 
 }
 
-void AppAutoTrade::ConstructSimInstrument() {
+void AppAutoTrade::ConstructSimInstrument( const std::string& sSymbol ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_options.sSymbol );
+  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
@@ -262,7 +283,9 @@ void AppAutoTrade::ConstructSimInstrument() {
     );
     std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
-  m_pStrategy->SetPosition( pPosition );
+  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
+  assert( m_mapStrategy.end() != iterStrategy );
+  iterStrategy->second->SetPosition( pPosition );
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
@@ -356,14 +379,20 @@ void AppAutoTrade::ConfirmProviders() {
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
     ) {
       bValidCombo = true;
-      ConstructIBInstrument();
+      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+        ConstructIBInstrument( vt.first );
+      }
+
     }
     if (
          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
     ) {
       bValidCombo = true;
-      ConstructSimInstrument();
+      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+        ConstructSimInstrument( vt.first );
+      }
+
     }
     if ( !bValidCombo ) {
       std::cout << "invalid combo of data and execution providers" << std::endl;

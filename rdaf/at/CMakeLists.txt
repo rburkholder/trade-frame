@@ -26,7 +26,6 @@ find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options t
 set(
   file_h
     AppAutoTrade.h
-    Config.h
     ConfigParser.hpp
     Strategy.h
   )
@@ -34,7 +33,6 @@ set(
 set(
   file_cpp
     AppAutoTrade.cpp
-    Config.cpp
     ConfigParser.cpp
     Strategy.cpp
   )

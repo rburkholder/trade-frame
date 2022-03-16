@@ -32,6 +32,8 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <OUCharting/ChartDataView.h>
+
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Order.h>
@@ -43,10 +45,6 @@ class TRint;
 class TFile;
 class TTree;
 class TMacro;
-
-namespace config {
-  class Options;
-}
 
 namespace ou {
   class ChartDataView;
@@ -62,16 +60,52 @@ public:
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  struct config_t {
+
+    std::string sSymbol;
+
+    size_t nTimeBins;
+    double dblTimeUpper;
+    double dblTimeLower;
+
+    size_t nPriceBins;
+    double dblPriceUpper;
+    double dblPriceLower;
+
+    size_t nVolumeBins;
+    size_t nVolumeUpper;
+    size_t nVolumeLower;
+
+    config_t()
+    : nTimeBins {}, dblTimeUpper {}, dblTimeLower {},
+      nPriceBins {}, dblPriceUpper{}, dblPriceLower {},
+      nVolumeBins {}, nVolumeUpper {}, nVolumeLower {}
+    {}
+
+    config_t(
+      const std::string sSymbol_,
+      size_t nTimeBins_, double dblTimeUpper_, double dblTimeLower_,
+      size_t nPriceBins_, double dblPriceUpper_, double dblPriceLower_,
+      size_t nVolumeBins_, size_t nVolumeUpper_, size_t nVolumeLower_
+    )
+    : sSymbol( sSymbol_ ),
+      nTimeBins( nTimeBins_ ), dblTimeUpper( dblTimeUpper_ ), dblTimeLower( dblTimeLower_ ),
+      nPriceBins( nPriceBins_ ), dblPriceUpper( dblPriceUpper_ ), dblPriceLower( dblPriceLower_ ),
+      nVolumeBins( nVolumeBins_ ), nVolumeUpper( nVolumeUpper_ ), nVolumeLower( nVolumeLower_ )
+    {}
+  };
+
   Strategy(
     const std::string& filename,
-    const config::Options&,
-    ou::ChartDataView&
+    const config_t
     );
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
 
   void SaveWatch( const std::string& );
+
+  ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
   void CloseAndDone();
 
@@ -92,7 +126,7 @@ private:
 
   ETradeState m_stateTrade;
 
-  const config::Options& m_options;
+  config_t m_config;
 
   const std::string m_sFilePrefix;
 
@@ -102,7 +136,7 @@ private:
 
   pOrder_t m_pOrder;
 
-  ou::ChartDataView& m_cdv;
+  ou::ChartDataView m_cdv;
 
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;

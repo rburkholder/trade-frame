@@ -29,13 +29,10 @@
 
 #include <wx/app.h>
 
-#include <OUCharting/ChartDataView.h>
-
 #include <TFTrading/DBWrapper.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-#include "Config.h"
 #include "ConfigParser.hpp"
 
 class Strategy;
@@ -68,15 +65,15 @@ private:
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 
-  config::Options m_options;
   ou::tf::config::choices_t m_choices;
 
-  ou::ChartDataView m_ChartDataView;
-
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
-  std::unique_ptr<Strategy> m_pStrategy;
 
   std::unique_ptr<ou::tf::db> m_pdb;
+
+  using pStrategy_t = std::unique_ptr<Strategy>;
+  using mapStrategy_t = std::map<std::string,pStrategy_t>;
+  mapStrategy_t m_mapStrategy;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -92,8 +89,8 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void ConstructIBInstrument();
-  void ConstructSimInstrument();
+  void ConstructIBInstrument( const std::string& sSymbol );
+  void ConstructSimInstrument( const std::string& sSymbol );
 
   void ConfirmProviders();
 
