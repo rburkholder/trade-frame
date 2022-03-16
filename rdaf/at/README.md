@@ -14,35 +14,32 @@ automated trading application.  Some of the features and functions represented:
 
 This project can be used as a template to try out your own high-frequency trading ideas.
 
-### x64/debug/rdaf/at/example.cfg
+### x64/debug/rdaf/at/choices.cfg
+
+Note: there is a new name for the configuration file, and there is a new format.
 
 This is a specialization of the AutoTrade project.  This project uses CERN's rdaf (ROOT Data Analysis Framework)
 libraries for analysing live data as it arrives.
 
 The parameters are sourced in the configuration file (as an example):
 
-x64/debug/rdaf/at/example.cfg:
-
+$ cat x64/debug/rdaf/at/choices.cfg
 ```
-symbol=SPY
-
-time_bins=3600
-#          yyyymmddThhmmss
-time_upper=20220228T000000
-time_lower=20220201T000000
-price_bins=200
-price_upper=3000
-price_lower=2000
-volume_bins= 100
-volume_upper=1000
-volume_lower=0
-
-# uncomment group_directory when a legal one is available
-#group_directory=/app/rdaf/at/20220223 20:05:28.214488-1
+ib_instance=3
 sim_start=off
+group_directory=/app/rdaf/at/20220311-18:33:33.786804-1
+time_bins=3600
+time_upper=20220316T000000
+time_lower=20220315T000000
+[SPY]
+price_bins=200
+price_upper=500
+price_lower=300
+volume_bins=100
+volume_upper=10000
+volume_lower=0
 ```
-
-When there is no data available, set the group directory such nothing follows the '='
+group_directory is optional if sim_start is off.
 
 ### x64/debug/rdaf/at/example.db
 
