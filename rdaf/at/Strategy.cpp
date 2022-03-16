@@ -294,21 +294,21 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         // and find the projection of h2. the result is a 1-D hist with x-axis being price
         // and value being volume
 
-        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-        nTime = (double)nTime / 1000.0;
+//        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+//        nTime = (double)nTime / 1000.0;
 
         //find the bin that the time given belongs to:
-        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
+//        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
 
         //if bin_y is valid and larger than 1 then proceed, else abort (since there is not enought data)
-        if ( bin_y < 1 ) {
-        }
-        else {
+//        if ( bin_y < 1 ) {
+//        }
+//        else {
           //now find projection of h2 from the beginning till now:
-          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+//          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
 
           // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
-          auto b = h2_x->Fit( "gaus", "S" );
+//          auto b = h2_x->Fit( "gaus", "S" );
 
           //if fit is valid proceed, else abort
 //          if ( !b->IsValid() ) {
@@ -319,7 +319,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 //              EnterLong( bar );
 //            }
 //          }
-        }
+//        }
       }
       break;
     case ETradeState::LongSubmitted:
