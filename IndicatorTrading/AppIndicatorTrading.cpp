@@ -56,9 +56,13 @@ namespace {
 
   class CustomItemData: public wxTreeItemData {
   public:
+    std::string sSymbol;
     wxMenu* pMenuPopup;
     CustomItemData(  wxMenu* pMenuPopup_ )
     : pMenuPopup( pMenuPopup_ )
+    {}
+    CustomItemData( const std::string& sSymbol_ )
+    : sSymbol( sSymbol_ ), pMenuPopup( nullptr )
     {}
     ~CustomItemData() {
       if ( nullptr != pMenuPopup ) {
@@ -69,7 +73,6 @@ namespace {
     }
   };
 }
-
 
 IMPLEMENT_APP(AppIndicatorTrading)
 
@@ -121,7 +124,6 @@ bool AppIndicatorTrading::OnInit() {
   m_ptreeTradables = new wxTreeCtrl( m_splitterRow );
   wxTreeItemId idRoot = m_ptreeTradables->AddRoot( "/", -1, -1, 0 );
   m_ptreeTradables->Bind( wxEVT_TREE_ITEM_MENU, &AppIndicatorTrading::HandleTreeEventItemMenu, this, m_ptreeTradables->GetId() );
-
 
   // panel for right side of splitter
   wxPanel* panelSplitterRight;
@@ -315,7 +317,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     pPosition,
     m_config,
     m_pOptionChainQuery,
-    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
+    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){ // fBuildOption_t
       m_pBuildInstrument->Queue(
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
@@ -323,10 +325,9 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    [this]( ou::tf::Order::idOrder_t id ){
+    [this]( ou::tf::Order::idOrder_t id ){ // fAddLifeCycle_t
 
       std::string sId( boost::lexical_cast<std::string>( id ) );
-      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
 
       wxMenu* pMenuPopup = new wxMenu();
 
@@ -356,10 +357,18 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         idPopUpCancel
         );
 
+      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( idRoot, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
     }
     );
+
+  wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
+  const std::string& sSymbol( pPosition->GetInstrument()->GetInstrumentName() );
+  wxTreeItemId idSymbol = m_ptreeTradables->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
+
+  m_ptreeTradables->ExpandAll();
+
   m_pInteractiveChart->Connect();
 }
 
