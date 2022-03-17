@@ -64,6 +64,7 @@ struct PanelOrderButtons_Order {
   , m_bPositionExitStopEnable( false ), m_ePositionExitStopMethod( EPositionExitStopMethod::TrailingAbsolute )
   , m_eInstrument( EInstrument::Underlying )
   , m_bStochastic1( false ), m_bStochastic2( false ), m_bStochastic3( false )
+  , m_sQuanStock( "100" ), m_sQuanFuture( "1" ), m_sQuanOption( "1" ) // needs to match prefilled gui fields
   {}
 
   double PositionEntryValue() const;
