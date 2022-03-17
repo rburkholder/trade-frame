@@ -308,13 +308,13 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
     switch ( selectors.m_ePositionEntryMethod ) {
       case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Market:
         m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, quantity );
-        m_ceBuySubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Sell Submit" );
+        m_ceSellSubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Sell Submit" );
         break;
       case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Limit:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
-          m_ceBuySubmit.AddLabel( quote.DateTime(), price, "Sell Submit" );
+          m_ceSellSubmit.AddLabel( quote.DateTime(), price, "Sell Submit" );
         }
         break;
       case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Stoch:
@@ -429,12 +429,12 @@ void TradeWithASell::HandleEntryOrderFilled( const ou::tf::Order& order ) {
   if ( m_pOrderStop ) {
     m_pPosition->PlaceOrder( m_pOrderStop );
     if ( 0.0 < m_dblStopTrailDelta ) m_bWatchStop = true;
-    m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit" );
+    m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit" );
     std::cout << "order " << m_pOrderStop->GetOrderId() << " placed (sell stop)" << std::endl;
   }
   if ( m_pOrderProfit ) {
     m_pPosition->PlaceOrder( m_pOrderProfit );
-    m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit" );
+    m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit" );
     std::cout << "order " << m_pOrderProfit->GetOrderId() << " placed (sell profit)" << std::endl;
   }
   TradeLifeTime::HandleOrderFilled( order );
@@ -448,7 +448,7 @@ void TradeWithASell::HandleProfitOrderFilled( const ou::tf::Order& order ) {
   if ( m_pOrderStop ) {
     m_pPosition->CancelOrder( m_pOrderStop->GetOrderId() );
   }
-  m_ceSellFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Profit Fill" );
+  m_ceBuyFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Profit Fill" );
   TradeLifeTime::HandleOrderFilled( order );
 }
 
@@ -462,7 +462,7 @@ void TradeWithASell::HandleStopOrderFilled( const ou::tf::Order& order ) {
   if ( m_pOrderProfit ) {
     m_pPosition->CancelOrder( m_pOrderProfit->GetOrderId() );
   }
-  m_ceSellFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Stop Fill" );
+  m_ceBuyFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Stop Fill" );
   TradeLifeTime::HandleOrderFilled( order );
 }
 
