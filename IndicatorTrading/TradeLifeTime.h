@@ -64,6 +64,10 @@ protected:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
+  using EPositionEntryMethod = ou::tf::PanelOrderButtons_Order::EPositionEntryMethod;
+  using EPositionExitProfitMethod = ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod;
+  using EPositionExitStopMethod = ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod;
+
   enum class EPositionState {
     InitializeEntry
   , EnteringPosition // sent order, waiting for fill

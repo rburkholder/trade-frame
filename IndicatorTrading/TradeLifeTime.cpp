@@ -123,18 +123,18 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
   assert( selectors.m_bPositionEntryEnable );
   {
     switch ( selectors.m_ePositionEntryMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Market:
+      case EPositionEntryMethod::Market:
         m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, quantity );
         m_ceBuySubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Buy Submit" );
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Limit:
+      case EPositionEntryMethod::Limit:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
           m_ceBuySubmit.AddLabel( quote.DateTime(), price, "Buy Submit" );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Stoch:
+      case EPositionEntryMethod::Stoch:
         assert( false ); // need code for this
         break;
     }
@@ -146,21 +146,21 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
 
   if ( selectors.m_bPositionExitProfitEnable ) {
     switch ( selectors.m_ePositionExitProfitMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Absolute:
+      case EPositionExitProfitMethod::Absolute:
         {
           double value = NormalizePrice( selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, value );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Relative:
+      case EPositionExitProfitMethod::Relative:
         {
           double value = NormalizePrice( quote.Midpoint() + selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, value );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Stoch:
+      case EPositionExitProfitMethod::Stoch:
         assert( false ); // need code for this
         break;
     }
@@ -172,7 +172,7 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
 
   if ( selectors.m_bPositionExitStopEnable ) {
     switch ( selectors.m_ePositionExitStopMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::TrailingAbsolute:
+      case EPositionExitStopMethod::TrailingAbsolute:
         {
           m_dblStopTrailDelta = selectors.PositionExitStopValue();
           m_dblStopCurrent = NormalizePrice( quote.Midpoint() - selectors.PositionExitStopValue() );
@@ -180,12 +180,12 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
             ou::tf::OrderType::Stop, ou::tf::OrderSide::Sell, quantity, m_dblStopCurrent );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::TrailingPercent:
+      case EPositionExitStopMethod::TrailingPercent:
         {
           assert( false ); // need code for this
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::Stop:
+      case EPositionExitStopMethod::Stop:
         {
           m_dblStopCurrent = NormalizePrice( selectors.PositionExitStopValue() );
           m_pOrderStop = m_pPosition->ConstructOrder(
@@ -306,18 +306,18 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
   assert( selectors.m_bPositionEntryEnable );
   {
     switch ( selectors.m_ePositionEntryMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Market:
+      case EPositionEntryMethod::Market:
         m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, quantity );
         m_ceSellSubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Sell Submit" );
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Limit:
+      case EPositionEntryMethod::Limit:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
           m_ceSellSubmit.AddLabel( quote.DateTime(), price, "Sell Submit" );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionEntryMethod::Stoch:
+      case EPositionEntryMethod::Stoch:
         assert( false ); // need code for this
         break;
     }
@@ -329,21 +329,21 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
 
   if ( selectors.m_bPositionExitProfitEnable ) {
     switch ( selectors.m_ePositionExitProfitMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Absolute:
+      case EPositionExitProfitMethod::Absolute:
         {
           double value = NormalizePrice( selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, value );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Relative:
+      case EPositionExitProfitMethod::Relative:
         {
           double value = NormalizePrice( quote.Midpoint() - selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, value );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod::Stoch:
+      case EPositionExitProfitMethod::Stoch:
         assert( false ); // need code for this
         break;
     }
@@ -355,7 +355,7 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
 
   if ( selectors.m_bPositionExitStopEnable ) {
     switch ( selectors.m_ePositionExitStopMethod ) {
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::TrailingAbsolute:
+      case EPositionExitStopMethod::TrailingAbsolute:
         {
           m_dblStopTrailDelta = selectors.PositionExitStopValue();
           m_dblStopCurrent = NormalizePrice( quote.Midpoint() + selectors.PositionExitStopValue() );
@@ -363,12 +363,12 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
             ou::tf::OrderType::Stop, ou::tf::OrderSide::Buy, quantity, m_dblStopCurrent );
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::TrailingPercent:
+      case EPositionExitStopMethod::TrailingPercent:
         {
           assert( false ); // need code for this
         }
         break;
-      case ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod::Stop:
+      case EPositionExitStopMethod::Stop:
         {
           m_dblStopCurrent = NormalizePrice( selectors.PositionExitStopValue() );
           m_pOrderStop = m_pPosition->ConstructOrder(
