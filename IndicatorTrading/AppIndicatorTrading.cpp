@@ -121,7 +121,7 @@ bool AppIndicatorTrading::OnInit() {
   m_splitterRow->SetSashGravity(0.2);
 
   // tree for viewed symbols
-  m_ptreeTradables = new wxTreeCtrl( m_splitterRow );
+  m_ptreeTradables = new wxTreeCtrl( m_splitterRow, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_HAS_BUTTONS |wxTR_TWIST_BUTTONS|wxTR_SINGLE );
   wxTreeItemId idRoot = m_ptreeTradables->AddRoot( "/", -1, -1, 0 );
   m_ptreeTradables->Bind( wxEVT_TREE_ITEM_MENU, &AppIndicatorTrading::HandleTreeEventItemMenu, this, m_ptreeTradables->GetId() );
 
@@ -313,6 +313,10 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
+  wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
+  const std::string& sSymbol( pPosition->GetInstrument()->GetInstrumentName() );
+  wxTreeItemId tiidSymbol = m_ptreeTradables->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) ); // can use popup to cancel/close orders
+
   m_pInteractiveChart->SetPosition(
     pPosition,
     m_config,
@@ -325,7 +329,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    [this]( ou::tf::Order::idOrder_t id ){ // fAddLifeCycle_t
+    [this,tiidSymbol]( ou::tf::Order::idOrder_t id ){ // fAddLifeCycle_t
 
       std::string sId( boost::lexical_cast<std::string>( id ) );
 
@@ -357,15 +361,10 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         idPopUpCancel
         );
 
-      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
-      wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( idRoot, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+      wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
     }
     );
-
-  wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
-  const std::string& sSymbol( pPosition->GetInstrument()->GetInstrumentName() );
-  wxTreeItemId idSymbol = m_ptreeTradables->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
 
   m_ptreeTradables->ExpandAll();
 
