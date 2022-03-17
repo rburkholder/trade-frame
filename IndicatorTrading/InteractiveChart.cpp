@@ -276,7 +276,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "234", "3",
+        "cp", "", "234", "1",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
@@ -527,7 +527,7 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );
+  m_fAddLifeCycle( id );  // add direction, to make it easier on the return trip
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
@@ -535,7 +535,7 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );
+  m_fAddLifeCycle( id );  // add direction, to make it easier on the return trip
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
