@@ -72,6 +72,9 @@ Strategy::Strategy(
 }
 
 Strategy::~Strategy() {
+  if ( m_pFile ) {
+    m_pFile->Write();
+  }
   if ( m_threadRdaf.joinable() ) {
     m_prdafApp->SetReturnFromRun( true );
     m_threadRdaf.join(); // returns after .quit at command line
@@ -413,6 +416,9 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  if ( m_pFile ) {
+    m_pFile->Write();
+  }
 }
 
 void Strategy::CloseAndDone() {
