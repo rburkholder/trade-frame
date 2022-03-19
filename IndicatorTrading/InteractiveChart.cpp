@@ -45,12 +45,13 @@ InteractiveChart::InteractiveChart()
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
@@ -70,12 +71,13 @@ InteractiveChart::InteractiveChart(
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
@@ -110,12 +112,11 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortEntry );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongEntry );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortFill );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongFill );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortExit );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongExit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceBuySubmit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceBuyFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceSellSubmit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceSellFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceCancelled );
 
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
@@ -523,7 +524,7 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 }
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
@@ -531,7 +532,7 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
+  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
   pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
@@ -547,24 +548,23 @@ void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& butto
 }
 
 void InteractiveChart::OrderCancel( idOrder_t id ) {
-  std::cout << "need to cancel " << id << std::endl;
-  // will need to determine when a cancel is a good idea
-  // =>  when limit based entry has been established.
-  //     only cancel if entry hasn't bee established
-  //     don't cancel if waiting for one of the exits
-  //     the close, will need to perform the cancel, then the close
-  // NOTE: use TradeLifeTime to cancel itself
+  mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
+  if ( m_mapTradeLifeTime.end() == iter ) {
+    std::cout << "OrderCancel: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    iter->second->Cancel();
+  }
 }
 
 void InteractiveChart::OrderClose( idOrder_t id ) {
-  std::cout << "need to close " << id << std::endl;
-  // determine direction, then do:
-  // OrderBuy( ou::tf::PanelOrderButtons_Order() );
-  // OrderSell( ou::tf::PanelOrderButtons_Order() );
-  // and delete menu item
-  // need to check the other orders, cancel if exists
-  // no close if entry has't been established
-  // NOTE: use TradeLifeTime to close itself
+  mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
+  if ( m_mapTradeLifeTime.end() == iter ) {
+    std::cout << "OrderClose: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    iter->second->Close();
+  }
 }
 
 void InteractiveChart::OptionWatchStart() {

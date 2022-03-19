@@ -189,12 +189,11 @@ private:
   ou::ChartEntryIndicator m_ceQuoteBid;
   ou::ChartEntryIndicator m_ceQuoteSpread;
 
-  ou::ChartEntryShape m_ceLongEntry;
-  ou::ChartEntryShape m_ceShortEntry;
-  ou::ChartEntryShape m_ceLongFill;
-  ou::ChartEntryShape m_ceShortFill;
-  ou::ChartEntryShape m_ceLongExit;
-  ou::ChartEntryShape m_ceShortExit;
+  ou::ChartEntryShape m_ceBuySubmit;
+  ou::ChartEntryShape m_ceBuyFill;
+  ou::ChartEntryShape m_ceSellSubmit;
+  ou::ChartEntryShape m_ceSellFill;
+  ou::ChartEntryShape m_ceCancelled;
 
   ou::ChartEntryShape m_ceBullCall;
   ou::ChartEntryShape m_ceBullPut;

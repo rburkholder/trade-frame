@@ -42,14 +42,17 @@ public:
     ou::ChartEntryShape& ceBuyFill;
     ou::ChartEntryShape& ceSellSubmit;
     ou::ChartEntryShape& ceSellFill;
+    ou::ChartEntryShape& ceCancelled;
     Indicators(
         ou::ChartEntryShape& ceBuySubmit_
       , ou::ChartEntryShape& ceBuyFill_
       , ou::ChartEntryShape& ceSellSubmit_
       , ou::ChartEntryShape& ceSellFill_
+      , ou::ChartEntryShape& ceCancelled_
     )
-    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ ),
-      ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
+    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ )
+    ,  ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
+    ,  ceCancelled( ceCancelled_ )
     {}
   };
 
@@ -60,13 +63,12 @@ public:
 
   ou::tf::Order::idOrder_t Id() const { return m_pOrderEntry->GetOrderId(); }
 
+  virtual void Cancel();
+  virtual void Close();
+
 protected:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
-
-  using EPositionEntryMethod = ou::tf::PanelOrderButtons_Order::EPositionEntryMethod;
-  using EPositionExitProfitMethod = ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod;
-  using EPositionExitStopMethod = ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod;
 
   enum class EPositionState {
     InitializeEntry
@@ -93,6 +95,7 @@ protected:
   ou::ChartEntryShape& m_ceBuyFill;
   ou::ChartEntryShape& m_ceSellSubmit;
   ou::ChartEntryShape& m_ceSellFill;
+  ou::ChartEntryShape& m_ceCancelled;
 
   bool m_bWatching;
   bool m_bWatchStop;
@@ -113,16 +116,13 @@ protected:
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 
-  virtual void Cancel() {}
-  virtual void Close() {}
-
 private:
 
   void ClearOrders();
 
 };
 
-// =====
+// ===== TradeWithABuy
 
 class TradeWithABuy: public TradeLifeTime {
 public:
@@ -131,6 +131,7 @@ public:
 
   virtual void Cancel();
   virtual void Close();
+
 protected:
 
   virtual void HandleQuote( const ou::tf::Quote& );
@@ -146,7 +147,7 @@ private:
   void HandleStopOrderFilled( const ou::tf::Order& );
 };
 
-// =====
+// ===== TradeWithASell
 
 class TradeWithASell: public TradeLifeTime {
 public:
@@ -155,6 +156,7 @@ public:
 
   virtual void Cancel();
   virtual void Close();
+
 protected:
 
   virtual void HandleQuote( const ou::tf::Quote& );
