@@ -108,7 +108,7 @@ protected:
   double PriceInterval( double price ) const;
   double NormalizePrice( double price ) const;
 
-  size_t Quantity( pPosition_t, const ou::tf::PanelOrderButtons_Order& );
+  size_t Quantity( pPosition_t, const ou::tf::PanelOrderButtons_Order& ) const;
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
