@@ -72,9 +72,9 @@ Strategy::Strategy(
 }
 
 Strategy::~Strategy() {
-  if ( m_pFile ) {
-    m_pFile->Write();
-  }
+  //if ( m_pFile ) { // commented out to maintain consistency with hd5f manual retention in SaveWatch
+  //  m_pFile->Write();
+  //}
   if ( m_threadRdaf.joinable() ) {
     m_prdafApp->SetReturnFromRun( true );
     m_threadRdaf.join(); // returns after .quit at command line
@@ -115,8 +115,6 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   SetupChart();
 
   StartRdaf( m_sFilePrefix );
-
-  //time_duration td = time_duration( 0, 0, m_nPeriodWidth );
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -179,7 +177,8 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
   //f1->Draw();
   //c->Modified(); c->Update();
 
-  // un-comment if you want the prompt for live analysis
+  // this needs to be refactored elsewhere, so as not to be started with each instrument
+  //  ie, will need to be started in caller instead
   //self->m_prdafApp->Run();
 }
 
