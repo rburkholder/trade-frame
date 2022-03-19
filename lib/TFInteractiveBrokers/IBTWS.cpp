@@ -527,7 +527,7 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       break;
   }
   twsorder.action = pOrder->GetOrderSideName();
-  twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuantity() );
+  twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuanOrdered() );
   twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
   twsorder.tif = "DAY";
   //twsorder.goodAfterTime = "20080625 09:30:00";
