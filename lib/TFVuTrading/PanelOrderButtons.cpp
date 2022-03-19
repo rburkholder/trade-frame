@@ -209,11 +209,13 @@ void PanelOrderButtons::CreateControls() {
     m_btnSell = new wxButton( itemPanel1, ID_BtnSell, _("&Sell"), wxDefaultPosition, wxSize(60, -1), 0 );
     sizerBtnOrderTypes->Add(m_btnSell, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
 
-    m_btnClose = new wxButton( itemPanel1, ID_BtnClose, _("&Close"), wxDefaultPosition, wxSize(60, -1), 0 );
-    sizerBtnOrderTypes->Add(m_btnClose, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
-
     m_btnCancel = new wxButton( itemPanel1, ID_BtnCancel, _("C&ancel"), wxDefaultPosition, wxSize(60, -1), 0 );
+    m_btnCancel->Enable(false);
     sizerBtnOrderTypes->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
+
+    m_btnClose = new wxButton( itemPanel1, ID_BtnClose, _("&Close"), wxDefaultPosition, wxSize(60, -1), 0 );
+    m_btnClose->Enable(false);
+    sizerBtnOrderTypes->Add(m_btnClose, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
 
     wxStaticLine* itemStaticLine9 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
     sizerMain->Add(itemStaticLine9, 0, wxGROW|wxTOP|wxBOTTOM, 2);
