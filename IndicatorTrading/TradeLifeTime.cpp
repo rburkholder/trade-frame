@@ -109,7 +109,7 @@ size_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrderB
   return quantity;
 }
 
-// =====
+// ===== TradeWithABuy =====
 
 TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
 : TradeLifeTime( pPosition, selectors, indicators )
@@ -292,7 +292,7 @@ void TradeWithABuy::Cancel() {
 void TradeWithABuy::Close() {
 }
 
-// =====
+// ===== TradeWithASell =====
 
 TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
 : TradeLifeTime( pPosition, selectors, indicators )

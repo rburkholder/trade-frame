@@ -539,9 +539,21 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
+  // button disabled till semantics defined by order, some, all, ...
 }
 
 void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& buttons ) {
+  // button disabled till semantics defined by order, some, all, ...
+}
+
+void InteractiveChart::OrderCancel( idOrder_t id ) {
+  std::cout << "need to cancel " << id << std::endl;
+  // will need to determine when a cancel is a good idea
+  // =>  when limit based entry has been established.
+  //     only cancel if entry hasn't bee established
+  //     don't cancel if waiting for one of the exits
+  //     the close, will need to perform the cancel, then the close
+  // NOTE: use TradeLifeTime to cancel itself
 }
 
 void InteractiveChart::OrderClose( idOrder_t id ) {
@@ -552,15 +564,7 @@ void InteractiveChart::OrderClose( idOrder_t id ) {
   // and delete menu item
   // need to check the other orders, cancel if exists
   // no close if entry has't been established
-}
-
-void InteractiveChart::OrderCancel( idOrder_t id ) {
-  std::cout << "need to cancel " << id << std::endl;
-  // will need to determine when a cancel is a good idea
-  // =>  when limit based entry has been established.
-  //     only cancel if entry hasn't bee established
-  //     don't cancel if waiting for one of the exits
-  //     the close, will need to perform the cancel, then the close
+  // NOTE: use TradeLifeTime to close itself
 }
 
 void InteractiveChart::OptionWatchStart() {

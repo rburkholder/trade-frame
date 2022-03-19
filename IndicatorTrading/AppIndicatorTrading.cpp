@@ -337,18 +337,6 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
       wxMenuItem* pMenuItem;
 
-      pMenuItem = pMenuPopup->Append( wxID_ANY, "Close" );
-      int idPopUpClose = pMenuItem->GetId();
-      pMenuPopup->Bind(
-        wxEVT_COMMAND_MENU_SELECTED,
-        [this, id]( wxCommandEvent& event ){
-          std::string sId( boost::lexical_cast<std::string>( id ) );
-          //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
-          m_pInteractiveChart->OrderClose( id );
-        },
-        idPopUpClose
-        );
-
       pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel" );
       int idPopUpCancel = pMenuItem->GetId();
       pMenuPopup->Bind(
@@ -359,6 +347,18 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
           m_pInteractiveChart->OrderCancel( id );
         },
         idPopUpCancel
+        );
+
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Close" );
+      int idPopUpClose = pMenuItem->GetId();
+      pMenuPopup->Bind(
+        wxEVT_COMMAND_MENU_SELECTED,
+        [this, id]( wxCommandEvent& event ){
+          std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
+          m_pInteractiveChart->OrderClose( id );
+        },
+        idPopUpClose
         );
 
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
