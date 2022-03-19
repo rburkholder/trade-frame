@@ -178,7 +178,7 @@ void PanelOrderButtons::CreateControls() {
     sizerPositionExitProfit->Add(m_radioExitProfit, 1, wxGROW|wxLEFT, 2);
 
     sizerPositionExitStop = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerPositionExitStop, 1, wxGROW, 2);
+    sizerMain->Add(sizerPositionExitStop, 1, wxGROW|wxBOTTOM, 2);
 
     m_cbEnableStopExit = new wxCheckBox( itemPanel1, ID_CB_PositionExitStop, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     m_cbEnableStopExit->SetValue(false);
@@ -197,8 +197,11 @@ void PanelOrderButtons::CreateControls() {
         m_radioExitStop->SetToolTip(_("Trailing Absolute\nTrailing Percent\nStop"));
     sizerPositionExitStop->Add(m_radioExitStop, 1, wxGROW|wxLEFT, 2);
 
+    wxStaticLine* itemStaticLine1 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine1, 0, wxGROW|wxTOP|wxBOTTOM, 2);
+
     sizerBtnOrderTypes = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerBtnOrderTypes, 0, wxALIGN_CENTER_HORIZONTAL|wxLEFT|wxRIGHT, 2);
+    sizerMain->Add(sizerBtnOrderTypes, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
     m_btnBuy = new wxButton( itemPanel1, ID_BtnBuy, _("&Buy"), wxDefaultPosition, wxSize(60, -1), 0 );
     sizerBtnOrderTypes->Add(m_btnBuy, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
@@ -212,6 +215,9 @@ void PanelOrderButtons::CreateControls() {
     m_btnCancel = new wxButton( itemPanel1, ID_BtnCancel, _("C&ancel"), wxDefaultPosition, wxSize(60, -1), 0 );
     sizerBtnOrderTypes->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
 
+    wxStaticLine* itemStaticLine9 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine9, 0, wxGROW|wxTOP|wxBOTTOM, 2);
+
     wxArrayString m_radioInstrumentStrings;
     m_radioInstrumentStrings.Add(_("&Base"));
     m_radioInstrumentStrings.Add(_("&Call1"));
@@ -222,8 +228,11 @@ void PanelOrderButtons::CreateControls() {
     m_radioInstrument->SetSelection(0);
     sizerMain->Add(m_radioInstrument, 1, wxALIGN_CENTER_HORIZONTAL|wxLEFT|wxRIGHT, 2);
 
+    wxStaticLine* itemStaticLine11 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine11, 0, wxGROW|wxTOP|wxBOTTOM, 2);
+
     sizerMarketData = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerMarketData, 0, wxGROW|wxLEFT|wxRIGHT, 2);
+    sizerMain->Add(sizerMarketData, 0, wxGROW|wxLEFT|wxRIGHT|wxTOP, 2);
 
     sizerMDBase = new wxBoxSizer(wxVERTICAL);
     sizerMarketData->Add(sizerMDBase, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
@@ -284,6 +293,9 @@ void PanelOrderButtons::CreateControls() {
 
     m_txtPut2Bid = new wxStaticText( itemPanel1, ID_TXT_Put2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerMDPut2->Add(m_txtPut2Bid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+
+    wxStaticLine* itemStaticLine35 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine35, 0, wxGROW|wxTOP|wxBOTTOM, 2);
 
     sizerStochastic = new wxBoxSizer(wxHORIZONTAL);
     sizerMain->Add(sizerStochastic, 1, wxALIGN_CENTER_HORIZONTAL, 2);
