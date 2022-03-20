@@ -356,7 +356,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    [this,tiidSymbol]( ou::tf::Order::idOrder_t id ){ // fAddLifeCycle_t
+    [this,tiidSymbol]( ou::tf::Order::idOrder_t id )->InteractiveChart::pairLifeCycle_t { // fAddLifeCycle_t
 
       std::string sId( boost::lexical_cast<std::string>( id ) );
 
@@ -369,7 +369,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       pMenuPopup->Bind(
         wxEVT_COMMAND_MENU_SELECTED,
         [this,id]( wxCommandEvent& event ){
-          std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::string sId( boost::lexical_cast<std::string>( id ) );
           //std::cout << "Cancel: " << sId << "," << event.GetId() << std::endl;
           m_pInteractiveChart->OrderCancel( id );
         },
@@ -381,15 +381,36 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       pMenuPopup->Bind(
         wxEVT_COMMAND_MENU_SELECTED,
         [this, id]( wxCommandEvent& event ){
-          std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::string sId( boost::lexical_cast<std::string>( id ) );
           //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
           m_pInteractiveChart->EmitOrderStatus( id );
         },
         idPopUpStatus
         );
 
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Delete" );
+      int idPopUpDelete = pMenuItem->GetId();
+      pMenuPopup->Bind(
+        wxEVT_COMMAND_MENU_SELECTED,
+        [this, id]( wxCommandEvent& event ){
+          //std::string sId( boost::lexical_cast<std::string>( id ) );
+          //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
+          m_pInteractiveChart->DeleteLifeCycle( id );
+        },
+        idPopUpDelete
+        );
+
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
+      return
+        InteractiveChart::pairLifeCycle_t (
+          [this,tiidSymbol](const std::string& s){
+            m_ptreeTradables->SetItemText( tiidSymbol, s );
+          },
+          [this,tiidSymbol](){
+            m_ptreeTradables->Delete( tiidSymbol );
+          } )
+      ;
     }
     );
 

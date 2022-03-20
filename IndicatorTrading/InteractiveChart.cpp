@@ -99,7 +99,7 @@ bool InteractiveChart::Create(
 InteractiveChart::~InteractiveChart() {
   Disconnect();
   m_bfPrice.SetOnBarComplete( nullptr );
-  m_mapTradeLifeTime.clear();
+  m_mapLifeCycle.clear();
 }
 
 void InteractiveChart::Init() {
@@ -525,18 +525,24 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );  // add direction, to make it easier on the return trip
+  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+  auto&& [fUpdate, fDelete] = std::move( m_fAddLifeCycle( id ) );
+  auto& [key,value] = *pair.first;
+  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( fUpdate ) );
+  value.fDeleteLifeCycle = std::move( fDelete );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );  // add direction, to make it easier on the return trip
+  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+  auto&& [fUpdate, fDelete] = std::move( m_fAddLifeCycle( id ) );
+  auto& [key,value] = *pair.first;
+  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( fUpdate ) );
+  value.fDeleteLifeCycle = std::move( fDelete );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
@@ -548,35 +554,47 @@ void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& butto
 }
 
 void InteractiveChart::CancelOrders() {
-  for ( mapTradeLifeTime_t::value_type& vt: m_mapTradeLifeTime ) {
-    OrderCancel( vt.first );
+  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
+    OrderCancel( vt.second.pTradeLifeTime->Id() );
   }
 }
 
 void InteractiveChart::OrderCancel( idOrder_t id ) {
-  mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
-  if ( m_mapTradeLifeTime.end() == iter ) {
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
     std::cout << "OrderCancel: can not find idOrder=" << id << std::endl;
   }
   else {
-    iter->second->Cancel();
+    iter->second.pTradeLifeTime->Cancel();
   }
 }
 
 void InteractiveChart::EmitStatus() {
-  for ( mapTradeLifeTime_t::value_type& vt: m_mapTradeLifeTime ) {
+  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
     // TODO: require a way to skip finished TradeLifeTimes
-    vt.second->EmitStatus();
+    vt.second.pTradeLifeTime->EmitStatus();
   }
 }
 
 void InteractiveChart::EmitOrderStatus( idOrder_t id ) {
-  mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
-  if ( m_mapTradeLifeTime.end() == iter ) {
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
     std::cout << "OrderStatus: can not find idOrder=" << id << std::endl;
   }
   else {
-    iter->second->EmitStatus();
+    iter->second.pTradeLifeTime->EmitStatus();
+  }
+}
+
+void InteractiveChart::DeleteLifeCycle( idOrder_t id ) {
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
+    std::cout << "DeleteLifeCycle: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    // TODO: need to perform some validation that nothing is in progress.
+    iter->second.fDeleteLifeCycle();
+    m_mapLifeCycle.erase( iter );
   }
 }
 

@@ -83,7 +83,12 @@ public:
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
-  using fAddLifeCycle_t = std::function<void(idOrder_t)>;
+  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
+  using fDeleteLifeCycle_t = std::function<void()>;
+
+  using pairLifeCycle_t = std::pair<fUpdateLifeCycle_t&&,fDeleteLifeCycle_t&&>;
+
+  using fAddLifeCycle_t = std::function<pairLifeCycle_t(idOrder_t)>;
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
@@ -105,7 +110,7 @@ public:
   virtual ~InteractiveChart();
 
   void SetPosition(
-    pPosition_t
+     pPosition_t
    , const config::Options&
    , pOptionChainQuery_t
    , fBuildOption_t&&
@@ -152,6 +157,7 @@ public:
 
   void OrderCancel( idOrder_t );
   void EmitOrderStatus( idOrder_t );
+  void DeleteLifeCycle( idOrder_t );
 
   void EmitStatus();
 
@@ -487,9 +493,18 @@ private:
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
-  using pTradeLifeTime_t = std::unique_ptr<TradeLifeTime>;
-  using mapTradeLifeTime_t = std::map<idOrder_t,pTradeLifeTime_t>;
-  mapTradeLifeTime_t m_mapTradeLifeTime;
+  using pTradeLifeTime_t = std::shared_ptr<TradeLifeTime>;
+
+  struct LifeCycle {
+    pTradeLifeTime_t pTradeLifeTime;
+    fDeleteLifeCycle_t fDeleteLifeCycle;
+    LifeCycle( pTradeLifeTime_t pTradeLifeTime_ )
+    : pTradeLifeTime( pTradeLifeTime_ )
+    {}
+  };
+
+  using mapLifeCycle_t = std::map<idOrder_t,LifeCycle>;
+  mapLifeCycle_t m_mapLifeCycle;
 
   void Init();
 

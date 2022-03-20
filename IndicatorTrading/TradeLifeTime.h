@@ -67,6 +67,11 @@ public:
   virtual void EmitStatus();
   //virtual void Close();  // doesn't make sense here, too many moving parts
 
+  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
+  void SetUpdateLifeCycle( fUpdateLifeCycle_t&& f ) {
+    m_fUpdateLifeCycle = std::move( f );
+  }
+
 protected:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
@@ -85,6 +90,8 @@ protected:
   EPositionState m_statePosition;
 
   pPosition_t m_pPosition;
+
+  fUpdateLifeCycle_t m_fUpdateLifeCycle;
 
   ou::tf::Quote m_quote;
 
