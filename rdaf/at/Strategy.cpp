@@ -19,6 +19,8 @@
  * Created: March 7, 2022 14:35
  */
 
+ #include <chrono>
+
 #include <rdaf/TH3.h>
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
@@ -67,6 +69,8 @@ Strategy::Strategy(
 
   m_ceProfitLoss.SetName( "P/L" );
 
+  m_ceExecutionTime.SetName( "Execution Time" );
+
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 
 }
@@ -98,6 +102,8 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
+
+  m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
 }
 
@@ -291,6 +297,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   // https://learnpriceaction.com/3-moving-average-crossover-strategy/
   // TODO: include the marketRule price difference here?
 
+  const std::chrono::time_point<std::chrono::system_clock> begin
+    = std::chrono::system_clock::now();
+
   switch ( m_stateTrade ) {
     case ETradeState::Search:
       if ( m_pHistVolume ) {
@@ -367,6 +376,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_stateTrade = ETradeState::Search;
       break;
   }
+
+  const std::chrono::time_point<std::chrono::system_clock> end
+    = std::chrono::system_clock::now();
+
+   auto delta = std::chrono::duration_cast<std::chrono::microseconds>( end - begin).count();
+   //auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end - begin).count();
+   m_ceExecutionTime.Append( bar.DateTime(), delta );
+
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& ) {
