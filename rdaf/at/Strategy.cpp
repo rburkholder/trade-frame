@@ -22,32 +22,25 @@
  #include <chrono>
 
 #include <rdaf/TH3.h>
-#include <rdaf/TRint.h>
-#include <rdaf/TROOT.h>
-#include <rdaf/TFile.h>
 #include <rdaf/TTree.h>
-//#include <rdaf//TMacro.h>
-//#include <rdaf/TCanvas.h>
-#include <rdaf/TFitResult.h>
-#include <rdaf/TDirectory.h>
+//#include <rdaf/TFitResult.h>
 
 #include <OUCharting/ChartDataView.h>
 
 #include <TFTrading/Watch.h>
 
 #include "ConfigParser.hpp"
+
 #include "Strategy.h"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy(
-  const std::string& sFilePrefix
-, const config_t config
+  const config_t config
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
-, m_sFilePrefix( sFilePrefix )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
@@ -79,10 +72,10 @@ Strategy::~Strategy() {
   //if ( m_pFile ) { // commented out to maintain consistency with hd5f manual retention in SaveWatch
   //  m_pFile->Write();
   //}
-  if ( m_threadRdaf.joinable() ) {
-    m_prdafApp->SetReturnFromRun( true );
-    m_threadRdaf.join(); // returns after .quit at command line
-  }
+  //if ( m_threadRdaf.joinable() ) {
+  //  m_prdafApp->SetReturnFromRun( true );
+  //  m_threadRdaf.join(); // returns after .quit at command line
+  //}
   Clear();
 }
 
@@ -120,7 +113,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   SetupChart();
 
-  StartRdaf( m_sFilePrefix );
+  InitRdaf();
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -137,67 +130,37 @@ void Strategy::Clear() {
   }
 }
 
-void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
+void Strategy::InitRdaf() {
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  pWatch_t pWatch = self->m_pPosition->GetWatch();
+  pWatch_t pWatch = m_pPosition->GetWatch();
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
-  self->m_pFile = std::make_unique<TFile>(
-    ( sFilePrefix + "-" + sSymbol + ".root" ).c_str(),
-    "RECREATE",
-    ( "tradeframe (" + sSymbol + ") rdaf/at quotes, trades & histogram" ).c_str()
-  );
-
-  self->m_pTreeQuote = std::make_shared<TTree>(
+  m_pTreeQuote = std::make_shared<TTree>(
     ( sSymbol + "-quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
   );
-  self->m_pTreeQuote->Branch( "quote", &self->m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
-  if ( !self->m_pTreeQuote ) {
+  m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+  if ( !m_pTreeQuote ) {
     std::cout << "problems m_pTreeQuote" << std::endl;
   }
 
-  self->m_pTreeTrade = std::make_shared<TTree>(
+  m_pTreeTrade = std::make_shared<TTree>(
     ( sSymbol + "-trades" ).c_str(), ( sSymbol + " trades" ).c_str()
   );
-  self->m_pTreeTrade->Branch( "trade", &self->m_branchTrade, "time/D:price/D:vol/l:direction/L" );
-  if ( !self->m_pTreeTrade ) {
+  m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
+  if ( !m_pTreeTrade ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
-  self->m_pHistVolume = std::make_shared<TH3D>(
+  m_pHistVolume = std::make_shared<TH3D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
-    self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper,
-    self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
-    self->m_config.nVolumeBins, self->m_config.nVolumeLower, self->m_config.nVolumeUpper
+    m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper,
+    m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
+    m_config.nVolumeBins, m_config.nVolumeLower, m_config.nVolumeUpper
   );
-  if ( !self->m_pHistVolume ) {
+  if ( !m_pHistVolume ) {
     std::cout << "problems history" << std::endl;
   }
 
-  // example charting code in live analysis mode
-  //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
-  //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
-  //f1->SetLineColor(kBlue+1);
-  //f1->SetTitle("My graph;x; sin(x)");
-  //f1->Draw();
-  //c->Modified(); c->Update();
-
-  // this needs to be refactored elsewhere, so as not to be started with each instrument
-  //  ie, will need to be started in caller instead
-  //self->m_prdafApp->Run();
-}
-
-void Strategy::StartRdaf( const std::string& sFileName ) {
-
-  int argc {};
-  char** argv = nullptr;
-
-  m_prdafApp = std::make_unique<TRint>( "rdaf_at", &argc, argv );
-  ROOT::EnableThreadSafety();
-  ROOT::EnableImplicitMT();
-
-  m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -294,8 +257,6 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   // DailyTradeTimeFrame: Trading during regular active equity market hours
-  // https://learnpriceaction.com/3-moving-average-crossover-strategy/
-  // TODO: include the marketRule price difference here?
 
   const std::chrono::time_point<std::chrono::system_clock> begin
     = std::chrono::system_clock::now();
@@ -432,9 +393,6 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
-  if ( m_pFile ) {
-    m_pFile->Write();
-  }
 }
 
 void Strategy::CloseAndDone() {

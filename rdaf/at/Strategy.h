@@ -19,10 +19,6 @@
  * Created: March 7, 2022 14:35
  */
 
-#include "TFTimeSeries/DatedDatum.h"
-#include <vector>
-#include <thread>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -41,10 +37,7 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 class TH3D;
-class TRint;
-class TFile;
 class TTree;
-class TMacro;
 
 namespace ou {
   class ChartDataView;
@@ -96,7 +89,6 @@ public:
   };
 
   Strategy(
-    const std::string& filename,
     const config_t
     );
   virtual ~Strategy();
@@ -127,8 +119,6 @@ private:
   ETradeState m_stateTrade;
 
   config_t m_config;
-
-  const std::string m_sFilePrefix;
 
   pPosition_t m_pPosition;
 
@@ -173,11 +163,6 @@ private:
     int64_t direction;
   } m_branchTrade;
 
-  std::thread m_threadRdaf;
-  std::unique_ptr<TRint> m_prdafApp;
-
-  std::unique_ptr<TFile> m_pFile;
-
   // https://root.cern/doc/master/classTTree.html
   using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
@@ -186,8 +171,7 @@ private:
   using pTH3D_t = std::shared_ptr<TH3D>;
   pTH3D_t m_pHistVolume;
 
-  void StartRdaf( const std::string& sFilePrefix );
-  static void ThreadRdaf( Strategy* p, const std::string& sFilePrefix );
+  void InitRdaf();
 
   // ==
 

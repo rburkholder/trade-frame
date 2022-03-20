@@ -35,6 +35,9 @@
 
 #include "ConfigParser.hpp"
 
+class TRint;
+class TFile;
+
 class Strategy;
 class FrameMain;
 
@@ -80,6 +83,11 @@ private:
   using pStrategy_t = std::unique_ptr<Strategy>;
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
+
+  std::unique_ptr<TRint> m_prdafApp;
+  std::unique_ptr<TFile> m_pFile;
+
+  void StartRdaf( const std::string& sFilePrefix );
 
   virtual bool OnInit();
   virtual int OnExit();
