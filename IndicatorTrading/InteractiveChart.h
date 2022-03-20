@@ -173,14 +173,15 @@ private:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   bool m_bConnected;
+  bool m_bOptionsReady;
 
   ou::ChartDataView m_dvChart; // the data
 
   pOrder_t m_pOrder;
   pPosition_t m_pPosition;
 
-  double m_dblSumVolumePrice; // part of vwap
   double m_dblSumVolume; // part of vwap
+  double m_dblSumVolumePrice; // part of vwap
 
   ou::tf::BarFactory m_bfPrice;
   ou::tf::BarFactory m_bfPriceUp;
@@ -481,8 +482,6 @@ private:
   };
 
   // ==
-
-  bool m_bOptionsReady;
 
   using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes

@@ -56,7 +56,7 @@ public:
     {}
   };
 
-  TradeLifeTime( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeLifeTime( pPosition_t, Indicators& );
   TradeLifeTime( TradeLifeTime&& ) = delete;
   TradeLifeTime( const TradeLifeTime& ) = delete;
   virtual ~TradeLifeTime();
@@ -99,17 +99,17 @@ protected:
   pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderStop;
 
+  bool m_bWatching;
+  bool m_bWatchStop;
+
+  double m_dblStopCurrent;
+  double m_dblStopTrailDelta;
+
   ou::ChartEntryShape& m_ceBuySubmit;
   ou::ChartEntryShape& m_ceBuyFill;
   ou::ChartEntryShape& m_ceSellSubmit;
   ou::ChartEntryShape& m_ceSellFill;
   ou::ChartEntryShape& m_ceCancelled;
-
-  bool m_bWatching;
-  bool m_bWatchStop;
-
-  double m_dblStopTrailDelta;
-  double m_dblStopCurrent;
 
   void StartWatch();
   void StopWatch();

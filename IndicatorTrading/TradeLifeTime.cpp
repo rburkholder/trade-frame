@@ -31,12 +31,13 @@ using EPositionEntryMethod = ou::tf::PanelOrderButtons_Order::EPositionEntryMeth
 using EPositionExitProfitMethod = ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod;
 using EPositionExitStopMethod = ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod;
 
-TradeLifeTime::TradeLifeTime( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
+TradeLifeTime::TradeLifeTime( pPosition_t pPosition, Indicators& indicators )
 : m_statePosition( EPositionState::InitializeEntry )
 , m_pPosition( pPosition )
 , m_bWatching( false )
 , m_bWatchStop( false )
-, m_dblStopTrailDelta( 0.0 )
+, m_dblStopCurrent {}
+, m_dblStopTrailDelta {}
 , m_ceBuySubmit(  indicators.ceBuySubmit )
 , m_ceBuyFill(    indicators.ceBuyFill )
 , m_ceSellSubmit( indicators.ceSellSubmit )
@@ -213,7 +214,7 @@ void TradeLifeTime::EmitStatus() {
 // ===== TradeWithABuy =====
 
 TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
-: TradeLifeTime( pPosition, selectors, indicators )
+: TradeLifeTime( pPosition, indicators )
 {
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " buying" << std::endl;
 
@@ -394,7 +395,7 @@ void TradeWithABuy::Cancel() {
 // ===== TradeWithASell =====
 
 TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
-: TradeLifeTime( pPosition, selectors, indicators )
+: TradeLifeTime( pPosition, indicators )
 {
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " selling" << std::endl;
 

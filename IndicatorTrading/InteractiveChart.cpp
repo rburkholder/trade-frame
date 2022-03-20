@@ -42,6 +42,10 @@ InteractiveChart::InteractiveChart()
 : WinChartView::WinChartView()
 , m_bConnected( false )
 , m_bOptionsReady( false )
+
+, m_dblSumVolume {}
+, m_dblSumVolumePrice {}
+
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
@@ -56,7 +60,6 @@ InteractiveChart::InteractiveChart()
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
@@ -68,6 +71,10 @@ InteractiveChart::InteractiveChart(
 : WinChartView::WinChartView( parent, id, pos, size, style )
 , m_bConnected( false )
 , m_bOptionsReady( false )
+
+, m_dblSumVolume {}
+, m_dblSumVolumePrice {}
+
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
@@ -82,7 +89,6 @@ InteractiveChart::InteractiveChart(
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
