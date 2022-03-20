@@ -45,16 +45,16 @@ Strategy::Strategy(
 , const config_t config
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_stateTrade( ETradeState::Init )
 , m_config( config )
 , m_sFilePrefix( sFilePrefix )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
 , m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
-, m_stateTrade( ETradeState::Init )
 {
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
