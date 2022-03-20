@@ -207,6 +207,7 @@ void InteractiveChart::SetPosition(
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fAddLifeCycle_t&& fAddLifeCycle
+, fAddExpiryToTree_t&& fAddExpiryToTree
 ) {
 
   bool bConnected = m_bConnected;
@@ -216,6 +217,7 @@ void InteractiveChart::SetPosition(
 
   m_fBuildOption = std::move( fBuildOption );
   m_fAddLifeCycle = std::move( fAddLifeCycle );
+  m_fAddExpiryToTree = std::move( fAddExpiryToTree );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
@@ -261,8 +263,7 @@ void InteractiveChart::SetPosition(
   // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
 
   OptionChainQuery(
-    pPosition->GetInstrument()->GetInstrumentName(
-      ou::tf::Instrument::eidProvider_t::EProviderIQF)
+    pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     );
 
   // --
@@ -320,9 +321,10 @@ void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
   std::cout << " .. option chains built." << std::endl;
 }
 
+// started from menu after option chains have been loaded
 void InteractiveChart::ProcessChains() {
 
-  if ( 0 == m_vExpiries.size() ) {
+  if ( 0 == m_mapExpiries.size() ) {
 
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       size_t nStrikes {};
@@ -334,9 +336,13 @@ void InteractiveChart::ProcessChains() {
       } );
 
       std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
-      if ( 10 < nStrikes ) {
+      if ( 20 < nStrikes ) {
         std::cout << "chain " << vt.first << " marked" << std::endl;
-        m_vExpiries.emplace_back( vt.first );
+        auto [iter, result ] = m_mapExpiries.emplace( std::make_pair( vt.first, Expiry() ) );
+        assert( result );
+
+        // place to put the expiries on the tree
+        iter->second.fAddOptionToTree = std::move( m_fAddExpiryToTree( ou::tf::Instrument::BuildDate( vt.first ) ) );
       }
     }
 
@@ -392,9 +398,9 @@ void InteractiveChart::CheckOptions() {
   if ( m_bOptionsReady ) {
 
     double mid( m_quote.Midpoint() );
-    for ( const vExpiries_t::value_type& expiry : m_vExpiries ) {
+    for ( const mapExpiries_t::value_type& vt : m_mapExpiries ) {
 
-      mapChains_t::iterator iterChains = m_mapChains.find( expiry );
+      mapChains_t::iterator iterChains = m_mapChains.find( vt.first );
       assert( m_mapChains.end() != iterChains );
       chain_t& chain( iterChains->second );
 
@@ -404,34 +410,49 @@ void InteractiveChart::CheckOptions() {
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
       strike = chain.Call_Atm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
       strike = chain.Call_Otm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
       // put
       strike = chain.Put_Itm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
       strike = chain.Put_Atm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
       strike = chain.Put_Otm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      if ( AddOptionTracker( strike, pOption ) ) {
+        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      }
 
     }
   }
 }
 
-void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+// adds to mapOptionTracker if it doesn't already exist, and starts watch
+bool InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+
+  bool bAdded( false );
 
   const std::string& sOptionName( pOption->GetInstrumentName() );
 
@@ -455,7 +476,9 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
           m_ceBullCall, m_ceBullPut,
           m_ceBearCall, m_ceBearPut
           ) ) );
+    bAdded = true;
   }
+  return bAdded;
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
@@ -532,8 +555,8 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
   pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
   auto& [key,value] = *pair.first;
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
   value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
   value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }
@@ -543,8 +566,8 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
   pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
   auto& [key,value] = *pair.first;
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
   value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
   value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }

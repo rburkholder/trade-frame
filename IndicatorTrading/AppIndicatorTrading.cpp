@@ -403,13 +403,20 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
       return InteractiveChart::LifeCycleFunctions(
-          [this,tiidSymbol](const std::string& s){
+          [this,tiidSymbol](const std::string& s){ // fUpdateLifeCycle_t
             m_ptreeTradables->SetItemText( tiidSymbol, s );
           },
-          [this,tiidSymbol](){
+          [this,tiidSymbol](){ // fDeleteLifeCycle_t
             m_ptreeTradables->Delete( tiidSymbol );
           }
           );
+    },
+    [this,tiidSymbol]( const std::string& sLabel )->InteractiveChart::fAddOptionToTree_t{ // fAddExpiryToTree_t
+      wxTreeItemId tiidExpiry = m_ptreeTradables->AppendItem( tiidSymbol, sLabel, -1, -1, nullptr );
+      return
+        [this, tiidExpiry]( const std::string sOptionName ){
+          wxTreeItemId idOption = m_ptreeTradables->AppendItem( tiidExpiry, sOptionName, -1, -1, nullptr );
+        };
     }
     );
 
