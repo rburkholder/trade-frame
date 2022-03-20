@@ -97,8 +97,8 @@ void TradeLifeTime::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
 }
 
-size_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors ) const {
-  size_t quantity {};
+uint32_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors ) const {
+  uint32_t quantity {};
   switch ( pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       quantity = selectors.QuanFuture();
@@ -220,7 +220,7 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
 
-  size_t quantity = Quantity( pPosition, selectors );
+  uint32_t quantity = Quantity( pPosition, selectors );
 
   assert( selectors.m_bPositionEntryEnable );
   {
@@ -401,7 +401,7 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
 
-  size_t quantity = Quantity( pPosition, selectors );
+  uint32_t quantity = Quantity( pPosition, selectors );
 
   assert( selectors.m_bPositionEntryEnable );
   {

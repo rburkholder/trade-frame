@@ -45,7 +45,9 @@ add_executable(
     ${file_cpp}
   )
 
-#target_compile_options( ${PROJECT_NAME} PRIVATE -Wall -Wextra )
+# from https://www.foonathan.net/2018/10/cmake-warnings/ (-Werror turns warnings into errors)
+#target_compile_options( ${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic -Wconversion )
+#target_compile_options( ${PROJECT_NAME} PRIVATE         -Wall -Wextra -Wpedantic -Wconversion )
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 # need to figure out how to make this work

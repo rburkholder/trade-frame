@@ -277,8 +277,6 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
 
   namespace ph = std::placeholders;
 
-  using fOption_t = ou::tf::option::fOption_t;
-
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
@@ -371,7 +369,7 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
   ptime dt( trade.DateTime() );
   ou::tf::Trade::price_t price = trade.Price();
 
-  double volume = trade.Volume();
+  double volume = (double)trade.Volume();
   m_dblSumVolume += volume;
   m_dblSumVolumePrice += volume * trade.Price();
 

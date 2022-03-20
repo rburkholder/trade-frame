@@ -71,9 +71,9 @@ struct PanelOrderButtons_Order {
   double PositionExitProfitValue() const;
   double PositionExitStopValue() const;
 
-  size_t QuanStock() const;
-  size_t QuanFuture() const;
-  size_t QuanOption() const;
+  uint32_t QuanStock() const;
+  uint32_t QuanFuture() const;
+  uint32_t QuanOption() const;
 };
 
 struct PanelOrderButtons_MarketData {
