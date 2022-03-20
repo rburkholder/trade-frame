@@ -151,14 +151,64 @@ void TradeLifeTime::Cancel() {
   }
 }
 
-void TradeLifeTime::Close() {
+void TradeLifeTime::EmitStatus() {
+  std::string sStatus( "TradeLifeTime::Status:" );
+  if ( m_pOrderEntry ) {
+    sStatus
+      += " entry " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() )
+      +  " has "
+      +  boost::lexical_cast<std::string>( m_pOrderEntry->GetQuanRemaining() )
+      + " remaining of "
+      +  boost::lexical_cast<std::string>( m_pOrderEntry->GetQuanOrdered() )
+      + " ordered;"
+      ;
+  }
+  if ( m_pOrderProfit ) {
+    sStatus
+      += " profit order " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() )
+      +  " has "
+      ;
+    if ( ou::tf::OrderStatus::Created == m_pOrderProfit->OrderStatus() ) {
+      sStatus += "not be submitted";
+    }
+    else {
+      sStatus
+      += boost::lexical_cast<std::string>( m_pOrderProfit->GetQuanRemaining() )
+      + " remaining of "
+      +  boost::lexical_cast<std::string>( m_pOrderProfit->GetQuanOrdered() )
+      + " ordered;"
+      ;
+    }
+  }
+  if ( m_pOrderStop ) {
+    sStatus
+      += " stop order " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() )
+      +  " has "
+      ;
+    if ( ou::tf::OrderStatus::Created == m_pOrderProfit->OrderStatus() ) {
+      sStatus += "not be submitted";
+    }
+    else {
+    sStatus
+      += boost::lexical_cast<std::string>( m_pOrderStop->GetQuanRemaining() )
+      + " remaining of "
+      +  boost::lexical_cast<std::string>( m_pOrderStop->GetQuanOrdered() )
+      + " ordered;"
+      ;
+    }
+  }
+  std::cout << sStatus << std::endl;
+}
+
+//void TradeLifeTime::Close() {
 // determine direction, then do:
 // OrderBuy( ou::tf::PanelOrderButtons_Order() );
 // OrderSell( ou::tf::PanelOrderButtons_Order() );
 // and delete menu item
 // need to check the other orders, cancel if exists
 // no close if entry has't been established
-}
+// too complicated, simply cancel stuff, then in caller create a new LifeTime to exit position
+//}
 
 // ===== TradeWithABuy =====
 
@@ -339,10 +389,6 @@ void TradeWithABuy::HandleStopOrderFilled( const ou::tf::Order& order ) {
 
 void TradeWithABuy::Cancel() {
   TradeLifeTime::Cancel();
-}
-
-void TradeWithABuy::Close() {
-  TradeLifeTime::Close();
 }
 
 // ===== TradeWithASell =====
@@ -526,8 +572,3 @@ void TradeWithASell::HandleStopOrderFilled( const ou::tf::Order& order ) {
 void TradeWithASell::Cancel() {
   TradeLifeTime::Cancel();
 }
-
-void TradeWithASell::Close() {
-  TradeLifeTime::Close();
-}
-

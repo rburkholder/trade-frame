@@ -547,6 +547,12 @@ void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& butto
   // button disabled till semantics defined by order, some, all, ...
 }
 
+void InteractiveChart::CancelOrders() {
+  for ( mapTradeLifeTime_t::value_type& vt: m_mapTradeLifeTime ) {
+    OrderCancel( vt.first );
+  }
+}
+
 void InteractiveChart::OrderCancel( idOrder_t id ) {
   mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
   if ( m_mapTradeLifeTime.end() == iter ) {
@@ -557,13 +563,20 @@ void InteractiveChart::OrderCancel( idOrder_t id ) {
   }
 }
 
-void InteractiveChart::OrderClose( idOrder_t id ) {
+void InteractiveChart::EmitStatus() {
+  for ( mapTradeLifeTime_t::value_type& vt: m_mapTradeLifeTime ) {
+    // TODO: require a way to skip finished TradeLifeTimes
+    vt.second->EmitStatus();
+  }
+}
+
+void InteractiveChart::EmitOrderStatus( idOrder_t id ) {
   mapTradeLifeTime_t::iterator iter = m_mapTradeLifeTime.find( id );
   if ( m_mapTradeLifeTime.end() == iter ) {
-    std::cout << "OrderClose: can not find idOrder=" << id << std::endl;
+    std::cout << "OrderStatus: can not find idOrder=" << id << std::endl;
   }
   else {
-    iter->second->Close();
+    iter->second->EmitStatus();
   }
 }
 

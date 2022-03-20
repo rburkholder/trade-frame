@@ -148,8 +148,12 @@ public:
   void OrderClose( const ou::tf::PanelOrderButtons_Order& );
   void OrderCancel( const ou::tf::PanelOrderButtons_Order& );
 
-  void OrderClose( idOrder_t );
+  void CancelOrders();
+
   void OrderCancel( idOrder_t );
+  void EmitOrderStatus( idOrder_t );
+
+  void EmitStatus();
 
   void Connect();
   void Disconnect();

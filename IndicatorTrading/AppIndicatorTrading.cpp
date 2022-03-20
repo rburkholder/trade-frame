@@ -58,11 +58,14 @@ namespace {
   public:
     std::string sSymbol;
     wxMenu* pMenuPopup;
-    CustomItemData(  wxMenu* pMenuPopup_ )
+    CustomItemData( wxMenu* pMenuPopup_ )
     : pMenuPopup( pMenuPopup_ )
     {}
     CustomItemData( const std::string& sSymbol_ )
     : sSymbol( sSymbol_ ), pMenuPopup( nullptr )
+    {}
+    CustomItemData( const std::string& sSymbol_, wxMenu* pMenuPopup_ )
+    : sSymbol( sSymbol_ ), pMenuPopup( pMenuPopup_ )
     {}
     ~CustomItemData() {
       if ( nullptr != pMenuPopup ) {
@@ -313,9 +316,33 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
+  wxMenu* pMenuPopup = new wxMenu();
+
+  wxMenuItem* pMenuItem;
+
+  pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel Orders" );
+  int idPopUpCancelOrders = pMenuItem->GetId();
+  pMenuPopup->Bind(
+    wxEVT_COMMAND_MENU_SELECTED,
+    [this]( wxCommandEvent& event ){
+      m_pInteractiveChart->CancelOrders();
+    },
+    idPopUpCancelOrders
+    );
+
+  pMenuItem = pMenuPopup->Append( wxID_ANY, "Status" );
+  int idPopUpStatus = pMenuItem->GetId();
+  pMenuPopup->Bind(
+    wxEVT_COMMAND_MENU_SELECTED,
+    [this]( wxCommandEvent& event ){
+      m_pInteractiveChart->EmitStatus();
+    },
+    idPopUpStatus
+    );
+
   wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
   const std::string& sSymbol( pPosition->GetInstrument()->GetInstrumentName() );
-  wxTreeItemId tiidSymbol = m_ptreeTradables->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) ); // can use popup to cancel/close orders
+  wxTreeItemId tiidSymbol = m_ptreeTradables->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol, pMenuPopup ) ); // can use popup to cancel/close orders
 
   m_pInteractiveChart->SetPosition(
     pPosition,
@@ -349,16 +376,16 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         idPopUpCancel
         );
 
-      pMenuItem = pMenuPopup->Append( wxID_ANY, "Close" );
-      int idPopUpClose = pMenuItem->GetId();
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Status" );
+      int idPopUpStatus = pMenuItem->GetId();
       pMenuPopup->Bind(
         wxEVT_COMMAND_MENU_SELECTED,
         [this, id]( wxCommandEvent& event ){
           std::string sId( boost::lexical_cast<std::string>( id ) );
           //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
-          m_pInteractiveChart->OrderClose( id );
+          m_pInteractiveChart->EmitOrderStatus( id );
         },
-        idPopUpClose
+        idPopUpStatus
         );
 
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
