@@ -356,7 +356,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    [this,tiidSymbol]( ou::tf::Order::idOrder_t id )->InteractiveChart::pairLifeCycle_t { // fAddLifeCycle_t
+    [this,tiidSymbol]( ou::tf::Order::idOrder_t id )->InteractiveChart::LifeCycleFunctions { // fAddLifeCycle_t
 
       std::string sId( boost::lexical_cast<std::string>( id ) );
 
@@ -402,15 +402,14 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
       wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
-      return
-        InteractiveChart::pairLifeCycle_t (
+      return InteractiveChart::LifeCycleFunctions(
           [this,tiidSymbol](const std::string& s){
             m_ptreeTradables->SetItemText( tiidSymbol, s );
           },
           [this,tiidSymbol](){
             m_ptreeTradables->Delete( tiidSymbol );
-          } )
-      ;
+          }
+          );
     }
     );
 

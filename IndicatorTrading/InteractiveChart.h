@@ -86,9 +86,15 @@ public:
   using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
   using fDeleteLifeCycle_t = std::function<void()>;
 
-  using pairLifeCycle_t = std::pair<fUpdateLifeCycle_t&&,fDeleteLifeCycle_t&&>;
+  struct LifeCycleFunctions {
+    fUpdateLifeCycle_t fUpdateLifeCycle;
+    fDeleteLifeCycle_t fDeleteLifeCycle;
+    LifeCycleFunctions( fUpdateLifeCycle_t&& fUpdateLifeCycle_,fDeleteLifeCycle_t&& fDeleteLifeCycle_ )
+    : fUpdateLifeCycle( std::move( fUpdateLifeCycle_ ) ), fDeleteLifeCycle( std::move( fDeleteLifeCycle_ ) )
+    {}
+  };
 
-  using fAddLifeCycle_t = std::function<pairLifeCycle_t(idOrder_t)>;
+  using fAddLifeCycle_t = std::function<LifeCycleFunctions(idOrder_t)>;
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
