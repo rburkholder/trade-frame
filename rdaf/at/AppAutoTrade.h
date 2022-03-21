@@ -42,6 +42,7 @@ class Strategy;
 class FrameMain;
 
 class wxTreeCtrl;
+class wxTreeEvent;
 class wxSplitterWindow;
 
 namespace ou {
