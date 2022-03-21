@@ -206,8 +206,7 @@ void InteractiveChart::SetPosition(
 , const config::Options& config
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
-, fAddLifeCycle_t&& fAddLifeCycle
-, fAddExpiryToTree_t&& fAddExpiryToTree
+, fAddUnderlying_t&& fAddUnderlying
 ) {
 
   bool bConnected = m_bConnected;
@@ -216,8 +215,6 @@ void InteractiveChart::SetPosition(
   // --
 
   m_fBuildOption = std::move( fBuildOption );
-  m_fAddLifeCycle = std::move( fAddLifeCycle );
-  m_fAddExpiryToTree = std::move( fAddExpiryToTree );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
@@ -261,6 +258,15 @@ void InteractiveChart::SetPosition(
   }
   m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
   // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
+
+  SubTreesForUnderlying stfu
+    = std::move( fAddUnderlying(
+        pWatch->GetInstrumentName(),
+        [this](){
+          this->SetChartDataView( &m_dvChart );
+        } ) );
+  m_fAddLifeCycleToTree = std::move( stfu.fAddLifeCycleToTree );
+  m_fAddExpiryToTree = std::move( stfu.fAddExpiryToTree );
 
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
@@ -406,43 +412,74 @@ void InteractiveChart::CheckOptions() {
 
       double strike;
       pOption_t pOption;
+      pOptionTracker_t pOptionTracker;
 
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
       strike = chain.Call_Atm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
       strike = chain.Call_Otm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
       // put
       strike = chain.Put_Itm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
       strike = chain.Put_Atm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
       strike = chain.Put_Otm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      if ( AddOptionTracker( strike, pOption ) ) {
-        vt.second.fAddOptionToTree( pOption->GetInstrumentName() );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
       }
 
     }
@@ -450,9 +487,9 @@ void InteractiveChart::CheckOptions() {
 }
 
 // adds to mapOptionTracker if it doesn't already exist, and starts watch
-bool InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
-  bool bAdded( false );
+  pOptionTracker_t pOptionTracker;
 
   const std::string& sOptionName( pOption->GetInstrumentName() );
 
@@ -468,17 +505,16 @@ bool InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
   mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
   if ( mapOptionTracker.end() == iterOptionTracker ) {
+    pOptionTracker = std::make_shared<OptionTracker>(
+      pOption,
+      m_ceBullCall, m_ceBullPut,
+      m_ceBearCall, m_ceBearPut
+    );
     mapOptionTracker.emplace(
-      mapOptionTracker_t::value_type(
-        sOptionName,
-        OptionTracker(
-          pOption,
-          m_ceBullCall, m_ceBullPut,
-          m_ceBearCall, m_ceBearPut
-          ) ) );
-    bAdded = true;
+      mapOptionTracker_t::value_type( sOptionName, pOptionTracker )
+    );
   }
-  return bAdded;
+  return pOptionTracker;
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
@@ -495,9 +531,11 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
   m_ceVolumeUp.Append( bar );
+  m_ceVolumeDn.Append( ou::tf::Bar( bar.DateTime(), 0, 0, 0, 0, 0 ) );
 }
 
 void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
+  m_ceVolumeUp.Append( ou::tf::Bar( bar.DateTime(), 0, 0, 0, 0, 0 ) );
   m_ceVolumeDn.Append( bar );
 }
 
@@ -505,7 +543,7 @@ void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
   for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
     for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
-      tracker.second.SaveWatch( sPrefix );
+      tracker.second->SaveWatch( sPrefix );
     }
   }
 }
@@ -556,7 +594,7 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
   auto& [key,value] = *pair.first;
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
   value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
   value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }
@@ -567,7 +605,7 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
   auto& [key,value] = *pair.first;
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycle( id ) );
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
   value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
   value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }

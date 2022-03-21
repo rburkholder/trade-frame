@@ -84,6 +84,7 @@ public:
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
+
   using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
   using fDeleteLifeCycle_t = std::function<void()>;
 
@@ -95,10 +96,20 @@ public:
     {}
   };
 
-  using fAddLifeCycle_t = std::function<LifeCycleFunctions(idOrder_t)>;
-
-  using fAddOptionToTree_t = std::function<void( const std::string& )>;
+  using fOnClick_t = std::function<void()>;
+  using fAddLifeCycleToTree_t = std::function<LifeCycleFunctions(idOrder_t)>;
+  using fAddOptionToTree_t = std::function<void( const std::string&, fOnClick_t&& )>;
   using fAddExpiryToTree_t = std::function<fAddOptionToTree_t( const std::string& )>;
+
+  struct SubTreesForUnderlying {
+    fAddLifeCycleToTree_t fAddLifeCycleToTree;
+    fAddExpiryToTree_t fAddExpiryToTree;
+    SubTreesForUnderlying( fAddLifeCycleToTree_t&& fAddLifeCycleToTree_, fAddExpiryToTree_t&& fAddExpiryToTree_)
+    : fAddLifeCycleToTree( std::move( fAddLifeCycleToTree_ ) ), fAddExpiryToTree( std::move( fAddExpiryToTree_ ) )
+    {}
+  };
+
+  using fAddUnderlying_t = std::function<SubTreesForUnderlying(const std::string&, fOnClick_t&&)>; // primary start for tree hierarchy
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
@@ -124,8 +135,7 @@ public:
    , const config::Options&
    , pOptionChainQuery_t
    , fBuildOption_t&&
-   , fAddLifeCycle_t&&
-   , fAddExpiryToTree_t&&
+   , fAddUnderlying_t&&
     );
 
   void EmitChainFull() const {
@@ -316,7 +326,7 @@ private:
   vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
-  fAddLifeCycle_t m_fAddLifeCycle;
+  fAddLifeCycleToTree_t m_fAddLifeCycleToTree;
   fAddExpiryToTree_t m_fAddExpiryToTree;
 
   struct BuiltOption: public ou::tf::option::chain::OptionName {
@@ -526,6 +536,8 @@ private:
         << std::endl;
     }
 
+    ou::ChartDataView* GetDataViewChart() { return &m_dvChart; }
+
     template<typename Archive>
     void save( Archive& ar, const unsigned int version ) const {
       ar & m_volBuy;
@@ -544,7 +556,8 @@ private:
 
   // ==
 
-  using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<option name,tracker>
+  using pOptionTracker_t = std::shared_ptr<OptionTracker>;
+  using mapOptionTracker_t = std::map<std::string, pOptionTracker_t>; // map<option name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
   mapStrikes_t m_mapStrikes;
 
@@ -588,7 +601,7 @@ private:
   void PopulateChains( const query_t::OptionList& );
 
   void CheckOptions();
-  bool AddOptionTracker( double strike, pOption_t );
+  pOptionTracker_t AddOptionTracker( double strike, pOption_t );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
