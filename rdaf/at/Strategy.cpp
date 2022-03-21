@@ -21,7 +21,7 @@
 
  #include <chrono>
 
-#include <rdaf/TH3.h>
+#include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
 //#include <rdaf/TFitResult.h>
@@ -157,11 +157,10 @@ void Strategy::InitRdaf() {
   }
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
-  m_pHistVolume = std::make_shared<TH3D>(
+  m_pHistVolume = std::make_shared<TH2D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
-    m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper,
     m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
-    m_config.nVolumeBins, m_config.nVolumeLower, m_config.nVolumeUpper
+    m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
   );
   if ( !m_pHistVolume ) {
     std::cout << "problems history" << std::endl;
@@ -289,47 +288,37 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   switch ( m_stateTrade ) {
     case ETradeState::Search:
       if ( m_pHistVolume ) {
-        //input of this function is the time, which is the current time
-        //therefore we need to find a suitable range of bins along Y-axis (remember time is stored in y-axis)
-        // and find the projection of h2. the result is a 1-D hist with x-axis being price
-        // and value being volume
+        auto n = m_pHistVolume->GetEntries();
+        if ( n < 1000 ) {
+          break;
+        }
+        else {
+          std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+          nTime = (double)nTime / 1000.0;
 
-//        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-//        nTime = (double)nTime / 1000.0;
+            //find the bin that the time given belongs to:
+          Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
 
-        //find the bin that the time given belongs to:
-//        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
-
-        //if bin_y is valid and larger than 1 then proceed, else abort (since there is not enought data)
-//        if ( bin_y < 1 ) {
-//        }
-//        else {
-          //now find projection of h2 from the beginning till now:
-//          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
-
-          // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
-//          auto b = h2_x->Fit( "gaus", "S" );
-
-          //if fit is valid proceed, else abort
-//          if ( !b->IsValid() ) {
-//          }
-//          else {
-            //finally, if price is within 1 sigma from the mean, it's a good signal and go long:
-//            if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
-//              EnterLong( bar );
-//            }
-//          }
-//        }
+          if ( bin_y < 1 ) {
+            break;
+          }
+          else {
+            //now find projection of h2 from the beginning till now:
+            auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+            if ( h1_x->GetSkewness(1) > 0.1 ){
+              EnterLong( bar );
+            }
+          }
+        }
       }
       break;
     case ETradeState::LongSubmitted:
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-/*      if ( bar.Close() < ma2 ) {
-        // exit long
+      if ( 20.0 < m_pPosition->GetUnRealizedPL() ) {
         ExitLong( bar );
-      }*/
+      }
       break;
     case ETradeState::ShortSubmitted:
       // wait for order to execute
