@@ -86,7 +86,7 @@ private:
   mapStrategy_t m_mapStrategy;
 
   std::unique_ptr<TRint> m_prdafApp;
-  std::unique_ptr<TFile> m_pFile;
+  std::shared_ptr<TFile> m_pFile;
 
   void StartRdaf( const std::string& sFilePrefix );
 

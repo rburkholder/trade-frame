@@ -188,7 +188,7 @@ bool AppAutoTrade::OnInit() {
       choices.nVolumeBins, choices.nVolumeUpper, choices.nVolumeLower
       );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( config );
+    pStrategy_t pStrategy = std::make_unique<Strategy>( config, m_pFile );
     m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     if ( m_choices.bStartSimulator ) {
@@ -250,7 +250,7 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
 
-  m_pFile = std::make_unique<TFile>(
+  m_pFile = std::make_shared<TFile>(
     ( sFileName + ".root" ).c_str(),
     "RECREATE",
     "tradeframe rdaf/at quotes, trades & histogram"
@@ -312,9 +312,9 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
           "/app/rdaf/at/" +
           m_sTSDataStreamStarted + "-" +
           boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
-        if ( m_pFile ) {
-          m_pFile->Write();
-        }
+      }
+      if ( m_pFile ) {
+        m_pFile->Write();
       }
       std::cout << "  ... Done " << std::endl;
     }

@@ -37,6 +37,7 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 class TH3D;
+class TFile;
 class TTree;
 
 namespace ou {
@@ -52,6 +53,7 @@ public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pFile_t = std::shared_ptr<TFile>;
 
   struct config_t {
 
@@ -90,7 +92,8 @@ public:
 
   Strategy(
     const config_t
-    );
+  , pFile_t
+  );
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
@@ -118,12 +121,12 @@ private:
 
   ETradeState m_stateTrade;
 
-  config_t m_config;
-
-  pPosition_t m_pPosition;
-
   ou::tf::Quote m_quote;
 
+  config_t m_config;
+
+  pFile_t m_pFile;
+  pPosition_t m_pPosition;
   pOrder_t m_pOrder;
 
   ou::ChartDataView m_cdv;

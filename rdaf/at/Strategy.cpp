@@ -23,6 +23,7 @@
 
 #include <rdaf/TH3.h>
 #include <rdaf/TTree.h>
+#include <rdaf/TFile.h>
 //#include <rdaf/TFitResult.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -37,6 +38,7 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy(
   const config_t config
+, pFile_t pFile
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_stateTrade( ETradeState::Init )
@@ -49,6 +51,8 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
+  m_pFile = pFile;
+  assert( m_pFile );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -142,6 +146,7 @@ void Strategy::InitRdaf() {
   if ( !m_pTreeQuote ) {
     std::cout << "problems m_pTreeQuote" << std::endl;
   }
+  m_pTreeQuote->SetDirectory( m_pFile.get() );
 
   m_pTreeTrade = std::make_shared<TTree>(
     ( sSymbol + "-trades" ).c_str(), ( sSymbol + " trades" ).c_str()
@@ -150,6 +155,7 @@ void Strategy::InitRdaf() {
   if ( !m_pTreeTrade ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
+  m_pTreeTrade->SetDirectory( m_pFile.get() );
 
   m_pHistVolume = std::make_shared<TH3D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
@@ -160,6 +166,7 @@ void Strategy::InitRdaf() {
   if ( !m_pHistVolume ) {
     std::cout << "problems history" << std::endl;
   }
+  m_pHistVolume->SetDirectory( m_pFile.get() );
 
 }
 
