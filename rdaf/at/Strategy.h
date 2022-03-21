@@ -40,7 +40,7 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-class TH3D;
+class TH2D;
 class TRint;
 class TFile;
 class TTree;
@@ -181,7 +181,7 @@ private:
   pTTree_t m_pTreeQuote;
   pTTree_t m_pTreeTrade;
 
-  using pTH3D_t = std::shared_ptr<TH3D>;
+  using pTH3D_t = std::shared_ptr<TH2D>;
   pTH3D_t m_pHistVolume;
 
   void StartRdaf( const std::string& sFilePrefix );

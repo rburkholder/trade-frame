@@ -19,7 +19,7 @@
  * Created: March 7, 2022 14:35
  */
 
-#include <rdaf/TH3.h>
+#include <rdaf/TH2.h>
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
 #include <rdaf/TFile.h>
@@ -158,11 +158,10 @@ void Strategy::ThreadRdaf( Strategy* self, const std::string& sFilePrefix ) {
     std::cout << "problems m_pTreeTrade" << std::endl;
   }
 
-  self->m_pHistVolume = std::make_shared<TH3D>(
+  self->m_pHistVolume = std::make_shared<TH2D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
-    self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper,
     self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
-    self->m_config.nVolumeBins, self->m_config.nVolumeLower, self->m_config.nVolumeUpper
+    self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper
   );
   if ( !self->m_pHistVolume ) {
     std::cout << "problems history" << std::endl;
@@ -250,7 +249,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   }
 
   if ( m_pHistVolume ) {
-    m_pHistVolume->Fill( m_branchTrade.time, trade.Price(), trade.Volume() );
+    m_pHistVolume->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
 
 }
@@ -297,47 +296,46 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         // and find the projection of h2. the result is a 1-D hist with x-axis being price
         // and value being volume
 
-//        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-//        nTime = (double)nTime / 1000.0;
-
+        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+        nTime = (double)nTime / 1000.0;
+	if (m_pHistVolume->GetEntries() < 10000) break;
         //find the bin that the time given belongs to:
-//        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
+        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
 
         //if bin_y is valid and larger than 1 then proceed, else abort (since there is not enought data)
-//        if ( bin_y < 1 ) {
-//        }
-//        else {
+        if ( bin_y < 1 ) {
+	  break;
+        }
+        else {
           //now find projection of h2 from the beginning till now:
-//          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
 
           // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
-//          auto b = h2_x->Fit( "gaus", "S" );
+          //auto b = h2_x->Fit( "gaus", "S" );
 
           //if fit is valid proceed, else abort
-//          if ( !b->IsValid() ) {
-//          }
-//          else {
-            //finally, if price is within 1 sigma from the mean, it's a good signal and go long:
-//            if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
-//              EnterLong( bar );
-//            }
-//          }
-//        }
+          //if ( b->IsValid() ) {
+	  if (h2_x->GetSkewness(1) > 0.2){
+	    //if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
+              EnterLong( bar );
+	      //}
+          }
+        }
       }
       break;
     case ETradeState::LongSubmitted:
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-/*      if ( bar.Close() < ma2 ) {
+      if (m_pPosition->GetUnRealizedPL() > 0.25 ) {
         // exit long
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceLongExit.AddLabel( bar.DateTime(), m_dblMid, "Long Exit" );
+        m_ceLongExit.AddLabel( bar.DateTime(), m_quote.Midpoint(), "Long Exit" );
         m_stateTrade = ETradeState::ExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
-      }*/
+      }
       break;
     case ETradeState::ShortSubmitted:
       // wait for order to execute
@@ -413,6 +411,9 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  if (m_pFile){
+    m_pFile->Write();
+  }
 }
 
 void Strategy::CloseAndDone() {
