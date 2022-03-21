@@ -56,9 +56,20 @@ namespace {
 
   class CustomItemData: public wxTreeItemData {
   public:
+
+    using fOnClick_t = std::function<void()>;
+
     wxMenu* pMenuPopup;
-    CustomItemData(  wxMenu* pMenuPopup_ )
+    fOnClick_t fOnClick;
+
+    CustomItemData( wxMenu* pMenuPopup_ )
     : pMenuPopup( pMenuPopup_ )
+    {}
+    CustomItemData( fOnClick_t&& fOnClick_ )
+    : pMenuPopup( nullptr ), fOnClick( std::move( fOnClick_ ) )
+    {}
+    CustomItemData( wxMenu* pMenuPopup_, fOnClick_t&& fOnClick_ )
+    : pMenuPopup( pMenuPopup_ ), fOnClick( std::move( fOnClick_ ) )
     {}
     ~CustomItemData() {
       if ( nullptr != pMenuPopup ) {
@@ -69,7 +80,6 @@ namespace {
     }
   };
 }
-
 
 IMPLEMENT_APP(AppIndicatorTrading)
 
@@ -118,10 +128,9 @@ bool AppIndicatorTrading::OnInit() {
   m_splitterRow->SetSashGravity(0.2);
 
   // tree for viewed symbols
-  m_ptreeTradables = new wxTreeCtrl( m_splitterRow );
+  m_ptreeTradables = new wxTreeCtrl( m_splitterRow, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_HAS_BUTTONS |wxTR_TWIST_BUTTONS|wxTR_SINGLE );
   wxTreeItemId idRoot = m_ptreeTradables->AddRoot( "/", -1, -1, 0 );
   m_ptreeTradables->Bind( wxEVT_TREE_ITEM_MENU, &AppIndicatorTrading::HandleTreeEventItemMenu, this, m_ptreeTradables->GetId() );
-
 
   // panel for right side of splitter
   wxPanel* panelSplitterRight;
@@ -315,7 +324,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     pPosition,
     m_config,
     m_pOptionChainQuery,
-    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
+    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){ // fBuildOption_t
       m_pBuildInstrument->Queue(
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
@@ -323,43 +332,118 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    [this]( ou::tf::Order::idOrder_t id ){
-
-      std::string sId( boost::lexical_cast<std::string>( id ) );
-      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
+    [this](const std::string& sUnderlying, InteractiveChart::fOnClick_t&& fOnClick)->InteractiveChart::SubTreesForUnderlying { // fAddUnderlying_t
 
       wxMenu* pMenuPopup = new wxMenu();
 
       wxMenuItem* pMenuItem;
 
-      pMenuItem = pMenuPopup->Append( wxID_ANY, "Close" );
-      int idPopUpClose = pMenuItem->GetId();
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel Orders" );
+      int idPopUpCancelOrders = pMenuItem->GetId();
       pMenuPopup->Bind(
         wxEVT_COMMAND_MENU_SELECTED,
-        [this, id]( wxCommandEvent& event ){
-          std::string sId( boost::lexical_cast<std::string>( id ) );
-          //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
-          m_pInteractiveChart->OrderClose( id );
+        [this]( wxCommandEvent& event ){
+          m_pInteractiveChart->CancelOrders();
         },
-        idPopUpClose
+        idPopUpCancelOrders
         );
 
-      pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel" );
-      int idPopUpCancel = pMenuItem->GetId();
+      pMenuItem = pMenuPopup->Append( wxID_ANY, "Status" );
+      int idPopUpStatus = pMenuItem->GetId();
       pMenuPopup->Bind(
         wxEVT_COMMAND_MENU_SELECTED,
-        [this,id]( wxCommandEvent& event ){
-          std::string sId( boost::lexical_cast<std::string>( id ) );
-          //std::cout << "Cancel: " << sId << "," << event.GetId() << std::endl;
-          m_pInteractiveChart->OrderCancel( id );
+        [this]( wxCommandEvent& event ){
+          m_pInteractiveChart->EmitStatus();
         },
-        idPopUpCancel
+        idPopUpStatus
         );
 
-      wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( idRoot, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+      wxTreeItemId idRoot = m_ptreeTradables->GetRootItem();
+      wxTreeItemId tiidSymbol = m_ptreeTradables->AppendItem( idRoot, sUnderlying, -1, -1, new CustomItemData( pMenuPopup, std::move(fOnClick) ) ); // can use popup to cancel/close orders
+
+      m_ptreeTradables->Bind(
+        wxEVT_TREE_SEL_CHANGED,
+        [this]( wxTreeEvent& event ){
+          wxTreeItemData* pData = m_ptreeTradables->GetItemData( event.GetItem() );
+          if ( nullptr != pData ) {
+            CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+            if ( pCustom->fOnClick ) {
+              pCustom->fOnClick();
+            }
+          }
+        }
+        );
+
+      return InteractiveChart::SubTreesForUnderlying(
+        [this,tiidSymbol]( ou::tf::Order::idOrder_t id )->InteractiveChart::LifeCycleFunctions { // m_fAddLifeCycleToTree
+
+          std::string sId( boost::lexical_cast<std::string>( id ) );
+
+          wxMenu* pMenuPopup = new wxMenu();
+
+          wxMenuItem* pMenuItem;
+
+          pMenuItem = pMenuPopup->Append( wxID_ANY, "Cancel" );
+          int idPopUpCancel = pMenuItem->GetId();
+          pMenuPopup->Bind(
+            wxEVT_COMMAND_MENU_SELECTED,
+            [this,id]( wxCommandEvent& event ){
+              //std::string sId( boost::lexical_cast<std::string>( id ) );
+              //std::cout << "Cancel: " << sId << "," << event.GetId() << std::endl;
+              m_pInteractiveChart->OrderCancel( id );
+            },
+            idPopUpCancel
+            );
+
+          pMenuItem = pMenuPopup->Append( wxID_ANY, "Status" );
+          int idPopUpStatus = pMenuItem->GetId();
+          pMenuPopup->Bind(
+            wxEVT_COMMAND_MENU_SELECTED,
+            [this, id]( wxCommandEvent& event ){
+              //std::string sId( boost::lexical_cast<std::string>( id ) );
+              //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
+              m_pInteractiveChart->EmitOrderStatus( id );
+            },
+            idPopUpStatus
+            );
+
+          pMenuItem = pMenuPopup->Append( wxID_ANY, "Delete" );
+          int idPopUpDelete = pMenuItem->GetId();
+          pMenuPopup->Bind(
+            wxEVT_COMMAND_MENU_SELECTED,
+            [this, id]( wxCommandEvent& event ){
+              //std::string sId( boost::lexical_cast<std::string>( id ) );
+              //std::cout << "Close: " << sId << "," << event.GetId() << std::endl;
+              m_pInteractiveChart->DeleteLifeCycle( id );
+            },
+            idPopUpDelete
+            );
+
+          wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+
+          return InteractiveChart::LifeCycleFunctions(
+              [this,tiidSymbol](const std::string& s){ // fUpdateLifeCycle_t
+                m_ptreeTradables->SetItemText( tiidSymbol, s );
+              },
+              [this,tiidSymbol](){ // fDeleteLifeCycle_t
+                m_ptreeTradables->Delete( tiidSymbol );
+              }
+              );
+        },
+        [this,tiidSymbol]( const std::string& sLabel )->InteractiveChart::fAddOptionToTree_t{ // fAddExpiryToTree_t
+          wxTreeItemId tiidExpiry = m_ptreeTradables->AppendItem( tiidSymbol, sLabel, -1, -1, nullptr );
+          return
+            [this, tiidExpiry]( const std::string sOptionName, InteractiveChart::fOnClick_t&& fOnClick_ ){ // fAddOptionToTree_t
+              wxTreeItemId idOption = m_ptreeTradables->AppendItem( tiidExpiry, sOptionName, -1, -1, new CustomItemData( std::move( fOnClick_ ) ) );
+            };
+        }
+      );
 
     }
     );
+
+  m_ptreeTradables->ExpandAll();
+
   m_pInteractiveChart->Connect();
 }
 

@@ -172,6 +172,42 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
+void Strategy::EnterLong( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
+  m_stateTrade = ETradeState::LongSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
+}
+
+void Strategy::EnterShort( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
+  m_stateTrade = ETradeState::ShortSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
+}
+
+void Strategy::ExitLong( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit" );
+  m_stateTrade = ETradeState::ExitSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
+}
+
+void Strategy::ExitShort( const ou::tf::Bar& bar ) {
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit" );
+  m_stateTrade = ETradeState::ExitSubmitted;
+  m_pPosition->PlaceOrder( m_pOrder );
+}
+
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   // DailyTradeTimeFrame: Trading during regular active equity market hours
@@ -194,23 +230,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case ETradeState::Search:
 
       if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
-        // enter long
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceLongEntry.AddLabel( bar.DateTime(), m_dblMid, "Long Submit" );
-        m_stateTrade = ETradeState::LongSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
+        EnterLong( bar );
       }
       else {
         if ( ( ma1 < ma3 ) && ( ma2 < ma3 ) && ( m_dblMid < ma1 ) ) {
-          // enter short
-          m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
-          m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-          m_ceShortEntry.AddLabel( bar.DateTime(), m_dblMid, "Short Submit" );
-          m_stateTrade = ETradeState::ShortSubmitted;
-          m_pPosition->PlaceOrder( m_pOrder );
+          EnterShort( bar );
         }
       }
       break;
@@ -219,13 +243,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case ETradeState::LongExit:
       if ( bar.Close() < ma2 ) {
-        // exit long
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceLongExit.AddLabel( bar.DateTime(), m_dblMid, "Long Exit" );
-        m_stateTrade = ETradeState::ExitSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
+        ExitLong( bar );
       }
       break;
     case ETradeState::ShortSubmitted:
@@ -233,13 +251,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case ETradeState::ShortExit:
       if ( bar.Close() > ma2 ) {
-        // exit short
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceShortExit.AddLabel( bar.DateTime(), m_dblMid, "Short Exit" );
-        m_stateTrade = ETradeState::ExitSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
+        ExitShort( bar );
       }
       break;
     case ETradeState::ExitSubmitted:

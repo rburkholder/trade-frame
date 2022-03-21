@@ -228,6 +228,9 @@ void Order::MarkAsCancelled() {
   case OrderStatus::Filled:
     m_row.eOrderStatus = OrderStatus::Filled;  // this one re-affirms, as cancel was too late
     break;
+  default:
+    std::cout << "Order::MarkAsCancelled unhandled order status: " << m_row.eOrderStatus << std::endl;
+    break;
   }
   OnOrderCancelled( *this );
 }

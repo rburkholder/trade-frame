@@ -19,10 +19,6 @@
  * Created: March 7, 2022 14:35
  */
 
-#include "TFTimeSeries/DatedDatum.h"
-#include <vector>
-#include <thread>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -40,11 +36,13 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+
 class TH2D;
 class TRint;
+class TH3D;
+
 class TFile;
 class TTree;
-class TMacro;
 
 namespace ou {
   class ChartDataView;
@@ -59,6 +57,7 @@ public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pFile_t = std::shared_ptr<TFile>;
 
   struct config_t {
 
@@ -96,9 +95,9 @@ public:
   };
 
   Strategy(
-    const std::string& filename,
     const config_t
-    );
+  , pFile_t
+  );
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
@@ -112,7 +111,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, PL }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, PL, ET }; // IndMA = moving averate indicator
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -126,14 +125,12 @@ private:
 
   ETradeState m_stateTrade;
 
-  config_t m_config;
-
-  const std::string m_sFilePrefix;
-
-  pPosition_t m_pPosition;
-
   ou::tf::Quote m_quote;
 
+  config_t m_config;
+
+  pFile_t m_pFile;
+  pPosition_t m_pPosition;
   pOrder_t m_pOrder;
 
   ou::ChartDataView m_cdv;
@@ -153,6 +150,8 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
+  ou::ChartEntryIndicator m_ceExecutionTime;
+
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   // ==
@@ -171,11 +170,6 @@ private:
     int64_t direction;
   } m_branchTrade;
 
-  std::thread m_threadRdaf;
-  std::unique_ptr<TRint> m_prdafApp;
-
-  std::unique_ptr<TFile> m_pFile;
-
   // https://root.cern/doc/master/classTTree.html
   using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
@@ -184,8 +178,7 @@ private:
   using pTH3D_t = std::shared_ptr<TH2D>;
   pTH3D_t m_pHistVolume;
 
-  void StartRdaf( const std::string& sFilePrefix );
-  static void ThreadRdaf( Strategy* p, const std::string& sFilePrefix );
+  void InitRdaf();
 
   // ==
 
@@ -200,6 +193,9 @@ private:
 
   void EnterLong( const ou::tf::Bar& );
   void EnterShort( const ou::tf::Bar& );
+
+  void ExitLong( const ou::tf::Bar& );
+  void ExitShort( const ou::tf::Bar& );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

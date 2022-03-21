@@ -42,20 +42,24 @@ InteractiveChart::InteractiveChart()
 : WinChartView::WinChartView()
 , m_bConnected( false )
 , m_bOptionsReady( false )
+
+, m_dblSumVolume {}
+, m_dblSumVolumePrice {}
+
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
@@ -67,20 +71,24 @@ InteractiveChart::InteractiveChart(
 : WinChartView::WinChartView( parent, id, pos, size, style )
 , m_bConnected( false )
 , m_bOptionsReady( false )
+
+, m_dblSumVolume {}
+, m_dblSumVolumePrice {}
+
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
 , m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
 , m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
 , m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_dblSumVolume {}, m_dblSumVolumePrice {}
 {
   Init();
 }
@@ -97,7 +105,7 @@ bool InteractiveChart::Create(
 InteractiveChart::~InteractiveChart() {
   Disconnect();
   m_bfPrice.SetOnBarComplete( nullptr );
-  m_mapTradeLifeTime.clear();
+  m_mapLifeCycle.clear();
 }
 
 void InteractiveChart::Init() {
@@ -110,12 +118,11 @@ void InteractiveChart::Init() {
 
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortEntry );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongEntry );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortFill );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongFill );
-  m_dvChart.Add( EChartSlot::Price, &m_ceShortExit );
-  m_dvChart.Add( EChartSlot::Price, &m_ceLongExit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceBuySubmit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceBuyFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceSellSubmit );
+  m_dvChart.Add( EChartSlot::Price, &m_ceSellFill );
+  m_dvChart.Add( EChartSlot::Price, &m_ceCancelled );
 
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
@@ -199,7 +206,7 @@ void InteractiveChart::SetPosition(
 , const config::Options& config
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
-, fAddLifeCycle_t&& fAddLifeCycle
+, fAddUnderlying_t&& fAddUnderlying
 ) {
 
   bool bConnected = m_bConnected;
@@ -208,7 +215,6 @@ void InteractiveChart::SetPosition(
   // --
 
   m_fBuildOption = std::move( fBuildOption );
-  m_fAddLifeCycle = std::move( fAddLifeCycle );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
@@ -253,9 +259,17 @@ void InteractiveChart::SetPosition(
   m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
   // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
 
+  SubTreesForUnderlying stfu
+    = std::move( fAddUnderlying(
+        pWatch->GetInstrumentName(),
+        [this](){
+          this->SetChartDataView( &m_dvChart );
+        } ) );
+  m_fAddLifeCycleToTree = std::move( stfu.fAddLifeCycleToTree );
+  m_fAddExpiryToTree = std::move( stfu.fAddExpiryToTree );
+
   OptionChainQuery(
-    pPosition->GetInstrument()->GetInstrumentName(
-      ou::tf::Instrument::eidProvider_t::EProviderIQF)
+    pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     );
 
   // --
@@ -270,13 +284,11 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
 
   namespace ph = std::placeholders;
 
-  using fOption_t = ou::tf::option::fOption_t;
-
   switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "234", "3",
+        "cp", "", "234", "1",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
@@ -315,9 +327,10 @@ void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
   std::cout << " .. option chains built." << std::endl;
 }
 
+// started from menu after option chains have been loaded
 void InteractiveChart::ProcessChains() {
 
-  if ( 0 == m_vExpiries.size() ) {
+  if ( 0 == m_mapExpiries.size() ) {
 
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       size_t nStrikes {};
@@ -329,9 +342,13 @@ void InteractiveChart::ProcessChains() {
       } );
 
       std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
-      if ( 10 < nStrikes ) {
+      if ( 20 < nStrikes ) {
         std::cout << "chain " << vt.first << " marked" << std::endl;
-        m_vExpiries.emplace_back( vt.first );
+        auto [iter, result ] = m_mapExpiries.emplace( std::make_pair( vt.first, Expiry() ) );
+        assert( result );
+
+        // place to put the expiries on the tree
+        iter->second.fAddOptionToTree = std::move( m_fAddExpiryToTree( ou::tf::Instrument::BuildDate( vt.first ) ) );
       }
     }
 
@@ -364,7 +381,7 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
   ptime dt( trade.DateTime() );
   ou::tf::Trade::price_t price = trade.Price();
 
-  double volume = trade.Volume();
+  double volume = (double)trade.Volume();
   m_dblSumVolume += volume;
   m_dblSumVolumePrice += volume * trade.Price();
 
@@ -387,46 +404,92 @@ void InteractiveChart::CheckOptions() {
   if ( m_bOptionsReady ) {
 
     double mid( m_quote.Midpoint() );
-    for ( const vExpiries_t::value_type& expiry : m_vExpiries ) {
+    for ( const mapExpiries_t::value_type& vt : m_mapExpiries ) {
 
-      mapChains_t::iterator iterChains = m_mapChains.find( expiry );
+      mapChains_t::iterator iterChains = m_mapChains.find( vt.first );
       assert( m_mapChains.end() != iterChains );
       chain_t& chain( iterChains->second );
 
       double strike;
       pOption_t pOption;
+      pOptionTracker_t pOptionTracker;
 
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
       strike = chain.Call_Atm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
       strike = chain.Call_Otm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
       // put
       strike = chain.Put_Itm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
       strike = chain.Put_Atm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
       strike = chain.Put_Otm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      AddOptionTracker( strike, pOption );
+      pOptionTracker = AddOptionTracker( strike, pOption );
+      if ( pOptionTracker ) {
+        vt.second.fAddOptionToTree(
+          pOption->GetInstrumentName(),
+          [this,pOptionTracker](){
+            SetChartDataView( pOptionTracker->GetDataViewChart() );
+          } );
+      }
 
     }
   }
 }
 
-void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+// adds to mapOptionTracker if it doesn't already exist, and starts watch
+InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
+
+  pOptionTracker_t pOptionTracker;
 
   const std::string& sOptionName( pOption->GetInstrumentName() );
 
@@ -442,15 +505,16 @@ void InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
   mapOptionTracker_t::iterator iterOptionTracker = mapOptionTracker.find( sOptionName );
   if ( mapOptionTracker.end() == iterOptionTracker ) {
+    pOptionTracker = std::make_shared<OptionTracker>(
+      pOption,
+      m_ceBullCall, m_ceBullPut,
+      m_ceBearCall, m_ceBearPut
+    );
     mapOptionTracker.emplace(
-      mapOptionTracker_t::value_type(
-        sOptionName,
-        OptionTracker(
-          pOption,
-          m_ceBullCall, m_ceBullPut,
-          m_ceBearCall, m_ceBearPut
-          ) ) );
+      mapOptionTracker_t::value_type( sOptionName, pOptionTracker )
+    );
   }
+  return pOptionTracker;
 }
 
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
@@ -467,9 +531,11 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
   m_ceVolumeUp.Append( bar );
+  m_ceVolumeDn.Append( ou::tf::Bar( bar.DateTime(), 0, 0, 0, 0, 0 ) );
 }
 
 void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
+  m_ceVolumeUp.Append( ou::tf::Bar( bar.DateTime(), 0, 0, 0, 0, 0 ) );
   m_ceVolumeDn.Append( bar );
 }
 
@@ -477,7 +543,7 @@ void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
   for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
     for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
-      tracker.second.SaveWatch( sPrefix );
+      tracker.second->SaveWatch( sPrefix );
     }
   }
 }
@@ -523,44 +589,78 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 }
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithABuy>( m_pPosition, buttons, indicators );
+  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );
+  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+  auto& [key,value] = *pair.first;
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
+  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+  value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceLongEntry, m_ceLongFill, m_ceShortEntry, m_ceShortFill );
-  pTradeLifeTime_t pTradeLifeTime = std::make_unique<TradeWithASell>( m_pPosition, buttons, indicators );
+  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPosition, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  m_mapTradeLifeTime.emplace( std::make_pair( id, std::move( pTradeLifeTime ) ) );
-  m_fAddLifeCycle( id );
+  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+  auto& [key,value] = *pair.first;
+  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
+  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+  value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
+  // button disabled till semantics defined by order, some, all, ...
 }
 
 void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& buttons ) {
+  // button disabled till semantics defined by order, some, all, ...
 }
 
-void InteractiveChart::OrderClose( idOrder_t id ) {
-  std::cout << "need to close " << id << std::endl;
-  // determine direction, then do:
-  // OrderBuy( ou::tf::PanelOrderButtons_Order() );
-  // OrderSell( ou::tf::PanelOrderButtons_Order() );
-  // and delete menu item
-  // need to check the other orders, cancel if exists
-  // no close if entry has't been established
+void InteractiveChart::CancelOrders() {
+  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
+    OrderCancel( vt.second.pTradeLifeTime->Id() );
+  }
 }
 
 void InteractiveChart::OrderCancel( idOrder_t id ) {
-  std::cout << "need to cancel " << id << std::endl;
-  // will need to determine when a cancel is a good idea
-  // =>  when limit based entry has been established.
-  //     only cancel if entry hasn't bee established
-  //     don't cancel if waiting for one of the exits
-  //     the close, will need to perform the cancel, then the close
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
+    std::cout << "OrderCancel: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    iter->second.pTradeLifeTime->Cancel();
+  }
+}
+
+void InteractiveChart::EmitStatus() {
+  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
+    // TODO: require a way to skip finished TradeLifeTimes
+    vt.second.pTradeLifeTime->EmitStatus();
+  }
+}
+
+void InteractiveChart::EmitOrderStatus( idOrder_t id ) {
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
+    std::cout << "OrderStatus: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    iter->second.pTradeLifeTime->EmitStatus();
+  }
+}
+
+void InteractiveChart::DeleteLifeCycle( idOrder_t id ) {
+  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
+  if ( m_mapLifeCycle.end() == iter ) {
+    std::cout << "DeleteLifeCycle: can not find idOrder=" << id << std::endl;
+  }
+  else {
+    // TODO: need to perform some validation that nothing is in progress.
+    iter->second.fDeleteLifeCycle();
+    m_mapLifeCycle.erase( iter );
+  }
 }
 
 void InteractiveChart::OptionWatchStart() {

@@ -45,6 +45,9 @@ add_executable(
     ${file_cpp}
   )
 
+# from https://www.foonathan.net/2018/10/cmake-warnings/ (-Werror turns warnings into errors)
+#target_compile_options( ${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic -Wconversion )
+#target_compile_options( ${PROJECT_NAME} PRIVATE         -Wall -Wextra -Wpedantic -Wconversion )
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 # need to figure out how to make this work
@@ -53,8 +56,10 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -DWXUSINGDLL )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 
+# SYSTEM turns the include directory into a system include directory. 
+# Compilers will not issue warnings from header files originating from there.
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC
+  ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
     "/usr/local/lib/wx/include/gtk3-unicode-3.0"
     "/usr/local/include/wx-3.0"

@@ -43,6 +43,7 @@ add_executable(
     ${file_cpp}
   )
 
+#target_compile_options( ${PROJECT_NAME} PRIVATE         -Wall -Wextra -Wpedantic -Wconversion )
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 # need to figure out how to make this work
@@ -52,7 +53,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -DWXUSINGDLL )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC
+  ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
     "/usr/local/lib/wx/include/gtk3-unicode-3.0"
     "/usr/local/include/wx-3.0"

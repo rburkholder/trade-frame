@@ -42,23 +42,35 @@ public:
     ou::ChartEntryShape& ceBuyFill;
     ou::ChartEntryShape& ceSellSubmit;
     ou::ChartEntryShape& ceSellFill;
+    ou::ChartEntryShape& ceCancelled;
     Indicators(
         ou::ChartEntryShape& ceBuySubmit_
       , ou::ChartEntryShape& ceBuyFill_
       , ou::ChartEntryShape& ceSellSubmit_
       , ou::ChartEntryShape& ceSellFill_
+      , ou::ChartEntryShape& ceCancelled_
     )
-    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ ),
-      ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
+    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ )
+    ,  ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
+    ,  ceCancelled( ceCancelled_ )
     {}
   };
 
-  TradeLifeTime( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeLifeTime( pPosition_t, Indicators& );
   TradeLifeTime( TradeLifeTime&& ) = delete;
   TradeLifeTime( const TradeLifeTime& ) = delete;
   virtual ~TradeLifeTime();
 
   ou::tf::Order::idOrder_t Id() const { return m_pOrderEntry->GetOrderId(); }
+
+  virtual void Cancel();
+  virtual void EmitStatus();
+  //virtual void Close();  // doesn't make sense here, too many moving parts
+
+  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
+  void SetUpdateLifeCycle( fUpdateLifeCycle_t&& f ) {
+    m_fUpdateLifeCycle = std::move( f );
+  }
 
 protected:
 
@@ -79,22 +91,25 @@ protected:
 
   pPosition_t m_pPosition;
 
+  fUpdateLifeCycle_t m_fUpdateLifeCycle;
+
   ou::tf::Quote m_quote;
 
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderEntry;
   pOrder_t m_pOrderStop;
 
+  bool m_bWatching;
+  bool m_bWatchStop;
+
+  double m_dblStopCurrent;
+  double m_dblStopTrailDelta;
+
   ou::ChartEntryShape& m_ceBuySubmit;
   ou::ChartEntryShape& m_ceBuyFill;
   ou::ChartEntryShape& m_ceSellSubmit;
   ou::ChartEntryShape& m_ceSellFill;
-
-  bool m_bWatching;
-  bool m_bWatchStop;
-
-  double m_dblStopTrailDelta;
-  double m_dblStopCurrent;
+  ou::ChartEntryShape& m_ceCancelled;
 
   void StartWatch();
   void StopWatch();
@@ -104,11 +119,10 @@ protected:
   double PriceInterval( double price ) const;
   double NormalizePrice( double price ) const;
 
+  uint32_t Quantity( pPosition_t, const ou::tf::PanelOrderButtons_Order& ) const;
+
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
-
-  virtual void Cancel() {}
-  virtual void Close() {}
 
 private:
 
@@ -116,7 +130,7 @@ private:
 
 };
 
-// =====
+// ===== TradeWithABuy
 
 class TradeWithABuy: public TradeLifeTime {
 public:
@@ -124,7 +138,7 @@ public:
   virtual ~TradeWithABuy();
 
   virtual void Cancel();
-  virtual void Close();
+
 protected:
 
   virtual void HandleQuote( const ou::tf::Quote& );
@@ -140,7 +154,7 @@ private:
   void HandleStopOrderFilled( const ou::tf::Order& );
 };
 
-// =====
+// ===== TradeWithASell
 
 class TradeWithASell: public TradeLifeTime {
 public:
@@ -148,7 +162,7 @@ public:
   virtual ~TradeWithASell();
 
   virtual void Cancel();
-  virtual void Close();
+
 protected:
 
   virtual void HandleQuote( const ou::tf::Quote& );

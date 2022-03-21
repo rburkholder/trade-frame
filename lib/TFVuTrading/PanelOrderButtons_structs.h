@@ -35,6 +35,10 @@ struct PanelOrderButtons_Order {
 
   bool m_bCockForCursor;
 
+  std::string m_sQuanStock;
+  std::string m_sQuanFuture;
+  std::string m_sQuanOption;
+
   bool m_bPositionEntryEnable;
   std::string m_sPositionEntryValue;
   EPositionEntryMethod m_ePositionEntryMethod;
@@ -60,11 +64,16 @@ struct PanelOrderButtons_Order {
   , m_bPositionExitStopEnable( false ), m_ePositionExitStopMethod( EPositionExitStopMethod::TrailingAbsolute )
   , m_eInstrument( EInstrument::Underlying )
   , m_bStochastic1( false ), m_bStochastic2( false ), m_bStochastic3( false )
+  , m_sQuanStock( "100" ), m_sQuanFuture( "1" ), m_sQuanOption( "1" ) // needs to match prefilled gui fields
   {}
 
   double PositionEntryValue() const;
   double PositionExitProfitValue() const;
   double PositionExitStopValue() const;
+
+  uint32_t QuanStock() const;
+  uint32_t QuanFuture() const;
+  uint32_t QuanOption() const;
 };
 
 struct PanelOrderButtons_MarketData {

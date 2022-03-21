@@ -32,6 +32,10 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 
+#include <rdaf/TRint.h>
+#include <rdaf/TROOT.h>
+#include <rdaf/TFile.h>
+
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/BuildInstrument.h>
@@ -170,6 +174,8 @@ bool AppAutoTrade::OnInit() {
     }
   }
 
+  StartRdaf( "rdaf/at/" + m_sTSDataStreamStarted );
+
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol, choices] = vt;
@@ -182,7 +188,7 @@ bool AppAutoTrade::OnInit() {
       choices.nVolumeBins, choices.nVolumeUpper, choices.nVolumeLower
       );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( "rdaf/at/" + m_sTSDataStreamStarted, config );
+    pStrategy_t pStrategy = std::make_unique<Strategy>( config, m_pFile );
     m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     if ( m_choices.bStartSimulator ) {
@@ -235,6 +241,32 @@ bool AppAutoTrade::OnInit() {
   return 1;
 }
 
+void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
+
+  int argc {};
+  char** argv = nullptr;
+
+  m_prdafApp = std::make_unique<TRint>( "rdaf_at", &argc, argv );
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT();
+
+  m_pFile = std::make_shared<TFile>(
+    ( sFileName + ".root" ).c_str(),
+    "RECREATE",
+    "tradeframe rdaf/at quotes, trades & histogram"
+  );
+
+  //m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
+
+  // example charting code in live analysis mode
+  //TCanvas* c = new TCanvas("c", "Something", 0, 0, 800, 600);
+  //TF1 *f1 = new TF1("f1","sin(x)", -5, 5);
+  //f1->SetLineColor(kBlue+1);
+  //f1->SetTitle("My graph;x; sin(x)");
+  //f1->Draw();
+  //c->Modified(); c->Update();
+}
+
 void AppAutoTrade::HandleTreeEventItemMenu( wxTreeEvent& event ) {
   wxTreeItemData* pData = m_treeSymbols->GetItemData( event.GetItem() );
   //if ( nullptr != pData ) {
@@ -280,6 +312,9 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
           "/app/rdaf/at/" +
           m_sTSDataStreamStarted + "-" +
           boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      }
+      if ( m_pFile ) {
+        m_pFile->Write();
       }
       std::cout << "  ... Done " << std::endl;
     }

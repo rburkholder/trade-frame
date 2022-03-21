@@ -89,6 +89,7 @@ private:
   , ID_CB_PositionEntry
   , ID_CB_PositionExitProfit
   , ID_CB_PositionExitStop
+  , ID_TXT_QuanStock, ID_TXT_QuanFuture, ID_TXT_QuanOption
   , ID_TXT_PositionEntry
   , ID_TXT_PositionExitProfit
   , ID_TXT_PositionExitStop
@@ -108,6 +109,9 @@ private:
   PanelOrderButtons_MarketData m_data;
 
     wxCheckBox* m_cbCockForCursor;
+    wxTextCtrl* m_txtQuanStock;
+    wxTextCtrl* m_txtQuanFuture;
+    wxTextCtrl* m_txtQuanOption;
     wxCheckBox* m_cbEnablePositionEntry;
     wxTextCtrl* m_txtPricePositionEntry;
     wxRadioBox* m_radioPositionEntry;
@@ -158,6 +162,15 @@ private:
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_CockForCursor
     void OnCBCockForCursorClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_QuanStock
+    void OnTXTQuanStockTextUpdated( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_QuanFuture
+    void OnTXTQuanFutureTextUpdated( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_QuanOption
+    void OnTXTQuanOptionTextUpdated( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_PositionEntry
     void OnCBPositionEntryClick( wxCommandEvent& event );

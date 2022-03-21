@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <OUCommon/Colour.h>
 #include <functional>
 
 #include <boost/serialization/version.hpp>
@@ -83,7 +84,32 @@ public:
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
-  using fAddLifeCycle_t = std::function<void(idOrder_t)>;
+
+  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
+  using fDeleteLifeCycle_t = std::function<void()>;
+
+  struct LifeCycleFunctions {
+    fUpdateLifeCycle_t fUpdateLifeCycle;
+    fDeleteLifeCycle_t fDeleteLifeCycle;
+    LifeCycleFunctions( fUpdateLifeCycle_t&& fUpdateLifeCycle_,fDeleteLifeCycle_t&& fDeleteLifeCycle_ )
+    : fUpdateLifeCycle( std::move( fUpdateLifeCycle_ ) ), fDeleteLifeCycle( std::move( fDeleteLifeCycle_ ) )
+    {}
+  };
+
+  using fOnClick_t = std::function<void()>;
+  using fAddLifeCycleToTree_t = std::function<LifeCycleFunctions(idOrder_t)>;
+  using fAddOptionToTree_t = std::function<void( const std::string&, fOnClick_t&& )>;
+  using fAddExpiryToTree_t = std::function<fAddOptionToTree_t( const std::string& )>;
+
+  struct SubTreesForUnderlying {
+    fAddLifeCycleToTree_t fAddLifeCycleToTree;
+    fAddExpiryToTree_t fAddExpiryToTree;
+    SubTreesForUnderlying( fAddLifeCycleToTree_t&& fAddLifeCycleToTree_, fAddExpiryToTree_t&& fAddExpiryToTree_)
+    : fAddLifeCycleToTree( std::move( fAddLifeCycleToTree_ ) ), fAddExpiryToTree( std::move( fAddExpiryToTree_ ) )
+    {}
+  };
+
+  using fAddUnderlying_t = std::function<SubTreesForUnderlying(const std::string&, fOnClick_t&&)>; // primary start for tree hierarchy
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
@@ -105,11 +131,11 @@ public:
   virtual ~InteractiveChart();
 
   void SetPosition(
-    pPosition_t
+     pPosition_t
    , const config::Options&
    , pOptionChainQuery_t
    , fBuildOption_t&&
-   , fAddLifeCycle_t&&
+   , fAddUnderlying_t&&
     );
 
   void EmitChainFull() const {
@@ -148,8 +174,13 @@ public:
   void OrderClose( const ou::tf::PanelOrderButtons_Order& );
   void OrderCancel( const ou::tf::PanelOrderButtons_Order& );
 
-  void OrderClose( idOrder_t );
+  void CancelOrders();
+
   void OrderCancel( idOrder_t );
+  void EmitOrderStatus( idOrder_t );
+  void DeleteLifeCycle( idOrder_t );
+
+  void EmitStatus();
 
   void Connect();
   void Disconnect();
@@ -163,14 +194,15 @@ private:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   bool m_bConnected;
+  bool m_bOptionsReady;
 
   ou::ChartDataView m_dvChart; // the data
 
   pOrder_t m_pOrder;
   pPosition_t m_pPosition;
 
-  double m_dblSumVolumePrice; // part of vwap
   double m_dblSumVolume; // part of vwap
+  double m_dblSumVolumePrice; // part of vwap
 
   ou::tf::BarFactory m_bfPrice;
   ou::tf::BarFactory m_bfPriceUp;
@@ -189,12 +221,11 @@ private:
   ou::ChartEntryIndicator m_ceQuoteBid;
   ou::ChartEntryIndicator m_ceQuoteSpread;
 
-  ou::ChartEntryShape m_ceLongEntry;
-  ou::ChartEntryShape m_ceShortEntry;
-  ou::ChartEntryShape m_ceLongFill;
-  ou::ChartEntryShape m_ceShortFill;
-  ou::ChartEntryShape m_ceLongExit;
-  ou::ChartEntryShape m_ceShortExit;
+  ou::ChartEntryShape m_ceBuySubmit;
+  ou::ChartEntryShape m_ceBuyFill;
+  ou::ChartEntryShape m_ceSellSubmit;
+  ou::ChartEntryShape m_ceSellFill;
+  ou::ChartEntryShape m_ceCancelled;
 
   ou::ChartEntryShape m_ceBullCall;
   ou::ChartEntryShape m_ceBullPut;
@@ -295,7 +326,8 @@ private:
   vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
-  fAddLifeCycle_t m_fAddLifeCycle;
+  fAddLifeCycleToTree_t m_fAddLifeCycleToTree;
+  fAddExpiryToTree_t m_fAddExpiryToTree;
 
   struct BuiltOption: public ou::tf::option::chain::OptionName {
     pOption_t pOption;
@@ -307,8 +339,11 @@ private:
 
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
-  using vExpiries_t = std::vector<boost::gregorian::date>; // usable chains
-  vExpiries_t m_vExpiries; // possibly change this to a map of iterators
+  struct Expiry {
+    fAddOptionToTree_t fAddOptionToTree;
+  };
+  using mapExpiries_t = std::map<boost::gregorian::date,Expiry>; // usable chains
+  mapExpiries_t m_mapExpiries; // possibly change this to a map of iterators
 
   // ==
 
@@ -316,17 +351,29 @@ private:
 
     bool m_bActive;
     pOption_t m_pOption;
-    size_t m_volBuy;
-    size_t m_volSell;
+    ou::tf::Trade::volume_t m_volBuy;
+    ou::tf::Trade::volume_t m_volSell;
 
     ou::ChartEntryShape& m_ceBullCall;
     ou::ChartEntryShape& m_ceBullPut;
     ou::ChartEntryShape& m_ceBearCall;
     ou::ChartEntryShape& m_ceBearPut;
 
+    ou::ChartEntryIndicator m_ceTrade;
+
+    ou::ChartEntryVolume m_ceVolumeUp;
+    ou::ChartEntryVolume m_ceVolumeDn;
+
+    ou::ChartEntryIndicator m_ceQuoteAsk;
+    ou::ChartEntryIndicator m_ceQuoteBid;
+
+    ou::ChartDataView m_dvChart; // the data
+
     void Add() {
+
       if ( !m_bActive ) {
         m_bActive = true;
+        m_pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
         switch ( m_pOption->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
             m_pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
@@ -338,12 +385,32 @@ private:
             assert( false );
             break;
         }
+
+        m_ceTrade.SetColour( ou::Colour::Green );
+        m_ceTrade.SetName( "Tick" );
+        m_ceQuoteAsk.SetColour( ou::Colour::Red );
+        m_ceQuoteAsk.SetName( "Ask" );
+        m_ceQuoteBid.SetColour( ou::Colour::Blue );
+        m_ceQuoteBid.SetName( "Bid" );
+        m_ceVolumeUp.SetColour( ou::Colour::Green );
+        m_ceVolumeUp.SetName( "Buy" );
+        m_ceVolumeDn.SetColour( ou::Colour::Red );
+        m_ceVolumeDn.SetName( "Sell" );
+
+        m_dvChart.Add( 0, &m_ceQuoteAsk );
+        m_dvChart.Add( 0, &m_ceQuoteBid );
+        m_dvChart.Add( 0, &m_ceTrade );
+        m_dvChart.Add( 1, &m_ceVolumeUp );
+        m_dvChart.Add( 1, &m_ceVolumeDn );
+
         m_pOption->StartWatch();
       }
     }
+
     void Del() {
       if ( m_bActive ) {
         m_pOption->StopWatch();
+        m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionTracker::HandleQuote ) );
         switch ( m_pOption->GetOptionSide() ) {
           case ou::tf::OptionSide::Call:
             m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
@@ -399,23 +466,31 @@ private:
     }
 
     void HandleQuote( const ou::tf::Quote& quote ) {
+      m_ceQuoteAsk.Append( quote.DateTime(), quote.Ask() );
+      m_ceQuoteBid.Append( quote.DateTime(), quote.Bid() );
     }
 
     void HandleTradeCall( const ou::tf::Trade& trade ) {
       const double price = trade.Price();
       const ou::tf::Quote& quote( m_pOption->LastQuote() );
       const double mid = quote.Midpoint();
+      m_ceTrade.Append( trade.DateTime(), price );
       if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
       }
       else {
+        ou::tf::Trade::volume_t volume = trade.Volume();
         if ( price > mid ) {
-          m_volBuy += trade.Volume();
+          m_volBuy += volume;
           m_ceBullCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
+          m_ceVolumeUp.Append( trade.DateTime(), volume );
+          m_ceVolumeDn.Append( trade.DateTime(), 0 );
         }
         else {
-          m_volSell += trade.Volume();
+          m_volSell += volume;
           m_ceBearCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
+          m_ceVolumeUp.Append( trade.DateTime(), 0 );
+          m_ceVolumeDn.Append( trade.DateTime(), volume );
         }
       }
     }
@@ -424,17 +499,23 @@ private:
       const double price = trade.Price();
       const ou::tf::Quote& quote( m_pOption->LastQuote() );
       const double mid = quote.Midpoint();
+      m_ceTrade.Append( trade.DateTime(), price );
       if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
         // can't really say, will need to check if bid came to ask or ask came to bid
       }
       else {
+        ou::tf::Trade::volume_t volume = trade.Volume();
         if ( price > mid ) {
-          m_volBuy += trade.Volume();
+          m_volBuy += volume;
           m_ceBearPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
+          m_ceVolumeUp.Append( trade.DateTime(), volume );
+          m_ceVolumeDn.Append( trade.DateTime(), 0 );
         }
         else {
-          m_volSell += trade.Volume();
+          m_volSell += volume;
           m_ceBullPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
+          m_ceVolumeUp.Append( trade.DateTime(), 0 );
+          m_ceVolumeDn.Append( trade.DateTime(), volume );
         }
       }
     }
@@ -455,6 +536,8 @@ private:
         << std::endl;
     }
 
+    ou::ChartDataView* GetDataViewChart() { return &m_dvChart; }
+
     template<typename Archive>
     void save( Archive& ar, const unsigned int version ) const {
       ar & m_volBuy;
@@ -473,9 +556,8 @@ private:
 
   // ==
 
-  bool m_bOptionsReady;
-
-  using mapOptionTracker_t = std::map<std::string,OptionTracker>; // map<name,tracker>
+  using pOptionTracker_t = std::shared_ptr<OptionTracker>;
+  using mapOptionTracker_t = std::map<std::string, pOptionTracker_t>; // map<option name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
   mapStrikes_t m_mapStrikes;
 
@@ -484,9 +566,18 @@ private:
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
-  using pTradeLifeTime_t = std::unique_ptr<TradeLifeTime>;
-  using mapTradeLifeTime_t = std::map<idOrder_t,pTradeLifeTime_t>;
-  mapTradeLifeTime_t m_mapTradeLifeTime;
+  using pTradeLifeTime_t = std::shared_ptr<TradeLifeTime>;
+
+  struct LifeCycle {
+    pTradeLifeTime_t pTradeLifeTime;
+    fDeleteLifeCycle_t fDeleteLifeCycle;
+    LifeCycle( pTradeLifeTime_t pTradeLifeTime_ )
+    : pTradeLifeTime( pTradeLifeTime_ )
+    {}
+  };
+
+  using mapLifeCycle_t = std::map<idOrder_t,LifeCycle>;
+  mapLifeCycle_t m_mapLifeCycle;
 
   void Init();
 
@@ -510,7 +601,7 @@ private:
   void PopulateChains( const query_t::OptionList& );
 
   void CheckOptions();
-  void AddOptionTracker( double strike, pOption_t );
+  pOptionTracker_t AddOptionTracker( double strike, pOption_t );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

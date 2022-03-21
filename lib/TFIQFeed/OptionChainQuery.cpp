@@ -326,6 +326,9 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
                   }
                   break;
+                case PreRoll::ECmd::S:
+                  // ignore the response, simply an echo of version, maybe validate sometime
+                  break;
               }
               break;
             case PreRoll::EExtra::V62:

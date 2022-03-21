@@ -50,21 +50,21 @@ public:
   void InitForUSEquityExchanges( boost::gregorian::date ); // can be used by simulation
   void InitForUS24HourFutures( boost::gregorian::date );
 
-  void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; };
-  void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; };
-  void SetStartTrading( boost::posix_time::ptime dtStartTrading ) { m_dtStartTrading = dtStartTrading; };
-  void SetCancellation( boost::posix_time::ptime dtTimeForCancellation ) { m_dtTimeForCancellation = dtTimeForCancellation; };
-  void SetGoNeutral( boost::posix_time::ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; };
-  void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; };
-  void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };
+  void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
+  void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; }
+  void SetStartTrading( boost::posix_time::ptime dtStartTrading ) { m_dtStartTrading = dtStartTrading; }
+  void SetCancellation( boost::posix_time::ptime dtTimeForCancellation ) { m_dtTimeForCancellation = dtTimeForCancellation; }
+  void SetGoNeutral( boost::posix_time::ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; }
+  void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; }
+  void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; }
 
-  boost::posix_time::ptime GetMarketOpen( void ) const { return m_dtMarketOpen; };
-  boost::posix_time::ptime GetRegularHoursOpen( void ) const { return m_dtRHOpen; };
-  boost::posix_time::ptime GetStartTrading( void ) const { return m_dtStartTrading; };
-  boost::posix_time::ptime GetCancellation( void ) const { return m_dtTimeForCancellation; };
-  boost::posix_time::ptime GetGoNeutral( void ) const { return m_dtGoNeutral; };
-  boost::posix_time::ptime GetRegularHoursClose( void ) const { return m_dtRHClose; };
-  boost::posix_time::ptime GetMarketClose( void ) const { return m_dtMarketClose; };
+  boost::posix_time::ptime GetMarketOpen( void ) const { return m_dtMarketOpen; }
+  boost::posix_time::ptime GetRegularHoursOpen( void ) const { return m_dtRHOpen; }
+  boost::posix_time::ptime GetStartTrading( void ) const { return m_dtStartTrading; }
+  boost::posix_time::ptime GetCancellation( void ) const { return m_dtTimeForCancellation; }
+  boost::posix_time::ptime GetGoNeutral( void ) const { return m_dtGoNeutral; }
+  boost::posix_time::ptime GetRegularHoursClose( void ) const { return m_dtRHClose; }
+  boost::posix_time::ptime GetMarketClose( void ) const { return m_dtMarketClose; }
 
 protected:
 
@@ -73,16 +73,16 @@ protected:
   TimeFrame CurrentTimeFrame() const { return m_stateTimeFrame; }
 
   // per type
-  template<typename DD> void HandleCommon( const DD& dd ) {};
-  template<typename DD> void HandleRHTrading( const DD& dd ) {};
-  template<typename DD> void HandlePauseForQuotes( const DD& dd ) {};
-  template<typename DD> void HandleCancelling( const DD& dd ) {};
-  template<typename DD> void HandleGoingNeutral( const DD& dd ) {};
-  template<typename DD> void HandlePreOpen( const DD& dd ) {};
-  template<typename DD> void HandleWaitForRHClose( const DD& dd ) {};
-  template<typename DD> void HandleAfterRH( const DD& dd ) {};
-  template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
-  template<typename DD> void HandleMarketClosed( const DD& dd ) {};
+  template<typename DD> void HandleCommon( const DD& dd ) {}
+  template<typename DD> void HandleRHTrading( const DD& dd ) {}
+  template<typename DD> void HandlePauseForQuotes( const DD& dd ) {}
+  template<typename DD> void HandleCancelling( const DD& dd ) {}
+  template<typename DD> void HandleGoingNeutral( const DD& dd ) {}
+  template<typename DD> void HandlePreOpen( const DD& dd ) {}
+  template<typename DD> void HandleWaitForRHClose( const DD& dd ) {}
+  template<typename DD> void HandleAfterRH( const DD& dd ) {}
+  template<typename DD> void HandleEndOfMarket( const DD& dd ) {}
+  template<typename DD> void HandleMarketClosed( const DD& dd ) {}
 
   // event change one shots
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}

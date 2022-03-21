@@ -195,7 +195,6 @@ public:
     return m_pInstrument;
   };
   const char *GetOrderSideName() const { return OrderSide::Name[ m_row.eOrderSide ]; };
-  boost::uint32_t GetQuantity() const { return m_row.nOrderQuantity; };
   OrderType::enumOrderType GetOrderType() const { return m_row.eOrderType; };
   OrderSide::enumOrderSide GetOrderSide() const { return m_row.eOrderSide; };
   double GetPrice1() const { return m_row.dblPrice1; };  // need to validate this on creation
@@ -233,6 +232,8 @@ public:
   ou::Delegate<const Order&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const Order&> OnOrderFilled; // on final fill
   ou::Delegate<const Order&> OnCommission;
+
+  OrderStatus::enumOrderStatus OrderStatus() const { return m_row.eOrderStatus; }
 
   const TableRowDef& GetRow() const { return m_row; };
 

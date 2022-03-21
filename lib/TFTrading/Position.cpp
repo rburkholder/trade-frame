@@ -291,7 +291,7 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
 
   if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
 
-  m_row.nPositionPending += pOrder->GetQuantity();
+  m_row.nPositionPending += pOrder->GetQuanOrdered();
   const auto id = pOrder->GetOrderId();
   if ( 0 == std::count_if(
     m_vAllOrders.begin(), m_vAllOrders.end(),  // this may not be efficient for large order lists, maybe use a map sometime

@@ -52,3 +52,11 @@ Some contrary comments on ROOT (from the cint days, not the recent cling):
 
   }
 ```
+
+The following can be used to examine data offline - it invokes the browser:
+
+```
+$ /usr/local/bin/rdaf/root
+root [0] TBrowser b
+(TBrowser &) Name: Browser Title: ROOT Object Browser
+```
