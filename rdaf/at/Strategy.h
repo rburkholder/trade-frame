@@ -107,7 +107,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, PL, ET }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, Skew, PL, ET }; // IndMA = moving averate indicator
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -147,6 +147,7 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
+  ou::ChartEntryIndicator m_ceSkewness;
   ou::ChartEntryIndicator m_ceExecutionTime;
 
   ou::tf::BarFactory m_bfQuotes01Sec;

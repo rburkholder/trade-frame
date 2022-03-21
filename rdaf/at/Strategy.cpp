@@ -64,6 +64,8 @@ Strategy::Strategy(
 
   m_ceVolume.SetName( "Volume" );
 
+  m_ceSkewness.SetName( "Skew" );
+
   m_ceProfitLoss.SetName( "P/L" );
 
   m_ceExecutionTime.SetName( "Execution Time" );
@@ -97,6 +99,8 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
@@ -305,9 +309,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           else {
             //now find projection of h2 from the beginning till now:
             auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
-            if ( h1_x->GetSkewness(1) > 0.1 ){
+            auto skew = h1_x->GetSkewness( 1 );
+            if ( skew > 0.1 ){
               EnterLong( bar );
             }
+            m_ceSkewness.Append( bar.DateTime(), skew );
           }
         }
       }
