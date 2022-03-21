@@ -150,7 +150,7 @@ Instrument::Instrument( idInstrument_cref idInstrument )
 // equity / generic creation
 Instrument::Instrument(
   idInstrument_cref idInstrument,
-  InstrumentType::enumInstrumentType eType,
+  InstrumentType::EInstrumentType eType,
   const idExchange_t &idExchange
 )
 : m_row( idInstrument, eType, idExchange ),
@@ -161,7 +161,7 @@ Instrument::Instrument(
  // future
 Instrument::Instrument(
   idInstrument_cref idInstrument,
-  InstrumentType::enumInstrumentType eType,
+  InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day )
 : m_row( idInstrument, eType, idExchange, year, month, day ),
@@ -176,7 +176,7 @@ Instrument::Instrument(
  // option yymm // TODO: get this removed
 Instrument::Instrument(
   idInstrument_cref idInstrument,
-  InstrumentType::enumInstrumentType eType,
+  InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
 //  pInstrument_t pUnderlying,
@@ -200,7 +200,7 @@ Instrument::Instrument(
  // option yymmdd
 Instrument::Instrument(
   idInstrument_cref idInstrument,
-  InstrumentType::enumInstrumentType eType,
+  InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //  pInstrument_t pUnderlying,
@@ -225,7 +225,7 @@ Instrument::Instrument(
 Instrument::Instrument(
   const idInstrument_t& idInstrument,
 //                       const idInstrument_t& idCounterInstrument,
-  InstrumentType::enumInstrumentType eType,
+  InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   Currency::enumCurrency base,
   Currency::enumCurrency counter

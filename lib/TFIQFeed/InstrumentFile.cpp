@@ -136,7 +136,7 @@ Instrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std:
 
         Instrument::pInstrument_t pUnderlying( CreateInstrumentFromIQFeed( sUnderlying ) );
         Instrument::pInstrument_t pInstrument( new Instrument( sIQFeedSymbolName, 
-          (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          (InstrumentType::EInstrumentTypes) rec.eInstrumentType, 
           sExchange, 
           rec.nYear, rec.nMonth,
           pUnderlying, 
@@ -147,7 +147,7 @@ Instrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std:
       break;
     case InstrumentType::Future: {
          Instrument::pInstrument_t pInstrument( 
-           new Instrument( sIQFeedSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, sExchange, rec.nYear, rec.nMonth ) );
+           new Instrument( sIQFeedSymbolName, (InstrumentType::EInstrumentTypes) rec.eInstrumentType, sExchange, rec.nYear, rec.nMonth ) );
          return pInstrument;
        }
       break;
@@ -170,7 +170,7 @@ Instrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std:
         u_int32_t len = e - p;
         std::string sUnderlying( rec.line + rec.ix[1], len );
         Instrument::pInstrument_t pInstrument( new Instrument( sIQFeedSymbolName, 
-          (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          (InstrumentType::EInstrumentTypes) rec.eInstrumentType, 
           sExchange, 
           rec.nYear, rec.nMonth, rec.nDay,
           pUnderlying, 
