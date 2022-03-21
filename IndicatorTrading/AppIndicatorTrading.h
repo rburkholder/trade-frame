@@ -88,6 +88,7 @@ private:
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -118,6 +119,7 @@ private:
 
   void StartChainQuery();
   void ConstructInstrument();
+  void ConfigureInstrument( pInstrument_t );
   void SetInteractiveChart( pPosition_t );
 
   void SaveState();

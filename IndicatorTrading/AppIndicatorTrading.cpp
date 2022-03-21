@@ -248,11 +248,9 @@ void AppIndicatorTrading::StartChainQuery() {
 
 void AppIndicatorTrading::ConstructInstrument() {
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 
-  if ( '#' == m_config.sSymbol.back() ) {
+  if ( '#' == m_config.sSymbol.back() ) { // assumes a general future, and need to find actual symbol
     m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
     m_pBuildInstrumentIQFeed->Queue(
       m_config.sSymbol,
@@ -272,28 +270,7 @@ void AppIndicatorTrading::ConstructInstrument() {
 
                   std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                   if ( expiry == pInstrument->GetExpiry() ) {
-
-                    pPosition_t pPosition;
-
-                    const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-                    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-
-                    if ( pm.PositionExists( "USD", idInstrument ) ) {
-                      pPosition = pm.GetPosition( "USD", idInstrument );
-                      std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-                    }
-                    else {
-                      using pWatch_t = ou::tf::Watch::pWatch_t;
-                      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-                      pPosition = pm.ConstructPosition(
-                        "USD", idInstrument, "manual",
-                        "ib01", "iq01", m_pExecutionProvider,
-                        pWatch
-                      );
-                      std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-                    }
-
-                    SetInteractiveChart( pPosition );
+                    ConfigureInstrument( pInstrument );
                   }
                 } );
             }
@@ -306,14 +283,34 @@ void AppIndicatorTrading::ConstructInstrument() {
     m_pBuildInstrument->Queue(
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
-
-        using pWatch_t = ou::tf::Watch::pWatch_t;
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-
-        SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+        ConfigureInstrument( pInstrument );
       } );
   }
+}
 
+void AppIndicatorTrading::ConfigureInstrument( pInstrument_t pInstrument ) {
+
+  pPosition_t pPosition;
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PositionExists( "USD", idInstrument ) ) {
+    pPosition = pm.GetPosition( "USD", idInstrument );
+    std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+  else {
+    using pWatch_t = ou::tf::Watch::pWatch_t;
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+    pPosition = pm.ConstructPosition(
+      "USD", idInstrument, "manual",
+      "ib01", "iq01", m_pExecutionProvider,
+      pWatch
+    );
+    std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+
+  SetInteractiveChart( pPosition );
 }
 
 void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
@@ -329,6 +326,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
           fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+          // TODO: need to register in database
         }
       );
     },
