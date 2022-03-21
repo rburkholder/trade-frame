@@ -264,8 +264,8 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit" );
-  m_stateTrade = ETradeState::ExitSubmitted;
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
+  m_stateTrade = ETradeState::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
 }
 
@@ -273,8 +273,8 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit" );
-  m_stateTrade = ETradeState::ExitSubmitted;
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
+  m_stateTrade = ETradeState::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
 }
 
@@ -329,7 +329,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         ExitShort( bar );
       } */
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+    case ETradeState::ShortExitSubmitted:
       // wait for order to execute
       break;
     case ETradeState::Done:
@@ -355,7 +356,8 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+    case ETradeState::ShortExitSubmitted:
       assert( false );  // TODO: need to figure out a plan to retry exit
       break;
     default:
@@ -369,14 +371,19 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
     case ETradeState::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Long Fill" );
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
       m_stateTrade = ETradeState::LongExit;
       break;
     case ETradeState::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Short Fill" );
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
       m_stateTrade = ETradeState::ShortExit;
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
+      m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::ShortExitSubmitted:
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
       m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::Done:
