@@ -187,6 +187,9 @@ private:
   void EnterLong( const ou::tf::Bar& );
   void EnterShort( const ou::tf::Bar& );
 
+  void ExitLong( const ou::tf::Bar& );
+  void ExitShort( const ou::tf::Bar& );
+
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 

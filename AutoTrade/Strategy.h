@@ -152,6 +152,12 @@ private:
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
+  void EnterLong( const ou::tf::Bar& );
+  void EnterShort( const ou::tf::Bar& );
+
+  void ExitLong( const ou::tf::Bar& );
+  void ExitShort( const ou::tf::Bar& );
+
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 
