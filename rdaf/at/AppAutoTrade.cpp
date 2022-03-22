@@ -53,6 +53,8 @@ namespace {
   static const std::string sDbName( "rdaf/at/example.db" );
   static const std::string sStateFileName( "rdaf/at/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+
+  static const std::string sMenuItemPortfolio( "_USD" );
 }
 
 namespace {
@@ -158,7 +160,29 @@ bool AppAutoTrade::OnInit() {
 
   LinkToPanelProviderControl();
 
+  m_ceUnRealized.SetName( "unrealized" );
+  m_ceRealized.SetName( "realized" );
+  m_ceCommissionsPaid.SetName( "commission" );
+  m_ceTotal.SetName( "total" );
+
+  m_ceUnRealized.SetColour( ou::Colour::Blue );
+  m_ceRealized.SetColour( ou::Colour::Purple );
+  m_ceCommissionsPaid.SetColour( ou::Colour::Red );
+  m_ceTotal.SetColour( ou::Colour::Green );
+
+  m_dvChart.Add( 0, &m_ceUnRealized );
+  m_dvChart.Add( 0, &m_ceRealized );
+  m_dvChart.Add( 0, &m_ceTotal );
+  m_dvChart.Add( 2, &m_ceCommissionsPaid );
+
+  m_pWinChartView->SetChartDataView( &m_dvChart );
+
+  m_timerOneSecond.SetOwner( this );
+  Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  m_timerOneSecond.Start( 500 );
+
   wxTreeItemId idRoot = m_treeSymbols->AddRoot( "/", -1, -1, nullptr );
+  wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
   m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
@@ -189,7 +213,7 @@ bool AppAutoTrade::OnInit() {
       );
 
     pStrategy_t pStrategy = std::make_unique<Strategy>( config, m_pFile );
-    m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
+    //m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     if ( m_choices.bStartSimulator ) {
       pStrategy->InitForUSEquityExchanges( date );
@@ -241,6 +265,25 @@ bool AppAutoTrade::OnInit() {
   return 1;
 }
 
+void AppAutoTrade::HandleOneSecondTimer( wxTimerEvent& event ) {
+
+  double dblUnRealized;
+  double dblRealized;
+  double dblCommissionsPaid;
+  double dblTotal;
+
+  if ( m_pPortfolioUSD ) {
+    m_pPortfolioUSD->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+
+    ptime dt = ou::TimeSource::Instance().Internal();
+
+    m_ceUnRealized.Append( dt, dblUnRealized );
+    m_ceRealized.Append( dt, dblRealized );
+    m_ceCommissionsPaid.Append( dt, dblCommissionsPaid );
+    m_ceTotal.Append( dt, dblTotal );
+  }
+}
+
 void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
 
   int argc {};
@@ -287,9 +330,14 @@ void AppAutoTrade::HandleTreeEventItemChanged( wxTreeEvent& event ) {
     CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
     assert( 0 < pCustom->sSymbol.size() );
 
-    mapStrategy_t::iterator iter = m_mapStrategy.find( pCustom->sSymbol );
-    assert( m_mapStrategy.end() != iter );
-    m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+    if ( sMenuItemPortfolio == pCustom->sSymbol ) {
+      m_pWinChartView->SetChartDataView( &m_dvChart );
+    }
+    else {
+      mapStrategy_t::iterator iter = m_mapStrategy.find( pCustom->sSymbol );
+      assert( m_mapStrategy.end() != iter );
+      m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+    }
   }
 
   event.Skip();
@@ -321,7 +369,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructIBInstrument( const std::string& sSymbol ) {
+void AppAutoTrade::ConstructIBInstrument( const std::string& sNamePortfolio, const std::string& sSymbol ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -329,18 +377,18 @@ void AppAutoTrade::ConstructIBInstrument( const std::string& sSymbol ) {
 
   m_pBuildInstrument->Queue(
     sSymbol,
-    [this,&sSymbol]( pInstrument_t pInstrument ){
+    [this,&sNamePortfolio, &sSymbol]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       pPosition_t pPosition;
-      if ( pm.PositionExists( "USD", idInstrument ) ) {
-        pPosition = pm.GetPosition( "USD", idInstrument );
+      if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
+        pPosition = pm.GetPosition( sNamePortfolio, idInstrument );
         std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
-          "USD", idInstrument, "ema",
+          sNamePortfolio, idInstrument, "rdaf",
           "ib01", "iq01", m_pExecutionProvider,
           pWatch
         );
@@ -353,7 +401,7 @@ void AppAutoTrade::ConstructIBInstrument( const std::string& sSymbol ) {
 
 }
 
-void AppAutoTrade::ConstructSimInstrument( const std::string& sSymbol ) {
+void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -366,15 +414,15 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sSymbol ) {
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPosition_t pPosition;
-  if ( pm.PositionExists( "USD", idInstrument ) ) {
-    pPosition = pm.GetPosition( "USD", idInstrument );
+  if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
+    pPosition = pm.GetPosition( sNamePortfolio, idInstrument );
     std::cout << "sim: probably should delete database first" << std::endl;
     std::cout << "sim: position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
     pPosition = pm.ConstructPosition(
-      "USD", idInstrument, "ema",
+      sNamePortfolio, idInstrument, "rdaf",
       "sim01", "sim01", m_pExecutionProvider,
       pWatch
     );
@@ -433,6 +481,9 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
+  m_timerOneSecond.Stop();
+  Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
@@ -468,6 +519,22 @@ void AppAutoTrade::OnExecDisconnected( int ) {
   //m_bExecConnected = false;
 }
 
+void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PortfolioExists( sName ) ) {
+    m_pPortfolioUSD = pm.GetPortfolio( sName );
+  }
+  else {
+    m_pPortfolioUSD
+      = pm.ConstructPortfolio(
+          sName, "tf01", "USD",
+          ou::tf::Portfolio::EPortfolioType::Standard,
+          ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
+  }
+}
+
 void AppAutoTrade::ConfirmProviders() {
   if ( m_bData1Connected && m_bExecConnected ) {
     bool bValidCombo( false );
@@ -476,8 +543,10 @@ void AppAutoTrade::ConfirmProviders() {
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
     ) {
       bValidCombo = true;
+      static const std::string sNamePortfolio( "IB" );
+      LoadPortfolio( sNamePortfolio );
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        ConstructIBInstrument( vt.first );
+        ConstructIBInstrument( sNamePortfolio, vt.first );
       }
 
     }
@@ -486,8 +555,10 @@ void AppAutoTrade::ConfirmProviders() {
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
     ) {
       bValidCombo = true;
+      static const std::string sNamePortfolio( "SIM" );
+      LoadPortfolio( sNamePortfolio );
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        ConstructSimInstrument( vt.first );
+        ConstructSimInstrument( sNamePortfolio, vt.first );
       }
 
     }
