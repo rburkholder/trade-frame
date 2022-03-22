@@ -170,7 +170,7 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
 
-  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Controls", wxPoint( 10, 10 ) );
+  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
   m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameControls );
   m_pFrameControls->Attach( m_pPanelOrderButtons );
 
@@ -270,7 +270,7 @@ void AppIndicatorTrading::ConstructInstrument() {
 
                   std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                   if ( expiry == pInstrument->GetExpiry() ) {
-                    ConfigureInstrument( pInstrument );
+                    SetInteractiveChart( ConstructPosition( pInstrument ) );
                   }
                 } );
             }
@@ -283,12 +283,12 @@ void AppIndicatorTrading::ConstructInstrument() {
     m_pBuildInstrument->Queue(
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
-        ConfigureInstrument( pInstrument );
+        SetInteractiveChart( ConstructPosition( pInstrument ) );
       } );
   }
 }
 
-void AppIndicatorTrading::ConfigureInstrument( pInstrument_t pInstrument ) {
+AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstrument_t pInstrument ) {
 
   pPosition_t pPosition;
 
@@ -310,7 +310,8 @@ void AppIndicatorTrading::ConfigureInstrument( pInstrument_t pInstrument ) {
     std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
 
-  SetInteractiveChart( pPosition );
+  return pPosition;
+
 }
 
 void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {

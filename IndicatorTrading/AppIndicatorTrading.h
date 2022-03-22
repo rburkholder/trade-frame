@@ -119,7 +119,7 @@ private:
 
   void StartChainQuery();
   void ConstructInstrument();
-  void ConfigureInstrument( pInstrument_t );
+  pPosition_t ConstructPosition( pInstrument_t );
   void SetInteractiveChart( pPosition_t );
 
   void SaveState();
