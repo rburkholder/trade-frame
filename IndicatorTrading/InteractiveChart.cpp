@@ -426,17 +426,6 @@ void InteractiveChart::CheckOptions() {
           } );
       }
 
-      strike = chain.Call_Atm( mid );
-      pOption = chain.GetStrike( strike ).call.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-          } );
-      }
-
       strike = chain.Call_Otm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
       pOptionTracker = AddOptionTracker( strike, pOption );
@@ -450,17 +439,6 @@ void InteractiveChart::CheckOptions() {
 
       // put
       strike = chain.Put_Itm( mid );
-      pOption = chain.GetStrike( strike ).put.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-          } );
-      }
-
-      strike = chain.Put_Atm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
       pOptionTracker = AddOptionTracker( strike, pOption );
       if ( pOptionTracker ) {
