@@ -180,10 +180,10 @@ void InteractiveChart::Init() {
 
 void InteractiveChart::Connect() {
 
-  if ( m_pPosition ) {
+  if ( m_pPositionUnderlying ) {
     if ( !m_bConnected ) {
       m_bConnected = true;
-      pWatch_t pWatch = m_pPosition->GetWatch();
+      pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -192,9 +192,9 @@ void InteractiveChart::Connect() {
 }
 
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
-  if ( m_pPosition ) {
+  if ( m_pPositionUnderlying ) {
     if ( m_bConnected ) {
-      pWatch_t pWatch = m_pPosition->GetWatch();
+      pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
@@ -222,8 +222,8 @@ void InteractiveChart::SetPosition(
   using vMAPeriods_t = std::vector<int>;
   vMAPeriods_t vMAPeriods;
 
-  m_pPosition = pPosition;
-  pWatch_t pWatch = m_pPosition->GetWatch();
+  m_pPositionUnderlying = pPosition;
+  pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
 
   time_duration td = time_duration( 0, 0, config.nPeriodWidth );
 
@@ -285,7 +285,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
 
   namespace ph = std::placeholders;
 
-  switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
+  switch ( m_pPositionUnderlying->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
@@ -504,7 +504,7 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
   CheckOptions();
@@ -521,7 +521,7 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
 }
 
 void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
-  m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
     for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
       tracker.second->SaveWatch( sPrefix );
@@ -604,7 +604,7 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
       break;
     case 'x':
       std::cout << "close out" << std::endl;
-      m_pPosition->ClosePosition();
+      m_pPositionUnderlying->ClosePosition();
       break;
   }
   event.Skip();
@@ -612,7 +612,7 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPosition, buttons, indicators );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPositionUnderlying, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
   auto& [key,value] = *pair.first;
@@ -623,7 +623,7 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPosition, buttons, indicators );
+  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPositionUnderlying, buttons, indicators );
   ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
   auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
   auto& [key,value] = *pair.first;
@@ -729,8 +729,8 @@ void InteractiveChart::OptionQuoteShow() {
       size_t best_count;
       double best_spread;
       std::cout
-        << m_pPosition->GetInstrument()->GetInstrumentName()
-        << " @ " << m_pPosition->GetWatch()->LastTrade().Price()
+        << m_pPositionUnderlying->GetInstrument()->GetInstrumentName()
+        << " @ " << m_pPositionUnderlying->GetWatch()->LastTrade().Price()
         << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         ou::tf::Quote quote( pOption->LastQuote() );

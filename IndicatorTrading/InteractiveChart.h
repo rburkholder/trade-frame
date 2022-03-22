@@ -139,7 +139,7 @@ public:
 
   void EmitChainFull() const {
     size_t cnt {};
-    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
+    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       cnt += vt.second.EmitValues();
@@ -150,7 +150,7 @@ public:
 
   void EmitChainSummary() const {
     size_t cnt {};
-    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
+    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       //vt.second.EmitValues();
@@ -199,7 +199,7 @@ private:
   ou::ChartDataView m_dvChart; // the data
 
   pOrder_t m_pOrder;
-  pPosition_t m_pPosition;
+  pPosition_t m_pPositionUnderlying;
 
   double m_dblSumVolume; // part of vwap
   double m_dblSumVolumePrice; // part of vwap
