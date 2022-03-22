@@ -107,6 +107,7 @@ private:
   void HandleMenuActionEmitChainsSummary();
   void HandleMenuActionEmitChainsFull();
   void HandleMenuActionProcessChains();
+  void HandleMenuActionEmitOptionVolume();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
 

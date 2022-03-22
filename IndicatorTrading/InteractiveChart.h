@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <OUCommon/Colour.h>
 #include <functional>
 
 #include <boost/serialization/version.hpp>
@@ -163,6 +162,7 @@ public:
   void ProcessChains();
 
   void SaveWatch( const std::string& );
+  void EmitOptions();
 
   void OptionWatchStart();
   void OptionQuoteShow();
@@ -524,8 +524,10 @@ private:
       m_pOption->SaveSeries( sPrefix );
     }
 
-    void Emit() {
+    void Emit( ou::tf::Trade::volume_t& volBuy, ou::tf::Trade::volume_t& volSell ) {
       ou::tf::Quote quote( m_pOption->LastQuote() );
+      volBuy += m_volBuy;
+      volSell += m_volSell;
       std::cout <<
            m_pOption->GetInstrumentName()
         << ": b=" << quote.Bid()

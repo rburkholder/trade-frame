@@ -414,6 +414,8 @@ void InteractiveChart::CheckOptions() {
       pOption_t pOption;
       pOptionTracker_t pOptionTracker;
 
+      // TODO: set colors for otm and itm
+
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
@@ -524,6 +526,23 @@ void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
       tracker.second->SaveWatch( sPrefix );
     }
   }
+}
+
+void InteractiveChart::EmitOptions() {
+  ou::tf::Trade::volume_t volTotalBuy {};
+  ou::tf::Trade::volume_t volTotalSell {};
+  for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
+    ou::tf::Trade::volume_t volBuy {};
+    ou::tf::Trade::volume_t volSell {};
+    for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
+      tracker.second->Emit( volBuy, volSell );
+    }
+    std::cout << "strike " << strike.first << ": bv=" << volBuy << " , sv=" << volSell << std::endl;
+    volTotalBuy += volBuy;
+    volTotalSell += volSell;
+  }
+
+  std::cout << "totals: bv=" << volTotalBuy << " , sv=" << volTotalSell << std::endl;
 }
 
 void InteractiveChart::BindEvents() {

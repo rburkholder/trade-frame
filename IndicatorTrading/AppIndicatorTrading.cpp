@@ -189,6 +189,7 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
   vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
+  vItems.push_back( new mi( "Emit Option Volume", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitOptionVolume ) ) );
   vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
@@ -446,22 +447,22 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   m_pInteractiveChart->Connect();
 }
 
-void AppIndicatorTrading::HandleMenuActionStartChart( void ) {
+void AppIndicatorTrading::HandleMenuActionStartChart() {
 }
 
-void AppIndicatorTrading::HandleMenuActionStopChart( void ) {
+void AppIndicatorTrading::HandleMenuActionStopChart() {
   //m_pWinChartView->SetChartDataView( nullptr );
 }
 
-void AppIndicatorTrading::HandleMenuActionStartWatch( void ) {
+void AppIndicatorTrading::HandleMenuActionStartWatch() {
   //m_pChartData->StartWatch();
 }
 
-void AppIndicatorTrading::HandleMenuActionStopWatch( void ) {
+void AppIndicatorTrading::HandleMenuActionStopWatch() {
   //m_pChartData->StopWatch();
 }
 
-void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
+void AppIndicatorTrading::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
@@ -471,7 +472,7 @@ void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionEmitChainsSummary( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitChainsSummary() {
   CallAfter(
     [this](){
       m_pInteractiveChart->EmitChainSummary();
@@ -479,7 +480,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsSummary( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionEmitChainsFull( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
   CallAfter(
     [this](){
       m_pInteractiveChart->EmitChainFull();
@@ -487,7 +488,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
+void AppIndicatorTrading::HandleMenuActionProcessChains() {
   CallAfter(
     [this](){
       m_pInteractiveChart->ProcessChains();
@@ -495,7 +496,15 @@ void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionWatchStart( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitOptionVolume() {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->EmitOptions();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionWatchStart() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionWatchStart();
@@ -503,7 +512,7 @@ void AppIndicatorTrading::HandleMenuActionOptionWatchStart( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionQuoteShow( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionQuoteShow() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionQuoteShow();
@@ -511,7 +520,7 @@ void AppIndicatorTrading::HandleMenuActionOptionQuoteShow( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionWatchStop() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionWatchStop();
@@ -519,7 +528,7 @@ void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionEmit( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionEmit() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionEmit();
