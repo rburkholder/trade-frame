@@ -235,14 +235,14 @@ void AppIndicatorTrading::StartChainQuery() {
 
   m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
     [this](){
-      ConstructInstrument();
+      ConstructUnderlying();
     }
   );
   m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
 
 }
 
-void AppIndicatorTrading::ConstructInstrument() {
+void AppIndicatorTrading::ConstructUnderlying() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 

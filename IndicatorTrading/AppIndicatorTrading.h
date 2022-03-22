@@ -122,7 +122,7 @@ private:
   void HandleTreeEventItemMenu( wxTreeEvent& );
 
   void StartChainQuery();
-  void ConstructInstrument();
+  void ConstructUnderlying();
   void InitializeUnderlying( pInstrument_t pInstrument );
   pPosition_t ConstructPosition( pInstrument_t );
   void SetInteractiveChart( pPosition_t );
