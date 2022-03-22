@@ -488,7 +488,6 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
     m_pFile->Write();
   }
 
-
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed

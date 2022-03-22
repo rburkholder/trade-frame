@@ -41,6 +41,7 @@ Strategy::Strategy(
 , pFile_t pFile
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
@@ -289,34 +290,48 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   const std::chrono::time_point<std::chrono::system_clock> begin
     = std::chrono::system_clock::now();
 
+  bool bTriggerEntry( false );
+  double skew( 0.0 );
+
+  if ( m_pHistVolume ) {
+
+    auto n = m_pHistVolume->GetEntries();
+    if ( n < 1000 ) {
+    }
+    else {
+
+      std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+      nTime = (double)nTime / 1000.0;
+
+      //find the bin that the time given belongs to:
+      Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
+
+      if ( bin_y < 1 ) {
+        if ( !m_bChangeConfigFileMessageLatch ) {
+          std::cout << "warning: need to adjust lower time in config file" << std::endl;
+          m_bChangeConfigFileMessageLatch = true;
+        }
+      }
+      else {
+        //now find projection of h1 from the beginning till now:
+        auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+        auto skew_ = h1_x->GetSkewness( 1 );
+        if ( -10.0 > skew_ ) skew_ = -10.0;  // not sure if we have negative infinity
+        if (  10.0 < skew_ ) skew_ =  10.0;  // not sure if we have positive infinity
+        if ( ( 0.1 < skew_ ) && ( 10.0 > skew_ ) ) {
+          bTriggerEntry = true;
+        }
+        skew = skew_;
+      }
+    }
+    m_ceSkewness.Append( bar.DateTime(), skew );
+  }
+
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      if ( m_pHistVolume ) {
-        auto n = m_pHistVolume->GetEntries();
-        if ( n < 1000 ) {
-          break;
-        }
-        else {
-          std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-          nTime = (double)nTime / 1000.0;
-
-            //find the bin that the time given belongs to:
-          Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
-
-          if ( bin_y < 1 ) {
-            break;
-          }
-          else {
-            //now find projection of h1 from the beginning till now:
-            auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
-            auto skew = h1_x->GetSkewness( 1 );
-            if ( skew > 0.1 ){
-              std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew << std::endl;
-              EnterLong( bar );
-            }
-            m_ceSkewness.Append( bar.DateTime(), (double)skew );
-          }
-        }
+      if ( bTriggerEntry ) {
+        std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew << std::endl;
+        EnterLong( bar );
       }
       break;
     case ETradeState::LongSubmitted:
@@ -329,9 +344,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           ExitLong( bar ); // profit
         }
         else {
-          if ( -5.0 > pl ) {
-            ExitLong( bar ); // stop loss
-          }
+          //if ( ( -5.0 > pl ) && ( skew ) ) {
+          //if ( -5.0 > pl ) {
+          //  ExitLong( bar ); // stop loss
+          //}
         }
       }
       break;

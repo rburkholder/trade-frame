@@ -120,6 +120,8 @@ private:
     Done // no more action
     };
 
+  bool m_bChangeConfigFileMessageLatch;
+
   ETradeState m_stateTrade;
 
   ou::tf::Quote m_quote;
