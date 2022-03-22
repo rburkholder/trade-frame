@@ -49,6 +49,8 @@
 
 #include <TFVuTrading/WinChartView.h>
 
+#include "Indicators.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
@@ -66,8 +68,8 @@ namespace config {
   class Options;
 }
 
-class TradeLifeTime;
 class OptionTracker;
+class TradeLifeTime;
 
 class InteractiveChart:
   public ou::tf::WinChartView
@@ -79,10 +81,12 @@ public:
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
+  using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
 
   using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
   using fDeleteLifeCycle_t = std::function<void()>;
@@ -134,6 +138,7 @@ public:
    , const config::Options&
    , pOptionChainQuery_t
    , fBuildOption_t&&
+   , fBuildPosition_t&&
    , fAddUnderlying_t&&
     );
 
@@ -200,6 +205,7 @@ private:
 
   pOrder_t m_pOrder;
   pPosition_t m_pPositionUnderlying;
+  pInstrument_t m_pActiveInstrument;  // selected from the tree for use in selecting position
 
   double m_dblSumVolume; // part of vwap
   double m_dblSumVolumePrice; // part of vwap
@@ -326,6 +332,7 @@ private:
   vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
+  fBuildPosition_t m_fBuildPosition;
   fAddLifeCycleToTree_t m_fAddLifeCycleToTree;
   fAddExpiryToTree_t m_fAddExpiryToTree;
 
@@ -354,6 +361,18 @@ private:
   vOptionForQuote_t m_vOptionForQuote;
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
+
+  struct LifeCycleComponents {
+    pPosition_t pPosition;
+    Indicators indicators;
+    LifeCycleComponents( Indicators indicators_ )
+    : indicators( indicators_ ) {}
+    LifeCycleComponents( pPosition_t pPosition_, Indicators indicators_ )
+    : pPosition( pPosition_ ), indicators( indicators_ ) {}
+  };
+
+  using mapLifeCycleComponents_t = std::map<std::string,LifeCycleComponents>;
+  mapLifeCycleComponents_t m_mapLifeCycleComponents;
 
   using pTradeLifeTime_t = std::shared_ptr<TradeLifeTime>;
 
@@ -388,6 +407,8 @@ private:
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );
+
+  LifeCycleComponents& LookupLifeCycleComponents();
 
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );

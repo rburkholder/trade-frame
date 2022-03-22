@@ -21,6 +21,63 @@
 
 #include "OptionTracker.hpp"
 
+OptionTracker::OptionTracker(
+  pOption_t pOption_
+, ou::ChartEntryShape& ceBullCall, ou::ChartEntryShape& ceBullPut
+, ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
+)
+: m_bActive( false ), m_pOption( pOption_ )
+, m_volCallBuy {}, m_volCallSell {}, m_volPutBuy {}, m_volPutSell {}
+, m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
+, m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+{
+  Add();
+  std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
+}
+
+OptionTracker::OptionTracker( const OptionTracker& rhs )
+: m_bActive( false ), m_pOption( rhs.m_pOption )
+, m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
+, m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
+, m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
+, m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+
+{
+  Add();
+}
+
+OptionTracker::OptionTracker( OptionTracker&& rhs )
+: m_bActive( false )
+, m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
+, m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
+, m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
+, m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
+, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+{
+  rhs.Del();
+  m_pOption = std::move( rhs.m_pOption );
+  Add();
+};
+
+OptionTracker::~OptionTracker() {
+  Del();
+  m_pOption.reset();
+}
+
 void OptionTracker::Add() {
 
   if ( !m_bActive ) {
@@ -50,12 +107,18 @@ void OptionTracker::Add() {
     m_ceVolumeDn.SetName( "Sell" );
     m_ceSpread.SetName( "Spread" );
 
-    m_dvChart.Add( 0, &m_ceQuoteAsk );
-    m_dvChart.Add( 0, &m_ceQuoteBid );
-    m_dvChart.Add( 0, &m_ceTrade );
-    m_dvChart.Add( 1, &m_ceVolumeUp );
-    m_dvChart.Add( 1, &m_ceVolumeDn );
-    m_dvChart.Add( 2, &m_ceSpread );
+    m_dvChart.Add( EChartSlot::Price, &m_ceQuoteAsk );
+    m_dvChart.Add( EChartSlot::Price, &m_ceQuoteBid );
+    m_dvChart.Add( EChartSlot::Price, &m_ceTrade );
+    m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
+    m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
+    m_dvChart.Add( EChartSlot::Spread, &m_ceSpread );
+
+    m_dvChart.Add( EChartSlot::Price, &m_ceBuySubmit );
+    m_dvChart.Add( EChartSlot::Price, &m_ceBuyFill );
+    m_dvChart.Add( EChartSlot::Price, &m_ceSellSubmit );
+    m_dvChart.Add( EChartSlot::Price, &m_ceSellFill );
+    m_dvChart.Add( EChartSlot::Price, &m_ceCancelled );
 
     m_pOption->StartWatch();
   }
@@ -78,47 +141,6 @@ void OptionTracker::Del() {
     }
     m_bActive = false;
   }
-}
-
-OptionTracker::OptionTracker(
-  pOption_t pOption_
-, ou::ChartEntryShape& ceBullCall, ou::ChartEntryShape& ceBullPut
-, ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
-)
-: m_bActive( false ), m_pOption( pOption_ )
-, m_volCallBuy {}, m_volCallSell {}, m_volPutBuy {}, m_volPutSell {}
-, m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
-, m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
-{
-  Add();
-  std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
-}
-
-OptionTracker::OptionTracker( const OptionTracker& rhs )
-: m_bActive( false ), m_pOption( rhs.m_pOption )
-, m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
-, m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
-, m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
-, m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-{
-  Add();
-}
-
-OptionTracker::OptionTracker( OptionTracker&& rhs )
-: m_bActive( false )
-, m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
-, m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
-, m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
-, m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-{
-  rhs.Del();
-  m_pOption = std::move( rhs.m_pOption );
-  Add();
-};
-
-OptionTracker::~OptionTracker() {
-  Del();
-  m_pOption.reset();
 }
 
 void OptionTracker::HandleQuote( const ou::tf::Quote& quote ) {

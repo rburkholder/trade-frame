@@ -347,6 +347,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
+    std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ),
     [this](const std::string& sUnderlying, InteractiveChart::fOnClick_t&& fOnClick)->InteractiveChart::SubTreesForUnderlying { // fAddUnderlying_t
 
       wxMenu* pMenuPopup = new wxMenu();

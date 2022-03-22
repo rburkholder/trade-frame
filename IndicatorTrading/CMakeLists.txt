@@ -27,6 +27,7 @@ set(
   file_h
     AppIndicatorTrading.h
     Config.h
+    Indicators.hpp
     InteractiveChart.h
     OptionTracker.hpp
     TradeLifeTime.h

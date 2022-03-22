@@ -26,6 +26,8 @@
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
+#include "Indicators.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   struct PanelOrderButtons_Order;
@@ -36,25 +38,6 @@ class TradeLifeTime {
 public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
-
-  struct Indicators {
-    ou::ChartEntryShape& ceBuySubmit;
-    ou::ChartEntryShape& ceBuyFill;
-    ou::ChartEntryShape& ceSellSubmit;
-    ou::ChartEntryShape& ceSellFill;
-    ou::ChartEntryShape& ceCancelled;
-    Indicators(
-        ou::ChartEntryShape& ceBuySubmit_
-      , ou::ChartEntryShape& ceBuyFill_
-      , ou::ChartEntryShape& ceSellSubmit_
-      , ou::ChartEntryShape& ceSellFill_
-      , ou::ChartEntryShape& ceCancelled_
-    )
-    : ceBuySubmit( ceBuySubmit_ ), ceBuyFill( ceBuyFill_ )
-    ,  ceSellSubmit( ceSellSubmit_ ), ceSellFill( ceSellFill_ )
-    ,  ceCancelled( ceCancelled_ )
-    {}
-  };
 
   TradeLifeTime( pPosition_t, Indicators& );
   TradeLifeTime( TradeLifeTime&& ) = delete;
