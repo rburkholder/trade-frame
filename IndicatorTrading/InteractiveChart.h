@@ -211,7 +211,7 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryBars m_cePriceBars;
 
-  //ou::ChartEntryIndicator m_ceVWAP;
+  ou::ChartEntryIndicator m_ceVWAP;
 
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryVolume m_ceVolumeUp;

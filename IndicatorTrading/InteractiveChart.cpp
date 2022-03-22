@@ -114,8 +114,6 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Price, &m_ceTrade );
   m_dvChart.Add( EChartSlot::Price, &m_ceQuoteBid );
 
-  //m_dvChart.Add( EChartSlot::Price, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
-
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
   m_dvChart.Add( EChartSlot::Price, &m_ceBuySubmit );
@@ -133,6 +131,8 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearPut );
 
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
+
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
   // need to present the marks prior to presenting the data
@@ -147,8 +147,8 @@ void InteractiveChart::Init() {
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
 
-  //m_ceVWAP.SetColour( ou::Colour::OrangeRed );
-  //m_ceVWAP.SetName( "VWAP" );
+  m_ceVWAP.SetColour( ou::Colour::OrangeRed );
+  m_ceVWAP.SetName( "VWAP" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -520,7 +520,7 @@ InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double st
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
 
   //m_ceVolume.Append( bar );
-  //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+  m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
