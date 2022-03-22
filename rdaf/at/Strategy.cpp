@@ -231,7 +231,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   }
 
   if ( m_pHistVolume ) {
-    m_pHistVolume->Fill( m_branchTrade.time, trade.Price(), trade.Volume() );
+    m_pHistVolume->Fill( trade.Price(), m_branchTrade.time, trade.Volume() );
   }
 
 }
@@ -307,13 +307,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             break;
           }
           else {
-            //now find projection of h2 from the beginning till now:
+            //now find projection of h1 from the beginning till now:
             auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
             auto skew = h1_x->GetSkewness( 1 );
             if ( skew > 0.1 ){
+              std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew << std::endl;
               EnterLong( bar );
             }
-            m_ceSkewness.Append( bar.DateTime(), skew );
+            m_ceSkewness.Append( bar.DateTime(), (double)skew );
           }
         }
       }
@@ -322,8 +323,16 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      if ( 20.0 < m_pPosition->GetUnRealizedPL() ) {
-        ExitLong( bar );
+      {
+        double pl = m_pPosition->GetUnRealizedPL();
+        if ( 20.0 < pl ) {
+          ExitLong( bar ); // profit
+        }
+        else {
+          if ( -5.0 > pl ) {
+            ExitLong( bar ); // stop loss
+          }
+        }
       }
       break;
     case ETradeState::ShortSubmitted:
