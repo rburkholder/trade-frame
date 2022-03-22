@@ -361,9 +361,9 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
           m_sTSDataStreamStarted + "-" +
           boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
       }
-      if ( m_pFile ) {
-        m_pFile->Write();
-      }
+      //if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      //  m_pFile->Write();
+      //}
       std::cout << "  ... Done " << std::endl;
     }
   );
@@ -483,6 +483,11 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
   m_timerOneSecond.Stop();
   Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+
+  if ( m_pFile ) { // performed at exit to ensure no duplication in file
+    m_pFile->Write();
+  }
+
 
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
