@@ -148,7 +148,7 @@ void InteractiveChart::Init() {
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
 
   m_ceVWAP.SetColour( ou::Colour::OrangeRed );
-  m_ceVWAP.SetName( "VWAP" );
+  m_ceVWAP.SetName( "vwap" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -529,20 +529,44 @@ void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
 }
 
 void InteractiveChart::EmitOptions() {
+
+  ou::tf::Trade::volume_t volTotalCallBuy {};
+  ou::tf::Trade::volume_t volTotalCallSell {};
+  ou::tf::Trade::volume_t volTotalPutBuy {};
+  ou::tf::Trade::volume_t volTotalPutSell {};
+
   ou::tf::Trade::volume_t volTotalBuy {};
   ou::tf::Trade::volume_t volTotalSell {};
+
   for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
-    ou::tf::Trade::volume_t volBuy {};
-    ou::tf::Trade::volume_t volSell {};
+
+    ou::tf::Trade::volume_t volCallBuy {};
+    ou::tf::Trade::volume_t volCallSell {};
+    ou::tf::Trade::volume_t volPutBuy {};
+    ou::tf::Trade::volume_t volPutSell {};
+
     for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
-      tracker.second->Emit( volBuy, volSell );
+      tracker.second->Emit( volCallBuy, volCallSell, volPutBuy, volPutSell );
     }
-    std::cout << "strike " << strike.first << ": bv=" << volBuy << " , sv=" << volSell << std::endl;
-    volTotalBuy += volBuy;
-    volTotalSell += volSell;
+    std::cout
+      << "strike " << strike.first
+      << ": cbv=" << volCallBuy << ", csv=" << volCallSell
+      << ", pbv=" << volPutBuy  << ", psv=" << volPutSell
+      << std::endl;
+
+    volTotalCallBuy  += volCallBuy;
+    volTotalCallSell += volCallSell;
+    volTotalPutBuy   += volPutBuy;
+    volTotalPutSell  += volPutSell;
+
   }
 
-  std::cout << "totals: bv=" << volTotalBuy << " , sv=" << volTotalSell << std::endl;
+  volTotalBuy  += ( volTotalCallBuy  + volTotalPutBuy );
+  volTotalSell += ( volTotalCallSell + volTotalPutSell );
+
+  std::cout << " calls: bv=" << volTotalCallBuy << " , sv=" << volTotalCallSell << std::endl;
+  std::cout << "  puts: bv=" << volTotalPutBuy  << " , sv=" << volTotalPutSell << std::endl;
+  std::cout << "totals: bv=" << volTotalBuy     << " , sv=" << volTotalSell << std::endl;
 }
 
 void InteractiveChart::BindEvents() {

@@ -351,8 +351,11 @@ private:
 
     bool m_bActive;
     pOption_t m_pOption;
-    ou::tf::Trade::volume_t m_volBuy;
-    ou::tf::Trade::volume_t m_volSell;
+
+    ou::tf::Trade::volume_t m_volCallBuy;
+    ou::tf::Trade::volume_t m_volCallSell;
+    ou::tf::Trade::volume_t m_volPutBuy;
+    ou::tf::Trade::volume_t m_volPutSell;
 
     ou::ChartEntryShape& m_ceBullCall;
     ou::ChartEntryShape& m_ceBullPut;
@@ -436,7 +439,7 @@ private:
     , ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
     )
     : m_bActive( false ), m_pOption( pOption_ )
-    , m_volBuy {}, m_volSell {}
+    , m_volCallBuy {}, m_volCallSell {}, m_volPutBuy {}, m_volPutSell {}
     , m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
     , m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
     {
@@ -446,7 +449,8 @@ private:
 
     OptionTracker( const OptionTracker& rhs )
     : m_bActive( false ), m_pOption( rhs.m_pOption )
-    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
+    , m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
+    , m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
     , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
     , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
@@ -455,7 +459,8 @@ private:
 
     OptionTracker( OptionTracker&& rhs )
     : m_bActive( false )
-    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
+    , m_volCallBuy( rhs.m_volCallBuy ), m_volCallSell( rhs.m_volCallSell)
+    , m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
     , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
     , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
     {
@@ -486,13 +491,13 @@ private:
       else {
         ou::tf::Trade::volume_t volume = trade.Volume();
         if ( price > mid ) {
-          m_volBuy += volume;
+          m_volCallBuy += volume;
           m_ceBullCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
           m_ceVolumeUp.Append( trade.DateTime(), volume );
           m_ceVolumeDn.Append( trade.DateTime(), 0 );
         }
         else {
-          m_volSell += volume;
+          m_volCallSell += volume;
           m_ceBearCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
           m_ceVolumeUp.Append( trade.DateTime(), 0 );
           m_ceVolumeDn.Append( trade.DateTime(), volume );
@@ -511,13 +516,13 @@ private:
       else {
         ou::tf::Trade::volume_t volume = trade.Volume();
         if ( price > mid ) {
-          m_volBuy += volume;
+          m_volPutBuy += volume;
           m_ceBearPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
           m_ceVolumeUp.Append( trade.DateTime(), volume );
           m_ceVolumeDn.Append( trade.DateTime(), 0 );
         }
         else {
-          m_volSell += volume;
+          m_volPutSell += volume;
           m_ceBullPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
           m_ceVolumeUp.Append( trade.DateTime(), 0 );
           m_ceVolumeDn.Append( trade.DateTime(), volume );
@@ -529,17 +534,23 @@ private:
       m_pOption->SaveSeries( sPrefix );
     }
 
-    void Emit( ou::tf::Trade::volume_t& volBuy, ou::tf::Trade::volume_t& volSell ) {
+    void Emit( ou::tf::Trade::volume_t& volCallBuy, ou::tf::Trade::volume_t& volCallSell
+             , ou::tf::Trade::volume_t& volPutBuy,  ou::tf::Trade::volume_t& volPutSell
+    ) {
       ou::tf::Quote quote( m_pOption->LastQuote() );
-      volBuy += m_volBuy;
-      volSell += m_volSell;
+      volCallBuy += m_volCallBuy;
+      volCallSell += m_volCallSell;
+      volPutBuy += m_volPutBuy;
+      volPutSell += m_volPutSell;
       std::cout <<
            m_pOption->GetInstrumentName()
         << ": b=" << quote.Bid()
         << ",a=" << quote.Ask()
         //<< ",oi=" << m_pOption->GetFundamentals().nOpenInterest // not available
-        << ",bv=" << m_volBuy
-        << ",sv=" << m_volSell
+        << ",cbv=" << m_volCallBuy
+        << ",csv=" << m_volCallSell
+        << ",pbv=" << m_volPutBuy
+        << ",psv=" << m_volPutSell
         << std::endl;
     }
 
@@ -547,14 +558,10 @@ private:
 
     template<typename Archive>
     void save( Archive& ar, const unsigned int version ) const {
-      ar & m_volBuy;
-      ar & m_volSell;
     }
 
     template<typename Archive>
     void load( Archive& ar, const unsigned int version ) {
-      ar & m_volBuy;
-      ar & m_volSell;
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
