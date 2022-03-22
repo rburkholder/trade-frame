@@ -24,14 +24,15 @@
 
 #include <memory>
 
-#include <TFOptions/Engine.h>
+//#include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
 
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Config.h"
-#include "InteractiveChart.h"
 #include "TradeLifeTime.h"
+#include "OptionTracker.hpp"
+#include "InteractiveChart.h"
 
 namespace {
   static const size_t nBarSeconds = 3;
