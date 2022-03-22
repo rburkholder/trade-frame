@@ -367,6 +367,8 @@ private:
     ou::ChartEntryIndicator m_ceQuoteAsk;
     ou::ChartEntryIndicator m_ceQuoteBid;
 
+    ou::ChartEntryIndicator m_ceSpread;
+
     ou::ChartDataView m_dvChart; // the data
 
     void Add() {
@@ -396,12 +398,14 @@ private:
         m_ceVolumeUp.SetName( "Buy" );
         m_ceVolumeDn.SetColour( ou::Colour::Red );
         m_ceVolumeDn.SetName( "Sell" );
+        m_ceSpread.SetName( "Spread" );
 
         m_dvChart.Add( 0, &m_ceQuoteAsk );
         m_dvChart.Add( 0, &m_ceQuoteBid );
         m_dvChart.Add( 0, &m_ceTrade );
         m_dvChart.Add( 1, &m_ceVolumeUp );
         m_dvChart.Add( 1, &m_ceVolumeDn );
+        m_dvChart.Add( 2, &m_ceSpread );
 
         m_pOption->StartWatch();
       }
@@ -468,6 +472,7 @@ private:
     void HandleQuote( const ou::tf::Quote& quote ) {
       m_ceQuoteAsk.Append( quote.DateTime(), quote.Ask() );
       m_ceQuoteBid.Append( quote.DateTime(), quote.Bid() );
+      m_ceSpread.Append( quote.DateTime(), quote.Ask() - quote.Bid() );
     }
 
     void HandleTradeCall( const ou::tf::Trade& trade ) {
