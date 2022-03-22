@@ -182,22 +182,17 @@ bool AppIndicatorTrading::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
-  //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
-  //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
-  //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
+  vItems.push_back( new mi( "Emit Option Volume", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitOptionVolume ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
   vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
-  vItems.push_back( new mi( "Emit Option Volume", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitOptionVolume ) ) );
-  vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   vItems.clear();
   vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStart ) ) );
   vItems.push_back( new mi( "Show Quotes", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionQuoteShow ) ) );
   vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
-  //vItems.push_back( new mi( "Emit Options", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionEmit ) ) );
   m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -271,7 +266,7 @@ void AppIndicatorTrading::ConstructInstrument() {
 
                   std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                   if ( expiry == pInstrument->GetExpiry() ) {
-                    SetInteractiveChart( ConstructPosition( pInstrument ) );
+                    InitializeUnderlying( pInstrument );
                   }
                 } );
             }
@@ -284,9 +279,29 @@ void AppIndicatorTrading::ConstructInstrument() {
     m_pBuildInstrument->Queue(
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
-        SetInteractiveChart( ConstructPosition( pInstrument ) );
+        InitializeUnderlying( pInstrument );
       } );
   }
+}
+
+void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PortfolioExists( idInstrument ) ) {
+    m_pPortfolio = pm.GetPortfolio( idInstrument );
+  }
+  else {
+    m_pPortfolio
+      = pm.ConstructPortfolio(
+          idInstrument, "tf01", "USD",
+          ou::tf::Portfolio::EPortfolioType::Standard,
+          ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
+  }
+
+  SetInteractiveChart( ConstructPosition( pInstrument ) );
+
 }
 
 AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstrument_t pInstrument ) {
@@ -296,7 +311,7 @@ AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstru
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 
-  if ( pm.PositionExists( "USD", idInstrument ) ) {
+  if ( pm.PositionExists( m_pPortfolio->Id(), idInstrument ) ) {
     pPosition = pm.GetPosition( "USD", idInstrument );
     std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
@@ -304,7 +319,7 @@ AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstru
     using pWatch_t = ou::tf::Watch::pWatch_t;
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
     pPosition = pm.ConstructPosition(
-      "USD", idInstrument, "manual",
+      m_pPortfolio->Id(), idInstrument, "manual",
       "ib01", "iq01", m_pExecutionProvider,
       pWatch
     );
