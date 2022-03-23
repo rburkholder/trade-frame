@@ -308,17 +308,34 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
       if ( bin_y < 1 ) {
         if ( !m_bChangeConfigFileMessageLatch ) {
-          std::cout << "warning: need to adjust lower time in config file" << std::endl;
+          std::cout << "warning: " << m_config.sSymbol << ", need to adjust lower time in config file" << std::endl;
           m_bChangeConfigFileMessageLatch = true;
         }
       }
       else {
         //now find projection of h1 from the beginning till now:
         auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
-        auto skew_ = h1_x->GetSkewness( 1 );
-        if ( -10.0 > skew_ ) skew_ = -10.0;  // not sure if we have negative infinity
-        if (  10.0 < skew_ ) skew_ =  10.0;  // not sure if we have positive infinity
-        if ( ( 0.1 < skew_ ) && ( 10.0 > skew_ ) ) {
+        double skew_ = h1_x->GetSkewness( 1 );
+
+        switch ( fpclassify( skew_ ) ) {
+            case FP_INFINITE:
+              skew_ = 0.0;
+              break;
+            case FP_NAN:
+              skew_ = 0.0;
+              break;
+            case FP_NORMAL:
+              break;
+            case FP_SUBNORMAL:
+              skew_ = 0.0;
+              break;
+            case FP_ZERO:
+              break;
+            default:
+              break;
+        }
+
+        if ( 0.1 < skew_ ) {
           bTriggerEntry = true;
         }
         skew = skew_;
