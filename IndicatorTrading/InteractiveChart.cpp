@@ -660,10 +660,10 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
     pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcc.pPosition, buttons, lcc.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-    auto& [key,value] = *pair.first;
+    auto& [idOrder,lifecycle] = *pair.first;
     LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
-    value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-    value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
   }
 }
 
@@ -673,10 +673,10 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
     pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcc.pPosition, buttons, lcc.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-    auto& [key,value] = *pair.first;
+    auto& [idOrder,lifecycle] = *pair.first;
     LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
-    value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-    value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
   }
 }
 
