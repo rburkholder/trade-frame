@@ -435,14 +435,14 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
             idPopUpDelete
             );
 
-          wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+          wxTreeItemId tiidLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
           return InteractiveChart::LifeCycleFunctions(
-              [this,tiidSymbol](const std::string& s){ // fUpdateLifeCycle_t
-                m_ptreeTradables->SetItemText( tiidSymbol, s );
+              [this,tiidLifeCycle](const std::string& s){ // fUpdateLifeCycle_t
+                m_ptreeTradables->SetItemText( tiidLifeCycle, s );
               },
-              [this,tiidSymbol](){ // fDeleteLifeCycle_t
-                m_ptreeTradables->Delete( tiidSymbol );
+              [this,tiidLifeCycle](){ // fDeleteLifeCycle_t
+                m_ptreeTradables->Delete( tiidLifeCycle );
               }
               );
         },
