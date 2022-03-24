@@ -2,7 +2,10 @@
 
 ## Introduction
 
-This is an application I use for automated trading securities.  
+This is a:
+* library of functions to sink market data, organize time series, build indicators, author algorithms, and issue orders to a broker
+* collection of projects using the libraries to carry out various manual & automated trading scenarios
+
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
 A C++17 compiler is used to build the libraries and code. It was built on Windows a number of years ago, 
