@@ -17,12 +17,15 @@
 #include <vector>
 #include <string>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/io_context_strand.hpp>
+
 #include <OUCommon/Delegate.h>
 
 #include <TFTrading/Symbol.h>
 
-#include "Fundamentals.h"
 #include "Messages.h"
+#include "Fundamentals.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -30,13 +33,14 @@ namespace iqfeed { // IQFeed
 
 class IQFeedProvider;
 
-class IQFeedSymbol : public Symbol<IQFeedSymbol> {
+class IQFeedSymbol
+: public Symbol<IQFeedSymbol>
+{
   friend class IQFeedProvider;
 public:
 
   using inherited_t = Symbol<IQFeedSymbol>;
   using pInstrument_t = inherited_t::pInstrument_t;
-  using symbol_id_t =  std::string;
 
   // Public for RowKeyValues.  Pass in a structure sometime.
   // Public for VuChartArmsIntraDay.  Pass in structure sometime.
@@ -71,8 +75,8 @@ public:
       {}
   };
 
-  IQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
-  virtual ~IQFeedSymbol(void);
+  IQFeedSymbol( const std::string &symbol, pInstrument_t pInstrument );
+  virtual ~IQFeedSymbol();
 
   using pFundamentals_t = std::shared_ptr<Fundamentals>;
   using pSummary_t = std::shared_ptr<Summary>;
@@ -82,6 +86,8 @@ public:
   ou::Delegate<pSummary_t> OnSummaryMessage;
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
+
+  void SetStrand( boost::asio::io_context& );
 
 protected:
 
@@ -128,6 +134,8 @@ private:
 
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
+
+  std::unique_ptr<boost::asio::io_context::strand> m_pStrand;
 };
 
 } // namespace iqfeed
