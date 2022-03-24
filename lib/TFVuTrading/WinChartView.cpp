@@ -110,7 +110,7 @@ void WinChartView::StartThread() {
   m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart, this );
 }
 
-void WinChartView::StopThread( void ) {
+void WinChartView::StopThread() {
   m_bThreadDrawChartActive = false;
   m_cvThreadDrawChart.notify_one();
   m_pThreadDrawChart->join();
@@ -243,7 +243,7 @@ void WinChartView::DrawChart( void ) {
 
 // could change this into a worker future/promise solution, or use asio to submit jobs or packages
 void WinChartView::ThreadDrawChart() {
-  m_bThreadDrawChartActive = true;
+  m_bThreadDrawChartActive = true; // TODO: examine if this a problem for locking (happened when multiple changes submitted in rapid succession)
   boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
   while ( m_bThreadDrawChartActive ) {
     m_cvThreadDrawChart.wait( lock );
