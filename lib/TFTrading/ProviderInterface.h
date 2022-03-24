@@ -25,7 +25,6 @@
 #include "KeyTypes.h"
 #include "Symbol.h"
 #include "Order.h"
-#include "OrderManager.h"
 
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
