@@ -25,68 +25,67 @@ Order::Order() {
 }
 
 Order::Order( // market order
-  Instrument::pInstrument_cref pInstrument,
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
-  boost::uint32_t nOrderQuantity,
-  idPosition_t idPosition,
-  ptime dtOrderSubmitted
+  Instrument::pInstrument_cref pInstrument
+, OrderType::enumOrderType eOrderType
+, OrderSide::enumOrderSide eOrderSide
+, boost::uint32_t nOrderQuantity
+, idPosition_t idPosition
+, ptime dtOrderSubmitted
   )
 :
-  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted ),
-  m_pInstrument( pInstrument ),
-  m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 ),
-  m_nNextExecutionId ( 0 )
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted )
+, m_pInstrument( pInstrument )
+, m_bOutsideRTH( false )
+, m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 )
+, m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
 Order::Order( // limit or stop
-  Instrument::pInstrument_cref pInstrument,
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
-  boost::uint32_t nOrderQuantity,
-  double dblPrice1,
-  idPosition_t idPosition,
-  ptime dtOrderSubmitted
+  Instrument::pInstrument_cref pInstrument
+, OrderType::enumOrderType eOrderType
+, OrderSide::enumOrderSide eOrderSide
+, boost::uint32_t nOrderQuantity
+, double dblPrice1
+, idPosition_t idPosition
+, ptime dtOrderSubmitted
   )
 :
-  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted ),
-  m_pInstrument( pInstrument ),
-  m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 ),
-  m_nNextExecutionId ( 0 )
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted )
+, m_pInstrument( pInstrument )
+, m_bOutsideRTH( false )
+, m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 )
+, m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
 Order::Order( // limit and stop
-  Instrument::pInstrument_cref pInstrument,
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
-  boost::uint32_t nOrderQuantity,
-  double dblPrice1, double dblPrice2,
-  idPosition_t idPosition,
-  ptime dtOrderSubmitted
+  Instrument::pInstrument_cref pInstrument
+, OrderType::enumOrderType eOrderType
+, OrderSide::enumOrderSide eOrderSide
+, boost::uint32_t nOrderQuantity
+, double dblPrice1, double dblPrice2
+, idPosition_t idPosition
+, ptime dtOrderSubmitted
   )
 :
-  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted ),
-  m_pInstrument( pInstrument ),
-  m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 ),
-  m_nNextExecutionId ( 0 )
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted )
+, m_pInstrument( pInstrument )
+, m_bOutsideRTH( false )
+, m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 )
+, m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
 Order::Order( const TableRowDef& row, pInstrument_t& pInstrument  )
-: m_row( row ), m_pInstrument( pInstrument ),
-  m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 ),
-  m_nNextExecutionId ( 0 )
-{
-}
+: m_row( row ), m_pInstrument( pInstrument )
+, m_bOutsideRTH( false )
+, m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 )
+, m_nNextExecutionId ( 0 )
+{}
 
 Order::~Order() {
 }
