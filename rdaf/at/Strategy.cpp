@@ -19,6 +19,10 @@
  * Created: March 7, 2022 14:35
  */
 
+// https://indico.cern.ch/event/697389/contributions/3062036/attachments/1712790/2761904/Support_for_SIMD_Vectorization_in_ROOT_ROOT_Workshop_2018.pdf
+// https://www.intel.com/content/www/us/en/develop/documentation/advisor-user-guide/top/analyze-cpu-roofline.html
+// https://stackoverflow.com/questions/52653025/why-is-march-native-used-so-rarely
+
  #include <chrono>
 
 #include <rdaf/TH2.h>
