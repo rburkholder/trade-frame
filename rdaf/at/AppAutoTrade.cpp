@@ -105,6 +105,8 @@ bool AppAutoTrade::OnInit() {
     return 0;
   }
 
+  m_iqfeed->SetThreadCount( m_choices.nThreads );
+
   //if ( m_options.bSimStart ) {
     // just always delete it
     if ( boost::filesystem::exists( sDbName ) ) {

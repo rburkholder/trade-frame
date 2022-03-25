@@ -53,6 +53,8 @@ public:
 
   void SetAlternateInstrumentName( pInstrument_t );
 
+  void SetThreadCount( size_t nThreads ) { m_nThreads = nThreads; }
+
 protected:
 
   // overridden from ProviderInterface, called when application adds/removes watches
@@ -81,6 +83,8 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
+
+  size_t m_nThreads;
 
   boost::asio::io_context m_srvc; // threads for use in symbols
   boost::asio::any_io_executor m_srvcWork;
