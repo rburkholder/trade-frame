@@ -39,7 +39,7 @@ IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument
 IQFeedSymbol::~IQFeedSymbol() {
 }
 
-void IQFeedSymbol::SetStrand( boost::asio::io_context& io_context ) {
+void IQFeedSymbol::SetContext( boost::asio::io_context& io_context ) {
   assert( !m_pStrand );
   m_pStrand = std::make_unique<boost::asio::io_context::strand>( io_context );
 }

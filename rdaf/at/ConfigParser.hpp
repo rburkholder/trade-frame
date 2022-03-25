@@ -44,7 +44,8 @@ struct choices_t {
 
   bool bStartSimulator;
   std::string sGroupDirectory;
-  size_t ib_instance;
+  size_t ib_client_id;
+  size_t nThreads;
 
   size_t nTimeBins;
 

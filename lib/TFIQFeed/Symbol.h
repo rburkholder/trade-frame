@@ -87,7 +87,7 @@ public:
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
-  void SetStrand( boost::asio::io_context& );
+  void SetContext( boost::asio::io_context& );
 
 protected:
 

@@ -51,7 +51,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::choices_t,
-  (size_t, ib_instance)
+  (size_t, ib_client_id)
+  (size_t, nThreads)
   (bool, bStartSimulator)
   (std::string, sGroupDirectory)
   (size_t, nTimeBins)
@@ -90,8 +91,13 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> qi::char_("0-9") >> qi::char_("0-9") // SS
       ;
 
-    ruleIbInstance
-      %= qi::lit("ib_instance")
+    ruleIbClientId
+      %= qi::lit("ib_client_id")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::uint_
+      >> *qi::lit(' ') >> qi::eol;
+    ruleThreads
+      %= qi::lit("threads")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> boost::spirit::uint_
       >> *qi::lit(' ') >> qi::eol;
@@ -178,7 +184,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleMap %= +ruleMapEntry;
 
     start
-      %= ruleIbInstance
+      %= ruleIbClientId
+      >> ruleThreads
       >> ruleStartSimulator
       >> -ruleGroupDirectory
       >> ruleTimeBins
@@ -204,7 +211,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
   qi::symbols<char, bool> boolValue;
 
-  qi::rule<Iterator, size_t()> ruleIbInstance;
+  qi::rule<Iterator, size_t()> ruleIbClientId;
+  qi::rule<Iterator, size_t()> ruleThreads;
   qi::rule<Iterator, bool()> ruleStartSimulator;
   //qi::rule<Iterator, ()> ruleSeparator;
   qi::rule<Iterator, std::string()> ruleGroupDirectory;
@@ -250,6 +258,10 @@ bool Load( const std::string& sFileName, choices_t& choices ) {
 
   if ( b ) {
     choices.Update();
+    if ( 0 == choices.nThreads ) {
+      std::cout << "ou::tf::config::Load thread count set to 1" << std::endl;
+      choices.nThreads = 1;
+    }
     if ( 0 == choices.nTimeBins ) {
       std::cout << "ou::tf::config::Load time: nbins is 0" << std::endl;
       b = false;
