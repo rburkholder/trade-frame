@@ -26,11 +26,11 @@ int ChartEntryShape::m_rShapes[] = {
 };
 
 ChartEntryShape::ChartEntryShape()
-: ChartEntryPrice(), m_eShape( EDefault )
+: ChartEntryPrice(), m_eShape( EShape::Default )
 {
 }
 
-ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour )
+ChartEntryShape::ChartEntryShape( EShape eShape, ou::Colour::EColour colour )
 : ChartEntryPrice(), m_eShape( eShape )
 {
   ChartEntryBase::SetColour( colour );
@@ -83,7 +83,7 @@ bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAtt
     if ( 0 != daXData.len ) {
       ScatterLayer *layer
         = pXY->addScatterLayer(
-          GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
+          GetDateTimes(), GetPrices(), NULL, m_rShapes[ (int)m_eShape ], 15, m_eColour, m_eColour );
 
       layer->setXData( daXData );
       pAttributes->dblXMin = daXData[0];

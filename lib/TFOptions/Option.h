@@ -48,7 +48,7 @@ public:
 
   double GetStrike() const { return m_dblStrike; }
   boost::gregorian::date GetExpiry() const { return m_pInstrument->GetExpiry(); }
-  ou::tf::OptionSide::enumOptionSide GetOptionSide() const { return m_pInstrument->GetOptionSide(); }
+  ou::tf::OptionSide::EOptionSide GetOptionSide() const { return m_pInstrument->GetOptionSide(); }
 
   static void CalcRate( // basic libor calcs
     ou::tf::option::binomial::structInput& input,

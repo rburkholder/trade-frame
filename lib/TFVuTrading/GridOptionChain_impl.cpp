@@ -30,42 +30,42 @@ GridOptionChain_impl::GridOptionChain_impl( GridOptionChain& details )
 }
 
 void GridOptionChain_impl::CreateControls() {
-  
+
     m_details.SetDefaultColSize(50);
     m_details.SetDefaultRowSize(22);
     m_details.SetColLabelSize(22);
     m_details.SetRowLabelSize(50);
-    
+
   m_details.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
-// found in ModelCell_macros.h  
+// found in ModelCell_macros.h
 #ifdef GRID_EMIT_SetColSettings
 #undef GRID_EMIT_SetColSettings
 #endif
-  
+
 #define GRID_EMIT_SetColSettings( z, n, VAR ) \
   m_details.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
   m_details.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
-  
+
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
-      
+
   //m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
   m_details.Bind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Bind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
-  
+
   m_details.Bind( wxEVT_GRID_LABEL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
   m_details.Bind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
-  
+
   m_details.EnableDragCell( true );
-  
+
   m_details.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
-  
+
   m_details.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
 
   m_details.EnableEditing( false );
-  
+
 }
 
 GridOptionChain_impl::~GridOptionChain_impl( void ) {
@@ -90,27 +90,27 @@ void GridOptionChain_impl::TimerDeactivate() {
   }
 }
 
-void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
+void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
-    iter = m_mapOptionValueRow.insert( 
+    iter = m_mapOptionValueRow.insert(
       m_mapOptionValueRow.begin(),
       mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details, strike ) ) );
-    
+
     struct Reindex {
       size_t ix;
       Reindex(): ix{} {}
       void operator()( OptionValueRow& row ) { row.m_nRow = ix; ix++; }
     };
-    
-    Reindex reindex; 
-    std::for_each( 
-      m_mapOptionValueRow.rbegin(), m_mapOptionValueRow.rend(), 
+
+    Reindex reindex;
+    std::for_each(
+      m_mapOptionValueRow.rbegin(), m_mapOptionValueRow.rend(),
         [&reindex](mapOptionValueRow_t::value_type& v){ reindex( v.second ); } );
-        
+
     assert( m_details.InsertRows( iter->second.m_nRow ) );
   }
-  
+
   switch ( side ) {
     case ou::tf::OptionSide::Call:
       iter->second.m_sCallName = sSymbol;
@@ -156,11 +156,11 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
     if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
       mapOptionValueRow_t::iterator iter;
-      iter = std::find_if( 
-        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+      iter = std::find_if(
+        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
         [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
       assert( m_mapOptionValueRow.end() != iter );
-      
+
 //      std::cout << "column: " << m_nColumn << std::endl;
 
 //      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
@@ -186,15 +186,15 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
   //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
-  
+
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
-  
+
     if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
       mapOptionValueRow_t::iterator iter;
-      iter = std::find_if( 
-        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+      iter = std::find_if(
+        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
         [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
       assert( m_mapOptionValueRow.end() != iter );
 
@@ -221,22 +221,22 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
-  
+
   bool bSkip( true );
-  
+
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
-  
+
   if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
-    
+
     mapOptionValueRow_t::iterator iterOptionValueRow;
-    iterOptionValueRow = std::find_if( 
-      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+    iterOptionValueRow = std::find_if(
+      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iterOptionValueRow );
-    
+
     if ( nullptr != m_details.m_fOnRowClicked ) {
-      
+
       if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
         GridOptionChain::OptionUpdateFunctions funcCall;
         funcCall.sSymbolName = iterOptionValueRow->second.m_sCallName;
@@ -254,9 +254,9 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
         m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
       }
-      
+
     }
-  
+
   }
 
   event.Skip( bSkip );
@@ -264,7 +264,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
 bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropInstrument& dddi ) {
 
-#if defined(__WXMSW__) 
+#if defined(__WXMSW__)
       wxCursor cursor( wxCURSOR_HAND );
       wxDropSource dragSource( dndCall, &m_details, cursor, cursor, cursor );
 #elif defined(__WXGTK__)
@@ -273,7 +273,7 @@ bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropInstrument& dddi ) {
 #else
       assert(0);
 #endif
-      
+
       dragSource.SetData( dddi );
       //std::cout << "call drag start " << std::endl;
       wxDragResult result = dragSource.DoDragDrop( true );
@@ -293,22 +293,22 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
   //std::cout << "Notebook Begin Drag: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
   // use to toggle monitoring
-  
+
   bool bSkip( true );
-  
+
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
-  
+
   if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
-    
+
     mapOptionValueRow_t::iterator iterOptionValueRow;
-    iterOptionValueRow = std::find_if( 
-      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+    iterOptionValueRow = std::find_if(
+      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
       [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
     assert( m_mapOptionValueRow.end() != iterOptionValueRow );
-    
+
     if ( nullptr != m_details.m_fOnOptionUnderlyingRetrieveInitiate ) {
-      
+
       if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) { // call drag and drop
         ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
           m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f ); // iqfeed name and strike
@@ -322,7 +322,7 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
           m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f ); // iqfeed name and strike
         } );
 
-        bSkip = StartDragDrop( dndPut );    
+        bSkip = StartDragDrop( dndPut );
       }
     }
 
@@ -345,23 +345,23 @@ void GridOptionChain_impl::StopWatch() {
         funcPut.sSymbolName = value.second.m_sPutName;
 
         m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, funcCall, funcPut );
-      }		
+      }
     }
   });
 }
 
-void GridOptionChain_impl::DestroyControls() { 
+void GridOptionChain_impl::DestroyControls() {
 
-  TimerDeactivate();  
-  
+  TimerDeactivate();
+
   m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );
-  
+
   m_details.Unbind( wxEVT_GRID_LABEL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
   m_details.Unbind( wxEVT_GRID_CELL_LEFT_CLICK , &GridOptionChain_impl::OnGridLeftClick, this );
-  
+
   m_details.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
   m_details.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
-  
+
   m_details.Unbind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 

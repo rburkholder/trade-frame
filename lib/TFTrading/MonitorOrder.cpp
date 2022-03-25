@@ -80,7 +80,7 @@ double MonitorOrder::PriceInterval( double price ) const {
 }
 
 // can only work on one order at a time
-bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::enumOrderSide side ) {
+bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side ) {
   bool bOk( false );
   switch ( m_state ) {
     case State::NoOrder:

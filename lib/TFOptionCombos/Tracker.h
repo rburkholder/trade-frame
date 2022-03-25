@@ -81,7 +81,7 @@ private:
   lu_strike_t m_luStrike;
 
   double m_dblStrikePosition;
-  ou::tf::OptionSide::enumOptionSide m_sidePosition;
+  ou::tf::OptionSide::EOptionSide m_sidePosition;
 
   double m_dblUnderlyingPrice;
   double m_dblUnderlyingSlope;

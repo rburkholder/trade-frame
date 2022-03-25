@@ -56,7 +56,7 @@ public:
 
 protected:
 
-  enum enumTradeDirection { ETradeDirUnkn=0, ETradeDirUp, ETradeDirDn } m_TradeDirection;
+  enum class ETradeDirection { TradeDirUnkn=0, TradeDirUp, TradeDirDn } m_TradeDirection;
 
   bool m_bFirstTrade;
 
@@ -120,7 +120,7 @@ protected:
 
     double m_dblBollingerWidth;
 
-    void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
+    void SetProperties( ou::Colour::EColour colour, const std::string& sName ) {
       m_ceEma.SetName( sName );
       m_ceEma.SetColour( colour );
       m_ceUpperBollinger.SetColour( colour );

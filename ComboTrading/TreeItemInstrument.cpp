@@ -146,7 +146,7 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
   InstrumentViaDialog( ou::tf::Allowed::All, "Instrument Name" );
 }
 
-void TreeItemInstrument::InstrumentViaDialog( ou::tf::Allowed::enumInstrument selector, const std::string& sPrompt ) {
+void TreeItemInstrument::InstrumentViaDialog( ou::tf::Allowed::EInstrument selector, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
   wxString wsx( m_baseResources.signalGetItemText( m_id ) );
   if ( p->NewInstrumentViaDialog( selector, wsx ) ) {  // wsx is used as sUnderlying to new instrument, when needed
@@ -164,7 +164,7 @@ void TreeItemInstrument::InstrumentViaDialog( ou::tf::Allowed::enumInstrument se
 //   InstrumentViaDialog (above)
 //   TreeItemGroup::HandleAddInstrument
 bool TreeItemInstrument::NewInstrumentViaDialog(
-  ou::tf::Allowed::enumInstrument selector, const wxString& wxsUnderlying
+  ou::tf::Allowed::EInstrument selector, const wxString& wxsUnderlying
   ) {
   // IQF underlying name, and IB underlying name will need to be provided for naming options during lock
   // need to assume/assert that this is a new dialog?  or communicate it is a replacement?

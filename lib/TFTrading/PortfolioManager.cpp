@@ -59,17 +59,17 @@ namespace PortfolioManagerQueries {
       ou::db::Field( a, "positionid", idPosition );
     }
     const ou::tf::keytypes::idPosition_t idPosition;
-    OrderSide::enumOrderSide eOrderSidePending;
+    OrderSide::EOrderSide eOrderSidePending;
     boost::uint32_t nPositionPending;
-    OrderSide::enumOrderSide eOrderSideActive;
+    OrderSide::EOrderSide eOrderSideActive;
     boost::uint32_t nPositionActive;
     double dblConstructedValue;
     double dblUnRealizedPL;
     double dblRealizedPL;
     UpdatePositionData(
       const ou::tf::keytypes::idPosition_t idPosition_,
-      OrderSide::enumOrderSide eOrderSidePending_, boost::uint32_t nPositionPending_,
-      OrderSide::enumOrderSide eOrderSideActive_,  boost::uint32_t nPositionActive_,
+      OrderSide::EOrderSide eOrderSidePending_, boost::uint32_t nPositionPending_,
+      OrderSide::EOrderSide eOrderSideActive_,  boost::uint32_t nPositionActive_,
       double dblConstructedValue_,
       double dblUnRealizedPL_, double dblRealizedPL_ )
       : idPosition( idPosition_ ),

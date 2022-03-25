@@ -48,12 +48,12 @@ Strategy::Strategy(
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
+, m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+, m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
+, m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+, m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
   m_pFile = pFile;

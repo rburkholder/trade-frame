@@ -68,7 +68,7 @@ std::string Instrument::BuildDate( uint16_t year, uint16_t month, uint16_t day )
     ;
 }
 
-std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, OptionSide::enumOptionSide side, double strike ) { // month is 1 based
+std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, OptionSide::EOptionSide side, double strike ) { // month is 1 based
   std::string sGenericName;
   std::string::size_type pos = sUnderlying.find_first_of( "-" );
   if ( std::string::npos == pos ) {
@@ -94,7 +94,7 @@ std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, 
   return sGenericName;
 }
 
-std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, boost::gregorian::date date, OptionSide::enumOptionSide side, double strike ) {
+std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, boost::gregorian::date date, OptionSide::EOptionSide side, double strike ) {
   std::string sGenericName;
   std::string::size_type pos = sUnderlying.find_first_of( "-" );
   if ( std::string::npos == pos ) {
@@ -180,7 +180,7 @@ Instrument::Instrument(
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
 //  pInstrument_t pUnderlying,
-  OptionSide::enumOptionSide eOptionSide,
+  OptionSide::EOptionSide eOptionSide,
   double dblStrike )
   : m_row( idInstrument, eType, idExchange,
 //  pUnderlying->GetInstrumentName(),
@@ -204,7 +204,7 @@ Instrument::Instrument(
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //  pInstrument_t pUnderlying,
-  OptionSide::enumOptionSide eOptionSide,
+  OptionSide::EOptionSide eOptionSide,
   double dblStrike )
   : m_row( idInstrument, eType, idExchange,
 //  pUnderlying->GetInstrumentName(),
@@ -227,8 +227,8 @@ Instrument::Instrument(
 //                       const idInstrument_t& idCounterInstrument,
   InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
-  Currency::enumCurrency base,
-  Currency::enumCurrency counter
+  Currency::ECurrency base,
+  Currency::ECurrency counter
   )
   : m_row( idInstrument,
 //  idCounterInstrument,

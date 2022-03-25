@@ -124,6 +124,7 @@ void Position::Construction() {
   assert( nullptr != m_pWatch.get() );
   assert( nullptr != m_pWatch->GetProvider().get() );  // new validation, and could trip up some code
   m_dblMultiplier = m_pWatch->GetInstrument()->GetMultiplier();
+  std::cout << m_pWatch->GetInstrumentName() << " multiplier=" << m_dblMultiplier << std::endl;
 //  HandleQuote( m_pWatch->LastQuote() ); // ensure we have at least one quote (some options don't quote on very otm) -- watch not yet activated
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Position::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Position::HandleTrade ) );
@@ -200,8 +201,8 @@ void Position::HandleTrade( trade_t& trade ) {
 }
 
 Order::pOrder_t Position::PlaceOrder( // market
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity
 ) {
   pOrder_t pOrder = ConstructOrder( eOrderType, eOrderSide, nOrderQuantity );
@@ -210,8 +211,8 @@ Order::pOrder_t Position::PlaceOrder( // market
 }
 
 Order::pOrder_t Position::PlaceOrder( // limit or stop
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
   double dblPrice1
 ) {
@@ -221,8 +222,8 @@ Order::pOrder_t Position::PlaceOrder( // limit or stop
 }
 
 Order::pOrder_t Position::PlaceOrder( // limit and stop
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
   double dblPrice1,
   double dblPrice2
@@ -233,8 +234,8 @@ Order::pOrder_t Position::PlaceOrder( // limit and stop
 }
 
 Order::pOrder_t Position::ConstructOrder( // market
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity
 ) {
   assert( OrderSide::Unknown != eOrderSide );
@@ -247,8 +248,8 @@ Order::pOrder_t Position::ConstructOrder( // market
 }
 
 Order::pOrder_t Position::ConstructOrder( // limit or stop
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
   double dblPrice1
 ) {
@@ -262,8 +263,8 @@ Order::pOrder_t Position::ConstructOrder( // limit or stop
 }
 
 Order::pOrder_t Position::ConstructOrder( // limit and stop
-  OrderType::enumOrderType eOrderType,
-  OrderSide::enumOrderSide eOrderSide,
+  OrderType::EOrderType eOrderType,
+  OrderSide::EOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
   double dblPrice1,
   double dblPrice2
@@ -377,7 +378,7 @@ void Position::CancelOrder( pOrder_t& pOrder ) {
   OrderManager::LocalCommonInstance().CancelOrder( pOrder->GetOrderId() );
 }
 
-void Position::ClosePosition( OrderType::enumOrderType eOrderType ) {
+void Position::ClosePosition( OrderType::EOrderType eOrderType ) {
   // should outstanding orders be auto cancelled?
   // position is closed with a market order, can try to do limit in the future, but need active market data
   if ( 0 != m_row.nPositionActive ) {
@@ -394,7 +395,7 @@ void Position::ClosePosition( OrderType::enumOrderType eOrderType ) {
   }
 }
 
-void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
+void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::EOrderSide side ) {
 
   // can only be called by HandleExecution as HandleExecution uses the before and after values of RealizedPL
 

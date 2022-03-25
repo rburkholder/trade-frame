@@ -460,7 +460,7 @@ size_t /* static */ Collar::LegCount() {
   return sName;
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, uint32_t nOrderQuantity ) {
+void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
@@ -483,7 +483,7 @@ void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, uint32_t nOrderQ
   }
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::enumOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
+void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
 
   LegNote::Side ln_side = m_mapLeg[type].GetLegNote().Values().m_side; // this is normal entry with order_side as buy
 

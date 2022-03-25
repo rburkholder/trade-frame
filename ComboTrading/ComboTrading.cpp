@@ -391,7 +391,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   //m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 
   m_pPanelCharts->m_fSelectInstrument =
-    [this](const ou::tf::Allowed::enumInstrument selector, const wxString& sUnderlying)->pInstrument_t {
+    [this](const ou::tf::Allowed::EInstrument selector, const wxString& sUnderlying)->pInstrument_t {
       std::shared_ptr<ou::tf::IQFeedInstrumentBuild> pBuild;
       pBuild.reset( new ou::tf::IQFeedInstrumentBuild( m_pPanelCharts ) );
 
@@ -790,13 +790,13 @@ void AppComboTrading::TestSymbols( void ) {
       struct Option {
         std::string sName;
         std::string sIqBaseName;
-        ou::tf::OptionSide::enumOptionSide side;
+        ou::tf::OptionSide::EOptionSide side;
         double dblStrike;
         boost::uint16_t nYear;
         boost::uint8_t nMonth;
         boost::uint8_t nDay;
         std::string sIbBaseName;
-        Option( const std::string& sName_, ou::tf::OptionSide::enumOptionSide side_,
+        Option( const std::string& sName_, ou::tf::OptionSide::EOptionSide side_,
           const std::string& sIqBaseName_, const std::string& sIbBaseName_,
           boost::uint16_t nYear_, boost::uint8_t nMonth_, boost::uint8_t nDay_, double dblStrike_ ):
             sName( sName_ ), side( side_ ),

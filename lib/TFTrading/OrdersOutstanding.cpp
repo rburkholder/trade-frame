@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <math.h>
 
 #include <boost/lexical_cast.hpp>
@@ -22,11 +20,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) : 
+OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) :
   m_pPosition( pPosition ), m_cntRoundTrips( 0 ),
-  m_durRoundTripTime( 0, 0, 0 ), 
+  m_durRoundTripTime( 0, 0, 0 ),
   m_durForceRoundTripClose( 0, 60, 0 ),  // try something from 5 minutes to 10 minutes
-  m_durOrderOpenTimeOut( 0, 0, 30 ), 
+  m_durOrderOpenTimeOut( 0, 0, 30 ),
   m_dblGlobalStop( 0.0 ),
   m_bCancelAndCloseInProgress( false )
 {
@@ -54,9 +52,9 @@ void OrdersOutstanding::HandleBaseOrderCancelled( const ou::tf::Order& order ) {
   const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
   const_cast<ou::tf::Order&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
 
-  iter->second->eState = EStateCancelled;
+  iter->second->eState = EState::Cancelled;
 
-  m_mapEntryOrdersFilling.erase( iter ); 
+  m_mapEntryOrdersFilling.erase( iter );
 }
 
 void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::Order& order ) {
@@ -68,22 +66,22 @@ void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::Order& order ) {
   const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
   const_cast<ou::tf::Order&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
 
-  iter->second->eState = EStateOpen;
+  iter->second->eState = EState::Open;
 
   double dblBasis = order.GetAverageFillPrice();
   iter->second->dblBasis = dblBasis;
   m_mapOrdersToMatch.insert( mapOrders_pair_t( dblBasis, iter->second ) );
 
-  m_mapEntryOrdersFilling.erase( iter ); 
+  m_mapEntryOrdersFilling.erase( iter );
 }
 
 void OrdersOutstanding::CheckBaseOrder( const ou::tf::Quote& quote ) { // cancel after minimal pending time
   for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
-    if ( EStateOpenWaitingFill == iter->second->eState ) {
+    if ( EState::OpenWaitingFill == iter->second->eState ) {
       if ( iter->second->pOrderEntry->GetDateTimeOrderSubmitted() + m_durOrderOpenTimeOut < quote.DateTime() ) {
         // close out order after time out
         m_pPosition->CancelOrder( iter->second->pOrderEntry->GetOrderId() );
-        iter->second->eState = EStateOpenCancelling;
+        iter->second->eState = EState::OpenCancelling;
       }
     }
   }
@@ -93,8 +91,8 @@ void OrdersOutstanding::CancelAllButNEntryOrders( unsigned int n ) {
   size_t m = m_mapEntryOrdersFilling.size();
   mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin();
   while ( m > n ) {
-    if ( EStateOpenWaitingFill == iter->second->eState ) {
-      iter->second->eState = EStateOpenCancelling;
+    if ( EState::OpenWaitingFill == iter->second->eState ) {
+      iter->second->eState = EState::OpenCancelling;
       m_pPosition->CancelOrder( iter->first );
     }
     ++iter;
@@ -120,9 +118,9 @@ void OrdersOutstanding::CancelAndCloseAllOrders( void ) {
   m_bCancelAndCloseInProgress = true;
   m_stateCancelAndClose = CACStarted;
   for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
-    if ( EStateOpenWaitingFill == iter->second->eState ) {
+    if ( EState::OpenWaitingFill == iter->second->eState ) {
       m_pPosition->CancelOrder( iter->second->pOrderEntry->GetOrderId() );
-      iter->second->eState = EStateOpenCancelling;
+      iter->second->eState = EState::OpenCancelling;
     }
   }
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
@@ -155,11 +153,11 @@ bool OrdersOutstanding::CancelAndCloseInProgress( void ) {
             switch ( iter->second->pOrderEntry->GetOrderSide() ) {
             case ou::tf::OrderSide::Buy:
               PlaceOrder( iter->second->pOrderExit, "Cancel&Close " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-              iter->second->eState = EStateClosing;
+              iter->second->eState = EState::Closing;
               break;
             case ou::tf::OrderSide::Sell:
               PlaceOrder( iter->second->pOrderExit, "Cancel&Close " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-              iter->second->eState = EStateClosing;
+              iter->second->eState = EState::Closing;
               break;
             }
           }
@@ -231,23 +229,23 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::Quote& quote ) {
       for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
         std::string sId( boost::lexical_cast<std::string>( iter->second->pOrderEntry->GetOrderId() ) );
         if ( iter->first >= ask ) { // price is outside of profitable range
-          if ( 0 == iter->second->pOrderExit.use_count() ) { 
+          if ( 0 == iter->second->pOrderExit.use_count() ) {
             if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
               // close out round trip
               PlaceOrder( iter->second->pOrderExit, "LongClose " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-              iter->second->eState = EStateClosing;
+              iter->second->eState = EState::Closing;
             }
             else { // check stop
               if ( 0.0 != iter->second->dblStop ) {
                 if ( iter->second->dblStop > ask ) {
                   PlaceOrder( iter->second->pOrderExit, "LongStop " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-                  iter->second->eState = EStateClosing;
+                  iter->second->eState = EState::Closing;
                 }
               }
             }
           }
           else { // cancel existing order, but only do once, so look at status
-            if ( EStateClosing != iter->second->eState ) {
+            if ( EState::Closing != iter->second->eState ) {
                 m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
                 //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
             }
@@ -279,19 +277,19 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::Quote& quote ) {
             if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
               // close out round trip
               PlaceOrder( iter->second->pOrderExit, "ShortClose " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-              iter->second->eState = EStateClosing;
+              iter->second->eState = EState::Closing;
             }
             else { // check stop
               if ( 0.0 != iter->second->dblStop ) {
                 if ( iter->second->dblStop < bid ) {
                   PlaceOrder( iter->second->pOrderExit, "ShortStop " + sId, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-                  iter->second->eState = EStateClosing;
+                  iter->second->eState = EState::Closing;
                 }
               }
             }
           }
           else { // cancel existing order, but only do once, so look at status
-            if ( EStateClosing != iter->second->eState ) {
+            if ( EState::Closing != iter->second->eState ) {
               m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
               //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
             }
@@ -332,26 +330,26 @@ void OrdersOutstanding::PostMortemReport( void ) {
     double sq = sqrt( (double) sum );
 
     std::stringstream ss;
-    ss << "round trips=" << m_vCompletedRoundTrips.size() 
+    ss << "round trips=" << m_vCompletedRoundTrips.size()
       << ", avg dur=" << mn << ", stddev=" << sq / ( m_vCompletedRoundTrips.size() - 1 )
-      << ", avg dif=" << dif / m_vCompletedRoundTrips.size() 
+      << ", avg dif=" << dif / m_vCompletedRoundTrips.size()
       << std::endl;
   }
 }
 
-void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity ) {
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType type, ou::tf::OrderSide::EOrderSide side, boost::uint32_t nOrderQuantity ) {
   pOrder = m_pPosition->ConstructOrder(type, side, nOrderQuantity );
   pOrder->SetDescription( sDescription );
   PlaceOrder( pOrder );
 }
 
-void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1  ) {
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType type, ou::tf::OrderSide::EOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1  ) {
   pOrder = m_pPosition->ConstructOrder(type, side, nOrderQuantity, dblPrice1 );
   pOrder->SetDescription( sDescription );
   PlaceOrder( pOrder );
 }
 
-void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 ) {
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType type, ou::tf::OrderSide::EOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 ) {
   pOrder = m_pPosition->ConstructOrder(type, side, nOrderQuantity, dblPrice1, dblPrice2 );
   pOrder->SetDescription( sDescription );
   PlaceOrder( pOrder );

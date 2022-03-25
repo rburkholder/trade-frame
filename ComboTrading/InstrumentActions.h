@@ -44,16 +44,16 @@ public:
 
   struct values_t {
     std::string name_;
-    ou::tf::Allowed::enumInstrument selector;
+    ou::tf::Allowed::EInstrument selector;
     values_t( void ): selector( ou::tf::Allowed::All ) {}
     values_t( const values_t& rhs ): name_( rhs.name_ ), selector( rhs.selector ) {}
-    values_t( const std::string& name, const ou::tf::Allowed::enumInstrument selector_ )
+    values_t( const std::string& name, const ou::tf::Allowed::EInstrument selector_ )
       : name_( name ), selector( selector_ ) {}
   };
 
   // used in TreeItemInstrument
   typedef boost::signals2::signal<values_t (
-    const wxTreeItemId&, ou::tf::Allowed::enumInstrument, const wxString&),
+    const wxTreeItemId&, ou::tf::Allowed::EInstrument, const wxString&),
       ou::tf::FirstOrDefault<values_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrument;

@@ -84,8 +84,8 @@ void IQFeedSymbol::HandleFundamentalMessage(
         for ( std::string::const_reverse_iterator iter = symbol.rbegin(); iter != symbol.rend(); iter++ ) {
           if ( ( '.' == *iter ) || ( ('0' <= *iter ) && ( '9' >= *iter ) ) ) {}
           else {
-            if ( 'L' >= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Call;
-            if ( 'M' <= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Put;
+            if ( 'L' >= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::EOptionSide::Call;
+            if ( 'M' <= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::EOptionSide::Put;
             break;
           }
         }

@@ -40,7 +40,7 @@ struct Fundamentals {
   int nAverageVolume;
   int nOpenInterest; // from Update message, not set currently
   ESecurityType eSecurityType;
-  ou::tf::OptionSide::enumOptionSide eOptionSide;
+  ou::tf::OptionSide::EOptionSide eOptionSide;
   double dblHistoricalVolatility;
   double dblStrikePrice;
   double dblPriceEarnings;

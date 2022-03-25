@@ -55,7 +55,7 @@ public:
 
   void Tick( ptime dt, double price );
 
-  void PlaceOrder( ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
+  void PlaceOrder( ou::tf::OrderSide::EOrderSide, boost::uint32_t nOrderQuantity );
   void CancelOrder();
   pPosition_t ClosePosition();
   bool IsActive() const;
@@ -63,7 +63,7 @@ public:
 
   void SaveSeries( const std::string& sPrefix );
 
-  void SetChartData( pChartDataView_t pChartData, ou::Colour::enumColour );
+  void SetChartData( pChartDataView_t pChartData, ou::Colour::EColour );
   void DelChartData();
 
   bool CloseItm( const double price );

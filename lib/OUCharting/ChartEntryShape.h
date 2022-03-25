@@ -26,11 +26,11 @@ namespace ou { // One Unified
 class ChartEntryShape :
   public ChartEntryPrice {
 public:
-  enum enumShape { EDefault, ELong, EShort, EFillLong, EFillShort, ELongStop, EShortStop };
+  enum class EShape { Default=0, Long, Short, FillLong, FillShort, LongStop, ShortStop };
   ChartEntryShape();
-  ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
-  void SetShape( enumShape shape ) { m_eShape = shape; };
-  enumShape GetShape() const { return m_eShape; };
+  ChartEntryShape( EShape eShape, ou::Colour::EColour colour );
+  void SetShape( EShape shape ) { m_eShape = shape; };
+  EShape GetShape() const { return m_eShape; };
   virtual ~ChartEntryShape(void);
   void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
@@ -49,7 +49,7 @@ protected:
   vpChar_t m_vpChar;
 
   static int m_rShapes[];  // constants
-  enumShape m_eShape;
+  EShape m_eShape;
   StringArray GetLabels() const {
     //std::vector<const char *>::const_iterator iter = m_vpChar.begin();
     //return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );

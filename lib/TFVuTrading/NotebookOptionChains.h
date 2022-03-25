@@ -11,10 +11,10 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-/* 
+/*
  * File:   NotebookOptionChains.h
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on July 2, 2017, 8:16 PM
  */
 
@@ -49,49 +49,49 @@ namespace tf { // TradeFrame
 class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
   friend class boost::serialization::access;
 public:
-  
+
   NotebookOptionChains();
-  NotebookOptionChains( 
-    wxWindow* parent, wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME, 
-    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION, 
-    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE, 
+  NotebookOptionChains(
+    wxWindow* parent, wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME,
+    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION,
+    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE,
     long style = SYMBOL_OPTIONCHAINS_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINS_TITLE );
   virtual ~NotebookOptionChains();
 
-  bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME, 
-    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION, 
-    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE, 
+  bool Create( wxWindow* parent,
+    wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME,
+    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION,
+    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE,
     long style = SYMBOL_OPTIONCHAINS_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINS_TITLE  );
-  
+
   void SetName( const std::string& sName );  // underlying
-  void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::enumOptionSide, const std::string& sSymbol );
-  
+  void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
+
   typedef std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
-  
+
   typedef std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )> fOnOptionUnderlyingRetrieve_t;
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
-  
+
   typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
-  
+
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
-  
+
 // really don't want these here, but necessary to deal with searchdynamiceventtable issues
   virtual void BindEvents();
   virtual void UnbindEvents();
-  
+
 protected:
 private:
-  
-  enum { 
+
+  enum {
     ID_Null=wxID_HIGHEST, ID_NOTEBOOK_OPTIONDETAILS
   };
-  
+
   // put/call at strike
   struct Row {
     int ixRow;
@@ -99,10 +99,10 @@ private:
     std::string sPut;
     explicit Row( int ix = 0 ): ixRow( ix ) {}
   };
-  
+
   // the strike list
   typedef std::map<double, Row> mapStrike_t;
-  
+
   struct Tab {
     size_t ixTab;
     std::string sDate;
@@ -114,28 +114,28 @@ private:
     Tab( const std::string& s, wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
       : ixTab{}, sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
   };
-  
+
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;
-  
+
   mapOptionExpiry_t m_mapOptionExpiry;
-  
+
   bool m_bBound;
-  
+
   std::string m_sName;  // should be underlying so can use to lookup in PanelCharts
-  
+
   ou::tf::GridColumnSizer* m_pgcsGridOptionChain;
-  
+
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
-  
+
   void Init();
   void CreateControls();
   void OnDestroy( wxWindowDestroyEvent& event );
-  
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
-  
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);

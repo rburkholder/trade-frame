@@ -365,7 +365,7 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
   if ( m_DialogSimpleOneLineOrder_DataExchange.bOk ) {
     // compose order and send it off
     // need to know for which position the order is meant
-    ou::tf::OrderSide::enumOrderSide eOrderSide;
+    ou::tf::OrderSide::EOrderSide eOrderSide;
 //    ou::tf::OrderType::enumOrderType eOrderType;
     pPositionGreek_t pPositionGreek( m_vPositions[ m_nRowRightClick ]->GetPositionGreek() );
     bool bOk( true );

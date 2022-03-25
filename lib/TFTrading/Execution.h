@@ -50,7 +50,7 @@ public:
     idOrder_t idOrder;
     boost::uint32_t nQuantity;  // quantity executed
     double dblPrice;  // execution price
-    OrderSide::enumOrderSide eOrderSide;
+    OrderSide::EOrderSide eOrderSide;
     ptime dtExecutionTimeStamp;
     std::string sExchange;
     std::string sExchangeExecutionId;  // unique execution id supplied by provider
@@ -58,13 +58,13 @@ public:
     TableRowDefNoKey() : idOrder( 0 ), nQuantity( 0 ), dblPrice( 0.0 ),
       eOrderSide( OrderSide::Unknown ) {};
     TableRowDefNoKey( idOrder_t idOrder_,
-      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::EOrderSide eOrderSide_,
       std::string sExchange_, std::string sExchangeExecutionId_ )
       : idOrder( idOrder_ ), nQuantity( nQuantity_ ),
         dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ),
         sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
     TableRowDefNoKey( /* idOrder_t idOrder_, */
-      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::EOrderSide eOrderSide_,
       std::string sExchange_, std::string sExchangeExecutionId_ )
       : idOrder( 0 ), nQuantity( nQuantity_ ),  // idOrder from owner
         dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ),
@@ -81,12 +81,12 @@ public:
 
     TableRowDef() : idExecution( 0 ), TableRowDefNoKey() {};
     TableRowDef( idExecution_t idExecution_, idOrder_t idOrder_,
-      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::EOrderSide eOrderSide_,
       std::string sExchange_, std::string sExchangeExecutionId_ )
       : idExecution( idExecution_ ), TableRowDefNoKey( idOrder_, nQuantity_,
         dblPrice_, eOrderSide_, sExchange_, sExchangeExecutionId_ ) {};
     TableRowDef( /* idExecution_t idExecution_, idOrder_t idOrder_, */
-      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::EOrderSide eOrderSide_,
       std::string sExchange_, std::string sExchangeExecutionId_ )
       : idExecution( 0 ), TableRowDefNoKey( nQuantity_,  // executionid from db, idOrder from owner
         dblPrice_, eOrderSide_, sExchange_, sExchangeExecutionId_ ) {};
@@ -104,16 +104,16 @@ public:
   Execution( const TableRowDef& row ): m_row( row ) {};
   Execution( // when relating to database
     idExecution_t idExecution, idOrder_t nOrderId,
-    double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
+    double dblPrice, boost::uint32_t nQuantity, OrderSide::EOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExchangeExecutionId );
   Execution( // when supplied by provider
-    double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
+    double dblPrice, boost::uint32_t nQuantity, OrderSide::EOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExchangeExecutionId );
   ~Execution();
 
   double GetPrice() const { return m_row.dblPrice; };
   boost::uint32_t GetSize() const { return m_row.nQuantity; };
-  OrderSide::enumOrderSide GetOrderSide() const { return m_row.eOrderSide; };
+  OrderSide::EOrderSide GetOrderSide() const { return m_row.eOrderSide; };
   const std::string& GetExchange() const { return m_row.sExchange; };
   const std::string& GetExchangeExecutionId() const { return m_row.sExchangeExecutionId; };
   ptime GetTimeStamp() const { return m_row.dtExecutionTimeStamp; };

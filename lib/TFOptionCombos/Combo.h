@@ -56,9 +56,9 @@ public:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   using citerChain_t = mapChains_t::const_iterator;
 
-  using EColour = ou::Colour::enumColour;
-  using EOptionSide = ou::tf::OptionSide::enumOptionSide;
-  using EOrderSide = ou::tf::OrderSide::enumOrderSide;
+  using EColour = ou::Colour::EColour;
+  using EOptionSide = ou::tf::OptionSide::EOptionSide;
+  using EOrderSide = ou::tf::OrderSide::EOrderSide;
 
   using fBuildPositionCallBack_t
     = std::function<void(pPosition_t,pChartDataView_t,EColour)>;
@@ -107,12 +107,12 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::enumColour );
+  const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::EColour );
 
   virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity ) = 0;
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ) = 0;
+  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
+  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type ) = 0;
 
   virtual double GetNet( double price );
 

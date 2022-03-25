@@ -59,8 +59,8 @@ public:
   ChartEntryBase( ChartEntryBase&& );
   virtual ~ChartEntryBase();
 
-  ou::Colour::enumColour GetColour() const { return m_eColour; };
-  virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
+  ou::Colour::EColour GetColour() const { return m_eColour; };
+  virtual void SetColour( ou::Colour::EColour colour ) { m_eColour = colour; };
 
   void SetName( const std::string& name ) { m_sName = name; };
   const std::string& GetName() const { return m_sName; };
@@ -78,7 +78,7 @@ public:
 
 protected:
 
-  ou::Colour::enumColour m_eColour;
+  ou::Colour::EColour m_eColour;
   std::string m_sName;
 
   size_t IxStart() const { return m_ixStart; }

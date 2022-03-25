@@ -167,7 +167,7 @@ Strategy::~Strategy() {
 }
 
 // called by UpdateStochasticSmoothed1, which is unused
-void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
+void Strategy::Entry1( ou::tf::OrderSide::EOrderSide side ) {
   static const double multiplier( 2.0 );
   // TODO: need to track orders, nothing new while existing ones active?
   m_trade.offset = multiplier * m_dblAverageBarSize;
@@ -179,13 +179,13 @@ void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
   //const double dblLower = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry - dblOffset );
 
   switch ( side ) {
-    case ou::tf::OrderSide::enumOrderSide::Buy:
+    case ou::tf::OrderSide::EOrderSide::Buy:
       m_trade.entry = m_quoteLast.Ask();  // TODO: set based upon execution price
       // TODO: adjust when entry is executed?
       //double dblProfit = m_trade.entry + multiplier * tick;
       m_trade.trail = m_trade.entry - m_trade.offset;
       break;
-    case ou::tf::OrderSide::enumOrderSide::Sell:
+    case ou::tf::OrderSide::EOrderSide::Sell:
       m_trade.entry = m_quoteLast.Bid();  // TODO: set based upon execution price
       //double dblProfit = dblEntry - multiplier * tick;
       m_trade.trail = m_trade.entry + m_trade.offset;
@@ -195,7 +195,7 @@ void Strategy::Entry1( ou::tf::OrderSide::enumOrderSide side ) {
   Entry( side, "" );
 }
 
-void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side, const std::string& sComment ) {
+void Strategy::Entry2( ou::tf::OrderSide::EOrderSide side, const std::string& sComment ) {
   //m_trade.offset = m_stopUpper - m_stopLower;
   //if ( min > m_trade.offset ) m_trade.offset = min;
   // TODO: fix so that the stop is dragged up / down slowly, until just beyond the other crossing line
@@ -210,17 +210,17 @@ void Strategy::Entry2( ou::tf::OrderSide::enumOrderSide side, const std::string&
   Entry( side, sComment );
 }
 
-void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& sComment ) {
+void Strategy::Entry( ou::tf::OrderSide::EOrderSide side, const std::string& sComment ) {
   if ( 0.0 < m_tradeLast.Price() ) {
     m_trade.side = side;
     switch ( side ) {
-      case ou::tf::OrderSide::enumOrderSide::Buy: {
+      case ou::tf::OrderSide::EOrderSide::Buy: {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "lEn" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Market,
-          ou::tf::OrderSide::enumOrderSide::Buy,
+          ou::tf::OrderType::EOrderType::Market,
+          ou::tf::OrderSide::EOrderSide::Buy,
           1
           //m_trade.entry
           // idPosition
@@ -245,13 +245,13 @@ void Strategy::Entry( ou::tf::OrderSide::enumOrderSide side, const std::string& 
 */
         }
         break;
-      case ou::tf::OrderSide::enumOrderSide::Sell: {
+      case ou::tf::OrderSide::EOrderSide::Sell: {
 
         ou::ChartDVBasics::m_ceShortEntries.AddLabel( m_quoteLast.DateTime(), m_trade.entry, "sEn" );
         //m_ceStop.AddLabel( m_quoteLast.DateTime(), m_trade.trail, "" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Market,
-          ou::tf::OrderSide::enumOrderSide::Sell,
+          ou::tf::OrderType::EOrderType::Market,
+          ou::tf::OrderSide::EOrderSide::Sell,
           1
           //m_trade.entry
           // idPosition
@@ -296,8 +296,8 @@ void Strategy::Exit( EExitType typeExit, ou::tf::Quote::dt_t dt, double exit, co
     case ou::tf::OrderSide::Buy: {
       ou::ChartDVBasics::m_ceLongExits.AddLabel( dt, exit, "lEx" );
       m_pOrderExit = m_pPosition->ConstructOrder(
-        ou::tf::OrderType::enumOrderType::Market,
-        ou::tf::OrderSide::enumOrderSide::Sell,
+        ou::tf::OrderType::EOrderType::Market,
+        ou::tf::OrderSide::EOrderSide::Sell,
         1
         //dblLoss,
         //dblEntry - dblLoss
@@ -309,8 +309,8 @@ void Strategy::Exit( EExitType typeExit, ou::tf::Quote::dt_t dt, double exit, co
     case ou::tf::OrderSide::Sell: {
       ou::ChartDVBasics::m_ceShortExits.AddLabel( dt, exit, "sEx" );
       m_pOrderExit = m_pPosition->ConstructOrder(
-        ou::tf::OrderType::enumOrderType::Market,
-        ou::tf::OrderSide::enumOrderSide::Buy,
+        ou::tf::OrderType::EOrderType::Market,
+        ou::tf::OrderSide::EOrderSide::Buy,
         1
         //dblLoss,
         //dblLoss - dblEntry

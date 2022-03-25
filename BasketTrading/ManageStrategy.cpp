@@ -87,7 +87,7 @@ using combo_t = ou::tf::option::Collar;
 #include "ManageStrategy.h"
 
 namespace {
-  ou::Colour::enumColour rColour[] = {
+  ou::Colour::EColour rColour[] = {
     ou::Colour::DarkBlue,
     ou::Colour::DarkCyan,
     ou::Colour::MediumSlateBlue,
@@ -255,12 +255,12 @@ ManageStrategy::ManageStrategy(
   //m_eOptionState( EOptionState::Initial1 ),
 
   m_ixColour {},
-  m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
-  m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
-  m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
-  m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
-  m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
-  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+  m_ceShortEntries( ou::ChartEntryShape::EShape::Short, ou::Colour::Red ),
+  m_ceLongEntries( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue ),
+  m_ceShortFills( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red ),
+  m_ceLongFills( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue ),
+  m_ceShortExits( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red ),
+  m_ceLongExits( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 {
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );

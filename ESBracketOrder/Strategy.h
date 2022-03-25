@@ -48,7 +48,7 @@ public:
   virtual ~Strategy();
 
   void HandleButtonUpdate();
-  void HandleButtonSend( ou::tf::OrderSide::enumOrderSide );
+  void HandleButtonSend( ou::tf::OrderSide::EOrderSide );
   //void HandleButtonSend();
   void HandleButtonCancel();
 
@@ -206,7 +206,7 @@ private:
   struct StateInfo {
     size_t nBarDuration; // use bars to determine waiting period to entry, or cancel
     BarMatching barMatching;
-    ou::tf::OrderSide::enumOrderSide sideEntry;
+    ou::tf::OrderSide::EOrderSide sideEntry;
     double dblEntryPrice;
     StateInfo(): dblEntryPrice {} {};
   };
@@ -216,7 +216,7 @@ private:
   enum class EState { initial, entry_wait, entry_filling, entry_cancelling, exit_filling, cancel_wait, quiesce };
   EState m_state;
 
-  using mapEntry_t = std::map<BarMatching,ou::tf::OrderSide::enumOrderSide>;
+  using mapEntry_t = std::map<BarMatching,ou::tf::OrderSide::EOrderSide>;
   mapEntry_t m_mapEntry;
 
   void HandleQuote( const ou::tf::Quote& );

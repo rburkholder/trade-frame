@@ -26,8 +26,8 @@
 #include <boost/fusion/algorithm/transformation/filter.hpp>
 #include <boost/fusion/include/filter.hpp>
 
+#include <wx/timer.h>
 #include <wx/stattext.h>
-//#include <wx/sizer.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -78,23 +78,23 @@ struct GridOptionChain_impl {
   typedef boost::fusion::VECTOR_DEF<
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
-  
+
   struct OptionValueRow {
   //public:
     OptionValueRow( wxGrid& grid, double strike )
       : m_grid( grid ), m_nRow {}, m_bSelected( false )
-      { 
-	      Init(); 
+      {
+	      Init();
         boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike );
       }
     OptionValueRow( const OptionValueRow& rhs )
       : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ), m_bSelected( rhs.m_bSelected )
-    { 
-      Init(); 
+    {
+      Init();
       boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Strike>( rhs.m_vModelCells ).GetValue() );
     }
     ~OptionValueRow( void ) {}
-    
+
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
@@ -124,51 +124,51 @@ struct GridOptionChain_impl {
     }
   //protected:
   //private:
-    
+
     std::string m_sCallName;
     std::string m_sPutName;
-    
+
     bool m_bSelected;
-    
+
     wxGrid& m_grid;
     int m_nRow;
     vModelCells_t m_vModelCells;
-    
+
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
     }
   };  // struct OptionValueRow
-  
+
   typedef std::map<double,OptionValueRow> mapOptionValueRow_t;
   typedef mapOptionValueRow_t::iterator mapOptionValueRow_iter;
   mapOptionValueRow_t m_mapOptionValueRow;
 
   int m_nRow;
   int m_nColumn;
-  
+
   mapOptionValueRow_iter FindOptionValueRow( double );
-  
-  void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
+
+  void Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol );
   void SetSelected( double strike, bool bSelected );
-  
+
   bool m_bTimerActive;
   void TimerActivate();
   void TimerDeactivate();
-  
+
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
 
   void StopWatch();
   void DestroyControls();
-  
+
   void OnGridLeftClick( wxGridEvent& event );
   void OnGridRightClick( wxGridEvent& event );
   void OnMouseMotion( wxMouseEvent& event );
   void OnGridCellBeginDrag( wxGridEvent& event );
-  
+
   bool StartDragDrop( DragDropInstrument& );
-  
+
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );
 
@@ -186,7 +186,7 @@ struct GridOptionChain_impl {
 template<class Archive>
 void GridOptionChain::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
-}  
+}
 
 } // namespace tf
 } // namespace ou

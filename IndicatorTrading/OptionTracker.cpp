@@ -30,11 +30,11 @@ OptionTracker::OptionTracker(
 , m_volCallBuy {}, m_volCallSell {}, m_volPutBuy {}, m_volPutSell {}
 , m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
 , m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
-, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
-, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
 {
   Add();
   std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
@@ -46,11 +46,11 @@ OptionTracker::OptionTracker( const OptionTracker& rhs )
 , m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
 , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
 , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
-, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
 
 {
   Add();
@@ -62,11 +62,11 @@ OptionTracker::OptionTracker( OptionTracker&& rhs )
 , m_volPutBuy( rhs.m_volPutBuy ), m_volPutSell( rhs.m_volPutSell)
 , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
 , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
-, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
 {
   rhs.Del();
   m_pOption = std::move( rhs.m_pOption );

@@ -26,8 +26,8 @@ Order::Order() {
 
 Order::Order( // market order
   Instrument::pInstrument_cref pInstrument
-, OrderType::enumOrderType eOrderType
-, OrderSide::enumOrderSide eOrderSide
+, OrderType::EOrderType eOrderType
+, OrderSide::EOrderSide eOrderSide
 , boost::uint32_t nOrderQuantity
 , idPosition_t idPosition
 , ptime dtOrderSubmitted
@@ -44,8 +44,8 @@ Order::Order( // market order
 
 Order::Order( // limit or stop
   Instrument::pInstrument_cref pInstrument
-, OrderType::enumOrderType eOrderType
-, OrderSide::enumOrderSide eOrderSide
+, OrderType::EOrderType eOrderType
+, OrderSide::EOrderSide eOrderSide
 , boost::uint32_t nOrderQuantity
 , double dblPrice1
 , idPosition_t idPosition
@@ -63,8 +63,8 @@ Order::Order( // limit or stop
 
 Order::Order( // limit and stop
   Instrument::pInstrument_cref pInstrument
-, OrderType::enumOrderType eOrderType
-, OrderSide::enumOrderSide eOrderSide
+, OrderType::EOrderType eOrderType
+, OrderSide::EOrderSide eOrderSide
 , boost::uint32_t nOrderQuantity
 , double dblPrice1, double dblPrice2
 , idPosition_t idPosition
@@ -113,7 +113,7 @@ void Order::SetSendingToProvider() {
   m_row.dtOrderSubmitted = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) {
+OrderStatus::EOrderStatus Order::ReportExecution(const Execution &exec) {
   // need to worry about fill after cancel, has multiple states:  canceling, fill during cancel, canceled
   assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
@@ -180,7 +180,7 @@ OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) {
   return m_row.eOrderStatus;
 }
 
-void Order::ActOnError(OrderError::enumOrderError eError) {
+void Order::ActOnError(OrderError::EOrderError eError) {
   switch( eError ) {
     case OrderError::Cancelled:
       m_row.eOrderStatus = OrderStatus::Cancelled;

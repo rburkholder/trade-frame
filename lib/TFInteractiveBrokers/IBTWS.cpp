@@ -43,7 +43,7 @@ namespace {
 
 // TODO: use spirit to parse?  will it be faster?
 struct DecodeStatusWord {
-  enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
+  enum EStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
   DecodeStatusWord( void ): kwm( Unknown, 50 ) {
     kwm.AddPattern( "Cancelled", Cancelled );
     kwm.AddPattern( "Filled", Filled );
@@ -53,9 +53,9 @@ struct DecodeStatusWord {
     kwm.AddPattern( "PendingSubmit", PendingSubmit );
     kwm.AddPattern( "PendingCancel", PendingCancel );
   }
-  enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
+  EStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
 private:
-  ou::KeyWordMatch<enumStatus> kwm;;
+  ou::KeyWordMatch<EStatus> kwm;;
 };
 
 DecodeStatusWord dsw;
@@ -680,7 +680,7 @@ void TWS::openOrder( ::OrderId orderId, const ::Contract& contract, const ::Orde
       // reports total commission for order rather than increment
       OrderManager::Instance().ReportCommission( orderId, state.commission );
     // use spirit to do this to make it faster with a trie, or use keyword match
-    DecodeStatusWord::enumStatus status = dsw.Match( state.status );
+    DecodeStatusWord::EStatus status = dsw.Match( state.status );
     switch ( status ) {
     case DecodeStatusWord::Submitted:
       break;
@@ -730,7 +730,7 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
     //std::cout << m_ss.str();  // ****
 //    OutputDebugString( m_ss.str().c_str() );
   }
-  DecodeStatusWord::enumStatus status_ = dsw.Match( status );
+  DecodeStatusWord::EStatus status_ = dsw.Match( status );
   switch ( status_ ) {
     case DecodeStatusWord::Cancelled:
       OrderManager::Instance().ReportCancellation( orderId );
@@ -765,7 +765,7 @@ void TWS::execDetails( int reqId, const ::Contract& contract, const ::Execution&
 //  std::cout << m_ss.str();  // ****
 //  OutputDebugString( m_ss.str().c_str() );
 
-  OrderSide::enumOrderSide side = OrderSide::Unknown;
+  OrderSide::EOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
   if ( "SLD" == execution.side ) side = OrderSide::Sell;
   if ( OrderSide::Unknown == side ) {
@@ -1239,7 +1239,7 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
   std::string sLocalSymbol( contract.localSymbol );  // and this to name them properly
   std::string sExchange( contract.exchange );
 
-  OptionSide::enumOptionSide os( OptionSide::Unknown );
+  OptionSide::EOptionSide os( OptionSide::Unknown );
 
   // calculate expiry, used with FuturesOption, Option   "GLD   120210C00159000"
   boost::gregorian::date dtExpiryRequested( boost::gregorian::not_a_date_time );
@@ -1329,11 +1329,11 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
     case InstrumentType::Currency: {
       // 20151227 will need to step this to see if it works, with no sUnderlying
       bFound = false;
-      Currency::enumCurrency base = Currency::_Count;
+      Currency::ECurrency base = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
         if ( 0 == strcmp( Currency::Name[ ix ], sBaseName.c_str() ) ) {
           bFound = true;
-          base = static_cast<Currency::enumCurrency>( ix );
+          base = static_cast<Currency::ECurrency>( ix );
           break;
         }
       }
@@ -1347,11 +1347,11 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
       ++szCounter;  // advance to character after '.'
 
       bFound = false;
-      Currency::enumCurrency counter = Currency::_Count;
+      Currency::ECurrency counter = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
         if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
           bFound = true;
-          counter = static_cast<Currency::enumCurrency>( ix );
+          counter = static_cast<Currency::ECurrency>( ix );
           break;
         }
       }

@@ -111,7 +111,7 @@ Strategy::~Strategy() {
 void Strategy::HandleButtonUpdate() {
 }
 
-void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
+void Strategy::HandleButtonSend( ou::tf::OrderSide::EOrderSide side ) {
   // TODO: need to track orders, nothing new while existing ones active?
   double dblOffset( 2.0 * m_dblAverageBarSize );
   double tick = m_pWatch->GetInstrument()->GetMinTick();
@@ -123,7 +123,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
   //const double dblLower = m_pWatch->GetInstrument()->NormalizeOrderPrice( dblEntry - dblOffset );
   if ( 0.0 < m_tradeLast.Price() ) {
     switch ( side ) {
-      case ou::tf::OrderSide::enumOrderSide::Buy: {
+      case ou::tf::OrderSide::EOrderSide::Buy: {
 
         double dblEntry = m_quoteLast.Ask();
         // TODO: adjust when entry is executed?
@@ -132,8 +132,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "long entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
-          ou::tf::OrderSide::enumOrderSide::Buy,
+          ou::tf::OrderType::EOrderType::Limit,
+          ou::tf::OrderSide::EOrderSide::Buy,
           1,
           m_quoteLast.Ask()
           // idPosition
@@ -145,8 +145,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblProfit, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
-          ou::tf::OrderSide::enumOrderSide::Sell,
+          ou::tf::OrderType::EOrderType::Limit,
+          ou::tf::OrderSide::EOrderSide::Sell,
           1,
           dblProfit
           // idPosition
@@ -158,8 +158,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLoss, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Trail,
-          ou::tf::OrderSide::enumOrderSide::Sell,
+          ou::tf::OrderType::EOrderType::Trail,
+          ou::tf::OrderSide::EOrderSide::Sell,
           1,
           dblLoss,
           dblEntry - dblLoss
@@ -171,7 +171,7 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
         m_pOrderStop->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
         }
         break;
-      case ou::tf::OrderSide::enumOrderSide::Sell: {
+      case ou::tf::OrderSide::EOrderSide::Sell: {
 
         double dblEntry = m_quoteLast.Bid();
         double dblProfit = dblEntry - 2.0 * tick;
@@ -179,8 +179,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblEntry, "short entry" );
         m_pOrderEntry = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
-          ou::tf::OrderSide::enumOrderSide::Sell,
+          ou::tf::OrderType::EOrderType::Limit,
+          ou::tf::OrderSide::EOrderSide::Sell,
           1,
           dblEntry
           // idPosition
@@ -192,8 +192,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblProfit, "profit target" );
         m_pOrderProfit = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Limit,
-          ou::tf::OrderSide::enumOrderSide::Buy,
+          ou::tf::OrderType::EOrderType::Limit,
+          ou::tf::OrderSide::EOrderSide::Buy,
           1,
           dblProfit
           // idPosition
@@ -205,8 +205,8 @@ void Strategy::HandleButtonSend( ou::tf::OrderSide::enumOrderSide side ) {
 
         ou::ChartDVBasics::m_ceLongEntries.AddLabel( m_tradeLast.DateTime(), dblLoss, "loss target" );
         m_pOrderStop = m_pPosition->ConstructOrder(
-          ou::tf::OrderType::enumOrderType::Trail,
-          ou::tf::OrderSide::enumOrderSide::Buy,
+          ou::tf::OrderType::EOrderType::Trail,
+          ou::tf::OrderSide::EOrderSide::Buy,
           1,
           dblLoss,
           dblLoss - dblEntry

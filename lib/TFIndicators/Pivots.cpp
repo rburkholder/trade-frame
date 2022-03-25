@@ -24,7 +24,7 @@ namespace tf { // TradeFrame
 const std::string PivotSet::m_sPivotNames[ PivotSet::PivotCount ]
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
-const ou::Colour::enumColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ]
+const ou::Colour::EColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ]
   = { ou::Colour::Tomato, ou::Colour::OrangeRed, ou::Colour::Orange, ou::Colour::RosyBrown, ou::Colour::Red, ou::Colour::Pink,
       ou::Colour::DarkRed,
       ou::Colour::BlueViolet, ou::Colour::Blue, ou::Colour::RoyalBlue, ou::Colour::Purple, ou::Colour::SkyBlue, ou::Colour::Violet };

@@ -34,12 +34,12 @@ ChartDVBasics::ChartDVBasics()
   , m_rocTickDiffs( m_pricesTickDiffsROC, seconds( 30 ) )
   , m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 )
   , m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
-  , m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red )
-  , m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-  , m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-  , m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-  , m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
-  , m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+  , m_ceShortEntries( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+  , m_ceLongEntries( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+  , m_ceShortFills( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+  , m_ceLongFills( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+  , m_ceShortExits( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
+  , m_ceLongExits( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 
 {
 
@@ -218,12 +218,12 @@ void ChartDVBasics::HandleTrade( const ou::tf::Trade& trade ) {
     double mid = m_quoteLast.Midpoint();
     if ( price == mid ) {
       switch ( m_TradeDirection ) {
-      case ETradeDirUnkn:
-        m_TradeDirection = ETradeDirUp;  // default to up
+      case ETradeDirection::TradeDirUnkn:
+        m_TradeDirection = ETradeDirection::TradeDirUp;  // default to up
         //break; fall through instead
-      case ETradeDirUp:  // leave as is
+      case ETradeDirection::TradeDirUp:  // leave as is
         break;
-      case ETradeDirDn: // leave as is
+      case ETradeDirection::TradeDirDn: // leave as is
         break;
       }
       ++m_dblMdTicks;
@@ -231,14 +231,14 @@ void ChartDVBasics::HandleTrade( const ou::tf::Trade& trade ) {
     }
     else {
       if ( price > mid ) {
-        m_TradeDirection = ETradeDirUp;   // definitively up
+        m_TradeDirection = ETradeDirection::TradeDirUp;   // definitively up
         //++m_dblMdTicks;
         m_pricesTickDiffs.Append( ou::tf::Price( dt, +1.0 ) );
         ++m_dblUpTicks;
         m_dblUpVolume += trade.Volume();
       }
       else {
-        m_TradeDirection = ETradeDirDn;  // definitively down
+        m_TradeDirection = ETradeDirection::TradeDirDn;  // definitively down
         //--m_dblMdTicks;
         m_pricesTickDiffs.Append( ou::tf::Price( dt, -1.0 ) );
         ++m_dblDnTicks;
@@ -247,13 +247,13 @@ void ChartDVBasics::HandleTrade( const ou::tf::Trade& trade ) {
     }
 
     switch ( m_TradeDirection ) {
-    case ETradeDirUp:
+    case ETradeDirection::TradeDirUp:
       m_bfBuys.Add( trade );
       break;
-    case ETradeDirDn:
+    case ETradeDirection::TradeDirDn:
       m_bfSells.Add( trade );
       break;
-    case ETradeDirUnkn:
+    case ETradeDirection::TradeDirUnkn:
       break;
     }
 

@@ -34,9 +34,9 @@ public:
     unsigned short nYear;
     unsigned short nMonth;
     unsigned short nDay;
-    OptionSide::enumOptionSide eSide;
+    OptionSide::EOptionSide eSide;
     structOption( void ) : dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), eSide( OptionSide::Unknown ) {};
-    structOption( double dblStrike_, unsigned short nYear_, unsigned short nMonth_, unsigned short nDay_, OptionSide::enumOptionSide eSide_ )
+    structOption( double dblStrike_, unsigned short nYear_, unsigned short nMonth_, unsigned short nDay_, OptionSide::EOptionSide eSide_ )
       : dblStrike( dblStrike_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_), eSide( eSide_ ) {};
   };
 

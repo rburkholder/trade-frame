@@ -40,7 +40,7 @@ public:
   void HandleMenuNewInstrument( wxCommandEvent& event );
 
   // todo: invocable only if no instrument already exists
-  bool NewInstrumentViaDialog( ou::tf::Allowed::enumInstrument selector, const wxString& wxsUnderlying = "" );
+  bool NewInstrumentViaDialog( ou::tf::Allowed::EInstrument selector, const wxString& wxsUnderlying = "" );
 
 protected:
 
@@ -72,11 +72,11 @@ private:
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
 
-  ou::tf::Allowed::enumInstrument m_InstrumentSelector;
+  ou::tf::Allowed::EInstrument m_InstrumentSelector;
 
   std::string m_sUnderlying;
 
-  void InstrumentViaDialog( ou::tf::Allowed::enumInstrument selector, const std::string& sPrompt );
+  void InstrumentViaDialog( ou::tf::Allowed::EInstrument selector, const std::string& sPrompt );
 
   // need to keep track of (load, save)
   //   * menu item text (as it can be changed)

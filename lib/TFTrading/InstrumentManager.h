@@ -53,18 +53,18 @@ public:
   pInstrument_t ConstructFuturesOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-    OptionSide::enumOptionSide side,
+    OptionSide::EOptionSide side,
     double strike );
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-    OptionSide::enumOptionSide side,
+    OptionSide::EOptionSide side,
     double strike );
   pInstrument_t ConstructCurrency(
     idInstrument_cref idInstrumentName,
 //    idInstrument_cref idCounterInstrument,
     const std::string& sExchangeName,
-    Currency::enumCurrency base, Currency::enumCurrency counter );
+    Currency::ECurrency base, Currency::ECurrency counter );
 
   void Register( pInstrument_t& pInstrument );
 

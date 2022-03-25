@@ -516,7 +516,7 @@ void PanelCharts::HandleLoadInstrument(
 
 InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest(
   const wxTreeItemId& item,
-  const ou::tf::Allowed::enumInstrument selector,
+  const ou::tf::Allowed::EInstrument selector,
   const wxString& wxsUnderlying // optional
 ) {
 

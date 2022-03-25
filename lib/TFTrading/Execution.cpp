@@ -22,7 +22,7 @@ namespace tf { // TradeFrame
 
 Execution::Execution(
   idExecution_t idExecution, idOrder_t idOrder,
-  double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
+  double dblPrice, boost::uint32_t nQuantity, OrderSide::EOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
 :
   m_row( idExecution, idOrder, nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )
@@ -34,7 +34,7 @@ Execution::Execution(
 
 Execution::Execution(
 /*  idExecution_t idExecution, idOrder_t idOrder, */
-  double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
+  double dblPrice, boost::uint32_t nQuantity, OrderSide::EOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
 :
   m_row( nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )

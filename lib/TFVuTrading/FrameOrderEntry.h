@@ -43,16 +43,16 @@ class FrameOrderEntry: public wxFrame {
 public:
 
   using fButton_t = std::function<void()>;
-  using fButtonSend_t = std::function<void(ou::tf::OrderSide::enumOrderSide)>;
+  using fButtonSend_t = std::function<void(ou::tf::OrderSide::EOrderSide)>;
 
   struct OrderParameters {
-    ou::tf::TimeInForce::enumTimeInForce m_eTimeInForce;
-    ou::tf::OrderType::enumOrderType m_eOrderType;
+    ou::tf::TimeInForce::ETimeInForce m_eTimeInForce;
+    ou::tf::OrderType::EOrderType m_eOrderType;
     std::string m_sProfitPrice;
     std::string m_sLimitPrice;
     std::string m_sStopPrice;
     std::string m_sOrderQuantity;
-    ou::tf::OrderSide::enumOrderSide m_eOrderSide;
+    ou::tf::OrderSide::EOrderSide m_eOrderSide;
     enum class EOperation { Update, Send, Cancel } m_eOperation;
   };
 
@@ -117,7 +117,7 @@ private:
     wxButton* m_btnSend;
     wxButton* m_btnCancel;
 
-  ou::tf::OrderSide::enumOrderSide m_eOrderSide;
+  ou::tf::OrderSide::EOrderSide m_eOrderSide;
 
   fButton_t m_fUpdate;
   fButtonSend_t m_fSend;

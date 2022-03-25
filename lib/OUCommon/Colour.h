@@ -21,7 +21,7 @@ typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
 typedef DWORD COLORREF;
- 
+
 #ifdef RGB
 #undef RGB
 #endif
@@ -41,7 +41,7 @@ typedef DWORD COLORREF;
 // may need to create two color namespaces if used in the same include hiearchy
 
 namespace Colour {
-  enum enumColour {
+  enum EColour {
     IndianRed = RGB(0xCD,0x5C,0x5C),
     LightCoral = RGB(0xF0,0x80,0x80),
     Salmon = RGB(0xFA,0x80,0x72),

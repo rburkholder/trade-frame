@@ -253,7 +253,7 @@ private:
     ou::ChartEntryIndicator m_ceStochasticMax;
     ou::ChartEntryIndicator m_ceStochasticMin;
 
-    Stochastic( const std::string sIx, ou::tf::Quotes& quotes, int nPeriods, time_duration td, ou::Colour::enumColour colour ) {
+    Stochastic( const std::string sIx, ou::tf::Quotes& quotes, int nPeriods, time_duration td, ou::Colour::EColour colour ) {
 
       m_ceStochastic.SetColour( colour );
       m_ceStochasticMax.SetColour( colour );
@@ -301,7 +301,7 @@ private:
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
     ou::ChartEntryIndicator m_ceMA;
 
-    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::enumColour colour, const std::string& sName )
+    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
     : m_ema( quotes, nPeriods, tdPeriod )
     {
       m_ceMA.SetName( sName );
