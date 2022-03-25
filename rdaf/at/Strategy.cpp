@@ -25,6 +25,8 @@
 
  #include <chrono>
 
+ #include <boost/log/trivial.hpp>
+
 #include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
@@ -153,7 +155,7 @@ void Strategy::InitRdaf() {
   );
   m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !m_pTreeQuote ) {
-    std::cout << "problems m_pTreeQuote" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems m_pTreeQuote";
   }
   m_pTreeQuote->SetDirectory( m_pFile.get() );
 
@@ -162,7 +164,7 @@ void Strategy::InitRdaf() {
   );
   m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !m_pTreeTrade ) {
-    std::cout << "problems m_pTreeTrade" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems m_pTreeTrade";
   }
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
@@ -172,7 +174,7 @@ void Strategy::InitRdaf() {
     m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
   );
   if ( !m_pHistVolume ) {
-    std::cout << "problems history" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems history";
   }
   m_pHistVolume->SetDirectory( m_pFile.get() );
 
@@ -312,7 +314,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
       if ( bin_y < 1 ) {
         if ( !m_bChangeConfigFileMessageLatch ) {
-          std::cout << "warning: " << m_config.sSymbol << ", need to adjust lower time in config file" << std::endl;
+          BOOST_LOG_TRIVIAL(warning) << m_config.sSymbol << ", need to adjust lower time in config file";
           m_bChangeConfigFileMessageLatch = true;
         }
       }
@@ -351,7 +353,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   switch ( m_stateTrade ) {
     case ETradeState::Search:
       if ( bTriggerEntry ) {
-        std::cout << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew << std::endl;
+        BOOST_LOG_TRIVIAL(info) << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew;
         EnterLong( bar );
       }
       break;

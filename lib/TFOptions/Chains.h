@@ -22,7 +22,8 @@
 #pragma once
 
 #include <string>
-#include <iostream>
+
+#include <boost/log/trivial.hpp>
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 
@@ -47,14 +48,14 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
 
   iterator_t iterChains = map.find( date ); // see if expiry date exists
   if ( map.end() == iterChains ) { // insert new expiry set if not
-    std::cout
+    BOOST_LOG_TRIVIAL(info)
       << "GetChain created: "
       << date.year() << "/"
       << date.month().as_number() << "/"
       << date.day()
       << " with "
       << pOption->GetInstrumentName()
-      << std::endl;
+      ;
     iterChains = map.insert(
       map.begin(),
       typename mapChains_t::value_type( date, std::move( chain ) )
@@ -91,7 +92,7 @@ OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
     }
   }
   catch ( std::runtime_error& e ) {
-    std::cout << "PopulateOption error" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "PopulateOption error";
   }
   return pOptionEntry;
 }
