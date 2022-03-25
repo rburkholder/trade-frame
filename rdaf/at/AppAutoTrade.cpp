@@ -118,7 +118,7 @@ bool AppAutoTrade::OnInit() {
     m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
   }
 
-  m_tws->SetClientId( m_choices.ib_instance );
+  m_tws->SetClientId( m_choices.ib_client_id );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();

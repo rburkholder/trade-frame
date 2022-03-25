@@ -51,7 +51,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::choices_t,
-  (size_t, ib_instance)
+  (size_t, ib_client_id)
   (bool, bStartSimulator)
   (std::string, sGroupDirectory)
   (size_t, nTimeBins)
@@ -91,7 +91,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ;
 
     ruleIbInstance
-      %= qi::lit("ib_instance")
+      %= qi::lit("ib_client_id")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> boost::spirit::uint_
       >> *qi::lit(' ') >> qi::eol;
