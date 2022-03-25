@@ -64,6 +64,10 @@ public:
 protected:
 private:
 
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::FrameControls* m_pFrameControls;
@@ -84,10 +88,10 @@ private:
 
   config::Options m_config;
 
+  pPortfolio_t m_pPortfolio;
+
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
-
-  using pPosition_t = ou::tf::Position::pPosition_t;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -106,6 +110,7 @@ private:
   void HandleMenuActionEmitChainsSummary();
   void HandleMenuActionEmitChainsFull();
   void HandleMenuActionProcessChains();
+  void HandleMenuActionEmitOptionVolume();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
 
@@ -117,7 +122,9 @@ private:
   void HandleTreeEventItemMenu( wxTreeEvent& );
 
   void StartChainQuery();
-  void ConstructInstrument();
+  void ConstructUnderlying();
+  void InitializeUnderlying( pInstrument_t pInstrument );
+  pPosition_t ConstructPosition( pInstrument_t );
   void SetInteractiveChart( pPosition_t );
 
   void SaveState();

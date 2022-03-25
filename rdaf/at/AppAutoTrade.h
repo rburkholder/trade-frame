@@ -28,6 +28,10 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
+#include <wx/timer.h>
+
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/DBWrapper.h>
 
@@ -43,6 +47,7 @@ class FrameMain;
 
 class wxTreeCtrl;
 class wxTreeEvent;
+class wxTimerEvent;
 class wxSplitterWindow;
 
 namespace ou {
@@ -59,10 +64,11 @@ class AppAutoTrade:
 {
   friend ou::tf::FrameWork01<AppAutoTrade>;
   friend class boost::serialization::access;
-
 public:
 protected:
 private:
+
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
@@ -70,6 +76,8 @@ private:
 
   wxSplitterWindow* m_splitterData;
   wxTreeCtrl* m_treeSymbols;
+
+  wxTimer m_timerOneSecond;
 
   std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
@@ -80,6 +88,15 @@ private:
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
   std::unique_ptr<ou::tf::db> m_pdb;
+
+  ou::ChartEntryIndicator m_ceUnRealized;
+  ou::ChartEntryIndicator m_ceRealized;
+  ou::ChartEntryIndicator m_ceCommissionsPaid;
+  ou::ChartEntryIndicator m_ceTotal;
+
+  ou::ChartDataView m_dvChart; // the data
+
+  pPortfolio_t m_pPortfolioUSD;
 
   using pStrategy_t = std::unique_ptr<Strategy>;
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
@@ -101,15 +118,18 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
+  void HandleOneSecondTimer( wxTimerEvent& event );
+
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
   void HandleTreeEventItemMenu( wxTreeEvent& );
   void HandleTreeEventItemChanged( wxTreeEvent& );
 
-  void ConstructIBInstrument( const std::string& sSymbol );
-  void ConstructSimInstrument( const std::string& sSymbol );
+  void ConstructIBInstrument(  const std::string& sNamePortfolio, const std::string& sSymbol );
+  void ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol );
 
+  void LoadPortfolio( const std::string& sName );
   void ConfirmProviders();
 
   void HandleMenuActionSimStart();

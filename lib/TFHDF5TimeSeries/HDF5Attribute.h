@@ -51,7 +51,7 @@ public:
 
   HDF5Attributes( HDF5DataManager& dm );
   HDF5Attributes( HDF5DataManager& dm, const std::string& sPath );
-  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, InstrumentType::enumInstrumentType );
+  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, InstrumentType::EInstrumentType );
   HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structOption& );
   HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structFuture& );
   ~HDF5Attributes(void);
@@ -59,8 +59,8 @@ public:
   void SetSignature( boost::uint64_t ); // left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
   boost::uint64_t GetSignature( void );
 
-  void SetInstrumentType( InstrumentType::enumInstrumentType );
-  InstrumentType::enumInstrumentType GetInstrumentType( void );
+  void SetInstrumentType( InstrumentType::EInstrumentType );
+  InstrumentType::EInstrumentType GetInstrumentType( void );
 
   void SetProviderType( keytypes::eidProvider_t );
   keytypes::eidProvider_t GetProviderType( void );

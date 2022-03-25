@@ -77,7 +77,7 @@ public:
     std::string sIQFeedDescription;
     int32_t nContractId;
     double dblStrike;
-    InstrumentType::enumInstrumentType it;
+    InstrumentType::EInstrumentType it;
     OptionSide::enumOptionSide os;
     std::uint16_t year;
     std::uint8_t month;

@@ -40,7 +40,6 @@
 class TH2D;
 class TRint;
 class TH3D;
-
 class TFile;
 class TTree;
 
@@ -111,7 +110,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, PL, ET }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, Skew, PL, ET };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -119,9 +118,12 @@ private:
     LongExit,  // position exists, looking for exit
     ShortSubmitted,  // order has been submitted, waiting for confirmtaion
     ShortExit,  // position exists, looking for exit
-    ExitSubmitted, // wait for exit to complete
+    LongExitSubmitted, // wait for exit to complete
+    ShortExitSubmitted, // wait for exit to complete
     Done // no more action
     };
+
+  bool m_bChangeConfigFileMessageLatch;
 
   ETradeState m_stateTrade;
 
@@ -150,6 +152,7 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
+  ou::ChartEntryIndicator m_ceSkewness;
   ou::ChartEntryIndicator m_ceExecutionTime;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
@@ -175,8 +178,9 @@ private:
   pTTree_t m_pTreeQuote;
   pTTree_t m_pTreeTrade;
 
-  using pTH3D_t = std::shared_ptr<TH2D>;
-  pTH3D_t m_pHistVolume;
+  using pTH2D_t = std::shared_ptr<TH2D>;
+  pTH2D_t m_pHistVolume;
+
 
   void InitRdaf();
 

@@ -19,7 +19,6 @@
  * Created: March 7, 2022 14:35
  */
 
-
 #include <rdaf/TH2.h>
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
@@ -45,6 +44,7 @@ Strategy::Strategy(
 , pFile_t pFile
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
@@ -67,6 +67,8 @@ Strategy::Strategy(
   m_ceQuoteBid.SetName( "Bid" );
 
   m_ceVolume.SetName( "Volume" );
+
+  m_ceSkewness.SetName( "Skew" );
 
   m_ceProfitLoss.SetName( "P/L" );
 
@@ -101,6 +103,8 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
@@ -161,12 +165,10 @@ void Strategy::InitRdaf() {
   }
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
-
   m_pHistVolume = std::make_shared<TH2D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
     m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
     m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
-
   );
   if ( !m_pHistVolume ) {
     std::cout << "problems history" << std::endl;
@@ -270,8 +272,8 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit" );
-  m_stateTrade = ETradeState::ExitSubmitted;
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
+  m_stateTrade = ETradeState::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
 }
 
@@ -279,8 +281,8 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit" );
-  m_stateTrade = ETradeState::ExitSubmitted;
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
+  m_stateTrade = ETradeState::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
 }
 
@@ -290,6 +292,60 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   const std::chrono::time_point<std::chrono::system_clock> begin
     = std::chrono::system_clock::now();
+
+  bool bTriggerEntry( false );
+  double skew( 0.0 );
+
+  if ( m_pHistVolume ) {
+
+    auto n = m_pHistVolume->GetEntries();
+    if ( n < 1000 ) {
+    }
+    else {
+
+      std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
+      nTime = (double)nTime / 1000.0;
+
+      //find the bin that the time given belongs to:
+      Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
+
+      if ( bin_y < 1 ) {
+        if ( !m_bChangeConfigFileMessageLatch ) {
+          std::cout << "warning: " << m_config.sSymbol << ", need to adjust lower time in config file" << std::endl;
+          m_bChangeConfigFileMessageLatch = true;
+        }
+      }
+      else {
+        //now find projection of h1 from the beginning till now:
+        auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+        double skew_ = h1_x->GetSkewness( 1 );
+
+        switch ( fpclassify( skew_ ) ) {
+            case FP_INFINITE:
+              skew_ = 0.0;
+              break;
+            case FP_NAN:
+              skew_ = 0.0;
+              break;
+            case FP_NORMAL:
+              break;
+            case FP_SUBNORMAL:
+              skew_ = 0.0;
+              break;
+            case FP_ZERO:
+              break;
+            default:
+              break;
+        }
+
+        if ( 0.1 < skew_ ) {
+          bTriggerEntry = true;
+        }
+        skew = skew_;
+      }
+    }
+    m_ceSkewness.Append( bar.DateTime(), skew );
+  }
 
   switch ( m_stateTrade ) {
     case ETradeState::Search:
@@ -350,7 +406,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         ExitShort( bar );
       } */
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+    case ETradeState::ShortExitSubmitted:
       // wait for order to execute
       break;
     case ETradeState::Done:
@@ -376,7 +433,8 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+    case ETradeState::ShortExitSubmitted:
       assert( false );  // TODO: need to figure out a plan to retry exit
       break;
     default:
@@ -390,14 +448,19 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
     case ETradeState::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Long Fill" );
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
       m_stateTrade = ETradeState::LongExit;
       break;
     case ETradeState::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), m_quote.Midpoint(), "Short Fill" );
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
       m_stateTrade = ETradeState::ShortExit;
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::LongExitSubmitted:
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
+      m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::ShortExitSubmitted:
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
       m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::Done:

@@ -107,6 +107,7 @@ uint32_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrde
       quantity = selectors.QuanStock();
       break;
     case ou::tf::InstrumentType::Option:
+    case ou::tf::InstrumentType::FuturesOption:
       quantity = selectors.QuanOption();
       break;
     default:

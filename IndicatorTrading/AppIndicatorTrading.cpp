@@ -170,7 +170,7 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
 
-  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Controls", wxPoint( 10, 10 ) );
+  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
   m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameControls );
   m_pFrameControls->Attach( m_pPanelOrderButtons );
 
@@ -182,21 +182,17 @@ bool AppIndicatorTrading::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  //vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStartWatch ) ) );
-  //vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionStopWatch ) ) );
-  //vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStartChart ) ) );
-  //vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppRdafL1::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
+  vItems.push_back( new mi( "Emit Option Volume", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitOptionVolume ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
   vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
-  vItems.push_back( new mi( "Process Chains", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionProcessChains ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   vItems.clear();
   vItems.push_back( new mi( "Start Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStart ) ) );
   vItems.push_back( new mi( "Show Quotes", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionQuoteShow ) ) );
   vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
-  //vItems.push_back( new mi( "Emit Options", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionEmit ) ) );
   m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -239,20 +235,18 @@ void AppIndicatorTrading::StartChainQuery() {
 
   m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
     [this](){
-      ConstructInstrument();
+      ConstructUnderlying();
     }
   );
   m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
 
 }
 
-void AppIndicatorTrading::ConstructInstrument() {
-
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+void AppIndicatorTrading::ConstructUnderlying() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 
-  if ( '#' == m_config.sSymbol.back() ) {
+  if ( '#' == m_config.sSymbol.back() ) { // assumes a general future, and need to find actual symbol
     m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
     m_pBuildInstrumentIQFeed->Queue(
       m_config.sSymbol,
@@ -272,28 +266,7 @@ void AppIndicatorTrading::ConstructInstrument() {
 
                   std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
                   if ( expiry == pInstrument->GetExpiry() ) {
-
-                    pPosition_t pPosition;
-
-                    const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-                    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-
-                    if ( pm.PositionExists( "USD", idInstrument ) ) {
-                      pPosition = pm.GetPosition( "USD", idInstrument );
-                      std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-                    }
-                    else {
-                      using pWatch_t = ou::tf::Watch::pWatch_t;
-                      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-                      pPosition = pm.ConstructPosition(
-                        "USD", idInstrument, "manual",
-                        "ib01", "iq01", m_pExecutionProvider,
-                        pWatch
-                      );
-                      std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
-                    }
-
-                    SetInteractiveChart( pPosition );
+                    InitializeUnderlying( pInstrument );
                   }
                 } );
             }
@@ -306,13 +279,54 @@ void AppIndicatorTrading::ConstructInstrument() {
     m_pBuildInstrument->Queue(
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
-
-        using pWatch_t = ou::tf::Watch::pWatch_t;
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-
-        SetInteractiveChart( std::make_shared<ou::tf::Position>( pWatch, m_pExecutionProvider ) );
+        InitializeUnderlying( pInstrument );
       } );
   }
+}
+
+void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PortfolioExists( idInstrument ) ) {
+    m_pPortfolio = pm.GetPortfolio( idInstrument );
+  }
+  else {
+    m_pPortfolio
+      = pm.ConstructPortfolio(
+          idInstrument, "tf01", "USD",
+          ou::tf::Portfolio::EPortfolioType::Standard,
+          ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
+  }
+
+  SetInteractiveChart( ConstructPosition( pInstrument ) );
+
+}
+
+AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstrument_t pInstrument ) {
+
+  pPosition_t pPosition;
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PositionExists( m_pPortfolio->Id(), idInstrument ) ) {
+    pPosition = pm.GetPosition( "USD", idInstrument );
+    std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+  else {
+    using pWatch_t = ou::tf::Watch::pWatch_t;
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+    pPosition = pm.ConstructPosition(
+      m_pPortfolio->Id(), idInstrument, "manual",
+      "ib01", "iq01", m_pExecutionProvider,
+      pWatch
+    );
+    std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  }
+
+  return pPosition;
 
 }
 
@@ -329,9 +343,11 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
           fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+          // TODO: need to register in database
         }
       );
     },
+    std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ),
     [this](const std::string& sUnderlying, InteractiveChart::fOnClick_t&& fOnClick)->InteractiveChart::SubTreesForUnderlying { // fAddUnderlying_t
 
       wxMenu* pMenuPopup = new wxMenu();
@@ -419,14 +435,14 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
             idPopUpDelete
             );
 
-          wxTreeItemId idLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
+          wxTreeItemId tiidLifeCycle = m_ptreeTradables->AppendItem( tiidSymbol, "Entry Order " + sId, -1, -1, new CustomItemData( pMenuPopup ) );
 
           return InteractiveChart::LifeCycleFunctions(
-              [this,tiidSymbol](const std::string& s){ // fUpdateLifeCycle_t
-                m_ptreeTradables->SetItemText( tiidSymbol, s );
+              [this,tiidLifeCycle](const std::string& s){ // fUpdateLifeCycle_t
+                m_ptreeTradables->SetItemText( tiidLifeCycle, s );
               },
-              [this,tiidSymbol](){ // fDeleteLifeCycle_t
-                m_ptreeTradables->Delete( tiidSymbol );
+              [this,tiidLifeCycle](){ // fDeleteLifeCycle_t
+                m_ptreeTradables->Delete( tiidLifeCycle );
               }
               );
         },
@@ -447,22 +463,22 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   m_pInteractiveChart->Connect();
 }
 
-void AppIndicatorTrading::HandleMenuActionStartChart( void ) {
+void AppIndicatorTrading::HandleMenuActionStartChart() {
 }
 
-void AppIndicatorTrading::HandleMenuActionStopChart( void ) {
+void AppIndicatorTrading::HandleMenuActionStopChart() {
   //m_pWinChartView->SetChartDataView( nullptr );
 }
 
-void AppIndicatorTrading::HandleMenuActionStartWatch( void ) {
+void AppIndicatorTrading::HandleMenuActionStartWatch() {
   //m_pChartData->StartWatch();
 }
 
-void AppIndicatorTrading::HandleMenuActionStopWatch( void ) {
+void AppIndicatorTrading::HandleMenuActionStopWatch() {
   //m_pChartData->StopWatch();
 }
 
-void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
+void AppIndicatorTrading::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
@@ -472,7 +488,7 @@ void AppIndicatorTrading::HandleMenuActionSaveValues( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionEmitChainsSummary( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitChainsSummary() {
   CallAfter(
     [this](){
       m_pInteractiveChart->EmitChainSummary();
@@ -480,7 +496,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsSummary( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionEmitChainsFull( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
   CallAfter(
     [this](){
       m_pInteractiveChart->EmitChainFull();
@@ -488,7 +504,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
+void AppIndicatorTrading::HandleMenuActionProcessChains() {
   CallAfter(
     [this](){
       m_pInteractiveChart->ProcessChains();
@@ -496,7 +512,15 @@ void AppIndicatorTrading::HandleMenuActionProcessChains( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionWatchStart( void ) {
+void AppIndicatorTrading::HandleMenuActionEmitOptionVolume() {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->EmitOptions();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionOptionWatchStart() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionWatchStart();
@@ -504,7 +528,7 @@ void AppIndicatorTrading::HandleMenuActionOptionWatchStart( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionQuoteShow( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionQuoteShow() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionQuoteShow();
@@ -512,7 +536,7 @@ void AppIndicatorTrading::HandleMenuActionOptionQuoteShow( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionWatchStop() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionWatchStop();
@@ -520,7 +544,7 @@ void AppIndicatorTrading::HandleMenuActionOptionWatchStop( void ) {
   );
 }
 
-void AppIndicatorTrading::HandleMenuActionOptionEmit( void ) {
+void AppIndicatorTrading::HandleMenuActionOptionEmit() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionEmit();

@@ -21,17 +21,19 @@
 
  // 2022/03/09 can use stochastic to feed a zigzag indicator, which can be used to
  //   indicate support/resistance as the day progresses
+ // 2022/03/21 perform a roll down on put, roll up on call?
 
 #include <memory>
 
-#include <TFOptions/Engine.h>
+//#include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
 
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Config.h"
-#include "InteractiveChart.h"
 #include "TradeLifeTime.h"
+#include "OptionTracker.hpp"
+#include "InteractiveChart.h"
 
 namespace {
   static const size_t nBarSeconds = 3;
@@ -51,9 +53,9 @@ InteractiveChart::InteractiveChart()
 , m_bfPriceDn( nBarSeconds )
 
 , m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
 , m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
 , m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
 
 , m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
@@ -114,8 +116,6 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Price, &m_ceTrade );
   m_dvChart.Add( EChartSlot::Price, &m_ceQuoteBid );
 
-  //m_dvChart.Add( EChartSlot::Price, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
-
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
 
   m_dvChart.Add( EChartSlot::Price, &m_ceBuySubmit );
@@ -133,6 +133,8 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearPut );
 
+  m_dvChart.Add( EChartSlot::Sentiment, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
+
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
   // need to present the marks prior to presenting the data
@@ -147,8 +149,8 @@ void InteractiveChart::Init() {
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
 
-  //m_ceVWAP.SetColour( ou::Colour::OrangeRed );
-  //m_ceVWAP.SetName( "VWAP" );
+  m_ceVWAP.SetColour( ou::Colour::OrangeRed );
+  m_ceVWAP.SetName( "vwap" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -179,10 +181,10 @@ void InteractiveChart::Init() {
 
 void InteractiveChart::Connect() {
 
-  if ( m_pPosition ) {
+  if ( m_pPositionUnderlying ) {
     if ( !m_bConnected ) {
       m_bConnected = true;
-      pWatch_t pWatch = m_pPosition->GetWatch();
+      pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -191,9 +193,9 @@ void InteractiveChart::Connect() {
 }
 
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
-  if ( m_pPosition ) {
+  if ( m_pPositionUnderlying ) {
     if ( m_bConnected ) {
-      pWatch_t pWatch = m_pPosition->GetWatch();
+      pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
@@ -206,6 +208,7 @@ void InteractiveChart::SetPosition(
 , const config::Options& config
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
+, fBuildPosition_t&& fBuildPosition
 , fAddUnderlying_t&& fAddUnderlying
 ) {
 
@@ -215,14 +218,21 @@ void InteractiveChart::SetPosition(
   // --
 
   m_fBuildOption = std::move( fBuildOption );
+  m_fBuildPosition = std::move( fBuildPosition );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
   using vMAPeriods_t = std::vector<int>;
   vMAPeriods_t vMAPeriods;
 
-  m_pPosition = pPosition;
-  pWatch_t pWatch = m_pPosition->GetWatch();
+  m_pPositionUnderlying = pPosition;
+  m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
+  pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
+  m_mapLifeCycleComponents.emplace(
+    m_pActiveInstrument->GetInstrumentName(),
+    LifeCycleComponents( m_pPositionUnderlying,
+      Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
+    );
 
   time_duration td = time_duration( 0, 0, config.nPeriodWidth );
 
@@ -262,8 +272,9 @@ void InteractiveChart::SetPosition(
   SubTreesForUnderlying stfu
     = std::move( fAddUnderlying(
         pWatch->GetInstrumentName(),
-        [this](){
+        [this,pInstrument=m_pActiveInstrument](){
           this->SetChartDataView( &m_dvChart );
+          m_pActiveInstrument = pInstrument;
         } ) );
   m_fAddLifeCycleToTree = std::move( stfu.fAddLifeCycleToTree );
   m_fAddExpiryToTree = std::move( stfu.fAddExpiryToTree );
@@ -284,7 +295,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
 
   namespace ph = std::placeholders;
 
-  switch ( m_pPosition->GetInstrument()->GetInstrumentType() ) {
+  switch ( m_pPositionUnderlying->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
@@ -414,6 +425,8 @@ void InteractiveChart::CheckOptions() {
       pOption_t pOption;
       pOptionTracker_t pOptionTracker;
 
+      // TODO: set colors for otm and itm
+
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
@@ -423,18 +436,12 @@ void InteractiveChart::CheckOptions() {
           pOption->GetInstrumentName(),
           [this,pOptionTracker](){
             SetChartDataView( pOptionTracker->GetDataViewChart() );
+            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
           } );
-      }
-
-      strike = chain.Call_Atm( mid );
-      pOption = chain.GetStrike( strike ).call.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
+        m_mapLifeCycleComponents.emplace(
           pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-          } );
+          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+          );
       }
 
       strike = chain.Call_Otm( mid );
@@ -445,7 +452,12 @@ void InteractiveChart::CheckOptions() {
           pOption->GetInstrumentName(),
           [this,pOptionTracker](){
             SetChartDataView( pOptionTracker->GetDataViewChart() );
+            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
           } );
+        m_mapLifeCycleComponents.emplace(
+          pOption->GetInstrumentName(),
+          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+          );
       }
 
       // put
@@ -457,18 +469,12 @@ void InteractiveChart::CheckOptions() {
           pOption->GetInstrumentName(),
           [this,pOptionTracker](){
             SetChartDataView( pOptionTracker->GetDataViewChart() );
+            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
           } );
-      }
-
-      strike = chain.Put_Atm( mid );
-      pOption = chain.GetStrike( strike ).put.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
+        m_mapLifeCycleComponents.emplace(
           pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-          } );
+          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+          );
       }
 
       strike = chain.Put_Otm( mid );
@@ -479,7 +485,12 @@ void InteractiveChart::CheckOptions() {
           pOption->GetInstrumentName(),
           [this,pOptionTracker](){
             SetChartDataView( pOptionTracker->GetDataViewChart() );
+            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
           } );
+        m_mapLifeCycleComponents.emplace(
+          pOption->GetInstrumentName(),
+          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+          );
       }
 
     }
@@ -520,10 +531,10 @@ InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double st
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
 
   //m_ceVolume.Append( bar );
-  //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+  m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
   CheckOptions();
@@ -540,12 +551,53 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
 }
 
 void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
-  m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
   for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
     for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
       tracker.second->SaveWatch( sPrefix );
     }
   }
+}
+
+void InteractiveChart::EmitOptions() {
+
+  ou::tf::Trade::volume_t volTotalCallBuy {};
+  ou::tf::Trade::volume_t volTotalCallSell {};
+  ou::tf::Trade::volume_t volTotalPutBuy {};
+  ou::tf::Trade::volume_t volTotalPutSell {};
+
+  ou::tf::Trade::volume_t volTotalBuy {};
+  ou::tf::Trade::volume_t volTotalSell {};
+
+  for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
+
+    ou::tf::Trade::volume_t volCallBuy {};
+    ou::tf::Trade::volume_t volCallSell {};
+    ou::tf::Trade::volume_t volPutBuy {};
+    ou::tf::Trade::volume_t volPutSell {};
+
+    for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
+      tracker.second->Emit( volCallBuy, volCallSell, volPutBuy, volPutSell );
+    }
+    std::cout
+      << "strike " << strike.first
+      << ": cbv=" << volCallBuy << ", csv=" << volCallSell
+      << ", pbv=" << volPutBuy  << ", psv=" << volPutSell
+      << std::endl;
+
+    volTotalCallBuy  += volCallBuy;
+    volTotalCallSell += volCallSell;
+    volTotalPutBuy   += volPutBuy;
+    volTotalPutSell  += volPutSell;
+
+  }
+
+  volTotalBuy  += ( volTotalCallBuy  + volTotalPutBuy );
+  volTotalSell += ( volTotalCallSell + volTotalPutSell );
+
+  std::cout << " calls: bv=" << volTotalCallBuy << " , sv=" << volTotalCallSell << std::endl;
+  std::cout << "  puts: bv=" << volTotalPutBuy  << " , sv=" << volTotalPutSell << std::endl;
+  std::cout << "totals: bv=" << volTotalBuy     << " , sv=" << volTotalSell << std::endl;
 }
 
 void InteractiveChart::BindEvents() {
@@ -582,32 +634,50 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
       break;
     case 'x':
       std::cout << "close out" << std::endl;
-      m_pPosition->ClosePosition();
+      m_pPositionUnderlying->ClosePosition();
       break;
   }
   event.Skip();
 }
 
+InteractiveChart::LifeCycleComponents& InteractiveChart::LookupLifeCycleComponents() {
+  assert( m_pActiveInstrument );
+  const std::string& sInstrumentName( m_pActiveInstrument->GetInstrumentName() );
+  mapLifeCycleComponents_t::iterator iter = m_mapLifeCycleComponents.find( sInstrumentName );
+  assert( m_mapLifeCycleComponents.end() != iter );
+  mapLifeCycleComponents_t::mapped_type& lcc( iter->second );
+  if ( lcc.pPosition ) {}
+  else {
+    lcc.pPosition = m_fBuildPosition( m_pActiveInstrument );
+    assert( lcc.pPosition );
+  }
+  return lcc;
+}
+
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( m_pPosition, buttons, indicators );
-  ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-  auto& [key,value] = *pair.first;
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
-  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-  value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+  if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
+    LifeCycleComponents& lcc( LookupLifeCycleComponents() );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcc.pPosition, buttons, lcc.indicators );
+    ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
+    auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+    auto& [idOrder,lifecycle] = *pair.first;
+    LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
+    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+  }
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
-  TradeLifeTime::Indicators indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled );
-  pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( m_pPosition, buttons, indicators );
-  ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-  auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-  auto& [key,value] = *pair.first;
-  LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) );
-  value.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-  value.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+  if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
+    LifeCycleComponents& lcc( LookupLifeCycleComponents() );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcc.pPosition, buttons, lcc.indicators );
+    ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
+    auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+    auto& [idOrder,lifecycle] = *pair.first;
+    LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
+    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
+    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
+  }
 }
 
 void InteractiveChart::OrderClose( const ou::tf::PanelOrderButtons_Order& buttons ) {
@@ -707,8 +777,8 @@ void InteractiveChart::OptionQuoteShow() {
       size_t best_count;
       double best_spread;
       std::cout
-        << m_pPosition->GetInstrument()->GetInstrumentName()
-        << " @ " << m_pPosition->GetWatch()->LastTrade().Price()
+        << m_pPositionUnderlying->GetInstrument()->GetInstrumentName()
+        << " @ " << m_pPositionUnderlying->GetWatch()->LastTrade().Price()
         << std::endl;
       for ( pOption_t pOption: m_vOptionForQuote ) {
         ou::tf::Quote quote( pOption->LastQuote() );

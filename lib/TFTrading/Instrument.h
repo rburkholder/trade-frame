@@ -82,7 +82,7 @@ public:
     }
 
     idInstrument_t idInstrument; // main name
-    InstrumentType::enumInstrumentType eType;
+    InstrumentType::EInstrumentType eType;
     std::string sDescription;
     idExchange_t idExchange;
 //    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
@@ -105,7 +105,7 @@ public:
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
     TableRowDef( // strictly for obtaining fundamentals
       idInstrument_t idInstrument_)
-      : idInstrument( idInstrument_ ), eType( InstrumentType::enumInstrumentType::Unknown ), idExchange( "" ),
+      : idInstrument( idInstrument_ ), eType( InstrumentType::EInstrumentType::Unknown ), idExchange( "" ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
@@ -114,7 +114,7 @@ public:
         assert( 0 < idInstrument.size() );
     };
     TableRowDef( // equity / generic creation
-      idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_ )
+      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
@@ -124,7 +124,7 @@ public:
         assert( 0 < idInstrument.size() );
     };
     TableRowDef( // future
-      idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_,
+      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ = 0 )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -134,7 +134,7 @@ public:
         assert( 0 < idInstrument.size() );
     };
     TableRowDef( // option/futuresoption with yymm [TODO with day available now, remove this?]
-      idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_,
+      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
 //      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
@@ -150,7 +150,7 @@ public:
 //        assert( 0 < idUnderlying.size() );
     };
     TableRowDef( // option/futuresoption with yymmdd
-      idInstrument_t idInstrument_, InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_,
+      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
 //      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
@@ -167,7 +167,7 @@ public:
     };
     TableRowDef( // currency
       const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
-      InstrumentType::enumInstrumentType eType_, idExchange_t idExchange_,
+      InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //        idUnderlying( idCounterInstrument_ ),
@@ -193,22 +193,22 @@ public:
 //  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
   Instrument( idInstrument_cref idInstrument ); // just enough to obtain more info via fundamentals
   Instrument( // equity / generic creation
-    idInstrument_cref idInstrument, InstrumentType::enumInstrumentType type,
+    idInstrument_cref idInstrument, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName
      );
   Instrument(   // future
-    idInstrument_cref idInstrument, InstrumentType::enumInstrumentType type,
+    idInstrument_cref idInstrument, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day = 0 );
   Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together
-    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentType type,
+    idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
 //    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side,
     double strike );
   Instrument(   // option with yymmdd
-    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentType type,
+    idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //    pInstrument_t pUnderlying,
@@ -217,7 +217,7 @@ public:
   Instrument(  // currency
     const idInstrument_t& idInstrument,
 //    const idInstrument_t& idCounterInstrument,
-    InstrumentType::enumInstrumentType eType, const idExchange_t& idExchange,
+    InstrumentType::EInstrumentType eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
   virtual ~Instrument();
@@ -245,7 +245,7 @@ public:
     }
   };
 
-  InstrumentType::enumInstrumentType GetInstrumentType( void ) const { return m_row.eType; };
+  InstrumentType::EInstrumentType GetInstrumentType( void ) const { return m_row.eType; };
   bool IsCurrency( void )      const { return ( InstrumentType::Currency == m_row.eType ); };
   bool IsStock( void )         const { return ( InstrumentType::Stock == m_row.eType ); };
   bool IsOption( void )        const { return ( InstrumentType::Option == m_row.eType ); };

@@ -22,7 +22,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-IQFeedProvider::IQFeedProvider( void )
+IQFeedProvider::IQFeedProvider()
 : ProviderInterface<IQFeedProvider,IQFeedSymbol>(),
   IQFeed<IQFeedProvider>()
 {
@@ -30,9 +30,19 @@ IQFeedProvider::IQFeedProvider( void )
   m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
+
+  m_srvcWork = boost::asio::require(
+    m_srvc.get_executor(),
+    boost::asio::execution::outstanding_work.tracked );
+
+  for ( std::size_t ix = 0; ix < 4; ix++ ) {  // change the final value to add threads
+    m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
+  }
 }
 
-IQFeedProvider::~IQFeedProvider(void) {
+IQFeedProvider::~IQFeedProvider() {
+  m_srvcWork = boost::asio::any_io_executor();
+  m_threads.join_all();
 }
 
 void IQFeedProvider::Connect() {
@@ -69,6 +79,7 @@ void IQFeedProvider::OnIQFeedError( size_t e ) {
 
 IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
+  pSymbol->SetStrand( m_srvc );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }

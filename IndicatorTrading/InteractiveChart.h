@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <OUCommon/Colour.h>
 #include <functional>
 
 #include <boost/serialization/version.hpp>
@@ -47,9 +46,10 @@
 
 #include <TFOptions/Chain.h>
 #include <TFOptions/Chains.h>
-#include <TFOptions/Option.h>
 
 #include <TFVuTrading/WinChartView.h>
+
+#include "Indicators.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -68,6 +68,7 @@ namespace config {
   class Options;
 }
 
+class OptionTracker;
 class TradeLifeTime;
 
 class InteractiveChart:
@@ -78,12 +79,14 @@ public:
   using idOrder_t = ou::tf::Order::idOrder_t;
 
   using pOrder_t = ou::tf::Order::pOrder_t;
-  using pOption_t = ou::tf::option::Option::pOption_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
+  using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
 
   using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
   using fDeleteLifeCycle_t = std::function<void()>;
@@ -135,12 +138,13 @@ public:
    , const config::Options&
    , pOptionChainQuery_t
    , fBuildOption_t&&
+   , fBuildPosition_t&&
    , fAddUnderlying_t&&
     );
 
   void EmitChainFull() const {
     size_t cnt {};
-    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
+    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       cnt += vt.second.EmitValues();
@@ -151,7 +155,7 @@ public:
 
   void EmitChainSummary() const {
     size_t cnt {};
-    std::cout << "underlying: " << m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
+    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
       std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
       //vt.second.EmitValues();
@@ -163,6 +167,7 @@ public:
   void ProcessChains();
 
   void SaveWatch( const std::string& );
+  void EmitOptions();
 
   void OptionWatchStart();
   void OptionQuoteShow();
@@ -199,7 +204,8 @@ private:
   ou::ChartDataView m_dvChart; // the data
 
   pOrder_t m_pOrder;
-  pPosition_t m_pPosition;
+  pPosition_t m_pPositionUnderlying;
+  pInstrument_t m_pActiveInstrument;  // selected from the tree for use in selecting position
 
   double m_dblSumVolume; // part of vwap
   double m_dblSumVolumePrice; // part of vwap
@@ -211,7 +217,7 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryBars m_cePriceBars;
 
-  //ou::ChartEntryIndicator m_ceVWAP;
+  ou::ChartEntryIndicator m_ceVWAP;
 
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryVolume m_ceVolumeUp;
@@ -326,6 +332,7 @@ private:
   vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
+  fBuildPosition_t m_fBuildPosition;
   fAddLifeCycleToTree_t m_fAddLifeCycleToTree;
   fAddExpiryToTree_t m_fAddExpiryToTree;
 
@@ -345,217 +352,6 @@ private:
   using mapExpiries_t = std::map<boost::gregorian::date,Expiry>; // usable chains
   mapExpiries_t m_mapExpiries; // possibly change this to a map of iterators
 
-  // ==
-
-  struct OptionTracker {
-
-    bool m_bActive;
-    pOption_t m_pOption;
-    ou::tf::Trade::volume_t m_volBuy;
-    ou::tf::Trade::volume_t m_volSell;
-
-    ou::ChartEntryShape& m_ceBullCall;
-    ou::ChartEntryShape& m_ceBullPut;
-    ou::ChartEntryShape& m_ceBearCall;
-    ou::ChartEntryShape& m_ceBearPut;
-
-    ou::ChartEntryIndicator m_ceTrade;
-
-    ou::ChartEntryVolume m_ceVolumeUp;
-    ou::ChartEntryVolume m_ceVolumeDn;
-
-    ou::ChartEntryIndicator m_ceQuoteAsk;
-    ou::ChartEntryIndicator m_ceQuoteBid;
-
-    ou::ChartDataView m_dvChart; // the data
-
-    void Add() {
-
-      if ( !m_bActive ) {
-        m_bActive = true;
-        m_pOption->OnQuote.Add( MakeDelegate( this, &OptionTracker::HandleQuote ) );
-        switch ( m_pOption->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            m_pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
-            break;
-          case ou::tf::OptionSide::Put:
-            m_pOption->OnTrade.Add( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
-            break;
-          default:
-            assert( false );
-            break;
-        }
-
-        m_ceTrade.SetColour( ou::Colour::Green );
-        m_ceTrade.SetName( "Tick" );
-        m_ceQuoteAsk.SetColour( ou::Colour::Red );
-        m_ceQuoteAsk.SetName( "Ask" );
-        m_ceQuoteBid.SetColour( ou::Colour::Blue );
-        m_ceQuoteBid.SetName( "Bid" );
-        m_ceVolumeUp.SetColour( ou::Colour::Green );
-        m_ceVolumeUp.SetName( "Buy" );
-        m_ceVolumeDn.SetColour( ou::Colour::Red );
-        m_ceVolumeDn.SetName( "Sell" );
-
-        m_dvChart.Add( 0, &m_ceQuoteAsk );
-        m_dvChart.Add( 0, &m_ceQuoteBid );
-        m_dvChart.Add( 0, &m_ceTrade );
-        m_dvChart.Add( 1, &m_ceVolumeUp );
-        m_dvChart.Add( 1, &m_ceVolumeDn );
-
-        m_pOption->StartWatch();
-      }
-    }
-
-    void Del() {
-      if ( m_bActive ) {
-        m_pOption->StopWatch();
-        m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionTracker::HandleQuote ) );
-        switch ( m_pOption->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradeCall ) );
-            break;
-          case ou::tf::OptionSide::Put:
-            m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionTracker::HandleTradePut ) );
-            break;
-          default:
-            assert( false );
-            break;
-        }
-        m_bActive = false;
-      }
-    }
-
-    OptionTracker(
-      pOption_t pOption_
-    , ou::ChartEntryShape& ceBullCall, ou::ChartEntryShape& ceBullPut
-    , ou::ChartEntryShape& ceBearCall, ou::ChartEntryShape& ceBearPut
-    )
-    : m_bActive( false ), m_pOption( pOption_ )
-    , m_volBuy {}, m_volSell {}
-    , m_ceBullCall( ceBullCall ), m_ceBullPut( ceBullPut )
-    , m_ceBearCall( ceBearCall ), m_ceBearPut( ceBearPut )
-    {
-      Add();
-      std::cout << "option " << m_pOption->GetInstrumentName() << " added" << std::endl;
-    }
-
-    OptionTracker( const OptionTracker& rhs )
-    : m_bActive( false ), m_pOption( rhs.m_pOption )
-    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
-    , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
-    , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-    {
-      Add();
-    }
-
-    OptionTracker( OptionTracker&& rhs )
-    : m_bActive( false )
-    , m_volBuy( rhs.m_volBuy ), m_volSell( rhs.m_volSell)
-    , m_ceBullCall( rhs.m_ceBullCall ), m_ceBullPut( rhs.m_ceBullPut )
-    , m_ceBearCall( rhs.m_ceBearCall ), m_ceBearPut( rhs.m_ceBearPut )
-    {
-      rhs.Del();
-      m_pOption = std::move( rhs.m_pOption );
-      Add();
-    };
-
-    ~OptionTracker() {
-      Del();
-      m_pOption.reset();
-    }
-
-    void HandleQuote( const ou::tf::Quote& quote ) {
-      m_ceQuoteAsk.Append( quote.DateTime(), quote.Ask() );
-      m_ceQuoteBid.Append( quote.DateTime(), quote.Bid() );
-    }
-
-    void HandleTradeCall( const ou::tf::Trade& trade ) {
-      const double price = trade.Price();
-      const ou::tf::Quote& quote( m_pOption->LastQuote() );
-      const double mid = quote.Midpoint();
-      m_ceTrade.Append( trade.DateTime(), price );
-      if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
-        // can't really say, will need to check if bid came to ask or ask came to bid
-      }
-      else {
-        ou::tf::Trade::volume_t volume = trade.Volume();
-        if ( price > mid ) {
-          m_volBuy += volume;
-          m_ceBullCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
-          m_ceVolumeUp.Append( trade.DateTime(), volume );
-          m_ceVolumeDn.Append( trade.DateTime(), 0 );
-        }
-        else {
-          m_volSell += volume;
-          m_ceBearCall.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "C" );
-          m_ceVolumeUp.Append( trade.DateTime(), 0 );
-          m_ceVolumeDn.Append( trade.DateTime(), volume );
-        }
-      }
-    }
-
-    void HandleTradePut( const ou::tf::Trade& trade ) {
-      const double price = trade.Price();
-      const ou::tf::Quote& quote( m_pOption->LastQuote() );
-      const double mid = quote.Midpoint();
-      m_ceTrade.Append( trade.DateTime(), price );
-      if ( ( price == mid ) || ( quote.Bid() == quote.Ask() ) ) {
-        // can't really say, will need to check if bid came to ask or ask came to bid
-      }
-      else {
-        ou::tf::Trade::volume_t volume = trade.Volume();
-        if ( price > mid ) {
-          m_volBuy += volume;
-          m_ceBearPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
-          m_ceVolumeUp.Append( trade.DateTime(), volume );
-          m_ceVolumeDn.Append( trade.DateTime(), 0 );
-        }
-        else {
-          m_volSell += volume;
-          m_ceBullPut.AddLabel( trade.DateTime(), m_pOption->GetStrike(), "P" );
-          m_ceVolumeUp.Append( trade.DateTime(), 0 );
-          m_ceVolumeDn.Append( trade.DateTime(), volume );
-        }
-      }
-    }
-
-    void SaveWatch( const std::string& sPrefix ) {
-      m_pOption->SaveSeries( sPrefix );
-    }
-
-    void Emit() {
-      ou::tf::Quote quote( m_pOption->LastQuote() );
-      std::cout <<
-           m_pOption->GetInstrumentName()
-        << ": b=" << quote.Bid()
-        << ",a=" << quote.Ask()
-        //<< ",oi=" << m_pOption->GetFundamentals().nOpenInterest // not available
-        << ",bv=" << m_volBuy
-        << ",sv=" << m_volSell
-        << std::endl;
-    }
-
-    ou::ChartDataView* GetDataViewChart() { return &m_dvChart; }
-
-    template<typename Archive>
-    void save( Archive& ar, const unsigned int version ) const {
-      ar & m_volBuy;
-      ar & m_volSell;
-    }
-
-    template<typename Archive>
-    void load( Archive& ar, const unsigned int version ) {
-      ar & m_volBuy;
-      ar & m_volSell;
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-  };
-
-  // ==
-
   using pOptionTracker_t = std::shared_ptr<OptionTracker>;
   using mapOptionTracker_t = std::map<std::string, pOptionTracker_t>; // map<option name,tracker>
   using mapStrikes_t = std::map<double,mapOptionTracker_t>; // map of options across strikes
@@ -565,6 +361,18 @@ private:
   vOptionForQuote_t m_vOptionForQuote;
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
+
+  struct LifeCycleComponents {
+    pPosition_t pPosition;
+    Indicators indicators;
+    LifeCycleComponents( Indicators indicators_ )
+    : indicators( indicators_ ) {}
+    LifeCycleComponents( pPosition_t pPosition_, Indicators indicators_ )
+    : pPosition( pPosition_ ), indicators( indicators_ ) {}
+  };
+
+  using mapLifeCycleComponents_t = std::map<std::string,LifeCycleComponents>;
+  mapLifeCycleComponents_t m_mapLifeCycleComponents;
 
   using pTradeLifeTime_t = std::shared_ptr<TradeLifeTime>;
 
@@ -599,6 +407,8 @@ private:
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );
+
+  LifeCycleComponents& LookupLifeCycleComponents();
 
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );

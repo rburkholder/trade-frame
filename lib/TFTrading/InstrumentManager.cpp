@@ -36,7 +36,7 @@ InstrumentManager::~InstrumentManager() {
 
 InstrumentManager::pInstrument_t InstrumentManager::ConstructInstrument(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
-  InstrumentType::enumInstrumentType type ) {
+  InstrumentType::EInstrumentType type ) {
   pInstrument_t pInstrument( new Instrument( sInstrumentName, type, sExchangeName ) );
   Register( pInstrument );
   return pInstrument;

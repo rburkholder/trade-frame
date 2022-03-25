@@ -39,7 +39,8 @@ namespace iqfeed { // IQFeed
 
 template <typename T>
 class IQFeed:
-  public ou::Network<IQFeed<T> > {
+  public ou::Network<IQFeed<T> >
+{
   friend ou::Network<IQFeed<T> >;
   friend T;
 public:
@@ -192,18 +193,17 @@ private:
 };
 
 template <typename T>
-IQFeed<T>::IQFeed( void )
-: ou::Network<IQFeed<T> >( "127.0.0.1", 5009 ),
-  m_stateNews( NEWSISOFF ),
-  m_version( v49 )
+IQFeed<T>::IQFeed()
+: ou::Network<IQFeed<T> >( "127.0.0.1", 5009 )
+, m_stateNews( NEWSISOFF )
+, m_version( v49 )
 {}
 
 template <typename T>
-IQFeed<T>::~IQFeed(void) {
-}
+IQFeed<T>::~IQFeed() {}
 
 template <typename T>
-void IQFeed<T>::SetNewsOn( void ) {
+void IQFeed<T>::SetNewsOn() {
   if ( NEWSISOFF == m_stateNews ) {
     m_stateNews = NEWSISON;
     std::stringstream ss;
@@ -213,7 +213,7 @@ void IQFeed<T>::SetNewsOn( void ) {
 }
 
 template <typename T>
-void IQFeed<T>::SetNewsOff( void ) {
+void IQFeed<T>::SetNewsOff() {
   if ( NEWSISON == m_stateNews ) {
     m_stateNews = NEWSISOFF;
     std::stringstream ss;

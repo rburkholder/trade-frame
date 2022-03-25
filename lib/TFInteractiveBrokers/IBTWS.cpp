@@ -487,9 +487,9 @@ void TWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
   }
 }
 
-// indexed with InstrumentType::enumInstrumentType
+// indexed with InstrumentType::EInstrumentType
 const char *TWS::szSecurityType[] = {
-  "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
+  "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::EInstrumentType
 const char *TWS::szOrderType[] = {
   "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
@@ -1256,12 +1256,12 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
     //OutputDebugString( m_ss.str().c_str() );
   }
 
-  InstrumentType::enumInstrumentType it;
+  InstrumentType::EInstrumentType it;
   bool bFound( false );
   // could use keyword lookup here
   for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
     if ( 0 == strcmp( szSecurityType[ ix ], contract.secType.c_str() ) ) {
-      it = static_cast<InstrumentType::enumInstrumentType>( ix );
+      it = static_cast<InstrumentType::EInstrumentType>( ix );
       bFound = true;
       break;
     }
