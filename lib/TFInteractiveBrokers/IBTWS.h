@@ -86,7 +86,6 @@ public:
 
   // From ProviderInterface Execution Section
   void PlaceOrder( pOrder_t order );
-  void PlaceOrder( pOrder_t order, long idParent, bool bTransmit );
   void PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop );
   void PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop );
   void CancelOrder( pOrder_t order );

@@ -21,9 +21,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Order::Order() {
-}
-
 Order::Order( // market order
   Instrument::pInstrument_cref pInstrument
 , OrderType::EOrderType eOrderType
@@ -35,7 +32,6 @@ Order::Order( // market order
 :
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted )
 , m_pInstrument( pInstrument )
-, m_bOutsideRTH( false )
 , m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 )
 , m_nNextExecutionId ( 0 )
 {
@@ -54,7 +50,6 @@ Order::Order( // limit or stop
 :
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted )
 , m_pInstrument( pInstrument )
-, m_bOutsideRTH( false )
 , m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 )
 , m_nNextExecutionId ( 0 )
 {
@@ -73,7 +68,6 @@ Order::Order( // limit and stop
 :
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted )
 , m_pInstrument( pInstrument )
-, m_bOutsideRTH( false )
 , m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 )
 , m_nNextExecutionId ( 0 )
 {
@@ -82,7 +76,6 @@ Order::Order( // limit and stop
 
 Order::Order( const TableRowDef& row, pInstrument_t& pInstrument  )
 : m_row( row ), m_pInstrument( pInstrument )
-, m_bOutsideRTH( false )
 , m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 )
 , m_nNextExecutionId ( 0 )
 {}

@@ -168,3 +168,4 @@ private:
 };
 
 BOOST_CLASS_VERSION(FrameOrderEntry, 1)
+

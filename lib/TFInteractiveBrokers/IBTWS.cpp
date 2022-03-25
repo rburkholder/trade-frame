@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+//#include <sstream>
 #include <stdexcept>
 
 #include <boost/regex.hpp>
@@ -495,14 +496,10 @@ const char *TWS::szOrderType[] = {
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void TWS::PlaceOrder( pOrder_t pOrder ) {
-  PlaceOrder( pOrder, 0, true );
-}
-
-void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
 
   ::Order twsorder;
-  twsorder.orderId = pOrder->GetOrderId();
-  twsorder.parentId = idParent;
+  twsorder.orderId  = pOrder->GetOrderId();
+  twsorder.parentId = pOrder->GetParentOrderId();
 
   Contract contract;
   contract.conId = pOrder->GetInstrument()->GetContract();  // mostly enough to have contract id
@@ -529,9 +526,42 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
   twsorder.action = pOrder->GetOrderSideName();
   twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuanOrdered() );
   twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
-  twsorder.tif = "DAY";
-  //twsorder.goodAfterTime = "20080625 09:30:00";
-  //twsorder.goodTillDate = "20080625 16:00:00";
+
+  twsorder.tif = ou::tf::TimeInForce::Name[ pOrder->GetTimeInForce() ];
+
+  switch ( pOrder->GetTimeInForce() ) {
+    case ou::tf::TimeInForce::GoodTillDate:
+      {
+        //twsorder.goodTillDate = "20080625 16:00:00";
+        ptime dt( pOrder->GetGoodTillDate() );
+        std::stringstream ss;
+        ss << dt.time_of_day();
+        twsorder.goodTillDate
+          = ou::tf::Instrument::BuildDate( dt.date() )
+          + " "
+          + ss.str();
+      }
+      break;
+    default:
+      break;
+  }
+  switch ( pOrder->GetTimeInForce() ) { // will need to convfirm how this is signalled
+    case ou::tf::TimeInForce::GoodAfterTime:
+      {
+        //twsorder.goodAfterTime = "20080625 09:30:00";
+        ptime dt( pOrder->GetGoodAfterTime() );
+        std::stringstream ss;
+        ss << dt.time_of_day();
+        twsorder.goodAfterTime
+          = ou::tf::Instrument::BuildDate( dt.date() )
+          + " "
+          + ss.str();
+      }
+      break;
+    default:
+      break;
+  }
+
   switch ( pOrder->GetOrderType() ) {
     case OrderType::Limit:
       twsorder.lmtPrice = pOrder->GetPrice1();
@@ -554,7 +584,7 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
   }
-  twsorder.transmit = bTransmit;
+  twsorder.transmit   = pOrder->GetTransmit();
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
 
@@ -563,15 +593,26 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
 }
 
 void TWS::PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop ) {
-  PlaceOrder( pOrderEntry, 0, false );
+  pOrderEntry->SetTransmit( false );
+  PlaceOrder( pOrderEntry );
+  //PlaceOrder( pOrderEntry, 0, false );
   //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );
-  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
+  PlaceOrder( pOrderStop );
 }
 
 void TWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop ) {
-  PlaceOrder( pOrderEntry, 0, false );                           // limit or market
-  PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
-  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
+  pOrderEntry->SetTransmit( false );
+  //PlaceOrder( pOrderEntry, 0, false );                           // limit or market
+  PlaceOrder( pOrderEntry );                           // limit or market
+  pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
+  pOrderProfit->SetTransmit( false );
+  //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
+  PlaceOrder( pOrderProfit );  // limit
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
+  PlaceOrder( pOrderStop );     // stop or trail
 }
 
 void TWS::CancelOrder( pOrder_t pOrder ) {

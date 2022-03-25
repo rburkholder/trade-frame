@@ -35,5 +35,9 @@ namespace OrderSide {
   const char* Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
 }
 
+namespace TimeInForce {
+  const char* Name[] = { "UNKN", "DAY", "GTC", "ATO", "IOC", "FOK", "GTC", "GTD", "GAC", "ATC", "AUC", "OPG" };
+}
+
 } // namespace tf
 } // namespace ou
