@@ -11,10 +11,10 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-/* 
+/*
  * File:   NotebookOptionChains.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on July 2, 2017, 8:16 PM
  */
 
@@ -47,21 +47,21 @@ void NotebookOptionChains::Init() {
 }
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
-  
+
   wxNotebook::Create(parent, id, pos, size, style, name );
-  
+
   CreateControls();
 
   return true;
 }
 
-void NotebookOptionChains::CreateControls() {   
-  
+void NotebookOptionChains::CreateControls() {
+
   //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Bind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this );
 
   BindEvents();
-  
+
 }
 
 void NotebookOptionChains::BindEvents() {
@@ -75,7 +75,7 @@ void NotebookOptionChains::BindEvents() {
 
     //Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
     //Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-    //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
     //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
     m_bBound = true;
@@ -93,9 +93,9 @@ void NotebookOptionChains::UnbindEvents() {
 
     //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
     //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-    //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+    //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
     //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-    
+
     m_bBound = false;
   }
 }
@@ -105,7 +105,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
   int ixTab = event.GetOldSelection();
   if ( -1 != ixTab ) {
     //std::cout << "page changing: " << ixTab << std::endl;
-    mapOptionExpiry_t::iterator iter 
+    mapOptionExpiry_t::iterator iter
      = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
        return ixTab == vt.second.ixTab;
     });
@@ -129,7 +129,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
 void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
   int ixTab = event.GetSelection();
   //std::cout << "page changed: " << ixTab << std::endl;
-  mapOptionExpiry_t::iterator iter 
+  mapOptionExpiry_t::iterator iter
     = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
       return ixTab == vt.second.ixTab;
       });
@@ -151,7 +151,7 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
 void NotebookOptionChains::SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* pgcs ) {
   m_pgcsGridOptionChain = pgcs;
   int ixTab = GetSelection();
-  mapOptionExpiry_t::iterator iter 
+  mapOptionExpiry_t::iterator iter
     = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
       return ixTab == vt.second.ixTab;
       });
@@ -171,24 +171,24 @@ void NotebookOptionChains::SetName( const std::string& sName ) {
 }
 
 // add specific put/call-at-strike pair to Notebook of OptionChaines
-void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
-  
+void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
+
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
-  
+
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
     // add another panel
     std::string sDate = boost::lexical_cast<std::string>( date.year() );
-    sDate += std::string( "/" ) 
-      + ( date.month().as_number() < 10 ? "0" : "" ) 
+    sDate += std::string( "/" )
+      + ( date.month().as_number() < 10 ? "0" : "" )
       + boost::lexical_cast<std::string>( date.month().as_number() );
     sDate += std::string( "/" ) + ( date.day()   < 10 ? "0" : "" ) + boost::lexical_cast<std::string>( date.day() );
-    
+
     auto* pPanel = new wxPanel( this, wxID_ANY );
     auto* pSizer = new wxBoxSizer(wxVERTICAL);
     pPanel->SetSizer( pSizer );
     auto* pGridOptionChain = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
     pSizer->Add( pGridOptionChain, 1, wxALL|wxEXPAND, 1 );
-    
+
     // a control right click will signal through that strike should watch/unwatch
     // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
     pGridOptionChain->m_fOnRowClicked = [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
@@ -201,34 +201,34 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
         m_fOnOptionUnderlyingRetrieve(sIQFeedOptionName, date, strike, f );
       }
     };
-    
-    iterExpiry = m_mapOptionExpiry.insert( 
+
+    iterExpiry = m_mapOptionExpiry.insert(
       m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
-    
+
     struct Reindex {
       size_t ix;
       Reindex(): ix{} {}
       void operator()( Tab& tab ) { tab.ixTab = ix; ix++; }
     };
-    
+
     // renumber the pages
-    Reindex reindex; 
-    std::for_each( 
-      m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), 
+    Reindex reindex;
+    std::for_each(
+      m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
         [&reindex](mapOptionExpiry_t::value_type& v){ reindex( v.second ); } );
-        
+
     InsertPage( iterExpiry->second.ixTab, pPanel, sDate );
-    
+
     SetSelection( 0 );
   } // end add panel
-  
+
   mapStrike_t& mapStrike( iterExpiry->second.mapStrike ); // assumes single thread
   mapStrike_t::iterator iterStrike = mapStrike.find( strike );
-  
+
   if ( mapStrike.end() == iterStrike ) {
     iterStrike = mapStrike.insert( mapStrike.begin(), mapStrike_t::value_type( strike, Row( mapStrike.size() ) ) );
   }
-  
+
   switch ( side ) {
     case ou::tf::OptionSide::Call:
       assert( "" == iterStrike->second.sCall );
@@ -239,17 +239,17 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
       iterStrike->second.sPut = sSymbol;
       break;
   }
-  
+
   // add option set to the expiry panel
   iterExpiry->second.pWinOptionChain->Add( strike, side, sSymbol );
-  
+
 }
 
 void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  std::for_each( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), 
+  std::for_each( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
     [](mapOptionExpiry_t::value_type& value){
      value.second.pWinOptionChain->PreDestroy();
      value.second.pWinOptionChain->Destroy();
@@ -261,9 +261,9 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
    //DeletePage( 0 );
    RemovePage( 0 );
   }
-	
+
   assert( Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this ) );
-  
+
   event.Skip();  // auto followed by Destroy();
 }
 

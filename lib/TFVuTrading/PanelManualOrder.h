@@ -51,8 +51,8 @@ public:
 
   struct Order_t {
     wxString sSymbol;
-    ou::tf::OrderSide::enumOrderSide eOrderSide;
-    ou::tf::OrderType::enumOrderType eOrderType;
+    ou::tf::OrderSide::EOrderSide eOrderSide;
+    ou::tf::OrderType::EOrderType eOrderType;
     unsigned long nQuantity;
     double dblPrice1;
     double dblPrice2;

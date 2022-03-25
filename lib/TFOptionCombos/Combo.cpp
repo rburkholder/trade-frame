@@ -72,7 +72,7 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
 }
 
 // will over-write existing Leg, needs notes field in pPosition
-const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDataView_t pChartData, ou::Colour::enumColour colour ) {
+const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDataView_t pChartData, ou::Colour::EColour colour ) {
 
   assert( pPositionNew );
   assert( pChartData );

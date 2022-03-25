@@ -270,7 +270,7 @@ private:
     //ou::ChartEntryIndicator m_ceSD;
     pChartDataView_t pChartDataView;
 
-    EMA( unsigned int nIntervals, pChartDataView_t pChartDataView_, ou::Colour::enumColour colour )
+    EMA( unsigned int nIntervals, pChartDataView_t pChartDataView_, ou::Colour::EColour colour )
     : dblEmaLatest {}, pChartDataView( pChartDataView_ ), state( State::same )//, dblSD {}, dblSn {}
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );

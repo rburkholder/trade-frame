@@ -31,9 +31,9 @@ namespace iqfeed { // IQFeed
 
 typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-void ComposeOptionName( 
-  /* OUT */ std::string& sCall, std::string& sPut, 
-  /* IN  */ const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike );
+void ComposeOptionName(
+  /* OUT */ std::string& sCall, std::string& sPut,
+  /* IN  */ const std::string& sUnderlying, ou::tf::OptionSide::EOptionSide option, ptime dtExpiry, double dblStrike );
 
 void SetAlternateName( const pInstrument_t& pInstrument );
 

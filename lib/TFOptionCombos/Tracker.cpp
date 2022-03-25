@@ -278,7 +278,7 @@ void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_
               m_transition = ETransition::Roll;
 
               double strike( m_dblStrikePosition );
-              ou::tf::OptionSide::enumOptionSide sidePosition( m_sidePosition );
+              ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
 
               m_compare = nullptr;
               m_luStrike = nullptr;

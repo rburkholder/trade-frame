@@ -51,8 +51,8 @@ public:
 
   static std::string BuildDate( boost::gregorian::date );
   static std::string BuildDate( uint16_t year, uint16_t month, uint16_t day );
-  static std::string BuildGenericOptionName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day, OptionSide::enumOptionSide side, double strike );
-  static std::string BuildGenericOptionName( const std::string& sBaseName, boost::gregorian::date, OptionSide::enumOptionSide side, double strike );
+  static std::string BuildGenericOptionName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day, OptionSide::EOptionSide side, double strike );
+  static std::string BuildGenericOptionName( const std::string& sBaseName, boost::gregorian::date, OptionSide::EOptionSide side, double strike );
   static std::string BuildGenericFutureName( const std::string& sBaseName, uint16_t year, uint16_t month, uint16_t day );
   static std::string BuildGenericFutureName( const std::string& sBaseName, boost::gregorian::date );
 
@@ -86,9 +86,9 @@ public:
     std::string sDescription;
     idExchange_t idExchange;
 //    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
-    Currency::enumCurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
-    Currency::enumCurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
-    OptionSide::enumOptionSide eOptionSide;
+    Currency::ECurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
+    Currency::ECurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
+    OptionSide::EOptionSide eOptionSide;
     boost::uint16_t nYear; // future, option
     boost::uint16_t nMonth; // future, option
     boost::uint16_t nDay; // future, option
@@ -137,7 +137,7 @@ public:
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
 //      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_,
-      OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
+      OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -153,7 +153,7 @@ public:
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
 //      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
-      OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
+      OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -168,7 +168,7 @@ public:
     TableRowDef( // currency
       const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
       InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
-      Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
+      Currency::ECurrency eCurrency_, Currency::ECurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //        idUnderlying( idCounterInstrument_ ),
 	eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ),
@@ -205,20 +205,20 @@ public:
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side,
+    OptionSide::EOptionSide side,
     double strike );
   Instrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
 //    pInstrument_t pUnderlying,
-    OptionSide::enumOptionSide side,
+    OptionSide::EOptionSide side,
     double strike );
   Instrument(  // currency
     const idInstrument_t& idInstrument,
 //    const idInstrument_t& idCounterInstrument,
     InstrumentType::EInstrumentType eType, const idExchange_t& idExchange,
-    Currency::enumCurrency base, Currency::enumCurrency counter );
+    Currency::ECurrency base, Currency::ECurrency counter );
 
   virtual ~Instrument();
 
@@ -255,7 +255,7 @@ public:
   void SetExchangeName( const std::string& sExchangeName ) { m_row.idExchange = sExchangeName; }
   const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
 
-  void SetCurrency( Currency::enumCurrency eCurrency ) { m_row.eCurrency = eCurrency; };
+  void SetCurrency( Currency::ECurrency eCurrency ) { m_row.eCurrency = eCurrency; };
   const char *GetCurrencyName( void ) const { return Currency::Name[ m_row.eCurrency ]; };
 
   double GetStrike( void ) const { return m_row.dblStrike; };
@@ -266,7 +266,7 @@ public:
   std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( GetExpiry() ); };
   boost::posix_time::ptime GetExpiryUtc( void ) const;
 
-  OptionSide::enumOptionSide GetOptionSide( void ) const { return m_row.eOptionSide; };
+  OptionSide::EOptionSide GetOptionSide( void ) const { return m_row.eOptionSide; };
 
   // these may not be needed anymore
   void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday

@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+//#include <sstream>
 #include <stdexcept>
 
 #include <boost/regex.hpp>
@@ -43,7 +44,7 @@ namespace {
 
 // TODO: use spirit to parse?  will it be faster?
 struct DecodeStatusWord {
-  enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
+  enum EStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
   DecodeStatusWord( void ): kwm( Unknown, 50 ) {
     kwm.AddPattern( "Cancelled", Cancelled );
     kwm.AddPattern( "Filled", Filled );
@@ -53,9 +54,9 @@ struct DecodeStatusWord {
     kwm.AddPattern( "PendingSubmit", PendingSubmit );
     kwm.AddPattern( "PendingCancel", PendingCancel );
   }
-  enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
+  EStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
 private:
-  ou::KeyWordMatch<enumStatus> kwm;;
+  ou::KeyWordMatch<EStatus> kwm;;
 };
 
 DecodeStatusWord dsw;
@@ -495,14 +496,10 @@ const char *TWS::szOrderType[] = {
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void TWS::PlaceOrder( pOrder_t pOrder ) {
-  PlaceOrder( pOrder, 0, true );
-}
-
-void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
 
   ::Order twsorder;
-  twsorder.orderId = pOrder->GetOrderId();
-  twsorder.parentId = idParent;
+  twsorder.orderId  = pOrder->GetOrderId();
+  twsorder.parentId = pOrder->GetParentOrderId();
 
   Contract contract;
   contract.conId = pOrder->GetInstrument()->GetContract();  // mostly enough to have contract id
@@ -529,9 +526,42 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
   twsorder.action = pOrder->GetOrderSideName();
   twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuanOrdered() );
   twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
-  twsorder.tif = "DAY";
-  //twsorder.goodAfterTime = "20080625 09:30:00";
-  //twsorder.goodTillDate = "20080625 16:00:00";
+
+  twsorder.tif = ou::tf::TimeInForce::Name[ pOrder->GetTimeInForce() ];
+
+  switch ( pOrder->GetTimeInForce() ) {
+    case ou::tf::TimeInForce::GoodTillDate:
+      {
+        //twsorder.goodTillDate = "20080625 16:00:00";
+        ptime dt( pOrder->GetGoodTillDate() );
+        std::stringstream ss;
+        ss << dt.time_of_day();
+        twsorder.goodTillDate
+          = ou::tf::Instrument::BuildDate( dt.date() )
+          + " "
+          + ss.str();
+      }
+      break;
+    default:
+      break;
+  }
+  switch ( pOrder->GetTimeInForce() ) { // will need to convfirm how this is signalled
+    case ou::tf::TimeInForce::GoodAfterTime:
+      {
+        //twsorder.goodAfterTime = "20080625 09:30:00";
+        ptime dt( pOrder->GetGoodAfterTime() );
+        std::stringstream ss;
+        ss << dt.time_of_day();
+        twsorder.goodAfterTime
+          = ou::tf::Instrument::BuildDate( dt.date() )
+          + " "
+          + ss.str();
+      }
+      break;
+    default:
+      break;
+  }
+
   switch ( pOrder->GetOrderType() ) {
     case OrderType::Limit:
       twsorder.lmtPrice = pOrder->GetPrice1();
@@ -554,7 +584,7 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
   }
-  twsorder.transmit = bTransmit;
+  twsorder.transmit   = pOrder->GetTransmit();
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
 
@@ -563,15 +593,26 @@ void TWS::PlaceOrder( pOrder_t pOrder, long idParent, bool bTransmit ) {
 }
 
 void TWS::PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop ) {
-  PlaceOrder( pOrderEntry, 0, false );
+  pOrderEntry->SetTransmit( false );
+  PlaceOrder( pOrderEntry );
+  //PlaceOrder( pOrderEntry, 0, false );
   //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );
-  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
+  PlaceOrder( pOrderStop );
 }
 
 void TWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop ) {
-  PlaceOrder( pOrderEntry, 0, false );                           // limit or market
-  PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
-  PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
+  pOrderEntry->SetTransmit( false );
+  //PlaceOrder( pOrderEntry, 0, false );                           // limit or market
+  PlaceOrder( pOrderEntry );                           // limit or market
+  pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
+  pOrderProfit->SetTransmit( false );
+  //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
+  PlaceOrder( pOrderProfit );  // limit
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
+  PlaceOrder( pOrderStop );     // stop or trail
 }
 
 void TWS::CancelOrder( pOrder_t pOrder ) {
@@ -680,7 +721,7 @@ void TWS::openOrder( ::OrderId orderId, const ::Contract& contract, const ::Orde
       // reports total commission for order rather than increment
       OrderManager::Instance().ReportCommission( orderId, state.commission );
     // use spirit to do this to make it faster with a trie, or use keyword match
-    DecodeStatusWord::enumStatus status = dsw.Match( state.status );
+    DecodeStatusWord::EStatus status = dsw.Match( state.status );
     switch ( status ) {
     case DecodeStatusWord::Submitted:
       break;
@@ -730,7 +771,7 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
     //std::cout << m_ss.str();  // ****
 //    OutputDebugString( m_ss.str().c_str() );
   }
-  DecodeStatusWord::enumStatus status_ = dsw.Match( status );
+  DecodeStatusWord::EStatus status_ = dsw.Match( status );
   switch ( status_ ) {
     case DecodeStatusWord::Cancelled:
       OrderManager::Instance().ReportCancellation( orderId );
@@ -765,7 +806,7 @@ void TWS::execDetails( int reqId, const ::Contract& contract, const ::Execution&
 //  std::cout << m_ss.str();  // ****
 //  OutputDebugString( m_ss.str().c_str() );
 
-  OrderSide::enumOrderSide side = OrderSide::Unknown;
+  OrderSide::EOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
   if ( "SLD" == execution.side ) side = OrderSide::Sell;
   if ( OrderSide::Unknown == side ) {
@@ -1239,7 +1280,7 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
   std::string sLocalSymbol( contract.localSymbol );  // and this to name them properly
   std::string sExchange( contract.exchange );
 
-  OptionSide::enumOptionSide os( OptionSide::Unknown );
+  OptionSide::EOptionSide os( OptionSide::Unknown );
 
   // calculate expiry, used with FuturesOption, Option   "GLD   120210C00159000"
   boost::gregorian::date dtExpiryRequested( boost::gregorian::not_a_date_time );
@@ -1329,11 +1370,11 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
     case InstrumentType::Currency: {
       // 20151227 will need to step this to see if it works, with no sUnderlying
       bFound = false;
-      Currency::enumCurrency base = Currency::_Count;
+      Currency::ECurrency base = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
         if ( 0 == strcmp( Currency::Name[ ix ], sBaseName.c_str() ) ) {
           bFound = true;
-          base = static_cast<Currency::enumCurrency>( ix );
+          base = static_cast<Currency::ECurrency>( ix );
           break;
         }
       }
@@ -1347,11 +1388,11 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
       ++szCounter;  // advance to character after '.'
 
       bFound = false;
-      Currency::enumCurrency counter = Currency::_Count;
+      Currency::ECurrency counter = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
         if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
           bFound = true;
-          counter = static_cast<Currency::enumCurrency>( ix );
+          counter = static_cast<Currency::ECurrency>( ix );
           break;
         }
       }

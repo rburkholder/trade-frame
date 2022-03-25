@@ -59,19 +59,19 @@ public:
 
   pOrder_t ConstructOrder( // market order
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit or stop
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity, double dblPrice1,
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit and stop
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition = 0
     );
@@ -82,7 +82,7 @@ public:
   void ReportCancellation( idOrder_t nOrderId );  // feedback from provider
   void ReportExecution( idOrder_t orderId, const Execution& exec );  // feedback from provider
   void ReportCommission( idOrder_t nOrderId, double dblCommission );  // feedback from provider
-  void ReportErrors( idOrder_t nOrderId, OrderError::enumOrderError eError );  // feedback from provider
+  void ReportErrors( idOrder_t nOrderId, OrderError::EOrderError eError );  // feedback from provider
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 

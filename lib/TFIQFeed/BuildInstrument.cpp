@@ -50,10 +50,10 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, trd.sExchange );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       if ( "TSE" == trd.sExchange ) {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::CAD );
       }
       else {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       pInstrument->SetMultiplier( 1 );  // default
       pInstrument->SetMinTick( 0.01 );
@@ -62,7 +62,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     case ESecurityType::IEOption:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       pInstrument->SetMultiplier( 100 );  // default, but there are ones with 10
       pInstrument->SetMinTick( 0.01 );
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
@@ -70,7 +70,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     case ESecurityType::Future:  // may need to pull out the prefix
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month(), date.day() );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       pInstrument->SetMultiplier( 100 );  // default
       pInstrument->SetMinTick( 0.05 );  // this may vary depending upon future type
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
@@ -78,7 +78,7 @@ pInstrument_t BuildInstrument( const std::string& sGenericName, const trd_t& trd
     case ESecurityType::FOption:  // futures option doesn't require underlying?
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month(), date.day(), trd.eOptionSide, trd.dblStrike );
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       pInstrument->SetMultiplier( 100 );  // varies
       pInstrument->SetMinTick( 0.01 );  // varies
       pInstrument->SetSignificantDigits( 2 );  // not sure about this one
@@ -102,28 +102,28 @@ pInstrument_t BuildInstrument( const trd_t& trd, const Fundamentals& fundamental
     case ESecurityType::Equity:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, trd.sExchange );
       if ( "TSE" == trd.sExchange ) {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::CAD );
       }
       else {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::IEOption: {
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::Future: { // may need to pull out the prefix
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number() );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::FOption: { // futures option doesn't require underlying?
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, date.year(), date.month().as_number(), date.day().as_number(), trd.eOptionSide, fundamentals.dblStrikePrice );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::Index:
@@ -153,28 +153,28 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
     case ESecurityType::Equity:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Stock, sExchange );
       if ( "TSE" == sExchange ) {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::CAD );
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::CAD );
       }
       else {
-        pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+        pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::IEOption: {
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Option, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::Future: { // may need to pull out the prefix
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, sExchange, date.year(), date.month().as_number(), date.day().as_number() );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::FOption: { // futures option doesn't require underlying?
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
-      pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
     case ESecurityType::Index:

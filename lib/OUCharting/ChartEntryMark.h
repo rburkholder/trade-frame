@@ -30,22 +30,22 @@ public:
 
   struct Mark_t {
     double m_dblPrice;
-    ou::Colour::enumColour m_colour;
+    ou::Colour::EColour m_colour;
     std::string m_sName;
     Mark_t( void ): m_dblPrice( 0.0 ), m_colour( ou::Colour::Black ) {};
-    Mark_t( double price, ou::Colour::enumColour colour, const std::string &name )
+    Mark_t( double price, ou::Colour::EColour colour, const std::string &name )
       : m_dblPrice( price ), m_colour( colour ), m_sName( name ) {};
   };
 
   ChartEntryMark();
   virtual ~ChartEntryMark();
-  void AddMark( double price, ou::Colour::enumColour colour, const std::string &name ); // bg thread
+  void AddMark( double price, ou::Colour::EColour colour, const std::string &name ); // bg thread
   void AddMark( const Mark_t& mark ); // bg thread
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
   virtual void Clear();
 protected:
   std::vector<double> m_vPrice;
-  std::vector<ou::Colour::enumColour> m_vColour;
+  std::vector<ou::Colour::EColour> m_vColour;
   std::vector<std::string> m_vName;
 private:
   using queueMark_t = ou::tf::Queue<Mark_t>;

@@ -80,22 +80,22 @@ private:
   ou::ChartEntryShape m_ceKShortEntry;
 
   struct Trade {
-    ou::tf::OrderSide::enumOrderSide side;
+    ou::tf::OrderSide::EOrderSide side;
     double entry;
     double offset;
     double stop;
     double trail;
     double tick;
     Trade(): entry {}, stop {}, trail {}, offset {}, side( ou::tf::OrderSide::Unknown ) {}
-    Trade( ou::tf::OrderSide::enumOrderSide side_, double entry_, double offset_ )
+    Trade( ou::tf::OrderSide::EOrderSide side_, double entry_, double offset_ )
     : Trade()
     {
       side = side_;
       offset = offset_;
       switch ( side ) {
-        case ou::tf::OrderSide::enumOrderSide::Buy:
+        case ou::tf::OrderSide::EOrderSide::Buy:
           break;
-        case ou::tf::OrderSide::enumOrderSide::Sell:
+        case ou::tf::OrderSide::EOrderSide::Sell:
           break;
       }
     }
@@ -108,14 +108,14 @@ private:
   struct RoundTrip {
     bool bComplete;
     std::string sText;
-    ou::tf::OrderSide::enumOrderSide eOrderSide;
+    ou::tf::OrderSide::EOrderSide eOrderSide;
     ptime dtEntry;
     ptime dtExit;
     double priceEntry;
     double priceExit;
     double dblProfitMax;
     double dblLossMax;
-    RoundTrip( const std::string& sText_, ou::tf::OrderSide::enumOrderSide side, ptime dtEntry_, double priceEntry_ )
+    RoundTrip( const std::string& sText_, ou::tf::OrderSide::EOrderSide side, ptime dtEntry_, double priceEntry_ )
     : sText( sText_ ), eOrderSide( side ), dtEntry( dtEntry_ ), priceEntry( priceEntry_ ),
       bComplete( false ), priceExit {}, dblProfitMax {}, dblLossMax {}
     {}
@@ -261,9 +261,9 @@ private:
 
   void StopTest1( const ou::tf::Quote& quote );
 
-  void Entry( ou::tf::OrderSide::enumOrderSide, const std::string& sComment );
-  void Entry1( ou::tf::OrderSide::enumOrderSide );
-  void Entry2( ou::tf::OrderSide::enumOrderSide, const std::string& sComment );
+  void Entry( ou::tf::OrderSide::EOrderSide, const std::string& sComment );
+  void Entry1( ou::tf::OrderSide::EOrderSide );
+  void Entry2( ou::tf::OrderSide::EOrderSide, const std::string& sComment );
   void Exit( EExitType typeExit, ou::tf::Quote::dt_t, double exit, const std::string& sComment );
   void CancelOrders();
 

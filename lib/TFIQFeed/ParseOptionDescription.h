@@ -35,12 +35,12 @@ struct structParsedOptionDescription {
   std::string& sUnderlying;
   boost::uint8_t& nMonth;
   boost::uint16_t& nYear;
-  ou::tf::OptionSide::enumOptionSide& eOptionSide;
+  ou::tf::OptionSide::EOptionSide& eOptionSide;
   double& dblStrike;
-  structParsedOptionDescription( 
+  structParsedOptionDescription(
     std::string& sUnderlying_,
-    boost::uint8_t& nMonth_, boost::uint16_t& nYear_, 
-        ou::tf::OptionSide::enumOptionSide& eOptionSide_, double& dblStrike_ ):
+    boost::uint8_t& nMonth_, boost::uint16_t& nYear_,
+        ou::tf::OptionSide::EOptionSide& eOptionSide_, double& dblStrike_ ):
       sUnderlying( sUnderlying_ ),
       nMonth( nMonth_ ), nYear( nYear_ ), eOptionSide( eOptionSide_ ), dblStrike( dblStrike_ ) {};
 };
@@ -56,7 +56,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sUnderlying)
   (boost::uint8_t&, nMonth)
   (boost::uint16_t&, nYear)
-  (ou::tf::OptionSide::enumOptionSide&, eOptionSide)
+  (ou::tf::OptionSide::EOptionSide&, eOptionSide)
   (double&, dblStrike)
   )
 
@@ -92,7 +92,7 @@ struct OptionDescriptionParser: qi::grammar<Iterator, adapted_option_t()> {
       ( "C", OptionSide::Call )
       ( "P", OptionSide::Put )
       ;
-    
+
     // define option processing rules
     ruleString %= +(qi::char_ - qi::char_(' '));
     ruleUnderlyingSymbol %= ruleString;
@@ -100,7 +100,7 @@ struct OptionDescriptionParser: qi::grammar<Iterator, adapted_option_t()> {
     ruleYear %= qi::uint_;
     ruleStrike %= qi::float_;
     ruleOptionSide %= symOptionSide;
-    start %= 
+    start %=
            ruleUnderlyingSymbol
          > qi::lit( ' ' ) > ruleMonth
          > qi::lit( ' ' ) > ruleYear
@@ -110,14 +110,14 @@ struct OptionDescriptionParser: qi::grammar<Iterator, adapted_option_t()> {
   }
 
   qi::symbols<char, boost::uint8_t> symMonths;
-  qi::symbols<char, ou::tf::OptionSide::enumOptionSide> symOptionSide;
+  qi::symbols<char, ou::tf::OptionSide::EOptionSide> symOptionSide;
 
   qi::rule<Iterator, std::string()> ruleString;
   qi::rule<Iterator, std::string()> ruleUnderlyingSymbol;
   qi::rule<Iterator, boost::uint8_t()> ruleMonth;
   qi::rule<Iterator, boost::uint16_t()> ruleYear;
   qi::rule<Iterator, double()> ruleStrike;
-  qi::rule<Iterator, ou::tf::OptionSide::enumOptionSide()> ruleOptionSide;
+  qi::rule<Iterator, ou::tf::OptionSide::EOptionSide()> ruleOptionSide;
   qi::rule<Iterator, adapted_option_t()> start;
 
 };

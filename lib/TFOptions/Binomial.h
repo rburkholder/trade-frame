@@ -28,8 +28,8 @@ namespace option { // options
 namespace binomial { // binomial
 
 struct structInput {
-  ou::tf::OptionSide::enumOptionSide optionSide;
-  ou::tf::OptionStyle::enumOptionStyle optionStyle;
+  ou::tf::OptionSide::EOptionSide optionSide;
+  ou::tf::OptionStyle::EOptionStyle optionStyle;
   double S; // price of underlying
   double X; // strike price
   double T; // time to expiry
@@ -37,7 +37,7 @@ struct structInput {
   double b; // make same as r, carry rate
   double v; // volatility
   long n;  // number of time steps
-  structInput( void ): 
+  structInput( void ):
     optionStyle( ou::tf::OptionStyle::American ),
     optionSide( ou::tf::OptionSide::Unknown ),
     n( 91 ), // binomial steps

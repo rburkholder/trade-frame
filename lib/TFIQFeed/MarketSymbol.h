@@ -51,7 +51,7 @@ public:
     boost::uint32_t nSIC;
     boost::uint32_t nNAICS;
     std::string sUnderlying;
-    ou::tf::OptionSide::enumOptionSide eOptionSide;
+    ou::tf::OptionSide::EOptionSide eOptionSide;
     double dblStrike;
     boost::uint16_t nYear;
     boost::uint8_t nMonth;

@@ -25,7 +25,6 @@
 #include "KeyTypes.h"
 #include "Symbol.h"
 #include "Order.h"
-#include "OrderManager.h"
 
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
@@ -149,7 +148,7 @@ template <typename P, typename S>  // p = provider, S = symbol
 class ProviderInterface: public ProviderInterfaceBase {
 public:
 
-  using symbol_id_t = typename SymbolBase::symbol_id_t;
+  using idSymbol_t = typename SymbolBase::idSymbol_t;
   using pSymbol_t = typename S::pSymbol_t;
 
   ProviderInterface();
@@ -173,7 +172,7 @@ public:
   bool Exists( pInstrument_cref pInstrument );
   pSymbol_t Add( pInstrument_cref pInstrument );
 
-  pSymbol_t GetSymbol( const symbol_id_t& );
+  pSymbol_t GetSymbol( const idSymbol_t& );
   pSymbol_t GetSymbol( const pInstrument_t );
 
   void  PlaceOrder( Order::pOrder_t pOrder );
@@ -181,8 +180,8 @@ public:
 
 protected:
 
-  using mapSymbols_t = std::map<symbol_id_t, pSymbol_t>;
-  using pair_mapSymbols_t = std::pair<symbol_id_t, pSymbol_t>;
+  using mapSymbols_t = std::map<idSymbol_t, pSymbol_t>;
+  using pair_mapSymbols_t = std::pair<idSymbol_t, pSymbol_t>;
   mapSymbols_t m_mapSymbols;
 
   //void Connecting( void );
@@ -304,7 +303,7 @@ typename ProviderInterface<P,S>::mapSymbols_t::iterator ProviderInterface<P,S>::
 
 
 template <typename P, typename S>
-typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
+typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( const idSymbol_t& id ) {
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {

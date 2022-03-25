@@ -52,16 +52,16 @@ InteractiveChart::InteractiveChart()
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
 
-, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::LightBlue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Pink )
-, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Pink )
+, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
 
-, m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
-, m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
-, m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceBullCall( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBullPut( ou::ChartEntryShape::EShape::Long, ou::Colour::LightBlue )
+, m_ceBearCall( ou::ChartEntryShape::EShape::Short, ou::Colour::Pink )
+, m_ceBearPut( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 {
   Init();
 }
@@ -81,16 +81,16 @@ InteractiveChart::InteractiveChart(
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
 
-, m_ceBuySubmit( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceCancelled( ou::ChartEntryShape::EShortStop, ou::Colour::Orange )
+, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
 
-, m_ceBullCall( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceBullPut( ou::ChartEntryShape::ELong, ou::Colour::LightBlue )
-, m_ceBearCall( ou::ChartEntryShape::EShort, ou::Colour::Pink )
-, m_ceBearPut( ou::ChartEntryShape::EShort, ou::Colour::Red )
+, m_ceBullCall( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceBullPut( ou::ChartEntryShape::EShape::Long, ou::Colour::LightBlue )
+, m_ceBearCall( ou::ChartEntryShape::EShape::Short, ou::Colour::Pink )
+, m_ceBearPut( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 {
   Init();
 }

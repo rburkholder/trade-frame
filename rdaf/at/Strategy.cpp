@@ -19,6 +19,16 @@
  * Created: March 7, 2022 14:35
  */
 
+
+// https://indico.cern.ch/event/697389/contributions/3062036/attachments/1712790/2761904/Support_for_SIMD_Vectorization_in_ROOT_ROOT_Workshop_2018.pdf
+// https://www.intel.com/content/www/us/en/develop/documentation/advisor-user-guide/top/analyze-cpu-roofline.html
+// https://stackoverflow.com/questions/52653025/why-is-march-native-used-so-rarely
+
+ #include <chrono>
+
+ #include <boost/log/trivial.hpp>
+
+
 #include <rdaf/TH2.h>
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
@@ -47,12 +57,12 @@ Strategy::Strategy(
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
-, m_ceLongEntry( ou::ChartEntryShape::ELong, ou::Colour::Blue )
-, m_ceLongFill( ou::ChartEntryShape::EFillLong, ou::Colour::Blue )
-, m_ceLongExit( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
-, m_ceShortEntry( ou::ChartEntryShape::EShort, ou::Colour::Red )
-, m_ceShortFill( ou::ChartEntryShape::EFillShort, ou::Colour::Red )
-, m_ceShortExit( ou::ChartEntryShape::EShortStop, ou::Colour::Red )
+, m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+, m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
+, m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+, m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
   m_pFile = pFile;
@@ -152,7 +162,7 @@ void Strategy::InitRdaf() {
   );
   m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !m_pTreeQuote ) {
-    std::cout << "problems m_pTreeQuote" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems m_pTreeQuote";
   }
   m_pTreeQuote->SetDirectory( m_pFile.get() );
 
@@ -161,7 +171,7 @@ void Strategy::InitRdaf() {
   );
   m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !m_pTreeTrade ) {
-    std::cout << "problems m_pTreeTrade" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems m_pTreeTrade";
   }
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
@@ -171,7 +181,7 @@ void Strategy::InitRdaf() {
     m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
   );
   if ( !m_pHistVolume ) {
-    std::cout << "problems history" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "problems history";
   }
   m_pHistVolume->SetDirectory( m_pFile.get() );
 
@@ -311,7 +321,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
       if ( bin_y < 1 ) {
         if ( !m_bChangeConfigFileMessageLatch ) {
-          std::cout << "warning: " << m_config.sSymbol << ", need to adjust lower time in config file" << std::endl;
+          BOOST_LOG_TRIVIAL(warning) << m_config.sSymbol << ", need to adjust lower time in config file";
           m_bChangeConfigFileMessageLatch = true;
         }
       }
@@ -349,37 +359,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      if ( m_pHistVolume ) {
-        //input of this function is the time, which is the current time
-        //therefore we need to find a suitable range of bins along Y-axis (remember time is stored in y-axis)
-        // and find the projection of h2. the result is a 1-D hist with x-axis being price
-        // and value being volume
 
-        std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-        nTime = (double)nTime / 1000.0;
-	if (m_pHistVolume->GetEntries() < 10000) break;
-        //find the bin that the time given belongs to:
-        Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
-
-        //if bin_y is valid and larger than 1 then proceed, else abort (since there is not enought data)
-        if ( bin_y < 1 ) {
-	  break;
-        }
-        else {
-          //now find projection of h2 from the beginning till now:
-          auto h2_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
-
-          // now that h2_x is calculated, fit a gaussian to the it (i.e volume distribution)
-          //auto b = h2_x->Fit( "gaus", "S" );
-
-          //if fit is valid proceed, else abort
-          //if ( b->IsValid() ) {
-	  if (h2_x->GetSkewness(1) > 0.2){
-	    //if ( abs( bar.Close() - b->Parameter(1)) < b->Parameter(2) ) {
-              EnterLong( bar );
-	      //}
-          }
-        }
+      if ( bTriggerEntry ) {
+        BOOST_LOG_TRIVIAL(info) << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew;
+        EnterLong( bar );
       }
       break;
     case ETradeState::LongSubmitted:
@@ -393,7 +376,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
         m_ceLongExit.AddLabel( bar.DateTime(), m_quote.Midpoint(), "Long Exit" );
-        m_stateTrade = ETradeState::ExitSubmitted;
+        m_stateTrade = ETradeState::LongExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
       }
       break;

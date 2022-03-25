@@ -19,6 +19,8 @@
  * Created on Sept 20, 2021, 21:52
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <TFTrading/Watch.h>
 #include <TFTrading/InstrumentManager.h>
 
@@ -142,14 +144,14 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           pInstrument_t pInstrument
             = ou::tf::iqfeed::BuildInstrument( fundamentals );
 
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "BuildInstrument: "
             << m_mapSymbol.size() << ","
             << m_mapInProgress.size() << ","
             << fundamentals.sExchangeRoot << ","
             << iterInProgress->first << ","
             << pInstrument->GetInstrumentName()
-            << std::endl;
+            ;
 
           if ( m_pIB ) {
 

@@ -16,6 +16,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include "BuildSymbolName.h"
 
 namespace ou { // One Unified
@@ -32,7 +34,7 @@ const std::string BuildName( const NameParts& parts ) {
       break;
     case ou::tf::InstrumentType::Option:
       if ( 0 != parts.day ) std::runtime_error( "ou::tf::iqfeed::BuildName: 0 == parts.day" );
-      sBuiltName 
+      sBuiltName
         = ou::tf::iqfeed::BuildOptionName( parts.sRootName, parts.year, parts.month, parts.day, parts.strike, parts.side );
       break;
     case ou::tf::InstrumentType::Future:
@@ -40,20 +42,20 @@ const std::string BuildName( const NameParts& parts ) {
         = ou::tf::iqfeed::BuildFuturesName( parts.sRootName, parts.year, parts.month );
       break;
     case ou::tf::InstrumentType::FuturesOption:
-      sBuiltName 
+      sBuiltName
         = ou::tf::iqfeed::BuildFuturesOptionName( parts.sRootName, parts.year, parts.month, parts.strike, parts.side );
       break;
-    default: 
+    default:
       throw std::runtime_error( "ou::tf::iqfeed::BuildName: unknown instrument type" );
       break;
   }
   return sBuiltName;
 }
 
-// something similar in Option.cpp  
+// something similar in Option.cpp
 // need to deal with x10 type options
 // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
-const std::string BuildOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+const std::string BuildOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::EOptionSide side ) {
   std::string sName = sUnderlying;
   if ( 0 != year ) {
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
@@ -61,7 +63,7 @@ const std::string BuildOptionName( const std::string& sUnderlying, uint16_t year
     //std::string sDay( '0' + boost::lexical_cast<std::string>( day ) );
     //sName += sDay.substr( sDay.length() - 2 , 2 ); // two digits
     switch ( side ) {
-      case 'C': 
+      case 'C':
         sName += 'A' - 1 + month;
         break;
       case 'P':
@@ -86,7 +88,7 @@ const std::string BuildFuturesName( const std::string& sUnderlying, uint16_t yea
   return sName;
 }
 
-const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, double strike, ou::tf::OptionSide::EOptionSide side ) {
   assert( 1 <= month );
   assert( 12 >= month );
   static const char* code = { "-FGHJKMNQUVXZ" }; // hyphen to make as 1 index
@@ -100,7 +102,7 @@ const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16
   return sName;
 }
 
-const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side ) {
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, uint16_t year, uint16_t month, uint16_t day, double strike, ou::tf::OptionSide::EOptionSide side ) {
   std::runtime_error( "ou::tf::iqfeed::BuildFuturesOptionName: day not used yet" ); // day isn't used yet, need to fix
   assert( 1 <= month );
   assert( 12 >= month );

@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <iostream>
+#include <boost/log/trivial.hpp>
 
 #include <boost/asio/post.hpp>
 
@@ -24,7 +24,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-IQFeedSymbol::IQFeedSymbol( const symbol_id_t& sSymbol, pInstrument_t pInstrument )
+IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 : Symbol<IQFeedSymbol>( pInstrument, sSymbol )
 , m_cnt( 0 )
 , m_QStatus( qUnknown )
@@ -84,8 +84,8 @@ void IQFeedSymbol::HandleFundamentalMessage(
         for ( std::string::const_reverse_iterator iter = symbol.rbegin(); iter != symbol.rend(); iter++ ) {
           if ( ( '.' == *iter ) || ( ('0' <= *iter ) && ( '9' >= *iter ) ) ) {}
           else {
-            if ( 'L' >= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Call;
-            if ( 'M' <= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::enumOptionSide::Put;
+            if ( 'L' >= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::EOptionSide::Call;
+            if ( 'M' <= *iter ) fundamentals.eOptionSide = ou::tf::OptionSide::EOptionSide::Put;
             break;
           }
         }
@@ -141,7 +141,8 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
         if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
           summary.dblOpen = dblOpen;
           summary.bNewOpen = true;
-          std::cout << "IQF new open 1: " << GetId() << "=" << summary.dblOpen << std::endl;
+            BOOST_LOG_TRIVIAL(info)
+              << "IQF new open 1: " << GetId() << "=" << summary.dblOpen;
         };
         break;
       case 'E':
@@ -202,7 +203,8 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T>* pMsg ) {
       if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
         summary.dblOpen = dblOpen;
         summary.bNewOpen = true;
-        std::cout << "IQF new open 2: " << GetId() << "=" << summary.dblOpen << std::endl;
+        BOOST_LOG_TRIVIAL(info)
+          << "IQF new open 2: " << GetId() << "=" << summary.dblOpen;
       };
       summary.nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
@@ -222,7 +224,8 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T>* pMsg ) {
     case 'o':
       break;
     default:
-      std::cout << "IQFeedSymbol::DecodePricingMessage: " << this->m_pInstrument->GetInstrumentName() << " Unknown price type: " << chType << std::endl;
+      BOOST_LOG_TRIVIAL(error)
+        << "IQFeedSymbol::DecodePricingMessage: " << this->m_pInstrument->GetInstrumentName() << " Unknown price type: " << chType;
   }
 //  }
 
@@ -271,7 +274,8 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage* pMsg ) {
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( "Not Found" == pMsg->Field( IQFPricingMessage<IQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
-      std::cout << GetId() << " not found" << std::endl;
+      BOOST_LOG_TRIVIAL(error)
+        << "IQFeedSymbol::HandleUpdateMessage: " << GetId() << " not found";
     }
   }
   if ( qFound == m_QStatus ) {

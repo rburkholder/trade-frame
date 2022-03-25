@@ -33,15 +33,15 @@ public:
 
   using pInstrument_t = Instrument::pInstrument_t;
   using pInstrument_cref =  Instrument::pInstrument_cref;
-  using symbol_id_t = Instrument::idInstrument_t;
+  using idSymbol_t = Instrument::idInstrument_t;
   //   may need to use provider specific name in alternate instrument name in Instrument
 
   // class should only be constructed with valid instrument, which already has general name as well as provider specific names
   SymbolBase( pInstrument_t pInstrument );  // instrument supplied name
   SymbolBase( pInstrument_t pInstrument, const std::string& sName );  // provider specific name
-  virtual ~SymbolBase(void);
+  virtual ~SymbolBase();
 
-  const symbol_id_t& GetId() const { return m_id; };  // used for mapping and indexing
+  const idSymbol_t& GetId() const { return m_id; };  // used for mapping and indexing
   pInstrument_t GetInstrument() { return m_pInstrument; };
 
   using quote_t = const Quote&;
@@ -86,7 +86,7 @@ public:
 
 protected:
 
-  symbol_id_t m_id;  // may be overwritten with provider specific override
+  idSymbol_t m_id;  // may be overwritten with provider specific override
   pInstrument_t m_pInstrument;  // composition rather than inheritance as same instrument refers to different market data and order providers
 
   ou::Delegate<trade_t> m_OnOpen;  // first value upon market opening
@@ -105,7 +105,7 @@ public:
   using pSymbol_t = boost::shared_ptr<S>;
   Symbol( pInstrument_t pInstrument ) : SymbolBase( pInstrument ) {};
   Symbol( pInstrument_t pInstrument, const std::string& sName ) : SymbolBase( pInstrument, sName ) {};
-  virtual ~Symbol( void ) {};
+  virtual ~Symbol() {};
 protected:
 private:
 

@@ -41,7 +41,7 @@ Order::idOrder_t OrderManager::CheckOrderId( idOrder_t id ) {
 
 OrderManager::pOrder_t OrderManager::ConstructOrder( // market order
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     idPosition_t idPosition
     ) {
@@ -53,7 +53,7 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // market order
 
 OrderManager::pOrder_t OrderManager::ConstructOrder( // limit or stop
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity, double dblPrice1,
     idPosition_t idPosition
     ) {
@@ -66,7 +66,7 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // limit or stop
 
 OrderManager::pOrder_t OrderManager::ConstructOrder( // limit and stop
     Instrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType, OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition
     ) {
@@ -116,10 +116,10 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "orderid", idOrder );
     }
     Order::idOrder_t idOrder;
-    OrderStatus::enumOrderStatus eOrderStatus;
+    OrderStatus::EOrderStatus eOrderStatus;
     ptime dtOrderSubmitted;
     double dblSignalPrice;
-    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_ )
+    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_ )
       : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ), dblSignalPrice( dblSignalPrice_ ) {};
   };
 }
@@ -275,8 +275,8 @@ namespace OrderManagerQueries {
     }
     Order::idOrder_t idOrder;
     ptime dtOrderClosed;
-    OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateAtOrderClose( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
+    OrderStatus::EOrderStatus eOrderStatus;
+    UpdateAtOrderClose( Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderClosed_ )
       : idOrder( id ), dtOrderClosed( dtOrderClosed_ ), eOrderStatus( status ) {};
   };
 }
@@ -331,13 +331,13 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "datetimeclosed", dtClosed );
       ou::db::Field( a, "orderid", idOrder );
     }
-    OrderStatus::enumOrderStatus eOrderStatus;
+    OrderStatus::EOrderStatus eOrderStatus;
     boost::uint32_t nQuantityRemaining;
     boost::uint32_t nQuantityFilled;
     ptime dtClosed;
     double dblAverageFillPrice;
     Order::idOrder_t idOrder;
-    UpdateOrder( Order::idOrder_t idOrder_, OrderStatus::enumOrderStatus eOrderStatus_,
+    UpdateOrder( Order::idOrder_t idOrder_, OrderStatus::EOrderStatus eOrderStatus_,
       boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, double dblAverageFillPrice_, ptime dtClosed_ = boost::date_time::not_a_date_time )
       : idOrder( idOrder_ ), eOrderStatus( eOrderStatus_ ),
       nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ),
@@ -352,7 +352,7 @@ void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
       pOrder_t pOrder = iter->second.pOrder;
-      OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
+      OrderStatus::EOrderStatus status = pOrder->ReportExecution( exec );
       if ( 0 != m_pSession ) {
         const Order::TableRowDef& row( pOrder->GetRow() );
         switch ( status ) {
@@ -449,13 +449,13 @@ namespace OrderManagerQueries {
     }
     Order::idOrder_t idOrder;
     ptime dtOrderClosed;
-    OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateOnOrderError( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
+    OrderStatus::EOrderStatus eOrderStatus;
+    UpdateOnOrderError( Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderClosed_ )
       : idOrder( id ), dtOrderClosed( dtOrderClosed_ ), eOrderStatus( status ) {};
   };
 }
 
-void OrderManager::ReportErrors( idOrder_t nOrderId, OrderError::enumOrderError eError) {
+void OrderManager::ReportErrors( idOrder_t nOrderId, OrderError::EOrderError eError) {
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {

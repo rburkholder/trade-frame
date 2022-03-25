@@ -28,9 +28,9 @@ const char rchCallMonth[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
 const char rchPutMonth[] =  { 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X' };
 
 // something similar in BuildSymbolName.cpp
-void ComposeOptionName( 
-  std::string& sCall, std::string& sPut, 
-  const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike ) {
+void ComposeOptionName(
+  std::string& sCall, std::string& sPut,
+  const std::string& sUnderlying, ou::tf::OptionSide::EOptionSide option, ptime dtExpiry, double dblStrike ) {
   std::string sDay;
   boost::gregorian::date::day_type day = dtExpiry.date().day();
   sDay = ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
@@ -47,7 +47,7 @@ void SetAlternateName( const pInstrument_t& pInstrument ) {
   boost::gregorian::date::day_type day = dateExpiry.day() + 1;  // IQFeed dates are the saturday after expiry
   char chMonth;
   switch ( pInstrument->GetOptionSide() ) {
-  case ou::tf::OptionSide::Call: 
+  case ou::tf::OptionSide::Call:
     chMonth = rchCallMonth[ dateExpiry.month() - 1 ];
     break;
   case ou::tf::OptionSide::Put:
@@ -60,9 +60,9 @@ void SetAlternateName( const pInstrument_t& pInstrument ) {
     // main option instrument name should be our own, and the iqfeed name set as the alternate name
   // uncomment the following once fixed with standard and iqfeed specific names
   // BuildSymbolName.h is the standard way to build the names now
-//  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, 
-//      pInstrument->GetUnderlyingName() 
-//    + boost::lexical_cast<std::string>( dateExpiry.year() ).substr( 2, 2 ) 
+//  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF,
+//      pInstrument->GetUnderlyingName()
+//    + boost::lexical_cast<std::string>( dateExpiry.year() ).substr( 2, 2 )
 //    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
 //    + chMonth
 //    + boost::lexical_cast<std::string>( pInstrument->GetStrike() ) );

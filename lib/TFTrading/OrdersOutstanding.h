@@ -27,13 +27,13 @@ public:
   typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::Position::pOrder_t pOrder_t;
 
-  enum enumState {
-    EStateOpenWaitingFill, EStateOpenCancelling, EStateOpen, 
-    EStateProfit, EStateLoss, EStateEven, EStateClosing, EStateCancelled
+  enum class EState {
+    OpenWaitingFill, OpenCancelling, Open,
+    Profit, Loss, Even, Closing, Cancelled
   };
 
   struct structRoundTrip {
-    enumState eState;
+    EState eState;
     pOrder_t pOrderEntry;
     pOrder_t pOrderExit;
     double dblBasis; // average price at which entry order filled
@@ -42,11 +42,11 @@ public:
     double dblSlope1, dblSlope2, dblSlope3;  // stats for post analysis
     double dblSlopeSlope1, dblSlopeSlope2;
     double dblSlopeBollingerOffset;
-    structRoundTrip( void ): eState( EStateOpenWaitingFill ), dblBasis( 0.0 ) {};
+    structRoundTrip( void ): eState( EState::OpenWaitingFill ), dblBasis( 0.0 ) {};
     structRoundTrip( pOrder_t entry )
-      : eState( EStateOpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ) {};
+      : eState( EState::OpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ) {};
     structRoundTrip( pOrder_t entry, double target, double stop )
-      : eState( EStateOpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ),
+      : eState( EState::OpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ),
         dblTarget( target ), dblStop( stop ) {};
   };
   typedef boost::shared_ptr<structRoundTrip> pRoundTrip_t;
@@ -101,11 +101,11 @@ protected:
   void CheckBaseOrder( const ou::tf::Quote& quote );
   bool CancelAndCloseInProgress( void );
 
-  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
-  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1 );
-  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType, ou::tf::OrderSide::EOrderSide, boost::uint32_t nOrderQuantity );
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType, ou::tf::OrderSide::EOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1 );
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::EOrderType, ou::tf::OrderSide::EOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
   void PlaceOrder( pOrder_t& pOrder );
-  
+
 private:
 
   bool m_bCancelAndCloseInProgress;

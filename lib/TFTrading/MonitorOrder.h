@@ -44,7 +44,7 @@ public:
   void SetPosition( pPosition_t pPosition );
 
   // can only work on one order at a time
-  bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::enumOrderSide side );
+  bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side );
   void CancelOrder();
   void ClosePosition();
 

@@ -35,12 +35,12 @@ struct structParsedFOptionDescription {
   std::string& sUnderlying;
   boost::uint8_t& nMonth;
   boost::uint16_t& nYear;
-  ou::tf::OptionSide::enumOptionSide& eOptionSide;
+  ou::tf::OptionSide::EOptionSide& eOptionSide;
   double& dblStrike;
   structParsedFOptionDescription(
     std::string& sUnderlying_,
     boost::uint8_t& nMonth_, boost::uint16_t& nYear_,
-        ou::tf::OptionSide::enumOptionSide& eOptionSide_, double& dblStrike_ ):
+        ou::tf::OptionSide::EOptionSide& eOptionSide_, double& dblStrike_ ):
       sUnderlying( sUnderlying_ ),
       nMonth( nMonth_ ), nYear( nYear_ ), eOptionSide( eOptionSide_ ), dblStrike( dblStrike_ ) {};
 };
@@ -56,7 +56,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sUnderlying)
   (boost::uint8_t&, nMonth)
   (boost::uint16_t&, nYear)
-  (ou::tf::OptionSide::enumOptionSide&, eOptionSide)
+  (ou::tf::OptionSide::EOptionSide&, eOptionSide)
   (double&, dblStrike)
   )
 
@@ -110,7 +110,7 @@ struct FOptionDescriptionParser: qi::grammar<Iterator, adapted_foption_t()> {
   }
 
   qi::symbols<char, boost::uint8_t> symMonths;
-  qi::symbols<char, ou::tf::OptionSide::enumOptionSide> symOptionSide;
+  qi::symbols<char, ou::tf::OptionSide::EOptionSide> symOptionSide;
 
   qi::rule<Iterator, std::string()> ruleNoSpaceString;
   qi::rule<Iterator, std::string()> ruleNotAMonth;
@@ -118,7 +118,7 @@ struct FOptionDescriptionParser: qi::grammar<Iterator, adapted_foption_t()> {
   qi::rule<Iterator, boost::uint8_t()> ruleMonth;
   qi::rule<Iterator, boost::uint16_t()> ruleYear;
   qi::rule<Iterator, double()> ruleStrike;
-  qi::rule<Iterator, ou::tf::OptionSide::enumOptionSide()> ruleOptionSide;
+  qi::rule<Iterator, ou::tf::OptionSide::EOptionSide()> ruleOptionSide;
   qi::rule<Iterator, adapted_foption_t()> start;
 
 };

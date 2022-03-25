@@ -65,8 +65,8 @@ public:
   virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
   // long by default for entry, short doesn't make much sense due to combo type
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity );
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
+  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
+  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
 
   virtual void CancelOrders();
   virtual void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time );

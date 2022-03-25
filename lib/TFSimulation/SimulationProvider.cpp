@@ -16,7 +16,9 @@
 #include <cassert>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
+
 #include <TFTrading/KeyTypes.h>
+#include <TFTrading/OrderManager.h>
 
 #include "SimulationProvider.h"
 

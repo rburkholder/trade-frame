@@ -25,36 +25,37 @@ namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
 }
 
 namespace OrderSide {
-  enum enumOrderSide { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
+  enum EOrderSide { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
   extern const char* Name[];
 }
 
 namespace OrderStatus {
-  enum enumOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted,
+  enum EOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted,
     Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
 }
 
 namespace OptionSide {
-  enum enumOptionSide { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
+  enum EOptionSide { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
   extern const char* Name[];
   extern const char* LongName[];
   extern const char* ShortName[];
 }
 
 namespace OptionStyle {
-  enum enumOptionStyle { American, European, _Count };
+  enum EOptionStyle { American, European, _Count };
 }
 
 namespace OrderType { // ib szOrderType depends upon order
-  enum enumOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
+  enum EOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }
 
 namespace OrderError {
-  enum enumOrderError { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
+  enum EOrderError { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
-namespace TimeInForce {
-  enum enumTimeInForce { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, AtTheClose, _Count };
+namespace TimeInForce { // need to do this way for now, as sql doesn't know about class enumerations
+  enum ETimeInForce { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, GoodAfterTime, AtTheClose, Auction, OPG, _Count };
+  extern const char* Name[];
 }
 
 namespace Currency {
@@ -62,7 +63,7 @@ namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
   typedef std::string type;
   // enumeration is subject to change, so do not use enumeration in persistent storage
-  enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
+  enum ECurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
   extern const char* Name[];
 }
 
@@ -70,7 +71,7 @@ namespace Currency {
   // * menu tree presents certain options depending upon what is allowed
   // * need to get this out of here for more generic use, maybe in the enumerations file
 namespace Allowed {
-  enum enumInstrument { All, Basic, Options, FuturesOptions, None };
+  enum EInstrument { All, Basic, Options, FuturesOptions, None };
 }
 
 // currency pair    base/quote(aka counter)  - depicts how many units of the counter currency are needed to buy one unit of the base currency.

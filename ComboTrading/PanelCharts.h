@@ -90,7 +90,7 @@ public:
   typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
   signalRetrieveOptionList_t signalRetrieveOptionList;
 
-  std::function<pInstrument_t(const ou::tf::Allowed::enumInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
+  std::function<pInstrument_t(const ou::tf::Allowed::EInstrument, const wxString&)> m_fSelectInstrument; // pop up for symbol / instrument selection
   std::function<pInstrument_t(const std::string&)> m_fBuildInstrumentFromIqfeed; // build instrument from grid / option chain click
 
   typedef std::function<void(pInstrument_t)> fBuildOptionInstrumentComplete_t;
@@ -274,7 +274,7 @@ private:
 
   InstrumentActions::values_t HandleNewInstrumentRequest(
     const wxTreeItemId& item,
-    const ou::tf::Allowed::enumInstrument,
+    const ou::tf::Allowed::EInstrument,
     const wxString& sUnderlying
   );
 

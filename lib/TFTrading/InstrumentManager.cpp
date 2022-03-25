@@ -54,7 +54,7 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructFuture(
 InstrumentManager::pInstrument_t InstrumentManager::ConstructFuturesOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-  OptionSide::enumOptionSide side,
+  OptionSide::EOptionSide side,
   double strike ) {
   pInstrument_t pInstrument(
     new Instrument( sInstrumentName, InstrumentType::FuturesOption, sExchangeName,
@@ -66,7 +66,7 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructFuturesOption(
 InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-  OptionSide::enumOptionSide side,
+  OptionSide::EOptionSide side,
   double strike ) {
   pInstrument_t pInstrument(
     new Instrument( sInstrumentName, InstrumentType::Option, sExchangeName,
@@ -79,7 +79,7 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency(
   idInstrument_cref idInstrumentName,
 //  idInstrument_cref idCounterInstrument,
   const std::string& sExchangeName,
-  Currency::enumCurrency base, Currency::enumCurrency counter ) {
+  Currency::ECurrency base, Currency::ECurrency counter ) {
   pInstrument_t pInstrument(
     new Instrument( idInstrumentName, /*idCounterInstrument,*/ InstrumentType::Currency, sExchangeName, base, counter ) );
   Register( pInstrument );

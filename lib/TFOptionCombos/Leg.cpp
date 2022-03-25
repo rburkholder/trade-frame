@@ -133,7 +133,7 @@ void Leg::Tick( ptime dt, double dblUnderlyingPrice ) {
   }
 }
 
-void Leg::PlaceOrder( ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity ) {
+void Leg::PlaceOrder( ou::tf::OrderSide::EOrderSide side, boost::uint32_t nOrderQuantity ) {
   if ( m_pPosition ) {
     m_monitor.PlaceOrder( nOrderQuantity, side );
   }
@@ -191,7 +191,7 @@ namespace {
   constexpr size_t ixVega = 15;
 }
 
-void Leg::SetChartData( pChartDataView_t pChartDataView, ou::Colour::enumColour colour ) {
+void Leg::SetChartData( pChartDataView_t pChartDataView, ou::Colour::EColour colour ) {
 
   DelChartData();
 

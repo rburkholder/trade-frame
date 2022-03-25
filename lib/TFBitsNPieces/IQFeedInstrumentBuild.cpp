@@ -20,6 +20,8 @@
 
 #include <functional>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include <TFIQFeed/BuildSymbolName.h>
 
 #include "IQFeedInstrumentBuild.h"
@@ -45,7 +47,7 @@ IQFeedInstrumentBuild::~IQFeedInstrumentBuild() {
 
 IQFeedInstrumentBuild::pInstrument_t
   IQFeedInstrumentBuild::HandleNewInstrumentRequest(
-    const ou::tf::Allowed::enumInstrument selector,
+    const ou::tf::Allowed::EInstrument selector,
     const wxString& wxsUnderlying // optional
 ) {
 

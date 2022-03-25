@@ -112,9 +112,9 @@ public:
   // all pending orders must be on the same side
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market
-    OrderSide::enumOrderSide eOrderSidePending;
+    OrderSide::EOrderSide eOrderSidePending;
     boost::uint32_t nPositionPending; // indicates whether we are in a long or short position
-    OrderSide::enumOrderSide eOrderSideActive;
+    OrderSide::EOrderSide eOrderSideActive;
     boost::uint32_t nPositionActive;
   // following value markers exclude commission
     double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accruing
@@ -215,38 +215,38 @@ public:
   bool SellOrdersPending() const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
 
   Order::pOrder_t ConstructOrder( // market
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity
     );
   Order::pOrder_t ConstructOrder( // limit or stop
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     double dblPrice1
     );
   Order::pOrder_t ConstructOrder( // limit and stop
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     double dblPrice1,
     double dblPrice2
     );
 
   Order::pOrder_t PlaceOrder( // market
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity
     );
   Order::pOrder_t PlaceOrder( // limit or stop
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     double dblPrice1
     );
   Order::pOrder_t PlaceOrder( // limit and stop
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide,
+    OrderType::EOrderType eOrderType,
+    OrderSide::EOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     double dblPrice1,
     double dblPrice2
@@ -257,7 +257,7 @@ public:
 
   void CancelOrder( idOrder_t idOrder );
   void CancelOrders();
-  void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
+  void ClosePosition( OrderType::EOrderType eOrderType = OrderType::Market );
 
   ou::Delegate<const ou::tf::Trade&> OnTrade;
   ou::Delegate<const ou::tf::Quote&> OnQuote;  // emitted in HandleQuote, prior to statistic calculations
@@ -319,7 +319,7 @@ private:
   void HandleQuote( quote_t& );
   void HandleTrade( trade_t& );
 
-  void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
+  void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::EOrderSide side );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

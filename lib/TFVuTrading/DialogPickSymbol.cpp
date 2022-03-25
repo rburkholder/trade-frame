@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * Created on December 22, 2015, 3:04 PM
  */
 
@@ -46,7 +46,7 @@ DialogPickSymbol::DialogPickSymbol( wxWindow* parent, wxWindowID id, const wxStr
 }
 
 bool DialogPickSymbol::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
-  
+
 ////@begin PanelPickSymbol creation
     //SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY); // from dialogblocks
     SetExtraStyle(wxWS_EX_BLOCK_EVENTS);  // from DialogInstrumentSelect
@@ -69,7 +69,7 @@ void DialogPickSymbol::Init() {
   m_bIBSymbolChanging = false;
   m_bOptionOnly = false;
   m_bFuturesOptionOnly = false;
-  
+
     m_radioEquity = NULL;
     m_radioOption = NULL;
     m_radioFuture = NULL;
@@ -88,10 +88,10 @@ void DialogPickSymbol::Init() {
     m_radioCurrencyCAD = NULL;
     m_btnOk = NULL;
     m_btnCancel = NULL;
-   
+
 }
 
-void DialogPickSymbol::CreateControls() {    
+void DialogPickSymbol::CreateControls() {
 
     DialogPickSymbol* itemPanel1 = this;
 
@@ -249,7 +249,7 @@ void DialogPickSymbol::CreateControls() {
     itemBoxSizer43->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     itemBoxSizer43->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
-    
+
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIQFSymbolChanged, this, ID_TEXT_IQF_SYMBOL );
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIBSymbolChanged, this, ID_TEXT_IB_SYMBOL );
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleStrikeChanged, this, ID_TEXT_STRIKE );
@@ -258,12 +258,12 @@ void DialogPickSymbol::CreateControls() {
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioOption, this, ID_RADIO_OPTION );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioFuture, this, ID_RADIO_FUTURE );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioFOption, this, ID_RADIO_FOPTION );
-  
+
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioPut, this, ID_RADIO_PUT );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioCall, this, ID_RADIO_CALL );
-  
+
   Bind( wxEVT_DATE_CHANGED, &DialogPickSymbol::HandleExpiryChanged, this, ID_DATE_EXPIRY );
-  
+
   Bind( EVT_SetFocus, &DialogPickSymbol::HandleSetFocus, this );
 
   // examples:
@@ -318,14 +318,14 @@ void DialogPickSymbol::SetFuturesOptionOnly( void ) {
 }
 
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
-  
+
   //std::cout << "DialogPickSymbol::HandleIQFSymbolChanged entered" << std::endl;
-  
+
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  
+
   m_txtSymbolDescription->SetLabel( "" );
   m_btnOk->Enable( false );
-  
+
   wxString text( m_txtIQFRootName->GetValue() );
   std::string sText( text.c_str() );
 
@@ -333,7 +333,7 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   m_txtIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need m_bIBSymbolChanging
   m_bIBSymbolChanging = false;
   pde->sIBSymbolName = text;
-  
+
   std::string sDescription;
   //pde->signalLookupIQFeedDescription( sText, sDescription );
   pde->fLookupIQFeedDescription( sText, sDescription );
@@ -402,11 +402,11 @@ void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
   UpdateComposite();
   QueueEvent( new SetFocusEvent( EVT_SetFocus, m_dateExpiry ) );
 }
- 
+
 void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
   SetRadioFuturesOption();
 }
-  
+
 void DialogPickSymbol::SetRadioFuturesOption( void ) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
@@ -418,7 +418,7 @@ void DialogPickSymbol::SetRadioFuturesOption( void ) {
   UpdateComposite();
   QueueEvent( new SetFocusEvent( EVT_SetFocus, m_txtStrike ) );
 }
-  
+
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
@@ -432,7 +432,7 @@ void DialogPickSymbol::HandleRadioCall( wxCommandEvent& event ) {
   pde->os = OptionSide::Call;
   UpdateComposite();
 }
-  
+
 void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
@@ -444,20 +444,20 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 }
 
 void DialogPickSymbol::UpdateComposite( void ) {
-  
+
   //std::cout << "DialogPickSymbol::UpdateComposite" << std::endl;
-  
+
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  
+
   pde->nContractId = 0;
   UpdateContractId();
-  
+
   pde->sIQFSymbolName = this->m_txtIQFRootName->GetValue();
   pde->sIQFeedDescription = "";
   pde->fComposeIQFeedFullName( pde );
   m_txtIQFeedFullName->SetValue( pde->sIQFeedFullName );
   m_txtIQFeedDescription->SetLabel( pde->sIQFeedDescription );
-  
+
   UpdateBtnOk();
 }
 
@@ -508,8 +508,8 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    
-    std::vector<wxDateTime::Month> vMonth = { 
+
+    std::vector<wxDateTime::Month> vMonth = {
       wxDateTime::Month::Jan,
       wxDateTime::Month::Feb,
       wxDateTime::Month::Mar,
@@ -534,16 +534,16 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
       pde->month = dt.GetMonth();
       pde->day = dt.GetDay();
     }
-    
+
     switch ( pde->os ) {
-      case OptionSide::enumOptionSide::Call:
+      case OptionSide::EOptionSide::Call:
         m_radioOptionCall->SetValue( true );
         break;
-      case OptionSide::enumOptionSide::Put:
+      case OptionSide::EOptionSide::Put:
         m_radioOptionPut->SetValue( true );
         break;
     }
-    
+
     //m_textIQFRootName->SetFocus();
   }
   else {

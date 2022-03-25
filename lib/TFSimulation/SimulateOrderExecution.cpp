@@ -113,7 +113,7 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
     // figure out price of execution
     Trade::tradesize_t quanAvail;
     double dblPrice;
-    OrderSide::enumOrderSide orderSide = pOrderFrontOfQueue->GetOrderSide();
+    OrderSide::EOrderSide orderSide = pOrderFrontOfQueue->GetOrderSide();
     switch ( orderSide ) {
       case OrderSide::Buy:
         quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
