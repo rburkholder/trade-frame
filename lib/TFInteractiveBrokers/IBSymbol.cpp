@@ -20,7 +20,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace ib { // Interactive Brokers
 
-Symbol::Symbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
+Symbol::Symbol( inherited_t::idSymbol_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 :
   ou::tf::Symbol<Symbol>( pInstrument, idSym ),
     m_TickerId( idTicker ), m_conId( 0 ),

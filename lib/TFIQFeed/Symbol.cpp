@@ -24,7 +24,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-IQFeedSymbol::IQFeedSymbol( const symbol_id_t& sSymbol, pInstrument_t pInstrument )
+IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 : Symbol<IQFeedSymbol>( pInstrument, sSymbol )
 , m_cnt( 0 )
 , m_QStatus( qUnknown )

@@ -39,7 +39,7 @@ public:
 
   using pProvider_t = boost::shared_ptr<IQFeedProvider>;
   using inherited_t = ProviderInterface<IQFeedProvider,IQFeedSymbol>;
-  using symbol_id_t = inherited_t::symbol_id_t ;
+  using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
   using pInstrument_t = inherited_t::pInstrument_t;
   using IQFeed_t = IQFeed<IQFeedProvider>;

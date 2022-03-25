@@ -14,7 +14,6 @@
 
 #pragma once
 
-//#include <stdexcept>
 
 #include "client/EWrapper.h"
 
@@ -35,7 +34,7 @@ public:
   using pSymbol_t = inherited_t::pSymbol_t;
 
   //IBSymbol( TickerId id, pInstrument_t pInstrument );
-  Symbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
+  Symbol( inherited_t::idSymbol_t, pInstrument_t pInstrument, TickerId id );
   Symbol( pInstrument_t pInstrument, TickerId id );
   virtual ~Symbol(void);
 
