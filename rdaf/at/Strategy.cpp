@@ -162,10 +162,10 @@ void Strategy::InitRdaf() {
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
 
-  self->m_pHistVolume = std::make_shared<TH2D>(
+  m_pHistVolume = std::make_shared<TH2D>(
     ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
-    self->m_config.nPriceBins, self->m_config.dblPriceLower, self->m_config.dblPriceUpper,
-    self->m_config.nTimeBins, self->m_config.dblTimeLower, self->m_config.dblTimeUpper
+    m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
+    m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
 
   );
   if ( !m_pHistVolume ) {
@@ -330,10 +330,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      if (m_pPosition->GetUnRealizedPL() > 20 ) {
+      if (m_pPosition->GetUnRealizedPL() > m_quote.Bid() * 0.08 ) {
         // exit long
 
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 100, m_quote.Bid() - 0.01 );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
         m_ceLongExit.AddLabel( bar.DateTime(), m_quote.Midpoint(), "Long Exit" );
