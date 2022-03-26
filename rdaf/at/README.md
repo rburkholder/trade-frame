@@ -25,7 +25,8 @@ The parameters are sourced in the configuration file (as an example):
 
 $ cat x64/debug/rdaf/at/choices.cfg
 ```
-ib_instance=3
+ib_client_id=5
+threads=2
 sim_start=off
 group_directory=/app/rdaf/at/20220311-18:33:33.786804-1
 time_bins=3600
