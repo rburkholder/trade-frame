@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <iostream>
 
 #include <math.h>
@@ -22,14 +20,16 @@
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/timer/timer.hpp>
 
 #include <boost/foreach.hpp>
 
-#include <wx/splitter.h>
 #include <wx/panel.h>
+#include <wx/sizer.h>
+#include <wx/treectrl.h>
+#include <wx/splitter.h>
 
 #include <OUCommon/TimeSource.h>
 
