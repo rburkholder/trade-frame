@@ -13,6 +13,9 @@ but the focus changed towards supporting a Linux environment.  Some work will be
 
 CMake is used for build management.
 
+Note the use of '-march=native' in the root CMakeFiles.txt.  This will cause code to be not necessarily transportable across CPU types'.  Comment out th eoption if you intend to compile across CPU types, ie, various releases of the Intel instruction set.  See the referenced
+URL for the variety of instructions across CPU releases.
+
 ## Example
 
 Picture from the ComboTrading project showing an instrument list, with a chart for one of the listed instruments.  Bid, ask, spread, and greeks are charted for the option (charted real-time).
