@@ -6,8 +6,6 @@ project(trade-frame)
 # https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
 add_definitions(-march=native)
 
-add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
-
 add_subdirectory(ArmsIndex)
 add_subdirectory(AutoTrade)
 add_subdirectory(BasketTrading)

@@ -19,7 +19,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
