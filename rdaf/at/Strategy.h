@@ -39,6 +39,7 @@
 class TH2D;
 class TFile;
 class TTree;
+class TClass;
 
 namespace ou {
   class ChartDataView;
@@ -97,6 +98,8 @@ public:
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
+
+  void LoadHistory( TClass* );
 
   void SaveWatch( const std::string& );
 

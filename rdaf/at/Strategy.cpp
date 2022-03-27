@@ -129,6 +129,23 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
+void Strategy::LoadHistory( TClass* tc ) {
+
+  BOOST_LOG_TRIVIAL(info) << "  loading history: " << tc->GetName();
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_quotes" ).c_str(), tc->GetName() ) ) {
+    TTree* pQuotes = (TTree*)tc;
+  }
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_trades" ).c_str(), tc->GetName() ) ) {
+    TTree* pTrades = (TTree*)tc;
+  }
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_h1" ).c_str(), tc->GetName() ) ) {
+    TH2D* pH1 = (TH2D*)tc;
+  }
+}
+
 void Strategy::Clear() {
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
@@ -145,7 +162,7 @@ void Strategy::InitRdaf() {
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
   m_pTreeQuote = std::make_shared<TTree>(
-    ( sSymbol + "-quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
+    ( sSymbol + "_quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
   );
   m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !m_pTreeQuote ) {
@@ -154,7 +171,7 @@ void Strategy::InitRdaf() {
   m_pTreeQuote->SetDirectory( m_pFile.get() );
 
   m_pTreeTrade = std::make_shared<TTree>(
-    ( sSymbol + "-trades" ).c_str(), ( sSymbol + " trades" ).c_str()
+    ( sSymbol + "_trades" ).c_str(), ( sSymbol + " trades" ).c_str()
   );
   m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !m_pTreeTrade ) {
@@ -163,7 +180,7 @@ void Strategy::InitRdaf() {
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
   m_pHistVolume = std::make_shared<TH2D>(
-    ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
+    ( sSymbol + "_h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
     m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
     m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
   );
