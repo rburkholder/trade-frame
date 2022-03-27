@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.13)
 
 project(trade-frame)
 
-# https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+# see https://blog.raymond.burkholder.net/index.php?/archives/1183-GCC-Optimization-for-Native-Architecture.html
 add_definitions(-march=native)
 
 add_subdirectory(ArmsIndex)
