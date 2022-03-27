@@ -89,10 +89,10 @@ bool AppAutoTrade::OnInit() {
 
   wxApp::OnInit();
 
+  auto dt = ou::TimeSource::Instance().External();
   m_nTSDataStreamSequence = 0;
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << "-"
@@ -189,13 +189,13 @@ bool AppAutoTrade::OnInit() {
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
   m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
 
-  boost::gregorian::date date;
+  boost::gregorian::date dateSim( dt.date() );
   if ( m_choices.bStartSimulator ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
     if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
-      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
-      std::cout << "simulation date " << date << std::endl;
+      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      std::cout << "simulation date " << dateSim << std::endl;
 
     }
   }
@@ -218,11 +218,12 @@ bool AppAutoTrade::OnInit() {
     //m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     if ( m_choices.bStartSimulator ) {
-      pStrategy->InitForUSEquityExchanges( date );
+      pStrategy->InitForUSEquityExchanges( dateSim );
     }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
 
+    // TODO: use this to add an order list to the instrument: date, direction, type, limit
     wxTreeItemId idSymbol = m_treeSymbols->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
 
   }
