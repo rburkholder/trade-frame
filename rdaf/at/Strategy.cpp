@@ -25,12 +25,13 @@
 
  #include <chrono>
 
+// no longer use iostream, std::cout has a multithread contention probolem
+//   due to it being captured to the gui, and is not thread safe
  #include <boost/log/trivial.hpp>
 
 #include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
-//#include <rdaf/TFitResult.h>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -82,13 +83,6 @@ Strategy::Strategy(
 }
 
 Strategy::~Strategy() {
-  //if ( m_pFile ) { // commented out to maintain consistency with hd5f manual retention in SaveWatch
-  //  m_pFile->Write();
-  //}
-  //if ( m_threadRdaf.joinable() ) {
-  //  m_prdafApp->SetReturnFromRun( true );
-  //  m_threadRdaf.join(); // returns after .quit at command line
-  //}
   Clear();
 }
 
