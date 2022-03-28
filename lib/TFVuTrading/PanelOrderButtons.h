@@ -26,13 +26,17 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/wx.h>
+#include <wx/panel.h>
 
 #include "PanelOrderButtons_structs.h"
 
 class wxButton;
 class wxListCtrl;
+class wxCheckBox;
+class wxTextCtrl;
+class wxRadioBox;
 class wxListEvent;
+class wxStaticText;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
