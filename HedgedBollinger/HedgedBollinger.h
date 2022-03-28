@@ -16,8 +16,8 @@
 
 // Started 2013/09/23
 
+#include <wx/app.h>
 #include <wx/timer.h>
-#include <wx/treectrl.h>
 
 #include <OUCommon/Worker.h>
 
@@ -41,6 +41,8 @@
 
 #include "EventUpdateOptionTree.h"
 #include "Strategy1.h"
+
+class wxTreeCtrl;
 
 class AppHedgedBollinger:
   public wxApp, public ou::tf::FrameWork01<AppHedgedBollinger> {

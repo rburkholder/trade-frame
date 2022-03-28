@@ -19,10 +19,17 @@
  * Created: February 11, 2022 13:20
  */
 
+#include <wx/sizer.h>
+#include <wx/button.h>
 #include <wx/listctrl.h>
+#include <wx/textctrl.h>
 #include <wx/statline.h>
+#include <wx/checkbox.h>
+#include <wx/radiobox.h>
+#include <wx/stattext.h>
 
 #include "PanelOrderButtons.h"
+
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -336,6 +343,14 @@ void PanelOrderButtons::CreateControls() {
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBStoch1Click, this, ID_CB_Stoch1 );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBStoch2Click, this, ID_CB_Stoch2 );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBStoch3Click, this, ID_CB_Stoch3 );
+
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTPositionEntryTextUpdated, this, ID_TXT_PositionEntry );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTPositionExitProfitTextUpdated, this, ID_TXT_PositionExitProfit );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTPositionExitStopTextUpdated, this, ID_TXT_PositionExitStop );
+
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTQuanStockTextUpdated, this, ID_TXT_QuanStock );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTQuanFutureTextUpdated, this, ID_TXT_QuanFuture );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelOrderButtons::OnTXTQuanOptionTextUpdated, this, ID_TXT_QuanOption );
 
 }
 

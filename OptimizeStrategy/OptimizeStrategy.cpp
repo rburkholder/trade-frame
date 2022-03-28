@@ -20,7 +20,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 
 #include <TFTrading/InstrumentManager.h>

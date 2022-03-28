@@ -26,6 +26,8 @@
 
  #include <chrono>
 
+// no longer use iostream, std::cout has a multithread contention probolem
+//   due to it being captured to the gui, and is not thread safe
  #include <boost/log/trivial.hpp>
 
 
@@ -37,7 +39,6 @@
 #include <rdaf/TH3.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
-//#include <rdaf/TFitResult.h>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -89,13 +90,6 @@ Strategy::Strategy(
 }
 
 Strategy::~Strategy() {
-  //if ( m_pFile ) { // commented out to maintain consistency with hd5f manual retention in SaveWatch
-  //  m_pFile->Write();
-  //}
-  //if ( m_threadRdaf.joinable() ) {
-  //  m_prdafApp->SetReturnFromRun( true );
-  //  m_threadRdaf.join(); // returns after .quit at command line
-  //}
   Clear();
 }
 
@@ -142,6 +136,23 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
+void Strategy::LoadHistory( TClass* tc ) {
+
+  BOOST_LOG_TRIVIAL(info) << "  loading history: " << tc->GetName();
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_quotes" ).c_str(), tc->GetName() ) ) {
+    TTree* pQuotes = (TTree*)tc;
+  }
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_trades" ).c_str(), tc->GetName() ) ) {
+    TTree* pTrades = (TTree*)tc;
+  }
+
+  if ( 0 == strcmp( ( m_config.sSymbol + "_h1" ).c_str(), tc->GetName() ) ) {
+    TH2D* pH1 = (TH2D*)tc;
+  }
+}
+
 void Strategy::Clear() {
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
@@ -158,7 +169,7 @@ void Strategy::InitRdaf() {
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
   m_pTreeQuote = std::make_shared<TTree>(
-    ( sSymbol + "-quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
+    ( sSymbol + "_quotes" ).c_str(), ( sSymbol + " quotes" ).c_str()
   );
   m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
   if ( !m_pTreeQuote ) {
@@ -167,7 +178,7 @@ void Strategy::InitRdaf() {
   m_pTreeQuote->SetDirectory( m_pFile.get() );
 
   m_pTreeTrade = std::make_shared<TTree>(
-    ( sSymbol + "-trades" ).c_str(), ( sSymbol + " trades" ).c_str()
+    ( sSymbol + "_trades" ).c_str(), ( sSymbol + " trades" ).c_str()
   );
   m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
   if ( !m_pTreeTrade ) {
@@ -176,7 +187,7 @@ void Strategy::InitRdaf() {
   m_pTreeTrade->SetDirectory( m_pFile.get() );
 
   m_pHistVolume = std::make_shared<TH2D>(
-    ( sSymbol + "-h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
+    ( sSymbol + "_h1" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
     m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
     m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
   );
@@ -259,6 +270,18 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   TimeTick( bar );
 }
+
+/*
+  // strip off fractional seconds, note calculations are in UTC
+  boost::posix_time::time_duration td( m_quote.DateTime( ).time_of_day() ) ;
+  boost::posix_time::time_duration time( td.hours(), td.minutes(), td.seconds() );
+  boost::posix_time::ptime dtQuote( m_quote.DateTime().date(), time );
+
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
+
+  m_pOrder->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
+  m_pOrder->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+*/
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );

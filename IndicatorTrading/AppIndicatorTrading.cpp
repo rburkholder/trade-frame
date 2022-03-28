@@ -312,7 +312,7 @@ AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstru
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 
   if ( pm.PositionExists( m_pPortfolio->Id(), idInstrument ) ) {
-    pPosition = pm.GetPosition( "USD", idInstrument );
+    pPosition = pm.GetPosition( m_pPortfolio->Id(), idInstrument );
     std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {

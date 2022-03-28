@@ -19,13 +19,20 @@
  * Created: March 7, 2022 14:35
  */
 
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+
 #include <sstream>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
 #include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/regex.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <wx/menu.h>
 #include <wx/sizer.h>
@@ -48,10 +55,11 @@
 #include "AppAutoTrade.h"
 
 namespace {
+  static const std::string sDirectory( "rdaf/at" );
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
-  static const std::string sChoicesFilename( "rdaf/at/choices.cfg" );
-  static const std::string sDbName( "rdaf/at/example.db" );
-  static const std::string sStateFileName( "rdaf/at/example.state" );
+  static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
+  static const std::string sDbName( sDirectory + "/example.db" );
+  static const std::string sStateFileName( sDirectory + "/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
 
   static const std::string sMenuItemPortfolio( "_USD" );
@@ -89,16 +97,12 @@ bool AppAutoTrade::OnInit() {
 
   wxApp::OnInit();
 
+  auto dt = ou::TimeSource::Instance().External();
   m_nTSDataStreamSequence = 0;
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
-    ss
-      << ou::tf::Instrument::BuildDate( dt.date() )
-      << "-"
-      << dt.time_of_day()
-      ;
-    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+    ss << boost::posix_time::to_iso_extended_string( dt );
+    m_sTSDataStreamStarted = ss.str();
   }
 
   if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
@@ -189,14 +193,16 @@ bool AppAutoTrade::OnInit() {
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
   m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
 
-  boost::gregorian::date date;
+  // will need to change the date selection in the file, maybe use date from upperTime
+  // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
+  //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
+  boost::gregorian::date dateSim( dt.date() );
   if ( m_choices.bStartSimulator ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
     if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
-      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
-      std::cout << "simulation date " << date << std::endl;
-
+      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      std::cout << "simulation date " << dateSim << std::endl;
     }
   }
 
@@ -218,13 +224,38 @@ bool AppAutoTrade::OnInit() {
     //m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     if ( m_choices.bStartSimulator ) {
-      pStrategy->InitForUSEquityExchanges( date );
+      pStrategy->InitForUSEquityExchanges( dateSim );
     }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
 
+    // TODO: use this to add an order list to the instrument: date, direction, type, limit
     wxTreeItemId idSymbol = m_treeSymbols->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
 
+  }
+
+  // does the list need to be sorted?
+  for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
+    std::cout << "loding history: " << sPath << std::endl;
+    TFile* pFile = new TFile( sPath.c_str(), "READ" );
+    assert( pFile->IsOpen() );
+
+    TList* pList = pFile->GetList();
+    for( const auto&& obj: *pList ) {
+      TClass* class_ = (TClass*) obj;
+      std::string name( class_->GetName() );
+      std::string::size_type pos = name.find( '_', 0 );
+      if ( std::string::npos != pos ) {
+        std::string sSymbol = name.substr( 0, pos );
+        mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
+        if ( m_mapStrategy.end() != iter ) {
+          iter->second->LoadHistory( class_ );
+        }
+      }
+    }
+
+    pFile->Close();
+    delete pFile;
   }
 
   m_treeSymbols->ExpandAll();
@@ -295,6 +326,41 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
 
+  namespace fs = boost::filesystem;
+  namespace algo = boost::algorithm;
+  if ( fs::is_directory( sDirectory ) ) {
+    for ( fs::directory_entry& entry : fs::directory_iterator( sDirectory ) ) {
+      if ( algo::ends_with( entry.path().string(), std::string( ".root" ) ) ) {
+        std::string datetime( entry.path().filename().string() );
+        algo::erase_last( datetime, ".root" );
+        // 2020-01-31T23:59:59.123.root
+        static const boost::regex regex(
+          "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T"
+          "[0-9][0-9]:[0-9][0-9]:[0-9][0-9]{0,1}\\.*[0-9]"
+        );
+        auto result
+          = algo::find_regex( datetime, regex );
+        if ( 0 < result.size() ) {
+          ptime dt( boost::posix_time::from_iso_extended_string( datetime ) );
+          if ( ( m_choices.dtLower <= dt ) && ( m_choices.dtUpper > dt ) ) {
+            const std::string sFileName( sDirectory + '/' + datetime + ".root" );
+            TFile* pFile = new TFile( sFileName.c_str(), "READ" );
+            if ( nullptr != pFile ) {
+              // run a preliminary test of the files
+              if ( pFile->IsOpen() ) {
+                //std::cout << "found " << sFileName << std::endl;
+                m_vRdafFiles.push_back( sFileName );
+                pFile->Close();
+              }
+              delete pFile;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // open file after directory scan, so it is not included in the list
   m_pFile = std::make_shared<TFile>(
     ( sFileName + ".root" ).c_str(),
     "RECREATE",

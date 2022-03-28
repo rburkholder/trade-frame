@@ -16,8 +16,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 

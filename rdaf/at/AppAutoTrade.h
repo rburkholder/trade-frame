@@ -105,6 +105,9 @@ private:
   std::unique_ptr<TRint> m_prdafApp;
   std::shared_ptr<TFile> m_pFile;
 
+  using vRdafFiles_t = std::vector<std::string>;
+  vRdafFiles_t m_vRdafFiles;
+
   void StartRdaf( const std::string& sFilePrefix );
 
   virtual bool OnInit();

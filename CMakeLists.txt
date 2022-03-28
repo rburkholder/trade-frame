@@ -3,7 +3,8 @@ cmake_minimum_required (VERSION 3.13)
 
 project(trade-frame)
 
-add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+# see https://blog.raymond.burkholder.net/index.php?/archives/1183-GCC-Optimization-for-Native-Architecture.html
+add_definitions(-march=native)
 
 add_subdirectory(ArmsIndex)
 add_subdirectory(AutoTrade)

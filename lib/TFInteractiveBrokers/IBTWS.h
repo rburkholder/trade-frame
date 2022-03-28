@@ -26,7 +26,7 @@
 //using namespace boost::posix_time;
 //using namespace boost::gregorian;
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
