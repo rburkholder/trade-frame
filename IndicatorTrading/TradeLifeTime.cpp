@@ -236,9 +236,9 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
 
           // strip off fractional seconds
-          boost::posix_time::time_duration td( quote.DateTime( ).time_of_day() ) ;
-          boost::posix_time::time_duration time( td.hours(), td.minutes(), td.seconds() );
-          boost::posix_time::ptime dtQuote( quote.DateTime().date(), time );
+          boost::posix_time::ptime dtQuote
+            = quote.DateTime()
+            - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
 
           m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
           m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );

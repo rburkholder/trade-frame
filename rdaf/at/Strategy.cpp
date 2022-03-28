@@ -265,10 +265,10 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 }
 
 /*
-  // strip off fractional seconds, note calculations are in UTC
-  boost::posix_time::time_duration td( m_quote.DateTime( ).time_of_day() ) ;
-  boost::posix_time::time_duration time( td.hours(), td.minutes(), td.seconds() );
-  boost::posix_time::ptime dtQuote( m_quote.DateTime().date(), time );
+  // strip off fractional seconds
+  boost::posix_time::ptime dtQuote
+    = quote.DateTime()
+    - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
 
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
 
