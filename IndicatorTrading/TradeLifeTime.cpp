@@ -31,6 +31,10 @@ using EPositionEntryMethod = ou::tf::PanelOrderButtons_Order::EPositionEntryMeth
 using EPositionExitProfitMethod = ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod;
 using EPositionExitStopMethod = ou::tf::PanelOrderButtons_Order::EPositionExitStopMethod;
 
+namespace {
+  const int secondsGTD( 10 );
+}
+
 TradeLifeTime::TradeLifeTime( pPosition_t pPosition, Indicators& indicators )
 : m_statePosition( EPositionState::InitializeEntry )
 , m_pPosition( pPosition )
@@ -240,8 +244,9 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
             = quote.DateTime()
             - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
 
-          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
+          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( secondsGTD ) );
           m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+
           m_ceBuySubmit.AddLabel( quote.DateTime(), price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
@@ -423,6 +428,15 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
+
+          // strip off fractional seconds
+          boost::posix_time::ptime dtQuote
+            = quote.DateTime()
+            - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
+
+          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( secondsGTD ) );
+          m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+
           m_ceSellSubmit.AddLabel( quote.DateTime(), price, "Sell Submit" + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
