@@ -234,6 +234,14 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
+
+          // strip off fractional seconds
+          boost::posix_time::time_duration td( quote.DateTime( ).time_of_day() ) ;
+          boost::posix_time::time_duration time( td.hours(), td.minutes(), td.seconds() );
+          boost::posix_time::ptime dtQuote( quote.DateTime().date(), time );
+
+          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
+          m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
           m_ceBuySubmit.AddLabel( quote.DateTime(), price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
