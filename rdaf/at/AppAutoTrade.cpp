@@ -23,6 +23,8 @@
 
 #include <sstream>
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -236,12 +238,12 @@ bool AppAutoTrade::OnInit() {
 
   // does the list need to be sorted?
   for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
-    std::cout << "loding history: " << sPath << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "loding history: " << sPath;
     TFile* pFile = new TFile( sPath.c_str(), "READ" );
     assert( pFile->IsOpen() );
 
-    TList* pList = pFile->GetList();
-    for( const auto&& obj: *pList ) {
+    TList* pList1 = pFile->GetListOfKeys();
+    for ( const auto&& obj: *pList1 ) {
       TClass* class_ = (TClass*) obj;
       std::string name( class_->GetName() );
       std::string::size_type pos = name.find( '_', 0 );

@@ -131,18 +131,18 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 void Strategy::LoadHistory( TClass* tc ) {
 
-  BOOST_LOG_TRIVIAL(info) << "  loading history: " << tc->GetName();
+  BOOST_LOG_TRIVIAL(info) << "  load: " << tc->GetName();
 
   if ( 0 == strcmp( ( m_config.sSymbol + "_quotes" ).c_str(), tc->GetName() ) ) {
-    TTree* pQuotes = (TTree*)tc;
+    TTree* pQuotes = dynamic_cast<TTree*>( tc );
   }
 
   if ( 0 == strcmp( ( m_config.sSymbol + "_trades" ).c_str(), tc->GetName() ) ) {
-    TTree* pTrades = (TTree*)tc;
+    TTree* pTrades = dynamic_cast<TTree*>( tc );
   }
 
   if ( 0 == strcmp( ( m_config.sSymbol + "_h1" ).c_str(), tc->GetName() ) ) {
-    TH2D* pH1 = (TH2D*)tc;
+    TH2D* pH1 = dynamic_cast<TH2D*>( tc );
   }
 }
 
