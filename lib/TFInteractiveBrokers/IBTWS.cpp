@@ -535,7 +535,7 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
         //twsorder.goodTillDate = "20080625 16:00:00";
         ptime dt( pOrder->GetGoodTillDate() );
         std::stringstream ss;
-        ss << dt.time_of_day();
+        ss << dt.time_of_day() << " UTC";
         twsorder.goodTillDate
           = ou::tf::Instrument::BuildDate( dt.date() )
           + " "

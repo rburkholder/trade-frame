@@ -264,6 +264,18 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
+/*
+  // strip off fractional seconds, note calculations are in UTC
+  boost::posix_time::time_duration td( m_quote.DateTime( ).time_of_day() ) ;
+  boost::posix_time::time_duration time( td.hours(), td.minutes(), td.seconds() );
+  boost::posix_time::ptime dtQuote( m_quote.DateTime().date(), time );
+
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
+
+  m_pOrder->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
+  m_pOrder->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+*/
+
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
