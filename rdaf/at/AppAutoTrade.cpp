@@ -323,8 +323,8 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   char** argv = nullptr;
 
   m_prdafApp = std::make_unique<TRint>( "rdaf_at", &argc, argv );
-  ROOT::EnableThreadSafety();
   ROOT::EnableImplicitMT();
+  ROOT::EnableThreadSafety();
 
   namespace fs = boost::filesystem;
   namespace algo = boost::algorithm;
