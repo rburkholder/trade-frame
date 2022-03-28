@@ -238,7 +238,7 @@ bool AppAutoTrade::OnInit() {
 
   // does the list need to be sorted?
   for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
-    BOOST_LOG_TRIVIAL(info) << "loding history: " << sPath;
+    BOOST_LOG_TRIVIAL(info) << "loading history: " << sPath;
     TFile* pFile = new TFile( sPath.c_str(), "READ" );
     assert( pFile->IsOpen() );
 
