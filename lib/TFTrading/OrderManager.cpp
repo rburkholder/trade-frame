@@ -22,10 +22,7 @@ namespace tf { // TradeFrame
 // OrderManager
 //
 
-OrderManager::OrderManager()
-//:
-//   m_orderIds( Trading::DbFileName, "OrderId" )  // need to remove dependency on DB4 and migrate to sql
-{
+OrderManager::OrderManager() {
 }
 
 OrderManager::~OrderManager() {
@@ -47,7 +44,10 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // market order
     ) {
   assert( nOrderQuantity > 0 );
   pOrder_t pOrder = std::make_shared<ou::tf::Order>( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition );
-  ConstructOrder( pOrder );
+  if ( ConstructOrder( pOrder ) ) {}
+  else {
+    pOrder.reset();
+  }
   return pOrder;
 }
 
@@ -60,7 +60,10 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // limit or stop
   assert( nOrderQuantity > 0 );
   assert( dblPrice1 > 0 );
   pOrder_t pOrder = std::make_shared<ou::tf::Order>( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition );
-  ConstructOrder( pOrder );
+  if ( ConstructOrder( pOrder ) ) {}
+  else {
+    pOrder.reset();
+  }
   return pOrder;
 }
 
@@ -74,36 +77,54 @@ OrderManager::pOrder_t OrderManager::ConstructOrder( // limit and stop
   assert( dblPrice1 > 0 );
   assert( dblPrice2 > 0 );
   pOrder_t pOrder = std::make_shared<ou::tf::Order>( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition );
-  ConstructOrder( pOrder );
+  if ( ConstructOrder( pOrder ) ) {}
+  else {
+    pOrder.reset();
+  }
   return pOrder;
 }
 
-void OrderManager::ConstructOrder( pOrder_t& pOrder ) {
-  // obtain an order id, then insert into maps, may need to change how this happens later in order to get rid of db4
-  idOrder_t id = m_orderIds.GetNextId();
-  pOrder->SetOrderId( id );
-  // need to create an exception free way to check that order does not exist, in the meantime:
-  try {
-    iterOrders_t iter;
-    if ( LocateOrder( id, iter ) ) {
-      std::cout << "OrderManager::ConstructOrder:  OrderId Already Exists" << std::endl;
+bool OrderManager::ConstructOrder( pOrder_t& pOrder ) {
+  // obtain an order id, then insert into maps
+
+  bool bOk( false );
+  idOrder_t idOrder {};
+  iterOrders_t iterOrder;
+
+  // repeat attempt for unused order, skip broken ones (when program crashes or is halted with order recorded)
+  for ( unsigned int cnt = 0; cnt < 5; cnt++ ) {
+    idOrder = m_orderIds.GetNextId();
+    if ( LocateOrder( idOrder, iterOrder ) ) {
+      // try again
     }
     else {
-      pairOrderState_t pair( id, structOrderState( pOrder ) );
+      bOk = true;
+      break;
+    }
+  }
+
+  if ( bOk ) {
+    bOk = false;  // reset for another go at it
+    pOrder->SetOrderId( idOrder );
+    try {
+      pairOrderState_t pair( idOrder, structOrderState( pOrder ) );
       m_mapOrders.insert( pair );
 
-      if ( nullptr != m_pSession ) {
-        // add to database
+      if ( nullptr != m_pSession ) { // add to database
         assert( 0 != pOrder->GetRow().idPosition );
         ou::db::QueryFields<Order::TableRowDef>::pQueryFields_t pQuery
           = m_pSession->Insert<Order::TableRowDef>( const_cast<Order::TableRowDef&>( pOrder->GetRow() ) );
       }
+      bOk = true;
+    }
+    catch (...) {
+      std::cout << "OrderManager::ConstructOrder:  Major Problems" << std::endl;
     }
   }
-  catch (...) {
-    std::cout << "OrderManager::ConstructOrder:  Major Problems" << std::endl;
+  else {
+    std::cout << "OrderManager::ConstructOrder:  can't find unused order id" << std::endl;
   }
-
+  return bOk;
 }
 
 namespace OrderManagerQueries {

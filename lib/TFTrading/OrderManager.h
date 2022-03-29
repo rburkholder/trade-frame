@@ -142,7 +142,7 @@ private:
 
   OnOrderNeedsDetailsHandler OnOrderNeedsDetails;
 
-  void ConstructOrder( pOrder_t& pOrder );
+  bool ConstructOrder( pOrder_t& pOrder );
 
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
