@@ -56,6 +56,7 @@ set(
 #    ChartViewPort.cpp
   )
 
+
 add_library(
   ${PROJECT_NAME} STATIC
   ${file_h}
@@ -66,4 +67,6 @@ target_include_directories(
   ${PROJECT_NAME} PUBLIC
     ".."
   )
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 
