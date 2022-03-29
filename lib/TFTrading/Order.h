@@ -261,6 +261,11 @@ public:
   double GetSignalPrice() const { return m_row.dblSignalPrice; };
   void SetDescription( const std::string& sDescription ) { m_row.sDescription = sDescription; }
   const std::string& GetDescription() const { return m_row.sDescription; }
+
+  const ptime &GetDateTimeOrderCreated() const {
+    assert( not_a_date_time != m_row.dtOrderCreated ); // is this a valid test?
+    return m_row.dtOrderCreated;
+  };
   const ptime &GetDateTimeOrderSubmitted() const {
     assert( not_a_date_time != m_row.dtOrderSubmitted ); // is this a valid test?
     return m_row.dtOrderSubmitted;
@@ -269,6 +274,7 @@ public:
     assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
     return m_row.dtOrderClosed;
   };
+
   double GetIncrementalCommission() const { return m_dblIncrementalCommission; };
   void MarkAsCancelled();  // called from OrderManager
 
