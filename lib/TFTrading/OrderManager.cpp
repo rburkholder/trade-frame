@@ -92,7 +92,7 @@ void OrderManager::ConstructOrder( pOrder_t& pOrder ) {
       pairOrderState_t pair( id, structOrderState( pOrder ) );
       m_mapOrders.insert( pair );
 
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         // add to database
         assert( 0 != pOrder->GetRow().idPosition );
         ou::db::QueryFields<Order::TableRowDef>::pQueryFields_t pQuery
@@ -133,7 +133,7 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
       iter->second.pProvider = pProvider;
       pOrder->SetSendingToProvider();
       pProvider->PlaceOrder( pOrder );
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateAtPlaceOrder1
           update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
@@ -175,7 +175,7 @@ void OrderManager::UpdateOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder
       iter->second.pProvider = pProvider;
       //pOrder->SetSendingToProvider();  // will generate assertion error
       pProvider->PlaceOrder( pOrder );  // for Interactive Brokers, can 'place' again to update, given same order number
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateAtPlaceOrder2
           update( pOrder->GetOrderId(), pOrder->GetRow().dblPrice1, pOrder->GetRow().dblPrice2 );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder2>::pQueryFields_t pQuery
@@ -222,7 +222,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
   }
   else {
     // check in database first, and if found, load order and executions
-    if ( 0 != m_pSession ) {
+    if ( nullptr != m_pSession ) {
       OrderManagerQueries::OrderKey keyOrder( nOrderId );
       ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pOrderExistsQuery
         = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder ).Where( "orderid=?" ).NoExecute();
@@ -303,7 +303,7 @@ void OrderManager::ReportCancellation( idOrder_t nOrderId ) {
     if ( LocateOrder( nOrderId, iter ) ) {
       pOrder_t pOrder = iter->second.pOrder;
       pOrder->MarkAsCancelled();
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateAtOrderClose
           close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtOrderClose>::pQueryFields_t pQuery
@@ -353,7 +353,7 @@ void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) {
     if ( LocateOrder( nOrderId, iter ) ) {
       pOrder_t pOrder = iter->second.pOrder;
       OrderStatus::EOrderStatus status = pOrder->ReportExecution( exec );
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         const Order::TableRowDef& row( pOrder->GetRow() );
         switch ( status ) {
         case OrderStatus::CancelledWithPartialFill:
@@ -420,7 +420,7 @@ void OrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) 
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
       pOrder_t pOrder = iter->second.pOrder;
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateCommission
           commission( pOrder->GetOrderId(), dblCommission );
         ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
@@ -462,7 +462,7 @@ void OrderManager::ReportErrors( idOrder_t nOrderId, OrderError::EOrderError eEr
       pOrder_t pOrder = iter->second.pOrder;
       pOrder->ActOnError( eError );
       //MoveActiveOrderToCompleted( nOrderId );
-      if ( 0 != m_pSession ) {
+      if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateOnOrderError
           error( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
         ou::db::QueryFields<OrderManagerQueries::UpdateOnOrderError>::pQueryFields_t pQuery
