@@ -58,13 +58,13 @@ public:
   void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; }
   void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; }
 
-  boost::posix_time::ptime GetMarketOpen( void ) const { return m_dtMarketOpen; }
-  boost::posix_time::ptime GetRegularHoursOpen( void ) const { return m_dtRHOpen; }
-  boost::posix_time::ptime GetStartTrading( void ) const { return m_dtStartTrading; }
-  boost::posix_time::ptime GetCancellation( void ) const { return m_dtTimeForCancellation; }
-  boost::posix_time::ptime GetGoNeutral( void ) const { return m_dtGoNeutral; }
-  boost::posix_time::ptime GetRegularHoursClose( void ) const { return m_dtRHClose; }
-  boost::posix_time::ptime GetMarketClose( void ) const { return m_dtMarketClose; }
+  boost::posix_time::ptime GetMarketOpen() const { return m_dtMarketOpen; }
+  boost::posix_time::ptime GetRegularHoursOpen() const { return m_dtRHOpen; }
+  boost::posix_time::ptime GetStartTrading() const { return m_dtStartTrading; }
+  boost::posix_time::ptime GetCancellation() const { return m_dtTimeForCancellation; }
+  boost::posix_time::ptime GetGoNeutral() const { return m_dtGoNeutral; }
+  boost::posix_time::ptime GetRegularHoursClose() const { return m_dtRHClose; }
+  boost::posix_time::ptime GetMarketClose() const { return m_dtMarketClose; }
 
 protected:
 
@@ -101,7 +101,6 @@ private:
   boost::posix_time::ptime m_dtMarketClose;
 
   TimeFrame m_stateTimeFrame;
-
 
 };
 
