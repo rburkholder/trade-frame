@@ -11,14 +11,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include <sstream>
-#include <iostream>
+#include <memory>
 #include <algorithm>
 
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind/bind_member_function.hpp>
-
-//#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
 
 #include "ChartEntryBase.h"
 
@@ -95,27 +92,72 @@ void ChartEntryTime::Append( boost::posix_time::ptime dt ) {
   m_queue.Append( dt );
 }
 
-// runs in thread of main
+// runs in thread of main?  What does this do?
 void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
 
-  m_vDateTime.push_back( dt );
+  bool bOk( true );
 
   // this is maybe done on the fly and not correct here.
+  // lotsa extra stuff to track random breakage
+  // end result, pOrder generation using non-available quote for datetime source
   try {
-    m_vChartTime.push_back(
-      Chart::chartTime(
-        dt.date().year(), dt.date().month(), dt.date().day(),
-        dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 
-    if ( ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) && ( dt > m_rangeViewPort.dtEnd ) ) {
-      // don't append any more values to visible area
+    if ( boost::posix_time::special_values::not_a_date_time == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg not a date time?";
+      bOk = false;
     }
-    else {
-     IncCntElements();
+
+    if ( boost::posix_time::special_values::max_date_time == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg max date time?";
+      bOk = false;
     }
+
+    if ( boost::posix_time::special_values::min_date_time == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg min date time?";
+      bOk = false;
+    }
+
+    if ( boost::posix_time::special_values::neg_infin == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg neg infin date time?";
+      bOk = false;
+    }
+
+    if ( boost::posix_time::special_values::pos_infin == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg pos infin date time?";
+      bOk = false;
+    }
+
+    if ( boost::posix_time::special_values::not_special == dt ) {
+      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg not special";
+      bOk = false;
+    }
+
+    if ( bOk ) {
+      //BOOST_LOG_TRIVIAL(debug) << m_sName << dt;
+
+      boost::gregorian::date date = dt.date();
+      boost::posix_time::time_duration time = dt.time_of_day();
+
+      double converted =  Chart::chartTime(
+          date.year(), date.month(), date.day(),
+          time.hours(), time.minutes(), time.seconds() )
+        ;
+
+      // do these go in with IncCntElements instead?
+      m_vDateTime.push_back( dt );
+      m_vChartTime.push_back( converted );
+
+      if ( ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) && ( dt > m_rangeViewPort.dtEnd ) ) {
+        // don't append any more values to visible area
+      }
+      else {
+        IncCntElements();
+      }
+    }
+
   }
   catch(...) {
-    std::cout << "there is probably a memory issue" << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg catch (bad datetime)";
   }
 }
 
@@ -190,8 +232,8 @@ boost::posix_time::ptime ChartEntryTime::GetExtentEnd() const {
 
 // there are out-of-order issues or loss-of-data issues if m_bUseThreadSafety is changed while something is in the Queue
 void ChartEntryTime::ClearQueue( void ) {
-  namespace args = boost::phoenix::placeholders;
-  m_queue.Sync( boost::phoenix::bind( &ChartEntryTime::AppendFg, this, args::arg1 ) );
+  namespace args = std::placeholders;
+  m_queue.Sync( std::bind( &ChartEntryTime::AppendFg, this, args::_1 ) );
 }
 
 void ChartEntryTime::Clear( void ) {
