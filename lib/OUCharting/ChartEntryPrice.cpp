@@ -65,7 +65,7 @@ void ChartEntryPrice::Pop( const ou::tf::Price& price ) {
   m_vDouble.push_back( price.Value() );
 }
 
-bool ChartEntryPrice::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes)  {
+bool ChartEntryPrice::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes )  {
   bool bAdded( false );
   ClearQueue();
   if ( 0 != this->ChartEntryTime::Size() ) {
