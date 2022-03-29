@@ -131,17 +131,37 @@ namespace OrderManagerQueries {
   struct UpdateAtPlaceOrder1 {
     template<class A>
     void Fields( A& a ) {
+      ou::db::Field( a, "timeinforce", eTimeInForce );
+      ou::db::Field( a, "goodtilldate", dtGoodTillDate );
+      ou::db::Field( a, "goodaftertime", dtGoodAfterTime );
+      ou::db::Field( a, "parentid", idParent );
+      ou::db::Field( a, "transmit", bTransmit );
+      ou::db::Field( a, "outsiderth", bOutsideRTH );
       ou::db::Field( a, "orderstatus", eOrderStatus );
       ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
       ou::db::Field( a, "signalprice", dblSignalPrice );
       ou::db::Field( a, "orderid", idOrder );
     }
+
     Order::idOrder_t idOrder;
+    TimeInForce::ETimeInForce eTimeInForce;
+    ptime dtGoodTillDate;
+    ptime dtGoodAfterTime;
+    Order::idOrder_t idParent;
+    bool bTransmit;
+    bool bOutsideRTH;
     OrderStatus::EOrderStatus eOrderStatus;
     ptime dtOrderSubmitted;
     double dblSignalPrice;
-    UpdateAtPlaceOrder1( Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_ )
-      : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ), dblSignalPrice( dblSignalPrice_ ) {};
+
+    UpdateAtPlaceOrder1(
+      TimeInForce::ETimeInForce eTimeInForce_, ptime dtGoodTillDate_, ptime dtGoodAfterTime_
+    , Order::idOrder_t idParent_, bool bTransmit_, bool bOutsideRTH_
+    , Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_
+    )
+    : eTimeInForce( eTimeInForce_ ), dtGoodTillDate( dtGoodTillDate_ ), dtGoodAfterTime( dtGoodAfterTime_ )
+    , idParent( idParent_ ), bTransmit( bTransmit_ ), bOutsideRTH( bOutsideRTH_ )
+    , idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ), dblSignalPrice( dblSignalPrice_ ) {};
   };
 }
 
@@ -156,10 +176,18 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
       pProvider->PlaceOrder( pOrder );
       if ( nullptr != m_pSession ) {
         OrderManagerQueries::UpdateAtPlaceOrder1
-          update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice );
+          update(
+            pOrder->GetTimeInForce(), pOrder->GetGoodTillDate(), pOrder->GetGoodAfterTime()
+            , pOrder->GetParentOrderId(), pOrder->GetTransmit(), pOrder->GetOutsideRTH()
+            , pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice
+          );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder1>( // todo:  cache this query
-            "update orders set orderstatus=?, datetimesubmitted=?, signalprice=?", update ).Where( "orderid=?" );
+            "update orders set"
+            " timeinforce=?, goodtilldate=?, goodaftertime=?"
+            ", parentid=?, transmit=?, outsiderth=?"
+            ", orderstatus=?, datetimesubmitted=?, signalprice=?"
+            , update ).Where( "orderid=?" );
       }
     }
     else {
