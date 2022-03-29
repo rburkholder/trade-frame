@@ -306,7 +306,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Stock:
       m_pOptionChainQuery->QueryEquityOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "1", "0", "", "",
+        "cp", "", "2", "0", "", "",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
