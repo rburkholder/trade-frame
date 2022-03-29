@@ -27,6 +27,11 @@ struct Options {
 
   std::string sSymbol;
 
+  // Interactive Brokers api instance
+  int ib_client_id;
+
+  size_t nThreads; // iqfeed multiple symbols
+
   int nPeriodWidth;  // units:  seconds
 
   // shortest EMA
@@ -38,16 +43,13 @@ struct Options {
   // longest EMA
   int nMA3Periods;
 
-  // Interactive Brokers api instance
-  int nIbInstance;
-
   int nStochastic1Periods;
   int nStochastic2Periods;
   int nStochastic3Periods;
 
   Options()
-  : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
-  , nIbInstance( 2 )
+  : ib_client_id( 2 ), nThreads( 1 )
+  , nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
   {}
 };
 

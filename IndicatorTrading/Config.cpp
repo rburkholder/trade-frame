@@ -31,11 +31,12 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sOption_Symbol( "symbol" );
+  static const std::string sOption_IbClientId( "ib_client_id" );
+  static const std::string sOption_Threads( "threads" );
   static const std::string sOption_PeriodWidth( "period_width" );
   static const std::string sOption_MA1Periods( "ma1_periods" );
   static const std::string sOption_MA2Periods( "ma2_periods" );
   static const std::string sOption_MA3Periods( "ma3_periods" );
-  static const std::string sOption_IbInstance( "ib_instance" );
   static const std::string sOption_Stochastic1Periods( "stochastic1_periods" );
   static const std::string sOption_Stochastic2Periods( "stochastic2_periods" );
   static const std::string sOption_Stochastic3Periods( "stochastic3_periods" );
@@ -66,6 +67,8 @@ bool Load( const std::string& sFileName, Options& options ) {
     po::options_description config( "AppIndicatorTrading Config" );
     config.add_options()
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol ), "symbol" )
+      ( sOption_IbClientId.c_str(), po::value<int>( &options.ib_client_id )->default_value( 1 ), "IB Client ID" )
+      ( sOption_Threads.c_str(), po::value<size_t>( &options.nThreads )->default_value( 1 ), "threads" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
 
@@ -73,7 +76,6 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods ), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods ), "ma3 (#periods)" )
 
-      ( sOption_IbInstance.c_str(), po::value<int>( &options.nIbInstance )->default_value( 1 ), "IB instance" )
 
       ( sOption_Stochastic1Periods.c_str(), po::value<int>( &options.nStochastic1Periods ), "stochastic1 (#periods)" )
       ( sOption_Stochastic2Periods.c_str(), po::value<int>( &options.nStochastic2Periods ), "stochastic2 (#periods)" )
@@ -93,13 +95,15 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk |= parse<std::string>( sFileName, vm, sOption_Symbol, options.sSymbol );
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
+      bOk |= parse<int>( sFileName, vm, sOption_IbClientId, options.ib_client_id );
+      bOk |= parse<size_t>( sFileName, vm, sOption_Threads, options.nThreads );
+
+
       bOk |= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
 
       bOk |= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
       bOk |= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
-
-      bOk |= parse<int>( sFileName, vm, sOption_IbInstance, options.nIbInstance );
 
       bOk |= parse<int>( sFileName, vm, sOption_Stochastic1Periods, options.nStochastic1Periods );
       bOk |= parse<int>( sFileName, vm, sOption_Stochastic2Periods, options.nStochastic2Periods );

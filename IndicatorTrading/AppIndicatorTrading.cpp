@@ -110,7 +110,8 @@ bool AppIndicatorTrading::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  m_tws->SetClientId( m_config.nIbInstance );
+  m_tws->SetClientId( m_config.ib_client_id );
+  m_iqfeed->SetThreadCount( m_config.nThreads );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
