@@ -63,6 +63,7 @@ struct decoded {
   int32_t year;
   int32_t month;
   int32_t day;
+  decoded(): nOrderId {}, nPriority {} {}
 };
 
 } // namespace OrderArrival
@@ -164,12 +165,12 @@ namespace OrderArrival {
       start %=
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
-        >> ruleUint64 >> qi::lit( ',' ) // nOrderId
+        >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
         >> ruleString >> qi::lit( ',' ) // sMarketMaker
         >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
         >> rulePrice >> qi::lit( ',' ) // dblPrice
         >> ruleUint32 >> qi::lit( ',' ) // nQuantity
-        >> ruleUint64 >> qi::lit( ',' ) // nPriority
+        >> -ruleUint64 >> qi::lit( ',' ) // nPriority
         >> ruleUint8 >> qi::lit( ',' ) // nPrecision
         >> ruleUint32 >> qi::lit( ':' ) // hours
         >> ruleUint32 >> qi::lit( ':' ) // minutes
@@ -177,7 +178,7 @@ namespace OrderArrival {
         >> ruleUint32 >> qi::lit( ',' ) // fractional
         >> ruleUint32 >> qi::lit( '-' ) // year
         >> ruleUint32 >> qi::lit( '-' ) // month
-        >> ruleUint32 // day
+        >> ruleUint32 >> qi::lit( ',' ) // day
         ;
 
     }
