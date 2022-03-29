@@ -150,7 +150,9 @@ void TradeLifeTime::Cancel() {
   }
 
   if ( bCancelled ) {
-    m_ceCancelled.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), sCancelled );
+    // this will need to be marked from the orders which were cancelled
+    // need to run m_quote continuously first
+    //m_ceCancelled.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), sCancelled );
   }
   else {
     std::cout << "TradeLifeTime::Cancel - nothing cancelled - " << m_pOrderEntry->GetOrderId() << std::endl;
@@ -231,23 +233,32 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
   {
     switch ( selectors.m_ePositionEntryMethod ) {
       case EPositionEntryMethod::Market:
-        m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, quantity );
-        m_ceBuySubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        {
+          m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, quantity );
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
+          m_ceBuySubmit.AddLabel( dtConstructed, quote.Midpoint(), "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        }
         break;
       case EPositionEntryMethod::Limit:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
 
-          // strip off fractional seconds
-          boost::posix_time::ptime dtQuote
-            = quote.DateTime()
-            - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
 
-          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( secondsGTD ) );
+          // strip off fractional seconds
+          boost::posix_time::ptime dtNormalized
+            = dtConstructed
+            - boost::posix_time::time_duration( 0, 0, 0, dtConstructed.time_of_day().fractional_seconds() );
+
+          assert( boost::posix_time::special_values::not_a_date_time != dtNormalized );
+          boost::posix_time::ptime dtExpiry = dtNormalized + boost::posix_time::seconds( secondsGTD );
+          assert( boost::posix_time::special_values::not_a_date_time != dtExpiry );
+
+          m_pOrderEntry->SetGoodTillDate( dtExpiry );
           m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
 
-          m_ceBuySubmit.AddLabel( quote.DateTime(), price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+          m_ceBuySubmit.AddLabel( dtConstructed, price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
       case EPositionEntryMethod::Stoch:
@@ -317,7 +328,7 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
 
   m_statePosition = EPositionState::EnteringPosition;
   m_pPosition->PlaceOrder( m_pOrderEntry );
-  std::cout << "TradeWithABuy entry order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
+  std::cout << "TradeWithABuy order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
   if ( m_bWatchStop ) {
     StartWatch();
   }
@@ -365,11 +376,13 @@ void TradeWithABuy::HandleEntryOrderFilled( const ou::tf::Order& order ) {
   if ( m_pOrderStop ) {
     m_pPosition->PlaceOrder( m_pOrderStop );
     if ( 0.0 < m_dblStopTrailDelta ) m_bWatchStop = true;
+    // m_quote may not be available
     m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
     std::cout << "order " << m_pOrderStop->GetOrderId() << " placed (buy stop)" << std::endl;
   }
   if ( m_pOrderProfit ) {
     m_pPosition->PlaceOrder( m_pOrderProfit );
+    // m_quote may not be available
     m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
     std::cout << "order " << m_pOrderProfit->GetOrderId() << " placed (buy profit)" << std::endl;
   }
@@ -421,23 +434,32 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
   {
     switch ( selectors.m_ePositionEntryMethod ) {
       case EPositionEntryMethod::Market:
-        m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, quantity );
-        m_ceSellSubmit.AddLabel( quote.DateTime(), quote.Midpoint(), "Sell Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        {
+          m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, quantity );
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
+          m_ceSellSubmit.AddLabel( dtConstructed, quote.Midpoint(), "Sell Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        }
         break;
       case EPositionEntryMethod::Limit:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
 
-          // strip off fractional seconds
-          boost::posix_time::ptime dtQuote
-            = quote.DateTime()
-            - boost::posix_time::time_duration( 0, 0, 0, quote.DateTime( ).time_of_day().fractional_seconds() );
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
 
-          m_pOrderEntry->SetGoodTillDate( dtQuote + boost::posix_time::seconds( secondsGTD ) );
+          // strip off fractional seconds
+          boost::posix_time::ptime dtNormalized
+            = dtConstructed
+            - boost::posix_time::time_duration( 0, 0, 0, dtConstructed.time_of_day().fractional_seconds() );
+
+          assert( boost::posix_time::special_values::not_a_date_time != dtNormalized );
+          boost::posix_time::ptime dtExpiry = dtNormalized + boost::posix_time::seconds( secondsGTD );
+          assert( boost::posix_time::special_values::not_a_date_time != dtExpiry );
+
+          m_pOrderEntry->SetGoodTillDate( dtExpiry );
           m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
 
-          m_ceSellSubmit.AddLabel( quote.DateTime(), price, "Sell Submit" + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+          m_ceSellSubmit.AddLabel( dtConstructed, price, "Sell Submit" + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
       case EPositionEntryMethod::Stoch:
@@ -507,7 +529,7 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
 
   m_statePosition = EPositionState::EnteringPosition;
   m_pPosition->PlaceOrder( m_pOrderEntry );
-  std::cout << "TradeWithASell entry order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
+  std::cout << "TradeWithASell order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
 
   if ( m_bWatchStop ) {
     StartWatch();
@@ -556,11 +578,13 @@ void TradeWithASell::HandleEntryOrderFilled( const ou::tf::Order& order ) {
   if ( m_pOrderStop ) {
     m_pPosition->PlaceOrder( m_pOrderStop );
     if ( 0.0 < m_dblStopTrailDelta ) m_bWatchStop = true;
+    // m_quote may not be available
     m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
     std::cout << "order " << m_pOrderStop->GetOrderId() << " placed (sell stop)" << std::endl;
   }
   if ( m_pOrderProfit ) {
     m_pPosition->PlaceOrder( m_pOrderProfit );
+    // m_quote may not be available
     m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
     std::cout << "order " << m_pOrderProfit->GetOrderId() << " placed (sell profit)" << std::endl;
   }
