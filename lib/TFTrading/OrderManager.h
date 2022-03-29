@@ -128,11 +128,11 @@ private:
   //  database table, and will need to auto-key from the order table instead.
 
   struct AutoIncKey {
-    int i;
-    AutoIncKey() : i( 1 ) {};
-    int GetNextId() { return ++i; };
-    void SetNextId( int i_ ) { assert( 0 < i_ ); i = i_; };
-    int GetCurrentId() { return i; };
+    int key;
+    AutoIncKey() : key( 1 ) {};
+    int GetNextId() { return ++key; };
+    void SetNextId( int keyNew ) { assert( 0 < keyNew ); key = keyNew; };
+    int GetCurrentId() { return key; };
   } m_orderIds;
 
   mapOrders_t m_mapOrders; // all orders for when checking for consistency
