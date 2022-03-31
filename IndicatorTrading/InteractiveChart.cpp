@@ -430,67 +430,75 @@ void InteractiveChart::CheckOptions() {
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-          } );
-        m_mapLifeCycleComponents.emplace(
-          pOption->GetInstrumentName(),
-          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
-          );
+      if ( pOption ) { // iqfeed isn't filling properly
+        pOptionTracker = AddOptionTracker( strike, pOption );
+        if ( pOptionTracker ) {
+          vt.second.fAddOptionToTree(
+            pOption->GetInstrumentName(),
+            [this,pOptionTracker](){
+              SetChartDataView( pOptionTracker->GetDataViewChart() );
+              m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
+            } );
+          m_mapLifeCycleComponents.emplace(
+            pOption->GetInstrumentName(),
+            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            );
+        }
       }
 
       strike = chain.Call_Otm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-          } );
-        m_mapLifeCycleComponents.emplace(
-          pOption->GetInstrumentName(),
-          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
-          );
+      if ( pOption ) {
+        pOptionTracker = AddOptionTracker( strike, pOption );
+        if ( pOptionTracker ) {
+          vt.second.fAddOptionToTree(
+            pOption->GetInstrumentName(),
+            [this,pOptionTracker](){
+              SetChartDataView( pOptionTracker->GetDataViewChart() );
+              m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
+            } );
+          m_mapLifeCycleComponents.emplace(
+            pOption->GetInstrumentName(),
+            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            );
+        }
       }
 
       // put
       strike = chain.Put_Itm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-          } );
-        m_mapLifeCycleComponents.emplace(
-          pOption->GetInstrumentName(),
-          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
-          );
+      if ( pOption ) {
+        pOptionTracker = AddOptionTracker( strike, pOption );
+        if ( pOptionTracker ) {
+          vt.second.fAddOptionToTree(
+            pOption->GetInstrumentName(),
+            [this,pOptionTracker](){
+              SetChartDataView( pOptionTracker->GetDataViewChart() );
+              m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
+            } );
+          m_mapLifeCycleComponents.emplace(
+            pOption->GetInstrumentName(),
+            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            );
+        }
       }
 
       strike = chain.Put_Otm( mid );
       pOption = chain.GetStrike( strike ).put.pOption;
-      pOptionTracker = AddOptionTracker( strike, pOption );
-      if ( pOptionTracker ) {
-        vt.second.fAddOptionToTree(
-          pOption->GetInstrumentName(),
-          [this,pOptionTracker](){
-            SetChartDataView( pOptionTracker->GetDataViewChart() );
-            m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-          } );
-        m_mapLifeCycleComponents.emplace(
-          pOption->GetInstrumentName(),
-          LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
-          );
+      if ( pOption ) {
+        pOptionTracker = AddOptionTracker( strike, pOption );
+        if ( pOptionTracker ) {
+          vt.second.fAddOptionToTree(
+            pOption->GetInstrumentName(),
+            [this,pOptionTracker](){
+              SetChartDataView( pOptionTracker->GetDataViewChart() );
+              m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
+            } );
+          m_mapLifeCycleComponents.emplace(
+            pOption->GetInstrumentName(),
+            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            );
+        }
       }
 
     }
