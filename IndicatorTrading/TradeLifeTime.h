@@ -34,6 +34,8 @@ namespace tf { // TradeFrame
 } // namespace tf
 } // namespace ou
 
+class TreeItem;
+
 class TradeLifeTime {
 public:
 
@@ -49,11 +51,6 @@ public:
   virtual void Cancel();
   virtual void EmitStatus();
   //virtual void Close();  // doesn't make sense here, too many moving parts
-
-  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
-  void SetUpdateLifeCycle( fUpdateLifeCycle_t&& f ) {
-    m_fUpdateLifeCycle = std::move( f );
-  }
 
 protected:
 
@@ -74,7 +71,7 @@ protected:
 
   pPosition_t m_pPosition;
 
-  fUpdateLifeCycle_t m_fUpdateLifeCycle;
+  TreeItem* m_pTreeItem;
 
   ou::tf::Quote m_quote;
 
@@ -107,6 +104,8 @@ protected:
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 
+  void BuildTreeItem( TreeItem* pTreeItemParent, const std::string& sText );
+
 private:
 
   void ClearOrders();
@@ -117,7 +116,7 @@ private:
 
 class TradeWithABuy: public TradeLifeTime {
 public:
-  TradeWithABuy( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeWithABuy( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators& );
   virtual ~TradeWithABuy();
 
   virtual void Cancel();
@@ -141,7 +140,7 @@ private:
 
 class TradeWithASell: public TradeLifeTime {
 public:
-  TradeWithASell( pPosition_t, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeWithASell( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators& );
   virtual ~TradeWithASell();
 
   virtual void Cancel();

@@ -68,6 +68,7 @@ namespace config {
   class Options;
 }
 
+class TreeItem;
 class OptionTracker;
 class TradeLifeTime;
 
@@ -87,32 +88,6 @@ public:
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
   using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
-
-  using fUpdateLifeCycle_t = std::function<void(const std::string&)>;
-  using fDeleteLifeCycle_t = std::function<void()>;
-
-  struct LifeCycleFunctions {
-    fUpdateLifeCycle_t fUpdateLifeCycle;
-    fDeleteLifeCycle_t fDeleteLifeCycle;
-    LifeCycleFunctions( fUpdateLifeCycle_t&& fUpdateLifeCycle_,fDeleteLifeCycle_t&& fDeleteLifeCycle_ )
-    : fUpdateLifeCycle( std::move( fUpdateLifeCycle_ ) ), fDeleteLifeCycle( std::move( fDeleteLifeCycle_ ) )
-    {}
-  };
-
-  using fOnClick_t = std::function<void()>;
-  using fAddLifeCycleToTree_t = std::function<LifeCycleFunctions(idOrder_t)>;
-  using fAddOptionToTree_t = std::function<void( const std::string&, fOnClick_t&& )>;
-  using fAddExpiryToTree_t = std::function<fAddOptionToTree_t( const std::string& )>;
-
-  struct SubTreesForUnderlying {
-    fAddLifeCycleToTree_t fAddLifeCycleToTree;
-    fAddExpiryToTree_t fAddExpiryToTree;
-    SubTreesForUnderlying( fAddLifeCycleToTree_t&& fAddLifeCycleToTree_, fAddExpiryToTree_t&& fAddExpiryToTree_)
-    : fAddLifeCycleToTree( std::move( fAddLifeCycleToTree_ ) ), fAddExpiryToTree( std::move( fAddExpiryToTree_ ) )
-    {}
-  };
-
-  using fAddUnderlying_t = std::function<SubTreesForUnderlying(const std::string&, fOnClick_t&&)>; // primary start for tree hierarchy
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
@@ -139,7 +114,7 @@ public:
    , pOptionChainQuery_t
    , fBuildOption_t&&
    , fBuildPosition_t&&
-   , fAddUnderlying_t&&
+   , TreeItem*
     );
 
   void EmitChainFull() const {
@@ -181,6 +156,7 @@ public:
 
   void CancelOrders();
 
+  // are these still required, as menu handlgin performed within TradeLifeTime?
   void OrderCancel( idOrder_t );
   void EmitOrderStatus( idOrder_t );
   void DeleteLifeCycle( idOrder_t );
@@ -202,6 +178,8 @@ private:
   bool m_bOptionsReady;
 
   ou::ChartDataView m_dvChart; // the data
+
+  TreeItem* m_pTreeItemUnderlying;
 
   pOrder_t m_pOrder;
   pPosition_t m_pPositionUnderlying;
@@ -333,8 +311,6 @@ private:
 
   fBuildOption_t m_fBuildOption;
   fBuildPosition_t m_fBuildPosition;
-  fAddLifeCycleToTree_t m_fAddLifeCycleToTree;
-  fAddExpiryToTree_t m_fAddExpiryToTree;
 
   struct BuiltOption: public ou::tf::option::chain::OptionName {
     pOption_t pOption;
@@ -347,7 +323,7 @@ private:
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   struct Expiry {
-    fAddOptionToTree_t fAddOptionToTree;
+    TreeItem* pTreeItem;
   };
   using mapExpiries_t = std::map<boost::gregorian::date,Expiry>; // usable chains
   mapExpiries_t m_mapExpiries; // possibly change this to a map of iterators
@@ -363,12 +339,13 @@ private:
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
   struct LifeCycleComponents {
+    TreeItem* pTreeItem;
     pPosition_t pPosition;
     Indicators indicators;
-    LifeCycleComponents( Indicators indicators_ )
-    : indicators( indicators_ ) {}
-    LifeCycleComponents( pPosition_t pPosition_, Indicators indicators_ )
-    : pPosition( pPosition_ ), indicators( indicators_ ) {}
+    LifeCycleComponents( TreeItem* pTreeItem_, Indicators indicators_ )
+    : pTreeItem( pTreeItem_ ), indicators( indicators_ ) {}
+    LifeCycleComponents( TreeItem* pTreeItem_, pPosition_t pPosition_, Indicators indicators_ )
+    : pTreeItem( pTreeItem_ ), pPosition( pPosition_ ), indicators( indicators_ ) {}
   };
 
   using mapLifeCycleComponents_t = std::map<std::string,LifeCycleComponents>;
@@ -378,7 +355,6 @@ private:
 
   struct LifeCycle {
     pTradeLifeTime_t pTradeLifeTime;
-    fDeleteLifeCycle_t fDeleteLifeCycle;
     LifeCycle( pTradeLifeTime_t pTradeLifeTime_ )
     : pTradeLifeTime( pTradeLifeTime_ )
     {}

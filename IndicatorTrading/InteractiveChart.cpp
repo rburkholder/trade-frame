@@ -28,6 +28,7 @@
 //#include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
 
+#include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Config.h"
@@ -209,7 +210,7 @@ void InteractiveChart::SetPosition(
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition
-, fAddUnderlying_t&& fAddUnderlying
+, TreeItem* pTreeItemParent
 ) {
 
   bool bConnected = m_bConnected;
@@ -226,11 +227,37 @@ void InteractiveChart::SetPosition(
   vMAPeriods_t vMAPeriods;
 
   m_pPositionUnderlying = pPosition;
-  m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
+    m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
   pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
+
+  m_pTreeItemUnderlying = pTreeItemParent->AppendChild(
+    pWatch->GetInstrumentName(),
+    [ this, pInstrument=m_pActiveInstrument ](TreeItem* pTreeItem){ // fOnClick_t
+      SetChartDataView( &m_dvChart ); // primary underlying chart
+      m_pActiveInstrument = pInstrument;
+    },
+    [this]( TreeItem* pTreeItem ){ // fOnBuildPopUp_t
+      pTreeItem->NewMenu();
+      pTreeItem->AppendMenuItem(
+        "Cancel Orders",
+        [this]( TreeItem* pTreeItem ){
+          CancelOrders();
+        }
+      );
+      pTreeItem->AppendMenuItem(
+        "Status",
+        [this]( TreeItem* pTreeItem ){
+          EmitStatus();
+        }
+      );
+    }
+    );
+
   m_mapLifeCycleComponents.emplace(
     m_pActiveInstrument->GetInstrumentName(),
-    LifeCycleComponents( m_pPositionUnderlying,
+    LifeCycleComponents(
+      m_pTreeItemUnderlying,
+      m_pPositionUnderlying,
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
     );
 
@@ -268,16 +295,6 @@ void InteractiveChart::SetPosition(
   }
   m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
   // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
-
-  SubTreesForUnderlying stfu
-    = std::move( fAddUnderlying(
-        pWatch->GetInstrumentName(),
-        [this,pInstrument=m_pActiveInstrument](){
-          this->SetChartDataView( &m_dvChart );
-          m_pActiveInstrument = pInstrument;
-        } ) );
-  m_fAddLifeCycleToTree = std::move( stfu.fAddLifeCycleToTree );
-  m_fAddExpiryToTree = std::move( stfu.fAddExpiryToTree );
 
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
@@ -359,7 +376,12 @@ void InteractiveChart::ProcessChains() {
         assert( result );
 
         // place to put the expiries on the tree
-        iter->second.fAddOptionToTree = std::move( m_fAddExpiryToTree( ou::tf::Instrument::BuildDate( vt.first ) ) );
+        iter->second.pTreeItem = m_pTreeItemUnderlying->AppendChild(
+          ou::tf::Instrument::BuildDate( vt.first ),
+          [this]( TreeItem* pTreeItem ){
+            // expiry label does nothing
+          }
+        );
       }
     }
 
@@ -430,18 +452,18 @@ void InteractiveChart::CheckOptions() {
       // call
       strike = chain.Call_Itm( mid );
       pOption = chain.GetStrike( strike ).call.pOption;
-      if ( pOption ) { // iqfeed isn't filling properly
+      if ( pOption ) { // iqfeed isn't filling strikes properly
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
-          vt.second.fAddOptionToTree(
+          TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
-            [this,pOptionTracker](){
+            [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
             } );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -451,15 +473,15 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
-          vt.second.fAddOptionToTree(
+          TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
-            [this,pOptionTracker](){
+            [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
             } );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -470,15 +492,15 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
-          vt.second.fAddOptionToTree(
+          TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
-            [this,pOptionTracker](){
+            [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
             } );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -488,15 +510,15 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
-          vt.second.fAddOptionToTree(
+          TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
-            [this,pOptionTracker](){
+            [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
             } );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -665,26 +687,18 @@ InteractiveChart::LifeCycleComponents& InteractiveChart::LookupLifeCycleComponen
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycleComponents& lcc( LookupLifeCycleComponents() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcc.pPosition, buttons, lcc.indicators );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcc.pPosition, lcc.pTreeItem, buttons, lcc.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-    auto& [idOrder,lifecycle] = *pair.first;
-    LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
-    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
   }
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycleComponents& lcc( LookupLifeCycleComponents() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcc.pPosition, buttons, lcc.indicators );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcc.pPosition, lcc.pTreeItem, buttons, lcc.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
-    auto& [idOrder,lifecycle] = *pair.first;
-    LifeCycleFunctions lcf = std::move( m_fAddLifeCycleToTree( id ) ); // TODO: add to the option, rather than underlying
-    lifecycle.pTradeLifeTime->SetUpdateLifeCycle( std::move( lcf.fUpdateLifeCycle ) );
-    lifecycle.fDeleteLifeCycle = std::move( lcf.fDeleteLifeCycle );
   }
 }
 
@@ -736,7 +750,7 @@ void InteractiveChart::DeleteLifeCycle( idOrder_t id ) {
   }
   else {
     // TODO: need to perform some validation that nothing is in progress.
-    iter->second.fDeleteLifeCycle();
+    //iter->second.fDeleteLifeCycle();
     m_mapLifeCycle.erase( iter );
   }
 }

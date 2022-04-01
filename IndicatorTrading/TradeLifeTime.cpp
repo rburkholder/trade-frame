@@ -23,6 +23,7 @@
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
+#include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "TradeLifeTime.h"
@@ -208,6 +209,37 @@ void TradeLifeTime::EmitStatus() {
   std::cout << sStatus << std::endl;
 }
 
+void TradeLifeTime::BuildTreeItem( TreeItem* pTreeItemParent, const std::string& sText ) {
+  m_pTreeItem = pTreeItemParent->AppendChild(
+    sText,
+    []( TreeItem* pTreeItem ){ // fOnClick_t
+      // nothing to do
+    },
+    [this]( TreeItem* pTreeItem ){ // fOnBuildPopUp_t
+      pTreeItem->NewMenu();
+      pTreeItem->AppendMenuItem(
+        "Cancel",
+        [this]( TreeItem* pTreeItem){
+          Cancel();
+        }
+        );
+      pTreeItem->AppendMenuItem(
+        "Status",
+        [this]( TreeItem* pTreeItem){
+          EmitStatus();
+        }
+        );
+      pTreeItem->AppendMenuItem(
+        "Delete",
+        [this]( TreeItem* pTreeItem){
+          std::cout << "deletion todo: delete structure and delete tree item" << std::endl;
+          // m_pInteractiveChart->DeleteLifeCycle( id );
+        }
+        );
+    }
+    );
+}
+
 //void TradeLifeTime::Close() {
 // determine direction, then do:
 // OrderBuy( ou::tf::PanelOrderButtons_Order() );
@@ -220,9 +252,14 @@ void TradeLifeTime::EmitStatus() {
 
 // ===== TradeWithABuy =====
 
-TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
-: TradeLifeTime( pPosition, indicators )
-{
+TradeWithABuy::TradeWithABuy(
+  pPosition_t pPosition
+, TreeItem* pTreeItemParent
+, const ou::tf::PanelOrderButtons_Order& selectors
+, Indicators& indicators
+)
+: TradeLifeTime( pPosition, indicators
+) {
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " buying" << std::endl;
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
@@ -329,6 +366,9 @@ TradeWithABuy::TradeWithABuy( pPosition_t pPosition, const ou::tf::PanelOrderBut
   m_statePosition = EPositionState::EnteringPosition;
   m_pPosition->PlaceOrder( m_pOrderEntry );
   std::cout << "TradeWithABuy order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
+
+  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+
   if ( m_bWatchStop ) {
     StartWatch();
   }
@@ -421,9 +461,14 @@ void TradeWithABuy::Cancel() {
 
 // ===== TradeWithASell =====
 
-TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors, Indicators& indicators )
-: TradeLifeTime( pPosition, indicators )
-{
+TradeWithASell::TradeWithASell(
+  pPosition_t pPosition
+, TreeItem* pTreeItemParent
+, const ou::tf::PanelOrderButtons_Order& selectors
+, Indicators& indicators
+)
+: TradeLifeTime( pPosition, indicators
+) {
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " selling" << std::endl;
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
@@ -530,6 +575,8 @@ TradeWithASell::TradeWithASell( pPosition_t pPosition, const ou::tf::PanelOrderB
   m_statePosition = EPositionState::EnteringPosition;
   m_pPosition->PlaceOrder( m_pOrderEntry );
   std::cout << "TradeWithASell order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
+
+  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
 
   if ( m_bWatchStop ) {
     StartWatch();

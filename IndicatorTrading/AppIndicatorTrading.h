@@ -40,6 +40,7 @@ class wxTreeCtrl;
 class wxTreeEvent;
 
 class FrameMain;
+class TreeItem;
 class InteractiveChart;
 
 namespace ou {
@@ -76,6 +77,7 @@ private:
 
   std::string m_sTSDataStreamStarted;
 
+  TreeItem* m_pTreeItem; // root of custom tree items
   wxTreeCtrl* m_ptreeTradables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   wxBoxSizer* m_sizerFrame;
@@ -118,8 +120,6 @@ private:
   void HandleMenuActionOptionQuoteShow();
   void HandleMenuActionOptionWatchStop();
   void HandleMenuActionOptionEmit();
-
-  void HandleTreeEventItemMenu( wxTreeEvent& );
 
   void StartChainQuery();
   void ConstructUnderlying();
