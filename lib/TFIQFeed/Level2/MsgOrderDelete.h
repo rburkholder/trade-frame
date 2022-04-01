@@ -31,8 +31,10 @@
 #include <boost/spirit/include/qi.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+//#include <boost/spirit/include/phoenix_operator.hpp>
+//#include <boost/spirit/include/phoenix_object.hpp>
 //#include <boost/spirit/include/phoenix_bind.hpp>
+//#include <boost/spirit/include/phoenix_container.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -45,21 +47,34 @@ namespace OrderDelete {
 //using td_t = boost::posix_time::time_duration;
 
 //  '5,TSLA,,CHXE,B,,2022-04-01,'
+
+struct time_t {
+  int32_t hours;
+  int32_t minutes;
+  int32_t seconds;
+  int32_t fractional;
+  time_t(): hours {}, minutes {}, seconds {}, fractional {} {}
+  time_t( int32_t hours_, int32_t minutes_, int32_t seconds_, int32_t fractional_ )
+  : hours( hours_ ), minutes( minutes_ ), seconds( seconds_ ), fractional( fractional_ ) {}
+};
+
+struct date_t {
+  int32_t year;
+  int32_t month;
+  int32_t day;
+  date_t(): year {}, month {}, day {} {}
+  date_t( int32_t year_, int32_t month_, int32_t day_ )
+  : year( year_ ), month( month_ ), day( day_ ) {}
+};
+
 struct decoded {
   char chMsgType;
   std::string sSymbolName;
   uint64_t nOrderId;
   std::string sMarketMaker;
   char chOrderSide;  // 'A' Sell, 'B' Buy
-  //time_t time;
-  int32_t hours;
-  int32_t minutes;
-  int32_t seconds;
-  int32_t fractional;
-  //date_t date;
-  int32_t year;
-  int32_t month;
-  int32_t day;
+  time_t time;
+  date_t date;
 };
 
 } // namespace OrderDelete
@@ -72,21 +87,38 @@ struct decoded {
 namespace msg_delete_t = ou::tf::iqfeed::l2::msg::OrderDelete;
 
 BOOST_FUSION_ADAPT_STRUCT(
+  msg_delete_t::time_t,
+  (int32_t, hours)
+  (int32_t, minutes)
+  (int32_t, seconds)
+  (int32_t, fractional)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  msg_delete_t::date_t,
+  (int32_t, year)
+  (int32_t, month)
+  (int32_t, day)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
   msg_delete_t::decoded,
   (char, chMsgType)
   (std::string, sSymbolName)
   (uint64_t, nOrderId)
   (std::string, sMarketMaker)
   (char, chOrderSide)
+  (msg_delete_t::time_t, time)
+  (msg_delete_t::date_t, date)
   //(msg_t::time_t,time)
-  (int32_t, hours)
-  (int32_t, minutes)
-  (int32_t, seconds)
-  (int32_t, fractional)
+  //(int32_t, hours)
+  //(int32_t, minutes)
+  //(int32_t, seconds)
+  //(int32_t, fractional)
   //(msg_t::date_t,date)
-  (int32_t, year)
-  (int32_t, month)
-  (int32_t, day)
+  //(int32_t, year)
+  //(int32_t, month)
+  //(int32_t, day)
   )
 
 namespace ou { // One Unified
@@ -118,34 +150,39 @@ namespace OrderDelete {
           qi::char_( 'A' ) // Sell
         | qi::char_( 'B' ) // Buy)
         ;
-/*
+
       ruleTime %=
-          qi::long_ > qi::lit( ':' ) // HH
-        > qi::long_ > qi::lit( ':' ) // mm
-        > qi::long_ > qi::lit( '.' ) // ss
-        > qi::long_                  // fractional
+        (
+          ruleUint32 > qi::lit( ':' ) // HH
+        > ruleUint32 > qi::lit( ':' ) // mm
+        > ruleUint32 > qi::lit( '.' ) // ss
+        > ruleUint32                  // fractional
+        )
         ;
 
       ruleDate %=
-          qi::long_ > qi::lit( '-' ) // year
-        | qi::long_ > qi::lit( '-' ) // month
-        | qi::long_                  // day
+        (
+          ruleUint32 > qi::lit( '-' ) // year
+        > ruleUint32 > qi::lit( '-' ) // month
+        > ruleUint32                  // day
+        )
         ;
-*/
+
       start %=
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
         >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
         >> -ruleString >> qi::lit( ',' ) // market maker for nasdaq LII
         >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
-        >> ruleUint32 >> qi::lit( ':' ) // hours
-        >> ruleUint32 >> qi::lit( ':' ) // minutes
-        >> ruleUint32 >> qi::lit( '.' ) // seconds
-        >> ruleUint32 >> qi::lit( ',' ) // fractional
-        //>> -ruleTime >> qi::lit( ',')
-        >> ruleUint32 >> qi::lit( '-' ) // year
-        >> ruleUint32 >> qi::lit( '-' ) // month
-        >> ruleUint32 // day
+        //>> ruleUint32 >> qi::lit( ':' ) // hours
+        //>> ruleUint32 >> qi::lit( ':' ) // minutes
+        //>> ruleUint32 >> qi::lit( '.' ) // seconds
+        //>> ruleUint32 >> qi::lit( ',' ) // fractional
+        >> -ruleTime >> qi::lit( ',')
+        //>> ruleUint32 >> qi::lit( '-' ) // year
+        //>> ruleUint32 >> qi::lit( '-' ) // month
+        //>> ruleUint32 // day
+        >> ruleDate
         >> qi::lit( ',' )
         ;
 
@@ -156,8 +193,8 @@ namespace OrderDelete {
     qi::rule<Iterator, uint32_t()> ruleUint32;
     qi::rule<Iterator, uint64_t()> ruleUint64;
     qi::rule<Iterator, std::string()> ruleString;
-    //qi::rule<Iterator, td_t()> ruleTime;
-    //qi::rule<Iterator, date_t()> ruleDate;
+    qi::rule<Iterator, time_t()> ruleTime;
+    qi::rule<Iterator, date_t()> ruleDate;
 
     qi::rule<Iterator, decoded()> start;
 
