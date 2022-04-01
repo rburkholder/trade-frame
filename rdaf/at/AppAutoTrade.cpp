@@ -50,6 +50,7 @@
 #include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
@@ -189,11 +190,18 @@ bool AppAutoTrade::OnInit() {
   Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
   m_timerOneSecond.Start( 500 );
 
-  wxTreeItemId idRoot = m_treeSymbols->AddRoot( "/", -1, -1, nullptr );
-  wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
+  TreeItem::Bind( m_pFrameMain, m_treeSymbols );
+  m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
+  //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
-  m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
+  //m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
+  m_pTreeItemPortfolio = m_pTreeItemRoot->AppendChild(
+    sMenuItemPortfolio,
+    [this]( TreeItem* pTreeItem ){
+      m_pWinChartView->SetChartDataView( &m_dvChart );
+    }
+  );
 
   // will need to change the date selection in the file, maybe use date from upperTime
   // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
@@ -222,8 +230,16 @@ bool AppAutoTrade::OnInit() {
       choices.nVolumeBins, choices.nVolumeUpper, choices.nVolumeLower
       );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( config, m_pFile );
-    //m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
+    TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
+      sSymbol,
+      [this,sSymbol]( TreeItem* pTreeItem ){
+        mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
+        assert( m_mapStrategy.end() != iter );
+        m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+      }
+    );
+
+    pStrategy_t pStrategy = std::make_unique<Strategy>( config, pTreeItem, m_pFile );
 
     if ( m_choices.bStartSimulator ) {
       pStrategy->InitForUSEquityExchanges( dateSim );
@@ -232,8 +248,6 @@ bool AppAutoTrade::OnInit() {
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
 
     // TODO: use this to add an order list to the instrument: date, direction, type, limit
-    wxTreeItemId idSymbol = m_treeSymbols->AppendItem( idRoot, sSymbol, -1, -1, new CustomItemData( sSymbol ) );
-
   }
 
   // does the list need to be sorted?
@@ -378,39 +392,6 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   //f1->SetTitle("My graph;x; sin(x)");
   //f1->Draw();
   //c->Modified(); c->Update();
-}
-
-void AppAutoTrade::HandleTreeEventItemMenu( wxTreeEvent& event ) {
-  wxTreeItemData* pData = m_treeSymbols->GetItemData( event.GetItem() );
-  //if ( nullptr != pData ) {
-  //  CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
-  //  if ( pCustom->pMenuPopup ) {
-  //    m_pFrameMain->PopupMenu( pCustom->pMenuPopup, event.GetPoint() );
-  //  }
-  //}
-  //else {
-  //  std::cout << "no item data" << std::endl;
-  //}
-  event.Skip();
-}
-
-void AppAutoTrade::HandleTreeEventItemChanged( wxTreeEvent& event ) {
-  wxTreeItemData* pData = m_treeSymbols->GetItemData( event.GetItem() );
-  if ( nullptr != pData ) {
-    CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
-    assert( 0 < pCustom->sSymbol.size() );
-
-    if ( sMenuItemPortfolio == pCustom->sSymbol ) {
-      m_pWinChartView->SetChartDataView( &m_dvChart );
-    }
-    else {
-      mapStrategy_t::iterator iter = m_mapStrategy.find( pCustom->sSymbol );
-      assert( m_mapStrategy.end() != iter );
-      m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
-    }
-  }
-
-  event.Skip();
 }
 
 void AppAutoTrade::HandleMenuActionCloseAndDone() {

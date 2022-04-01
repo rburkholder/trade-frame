@@ -37,6 +37,8 @@
 
 #include <TFTrading/Watch.h>
 
+#include <TFVuTrading/TreeItem.hpp>
+
 #include "ConfigParser.hpp"
 
 #include "Strategy.h"
@@ -45,9 +47,12 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy(
   const config_t config
+, TreeItem* pTreeItem
 , pFile_t pFile
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_pTreeItem( pTreeItem )
+, m_pFile( pFile )
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
@@ -59,7 +64,6 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
-  m_pFile = pFile;
   assert( m_pFile );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );

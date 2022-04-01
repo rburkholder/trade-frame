@@ -41,6 +41,8 @@ class TFile;
 class TTree;
 class TClass;
 
+class TreeItem;
+
 namespace ou {
   class ChartDataView;
 }
@@ -93,6 +95,7 @@ public:
 
   Strategy(
     const config_t
+  , TreeItem*
   , pFile_t
   );
   virtual ~Strategy();
@@ -122,6 +125,8 @@ private:
     ShortExitSubmitted, // wait for exit to complete
     Done // no more action
     };
+
+  TreeItem* m_pTreeItem;
 
   bool m_bChangeConfigFileMessageLatch;
 

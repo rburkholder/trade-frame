@@ -42,6 +42,7 @@
 class TRint;
 class TFile;
 
+class TreeItem;
 class Strategy;
 class FrameMain;
 
@@ -74,8 +75,10 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
 
-  wxSplitterWindow* m_splitterData;
+  TreeItem* m_pTreeItemRoot; // root of custom tree items
+  TreeItem* m_pTreeItemPortfolio;
   wxTreeCtrl* m_treeSymbols;
+  wxSplitterWindow* m_splitterData;
 
   wxTimer m_timerOneSecond;
 
@@ -125,9 +128,6 @@ private:
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
-
-  void HandleTreeEventItemMenu( wxTreeEvent& );
-  void HandleTreeEventItemChanged( wxTreeEvent& );
 
   void ConstructIBInstrument(  const std::string& sNamePortfolio, const std::string& sSymbol );
   void ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol );
