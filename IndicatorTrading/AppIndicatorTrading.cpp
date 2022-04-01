@@ -101,7 +101,7 @@ bool AppIndicatorTrading::OnInit() {
   // tree for viewed symbols
   m_ptreeTradables = new wxTreeCtrl( m_splitterRow, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_HAS_BUTTONS |wxTR_TWIST_BUTTONS|wxTR_SINGLE );
   TreeItem::Bind( m_pFrameMain, m_ptreeTradables );
-  m_pTreeItem = new TreeItem( m_ptreeTradables, "/" ); // initialize tree
+  m_pTreeItemRoot = new TreeItem( m_ptreeTradables, "/" ); // initialize tree
 
   // panel for right side of splitter
   wxPanel* panelSplitterRight;
@@ -319,7 +319,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       );
     },
     std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ), // fBuildPosition_t
-    m_pTreeItem
+    m_pTreeItemRoot
   );
 
   m_ptreeTradables->ExpandAll();

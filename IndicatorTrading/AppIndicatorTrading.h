@@ -39,8 +39,8 @@ class wxBoxSizer;
 class wxTreeCtrl;
 class wxTreeEvent;
 
-class FrameMain;
 class TreeItem;
+class FrameMain;
 class InteractiveChart;
 
 namespace ou {
@@ -77,7 +77,7 @@ private:
 
   std::string m_sTSDataStreamStarted;
 
-  TreeItem* m_pTreeItem; // root of custom tree items
+  TreeItem* m_pTreeItemRoot; // root of custom tree items
   wxTreeCtrl* m_ptreeTradables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   wxBoxSizer* m_sizerFrame;
