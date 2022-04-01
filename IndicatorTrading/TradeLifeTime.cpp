@@ -99,7 +99,8 @@ double TradeLifeTime::NormalizePrice( double price ) const {
 }
 
 void TradeLifeTime::HandleQuote( const ou::tf::Quote& quote ) {
-  m_quote = quote;
+  // TODO: fix this for stop
+  //m_quote = quote;
 }
 
 uint32_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors ) const {
@@ -417,13 +418,15 @@ void TradeWithABuy::HandleEntryOrderFilled( const ou::tf::Order& order ) {
     m_pPosition->PlaceOrder( m_pOrderStop );
     if ( 0.0 < m_dblStopTrailDelta ) m_bWatchStop = true;
     // m_quote may not be available
-    m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
+    ou::tf::Quote quote = m_pPosition->GetWatch()->LastQuote();
+    m_ceSellSubmit.AddLabel( quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
     std::cout << "order " << m_pOrderStop->GetOrderId() << " placed (buy stop)" << std::endl;
   }
   if ( m_pOrderProfit ) {
     m_pPosition->PlaceOrder( m_pOrderProfit );
     // m_quote may not be available
-    m_ceSellSubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
+    ou::tf::Quote quote = m_pPosition->GetWatch()->LastQuote();
+    m_ceSellSubmit.AddLabel( quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
     std::cout << "order " << m_pOrderProfit->GetOrderId() << " placed (buy profit)" << std::endl;
   }
   TradeLifeTime::HandleOrderFilled( order );
@@ -626,13 +629,15 @@ void TradeWithASell::HandleEntryOrderFilled( const ou::tf::Order& order ) {
     m_pPosition->PlaceOrder( m_pOrderStop );
     if ( 0.0 < m_dblStopTrailDelta ) m_bWatchStop = true;
     // m_quote may not be available
-    m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
+    ou::tf::Quote quote = m_pPosition->GetWatch()->LastQuote();
+    m_ceBuySubmit.AddLabel( quote.DateTime(), m_pOrderStop->GetPrice1(), "Stop Submit " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() ) );
     std::cout << "order " << m_pOrderStop->GetOrderId() << " placed (sell stop)" << std::endl;
   }
   if ( m_pOrderProfit ) {
     m_pPosition->PlaceOrder( m_pOrderProfit );
     // m_quote may not be available
-    m_ceBuySubmit.AddLabel( m_quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
+    ou::tf::Quote quote = m_pPosition->GetWatch()->LastQuote();
+    m_ceBuySubmit.AddLabel( quote.DateTime(), m_pOrderProfit->GetPrice1(), "Profit Submit " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() ) );
     std::cout << "order " << m_pOrderProfit->GetOrderId() << " placed (sell profit)" << std::endl;
   }
   TradeLifeTime::HandleOrderFilled( order );

@@ -73,7 +73,7 @@ protected:
 
   TreeItem* m_pTreeItem;
 
-  ou::tf::Quote m_quote;
+  //ou::tf::Quote m_quote;
 
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderEntry;
