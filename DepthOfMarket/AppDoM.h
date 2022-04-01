@@ -23,6 +23,9 @@
 
 #include <memory>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/app.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -39,6 +42,7 @@ class AppDoM:
   public ou::tf::FrameWork01<AppDoM>
 {
   friend ou::tf::FrameWork01<AppDoM>;
+  friend class boost::serialization::access;
 public:
 protected:
 private:
@@ -60,7 +64,23 @@ private:
   void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
 
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
-// Implements MyApp& wxGetApp()
+BOOST_CLASS_VERSION(AppDoM, 1)
+
 DECLARE_APP(AppDoM)

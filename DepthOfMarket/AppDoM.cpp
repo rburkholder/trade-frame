@@ -29,12 +29,23 @@ TODO:
       validate against trade stream for actual orders (limits vs market)
 */
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
 #include <wx/defs.h>
 #include <wx/sizer.h>
 
 #include "Config.h"
-
 #include "AppDoM.h"
+
+namespace {
+  static const std::string sDirectory( "." );
+  static const std::string sAppName( "Depth of Market" );
+  static const std::string sChoicesFilename( sDirectory + "/dom.cfg" );
+  //static const std::string sDbName( sDirectory + "/example.db" );
+  static const std::string sStateFileName( sDirectory + "/dom.state" );
+  static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+}
 
 IMPLEMENT_APP(AppDoM)
 
@@ -49,7 +60,7 @@ bool AppDoM::OnInit() {
   }
   else {
 
-    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, "Depth of Market" );
+    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
     //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -61,6 +72,12 @@ bool AppDoM::OnInit() {
 
     m_pFrameMain->SetSize( 675, 800 );
     SetTopWindow( m_pFrameMain );
+
+    m_pFrameMain->SetAutoLayout( true );
+    m_pFrameMain->Layout();
+    m_pFrameMain->Show( true );
+
+    m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppDoM::OnClose, this );  // start close of windows and controls
 
     //Bind(
     //  wxEVT_SIZE,
@@ -84,7 +101,7 @@ bool AppDoM::OnInit() {
 
     LinkToPanelProviderControl();
 
-    m_pFrameMain->Show( true );
+    //m_pFrameMain->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
     sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 4 );
@@ -112,7 +129,15 @@ bool AppDoM::OnInit() {
   //  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
   //  wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Load Symbols", vItemsLoadSymbols );
 
+    CallAfter(
+      [this](){
+        // doesn't cooperate
+        LoadState();
+      }
+    );
+
   }
+
 
   return code;
 }
@@ -132,7 +157,7 @@ void AppDoM::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
 
-  //SaveState();
+  SaveState();
 
   //if ( m_db.IsOpen() ) m_db.Close();
   event.Skip();  // auto followed by Destroy();
@@ -156,4 +181,25 @@ void AppDoM::OnData1Disconnecting( int ) {
 
 void AppDoM::OnData1Disconnected( int ) {
   std::cout << "Depth of Market disconnected" << std::endl;
+}
+
+void AppDoM::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppDoM::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
 }
