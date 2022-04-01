@@ -25,6 +25,8 @@ namespace config {
 
 struct Options {
   std::string sSymbolName;
+  //size_t ib_client_id;
+  //size_t nThreads;
 };
 
 bool Load( Options& );
