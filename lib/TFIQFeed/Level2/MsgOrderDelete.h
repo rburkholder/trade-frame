@@ -44,10 +44,12 @@ namespace OrderDelete {
 //using date_t = boost::gregorian::date;
 //using td_t = boost::posix_time::time_duration;
 
+//  '5,TSLA,,CHXE,B,,2022-04-01,'
 struct decoded {
   char chMsgType;
   std::string sSymbolName;
   uint64_t nOrderId;
+  std::string sMarketMaker;
   char chOrderSide;  // 'A' Sell, 'B' Buy
   //time_t time;
   int32_t hours;
@@ -74,6 +76,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (char, chMsgType)
   (std::string, sSymbolName)
   (uint64_t, nOrderId)
+  (std::string, sMarketMaker)
   (char, chOrderSide)
   //(msg_t::time_t,time)
   (int32_t, hours)
@@ -132,13 +135,14 @@ namespace OrderDelete {
       start %=
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
-        >> ruleUint64 >> qi::lit( ',' ) // nOrderId
-        >> /* reserved */ qi::lit( ',' ) // reserved
+        >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
+        >> -ruleString >> qi::lit( ',' ) // market maker for nasdaq LII
         >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
         >> ruleUint32 >> qi::lit( ':' ) // hours
         >> ruleUint32 >> qi::lit( ':' ) // minutes
         >> ruleUint32 >> qi::lit( '.' ) // seconds
         >> ruleUint32 >> qi::lit( ',' ) // fractional
+        //>> -ruleTime >> qi::lit( ',')
         >> ruleUint32 >> qi::lit( '-' ) // year
         >> ruleUint32 >> qi::lit( '-' ) // month
         >> ruleUint32 // day
@@ -164,6 +168,7 @@ namespace OrderDelete {
 
     static parser_decoded<T> parser;
 
+    // '5,TSLA,,CHXE,B,,2022-04-01,' nasdaq LII
     // "5,@ESZ21,648907593934,,A,20:32:47.333543,2021-10-24,"
     bool bOk = parse( begin, end, parser, out );
 

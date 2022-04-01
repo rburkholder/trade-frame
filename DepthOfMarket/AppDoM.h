@@ -56,6 +56,8 @@ private:
 
   std::unique_ptr<DoMDispatch> m_pDispatch;  // one per symbol
 
+  void EmitMarketMakerMaps();
+
   virtual bool OnInit();
   void OnClose( wxCloseEvent& event );
   virtual int OnExit();
