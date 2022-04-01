@@ -126,7 +126,8 @@ private:
     Done // no more action
     };
 
-  TreeItem* m_pTreeItem;
+  TreeItem* m_pTreeItemSymbol;
+  TreeItem* m_pTreeItemOrder;
 
   bool m_bChangeConfigFileMessageLatch;
 
@@ -204,6 +205,8 @@ private:
 
   void ExitLong( const ou::tf::Bar& );
   void ExitShort( const ou::tf::Bar& );
+
+  void ShowOrder( pOrder_t );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

@@ -25,9 +25,11 @@
 
  #include <chrono>
 
-// no longer use iostream, std::cout has a multithread contention probolem
+// no longer use iostream, std::cout has a multithread contention problem
 //   due to it being captured to the gui, and is not thread safe
  #include <boost/log/trivial.hpp>
+
+ #include <boost/lexical_cast.hpp>
 
 #include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
@@ -51,7 +53,7 @@ Strategy::Strategy(
 , pFile_t pFile
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
-, m_pTreeItem( pTreeItem )
+, m_pTreeItemSymbol( pTreeItem )
 , m_pFile( pFile )
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
@@ -287,6 +289,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
   m_stateTrade = ETradeState::LongSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
+  ShowOrder( m_pOrder );
 }
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
@@ -296,6 +299,7 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
   m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
   m_stateTrade = ETradeState::ShortSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
+  ShowOrder( m_pOrder );
 }
 
 void Strategy::ExitLong( const ou::tf::Bar& bar ) {
@@ -305,6 +309,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
   m_stateTrade = ETradeState::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
+  ShowOrder( m_pOrder );
 }
 
 void Strategy::ExitShort( const ou::tf::Bar& bar ) {
@@ -314,6 +319,14 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
   m_stateTrade = ETradeState::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
+  ShowOrder( m_pOrder );
+}
+
+void Strategy::ShowOrder( pOrder_t pOrder ) {
+  m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
+      "Order "
+    + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
+    );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
