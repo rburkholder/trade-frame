@@ -78,7 +78,7 @@ public:
     idPosition_t idPosition;
     idInstrument_t idInstrument;
     std::string sDescription;
-    TimeInForce::ETimeInForce eTimeInForce;
+    ETimeInForce eTimeInForce;
     ptime dtGoodTillDate;
     ptime dtGoodAfterTime;
     idOrder_t idParent;
@@ -102,7 +102,7 @@ public:
 
     TableRowDef() // default constructor
       : idOrder( 0 ), idPosition( 0 ),
-        eTimeInForce( ou::tf::TimeInForce::Day ),
+        eTimeInForce( ou::tf::ETimeInForce::Day ),
         dtGoodTillDate( boost::date_time::not_a_date_time  ), dtGoodAfterTime( boost::date_time::not_a_date_time  ),
         idParent( 0 ), bTransmit( true ), bOutsideRTH( false ),
         eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ),
@@ -113,7 +113,7 @@ public:
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::EOrderType eOrderType_, OrderSide::EOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ),
-        eTimeInForce( ou::tf::TimeInForce::Day ),
+        eTimeInForce( ou::tf::ETimeInForce::Day ),
         dtGoodTillDate( boost::date_time::not_a_date_time  ), dtGoodAfterTime( boost::date_time::not_a_date_time  ),
         idParent( 0 ), bTransmit( true ), bOutsideRTH( false ),
         eOrderStatus( OrderStatus::Created ),
@@ -125,7 +125,7 @@ public:
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::EOrderType eOrderType_, OrderSide::EOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ),
-        eTimeInForce( ou::tf::TimeInForce::Day ),
+        eTimeInForce( ou::tf::ETimeInForce::Day ),
         dtGoodTillDate( boost::date_time::not_a_date_time  ), dtGoodAfterTime( boost::date_time::not_a_date_time  ),
         idParent( 0 ), bTransmit( true ), bOutsideRTH( false ),
         eOrderStatus( OrderStatus::Created ),
@@ -137,7 +137,7 @@ public:
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::EOrderType eOrderType_, OrderSide::EOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ),
-        eTimeInForce( ou::tf::TimeInForce::Day ),
+        eTimeInForce( ou::tf::ETimeInForce::Day ),
         dtGoodTillDate( boost::date_time::not_a_date_time  ), dtGoodAfterTime( boost::date_time::not_a_date_time  ),
         idParent( 0 ), bTransmit( true ), bOutsideRTH( false ),
         eOrderStatus( OrderStatus::Created ),
@@ -154,7 +154,7 @@ public:
       ptime dtOrderCreated_, ptime dtOrderSubmitted_, ptime dtOrderClosed_ )
       : idOrder( idOrder_ ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), sDescription( sDescription_ ),
         eOrderStatus( eOrderStatus_ ), eOrderType( eOrderType_ ),
-        eTimeInForce( ou::tf::TimeInForce::Day ),
+        eTimeInForce( ou::tf::ETimeInForce::Day ),
         dtGoodTillDate( boost::date_time::not_a_date_time  ), dtGoodAfterTime( boost::date_time::not_a_date_time  ),
         idParent( 0 ), bTransmit( true ), bOutsideRTH( false ),
         eOrderSide( eOrderSide_ ),
@@ -211,8 +211,8 @@ public:
   void SetOutsideRTH( bool bOutsideRTH ) { m_row.bOutsideRTH = bOutsideRTH; }; // need to persist to db
   bool GetOutsideRTH() const { return m_row.bOutsideRTH; };
 
-  void SetTimeInForce( ou::tf::TimeInForce::ETimeInForce tif ) { m_row.eTimeInForce = tif; } // need to persist to db
-  ou::tf::TimeInForce::ETimeInForce GetTimeInForce() const { return m_row.eTimeInForce; }
+  void SetTimeInForce( ou::tf::ETimeInForce tif ) { m_row.eTimeInForce = tif; } // need to persist to db
+  ou::tf::ETimeInForce GetTimeInForce() const { return m_row.eTimeInForce; }
 
   void SetTransmit( bool bTransmit ) { m_row.bTransmit = bTransmit; } // need to persist to db
   bool GetTransmit() const { return m_row.bTransmit; }

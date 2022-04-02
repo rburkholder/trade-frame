@@ -294,7 +294,7 @@ TradeWithABuy::TradeWithABuy(
           assert( boost::posix_time::special_values::not_a_date_time != dtExpiry );
 
           m_pOrderEntry->SetGoodTillDate( dtExpiry );
-          m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+          m_pOrderEntry->SetTimeInForce( ou::tf::ETimeInForce::GoodTillDate );
 
           m_ceBuySubmit.AddLabel( dtConstructed, price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
@@ -505,7 +505,7 @@ TradeWithASell::TradeWithASell(
           assert( boost::posix_time::special_values::not_a_date_time != dtExpiry );
 
           m_pOrderEntry->SetGoodTillDate( dtExpiry );
-          m_pOrderEntry->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
+          m_pOrderEntry->SetTimeInForce( ou::tf::ETimeInForce::GoodTillDate );
 
           m_ceSellSubmit.AddLabel( dtConstructed, price, "Sell Submit" + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }

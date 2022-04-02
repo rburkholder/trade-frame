@@ -144,7 +144,7 @@ namespace OrderManagerQueries {
     }
 
     Order::idOrder_t idOrder;
-    TimeInForce::ETimeInForce eTimeInForce;
+    ETimeInForce eTimeInForce;
     ptime dtGoodTillDate;
     ptime dtGoodAfterTime;
     Order::idOrder_t idParent;
@@ -155,7 +155,7 @@ namespace OrderManagerQueries {
     double dblSignalPrice;
 
     UpdateAtPlaceOrder1(
-      TimeInForce::ETimeInForce eTimeInForce_, ptime dtGoodTillDate_, ptime dtGoodAfterTime_
+      ETimeInForce eTimeInForce_, ptime dtGoodTillDate_, ptime dtGoodAfterTime_
     , Order::idOrder_t idParent_, bool bTransmit_, bool bOutsideRTH_
     , Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_
     )

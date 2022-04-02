@@ -46,7 +46,7 @@ public:
   using fButtonSend_t = std::function<void(ou::tf::OrderSide::EOrderSide)>;
 
   struct OrderParameters {
-    ou::tf::TimeInForce::ETimeInForce m_eTimeInForce;
+    ou::tf::ETimeInForce m_eTimeInForce;
     ou::tf::OrderType::EOrderType m_eOrderType;
     std::string m_sProfitPrice;
     std::string m_sLimitPrice;

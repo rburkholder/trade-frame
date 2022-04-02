@@ -53,8 +53,8 @@ namespace OrderError {
   enum EOrderError { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
-namespace TimeInForce { // need to do this way for now, as sql doesn't know about class enumerations
-  enum ETimeInForce { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, GoodAfterTime, AtTheClose, Auction, OPG, _Count };
+enum ETimeInForce: std::uint32_t { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, GoodAfterTime, AtTheClose, Auction, OPG, _Count };
+namespace TimeInForce {
   extern const char* Name[];
 }
 

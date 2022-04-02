@@ -530,7 +530,7 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
   twsorder.tif = ou::tf::TimeInForce::Name[ pOrder->GetTimeInForce() ];
 
   switch ( pOrder->GetTimeInForce() ) {
-    case ou::tf::TimeInForce::GoodTillDate:
+    case ou::tf::ETimeInForce::GoodTillDate:
       {
         //twsorder.goodTillDate = "20080625 16:00:00";
         ptime dt( pOrder->GetGoodTillDate() );
@@ -546,7 +546,7 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
       break;
   }
   switch ( pOrder->GetTimeInForce() ) { // will need to convfirm how this is signalled
-    case ou::tf::TimeInForce::GoodAfterTime:
+    case ou::tf::ETimeInForce::GoodAfterTime:
       {
         //twsorder.goodAfterTime = "20080625 09:30:00";
         ptime dt( pOrder->GetGoodAfterTime() );
@@ -619,6 +619,7 @@ void TWS::CancelOrder( pOrder_t pOrder ) {
   ProviderInterface<TWS,Symbol>::CancelOrder( pOrder );
   m_pTWS->cancelOrder( pOrder->GetOrderId() );
 }
+
 void TWS::tickPrice( TickerId tickerId, TickType tickType, double price, const TickAttrib& attrib ) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept
   //   when a valid symbol has been defined
@@ -628,6 +629,7 @@ void TWS::tickPrice( TickerId tickerId, TickType tickType, double price, const T
     pSym->AcceptTickPrice( tickType, price );
   }
 }
+
 void TWS::tickSize( TickerId tickerId, TickType tickType, Decimal size ) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept
   //   when a valid symbol has been defined
@@ -1270,7 +1272,7 @@ void TWS::nextValidId( OrderId orderId) {
     m_ss << "next order id (" << id << "), IB had (" << orderId << ")";
   }
 
-  //std::cout << m_ss.str() << std::endl;
+  std::cout << m_ss.str() << std::endl;
 }
 
 // called from contractDetails, info comes from IB
