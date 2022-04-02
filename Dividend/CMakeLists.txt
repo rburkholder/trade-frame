@@ -25,11 +25,13 @@ find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options t
 
 set(
   file_h
+    Process.hpp
   )
 
 set(
   file_cpp
     main.cpp
+    Process.cpp
   )
 
 add_executable(
@@ -65,28 +67,29 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
-      TFBitsNPieces
-#      TFInteractiveBrokers
-#      ib_client
-#      bidgcc000
+#      TFBitsNPieces
+      TFTrading
+      TFInteractiveBrokers
+      ib_client
+      bidgcc000
 #      TFSimulation
 #      TFVuTrading
-      TFTrading
 #      TFOptions
-      TFTrading
-#      TFHDF5TimeSeries
-      OUCommon
-#      OUSQL
-#      OUSqlite
+      TFHDF5TimeSeries
+      OUSQL
+      OUSqlite
 #      OUCharting
 #      TFIndicators
-      TFTimeSeries
       TFIQFeed
-#      hdf5_cpp
-#      hdf5
-#      sz
-#      dl
-#      z
+      TFTimeSeries
+      TFTrading
+      OUCommon
+      TFTrading
+      hdf5_cpp
+      hdf5
+      sz
+      dl
+      z
 #      curl
 #      chartdir
       ${Boost_LIBRARIES}

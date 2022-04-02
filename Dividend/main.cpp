@@ -19,12 +19,11 @@
  * Created: April 1, 2022  19:09
  */
 
-
-#include <vector>
-
 #include <TFTrading/TradingEnumerations.h>
 
 #include <TFIQFeed/InMemoryMktSymbolList.h>
+
+#include "Process.hpp"
 
 int main( int argc, char* argv[] ) {
 
@@ -42,14 +41,15 @@ int main( int argc, char* argv[] ) {
     "NYSE"
   , "NYSE,NYSE_ARCA"
   , "NYSE_AMERICAN"
-//    "NASDAQ"
+  , "NASDAQ"
 //  , "NASDAQ,NCM"
   , "NASDAQ,NGM"
   , "NASDAQ,NGSM"
 //  , "NASDAQ,OTC"
   };
 
-  using vSymbols_t = std::vector<std::string>;
+  using dividend_t = Process::dividend_t;
+  using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
 
   list.SelectSymbolsByExchange(
@@ -57,12 +57,29 @@ int main( int argc, char* argv[] ) {
     [&vSymbols](const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd){
       if ( ou::tf::iqfeed::ESecurityType::Equity == trd.sc ) {
         //std::cout << trd.sSymbol << std::endl;
-        vSymbols.push_back( trd.sSymbol );
+        vSymbols.push_back( dividend_t( trd.sSymbol ) );
       }
     }
     );
 
   std::cout << "#symbols=" << vSymbols.size() << std::endl;
+
+  Process process( vSymbols );
+  process.Wait();
+
+  for ( vSymbols_t::value_type& vt: vSymbols ) {
+    if ( 7.0 < vt.yield ) {
+      std::cout
+        << vt.sExchange
+        << "," << vt.sSymbol
+        << ",rate," << vt.rate
+        << ",yield," << vt.yield
+        << ",amount," << vt.amount
+        << ",vol," << vt.nAverageVolume
+        << ",exdiv," << vt.dateExDividend
+        << std::endl;
+    }
+  }
 
   return 0;
 }
