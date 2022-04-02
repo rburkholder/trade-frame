@@ -37,6 +37,10 @@ public:
   AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ );
   ~AcquireFundamentals();
 
+  static pAcquireFundamentals_t Factory( pWatch_t&& pWatch, fDone_t&& fDone ) {
+    return std::make_shared<AcquireFundamentals>( std::move( pWatch ), std::move( fDone ) );
+  }
+
   void Start();
 
 private:
