@@ -128,7 +128,8 @@ private:
     wxSize size( x, y );
     this->SetSize( size );
     this->SetPosition( point ); // seems to work better with this order
-    Layout();
+    Layout(); // but still not consistently, seems to be a timing problem somewhere
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

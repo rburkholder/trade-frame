@@ -195,7 +195,7 @@ bool AppIndicatorTrading::OnInit() {
       LoadState();
       m_splitterRow->Layout(); // the sash does not appear to update
       m_pFrameMain->Layout();
-      m_sizerFrame->Layout();
+      m_sizerFrame->Layout(); // seems to make it consistent
     }
   );
 
