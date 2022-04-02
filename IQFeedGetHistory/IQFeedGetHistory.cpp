@@ -46,7 +46,7 @@ bool AppIQFeedGetHistory::OnInit() {
   m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
-  
+
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -58,8 +58,8 @@ bool AppIQFeedGetHistory::OnInit() {
 
   m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
   m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){ 
-      std::cout << sStatus << std::endl; 
+    CallAfter( [sStatus](){  // cross threads to foreground
+      std::cout << sStatus << std::endl;
     });
   });
   m_pIQFeedSymbolListOps->Done.connect( [this]( ou::tf::IQFeedSymbolListOps::ECompletionCode code ) {
@@ -74,7 +74,7 @@ bool AppIQFeedGetHistory::OnInit() {
         break;
     }
   });
-	
+
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
   FrameMain::vpItems_t vItemsLoadSymbols;
@@ -91,7 +91,7 @@ bool AppIQFeedGetHistory::OnInit() {
   vItemsLoadDays.push_back( new mi( "200 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays200 ) ) );
   vItemsLoadDays.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
   m_pMenuLoadDays = m_pFrameMain->AddDynamicMenu( "Load History", vItemsLoadDays );
-	
+
   DisableMenuActionDays();
 
   return 1;
