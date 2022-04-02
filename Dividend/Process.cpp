@@ -25,7 +25,7 @@
 #include "TFTrading/Watch.h"
 
 namespace {
-  const size_t nInTransit = 20;
+  const size_t nInTransit = 40;
 }
 
 Process::Process( vSymbols_t& vSymbols )
@@ -55,7 +55,7 @@ void Process::Lookup() {
   using Fundamentals = ou::tf::Watch::Fundamentals;
 
   const std::string sSymbol( m_iterSymbols->sSymbol );
-  std::cout << "lookup " << sSymbol << std::endl;
+  //std::cout << "lookup " << sSymbol << std::endl;
 
   pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );

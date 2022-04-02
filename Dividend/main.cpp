@@ -19,6 +19,8 @@
  * Created: April 1, 2022  19:09
  */
 
+#include <OUCommon/KeyWordMatch.h>
+
 #include <TFTrading/TradingEnumerations.h>
 
 #include <TFIQFeed/InMemoryMktSymbolList.h>
@@ -41,40 +43,34 @@ int main( int argc, char* argv[] ) {
     "NYSE"
   , "NYSE,NYSE_ARCA"
   , "NYSE_AMERICAN"
-//  , "NASDAQ"
+  , "NASDAQ"
   , "NASDAQ,NCM"
   , "NASDAQ,NGM"
   , "NASDAQ,NGSM"
-//  , "NASDAQ,OTC"
   };
 
   using dividend_t = Process::dividend_t;
   using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
 
+  ou::KeyWordMatch<bool> kwm( true, 20 ); // scan can't find these
+  kwm.AddPattern( "ORPH", false );
+  kwm.AddPattern( "DBBPF", false );
+  kwm.AddPattern( "UELMO", false );
+  kwm.AddPattern( "GRZZU", false );
+  kwm.AddPattern( "PB", false );
+  kwm.AddPattern( "ELSBF", false );
+  kwm.AddPattern( "LIBC", false );
+  kwm.AddPattern( "SSDT", false );
+  kwm.AddPattern( "BSCE", false );
+
   list.SelectSymbolsByExchange(
     vExchanges.begin(), vExchanges.end(),
-    [&vSymbols](const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd){
+    [&vSymbols,&kwm](const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd){
       if ( ou::tf::iqfeed::ESecurityType::Equity == trd.sc ) {
-        if ( "ORPH" == trd.sSymbol ) {}
-        else {
-          if ( "DBBPF" == trd.sSymbol ) {}
-          else {
-            if ( "UELMO" == trd.sSymbol ) {}
-            else {
-              if ( "GRZZU" == trd.sSymbol ) {}
-              else {
-                if ( "PB" == trd.sSymbol ) {}
-                else {
-                  if ( "ELSBF" == trd.sSymbol ) {}
-                  else {
-                    //std::cout << trd.sSymbol << std::endl;
-                    vSymbols.push_back( dividend_t( trd.sSymbol ) );
-                  }
-                }
-              }
-            }
-          }
+        if ( kwm.FindMatch( trd.sSymbol ) ) { // note the reverse logic in kwm
+          //std::cout << trd.sSymbol << std::endl;
+          vSymbols.push_back( dividend_t( trd.sSymbol ) );
         }
       }
     }
@@ -85,16 +81,20 @@ int main( int argc, char* argv[] ) {
   Process process( vSymbols );
   process.Wait();
 
+  std::cout
+    << "exchange,symbol,yield,rate,amount,volume,exdiv"
+    << std::endl;
+
   for ( vSymbols_t::value_type& vt: vSymbols ) {
-    if ( 7.0 < vt.yield ) {
+    if ( ( 7.0 < vt.yield ) && ( 5000 <= vt.nAverageVolume ) ) {
       std::cout
-        << vt.sExchange
+               << vt.sExchange
         << "," << vt.sSymbol
-        << ",rate," << vt.rate
-        << ",yield," << vt.yield
-        << ",amount," << vt.amount
-        << ",vol," << vt.nAverageVolume
-        << ",exdiv," << vt.dateExDividend
+        << "," << vt.yield
+        << "," << vt.rate
+        << "," << vt.amount
+        << "," << vt.nAverageVolume
+        << "," << vt.dateExDividend
         << std::endl;
     }
   }
