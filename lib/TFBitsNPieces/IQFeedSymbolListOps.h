@@ -80,12 +80,12 @@ public:
   signalStatus_t Status;
   signalDone_t Done;
 
-  void ObtainNewIQFeedSymbolListRemote( void );
-  void ObtainNewIQFeedSymbolListLocal( void );
-  void LoadIQFeedSymbolList( void );
+  void ObtainNewIQFeedSymbolListRemote();
+  void ObtainNewIQFeedSymbolListLocal();
+  void LoadIQFeedSymbolList();
   void SaveSymbolSubset( const std::string& sFileName, const ou::tf::iqfeed::InMemoryMktSymbolList& subset );  // sample
   void LoadSymbolSubset( const std::string& sFileName );  // sample
-  void ClearIQFeedSymbolList( void );
+  void ClearIQFeedSymbolList();
 
 protected:
 private:
@@ -97,9 +97,9 @@ private:
   void StatusBusy();
   void StatusDone();
 
-  void WorkerObtainNewIQFeedSymbolListRemote( void );
-  void WorkerObtainNewIQFeedSymbolListLocal( void );
-  void WorkerLoadIQFeedSymbolList( void );
+  void WorkerObtainNewIQFeedSymbolListRemote();
+  void WorkerObtainNewIQFeedSymbolListLocal();
+  void WorkerLoadIQFeedSymbolList();
 };
 
 } // namespace tf
