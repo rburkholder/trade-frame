@@ -47,6 +47,10 @@ public:
   IQFeedProvider();
   virtual ~IQFeedProvider();
 
+  static pProvider_t Factory() {
+    return boost::make_shared<IQFeedProvider>();
+  }
+
   // do these need to be virtual?  use crtp?
   virtual void Connect();
   virtual void Disconnect();
