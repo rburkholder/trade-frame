@@ -19,6 +19,7 @@
  * Created: April 1, 2022  21:48
  */
 
+#include <map>
 #include <vector>
 #include <memory>
 #include <thread>
@@ -58,11 +59,24 @@ private:
 
   pIQFeed_t m_piqfeed;
 
-  std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_live;
-  std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_dead;
-
+  using vSymbols_iter = vSymbols_t::iterator;
   vSymbols_t& m_vSymbols;
-  vSymbols_t::iterator m_iterSymbols;
+  vSymbols_iter m_iterSymbols;
+
+
+  using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
+  //std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_live;
+
+  struct InProgress {
+    vSymbols_iter iterSymbols;
+    pAcquireFundamentals_t pAcquireFundamentals;
+  };
+
+  using mapInProgress_t = std::map<std::string,InProgress>;
+  mapInProgress_t m_mapInProgress;
+
+  // assumes single thread
+  std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_dead;
 
   bool m_bDone;
   std::mutex m_mutexWait;

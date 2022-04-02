@@ -41,8 +41,8 @@ int main( int argc, char* argv[] ) {
     "NYSE"
   , "NYSE,NYSE_ARCA"
   , "NYSE_AMERICAN"
-  , "NASDAQ"
-//  , "NASDAQ,NCM"
+//  , "NASDAQ"
+  , "NASDAQ,NCM"
   , "NASDAQ,NGM"
   , "NASDAQ,NGSM"
 //  , "NASDAQ,OTC"
@@ -56,8 +56,26 @@ int main( int argc, char* argv[] ) {
     vExchanges.begin(), vExchanges.end(),
     [&vSymbols](const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd){
       if ( ou::tf::iqfeed::ESecurityType::Equity == trd.sc ) {
-        //std::cout << trd.sSymbol << std::endl;
-        vSymbols.push_back( dividend_t( trd.sSymbol ) );
+        if ( "ORPH" == trd.sSymbol ) {}
+        else {
+          if ( "DBBPF" == trd.sSymbol ) {}
+          else {
+            if ( "UELMO" == trd.sSymbol ) {}
+            else {
+              if ( "GRZZU" == trd.sSymbol ) {}
+              else {
+                if ( "PB" == trd.sSymbol ) {}
+                else {
+                  if ( "ELSBF" == trd.sSymbol ) {}
+                  else {
+                    //std::cout << trd.sSymbol << std::endl;
+                    vSymbols.push_back( dividend_t( trd.sSymbol ) );
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
     );

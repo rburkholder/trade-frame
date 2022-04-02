@@ -19,12 +19,14 @@
  * Created: April 1, 2022  21:48
  */
 
-#include <memory>
-
 #include <TFTrading/AcquireFundamentals.h>
 
 #include "Process.hpp"
 #include "TFTrading/Watch.h"
+
+namespace {
+  const size_t nInTransit = 20;
+}
 
 Process::Process( vSymbols_t& vSymbols )
 : m_vSymbols( vSymbols ), m_bDone( false )
@@ -40,7 +42,10 @@ Process::Process( vSymbols_t& vSymbols )
 void Process::HandleConnected( int ) {
 
   m_iterSymbols = m_vSymbols.begin();
-  Lookup();
+  while ( ( nInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
+    Lookup();
+  }
+
 }
 
 void Process::Lookup() {
@@ -49,44 +54,61 @@ void Process::Lookup() {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using Fundamentals = ou::tf::Watch::Fundamentals;
 
-  if ( m_vSymbols.end() == m_iterSymbols ) {
-    m_bDone = true;
-    m_cvWait.notify_one();
-  }
-  else {
+  const std::string sSymbol( m_iterSymbols->sSymbol );
+  std::cout << "lookup " << sSymbol << std::endl;
 
-    std::cout << "lookup " << m_iterSymbols->sSymbol << std::endl;
+  pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
+  pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
 
-    pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_iterSymbols->sSymbol );
-    pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, m_iterSymbols->sSymbol );
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+  mapInProgress_t::iterator iterInProgress
+    = m_mapInProgress.insert(
+        m_mapInProgress.begin(),
+        mapInProgress_t::value_type( sSymbol, InProgress() ) );
 
-    m_pAcquireFundamentals_live
-      = ou::tf::AcquireFundamentals::Factory (
-        std::move( pWatch ),
-        [this]( pWatch_t pWatch ){
-          const Fundamentals& fundamentals( pWatch->GetFundamentals() );
-          dividend_t& dividend( *m_iterSymbols );
-          dividend.sExchange = fundamentals.sExchange;
-          dividend.rate = fundamentals.dblDividendRate;
-          dividend.yield = fundamentals.dblDividendYield;
-          dividend.amount = fundamentals.dblDividendAmount;
-          dividend.nAverageVolume = fundamentals.nAverageVolume;
-          dividend.dateExDividend = fundamentals.dateExDividend;
-          if ( 10.0 < fundamentals.dblDividendYield ) {
-            std::cout
-              << fundamentals.sExchange
-              << " " << fundamentals.sSymbolName
-              << " div.yield=" << fundamentals.dblDividendYield
-              << std::endl;
+  iterInProgress->second.iterSymbols = m_iterSymbols;
+
+  iterInProgress->second.pAcquireFundamentals
+    = ou::tf::AcquireFundamentals::Factory (
+      std::move( pWatch ),
+      [this,iterInProgress,iterSymbols=m_iterSymbols]( pWatch_t pWatch ){
+        const Fundamentals& fundamentals( pWatch->GetFundamentals() );
+        dividend_t& dividend( *iterSymbols );
+        dividend.sExchange = fundamentals.sExchange;
+        dividend.rate = fundamentals.dblDividendRate;
+        dividend.yield = fundamentals.dblDividendYield;
+        dividend.amount = fundamentals.dblDividendAmount;
+        dividend.nAverageVolume = fundamentals.nAverageVolume;
+        dividend.dateExDividend = fundamentals.dateExDividend;
+        //if ( 10.0 < fundamentals.dblDividendYield ) {
+        //  std::cout
+        //    << fundamentals.sExchange
+        //    << " " << fundamentals.sSymbolName
+        //    << " div.yield=" << fundamentals.dblDividendYield
+        //    << std::endl;
+        //}
+        m_pAcquireFundamentals_dead = std::move( iterInProgress->second.pAcquireFundamentals );
+        m_mapInProgress.erase( iterInProgress ); // needs to come before the lookup
+        if ( m_vSymbols.end() == m_iterSymbols ) {
+          if  ( 0 == m_mapInProgress.size() ) {
+            m_bDone = true;
+            m_cvWait.notify_one();
           }
-          m_iterSymbols++;
-          m_pAcquireFundamentals_dead = std::move( m_pAcquireFundamentals_live );
+          else {
+            std::cout << "waiting on: ";
+            for ( mapInProgress_t::value_type& vt: m_mapInProgress ) {
+              std::cout << vt.first << ",";
+            }
+            std::cout << std::endl;
+          }
+        }
+        else {
           Lookup();
         }
-        );
-    m_pAcquireFundamentals_live->Start();
-  }
+      }
+      );
+  iterInProgress->second.pAcquireFundamentals->Start();
+  m_iterSymbols++;
 }
 
 void Process::Wait() {
