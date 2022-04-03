@@ -49,9 +49,7 @@ private:
   // TODO: boost::fusion?  std::tuple?
   DataRowElement<double>         m_dreAcctPl;
   DataRowElement<unsigned int>   m_dreBidVolume;
-  DataRowElement<double>         m_dreBid;
   DataRowElement<double>         m_drePrice;
-  DataRowElement<double>         m_dreAsk;
   DataRowElement<unsigned int>   m_dreAskVolume;
   DataRowElement<unsigned int>   m_dreTicks;
   DataRowElement<unsigned int>   m_dreVolume;

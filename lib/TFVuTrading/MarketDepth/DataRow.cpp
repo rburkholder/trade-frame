@@ -39,9 +39,7 @@ DataRow::DataRow( int ix, double price )
   m_price( price ), m_ix( ix ),
   m_dreAcctPl( sFmtPrice, m_bChanged ),
   m_dreBidVolume( sFmtInteger, m_bChanged ),
-  m_dreBid( sFmtPrice, m_bChanged ),
   m_drePrice( sFmtPrice, m_bChanged ),
-  m_dreAsk( sFmtPrice, m_bChanged ),
   m_dreAskVolume( sFmtInteger, m_bChanged ),
   m_dreTicks( sFmtInteger, m_bChanged ),
   m_dreVolume( sFmtInteger, m_bChanged ),
@@ -66,9 +64,7 @@ void DataRow::SetRowElements( RowElements& re ) {
 
   m_dreAcctPl.SetWinRowElement( re[ Field::AcctPL ] );
   m_dreBidVolume.SetWinRowElement( re[ Field::BidVol ] );
-  m_dreBid.SetWinRowElement( re[ Field::Bid ] );
   m_drePrice.SetWinRowElement( re[ Field::Price ] );
-  m_dreAsk.SetWinRowElement( re[ Field::Ask ] );
   m_dreAskVolume.SetWinRowElement( re[ Field::AskVol ] );
   m_dreTicks.SetWinRowElement( re[ Field::Ticks ] );
   m_dreVolume.SetWinRowElement( re[ Field::Volume ] );
@@ -80,9 +76,7 @@ void DataRow::SetRowElements( RowElements& re ) {
 void DataRow::Refresh() {
   m_dreAcctPl.UpdateWinRowElement();
   m_dreBidVolume.UpdateWinRowElement();
-  m_dreBid.UpdateWinRowElement();
   m_drePrice.UpdateWinRowElement();
-  m_dreAsk.UpdateWinRowElement();
   m_dreAskVolume.UpdateWinRowElement();
   m_dreTicks.UpdateWinRowElement();
   m_dreVolume.UpdateWinRowElement();
@@ -94,9 +88,7 @@ void DataRow::DelRowElements() {
   //m_pRowElements = nullptr;
   m_dreAcctPl.SetWinRowElement( nullptr );
   m_dreBidVolume.SetWinRowElement( nullptr );
-  m_dreBid.SetWinRowElement( nullptr );
   m_drePrice.SetWinRowElement( nullptr );
-  m_dreAsk.SetWinRowElement( nullptr );
   m_dreAskVolume.SetWinRowElement( nullptr );
   m_dreTicks.SetWinRowElement( nullptr );
   m_dreVolume.SetWinRowElement( nullptr );

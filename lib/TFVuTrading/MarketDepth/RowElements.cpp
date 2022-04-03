@@ -40,18 +40,16 @@ namespace { // local variables
 
   // crColumnHeader = Colour::LightGoldenrodYellow;
 
-  using vElementTrait_t = std::vector<ElementTrait>;
+  using vElementTrait_t = std::vector<ElementTrait>; // Changes here have dependencies in DataRow.h
   const vElementTrait_t vElementTrait = {
     { Field::AcctPL,   60, "AccPL",   /* ou::Colour::LightSeaGreen */ },
-    { Field::BidVol,   60, "BidVol",  /* ou::Colour::LightSlateGray */ },
-    { Field::Bid,      60, "Bid",     /* ou::Colour::DodgerBlue */ },
-    { Field::Price,    60, "Price",   /* ou::Colour::LightSteelBlue */ },
-    { Field::Ask,      60, "Ask",     /* ou::Colour::Magenta */ },
-    { Field::AskVol,   60, "AskVol",  /* ou::Colour::LightSlateGray */ },
-    { Field::Ticks,    50, "Ticks",   /* ou::Colour::LightSlateGray */ },
-    { Field::Volume,   60, "Volume",  /* ou::Colour::LightSlateGray */ },
-    { Field::Static,   80, "Static",  /* ou::Colour::LightSlateGray */ },
-    { Field::Dynamic, 100, "Dynamic", /* ou::Colour::LightSlateGray */ }
+    { Field::BidVol,   60, "BidVol",  /* ou::Colour::LightSlateGray */ }, // changes
+    { Field::Price,    60, "Price",   /* ou::Colour::LightSteelBlue */ }, // static
+    { Field::AskVol,   60, "AskVol",  /* ou::Colour::LightSlateGray */ }, // changes
+    { Field::Ticks,    50, "Ticks",   /* ou::Colour::LightSlateGray */ }, // count of trades
+    { Field::Volume,   60, "Volume",  /* ou::Colour::LightSlateGray */ }, // sum of volume
+    { Field::Static,   80, "Static",  /* ou::Colour::LightSlateGray */ }, // static indicators - pivots, ...
+    { Field::Dynamic, 100, "Dynamic", /* ou::Colour::LightSlateGray */ }  // dynamic indicators - ema, ...
   };
 }; // namespace anonymmous
 
