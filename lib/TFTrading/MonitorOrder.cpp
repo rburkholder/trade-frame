@@ -31,30 +31,30 @@ namespace {
 }
 
 MonitorOrder::MonitorOrder()
-: m_CountDownToAdjustment {},
-  m_state( State::NoPosition )
-  {}
+: m_state( State::NoPosition )
+, m_CountDownToAdjustment {}
+{}
 
 MonitorOrder::MonitorOrder( pPosition_t& pPosition )
-: m_CountDownToAdjustment {},
-  m_state( State::NoOrder ),
-  m_pPosition( pPosition )
-{}
+:m_CountDownToAdjustment {}
+{
+  SetPosition( pPosition );
+}
 
 // what checks to perform on m_state?  need to be in a good state for things to sync properly
 //assert( !m_pPosition ); // let us see where this goes, may raise an issue with the constructor initialized with position
 //assert( !m_pOrder ); // this causes issues if duplicated
 MonitorOrder::MonitorOrder( MonitorOrder&& rhs )
-: m_CountDownToAdjustment( rhs.m_CountDownToAdjustment ),
-  m_state( rhs.m_state ),
-  m_pPosition( std::move( rhs.m_pPosition ) ),
-  m_pOrder( std::move( rhs.m_pOrder ) )
+: m_state( rhs.m_state )
+, m_CountDownToAdjustment( rhs.m_CountDownToAdjustment )
+, m_pPosition( std::move( rhs.m_pPosition ) )
+, m_pOrder( std::move( rhs.m_pOrder ) )
 {}
 
 MonitorOrder& MonitorOrder::operator=( const MonitorOrder&& rhs ) {
   if ( this != &rhs ) {
-    m_CountDownToAdjustment = rhs.m_CountDownToAdjustment;
     m_state = rhs.m_state;
+    m_CountDownToAdjustment = rhs.m_CountDownToAdjustment;
     m_pPosition = std::move( rhs.m_pPosition ),
     m_pOrder = std::move( rhs.m_pOrder );
   }
@@ -65,7 +65,7 @@ void MonitorOrder::SetPosition( pPosition_t pPosition ) {
   //assert( !m_pPosition );
   assert( !m_pOrder ); // no outstanding orders should exist
   m_pPosition = pPosition;
-  m_state = State::NoOrder;
+  m_state = State::Available;
 }
 
 double MonitorOrder::NormalizePrice( double price ) const {
@@ -83,7 +83,7 @@ double MonitorOrder::PriceInterval( double price ) const {
 bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side ) {
   bool bOk( false );
   switch ( m_state ) {
-    case State::NoOrder:
+    case State::Available:
     case State::Cancelled:  // can overwrite?
     case State::Filled:     // can overwrite?
       {
@@ -109,7 +109,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           bOk = true;
         }
         else {
-          m_state = State::NoOrder;
+          m_state = State::Available;
           std::cout
             << "MonitorOrder::PlaceOrder: "
             << m_pPosition->GetInstrument()->GetInstrumentName() << " failed to construct order"
@@ -157,7 +157,7 @@ void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Orde
     case State::Active:
       m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
       break;
-    case State::NoOrder:
+    case State::Available:
     case State::Cancelled:
     case State::Filled:
     case State::NoPosition:
@@ -173,10 +173,10 @@ void MonitorOrder::Tick( ptime dt ) {
     case State::Cancelled:
     case State::Filled:
       //m_pOrder.reset();
-      m_state = State::NoOrder;
+      m_state = State::Available;
       // TODO: clear position?
       break;
-    case State::NoOrder:
+    case State::Available:
     case State::NoPosition:
       break;
   }
@@ -190,7 +190,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
     // TODO: generate message? error on filled, but may be present on cancel
   }
   else {
-    assert( 0 < m_CountDownToAdjustment );
+    assert( 0 < m_CountDownToAdjustment ); // TODO: used the GTD Limit order to automate the count down
     m_CountDownToAdjustment--;
     bool bUpdateOrder( false );
     if ( 0 == m_CountDownToAdjustment ) {
@@ -200,6 +200,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
       switch ( m_pOrder->GetOrderSide() ) {
         case ou::tf::OrderSide::Buy:
           {
+            // TODO: need to use the EnsableStatsAdd to run this code only with decent spread
             // TODO: maximum number of increments? aka don't chase too far?
             // TODO: check that bid is non-zero
             //const double normalizedBid = NormalizePrice( quote.Bid() );

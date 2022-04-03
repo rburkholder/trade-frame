@@ -56,7 +56,14 @@ private:
 
   using pOrder_t = Order::pOrder_t;
 
-  enum class State { NoPosition, NoOrder, Active, Filled, Cancelled };
+  enum class State {
+    NoPosition, // virgin state
+    Available, // has position, no order created yet
+    Active, // exchange based cancel for GTD orders
+    ManualCancel, // no order resubmit
+    Filled,  // provides state machine step to restart
+    Cancelled // provides state machine step to restart
+    };
   State m_state;
   size_t m_CountDownToAdjustment;
   pPosition_t m_pPosition;
