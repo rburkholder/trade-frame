@@ -58,6 +58,7 @@ void IQFeedSymbol::HandleFundamentalMessage(
   fundamentals.sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
   fundamentals.sExchange = fLookupListedMarket( pMsg->Field( IQFFundamentalMessage::fExchangeID ) );
   fundamentals.nPrecision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
+  fundamentals.nFormatCode = pMsg->Integer( IQFFundamentalMessage::FFormatCode );
   fundamentals.nContractSize = pMsg->Integer( IQFFundamentalMessage::FContractSize );
   fundamentals.nAverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
   fundamentals.eSecurityType = fLookupSecurityType( pMsg->Integer( IQFFundamentalMessage::FSecurityType ) );
@@ -70,6 +71,7 @@ void IQFeedSymbol::HandleFundamentalMessage(
   fundamentals.dblDividendRate = pMsg->Double( IQFFundamentalMessage::FDivRate );
   fundamentals.dblDividendYield = pMsg->Double( IQFFundamentalMessage::FDivYld );
   fundamentals.dblTickSize = pMsg->Double( IQFFundamentalMessage::FMinimumTickSize );
+  fundamentals.datePayed = pMsg->Date( IQFFundamentalMessage::FDivPayDate );
   fundamentals.dateExDividend = pMsg->Date( IQFFundamentalMessage::FDivExDate );
   fundamentals.dateExpiration = pMsg->Date( IQFFundamentalMessage::FExpirationDate );
   fundamentals.timeSessionOpen = pMsg->Time( IQFFundamentalMessage::FSessionOpenTime );

@@ -79,6 +79,7 @@ void Process::Lookup() {
         dividend.yield = fundamentals.dblDividendYield;
         dividend.amount = fundamentals.dblDividendAmount;
         dividend.nAverageVolume = fundamentals.nAverageVolume;
+        dividend.datePayed = fundamentals.datePayed;
         dividend.dateExDividend = fundamentals.dateExDividend;
         //if ( 10.0 < fundamentals.dblDividendYield ) {
         //  std::cout

@@ -42,6 +42,7 @@ public:
     double rate;
     double amount;
     int nAverageVolume;
+    boost::gregorian::date datePayed;
     boost::gregorian::date dateExDividend;
     dividend_t( const std::string& sSymbol_ )
     : sSymbol( sSymbol_ ), yield {}, rate {} {}

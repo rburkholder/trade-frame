@@ -63,6 +63,11 @@ int main( int argc, char* argv[] ) {
   kwm.AddPattern( "LIBC", false );
   kwm.AddPattern( "SSDT", false );
   kwm.AddPattern( "BSCE", false );
+  kwm.AddPattern( "GLMGF", false );
+  kwm.AddPattern( "HUICF", false );
+  kwm.AddPattern( "RTWRF", false );
+  kwm.AddPattern( "SBEAU", false );
+  kwm.AddPattern( "PFH", false ); // this one works, bug somewhere?
 
   list.SelectSymbolsByExchange(
     vExchanges.begin(), vExchanges.end(),
@@ -82,7 +87,7 @@ int main( int argc, char* argv[] ) {
   process.Wait();
 
   std::cout
-    << "exchange,symbol,yield,rate,amount,vol(x1000),exdiv"
+    << "exchange,symbol,yield,rate,amount,vol,exdiv,payed"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
@@ -95,12 +100,15 @@ int main( int argc, char* argv[] ) {
         << "," << vt.amount
         << "," << vt.nAverageVolume
         << "," << vt.dateExDividend
+        << "," << vt.datePayed
         << std::endl;
     }
   }
 
   return 0;
 }
+
+// https://www.nasdaq.com/market-activity/funds-and-etfs/xxxx/dividend-history
 
 /*
 
