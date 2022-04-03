@@ -31,10 +31,6 @@
 #include <boost/spirit/include/qi.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-//#include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/spirit/include/phoenix_object.hpp>
-//#include <boost/spirit/include/phoenix_bind.hpp>
-//#include <boost/spirit/include/phoenix_container.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -110,15 +106,6 @@ BOOST_FUSION_ADAPT_STRUCT(
   (char, chOrderSide)
   (msg_delete_t::time_t, time)
   (msg_delete_t::date_t, date)
-  //(msg_t::time_t,time)
-  //(int32_t, hours)
-  //(int32_t, minutes)
-  //(int32_t, seconds)
-  //(int32_t, fractional)
-  //(msg_t::date_t,date)
-  //(int32_t, year)
-  //(int32_t, month)
-  //(int32_t, day)
   )
 
 namespace ou { // One Unified
@@ -174,14 +161,7 @@ namespace OrderDelete {
         >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
         >> -ruleString >> qi::lit( ',' ) // market maker for nasdaq LII
         >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
-        //>> ruleUint32 >> qi::lit( ':' ) // hours
-        //>> ruleUint32 >> qi::lit( ':' ) // minutes
-        //>> ruleUint32 >> qi::lit( '.' ) // seconds
-        //>> ruleUint32 >> qi::lit( ',' ) // fractional
         >> -ruleTime >> qi::lit( ',')
-        //>> ruleUint32 >> qi::lit( '-' ) // year
-        //>> ruleUint32 >> qi::lit( '-' ) // month
-        //>> ruleUint32 // day
         >> ruleDate
         >> qi::lit( ',' )
         ;
