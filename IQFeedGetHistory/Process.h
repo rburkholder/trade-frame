@@ -43,15 +43,15 @@ public:
     const std::string& sPrefixPath,
     size_t nDatums
   );
-  ~Process(void);
-  void Start( void );
+  ~Process();
+  void Start();
 
 protected:
 
   // CRTP from HistoryBulkQuery<CProcess>
   void OnBars( inherited_t::structResultBar* bars );
   void OnTicks( inherited_t::structResultTicks* ticks );
-  void OnCompletion( void );
+  void OnCompletion();
 
   void OnBarsForDarvas( inherited_t::structResultBar* bars );
 

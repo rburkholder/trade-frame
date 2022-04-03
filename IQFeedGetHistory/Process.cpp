@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <algorithm>
 
 #include <boost/foreach.hpp>
@@ -53,10 +51,10 @@ Process::Process(
   //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
 }
 
-Process::~Process(void) {
+Process::~Process() {
 }
 
-void Process::Start( void ) {
+void Process::Start() {
 
   //ou::tf::iqfeed::InMemoryMktSymbolList list;
 
@@ -156,7 +154,7 @@ void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
   ReQueueTicks( ticks );
 }
 
-void Process::OnCompletion( void ) {
+void Process::OnCompletion() {
   std::cout << "Downloads complete." << std::endl;
 }
 
