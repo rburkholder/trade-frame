@@ -82,7 +82,7 @@ int main( int argc, char* argv[] ) {
   process.Wait();
 
   std::cout
-    << "exchange,symbol,yield,rate,amount,volume,exdiv"
+    << "exchange,symbol,yield,rate,amount,vol(x1000),exdiv"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
