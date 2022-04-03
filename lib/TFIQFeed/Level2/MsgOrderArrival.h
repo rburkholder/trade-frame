@@ -31,8 +31,6 @@
 #include <boost/spirit/include/qi.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/spirit/include/phoenix_bind.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -44,6 +42,25 @@ namespace OrderArrival {
 //using date_t = boost::gregorian::date;
 //using time_t = boost::posix_time::time_duration;
 
+struct time_t {
+  int32_t hours;
+  int32_t minutes;
+  int32_t seconds;
+  int32_t fractional;
+  time_t(): hours {}, minutes {}, seconds {}, fractional {} {}
+  time_t( int32_t hours_, int32_t minutes_, int32_t seconds_, int32_t fractional_ )
+  : hours( hours_ ), minutes( minutes_ ), seconds( seconds_ ), fractional( fractional_ ) {}
+};
+
+struct date_t {
+  int32_t year;
+  int32_t month;
+  int32_t day;
+  date_t(): year {}, month {}, day {} {}
+  date_t( int32_t year_, int32_t month_, int32_t day_ )
+  : year( year_ ), month( month_ ), day( day_ ) {}
+};
+
 struct decoded {
   char chMsgType;
   std::string sSymbolName;
@@ -54,15 +71,8 @@ struct decoded {
   uint32_t nQuantity;
   uint64_t nPriority;
   uint8_t nPrecision;
-  //time_t time;
-  int32_t hours;
-  int32_t minutes;
-  int32_t seconds;
-  int32_t fractional;
-  //date_t date;
-  int32_t year;
-  int32_t month;
-  int32_t day;
+  time_t time;
+  date_t date;
   decoded(): nOrderId {}, nPriority {} {}
 };
 
@@ -76,6 +86,21 @@ struct decoded {
 namespace arrival_msg_t = ou::tf::iqfeed::l2::msg::OrderArrival;
 
 BOOST_FUSION_ADAPT_STRUCT(
+  arrival_msg_t::time_t,
+  (int32_t, hours)
+  (int32_t, minutes)
+  (int32_t, seconds)
+  (int32_t, fractional)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  arrival_msg_t::date_t,
+  (int32_t, year)
+  (int32_t, month)
+  (int32_t, day)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
   arrival_msg_t::decoded,
   (char, chMsgType)
   (std::string, sSymbolName)
@@ -86,15 +111,8 @@ BOOST_FUSION_ADAPT_STRUCT(
   (uint32_t, nQuantity)
   (uint64_t, nPriority)
   (uint8_t, nPrecision)
-  //(msg_t::time_t,time)
-  (int32_t, hours)
-  (int32_t, minutes)
-  (int32_t, seconds)
-  (int32_t, fractional)
-  //(msg_t::date_t,date)
-  (int32_t, year)
-  (int32_t, month)
-  (int32_t, day)
+  (arrival_msg_t::time_t, time)
+  (arrival_msg_t::date_t, date)
   )
 
 namespace ou { // One Unified
@@ -130,38 +148,24 @@ namespace OrderArrival {
         ;
 
       rulePrice %= qi::double_;
-/*
+
       ruleTime %=
         (
-           qi::long_ >> qi::lit( ':' ) // HH
-        >> qi::long_ >> qi::lit( ':' ) // mm
-        >> qi::long_ >> qi::lit( '.' ) // ss
-        >> qi::long_                  // fractional
+          ruleUint32 > qi::lit( ':' ) // HH
+        > ruleUint32 > qi::lit( ':' ) // mm
+        > ruleUint32 > qi::lit( '.' ) // ss
+        > ruleUint32                  // fractional
         )
-        // NOTE: unable to make this assignment work, even with:
-        [ qi::_val = time_t( qi::_1, qi::_2, qi::_3, qi::_4 ) ]
         ;
 
       ruleDate %=
-           qi::long_ >> qi::lit( '-' ) // year
-        >> qi::long_ >> qi::lit( '-' ) // month
-        >> qi::long_                  // day
+        (
+          ruleUint32 > qi::lit( '-' ) // year
+        > ruleUint32 > qi::lit( '-' ) // month
+        > ruleUint32                  // day
+        )
         ;
 
-      start0 %=
-           ruleMsgType > qi::lit( ',' ) // cMsgType
-        >> ruleString > qi::lit( ',' ) // sSymbolName
-        >> ruleUint64 > qi::lit( ',' ) // nOrderId
-        >> ruleString > qi::lit( ',' ) // sMarketMaker
-        >> ruleOrderSide > qi::lit( ',' ) // ruleOrderSide
-        >> rulePrice > qi::lit( ',' ) // dblPrice
-        >> ruleUint32 > qi::lit( ',' ) // nQuantity
-        >> ruleUint64 > qi::lit( ',' ) // nPriority
-        >> ruleUint8 > qi::lit( ',' ) // nPrecision
-        >> ruleTime > qi::lit( ',' ) // time
-        >> ruleDate > qi::lit( ',' ) // date
-        ;
-*/
       start %=
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
@@ -172,13 +176,9 @@ namespace OrderArrival {
         >> ruleUint32 >> qi::lit( ',' ) // nQuantity
         >> -ruleUint64 >> qi::lit( ',' ) // nPriority
         >> ruleUint8 >> qi::lit( ',' ) // nPrecision
-        >> ruleUint32 >> qi::lit( ':' ) // hours
-        >> ruleUint32 >> qi::lit( ':' ) // minutes
-        >> ruleUint32 >> qi::lit( '.' ) // seconds
-        >> ruleUint32 >> qi::lit( ',' ) // fractional
-        >> ruleUint32 >> qi::lit( '-' ) // year
-        >> ruleUint32 >> qi::lit( '-' ) // month
-        >> ruleUint32 >> qi::lit( ',' ) // day
+        >> -ruleTime >> qi::lit( ',')
+        >> ruleDate
+        >> qi::lit( ',' )
         ;
 
     }
@@ -190,10 +190,9 @@ namespace OrderArrival {
     qi::rule<Iterator, uint64_t()> ruleUint64;
     qi::rule<Iterator, double()> rulePrice;
     qi::rule<Iterator, std::string()> ruleString;
-    //qi::rule<Iterator, time_t()> ruleTime;
-    //qi::rule<Iterator, date_t()> ruleDate;
+    qi::rule<Iterator, time_t()> ruleTime;
+    qi::rule<Iterator, date_t()> ruleDate;
 
-    //qi::rule<Iterator, msg_t::decoded()> start0;
     qi::rule<Iterator, decoded()> start;
 
   };
@@ -203,6 +202,7 @@ namespace OrderArrival {
 
     static parser_decoded<T> parser;
 
+    // nasdaq l2: '6,QQQ,,AMEX,A,408.8400,100,,4,17:52:38.059128,2022-04-01,'
     bool bOk = parse( begin, end, parser, out );
 
     return bOk;
