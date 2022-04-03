@@ -64,7 +64,9 @@ private:
     Filled,  // provides state machine step to restart
     Cancelled // provides state machine step to restart
     };
+
   State m_state;
+  bool m_bEnableStatsAdd;
   size_t m_CountDownToAdjustment;
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;
@@ -73,6 +75,8 @@ private:
   double NormalizePrice( double price ) const;
 
   void UpdateOrder( ptime dt );
+
+  void EnableStatsRemove();
 
   void OrderCancelled( const ou::tf::Order& order );
   void OrderFilled( const ou::tf::Order& order );

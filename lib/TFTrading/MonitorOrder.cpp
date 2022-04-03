@@ -19,7 +19,7 @@
  * Created on May 25, 2019, 1:44 PM
  */
 
- #include <TFInteractiveBrokers/IBTWS.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 
 #include "MonitorOrder.h"
 
@@ -32,11 +32,13 @@ namespace {
 
 MonitorOrder::MonitorOrder()
 : m_state( State::NoPosition )
+, m_bEnableStatsAdd( false )
 , m_CountDownToAdjustment {}
 {}
 
 MonitorOrder::MonitorOrder( pPosition_t& pPosition )
-:m_CountDownToAdjustment {}
+: m_bEnableStatsAdd( false )
+, m_CountDownToAdjustment {}
 {
   SetPosition( pPosition );
 }
@@ -61,10 +63,20 @@ MonitorOrder& MonitorOrder::operator=( const MonitorOrder&& rhs ) {
   return *this;
 }
 
+void MonitorOrder::EnableStatsRemove() {
+  if ( m_bEnableStatsAdd ) {
+    ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
+    pWatch->EnableStatsRemove();
+    m_bEnableStatsAdd = false;
+  }
+}
+
 void MonitorOrder::SetPosition( pPosition_t pPosition ) {
-  //assert( !m_pPosition );
   assert( !m_pOrder ); // no outstanding orders should exist
+  EnableStatsRemove();
   m_pPosition = pPosition;
+  ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
+  pWatch->EnableStatsAdd();
   m_state = State::Available;
 }
 
@@ -155,12 +167,23 @@ void MonitorOrder::ClosePosition() {
 void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Order out of UpdateOrder
   switch ( m_state ) {
     case State::Active:
+      assert ( m_pOrder );
+      m_state = State::ManualCancel;
       m_pPosition->CancelOrder( m_pOrder->GetOrderId() );
       break;
     case State::Available:
     case State::Cancelled:
     case State::Filled:
     case State::NoPosition:
+      break;
+    case State::ManualCancel:
+      if ( m_pOrder ) {
+        std::cout << "MonitorOrder::CancelOrder already issued a cancellation" << m_pOrder->GetOrderId()  << std::endl;
+      }
+      else {
+        std::cout << "MonitorOrder::CancelOrder: no order to cancel"  << std::endl;
+      }
+
       break;
   }
 }
@@ -173,11 +196,13 @@ void MonitorOrder::Tick( ptime dt ) {
     case State::Cancelled:
     case State::Filled:
       //m_pOrder.reset();
+      EnableStatsRemove();
       m_state = State::Available;
       // TODO: clear position?
       break;
     case State::Available:
     case State::NoPosition:
+    case State::ManualCancel:
       break;
   }
 }
@@ -271,16 +296,32 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
 
 void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
   //auto tod = order.GetDateTimeOrderFilled().time_of_day(); [not available in cancelled order]
+  // look at TWS::openOrder, ~ line 718 to evaluate order status
   switch ( m_state ) {
-    case State::Active:
+    case State::Active: // TODO: rework this for order resubmission for GTD, are there any cancellation codes from the exchange?
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
       std::cout
 //        << tod << " "
+        << "MOnitorOrder "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
-        << ": cancelled"
+        << ": exchange cancelled"
+        << std::endl;
+      m_pOrder.reset();
+      m_state = State::Cancelled;
+      break;
+    case State::ManualCancel:
+      assert( order.GetOrderId() == m_pOrder->GetOrderId() );
+      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+      std::cout
+//        << tod << " "
+        << "MOnitorOrder "
+        << order.GetOrderId() << " "
+        << order.GetInstrument()->GetInstrumentName()
+        << ": manual cancellation complete"
         << std::endl;
       m_pOrder.reset();
       m_state = State::Cancelled;
@@ -288,6 +329,7 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
     default:
       std::cout
 //        << tod << " "
+        << "MOnitorOrder "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": cancelled has no matching state (" << (int)m_state << ")"
