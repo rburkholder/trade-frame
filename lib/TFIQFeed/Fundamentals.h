@@ -37,7 +37,7 @@ struct Fundamentals {
   std::string sExchange;
   int nPrecision;
   int nContractSize;
-  int nAverageVolume;
+  int nAverageVolume; // multiply by 1000
   int nOpenInterest; // from Update message, not set currently
   ESecurityType eSecurityType;
   ou::tf::OptionSide::EOptionSide eOptionSide;
@@ -46,10 +46,11 @@ struct Fundamentals {
   double dblPriceEarnings;
   double dbl52WkHi;
   double dbl52WkLo;
-  double dblDividendAmount;
-  double dblDividendRate;
-  double dblDividendYield;
+  double dblDividendAmount; // current actual dividend
+  double dblDividendRate; // annualized amount of actual dividend
+  double dblDividendYield; // annual dividends / current market price
   double dblTickSize;
+  boost::gregorian::date datePayed; // last dividend pay date (to be implemented)
   boost::gregorian::date dateExDividend;
   boost::gregorian::date dateExpiration;
   boost::posix_time::time_duration timeSessionOpen; // futures, futures options
