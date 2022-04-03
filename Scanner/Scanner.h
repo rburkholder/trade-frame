@@ -18,10 +18,12 @@
 
 #include <thread>
 
-#include <TFBitsNPieces/FrameWork01.h>
+#include <wx/app.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+
+#include <TFBitsNPieces/FrameWork01.h>
 
 class AppScanner:
   public wxApp, public ou::tf::FrameWork01<AppScanner> {
@@ -60,8 +62,8 @@ private:
     {};
   };
 
-  void HandleMenuActionScan( void );
-  void ScanBars( void );
+  void HandleMenuActionScan();
+  void ScanBars();
   bool HandleCallBackUseGroup( s_t&, const std::string& sPath, const std::string& sGroup );
   bool HandleCallBackFilter( s_t&, const std::string& sObject, const ou::tf::Bars& bars );
   void HandleCallBackResults( s_t&, const std::string& sPath, const std::string& sObject, const ou::tf::Bars& bars );

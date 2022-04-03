@@ -14,12 +14,13 @@
 
 // dates around line 30 need to be adjusted for date of last daily bar
 
-#include "stdafx.h"
+#include <wx/sizer.h>
 
 #include <TFTimeSeries/TimeSeries.h>
-#include <TFBitsNPieces/InstrumentFilter.h>
 
 #include <TFStatistics/Pivot.h>
+
+#include <TFBitsNPieces/InstrumentFilter.h>
 
 #include "Scanner.h"
 
@@ -27,6 +28,7 @@ IMPLEMENT_APP(AppScanner)
 
 bool AppScanner::OnInit() {
 
+  // TOOD: convert to configuration file
   m_dtEnd   = ptime( date( 2019, 3, 22 ), time_duration( 23, 59, 59 ) );
   m_dtBegin = m_dtEnd - days( 50 );
 
@@ -141,7 +143,7 @@ void AppScanner::HandleCallBackResults( s_t& data, const std::string& sPath, con
     << std::endl;
 }
 
-void AppScanner::ScanBars( void ) {
+void AppScanner::ScanBars() {
   namespace ph = std::placeholders;
   m_nMinBarCount = 20;  // tie this approx to the date range below
   s_t s;
@@ -160,7 +162,7 @@ void AppScanner::ScanBars( void ) {
   std::cout << "Scan Complete" << std::endl;
 }
 
-void AppScanner::HandleMenuActionScan( void ) {
+void AppScanner::HandleMenuActionScan() {
   CallAfter( [this](){
     if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
     m_worker = std::thread( &AppScanner::ScanBars, this );
