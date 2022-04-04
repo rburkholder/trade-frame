@@ -725,24 +725,24 @@ void TWS::openOrder( ::OrderId orderId, const ::Contract& contract, const ::Orde
     // use spirit to do this to make it faster with a trie, or use keyword match
     DecodeStatusWord::EStatus status = dsw.Match( state.status );
     switch ( status ) {
-    case DecodeStatusWord::Submitted:
-      break;
-    case DecodeStatusWord::Filled:
-      break;
-    case DecodeStatusWord::Cancelled:
-      OrderManager::Instance().ReportCancellation( order.orderId );
-      break;
-    case DecodeStatusWord::Inactive:
-      break;
-    case DecodeStatusWord::PreSubmitted:
-      break;
-    case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours, or due to something similar as described in next comment
-      break;
-    case DecodeStatusWord::PendingCancel:  // pendingsubmit, pendingcancel happened for order to short, but IB didn't have anything to loan for shorting
-      break;
-    case DecodeStatusWord::Unknown:
-      assert( false );
-      break;
+      case DecodeStatusWord::Submitted:
+        break;
+      case DecodeStatusWord::Filled:
+        break;
+      case DecodeStatusWord::Cancelled:
+        OrderManager::Instance().ReportCancellation( order.orderId );
+        break;
+      case DecodeStatusWord::Inactive:
+        break;
+      case DecodeStatusWord::PreSubmitted:
+        break;
+      case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours, or due to something similar as described in next comment
+        break;
+      case DecodeStatusWord::PendingCancel:  // pendingsubmit, pendingcancel happened for order to short, but IB didn't have anything to loan for shorting
+        break;
+      case DecodeStatusWord::Unknown:
+        assert( false );
+        break;
     }
   }
   if ( state.warningText != "" ) {
