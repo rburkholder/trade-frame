@@ -41,10 +41,11 @@ class TFile;
 class TTree;
 class TClass;
 
-class TreeItem;
-
 namespace ou {
   class ChartDataView;
+namespace tf {
+  class TreeItem;
+}
 }
 
 class Strategy:
@@ -54,6 +55,7 @@ class Strategy:
   friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
+  using TreeItem = ou::tf::TreeItem;
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pFile_t = std::shared_ptr<TFile>;

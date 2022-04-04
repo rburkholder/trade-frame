@@ -30,6 +30,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+  class TreeItem;
   struct PanelOrderButtons_Order;
 } // namespace tf
 } // namespace ou
@@ -38,6 +39,8 @@ class TreeItem;
 
 class TradeLifeTime {
 public:
+
+  using TreeItem = ou::tf::TreeItem;
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 

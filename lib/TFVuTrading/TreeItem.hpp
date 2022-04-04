@@ -15,7 +15,7 @@
 /*
  * File:    Item.hpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: TFVuTrading
  * Created: March 31, 2022 09:50
  */
 
@@ -28,6 +28,9 @@
 
 class wxMenu;
 class wxTreeCtrl;
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class TreeItem {
 public:
@@ -71,3 +74,6 @@ private:
   void HandleTreeEventItemMenu();
 
 };
+
+} // namespace tf
+} // namespace ou

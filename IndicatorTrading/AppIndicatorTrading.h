@@ -39,12 +39,12 @@ class wxBoxSizer;
 class wxTreeCtrl;
 class wxTreeEvent;
 
-class TreeItem;
 class FrameMain;
 class InteractiveChart;
 
 namespace ou {
 namespace tf {
+  class TreeItem;
   class PanelLogging;
   class FrameControls;
   class BuildInstrument;
@@ -65,6 +65,7 @@ public:
 protected:
 private:
 
+  using TreeItem = ou::tf::TreeItem;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;

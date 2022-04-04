@@ -15,7 +15,7 @@
 /*
  * File:    Item.cpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: TFVuTrading
  * Created: March 31, 2022 09:50
  */
 
@@ -23,6 +23,9 @@
 #include <wx/treectrl.h>
 
 #include "TreeItem.hpp"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // ================================
 
@@ -165,3 +168,5 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
 
 }
 
+} // namespace tf
+} // namespace ou

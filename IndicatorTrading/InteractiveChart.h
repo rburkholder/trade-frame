@@ -53,6 +53,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+  class TreeItem;
 namespace iqfeed { // IQFeed
   class OptionChainQuery;
 } // namespace iqfeed
@@ -68,7 +69,6 @@ namespace config {
   class Options;
 }
 
-class TreeItem;
 class OptionTracker;
 class TradeLifeTime;
 
@@ -76,6 +76,8 @@ class InteractiveChart:
   public ou::tf::WinChartView
 {
 public:
+
+  using TreeItem = ou::tf::TreeItem;
 
   using idOrder_t = ou::tf::Order::idOrder_t;
 

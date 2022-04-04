@@ -42,7 +42,6 @@
 class TRint;
 class TFile;
 
-class TreeItem;
 class Strategy;
 class FrameMain;
 
@@ -53,6 +52,7 @@ class wxSplitterWindow;
 
 namespace ou {
 namespace tf {
+  class TreeItem;
   class PanelLogging;
   class WinChartView;
   class BuildInstrument;
@@ -69,6 +69,7 @@ public:
 protected:
 private:
 
+  using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   FrameMain* m_pFrameMain;
