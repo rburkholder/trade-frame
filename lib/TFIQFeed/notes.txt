@@ -1,0 +1,6 @@
+2022/03/28 IQFeed Email list:
+
+The IEOPTION.zip and EQUITY.zip files (lists of past symbols) will now be located at:
+
+www.iqfeed.net/downloads/beta/IEOPTION.zip
+www.iqfeed.net/downloads/beta/EQUITY.zip
