@@ -130,6 +130,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   InitRdaf();
 
+  pWatch->RecordSeries( false );
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
 
@@ -497,6 +498,7 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
+  // RecordSeries has been set to false
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
 }
 

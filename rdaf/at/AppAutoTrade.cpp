@@ -285,7 +285,9 @@ bool AppAutoTrade::OnInit() {
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
-  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  // disable for now, due to memory consumption, timeseries recording is being turned off.
+  // all can be re-enalbed if saving times series is useful and is used to populate the simulator
+  //vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
