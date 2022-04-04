@@ -1,5 +1,7 @@
 ## AutoTrade
 
+NOTE: turn off the feeds prior to exit.  This prevents updating the structures during save and exit.
+
 This sample project is composed of current best practicies for building an
 automated trading application.  Some of the features and functions represented:
 
