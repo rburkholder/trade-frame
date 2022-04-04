@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "RowElements.hpp"
+#include "WinRow.hpp"
 #include "DataRowElement.hpp"
 
 namespace ou { // One Unified
@@ -34,7 +34,7 @@ public:
   DataRow( int ix, double price );
   ~DataRow();
 
-  void SetRowElements( RowElements& );
+  void SetRowElements( WinRow& );
   void Refresh();
   void DelRowElements();
 
@@ -47,10 +47,10 @@ private:
   bool m_bChanged;
 
   // TODO: boost::fusion?  std::tuple?
-  DataRowElement<double>         m_dreAcctPl;
-  DataRowElement<unsigned int>   m_dreBidVolume;
+  //DataRowElement<double>         m_dreAcctPl;
+  DataRowElement<unsigned int>   m_dreBidSize;
   DataRowElement<double>         m_drePrice;
-  DataRowElement<unsigned int>   m_dreAskVolume;
+  DataRowElement<unsigned int>   m_dreAskSize;
   DataRowElement<unsigned int>   m_dreTicks;
   DataRowElement<unsigned int>   m_dreVolume;
   DataRowElementIndicatorStatic  m_dreIndicatorStatic;

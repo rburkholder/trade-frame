@@ -109,23 +109,23 @@ void PanelTrade::DrawRows() {
 
       int yOffset = BorderWidth; // start offset with border
 
-      int ixRowElements = 0;
-      m_vRowElements.resize( m_nRowCount );
+      int ixWinRow = 0;
+      m_vWinRow.resize( m_nRowCount );
 
       if ( 1 < m_nRowCount ) {
 
         // should this go into the vector?
-        m_pRowElements_Header.reset();
-        m_pRowElements_Header = std::make_shared<RowElements>( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+        m_pWinRow_Header.reset();
+        m_pWinRow_Header = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
         //m_vRowElements[ ixRowElements ] = pRow;
         yOffset += RowHeight;
         //ixRowElements++;
 
-        while ( ixRowElements < m_nRowCount ) {
-          pRowElements_t pRow = std::make_shared<RowElements>( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
-          m_vRowElements[ ixRowElements ] = pRow;
+        while ( ixWinRow < m_nRowCount ) {
+          pWinRow_t pWinRow = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+          m_vWinRow[ ixWinRow ] = pWinRow;
           yOffset += RowHeight;
-          ixRowElements++;
+          ixWinRow++;
         }
 
       }
@@ -142,8 +142,8 @@ void PanelTrade::OnResize( wxSizeEvent& event ) {
   CallAfter(
     [this](){
       if ( 0 != m_nRowCount ) {
-        m_pRowElements_Header.reset();
-        m_vRowElements.clear();
+        m_pWinRow_Header.reset();
+        m_vWinRow.clear();
         m_nRowCount = 0;
       }
       DrawRows();
@@ -152,8 +152,8 @@ void PanelTrade::OnResize( wxSizeEvent& event ) {
 }
 
 void PanelTrade::OnResizing( wxSizeEvent& event ) {
-  m_pRowElements_Header.reset();
-  m_vRowElements.clear();
+  m_pWinRow_Header.reset();
+  m_vWinRow.clear();
   m_nRowCount = 0;
   event.Skip(); // required when working with sizers
 }
@@ -162,8 +162,8 @@ void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
 
   if ( event.GetId() == GetId() ) {
 
-    m_pRowElements_Header.reset();
-    m_vRowElements.clear();
+    m_pWinRow_Header.reset();
+    m_vWinRow.clear();
 
     //Unbind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
 

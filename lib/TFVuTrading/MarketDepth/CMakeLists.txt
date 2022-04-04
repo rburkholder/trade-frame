@@ -10,13 +10,12 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
-    DataRowElement.h
-    DataRow.h
-    DataRows.h
-    PanelTrade.h
-    RowElements.h
-    WinRow.hpp
+    DataRowElement.hpp
+    DataRow.hpp
+    DataRows.hpp
+    PanelTrade.hpp
     WinRowElement.hpp
+    WinRow.hpp
   )
 
 set(
@@ -25,9 +24,8 @@ set(
     DataRow.cpp
     DataRows.cpp
     PanelTrade.cpp
-    RowElements.cpp
-    WinRow.cpp
     WinRowElement.cpp
+    WinRow.cpp
   )
 
 add_library(

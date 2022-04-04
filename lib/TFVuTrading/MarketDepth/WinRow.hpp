@@ -21,11 +21,8 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
-
-#include <OUCommon/Colour.h>
-
-#include "WinRowElement.hpp"
 
 class wxPoint;
 class wxWindow;
@@ -34,13 +31,18 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
+class WinRowElement;
+
 class WinRow {
 public:
 
-  WinRow();
+  WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
   ~WinRow();
 
-  void Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
+  using pWinRow_t = std::shared_ptr<WinRow>;
+  static pWinRow_t Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
+
+  enum class EField: int { BidSize, Price, AskSize, Ticks, Volume, Static, Dynamic };
 
   void HighlightBid( bool );
   void HighlightAsk( bool );
@@ -48,25 +50,16 @@ public:
 
   static int RowWidth();
 
+  WinRowElement* operator[]( EField );
+
 protected:
 private:
-
-  WinRowElement m_wreAcctPL;
-  WinRowElement m_wreBidQuantity;
-  WinRowElement m_wrePrice;
-  WinRowElement m_wreAskQuantity;
-  WinRowElement m_wreTicks;
-  WinRowElement m_wreVolume;
-  WinRowElement m_wreBuyVolume;
-  WinRowElement m_wreSellVolume;
-  WinRowElement m_wreStatic;
-  WinRowElement m_wreDynamic;
 
   using vWinRowElement_t = std::vector<WinRowElement*>;
   vWinRowElement_t m_vWinRowElement;
 
-  void ConstructElement( wxWindow* parent, WinRowElement&, bool bIsHeader, const wxPoint&, const wxSize& );
 
+  void Clear();
 };
 
 } // market depth

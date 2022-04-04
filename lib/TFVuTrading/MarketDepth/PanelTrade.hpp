@@ -25,7 +25,7 @@
 
 #include <wx/window.h>
 
-#include "RowElements.hpp"
+#include "WinRow.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -65,17 +65,17 @@ private:
     ID_Null=wxID_HIGHEST, ID_PANELTRADE
   };
 
-  using pRowElements_t = RowElements::pRowElements_t;
+  using pWinRow_t = WinRow::pWinRow_t;
 
   unsigned int m_nRowCount; // use m_vRowElements.size() instead?
   unsigned int m_nVisibleRows;
   unsigned int m_nFramedRows;
   unsigned int m_nCenteredRows;
 
-  pRowElements_t m_pRowElements_Header;
+  pWinRow_t m_pWinRow_Header;
 
-  using vRowElements_t = std::vector<pRowElements_t>;
-  vRowElements_t m_vRowElements;
+  using vWinRow_t = std::vector<pWinRow_t>;
+  vWinRow_t m_vWinRow;
 
   void Init();
   void CreateControls();
