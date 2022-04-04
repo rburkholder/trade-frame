@@ -361,7 +361,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       else {
         //now find projection of h1 from the beginning till now:
-        auto h1_x = m_pHistVolume->ProjectionX( "_x", 1, bin_y );
+        auto h1_x = m_pHistVolume->ProjectionX( ( m_config.sSymbol + "_px" ).c_str(), 1, bin_y );
         double skew_ = h1_x->GetSkewness( 1 );
 
         switch ( fpclassify( skew_ ) ) {
