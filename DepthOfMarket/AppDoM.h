@@ -33,7 +33,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
-#include <TFVuTrading/MarketDepth/PanelTrade.h>
+#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "DoMDispatch.h"
 

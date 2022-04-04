@@ -13,42 +13,52 @@
  ************************************************************************/
 
 /*
- * File:    DataRows.cpp
+ * File:    DataRow.h
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: November 11, 2021 16:46
+ * Created: November 11, 2021 09:08
  */
 
-#include "DataRows.hpp"
+#pragma once
+
+#include "RowElements.hpp"
+#include "DataRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-DataRows::DataRows( double interval )
-: m_interval( interval ),
-  m_intervalby2( interval / 2.0 )
-{
-  assert( 0 != interval );
-}
+class DataRow {
+public:
 
-DataRows::~DataRows() {
-}
+  DataRow( int ix, double price );
+  ~DataRow();
 
-int DataRows::Cast( double price ) {
-  return std::floor( ( price + m_intervalby2 ) / m_interval );
-}
+  void SetRowElements( RowElements& );
+  void Refresh();
+  void DelRowElements();
 
-DataRow& DataRows::operator[]( double price ) {
-  int ix = Cast( price );
-  mapRow_t::iterator iter = m_mapRow.find( ix );
-  if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, price ) ) );
-    assert( pair.second );
-    iter = pair.first;
-  }
-  return iter->second;
-}
+protected:
+private:
+
+  int m_ix;
+  double m_price;
+
+  bool m_bChanged;
+
+  // TODO: boost::fusion?  std::tuple?
+  DataRowElement<double>         m_dreAcctPl;
+  DataRowElement<unsigned int>   m_dreBidVolume;
+  DataRowElement<double>         m_drePrice;
+  DataRowElement<unsigned int>   m_dreAskVolume;
+  DataRowElement<unsigned int>   m_dreTicks;
+  DataRowElement<unsigned int>   m_dreVolume;
+  DataRowElementIndicatorStatic  m_dreIndicatorStatic;
+  DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
+
+  //RowElements* m_pRowElements;  // shared_ptr ?
+
+};
 
 } // market depth
 } // namespace tf

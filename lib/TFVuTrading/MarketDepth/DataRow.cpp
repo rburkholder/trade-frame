@@ -21,7 +21,7 @@
 
  #include <string>
 
-#include "DataRow.h"
+#include "DataRow.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -100,3 +100,23 @@ void DataRow::DelRowElements() {
 } // market depth
 } // namespace tf
 } // namespace ou
+
+/*
+  "Acct1 P/L",
+  "Acct2 P/L",
+  "Acct P/L",
+  "Bid Pend 1",
+  "Bid Pend 2",
+  "Bid Pend",
+  "Bid",
+  "Price",
+  "Ask",
+  "Ask Pend 1",
+  "Ask Pend 2",
+  "Ask Pend",
+  "Ticks",
+  "Volume",
+  "Histogram",
+  "Static Ind",
+  "Dynamic Ind"
+*/

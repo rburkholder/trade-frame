@@ -15,7 +15,8 @@ set(
     DataRows.h
     PanelTrade.h
     RowElements.h
-    WinRowElement.h
+    WinRow.hpp
+    WinRowElement.hpp
   )
 
 set(
@@ -25,6 +26,7 @@ set(
     DataRows.cpp
     PanelTrade.cpp
     RowElements.cpp
+    WinRow.cpp
     WinRowElement.cpp
   )
 

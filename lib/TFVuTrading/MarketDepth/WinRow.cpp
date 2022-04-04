@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2021, One Unified. All rights reserved.                 *
+ * Copyright(c) 2022, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -13,41 +13,41 @@
  ************************************************************************/
 
 /*
- * File:    DataRows.cpp
+ * File:    WinRow.cpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: November 11, 2021 16:46
+ * Created on April 4, 2022  12:14
  */
 
-#include "DataRows.hpp"
+ #include "WinRow.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-DataRows::DataRows( double interval )
-: m_interval( interval ),
-  m_intervalby2( interval / 2.0 )
-{
-  assert( 0 != interval );
+WinRow::WinRow() {
 }
 
-DataRows::~DataRows() {
+WinRow::~WinRow() {
 }
 
-int DataRows::Cast( double price ) {
-  return std::floor( ( price + m_intervalby2 ) / m_interval );
+void WinRow::Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader ) {
 }
 
-DataRow& DataRows::operator[]( double price ) {
-  int ix = Cast( price );
-  mapRow_t::iterator iter = m_mapRow.find( ix );
-  if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, price ) ) );
-    assert( pair.second );
-    iter = pair.first;
-  }
-  return iter->second;
+void WinRow::HighlightBid( bool ) {
+}
+
+void WinRow::HighlightAsk( bool ) {
+}
+
+void WinRow::HighlightPrice( bool ) {
+}
+
+int WinRow::RowWidth() {
+  return 0;
+}
+
+void WinRow::ConstructElement( wxWindow* parent, WinRowElement&, bool bIsHeader, const wxPoint&, const wxSize& ) {
 }
 
 } // market depth

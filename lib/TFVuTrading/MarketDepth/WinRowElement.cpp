@@ -23,7 +23,7 @@
 #include <wx/event.h>
 #include <wx/dcclient.h>
 
-#include "WinRowElement.h"
+#include "WinRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

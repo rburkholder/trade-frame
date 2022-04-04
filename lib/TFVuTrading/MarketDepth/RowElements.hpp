@@ -13,50 +13,47 @@
  ************************************************************************/
 
 /*
- * File:    DataRow.h
+ * File:    RowElements.h
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: November 11, 2021 09:08
+ * Created: November 9, 2021 16:53
  */
 
-#pragma once
+#include <vector>
+#include <memory>
 
-#include "RowElements.h"
-#include "DataRowElement.h"
+#include <wx/window.h>
+
+#include "WinRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-class DataRow {
+class RowElements {
 public:
 
-  DataRow( int ix, double price );
-  ~DataRow();
+  using pRowElements_t = std::shared_ptr<RowElements>;
 
-  void SetRowElements( RowElements& );
-  void Refresh();
-  void DelRowElements();
+  enum class Field { AcctPL = 0, BidVol, Price, AskVol, Ticks, Volume, Static, Dynamic };
+
+  RowElements( wxWindow* pParent, const wxPoint& origin, int nRowHeight, bool bIsHeader );
+  ~RowElements();
+
+  static int RowWidth();
+
+  WinRowElement* operator[]( Field );
 
 protected:
 private:
 
-  int m_ix;
-  double m_price;
+  wxWindow* m_pParentWindow;
 
-  bool m_bChanged;
+  using vElements_t = std::vector<WinRowElement*>;
+  vElements_t m_vElements;
 
-  // TODO: boost::fusion?  std::tuple?
-  DataRowElement<double>         m_dreAcctPl;
-  DataRowElement<unsigned int>   m_dreBidVolume;
-  DataRowElement<double>         m_drePrice;
-  DataRowElement<unsigned int>   m_dreAskVolume;
-  DataRowElement<unsigned int>   m_dreTicks;
-  DataRowElement<unsigned int>   m_dreVolume;
-  DataRowElementIndicatorStatic  m_dreIndicatorStatic;
-  DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
-
-  //RowElements* m_pRowElements;  // shared_ptr ?
+  void Clear();
+  void Create( const wxPoint& origin, int nRowHeight, bool bIsHeader );
 
 };
 

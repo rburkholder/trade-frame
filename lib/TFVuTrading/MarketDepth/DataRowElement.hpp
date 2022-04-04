@@ -26,7 +26,7 @@
 
 #include <boost/format.hpp>
 
-#include "WinRowElement.h"
+#include "WinRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

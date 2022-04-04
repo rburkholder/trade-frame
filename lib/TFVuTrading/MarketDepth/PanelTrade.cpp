@@ -22,7 +22,7 @@
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
 
-#include "PanelTrade.h"
+#include "PanelTrade.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
