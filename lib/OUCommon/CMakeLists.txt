@@ -19,7 +19,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost 1.69.0 COMPONENTS system REQUIRED)
+find_package(Boost 1.77.0 COMPONENTS system REQUIRED)
 
 set(
   file_h
