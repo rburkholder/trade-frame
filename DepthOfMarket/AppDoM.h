@@ -28,6 +28,8 @@
 
 #include <wx/app.h>
 
+#include <TFTrading/Watch.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFVuTrading/FrameMain.h>
@@ -36,6 +38,7 @@
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "DoMDispatch.h"
+#include "TFTimeSeries/DatedDatum.h"
 
 class AppDoM:
   public wxApp,
@@ -56,6 +59,8 @@ private:
 
   std::unique_ptr<DoMDispatch> m_pDispatch;  // one per symbol
 
+  ou::tf::Watch::pWatch_t m_pWatch;
+
   void EmitMarketMakerMaps();
 
   virtual bool OnInit();
@@ -65,6 +70,10 @@ private:
   void OnData1Connected( int );
   void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
+
+  void OnFundamentals( const ou::tf::Watch::Fundamentals& );
+  void OnQuote( const ou::tf::Quote& );
+  void OnTrade( const ou::tf::Trade& );
 
   void SaveState();
   void LoadState();

@@ -24,10 +24,7 @@
 
 #pragma once
 
-#include "wx/event.h"
 #include <wx/window.h>
-
-//#include <OUCommon/Colour.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

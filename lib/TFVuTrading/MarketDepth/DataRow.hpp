@@ -22,6 +22,7 @@
 #pragma once
 
 #include "WinRow.hpp"
+
 #include "DataRowElement.hpp"
 
 namespace ou { // One Unified
@@ -34,9 +35,24 @@ public:
   DataRow( int ix, double price );
   ~DataRow();
 
-  void SetRowElements( WinRow& );
+  void SetRow( WinRow& );
   void Refresh();
   void DelRowElements();
+
+  // doesn't work - cna't do partial specialization, try fusion?
+  //template<typename T>
+  //void Set(WinRow::EField field, T t ) {}
+  //template <> void Set<double>( WinRow::EField field, double value ) {
+  //  m_drePrice.Set( value );
+  //}
+
+  void SetPrice( double price ) { m_drePrice.Set( price ); }  // specialize in DataRowElement to do the highlight on and off
+
+  unsigned int GetTicks() const { return m_dreTicks.Get(); }
+  void SetTicks( unsigned int count ) { m_dreTicks.Set( count ); }
+
+  unsigned int GetVolume() const { return m_dreVolume.Get(); }
+  void SetVolume( unsigned int count ) { m_dreVolume.Set( count ); }
 
 protected:
 private:

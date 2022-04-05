@@ -117,9 +117,15 @@ bool AppDoM::OnInit() {
 //    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 //    m_pPanelLogging->Show( true );
 
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbolName );
+    m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+    m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
+    m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
+    m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
+
     m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
 
-    std::cout << "watching " << options.sSymbolName << std::endl;
+    std::cout << "watching L1/L2: " << options.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -133,6 +139,7 @@ bool AppDoM::OnInit() {
       [this](){
         // doesn't cooperate
         LoadState();
+        m_pFrameMain->Layout();
       }
     );
 
@@ -176,15 +183,36 @@ int AppDoM::OnExit() {
 
 void AppDoM::OnData1Connected( int ) {
   std::cout << "Depth of Market connected" << std::endl;
+  m_pWatch->StartWatch();
   m_pDispatch->Connect();
 }
 
 void AppDoM::OnData1Disconnecting( int ) {
   m_pDispatch->Disconnect();
+  m_pWatch->StopWatch();
 }
 
 void AppDoM::OnData1Disconnected( int ) {
   std::cout << "Depth of Market disconnected" << std::endl;
+}
+
+// TODO: there is an order interval, and there is a quote interval
+void AppDoM::OnFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->SetInterval( fundamentals.dblTickSize );
+  }
+}
+
+void AppDoM::OnQuote( const ou::tf::Quote& quote ) {
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->OnQuote( quote );
+  }
+}
+
+void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->OnTrade( trade );
+  }
 }
 
 void AppDoM::SaveState() {

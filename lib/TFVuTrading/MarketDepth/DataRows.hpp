@@ -32,10 +32,15 @@ namespace l2 { // market depth
 class DataRows {
 public:
 
+  DataRows();
   DataRows( double interval );
   ~DataRows();
 
+  void SetInterval( double );
+  int Cast( double price );
+
   DataRow& operator[]( double );
+  DataRow& operator[]( int );
 
 protected:
 private:
@@ -48,8 +53,6 @@ private:
   double m_intervalby2;
 
   mapRow_t m_mapRow;
-
-  int Cast( double price );
 
 };
 

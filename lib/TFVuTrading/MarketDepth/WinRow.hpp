@@ -58,7 +58,6 @@ private:
   using vWinRowElement_t = std::vector<WinRowElement*>;
   vWinRowElement_t m_vWinRowElement;
 
-
   void Clear();
 };
 

@@ -28,9 +28,9 @@ namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 namespace {
-  const std::string sFmtInteger( "%i%" );
-  const std::string sFmtPrice( "%0.2f%" );
-  const std::string sFmtString( "%s%" );
+  const std::string sFmtInteger( "%i" );
+  const std::string sFmtPrice( "%0.2f" );
+  const std::string sFmtString( "%s" );
 }
 
 DataRow::DataRow( int ix, double price )
@@ -54,7 +54,7 @@ DataRow::~DataRow() {
 // TODO: convert to;
 //   https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 
-void DataRow::SetRowElements( WinRow& wr ) {
+void DataRow::SetRow( WinRow& wr ) {
   //if ( nullptr != m_pRowElements ) {
     DelRowElements();
   //}
@@ -63,11 +63,11 @@ void DataRow::SetRowElements( WinRow& wr ) {
   using EField = WinRow::EField;
 
   //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
-  m_dreBidSize.SetWinRowElement( wr[ EField::BidSize ] );
-  m_drePrice.SetWinRowElement(     wr[ EField::Price ] );
-  m_dreAskSize.SetWinRowElement( wr[ EField::AskSize ] );
-  m_dreTicks.SetWinRowElement(     wr[ EField::Ticks ] );
-  m_dreVolume.SetWinRowElement(    wr[ EField::Volume ] );
+  m_dreBidSize.SetWinRowElement(     wr[ EField::BidSize ] );
+  m_drePrice.SetWinRowElement(       wr[ EField::Price ] );
+  m_dreAskSize.SetWinRowElement(     wr[ EField::AskSize ] );
+  m_dreTicks.SetWinRowElement(       wr[ EField::Ticks ] );
+  m_dreVolume.SetWinRowElement(      wr[ EField::Volume ] );
   m_dreIndicatorStatic.SetWinRowElement(  wr[ EField::Static ] );
   m_dreIndicatorDynamic.SetWinRowElement( wr[ EField::Dynamic ] );
 

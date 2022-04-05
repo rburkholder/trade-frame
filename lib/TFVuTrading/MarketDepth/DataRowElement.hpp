@@ -83,6 +83,11 @@ T DataRowElement<T>::Get() const {
 }
 
 template<typename T>
+void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
+  m_pWinRowElement = pwre;
+}
+
+template<typename T>
 void DataRowElement<T>::UpdateWinRowElement() {
   if ( 0 != m_value ) {
     m_format % m_value;

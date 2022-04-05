@@ -26,9 +26,14 @@
 #include <wx/window.h>
 
 #include "WinRow.hpp"
+#include "DataRows.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+  class Quote;
+  class Trade;
+
 namespace l2 { // market depth
 
 #define SYMBOL_PANELTRADE_STYLE wxTAB_TRAVERSAL
@@ -58,6 +63,10 @@ public:
    long style = SYMBOL_PANELTRADE_STYLE
    );
 
+  void SetInterval( double );
+  void OnQuote( const ou::tf::Quote& );
+  void OnTrade( const ou::tf::Trade& );
+
 protected:
 private:
 
@@ -67,27 +76,41 @@ private:
 
   using pWinRow_t = WinRow::pWinRow_t;
 
-  unsigned int m_nRowCount; // use m_vRowElements.size() instead?
-  unsigned int m_nVisibleRows;
   unsigned int m_nFramedRows;
   unsigned int m_nCenteredRows;
+
+  unsigned int m_cntTotalWinRows; // includes header row: TODO: verify all usage locations are correct
+  unsigned int m_cntWinRows; // without header row
+
+  int m_ixFirstVisibleRow;
+  int m_ixLastVisibleRow;
+
+  int m_ixHiRecenterFrame;
+  int m_ixLoRecenterFrame;
+
+  double m_dblLastPrice;
 
   pWinRow_t m_pWinRow_Header;
 
   using vWinRow_t = std::vector<pWinRow_t>;
   vWinRow_t m_vWinRow;
 
-  void Init();
-  void CreateControls();
-  bool ShowToolTips() { return true; };
+  DataRows m_DataRows;
+
+  void ReCenterVisible( int ix );
 
   void DrawRows();
+  void DeleteAllRows();
 
   void OnPaint( wxPaintEvent& );
 
   void OnResize( wxSizeEvent& );
   void OnResizing( wxSizeEvent& );
   void OnDestroy( wxWindowDestroyEvent& );
+
+  void Init();
+  void CreateControls();
+  bool ShowToolTips() { return true; };
 
 };
 

@@ -25,14 +25,22 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-DataRows::DataRows( double interval )
-: m_interval( interval ),
-  m_intervalby2( interval / 2.0 )
-{
-  assert( 0 != interval );
+DataRows::DataRows() {
+  SetInterval( 0.01 );
+}
+
+
+DataRows::DataRows( double interval ) {
+  SetInterval( interval );
 }
 
 DataRows::~DataRows() {
+}
+
+void DataRows::SetInterval( double interval ) {
+  assert( 0.0 < interval );
+  m_interval = ( interval ),
+  m_intervalby2 = interval / 2.0;
 }
 
 int DataRows::Cast( double price ) {
@@ -44,6 +52,16 @@ DataRow& DataRows::operator[]( double price ) {
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
     auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, price ) ) );
+    assert( pair.second );
+    iter = pair.first;
+  }
+  return iter->second;
+}
+
+DataRow& DataRows::operator[]( int ix ) {
+  mapRow_t::iterator iter = m_mapRow.find( ix );
+  if ( m_mapRow.end() == iter ) {
+    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, m_interval * ix  ) ) );
     assert( pair.second );
     iter = pair.first;
   }

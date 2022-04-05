@@ -22,6 +22,8 @@
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
 
+#include <TFTimeSeries/DatedDatum.h>
+
 #include "PanelTrade.hpp"
 
 namespace ou { // One Unified
@@ -51,10 +53,21 @@ PanelTrade::PanelTrade( /*wxWindow* parent, const wxString& title, const wxPoint
 PanelTrade::~PanelTrade() {}
 
 void PanelTrade::Init() {
-  m_nRowCount = 0;
-  m_nVisibleRows = 0;
+
   m_nFramedRows = 0;
   m_nCenteredRows = 0;
+
+
+  m_cntTotalWinRows = 0;
+  m_cntWinRows = 0;
+
+  m_ixFirstVisibleRow = 0; // first visible integerized price
+  m_ixLastVisibleRow = 0;  // last visible integerized price
+
+  m_ixHiRecenterFrame = 0;
+  m_ixLoRecenterFrame = 0;
+
+  m_dblLastPrice = 0.0;
 }
 
 bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
@@ -99,20 +112,20 @@ void PanelTrade::DrawRows() {
   if ( Height > BorderWidthTimes2 ) {
 
     //assert( 0 == m_nRowCount );
-    m_nRowCount = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
+    m_cntTotalWinRows = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
 
-    if ( 1 < m_nRowCount ) {
+    if ( 1 < m_cntTotalWinRows ) {
 
-      m_nVisibleRows = m_nRowCount - 1; // first row is header row
-      m_nFramedRows = m_nVisibleRows / FramedRows;
-      m_nCenteredRows = ( ( m_nVisibleRows - m_nFramedRows ) / 2 ) - 1; // eliminates up/down jitter
+      m_cntWinRows = m_cntTotalWinRows - 1; // first row is header row
+      m_nFramedRows = m_cntWinRows / FramedRows;
+      m_nCenteredRows = ( ( m_cntWinRows - m_nFramedRows ) / 2 ) - 1; // eliminates up/down jitter
 
       int yOffset = BorderWidth; // start offset with border
 
       int ixWinRow = 0;
-      m_vWinRow.resize( m_nRowCount );
+      m_vWinRow.resize( m_cntTotalWinRows );
 
-      if ( 1 < m_nRowCount ) {
+      if ( 1 < m_cntTotalWinRows ) {
 
         // should this go into the vector?
         m_pWinRow_Header.reset();
@@ -121,7 +134,7 @@ void PanelTrade::DrawRows() {
         yOffset += RowHeight;
         //ixRowElements++;
 
-        while ( ixWinRow < m_nRowCount ) {
+        while ( ixWinRow < m_cntTotalWinRows ) {
           pWinRow_t pWinRow = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
           m_vWinRow[ ixWinRow ] = pWinRow;
           yOffset += RowHeight;
@@ -132,19 +145,39 @@ void PanelTrade::DrawRows() {
 
     }
     else {
-      m_nRowCount = 0;
+      m_cntTotalWinRows = 0;
     }
   }
+
+}
+
+void PanelTrade::DeleteAllRows() {
+
+  WinRow* pWinRow;
+
+  for (
+    int ix = 0, iy = m_ixFirstVisibleRow;
+    ix < m_cntTotalWinRows;
+    ix++, iy++
+  ) {
+    DataRow& rowData( m_DataRows[ iy ] );
+    rowData.DelRowElements();
+    pWinRow_t pWinRow = std::move( m_vWinRow[ ix ] );
+    //pRow->DestroyWindow();
+    // delete pVRow; pWinRow auto deletes
+  }
+  m_cntTotalWinRows = 0;
+  m_cntWinRows = 0;
 
 }
 
 void PanelTrade::OnResize( wxSizeEvent& event ) {
   CallAfter(
     [this](){
-      if ( 0 != m_nRowCount ) {
+      if ( 0 != m_cntTotalWinRows ) {
         m_pWinRow_Header.reset();
         m_vWinRow.clear();
-        m_nRowCount = 0;
+        m_cntTotalWinRows = 0;
       }
       DrawRows();
     });
@@ -154,7 +187,7 @@ void PanelTrade::OnResize( wxSizeEvent& event ) {
 void PanelTrade::OnResizing( wxSizeEvent& event ) {
   m_pWinRow_Header.reset();
   m_vWinRow.clear();
-  m_nRowCount = 0;
+  m_cntTotalWinRows = 0;
   event.Skip(); // required when working with sizers
 }
 
@@ -173,6 +206,77 @@ void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
 
     //event.Skip();  // do not put this in
   }
+
+}
+
+void PanelTrade::SetInterval( double interval ) {
+  m_DataRows.SetInterval( interval );
+}
+
+void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
+}
+
+void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
+
+  if ( 0.0 != m_dblLastPrice ) {
+    DataRow& row( m_DataRows[ m_dblLastPrice ] );
+    row.SetPrice( m_dblLastPrice ); // TODO: needs to reset back to the price, remove highlight
+    CallAfter(
+      [this,&row](){
+        row.Refresh();  // TODO: will need to do this in different thread
+      });
+  }
+
+  m_dblLastPrice = trade.Price();
+  int ixPrice = m_DataRows.Cast( m_dblLastPrice );
+  ReCenterVisible( ixPrice );
+  DataRow& rowData( m_DataRows[ ixPrice ] );
+
+  rowData.SetPrice( trade.Volume() ); // need to highlight the price level
+  rowData.SetTicks( rowData.GetTicks() + 1 );
+  rowData.SetVolume( rowData.GetVolume() + trade.Volume() );
+
+  CallAfter(
+    [this,&rowData](){
+      rowData.Refresh();  // TODO: will need to do this in different thread
+    });
+
+
+  // TODO: add TickBuyVolume, TickSellVolume
+
+}
+
+void PanelTrade::ReCenterVisible( int ixPrice ) {
+  // does this need a lock from background thread?
+  // may need to put the recenter index somewhere for use by the the foreground thread
+
+  // only does something if ixPrice moves outside of window
+
+  if ( ( ixPrice <= m_ixLoRecenterFrame ) || ( ixPrice >= m_ixHiRecenterFrame ) ) {
+    // recalibrate mappings
+    if ( m_ixFirstVisibleRow != m_ixLastVisibleRow ) {
+      for ( int iy = m_ixFirstVisibleRow; iy <= m_ixLastVisibleRow; iy++ ) {
+        // remove existing string update events
+        DataRow& rowData( m_DataRows[ iy ] );
+        //pDRow -> SetOnStringUpdatedHandlers(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+        rowData.DelRowElements();
+      }
+    }
+    m_ixFirstVisibleRow = ixPrice - ( m_cntTotalWinRows / 2 );
+    m_ixLastVisibleRow = m_ixFirstVisibleRow + m_cntWinRows - 1;
+    m_ixHiRecenterFrame = m_ixLastVisibleRow - m_nFramedRows;
+    m_ixLoRecenterFrame = m_ixFirstVisibleRow + m_nFramedRows;
+    for (
+      int ix = m_cntWinRows, iy = m_ixFirstVisibleRow;
+      ix >= 1;
+      ix--, iy++
+    ) {
+       pWinRow_t pWinRow = m_vWinRow[ ix ];
+       DataRow& rowData( m_DataRows[ iy ] );
+       rowData.SetRow( *pWinRow );
+    }
+  }
+
 
 }
 

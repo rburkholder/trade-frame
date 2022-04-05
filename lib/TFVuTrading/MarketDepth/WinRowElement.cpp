@@ -30,13 +30,11 @@ namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 WinRowElement::WinRowElement() {
-  Init();
 }
 
 WinRowElement::WinRowElement(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
 ) {
-  Init();
   Create(parent, id, pos, size, style);
 }
 
@@ -49,6 +47,8 @@ bool WinRowElement::Create(
 
   SetExtraStyle(wxWS_EX_BLOCK_EVENTS); // TODO: do we keep this or not?
   wxWindow::Create( parent, id, pos, size, style );
+
+  Init();
 
   CreateControls();
   if ( GetSizer() ) {
