@@ -23,6 +23,7 @@
 
 #include <vector>
 
+#include <wx/timer.h>
 #include <wx/window.h>
 
 #include "WinRow.hpp"
@@ -101,12 +102,15 @@ private:
 
   DataRows m_DataRows;
 
+  wxTimer m_timerRefresh; // TODO: need to sync foreground & background
+
   void ReCenterVisible( int ix );
 
   void DrawRows();
   void DeleteAllRows();
 
   void OnPaint( wxPaintEvent& );
+  void HandleTimerRefresh( wxTimerEvent& );
 
   void OnResize( wxSizeEvent& );
   void OnResizing( wxSizeEvent& );

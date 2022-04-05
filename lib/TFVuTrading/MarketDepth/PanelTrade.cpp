@@ -71,6 +71,10 @@ void PanelTrade::Init() {
 
   m_ixLastAsk = 0.0;
   m_ixLastBid = 0.0;
+
+  m_timerRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
+  m_timerRefresh.Start( 200 ); // 5 times a second
 }
 
 bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
@@ -103,6 +107,12 @@ void PanelTrade::CreateControls( void ) {
 
 void PanelTrade::OnPaint( wxPaintEvent& event ) {
   wxPaintDC dc( this );
+}
+
+void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
+  for ( int ix = m_ixFirstVisibleRow; ix <= m_ixLastVisibleRow; ix++ ) {
+    m_DataRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+  }
 }
 
 void PanelTrade::DrawRows() {
@@ -206,6 +216,7 @@ void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
     Unbind( wxEVT_SIZE, &PanelTrade::OnResize, this, GetId() );
     Unbind( wxEVT_SIZING, &PanelTrade::OnResizing, this, GetId() );
     Unbind( wxEVT_DESTROY, &PanelTrade::OnDestroy, this, GetId() );
+    Unbind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
 
     //event.Skip();  // do not put this in
   }
@@ -222,34 +233,18 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   if ( ( 0 != m_ixLastAsk ) && ( ixAskPrice != m_ixLastAsk ) ) {
     DataRow& row( m_DataRows[ m_ixLastAsk ] );
     row.SetAskVolume( 0 );
-    CallAfter(
-      [this,&row](){
-        row.Refresh();  // TODO: will need to do this in different thread
-      });
   }
   DataRow& rowAsk( m_DataRows[ ixAskPrice ] );
   rowAsk.SetAskVolume( quote.AskSize() );
-  CallAfter(
-    [this,&rowAsk](){
-      rowAsk.Refresh();  // TODO: will need to do this in different thread
-    });
   m_ixLastAsk = ixAskPrice;
 
   int ixBidPrice = m_DataRows.Cast( quote.Bid() );
   if ( ( 0 != m_ixLastBid ) && ( ixBidPrice != m_ixLastBid ) ) {
     DataRow& row( m_DataRows[ m_ixLastBid ] );
     row.SetBidVolume( 0 );
-    CallAfter(
-      [this,&row](){
-        row.Refresh();  // TODO: will need to do this in different thread
-      });
   }
   DataRow& rowBid( m_DataRows[ ixBidPrice ] );
   rowBid.SetBidVolume( quote.BidSize() );
-  CallAfter(
-    [this,&rowBid](){
-      rowBid.Refresh();  // TODO: will need to do this in different thread
-    });
   m_ixLastBid = ixBidPrice;
 
   int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
@@ -270,10 +265,6 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
   if ( 0.0 != m_dblLastPrice ) {
     DataRow& row( m_DataRows[ m_dblLastPrice ] );
     row.SetPrice( m_dblLastPrice ); // TODO: needs to reset back to the price, remove highlight
-    CallAfter(
-      [this,&row](){
-        row.Refresh();  // TODO: will need to do this in different thread
-      });
   }
 
   m_dblLastPrice = trade.Price();
@@ -284,12 +275,6 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
   rowData.SetPrice( trade.Volume() ); // need to highlight the price level
   rowData.SetTicks( rowData.GetTicks() + 1 );
   rowData.SetVolume( rowData.GetVolume() + trade.Volume() );
-
-  CallAfter(
-    [this,&rowData](){
-      rowData.Refresh();  // TODO: will need to do this in different thread
-    });
-
 
   // TODO: add TickBuyVolume, TickSellVolume
 
