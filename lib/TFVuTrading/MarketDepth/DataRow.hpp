@@ -54,6 +54,9 @@ public:
   unsigned int GetVolume() const { return m_dreVolume.Get(); }
   void SetVolume( unsigned int count ) { m_dreVolume.Set( count ); }
 
+  void SetAskVolume( unsigned int nVolume ) { m_dreAskSize.Set( nVolume ); }
+  void SetBidVolume( unsigned int nVolume ) { m_dreBidSize.Set( nVolume ); }
+
 protected:
 private:
 

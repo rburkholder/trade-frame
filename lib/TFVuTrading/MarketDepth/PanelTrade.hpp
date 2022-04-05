@@ -64,6 +64,7 @@ public:
    );
 
   void SetInterval( double );
+
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
 
@@ -87,6 +88,9 @@ private:
 
   int m_ixHiRecenterFrame;
   int m_ixLoRecenterFrame;
+
+  int m_ixLastAsk;
+  int m_ixLastBid;
 
   double m_dblLastPrice;
 

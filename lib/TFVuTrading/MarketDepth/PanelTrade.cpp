@@ -68,6 +68,9 @@ void PanelTrade::Init() {
   m_ixLoRecenterFrame = 0;
 
   m_dblLastPrice = 0.0;
+
+  m_ixLastAsk = 0.0;
+  m_ixLastBid = 0.0;
 }
 
 bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
@@ -214,6 +217,52 @@ void PanelTrade::SetInterval( double interval ) {
 }
 
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
+
+  int ixAskPrice = m_DataRows.Cast( quote.Ask() );
+  if ( ( 0 != m_ixLastAsk ) && ( ixAskPrice != m_ixLastAsk ) ) {
+    DataRow& row( m_DataRows[ m_ixLastAsk ] );
+    row.SetAskVolume( 0 );
+    CallAfter(
+      [this,&row](){
+        row.Refresh();  // TODO: will need to do this in different thread
+      });
+  }
+  DataRow& rowAsk( m_DataRows[ ixAskPrice ] );
+  rowAsk.SetAskVolume( quote.AskSize() );
+  CallAfter(
+    [this,&rowAsk](){
+      rowAsk.Refresh();  // TODO: will need to do this in different thread
+    });
+  m_ixLastAsk = ixAskPrice;
+
+  int ixBidPrice = m_DataRows.Cast( quote.Bid() );
+  if ( ( 0 != m_ixLastBid ) && ( ixBidPrice != m_ixLastBid ) ) {
+    DataRow& row( m_DataRows[ m_ixLastBid ] );
+    row.SetBidVolume( 0 );
+    CallAfter(
+      [this,&row](){
+        row.Refresh();  // TODO: will need to do this in different thread
+      });
+  }
+  DataRow& rowBid( m_DataRows[ ixBidPrice ] );
+  rowBid.SetBidVolume( quote.BidSize() );
+  CallAfter(
+    [this,&rowBid](){
+      rowBid.Refresh();  // TODO: will need to do this in different thread
+    });
+  m_ixLastBid = ixBidPrice;
+
+  int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
+  int ixLoPrice = std::max( ixAskPrice, ixBidPrice );
+  int ixDiffPrice = ixHiPrice - ixLoPrice + 1;
+  if ( ixDiffPrice <= m_nCenteredRows ) {
+    // not sure where to recenter
+  }
+  else {
+    int ixMidPoint = ( ixHiPrice + ixLoPrice ) / 2;
+    ReCenterVisible( ixMidPoint );
+  }
+
 }
 
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
@@ -252,6 +301,9 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
 
   // only does something if ixPrice moves outside of window
 
+  // TODO: check flags so changes aren't made while one thread or the other are updating
+  //   maybe count how many missed opportunties presetn themeselves
+
   if ( ( ixPrice <= m_ixLoRecenterFrame ) || ( ixPrice >= m_ixHiRecenterFrame ) ) {
     // recalibrate mappings
     if ( m_ixFirstVisibleRow != m_ixLastVisibleRow ) {
@@ -274,6 +326,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
        pWinRow_t pWinRow = m_vWinRow[ ix ];
        DataRow& rowData( m_DataRows[ iy ] );
        rowData.SetRow( *pWinRow );
+       rowData.Refresh();  // TODO: refactor out into timer
     }
   }
 
