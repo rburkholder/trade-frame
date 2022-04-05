@@ -199,7 +199,9 @@ void AppDoM::OnData1Disconnected( int ) {
 // TODO: there is an order interval, and there is a quote interval
 void AppDoM::OnFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
   if ( m_pPanelTrade ) {
-    m_pPanelTrade->SetInterval( fundamentals.dblTickSize );
+    if ( 0 < fundamentals.dblTickSize ) { // eg QQQ shows 0 (equities are 0?)
+      m_pPanelTrade->SetInterval( fundamentals.dblTickSize );
+    }
   }
 }
 
