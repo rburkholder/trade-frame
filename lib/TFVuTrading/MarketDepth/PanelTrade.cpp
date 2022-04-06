@@ -31,9 +31,9 @@ namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 namespace {
-  const unsigned int FontHeight = 15;
-  const unsigned int RowHeight = 20;
-  const unsigned int BorderWidth = 5;
+  const unsigned int FontHeight = 15; // pixels
+  const unsigned int RowHeight = 20;  // pixels
+  const unsigned int BorderWidth = 6; // pixels
   const unsigned int FramedRows = 10; // when to move into frame then recenter
 }
 
@@ -57,12 +57,11 @@ void PanelTrade::Init() {
   m_nFramedRows = 0;
   m_nCenteredRows = 0;
 
+  m_cntWinRows_Total = 0;
+  m_cntWinRows_Data = 0;
 
-  m_cntTotalWinRows = 0;
-  m_cntWinRows = 0;
-
-  m_ixFirstVisibleRow = 0; // first visible integerized price
-  m_ixLastVisibleRow = 0;  // last visible integerized price
+  m_ixFirstDataRow = 0; // first visible integerized price
+  m_ixLastDataRow = 0;  // last visible integerized price
 
   m_ixHiRecenterFrame = 0;
   m_ixLoRecenterFrame = 0;
@@ -95,7 +94,7 @@ bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoin
 void PanelTrade::CreateControls( void ) {
 
   //PanelTrade* itemPanel1 = this;
-  DrawRows();
+  DrawWinRows();
 
   //Bind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
 
@@ -110,17 +109,26 @@ void PanelTrade::OnPaint( wxPaintEvent& event ) {
 }
 
 void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
-  std::scoped_lock<std::mutex> lock( m_mutexTimer );
-  for ( int ix = m_ixFirstVisibleRow; ix <= m_ixLastVisibleRow; ix++ ) {
-    m_DataRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+  //std::scoped_lock<std::mutex> lock( m_mutexTimer );
+  if ( 0 < m_cntWinRows_Data ) {
+    for ( int ix = m_ixFirstDataRow; ix <= m_ixLastDataRow; ix++ ) {
+      m_DataRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+    }
   }
 }
 
-void PanelTrade::DrawRows() {
+void PanelTrade::DrawWinRows() {
+
+  if ( 0 != m_cntWinRows_Data ) {
+    //m_pWinRow_Header.reset();
+    //m_vWinRow.clear();
+    //m_cntTotalWinRows = 0;
+    DeleteWinRows();
+  }
 
   wxSize sizeClient = wxWindow::GetClientSize();
 
-  std::scoped_lock<std::mutex> lock( m_mutexTimer );
+  //std::scoped_lock<std::mutex> lock( m_mutexTimer );
 
   auto BorderWidthTimes2 = 2 * BorderWidth;
   auto Height = sizeClient.GetHeight();
@@ -128,84 +136,72 @@ void PanelTrade::DrawRows() {
   if ( Height > BorderWidthTimes2 ) {
 
     //assert( 0 == m_nRowCount );
-    m_cntTotalWinRows = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
+    m_cntWinRows_Total = ( sizeClient.GetHeight() - 2 * BorderWidth ) / RowHeight;
 
-    if ( 1 < m_cntTotalWinRows ) {
+    if ( 1 < m_cntWinRows_Total ) { // space enough for at least header row, and one data row
 
-      m_cntWinRows = m_cntTotalWinRows - 1; // first row is header row
-      m_nFramedRows = m_cntWinRows / FramedRows;
-      m_nCenteredRows = ( ( m_cntWinRows - m_nFramedRows ) / 2 ) - 1; // eliminates up/down jitter
+      m_cntWinRows_Data = m_cntWinRows_Total - 1; // first row is header row
+      m_nFramedRows = m_cntWinRows_Data / FramedRows;
+      m_nCenteredRows = ( ( m_cntWinRows_Data - m_nFramedRows ) / 2 ) - 1; // eliminates up/down jitter
 
       int yOffset = BorderWidth; // start offset with border
 
+      // should this go into the vector?
+      m_pWinRow_Header.reset();
+      m_pWinRow_Header = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+
+      yOffset += RowHeight;
+
       int ixWinRow = 0;
-      m_vWinRow.resize( m_cntTotalWinRows );
+      m_vWinRow.resize( m_cntWinRows_Data );
 
-      if ( 1 < m_cntTotalWinRows ) {
-
-        // should this go into the vector?
-        m_pWinRow_Header.reset();
-        m_pWinRow_Header = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
-        //m_vRowElements[ ixRowElements ] = pRow;
+      while ( ixWinRow < m_cntWinRows_Data ) {
+        pWinRow_t pWinRow = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+        m_vWinRow[ ixWinRow ] = pWinRow;
         yOffset += RowHeight;
-        //ixRowElements++;
-
-        while ( ixWinRow < m_cntTotalWinRows ) {
-          pWinRow_t pWinRow = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
-          m_vWinRow[ ixWinRow ] = pWinRow;
-          yOffset += RowHeight;
-          ixWinRow++;
-        }
-
+        ixWinRow++;
       }
 
     }
     else {
-      m_cntTotalWinRows = 0;
+      m_cntWinRows_Total = 0;
     }
   }
 
 }
 
-void PanelTrade::DeleteAllRows() {
-
-  //WinRow* pWinRow;
+void PanelTrade::DeleteWinRows() {
 
   for (
-    int ix = 0, iy = m_ixFirstVisibleRow;
-    ix < m_cntTotalWinRows;
-    ix++, iy++
+    int ixWinRow = 0, iyDataRow = m_ixFirstDataRow;
+    ixWinRow < m_cntWinRows_Data;
+    ixWinRow++, iyDataRow++
   ) {
-    DataRow& rowData( m_DataRows[ iy ] );
+    DataRow& rowData( m_DataRows[ iyDataRow ] );
     rowData.DelRowElements();
-    pWinRow_t pWinRow = std::move( m_vWinRow[ ix ] );
+    pWinRow_t pWinRow = std::move( m_vWinRow[ ixWinRow ] );
     //pRow->DestroyWindow();
     // delete pVRow; pWinRow auto deletes
   }
-  m_cntTotalWinRows = 0;
-  m_cntWinRows = 0;
+  m_cntWinRows_Total = 1;  // 0 or 1? // header row remains in tact
+  m_cntWinRows_Data = 0;
 
 }
 
 void PanelTrade::OnResize( wxSizeEvent& event ) {  // TODO: need to fix this
   CallAfter(
     [this](){
-      if ( 0 != m_cntTotalWinRows ) {
-        //m_pWinRow_Header.reset();
-        //m_vWinRow.clear();
-        //m_cntTotalWinRows = 0;
-        DeleteAllRows();
-      }
-      DrawRows(); // probably shouldn't do this
+      DrawWinRows(); // probably shouldn't do this
       //ReCenterVisible( ix );  // what can we use as ix?
     });
   event.Skip(); // required when working with sizers
 }
 
 void PanelTrade::OnResizing( wxSizeEvent& event ) {
-  m_pWinRow_Header.reset();
-  m_vWinRow.clear();
-  m_cntTotalWinRows = 0;
+  DrawWinRows();
+  //m_pWinRow_Header.reset();
+  //m_vWinRow.clear();
+  //m_cntTotalRows = 0;
   event.Skip(); // required when working with sizers
 }
 
@@ -325,24 +321,25 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
   //   maybe count how many missed opportunties presetn themeselves
 
   if ( ( ixPrice <= m_ixLoRecenterFrame ) || ( ixPrice >= m_ixHiRecenterFrame ) ) {
-    std::scoped_lock<std::mutex> lock( m_mutexTimer );
+    //std::scoped_lock<std::mutex> lock( m_mutexTimer );
     // recalibrate mappings
-    if ( m_ixFirstVisibleRow != m_ixLastVisibleRow ) {
-      for ( int iy = m_ixFirstVisibleRow; iy <= m_ixLastVisibleRow; iy++ ) {
+    if ( m_ixFirstDataRow != m_ixLastDataRow ) {
+      for ( int iy = m_ixFirstDataRow; iy <= m_ixLastDataRow; iy++ ) {
         // remove existing string update events
         DataRow& rowData( m_DataRows[ iy ] );
         //pDRow -> SetOnStringUpdatedHandlers(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
         rowData.DelRowElements();
       }
     }
-    m_ixFirstVisibleRow = ixPrice - ( m_cntTotalWinRows / 2 );
-    m_ixLastVisibleRow = m_ixFirstVisibleRow + m_cntWinRows - 1;
-    m_ixHiRecenterFrame = m_ixLastVisibleRow - m_nFramedRows;
-    m_ixLoRecenterFrame = m_ixFirstVisibleRow + m_nFramedRows;
+    m_ixFirstDataRow = ixPrice - ( m_cntWinRows_Data / 2 );
+    m_ixLastDataRow = m_ixFirstDataRow + m_cntWinRows_Data - 1;
+    m_ixHiRecenterFrame = m_ixLastDataRow - m_nFramedRows;
+    m_ixLoRecenterFrame = m_ixFirstDataRow + m_nFramedRows;
+    // need to check that same numbers for each
     for (
-      int ix = m_cntWinRows, iy = m_ixFirstVisibleRow;
-      ix >= 1;
-      ix--, iy++
+      int ix = 0, iy = m_ixLastDataRow;
+      ix < m_cntWinRows_Data;
+      ix++, iy--
     ) {
        pWinRow_t pWinRow = m_vWinRow[ ix ];
        DataRow& rowData( m_DataRows[ iy ] );

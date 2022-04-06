@@ -85,11 +85,11 @@ private:
   unsigned int m_nFramedRows;
   unsigned int m_nCenteredRows;
 
-  unsigned int m_cntTotalWinRows; // includes header row: TODO: verify all usage locations are correct
-  unsigned int m_cntWinRows; // without header row
+  unsigned int m_cntWinRows_Total; // includes header row: TODO: verify all usage locations are correct
+  unsigned int m_cntWinRows_Data; // without header row
 
-  int m_ixFirstVisibleRow;
-  int m_ixLastVisibleRow;
+  int m_ixFirstDataRow;
+  int m_ixLastDataRow;
 
   int m_ixHiRecenterFrame;
   int m_ixLoRecenterFrame;
@@ -102,7 +102,7 @@ private:
   pWinRow_t m_pWinRow_Header;
 
   using vWinRow_t = std::vector<pWinRow_t>;
-  vWinRow_t m_vWinRow;
+  vWinRow_t m_vWinRow; // non header rows only
 
   DataRows m_DataRows;
 
@@ -111,8 +111,8 @@ private:
 
   void ReCenterVisible( int ix );
 
-  void DrawRows();
-  void DeleteAllRows();
+  void DrawWinRows();
+  void DeleteWinRows();
 
   void OnPaint( wxPaintEvent& );
   void HandleTimerRefresh( wxTimerEvent& );
