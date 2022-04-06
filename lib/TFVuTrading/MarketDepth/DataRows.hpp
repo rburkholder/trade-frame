@@ -38,7 +38,9 @@ public:
   ~DataRows();
 
   void SetInterval( double );
-  int Cast( double price );
+
+  int Cast( double price ) const;
+  double Cast( int ix ) const;
 
   DataRow& operator[]( double );
   DataRow& operator[]( int );

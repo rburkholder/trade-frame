@@ -32,7 +32,8 @@ namespace l2 { // market depth
 class DataRow {
 public:
 
-  DataRow( int ix, double price );
+  explicit DataRow( double price );
+  DataRow( const DataRow& );
   ~DataRow();
 
   void SetRowElements( WinRow& );
@@ -61,7 +62,6 @@ public:
 protected:
 private:
 
-  int m_ix;
   double m_price;
 
   bool m_bChanged;

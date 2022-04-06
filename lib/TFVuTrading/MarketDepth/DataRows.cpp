@@ -43,8 +43,12 @@ void DataRows::SetInterval( double interval ) {
   m_intervalby2 = interval / 2.0;
 }
 
-int DataRows::Cast( double price ) {
+int DataRows::Cast( double price ) const {
   return std::floor( ( price + m_intervalby2 ) / m_interval );
+}
+
+double DataRows::Cast( int ix ) const {
+  return ix * m_interval;
 }
 
 DataRow& DataRows::operator[]( double price ) {
@@ -52,7 +56,7 @@ DataRow& DataRows::operator[]( double price ) {
   int ix = Cast( price );
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, price ) ) );
+    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( price ) ) );
     assert( pair.second );
     iter = pair.first;
   }
@@ -63,7 +67,7 @@ DataRow& DataRows::operator[]( int ix ) {
   std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive, put back, and do double lookup
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, m_interval * ix  ) ) );
+    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( Cast( ix ) ) ) );
     assert( pair.second );
     iter = pair.first;
   }
