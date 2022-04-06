@@ -344,6 +344,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
        pWinRow_t pWinRow = m_vWinRow[ ix ];
        DataRow& rowData( m_DataRows[ iy ] );
        rowData.SetRowElements( *pWinRow );
+       rowData.SetPrice( m_DataRows.Cast( iy ) );
        //rowData.Refresh();  // TODO: refactor out into timer
     }
   }
