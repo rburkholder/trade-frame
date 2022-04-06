@@ -26,23 +26,24 @@
 #include "WinRowElement.hpp"
 
 #include "WinRow.hpp"
+#include "wx/defs.h"
 
 namespace { // local variables
 
   using EColour = ou::Colour::wx::EColour;
 
-  static int colourNormalCell( EColour::White ); // TODO: need the neutral background
+  const static EColour colourNormalCell( EColour::White ); // TODO: need the neutral background
 
-  static int colourColumnHeader( EColour::LightGoldenrodYellow );
+  const static EColour colourColumnHeader( EColour::LightGoldenrodYellow );
 
-  static int colourAccount1( EColour::LightSeaGreen );
-  static int colourAccount2( EColour::LightGreen );
+  const static EColour colourAccount1( EColour::LightSeaGreen );
+  const static EColour colourAccount2( EColour::LightGreen );
 
-  static int colourPrice( EColour::LightSteelBlue );
-  static int colourPriceHighlight( EColour::SkyBlue );
+  const static EColour colourPrice( EColour::LightSeaGreen );
+  const static EColour colourPriceHighlight( EColour::Yellow );
 
-  static int colourBidHighlight( EColour::DodgerBlue );
-  static int colourAskHighlight( EColour::Magenta );
+  const static EColour colourBidHighlight( EColour::DodgerBlue );
+  const static EColour colourAskHighlight( EColour::Magenta );
 
   using EField = ou::tf::l2::WinRow::EField;
 
@@ -50,18 +51,20 @@ namespace { // local variables
     EField field;
     int width;
     std::string header;
-    EColour colour;
+    long alignment; // not used at moment as WinRowElement uses dc.draw commands
+    EColour colourBackground;
+    EColour colourForeground;
   };
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BidSize,  60, "BidSize", EColour::LightSkyBlue   } // changes
-   , { EField::Price,    60, "Price",   EColour::LightSeaGreen  }
-   , { EField::AskSize,  60, "AskSize", EColour::LightPink      } // changes
-   , { EField::Ticks,    50, "Ticks",   EColour::LightSlateGray } // count of trades
-   , { EField::Volume,   50, "Vol",     EColour::LightSlateGray } // sum of volume
-   , { EField::Static,   80, "SttcInd", EColour::LightSlateGray } // static indicators - pivots, ...
-   , { EField::Dynamic, 100, "DynInd",  EColour::LightSlateGray } // dynamic indicators - ema, ...
+     { EField::BidSize,  50, "BidSize", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
+   , { EField::Price,    60, "Price",   wxRIGHT, colourPrice, EColour::Black  }
+   , { EField::AskSize,  50, "AskSize", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
+   , { EField::Ticks,    50, "Ticks",   wxRIGHT, EColour::DimGray, EColour::White } // count of trades
+   , { EField::Volume,   60, "Vol",     wxRIGHT, EColour::DimGray, EColour::White } // sum of volume
+   , { EField::Static,   80, "SttcInd", wxLEFT, EColour::DimGray, EColour::White } // static indicators - pivots, ...
+   , { EField::Dynamic, 100, "DynInd",  wxLEFT, EColour::DimGray, EColour::White } // dynamic indicators - ema, ...
   };
 }
 
@@ -81,7 +84,8 @@ WinRow::WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIs
       pwre->SetBackgroundColour( colourColumnHeader );
     }
     else {
-      pwre->SetBackgroundColour( element.colour );
+      pwre->SetBackgroundColour( element.colourBackground );
+      pwre->SetForegroundColour( element.colourForeground );
     }
     m_vWinRowElement.push_back( pwre );
     xPos += element.width; // maybe +1 for a border

@@ -100,11 +100,16 @@ void WinRowElement::Render( wxDC& dc ) {
   if ( m_bFocusSet ) {
     size.DecBy( 2, 2 );
     dc.DrawRectangle( wxPoint( 1, 1 ), size );
-    dc.DrawText( m_sText, wxPoint( 1, 1 ) );
   }
-  else {
-    dc.DrawText( m_sText, wxPoint( 1, 1 ) );
+
+  wxCoord width;
+  wxCoord height;
+  wxCoord x( 1 );
+  GetTextExtent( m_sText, &width, &height );
+  if ( width <= size.x ) {
+    x = ( size.x - width ) / 2;
   }
+  dc.DrawText( m_sText, wxPoint( x, 1 ) );
 }
 
 void WinRowElement::OnPaint( wxPaintEvent& event ) {
