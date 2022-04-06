@@ -28,21 +28,23 @@
 #include "WinRow.hpp"
 
 namespace { // local variables
-  static int colourNormalCell( ou::Colour::White ); // TODO: need the neutral background
 
-  static int colourColumnHeader( ou::Colour::LightGoldenrodYellow );
+  using EColour = ou::Colour::wx::EColour;
 
-  static int colourAccount1( ou::Colour::LightSeaGreen );
-  static int colourAccount2( ou::Colour::LightGreen );
+  static int colourNormalCell( EColour::White ); // TODO: need the neutral background
 
-  static int colourPrice( ou::Colour::LightSteelBlue );
-  static int colourPriceHighlight( ou::Colour::SkyBlue );
+  static int colourColumnHeader( EColour::LightGoldenrodYellow );
 
-  static int colourBidHighlight( ou::Colour::DodgerBlue );
-  static int colourAskHighlight( ou::Colour::Magenta );
+  static int colourAccount1( EColour::LightSeaGreen );
+  static int colourAccount2( EColour::LightGreen );
+
+  static int colourPrice( EColour::LightSteelBlue );
+  static int colourPriceHighlight( EColour::SkyBlue );
+
+  static int colourBidHighlight( EColour::DodgerBlue );
+  static int colourAskHighlight( EColour::Magenta );
 
   using EField = ou::tf::l2::WinRow::EField;
-  using EColour = ou::Colour::EColour;
 
   struct Element {
     EField field;
@@ -53,9 +55,9 @@ namespace { // local variables
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BidSize,  60, "BidSize", EColour::LightSlateGray } // changes
-   , { EField::Price,    60, "Price",   EColour::LightSteelBlue } // static
-   , { EField::AskSize,  60, "AskSize", EColour::LightSlateGray } // changes
+     { EField::BidSize,  60, "BidSize", EColour::LightSkyBlue   } // changes
+   , { EField::Price,    60, "Price",   EColour::LightSeaGreen  }
+   , { EField::AskSize,  60, "AskSize", EColour::LightPink      } // changes
    , { EField::Ticks,    50, "Ticks",   EColour::LightSlateGray } // count of trades
    , { EField::Volume,   50, "Vol",     EColour::LightSlateGray } // sum of volume
    , { EField::Static,   80, "SttcInd", EColour::LightSlateGray } // static indicators - pivots, ...
@@ -78,6 +80,9 @@ WinRow::WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIs
       pwre->SetText( element.header );
       pwre->SetBackgroundColour( colourColumnHeader );
     }
+    else {
+      pwre->SetBackgroundColour( element.colour );
+    }
     m_vWinRowElement.push_back( pwre );
     xPos += element.width; // maybe +1 for a border
   }
@@ -90,7 +95,7 @@ WinRow::pWinRow_t WinRow::Construct( wxWindow* parent, const wxPoint& origin, in
 
 WinRow::~WinRow() {
   Clear();
-  m_vWinRowElement.clear(); // wxWindows destroys children
+  m_vWinRowElement.clear();
 }
 
 void WinRow::HighlightBid( bool bHighlight ) {
