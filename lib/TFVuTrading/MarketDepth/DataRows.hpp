@@ -48,7 +48,7 @@ private:
 
   // to consider: build total ladder in memory?
   // however, locks used only on map expansion (for now)
-  std::mutex m_mutexMap; // prevent l1 l2 thread interference
+  std::mutex m_mutexMap; // prevent foreground, l1, l2 thread interference
 
   using mapRow_t = std::map<int,DataRow>;
 
