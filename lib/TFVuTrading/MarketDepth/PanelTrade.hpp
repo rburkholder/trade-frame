@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <vector>
 
 #include <wx/timer.h>
@@ -102,6 +103,7 @@ private:
 
   DataRows m_DataRows;
 
+  std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background
 
   void ReCenterVisible( int ix );

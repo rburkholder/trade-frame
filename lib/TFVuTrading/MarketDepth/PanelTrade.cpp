@@ -110,6 +110,7 @@ void PanelTrade::OnPaint( wxPaintEvent& event ) {
 }
 
 void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
+  std::scoped_lock<std::mutex> lock( m_mutexTimer );
   for ( int ix = m_ixFirstVisibleRow; ix <= m_ixLastVisibleRow; ix++ ) {
     m_DataRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
   }
@@ -118,6 +119,8 @@ void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
 void PanelTrade::DrawRows() {
 
   wxSize sizeClient = wxWindow::GetClientSize();
+
+  std::scoped_lock<std::mutex> lock( m_mutexTimer );
 
   auto BorderWidthTimes2 = 2 * BorderWidth;
   auto Height = sizeClient.GetHeight();
@@ -166,7 +169,7 @@ void PanelTrade::DrawRows() {
 
 void PanelTrade::DeleteAllRows() {
 
-  WinRow* pWinRow;
+  //WinRow* pWinRow;
 
   for (
     int ix = 0, iy = m_ixFirstVisibleRow;
@@ -184,15 +187,17 @@ void PanelTrade::DeleteAllRows() {
 
 }
 
-void PanelTrade::OnResize( wxSizeEvent& event ) {
+void PanelTrade::OnResize( wxSizeEvent& event ) {  // TODO: need to fix this
   CallAfter(
     [this](){
       if ( 0 != m_cntTotalWinRows ) {
-        m_pWinRow_Header.reset();
-        m_vWinRow.clear();
-        m_cntTotalWinRows = 0;
+        //m_pWinRow_Header.reset();
+        //m_vWinRow.clear();
+        //m_cntTotalWinRows = 0;
+        DeleteAllRows();
       }
-      DrawRows();
+      DrawRows(); // probably shouldn't do this
+      //ReCenterVisible( ix );  // what can we use as ix?
     });
   event.Skip(); // required when working with sizers
 }
@@ -269,7 +274,7 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   m_dblLastPrice = trade.Price();
   int ixPrice = m_DataRows.Cast( m_dblLastPrice );
-  ReCenterVisible( ixPrice );
+  ReCenterVisible( ixPrice ); // TODO: call it this often?
   DataRow& rowData( m_DataRows[ ixPrice ] );
 
   rowData.SetPrice( trade.Volume() ); // need to highlight the price level
@@ -290,6 +295,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
   //   maybe count how many missed opportunties presetn themeselves
 
   if ( ( ixPrice <= m_ixLoRecenterFrame ) || ( ixPrice >= m_ixHiRecenterFrame ) ) {
+    std::scoped_lock<std::mutex> lock( m_mutexTimer );
     // recalibrate mappings
     if ( m_ixFirstVisibleRow != m_ixLastVisibleRow ) {
       for ( int iy = m_ixFirstVisibleRow; iy <= m_ixLastVisibleRow; iy++ ) {
@@ -310,8 +316,8 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
     ) {
        pWinRow_t pWinRow = m_vWinRow[ ix ];
        DataRow& rowData( m_DataRows[ iy ] );
-       rowData.SetRow( *pWinRow );
-       rowData.Refresh();  // TODO: refactor out into timer
+       rowData.SetRowElements( *pWinRow );
+       //rowData.Refresh();  // TODO: refactor out into timer
     }
   }
 

@@ -54,7 +54,7 @@ DataRow::~DataRow() {
 // TODO: convert to;
 //   https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 
-void DataRow::SetRow( WinRow& wr ) {
+void DataRow::SetRowElements( WinRow& wr ) {
   //if ( nullptr != m_pRowElements ) {
     DelRowElements();
   //}

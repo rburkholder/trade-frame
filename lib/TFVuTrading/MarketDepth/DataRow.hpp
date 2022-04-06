@@ -35,9 +35,10 @@ public:
   DataRow( int ix, double price );
   ~DataRow();
 
-  void SetRow( WinRow& );
-  void Refresh();
+  void SetRowElements( WinRow& );
   void DelRowElements();
+
+  void Refresh();
 
   // doesn't work - cna't do partial specialization, try fusion?
   //template<typename T>
