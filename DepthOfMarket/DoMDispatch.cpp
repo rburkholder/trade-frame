@@ -253,15 +253,15 @@ void DoMDispatch::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival
 
   switch ( msg.chOrderSide ) {
     case 'A':
-      UpdateMMAuction( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapAuctionAsk );
+      MMAuction_Update( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapAuctionAsk );
       break;
     case 'B':
-      UpdateMMAuction( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapAuctionBid );
+      MMAuction_Update( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapAuctionBid );
       break;
   }
 }
 
-void DoMDispatch::UpdateMMAuction(
+void DoMDispatch::MMAuction_Update(
   const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
@@ -272,13 +272,18 @@ void DoMDispatch::UpdateMMAuction(
 
   mapMM_t::iterator mapMM_iter = mapMM.find( msg.sMarketMaker );
   if ( mapMM.end() == mapMM_iter ) {
-    mapMM.emplace( msg.sMarketMaker, pl );
+    auto pair = mapMM.emplace( msg.sMarketMaker, pl );
+    assert( pair.second );
+    mapMM_iter = pair.first;
   }
   else {
     // remove volume from existing price level
     mapAuction_t::iterator mapAuction_iter = mapAuction.find( mapMM_iter->second.price );
     if ( mapAuction.end() != mapAuction_iter ) {
       mapAuction_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
+      if ( 10000 < mapAuction_iter->second.nQuantity ) {
+//        std::cout << mapAuction_iter->second.nQuantity << std::endl; // debug only
+      }
       if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
     }
     else assert( false ); // how inconsistent are things?
@@ -298,6 +303,9 @@ void DoMDispatch::UpdateMMAuction(
     mapAuction_iter->second.nQuantity += mapMM_iter->second.volume; // add new volume
   }
 
+  if ( 10000 < mapAuction_iter->second.nQuantity ) {
+//    std::cout << mapAuction_iter->second.nQuantity << std::endl; // debug only
+  }
   if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
 
 }
@@ -309,26 +317,10 @@ void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decod
   if ( 0 == msg.nOrderId ) { // nasdaq L II
     switch ( msg.chOrderSide ) {
       case 'A':
-        {
-          mapMM_t::iterator iter = m_mapMMAsk.find( msg.sMarketMaker );
-          if ( m_mapMMAsk.end() == iter ) {
-            // nothing to do
-          }
-          else {
-            m_mapMMAsk.erase( iter );
-          }
-        }
+        MMAuction_Delete( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapAuctionAsk );
         break;
       case 'B':
-        {
-          mapMM_t::iterator iter = m_mapMMBid.find( msg.sMarketMaker );
-          if ( m_mapMMBid.end() == iter ) {
-            // nothing to do
-          }
-          else {
-            m_mapMMBid.erase( iter );
-          }
-        }
+        MMAuction_Delete( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapAuctionBid );
         break;
     }
   }
@@ -352,6 +344,29 @@ void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decod
     }
   }
 
+}
+
+void DoMDispatch::MMAuction_Delete(
+  const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg,
+  fVolumeAtPrice_t& f,
+  mapMM_t& mapMM,
+  mapAuction_t& mapAuction
+) {
+
+  mapMM_t::iterator mapMM_iter = mapMM.find( msg.sMarketMaker );
+  if ( mapMM.end() == mapMM_iter ) {
+    // this should probably be an assert( false )
+  }
+  else {
+    // remove volume from existing price level
+    mapAuction_t::iterator mapAuction_iter = mapAuction.find( mapMM_iter->second.price );
+    if ( mapAuction.end() != mapAuction_iter ) {
+      mapAuction_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
+      if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
+    }
+    else assert( false ); // how inconsistent are things?
+    mapMM.erase( mapMM_iter ); // TODO: maybe just keep at 0?, no erasure?
+  }
 
 }
 

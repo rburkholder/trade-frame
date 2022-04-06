@@ -144,8 +144,12 @@ private:
 
   // OnMBOSummary, OnMBOUpdate (for Nasdaq LII )
   void OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
-  void UpdateMMAuction(
+  void MMAuction_Update(
     const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
+    fVolumeAtPrice_t&,
+    mapMM_t&, mapAuction_t& );
+  void MMAuction_Delete(
+    const ou::tf::iqfeed::l2::msg::OrderDelete::decoded&,
     fVolumeAtPrice_t&,
     mapMM_t&, mapAuction_t& );
 
