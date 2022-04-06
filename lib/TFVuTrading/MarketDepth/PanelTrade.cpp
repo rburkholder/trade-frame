@@ -233,8 +233,13 @@ void PanelTrade::SetInterval( double interval ) {
 }
 
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
+  // will need to use quote for tick analysis.
+  // don't update the ladder, as it interferes with L2
+  // maybe use to set the colour for best bid offer
 
   int ixAskPrice = m_DataRows.Cast( quote.Ask() );
+  int ixBidPrice = m_DataRows.Cast( quote.Bid() );
+/*
   if ( ( 0 != m_ixLastAsk ) && ( ixAskPrice != m_ixLastAsk ) ) {
     DataRow& row( m_DataRows[ m_ixLastAsk ] );
     row.SetAskVolume( 0 );
@@ -243,7 +248,6 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   rowAsk.SetAskVolume( quote.AskSize() );
   m_ixLastAsk = ixAskPrice;
 
-  int ixBidPrice = m_DataRows.Cast( quote.Bid() );
   if ( ( 0 != m_ixLastBid ) && ( ixBidPrice != m_ixLastBid ) ) {
     DataRow& row( m_DataRows[ m_ixLastBid ] );
     row.SetBidVolume( 0 );
@@ -251,6 +255,8 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   DataRow& rowBid( m_DataRows[ ixBidPrice ] );
   rowBid.SetBidVolume( quote.BidSize() );
   m_ixLastBid = ixBidPrice;
+
+*/
 
   int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
   int ixLoPrice = std::max( ixAskPrice, ixBidPrice );
@@ -260,21 +266,31 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   }
   else {
     int ixMidPoint = ( ixHiPrice + ixLoPrice ) / 2;
-    ReCenterVisible( ixMidPoint );
+    CallAfter(
+      [this, ixMidPoint](){
+        ReCenterVisible( ixMidPoint );
+      });
   }
-
 }
 
 void PanelTrade::OnQuoteAsk( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetAskVolume( volume );
+  CallAfter(
+    [this, ixPrice](){
+      ReCenterVisible( ixPrice );
+    });
 }
 
 void PanelTrade::OnQuoteBid( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetBidVolume( volume );
+  CallAfter(
+    [this, ixPrice](){
+      ReCenterVisible( ixPrice );
+    });
 }
 
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
@@ -286,20 +302,22 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   m_dblLastPrice = trade.Price();
   int ixPrice = m_DataRows.Cast( m_dblLastPrice );
-  ReCenterVisible( ixPrice ); // TODO: call it this often?
   DataRow& rowData( m_DataRows[ ixPrice ] );
 
   rowData.SetPrice( trade.Volume() ); // need to highlight the price level
   rowData.SetTicks( rowData.GetTicks() + 1 );
   rowData.SetVolume( rowData.GetVolume() + trade.Volume() );
 
+  CallAfter(
+    [this, ixPrice](){
+      ReCenterVisible( ixPrice );
+    });
   // TODO: add TickBuyVolume, TickSellVolume
 
 }
 
 void PanelTrade::ReCenterVisible( int ixPrice ) {
-  // does this need a lock from background thread?
-  // may need to put the recenter index somewhere for use by the the foreground thread
+  // does this need a lock from background thread? - no longer, is run in foreground
 
   // only does something if ixPrice moves outside of window
 

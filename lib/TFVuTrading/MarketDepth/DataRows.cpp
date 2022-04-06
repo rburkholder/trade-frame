@@ -48,6 +48,7 @@ int DataRows::Cast( double price ) {
 }
 
 DataRow& DataRows::operator[]( double price ) {
+  std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive
   int ix = Cast( price );
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
@@ -59,6 +60,7 @@ DataRow& DataRows::operator[]( double price ) {
 }
 
 DataRow& DataRows::operator[]( int ix ) {
+  std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
     auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( ix, m_interval * ix  ) ) );
