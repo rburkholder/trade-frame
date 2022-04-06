@@ -44,8 +44,12 @@ class DoMDispatch
 
 public:
 
+  using fVolumeAtPrice_t = std::function<void(double,int)>;
+
   DoMDispatch( const std::string& sWatch );
   virtual ~DoMDispatch();
+
+  void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
 
   void EmitMarketMakerMaps();
 
@@ -68,6 +72,9 @@ protected:
 
 private:
 
+  fVolumeAtPrice_t m_fBidVolumeAtPrice;
+  fVolumeAtPrice_t m_fAskVolumeAtPrice;
+
   using volume_t = ou::tf::Trade::volume_t;
 
   std::string m_sWatch;
@@ -87,6 +94,9 @@ private:
     {}
   };
 
+  using mapOrder_t = std::map<uint64_t,Order>; // key is order id
+  mapOrder_t m_mapOrder;
+
   struct Auction {
     // maintain set of orders?
     volume_t nQuantity;
@@ -95,9 +105,6 @@ private:
     Auction( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
     : nQuantity( msg.nQuantity ) {}
   };
-
-  using mapOrder_t = std::map<uint64_t,Order>; // key is order id
-  mapOrder_t m_mapOrder;
 
   using mapAuction_t = std::map<double,Auction>;  // key is price
   mapAuction_t m_mapAuctionAsk;
@@ -123,6 +130,7 @@ private:
   mapPriceLevels_t m_mapPriceMMAsk;
   mapPriceLevels_t m_mapPriceMMBid;
 
+  // updated with OnMBOOrderArrival
   struct price_level {
     double price;
     volume_t volume;
@@ -130,12 +138,16 @@ private:
     price_level( double price_, volume_t volume_ )
     : price( price_ ), volume( volume_ ) {}
   };
-  using mapMM_t = std::map<std::string,price_level>;
+  using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  // OnMBOAdd, OnMBOSummary, OnMBOUpdate (at least for Nasdaq LII )
+  // OnMBOSummary, OnMBOUpdate (for Nasdaq LII )
   void OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
+  void UpdateMMAuction(
+    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
+    fVolumeAtPrice_t&,
+    mapMM_t&, mapAuction_t& );
 
   void AuctionAdd( mapAuction_t& map, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
   void AuctionUpdate( mapAuction_t& map, const Order& order, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );

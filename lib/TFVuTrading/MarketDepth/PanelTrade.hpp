@@ -70,6 +70,9 @@ public:
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
 
+  void OnQuoteAsk( double price, int volume );
+  void OnQuoteBid( double price, int volume );
+
 protected:
 private:
 

@@ -31,6 +31,11 @@ DoMDispatch::DoMDispatch( const std::string& sWatch )
 DoMDispatch::~DoMDispatch() {
 }
 
+void DoMDispatch::Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
+  m_fAskVolumeAtPrice = std::move( fAsk );
+  m_fBidVolumeAtPrice = std::move( fBid );
+}
+
 void DoMDispatch::EmitMarketMakerMaps() {
   // will probably need a lock on this, as maps are in background thread
   // but mostly works as the deletion isn't in place yet
@@ -153,7 +158,6 @@ void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
 
   if ( 0 == msg.nOrderId ) { // nasdaq type LII
-
   }
   else { // other type
     mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
@@ -247,31 +251,55 @@ void DoMDispatch::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival
   //    << std::endl;
   //}
 
-  price_level pl( msg.dblPrice, msg.nQuantity );
   switch ( msg.chOrderSide ) {
     case 'A':
-      {
-        mapMM_t::iterator iter = m_mapMMAsk.find( msg.sMarketMaker );
-        if ( m_mapMMAsk.end() == iter ) {
-          m_mapMMAsk.emplace( msg.sMarketMaker, pl );
-        }
-        else {
-          iter->second = pl;
-        }
-      }
+      UpdateMMAuction( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapAuctionAsk );
       break;
     case 'B':
-      {
-        mapMM_t::iterator iter = m_mapMMBid.find( msg.sMarketMaker );
-        if ( m_mapMMBid.end() == iter ) {
-          m_mapMMBid.emplace( msg.sMarketMaker, pl );
-        }
-        else {
-          iter->second = pl;
-        }
-      }
+      UpdateMMAuction( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapAuctionBid );
       break;
   }
+}
+
+void DoMDispatch::UpdateMMAuction(
+  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  fVolumeAtPrice_t& f,
+  mapMM_t& mapMM,
+  mapAuction_t& mapAuction
+) {
+
+  price_level pl( msg.dblPrice, msg.nQuantity );
+
+  mapMM_t::iterator mapMM_iter = mapMM.find( msg.sMarketMaker );
+  if ( mapMM.end() == mapMM_iter ) {
+    mapMM.emplace( msg.sMarketMaker, pl );
+  }
+  else {
+    // remove volume from existing price level
+    mapAuction_t::iterator mapAuction_iter = mapAuction.find( mapMM_iter->second.price );
+    if ( mapAuction.end() != mapAuction_iter ) {
+      mapAuction_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
+      if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
+    }
+    else assert( false ); // how inconsistent are things?
+    // assign new price level
+    mapMM_iter->second = pl;
+  }
+
+  // update new price level
+  bool bResult;
+  mapAuction_t::iterator mapAuction_iter = mapAuction.find( msg.dblPrice );
+  if ( mapAuction.end() == mapAuction_iter ) {
+    auto pair = mapAuction.emplace( msg.dblPrice, Auction( msg.nQuantity ) ); // provide new price_level
+    assert( pair.second );
+    mapAuction_iter = pair.first;
+  }
+  else {
+    mapAuction_iter->second.nQuantity += mapMM_iter->second.volume; // add new volume
+  }
+
+  if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
+
 }
 
 void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg ) {

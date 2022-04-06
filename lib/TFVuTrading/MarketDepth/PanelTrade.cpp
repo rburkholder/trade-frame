@@ -265,6 +265,18 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
 
 }
 
+void PanelTrade::OnQuoteAsk( double price, int volume ) {
+  int ixPrice = m_DataRows.Cast( price );
+  DataRow& row( m_DataRows[ ixPrice ] );
+  row.SetAskVolume( volume );
+}
+
+void PanelTrade::OnQuoteBid( double price, int volume ) {
+  int ixPrice = m_DataRows.Cast( price );
+  DataRow& row( m_DataRows[ ixPrice ] );
+  row.SetBidVolume( volume );
+}
+
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   if ( 0.0 != m_dblLastPrice ) {

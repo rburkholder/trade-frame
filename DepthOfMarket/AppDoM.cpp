@@ -60,7 +60,7 @@ bool AppDoM::OnInit() {
   }
   else {
 
-    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName );
+    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + options.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
     //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -125,6 +125,14 @@ bool AppDoM::OnInit() {
 
     m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
 
+    m_pDispatch->Set(
+      [this]( double price, int volume ){
+        m_pPanelTrade->OnQuoteBid( price, volume );
+      },
+      [this]( double price, int volume ){
+        m_pPanelTrade->OnQuoteAsk( price, volume );
+      } );
+
     std::cout << "watching L1/L2: " << options.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
@@ -144,7 +152,6 @@ bool AppDoM::OnInit() {
     );
 
   }
-
 
   return code;
 }
