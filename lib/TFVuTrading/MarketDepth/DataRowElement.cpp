@@ -51,6 +51,7 @@ void DataRowElementIndicatorStatic::UpdateWinRowElement() {
 
 DataRowElementIndicatorDynamic::DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged )
 : DataRowElement<std::string>( sFormat, bChanged )
+, m_bListChanged( false )
 {}
 
 void DataRowElementIndicatorDynamic::Set( const std::string& sValue ) {
