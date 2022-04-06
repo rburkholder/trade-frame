@@ -63,6 +63,7 @@ struct date_t {
   : year( year_ ), month( month_ ), day( day_ ) {}
 };
 
+// '5,QQQ,,MEMX,B,,2022-04-06,'
 struct decoded {
   char chMsgType;
   std::string sSymbolName;
@@ -71,6 +72,7 @@ struct decoded {
   char chOrderSide;  // 'A' Sell, 'B' Buy
   time_t time;
   date_t date;
+  decoded(): nOrderId {} {}
 };
 
 } // namespace OrderDelete
@@ -155,6 +157,7 @@ namespace OrderDelete {
         )
         ;
 
+      // '5,QQQ,,MEMX,B,,2022-04-06,'
       start %=
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
