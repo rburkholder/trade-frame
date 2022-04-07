@@ -94,8 +94,8 @@ private:
   int m_ixHiRecenterFrame;
   int m_ixLoRecenterFrame;
 
-  int m_ixLastAsk;
-  int m_ixLastBid;
+  //int m_ixLastAsk;
+  //int m_ixLastBid;
 
   double m_dblLastPrice;
   double m_dblLastAsk;

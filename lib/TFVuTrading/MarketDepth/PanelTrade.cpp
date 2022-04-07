@@ -68,8 +68,8 @@ void PanelTrade::Init() {
 
   m_dblLastPrice = 0.0;
 
-  m_ixLastAsk = 0.0;
-  m_ixLastBid = 0.0;
+  //m_ixLastAsk = 0.0;
+  //m_ixLastBid = 0.0;
 
   m_timerRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
@@ -129,7 +129,6 @@ void PanelTrade::DrawWinRows() {
   wxSize sizeClient = wxWindow::GetClientSize();
 
   //std::scoped_lock<std::mutex> lock( m_mutexTimer );
-
   auto BorderWidthTimes2 = 2 * BorderWidth;
   auto Height = sizeClient.GetHeight();
 
@@ -186,19 +185,22 @@ void PanelTrade::DeleteWinRows() {
   m_cntWinRows_Total = 1;  // 0 or 1? // header row remains in tact
   m_cntWinRows_Data = 0;
 
+  m_ixFirstDataRow = m_ixLastDataRow = 0;
+  m_ixLoRecenterFrame = m_ixHiRecenterFrame = 0;
+
 }
 
 void PanelTrade::OnResize( wxSizeEvent& event ) {  // TODO: need to fix this
   CallAfter(
     [this](){
       DrawWinRows(); // probably shouldn't do this
-      //ReCenterVisible( ix );  // what can we use as ix?
+      //ReCenterVisible( m_DataRows.Cast( m_dblLastPrice ) );
     });
   event.Skip(); // required when working with sizers
 }
 
 void PanelTrade::OnResizing( wxSizeEvent& event ) {
-  DrawWinRows();
+  //DrawWinRows();
   //m_pWinRow_Header.reset();
   //m_vWinRow.clear();
   //m_cntTotalRows = 0;
@@ -337,35 +339,44 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
   // TODO: check flags so changes aren't made while one thread or the other are updating
   //   maybe count how many missed opportunties presetn themeselves
 
-  if ( ( ixPrice <= m_ixLoRecenterFrame ) || ( ixPrice >= m_ixHiRecenterFrame ) ) {
-    //std::scoped_lock<std::mutex> lock( m_mutexTimer );
-    // recalibrate mappings
-    if ( m_ixFirstDataRow != m_ixLastDataRow ) {
-      for ( int iy = m_ixFirstDataRow; iy <= m_ixLastDataRow; iy++ ) {
-        // remove existing string update events
+  if ( 0 == ixPrice ) {
+    std::cout << "PanelTrade::ReCenterVisible has 0 ixPrice" << std::endl;
+  }
+  else {
+    if (
+        ( ixPrice <= m_ixLoRecenterFrame )
+      || ( ixPrice >= m_ixHiRecenterFrame )
+      || ( m_ixLoRecenterFrame == m_ixHiRecenterFrame )
+    ) {
+      //std::scoped_lock<std::mutex> lock( m_mutexTimer );
+      // recalibrate mappings
+      if ( m_ixFirstDataRow != m_ixLastDataRow ) {
+        // TODO: should this be performed by DeleteWinRows?
+        for ( int iy = m_ixFirstDataRow; iy <= m_ixLastDataRow; iy++ ) {
+          // remove existing string update events
+          DataRow& rowData( m_DataRows[ iy ] );
+          //pDRow -> SetOnStringUpdatedHandlers(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+          rowData.DelRowElements();
+        }
+      }
+      m_ixFirstDataRow = ixPrice - ( m_cntWinRows_Data / 2 );
+      m_ixLastDataRow = m_ixFirstDataRow + m_cntWinRows_Data - 1;
+      m_ixHiRecenterFrame = m_ixLastDataRow - m_nFramedRows;
+      m_ixLoRecenterFrame = m_ixFirstDataRow + m_nFramedRows;
+      // need to check that same numbers for each
+      for (
+        int ix = 0, iy = m_ixLastDataRow;
+        ix < m_cntWinRows_Data;
+        ix++, iy--
+      ) {
+        pWinRow_t pWinRow = m_vWinRow[ ix ];
         DataRow& rowData( m_DataRows[ iy ] );
-        //pDRow -> SetOnStringUpdatedHandlers(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-        rowData.DelRowElements();
+        rowData.SetRowElements( *pWinRow );
+        rowData.SetPrice( m_DataRows.Cast( iy ) );
+        //rowData.Refresh();  // TODO: refactor out into timer
       }
     }
-    m_ixFirstDataRow = ixPrice - ( m_cntWinRows_Data / 2 );
-    m_ixLastDataRow = m_ixFirstDataRow + m_cntWinRows_Data - 1;
-    m_ixHiRecenterFrame = m_ixLastDataRow - m_nFramedRows;
-    m_ixLoRecenterFrame = m_ixFirstDataRow + m_nFramedRows;
-    // need to check that same numbers for each
-    for (
-      int ix = 0, iy = m_ixLastDataRow;
-      ix < m_cntWinRows_Data;
-      ix++, iy--
-    ) {
-       pWinRow_t pWinRow = m_vWinRow[ ix ];
-       DataRow& rowData( m_DataRows[ iy ] );
-       rowData.SetRowElements( *pWinRow );
-       rowData.SetPrice( m_DataRows.Cast( iy ) );
-       //rowData.Refresh();  // TODO: refactor out into timer
-    }
   }
-
 
 }
 
