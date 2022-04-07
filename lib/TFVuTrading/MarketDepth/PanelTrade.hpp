@@ -98,6 +98,8 @@ private:
   int m_ixLastBid;
 
   double m_dblLastPrice;
+  double m_dblLastAsk;
+  double m_dblLastBid;
 
   pWinRow_t m_pWinRow_Header;
 

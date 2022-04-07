@@ -42,7 +42,12 @@ public:
   using pWinRow_t = std::shared_ptr<WinRow>;
   static pWinRow_t Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
 
-  enum class EField: int { BidSize, Price, AskSize, Ticks, Volume, Static, Dynamic };
+  enum class EField: int {
+    BuyCount, BuyVolume,
+    BidSize, Price, AskSize,
+    SellVolume, SellCount,
+    Ticks, Volume, Static, Dynamic
+    };
 
   void HighlightBid( bool );
   void HighlightAsk( bool );

@@ -58,9 +58,13 @@ namespace { // local variables
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BidSize,  50, "BidSize", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
+     { EField::BuyCount,  50, "BuyCnt", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
+   , { EField::BuyVolume,  50, "BuyVol", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
+   , { EField::BidSize,  50, "BidSize", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
    , { EField::Price,    60, "Price",   wxRIGHT, colourPrice, EColour::Black  }
    , { EField::AskSize,  50, "AskSize", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
+   , { EField::SellVolume, 50, "SellVol", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
+   , { EField::SellCount,  50, "SellCnt", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
    , { EField::Ticks,    50, "Ticks",   wxRIGHT, EColour::DimGray, EColour::White } // count of trades
    , { EField::Volume,   60, "Vol",     wxRIGHT, EColour::DimGray, EColour::White } // sum of volume
    , { EField::Static,   80, "SttcInd", wxLEFT, EColour::DimGray, EColour::White } // static indicators - pivots, ...

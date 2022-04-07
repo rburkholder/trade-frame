@@ -50,14 +50,18 @@ public:
 
   void SetPrice( double price ) { m_drePrice.Set( price ); }  // specialize in DataRowElement to do the highlight on and off
 
-  unsigned int GetTicks() const { return m_dreTicks.Get(); }
-  void SetTicks( unsigned int count ) { m_dreTicks.Set( count ); }
+  void IncTicks() { m_dreTicks.Inc(); }
 
-  unsigned int GetVolume() const { return m_dreVolume.Get(); }
-  void SetVolume( unsigned int count ) { m_dreVolume.Set( count ); }
+  void AddVolume( unsigned int nVolume ) { m_dreVolume.Add( nVolume ); }
 
   void SetAskVolume( unsigned int nVolume ) { m_dreAskSize.Set( nVolume ); }
   void SetBidVolume( unsigned int nVolume ) { m_dreBidSize.Set( nVolume ); }
+
+  void IncBuyCount() { m_dreBuyCount.Inc(); }
+  void IncSellCount() { m_dreSellCount.Inc(); }
+
+  void AddToBuyVolume( unsigned int n ) { m_dreBuyVolume.Add( n ); }
+  void AddToSellVolume( unsigned int n ) { m_dreSellVolume.Add( n ); }
 
 protected:
 private:
@@ -68,9 +72,13 @@ private:
 
   // TODO: boost::fusion?  std::tuple?
   //DataRowElement<double>         m_dreAcctPl;
+  DataRowElement<unsigned int>   m_dreBuyCount;
+  DataRowElement<unsigned int>   m_dreBuyVolume;
   DataRowElement<unsigned int>   m_dreBidSize;
   DataRowElement<double>         m_drePrice;
   DataRowElement<unsigned int>   m_dreAskSize;
+  DataRowElement<unsigned int>   m_dreSellVolume;
+  DataRowElement<unsigned int>   m_dreSellCount;
   DataRowElement<unsigned int>   m_dreTicks;
   DataRowElement<unsigned int>   m_dreVolume;
   DataRowElementIndicatorStatic  m_dreIndicatorStatic;

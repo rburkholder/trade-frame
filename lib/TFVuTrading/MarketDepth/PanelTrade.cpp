@@ -254,6 +254,9 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
 
 */
 
+  m_dblLastAsk = quote.Ask();
+  m_dblLastBid = quote.Bid();
+
   int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
   int ixLoPrice = std::max( ixAskPrice, ixBidPrice );
   int ixDiffPrice = ixHiPrice - ixLoPrice + 1;
@@ -301,8 +304,22 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
   DataRow& rowData( m_DataRows[ ixPrice ] );
 
   rowData.SetPrice( trade.Volume() ); // need to highlight the price level
-  rowData.SetTicks( rowData.GetTicks() + 1 );
-  rowData.SetVolume( rowData.GetVolume() + trade.Volume() );
+  rowData.IncTicks();
+  rowData.AddVolume( trade.Volume() );
+
+  const double mid = ( m_dblLastAsk + m_dblLastBid ) / 2.0;
+  if ( mid == m_dblLastPrice ) {
+  }
+  else {
+    if ( mid < m_dblLastPrice ) {
+      rowData.IncBuyCount();
+      rowData.AddToBuyVolume( trade.Volume() );
+    }
+    else {
+      rowData.IncSellCount();
+      rowData.AddToSellVolume( trade.Volume() );
+    }
+  }
 
   CallAfter(
     [this, ixPrice](){

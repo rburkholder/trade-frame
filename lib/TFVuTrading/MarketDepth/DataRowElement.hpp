@@ -44,6 +44,8 @@ public:
   virtual void UpdateWinRowElement();
 
   virtual void Set( T );
+  void Inc();
+  void Add( T );
   T Get() const;
 
 protected:
@@ -80,6 +82,16 @@ void DataRowElement<T>::Set( T value ) {
 template<typename T>
 T DataRowElement<T>::Get() const {
   return m_value;
+}
+
+template<typename T>
+void DataRowElement<T>::Inc()  {
+  m_value++;
+}
+
+template<typename T>
+void DataRowElement<T>::Add( T value )  {
+  m_value += value;
 }
 
 template<typename T>
