@@ -273,20 +273,20 @@ void PanelTrade::OnQuoteAsk( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetAskVolume( volume );
-  CallAfter(
-    [this, ixPrice](){
-      ReCenterVisible( ixPrice );
-    });
+  //CallAfter(
+  //  [this, ixPrice](){
+  //    ReCenterVisible( ixPrice );
+  //  });
 }
 
 void PanelTrade::OnQuoteBid( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetBidVolume( volume );
-  CallAfter(
-    [this, ixPrice](){
-      ReCenterVisible( ixPrice );
-    });
+  //CallAfter(
+  //  [this, ixPrice](){
+  //    ReCenterVisible( ixPrice );
+  //  });
 }
 
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
