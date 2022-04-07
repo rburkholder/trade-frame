@@ -156,10 +156,9 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   BOOST_ASSERT( iter != end );
 
   std::string str( iter, end );
-  //std::cout << "MarketDepth: '" << str << "'" << std::endl;
-  if ( '4' != str[0] ) {
-    std::cout << "MarketDepth: '" << str << "'" << std::endl;
-  }
+  //if ( '5' == str[0] ) {
+  //  std::cout << "MarketDepth: '" << str << "'" << std::endl;
+  //}
 
   switch ( *iter ) {
     case '3': // Order Add
