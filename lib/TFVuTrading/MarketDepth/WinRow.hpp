@@ -49,10 +49,6 @@ public:
     Ticks, Volume, Static, Dynamic
     };
 
-  void HighlightBid( bool );
-  void HighlightAsk( bool );
-  void HighlightPrice( bool );
-
   static int RowWidth();
 
   WinRowElement* operator[]( EField );

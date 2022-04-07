@@ -34,39 +34,39 @@ namespace {
 }
 
 DataRow::DataRow( double price )
-: m_bChanged( false ),
+: m_bChanged( false )
   //m_pRowElements( nullptr ),
-  m_price( price ),
+  //m_price( price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
-  m_dreBuyCount( sFmtInteger, m_bChanged ),
-  m_dreBuyVolume( sFmtInteger, m_bChanged ),
-  m_dreBidSize( sFmtInteger, m_bChanged ),
-  m_drePrice( sFmtPrice, m_bChanged ),
-  m_dreAskSize( sFmtInteger, m_bChanged ),
-  m_dreSellVolume( sFmtInteger, m_bChanged ),
-  m_dreSellCount(sFmtInteger, m_bChanged ),
-  m_dreTicks( sFmtInteger, m_bChanged ),
-  m_dreVolume( sFmtInteger, m_bChanged ),
-  m_dreIndicatorStatic( sFmtString, m_bChanged ),
-  m_dreIndicatorDynamic( sFmtString, m_bChanged )
+, m_dreBuyCount( sFmtInteger, m_bChanged )
+, m_dreBuyVolume( sFmtInteger, m_bChanged )
+, m_dreBidSize( sFmtInteger, m_bChanged )
+, m_drePrice( sFmtPrice, m_bChanged )
+, m_dreAskSize( sFmtInteger, m_bChanged )
+, m_dreSellVolume( sFmtInteger, m_bChanged )
+, m_dreSellCount(sFmtInteger, m_bChanged )
+, m_dreTicks( sFmtInteger, m_bChanged )
+, m_dreVolume( sFmtInteger, m_bChanged )
+, m_dreIndicatorStatic( sFmtString, m_bChanged )
+, m_dreIndicatorDynamic( sFmtString, m_bChanged )
 {}
 
 DataRow::DataRow( const DataRow& rhs ) // don't copy or move anything
-: m_bChanged( false ),
+: m_bChanged( false )
   //m_pRowElements( nullptr ),
-  m_price( rhs.m_price ),
+  //m_price( rhs.m_price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
-  m_dreBuyCount( sFmtInteger, m_bChanged ),
-  m_dreBuyVolume( sFmtInteger, m_bChanged ),
-  m_dreBidSize( sFmtInteger, m_bChanged ),
-  m_drePrice( sFmtPrice, m_bChanged ),
-  m_dreAskSize( sFmtInteger, m_bChanged ),
-  m_dreSellVolume( sFmtInteger, m_bChanged ),
-  m_dreSellCount(sFmtInteger, m_bChanged ),
-  m_dreTicks( sFmtInteger, m_bChanged ),
-  m_dreVolume( sFmtInteger, m_bChanged ),
-  m_dreIndicatorStatic( sFmtString, m_bChanged ),
-  m_dreIndicatorDynamic( sFmtString, m_bChanged )
+, m_dreBuyCount( sFmtInteger, m_bChanged )
+, m_dreBuyVolume( sFmtInteger, m_bChanged )
+, m_dreBidSize( sFmtInteger, m_bChanged )
+, m_drePrice( sFmtPrice, m_bChanged )
+, m_dreAskSize( sFmtInteger, m_bChanged )
+, m_dreSellVolume( sFmtInteger, m_bChanged )
+, m_dreSellCount(sFmtInteger, m_bChanged )
+, m_dreTicks( sFmtInteger, m_bChanged )
+, m_dreVolume( sFmtInteger, m_bChanged )
+, m_dreIndicatorStatic( sFmtString, m_bChanged )
+, m_dreIndicatorDynamic( sFmtString, m_bChanged )
 {}
 
 DataRow::~DataRow() {

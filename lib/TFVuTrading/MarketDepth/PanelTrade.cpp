@@ -32,8 +32,8 @@ namespace l2 { // market depth
 
 namespace {
   const unsigned int FontHeight = 15; // pixels
-  const unsigned int RowHeight = 20;  // pixels
-  const unsigned int BorderWidth = 6; // pixels
+  const unsigned int RowHeight = 18;  // pixels
+  const unsigned int BorderWidth = 4; // pixels
   const unsigned int FramedRows = 10; // when to move into frame then recenter
 }
 
@@ -298,14 +298,14 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   if ( 0.0 != m_dblLastPrice ) {
     DataRow& row( m_DataRows[ m_dblLastPrice ] );
-    row.SetPrice( m_dblLastPrice ); // TODO: needs to reset back to the price, remove highlight
+    row.SetPrice( m_dblLastPrice, false ); // TODO: needs to reset back to the price, remove highlight
   }
 
   m_dblLastPrice = trade.Price();
   int ixPrice = m_DataRows.Cast( m_dblLastPrice );
   DataRow& rowData( m_DataRows[ ixPrice ] );
 
-  rowData.SetPrice( trade.Volume() ); // need to highlight the price level
+  rowData.SetPrice( trade.Volume(), true ); // need to highlight the price level
   rowData.IncTicks();
   rowData.AddVolume( trade.Volume() );
 
@@ -372,7 +372,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         pWinRow_t pWinRow = m_vWinRow[ ix ];
         DataRow& rowData( m_DataRows[ iy ] );
         rowData.SetRowElements( *pWinRow );
-        rowData.SetPrice( m_DataRows.Cast( iy ) );
+        rowData.SetPrice( m_DataRows.Cast( iy ), false );
         //rowData.Refresh();  // TODO: refactor out into timer
       }
     }

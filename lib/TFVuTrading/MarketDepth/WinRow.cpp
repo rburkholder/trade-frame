@@ -39,12 +39,6 @@ namespace { // local variables
   const static EColour colourAccount1( EColour::LightSeaGreen );
   const static EColour colourAccount2( EColour::LightGreen );
 
-  const static EColour colourPrice( EColour::LightSeaGreen );
-  const static EColour colourPriceHighlight( EColour::Yellow );
-
-  const static EColour colourBidHighlight( EColour::DodgerBlue );
-  const static EColour colourAskHighlight( EColour::Magenta );
-
   using EField = ou::tf::l2::WinRow::EField;
 
   struct Element {
@@ -54,21 +48,22 @@ namespace { // local variables
     long alignment; // not used at moment as WinRowElement uses dc.draw commands
     EColour colourBackground;
     EColour colourForeground;
+    EColour colourHighlight;
   };
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BuyCount,  50, "BuyCnt", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
-   , { EField::BuyVolume,  50, "BuyVol", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
-   , { EField::BidSize,  50, "BidSize", wxRIGHT, EColour::LightSkyBlue, EColour::Black  } // changes
-   , { EField::Price,    60, "Price",   wxRIGHT, colourPrice, EColour::Black  }
-   , { EField::AskSize,  50, "AskSize", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
-   , { EField::SellVolume, 50, "SellVol", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
-   , { EField::SellCount,  50, "SellCnt", wxRIGHT, EColour::LightPink, EColour::Black      } // changes
-   , { EField::Ticks,    50, "Ticks",   wxRIGHT, EColour::DimGray, EColour::White } // count of trades
-   , { EField::Volume,   60, "Vol",     wxRIGHT, EColour::DimGray, EColour::White } // sum of volume
-   , { EField::Static,   80, "SttcInd", wxLEFT, EColour::DimGray, EColour::White } // static indicators - pivots, ...
-   , { EField::Dynamic, 100, "DynInd",  wxLEFT, EColour::DimGray, EColour::White } // dynamic indicators - ema, ...
+     { EField::BuyCount,   50, "BuyCnt",  wxRIGHT, EColour::LightSkyBlue, EColour::Black, EColour::PaleGoldenrod  }
+   , { EField::BuyVolume,  50, "BuyVol",  wxRIGHT, EColour::LightSkyBlue, EColour::Black, EColour::PaleGoldenrod  }
+   , { EField::BidSize,    50, "BidSize", wxRIGHT, EColour::LightSkyBlue, EColour::Black, EColour::DodgerBlue  }
+   , { EField::Price,      60, "Price",   wxRIGHT, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow  }
+   , { EField::AskSize,    50, "AskSize", wxRIGHT, EColour::LightPink, EColour::Black, EColour::Magenta      }
+   , { EField::SellVolume, 50, "SellVol", wxRIGHT, EColour::LightPink, EColour::Black, EColour::PaleGoldenrod      }
+   , { EField::SellCount,  50, "SellCnt", wxRIGHT, EColour::LightPink, EColour::Black, EColour::PaleGoldenrod      }
+   , { EField::Ticks,      50, "Ticks",   wxRIGHT, EColour::DimGray, EColour::White, EColour::PaleGoldenrod } // count of trades
+   , { EField::Volume,     60, "Vol",     wxRIGHT, EColour::DimGray, EColour::White, EColour::PaleGoldenrod } // sum of volume
+   , { EField::Static,     80, "SttcInd", wxLEFT,  EColour::DimGray, EColour::White, EColour::PaleGoldenrod } // static indicators - pivots, ...
+   , { EField::Dynamic,   100, "DynInd",  wxLEFT,  EColour::DimGray, EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
   };
 }
 
@@ -88,8 +83,7 @@ WinRow::WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIs
       pwre->SetBackgroundColour( colourColumnHeader );
     }
     else {
-      pwre->SetBackgroundColour( element.colourBackground );
-      pwre->SetForegroundColour( element.colourForeground );
+      pwre->SetColours( element.colourBackground, element.colourForeground, element.colourHighlight );
     }
     m_vWinRowElement.push_back( pwre );
     xPos += element.width; // maybe +1 for a border
@@ -104,37 +98,6 @@ WinRow::pWinRow_t WinRow::Construct( wxWindow* parent, const wxPoint& origin, in
 WinRow::~WinRow() {
   Clear();
   m_vWinRowElement.clear();
-}
-
-void WinRow::HighlightBid( bool bHighlight ) {
-  if ( bHighlight ) {
-    m_vWinRowElement[ (int)EField::BidSize ]->SetBackgroundColour( colourBidHighlight );
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourBidHighlight );
-  }
-  else {
-    m_vWinRowElement[ (int)EField::BidSize ]->SetBackgroundColour( colourNormalCell );
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourPrice );
-   }
-}
-
-void WinRow::HighlightAsk( bool bHighlight ) {
-  if ( bHighlight ) {
-    m_vWinRowElement[ (int)EField::AskSize ]->SetBackgroundColour( colourAskHighlight );
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourAskHighlight );
-  }
-  else {
-    m_vWinRowElement[ (int)EField::AskSize ]->SetBackgroundColour( colourNormalCell );
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourPrice );
-   }
-}
-
-void WinRow::HighlightPrice( bool bHighlight ) {
-  if ( bHighlight ) {
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourPriceHighlight );
-  }
-  else {
-    m_vWinRowElement[ (int)EField::Price ]->SetBackgroundColour( colourPrice );
-   }
 }
 
 int WinRow::RowWidth() {

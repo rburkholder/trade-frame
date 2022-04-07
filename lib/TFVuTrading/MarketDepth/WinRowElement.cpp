@@ -19,7 +19,7 @@
  * Created on October 28, 2021, 16:29
  */
 
-#include <wx/sizer.h>
+//#include <wx/sizer.h>
 #include <wx/event.h>
 #include <wx/dcclient.h>
 
@@ -51,9 +51,9 @@ bool WinRowElement::Create(
   Init();
 
   CreateControls();
-  if ( GetSizer() ) {
-    GetSizer()->SetSizeHints( this );
-  }
+  //if ( GetSizer() ) {
+  //  GetSizer()->SetSizeHints( this );
+  //}
 
   Paint();
 
@@ -87,6 +87,32 @@ void WinRowElement::SetCanHaveFocus( bool bCanHaveFocus ) {
 void WinRowElement::SetText( const std::string& sText ) {
   m_sText = sText;
   Paint();
+}
+
+void WinRowElement::SetText( const std::string& sText, bool bHighlight ) {
+  m_sText = sText;
+  wxWindow::SetBackgroundColour( bHighlight ? m_colourHighlight : m_colourBackground );
+  Paint();
+}
+
+void WinRowElement::SetColourBackground( EColour colour ) {
+  m_colourBackground = colour;
+  wxWindow::SetBackgroundColour( colour );
+}
+
+void WinRowElement::SetColourForeground( EColour colour ) {
+  m_colourForeground = colour;
+  wxWindow::SetForegroundColour( colour );
+}
+
+void WinRowElement::SetColourHighlight( EColour colour ) {
+  m_colourHighlight = colour;
+}
+
+void WinRowElement::SetColours( EColour colourB, EColour colourF, EColour colourH ) {
+  SetColourBackground( colourB );
+  SetColourForeground( colourF );
+  SetColourHighlight( colourH );
 }
 
 void WinRowElement::Paint() {

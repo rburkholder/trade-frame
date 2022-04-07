@@ -48,7 +48,9 @@ public:
   //  m_drePrice.Set( value );
   //}
 
-  void SetPrice( double price ) { m_drePrice.Set( price ); }  // specialize in DataRowElement to do the highlight on and off
+  void SetPrice( double price, bool bHighLight ) {
+    m_drePrice.Set( price, bHighLight );
+  }
 
   void IncTicks() { m_dreTicks.Inc(); }
 
@@ -66,7 +68,7 @@ public:
 protected:
 private:
 
-  double m_price;
+  //double m_price;
 
   bool m_bChanged;
 

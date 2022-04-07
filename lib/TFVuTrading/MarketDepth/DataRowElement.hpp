@@ -40,18 +40,22 @@ public:
   virtual ~DataRowElement();
 
   void SetWinRowElement( WinRowElement* );
+  WinRowElement* GetWinRowElement() { return m_pWinRowElement; }
 
   virtual void UpdateWinRowElement();
 
   virtual void Set( T );
+  void Set( T, bool );
   void Inc();
   void Add( T );
   T Get() const;
 
 protected:
 
-  bool& m_bChanged; // reference to global
   T m_value;
+
+  bool& m_bChanged; // reference to global
+  bool m_bHighlight;
 
   boost::format m_format;
   std::string m_sValue; // value to be placed in WinRowElement
@@ -63,9 +67,11 @@ private:
 
 template<typename T>
 DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
-: m_format( sFormat ), m_bChanged( bChanged ),
-  m_pWinRowElement( nullptr ),
-  m_value {}
+: m_bChanged( bChanged )
+, m_bHighlight( false )
+, m_format( sFormat )
+, m_pWinRowElement( nullptr )
+, m_value {}
 {}
 
 template<typename T>
@@ -76,6 +82,13 @@ DataRowElement<T>::~DataRowElement() {
 template<typename T>
 void DataRowElement<T>::Set( T value ) {
   m_value = value;
+  m_bChanged = true;
+}
+
+template<typename T>
+void DataRowElement<T>::Set( T value, bool bHighlight ) {
+  m_value = value;
+  m_bHighlight = bHighlight;
   m_bChanged = true;
 }
 
@@ -109,7 +122,7 @@ void DataRowElement<T>::UpdateWinRowElement() {
     m_sValue.clear();
   }
   if ( nullptr != m_pWinRowElement ) {
-    m_pWinRowElement->SetText( m_sValue );
+    m_pWinRowElement->SetText( m_sValue, m_bHighlight );
   }
 }
 

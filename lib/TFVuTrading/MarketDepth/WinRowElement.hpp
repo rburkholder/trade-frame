@@ -26,6 +26,8 @@
 
 #include <wx/window.h>
 
+#include <OUCommon/Colour.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
@@ -59,10 +61,16 @@ public:
     long style = SYMBOL_WINELEMENT_STYLE
     );
 
+  using EColour = ou::Colour::wx::EColour;
+
   void SetText( const std::string& );
+  void SetText( const std::string&, bool bHighlight );
   void SetCanHaveFocus( bool );
-  //void SetColourBackground( ou::Colour::enumColour ); // convert to wxColour
-  //void SetColourForeground( ou::Colour::enumColour ); // convert to wxColour
+
+  void SetColourBackground( EColour colour );
+  void SetColourForeground( EColour colour );
+  void SetColourHighlight( EColour colour );
+  void SetColours( EColour colourB, EColour colourF, EColour colourH );
 
 protected:
 private:
@@ -72,10 +80,12 @@ private:
 
   bool m_bCanHaveFocus;
   bool m_bFocusSet;
+  bool m_bHighlight;
   std::string m_sText;
 
-  //ou::Colour::enumColour m_ColourBackground;
-  //ou::Colour::enumColour m_ColourForeground;
+  EColour m_colourBackground;
+  EColour m_colourForeground;
+  EColour m_colourHighlight;
 
   void Init();
   void CreateControls();
