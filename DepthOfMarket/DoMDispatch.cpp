@@ -351,8 +351,8 @@ void DoMDispatch::AuctionAdd(
   fVolumeAtPrice_t& f,
   mapAuction_t& map
 ) {
-  mapAuction_t::iterator iter = map.find( msg.dblPrice );
-  if ( map.end() == iter ) {
+  mapAuction_t::iterator iterAuction = map.find( msg.dblPrice );
+  if ( map.end() == iterAuction ) {
     map.emplace(
       std::pair(
         msg.dblPrice,
@@ -361,9 +361,10 @@ void DoMDispatch::AuctionAdd(
     );
   }
   else {
-    iter->second.nQuantity += msg.nQuantity;
+    iterAuction->second.nQuantity += msg.nQuantity;
+    iterAuction->second.nOrders++;
   }
-  if ( f ) f( msg.dblPrice, iter->second.nQuantity );
+  if ( f ) f( msg.dblPrice, iterAuction->second.nQuantity );
 }
 
 void DoMDispatch::AuctionUpdate(
@@ -386,6 +387,7 @@ void DoMDispatch::AuctionUpdate(
     // assert( nQuantity >= order.nQuantity ); // doesn't work for equities, need to fix for mmid
     //nQuantity += msg.nQuantity;
     nQuantity -= order.nQuantity;
+    iterAuction->second.nOrders--;
     if ( f ) f( order.dblPrice, nQuantity );
   }
 
@@ -398,6 +400,7 @@ void DoMDispatch::AuctionUpdate(
     auto& nQuantity( iterAuction->second.nQuantity );
     // assert( nQuantity >= order.nQuantity ); // doesn't work for equities, need to fix for mmid
     nQuantity += msg.nQuantity;
+    iterAuction->second.nOrders++;
     //nQuantity -= order.nQuantity;
     if ( f ) f( order.dblPrice, nQuantity );
   }
@@ -411,6 +414,7 @@ void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPr
   }
   else {
     iterAuction->second.nQuantity -= order.nQuantity;
+    iterAuction->second.nOrders--;
   }
   if ( f ) f( order.dblPrice, iterAuction->second.nQuantity );
 

@@ -102,9 +102,9 @@ private:
     volume_t nQuantity;
     int nOrders;
     Auction( volume_t nQuantity_ )
-    : nQuantity( nQuantity_ ), nOrders {}  {}
+    : nQuantity( nQuantity_ ), nOrders( 1 )  {}
     Auction( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
-    : nQuantity( msg.nQuantity ), nOrders {} {}
+    : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
   using mapAuction_t = std::map<double,Auction>;  // key is price
