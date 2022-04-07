@@ -48,15 +48,14 @@ public:
 protected:
 private:
 
+  double m_interval;
+  double m_intervalby2;
+
   // to consider: build total ladder in memory?
   // however, locks used only on map expansion (for now)
   std::mutex m_mutexMap; // prevent foreground, l1, l2 thread interference
 
   using mapRow_t = std::map<int,DataRow>;
-
-  double m_interval;
-  double m_intervalby2;
-
   mapRow_t m_mapRow;
 
 };

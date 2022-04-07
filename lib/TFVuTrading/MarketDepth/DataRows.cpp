@@ -39,7 +39,7 @@ DataRows::~DataRows() {
 
 void DataRows::SetInterval( double interval ) {
   assert( 0.0 < interval );
-  m_interval = ( interval ),
+  m_interval = interval;
   m_intervalby2 = interval / 2.0;
 }
 
