@@ -52,24 +52,32 @@ double DataRows::Cast( int ix ) const {
 }
 
 DataRow& DataRows::operator[]( double price ) {
-  std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive, put back, and do double lookup
+  //std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive, put back, and do double lookup
   int ix = Cast( price );
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( price ) ) );
-    assert( pair.second );
-    iter = pair.first;
+    std::scoped_lock<std::mutex> lock( m_mutexMap ); // is this fine to reduce locking?
+    iter = m_mapRow.find( ix ); // try again to confrirm
+    if ( m_mapRow.end() == iter ) {
+      auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( price ) ) );
+      assert( pair.second );
+      iter = pair.first;
+    }
   }
   return iter->second;
 }
 
 DataRow& DataRows::operator[]( int ix ) {
-  std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive, put back, and do double lookup
+  //std::scoped_lock<std::mutex> lock( m_mutexMap ); // this might be a bit excessive, put back, and do double lookup
   mapRow_t::iterator iter = m_mapRow.find( ix );
   if ( m_mapRow.end() == iter ) {
-    auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( Cast( ix ) ) ) );
-    assert( pair.second );
-    iter = pair.first;
+    std::scoped_lock<std::mutex> lock( m_mutexMap ); // is this fine to reduce locking
+    iter = m_mapRow.find( ix ); // try again to confirm inside lock
+    if ( m_mapRow.end() == iter ) {
+      auto pair = m_mapRow.emplace( std::make_pair( ix, DataRow( Cast( ix ) ) ) );
+      assert( pair.second );
+      iter = pair.first;
+    }
   }
   return iter->second;
 }
