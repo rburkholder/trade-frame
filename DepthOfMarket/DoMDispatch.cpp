@@ -40,20 +40,31 @@ void DoMDispatch::EmitMarketMakerMaps() {
   // will probably need a lock on this, as maps are in background thread
   // but mostly works as the deletion isn't in place yet
 
-  m_mapPriceMMAsk.clear();
-  m_mapAuctionAsk.clear();
+  // map to track price levels by market maker
+  struct price_mm {
+    double price;
+    std::string mm;
+    price_mm() : price {} {}
+    price_mm( double price_, const std::string& mm_ )
+    : price( price_ ), mm( mm_ ) {}
+    bool operator()( const price_mm& lhs, const price_mm& rhs ) const {
+      if ( lhs.price == rhs.price ) {
+        return ( lhs.mm < rhs.mm );
+      }
+      else {
+        return ( lhs.price < rhs.price );
+      }
+    }
+  };
+  using mapPriceLevels_t = std::map<price_mm, volume_t, price_mm>;
+  mapPriceLevels_t mapPriceMMAsk;
+  mapPriceLevels_t mapPriceMMBid;
+
 
   for ( const mapMM_t::value_type& vt: m_mapMMAsk ) {
     price_mm pmm( vt.second.price, vt.first );
-    m_mapPriceMMAsk.emplace( pmm, vt.second.volume );
+    mapPriceMMAsk.emplace( pmm, vt.second.volume );
 
-    mapAuction_t::iterator iter = m_mapAuctionAsk.find( vt.second.price );
-    if ( m_mapAuctionAsk.end() == iter ) {
-      m_mapAuctionAsk.emplace( vt.second.price, Auction( vt.second.volume ) );
-    }
-    else {
-      iter->second.nQuantity += vt.second.volume;
-    }
     //std::cout
     //  << "ask "
     //  << vt.first
@@ -62,20 +73,10 @@ void DoMDispatch::EmitMarketMakerMaps() {
     //  << std::endl;
   }
 
-  m_mapPriceMMBid.clear();
-  m_mapAuctionBid.clear();
-
   for ( const mapMM_t::value_type& vt: m_mapMMBid ) {
     price_mm pmm( vt.second.price, vt.first );
-    m_mapPriceMMBid.emplace( pmm, vt.second.volume );
+    mapPriceMMBid.emplace( pmm, vt.second.volume );
 
-    mapAuction_t::iterator iter = m_mapAuctionBid.find( vt.second.price );
-    if ( m_mapAuctionBid.end() == iter ) {
-      m_mapAuctionBid.emplace( vt.second.price, Auction( vt.second.volume ) );
-    }
-    else {
-      iter->second.nQuantity += vt.second.volume;
-    }
     //std::cout
     //  << "bid "
     //  << vt.first
@@ -85,8 +86,8 @@ void DoMDispatch::EmitMarketMakerMaps() {
   }
 
   for (
-    mapPriceLevels_t::const_reverse_iterator iter = m_mapPriceMMAsk.rbegin();
-    iter != m_mapPriceMMAsk.rend();
+    mapPriceLevels_t::const_reverse_iterator iter = mapPriceMMAsk.rbegin();
+    iter != mapPriceMMAsk.rend();
     iter++
   ) {
     std::cout
@@ -100,8 +101,8 @@ void DoMDispatch::EmitMarketMakerMaps() {
   std::cout << "----" << std::endl;
 
   for (
-    mapPriceLevels_t::const_reverse_iterator iter = m_mapPriceMMBid.rbegin();
-    iter != m_mapPriceMMBid.rend();
+    mapPriceLevels_t::const_reverse_iterator iter = mapPriceMMBid.rbegin();
+    iter != mapPriceMMBid.rend();
     iter++
   ) {
     std::cout
@@ -109,32 +110,6 @@ void DoMDispatch::EmitMarketMakerMaps() {
       << iter->first.price
       << "," << iter->first.mm
       << "=" << iter->second
-      << std::endl;
-  }
-
-  for (
-    mapAuction_t::const_reverse_iterator iter = m_mapAuctionAsk.rbegin();
-    iter != m_mapAuctionAsk.rend();
-    iter++
-  ) {
-    std::cout
-      << "ask "
-      << iter->first
-      << "=" << iter->second.nQuantity
-      << std::endl;
-  }
-
-  std::cout << "----" << std::endl;
-
-  for (
-    mapAuction_t::const_reverse_iterator iter = m_mapAuctionBid.rbegin();
-    iter != m_mapAuctionBid.rend();
-    iter++
-  ) {
-    std::cout
-      << "bid "
-      << iter->first
-      << "=" << iter->second.nQuantity
       << std::endl;
   }
 

@@ -110,26 +110,6 @@ private:
   mapAuction_t m_mapAuctionAsk;
   mapAuction_t m_mapAuctionBid;
 
-  // map to track price levels by market maker
-  struct price_mm {
-    double price;
-    std::string mm;
-    price_mm() : price {} {}
-    price_mm( double price_, const std::string& mm_ )
-    : price( price_ ), mm( mm_ ) {}
-    bool operator()( const price_mm& lhs, const price_mm& rhs ) const {
-      if ( lhs.price == rhs.price ) {
-        return ( lhs.mm < rhs.mm );
-      }
-      else {
-        return ( lhs.price < rhs.price );
-      }
-    }
-  };
-  using mapPriceLevels_t = std::map<price_mm, volume_t, price_mm>;
-  mapPriceLevels_t m_mapPriceMMAsk;
-  mapPriceLevels_t m_mapPriceMMBid;
-
   // updated with OnMBOOrderArrival
   struct price_level {
     double price;
