@@ -198,9 +198,9 @@ namespace OrderArrival {
   };
 
   template <typename T>
-  bool Decode( decoded& out, T begin, T end ) {
+  bool Decode( parser_decoded<T>& parser, decoded& out, T begin, T end ) {
 
-    static parser_decoded<T> parser;
+    //static parser_decoded<T> parser;
     // parser_decoded<T> parser; // do we want to recreate this each time?
 
     // nasdaq l2: '6,QQQ,,AMEX,A,408.8400,100,,4,17:52:38.059128,2022-04-01,'

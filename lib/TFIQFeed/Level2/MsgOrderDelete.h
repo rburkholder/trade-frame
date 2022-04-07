@@ -184,9 +184,9 @@ namespace OrderDelete {
   };
 
   template <typename T>
-  bool Decode( decoded& out, T begin, T end ) {
+  bool Decode( parser_decoded<T>& parser, decoded& out, T begin, T end ) {
 
-    static parser_decoded<T> parser;
+    //static parser_decoded<T> parser;
 
     // '5,TSLA,,CHXE,B,,2022-04-01,' nasdaq LII
     // "5,@ESZ21,648907593934,,A,20:32:47.333543,2021-10-24,"

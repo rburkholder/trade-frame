@@ -72,6 +72,8 @@ protected:
 
 private:
   bool m_bInitialized;
+  ou::tf::iqfeed::l2::msg::OrderArrival::parser_decoded<typename linebuffer_t::iterator> m_parserArrival;
+  ou::tf::iqfeed::l2::msg::OrderDelete::parser_decoded<typename linebuffer_t::iterator> m_parserDelete;
 };
 
 template <typename T>
@@ -165,7 +167,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
-        if ( OrderArrival::Decode( msg, iter, end) ) {
+        if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
           if ( &Dispatcher<T>::OnMBOAdd != &T::OnMBOAdd ) {
             static_cast<T*>( this )->OnMBOAdd( msg );
           }
@@ -179,7 +181,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
-        if ( OrderArrival::Decode( msg, iter, end) ) {
+        if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
           if ( &Dispatcher<T>::OnMBOUpdate != &T::OnMBOUpdate ) {
             static_cast<T*>( this )->OnMBOUpdate( msg );
           }
@@ -193,7 +195,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         namespace OrderDelete = ou::tf::iqfeed::l2::msg::OrderDelete;
         OrderDelete::decoded msg;
-        if ( OrderDelete::Decode( msg, iter, end) ) {
+        if ( OrderDelete::Decode( m_parserDelete, msg, iter, end) ) {
           if ( &Dispatcher<T>::OnMBODelete != &T::OnMBODelete ) {
             static_cast<T*>( this )->OnMBODelete( msg );
           }
@@ -213,7 +215,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
-        if ( OrderArrival::Decode( msg, iter, end) ) {
+        if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
           if ( &Dispatcher<T>::OnMBOSummary != &T::OnMBOSummary ) {
             static_cast<T*>( this )->OnMBOSummary( msg );
           }
