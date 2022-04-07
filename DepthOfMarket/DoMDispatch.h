@@ -133,8 +133,16 @@ private:
     fVolumeAtPrice_t&,
     mapMM_t&, mapAuction_t& );
 
-  void AuctionAdd( mapAuction_t& map, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
-  void AuctionUpdate( mapAuction_t& map, const Order& order, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
-  void AuctionDel( mapAuction_t& map, const Order& );
+  void AuctionAdd(
+    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
+    fVolumeAtPrice_t&,
+    mapAuction_t& );
+  void AuctionUpdate(
+    mapAuction_t& map,
+    const Order& order,
+    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ,
+    fVolumeAtPrice_t&
+    );
+  void AuctionDel( mapAuction_t& map, const Order&, fVolumeAtPrice_t& );
 
 };

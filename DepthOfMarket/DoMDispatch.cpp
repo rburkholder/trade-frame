@@ -133,6 +133,7 @@ void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
 
   if ( 0 == msg.nOrderId ) { // nasdaq type LII
+    std::cout << "found nasdaq type lii add message" << std::endl;
   }
   else { // other type
     mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
@@ -149,10 +150,10 @@ void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded
 
     switch ( msg.chOrderSide ) {
       case 'A':
-        AuctionAdd( m_mapAuctionAsk, msg );
+        AuctionAdd( msg, m_fAskVolumeAtPrice, m_mapAuctionAsk );
         break;
       case 'B':
-        AuctionAdd( m_mapAuctionBid, msg );
+        AuctionAdd( msg, m_fBidVolumeAtPrice, m_mapAuctionBid );
         break;
     }
   }
@@ -199,10 +200,10 @@ void DoMDispatch::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::deco
 
       switch ( msg.chOrderSide ) {
         case 'A':
-          AuctionUpdate( m_mapAuctionAsk, iter->second, msg );
+          AuctionUpdate( m_mapAuctionAsk, iter->second, msg, m_fAskVolumeAtPrice );
           break;
         case 'B':
-          AuctionUpdate( m_mapAuctionBid, iter->second, msg );
+          AuctionUpdate( m_mapAuctionBid, iter->second, msg, m_fBidVolumeAtPrice );
           break;
       }
 
@@ -308,10 +309,10 @@ void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decod
 
       switch ( msg.chOrderSide ) {
         case 'A':
-          AuctionDel( m_mapAuctionAsk, iter->second );
+          AuctionDel( m_mapAuctionAsk, iter->second, m_fAskVolumeAtPrice );
           break;
         case 'B':
-          AuctionDel( m_mapAuctionBid, iter->second );
+          AuctionDel( m_mapAuctionBid, iter->second, m_fBidVolumeAtPrice );
           break;
       }
 
@@ -345,7 +346,11 @@ void DoMDispatch::MMAuction_Delete(
 
 }
 
-void DoMDispatch::AuctionAdd( mapAuction_t& map, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void DoMDispatch::AuctionAdd(
+  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  fVolumeAtPrice_t& f,
+  mapAuction_t& map
+) {
   mapAuction_t::iterator iter = map.find( msg.dblPrice );
   if ( map.end() == iter ) {
     map.emplace(
@@ -358,9 +363,15 @@ void DoMDispatch::AuctionAdd( mapAuction_t& map, const ou::tf::iqfeed::l2::msg::
   else {
     iter->second.nQuantity += msg.nQuantity;
   }
+  if ( f ) f( msg.dblPrice, iter->second.nQuantity );
 }
 
-void DoMDispatch::AuctionUpdate( mapAuction_t& map, const Order& order, const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void DoMDispatch::AuctionUpdate(
+  mapAuction_t& map,
+  const Order& order,
+  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  fVolumeAtPrice_t& f
+) {
   mapAuction_t::iterator iter = map.find( order.dblPrice );
   if ( map.end() == iter ) {
     std::cout << "AuctionUpdate price not found: " << order.sMarketMaker << "," << order.dblPrice << std::endl;
@@ -371,9 +382,10 @@ void DoMDispatch::AuctionUpdate( mapAuction_t& map, const Order& order, const ou
     nQuantity += msg.nQuantity;
     nQuantity -= order.nQuantity;
   }
+  if ( f ) f( order.dblPrice, iter->second.nQuantity );
 }
 
-void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order ) {
+void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPrice_t& f ) {
 
   mapAuction_t::iterator iter = map.find( order.dblPrice );
   if ( map.end() == iter ) {
@@ -382,5 +394,6 @@ void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order ) {
   else {
     iter->second.nQuantity -= order.nQuantity;
   }
+  if ( f ) f( order.dblPrice, iter->second.nQuantity );
 
 }
