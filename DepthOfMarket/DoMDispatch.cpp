@@ -368,32 +368,50 @@ void DoMDispatch::AuctionAdd(
 
 void DoMDispatch::AuctionUpdate(
   mapAuction_t& map,
-  const Order& order,
+  Order& order,
   const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f
 ) {
-  mapAuction_t::iterator iter = map.find( order.dblPrice );
-  if ( map.end() == iter ) {
+
+  if ( order.chOrderSide != msg.chOrderSide ) {
+    std::cout << "order side change " << order.chOrderSide << " to " << msg.chOrderSide << std::endl;
+  }
+
+  mapAuction_t::iterator iterAuction = map.find( order.dblPrice );
+  if ( map.end() == iterAuction ) {
     std::cout << "AuctionUpdate price not found: " << order.sMarketMaker << "," << order.dblPrice << std::endl;
   }
   else {
-    auto& nQuantity( iter->second.nQuantity );
+    auto& nQuantity( iterAuction->second.nQuantity );
+    // assert( nQuantity >= order.nQuantity ); // doesn't work for equities, need to fix for mmid
+    //nQuantity += msg.nQuantity;
+    nQuantity -= order.nQuantity;
+    if ( f ) f( order.dblPrice, nQuantity );
+  }
+
+  if ( order.dblPrice != msg.dblPrice ) {
+    //std::cout << "price change " << order.dblPrice << " to " << msg.dblPrice << std::endl;
+    AuctionAdd( msg, f, map );
+    order.dblPrice = msg.dblPrice;
+  }
+  else {
+    auto& nQuantity( iterAuction->second.nQuantity );
     // assert( nQuantity >= order.nQuantity ); // doesn't work for equities, need to fix for mmid
     nQuantity += msg.nQuantity;
-    nQuantity -= order.nQuantity;
+    //nQuantity -= order.nQuantity;
+    if ( f ) f( order.dblPrice, nQuantity );
   }
-  if ( f ) f( order.dblPrice, iter->second.nQuantity );
 }
 
 void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPrice_t& f ) {
 
-  mapAuction_t::iterator iter = map.find( order.dblPrice );
-  if ( map.end() == iter ) {
+  mapAuction_t::iterator iterAuction = map.find( order.dblPrice );
+  if ( map.end() == iterAuction ) {
     std::cout << "AuctionDel price not found: " << order.dblPrice << std::endl;
   }
   else {
-    iter->second.nQuantity -= order.nQuantity;
+    iterAuction->second.nQuantity -= order.nQuantity;
   }
-  if ( f ) f( order.dblPrice, iter->second.nQuantity );
+  if ( f ) f( order.dblPrice, iterAuction->second.nQuantity );
 
 }

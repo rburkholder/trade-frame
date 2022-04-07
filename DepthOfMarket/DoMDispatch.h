@@ -100,10 +100,11 @@ private:
   struct Auction {
     // maintain set of orders?
     volume_t nQuantity;
+    int nOrders;
     Auction( volume_t nQuantity_ )
-    : nQuantity( nQuantity_ ) {}
+    : nQuantity( nQuantity_ ), nOrders {}  {}
     Auction( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
-    : nQuantity( msg.nQuantity ) {}
+    : nQuantity( msg.nQuantity ), nOrders {} {}
   };
 
   using mapAuction_t = std::map<double,Auction>;  // key is price
@@ -139,7 +140,7 @@ private:
     mapAuction_t& );
   void AuctionUpdate(
     mapAuction_t& map,
-    const Order& order,
+    Order& order,
     const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ,
     fVolumeAtPrice_t&
     );
