@@ -19,6 +19,7 @@
  * Created: March 7, 2022 14:35
  */
 
+
 // https://indico.cern.ch/event/697389/contributions/3062036/attachments/1712790/2761904/Support_for_SIMD_Vectorization_in_ROOT_ROOT_Workshop_2018.pdf
 // https://www.intel.com/content/www/us/en/develop/documentation/advisor-user-guide/top/analyze-cpu-roofline.html
 // https://stackoverflow.com/questions/52653025/why-is-march-native-used-so-rarely
@@ -29,9 +30,13 @@
 //   due to it being captured to the gui, and is not thread safe
  #include <boost/log/trivial.hpp>
 
- #include <boost/lexical_cast.hpp>
-
+#include <boost/lexical_cast.hpp>
 #include <rdaf/TH2.h>
+#include <rdaf/TRint.h>
+#include <rdaf/TROOT.h>
+#include <rdaf/TFile.h>
+#include <chrono>
+#include <rdaf/TH3.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
 
@@ -256,7 +261,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   }
 
   if ( m_pHistVolume ) {
-    m_pHistVolume->Fill( trade.Price(), m_branchTrade.time, trade.Volume() );
+    m_pHistVolume->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
 
 }
@@ -393,6 +398,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   switch ( m_stateTrade ) {
     case ETradeState::Search:
+
       if ( bTriggerEntry ) {
         BOOST_LOG_TRIVIAL(info) << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew;
         EnterLong( bar );
@@ -402,17 +408,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      {
-        double pl = m_pPosition->GetUnRealizedPL();
-        if ( 20.0 < pl ) {
-          ExitLong( bar ); // profit
-        }
-        else {
-          //if ( ( -5.0 > pl ) && ( skew ) ) {
-          //if ( -5.0 > pl ) {
-          //  ExitLong( bar ); // stop loss
-          //}
-        }
+      if (m_pPosition->GetUnRealizedPL() > m_quote.Bid() * 0.08 ) {
+        // exit long
+
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 100, m_quote.Bid() - 0.01 );
+        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+        m_ceLongExit.AddLabel( bar.DateTime(), m_quote.Midpoint(), "Long Exit" );
+        m_stateTrade = ETradeState::LongExitSubmitted;
+        m_pPosition->PlaceOrder( m_pOrder );
       }
       break;
     case ETradeState::ShortSubmitted:
@@ -500,6 +504,9 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   // RecordSeries has been set to false
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  if (m_pFile){
+    m_pFile->Write();
+  }
 }
 
 void Strategy::CloseAndDone() {
