@@ -73,7 +73,7 @@ void PanelFinancialChart::CreateControls() {
   m_pTree->ExpandAll();
   m_pTree->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelFinancialChart::HandleTreeEventItemGetToolTip, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
 
-  //m_pTreeItems = new TreeItem( m_pTree, "/" ); // initialize tree - instead this is supplied by outside caller
+  //m_pTreeItem = new TreeItem( m_pTree, "/" ); // initialize tree - instead this is supplied by outside caller
 
   // panel for right side of splitter
   m_pWinChartView = new WinChartView( m_pSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
@@ -95,20 +95,20 @@ void PanelFinancialChart::CreateControls() {
 
 TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
 
-  wxTreeItemId id;
+  wxTreeItemId id =  m_pTree->GetRootItem();
 
-  if ( m_pTree->GetRootItem().IsOk() ) {
+  if ( id.IsOk() ) {
     throw std::runtime_error( "root item already exists" );
   }
   else {
-    m_pTreeItems = new TreeItem( m_pTree, sName );
-    m_pTreeItems->SetOnClick(
+    m_pTreeItem = new TreeItem( m_pTree, sName );
+    m_pTreeItem->SetOnClick(
       [this, pChartDataView]( TreeItem* pti ){
         m_pWinChartView->SetChartDataView( pChartDataView.get() );
       });
-    m_pTree->Expand( id );
+    //m_pTree->Expand( id );
   }
-  return m_pTreeItems;
+  return m_pTreeItem;
 }
 
 void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView ) {

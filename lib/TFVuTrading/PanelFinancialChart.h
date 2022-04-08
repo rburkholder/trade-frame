@@ -76,7 +76,7 @@ protected:
 private:
 
   wxTreeCtrl* m_pTree;
-  TreeItem* m_pTreeItems; // root of custom tree items
+  TreeItem* m_pTreeItem; // root of custom tree items
   wxSplitterWindow* m_pSplitter;
 
   WinChartView* m_pWinChartView; // handles drawing the chart
