@@ -337,6 +337,38 @@ ManageStrategy::ManageStrategy(
 
     assert( 0 != m_mapChains.size() );
 
+    std::vector<boost::gregorian::date> vChainsToBeRemoved;
+
+    size_t nStrikesSum {};
+    for ( const mapChains_t::value_type& vt: m_mapChains ) { // only use chains where all calls/puts available
+      size_t nStrikesTotal {};
+      size_t nStrikesMatch {};
+      vt.second.Strikes(
+        [&nStrikesTotal,&nStrikesMatch]( double strike, const chain_t::strike_t& options ){
+          nStrikesTotal++;
+          if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
+            nStrikesMatch++;
+          }
+      } );
+      if ( nStrikesTotal == nStrikesMatch ) {
+        nStrikesSum += nStrikesTotal;
+        std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strkes" << std::endl;
+      }
+      else {
+        std::cout << "chain " << vt.first << " removed with " << nStrikesTotal << " strkes" << std::endl;
+        vChainsToBeRemoved.push_back( vt.first );
+      }
+    }
+
+    assert( vChainsToBeRemoved.size() != m_mapChains.size() );
+    for ( auto date: vChainsToBeRemoved ) { // remove chains with incomplete info
+      mapChains_t::iterator iter = m_mapChains.find( date );
+      m_mapChains.erase( iter );
+    }
+
+    size_t nAverageStrikes = nStrikesSum / m_mapChains.size();
+    std::cout << "chain size average: " << nAverageStrikes << std::endl;
+
     m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
     m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
