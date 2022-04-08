@@ -31,6 +31,8 @@ using vSymbol_t = std::vector<std::string>;
 struct Options {
   boost::gregorian::date dateHistory;
   boost::gregorian::date dateTrading;
+  boost::gregorian::days nDaysFront;
+  boost::gregorian::days nDaysBack;
   vSymbol_t vSymbol;
 };
 

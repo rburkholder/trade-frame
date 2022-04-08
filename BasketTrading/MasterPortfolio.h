@@ -78,8 +78,9 @@ public:
   using fChartRoot_t = std::function<ou::tf::TreeItem*(const std::string&,pChartDataView_t)>;
 
   MasterPortfolio(
-    boost::gregorian::date dateTrading,
-    vSymbol_t&& vSymbol,
+    boost::gregorian::date dateTrading, // from config file
+    ou::tf::option::SpreadSpecs, // from config file
+    vSymbol_t&& vSymbol, // from config file? - maybe just send config file?
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
     fChartRoot_t&&
@@ -125,6 +126,7 @@ private:
   bool m_bStarted;
 
   boost::gregorian::date m_dateTrading;  // for use in DailyTradeTimeFrame
+  ou::tf::option::SpreadSpecs m_spread_specs;
   ptime m_dtLatestEod;
 
   // need to unify this with m_setSymbol;
@@ -284,8 +286,8 @@ private:
   setSymbols_t m_setSymbols;
   setSymbols_t::const_iterator m_iterSymbols;
 
-  using mapSpecs_t = std::map<std::string,ou::tf::option::SpreadSpecs>;
-  static const mapSpecs_t m_mapSpecs;
+  //using mapSpecs_t = std::map<std::string,ou::tf::option::SpreadSpecs>;
+  //static const mapSpecs_t m_mapSpecs;
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
   std::unique_ptr<HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect

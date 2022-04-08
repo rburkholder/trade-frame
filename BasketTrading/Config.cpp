@@ -41,17 +41,23 @@ bool Load( Options& options ) {
 
     static const std::string sOption_DateHistory( "date_history" );
     static const std::string sOption_DateTrading( "date_trading" );
+    static const std::string sOption_DaysFront( "days_front" );
+    static const std::string sOption_DaysBack( "days_back" );
     static const std::string sOption_Symbol( "symbol" );
 
     std::string sDateHistory;
     std::string sDateTrading;
+    unsigned int nDaysFront;
+    unsigned int nDaysBack;
     vSymbol_t vSymbol;
 
     po::options_description config( "BasketTrading Config" );
     config.add_options()
       ( sOption_DateHistory.c_str(), po::value<std::string>(&sDateHistory), "history date")
       ( sOption_DateTrading.c_str(), po::value<std::string>(&sDateTrading), "trading date")
-      ( sOption_Symbol.c_str(), po::value<vSymbol_t>(&vSymbol), "symbol" );
+      ( sOption_DaysFront.c_str(), po::value<unsigned int>(&nDaysFront), "minimum front month days in future")
+      ( sOption_DaysBack.c_str(), po::value<unsigned int>(&nDaysBack), "minimum back month days in future")
+      ( sOption_Symbol.c_str(), po::value<vSymbol_t>(&vSymbol), "underlying symbol" );
       ;
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
@@ -82,6 +88,22 @@ bool Load( Options& options ) {
     else {
       BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DateTrading << "='";
       bOk = false;
+    }
+
+    if ( 0 < vm.count( sOption_DaysFront ) ) {
+      options.nDaysFront = boost::gregorian::days( vm[sOption_DaysFront].as<unsigned int>() );
+      BOOST_LOG_TRIVIAL(info) << "front month days " << options.nDaysFront;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DaysFront << "='";
+    }
+
+    if ( 0 < vm.count( sOption_DaysBack ) ) {
+      options.nDaysBack = boost::gregorian::days( vm[sOption_DaysBack].as<unsigned int>() );
+      BOOST_LOG_TRIVIAL(info) << "back month days " << options.nDaysBack;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DaysBack << "='";
     }
 
     if ( 0 < vm.count( sOption_Symbol ) ) {

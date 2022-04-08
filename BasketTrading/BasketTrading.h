@@ -65,7 +65,8 @@ private:
   using pPortfolio_t = ou::tf::PortfolioManager::pPortfolio_t;
   using pPosition_t  = ou::tf::PortfolioManager::pPosition_t;
 
-  boost::gregorian::date m_dateTrading;
+  boost::gregorian::date m_dateTrading; // save the config file instead?
+  ou::tf::option::SpreadSpecs m_spread_specs; // save the config file instead?
   ptime m_dtLatestEod;
   vSymbol_t m_vSymbol;
 

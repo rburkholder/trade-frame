@@ -39,15 +39,15 @@ namespace {
 }
 
 // this does not appear to be used?
-const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
+//const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 //        { "GLD", { 0.10, 0.20, 3, 30 } }
 //      , { "SPY", { 0.10, 0.20, 3, 30 } }
 //       { "QGCZ21", { 0.10, 0.20, 5, 32 } }
 //        { "@ESZ21", {  0.75, 1.50, 6, 30 } }
 // TODO: use trading hours, liquid trading hours for different ranges
 //        { "@ESH22", {  1.00, 2.00, 6, 30 } } // NOTE: this needs to be replicated below, TODO fix the duplication requirements
-        { "@ESM22", {  3, 35 } } // TODO fix the duplication requirements - TODO: put this in config file
-    };
+//        { "@ESM22", {  3, 35 } } // TODO fix the duplication requirements - TODO: put this in config file
+//    };
 
 /*
 @ES#    E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
@@ -64,22 +64,24 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 */
 
 MasterPortfolio::MasterPortfolio(
-    boost::gregorian::date dateTrading,
-    vSymbol_t&& vSymbol,
-    pPortfolio_t pMasterPortfolio,
-    pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fChartRoot_t&& fChartRoot
-    )
-  : m_bStarted( false ),
-    m_nQuery {},
-    m_nSharesTrading( 0 ),
-    m_dateTrading( dateTrading ),
-    m_vSymbol( std::move( vSymbol ) ),
-    m_fChartRoot( std::move( fChartRoot ) ),
-    m_pMasterPortfolio( pMasterPortfolio ),
-    m_pExec( pExec ),
-    m_pData1( pData1 ),
-    m_pData2( pData2 )
+  boost::gregorian::date dateTrading
+, ou::tf::option::SpreadSpecs spread_specs // from config file
+, vSymbol_t&& vSymbol
+, pPortfolio_t pMasterPortfolio
+, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
+, fChartRoot_t&& fChartRoot
+)
+: m_bStarted( false )
+, m_nQuery {}
+, m_nSharesTrading( 0 )
+, m_dateTrading( dateTrading )
+, m_spread_specs( spread_specs )
+, m_vSymbol( std::move( vSymbol ) )
+, m_fChartRoot( std::move( fChartRoot ) )
+, m_pMasterPortfolio( pMasterPortfolio )
+, m_pExec( pExec )
+, m_pData1( pData1 )
+, m_pData2( pData2 )
     //m_eAllocate( EAllocate::Waiting )
 {
   assert( 0 < m_vSymbol.size() );
@@ -552,8 +554,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
 
   const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );
 
-  mapSpecs_t::const_iterator iterSpreadSpecs
-    = m_mapSpecs.find( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+  //mapSpecs_t::const_iterator iterSpreadSpecs
+  //  = m_mapSpecs.find( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
   namespace ph = std::placeholders;
 
@@ -564,7 +566,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
         m_dateTrading,
-        iterSpreadSpecs->second,
+        m_spread_specs,
     // ManageStrategy::fGatherOptions_t
         [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){
           mapUnderlyingWithStrategies_t::const_iterator iter = m_mapUnderlyingWithStrategies.find( sIQFeedUnderlyingName );
