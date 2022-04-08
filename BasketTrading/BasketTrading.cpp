@@ -31,6 +31,8 @@
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include <TFVuTrading/TreeItem.hpp>
+
 #include "Config.h"
 #include "BasketTrading.h"
 #include "PanelPortfolioStats.h"
@@ -234,16 +236,8 @@ void AppBasketTrading::BuildMasterPortfolio() {
     // providers
     m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
     // root ChartDataView to PanelFinancialChart
-    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->wxTreeItemId{
+    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
       return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
-    },
-    // add ChartDataView to PanelFinancialChart
-    [this]( wxTreeItemId idParent, const std::string& sName,  pChartDataView_t pChartDataView, wxMenu* pMenuPopup )->wxTreeItemId{
-      return m_pPanelFinancialChart->AppendItem( idParent, sName, pChartDataView, pMenuPopup );
-    },
-    // del ChartDataView from PanelFinancialChart
-    [this]( wxTreeItemId id ){
-      m_pPanelFinancialChart->DeleteItem( id );
     }
     );
   //std::cout << "  done." << std::endl;

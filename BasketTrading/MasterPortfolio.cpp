@@ -28,6 +28,8 @@
 
 #include <TFOptions/Engine.h>
 
+#include <TFVuTrading/TreeItem.hpp>
+
 #include "MoneyManager.h"
 #include "HistoryRequest.h"
 #include "MasterPortfolio.h"
@@ -50,9 +52,6 @@ const MasterPortfolio::mapSpecs_t MasterPortfolio::m_mapSpecs = {
 /*
 @ES#    E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
 
-@ESU21  E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
-@ESZ21  E-MINI S&P 500 DECEMBER 2021    CME     CMEMINI FUTURE
-@ESH22  E-MINI S&P 500 MARCH 2022       CME     CMEMINI FUTURE
 @ESM22  E-MINI S&P 500 JUNE 2022        CME     CMEMINI FUTURE
 @ESU22  E-MINI S&P 500 SEPTEMBER 2022   CME     CMEMINI FUTURE
 @ESZ22  E-MINI S&P 500 DECEMBER 2022    CME     CMEMINI FUTURE
@@ -69,7 +68,7 @@ MasterPortfolio::MasterPortfolio(
     vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fChartRoot_t&& fChartRoot, fChartAdd_t&& fChartAdd, fChartDel_t&& fChartDel
+    fChartRoot_t&& fChartRoot
     )
   : m_bStarted( false ),
     m_nQuery {},
@@ -77,8 +76,6 @@ MasterPortfolio::MasterPortfolio(
     m_dateTrading( dateTrading ),
     m_vSymbol( std::move( vSymbol ) ),
     m_fChartRoot( std::move( fChartRoot ) ),
-    m_fChartAdd( std::move( fChartAdd ) ),
-    m_fChartDel( std::move( fChartDel ) ),
     m_pMasterPortfolio( pMasterPortfolio ),
     m_pExec( pExec ),
     m_pData1( pData1 ),
@@ -88,8 +85,6 @@ MasterPortfolio::MasterPortfolio(
   assert( 0 < m_vSymbol.size() );
 
   assert( m_fChartRoot );
-  assert( m_fChartAdd );
-  assert( m_fChartDel );
 
   assert( pMasterPortfolio );
   assert( pExec );
@@ -128,23 +123,25 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
-  wxMenuItem* pMenuItem;
-  wxMenu* pMenuPopupUnderlying = new wxMenu( "Underlying" );
-  pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "New Underlying" );
-  int id = pMenuItem->GetId();
-  pMenuPopupUnderlying->Bind(
-    wxEVT_COMMAND_MENU_SELECTED,
-    []( wxCommandEvent& event ){
-      //std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
-    },
-    id );
-
-  m_idTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
-  m_idTreeUnderlying = m_fChartAdd( m_idTreeRoot, "Underlying", nullptr, pMenuPopupUnderlying );
-  m_idTreeStrategies = m_fChartAdd( m_idTreeRoot, "Strategies", nullptr, nullptr );
+  m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
+  m_ptiTreeUnderlying = m_ptiTreeRoot->AppendChild(
+    "Underlying",
+    []( ou::tf::TreeItem* ){},
+    [this]( ou::tf::TreeItem* pti ){
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "New Underlying",
+        []( ou::tf::TreeItem* pti ){
+          //std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
+        }
+      );
+    });
+  m_ptiTreeStrategies = m_ptiTreeRoot->AppendChild(
+    "Strategies",
+    []( ou::tf::TreeItem* ){},
+    []( ou::tf::TreeItem* ){}
+    );
   //m_idTreeOptions = m_fChartAdd( m_idTreeRoot, "Options", nullptr, nullptr ); // needs to be within the associated underlying
-
-  pMenuPopupUnderlying = nullptr;
 
   std::stringstream ss;
   //ss.str( "" );
@@ -484,20 +481,19 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
         m_pOptionEngine->RegisterWatch( uws.pUnderlying->GetWatch() );
 
-        wxMenuItem* pMenuItem;
-        wxMenu* pMenuPopupUnderlying = new wxMenu( sUnderlying );
-        pMenuItem = pMenuPopupUnderlying->Append( wxID_ANY, "Add Strategy" );
-        int id = pMenuItem->GetId();
-        pMenuPopupUnderlying->Bind(
-          wxEVT_COMMAND_MENU_SELECTED,
-          [sUnderlying]( wxCommandEvent& event ){
-            std::cout << "Add Strategy for: " << sUnderlying << " (" << event.GetId() << ")" << std::endl;
+        uws.pti = m_ptiTreeUnderlying->AppendChild(
+          sUnderlying,
+          [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
+            uws.pUnderlying->GetChartDataView();//, pMenuPopupUnderlying
           },
-          id );
-
-        uws.idTreeItem = m_fChartAdd( m_idTreeUnderlying, sUnderlying, uws.pUnderlying->GetChartDataView(), pMenuPopupUnderlying );
-
-        pMenuPopupUnderlying = nullptr;
+          [this,sUnderlying]( ou::tf::TreeItem* pti ){
+            pti->NewMenu();
+            pti->AppendMenuItem(
+              "Add Strategy",
+              [this,sUnderlying]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Strategy for: " << sUnderlying << " (todo)" << std::endl;
+              });
+          });
 
         // TODO: run this in a thread, takes a while to process large option lists
 
@@ -822,23 +818,23 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
 
     pManageStrategy_t pManageStrategy = strategy.pManageStrategy;
 
-    wxMenuItem* pMenuItem;
-    wxMenu* pMenuPopupStrategy = new wxMenu( idPortfolioStrategy );
-    pMenuItem = pMenuPopupStrategy->Append( wxID_ANY, "Close" );
-    int id = pMenuItem->GetId();
-    pMenuPopupStrategy->Bind(
-      wxEVT_COMMAND_MENU_SELECTED,
-      [idPortfolioStrategy,pManageStrategy]( wxCommandEvent& event ){
-        std::cout << "Closing: " << idPortfolioStrategy << event.GetId() << std::endl;
-        pManageStrategy->ClosePositions();
-      },
-      id );
-
     // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
     //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
-    strategy.idTreeItem = m_fChartAdd( uws.idTreeItem, idPortfolioStrategy, pChartDataView, pMenuPopupStrategy );
+    strategy.pti = m_ptiTreeStrategies->AppendChild(
+      idPortfolioStrategy,
+      []( ou::tf::TreeItem* pti ){
+        // pChartDataView
+      },
+      [this,pManageStrategy,idPortfolioStrategy]( ou::tf::TreeItem* pti ){
+        pti->NewMenu();
+        pti->AppendMenuItem(
+          "Close",
+          [this,pManageStrategy, idPortfolioStrategy]( ou::tf::TreeItem* pti){
+            std::cout << "Closing: " << idPortfolioStrategy << std::endl;
+            pManageStrategy->ClosePositions();
+          });
+      } );
     strategy.bChartActivated = true;
-    pMenuPopupStrategy = nullptr;
   }
 
   strategy.pManageStrategy->Run();

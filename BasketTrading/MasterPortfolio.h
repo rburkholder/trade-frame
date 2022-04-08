@@ -47,6 +47,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+  class TreeItem;
 namespace iqfeed { // IQFeed
 class OptionChainQuery;
 } // namespace iqfeed
@@ -74,16 +75,14 @@ public:
 
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
-  using fChartRoot_t = std::function<wxTreeItemId(const std::string&,pChartDataView_t)>;
-  using fChartAdd_t = std::function<wxTreeItemId(wxTreeItemId,const std::string&,pChartDataView_t,wxMenu*)>;
-  using fChartDel_t = std::function<void(wxTreeItemId)>;
+  using fChartRoot_t = std::function<ou::tf::TreeItem*(const std::string&,pChartDataView_t)>;
 
   MasterPortfolio(
     boost::gregorian::date dateTrading,
     vSymbol_t&& vSymbol,
     pPortfolio_t pMasterPortfolio,
     pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fChartRoot_t&&, fChartAdd_t&&, fChartDel_t&&
+    fChartRoot_t&&
     );
   ~MasterPortfolio();
 
@@ -156,15 +155,15 @@ private:
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
-  wxTreeItemId m_idTreeRoot;
-  wxTreeItemId m_idTreeUnderlying;
-  wxTreeItemId m_idTreeStrategies;
+  ou::tf::TreeItem* m_ptiTreeRoot;
+  ou::tf::TreeItem* m_ptiTreeUnderlying;
+  ou::tf::TreeItem* m_ptiTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
-    wxTreeItemId idTreeItem;
+    ou::tf::TreeItem* pti;
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;
@@ -197,7 +196,7 @@ private:
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
-    wxTreeItemId idTreeItem;
+    ou::tf::TreeItem* pti;
     Statistics statistics;
     ou::tf::Bars m_barsHistory;
 
@@ -279,8 +278,6 @@ private:
   //mapVolatility_t m_mapVolatility;
 
   fChartRoot_t m_fChartRoot;
-  fChartAdd_t m_fChartAdd;
-  fChartDel_t m_fChartDel;
 
   // used by Load
   using setSymbols_t = std::set<std::string>;

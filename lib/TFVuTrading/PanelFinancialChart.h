@@ -34,6 +34,8 @@ class wxTreeItemId;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+class TreeItem;
+
 #define SYMBOL_PANELFINANCIALCHART_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELFINANCIALCHART_TITLE _("Panel Financial Chart")
 #define SYMBOL_PANELFINANCIALCHART_IDNAME ID_PANELFINANCIALCHART
@@ -44,16 +46,18 @@ class PanelFinancialChart: public wxPanel {
   friend class boost::serialization::access;
 public:
 
+  using TreeItem = ou::tf::TreeItem;
+
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  PanelFinancialChart(void);
+  PanelFinancialChart();
   PanelFinancialChart(
     wxWindow* parent,
     wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
     const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
-  ~PanelFinancialChart(void);
+  ~PanelFinancialChart();
 
   bool Create(
     wxWindow* parent, wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
@@ -61,12 +65,8 @@ public:
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
 
-  using fAdd_t = std::function<wxTreeItemId()>;
-  using fDel_t = std::function<void(wxTreeItemId)>;
-
-  wxTreeItemId SetRoot(                  const std::string& sName, pChartDataView_t );
-  wxTreeItemId AppendItem( wxTreeItemId, const std::string& sName, pChartDataView_t, wxMenu* );
-  void DeleteItem( wxTreeItemId );
+  TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
+  void SetChartDataView( pChartDataView_t );
 
 protected:
 
@@ -76,19 +76,16 @@ protected:
 private:
 
   wxTreeCtrl* m_pTree;
+  TreeItem* m_pTreeItems; // root of custom tree items
   wxSplitterWindow* m_pSplitter;
 
   WinChartView* m_pWinChartView; // handles drawing the chart
+  pChartDataView_t m_pChartDataView; // for use with tooltip
 
   void Init();
   void CreateControls();
 
-  void HandleTreeEventItemActivated( wxTreeEvent& );
-  void HandleTreeEventItemRightClick( wxTreeEvent& );
-  void HandleTreeEventItemMenu( wxTreeEvent& );
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
-
-  void HandlePopUpClick( wxCommandEvent& event );
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
