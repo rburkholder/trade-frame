@@ -230,16 +230,19 @@ void AppBasketTrading::BuildMasterPortfolio() {
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
-    m_dateTrading,
-    m_spread_specs,
-    std::move( m_vSymbol ),
+    m_dateTrading
+  , m_spread_specs
+  , std::move( m_vSymbol )
     // aggregation portfolio
-    m_pPortfolioStrategyAggregate,
+  , m_pPortfolioStrategyAggregate
     // providers
-    m_pExecutionProvider, m_pData1Provider, m_pData2Provider,
+  , m_pExecutionProvider, m_pData1Provider, m_pData2Provider
     // root ChartDataView to PanelFinancialChart
-    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
+  , [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
       return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
+    }
+  , [this]( pChartDataView_t pChartDataView ) {
+      m_pPanelFinancialChart->SetChartDataView( pChartDataView );
     }
     );
   //std::cout << "  done." << std::endl;

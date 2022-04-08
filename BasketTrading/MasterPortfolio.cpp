@@ -70,6 +70,7 @@ MasterPortfolio::MasterPortfolio(
 , pPortfolio_t pMasterPortfolio
 , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
 , fChartRoot_t&& fChartRoot
+, fSetChartDataView_t&& fSetChartDataView
 )
 : m_bStarted( false )
 , m_nQuery {}
@@ -78,6 +79,7 @@ MasterPortfolio::MasterPortfolio(
 , m_spread_specs( spread_specs )
 , m_vSymbol( std::move( vSymbol ) )
 , m_fChartRoot( std::move( fChartRoot ) )
+, m_fSetChartDataView( std::move( fSetChartDataView ) )
 , m_pMasterPortfolio( pMasterPortfolio )
 , m_pExec( pExec )
 , m_pData1( pData1 )
@@ -87,6 +89,7 @@ MasterPortfolio::MasterPortfolio(
   assert( 0 < m_vSymbol.size() );
 
   assert( m_fChartRoot );
+  assert( m_fSetChartDataView );
 
   assert( pMasterPortfolio );
   assert( pExec );
@@ -128,7 +131,8 @@ MasterPortfolio::MasterPortfolio(
   m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
   m_ptiTreeUnderlying = m_ptiTreeRoot->AppendChild(
     "Underlying",
-    []( ou::tf::TreeItem* ){},
+    [this]( ou::tf::TreeItem* ){
+    },
     [this]( ou::tf::TreeItem* pti ){
       pti->NewMenu();
       pti->AppendMenuItem(
@@ -486,7 +490,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         uws.pti = m_ptiTreeUnderlying->AppendChild(
           sUnderlying,
           [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
-            uws.pUnderlying->GetChartDataView();//, pMenuPopupUnderlying
+            m_fSetChartDataView( uws.pUnderlying->GetChartDataView() );
           },
           [this,sUnderlying]( ou::tf::TreeItem* pti ){
             pti->NewMenu();
@@ -824,8 +828,8 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
     //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
     strategy.pti = m_ptiTreeStrategies->AppendChild(
       idPortfolioStrategy,
-      []( ou::tf::TreeItem* pti ){
-        // pChartDataView
+      [this,pChartDataView]( ou::tf::TreeItem* pti ){
+        m_fSetChartDataView(pChartDataView );
       },
       [this,pManageStrategy,idPortfolioStrategy]( ou::tf::TreeItem* pti ){
         pti->NewMenu();

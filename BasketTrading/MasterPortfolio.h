@@ -76,15 +76,17 @@ public:
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
   using fChartRoot_t = std::function<ou::tf::TreeItem*(const std::string&,pChartDataView_t)>;
+  using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
   MasterPortfolio(
-    boost::gregorian::date dateTrading, // from config file
-    ou::tf::option::SpreadSpecs, // from config file
-    vSymbol_t&& vSymbol, // from config file? - maybe just send config file?
-    pPortfolio_t pMasterPortfolio,
-    pProvider_t pExec, pProvider_t pData1, pProvider_t pData2,
-    fChartRoot_t&&
-    );
+    boost::gregorian::date dateTrading // from config file
+  , ou::tf::option::SpreadSpecs // from config file
+  , vSymbol_t&& vSymbol // from config file? - maybe just send config file?
+  , pPortfolio_t pMasterPortfolio
+  , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
+  , fChartRoot_t&&
+  , fSetChartDataView_t&&
+  );
   ~MasterPortfolio();
 
   void Add( pPortfolio_t ); // from database load
@@ -280,6 +282,7 @@ private:
   //mapVolatility_t m_mapVolatility;
 
   fChartRoot_t m_fChartRoot;
+  fSetChartDataView_t m_fSetChartDataView;
 
   // used by Load
   using setSymbols_t = std::set<std::string>;
