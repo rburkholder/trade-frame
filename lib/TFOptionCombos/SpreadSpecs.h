@@ -44,6 +44,10 @@ public:
   : nDaysFront( days_t( nDaysFront_ ) ), nDaysBack( days_t( nDaysBack_ ) )
   {}
 
+  SpreadSpecs( boost::gregorian::days nDaysFront_, boost::gregorian::days nDaysBack_ )
+  : nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack_ )
+  {}
+
 protected:
 private:
 };
