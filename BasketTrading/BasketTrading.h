@@ -45,8 +45,6 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelFinancialChart.h>
 
-#include <TFBitsNPieces/IQFeedSymbolListOps.h>
-
 #include "MasterPortfolio.h"
 
 class wxRadioButton;
@@ -101,11 +99,6 @@ private:
   double m_dblMaxPL;
   double m_dblMinPL;
 
-  ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
-  ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
-  ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
-  ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
-
   virtual bool OnInit();
   void OnClose( wxCloseEvent& event );
   virtual int OnExit();
@@ -151,9 +144,6 @@ private:
   void HandleGuiRefresh( wxTimerEvent& event );
 
   void HandleMenuActionTestSelection( void );
-
-  void HandleMenuActionSaveSymbolSubset( void );
-  void HandleMenuActionLoadSymbolSubset( void );
 
   void SaveState();
   void LoadState();

@@ -148,15 +148,6 @@ void AppBasketTrading::Init() {
 
   // maybe set scenario with database and with in memory data structure?
 
-  // this needs to come before the menu, before master portfolio
-  // TODO: there might be a circular issue with master portfolio
-  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols );
-  m_pIQFeedSymbolListOps->Status.connect( [this]( const std::string sStatus ){
-    CallAfter( [sStatus](){
-      std::cout << sStatus << std::endl;
-    });
-  });
-
   m_sPortfolioStrategyAggregate = "started-" + boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() );
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
@@ -189,11 +180,6 @@ void AppBasketTrading::Init() {
   // build menu last
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   FrameMain::vpItems_t vItems;
-  //vItems.push_back( new mi( "a1 Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
-  vItems.push_back( new mi( "b1 Load List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b2 Save Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionSaveSymbolSubset ) ) );
-  vItems.push_back( new mi( "b3 Load Subset", MakeDelegate( this, &AppBasketTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Symbols", vItems );
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleButtonLoad ) ) );
@@ -518,61 +504,3 @@ void AppBasketTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
 void AppBasketTrading::HandlePositionLoad( pPosition_t& pPosition ) {
   m_pMasterPortfolio->Add( pPosition );
 }
-
-// maybe put this into background thread
-void AppBasketTrading::HandleMenuActionSaveSymbolSubset( void ) {
-
-  m_vExchanges.clear();
-  m_vExchanges.insert( "NYSE" );
-  m_vExchanges.insert( "NYSE_AMERICAN" );
-  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
-  m_vExchanges.insert( "NASDAQ,NGSM" );
-  m_vExchanges.insert( "NASDAQ,NGM" );
-  //m_vExchanges.push_back( "NASDAQ,NMS" );
-  //m_vExchanges.push_back( "NASDAQ,SMCAP" );
-  //m_vExchanges.push_back( "NASDAQ,OTCBB" );
-  //m_vExchanges.push_back( "NASDAQ,OTC" );
-  m_vExchanges.insert( "OPRA" );
-  //m_vExchanges.insert( "COMEX" );
-  //m_vExchanges.insert( "COMEX,COMEX_GBX" );
-  //m_vExchanges.insert( "TSE" );
-  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
-
-  m_vClassifiers.clear();
-  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
-  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
-  //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Future );
-  //m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::FOption );
-
-  std::cout << "Subsetting symbols ... " << std::endl;
-
-  CallAfter( [this](){
-    if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
-    m_worker = std::thread(
-      [this](){
-        ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-        ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
-        m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
-        std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
-
-        std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-        listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
-        std::cout << " ... done." << std::endl;
-      });
-  });
-
-}
-
-// TODO: set flag to only load once?  Otherwise, is the structure cleared first?
-void AppBasketTrading::HandleMenuActionLoadSymbolSubset( void ) {
-  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-  CallAfter( [this](){
-    if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
-    m_worker = std::thread(
-      [this](){
-        m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
-        std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
-      } );
-  });
-}
-
