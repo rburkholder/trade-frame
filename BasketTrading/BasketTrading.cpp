@@ -284,8 +284,10 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 
   double dblCurrent {};
 
-  if ( m_pPortfolioStrategyAggregate ) {
-    dblCurrent = m_pMasterPortfolio->UpdateChart();
+  if ( m_pPortfolioStrategyAggregate ) { // not sure if this check is required, might be typo
+    if ( m_pMasterPortfolio ) {
+      dblCurrent = m_pMasterPortfolio->UpdateChart();
+    }
   }
 
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
