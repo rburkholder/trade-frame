@@ -94,6 +94,10 @@ TreeItem* TreeItem::AppendChild( const std::string& sText ) {
   return pTreeItem;
 }
 
+void TreeItem::SortChildren() {
+  m_pTreeCtrl->SortChildren( m_idSelf );
+}
+
 void TreeItem::HandleTreeEventItemChanged() {
   if ( m_fOnClick ) {
     m_fOnClick( this );
@@ -111,6 +115,7 @@ void TreeItem::UpdateText( const std::string& sText ) {
 }
 
 void TreeItem::Delete() {
+  //  if ( 0 < m_pTree->GetChildrenCount( id ) ) throw std::runtime_error( "item has children" );
   // everything should self delete
   m_pTreeCtrl->Delete( m_idSelf );
 }
