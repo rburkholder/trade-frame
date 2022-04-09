@@ -175,10 +175,11 @@ public:
   void DisableAppend() { m_bAppendToVector = false; };
   bool AppendEnabled() const { return m_bAppendToVector; };  // affects Append(...) only
 
-  template<typename Functor>
-  typename Functor::return_type ForEach( Functor f ) const {
-    //strict_lock<TimeSeries<T> > guard(*this);
-    return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
+  using fForEach_t = std::function<void(const T&)>;
+  void ForEach( fForEach_t&& f ) {
+    for ( const typename vTimeSeries_t::value_type& vt: m_vSeries ) {
+      f( vt );
+    }
   }
 
 protected:
