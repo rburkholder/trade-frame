@@ -22,6 +22,10 @@
 #include "DailyHistory.h"
 #include "HistoryRequest.h"
 
+namespace ou {
+namespace tf {
+namespace iqfeed {
+
 HistoryRequest::HistoryRequest(
   fConnected_t&& fConnected
 )
@@ -73,3 +77,7 @@ void HistoryRequest::NextRequest( Entry&& entry ) {
   m_entryCurrent = std::move( entry );
   m_pHistory->Request( m_entryCurrent.sSymbol, m_entryCurrent.nBar );
 }
+
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

@@ -22,6 +22,10 @@
 
  #include "DailyHistory.h"
 
+namespace ou {
+namespace tf {
+namespace iqfeed {
+
 DailyHistory::DailyHistory(
   fConnected_t&& fConnected, fBar_t&& fBar, fDone_t&& fDone
 )
@@ -72,3 +76,7 @@ void DailyHistory::OnHistoryError( size_t e ) {
 void DailyHistory::Disconnect() {
   ou::tf::iqfeed::HistoryQuery<DailyHistory>::Disconnect();
 }
+
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

@@ -25,10 +25,16 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 
+namespace ou {
+namespace tf {
+namespace iqfeed {
+
 class DailyHistory;
 
 class HistoryRequest {
 public:
+
+  using pHistoryRequest_t = std::unique_ptr<HistoryRequest>;
 
   using fConnected_t = std::function<void()>;
 
@@ -37,6 +43,12 @@ public:
 
   HistoryRequest( fConnected_t&& fConnected );
   ~HistoryRequest();
+
+  static pHistoryRequest_t Construct( fConnected_t&& fConnected ) {
+    return std::make_unique<HistoryRequest>(
+      std::move( fConnected )
+    );
+    }
 
   void Request( const std::string& sSymbol_, uint16_t nBar, fBar_t&& fBar, fDone_t&& fDone );
 
@@ -84,3 +96,6 @@ private:
 
 };
 
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

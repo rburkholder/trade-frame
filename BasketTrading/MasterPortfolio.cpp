@@ -22,6 +22,7 @@
 
 #include <OUCommon/TimeSource.h>
 
+#include <TFIQFeed/HistoryRequest.h>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -31,7 +32,6 @@
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "MoneyManager.h"
-#include "HistoryRequest.h"
 #include "MasterPortfolio.h"
 
 namespace {
@@ -392,7 +392,7 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
     // 1) connect OptionChainQuery, 2) connect HistoryRequest, 3) start symbol processing
     m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
       [this](){
-        m_pHistoryRequest = std::make_unique<HistoryRequest>(
+        m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
           [this](){ // fConnected_t
             ProcessSeedList();
           }

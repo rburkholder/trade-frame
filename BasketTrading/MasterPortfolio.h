@@ -49,16 +49,16 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
 namespace iqfeed { // IQFeed
-class OptionChainQuery;
+  class HistoryRequest;
+  class OptionChainQuery;
 } // namespace iqfeed
 namespace option {
-class Engine;
+  class Engine;
 } // namespace option
 } // namespace tf
 } // namespace ou
 
 class wxMenu;
-class HistoryRequest;
 
 class MasterPortfolio {
   friend class boost::serialization::access;
@@ -293,7 +293,7 @@ private:
   //static const mapSpecs_t m_mapSpecs;
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
-  std::unique_ptr<HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect
+  std::unique_ptr<ou::tf::iqfeed::HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect
 
   void ProcessSeedList();
   void AddUnderlying( pWatch_t );

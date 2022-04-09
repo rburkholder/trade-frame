@@ -27,8 +27,12 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
-class DailyHistory: ou::tf::iqfeed::HistoryQuery<DailyHistory> {
-  friend ou::tf::iqfeed::HistoryQuery<DailyHistory>;
+namespace ou {
+namespace tf {
+namespace iqfeed {
+
+class DailyHistory: HistoryQuery<DailyHistory> {
+  friend HistoryQuery<DailyHistory>;
 public:
 
   using fConnected_t = std::function<void(void)>;
@@ -51,3 +55,7 @@ private:
   fBar_t m_fBar;
   fDone_t m_fDone;
 };
+
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou
