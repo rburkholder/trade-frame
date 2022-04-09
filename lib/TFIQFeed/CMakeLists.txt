@@ -13,6 +13,8 @@ set(
     BuildInstrument.h
     BuildSymbolName.h
     CurlGetMktSymbols.h
+    DailyHistory.h
+    HistoryRequest.h
     InMemoryMktSymbolList.h
     IQFeed.h
     HistoryBulkQuery.h
@@ -49,6 +51,8 @@ set(
     BuildInstrument.cpp
     BuildSymbolName.cpp
     CurlGetMktSymbols.cpp
+    DailyHistory.cpp
+    HistoryRequest.cpp
     InMemoryMktSymbolList.cpp
     IQFeed.cpp
 #    HistoryCollector.cpp

@@ -14,7 +14,7 @@
 /*
  * File:    DailyHistory.h
  * Author:  raymond@burkholder.net
- * Project: BasketTrading
+ * Project: lib/TFIQFeed
  * Created: August 7, 2021, 19:06
  */
 

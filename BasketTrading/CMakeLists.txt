@@ -27,8 +27,6 @@ set(
   file_h
     BasketTrading.h
     Config.h
-    DailyHistory.h
-    HistoryRequest.h
     LegSelected.h
     ManagePosition.h
     ManageStrategy.h
@@ -47,8 +45,6 @@ set(
   file_cpp
     BasketTrading.cpp
     Config.cpp
-    DailyHistory.cpp
-    HistoryRequest.cpp
     LegSelected.cpp
     ManagePosition.cpp
     ManageStrategy.cpp
