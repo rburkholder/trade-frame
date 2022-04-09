@@ -31,7 +31,7 @@ DataRowElementIndicatorStatic::DataRowElementIndicatorStatic( const std::string&
 : DataRowElement<std::string>( sFormat, bChanged )
 {}
 
-void DataRowElementIndicatorStatic::Set( const std::string& sValue ) {
+void DataRowElementIndicatorStatic::Append( const std::string& sValue ) {
   if ( 0 == m_sValue.size() ) {
     m_sValue = sValue;
   }

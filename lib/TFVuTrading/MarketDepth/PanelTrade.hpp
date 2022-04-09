@@ -67,6 +67,8 @@ public:
 
   void SetInterval( double );
 
+  void AppendStaticIndicator( double, const std::string& );
+
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
 

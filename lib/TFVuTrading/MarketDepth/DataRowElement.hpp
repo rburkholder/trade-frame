@@ -140,7 +140,7 @@ class DataRowElementIndicatorStatic: public DataRowElement<std::string> {
 public:
   DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
   virtual void UpdateWinRowElement();
-  void Set( const std::string& );
+  void Append( const std::string& );
 protected:
 private:
 };

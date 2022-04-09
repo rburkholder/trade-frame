@@ -65,6 +65,10 @@ public:
   void AddToBuyVolume( unsigned int n ) { m_dreBuyVolume.Add( n ); }
   void AddToSellVolume( unsigned int n ) { m_dreSellVolume.Add( n ); }
 
+  void AppendIndicatorStatic( const std::string& sIndicator ) {
+    m_dreIndicatorStatic.Append( sIndicator );
+  }
+
 protected:
 private:
 

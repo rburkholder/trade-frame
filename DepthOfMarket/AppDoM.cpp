@@ -192,6 +192,7 @@ void AppDoM::OnData1Connected( int ) {
   std::cout << "Depth of Market connected" << std::endl;
   m_pWatch->StartWatch();
   m_pDispatch->Connect();
+  LoadDailyHistory();
 }
 
 void AppDoM::OnData1Disconnecting( int ) {
@@ -243,4 +244,41 @@ void AppDoM::LoadState() {
   catch(...) {
     std::cout << "load exception" << std::endl;
   }
+}
+
+void AppDoM::LoadDailyHistory() {
+  m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
+    [this](){ // fConnected_t
+      m_pHistoryRequest->Request(
+        m_pWatch->GetInstrumentName(),
+        20,
+        [this]( const ou::tf::Bar& bar ){
+          m_barsHistory.Append( bar );
+          //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
+        },
+        [this](){
+          const ou::tf::Bar& bar( m_barsHistory.last() );
+
+          std::cout
+            << m_pWatch->GetInstrumentName()
+            << ", bar=" << bar.DateTime()
+            << std::endl;
+
+          m_setPivots.CalcPivots( bar );
+          const ou::tf::PivotSet& ps( m_setPivots );
+          using PS = ou::tf::PivotSet;
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R2 ), "R2" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R1 ), "R1" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::PV ), "PV" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "S1" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "S2" );
+
+          m_barsHistory.ForEach( [this]( const ou::tf::Bar& bar ){
+            m_pPanelTrade->AppendStaticIndicator( bar.High(), "Hi" );
+            m_pPanelTrade->AppendStaticIndicator( bar.Low(), "Lo" );
+          });
+        }
+      );
+    }
+  );
 }

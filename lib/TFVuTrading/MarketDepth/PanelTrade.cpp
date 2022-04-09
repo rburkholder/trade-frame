@@ -230,6 +230,11 @@ void PanelTrade::SetInterval( double interval ) {
   m_DataRows.SetInterval( interval );
 }
 
+void PanelTrade::AppendStaticIndicator( double price, const std::string& sStatic ) {
+  DataRow& row( m_DataRows[ price ] );
+  row.AppendIndicatorStatic( sStatic );
+}
+
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   // will need to use quote for tick analysis.
   // don't update the ladder, as it interferes with L2
@@ -377,7 +382,6 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
       }
     }
   }
-
 }
 
 } // market depth

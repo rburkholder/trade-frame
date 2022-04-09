@@ -30,12 +30,16 @@
 
 #include <TFTrading/Watch.h>
 
+#include <TFIQFeed/HistoryRequest.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
+
+#include <TFIndicators/Pivots.h>
 
 #include "DoMDispatch.h"
 #include "TFTimeSeries/DatedDatum.h"
@@ -58,8 +62,12 @@ private:
   //wxMenu* m_pMenuLoadDays;
 
   std::unique_ptr<DoMDispatch> m_pDispatch;  // one per symbol
+  ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
 
   ou::tf::Watch::pWatch_t m_pWatch;
+
+  ou::tf::Bars m_barsHistory;
+  ou::tf::PivotSet m_setPivots;
 
   void EmitMarketMakerMaps();
 
@@ -74,6 +82,8 @@ private:
   void OnFundamentals( const ou::tf::Watch::Fundamentals& );
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
+
+  void LoadDailyHistory();
 
   void SaveState();
   void LoadState();

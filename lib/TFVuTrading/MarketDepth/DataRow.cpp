@@ -130,7 +130,6 @@ void DataRow::DelRowElements() {
   m_dreIndicatorDynamic.SetWinRowElement( nullptr );
 }
 
-
 } // market depth
 } // namespace tf
 } // namespace ou
