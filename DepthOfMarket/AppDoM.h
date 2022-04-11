@@ -42,7 +42,7 @@
 #include <TFIndicators/Pivots.h>
 
 #include "DoMDispatch.h"
-#include "TFTimeSeries/DatedDatum.h"
+#include "PanelStatistics.hpp"
 
 class AppDoM:
   public wxApp,
@@ -58,6 +58,9 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 
   ou::tf::l2::PanelTrade* m_pPanelTrade;
+
+  PanelStatistics::values_t m_valuesStatistics;
+  PanelStatistics* m_pPanelStatistics;
 
   //wxMenu* m_pMenuLoadDays;
 

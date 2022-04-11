@@ -28,6 +28,7 @@ set(
     AppDoM.h
     Config.h
     DoMDispatch.h
+    PanelStatistics.hpp
   )
 
 set(
@@ -35,6 +36,7 @@ set(
     AppDoM.cpp
     Config.cpp
     DoMDispatch.cpp
+    PanelStatistics.cpp
   )
 
 add_executable(

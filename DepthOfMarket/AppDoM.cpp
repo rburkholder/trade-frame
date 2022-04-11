@@ -103,7 +103,9 @@ bool AppDoM::OnInit() {
 
     LinkToPanelProviderControl();
 
-    //m_pFrameMain->Show( true );
+    m_pPanelStatistics = new PanelStatistics( m_pFrameMain, wxID_ANY );
+    sizerControls->Add( m_pPanelStatistics, 0, wxALIGN_LEFT, 4);
+    m_pPanelStatistics->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
     sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 4 );
@@ -111,6 +113,12 @@ bool AppDoM::OnInit() {
     m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain );
     sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND, 4 );
     m_pPanelTrade->Show( true );
+
+    m_pPanelTrade->SetOnTimer(
+      [this](){
+        m_pPanelStatistics->Update( m_valuesStatistics );
+        m_valuesStatistics.Zero();
+      });
 
     //wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );
     //sizerMain->Add( sizerStatus, 1, wxEXPAND|wxALL, 5 );
@@ -129,9 +137,13 @@ bool AppDoM::OnInit() {
 
     m_pDispatch->Set(
       [this]( double price, int volume ){
+        m_valuesStatistics.nL2MsgBid++;
+        m_valuesStatistics.nL2MsgTtl++;
         m_pPanelTrade->OnQuoteBid( price, volume );
       },
       [this]( double price, int volume ){
+        m_valuesStatistics.nL2MsgAsk++;
+        m_valuesStatistics.nL2MsgTtl++;
         m_pPanelTrade->OnQuoteAsk( price, volume );
       } );
 
@@ -216,12 +228,16 @@ void AppDoM::OnFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
 }
 
 void AppDoM::OnQuote( const ou::tf::Quote& quote ) {
+  m_valuesStatistics.nL1MsgBid++;
+  m_valuesStatistics.nL1MsgAsk++;
+  m_valuesStatistics.nL1MsgTtl++;
   if ( m_pPanelTrade ) {
     m_pPanelTrade->OnQuote( quote );
   }
 }
 
 void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
+  m_valuesStatistics.nTicks++;
   if ( m_pPanelTrade ) {
     m_pPanelTrade->OnTrade( trade );
   }
@@ -275,6 +291,15 @@ void AppDoM::LoadDailyHistory() {
           m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "s1" );
           m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "s2" );
 
+          std::cout
+            << "pivots"
+            <<  " r2=" << ps.GetPivotValue( PS::R2 )
+            << ", r1=" << ps.GetPivotValue( PS::R1 )
+            << ", pv=" << ps.GetPivotValue( PS::PV )
+            << ", s1=" << ps.GetPivotValue( PS::S1 )
+            << ", s2=" << ps.GetPivotValue( PS::S2 )
+            << std::endl;
+
           double dblSum200 {};
           double dblSum100 {};
           double dblSum50 {};
@@ -284,7 +309,7 @@ void AppDoM::LoadDailyHistory() {
             //std::cout
             //  << "bar " << ix << " is " << bar.Close()
             //  << std::endl;
-            if ( 20 >= ix ) {
+            if ( 200 >= ix ) {
               std::string sIx = boost::lexical_cast<std::string>( ix );
               m_pPanelTrade->AppendStaticIndicator( bar.High(), "hi-" + sIx );
               m_pPanelTrade->AppendStaticIndicator( bar.Low(), "lo-" + sIx  );
@@ -302,7 +327,7 @@ void AppDoM::LoadDailyHistory() {
           });
 
           std::cout
-            << "sma "
+            << "sma"
             << " 50 day=" << dblSum50
             << ", 100 day=" << dblSum100
             << ", 200 day=" << dblSum200
