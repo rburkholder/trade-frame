@@ -53,17 +53,17 @@ namespace { // local variables
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BuyCount,   50, "Ticks",   wxRIGHT, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod  }
-   , { EField::BuyVolume,  50, "Bought",  wxRIGHT, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod  }
-   , { EField::BidSize,    50, "BidSize", wxRIGHT, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue  }
-   , { EField::Price,      60, "Price",   wxRIGHT, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow  }
-   , { EField::AskSize,    50, "AskSize", wxRIGHT, EColour::LightPink,     EColour::Black, EColour::Magenta      }
-   , { EField::SellVolume, 50, "Sold",    wxRIGHT, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod      }
-   , { EField::SellCount,  50, "Ticks",   wxRIGHT, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod      }
-   , { EField::Ticks,      50, "Ticks",   wxRIGHT, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
-   , { EField::Volume,     60, "Vol",     wxRIGHT, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // sum of volume
-   , { EField::Static,     80, "SttcInd", wxLEFT,  EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // static indicators - pivots, ...
-   , { EField::Dynamic,   100, "DynInd",  wxLEFT,  EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
+     { EField::BuyCount,   50, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod  }
+   , { EField::BuyVolume,  50, "Bought",  wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod  }
+   , { EField::BidSize,    50, "BidSize", wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue  }
+   , { EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow  }
+   , { EField::AskSize,    50, "AskSize", wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta      }
+   , { EField::SellVolume, 50, "Sold",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod      }
+   , { EField::SellCount,  50, "Ticks",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod      }
+   , { EField::Ticks,      50, "Ticks",   wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
+   , { EField::Volume,     60, "Vol",     wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // sum of volume
+   , { EField::Static,     80, "SttcInd", wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // static indicators - pivots, ...
+   , { EField::Dynamic,   100, "DynInd",  wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
   };
 }
 
@@ -76,7 +76,7 @@ WinRow::WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIs
   int xPos = origin.x;
 
   for ( const vElement_t::value_type& element: vElement ) {
-    WinRowElement* pwre = new WinRowElement( parent, wxID_ANY, wxPoint( xPos, origin.y ), wxSize( element.width -1 , RowHeight - 1 ) );
+    WinRowElement* pwre = new WinRowElement( parent, wxID_ANY, wxPoint( xPos, origin.y ), wxSize( element.width -1 , RowHeight - 1 ), element.alignment );
     pwre->SetCanHaveFocus( !bIsHeader );
     if ( bIsHeader ) {
       pwre->SetText( element.header );

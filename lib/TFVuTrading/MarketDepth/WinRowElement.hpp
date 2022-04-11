@@ -87,6 +87,8 @@ private:
   EColour m_colourForeground;
   EColour m_colourHighlight;
 
+  long m_style;  // wxCENTER, wxLEFT, wxRIGHT
+
   void Init();
   void CreateControls();
   bool ShowToolTips() { return true; };

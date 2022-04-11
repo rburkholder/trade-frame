@@ -44,6 +44,7 @@ WinRowElement::~WinRowElement() {
 bool WinRowElement::Create(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
 ) {
+  m_style = style;
 
   SetExtraStyle(wxWS_EX_BLOCK_EVENTS); // TODO: do we keep this or not?
   wxWindow::Create( parent, id, pos, size, style );
@@ -132,8 +133,18 @@ void WinRowElement::Render( wxDC& dc ) {
   wxCoord height;
   wxCoord x( 1 );
   GetTextExtent( m_sText, &width, &height );
-  if ( width <= size.x ) {
-    x = ( size.x - width ) / 2;
+  switch ( m_style ) {
+    case wxRIGHT:
+      x = width - 1;
+      break;
+    case wxCENTER:
+      if ( width <= size.x ) {
+        x = ( size.x - width ) / 2;
+      }
+      break;
+    case wxLEFT:
+      x = 1;
+      break;
   }
   dc.DrawText( m_sText, wxPoint( x, 1 ) );
 }
