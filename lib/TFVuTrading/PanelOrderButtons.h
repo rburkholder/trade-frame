@@ -58,7 +58,7 @@ public:
    const wxSize& size = SYMBOL_PANELORDERBUTTONS_SIZE,
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
-  virtual ~PanelOrderButtons(void);
+  virtual ~PanelOrderButtons();
 
   bool Create(
    wxWindow* parent,
