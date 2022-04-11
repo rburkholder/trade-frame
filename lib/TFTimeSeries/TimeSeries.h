@@ -182,6 +182,16 @@ public:
     }
   }
 
+  void ForEachReverse( fForEach_t&& f ) {
+    for (
+      typename vTimeSeries_t::reverse_iterator iter = m_vSeries.rbegin();
+      iter != m_vSeries.rend();
+      iter++
+    ) {
+      f( *iter );
+    }
+  }
+
 protected:
 private:
 

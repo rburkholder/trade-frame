@@ -32,6 +32,8 @@ TODO:
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <wx/defs.h>
 #include <wx/sizer.h>
 
@@ -251,7 +253,7 @@ void AppDoM::LoadDailyHistory() {
     [this](){ // fConnected_t
       m_pHistoryRequest->Request(
         m_pWatch->GetInstrumentName(),
-        20,
+        200,
         [this]( const ou::tf::Bar& bar ){
           m_barsHistory.Append( bar );
           //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
@@ -267,16 +269,48 @@ void AppDoM::LoadDailyHistory() {
           m_setPivots.CalcPivots( bar );
           const ou::tf::PivotSet& ps( m_setPivots );
           using PS = ou::tf::PivotSet;
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R2 ), "R2" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R1 ), "R1" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::PV ), "PV" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "S1" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "S2" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R2 ), "r2" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R1 ), "r1" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::PV ), "pv" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "s1" );
+          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "s2" );
 
-          m_barsHistory.ForEach( [this]( const ou::tf::Bar& bar ){
-            m_pPanelTrade->AppendStaticIndicator( bar.High(), "Hi" );
-            m_pPanelTrade->AppendStaticIndicator( bar.Low(), "Lo" );
+          double dblSum200 {};
+          double dblSum100 {};
+          double dblSum50 {};
+          int ix( 1 );
+
+          m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50]( const ou::tf::Bar& bar ){
+            //std::cout
+            //  << "bar " << ix << " is " << bar.Close()
+            //  << std::endl;
+            if ( 20 >= ix ) {
+              std::string sIx = boost::lexical_cast<std::string>( ix );
+              m_pPanelTrade->AppendStaticIndicator( bar.High(), "hi-" + sIx );
+              m_pPanelTrade->AppendStaticIndicator( bar.Low(), "lo-" + sIx  );
+            }
+            if ( 200 >= ix ) {
+              dblSum200 += bar.Close() / 200.0;
+            }
+            if ( 100 >= ix ) {
+              dblSum100 += bar.Close() / 100.0;
+            }
+            if ( 50 >= ix ) {
+              dblSum50 += bar.Close() / 50;
+            }
+            ix++;
           });
+
+          std::cout
+            << "sma "
+            << " 50 day=" << dblSum50
+            << ", 100 day=" << dblSum100
+            << ", 200 day=" << dblSum200
+            << std::endl;
+
+          m_pPanelTrade->AppendStaticIndicator( dblSum200, "200day" );
+          m_pPanelTrade->AppendStaticIndicator( dblSum100, "100day" );
+          m_pPanelTrade->AppendStaticIndicator( dblSum50, "50day" );
         }
       );
     }
