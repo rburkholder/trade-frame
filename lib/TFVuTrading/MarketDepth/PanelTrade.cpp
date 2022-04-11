@@ -109,6 +109,7 @@ void PanelTrade::OnPaint( wxPaintEvent& event ) {
 }
 
 void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
+  if ( m_fTimer ) m_fTimer();
   //std::scoped_lock<std::mutex> lock( m_mutexTimer );
   if ( 0 < m_cntWinRows_Data ) {
     for ( int ix = m_ixFirstDataRow; ix <= m_ixLastDataRow; ix++ ) {
@@ -235,6 +236,7 @@ void PanelTrade::AppendStaticIndicator( double price, const std::string& sStatic
   row.AppendIndicatorStatic( sStatic );
 }
 
+// l1 update
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   // will need to use quote for tick analysis.
   // don't update the ladder, as it interferes with L2
@@ -271,6 +273,7 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
     // not sure where to recenter
   }
   else {
+    // maybe do this on the timer interval instead?
     int ixMidPoint = ( ixHiPrice + ixLoPrice ) / 2;
     CallAfter(
       [this, ixMidPoint](){
@@ -279,26 +282,21 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   }
 }
 
+// l2 update
 void PanelTrade::OnQuoteAsk( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetAskVolume( volume );
-  //CallAfter(
-  //  [this, ixPrice](){
-  //    ReCenterVisible( ixPrice );
-  //  });
 }
 
+// l2 update
 void PanelTrade::OnQuoteBid( double price, int volume ) {
   int ixPrice = m_DataRows.Cast( price );
   DataRow& row( m_DataRows[ ixPrice ] );
   row.SetBidVolume( volume );
-  //CallAfter(
-  //  [this, ixPrice](){
-  //    ReCenterVisible( ixPrice );
-  //  });
 }
 
+// l1 update
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   if ( 0.0 != m_dblLastPrice ) {
@@ -328,6 +326,7 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
     }
   }
 
+  // maybe do this on the timer interval instead?
   CallAfter(
     [this, ixPrice](){
       ReCenterVisible( ixPrice );
@@ -360,7 +359,6 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         for ( int iy = m_ixFirstDataRow; iy <= m_ixLastDataRow; iy++ ) {
           // remove existing string update events
           DataRow& rowData( m_DataRows[ iy ] );
-          //pDRow -> SetOnStringUpdatedHandlers(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
           rowData.DelRowElements();
         }
       }

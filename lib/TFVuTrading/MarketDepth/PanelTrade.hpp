@@ -75,12 +75,17 @@ public:
   void OnQuoteAsk( double price, int volume );
   void OnQuoteBid( double price, int volume );
 
+  using fTimer_t = std::function<void()>;
+  void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
+
 protected:
 private:
 
   enum {
     ID_Null=wxID_HIGHEST, ID_PANELTRADE
   };
+
+  fTimer_t m_fTimer;
 
   using pWinRow_t = WinRow::pWinRow_t;
 
@@ -96,12 +101,9 @@ private:
   int m_ixHiRecenterFrame;
   int m_ixLoRecenterFrame;
 
-  //int m_ixLastAsk;
-  //int m_ixLastBid;
-
-  double m_dblLastPrice;
   double m_dblLastAsk;
   double m_dblLastBid;
+  double m_dblLastPrice;
 
   pWinRow_t m_pWinRow_Header;
 
