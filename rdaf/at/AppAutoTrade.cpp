@@ -59,6 +59,7 @@
 
 namespace {
   static const std::string sDirectory( "rdaf/at" );
+  static const std::string sFileNameUtility( sDirectory + "/utility.root" );
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
   static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
   static const std::string sDbName( sDirectory + "/example.db" );
@@ -216,7 +217,7 @@ bool AppAutoTrade::OnInit() {
     }
   }
 
-  StartRdaf( "rdaf/at/" + m_sTSDataStreamStarted );
+  StartRdaf( sDirectory + m_sTSDataStreamStarted );
 
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
@@ -232,14 +233,14 @@ bool AppAutoTrade::OnInit() {
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       sSymbol,
-      [this,sSymbol]( TreeItem* pTreeItem ){
+      [this,sSymbol=vt.first]( TreeItem* pTreeItem ){
         mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
         assert( m_mapStrategy.end() != iter );
         m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
       }
     );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( config, pTreeItem, m_pFile );
+    pStrategy_t pStrategy = std::make_unique<Strategy>( config, pTreeItem, m_pFile, m_pFileUtility );
 
     if ( m_choices.bStartSimulator ) {
       pStrategy->InitForUSEquityExchanges( dateSim );
@@ -284,11 +285,19 @@ bool AppAutoTrade::OnInit() {
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
   // disable for now, due to memory consumption, timeseries recording is being turned off.
   // all can be re-enalbed if saving times series is useful and is used to populate the simulator
   //vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+  vItems.clear();
+  vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
+  vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
+  //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+  vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+  m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
 
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
@@ -384,6 +393,8 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
     "RECREATE",
     "tradeframe rdaf/at quotes, trades & histogram"
   );
+
+  UpdateUtilityFile();  // re-open what exists
 
   //m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
 
@@ -510,6 +521,39 @@ void AppAutoTrade::HandleMenuActionSimStop() {
       m_sim->Stop();
     }
   );
+}
+
+// don't use this, as the pointer changes, and needs to be redistributed into the objects
+void AppAutoTrade::RecreateUtilityFile() {
+  m_pFileUtility = std::make_shared<TFile>(
+    sFileNameUtility.c_str(),
+    "RECREATE",
+    "tradeframe rdaf/at utility"
+  );
+}
+
+void AppAutoTrade::UpdateUtilityFile() {
+  m_pFileUtility = std::make_shared<TFile>(
+    sFileNameUtility.c_str(),
+    "UPDATE",
+    "tradeframe rdaf/at utility"
+  );
+}
+
+void AppAutoTrade::HandleMenuActionUtilitySave() {
+  if ( m_pFileUtility ) {
+    m_pFileUtility->Write();
+  }
+}
+
+void AppAutoTrade::HandleMenuActionUtilityFlush() {
+  if ( m_pFileUtility ) {
+    m_pFileUtility->Flush();
+  }
+}
+
+void AppAutoTrade::HandleMenuActionUtilityClear() {
+  RecreateUtilityFile();
 }
 
 void AppAutoTrade::HandleMenuActionSimEmitStats() {

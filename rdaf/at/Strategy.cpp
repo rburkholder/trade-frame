@@ -31,23 +31,16 @@
  #include <boost/log/trivial.hpp>
 
 #include <boost/lexical_cast.hpp>
+
 #include <rdaf/TH2.h>
-#include <rdaf/TRint.h>
-#include <rdaf/TROOT.h>
-#include <rdaf/TFile.h>
-#include <chrono>
-#include <rdaf/TH3.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
 
 #include <OUCharting/ChartDataView.h>
 
-#include <TFTrading/Watch.h>
-
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "ConfigParser.hpp"
-
 #include "Strategy.h"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -56,10 +49,12 @@ Strategy::Strategy(
   const config_t config
 , TreeItem* pTreeItem
 , pFile_t pFile
+, pFile_t pFileUtility
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_pTreeItemSymbol( pTreeItem )
 , m_pFile( pFile )
+, m_pFileUtility( pFileUtility )
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
@@ -72,6 +67,7 @@ Strategy::Strategy(
 , m_bfQuotes01Sec( 1 )
 {
   assert( m_pFile );
+  assert( m_pFileUtility );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -201,6 +197,16 @@ void Strategy::InitRdaf() {
   }
   m_pHistVolume->SetDirectory( m_pFile.get() );
 
+  m_pHistVolumeDemo = std::make_shared<TH2D>(
+    ( sSymbol + "_h1_demo" ).c_str(), ( sSymbol + " Volume Histogram" ).c_str(),
+    m_config.nPriceBins, m_config.dblPriceLower, m_config.dblPriceUpper,
+    m_config.nTimeBins, m_config.dblTimeLower, m_config.dblTimeUpper
+  );
+  if ( !m_pHistVolumeDemo ) {
+    BOOST_LOG_TRIVIAL(error) << "problems history";
+  }
+  m_pHistVolumeDemo->SetDirectory( m_pFileUtility.get() );
+
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -262,6 +268,10 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   if ( m_pHistVolume ) {
     m_pHistVolume->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
+  }
+
+  if ( m_pHistVolumeDemo ) {
+    m_pHistVolumeDemo->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
 
 }
@@ -408,7 +418,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::LongExit:
-      if (m_pPosition->GetUnRealizedPL() > m_quote.Bid() * 0.08 ) {
+      if ( m_pPosition->GetUnRealizedPL() > m_quote.Bid() * 0.08 ) { // NOTE: GetUnRealizedPL may need to be divided by 100
         // exit long
 
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 100, m_quote.Bid() - 0.01 );
@@ -504,9 +514,10 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   // RecordSeries has been set to false
   m_pPosition->GetWatch()->SaveSeries( sPrefix );
-  if (m_pFile){
-    m_pFile->Write();
-  }
+  //if (m_pFile){ // don't do this, as the file is save on exit,
+  //  this will create another version, which will cause problems during reload
+  //  m_pFile->Write();
+  //}
 }
 
 void Strategy::CloseAndDone() {

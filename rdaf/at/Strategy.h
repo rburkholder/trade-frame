@@ -38,8 +38,6 @@
 
 
 class TH2D;
-class TRint;
-class TH3D;
 class TFile;
 class TTree;
 class TClass;
@@ -102,6 +100,7 @@ public:
     const config_t
   , TreeItem*
   , pFile_t
+  , pFile_t
   );
   virtual ~Strategy();
 
@@ -143,6 +142,7 @@ private:
   config_t m_config;
 
   pFile_t m_pFile;
+  pFile_t m_pFileUtility;
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;
 
@@ -191,6 +191,7 @@ private:
 
   using pTH2D_t = std::shared_ptr<TH2D>;
   pTH2D_t m_pHistVolume;
+  pTH2D_t m_pHistVolumeDemo;
 
 
   void InitRdaf();

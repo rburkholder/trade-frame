@@ -107,7 +107,8 @@ private:
   mapStrategy_t m_mapStrategy;
 
   std::unique_ptr<TRint> m_prdafApp;
-  std::shared_ptr<TFile> m_pFile;
+  std::shared_ptr<TFile> m_pFile; // primary timeseries
+  std::shared_ptr<TFile> m_pFileUtility;  // scratch pad use
 
   using vRdafFiles_t = std::vector<std::string>;
   vRdafFiles_t m_vRdafFiles;
@@ -129,6 +130,12 @@ private:
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
+
+  void RecreateUtilityFile();
+  void UpdateUtilityFile();
+  void HandleMenuActionUtilityFlush();
+  void HandleMenuActionUtilitySave();
+  void HandleMenuActionUtilityClear();
 
   void ConstructIBInstrument(  const std::string& sNamePortfolio, const std::string& sSymbol );
   void ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol );
