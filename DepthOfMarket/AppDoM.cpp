@@ -114,10 +114,15 @@ bool AppDoM::OnInit() {
     sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND, 4 );
     m_pPanelTrade->Show( true );
 
+    m_cntLoops = 0;
     m_pPanelTrade->SetOnTimer(
       [this](){
-        m_pPanelStatistics->Update( m_valuesStatistics );
-        m_valuesStatistics.Zero();
+        if ( 0 == m_cntLoops ) {
+          m_pPanelStatistics->Update( m_valuesStatistics );
+          m_valuesStatistics.Zero();
+          m_cntLoops = 5;
+        }
+        else m_cntLoops--;
       });
 
     //wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );

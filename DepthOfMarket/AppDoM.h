@@ -59,6 +59,7 @@ private:
 
   ou::tf::l2::PanelTrade* m_pPanelTrade;
 
+  int m_cntLoops;
   PanelStatistics::values_t m_valuesStatistics;
   PanelStatistics* m_pPanelStatistics;
 
