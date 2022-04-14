@@ -25,17 +25,17 @@ namespace tf { // TradeFrame
 // DatedDatum
 //
 
-DatedDatum::DatedDatum(void) :
-  m_dt( not_a_date_time ) {
-}
+DatedDatum::DatedDatum()
+: m_dt( not_a_date_time )
+{}
 
-DatedDatum::DatedDatum(const boost::posix_time::ptime& dt):
-  m_dt( dt ) {
-}
+DatedDatum::DatedDatum( const boost::posix_time::ptime& dt )
+: m_dt( dt )
+{}
 
-DatedDatum::DatedDatum(const DatedDatum& datum) :
-  m_dt( datum.m_dt ) {
-}
+DatedDatum::DatedDatum( const DatedDatum& datum )
+: m_dt( datum.m_dt )
+{}
 
 DatedDatum::DatedDatum(const std::string& dt) {
   //m_dt = boost::posix_time::time_from_string(dt);
@@ -46,7 +46,7 @@ DatedDatum::DatedDatum(const std::string& dt) {
     boost::posix_time::time_duration( atoi( s + 11 ), atoi( s + 14 ), atoi( s + 17 ) ) );
 }
 
-DatedDatum::~DatedDatum(void) {
+DatedDatum::~DatedDatum() {
 }
 
 H5::CompType* DatedDatum::DefineDataType( H5::CompType* pComp ) {
@@ -59,28 +59,30 @@ H5::CompType* DatedDatum::DefineDataType( H5::CompType* pComp ) {
 // Quote
 //
 
-Quote::Quote(void): DatedDatum(), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ) {
-}
+Quote::Quote()
+: DatedDatum(), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 )
+{}
 
-Quote::Quote(const ptime &dt): DatedDatum(dt), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ) {
-}
+Quote::Quote( const ptime &dt )
+: DatedDatum(dt), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 )
+{}
 
-Quote::Quote(const Quote& quote):
-  DatedDatum( quote.m_dt ),
-    m_dblBid( quote.m_dblBid ), m_dblAsk( quote.m_dblAsk ),
-    m_nBidSize( quote.m_nBidSize ), m_nAskSize( quote.m_nAskSize )
-{
-}
+Quote::Quote( const Quote& quote )
+: DatedDatum( quote.m_dt )
+, m_dblBid( quote.m_dblBid ), m_dblAsk( quote.m_dblAsk )
+, m_nBidSize( quote.m_nBidSize ), m_nAskSize( quote.m_nAskSize )
+{}
 
-Quote::Quote( const ptime& dt, price_t dblBid, bidsize_t nBidSize, price_t dblAsk, asksize_t nAskSize ) :
-DatedDatum( dt ),
-    m_dblBid( dblBid ), m_dblAsk( dblAsk ),
-    m_nBidSize( nBidSize ), m_nAskSize( nAskSize ) {
-}
+Quote::Quote( const ptime& dt, price_t dblBid, bidsize_t nBidSize, price_t dblAsk, asksize_t nAskSize )
+: DatedDatum( dt )
+, m_dblBid( dblBid ), m_dblAsk( dblAsk )
+, m_nBidSize( nBidSize ), m_nAskSize( nAskSize )
+{}
 
 Quote::Quote( const std::string& dt, const std::string& bid,
-               const std::string& bidsize, const std::string& ask, const std::string& asksize ) :
-DatedDatum( dt ) {
+               const std::string& bidsize, const std::string& ask, const std::string& asksize )
+: DatedDatum( dt )
+{
   char* stopchar;
   m_dblBid = strtod( bid.c_str(), &stopchar );
   m_nBidSize = atoi( bidsize.c_str() );
@@ -88,7 +90,7 @@ DatedDatum( dt ) {
   m_nAskSize = atoi( asksize.c_str() );
 }
 
-Quote::~Quote(void) {
+Quote::~Quote() {
 }
 
 bool Quote::IsValid() const {
@@ -123,28 +125,31 @@ H5::CompType* Quote::DefineDataType( H5::CompType* pComp ) {
 // Trade
 //
 
-Trade::Trade(void): DatedDatum(), m_dblPrice( 0 ), m_nTradeSize( 0 ) {
-}
+Trade::Trade()
+: DatedDatum(), m_dblPrice( 0 ), m_nTradeSize( 0 )
+{}
 
-Trade::Trade(const ptime& dt): DatedDatum(dt), m_dblPrice( 0 ), m_nTradeSize( 0 ) {
-}
+Trade::Trade(const ptime& dt)
+: DatedDatum(dt), m_dblPrice( 0 ), m_nTradeSize( 0 )
+{}
 
-Trade::Trade(const Trade& trade): DatedDatum( trade.m_dt ),
-    m_dblPrice( trade.m_dblPrice ), m_nTradeSize( trade.m_nTradeSize ) {
-}
+Trade::Trade(const Trade& trade)
+: DatedDatum( trade.m_dt ), m_dblPrice( trade.m_dblPrice ), m_nTradeSize( trade.m_nTradeSize )
+{}
 
-Trade::Trade( const ptime& dt, price_t dblTrade, volume_t nTradeSize ) :
-DatedDatum( dt ), m_dblPrice( dblTrade ), m_nTradeSize( nTradeSize ) {
-}
+Trade::Trade( const ptime& dt, price_t dblTrade, volume_t nTradeSize )
+: DatedDatum( dt ), m_dblPrice( dblTrade ), m_nTradeSize( nTradeSize )
+{}
 
-Trade::Trade( const std::string& dt, const std::string& trade, const std::string& size ) :
-DatedDatum( dt ) {
+Trade::Trade( const std::string& dt, const std::string& trade, const std::string& size )
+: DatedDatum( dt )
+{
   char* stopchar;
   m_dblPrice = strtod( trade.c_str(), &stopchar );
   m_nTradeSize = atoi( size.c_str() );
 }
 
-Trade::~Trade(void) {
+Trade::~Trade() {
 }
 
 H5::CompType* Trade::DefineDataType( H5::CompType* pComp ) {
@@ -157,7 +162,7 @@ H5::CompType* Trade::DefineDataType( H5::CompType* pComp ) {
 
 // CBar
 
-Bar::Bar(void): DatedDatum(), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 ) {
+Bar::Bar(): DatedDatum(), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 ) {
 }
 
 Bar::Bar( const ptime& dt): DatedDatum(dt), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 ) {
@@ -184,7 +189,7 @@ DatedDatum( dt ) {
   m_nVolume = atoi( volume.c_str() );
 }
 
-Bar::~Bar(void) {
+Bar::~Bar() {
 }
 
 H5::CompType* Bar::DefineDataType( H5::CompType* pComp ) {
@@ -262,7 +267,7 @@ H5::CompType* MarketDepth::DefineDataType( H5::CompType* pComp ) {
 // Greek
 //
 
-Greek::Greek( void ): DatedDatum(), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
+Greek::Greek(): DatedDatum(), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
 }
 
 Greek::Greek( const ptime& dt ): DatedDatum(dt), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
@@ -284,7 +289,7 @@ Greek::Greek( const boost::posix_time::ptime& dt, double dblImpliedVolatility, d
   m_dblDelta( dblDelta ), m_dblGamma( dblGamma ), m_dblTheta( dblTheta ), m_dblVega( dblVega ), m_dblRho( dblRho ) {
 }
 
-Greek::~Greek( void ) {
+Greek::~Greek() {
 }
 
 H5::CompType* Greek::DefineDataType( H5::CompType* pComp ) {
@@ -303,7 +308,7 @@ H5::CompType* Greek::DefineDataType( H5::CompType* pComp ) {
 // Price
 //
 
-Price::Price(void): DatedDatum(), m_dblPrice( 0 ) {
+Price::Price(): DatedDatum(), m_dblPrice( 0 ) {
 }
 
 Price::Price(const ptime& dt): DatedDatum(dt), m_dblPrice( 0 ) {
@@ -323,7 +328,7 @@ DatedDatum( dt ) {
   m_dblPrice = strtod( price.c_str(), &stopchar );
 }
 
-Price::~Price(void) {
+Price::~Price() {
 }
 
 H5::CompType* Price::DefineDataType( H5::CompType* pComp ) {
@@ -337,7 +342,7 @@ H5::CompType* Price::DefineDataType( H5::CompType* pComp ) {
 // PriceIV
 //
 
-PriceIV::PriceIV( void ): Price(), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
+PriceIV::PriceIV(): Price(), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
 
 PriceIV::PriceIV(const ptime& dt): Price(dt),  m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
 }
@@ -364,7 +369,7 @@ H5::CompType* PriceIV::DefineDataType( H5::CompType* pComp ) {
 // PriceIVExpiry
 //
 
-PriceIVExpiry::PriceIVExpiry( void ): Price(), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
+PriceIVExpiry::PriceIVExpiry(): Price(), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {};
 
 PriceIVExpiry::PriceIVExpiry(const ptime& dt): Price(dt), m_dtExpiry( not_a_date_time), m_dblIVCall( 0.0 ), m_dblIVPut( 0.0 ) {
 }

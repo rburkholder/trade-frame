@@ -97,7 +97,7 @@ public:
   bool CrossedQuote() const { return ( m_dblBid >= m_dblAsk ); };
   price_t Midpoint() const { return ( m_dblBid + m_dblAsk ) / 2.0; };
   price_t Spread() const { return m_dblAsk - m_dblBid; };
-  price_t GeometricMidPoint( void ) const { return std::sqrt( m_dblBid * m_dblAsk ); };  // pg 53, Intro HF Finance
+  price_t GeometricMidPoint() const { return std::sqrt( m_dblBid * m_dblAsk ); };  // pg 53, Intro HF Finance
   price_t LogarithmicMidPointA() const { return ( std::log( m_dblBid ) + std::log( m_dblAsk ) ) / 2.0; }; // eq 3.4 pg 39, Intro HF Finance
   price_t LogarithmicMidPointB() const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance
 
@@ -126,8 +126,8 @@ public:
   Trade( const std::string& dt, const std::string& trade, const std::string& size );
   ~Trade();
 
-  price_t Price( void ) const { return m_dblPrice; };  // 20120715 was Trace, may cause problems in other areas.
-  volume_t Volume( void ) const { return m_nTradeSize; };
+  price_t Price() const { return m_dblPrice; };  // 20120715 was Trace, may cause problems in other areas.
+  volume_t Volume() const { return m_nTradeSize; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static boost::uint64_t Signature() { return DatedDatum::Signature() * 100 + 13; };
@@ -153,11 +153,11 @@ public:
     const std::string& low, const std::string& close, const std::string& volume );
   ~Bar();
 
-  price_t Open( void ) const { return m_dblOpen; };
-  price_t High( void ) const { return m_dblHigh; };
-  price_t Low( void ) const { return m_dblLow; };
-  price_t Close( void ) const { return m_dblClose; };
-  volume_t Volume( void ) const { return m_nVolume; };
+  price_t Open() const { return m_dblOpen; };
+  price_t High() const { return m_dblHigh; };
+  price_t Low() const { return m_dblLow; };
+  price_t Close() const { return m_dblClose; };
+  volume_t Volume() const { return m_nVolume; };
 
   void Open( price_t price ) { m_dblOpen = price; };
   void High( price_t price ) { m_dblHigh = price; };
@@ -191,9 +191,10 @@ public:
   MarketDepth( const dt_t& dt );
   MarketDepth( const MarketDepth& md );
   MarketDepth( const dt_t& dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  MarketDepth( const std::string& dt, char chSide, const std::string& shares,
+  MarketDepth(
+    const std::string& dt, char chSide, const std::string& shares,
     const std::string& price, const std::string& mmid );
-   ~MarketDepth();
+  ~MarketDepth();
 
   MMID_t MMID() const { return m_uMMID.mmid; };
   price_t Price() const { return m_dblPrice; };
@@ -208,7 +209,7 @@ protected:
   union unionMMID {
     MMID_t mmid;
     char rch[5];
-    unionMMID( void ) { mmid = 0; rch[4] = 0; };
+    unionMMID() { mmid = 0; rch[4] = 0; };
     unionMMID( MMID_t id ) : mmid( id ) { rch[4] = 0; };
     unionMMID( const unionMMID &u ) : mmid( u.mmid ) { rch[4] = 0; };
   } m_uMMID;
@@ -231,7 +232,7 @@ public:
     double theta;
     double vega;
     double rho;
-    greeks_t( void ) : delta( 0.0 ), gamma( 0.0 ), theta( 0.0 ), vega( 0.0 ), rho( 0.0 ) {};
+    greeks_t() : delta( 0.0 ), gamma( 0.0 ), theta( 0.0 ), vega( 0.0 ), rho( 0.0 ) {};
   };
 
   Greek();
@@ -242,11 +243,11 @@ public:
   ~Greek();
 
   double ImpliedVolatility() const { return m_dblImpliedVolatility; };
-  double Delta( void ) const { return m_dblDelta; };
-  double Gamma( void ) const { return m_dblGamma; };
-  double Theta( void ) const { return m_dblTheta; };
-  double Vega( void ) const { return m_dblVega; };
-  double Rho( void ) const { return m_dblRho; };
+  double Delta() const { return m_dblDelta; };
+  double Gamma() const { return m_dblGamma; };
+  double Theta() const { return m_dblTheta; };
+  double Vega() const { return m_dblVega; };
+  double Rho() const { return m_dblRho; };
 
   void ImpliedVolatility( double dblImpliedVolatility ) { m_dblImpliedVolatility = dblImpliedVolatility; };
   void Delta( double dblDelta ) { m_dblDelta = dblDelta; };
@@ -266,7 +267,7 @@ public:
   };
 
   static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
-  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 1000000 + 111111; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 1000000 + 111111; };
 
 protected:
 
@@ -294,10 +295,10 @@ public:
   Price( const std::string &dt, const std::string& price );
   ~Price();
 
-  price_t Value( void ) const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
+  price_t Value() const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 10 + 1; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10 + 1; };
 
 protected:
 private:
@@ -316,11 +317,11 @@ public:
   PriceIV( const dt_t& dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut );
   ~PriceIV() {};
 
-  double IVCall( void ) const { return m_dblIVCall; };
-  double IVPut( void ) const { return m_dblIVPut; };
+  double IVCall() const { return m_dblIVCall; };
+  double IVPut() const { return m_dblIVPut; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature( void ) { return Price::Signature() * 1000 + 412; };
+  static boost::uint64_t Signature() { return Price::Signature() * 1000 + 412; };
 
 protected:
 private:
@@ -340,7 +341,7 @@ public:
   PriceIVExpiry( const dt_t& dt );
   PriceIVExpiry( const PriceIVExpiry& rhs );
   PriceIVExpiry( const dt_t& dtSampled, price_t dblPrice, const dt_t& dtExpiry, double dblIVCall, double dblIVPut );
-  ~PriceIVExpiry( void ) {};
+  ~PriceIVExpiry() {};
 
   double IVCall() const { return m_dblIVCall; };
   double IVPut() const { return m_dblIVPut; };
