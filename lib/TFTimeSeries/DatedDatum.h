@@ -60,7 +60,9 @@ public:
   void DateTime( const dt_t& dt ) { m_dt = dt; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );  // create new one if null
-  static boost::uint64_t Signature() { return 9; };
+  static boost::uint64_t Signature() { return 9; }; // DatedDatum
+
+   // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
   dt_t m_dt;
@@ -102,7 +104,7 @@ public:
   price_t LogarithmicMidPointB() const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10000 + 1133; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10000 + 1133; }; // DatedDatum -> Quote
 
 protected:
 private:
@@ -130,7 +132,7 @@ public:
   volume_t Volume() const { return m_nTradeSize; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 100 + 13; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 100 + 13; };  // DatedDatum -> Trade
 
 protected:
 private:
@@ -166,7 +168,7 @@ public:
   void Volume( volume_t vol ) { m_nVolume = vol; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 100000 + 11113; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 100000 + 11113; }; // DatedDatum -> Bar
 
 protected:
 private:
@@ -203,7 +205,7 @@ public:
   const char& MMIDStr() const { return *m_uMMID.rch; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10000000 + 3188888; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10000000 + 3188888; }; // DatedDatum -> MarketDepth
 
 protected:
   union unionMMID {
@@ -267,7 +269,7 @@ public:
   };
 
   static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 1000000 + 111111; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 1000000 + 111111; }; // DatedDatum > Greek
 
 protected:
 
@@ -298,7 +300,7 @@ public:
   price_t Value() const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10 + 1; };
+  static boost::uint64_t Signature() { return DatedDatum::Signature() * 10 + 1; }; // DatedDatum > Price
 
 protected:
 private:
@@ -321,7 +323,7 @@ public:
   double IVPut() const { return m_dblIVPut; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return Price::Signature() * 1000 + 412; };
+  static boost::uint64_t Signature() { return Price::Signature() * 100 + 11; }; // Price -> PriceIV
 
 protected:
 private:
@@ -348,7 +350,7 @@ public:
   dt_t Expiry() const { return m_dtExpiry; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
-  static boost::uint64_t Signature() { return Price::Signature() * 1000 + 411; };
+  static boost::uint64_t Signature() { return Price::Signature() * 1000 + 411; }; // Price -> PriceIVExpiry
 
 protected:
 private:
