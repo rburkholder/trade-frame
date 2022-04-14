@@ -177,48 +177,64 @@ private:
 };
 
 //
-// MarketDepth
+// MarketDepth (equity only)
 //
 
 class MarketDepth: public DatedDatum {
 public:
 
   using MMID_t = unsigned long;
-  enum ESide : char { Bid, Ask, None };
+  enum ESide : char { Bid, Ask, None }; // use global enumerations?
 
   MarketDepth();
   MarketDepth( const dt_t dt );
   MarketDepth( const MarketDepth& md );
-  MarketDepth( const dt_t dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  MarketDepth(
-    const std::string& dt, char chSide, const std::string& shares,
-    const std::string& price, const std::string& mmid );
+  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
+  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, const std::string& smmid );
   ~MarketDepth();
 
-  MMID_t MMID() const { return m_uMMID.mmid; }
-  price_t Price() const { return m_dblPrice; }
+  char MsgType() const { return m_chMsgType; }
+  ESide Side() const { return m_eSide; }
   volume_t Volume() const { return m_nShares; }
+  price_t Price() const { return m_dblPrice; }
 
+  MMID_t MMID() const { return m_uMMID.mmid; }
   const char& MMIDStr() const { return *m_uMMID.rch; }
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() {
-    return DatedDatum::Signature() * 10000000 + 3188888; } // DatedDatum -> MarketDepth
+    return DatedDatum::Signature() * 100000000 + 83188888; } // DatedDatum -> MarketDepth
 
 protected:
   union unionMMID {
     MMID_t mmid;
     char rch[5];
     unionMMID() { mmid = 0; rch[4] = 0; }
-    unionMMID( MMID_t id ) : mmid( id ) { rch[4] = 0; }
-    unionMMID( const unionMMID &u ) : mmid( u.mmid ) { rch[4] = 0; }
+    unionMMID( MMID_t id ): mmid( id ) { rch[4] = 0; }
+    unionMMID( const unionMMID &u ): mmid( u.mmid ) { rch[4] = 0; }
+    unionMMID( const std::string& s ) {
+      assert( 4 == s.size() );
+      rch[0] = s[0];
+      rch[1] = s[1];
+      rch[2] = s[2];
+      rch[3] = s[3];
+      rch[4] = 0;
+    }
   } m_uMMID;
 private:
-  char chMsgType; // 6 is summary, 3 is add, 4 is update
+  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
   ESide m_eSide;
   volume_t m_nShares;
   price_t m_dblPrice;
 };
+
+//
+// MarketDepth (futures, arrival, todo)
+//
+
+//
+// MarketDepth (futures, deletion, todo)
+//
 
 //
 // Greek
