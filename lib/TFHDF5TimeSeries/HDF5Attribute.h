@@ -57,7 +57,7 @@ public:
   ~HDF5Attributes(void);
 
   void SetSignature( boost::uint64_t ); // left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
-  boost::uint64_t GetSignature( void );
+  boost::uint64_t GetSignature();
 
   void SetInstrumentType( InstrumentType::EInstrumentType );
   InstrumentType::EInstrumentType GetInstrumentType( void );

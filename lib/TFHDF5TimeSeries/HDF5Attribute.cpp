@@ -92,7 +92,7 @@ void HDF5Attributes::SetSignature( boost::uint64_t sig ) {
   attribute.close();
 }
 
-boost::uint64_t HDF5Attributes::GetSignature( void ) {
+boost::uint64_t HDF5Attributes::GetSignature() {
   boost::uint64_t sig;
   H5::Attribute attribute( m_pDataSet->openAttribute( szSignature ) );
   attribute.read(H5::PredType::NATIVE_UINT64, &sig );
