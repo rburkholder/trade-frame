@@ -127,7 +127,6 @@ void Dispatcher<T>::Initialized() {
   }
 }
 
-
 template <typename T>
 void Dispatcher<T>::StartMarketByOrder( const std::string& sName ) {
   ou::Network<Dispatcher<T> >::Send( "WOR," + sName + "\n" );
@@ -157,20 +156,18 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
   BOOST_ASSERT( iter != end );
 
-  std::string str( iter, end );
+  //std::string str( iter, end );
   //if ( '5' == str[0] ) {
   //  std::cout << "MarketDepth: '" << str << "'" << std::endl;
   //}
 
   switch ( *iter ) {
     case '3': // Order Add
-      {
+      if ( &Dispatcher<T>::OnMBOAdd != &T::OnMBOAdd ) {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
         if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
-          if ( &Dispatcher<T>::OnMBOAdd != &T::OnMBOAdd ) {
-            static_cast<T*>( this )->OnMBOAdd( msg );
-          }
+          static_cast<T*>( this )->OnMBOAdd( msg );
         }
         else {
           std::cout << "MarketDepth Order Add error" << std::endl;
@@ -178,13 +175,11 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       }
       break;
     case '4': // Order/Level2 Update
-      {
+      if ( &Dispatcher<T>::OnMBOUpdate != &T::OnMBOUpdate ) {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
         if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
-          if ( &Dispatcher<T>::OnMBOUpdate != &T::OnMBOUpdate ) {
-            static_cast<T*>( this )->OnMBOUpdate( msg );
-          }
+          static_cast<T*>( this )->OnMBOUpdate( msg );
         }
         else {
           std::cout << "MarketDepth Order Update error" << std::endl;
@@ -192,13 +187,11 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       }
       break;
     case '5': // Order Delete
-      {
+      if ( &Dispatcher<T>::OnMBODelete != &T::OnMBODelete ) {
         namespace OrderDelete = ou::tf::iqfeed::l2::msg::OrderDelete;
         OrderDelete::decoded msg;
         if ( OrderDelete::Decode( m_parserDelete, msg, iter, end) ) {
-          if ( &Dispatcher<T>::OnMBODelete != &T::OnMBODelete ) {
-            static_cast<T*>( this )->OnMBODelete( msg );
-          }
+          static_cast<T*>( this )->OnMBODelete( msg );
         }
         else {
           std::string str( iter, end );
@@ -212,13 +205,11 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       }
       break;
     case '6': // Order/Level2 Summary
-      {
+      if ( &Dispatcher<T>::OnMBOSummary != &T::OnMBOSummary ) {
         namespace OrderArrival = ou::tf::iqfeed::l2::msg::OrderArrival;
         OrderArrival::decoded msg;
         if ( OrderArrival::Decode( m_parserArrival, msg, iter, end) ) {
-          if ( &Dispatcher<T>::OnMBOSummary != &T::OnMBOSummary ) {
-            static_cast<T*>( this )->OnMBOSummary( msg );
-          }
+          static_cast<T*>( this )->OnMBOSummary( msg );
         }
         else {
           std::cout << "MarketDepth Order Summary error" << std::endl;
