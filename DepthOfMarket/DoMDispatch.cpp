@@ -128,6 +128,7 @@ void DoMDispatch::Initialized() {
   //StartPriceLevel( m_sWatch );
 }
 
+// used with futures, not equities
 void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
@@ -380,7 +381,7 @@ void DoMDispatch::AuctionUpdate(
 
   mapAuction_t::iterator iterAuction = map.find( order.dblPrice );
   if ( map.end() == iterAuction ) {
-    std::cout << "AuctionUpdate price not found: " << order.sMarketMaker << "," << order.dblPrice << std::endl;
+    std::cout << "AuctionUpdate price not found: " << order.dblPrice << std::endl;
   }
   else {
     auto& nQuantity( iterAuction->second.nQuantity );

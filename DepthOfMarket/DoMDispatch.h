@@ -28,8 +28,13 @@
 
 #include <TFIQFeed/Level2/Dispatcher.h>
 
-// NOTE: implement one per symbol
+// TODO: implement one per symbol
 //   might be somewhat faster with out a symbol lookup on each message
+//   this then makes the iqfeed agent the dispatcher for each symbol
+//   or make a fast symbol lookup, which will need to be in the provider
+// for consistency, needs to go through proivider, and is processed through Symbol
+// so ... keep this for the Visual Ladders for fast access,
+//    will need a different version of this for Provider access
 
 // TODO - make a choice
 //    pass in dispatch lambdas?
@@ -80,18 +85,18 @@ private:
   std::string m_sWatch;
 
   struct Order {
-    std::string sMarketMaker;
     char chOrderSide;
     double dblPrice;
     volume_t nQuantity;
     uint64_t nPriority;
     uint8_t nPrecision;
     // ptime, if needed
+    // note: there is no MarketMaker in messages with an order ID,
     Order( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
-    : sMarketMaker( std::move( msg.sMarketMaker ) ), chOrderSide( msg.chOrderSide ),
+    : chOrderSide( msg.chOrderSide ),
       dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
       nPriority( msg.nPriority ), nPrecision( msg.nPrecision )
-    {}
+    { assert( 0 == msg.sMarketMaker.size() ); }
   };
 
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
