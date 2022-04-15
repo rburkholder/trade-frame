@@ -46,7 +46,6 @@ class DoMDispatch
 : public ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>
 {
   friend ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>;
-
 public:
 
   using fVolumeAtPrice_t = std::function<void(double,int)>;
@@ -68,7 +67,7 @@ protected:
   //void OnNetworkDisconnected();
   //void OnNetworkError( size_t e );
 
-  void Initialized();
+  void OnL2Initialized();
 
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );
   void OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& );

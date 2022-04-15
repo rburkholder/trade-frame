@@ -56,14 +56,13 @@ public:
 
 protected:
 
-  // called by Network via CRTP
-  void OnNetworkConnected();
-  void OnNetworkDisconnected();
-  void OnNetworkError( size_t e );
-  void OnNetworkSendDone();
-  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+  // translated from network layer to eliminate name clash
+  void OnL2Connected() {}
+  void OnL2Disconnected() {}
+  void OnL2Error( size_t e ) {}
+  void OnL2SendDone() {}
 
-  void Initialized();
+  void OnL2Initialized();
 
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
   void OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
@@ -71,9 +70,18 @@ protected:
   void OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& ) {}
 
 private:
+
   bool m_bInitialized;
   ou::tf::iqfeed::l2::msg::OrderArrival::parser_decoded<typename linebuffer_t::iterator> m_parserArrival;
   ou::tf::iqfeed::l2::msg::OrderDelete::parser_decoded<typename linebuffer_t::iterator> m_parserDelete;
+
+  // called by Network via CRTP
+  void OnNetworkConnected();
+  void OnNetworkDisconnected();
+  void OnNetworkError( size_t e );
+  void OnNetworkSendDone();
+  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+
 };
 
 template <typename T>
@@ -98,15 +106,15 @@ void Dispatcher<T>::Disconnect() {
 
 template <typename T>
 void Dispatcher<T>::OnNetworkConnected() {
-  if ( &Dispatcher<T>::OnNetworkConnected != &T::OnNetworkConnected ) {
-    static_cast<T*>( this )->OnNetworkConnected();
+  if ( &Dispatcher<T>::OnL2Connected != &T::OnL2Connected ) {
+    static_cast<T*>( this )->OnL2Connected();
   }
 }
 
 template <typename T>
 void Dispatcher<T>::OnNetworkDisconnected() {
-  if ( &Dispatcher<T>::OnNetworkDisconnected != &T::OnNetworkDisconnected ) {
-    static_cast<T*>( this )->OnNetworkDisconnected();
+  if ( &Dispatcher<T>::OnL2Disconnected != &T::OnL2Disconnected ) {
+    static_cast<T*>( this )->OnL2Disconnected();
   }
   std::cout << "Dispatcher<T>::OnNetworkDisconnected()" << std::endl;
   m_bInitialized = false;
@@ -114,22 +122,22 @@ void Dispatcher<T>::OnNetworkDisconnected() {
 
 template <typename T>
 void Dispatcher<T>::OnNetworkError( size_t e ) {
-  if ( &Dispatcher<T>::OnNetworkError != &T::OnNetworkError ) {
-    static_cast<T*>( this )->OnNetworkError( e );
+  if ( &Dispatcher<T>::OnL2Error != &T::OnL2Error ) {
+    static_cast<T*>( this )->OnL2Error( e );
   }
 }
 
 template <typename T>
 void Dispatcher<T>::OnNetworkSendDone() {
-  if ( &Dispatcher<T>::OnNetworkSendDone != &T::OnNetworkSendDone ) {
-    static_cast<T*>( this )->OnNetworkSendDone();
+  if ( &Dispatcher<T>::OnL2SendDone != &T::OnL2SendDone ) {
+    static_cast<T*>( this )->OnL2SendDone();
   }
 }
 
 template <typename T>
-void Dispatcher<T>::Initialized() {
-  if ( &Dispatcher<T>::Initialized != &T::Initialized ) {
-    static_cast<T*>( this )->Initialized();
+void Dispatcher<T>::OnL2Initialized() {
+  if ( &Dispatcher<T>::OnL2Initialized != &T::OnL2Initialized ) {
+    static_cast<T*>( this )->OnL2Initialized();
   }
 }
 
@@ -244,7 +252,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       else {
         std::string str( iter, end );
         if ( "S,CURRENT PROTOCOL,6.2," == str ) {
-          Initialized();
+          OnL2Initialized();
         }
       }
       break;

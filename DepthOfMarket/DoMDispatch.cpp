@@ -123,7 +123,7 @@ void DoMDispatch::Disconnect() {
   inherited_t::Disconnect();
 }
 
-void DoMDispatch::Initialized() {
+void DoMDispatch::OnL2Initialized() {
   StartMarketByOrder( m_sWatch );
   //StartPriceLevel( m_sWatch );
 }
