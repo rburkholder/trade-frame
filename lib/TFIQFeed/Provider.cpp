@@ -334,22 +334,28 @@ void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   // iqfeed name is then set as an alternate name, with a name of our design used as the primary name
   std::string sName;
   switch ( pInstrument->GetInstrumentType() ) {
-  case ou::tf::InstrumentType::Option:
-//    sName += pInstrument->GetUnderlyingName();
-    std::string d = pInstrument->GetCommonCalcExpiryAsIsoString();
-    sName += d.substr( 2, 2 );
-    int month = boost::lexical_cast<int>( d.substr( 4, 2 ) );
-    sName += d.substr( 6, 2 );
-    switch ( pInstrument->GetOptionSide() ) {
-    case ou::tf::OptionSide::Call:
-      sName += 'A' + month - 1;
+    case ou::tf::InstrumentType::Option:
+      {
+        //sName += pInstrument->GetUnderlyingName();
+        std::string d = pInstrument->GetCommonCalcExpiryAsIsoString();
+        sName += d.substr( 2, 2 );
+        int month = boost::lexical_cast<int>( d.substr( 4, 2 ) );
+        sName += d.substr( 6, 2 );
+        switch ( pInstrument->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            sName += 'A' + month - 1;
+            break;
+          case ou::tf::OptionSide::Put:
+            sName += 'M' + month - 1;
+            break;
+          default: // ignore the other enumerations
+            break;
+        }
+        sName += boost::lexical_cast<std::string>( pInstrument->GetStrike() );
+      }
       break;
-    case ou::tf::OptionSide::Put:
-      sName += 'M' + month - 1;
+    default: // ignore the other enumerations
       break;
-    }
-    sName += boost::lexical_cast<std::string>( pInstrument->GetStrike() );
-    break;
   }
   pInstrument->SetAlternateName( ID(), sName );
 }
