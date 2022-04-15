@@ -91,7 +91,7 @@ private:
     uint64_t nPriority;
     uint8_t nPrecision;
     // ptime, if needed
-    // note: there is no MarketMaker in messages with an order ID,
+    // note: there is no MarketMaker in messages with an order ID
     Order( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
     : chOrderSide( msg.chOrderSide ),
       dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
