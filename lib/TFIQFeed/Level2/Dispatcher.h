@@ -114,10 +114,16 @@ void Dispatcher<T>::OnNetworkDisconnected() {
 
 template <typename T>
 void Dispatcher<T>::OnNetworkError( size_t e ) {
+  if ( &Dispatcher<T>::OnNetworkError != &T::OnNetworkError ) {
+    static_cast<T*>( this )->OnNetworkError( e );
+  }
 }
 
 template <typename T>
 void Dispatcher<T>::OnNetworkSendDone() {
+  if ( &Dispatcher<T>::OnNetworkSendDone != &T::OnNetworkSendDone ) {
+    static_cast<T*>( this )->OnNetworkSendDone();
+  }
 }
 
 template <typename T>
@@ -244,21 +250,21 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'n':
       {
-      std::string str( iter, end );
-      std::cout << "MarketDepth Unknown symbol: '" << str << "'" << std::endl;
+        std::string str( iter, end );
+        std::cout << "MarketDepth Unknown symbol: '" << str << "'" << std::endl;
       }
       break;
     case 'q':
       {
-      std::string str( iter, end );
-      std::cout << "MarketDepth no depth available: '" << str << "'" << std::endl;
+        std::string str( iter, end );
+        std::cout << "MarketDepth no depth available: '" << str << "'" << std::endl;
       }
       break;
     default:
       {
-      //throw "Unknown message type in port 9200"; // unknown message type
-      std::string str( iter, end );
-      std::cout << "MarketDepth unknown message type: '" << str << "'" << std::endl;
+        //throw "Unknown message type in port 9200"; // unknown message type
+        std::string str( iter, end );
+        std::cout << "MarketDepth unknown message type: '" << str << "'" << std::endl;
       }
       break;
   }
