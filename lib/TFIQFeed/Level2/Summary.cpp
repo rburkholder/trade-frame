@@ -13,13 +13,13 @@
  ************************************************************************/
 
 /*
- * File:    DoMDispatch.cpp
+ * File:    Summary.cpp
  * Author:  raymond@burkholder.net
- * Project: DepthOfMarket
+ * Project: TFIQFeed/Level2
  * Created on October 17, 2021 11:45
  */
 
-#include "DoMDispatch.h"
+#include "Summary.hpp"
 
 using inherited_t = ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>;
 

@@ -31,6 +31,7 @@
 #include <TFTrading/Watch.h>
 
 #include <TFIQFeed/HistoryRequest.h>
+#include <TFIQFeed/Level2/Summary.hpp>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -41,7 +42,6 @@
 
 #include <TFIndicators/Pivots.h>
 
-#include "DoMDispatch.h"
 #include "PanelStatistics.hpp"
 
 class AppDoM:

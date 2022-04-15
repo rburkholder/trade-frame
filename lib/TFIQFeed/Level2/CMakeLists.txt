@@ -15,6 +15,7 @@ set(
     MsgOrderDelete.h
     MsgPriceLevelArrival.h
     MsgPriceLevelDelete.h
+    Summary.hpp
   )
 
 set(
@@ -24,6 +25,7 @@ set(
     MsgOrderDelete.cpp
     MsgPriceLevelArrival.cpp
     MsgPriceLevelDelete.cpp
+    Summary.cpp
   )
 
 add_library(

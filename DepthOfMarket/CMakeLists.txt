@@ -27,7 +27,6 @@ set(
   file_h
     AppDoM.h
     Config.h
-    DoMDispatch.h
     PanelStatistics.hpp
   )
 
@@ -35,7 +34,6 @@ set(
   file_cpp
     AppDoM.cpp
     Config.cpp
-    DoMDispatch.cpp
     PanelStatistics.cpp
   )
 
@@ -77,6 +75,7 @@ target_link_libraries(
       TFIndicators
       TFVuTrading
       MarketDepth
+      TFIQFeedLevel2
       TFTrading
       TFTimeSeries
       TFHDF5TimeSeries
