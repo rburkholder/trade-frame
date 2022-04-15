@@ -31,8 +31,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 class IQFeedProvider :
-  public ProviderInterface<IQFeedProvider,IQFeedSymbol>,
-  public IQFeed<IQFeedProvider>
+  public ProviderInterface<IQFeedProvider,IQFeedSymbol>
+, public IQFeed<IQFeedProvider>
 {
   friend IQFeed<IQFeedProvider>;
 public:
@@ -67,9 +67,6 @@ protected:
 
   virtual void StartTradeWatch( pSymbol_t pSymbol );
   virtual void  StopTradeWatch( pSymbol_t pSymbol );
-
-  virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
-  virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 

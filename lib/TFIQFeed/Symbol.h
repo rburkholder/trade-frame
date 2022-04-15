@@ -101,11 +101,6 @@ protected:
   void SetWatchState( WatchState state ) { m_stateWatch = state; };
   WatchState GetWatchState() const { return m_stateWatch; };
 
-  void SetDepthWatchInProgress() { m_bDepthWatchInProgress = true; };
-  void ResetDepthWatchInProgress() { m_bDepthWatchInProgress = false; };
-  bool GetDepthWatchInProgress() const { return m_bDepthWatchInProgress; };
-  bool m_bDepthWatchInProgress;
-
   using fLookupSecurityType_t = std::function<ESecurityType(int)>;
   using fLookupListedMarket_t = std::function<std::string(std::string)>;
 

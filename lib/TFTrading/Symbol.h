@@ -18,6 +18,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <OUCommon/Delegate.h>
+
 #include <TFTimeSeries/DatedDatum.h>
 
 #include "Instrument.h"

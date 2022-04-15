@@ -29,7 +29,6 @@ IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument
 , m_cnt( 0 )
 , m_QStatus( qUnknown )
 , m_stateWatch( WatchState::None )
-, m_bDepthWatchInProgress( false )
 , m_bWaitForFirstQuote( true )
 {
   m_pFundamentals = std::make_shared<Fundamentals>();
