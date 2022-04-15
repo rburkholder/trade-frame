@@ -60,7 +60,6 @@ void DoMDispatch::EmitMarketMakerMaps() {
   mapPriceLevels_t mapPriceMMAsk;
   mapPriceLevels_t mapPriceMMBid;
 
-
   for ( const mapMM_t::value_type& vt: m_mapMMAsk ) {
     price_mm pmm( vt.second.price, vt.first );
     mapPriceMMAsk.emplace( pmm, vt.second.volume );

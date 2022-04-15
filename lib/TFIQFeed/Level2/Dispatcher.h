@@ -39,9 +39,6 @@ class Dispatcher
   friend ou::Network<Dispatcher<T> >;
 public:
 
-  using inherited_t = typename ou::Network<Dispatcher<T> >;
-  using linebuffer_t = typename inherited_t::linebuffer_t;
-
   Dispatcher();
   virtual ~Dispatcher();
 
@@ -71,16 +68,20 @@ protected:
 
 private:
 
+  using l2_inherited_t = typename ou::Network<Dispatcher<T> >;
+  using l2_linebuffer_t = typename l2_inherited_t::linebuffer_t;
+
   bool m_bInitialized;
-  ou::tf::iqfeed::l2::msg::OrderArrival::parser_decoded<typename linebuffer_t::iterator> m_parserArrival;
-  ou::tf::iqfeed::l2::msg::OrderDelete::parser_decoded<typename linebuffer_t::iterator> m_parserDelete;
+
+  ou::tf::iqfeed::l2::msg::OrderArrival::parser_decoded<typename l2_linebuffer_t::iterator> m_parserArrival;
+  ou::tf::iqfeed::l2::msg::OrderDelete::parser_decoded<typename l2_linebuffer_t::iterator> m_parserDelete;
 
   // called by Network via CRTP
   void OnNetworkConnected();
   void OnNetworkDisconnected();
   void OnNetworkError( size_t e );
   void OnNetworkSendDone();
-  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+  void OnNetworkLineBuffer( l2_linebuffer_t* );  // new line available for processing
 
 };
 
@@ -163,10 +164,10 @@ void Dispatcher<T>::StopPriceLevel( const std::string& sName ) {
 }
 
 template <typename T>
-void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
+void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
 
-  typename linebuffer_t::iterator iter = (*pBuffer).begin();
-  typename linebuffer_t::iterator end = (*pBuffer).end();
+  typename l2_linebuffer_t::iterator iter = (*pBuffer).begin();
+  typename l2_linebuffer_t::iterator end = (*pBuffer).end();
 
   BOOST_ASSERT( iter != end );
 
@@ -277,7 +278,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
   }
 
-  inherited_t::GiveBackBuffer( pBuffer );
+  l2_inherited_t::GiveBackBuffer( pBuffer );
 
 }
 
