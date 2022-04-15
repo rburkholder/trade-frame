@@ -13,37 +13,20 @@
 
 #pragma once
 
-// http://boost.2283326.n4.nabble.com/WinSock-h-has-already-been-included-td2580721.html
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
 #include <string>
 #include <vector>
 #include <cassert>
 
-#include <typeinfo>
-#include <sstream>
-
-#include <boost/thread.hpp>  // separate thread for asio run processing
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/asio.hpp>  // class outbound processing
 #include <boost/array.hpp>
+#include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/bind/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/interprocess/detail/atomic.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <OUCommon/Debug.h>
 
 #include "ReusableBuffers.h"
-
-// custom on
-// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
-// http://msdn.microsoft.com/en-us/library/x98tx3cf.aspx
-//#define _CRTDBG_MAP_ALLOC
-//#include <stdlib.h>
-//#include <crtdbg.h>
-// custom off
 
 // example timeout code
 // http://www.boost.org/doc/libs/1_43_0/doc/html/boost_asio/example/timeouts/connect_timeout.cpp
@@ -544,7 +527,7 @@ void Network<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) 
 
     typename linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
-    BOOST_FOREACH( char ch, send ) {
+    for ( char ch: send ) {
       (*pbuffer).push_back( ch );
     }
     if ( bNotifyOnDone ) {
