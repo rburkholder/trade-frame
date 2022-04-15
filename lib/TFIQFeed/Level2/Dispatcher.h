@@ -48,8 +48,8 @@ public:
   // http://www.iqfeed.net/dev/api/docs/docsBeta/MarketDepth.cfm
   void StartMarketByOrder( const std::string& );
   void StopMarketByOrder( const std::string& );
-  void StartPriceLevel( const std::string& );
-  void StopPriceLevel( const std::string& );
+  void StartPriceLevel( const std::string& ); // not implemented
+  void StopPriceLevel( const std::string& );  // not implemented
 
 protected:
 
