@@ -33,8 +33,8 @@ public:
 
   enum enumMergingState { eInit, eRunning, ePaused, eStopped };
 
-  MergeDatedDatums(void);
-  virtual ~MergeDatedDatums(void);
+  MergeDatedDatums();
+  virtual ~MergeDatedDatums();
 
   typedef FastDelegate1<const DatedDatum &> OnDatumHandler;
 
@@ -43,12 +43,12 @@ public:
   void Add( TimeSeries<Bar>& series, OnDatumHandler );
   void Add( TimeSeries<Greek>& series, OnDatumHandler );
   void Add( TimeSeries<MarketDepth>& series, OnDatumHandler );
-  void Run( void );
-  void Stop( void );
+  void Run();
+  void Stop();
 
-  enumMergingState GetState( void ) const { return m_state; };
+  enumMergingState GetState() const { return m_state; };
 
-  unsigned long GetCountProcessedDatums( void ) const { return m_cntProcessedDatums; };
+  unsigned long GetCountProcessedDatums() const { return m_cntProcessedDatums; };
 
 protected:
 

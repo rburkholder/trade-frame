@@ -17,22 +17,24 @@
 #include <string>
 #include <sstream>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include <OUCommon/TimeSource.h>
+
 #include <TFTrading/ProviderInterface.h>
 #include <TFTrading/Order.h>
-#include <TFTimeSeries/MergeDatedDatums.h>
 
 #include "SimulationSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+class MergeDatedDatums;
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -68,10 +70,12 @@ public:
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
 
-  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
-  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
   void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
   void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
+  void AddDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler );
+  void RemoveDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler );
+  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
 
   void EmitStats( std::stringstream& ss );
 
@@ -91,6 +95,14 @@ public:
 
 protected:
 
+  std::string m_sGroupDirectory;
+
+  ptime m_dtSimStart;
+  ptime m_dtSimStop;
+  unsigned long m_nProcessedDatums;
+
+  MergeDatedDatums* m_pMerge;
+
   pSymbol_t NewCSymbol( SimulationSymbol::pInstrument_t pInstrument );
 
   void StartQuoteWatch( pSymbol_t pSymbol );
@@ -102,10 +114,6 @@ protected:
   void StartGreekWatch( pSymbol_t pSymbol );
   void StopGreekWatch( pSymbol_t pSymbol );
 
-  std::string m_sGroupDirectory;
-
-  MergeDatedDatums* m_pMerge;
-
   OnSimulationThreadStarted_t m_OnSimulationThreadStarted;
   OnSimulationThreadEnded_t m_OnSimulationThreadEnded;
   OnSimulationComplete_t m_OnSimulationComplete;
@@ -115,10 +123,6 @@ protected:
   void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
   void HandleCommission( Order::idOrder_t orderId, double commission );
   void HandleCancellation( Order::idOrder_t orderId );
-
-  ptime m_dtSimStart;
-  ptime m_dtSimStop;
-  unsigned long m_nProcessedDatums;
 
 private:
 

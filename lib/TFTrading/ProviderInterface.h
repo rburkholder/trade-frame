@@ -70,7 +70,7 @@ public:
   ProviderInterfaceBase()
     : m_nID( keytypes::EProviderUnknown ), m_bConnected( false ),
       m_pProvidesBrokerInterface( false ),
-      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepth( false )
+      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepths( false )
     {};
   virtual ~ProviderInterfaceBase() {};
 
@@ -94,7 +94,7 @@ public:
 
   bool ProvidesQuotes() const { return m_bProvidesQuotes; };
   bool ProvidesTrades() const { return m_bProvidesTrades; };
-  bool ProvidesDepth()  const { return m_bProvidesDepth; };
+  bool ProvidesDepth()  const { return m_bProvidesDepths; };
   bool ProvidesGreeks() const { return m_bProvidesGreeks; };
 
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
@@ -131,7 +131,7 @@ protected:
 
   bool m_bProvidesQuotes;
   bool m_bProvidesTrades;
-  bool m_bProvidesDepth;
+  bool m_bProvidesDepths;
   bool m_bProvidesGreeks;
 
   OnSecurityDefinitionNotFoundHandler_t OnSecurityDefinitionNotFound;

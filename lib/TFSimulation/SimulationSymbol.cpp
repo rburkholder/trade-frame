@@ -12,10 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "SimulationSymbol.h"
-
-#include "TFHDF5TimeSeries/HDF5TimeSeriesContainer.h"
 #include "TFHDF5TimeSeries/HDF5IterateGroups.h"
+#include "TFHDF5TimeSeries/HDF5TimeSeriesContainer.h"
+
+#include "SimulationSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -29,12 +29,12 @@ SimulationSymbol::SimulationSymbol(
 : Symbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
-  //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  // m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
 SimulationSymbol::~SimulationSymbol() {
-  // we don't yet have a .Remove for this in SimulationProvider yet.
-  //m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  // we don't yet have a .Remove for this in SimulationProvider.
+  // m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 
 }
 
@@ -102,6 +102,21 @@ void SimulationSymbol::StopGreekWatch() {
 }
 
 void SimulationSymbol::StartDepthWatch() {
+  if ( 0 == m_depths.Size() )  {
+    try {
+      std::string sPath( m_sDirectory + "/depths/" + GetId() );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      HDF5TimeSeriesContainer<MarketDepth> depthRepository( dm, sPath );
+      HDF5TimeSeriesContainer<MarketDepth>::iterator begin, end;
+      begin = depthRepository.begin();
+      end = depthRepository.end();
+      m_depths.Resize( end - begin );
+      depthRepository.Read( begin, end, &m_depths );
+    }
+    catch ( std::runtime_error &e ) {
+      // couldn't do read, so leave as empty
+    }
+  }
 }
 
 void SimulationSymbol::StopDepthWatch() {
@@ -109,6 +124,10 @@ void SimulationSymbol::StopDepthWatch() {
 
 void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
   m_OnQuote( dynamic_cast<const Quote &>( datum ) );
+}
+
+void SimulationSymbol::HandleDepthEvent( const DatedDatum &datum ) {
+  m_OnDepth( dynamic_cast<const MarketDepth &>( datum ) );
 }
 
 void SimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {

@@ -12,8 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <stdexcept>
 #include <cassert>
+#include <stdexcept>
+
+#include <TFTimeSeries/MergeDatedDatums.h>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 
@@ -33,6 +35,7 @@ SimulationProvider::SimulationProvider()
   m_nID = keytypes::EProviderSimulator;
 
   m_bProvidesQuotes = true;
+  m_bProvidesDepths = true;
   m_bProvidesTrades = true;
   m_bProvidesGreeks = true;
   m_pProvidesBrokerInterface = true;
@@ -109,6 +112,32 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
     if ( 1 == iter->second->GetQuoteHandlerCount() ) {
       pSymbol_t pSymSymbol( iter->second );
       inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+    }
+  }
+}
+
+void SimulationProvider::AddDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler ) {
+  inherited_t::AddDepthHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  assert( m_mapSymbols.end() != iter );
+  pSymbol_t pSymSymbol( iter->second );
+  if ( 1 == iter->second->GetDepthHandlerCount() ) {
+    inherited_t::AddDepthHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepth ) );
+  }
+}
+
+void SimulationProvider::RemoveDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler ) {
+  inherited_t::RemoveDepthHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );  // this shouldn't occur
+  }
+  else {
+    if ( 1 == iter->second->GetDepthHandlerCount() ) {
+      pSymbol_t pSymSymbol( iter->second );
+      inherited_t::RemoveDepthHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepth ) );
     }
   }
 }
@@ -190,6 +219,13 @@ void SimulationProvider::Merge() {
         m_pMerge -> Add(
           quotes,
           MakeDelegate( iter->second.get(), &SimulationSymbol::HandleQuoteEvent ) );
+      }
+
+      MarketDepths& depths( sym->m_depths );
+      if ( 0 != depths.Size() ) {
+        m_pMerge -> Add(
+          depths,
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleDepthEvent ) );
       }
 
       Trades& trades( sym->m_trades );

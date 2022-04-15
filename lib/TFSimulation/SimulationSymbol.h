@@ -39,29 +39,34 @@ public:
   using greek_t = inherited_t::greek_t;
 
   SimulationSymbol( const std::string& sSymbol,
-                     pInstrument_cref pInstrument,
-                     const std::string& sGroup ); // base with trades/ quotes/, greeks/
+                    pInstrument_cref pInstrument,
+                    const std::string& sGroup ); // base with trades/ quotes/, greeks/
   virtual ~SimulationSymbol();
 
 protected:
 
-  void StartTradeWatch();
-  void StopTradeWatch();
   void StartQuoteWatch();
   void StopQuoteWatch();
+
   void StartDepthWatch();
   void StopDepthWatch();
+
+  void StartTradeWatch();
+  void StopTradeWatch();
+
   void StartGreekWatch();
   void StopGreekWatch();
 
-  void HandleTradeEvent( const DatedDatum &datum );
   void HandleQuoteEvent( const DatedDatum &datum );
+  void HandleDepthEvent( const DatedDatum &datum );
+  void HandleTradeEvent( const DatedDatum &datum );
   void HandleGreekEvent( const DatedDatum &datum );
 
   std::string m_sDirectory;
 
   Quotes m_quotes;
   Trades m_trades;
+  MarketDepths m_depths;
   Greeks m_greeks;
 
   SimulateOrderExecution m_simExec;

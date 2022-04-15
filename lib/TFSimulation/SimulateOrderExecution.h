@@ -29,9 +29,9 @@ using namespace boost::gregorian;
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <TFTimeSeries/DatedDatum.h>
 #include <TFTrading/Order.h>
 #include <TFTrading/Execution.h>
+#include <TFTimeSeries/DatedDatum.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -41,8 +41,8 @@ public:
 
   using pOrder_t = Order::pOrder_t;
 
-  SimulateOrderExecution(void);
-  ~SimulateOrderExecution(void);
+  SimulateOrderExecution();
+  ~SimulateOrderExecution();
 
   using OnOrderCancelledHandler = FastDelegate1<Order::idOrder_t>;
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
@@ -64,8 +64,9 @@ public:
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
 
-  void NewTrade( const Trade& trade );
   void NewQuote( const Quote& quote );
+  void NewDepth( const MarketDepth& depth ); // has no influence on the self administred order books
+  void NewTrade( const Trade& trade );
 
   void SubmitOrder( pOrder_t pOrder );
   void CancelOrder( Order::idOrder_t nOrderId );
@@ -117,6 +118,7 @@ protected:
     assert( 0 != sId->length() );
     return;
   }
+
 private:
 };
 

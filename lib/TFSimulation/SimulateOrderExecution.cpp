@@ -29,13 +29,18 @@ SimulateOrderExecution::SimulateOrderExecution()
 SimulateOrderExecution::~SimulateOrderExecution() {
 }
 
-void SimulateOrderExecution::NewTrade( const Trade& trade ) {
-  ProcessLimitOrders( trade );
-}
-
 void SimulateOrderExecution::NewQuote( const Quote& quote ) {
   ProcessOrderQueues( quote );
   m_lastQuote = quote;
+}
+
+void SimulateOrderExecution::NewDepth( const MarketDepth& depth ) {
+//  ProcessOrderQueues( quote );
+//  m_lastQuote = quote;
+}
+
+void SimulateOrderExecution::NewTrade( const Trade& trade ) {
+  ProcessLimitOrders( trade );
 }
 
 void SimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
