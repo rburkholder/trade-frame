@@ -138,7 +138,7 @@ bool AppDoM::OnInit() {
     m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
     m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
 
-    m_pDispatch = std::make_unique<DoMDispatch>( options.sSymbolName );
+    m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Summary>( options.sSymbolName );
 
     m_pDispatch->Set(
       [this]( double price, int volume ){

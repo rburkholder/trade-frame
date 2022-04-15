@@ -42,16 +42,21 @@
 //    CRTP with the graph code?  CRTP with multi-purpose code:  chart plus trading?
 //       then allows intermediate multi-purpose dispatch via very fast calls
 
-class DoMDispatch
-: public ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+namespace l2 { // level 2 data
+
+class Summary
+: public ou::tf::iqfeed::l2::Dispatcher<Summary>
 {
-  friend ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>;
+  friend ou::tf::iqfeed::l2::Dispatcher<Summary>;
 public:
 
   using fVolumeAtPrice_t = std::function<void(double,int)>;
 
-  DoMDispatch( const std::string& sWatch );
-  virtual ~DoMDispatch();
+  Summary( const std::string& sWatch );
+  virtual ~Summary();
 
   void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
 
@@ -151,3 +156,8 @@ private:
   void AuctionDel( mapAuction_t& map, const Order&, fVolumeAtPrice_t& );
 
 };
+
+} // namespace l2
+} // namesapce iqfeed
+} // namespace tf
+} // namespace ou

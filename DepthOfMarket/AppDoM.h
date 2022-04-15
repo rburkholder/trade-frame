@@ -65,7 +65,7 @@ private:
 
   //wxMenu* m_pMenuLoadDays;
 
-  std::unique_ptr<DoMDispatch> m_pDispatch;  // one per symbol
+  std::unique_ptr<ou::tf::iqfeed::l2::Summary> m_pDispatch;  // one per symbol
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
 
   ou::tf::Watch::pWatch_t m_pWatch;

@@ -21,22 +21,27 @@
 
 #include "Summary.hpp"
 
-using inherited_t = ou::tf::iqfeed::l2::Dispatcher<DoMDispatch>;
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+namespace l2 { // level 2 data
 
-DoMDispatch::DoMDispatch( const std::string& sWatch )
+using inherited_t = Dispatcher<Summary>;
+
+Summary::Summary( const std::string& sWatch )
 : m_sWatch( sWatch )
 {
 }
 
-DoMDispatch::~DoMDispatch() {
+Summary::~Summary() {
 }
 
-void DoMDispatch::Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
+void Summary::Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
   m_fAskVolumeAtPrice = std::move( fAsk );
   m_fBidVolumeAtPrice = std::move( fBid );
 }
 
-void DoMDispatch::EmitMarketMakerMaps() {
+void Summary::EmitMarketMakerMaps() {
   // will probably need a lock on this, as maps are in background thread
   // but mostly works as the deletion isn't in place yet
 
@@ -114,21 +119,21 @@ void DoMDispatch::EmitMarketMakerMaps() {
 
 }
 
-void DoMDispatch::Connect() {
+void Summary::Connect() {
   inherited_t::Connect();
 }
 
-void DoMDispatch::Disconnect() {
+void Summary::Disconnect() {
   inherited_t::Disconnect();
 }
 
-void DoMDispatch::OnL2Initialized() {
+void Summary::OnL2Initialized() {
   StartMarketByOrder( m_sWatch );
   //StartPriceLevel( m_sWatch );
 }
 
 // used with futures, not equities
-void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void Summary::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
 
@@ -160,7 +165,7 @@ void DoMDispatch::OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded
 
 }
 
-void DoMDispatch::OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void Summary::OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
   assert( '6' == msg.chMsgType );
 
@@ -173,7 +178,7 @@ void DoMDispatch::OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::dec
 
 }
 
-void DoMDispatch::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void Summary::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
   assert( '4' == msg.chMsgType );
 
@@ -215,7 +220,7 @@ void DoMDispatch::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::deco
 }
 
 // for nasdaq LII
-void DoMDispatch::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
+void Summary::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
 
   //if ( "NSDQ" != msg.sMarketMaker ) {
   //  std::cout
@@ -237,7 +242,7 @@ void DoMDispatch::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival
   }
 }
 
-void DoMDispatch::MMAuction_Update(
+void Summary::MMAuction_Update(
   const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
@@ -286,7 +291,7 @@ void DoMDispatch::MMAuction_Update(
 
 }
 
-void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg ) {
+void Summary::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg ) {
 
   assert( '5' == msg.chMsgType );
 
@@ -322,7 +327,7 @@ void DoMDispatch::OnMBODelete( const ou::tf::iqfeed::l2::msg::OrderDelete::decod
 
 }
 
-void DoMDispatch::MMAuction_Delete(
+void Summary::MMAuction_Delete(
   const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
@@ -346,7 +351,7 @@ void DoMDispatch::MMAuction_Delete(
 
 }
 
-void DoMDispatch::AuctionAdd(
+void Summary::AuctionAdd(
   const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f,
   mapAuction_t& map
@@ -367,7 +372,7 @@ void DoMDispatch::AuctionAdd(
   if ( f ) f( msg.dblPrice, iterAuction->second.nQuantity );
 }
 
-void DoMDispatch::AuctionUpdate(
+void Summary::AuctionUpdate(
   mapAuction_t& map,
   Order& order,
   const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
@@ -406,7 +411,7 @@ void DoMDispatch::AuctionUpdate(
   }
 }
 
-void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPrice_t& f ) {
+void Summary::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPrice_t& f ) {
 
   mapAuction_t::iterator iterAuction = map.find( order.dblPrice );
   if ( map.end() == iterAuction ) {
@@ -419,3 +424,8 @@ void DoMDispatch::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPr
   if ( f ) f( order.dblPrice, iterAuction->second.nQuantity );
 
 }
+
+} // namespace l2
+} // namesapce iqfeed
+} // namespace tf
+} // namespace ou
