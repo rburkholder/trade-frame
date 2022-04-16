@@ -420,11 +420,11 @@ void Symbols::SetCarrier( Carrier& carrier, uint64_t nOrderId, const std::string
 
   if ( 0 != nOrderId ) {
     assert( 0 == sMarketMaker.size() );
-    carrier = new OrderBased();
+    carrier = OrderBased::Factory();
   }
   else {
     assert( 4 == sMarketMaker.size() );
-    carrier = new MarketMaker();
+    carrier = MarketMaker::Factory();
   }
 
   mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( sSymbolName );

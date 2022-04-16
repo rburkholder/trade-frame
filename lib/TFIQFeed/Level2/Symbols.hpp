@@ -21,8 +21,7 @@
 
 #pragma once
 
-//#include <functional>
-//#include <memory>
+#include <memory>
 
 #include <OUCommon/KeyWordMatch.h>
 
@@ -42,7 +41,11 @@ using volume_t = ou::tf::Trade::volume_t;
 class L2Base {  // TODO: convert to CRTP
 public:
 
+  using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int)>;
+
+  L2Base() {}
+  virtual ~L2Base() {}
 
   void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
     m_fAskVolumeAtPrice = std::move( fAsk );
@@ -86,6 +89,13 @@ private:
 class MarketMaker: public L2Base {
 public:
 
+  using pMarketMaker_t = std::shared_ptr<MarketMaker>;
+
+  MarketMaker() {}
+  virtual ~MarketMaker() {}
+
+  static pMarketMaker_t Factory() { return std::make_shared<MarketMaker>(); }
+
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ); // Equity doesn't have this message
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
@@ -123,6 +133,13 @@ private:
 
 class OrderBased: public L2Base {
 public:
+
+  using pOrderBased_t = std::shared_ptr<OrderBased>;
+
+  OrderBased() {}
+  virtual ~OrderBased() {}
+
+  static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& msg );
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOAdd( msg ); } // will this work as expected?
@@ -162,9 +179,25 @@ private:
 // ==== Carrier for symbol lookup
 
 struct Carrier {
-  L2Base* pL2Base;
+
+  using pL2Base_t = L2Base::pL2Base_t;
+  pL2Base_t pL2Base;
+
   Carrier(): pL2Base {} {}
-  Carrier( L2Base* p ): pL2Base( p ) {}
+  Carrier( pL2Base_t p ): pL2Base( p ) {}
+  Carrier( const Carrier& rhs ) {
+    pL2Base = rhs.pL2Base;
+  }
+  Carrier& operator=( const Carrier& rhs ) {
+    if ( *this != rhs ) {
+      pL2Base = rhs.pL2Base;
+    }
+    return *this;
+  }
+  Carrier& operator=( pL2Base_t p ) {
+    pL2Base = p;
+    return *this;
+  }
   bool operator!=( const Carrier& rhs ) { return pL2Base != rhs.pL2Base; }
   bool IsNull() { return nullptr == pL2Base; }
 };
@@ -244,7 +277,7 @@ private:
       //auto f1 = std::bind( f, m_single.pL2Base, ph::_1 );
       //f1( msg );
       //f2( m_single.pL2Base, msg );
-      (m_single.pL2Base->*f)( msg );
+      (m_single.pL2Base.get()->*f)( msg );
       //m_single.pL2Base->f( msg );
     }
     else {
@@ -256,7 +289,7 @@ private:
       //auto f1 = std::bind( f, carrier.pL2Base, ph::_1 );
       //f1( msg );
       //f2( carrier.pL2Base, msg );
-      (carrier.pL2Base->*f)( msg );
+      (carrier.pL2Base.get()->*f)( msg );
       //carrier.pL2Base->f( msg );
     }
   }
