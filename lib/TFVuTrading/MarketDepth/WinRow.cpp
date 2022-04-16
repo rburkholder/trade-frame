@@ -26,7 +26,6 @@
 #include "WinRowElement.hpp"
 
 #include "WinRow.hpp"
-#include "wx/defs.h"
 
 namespace { // local variables
 
