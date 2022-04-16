@@ -364,8 +364,9 @@ void OrderBased::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPri
 
 using inherited_t = Dispatcher<Symbols>;
 
-Symbols::Symbols()
+Symbols::Symbols( fConnected_t&& fConnected )
 : m_bSingle( false )
+, m_fConnected( std::move( fConnected ) )
 , m_luSymbol( Carrier(), 20 )
 {}
 
@@ -390,9 +391,8 @@ void Symbols::Disconnect() {
   inherited_t::Disconnect();
 }
 
-void Symbols::OnL2Initialized() {
-  //StartMarketByOrder( m_sWatch );
-  //StartPriceLevel( m_sWatch );
+void Symbols::OnNetworkConnected() {
+  if ( m_fConnected ) m_fConnected();
 }
 
 void Symbols::WatchAdd( const std::string& sSymbol, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {

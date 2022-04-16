@@ -210,7 +210,9 @@ class Symbols
   friend Dispatcher<Symbols>;
 public:
 
-  Symbols();
+  using fConnected_t = std::function<void()>;
+
+  Symbols( fConnected_t&& );
   virtual ~Symbols();
 
   void Connect();
@@ -228,14 +230,12 @@ protected:
   ou::KeyWordMatch<Carrier> m_luSymbol;
 
   // called by Network via CRTP
-  //void OnNetworkConnected();
+  void OnNetworkConnected();
   //void OnNetworkDisconnected();
   //void OnNetworkError( size_t e );
 
   bool m_bSingle;  // don't use lookups, dedicated to single symbol
   Carrier m_single; // carrier for single symbol
-
-  void OnL2Initialized();
 
   void OnMBOAdd( const msg::OrderArrival::decoded& );
   void OnMBOSummary( const msg::OrderArrival::decoded& );
@@ -243,6 +243,8 @@ protected:
   void OnMBODelete( const msg::OrderDelete::decoded& );
 
 private:
+
+  fConnected_t&& m_fConnected;
 
   struct VolumeAtPriceFunctions {
 
