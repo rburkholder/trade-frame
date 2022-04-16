@@ -416,23 +416,6 @@ void Symbols::WatchDel( const std::string& sSymbol ) {
 
   // equity, nasdaq l2:  '4,SPY,,NSDQ,B,451.4400,300,,4,11:33:27.030724,2022-04-01,'
 
-void Symbols::SetCarrier( Carrier& carrier, uint64_t nOrderId, const std::string& sSymbolName, const std::string& sMarketMaker ) {
-
-  if ( 0 != nOrderId ) {
-    assert( 0 == sMarketMaker.size() );
-    carrier = OrderBased::Factory();
-  }
-  else {
-    assert( 4 == sMarketMaker.size() );
-    carrier = MarketMaker::Factory();
-  }
-
-  mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( sSymbolName );
-  assert( m_mapVolumeAtPriceFunctions.end() != iter );
-  carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
-  m_mapVolumeAtPriceFunctions.erase( iter );
-}
-
 // used with futures, not equities
 void Symbols::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 

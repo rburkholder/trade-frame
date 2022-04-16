@@ -262,7 +262,23 @@ private:
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;
 
-  void SetCarrier( Carrier& carrier, uint64_t nOrderId, const std::string& sSymbolName, const std::string& sMarketMaker );
+  template<typename Msg>
+  void SetCarrier( Carrier& carrier, const Msg& msg ) {
+
+    if ( 0 != msg.nOrderId ) {
+      assert( 0 == msg.sMarketMaker.size() );
+      carrier = OrderBased::Factory();
+    }
+    else {
+      assert( 4 == msg.sMarketMaker.size() );
+      carrier = MarketMaker::Factory();
+    }
+
+    mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
+    assert( m_mapVolumeAtPriceFunctions.end() != iter );
+    carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
+    m_mapVolumeAtPriceFunctions.erase( iter );
+  }
 
   template<typename Msg, typename F>
   void Call( const Msg& msg,  F f ) {
@@ -272,7 +288,7 @@ private:
 
     if ( m_bSingle ) {
       if ( m_single.IsNull() ) {
-        SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
+        SetCarrier( m_single, msg );
       }
       //auto f1 = std::bind( f, m_single.pL2Base, ph::_1 );
       //f1( msg );
@@ -283,7 +299,7 @@ private:
     else {
       Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
       if ( carrier.IsNull() ) {
-        SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
+        SetCarrier( carrier, msg );
         m_luSymbol.AddPattern( msg.sSymbolName, carrier );
       }
       //auto f1 = std::bind( f, carrier.pL2Base, ph::_1 );
