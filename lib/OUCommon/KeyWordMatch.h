@@ -24,7 +24,7 @@
 
 namespace ou {
 
-template<typename T> 
+template<typename T>
 class KeyWordMatch {
   // T is something to be returned once a match is found, requires copy constructor and operator!=()
   // example usage is to return per minute rate for longest match on telephone number prefix
@@ -43,7 +43,7 @@ protected:
     size_t ixLinkAtSameLevel;  // look for other letters at same location
     T object;  // upon match, (returned when keyword found)
     char chLetter;  // the letter at this node
-    explicit structNode( T initializer ) : ixLinkToNextLevel( 0 ), ixLinkAtSameLevel( 0 ), 
+    explicit structNode( T initializer ) : ixLinkToNextLevel( 0 ), ixLinkAtSameLevel( 0 ),
       object( initializer ), chLetter( 0 ) {};
   };
 private:
@@ -69,9 +69,9 @@ template<typename T> void KeyWordMatch<T>::ClearPatterns() {
   m_cntPatterns = 0;
 }
 
-template<typename T> void KeyWordMatch<T>::AddPattern( 
+template<typename T> void KeyWordMatch<T>::AddPattern(
               const std::string &sPattern, T object ) {
-  std::string::const_iterator iter = sPattern.begin(); 
+  std::string::const_iterator iter = sPattern.begin();
   if ( sPattern.end() == iter ) {
     throw std::invalid_argument( "zero length pattern" );
   }
@@ -93,14 +93,14 @@ template<typename T> void KeyWordMatch<T>::AddPattern(
       bool bLevelDone = false;
       size_t ixLevel = ix;  // set from above
       while ( !bLevelDone ) {
-        if ( ch == m_vNodes[ ixLevel ].chLetter ) { 
+        if ( ch == m_vNodes[ ixLevel ].chLetter ) {
           // found matching character
           ixNode = ixLevel;
           bLevelDone = true;
         }
         else {
           // move onto next node at this level to find character
-          size_t ixLinkAtNextSameLevel 
+          size_t ixLinkAtNextSameLevel
             = m_vNodes[ ixLevel ].ixLinkAtSameLevel;
           if ( 0 == ixLinkAtNextSameLevel ) {
             // add a new node at this level
@@ -134,7 +134,7 @@ template<typename T> void KeyWordMatch<T>::AddPattern(
 
 template<typename T> T KeyWordMatch<T>::FindMatch( const std::string &sPattern ) {
   // traverse structure looking for matches, object at longest match is returned
-  std::string::const_iterator iter = sPattern.begin(); 
+  std::string::const_iterator iter = sPattern.begin();
   if ( sPattern.end() == iter ) {
     throw std::runtime_error( "zero length pattern" );
   }
