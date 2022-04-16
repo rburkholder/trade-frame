@@ -16,6 +16,7 @@ set(
     MsgPriceLevelArrival.h
     MsgPriceLevelDelete.h
     Summary.hpp
+    Symbols.hpp
   )
 
 set(
@@ -26,6 +27,7 @@ set(
     MsgPriceLevelArrival.cpp
     MsgPriceLevelDelete.cpp
     Summary.cpp
+    Symbols.cpp
   )
 
 add_library(
