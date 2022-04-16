@@ -21,6 +21,9 @@
 
 #pragma once
 
+//#include <functional>
+//#include <memory>
+
 #include <OUCommon/KeyWordMatch.h>
 
 #include <TFTimeSeries/DatedDatum.h>
@@ -227,6 +230,36 @@ private:
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;
 
   void SetCarrier( Carrier& carrier, uint64_t nOrderId, const std::string& sSymbolName, const std::string& sMarketMaker );
+
+  template<typename Msg, typename F>
+  void Call( const Msg& msg,  F f ) {
+
+    //namespace ph = std::placeholders;
+    //auto f2 = std::bind( f, ph::_1, ph::_2 );  // probably adds overhead?
+
+    if ( m_bSingle ) {
+      if ( m_single.IsNull() ) {
+        SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
+      }
+      //auto f1 = std::bind( f, m_single.pL2Base, ph::_1 );
+      //f1( msg );
+      //f2( m_single.pL2Base, msg );
+      (m_single.pL2Base->*f)( msg );
+      //m_single.pL2Base->f( msg );
+    }
+    else {
+      Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
+      if ( carrier.IsNull() ) {
+        SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
+        m_luSymbol.AddPattern( msg.sSymbolName, carrier );
+      }
+      //auto f1 = std::bind( f, carrier.pL2Base, ph::_1 );
+      //f1( msg );
+      //f2( carrier.pL2Base, msg );
+      (carrier.pL2Base->*f)( msg );
+      //carrier.pL2Base->f( msg );
+    }
+  }
 
 };
 

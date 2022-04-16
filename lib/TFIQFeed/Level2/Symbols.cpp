@@ -437,7 +437,7 @@ void Symbols::SetCarrier( Carrier& carrier, uint64_t nOrderId, const std::string
 void Symbols::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
-
+/*
   if ( m_bSingle ) {
     if ( m_single.IsNull() ) {
       SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
@@ -452,13 +452,14 @@ void Symbols::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
     }
     carrier.pL2Base->OnMBOAdd( msg );
   }
-
+*/
+  Call( msg, &L2Base::OnMBOAdd );
 }
 
 void Symbols::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 
   assert( '6' == msg.chMsgType );
-
+/*
   if ( m_bSingle ) {
     if ( m_single.IsNull() ) {
       SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
@@ -473,13 +474,14 @@ void Symbols::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
     }
     carrier.pL2Base->OnMBOSummary( msg );
   }
-
+*/
+  Call( msg, &L2Base::OnMBOSummary );
 }
 
 void Symbols::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   assert( '4' == msg.chMsgType );
-
+/*
   if ( m_bSingle ) {
     if ( m_single.IsNull() ) {
       SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
@@ -494,13 +496,14 @@ void Symbols::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
     }
     carrier.pL2Base->OnMBOUpdate( msg );
   }
-
+*/
+  Call( msg, &L2Base::OnMBOUpdate );
 }
 
 void Symbols::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   assert( '5' == msg.chMsgType );
-
+/*
   if ( m_bSingle ) {
     if ( m_single.IsNull() ) {
       SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
@@ -515,7 +518,8 @@ void Symbols::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
     }
     carrier.pL2Base->OnMBODelete( msg );
   }
-
+*/
+  Call( msg, &L2Base::OnMBODelete );
 }
 
 } // namespace l2
