@@ -180,7 +180,7 @@ private:
 
 struct Carrier {
 
-  using pL2Base_t = L2Base::pL2Base_t;
+  using pL2Base_t = L2Base*;
   pL2Base_t pL2Base;
 
   Carrier(): pL2Base {} {}
@@ -264,17 +264,24 @@ private:
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;
 
+  using pL2Base_t = std::shared_ptr<L2Base>;
+  using vL2Base_t = std::vector<pL2Base_t>;
+  vL2Base_t m_vL2Base;  // provides end of life destruction
+
   template<typename Msg>
   void SetCarrier( Carrier& carrier, const Msg& msg ) {
 
+    pL2Base_t pL2Base;
     if ( 0 != msg.nOrderId ) {
       assert( 0 == msg.sMarketMaker.size() );
-      carrier = OrderBased::Factory();
+      pL2Base = OrderBased::Factory();
     }
     else {
       assert( 4 == msg.sMarketMaker.size() );
-      carrier = MarketMaker::Factory();
+      pL2Base = MarketMaker::Factory();
     }
+    m_vL2Base.push_back( pL2Base );
+    carrier = pL2Base.get();
 
     mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
     assert( m_mapVolumeAtPriceFunctions.end() != iter );
@@ -295,7 +302,7 @@ private:
       //auto f1 = std::bind( f, m_single.pL2Base, ph::_1 );
       //f1( msg );
       //f2( m_single.pL2Base, msg );
-      (m_single.pL2Base.get()->*f)( msg );
+      (m_single.pL2Base->*f)( msg );
       //m_single.pL2Base->f( msg );
     }
     else {
@@ -307,7 +314,7 @@ private:
       //auto f1 = std::bind( f, carrier.pL2Base, ph::_1 );
       //f1( msg );
       //f2( carrier.pL2Base, msg );
-      (carrier.pL2Base.get()->*f)( msg );
+      (carrier.pL2Base->*f)( msg );
       //carrier.pL2Base->f( msg );
     }
   }
