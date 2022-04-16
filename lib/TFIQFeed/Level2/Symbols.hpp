@@ -233,6 +233,7 @@ protected:
   void OnNetworkConnected();
   //void OnNetworkDisconnected();
   //void OnNetworkError( size_t e );
+  void OnL2Initialized();
 
   bool m_bSingle;  // don't use lookups, dedicated to single symbol
   Carrier m_single; // carrier for single symbol

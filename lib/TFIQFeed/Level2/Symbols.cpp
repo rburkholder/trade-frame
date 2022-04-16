@@ -392,6 +392,9 @@ void Symbols::Disconnect() {
 }
 
 void Symbols::OnNetworkConnected() {
+}
+
+void Symbols::OnL2Initialized() {
   if ( m_fConnected ) m_fConnected();
 }
 
