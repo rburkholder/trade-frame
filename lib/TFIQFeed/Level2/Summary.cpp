@@ -182,7 +182,7 @@ void Summary::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&
 
   assert( '4' == msg.chMsgType );
 
-  // for nasdaq l2 on equities, there is on orderid, so will need to lookup by mmid
+  // for nasdaq l2 on equities, there is no orderid, so will need to lookup by mmid
   // so need a way to distinquish between futures and nasdaq and price levels
 
   // MBO Futures        WOR WPL L2O|
@@ -215,7 +215,6 @@ void Summary::OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&
       iter->second.nQuantity = msg.nQuantity;
     }
   }
-
 
 }
 
@@ -372,6 +371,7 @@ void Summary::AuctionAdd(
   if ( f ) f( msg.dblPrice, iterAuction->second.nQuantity );
 }
 
+// Future only
 void Summary::AuctionUpdate(
   mapAuction_t& map,
   Order& order,
@@ -411,6 +411,7 @@ void Summary::AuctionUpdate(
   }
 }
 
+// Future only
 void Summary::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPrice_t& f ) {
 
   mapAuction_t::iterator iterAuction = map.find( order.dblPrice );

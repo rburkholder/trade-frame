@@ -48,9 +48,9 @@ namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
 class Summary
-: public ou::tf::iqfeed::l2::Dispatcher<Summary>
+: public Dispatcher<Summary>
 {
-  friend ou::tf::iqfeed::l2::Dispatcher<Summary>;
+  friend Dispatcher<Summary>;
 public:
 
   using fVolumeAtPrice_t = std::function<void(double,int)>;
