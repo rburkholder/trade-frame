@@ -42,7 +42,7 @@ HistoryRequest::HistoryRequest(
     [this](){ // fDone_t
       m_entryCurrent.fDone();
 
-      std::lock_guard<std::mutex> lock( m_mutexHistorySlots );
+      std::scoped_lock lock( m_mutexHistorySlots );
       if ( 0 != m_vEntry.size() ) {
         NextRequest( std::move( m_vEntry.back() ) );
         m_vEntry.pop_back();
@@ -63,7 +63,7 @@ HistoryRequest::~HistoryRequest() {
 void HistoryRequest::Request( const std::string& sSymbol_, uint16_t nBar, fBar_t&& fBar, fDone_t&& fDone ) {
   const std::string sSymbol( sSymbol_ );
   Entry entry( std::move( sSymbol ), nBar, std::move( fBar ), std::move( fDone ) );
-  std::lock_guard<std::mutex> lock( m_mutexHistorySlots );
+  std::scoped_lock lock( m_mutexHistorySlots );
   if ( m_bInProcess ) {
     m_vEntry.emplace_back( std::move( entry ) );
   }
