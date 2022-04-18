@@ -5,6 +5,7 @@ project(trade-frame)
 
 # see https://blog.raymond.burkholder.net/index.php?/archives/1183-GCC-Optimization-for-Native-Architecture.html
 add_definitions(-march=native)
+add_definitions(-pthread)
 
 add_subdirectory(ArmsIndex)
 add_subdirectory(AutoTrade)
