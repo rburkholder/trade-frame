@@ -86,13 +86,13 @@ private:
 };
 
 template <typename T>
-Dispatcher<T>::Dispatcher( void )
+Dispatcher<T>::Dispatcher()
 : ou::Network<Dispatcher<T> >( "127.0.0.1", 9200 ),
   m_bInitialized( false )
 {}
 
 template <typename T>
-Dispatcher<T>::~Dispatcher(void) {
+Dispatcher<T>::~Dispatcher() {
 }
 
 template <typename T>
