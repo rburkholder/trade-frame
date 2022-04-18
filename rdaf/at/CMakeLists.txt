@@ -78,6 +78,7 @@ target_link_libraries(
       TFOptions
       TFTrading
       TFIQFeed
+      TFIQFeedLevel2
       TFHDF5TimeSeries
       OUCommon
       OUSQL

@@ -276,6 +276,13 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
+void Strategy::HandleUpdateL2Ask( double price, int volume ) {
+}
+
+void Strategy::HandleUpdateL2Bid( double price, int volume ) {
+}
+
+
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;

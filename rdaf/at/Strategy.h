@@ -108,6 +108,9 @@ public:
 
   void LoadHistory( TClass* );
 
+  void HandleUpdateL2Ask( double price, int volume );
+  void HandleUpdateL2Bid( double price, int volume );
+
   void SaveWatch( const std::string& );
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }

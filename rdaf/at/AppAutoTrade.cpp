@@ -101,6 +101,8 @@ bool AppAutoTrade::OnInit() {
 
   wxApp::OnInit();
 
+  m_bL2Connected = false;
+
   auto dt = ou::TimeSource::Instance().External();
   m_nTSDataStreamSequence = 0;
   {
@@ -216,6 +218,12 @@ bool AppAutoTrade::OnInit() {
       std::cout << "simulation date " << dateSim << std::endl;
     }
   }
+
+  m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+    [this](){
+      m_bL2Connected = true;
+      ConfirmProviders();
+    } );
 
   StartRdaf( sDirectory + m_sTSDataStreamStarted );
 
@@ -595,6 +603,7 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
 void AppAutoTrade::OnData1Connected( int ) {
   //m_bData1Connected = true;
+  m_pL2Symbols->Connect();
   ConfirmProviders();
 }
 
@@ -637,7 +646,7 @@ void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
 }
 
 void AppAutoTrade::ConfirmProviders() {
-  if ( m_bData1Connected && m_bExecConnected ) {
+  if ( m_bData1Connected && m_bExecConnected && m_bL2Connected ) {
     bool bValidCombo( false );
     if (
          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
@@ -648,9 +657,20 @@ void AppAutoTrade::ConfirmProviders() {
       LoadPortfolio( sNamePortfolio );
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         ConstructIBInstrument( sNamePortfolio, vt.first );
+        { // capture the Strategy object for specific use
+          Strategy& strategy( *vt.second );
+          m_pL2Symbols->WatchAdd(
+            vt.first,
+            [&strategy]( double price, int volume ){ // fVolumeAtPrice_t&& fBid_
+              strategy.HandleUpdateL2Bid( price, volume );
+            },
+            [&strategy]( double price, int volume ){ // fVolumeAtPrice_t&& fAsk_
+              strategy.HandleUpdateL2Ask( price, volume );
+            });
+        }
       }
-
     }
+
     if (
          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )

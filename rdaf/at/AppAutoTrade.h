@@ -35,6 +35,8 @@
 
 #include <TFTrading/DBWrapper.h>
 
+#include <TFIQFeed/Level2/Symbols.hpp>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include "ConfigParser.hpp"
@@ -72,22 +74,25 @@ private:
   using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  ou::tf::config::choices_t m_choices;
+
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
 
+  wxSplitterWindow* m_splitterData;
+
   TreeItem* m_pTreeItemRoot; // root of custom tree items
   TreeItem* m_pTreeItemPortfolio;
   wxTreeCtrl* m_treeSymbols;
-  wxSplitterWindow* m_splitterData;
 
   wxTimer m_timerOneSecond;
 
-  std::string m_sSymbol;
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 
-  ou::tf::config::choices_t m_choices;
+  bool m_bL2Connected;
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
