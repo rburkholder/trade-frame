@@ -31,7 +31,8 @@
 #include <TFTrading/Watch.h>
 
 #include <TFIQFeed/HistoryRequest.h>
-#include <TFIQFeed/Level2/Summary.hpp>
+
+#include <TFIQFeed/Level2/Symbols.hpp>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -54,6 +55,8 @@ public:
 protected:
 private:
 
+  config::Options m_options;
+
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
@@ -65,7 +68,7 @@ private:
 
   //wxMenu* m_pMenuLoadDays;
 
-  std::unique_ptr<ou::tf::iqfeed::l2::Summary> m_pDispatch;  // one per symbol
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;  // one per symbol
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
 
   ou::tf::Watch::pWatch_t m_pWatch;

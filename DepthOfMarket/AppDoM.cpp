@@ -55,14 +55,12 @@ bool AppDoM::OnInit() {
 
   int code = 1;
 
-  config::Options options;
-
-  if ( !Load( options ) ) {
+  if ( !Load( m_options ) ) {
     code = 0;
   }
   else {
 
-    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + options.sSymbolName );
+    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_options.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
     //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -132,27 +130,30 @@ bool AppDoM::OnInit() {
 //    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 //    m_pPanelLogging->Show( true );
 
-    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( options.sSymbolName );
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_options.sSymbolName );
     m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
     m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
     m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
     m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
 
-    m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Summary>( options.sSymbolName );
-
-    m_pDispatch->Set(
-      [this]( double price, int volume ){
-        m_valuesStatistics.nL2MsgBid++;
-        m_valuesStatistics.nL2MsgTtl++;
-        m_pPanelTrade->OnQuoteBid( price, volume );
-      },
-      [this]( double price, int volume ){
-        m_valuesStatistics.nL2MsgAsk++;
-        m_valuesStatistics.nL2MsgTtl++;
-        m_pPanelTrade->OnQuoteAsk( price, volume );
+    m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+      [ this ](){
+        m_pDispatch->Single( true );
+        m_pDispatch->WatchAdd(
+          m_options.sSymbolName,
+          [this]( double price, int volume ){
+            m_valuesStatistics.nL2MsgBid++;
+            m_valuesStatistics.nL2MsgTtl++;
+            m_pPanelTrade->OnQuoteBid( price, volume );
+          },
+          [this]( double price, int volume ){
+            m_valuesStatistics.nL2MsgAsk++;
+            m_valuesStatistics.nL2MsgTtl++;
+            m_pPanelTrade->OnQuoteAsk( price, volume );
+          });
       } );
 
-    std::cout << "watching L1/L2: " << options.sSymbolName << std::endl;
+    std::cout << "watching L1/L2: " << m_options.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -176,16 +177,16 @@ bool AppDoM::OnInit() {
 }
 
 void AppDoM::EmitMarketMakerMaps() {
-  m_pDispatch->EmitMarketMakerMaps();
+  // m_pDispatch->EmitMarketMakerMaps(); TODO: need to make this work
 }
 
 void AppDoM::OnClose( wxCloseEvent& event ) {
 
-  if ( m_bData1Connected ) {
+  if ( m_bData1Connected ) { // TODO: fix this logic to work with OnData1Disconnecting
     m_pDispatch->Disconnect();
   }
 
-  m_pDispatch.reset();
+  // m_pDispatch.reset(); // TODO: need to do this in a callback?
 
   //if ( m_worker.joinable() ) m_worker.join();
   //m_timerGuiRefresh.Stop();
