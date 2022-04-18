@@ -37,7 +37,6 @@ TODO:
 #include <wx/defs.h>
 #include <wx/sizer.h>
 
-#include "Config.h"
 #include "AppDoM.h"
 
 namespace {
@@ -141,12 +140,12 @@ bool AppDoM::OnInit() {
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
           m_options.sSymbolName,
-          [this]( double price, int volume ){
+          [this]( double price, int volume ){ // fVolumeAtPrice_t&& fBid_
             m_valuesStatistics.nL2MsgBid++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteBid( price, volume );
           },
-          [this]( double price, int volume ){
+          [this]( double price, int volume ){ // fVolumeAtPrice_t&& fAsk_
             m_valuesStatistics.nL2MsgAsk++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteAsk( price, volume );
@@ -157,11 +156,11 @@ bool AppDoM::OnInit() {
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
-    FrameMain::vpItems_t vItemsLoadSymbols;
-    vItemsLoadSymbols.push_back( new mi( "Market Maker Maps", MakeDelegate( this, &AppDoM::EmitMarketMakerMaps ) ) );
+    //FrameMain::vpItems_t vItemsLoadSymbols;
+    //vItemsLoadSymbols.push_back( new mi( "Market Maker Maps", MakeDelegate( this, &AppDoM::EmitMarketMakerMaps ) ) );
   //  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
   //  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
-    wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Utility", vItemsLoadSymbols );
+    //wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Utility", vItemsLoadSymbols );
 
     CallAfter(
       [this](){
@@ -178,6 +177,7 @@ bool AppDoM::OnInit() {
 
 void AppDoM::EmitMarketMakerMaps() {
   // m_pDispatch->EmitMarketMakerMaps(); TODO: need to make this work
+  std::cout << "not implemented" << std::endl;
 }
 
 void AppDoM::OnClose( wxCloseEvent& event ) {

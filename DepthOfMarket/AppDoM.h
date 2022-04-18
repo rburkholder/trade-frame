@@ -43,6 +43,7 @@
 
 #include <TFIndicators/Pivots.h>
 
+#include "Config.h"
 #include "PanelStatistics.hpp"
 
 class AppDoM:
@@ -68,7 +69,7 @@ private:
 
   //wxMenu* m_pMenuLoadDays;
 
-  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;  // one per symbol
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
 
   ou::tf::Watch::pWatch_t m_pWatch;
