@@ -85,14 +85,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace ib { // Interactive Brokers
 
-TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int port ):
-  ProviderInterface<TWS,Symbol>(),
-  EWrapper(),
-  m_osSignal(2000), //2-seconds timeout
-  m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
-//  m_dblPortfolioDelta( 0 ),
-  m_idClient( 0 ),
-  m_nxtReqId( 0 )
+TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int port )
+: EWrapper()
+, ProviderInterface<TWS,Symbol>()
+, m_osSignal( 1000 )
+, m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
+, m_idClient( 0 )
+,  m_nxtReqId( 0 )
 {
   m_sName = "IB";
   m_nID = keytypes::EProviderIB;
@@ -228,7 +227,7 @@ void TWS::processMessages() {
           break;
         default:
           std::cout
-            << "IB errno=" << errno << " [" << strerror(errno) << "]"
+            << "IB status id=" << errno << " [" << strerror(errno) << "]"
             << ",connected=" << m_pTWS->isConnected()
             << std::endl;
           errno = 0;

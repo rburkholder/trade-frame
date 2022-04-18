@@ -57,8 +57,8 @@ namespace tf { // TradeFrame
 namespace ib { // Interactive Brokers
 
 class TWS :
-  public ProviderInterface<TWS, Symbol>,
   public EWrapper
+, public ProviderInterface<TWS, Symbol>
 {
 public:
 
