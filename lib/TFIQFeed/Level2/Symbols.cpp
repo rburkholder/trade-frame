@@ -109,9 +109,6 @@ void MarketMaker::MMAuction_Update(
     mapAuction_t::iterator mapAuction_iter = mapAuction.find( mapMM_iter->second.price );
     if ( mapAuction.end() != mapAuction_iter ) {
       mapAuction_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
-      if ( 10000 < mapAuction_iter->second.nQuantity ) {
-//        std::cout << mapAuction_iter->second.nQuantity << std::endl; // debug only
-      }
       if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
     }
     else assert( false ); // how inconsistent are things?
@@ -131,9 +128,6 @@ void MarketMaker::MMAuction_Update(
     mapAuction_iter->second.nQuantity += mapMM_iter->second.volume; // add new volume
   }
 
-  if ( 10000 < mapAuction_iter->second.nQuantity ) {
-//    std::cout << mapAuction_iter->second.nQuantity << std::endl; // debug only
-  }
   if ( f ) f( mapAuction_iter->first, mapAuction_iter->second.nQuantity );
 
 }

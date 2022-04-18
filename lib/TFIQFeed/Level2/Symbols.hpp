@@ -38,7 +38,7 @@ using volume_t = ou::tf::Trade::volume_t;
 
 // ==== L2Base
 
-class L2Base {  // TODO: convert to CRTP
+class L2Base {  // TODO: convert to CRTP?
 public:
 
   using pL2Base_t = std::shared_ptr<L2Base>;
@@ -96,7 +96,7 @@ public:
 
   static pMarketMaker_t Factory() { return std::make_shared<MarketMaker>(); }
 
-  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) {}; // Equity doesn't have this message
+  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) { assert( false ); }; // Equity doesn't have this message
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
@@ -293,8 +293,8 @@ private:
     m_mapVolumeAtPriceFunctions.erase( iter );
   }
 
-  template<typename Msg, typename F>
-  void Call( const Msg& msg,  F f ) {
+  template<typename Msg, typename Function>
+  void Call( const Msg& msg, Function f ) {
 
     if ( m_bSingle ) {
       if ( m_single.IsNull() ) {
