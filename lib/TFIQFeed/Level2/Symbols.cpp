@@ -365,7 +365,8 @@ void OrderBased::AuctionDel( mapAuction_t& map, const Order& order, fVolumeAtPri
 using inherited_t = Dispatcher<Symbols>;
 
 Symbols::Symbols( fConnected_t&& fConnected )
-: m_bSingle( false )
+: inherited_t()
+, m_bSingle( false )
 , m_fConnected( std::move( fConnected ) )
 , m_luSymbol( Carrier(), 20 )
 {}
@@ -373,14 +374,14 @@ Symbols::Symbols( fConnected_t&& fConnected )
 Symbols::~Symbols() {
 }
 
-void Symbols::Single( bool b ) {
-  if ( b ) {
-    assert( 0 == m_luSymbol.GetNodeCount() );
+void Symbols::Single( bool bSingle ) {
+  if ( bSingle ) {
+    assert( 1 >= m_luSymbol.GetNodeCount() );
   }
   else {
     assert( m_single.IsNull() );
   }
-  m_bSingle = b;
+  m_bSingle = bSingle;
 }
 
 void Symbols::Connect() {
@@ -423,88 +424,24 @@ void Symbols::WatchDel( const std::string& sSymbol ) {
 void Symbols::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );
-/*
-  if ( m_bSingle ) {
-    if ( m_single.IsNull() ) {
-      SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-    }
-    m_single.pL2Base->OnMBOAdd( msg );
-  }
-  else {
-    Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
-    if ( carrier.IsNull() ) {
-      SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-      m_luSymbol.AddPattern( msg.sSymbolName, Carrier( carrier ) );
-    }
-    carrier.pL2Base->OnMBOAdd( msg );
-  }
-*/
   Call( msg, &L2Base::OnMBOAdd );
 }
 
 void Symbols::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 
   assert( '6' == msg.chMsgType );
-/*
-  if ( m_bSingle ) {
-    if ( m_single.IsNull() ) {
-      SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-    }
-    m_single.pL2Base->OnMBOSummary( msg );
-  }
-  else {
-    Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
-    if ( carrier.IsNull() ) {
-      SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-      m_luSymbol.AddPattern( msg.sSymbolName, Carrier( carrier ) );
-    }
-    carrier.pL2Base->OnMBOSummary( msg );
-  }
-*/
   Call( msg, &L2Base::OnMBOSummary );
 }
 
 void Symbols::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   assert( '4' == msg.chMsgType );
-/*
-  if ( m_bSingle ) {
-    if ( m_single.IsNull() ) {
-      SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-    }
-    m_single.pL2Base->OnMBOUpdate( msg );
-  }
-  else {
-    Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
-    if ( carrier.IsNull() ) {
-      SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-      m_luSymbol.AddPattern( msg.sSymbolName, Carrier( carrier ) );
-    }
-    carrier.pL2Base->OnMBOUpdate( msg );
-  }
-*/
   Call( msg, &L2Base::OnMBOUpdate );
 }
 
 void Symbols::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   assert( '5' == msg.chMsgType );
-/*
-  if ( m_bSingle ) {
-    if ( m_single.IsNull() ) {
-      SetCarrier( m_single, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-    }
-    m_single.pL2Base->OnMBODelete( msg );
-  }
-  else {
-    Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
-    if ( carrier.IsNull() ) {
-      SetCarrier( carrier, msg.nOrderId, msg.sSymbolName, msg.sMarketMaker );
-      m_luSymbol.AddPattern( msg.sSymbolName, Carrier( carrier ) );
-    }
-    carrier.pL2Base->OnMBODelete( msg );
-  }
-*/
   Call( msg, &L2Base::OnMBODelete );
 }
 

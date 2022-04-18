@@ -91,12 +91,12 @@ public:
 
   using pMarketMaker_t = std::shared_ptr<MarketMaker>;
 
-  MarketMaker() {}
+  MarketMaker(): L2Base() {}
   virtual ~MarketMaker() {}
 
   static pMarketMaker_t Factory() { return std::make_shared<MarketMaker>(); }
 
-  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ); // Equity doesn't have this message
+  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) {}; // Equity doesn't have this message
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
@@ -136,13 +136,15 @@ public:
 
   using pOrderBased_t = std::shared_ptr<OrderBased>;
 
-  OrderBased() {}
+  OrderBased(): L2Base() {}
   virtual ~OrderBased() {}
 
   static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& msg );
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOAdd( msg ); } // will this work as expected?
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
+    OnMBOAdd( msg );
+  } // will this work as expected?
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& msg );
 
@@ -227,8 +229,6 @@ public:
 
 protected:
 
-  ou::KeyWordMatch<Carrier> m_luSymbol;
-
   // called by Network via CRTP
   void OnNetworkConnected();
   //void OnNetworkDisconnected();
@@ -245,7 +245,9 @@ protected:
 
 private:
 
-  fConnected_t&& m_fConnected;
+  fConnected_t m_fConnected;
+
+  ou::KeyWordMatch<Carrier> m_luSymbol;
 
   struct VolumeAtPriceFunctions {
 
@@ -284,6 +286,7 @@ private:
     m_vL2Base.push_back( pL2Base );
     carrier = pL2Base.get();
 
+    // may need mutex on this, vs foreground
     mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
     assert( m_mapVolumeAtPriceFunctions.end() != iter );
     carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
@@ -293,18 +296,11 @@ private:
   template<typename Msg, typename F>
   void Call( const Msg& msg,  F f ) {
 
-    //namespace ph = std::placeholders;
-    //auto f2 = std::bind( f, ph::_1, ph::_2 );  // probably adds overhead?
-
     if ( m_bSingle ) {
       if ( m_single.IsNull() ) {
         SetCarrier( m_single, msg );
       }
-      //auto f1 = std::bind( f, m_single.pL2Base, ph::_1 );
-      //f1( msg );
-      //f2( m_single.pL2Base, msg );
       (m_single.pL2Base->*f)( msg );
-      //m_single.pL2Base->f( msg );
     }
     else {
       Carrier carrier = m_luSymbol.FindMatch( msg.sSymbolName );
@@ -312,11 +308,7 @@ private:
         SetCarrier( carrier, msg );
         m_luSymbol.AddPattern( msg.sSymbolName, carrier );
       }
-      //auto f1 = std::bind( f, carrier.pL2Base, ph::_1 );
-      //f1( msg );
-      //f2( carrier.pL2Base, msg );
       (carrier.pL2Base->*f)( msg );
-      //carrier.pL2Base->f( msg );
     }
   }
 
