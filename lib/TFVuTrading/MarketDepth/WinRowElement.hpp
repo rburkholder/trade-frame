@@ -91,7 +91,6 @@ private:
 
   void Init();
   void CreateControls();
-  bool ShowToolTips() { return true; };
 
   void Paint();
   void Render( wxDC& );

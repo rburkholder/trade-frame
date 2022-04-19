@@ -87,13 +87,18 @@ void WinRowElement::SetCanHaveFocus( bool bCanHaveFocus ) {
 
 void WinRowElement::SetText( const std::string& sText ) {
   m_sText = sText;
+  if ( 0 == m_sText.size() ) {
+    UnsetToolTip();
+  }
+  else {
+    SetToolTip( m_sText );
+  }
   Paint();
 }
 
 void WinRowElement::SetText( const std::string& sText, bool bHighlight ) {
-  m_sText = sText;
   wxWindow::SetBackgroundColour( bHighlight ? m_colourHighlight : m_colourBackground );
-  Paint();
+  SetText( sText );
 }
 
 void WinRowElement::SetColourBackground( EColour colour ) {
@@ -152,17 +157,18 @@ void WinRowElement::Render( wxDC& dc ) {
 void WinRowElement::OnPaint( wxPaintEvent& event ) {
   wxPaintDC dc( this );
   Render( dc );
+  event.Skip();
 }
 
 // requires a click
 void WinRowElement::OnFocusSet( wxFocusEvent& event ) {
   //std::cout << "OnFocusSet" << std::endl;
-  //event.Skip();
+  event.Skip();
 }
 
 void WinRowElement::OnFocusKill( wxFocusEvent& event ) {
   //std::cout << "OnFocusKill" << std::endl;
-  //event.Skip();
+  event.Skip();
 }
 
 void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
