@@ -129,7 +129,6 @@ private:
 
   void Init();
   void CreateControls();
-  bool ShowToolTips() { return true; };
 
 };
 
