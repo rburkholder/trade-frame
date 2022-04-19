@@ -52,14 +52,14 @@ namespace { // local variables
 
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
-     { EField::BuyCount,   50, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
-   , { EField::BuyVolume,  50, "Bought",  wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
-   , { EField::BidSize,    50, "BidSize", wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+     { EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+   , { EField::BuyVolume,  45, "Bought",  wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+   , { EField::BidSize,    45, "BidSize", wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
    , { EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-   , { EField::AskSize,    50, "AskSize", wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-   , { EField::SellVolume, 50, "Sold",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
-   , { EField::SellCount,  50, "Ticks",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
-   , { EField::Ticks,      50, "Ticks",   wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
+   , { EField::AskSize,    45, "AskSize", wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+   , { EField::SellVolume, 45, "Sold",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
+   , { EField::SellCount,  45, "Ticks",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
+   , { EField::Ticks,      45, "Ticks",   wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
    , { EField::Volume,     60, "Vol",     wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // sum of volume
    , { EField::Static,     80, "SttcInd", wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // static indicators - pivots, ...
    , { EField::Dynamic,   100, "DynInd",  wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
