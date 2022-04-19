@@ -78,7 +78,6 @@ public:
 
   wxMenu* AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
 
-  static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
