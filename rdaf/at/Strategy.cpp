@@ -276,12 +276,11 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
-void Strategy::HandleUpdateL2Ask( double price, int volume ) {
+void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {
 }
 
-void Strategy::HandleUpdateL2Bid( double price, int volume ) {
+void Strategy::HandleUpdateL2Bid( double price, int volume, bool bAdd ) {
 }
-
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 

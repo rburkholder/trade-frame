@@ -140,12 +140,12 @@ bool AppDoM::OnInit() {
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
           m_options.sSymbolName,
-          [this]( double price, int volume ){ // fVolumeAtPrice_t&& fBid_
+          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
             m_valuesStatistics.nL2MsgBid++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteBid( price, volume );
           },
-          [this]( double price, int volume ){ // fVolumeAtPrice_t&& fAsk_
+          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
             m_valuesStatistics.nL2MsgAsk++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteAsk( price, volume );

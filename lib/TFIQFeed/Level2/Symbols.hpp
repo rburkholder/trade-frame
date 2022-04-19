@@ -42,7 +42,7 @@ class L2Base {  // TODO: convert to CRTP?
 public:
 
   using pL2Base_t = std::shared_ptr<L2Base>;
-  using fVolumeAtPrice_t = std::function<void(double,int)>;
+  using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
 
   L2Base() {}
   virtual ~L2Base() {}

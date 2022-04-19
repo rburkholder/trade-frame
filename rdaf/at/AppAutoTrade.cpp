@@ -661,11 +661,11 @@ void AppAutoTrade::ConfirmProviders() {
           Strategy& strategy( *vt.second );
           m_pL2Symbols->WatchAdd(
             vt.first,
-            [&strategy]( double price, int volume ){ // fVolumeAtPrice_t&& fBid_
-              strategy.HandleUpdateL2Bid( price, volume );
+            [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+              strategy.HandleUpdateL2Bid( price, volume, bAdd );
             },
-            [&strategy]( double price, int volume ){ // fVolumeAtPrice_t&& fAsk_
-              strategy.HandleUpdateL2Ask( price, volume );
+            [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+              strategy.HandleUpdateL2Ask( price, volume, bAdd );
             });
         }
       }

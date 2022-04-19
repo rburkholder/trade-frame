@@ -36,7 +36,6 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-
 class TH2D;
 class TFile;
 class TTree;
@@ -46,8 +45,8 @@ namespace ou {
   class ChartDataView;
 namespace tf {
   class TreeItem;
-}
-}
+} // namespace tf
+} // namespace ou
 
 class Strategy:
   public ou::tf::DailyTradeTimeFrame<Strategy>
@@ -108,8 +107,8 @@ public:
 
   void LoadHistory( TClass* );
 
-  void HandleUpdateL2Ask( double price, int volume );
-  void HandleUpdateL2Bid( double price, int volume );
+  void HandleUpdateL2Ask( double price, int volume, bool bAdd );
+  void HandleUpdateL2Bid( double price, int volume, bool bAdd );
 
   void SaveWatch( const std::string& );
 
@@ -146,8 +145,9 @@ private:
 
   pFile_t m_pFile;
   pFile_t m_pFileUtility;
-  pPosition_t m_pPosition;
+
   pOrder_t m_pOrder;
+  pPosition_t m_pPosition;
 
   ou::ChartDataView m_cdv;
 

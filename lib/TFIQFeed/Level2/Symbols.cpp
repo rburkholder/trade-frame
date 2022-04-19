@@ -48,7 +48,7 @@ void L2Base::LimitOrderAdd(
     iterLimitOrderBook->second.nQuantity += msg.nQuantity;
     iterLimitOrderBook->second.nOrders++;
   }
-  if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity );
+  if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity, true );
 }
 
 // ==== MarketMaker
@@ -109,7 +109,7 @@ void MarketMaker::MMLimitOrder_Update(
     mapLimitOrderBook_t::iterator mapLimitOrderBook_iter = mapLimitOrderBook.find( mapMM_iter->second.price );
     if ( mapLimitOrderBook.end() != mapLimitOrderBook_iter ) {
       mapLimitOrderBook_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
-      if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity );
+      if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity, false );
     }
     else assert( false ); // how inconsistent are things?
     // assign new price level
@@ -128,7 +128,7 @@ void MarketMaker::MMLimitOrder_Update(
     mapLimitOrderBook_iter->second.nQuantity += mapMM_iter->second.volume; // add new volume
   }
 
-  if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity );
+  if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity, true );
 
 }
 
@@ -148,7 +148,7 @@ void MarketMaker::MMLimitOrder_Delete(
     mapLimitOrderBook_t::iterator mapLimitOrderBook_iter = mapLimitOrderBook.find( mapMM_iter->second.price );
     if ( mapLimitOrderBook.end() != mapLimitOrderBook_iter ) {
       mapLimitOrderBook_iter->second.nQuantity -= mapMM_iter->second.volume; // remove old volume
-      if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity );
+      if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity, false );
     }
     else assert( false ); // how inconsistent are things?
     mapMM.erase( mapMM_iter ); // TODO: maybe just keep at 0?, no erasure?
@@ -322,7 +322,7 @@ void OrderBased::LimitOrderUpdate(
     //nQuantity += msg.nQuantity;
     nQuantity -= order.nQuantity;
     iterLimitOrderBook->second.nOrders--;
-    if ( f ) f( order.dblPrice, nQuantity );
+    if ( f ) f( order.dblPrice, nQuantity, false );
   }
 
   if ( order.dblPrice != msg.dblPrice ) {
@@ -336,7 +336,7 @@ void OrderBased::LimitOrderUpdate(
     nQuantity += msg.nQuantity;
     iterLimitOrderBook->second.nOrders++;
     //nQuantity -= order.nQuantity;
-    if ( f ) f( order.dblPrice, nQuantity );
+    if ( f ) f( order.dblPrice, nQuantity, true );
   }
 }
 
@@ -350,7 +350,7 @@ void OrderBased::LimitOrderDel( mapLimitOrderBook_t& map, const Order& order, fV
     iterLimitOrderBook->second.nQuantity -= order.nQuantity;
     iterLimitOrderBook->second.nOrders--;
   }
-  if ( f ) f( order.dblPrice, iterLimitOrderBook->second.nQuantity );
+  if ( f ) f( order.dblPrice, iterLimitOrderBook->second.nQuantity, false );
 
 }
 
