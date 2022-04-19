@@ -14,11 +14,12 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 #include <sstream>
 #include <functional>
+#include <condition_variable>
 
 #include <boost/shared_ptr.hpp>
 
@@ -212,6 +213,10 @@ private:
 
   EReaderOSSignal m_osSignal;
   std::unique_ptr<EClientSocket> m_pTWS;
+
+  std::mutex m_mutexThreadSync;
+  std::condition_variable m_cvThreadSync;
+  bool m_bThreadSync;
 
   long m_time;
   int m_idClient; // for session uniqueness when multiple applications are connected to TWS

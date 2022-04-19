@@ -153,16 +153,27 @@ void TWS::Connect() {
 
       m_bConnected = true;
 
-      m_thrdIBMessages = boost::thread( boost::bind( &TWS::processMessages, this ) );
+      {
+        std::unique_lock lock( m_mutexThreadSync );
+        m_bThreadSync = false;
+        m_thrdIBMessages = std::move( boost::thread( boost::bind( &TWS::processMessages, this ) ) );
+        m_cvThreadSync.wait(
+          lock,
+          [this](){
+            if ( m_bThreadSync ) {
+              //std::cout << "thread notified" << std::endl;
+              m_pTWS->reqCurrentTime();
+              m_pTWS->reqNewsBulletins( true );
+              m_pTWS->reqOpenOrders();
+              //ExecutionFilter filter;
+              //pTWS->reqExecutions( filter );
+              m_pTWS->reqAccountUpdates( true, "" );
 
-      m_pTWS->reqCurrentTime();
-      m_pTWS->reqNewsBulletins( true );
-      m_pTWS->reqOpenOrders();
-      //ExecutionFilter filter;
-      //pTWS->reqExecutions( filter );
-      m_pTWS->reqAccountUpdates( true, "" );
-
-      OnConnected( 0 );
+              OnConnected( 0 );
+            }
+            return m_bThreadSync;
+          } );
+      }
 
     }
     else {
@@ -171,30 +182,6 @@ void TWS::Connect() {
       Disconnect();
     }
   }
-}
-
-void TWS::Disconnect() {
-  // check to see if there are any watches happening, and get them disconnected
-  if ( m_pTWS ) {
-    DisconnectCommon( true );
-    m_pTWS.reset();
-  }
-}
-
-void TWS::DisconnectCommon( bool bSignalEnd ){
-
-    OnDisconnecting( 0 );
-    m_bConnected = false;
-
-    if ( bSignalEnd ) {
-      m_pTWS->eDisconnect();
-      m_thrdIBMessages.join();  // wait for message processing to exit
-    }
-
-    OnDisconnected( 0 );
-    m_ss.str("");
-    m_ss << "IB Disconnected " << std::endl;
-
 }
 
 // this is executed in non-main thread, and the events below will be called from the processing here
@@ -206,6 +193,10 @@ void TWS::processMessages() {
   std::unique_ptr<EReader> pReader;
   pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
   pReader->start();
+
+  //std::cout << "thread notifying" << std::endl;
+  m_bThreadSync = true;
+  m_cvThreadSync.notify_one();
 
   try {
     while ( bOK && m_bConnected ) {
@@ -247,6 +238,30 @@ void TWS::processMessages() {
 
   // need to deal with pre=mature exit so that flags get reset
   // maybe a state machine would keep track
+
+}
+
+void TWS::Disconnect() {
+  // check to see if there are any watches happening, and get them disconnected
+  if ( m_pTWS ) {
+    DisconnectCommon( true );
+    m_pTWS.reset();
+  }
+}
+
+void TWS::DisconnectCommon( bool bSignalEnd ){
+
+    OnDisconnecting( 0 );
+    m_bConnected = false;
+
+    if ( bSignalEnd ) {
+      m_pTWS->eDisconnect();
+      m_thrdIBMessages.join();  // wait for message processing to exit
+    }
+
+    OnDisconnected( 0 );
+    m_ss.str("");
+    m_ss << "IB Disconnected " << std::endl;
 
 }
 
@@ -875,12 +890,12 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
   switch ( errorCode ) {
     case 103: // Duplicate order id
         // id is the order number
-      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "IB error (1) " << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
     case 110: // The price does not conform to the minimum price variation for this contract.
         // id is the order number
         // TODO something like:  OrderManager::Instance().ReportCancellation( orderId );
-      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "IB error (2)" << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
     case 1102: // Connectivity has been restored
       m_pTWS->reqAccountUpdates( true, "" );
@@ -890,11 +905,12 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
     case 200:  // no security definition has been found
       if ( 0 != OnSecurityDefinitionNotFound ) OnSecurityDefinitionNotFound();
       break;
+    case 2106: //
+    case 2158: //
+      std::cout << "IB status " << errorCode << ", " << errorString << std::endl;
+      break;
     default:
-//      m_ss.str("");
-//      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
-//      OutputDebugString( m_ss.str().c_str() );
-      std::cout << "IB error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "IB error (3)" << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
   }
 }
@@ -913,9 +929,9 @@ void TWS::updateNewsBulletin(int msgId, int msgType, const std::string& newsMess
 }
 
 void TWS::currentTime(long time) {
-  m_ss.str("");
-  m_ss << "current time " << time << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+  //m_ss.str("");
+  //m_ss << "current time " << time << std::endl;
+  //std::cout << m_ss.str() << std::endl;
   m_time = time;
 }
 
