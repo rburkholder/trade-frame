@@ -346,4 +346,5 @@ void AppDoM::LoadDailyHistory() {
       );
     }
   );
+  m_pHistoryRequest->Connect();
 }
