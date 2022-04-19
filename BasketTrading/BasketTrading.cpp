@@ -60,6 +60,8 @@ bool AppBasketTrading::OnInit() {
     m_spread_specs = ou::tf::option::SpreadSpecs( options.nDaysFront, options.nDaysBack );
     m_dtLatestEod = boost::posix_time::ptime( options.dateHistory, time_duration( 23, 59, 59 ) );
     m_vSymbol = std::move( options.vSymbol );
+     m_tws->SetClientId( options.ib_client_id );
+
     Init();
 
   }
@@ -200,12 +202,8 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
-  CallAfter(
-    [this](){
-      LoadState();
-      m_pFrameMain->Show( true );
-     }
-  );
+  LoadState();
+  m_pFrameMain->Show( true );
 
 }
 

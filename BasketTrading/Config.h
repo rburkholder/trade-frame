@@ -29,11 +29,15 @@ namespace config {
 using vSymbol_t = std::vector<std::string>;
 
 struct Options {
+
+  vSymbol_t vSymbol;
+  size_t ib_client_id;
+
   boost::gregorian::date dateHistory;
   boost::gregorian::date dateTrading;
   boost::gregorian::days nDaysFront;
   boost::gregorian::days nDaysBack;
-  vSymbol_t vSymbol;
+
 };
 
 bool Load( Options& );
