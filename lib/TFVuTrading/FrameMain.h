@@ -107,28 +107,36 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);
-    wxPoint point = this->GetPosition();
-    ar & point.x;
-    ar & point.y;
-    wxSize size = this->GetSize();
+
+    wxSize size = GetSize();
     ar & size.x;
     ar & size.y;
+
+    wxPoint point = GetPosition();
+    ar & point.x;
+    ar & point.y;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
+
     int x, y;
-    ar & x;
-    ar & y;
-    wxPoint point( x, y );
+
     ar & x;
     ar & y;
     wxSize size( x, y );
-    this->SetSize( size );
-    this->SetPosition( point ); // seems to work better with this order
-    Layout(); // but still not consistently, seems to be a timing problem somewhere
+    SetSize( size );
+    Layout();
 
+    ar & x;
+    ar & y;
+    wxPoint point( x, y );
+    CallAfter(
+      [this,point](){
+        usleep( 1000000 ); // seems to be some sort of magic delay
+        SetPosition( point );
+      } );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
