@@ -62,24 +62,25 @@ protected:
   fVolumeAtPrice_t m_fBidVolumeAtPrice;
   fVolumeAtPrice_t m_fAskVolumeAtPrice;
 
-  struct Auction {
+  struct LimitOrder {
     // maintain set of orders?
     volume_t nQuantity;
     int nOrders;
-    Auction( volume_t nQuantity_ )
+    LimitOrder( volume_t nQuantity_ )
     : nQuantity( nQuantity_ ), nOrders( 1 )  {}
-    Auction( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
+    LimitOrder( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
     : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
-  using mapAuction_t = std::map<double,Auction>;  // key is price
-  mapAuction_t m_mapAuctionAsk;
-  mapAuction_t m_mapAuctionBid;
+  using mapLimitOrderBook_t = std::map<double,LimitOrder>;  // key is price
+  mapLimitOrderBook_t m_mapLimitOrderBookAsk;
+  mapLimitOrderBook_t m_mapLimitOrderBookBid;
 
-  void AuctionAdd(
+  void LimitOrderAdd(
     const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
-    mapAuction_t& );
+    mapLimitOrderBook_t&
+  );
 
 private:
 };
@@ -119,14 +120,14 @@ private:
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  void MMAuction_Update(
+  void MMLimitOrder_Update(
     const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
-    mapMM_t&, mapAuction_t& );
-  void MMAuction_Delete(
+    mapMM_t&, mapLimitOrderBook_t& );
+  void MMLimitOrder_Delete(
     const ou::tf::iqfeed::l2::msg::OrderDelete::decoded&,
     fVolumeAtPrice_t&,
-    mapMM_t&, mapAuction_t& );
+    mapMM_t&, mapLimitOrderBook_t& );
 };
 
 // ==== OrderBased (Futures, etc)
@@ -169,13 +170,13 @@ private:
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
   mapOrder_t m_mapOrder;
 
-  void AuctionUpdate(
-    mapAuction_t& map,
+  void LimitOrderUpdate(
+    mapLimitOrderBook_t& map,
     Order& order,
     const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ,
     fVolumeAtPrice_t&
     );
-  void AuctionDel( mapAuction_t& map, const Order&, fVolumeAtPrice_t& );
+  void LimitOrderDel( mapLimitOrderBook_t& map, const Order&, fVolumeAtPrice_t& );
 };
 
 // ==== Carrier for symbol lookup
