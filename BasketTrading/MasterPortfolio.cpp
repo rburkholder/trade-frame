@@ -194,8 +194,10 @@ MasterPortfolio::~MasterPortfolio() {
   m_pOptionEngine.release();
   m_libor.SetWatchOff();
 
-  m_pOptionChainQuery->Disconnect();
-  m_pOptionChainQuery.reset();
+  if ( m_pOptionChainQuery ) {
+    m_pOptionChainQuery->Disconnect();
+    m_pOptionChainQuery.reset();
+  }
 
   m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
 
