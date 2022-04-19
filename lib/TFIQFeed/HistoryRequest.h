@@ -50,6 +50,8 @@ public:
     );
     }
 
+  void Connect();
+
   void Request( const std::string& sSymbol_, uint16_t nBar, fBar_t&& fBar, fDone_t&& fDone );
 
 protected:

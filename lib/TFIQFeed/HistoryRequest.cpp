@@ -53,11 +53,15 @@ HistoryRequest::HistoryRequest(
       }
     }
   );
-  m_pHistory->Connect(); // start the process
+  //m_pHistory->Connect(); // start the process // commented out as it turns around faster than it is constructed
 }
 
 HistoryRequest::~HistoryRequest() {
   m_pHistory->Disconnect();
+}
+
+void HistoryRequest::Connect() {
+  m_pHistory->Connect();
 }
 
 void HistoryRequest::Request( const std::string& sSymbol_, uint16_t nBar, fBar_t&& fBar, fDone_t&& fDone ) {
