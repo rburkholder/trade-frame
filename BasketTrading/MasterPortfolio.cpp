@@ -399,9 +399,10 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
             ProcessSeedList();
           }
         );
+        m_pHistoryRequest->Connect();
       }
     );
-    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+    m_pOptionChainQuery->Connect();
 
   }
 }
