@@ -294,22 +294,28 @@ bool Instrument::operator==( const Instrument& rhs ) const {
 // use 16:00 est as time of expiry, as that is when they cease trading (for OPRA equities)
 // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
 
-boost::posix_time::ptime Instrument::GetExpiryUtc( void ) const {
+boost::posix_time::ptime Instrument::GetExpiryUtc() const {
   // may require further time refinements with other option types
   // may require a table for handling other markets and time zones
   boost::gregorian::date dateExpiry( m_row.nYear, m_row.nMonth, m_row.nDay );
   switch ( m_row.eType ) {
     case InstrumentType::Option:  // for equities options
       return ou::TimeSource::Instance().
-              ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
+             ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
       break;
     case InstrumentType::FuturesOption:  // for metals options
-      return ou::TimeSource::Instance().
-              ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York", true );
+      if ( "GLOBEX" == m_row.idExchange ) { // ES symbols
+        return ou::TimeSource::Instance().
+               ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago", true );
+      }
+      else {
+        return ou::TimeSource::Instance().
+               ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York", true );
+      }
       break;
   }
   return ou::TimeSource::Instance().
-          ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
+         ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
 }
 
 double Instrument::NormalizeOrderPrice( double price ) const {
