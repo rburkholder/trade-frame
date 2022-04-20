@@ -123,24 +123,43 @@ private:
 
     int x, y;
 
-    ar & x;
-    ar & y;
-    wxSize size( x, y );
-    SetSize( size );
-    Layout();
+    if ( 1 == version ) {
+      ar & x;
+      ar & y;
+      wxPoint point( x, y );
+      CallAfter(
+        [this,point](){
+          usleep( 1000000 ); // seems to be some sort of magic delay
+          SetPosition( point );
+        } );
 
-    ar & x;
-    ar & y;
-    wxPoint point( x, y );
-    CallAfter(
-      [this,point](){
-        usleep( 1000000 ); // seems to be some sort of magic delay
-        SetPosition( point );
-      } );
+      ar & x;
+      ar & y;
+      wxSize size( x, y );
+      SetSize( size );
+      Layout();
+
+    }
+    else {
+      ar & x;
+      ar & y;
+      wxSize size( x, y );
+      SetSize( size );
+      Layout();
+
+      ar & x;
+      ar & y;
+      wxPoint point( x, y );
+      CallAfter(
+        [this,point](){
+          usleep( 900000 ); // seems to be some sort of magic delay
+          SetPosition( point );
+        } );
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
 
-BOOST_CLASS_VERSION(FrameMain, 1)
+BOOST_CLASS_VERSION(FrameMain, 2)
 
