@@ -17,6 +17,10 @@
 #include <string>
 #include <functional>
 
+// Note, that there is a wxChartDir wrapper!
+// https://github.com/utelle/wxchartdir
+// https://www.wxwidgets.org/blog/2018/08/wxchartdir-using-chartdirector-in-wxwidgets-applications/
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 class MultiChart;
