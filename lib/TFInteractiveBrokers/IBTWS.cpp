@@ -155,6 +155,7 @@ void TWS::Connect() {
 
       {
         std::unique_lock lock( m_mutexThreadSync );
+
         m_bThreadSync = false;
         m_thrdIBMessages = std::move( boost::thread( boost::bind( &TWS::processMessages, this ) ) );
         m_cvThreadSync.wait(
@@ -163,10 +164,12 @@ void TWS::Connect() {
             if ( m_bThreadSync ) {
               //std::cout << "thread notified" << std::endl;
               m_pTWS->reqCurrentTime();
+              usleep( 50000 );
               m_pTWS->reqNewsBulletins( true );
-              m_pTWS->reqOpenOrders();
+//              m_pTWS->reqOpenOrders();
               //ExecutionFilter filter;
               //pTWS->reqExecutions( filter );
+              usleep( 50000 );
               m_pTWS->reqAccountUpdates( true, "" );
 
               OnConnected( 0 );
@@ -194,8 +197,11 @@ void TWS::processMessages() {
   pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
   pReader->start();
 
+  {
+    std::scoped_lock lock( m_mutexThreadSync );
+    m_bThreadSync = true;
+  }
   //std::cout << "thread notifying" << std::endl;
-  m_bThreadSync = true;
   m_cvThreadSync.notify_one();
 
   try {
@@ -928,7 +934,7 @@ void TWS::updateNewsBulletin(int msgId, int msgType, const std::string& newsMess
 //  OutputDebugString( m_ss.str().c_str() );
 }
 
-void TWS::currentTime(long time) {
+void TWS::currentTime( long time ) {
   //m_ss.str("");
   //m_ss << "current time " << time << std::endl;
   //std::cout << m_ss.str() << std::endl;
