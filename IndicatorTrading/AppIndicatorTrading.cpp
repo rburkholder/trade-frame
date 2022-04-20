@@ -49,6 +49,7 @@ namespace {
   static const std::string sConfigFilename( "IndicatorTrading.cfg" );
   static const std::string sStateFileName( "IndicatorTrading.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+  static const std::string sSaveValuesRoot( "/app/IndicatorTrading" );
 }
 
 IMPLEMENT_APP(AppIndicatorTrading)
@@ -346,7 +347,7 @@ void AppIndicatorTrading::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
-      m_pInteractiveChart->SaveWatch( "/app/InddicatorTrading/" + m_sTSDataStreamStarted );
+      m_pInteractiveChart->SaveWatch( sSaveValuesRoot + "/" + m_sTSDataStreamStarted );
       std::cout << "  ... Done " << std::endl;
     }
   );
