@@ -21,6 +21,7 @@
 
 //#include <wx/sizer.h>
 #include <wx/event.h>
+//#include <wx/tooltip.h>
 #include <wx/dcclient.h>
 
 #include "WinRowElement.hpp"
@@ -29,12 +30,12 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-WinRowElement::WinRowElement() {
-}
+WinRowElement::WinRowElement() {}
 
 WinRowElement::WinRowElement(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-) {
+)
+{
   Create(parent, id, pos, size, style);
 }
 
@@ -87,12 +88,15 @@ void WinRowElement::SetCanHaveFocus( bool bCanHaveFocus ) {
 
 void WinRowElement::SetText( const std::string& sText ) {
   m_sText = sText;
-  if ( 0 == m_sText.size() ) {
-    UnsetToolTip();
-  }
-  else {
-    SetToolTip( m_sText );
-  }
+  // for tooltip, need to assign to undelrying window
+  // will need to identify the the container under the cursor,
+  //   and use that to populate the tooltip
+  //if ( 0 == m_sText.size() ) {
+  //  UnsetToolTip();
+  //}
+  //else {
+  //  this->GetParent()->SetToolTip( m_sText );
+  //}
   Paint();
 }
 
