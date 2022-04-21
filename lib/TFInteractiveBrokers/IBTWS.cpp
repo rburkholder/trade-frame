@@ -916,7 +916,7 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
       std::cout << "IB status " << errorCode << ", " << errorString << std::endl;
       break;
     default:
-      std::cout << "IB error (3)" << id << ", " << errorCode << ", " << errorString << std::endl;
+      std::cout << "IB error (3): " << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
   }
 }
@@ -1039,23 +1039,18 @@ void TWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClos
 void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 
   // instrument is constructed, but is not registered with InstrumentManager
-#if DEBUG
-  m_ss.str("");
-  m_ss << "contract Details "
-    << contractDetails.marketName << ", "
-    << contractDetails.longName << ", "
-    << contractDetails.summary.symbol << ", "
-    << contractDetails.summary.localSymbol << ", "
-    << contractDetails.summary.secType << ", "
-    << contractDetails.summary.conId << ", "
-    << contractDetails.summary.strike << ", "
-    << contractDetails.summary.right  << ", "
-    << contractDetails.summary.expiry
-    ;
-  std::cout << m_ss.str() << std::endl;
-#endif
 
   assert( 0 < contractDetails.contract.conId );
+
+  std::cout
+    << "IB details: "
+    <<        contractDetails.realExpirationDate
+    << "," << contractDetails.lastTradeTime
+    << "," << contractDetails.timeZoneId
+//    << "," << "lqdhrs=" << contractDetails.liquidHours
+//    << "," << "trdhrs=" << contractDetails.tradingHours
+    << std::endl;
+    // 202205/02,15:00,US/Central
 
   fOnContractDetail_t handler = nullptr;
   pInstrument_t pInstrument;
