@@ -129,6 +129,8 @@ private:
     ShortExit,  // position exists, looking for exit
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
+    EndOfDayCancel,
+    EndOfDayNeutrall,
     Done // no more action
     };
 

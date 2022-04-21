@@ -501,21 +501,27 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
       m_stateTrade = ETradeState::Search;
       break;
+    case ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayNeutrall:
+      // figure out what labels to apply
+      break;
     case ETradeState::Done:
       break;
     default:
-      assert( false ); // TODO: unravel the state mess if we get here
+       assert( false ); // TODO: unravel the state mess if we get here
   }
   m_pOrder.reset();
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+  m_stateTrade = ETradeState::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+  m_stateTrade = ETradeState::EndOfDayNeutrall;
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
   }
