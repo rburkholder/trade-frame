@@ -202,6 +202,16 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
+  vItems.clear();
+  vItems.push_back( new mi( "Close Cover", MakeDelegate( this, &AppBasketTrading::HandleCloseCover ) ) );
+  vItems.push_back( new mi( "Close Synth Short", MakeDelegate( this, &AppBasketTrading::HandleCloseSynthShort ) ) );
+  vItems.push_back( new mi( "Lock Synth Long", MakeDelegate( this, &AppBasketTrading::HandleLockSynthLong ) ) );
+  vItems.push_back( new mi( "Lock Protection", MakeDelegate( this, &AppBasketTrading::HandleLockProtection ) ) );
+  // used to roll short in the money to next expiry to take premium and hopefully recoup loss
+  vItems.push_back( new mi( "Roll Cover", MakeDelegate( this, &AppBasketTrading::HandleRollCover ) ) );
+  vItems.push_back( new mi( "Roll Synth Short", MakeDelegate( this, &AppBasketTrading::HandleRollSynthShort ) ) );
+  m_pFrameMain->AddDynamicMenu( "Legs", vItems );
+
   LoadState();
   m_pFrameMain->Show( true );
 
@@ -321,7 +331,7 @@ void AppBasketTrading::HandleButtonLoad() {
     );
 }
 
-void AppBasketTrading::HandleMenuActionTestSelection( void ) {
+void AppBasketTrading::HandleMenuActionTestSelection() {
   CallAfter(
     [this](){
       std::cout << "Starting Symbol Test ... nothing to do" << std::endl;
@@ -336,7 +346,7 @@ void AppBasketTrading::HandleMenuActionTestSelection( void ) {
 //    } );
 //}
 
-void AppBasketTrading::HandleButtonClosePositions(void) {
+void AppBasketTrading::HandleButtonClosePositions() {
   CallAfter(
     [this](){
       m_pMasterPortfolio->ClosePositions();

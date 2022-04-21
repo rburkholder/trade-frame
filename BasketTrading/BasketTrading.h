@@ -114,24 +114,31 @@ private:
 
   void BuildMasterPortfolio();
 
-  void HandleButtonLoad( void );
-//  void HandleButtonStart( void );
-  void HandleButtonClosePositions( void );
-  void HandleButtonSave( void );
-  void HandleEmitInfo( void );
-  void HandleButtonTest( void );
+  void HandleButtonLoad();
+//  void HandleButtonStart();
+  void HandleButtonClosePositions();
+  void HandleButtonSave();
+  void HandleEmitInfo();
+  void HandleButtonTest();
 
-  void HandleTakeProfits( void );
-  void HandleCloseExpiryItm( void );
-  void HandleCloseFarItm( void );
-  void HandleCloseForProfits( void );
-  void HandleCloseItmLeg( void );
+  void HandleTakeProfits();
+  void HandleCloseExpiryItm();
+  void HandleCloseFarItm();
+  void HandleCloseForProfits();
+  void HandleCloseItmLeg();
 
-  void HandleAddComboAllowed( void );
-  void HandleAddComboForced( void );
+  void HandleCloseCover() {}
+  void HandleCloseSynthShort() {}
+  void HandleLockSynthLong() {}
+  void HandleLockProtection() {}
+  void HandleRollCover() {}
+  void HandleRollSynthShort() {}
 
-  void HandlePopulateDatabase( void );
-  void HandleLoadDatabase( void );
+  void HandleAddComboAllowed();
+  void HandleAddComboForced();
+
+  void HandlePopulateDatabase();
+  void HandleLoadDatabase();
 
   void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
   void HandlePositionLoad( pPosition_t& pPosition );
@@ -143,7 +150,7 @@ private:
 
   void HandleGuiRefresh( wxTimerEvent& event );
 
-  void HandleMenuActionTestSelection( void );
+  void HandleMenuActionTestSelection();
 
   void SaveState();
   void LoadState();
