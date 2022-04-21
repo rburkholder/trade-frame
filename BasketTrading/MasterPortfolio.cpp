@@ -495,12 +495,17 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
             m_fSetChartDataView( uws.pUnderlying->GetChartDataView() );
           },
-          [this,sUnderlying]( ou::tf::TreeItem* pti ){
+          [this,sUnderlying,sIqfSymbol]( ou::tf::TreeItem* pti ){
             pti->NewMenu();
             pti->AppendMenuItem(
               "Add Strategy",
               [this,sUnderlying]( ou::tf::TreeItem* pti ){
                 std::cout << "Add Strategy for: " << sUnderlying << " (todo)" << std::endl;
+              });
+            pti->AppendMenuItem(
+              "IQFeed Name",
+              [this,sUnderlying,sIqfSymbol]( ou::tf::TreeItem* pti ){
+                std::cout << "Lookup: " << sUnderlying << "=" << sIqfSymbol << std::endl;
               });
           });
 
