@@ -293,6 +293,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 }
 
 /*
+  // template to submit GTC limit order
   // strip off fractional seconds
   boost::posix_time::ptime dtQuote
     = quote.DateTime()
@@ -475,12 +476,12 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   switch ( m_stateTrade ) {
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutrall:
-      BOOST_LOG_TRIVIAL(info) << "order cancelled - end of day";
+      BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
       break;
     case ETradeState::LongExitSubmitted:
     case ETradeState::ShortExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
-      BOOST_LOG_TRIVIAL(error) << "order cancelled - needs fixes";
+      BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
       m_stateTrade = ETradeState::Done;
       break;
     default:
