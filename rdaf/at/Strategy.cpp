@@ -469,13 +469,19 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
 }
 
-void Strategy::HandleOrderCancelled( const ou::tf::Order& ) {
+void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
+    case ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayNeutrall:
+      BOOST_LOG_TRIVIAL(info) << "order cancelled - end of day";
+      break;
     case ETradeState::LongExitSubmitted:
     case ETradeState::ShortExitSubmitted:
-      assert( false );  // TODO: need to figure out a plan to retry exit
+      //assert( false );  // TODO: need to figure out a plan to retry exit
+      BOOST_LOG_TRIVIAL(error) << "order cancelled - needs fixes";
+      m_stateTrade = ETradeState::Done;
       break;
     default:
       m_stateTrade = ETradeState::Search;
