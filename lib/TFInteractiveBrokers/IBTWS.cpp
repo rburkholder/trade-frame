@@ -149,7 +149,7 @@ void TWS::Connect() {
 
     m_pTWS = std::make_unique<EClientSocket>( this, &m_osSignal );
 
-    m_pTWS->setConnectOptions( "+PACEAPI" ); //  https://www.interactivebrokers.com/en/index.php?f=24356 (needs version >=974)
+    //m_pTWS->setConnectOptions( "+PACEAPI" ); //  https://www.interactivebrokers.com/en/index.php?f=24356 (needs version >=974)
     bool bOk = m_pTWS->eConnect( m_sIPAddress.c_str(), m_nPort, m_idClient );
     if ( bOk ) {
 
@@ -1381,9 +1381,10 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
           );
 
           std::string tz = details.timeZoneId; // TODO: need the keyword parser to lookup/replace faster
-          if ( "US/Central" == tz ) tz = "America/Chicago";
           if ( "US/Eastern" == tz ) tz = "America/New_York"; // TODO need to confirm what OPRA options have
-
+          if ( "US/Central" == tz ) tz = "America/Chicago";
+          if ( "US/Mountain" == tz ) tz = "America/Edmonton";
+          if ( "US/Pacific" == tz ) tz = "America/Vancouver";
           dtExpiry = ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, tz, true );
         }
 
