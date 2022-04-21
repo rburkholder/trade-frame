@@ -510,24 +510,32 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_pPosition->CancelOrders();
+  if ( m_pPosition ) {
+    m_pPosition->CancelOrders();
+  }
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_pPosition->ClosePosition();
+  if ( m_pPosition ) {
+    m_pPosition->ClosePosition();
+  }
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   // RecordSeries has been set to false
-  m_pPosition->GetWatch()->SaveSeries( sPrefix );
-  //if (m_pFile){ // don't do this, as the file is save on exit,
-  //  this will create another version, which will cause problems during reload
-  //  m_pFile->Write();
-  //}
+  if ( m_pPosition ) {
+    m_pPosition->GetWatch()->SaveSeries( sPrefix );
+    //if (m_pFile){ // don't do this, as the file is save on exit,
+    //  this will create another version, which will cause problems during reload
+    //  m_pFile->Write();
+    //}
+  }
 }
 
 void Strategy::CloseAndDone() {
   std::cout << "Sending Close & Done" << std::endl;
-  m_pPosition->ClosePosition();
+  if ( m_pPosition ) {
+    m_pPosition->ClosePosition();
+  }
   m_stateTrade = ETradeState::Done;
 }
