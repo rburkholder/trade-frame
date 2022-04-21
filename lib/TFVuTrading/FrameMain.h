@@ -152,7 +152,7 @@ private:
       wxPoint point( x, y );
       CallAfter(
         [this,point](){
-          usleep( 900000 ); // seems to be some sort of magic delay
+          usleep( 1000000 ); // seems to be some sort of magic delay
           SetPosition( point );
         } );
     }
