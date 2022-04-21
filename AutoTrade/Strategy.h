@@ -76,7 +76,10 @@ private:
     LongExit,  // position exists, looking for exit
     ShortSubmitted,  // order has been submitted, waiting for confirmtaion
     ShortExit,  // position exists, looking for exit
-    ExitSubmitted, // wait for exit to complete
+    LongExitSubmitted, // wait for exit to complete
+    ShortExitSubmitted, // wait for exit to complete
+    EndOfDayCancel,
+    EndOfDayNeutrall,
     Done // no more action
     };
 
