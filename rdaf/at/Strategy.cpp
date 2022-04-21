@@ -448,6 +448,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case ETradeState::ShortExitSubmitted:
       // wait for order to execute
       break;
+    case ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayNeutrall:
     case ETradeState::Done:
       // quiescent
       break;
