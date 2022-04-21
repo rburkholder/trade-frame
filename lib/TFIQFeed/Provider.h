@@ -55,8 +55,6 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
-  void SetAlternateInstrumentName( pInstrument_t );
-
   void SetThreadCount( size_t nThreads ) { m_nThreads = nThreads; }
 
 protected:

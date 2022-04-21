@@ -325,41 +325,6 @@ void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMess
   this->SystemDone( pBuffer, pMsg );
 }
 
-// 2014/09/30: some similar code in IQFeed/Option.cpp
-//http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
-void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
-  // need to check if it already set or not
-  assert( 0 );  // 20151227 no longer has underlying name in Instrument, will need to look up in IQFeed Market Symbols File
-  // to build the name, use the BuildSymbolName.h file.
-  // iqfeed name is then set as an alternate name, with a name of our design used as the primary name
-  std::string sName;
-  switch ( pInstrument->GetInstrumentType() ) {
-    case ou::tf::InstrumentType::Option:
-      {
-        //sName += pInstrument->GetUnderlyingName();
-        std::string d = pInstrument->GetCommonCalcExpiryAsIsoString();
-        sName += d.substr( 2, 2 );
-        int month = boost::lexical_cast<int>( d.substr( 4, 2 ) );
-        sName += d.substr( 6, 2 );
-        switch ( pInstrument->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            sName += 'A' + month - 1;
-            break;
-          case ou::tf::OptionSide::Put:
-            sName += 'M' + month - 1;
-            break;
-          default: // ignore the other enumerations
-            break;
-        }
-        sName += boost::lexical_cast<std::string>( pInstrument->GetStrike() );
-      }
-      break;
-    default: // ignore the other enumerations
-      break;
-  }
-  pInstrument->SetAlternateName( ID(), sName );
-}
-
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou

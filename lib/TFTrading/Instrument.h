@@ -105,6 +105,7 @@ public:
       nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
       dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
+
     TableRowDef( // strictly for obtaining fundamentals
       idInstrument_t idInstrument_)
       : idInstrument( idInstrument_ ), eType( InstrumentType::EInstrumentType::Unknown ), idExchange( "" ),
@@ -116,6 +117,7 @@ public:
         //assert( eType > InstrumentType::Unknown );
         assert( 0 < idInstrument.size() );
     };
+
     TableRowDef( // equity / generic creation
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
@@ -127,6 +129,7 @@ public:
         assert( eType > InstrumentType::Unknown );
         assert( 0 < idInstrument.size() );
     };
+
     TableRowDef( // future
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ = 0 )
@@ -139,21 +142,7 @@ public:
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );
     };
-    TableRowDef( // option/futuresoption with yymm [TODO with day available now, remove this?] => deprecate and see
-      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
-      boost::uint16_t nYear_, boost::uint16_t nMonth_,
-      OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
-      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      dtExpiry( boost::gregorian::date( nYear_, nMonth_, 1 ), boost::posix_time::time_duration( 23, 59, 59 ) ), // may need to fix time, and day is incorrect
-      nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ),
-      dblStrike( dblStrike_ ), eOptionSide( eOptionSide_ ),
-      nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
-        assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
-        assert( ( eType_ == InstrumentType::Option )
-             || ( eType_ == InstrumentType::FuturesOption ) );
-        assert( 0 < idInstrument.size() );
-    };
+
     TableRowDef( // option/futuresoption with yymmdd
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
@@ -168,8 +157,8 @@ public:
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
         assert( 0 < idInstrument.size() );
-//        assert( 0 < idUnderlying.size() );
     };
+
     TableRowDef( // option/futuresoption with ptime
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_, // <= remove this at some point
@@ -185,8 +174,8 @@ public:
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
         assert( 0 < idInstrument.size() );
-//        assert( 0 < idUnderlying.size() );
     };
+
     TableRowDef( // currency
       const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
       InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
@@ -199,7 +188,6 @@ public:
         nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.00005 ), nSignificantDigits( 5 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
-//          assert( 0 < idUnderlying.size() );
     };
   };
 
@@ -209,11 +197,10 @@ public:
       TableRowDef::Fields( a );
       ou::db::Key( a, "instrumentid" );
       ou::db::Constraint( a, "exchangeid", tablenames::sExchange, "exchangeid" );
-//      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );  // what happens with empty string?
     }
   };
+
   Instrument( const TableRowDef& row );  // regular instruments
-//  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
   Instrument( idInstrument_cref idInstrument ); // just enough to obtain more info via fundamentals
   Instrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::EInstrumentType type,
@@ -223,12 +210,6 @@ public:
     idInstrument_cref idInstrument, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day = 0 );
-  Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together <= deprecate and test this goes away
-    idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
-    const idExchange_t& sExchangeName,
-    boost::uint16_t year, boost::uint16_t month,
-    OptionSide::EOptionSide side,
-    double strike );
   Instrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
@@ -249,11 +230,8 @@ public:
 
   virtual ~Instrument();
 
-  idInstrument_cref GetInstrumentName() const { return m_row.idInstrument; };
-//  idInstrument_cref GetUnderlyingName();
-
   idInstrument_cref GetInstrumentName( eidProvider_t id ) const;
-//  idInstrument_cref GetUnderlyingName( eidProvider_t id );
+  idInstrument_cref GetInstrumentName() const { return m_row.idInstrument; };
 
   void SetAlternateName( eidProvider_t, idInstrument_cref );
 
@@ -297,11 +275,6 @@ public:
 
   OptionSide::EOptionSide GetOptionSide() const { return m_row.eOptionSide; };
 
-  // these may not be needed anymore
-  void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday
-  boost::gregorian::date GetCommonCalcExpiry() const { return m_dateCommonCalc; };
-  std::string GetCommonCalcExpiryAsIsoString() const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); }
-
   void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };  // for Interactive Brokers contract identification
   boost::int32_t GetContract() const { return m_row.nIBContract; };
 
@@ -340,8 +313,6 @@ private:
 
   using mapAlternateNames_t = std::map<eidProvider_t, idInstrument_t>;
   mapAlternateNames_t m_mapAlternateNames;
-
-  boost::gregorian::date m_dateCommonCalc;
 
   mapExchangeRule_t m_mapExchangeRule;
 

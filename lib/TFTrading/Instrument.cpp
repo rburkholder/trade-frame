@@ -116,10 +116,9 @@ std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, 
 }
 
 Instrument::Instrument( const TableRowDef& row )
-  : m_row( row ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),
-  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+: m_row( row )
+, m_dtrTimeLiquid( dtDefault, dtDefault )
+, m_dtrTimeTrading( dtDefault, dtDefault )
 {
   switch ( row.eType ) {
     case InstrumentType::Stock:
@@ -139,77 +138,60 @@ Instrument::Instrument( const TableRowDef& row )
 
 // just enough to obtain fundamentals
 Instrument::Instrument( idInstrument_cref idInstrument )
-: m_row( idInstrument ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+: m_row( idInstrument )
+, m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {}
 
 // equity / generic creation
 Instrument::Instrument(
-  idInstrument_cref idInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t &idExchange
+  idInstrument_cref idInstrument
+, InstrumentType::EInstrumentType eType
+, const idExchange_t &idExchange
 )
-: m_row( idInstrument, eType, idExchange ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+: m_row( idInstrument, eType, idExchange )
+, m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {}
 
  // future
 Instrument::Instrument(
-  idInstrument_cref idInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t& idExchange,
-  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day )
-: m_row( idInstrument, eType, idExchange, year, month, day ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+  idInstrument_cref idInstrument
+, InstrumentType::EInstrumentType eType
+, const idExchange_t& idExchange
+, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day
+)
+: m_row( idInstrument, eType, idExchange, year, month, day )
+, m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sSymbolName.size() );
   //assert( 0 < m_sExchange.size() );
 }
 
- // option yymm // TODO: get this removed
-Instrument::Instrument(
-  idInstrument_cref idInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t& idExchange,
-  boost::uint16_t year, boost::uint16_t month,
-  OptionSide::EOptionSide eOptionSide,
-  double dblStrike )
-  : m_row( idInstrument, eType, idExchange,
-  year, month, eOptionSide, dblStrike ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
-{
-  //assert( 0 < m_sExchange.size() );
-}
-
  // option yymmdd
 Instrument::Instrument(
-  idInstrument_cref idInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t& idExchange,
-  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-  OptionSide::EOptionSide eOptionSide,
-  double dblStrike )
-  : m_row( idInstrument, eType, idExchange,
-  year, month, day, eOptionSide, dblStrike ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+  idInstrument_cref idInstrument
+, InstrumentType::EInstrumentType eType
+, const idExchange_t& idExchange
+, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day
+, OptionSide::EOptionSide eOptionSide
+, double dblStrike
+)
+: m_row(
+  idInstrument, eType, idExchange
+, year, month, day, eOptionSide, dblStrike )
+, m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sExchange.size() );
 }
 
 /// option ptime
 Instrument::Instrument(
-  idInstrument_cref idInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t& idExchange,
-  boost::posix_time::ptime dtExpiry,
-  double dblStrike,
-  OptionSide::EOptionSide eOptionSide
-  )
+  idInstrument_cref idInstrument
+, InstrumentType::EInstrumentType eType
+, const idExchange_t& idExchange
+, boost::posix_time::ptime dtExpiry
+, double dblStrike
+, OptionSide::EOptionSide eOptionSide
+)
 : m_row(
   idInstrument, eType, idExchange
 , dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day()
@@ -218,33 +200,29 @@ Instrument::Instrument(
 )
 , m_dtrTimeLiquid( dtDefault, dtDefault )
 , m_dtrTimeTrading( dtDefault, dtDefault )
-, m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
 }
 
 // currency
 Instrument::Instrument(
-  const idInstrument_t& idInstrument,
+  const idInstrument_t& idInstrument
 // const idInstrument_t& idCounterInstrument,
-  InstrumentType::EInstrumentType eType,
-  const idExchange_t& idExchange,
-  Currency::ECurrency base,
-  Currency::ECurrency counter
-  )
-  : m_row( idInstrument,
+, InstrumentType::EInstrumentType eType
+, const idExchange_t& idExchange
+, Currency::ECurrency base
+, Currency::ECurrency counter
+)
+: m_row(
+  idInstrument
 //  idCounterInstrument,
-  eType, idExchange, base, counter ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
-{
-
-}
+, eType, idExchange, base, counter )
+, m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+{}
 
 Instrument::Instrument( const Instrument& instrument )
-: m_row( instrument.m_row ),
-  m_dtrTimeLiquid( dtDefault, dtDefault ), m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+: m_row( instrument.m_row )
+, m_dtrTimeLiquid( dtDefault, dtDefault ), m_dtrTimeTrading( dtDefault, dtDefault )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
   while ( instrument.m_mapAlternateNames.end() != iter ) {
