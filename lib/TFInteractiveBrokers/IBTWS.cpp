@@ -28,6 +28,8 @@
 
 #include <boost/spirit/include/qi.hpp>
 
+#include <OUCommon/TimeSource.h>
+
 #include <OUCommon/KeyWordMatch.h>
 
 #include <TFTrading/KeyTypes.h>
@@ -1042,16 +1044,6 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 
   assert( 0 < contractDetails.contract.conId );
 
-  std::cout
-    << "IB details: "
-    <<        contractDetails.realExpirationDate
-    << "," << contractDetails.lastTradeTime
-    << "," << contractDetails.timeZoneId
-//    << "," << "lqdhrs=" << contractDetails.liquidHours
-//    << "," << "trdhrs=" << contractDetails.tradingHours
-    << std::endl;
-    // 202205/02,15:00,US/Central
-
   fOnContractDetail_t handler = nullptr;
   pInstrument_t pInstrument;
 
@@ -1069,7 +1061,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   // need some logic here (some or all of which may now be implemented, just needs a cleanup):
   // * if instrument is supplied, only supplement some existing information
   // * if instrument not supplied, then go through whole building instrument exercise, or will BuildInstrument supply additional information
-  // * also, need to logic to determine if we have the symbol, or not
+  // * also, need logic to determine if we have the symbol, or not
   // * build instrument doesn't build the symbol, is performed later in the logic here, so can skip the assignment.
   // * need a truth table for what to do with instrument (present or not), and symbol(present or not)
 
@@ -1088,7 +1080,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
     pInstrument = iterMap->second->GetInstrument();
   }
 
-  BuildInstrumentFromContract( contractDetails.contract, pInstrument );  // creates new contract, or uses existing one
+  BuildInstrumentFromContractDetails( contractDetails, pInstrument );  // creates new contract, or uses existing one
 
   pInstrument->SetMinTick( contractDetails.minTick );
 
@@ -1292,7 +1284,9 @@ void TWS::nextValidId( OrderId orderId) {
 }
 
 // called from contractDetails, info comes from IB
-void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument ) {
+void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pInstrument_t& pInstrument ) {
+
+  const Contract& contract( details.contract );
 
   std::string sBaseName( contract.symbol );  // need to look at this (was sUnderlying)
   std::string sLocalSymbol( contract.localSymbol );  // and this to name them properly
@@ -1353,17 +1347,70 @@ void TWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& 
     case InstrumentType::Option:
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
-      if ( 0 == pInstrument.get() ) {
-	      pInstrument = Instrument::pInstrument_t( new Instrument(
-	        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(),
-	        os, contract.strike ) );
+
+      /*
+        std::cout
+          << "IB details: "
+          <<        contractDetails.realExpirationDate
+          << "," << contractDetails.lastTradeTime
+          << "," << contractDetails.timeZoneId
+      //    << "," << "lqdhrs=" << contractDetails.liquidHours
+      //    << "," << "trdhrs=" << contractDetails.tradingHours
+          << std::endl;
+          // 20220425,15:00,US/Central
+      */
+      {
+        boost::posix_time::ptime dtExpiry( boost::posix_time::not_a_date_time );
+        if ( ( 0 != details.realExpirationDate.size() )
+          && ( 0 != details.lastTradeTime.size() )
+          && ( 0 != details.timeZoneId.size() )
+        ) {
+          const std::string& sDate( details.realExpirationDate );
+          assert( 8 == sDate.size() );
+          const std::string& sTime( details.lastTradeTime );
+          assert( 5 == sTime.size() );
+          boost::gregorian::date date(
+            boost::lexical_cast<int>( sDate.substr( 0, 4 )),
+            boost::lexical_cast<int>( sDate.substr( 4, 2 ) ),
+            boost::lexical_cast<int>( sDate.substr( 6, 2 ) )
+          );
+          boost::posix_time::time_duration time(
+                  boost::lexical_cast<int>( sTime.substr( 0, 2 ) ),
+                  boost::lexical_cast<int>( sTime.substr( 3, 2 ) ),
+                  0
+          );
+
+          std::string tz = details.timeZoneId; // TODO: need the keyword parser to lookup/replace faster
+          if ( "US/Central" == tz ) tz = "America/Chicago";
+          if ( "US/Eastern" == tz ) tz = "America/New_York"; // TODO need to confirm what OPRA options have
+
+          dtExpiry = ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, tz, true );
+        }
+
+        if ( 0 == pInstrument.get() ) {
+          if ( boost::posix_time::not_a_date_time == dtExpiry ) {
+            pInstrument = Instrument::pInstrument_t( new Instrument(
+              sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(),
+              os, contract.strike ) );
+          }
+          else {
+            pInstrument = Instrument::pInstrument_t( new Instrument(
+              sLocalSymbol, it, sExchange,
+              dtExpiry,
+              contract.strike, os ) );
+          }
+        }
+        else {
+          //if ( pInstrument->GetUnderlyingName() != sUnderlying ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying doesn't match" );
+          if ( pInstrument->GetOptionSide() != os ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract side doesn't match" );
+          if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
+          if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
+          if ( boost::posix_time::not_a_date_time != dtExpiry ) {
+            pInstrument->SetExpiry( dtExpiry );
+          }
+        }
       }
-      else {
-        //if ( pInstrument->GetUnderlyingName() != sUnderlying ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying doesn't match" );
-        if ( pInstrument->GetOptionSide() != os ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract side doesn't match" );
-        if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
-        if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
-      }
+
 //      try {
 //        futures option looks like '"OG2V1 C1590"'
 //        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date(

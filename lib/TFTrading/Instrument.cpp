@@ -77,7 +77,6 @@ std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, 
   else {
     sGenericName = sUnderlying.substr( 0, pos );
   }
-  //std::string sGenericName( sUnderlying );
   sGenericName += "-" + BuildDate( year, month, day );
   sGenericName += "-";
   sGenericName += side;
@@ -103,7 +102,6 @@ std::string Instrument::BuildGenericOptionName( const std::string& sUnderlying, 
   else {
     sGenericName = sUnderlying.substr( 0, pos );
   }
-  //std::string sGenericName( sUnderlying );
   sGenericName += "-" + BuildDate( date );
   sGenericName += "-";
   sGenericName += side;
@@ -119,7 +117,6 @@ std::string Instrument::BuildGenericFutureName( const std::string& sUnderlying, 
 
 Instrument::Instrument( const TableRowDef& row )
   : m_row( row ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),
   m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
@@ -165,7 +162,6 @@ Instrument::Instrument(
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day )
 : m_row( idInstrument, eType, idExchange, year, month, day ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -179,22 +175,14 @@ Instrument::Instrument(
   InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
-//  pInstrument_t pUnderlying,
   OptionSide::EOptionSide eOptionSide,
   double dblStrike )
   : m_row( idInstrument, eType, idExchange,
-//  pUnderlying->GetInstrumentName(),
   year, month, eOptionSide, dblStrike ),
-//  m_pUnderlying( pUnderlying ),
-//  m_eUnderlyingStatus( EUnderlyingSet ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
-//  assert( 0 != pUnderlying.get() );
-//  assert( "" != pUnderlying->GetInstrumentName() );
-  //m_eUnderlyingStatus = EUnderlyingSet;
-  //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
 }
 
  // option yymmdd
@@ -203,28 +191,42 @@ Instrument::Instrument(
   InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-//  pInstrument_t pUnderlying,
   OptionSide::EOptionSide eOptionSide,
   double dblStrike )
   : m_row( idInstrument, eType, idExchange,
-//  pUnderlying->GetInstrumentName(),
   year, month, day, eOptionSide, dblStrike ),
-//  m_pUnderlying( pUnderlying ),
-//  m_eUnderlyingStatus( EUnderlyingSet ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
-//  assert( 0 != pUnderlying.get() );
-//  assert( "" != pUnderlying->GetInstrumentName() );
-  //m_eUnderlyingStatus = EUnderlyingSet;
-  //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
+}
+
+/// option ptime
+Instrument::Instrument(
+  idInstrument_cref idInstrument,
+  InstrumentType::EInstrumentType eType,
+  const idExchange_t& idExchange,
+  boost::posix_time::ptime dtExpiry,
+  double dblStrike,
+  OptionSide::EOptionSide eOptionSide
+  )
+: m_row(
+  idInstrument, eType, idExchange
+, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day()
+, dtExpiry
+, dblStrike, eOptionSide
+)
+, m_dtrTimeLiquid( dtDefault, dtDefault )
+, m_dtrTimeTrading( dtDefault, dtDefault )
+, m_dateCommonCalc( boost::gregorian::not_a_date_time )
+{
+  //assert( 0 < m_sExchange.size() );
 }
 
 // currency
 Instrument::Instrument(
   const idInstrument_t& idInstrument,
-//                       const idInstrument_t& idCounterInstrument,
+// const idInstrument_t& idCounterInstrument,
   InstrumentType::EInstrumentType eType,
   const idExchange_t& idExchange,
   Currency::ECurrency base,
@@ -233,8 +235,6 @@ Instrument::Instrument(
   : m_row( idInstrument,
 //  idCounterInstrument,
   eType, idExchange, base, counter ),
-//  m_pUnderlying( pUnderlying ),
-//  m_eUnderlyingStatus( EUnderlyingNotSettable ),
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -299,17 +299,27 @@ boost::posix_time::ptime Instrument::GetExpiryUtc() const {
   boost::gregorian::date dateExpiry( m_row.nYear, m_row.nMonth, m_row.nDay );
   switch ( m_row.eType ) {
     case InstrumentType::Option:  // for equities options
-      return ou::TimeSource::Instance().
-             ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
-      break;
-    case InstrumentType::FuturesOption:  // for metals options
-      if ( "GLOBEX" == m_row.idExchange ) { // ES symbols
-        return ou::TimeSource::Instance().
-               ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago", true );
+      if ( boost::posix_time::not_a_date_time != m_row.dtExpiry) {
+        return m_row.dtExpiry;
       }
       else {
         return ou::TimeSource::Instance().
-               ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York", true );
+              ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
+      }
+      break;
+    case InstrumentType::FuturesOption:  // for metals options
+      if ( boost::posix_time::not_a_date_time != m_row.dtExpiry) {
+        return m_row.dtExpiry;
+      }
+      else {
+        if ( "GLOBEX" == m_row.idExchange ) { // ES symbols
+          return ou::TimeSource::Instance().
+                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago", true );
+        }
+        else {
+          return ou::TimeSource::Instance().
+                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York", true );
+        }
       }
       break;
   }

@@ -58,6 +58,7 @@ public:
 
   // To consider: use boost::gregorian::date or use a date_t(year,month,day) structure?
   //   then conversion in and out of boost::gregorian::date is not required
+  //   => is a work-in-progress for expiry
 
   struct TableRowDef {
     template<class A>
@@ -66,14 +67,14 @@ public:
       ou::db::Field( a, "type", eType );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "exchangeid", idExchange );
-//      ou::db::Field( a, "underlyingid", idUnderlying );
       ou::db::Field( a, "currency", eCurrency );
       ou::db::Field( a, "countercurrency", eCounterCurrency );
-      ou::db::Field( a, "optionside", eOptionSide );
+      ou::db::Field( a, "expiry", dtExpiry );
       ou::db::Field( a, "year", nYear );
       ou::db::Field( a, "month", nMonth );
       ou::db::Field( a, "day", nDay );
       ou::db::Field( a, "strike", dblStrike );
+      ou::db::Field( a, "optionside", eOptionSide );
       ou::db::Field( a, "ibcontract", nIBContract );
       ou::db::Field( a, "multiplier", nMultiplier );
       ou::db::Field( a, "mintick", dblMinTick );
@@ -85,14 +86,14 @@ public:
     InstrumentType::EInstrumentType eType;
     std::string sDescription;
     idExchange_t idExchange;
-//    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
     Currency::ECurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
     Currency::ECurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
-    OptionSide::EOptionSide eOptionSide;
+    boost::posix_time::ptime dtExpiry; // future, option, futureoption - to supercede previous three fields
     boost::uint16_t nYear; // future, option
     boost::uint16_t nMonth; // future, option
     boost::uint16_t nDay; // future, option
     double dblStrike;
+    OptionSide::EOptionSide eOptionSide;
     boost::int32_t nIBContract; // used with CIBTWS
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
     double dblMinTick;
@@ -101,13 +102,15 @@ public:
 
     TableRowDef() // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
+      nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
+      dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
     TableRowDef( // strictly for obtaining fundamentals
       idInstrument_t idInstrument_)
       : idInstrument( idInstrument_ ), eType( InstrumentType::EInstrumentType::Unknown ), idExchange( "" ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
+      nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
+      dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         //assert( eType < InstrumentType::_Count );
         //assert( eType > InstrumentType::Unknown );
@@ -117,7 +120,8 @@ public:
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
+      nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
+      dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( eType < InstrumentType::_Count );
         assert( eType > InstrumentType::Unknown );
@@ -128,20 +132,37 @@ public:
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ = 0 )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( 0.0 ),
+      dtExpiry( boost::gregorian::date( nYear_, nMonth_, nDay_ ), boost::posix_time::time_duration( 23, 59, 59 ) ), // may need to fix time
+      nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ),
+      dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );
     };
-    TableRowDef( // option/futuresoption with yymm [TODO with day available now, remove this?]
+    TableRowDef( // option/futuresoption with yymm [TODO with day available now, remove this?] => deprecate and see
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
-//      idInstrument_t idUnderlying_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_,
       OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
-//      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ),
+      dtExpiry( boost::gregorian::date( nYear_, nMonth_, 1 ), boost::posix_time::time_duration( 23, 59, 59 ) ), // may need to fix time, and day is incorrect
+      nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ),
+      dblStrike( dblStrike_ ), eOptionSide( eOptionSide_ ),
+      nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
+        assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
+        assert( ( eType_ == InstrumentType::Option )
+             || ( eType_ == InstrumentType::FuturesOption ) );
+        assert( 0 < idInstrument.size() );
+    };
+    TableRowDef( // option/futuresoption with yymmdd
+      idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
+      boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
+      OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      dtExpiry( boost::gregorian::date( nYear_, nMonth_, nDay_ ), boost::posix_time::time_duration( 23, 59, 59 ) ), // may need to fix time, and day is incorrect
+      nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ),
+      dblStrike( dblStrike_ ), eOptionSide( eOptionSide_ ),
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
@@ -149,15 +170,16 @@ public:
         assert( 0 < idInstrument.size() );
 //        assert( 0 < idUnderlying.size() );
     };
-    TableRowDef( // option/futuresoption with yymmdd
+    TableRowDef( // option/futuresoption with ptime
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
-//      idInstrument_t idUnderlying_,
-      boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
-      OptionSide::EOptionSide eOptionSide_, double dblStrike_  )
+      boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_, // <= remove this at some point
+      boost::posix_time::ptime dtExpiry_,
+      double dblStrike_, OptionSide::EOptionSide eOptionSide_
+      )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
-//      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ),
+      nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dtExpiry( dtExpiry_ ),
+      dblStrike( dblStrike_ ), eOptionSide( eOptionSide_ ),
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
@@ -171,8 +193,9 @@ public:
       Currency::ECurrency eCurrency_, Currency::ECurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
 //        idUnderlying( idCounterInstrument_ ),
-	eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ),
-        eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
+	      eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ),
+        dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
+        nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
         nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.00005 ), nSignificantDigits( 5 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
@@ -200,20 +223,24 @@ public:
     idInstrument_cref idInstrument, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day = 0 );
-  Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together
+  Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together <= deprecate and test this goes away
     idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
-//    pInstrument_t pUnderlying,
     OptionSide::EOptionSide side,
     double strike );
   Instrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-//    pInstrument_t pUnderlying,
     OptionSide::EOptionSide side,
     double strike );
+  Instrument(   // option with ptime
+    idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
+    const idExchange_t& sExchangeName,
+    boost::posix_time::ptime dtExpiry,
+    double strike, OptionSide::EOptionSide side
+    );
   Instrument(  // currency
     const idInstrument_t& idInstrument,
 //    const idInstrument_t& idCounterInstrument,
@@ -265,6 +292,8 @@ public:
   boost::gregorian::date GetExpiry() const { return boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ); };
   std::string GetExpiryAsIsoString() const { return boost::gregorian::to_iso_string( GetExpiry() ); };
   boost::posix_time::ptime GetExpiryUtc() const;
+
+  void SetExpiry( boost::posix_time::ptime dtExpiry ) { m_row.dtExpiry = dtExpiry; }
 
   OptionSide::EOptionSide GetOptionSide() const { return m_row.eOptionSide; };
 

@@ -168,7 +168,7 @@ public:
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
-  void BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument );
+  void BuildInstrumentFromContractDetails( const ContractDetails&, pInstrument_t& );
 
   void Sync( pInstrument_t ); // for now, ensures we have relevant market rules
   double GetInterval( const double price, const int rule );
