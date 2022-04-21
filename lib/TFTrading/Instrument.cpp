@@ -242,8 +242,7 @@ Instrument::Instrument(
 }
 
 Instrument::Instrument( const Instrument& instrument )
-:
-  m_row( instrument.m_row ),
+: m_row( instrument.m_row ),
   m_dtrTimeLiquid( dtDefault, dtDefault ), m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -292,8 +291,8 @@ bool Instrument::operator==( const Instrument& rhs ) const {
 }
 
 // use 16:00 est as time of expiry, as that is when they cease trading (for OPRA equities)
-// 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
-
+// 18:30 deals with after hours trading and settlements on the underlying.
+// TODO: pull the date,time,tz from IB and rebuild m_row with a ptime
 boost::posix_time::ptime Instrument::GetExpiryUtc() const {
   // may require further time refinements with other option types
   // may require a table for handling other markets and time zones

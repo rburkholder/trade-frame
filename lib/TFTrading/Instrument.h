@@ -99,7 +99,7 @@ public:
     boost::uint8_t nSignificantDigits;
     std::string sExchangeRules;  // from ib, one or more exchange:ruleid
 
-    TableRowDef( void ) // default constructor
+    TableRowDef() // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ),
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {};
@@ -222,8 +222,8 @@ public:
 
   virtual ~Instrument();
 
-  idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
-//  idInstrument_cref GetUnderlyingName( void );
+  idInstrument_cref GetInstrumentName() const { return m_row.idInstrument; };
+//  idInstrument_cref GetUnderlyingName();
 
   idInstrument_cref GetInstrumentName( eidProvider_t id ) const;
 //  idInstrument_cref GetUnderlyingName( eidProvider_t id );
@@ -245,61 +245,64 @@ public:
     }
   };
 
-  InstrumentType::EInstrumentType GetInstrumentType( void ) const { return m_row.eType; };
-  bool IsCurrency( void )      const { return ( InstrumentType::Currency == m_row.eType ); };
-  bool IsStock( void )         const { return ( InstrumentType::Stock == m_row.eType ); };
-  bool IsOption( void )        const { return ( InstrumentType::Option == m_row.eType ); };
-  bool IsFuture( void )        const { return ( InstrumentType::Future == m_row.eType ); };
-  bool IsFuturesOption( void ) const { return ( InstrumentType::FuturesOption == m_row.eType ); };
+  InstrumentType::EInstrumentType GetInstrumentType() const { return m_row.eType; };
+  bool IsCurrency()      const { return ( InstrumentType::Currency == m_row.eType ); };
+  bool IsStock()         const { return ( InstrumentType::Stock == m_row.eType ); };
+  bool IsOption()        const { return ( InstrumentType::Option == m_row.eType ); };
+  bool IsFuture()        const { return ( InstrumentType::Future == m_row.eType ); };
+  bool IsFuturesOption() const { return ( InstrumentType::FuturesOption == m_row.eType ); };
 
   void SetExchangeName( const std::string& sExchangeName ) { m_row.idExchange = sExchangeName; }
-  const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
+  const std::string& GetExchangeName() const { return m_row.idExchange; };
 
   void SetCurrency( Currency::ECurrency eCurrency ) { m_row.eCurrency = eCurrency; };
-  const char *GetCurrencyName( void ) const { return Currency::Name[ m_row.eCurrency ]; };
+  const char *GetCurrencyName() const { return Currency::Name[ m_row.eCurrency ]; };
 
-  double GetStrike( void ) const { return m_row.dblStrike; };
-  boost::uint16_t GetExpiryYear( void ) const { return m_row.nYear; };
-  boost::uint16_t GetExpiryMonth( void ) const { return m_row.nMonth; };
-  boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
-  boost::gregorian::date GetExpiry( void ) const { return boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ); };
-  std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( GetExpiry() ); };
-  boost::posix_time::ptime GetExpiryUtc( void ) const;
+  double GetStrike() const { return m_row.dblStrike; };
+  boost::uint16_t GetExpiryYear() const { return m_row.nYear; };
+  boost::uint16_t GetExpiryMonth() const { return m_row.nMonth; };
+  boost::uint16_t GetExpiryDay() const { return m_row.nDay; };
+  boost::gregorian::date GetExpiry() const { return boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ); };
+  std::string GetExpiryAsIsoString() const { return boost::gregorian::to_iso_string( GetExpiry() ); };
+  boost::posix_time::ptime GetExpiryUtc() const;
 
-  OptionSide::EOptionSide GetOptionSide( void ) const { return m_row.eOptionSide; };
+  OptionSide::EOptionSide GetOptionSide() const { return m_row.eOptionSide; };
 
   // these may not be needed anymore
   void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday
-  boost::gregorian::date GetCommonCalcExpiry( void ) const { return m_dateCommonCalc; };
-  std::string GetCommonCalcExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); }
+  boost::gregorian::date GetCommonCalcExpiry() const { return m_dateCommonCalc; };
+  std::string GetCommonCalcExpiryAsIsoString() const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); }
 
   void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };  // for Interactive Brokers contract identification
-  boost::int32_t GetContract( void ) const { return m_row.nIBContract; };
+  boost::int32_t GetContract() const { return m_row.nIBContract; };
 
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
-  boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };
+  boost::uint32_t GetMultiplier() const { return m_row.nMultiplier; };
 
   void SetMinTick( double dblMinTick ) { m_row.dblMinTick = dblMinTick; };
-  double GetMinTick( void ) const { return m_row.dblMinTick; };
+  double GetMinTick() const { return m_row.dblMinTick; };
   double NormalizeOrderPrice( double price ) const;
   static double NormalizeOrderPrice( double price, double interval );
 
   void SetSignificantDigits( boost::uint8_t nSignificantDigits ) { m_row.nSignificantDigits = nSignificantDigits; };
-  boost::uint8_t GetSignificantDigits( void ) const { return m_row.nSignificantDigits; };
+  boost::uint8_t GetSignificantDigits() const { return m_row.nSignificantDigits; };
 
-  typedef boost::posix_time::time_period dtrMarketOpenClose_t;
+  using dtrMarketOpenClose_t = boost::posix_time::time_period;
+
+  // may need per session query as IB provides a series of days
   void SetTimeLiquid( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeLiquid = dtrMarketOpenClose_t( dtOpen, dtClose ); };
-  const dtrMarketOpenClose_t& GetTimeLiquid( void ) const { return m_dtrTimeLiquid; };
+  const dtrMarketOpenClose_t& GetTimeLiquid() const { return m_dtrTimeLiquid; };
 
+  // may need per session query as IB provides a series of days
   void SetTimeTrading( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
-  const dtrMarketOpenClose_t& GetTimeTrading( void ) const { return m_dtrTimeTrading; };
+  const dtrMarketOpenClose_t& GetTimeTrading() const { return m_dtrTimeTrading; };
 
   void SetExchangeRules( const std::string& sExchangeRules ) { m_row.sExchangeRules = sExchangeRules; }
   int GetExchangeRule();
 
   bool operator==( const Instrument& rhs ) const;
 
-  const TableRowDef& GetRow( void ) const { return m_row; };
+  const TableRowDef& GetRow() const { return m_row; };
 
 protected:
 private:
@@ -317,7 +320,7 @@ private:
   dtrMarketOpenClose_t m_dtrTimeTrading;
 
   Instrument( const Instrument& );  // copy ctor
-  Instrument& operator=( const Instrument& ); // assignement
+  Instrument& operator=( const Instrument& ) = delete; // assignment
 
 };
 
