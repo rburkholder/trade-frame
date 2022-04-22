@@ -194,7 +194,8 @@ public:
   ~MarketDepth();
 
   char MsgType() const { return m_chMsgType; }
-  ESide Side() const { return m_eSide; }
+  //ESide Side() const { return m_eSide; }
+  char Side() const { return m_chSide; }
   volume_t Volume() const { return m_nShares; }
   price_t Price() const { return m_dblPrice; }
 
@@ -222,10 +223,11 @@ protected:
     }
   } m_uMMID;
 private:
-  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
-  ESide m_eSide;
   volume_t m_nShares;
   price_t m_dblPrice;
+  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
+  //ESide m_eSide;
+  char m_chSide; // simplifies insertion into MarketDepth handlers
 };
 
 //

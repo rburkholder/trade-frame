@@ -19,9 +19,16 @@
  * Created  April 15, 2022 18:20
  */
 
- // Next Step:  use this to replace Summary.cpp
+#include <OUCommon/TimeSource.h>
 
- #include "Symbols.hpp"
+#include <TFTrading/KeyTypes.h>
+
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
+#include "Symbols.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -29,6 +36,10 @@ namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
 // ==== L2Base
+
+L2Base::L2Base()
+: m_bBuildTimeSeries( false )
+{}
 
 void L2Base::LimitOrderAdd(
   const msg::OrderArrival::decoded& msg,
@@ -51,6 +62,32 @@ void L2Base::LimitOrderAdd(
   if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity, true );
 }
 
+void L2Base::SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  try {
+
+    std::string sPathName;
+
+    if ( 0 != m_depths.Size() ) {
+      sPathName = sPrefix + "/depths/" + sSymbol;
+      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
+      wtsDepths.Write( sPathName, &m_depths );
+      HDF5Attributes attrQuotes( dm, sPathName );
+      attrQuotes.SetSignature( ou::tf::MarketDepth::Signature() );
+      attrQuotes.SetMultiplier( 1 );  // is this required?
+      //attrQuotes.SetSignificantDigits( 2 ); // is this required? - might use precision from original message
+      attrQuotes.SetProviderType( ou::tf::keytypes::EProviderIQF );
+    }
+
+  }
+  catch (...) {
+    std::cout << "L2Base::SaveSeries depths error: " << sPrefix << std::endl;
+  }
+
+}
+
 // ==== MarketMaker
 
 // for nasdaq LII
@@ -63,6 +100,12 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
     case 'B':
       MMLimitOrder_Update( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
       break;
+  }
+
+  if ( m_bBuildTimeSeries ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.sMarketMaker );
+    m_depths.Append( md );
   }
 }
 
@@ -77,6 +120,11 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
       break;
   }
 
+  if ( m_bBuildTimeSeries ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.sMarketMaker );
+    m_depths.Append( md );
+  }
 }
 
 void MarketMaker::MMLimitOrder_Update(
@@ -86,7 +134,7 @@ void MarketMaker::MMLimitOrder_Update(
   mapLimitOrderBook_t& mapLimitOrderBook
 ) {
 
-  price_level pl( msg.dblPrice, msg.nQuantity );
+  price_level pl( msg );
 
   mapMM_t::iterator mapMM_iter = mapMM.find( msg.sMarketMaker );
   if ( mapMM.end() == mapMM_iter ) {
@@ -107,7 +155,6 @@ void MarketMaker::MMLimitOrder_Update(
   }
 
   // update new price level
-  bool bResult;
   mapLimitOrderBook_t::iterator mapLimitOrderBook_iter = mapLimitOrderBook.find( msg.dblPrice );
   if ( mapLimitOrderBook.end() == mapLimitOrderBook_iter ) {
     auto pair = mapLimitOrderBook.emplace( msg.dblPrice, LimitOrder( msg.nQuantity ) ); // provide new price_level
@@ -132,6 +179,7 @@ void MarketMaker::MMLimitOrder_Delete(
   mapMM_t::iterator mapMM_iter = mapMM.find( msg.sMarketMaker );
   if ( mapMM.end() == mapMM_iter ) {
     // this should probably be an assert( false )
+    // but then will reqquire recovery from stream outages
   }
   else {
     // remove volume from existing price level
@@ -141,7 +189,7 @@ void MarketMaker::MMLimitOrder_Delete(
       if ( f ) f( mapLimitOrderBook_iter->first, mapLimitOrderBook_iter->second.nQuantity, false );
     }
     else assert( false ); // how inconsistent are things?
-    mapMM.erase( mapMM_iter ); // TODO: maybe just keep at 0?, no erasure?
+    mapMM.erase( mapMM_iter );
   }
 
 }
@@ -350,6 +398,7 @@ using inherited_t = Dispatcher<Symbols>;
 
 Symbols::Symbols( fConnected_t&& fConnected )
 : inherited_t()
+, m_bBuildTimeSeries( false )
 , m_bSingle( false )
 , m_fConnected( std::move( fConnected ) )
 , m_luSymbol( Carrier(), 20 )
@@ -427,6 +476,19 @@ void Symbols::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   assert( '5' == msg.chMsgType );
   Call( msg, &L2Base::OnMBODelete );
+}
+
+void Symbols::BuildTimeSeries( bool bFlag ) {
+  m_bBuildTimeSeries = bFlag;
+  for ( mapL2Base_t::value_type& vt: m_mapL2Base ) {
+    vt.second->BuildTimeSeries( bFlag );
+  }
+}
+
+void Symbols::SaveSeries( const std::string& sPrefix ) {
+  for ( mapL2Base_t::value_type& vt: m_mapL2Base ) {
+    vt.second->SaveSeries( sPrefix, vt.first );
+  }
 }
 
 } // namespace l2

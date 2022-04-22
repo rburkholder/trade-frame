@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <assert.h>
 
 #include "DatedDatum.h"
@@ -211,34 +209,27 @@ H5::CompType* Bar::DefineDataType( H5::CompType* pComp ) {
 //
 
 MarketDepth::MarketDepth()
-: DatedDatum(), m_chMsgType( '0' ), m_eSide( None ), m_nShares( 0 ), m_dblPrice( 0 )
+: DatedDatum(), m_chMsgType( '0' ), m_chSide( ' ' ), m_nShares( 0 ), m_dblPrice( 0 )
 {}
 
 MarketDepth::MarketDepth( const ptime dt )
-: DatedDatum( dt ), m_chMsgType( '0' ), m_eSide( None ), m_nShares( 0 ), m_dblPrice( 0 )
+: DatedDatum( dt ), m_chMsgType( '0' ), m_chSide( ' '), m_nShares( 0 ), m_dblPrice( 0 )
 {}
 
 MarketDepth::MarketDepth( const MarketDepth& md )
 : DatedDatum( md.m_dt )
-, m_chMsgType( md.m_chMsgType ), m_eSide( md.m_eSide ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_uMMID( md.m_uMMID )
+, m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_uMMID( md.m_uMMID )
 {}
 
 MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid )
-: DatedDatum( dt ), m_chMsgType( chMsgType ), m_eSide( None ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( mmid )
-{
-  if ( 'A' == chSide ) m_eSide = Ask;
-  if ( 'B' == chSide ) m_eSide = Bid;
-}
+: DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( mmid )
+{}
 
 MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, const std::string& sMMID )
-: DatedDatum( dt ), m_chMsgType( chMsgType ), m_eSide( None ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( sMMID )
-{
-  if ( 'A' == chSide ) m_eSide = Ask;
-  if ( 'B' == chSide ) m_eSide = Bid;
-}
+: DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( sMMID )
+{}
 
-MarketDepth::~MarketDepth() {
-}
+MarketDepth::~MarketDepth() {}
 
 H5::CompType* MarketDepth::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( MarketDepth ) );
@@ -246,7 +237,7 @@ H5::CompType* MarketDepth::DefineDataType( H5::CompType* pComp ) {
   pComp->insertMember( "MsgType",  HOFFSET( MarketDepth, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "Shares",   HOFFSET( MarketDepth, m_nShares ),      H5::PredType::NATIVE_LONG );
   pComp->insertMember( "Price",    HOFFSET( MarketDepth, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Side",     HOFFSET( MarketDepth, m_eSide ),        H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "Side",     HOFFSET( MarketDepth, m_chSide ),       H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "MMID0",    HOFFSET( MarketDepth, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "MMID1",    HOFFSET( MarketDepth, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "MMID2",    HOFFSET( MarketDepth, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );

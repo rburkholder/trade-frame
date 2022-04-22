@@ -26,6 +26,7 @@
 #include <OUCommon/KeyWordMatch.h>
 
 #include <TFTimeSeries/DatedDatum.h>
+#include <TFTimeSeries/TimeSeries.h>
 
 #include "Dispatcher.h"
 
@@ -44,7 +45,7 @@ public:
   using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
 
-  L2Base() {}
+  L2Base();
   virtual ~L2Base() {}
 
   void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
@@ -57,10 +58,15 @@ public:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
+  void BuildTimeSeries( bool bFlag ) { m_bBuildTimeSeries = bFlag; }
+  void SaveSeries( const std::string& sPrefix, const std::string& sSymbol );
+
 protected:
 
   fVolumeAtPrice_t m_fBidVolumeAtPrice;
   fVolumeAtPrice_t m_fAskVolumeAtPrice;
+
+  bool m_bBuildTimeSeries;
 
   struct LimitOrder {
     // maintain set of orders?
@@ -76,11 +82,13 @@ protected:
   mapLimitOrderBook_t m_mapLimitOrderBookAsk;
   mapLimitOrderBook_t m_mapLimitOrderBookBid;
 
-  void LimitOrderAdd(
+  void LimitOrderAdd( // used in OrderBased
     const msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
     mapLimitOrderBook_t&
   );
+
+  ou::tf::MarketDepths m_depths;
 
 private:
 };
@@ -108,12 +116,15 @@ protected:
 private:
 
   struct price_level {
+
     double price;
     volume_t volume;
+
     price_level(): price {}, volume {} {}
-    price_level( double price_, volume_t volume_ )
-    : price( price_ ), volume( volume_ ) {}
+    price_level( const msg::OrderArrival::decoded& msg )
+    : price( msg.dblPrice ), volume( msg.nQuantity ) {}
   };
+
   using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
@@ -226,6 +237,9 @@ public:
 
   void Single( bool );
 
+  void BuildTimeSeries( bool bFlag );
+  void SaveSeries( const std::string& sPrefix );
+
 protected:
 
   // called by Network via CRTP
@@ -234,15 +248,17 @@ protected:
   //void OnNetworkError( size_t e );
   void OnL2Initialized();
 
-  bool m_bSingle;  // don't use lookups, dedicated to single symbol
-  Carrier m_single; // carrier for single symbol
-
   void OnMBOAdd( const msg::OrderArrival::decoded& );
   void OnMBOSummary( const msg::OrderArrival::decoded& );
   void OnMBOUpdate( const msg::OrderArrival::decoded& );
   void OnMBODelete( const msg::OrderDelete::decoded& );
 
 private:
+
+  bool m_bBuildTimeSeries;
+
+  bool m_bSingle;  // don't use lookups, dedicated to single symbol
+  Carrier m_single; // carrier for single symbol
 
   fConnected_t m_fConnected;
 
@@ -267,8 +283,8 @@ private:
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;
 
   using pL2Base_t = std::shared_ptr<L2Base>;
-  using vL2Base_t = std::vector<pL2Base_t>;
-  vL2Base_t m_vL2Base;  // provides end of life destruction
+  using mapL2Base_t = std::map<std::string,pL2Base_t>;
+  mapL2Base_t m_mapL2Base;
 
   template<typename Msg>
   void SetCarrier( Carrier& carrier, const Msg& msg ) {
@@ -282,8 +298,10 @@ private:
       assert( 4 == msg.sMarketMaker.size() );
       pL2Base = MarketMaker::Factory();
     }
-    m_vL2Base.push_back( pL2Base );
+    m_mapL2Base.emplace( msg.sSymbolName, pL2Base );
     carrier = pL2Base.get();
+
+    pL2Base->BuildTimeSeries( m_bBuildTimeSeries );
 
     // may need mutex on this, vs foreground
     mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );

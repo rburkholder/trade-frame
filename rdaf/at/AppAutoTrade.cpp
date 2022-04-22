@@ -65,6 +65,7 @@ namespace {
   static const std::string sDbName( sDirectory + "/example.db" );
   static const std::string sStateFileName( sDirectory + "/example.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+  static const std::string sVendorName( "One Unified Net Limited" );
 
   static const std::string sMenuItemPortfolio( "_USD" );
 }
@@ -96,8 +97,8 @@ IMPLEMENT_APP(AppAutoTrade)
 bool AppAutoTrade::OnInit() {
 
   wxApp::SetAppDisplayName( sAppName );
-  wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
+  wxApp::SetVendorName( sVendorName );
+  wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
 
   wxApp::OnInit();
 
@@ -224,6 +225,7 @@ bool AppAutoTrade::OnInit() {
       m_bL2Connected = true;
       ConfirmProviders();
     } );
+  m_pL2Symbols->BuildTimeSeries( true );
 
   StartRdaf( sDirectory + m_sTSDataStreamStarted );
 
@@ -295,9 +297,7 @@ bool AppAutoTrade::OnInit() {
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
-  // disable for now, due to memory consumption, timeseries recording is being turned off.
-  // all can be re-enalbed if saving times series is useful and is used to populate the simulator
-  //vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   vItems.clear();
@@ -426,13 +426,15 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
-      m_nTSDataStreamSequence++;
+      m_nTSDataStreamSequence++; // sequence number on each save
+      std::string sPath(
+        "/app/" + sDirectory + "/" +
+        m_sTSDataStreamStarted + "-" +
+        boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        vt.second->SaveWatch(
-          "/app/rdaf/at/" +
-          m_sTSDataStreamStarted + "-" +
-          boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+        vt.second->SaveWatch( sPath );
       }
+      m_pL2Symbols->SaveSeries( sPath );
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //  m_pFile->Write();
       //}
