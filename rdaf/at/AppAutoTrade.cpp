@@ -620,6 +620,7 @@ void AppAutoTrade::OnExecConnected( int ) {
 }
 
 void AppAutoTrade::OnData1Disconnected( int ) {
+  m_pL2Symbols->Disconnect();
   //m_bData1Connected = false;
 }
 
