@@ -68,7 +68,7 @@ protected:
     int nOrders;
     LimitOrder( volume_t nQuantity_ )
     : nQuantity( nQuantity_ ), nOrders( 1 )  {}
-    LimitOrder( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
+    LimitOrder( const msg::OrderArrival::decoded& msg )
     : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
@@ -77,7 +77,7 @@ protected:
   mapLimitOrderBook_t m_mapLimitOrderBookBid;
 
   void LimitOrderAdd(
-    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
+    const msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
     mapLimitOrderBook_t&
   );
@@ -98,17 +98,15 @@ public:
   static pMarketMaker_t Factory() { return std::make_shared<MarketMaker>(); }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) { assert( false ); }; // Equity doesn't have this message
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
-  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg ) { OnMBOOrderArrival( msg ); }
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOUpdate( msg ); }
+  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
 
   void EmitMarketMakerMaps();
 
 protected:
-  void OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg );
 private:
 
-  // updated with OnMBOOrderArrival
   struct price_level {
     double price;
     volume_t volume;
@@ -121,11 +119,11 @@ private:
   mapMM_t m_mapMMBid;
 
   void MMLimitOrder_Update(
-    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded&,
+    const msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
   void MMLimitOrder_Delete(
-    const ou::tf::iqfeed::l2::msg::OrderDelete::decoded&,
+    const msg::OrderDelete::decoded&,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
 };
@@ -160,7 +158,7 @@ private:
     uint8_t nPrecision;
     // ptime, if needed
     // note: there is no MarketMaker in messages with an order ID
-    Order( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg )
+    Order( const msg::OrderArrival::decoded& msg )
     : chOrderSide( msg.chOrderSide ),
       dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
       nPriority( msg.nPriority ), nPrecision( msg.nPrecision )
@@ -173,7 +171,7 @@ private:
   void LimitOrderUpdate(
     mapLimitOrderBook_t& map,
     Order& order,
-    const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ,
+    const msg::OrderArrival::decoded& ,
     fVolumeAtPrice_t&
     );
   void LimitOrderDel( mapLimitOrderBook_t& map, const Order&, fVolumeAtPrice_t& );
@@ -263,7 +261,7 @@ private:
 
     VolumeAtPriceFunctions( VolumeAtPriceFunctions&& rhs )
     : fBid( std::move( rhs.fBid ) ), fAsk( std::move( rhs.fAsk ) ) {}
-  };
+  }; // struct VolumeAtPriceFunctions
 
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;

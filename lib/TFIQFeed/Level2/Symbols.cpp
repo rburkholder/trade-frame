@@ -31,7 +31,7 @@ namespace l2 { // level 2 data
 // ==== L2Base
 
 void L2Base::LimitOrderAdd(
-  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  const msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f,
   mapLimitOrderBook_t& map
 ) {
@@ -54,17 +54,7 @@ void L2Base::LimitOrderAdd(
 // ==== MarketMaker
 
 // for nasdaq LII
-void MarketMaker::OnMBOOrderArrival( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg ) {
-
-  //if ( "NSDQ" != msg.sMarketMaker ) {
-  //  std::cout
-  //    << "mmid: "
-  //    << msg.sMarketMaker
-  //    << "," << msg.chOrderSide
-  //    << "," << msg.dblPrice
-  //    << "," << msg.nQuantity
-  //    << std::endl;
-  //}
+void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   switch ( msg.chOrderSide ) {
     case 'A':
@@ -90,7 +80,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 }
 
 void MarketMaker::MMLimitOrder_Update(
-  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  const msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
@@ -133,7 +123,7 @@ void MarketMaker::MMLimitOrder_Update(
 }
 
 void MarketMaker::MMLimitOrder_Delete(
-  const ou::tf::iqfeed::l2::msg::OrderDelete::decoded& msg,
+  const msg::OrderDelete::decoded& msg,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
@@ -304,7 +294,7 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 void OrderBased::LimitOrderUpdate(
   mapLimitOrderBook_t& map,
   Order& order,
-  const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& msg,
+  const msg::OrderArrival::decoded& msg,
   fVolumeAtPrice_t& f
 ) {
 
