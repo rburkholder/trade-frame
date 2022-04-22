@@ -44,7 +44,7 @@ Leg::Leg( Leg&& rhs )
 {
 }
 
-Leg& Leg::operator=( const Leg&& rhs ) {
+Leg& Leg::operator=( Leg&& rhs ) {
   if ( this != &rhs ) {
     DelChartData();
     m_pPosition = std::move( rhs.m_pPosition );

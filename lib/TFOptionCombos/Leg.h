@@ -47,7 +47,7 @@ public:
   Leg( Leg&& rhs );
   Leg( const Leg& rhs ) = delete;
   Leg( pPosition_t pPosition );
-  Leg& operator=( const Leg&& rhs );
+  Leg& operator=( Leg&& rhs );
   virtual ~Leg();
 
   const option::LegNote::values_t& SetPosition( pPosition_t pPosition );

@@ -38,7 +38,7 @@ public:
   MonitorOrder();
   MonitorOrder( MonitorOrder&& rhs );
   MonitorOrder( pPosition_t& pPosition );
-  MonitorOrder& operator=( const MonitorOrder&& );
+  MonitorOrder& operator=( MonitorOrder&& );
   MonitorOrder( const MonitorOrder& rhs ) = delete; // TODO: work on cleaning this up
 
   void SetPosition( pPosition_t pPosition );

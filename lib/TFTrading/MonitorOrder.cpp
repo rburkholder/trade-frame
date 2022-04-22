@@ -40,6 +40,7 @@ MonitorOrder::MonitorOrder( pPosition_t& pPosition )
 : m_bEnableStatsAdd( false )
 , m_CountDownToAdjustment {}
 {
+  // TODO: need to undo anything? or already performed?
   SetPosition( pPosition );
 }
 
@@ -48,26 +49,44 @@ MonitorOrder::MonitorOrder( pPosition_t& pPosition )
 //assert( !m_pOrder ); // this causes issues if duplicated
 MonitorOrder::MonitorOrder( MonitorOrder&& rhs )
 : m_state( rhs.m_state )
+, m_bEnableStatsAdd( rhs.m_bEnableStatsAdd )
 , m_CountDownToAdjustment( rhs.m_CountDownToAdjustment )
 , m_pPosition( std::move( rhs.m_pPosition ) )
 , m_pOrder( std::move( rhs.m_pOrder ) )
-{}
+{
+  rhs.m_bEnableStatsAdd = false;
+  rhs.m_state = State::NoPosition;
+}
 
-MonitorOrder& MonitorOrder::operator=( const MonitorOrder&& rhs ) {
+MonitorOrder& MonitorOrder::operator=( MonitorOrder&& rhs ) {
   if ( this != &rhs ) {
     m_state = rhs.m_state;
+    m_bEnableStatsAdd = rhs.m_bEnableStatsAdd;
     m_CountDownToAdjustment = rhs.m_CountDownToAdjustment;
     m_pPosition = std::move( rhs.m_pPosition ),
     m_pOrder = std::move( rhs.m_pOrder );
+    rhs.m_bEnableStatsAdd = false;
+    rhs.m_state = State::NoPosition;
   }
   return *this;
 }
 
 void MonitorOrder::EnableStatsRemove() {
-  if ( m_bEnableStatsAdd ) {
-    ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
-    pWatch->EnableStatsRemove();
-    m_bEnableStatsAdd = false;
+  if ( State::NoPosition == m_state ) {
+    //std::cout << "MonitorOrder::EnableStatsRemove has inconsistent State::NoPosition" << std::endl;
+  }
+  else {
+    if ( m_bEnableStatsAdd ) {
+      if ( m_pPosition ) {
+        ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
+        pWatch->EnableStatsRemove();
+        m_bEnableStatsAdd = false;
+      }
+      else {
+        // also in debug, check the flag, possible problem in caller
+        std::cout << "MonitorOrder::EnableStatsRemove inconsistency" << std::endl;
+      }
+    }
   }
 }
 
