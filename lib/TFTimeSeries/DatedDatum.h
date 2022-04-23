@@ -200,7 +200,8 @@ public:
   price_t Price() const { return m_dblPrice; }
 
   MMID_t MMID() const { return m_uMMID.mmid; }
-  const char& MMIDStr() const { return *m_uMMID.rch; }
+  //const char& MMIDStr() const { return *m_uMMID.rch; }
+  std::string MMIDStr() const { return std::string( m_uMMID.rch, 4 ); }
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() {

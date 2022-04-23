@@ -110,6 +110,8 @@ public:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
 
+  void OnMarketDepth( const ou::tf::MarketDepth& );
+
   void EmitMarketMakerMaps();
 
 protected:
@@ -123,18 +125,35 @@ private:
     price_level(): price {}, volume {} {}
     price_level( const msg::OrderArrival::decoded& msg )
     : price( msg.dblPrice ), volume( msg.nQuantity ) {}
+    price_level( double price_, volume_t volume_ )
+    : price( price_ ), volume( volume_ ) {}
   };
 
   using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  void MMLimitOrder_Update(
+  void BidOrAsk_Update( const ou::tf::MarketDepth& );
+  void BidOrAsk_Delete( const ou::tf::MarketDepth& );
+
+  void MMLimitOrder_Update_Live(
     const msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
-  void MMLimitOrder_Delete(
+
+  void MMLimitOrder_Update(
+    const std::string& sMarketMaker,
+    double price, volume_t volume,
+    fVolumeAtPrice_t&,
+    mapMM_t&, mapLimitOrderBook_t& );
+
+  void MMLimitOrder_Delete_Live(
     const msg::OrderDelete::decoded&,
+    fVolumeAtPrice_t&,
+    mapMM_t&, mapLimitOrderBook_t& );
+
+  void MMLimitOrder_Delete(
+    const std::string& sMarketMaker,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
 };
