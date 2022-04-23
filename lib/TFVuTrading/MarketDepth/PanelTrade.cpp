@@ -25,7 +25,32 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
+#include "WinRow.hpp"
 #include "PanelTrade.hpp"
+
+namespace {
+
+  using EColour = ou::Colour::wx::EColour;
+  using EField = ou::tf::l2::DataRow::EField;
+
+  const ou::tf::l2::WinRow::vElement_t vElement = {
+     { (int)EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+   , { (int)EField::BuyVolume,  45, "BVol",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+   , { (int)EField::BidSize,    45, "BSize",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+   , { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
+   , { (int)EField::BidOrder,   40, "Buy",     wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
+   , { (int)EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+   , { (int)EField::AskOrder,   40, "Sell",    wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
+   , { (int)EField::AskSize,    45, "ASize",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+   , { (int)EField::SellVolume, 45, "AVol",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
+   , { (int)EField::SellCount,  45, "Ticks",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
+   , { (int)EField::Ticks,      45, "Ticks",   wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
+   , { (int)EField::Volume,     60, "Vol",     wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // sum of volume
+   , { (int)EField::Static,     80, "SttcInd", wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // static indicators - pivots, ...
+   , { (int)EField::Dynamic,   100, "DynInd",  wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
+  };
+
+} // anonymous
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -154,7 +179,7 @@ void PanelTrade::DrawWinRows() {
 
       // should this go into the vector?
       m_pWinRow_Header.reset();
-      m_pWinRow_Header = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+      m_pWinRow_Header = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, true );
 
       yOffset += RowHeight;
 
@@ -162,7 +187,7 @@ void PanelTrade::DrawWinRows() {
       m_vWinRow.resize( m_cntWinRows_Data );
 
       while ( ixWinRow < m_cntWinRows_Data ) {
-        pWinRow_t pWinRow = WinRow::Construct( this, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+        pWinRow_t pWinRow = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
         m_vWinRow[ ixWinRow ] = pWinRow;
         yOffset += RowHeight;
         ixWinRow++;

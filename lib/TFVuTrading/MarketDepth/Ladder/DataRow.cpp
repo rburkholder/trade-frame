@@ -82,20 +82,18 @@ void DataRow::SetRowElements( WinRow& wr ) {
   //}
   //m_pRowElements = re;
 
-  using EField = WinRow::EField;
-
   //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
-  m_dreBuyCount.SetWinRowElement(    wr[ EField::BuyCount ] );
-  m_dreBuyVolume.SetWinRowElement(   wr[ EField::BuyVolume ] );
-  m_dreBidSize.SetWinRowElement(     wr[ EField::BidSize ] );
-  m_drePrice.SetWinRowElement(       wr[ EField::Price ] );
-  m_dreAskSize.SetWinRowElement(     wr[ EField::AskSize ] );
-  m_dreSellVolume.SetWinRowElement(  wr[ EField::SellVolume ] );
-  m_dreSellCount.SetWinRowElement(   wr[ EField::SellCount ] );
-  m_dreTicks.SetWinRowElement(       wr[ EField::Ticks ] );
-  m_dreVolume.SetWinRowElement(      wr[ EField::Volume ] );
-  m_dreIndicatorStatic.SetWinRowElement(  wr[ EField::Static ] );
-  m_dreIndicatorDynamic.SetWinRowElement( wr[ EField::Dynamic ] );
+  m_dreBuyCount.SetWinRowElement(         wr[ (int)EField::BuyCount ] );
+  m_dreBuyVolume.SetWinRowElement(        wr[ (int)EField::BuyVolume ] );
+  m_dreBidSize.SetWinRowElement(          wr[ (int)EField::BidSize ] );
+  m_drePrice.SetWinRowElement(            wr[ (int)EField::Price ] );
+  m_dreAskSize.SetWinRowElement(          wr[ (int)EField::AskSize ] );
+  m_dreSellVolume.SetWinRowElement(       wr[ (int)EField::SellVolume ] );
+  m_dreSellCount.SetWinRowElement(        wr[ (int)EField::SellCount ] );
+  m_dreTicks.SetWinRowElement(            wr[ (int)EField::Ticks ] );
+  m_dreVolume.SetWinRowElement(           wr[ (int)EField::Volume ] );
+  m_dreIndicatorStatic.SetWinRowElement(  wr[ (int)EField::Static ] );
+  m_dreIndicatorDynamic.SetWinRowElement( wr[ (int)EField::Dynamic ] );
 
 }
 

@@ -23,6 +23,9 @@
 
 #include <memory>
 #include <vector>
+#include <string>
+
+#include <OUCommon/Colour.h>
 
 class wxPoint;
 class wxWindow;
@@ -36,25 +39,29 @@ class WinRowElement;
 class WinRow {
 public:
 
-  WinRow( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
+  using EColour = ou::Colour::wx::EColour;
+
+  struct Element {
+    int field;
+    int width;
+    std::string header;
+    long alignment; // passed as style
+    EColour colourBackground; // box fill
+    EColour colourForeground; // text
+    EColour colourHighlight;  // fox fill to highlight
+  };
+
+  using vElement_t = std::vector<Element>;
+
+  WinRow( wxWindow* parent, const vElement_t&, const wxPoint& origin, int RowHeight, bool bIsHeader );
   ~WinRow();
 
   using pWinRow_t = std::shared_ptr<WinRow>;
-  static pWinRow_t Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
+  static pWinRow_t Construct( wxWindow* parent, const vElement_t&, const wxPoint& origin, int RowHeight, bool bIsHeader );
 
-  enum class EField: int {
-    PL,
-    BuyCount, BuyVolume,
-    BidSize,
-    BidOrder, Price, AskOrder,
-    AskSize,
-    SellVolume, SellCount,
-    Ticks, Volume, Static, Dynamic
-    };
+  static int RowWidth( const vElement_t& );
 
-  static int RowWidth();
-
-  WinRowElement* operator[]( EField );
+  WinRowElement* operator[]( int );
 
 protected:
 private:

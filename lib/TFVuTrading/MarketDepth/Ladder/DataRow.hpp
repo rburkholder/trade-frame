@@ -32,6 +32,17 @@ namespace l2 { // market depth
 class DataRow {
 public:
 
+  enum class EField: int {
+    PL,
+    BuyCount, BuyVolume,
+    BidSize,
+    BidOrder, Price, AskOrder,
+    AskSize,
+    SellVolume, SellCount,
+    Ticks, Volume, Static, Dynamic
+    };
+
+
   explicit DataRow( double price );
   DataRow( const DataRow& );
   ~DataRow();
