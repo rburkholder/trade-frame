@@ -43,8 +43,11 @@ public:
   static pWinRow_t Construct( wxWindow* parent, const wxPoint& origin, int RowHeight, bool bIsHeader );
 
   enum class EField: int {
+    PL,
     BuyCount, BuyVolume,
-    BidSize, Price, AskSize,
+    BidSize,
+    BidOrder, Price, AskOrder,
+    AskSize,
     SellVolume, SellCount,
     Ticks, Volume, Static, Dynamic
     };

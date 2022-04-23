@@ -53,11 +53,14 @@ namespace { // local variables
   using vElement_t = std::vector<Element>;
   vElement_t vElement = {
      { EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
-   , { EField::BuyVolume,  45, "Bought",  wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
-   , { EField::BidSize,    45, "BidSize", wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+   , { EField::BuyVolume,  45, "BVol",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+   , { EField::BidSize,    45, "BSize",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+   , { EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
+   , { EField::BidOrder,   40, "Buy",     wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
    , { EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-   , { EField::AskSize,    45, "AskSize", wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-   , { EField::SellVolume, 45, "Sold",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
+   , { EField::AskOrder,   40, "Sell",    wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
+   , { EField::AskSize,    45, "ASize",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+   , { EField::SellVolume, 45, "AVol",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
    , { EField::SellCount,  45, "Ticks",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
    , { EField::Ticks,      45, "Ticks",   wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // count of trades
    , { EField::Volume,     60, "Vol",     wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // sum of volume
