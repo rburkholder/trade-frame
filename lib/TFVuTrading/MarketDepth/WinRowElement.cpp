@@ -71,11 +71,15 @@ void WinRowElement::Init() {
 
 void WinRowElement::CreateControls() {
 
-  Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
-  Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
-  Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Bind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
   Bind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
+
+  Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
+  Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
+
+  Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Bind( wxEVT_RIGHT_UP, &WinRowElement::OnMouseRightUp, this );
+
   //Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, GetId() );
   //Bind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
   //Bind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );
@@ -179,6 +183,10 @@ void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
   event.Skip();
 }
 
+void WinRowElement::OnMouseRightUp( wxMouseEvent& event ) {
+  event.Skip();
+}
+
 void WinRowElement::OnMouseEnterWindow( wxMouseEvent& event ) {
   if ( m_bCanHaveFocus ) {
     m_bFocusSet = true;
@@ -201,11 +209,15 @@ void WinRowElement::OnContextMenu( wxContextMenuEvent& event ) {
 
 void WinRowElement::OnDestroy( wxWindowDestroyEvent& event ) {
 
-  Unbind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
-  Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
-  Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Unbind( wxEVT_PAINT, &WinRowElement::OnPaint, this, GetId() );
   Unbind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
+
+  Unbind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
+  Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
+
+  Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Unbind( wxEVT_RIGHT_UP, &WinRowElement::OnMouseRightUp, this );
+
   //Unbind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, this->GetId() );
   //Unbind( wxEVT_SET_FOCUS, &WinRowElement::OnFocusSet, this, GetId() );
   //Unbind( wxEVT_KILL_FOCUS, &WinRowElement::OnFocusKill, this, GetId() );

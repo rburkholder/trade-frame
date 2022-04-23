@@ -97,10 +97,15 @@ private:
 
   void OnFocusSet( wxFocusEvent& );
   void OnFocusKill( wxFocusEvent& );
+
   void OnMouseLeftUp( wxMouseEvent& );
+  void OnMouseRightUp( wxMouseEvent& );
+
   void OnMouseEnterWindow( wxMouseEvent& );
   void OnMouseLLeaveWindow( wxMouseEvent& );
+
   void OnContextMenu( wxContextMenuEvent& );
+
   void OnPaint( wxPaintEvent& );
   void OnDestroy( wxWindowDestroyEvent& );
 
