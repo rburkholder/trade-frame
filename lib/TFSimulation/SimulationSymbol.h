@@ -62,6 +62,8 @@ protected:
   void HandleTradeEvent( const DatedDatum &datum );
   void HandleGreekEvent( const DatedDatum &datum );
 
+private:
+
   std::string m_sDirectory;
 
   Quotes m_quotes;
@@ -70,8 +72,6 @@ protected:
   Greeks m_greeks;
 
   SimulateOrderExecution m_simExec;
-
-private:
 
 };
 
