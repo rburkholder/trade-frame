@@ -15,13 +15,13 @@
 /*
  * File:    DataRow.h
  * Author:  raymond@burkholder.net
- * Project: TFVuTrading/MarketDepth
+ * Project: TFVuTrading/MarketDepth/Ladder
  * Created: November 11, 2021 09:08
  */
 
 #pragma once
 
-#include "WinRow.hpp"
+#include "../WinRow.hpp"
 
 #include "DataRowElement.hpp"
 
