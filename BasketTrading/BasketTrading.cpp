@@ -194,10 +194,10 @@ void AppBasketTrading::Init() {
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Take Profits", MakeDelegate( this, &AppBasketTrading::HandleTakeProfits ) ) );
-  vItems.push_back( new mi( "a2 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
-  vItems.push_back( new mi( "a3 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
+  //vItems.push_back( new mi( "a2 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
+  //vItems.push_back( new mi( "a3 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
   vItems.push_back( new mi( "a4 Close leg for profits", MakeDelegate( this, &AppBasketTrading::HandleCloseForProfits ) ) );
-  vItems.push_back( new mi( "a5 Close ITM leg", MakeDelegate( this, &AppBasketTrading::HandleCloseItmLeg ) ) );
+  //vItems.push_back( new mi( "a5 Close ITM leg", MakeDelegate( this, &AppBasketTrading::HandleCloseItmLeg ) ) );
   vItems.push_back( new mi( "a6 Add combo - allowed", MakeDelegate( this, &AppBasketTrading::HandleAddComboAllowed ) ) );
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
