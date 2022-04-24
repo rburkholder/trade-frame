@@ -84,6 +84,8 @@
 using combo_t = ou::tf::option::Collar;
 #include <TFOptionCombos/LegNote.h>
 
+#include <TFVuTrading/TreeItem.hpp>
+
 #include "ManageStrategy.h"
 
 namespace {
@@ -233,6 +235,8 @@ ManageStrategy::ManageStrategy(
   m_dateTrading( dateTrading ),
   m_specsSpread( specSpread ),
 
+  m_ptiParent( nullptr ),
+
   m_fConstructOption( std::move( fConstructOption ) ),
   m_fConstructPosition( std::move( fConstructPosition ) ),
   m_fConstructPortfolio( std::move( fConstructPortfolio ) ),
@@ -265,13 +269,13 @@ ManageStrategy::ManageStrategy(
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
 
-  assert( nullptr != fGatherOptions );
+  assert( fGatherOptions );
   //assert( nullptr != m_fConstructWatch );
-  assert( nullptr != m_fConstructOption );
-  assert( nullptr != m_fConstructPosition );
-  assert( nullptr != m_fConstructPortfolio );
-  assert( nullptr != m_fFirstTrade );
-  assert( nullptr != m_fBar );
+  assert( m_fConstructOption );
+  assert( m_fConstructPosition );
+  assert( m_fConstructPortfolio );
+  assert( m_fFirstTrade );
+  assert( m_fBar );
 
   //m_rBarDirection[ 0 ] = EBarDirection::None;
   //m_rBarDirection[ 1 ] = EBarDirection::None;

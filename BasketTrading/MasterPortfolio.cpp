@@ -129,35 +129,33 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
   m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
+  m_ptiTreeRoot->NewMenu();
+  m_ptiTreeRoot->AppendMenuItem(
+    "New Underlying",
+    []( ou::tf::TreeItem* pti ){
+      std::cout << "HandleNewUnderlying: not implemented" << std::endl;
+    }
+  );
+
   m_ptiTreeUnderlying = m_ptiTreeRoot->AppendChild(
     "Underlying",
-    [this]( ou::tf::TreeItem* ){
-    },
-    [this]( ou::tf::TreeItem* pti ){
-      pti->NewMenu();
-      pti->AppendMenuItem(
-        "New Underlying",
-        []( ou::tf::TreeItem* pti ){
-          //std::cout << "HandleNewUnderlying: " << event.GetId() << std::endl;
-        }
-      );
-    });
+    [this]( ou::tf::TreeItem* ){},
+    [this]( ou::tf::TreeItem* ){}
+    );
   m_ptiTreeStrategies = m_ptiTreeRoot->AppendChild(
     "Strategies",
     []( ou::tf::TreeItem* ){},
     []( ou::tf::TreeItem* ){}
     );
-  //m_idTreeOptions = m_fChartAdd( m_idTreeRoot, "Options", nullptr, nullptr ); // needs to be within the associated underlying
 
   std::stringstream ss;
   //ss.str( "" );
   auto dt = ou::TimeSource::Instance().External();
   ss
     << ou::tf::Instrument::BuildDate( dt.date() )
-    << " "
+    << "-"
     << dt.time_of_day()
     ;
-  //ss << ou::TimeSource::Instance().External();
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
@@ -292,7 +290,7 @@ void MasterPortfolio::Add( pPosition_t pPosition ) {
 
 }
 
-double MasterPortfolio::UpdateChart() {
+double MasterPortfolio::UpdateChart() { // called for GUI refresh
 
   double dblPLUnRealized {};
   double dblPLRealized {};
@@ -833,13 +831,12 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
     pManageStrategy_t pManageStrategy = strategy.pManageStrategy;
 
     // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
-    //strategy.idTreeItem = m_fChartAdd( m_idTreeStrategies, idPortfolio, pChartDataView, pMenuPopupStrategy );
-    strategy.pti = m_ptiTreeStrategies->AppendChild(
+    ou::tf::TreeItem* ptiOwner = m_ptiTreeStrategies->AppendChild(
       idPortfolioStrategy,
-      [this,pChartDataView]( ou::tf::TreeItem* pti ){
-        m_fSetChartDataView(pChartDataView );
+      [this,pChartDataView]( ou::tf::TreeItem* pti ){ // OnClick
+        m_fSetChartDataView( pChartDataView );
       },
-      [this,pManageStrategy,idPortfolioStrategy]( ou::tf::TreeItem* pti ){
+      [this,pManageStrategy,idPortfolioStrategy]( ou::tf::TreeItem* pti ){ // OnMenu
         pti->NewMenu();
         pti->AppendMenuItem(
           "Close",
@@ -848,7 +845,11 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
             pManageStrategy->ClosePositions();
           });
       } );
+    pManageStrategy->SetTreeItemParent( ptiOwner );
     strategy.bChartActivated = true;
+  }
+  else {
+    std::cout << "MasterPortfolio::AddAsActiveStrategy: when is bChartActivated activated?" << std::endl;
   }
 
   strategy.pManageStrategy->Run();

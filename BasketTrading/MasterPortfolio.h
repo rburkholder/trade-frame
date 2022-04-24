@@ -167,7 +167,6 @@ private:
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
   struct Strategy {
-    ou::tf::TreeItem* pti;
     pManageStrategy_t pManageStrategy;
     ou::tf::Price::price_t priceOpen;
     double dblBestProbability;

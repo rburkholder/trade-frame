@@ -52,6 +52,12 @@
 
 #include "ValidateOptions.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+  class TreeItem;
+} // namespace tf
+} // namespace ou
+
 class OptionRepository;
 
 class ManageStrategy:
@@ -131,6 +137,7 @@ public:
   void SaveSeries( const std::string& sPrefix );
 
   void AddPosition( pPosition_t ); // add pre-existing position
+  void SetTreeItemParent( ou::tf::TreeItem* pti ) { m_ptiParent = pti; }
 
   pChartDataView_t GetChartDataView() { return m_pChartDataView; }
 
@@ -212,6 +219,7 @@ private:
   //const ou::tf::Bar& m_barPriorDaily;
 
   pPortfolio_t m_pPortfolioOwning; // owning portfolio
+  ou::tf::TreeItem* m_ptiParent; // should be strategy list
 
   //PivotCrossing m_pivotCrossing;
 
