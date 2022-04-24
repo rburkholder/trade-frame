@@ -276,12 +276,12 @@ private:
 
   bool m_bBuildTimeSeries;
 
-  bool m_bSingle;  // don't use lookups, dedicated to single symbol
+  bool m_bSingle;  // don't use m_luSymbol, dedicated to single symbol
   Carrier m_single; // carrier for single symbol
 
   fConnected_t m_fConnected;
 
-  ou::KeyWordMatch<Carrier> m_luSymbol;
+  ou::KeyWordMatch<Carrier> m_luSymbol; // contains the carrier as destination for inbound records
 
   struct VolumeAtPriceFunctions {
 
@@ -299,11 +299,11 @@ private:
   }; // struct VolumeAtPriceFunctions
 
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
-  mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions;
+  mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions; // temporary entries till symbol encountered & assigned to a carrier
 
   using pL2Base_t = std::shared_ptr<L2Base>;
-  using mapL2Base_t = std::map<std::string,pL2Base_t>;
-  mapL2Base_t m_mapL2Base;
+  using mapL2Base_t = std::map<std::string,pL2Base_t>; // symbol name, L2Processing
+  mapL2Base_t m_mapL2Base; //used for batch operations
 
   template<typename Msg>
   void SetCarrier( Carrier& carrier, const Msg& msg ) {
