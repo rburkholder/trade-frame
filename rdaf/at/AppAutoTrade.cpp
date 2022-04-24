@@ -104,6 +104,10 @@ bool AppAutoTrade::OnInit() {
 
   m_bL2Connected = false;
 
+  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
+    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
+  }
+
   auto dt = ou::TimeSource::Instance().External();
   m_nTSDataStreamSequence = 0;
   {
@@ -218,15 +222,23 @@ bool AppAutoTrade::OnInit() {
       dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
       std::cout << "simulation date " << dateSim << std::endl;
     }
+    // need to be able to hookup simulation depth to the algo
+    // does the symbol pump the depth through the same fibre/thread?
+    // need to turn off m_pL2Symbols when running a simulation
+    // need to feed the algo, not from m_pL2Symbols
+    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
+  }
+  else {
+    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+      [this](){
+        m_bL2Connected = true;
+        ConfirmProviders();
+      } );
+    m_pL2Symbols->BuildTimeSeries( true );
   }
 
-  m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-    [this](){
-      m_bL2Connected = true;
-      ConfirmProviders();
-    } );
-  m_pL2Symbols->BuildTimeSeries( true );
-
+  // NOTE: during simulation, this subsystem is going to have to be temporary
+  //   otherwise, the same data is read in multiple times when the simulation is run multiple times
   StartRdaf( sDirectory + m_sTSDataStreamStarted );
 
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
@@ -296,19 +308,20 @@ bool AppAutoTrade::OnInit() {
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
+  vItems.clear(); // maybe wrap this whole menu in the sim conditional
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
-  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  if ( !m_choices.bStartSimulator ) {
+    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+  }
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  vItems.clear();
-  vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
-  vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
-  //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-  vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-  m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
-
-  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
-    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
+  vItems.clear(); // TODO: need to turn off the autosave as well
+  if ( !m_choices.bStartSimulator ) {
+    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
+    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
+    //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+    m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
   }
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
@@ -434,7 +447,9 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         vt.second->SaveWatch( sPath );
       }
-      m_pL2Symbols->SaveSeries( sPath );
+      if ( m_pL2Symbols ) {
+        m_pL2Symbols->SaveSeries( sPath );  // the menu item isn't available during simulation
+      }
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //  m_pFile->Write();
       //}
@@ -505,15 +520,6 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, co
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
   assert( m_mapStrategy.end() != iterStrategy );
   iterStrategy->second->SetPosition( pPosition );
-
-  FrameMain::vpItems_t vItems;
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStart ) ) );
-  vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
-  vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
-  m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
-
-  m_sim->Run();
 
 }
 
@@ -591,8 +597,18 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   m_timerOneSecond.Stop();
   Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
 
-  if ( m_pFile ) { // performed at exit to ensure no duplication in file
-    m_pFile->Write();
+  // NOTE: when running the simuliation, perform a deletion instead
+  //   use the boost file system utilities?
+  //   or the object Delete() operator may work
+  if ( m_choices.bStartSimulator ) {
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      m_pFile->Delete(); // does this delete the file or the timeseries in it?
+    }
+  }
+  else {
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      m_pFile->Write();
+    }
   }
 
   DelinkFromPanelProviderControl();
@@ -605,7 +621,9 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
 void AppAutoTrade::OnData1Connected( int ) {
   //m_bData1Connected = true;
-  m_pL2Symbols->Connect();
+  if (m_pL2Symbols ) {
+    m_pL2Symbols->Connect();
+  }
   ConfirmProviders();
 }
 
@@ -620,7 +638,9 @@ void AppAutoTrade::OnExecConnected( int ) {
 }
 
 void AppAutoTrade::OnData1Disconnected( int ) {
-  m_pL2Symbols->Disconnect();
+  if ( m_pL2Symbols ) {
+    m_pL2Symbols->Disconnect();
+  }
   //m_bData1Connected = false;
 }
 
@@ -662,14 +682,16 @@ void AppAutoTrade::ConfirmProviders() {
         ConstructIBInstrument( sNamePortfolio, vt.first );
         { // capture the Strategy object for specific use
           Strategy& strategy( *vt.second );
-          m_pL2Symbols->WatchAdd(
-            vt.first,
-            [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-              strategy.HandleUpdateL2Bid( price, volume, bAdd );
-            },
-            [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-              strategy.HandleUpdateL2Ask( price, volume, bAdd );
-            });
+          if ( m_pL2Symbols ) {
+            m_pL2Symbols->WatchAdd(
+              vt.first,
+              [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+                strategy.HandleUpdateL2Bid( price, volume, bAdd );
+              },
+              [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+                strategy.HandleUpdateL2Ask( price, volume, bAdd );
+              });
+          }
         }
       }
     }
@@ -684,6 +706,15 @@ void AppAutoTrade::ConfirmProviders() {
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         ConstructSimInstrument( sNamePortfolio, vt.first );
       }
+
+      FrameMain::vpItems_t vItems;
+      using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+      vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStart ) ) );
+      vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
+      vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
+      m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+
+      m_sim->Run();
 
     }
     if ( !bValidCombo ) {
