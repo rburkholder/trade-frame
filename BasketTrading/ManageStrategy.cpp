@@ -392,7 +392,7 @@ ManageStrategy::ManageStrategy(
         std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strkes" << std::endl;
       }
       else {
-        std::cout << "chain " << vt.first << " removed with " << nStrikesTotal << " strkes" << std::endl;
+        std::cout << "chain " << vt.first << " skipped with " << nStrikesTotal << " strkes" << std::endl;
         vChainsToBeRemoved.push_back( vt.first );
       }
     }
