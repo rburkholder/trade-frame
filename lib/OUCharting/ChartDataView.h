@@ -59,6 +59,8 @@ public:
   ChartDataView();
   virtual ~ChartDataView();
 
+  static pChartDataView_t Factory() { return std::make_shared<ChartDataView>(); }
+
   void Add( size_t nChart, ChartEntryBase* pEntry );  // could try boost::fusion here?  some crtp stuff?
   void Remove( size_t nChart, ChartEntryBase* pEntry );
   void Clear();  // remove stuff in order to reuse.
