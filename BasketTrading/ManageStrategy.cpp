@@ -389,10 +389,10 @@ ManageStrategy::ManageStrategy(
       } );
       if ( nStrikesTotal == nStrikesMatch ) {
         nStrikesSum += nStrikesTotal;
-        std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strkes" << std::endl;
+        std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strikes" << std::endl;
       }
       else {
-        std::cout << "chain " << vt.first << " skipped with " << nStrikesTotal << " strkes" << std::endl;
+        std::cout << "chain " << vt.first << " skipped with " << nStrikesTotal << " strikes" << std::endl;
         vChainsToBeRemoved.push_back( vt.first );
       }
     }
