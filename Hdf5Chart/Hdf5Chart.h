@@ -19,6 +19,8 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/app.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFVuTrading/FrameMain.h>
@@ -36,8 +38,6 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelChartHdf5* m_pPanelChartHdf5;
-
-  std::string m_sStateFileName;
 
   virtual bool OnInit();
   virtual int OnExit();
