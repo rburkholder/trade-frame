@@ -32,6 +32,7 @@ set(
     ManageStrategy.h
     MasterPortfolio.h
     MoneyManager.h
+    OptionStatistics.hpp
     PanelBasketTradingMain.h
     PanelPortfolioStats.h
     PivotCrossing.h
@@ -50,6 +51,7 @@ set(
     ManageStrategy.cpp
     MasterPortfolio.cpp
     MoneyManager.cpp
+    OptionStatistics.cpp
     PanelBasketTradingMain.cpp
     PanelPortfolioStats.cpp
     PivotCrossing.cpp
