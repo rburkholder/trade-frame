@@ -669,30 +669,39 @@ void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
 }
 
 void AppAutoTrade::ConfirmProviders() {
-  if ( m_bData1Connected && m_bExecConnected && m_bL2Connected ) {
+  if ( m_bData1Connected && m_bExecConnected ) {
     bool bValidCombo( false );
     if (
          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
       && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
     ) {
-      bValidCombo = true;
-      static const std::string sNamePortfolio( "IB" );
-      LoadPortfolio( sNamePortfolio );
-      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        ConstructIBInstrument( sNamePortfolio, vt.first );
-        { // capture the Strategy object for specific use
-          Strategy& strategy( *vt.second );
-          if ( m_pL2Symbols ) {
-            m_pL2Symbols->WatchAdd(
-              vt.first,
-              [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-                strategy.HandleUpdateL2Bid( price, volume, bAdd );
-              },
-              [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-                strategy.HandleUpdateL2Ask( price, volume, bAdd );
-              });
+      if ( m_bL2Connected ) {
+        bValidCombo = true;
+        std::cout << "ConfirmProviders: using iqfeed and tws for data/execution" << std::endl;
+        static const std::string sNamePortfolio( "IB" );
+        LoadPortfolio( sNamePortfolio );
+        for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+          ConstructIBInstrument( sNamePortfolio, vt.first );
+          { // capture the Strategy object for specific use
+            Strategy& strategy( *vt.second );
+            if ( m_pL2Symbols ) {
+              m_pL2Symbols->WatchAdd(
+                vt.first,
+                [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+                  strategy.HandleUpdateL2Bid( price, volume, bAdd );
+                },
+                [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+                  strategy.HandleUpdateL2Ask( price, volume, bAdd );
+                });
+            }
+            else {
+              assert( false ); // m_pL2Symbols needs to be available
+            }
           }
         }
+      }
+      else {
+        std::cout << "ConfirmProviders: waiting for iqfeed level 2 connection" << std::endl;
       }
     }
 
@@ -718,7 +727,7 @@ void AppAutoTrade::ConfirmProviders() {
 
     }
     if ( !bValidCombo ) {
-      std::cout << "invalid combo of data and execution providers" << std::endl;
+      std::cout << "ConfirmProviders: waiting for data and execution providers" << std::endl;
     }
   }
 }
