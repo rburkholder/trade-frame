@@ -602,7 +602,7 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   //   or the object Delete() operator may work
   if ( m_choices.bStartSimulator ) {
     if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      m_pFile->Delete(); // does this delete the file or the timeseries in it?
+      //m_pFile->Delete(); // double free or corruption here
     }
   }
   else {
