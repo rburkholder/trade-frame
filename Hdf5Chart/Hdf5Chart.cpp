@@ -19,6 +19,10 @@
 
 #include <wx/sizer.h>
 
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/PanelChartHdf5.h>
+
 #include "Hdf5Chart.h"
 
 namespace {

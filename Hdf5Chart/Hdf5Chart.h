@@ -23,9 +23,14 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-#include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/PanelLogging.h>
-#include <TFVuTrading/PanelChartHdf5.h>
+class FrameMain;
+
+namespace ou {
+namespace tf {
+  class PanelLogging;
+  class PanelChartHdf5;
+}
+}
 
 class AppHdf5Chart:
   public wxApp, public ou::tf::FrameWork01<AppHdf5Chart> {
