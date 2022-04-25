@@ -12,13 +12,12 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <vector>
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
+#include <wx/sizer.h>
 #include <wx/splitter.h>
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -59,7 +58,7 @@ bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos
   wxPanel::Create( parent, id, pos, size, style );
 
   CreateControls();
-  if (GetSizer())     {
+  if (GetSizer()) {
       GetSizer()->SetSizeHints(this);
   }
   Centre();
@@ -246,8 +245,8 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType e
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
       break;
     case CustomItemData::Depths:
-      std::cout << "MarketDepth not chartable" << std::endl;
-      //cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<MarketDepths>( m_pdm, m_pChartDataView, "MarketDepths", sPath );
+      std::cout << "MarketDepth will not show data" << std::endl;
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<MarketDepths>( m_pdm, m_pChartDataView, "MarketDepths", sPath );
       break;
     default:
       throw std::runtime_error("unknown CustomItemData");
@@ -264,10 +263,10 @@ wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {
     return wxNullBitmap;
 }
 
-wxIcon PanelChartHdf5::GetIconResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullIcon;
-}
+//wxIcon PanelChartHdf5::GetIconResource( const wxString& name ) {
+//    wxUnusedVar(name);
+//    return wxNullIcon;
+//}
 
 } // namespace tf
 } // namespace ou

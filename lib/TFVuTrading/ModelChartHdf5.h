@@ -109,21 +109,23 @@ private:
 
   void Clear();
 
-  void DefineChartBars( ou::ChartDataView* pChartDataView );
-  void DefineChartQuotes( ou::ChartDataView* pChartDataView );
-  void DefineChartTrades( ou::ChartDataView* pChartDataView );
-  void DefineChartPriceIVs( ou::ChartDataView* pChartDataView );
-  void DefineChartGreeks( ou::ChartDataView* pChartDataView );
-  void DefineChartEquities( ou::ChartDataView* pChartDataView );
-  void DefineChartOptions( ou::ChartDataView* pChartDataView );
+  void DefineChartBars( ou::ChartDataView* );
+  void DefineChartQuotes( ou::ChartDataView* );
+  void DefineChartTrades( ou::ChartDataView* );
+  void DefineChartPriceIVs( ou::ChartDataView* );
+  void DefineChartGreeks( ou::ChartDataView* );
+  void DefineChartEquities( ou::ChartDataView* );
+  void DefineChartOptions( ou::ChartDataView* );
+  void DefineChartDepths( ou::ChartDataView* );
 
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const Equities& equities );
-  void AddChartEntries( ou::ChartDataView* pChartDataView, const Options& options );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::Bars& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::Quotes& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::Trades& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::PriceIVExpirys& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::Greeks& );
+  void AddChartEntries( ou::ChartDataView*, const Equities& );
+  void AddChartEntries( ou::ChartDataView*, const Options& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::MarketDepths& );
 
 };
 

@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "ModelChartHdf5.h"
 
 namespace ou { // One Unified
@@ -74,6 +72,7 @@ void ModelChartHdf5::DefineChartQuotes( ou::ChartDataView* pChartDataView ) {
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
   m_ceVolumeLower.SetColour( ou::Colour::Blue );
   m_ceQuoteSpread.SetColour( ou::Colour::Black );
+
   pChartDataView->Add( 0, &m_ceQuoteUpper );
   pChartDataView->Add( 1, &m_ceVolumeUpper );
   pChartDataView->Add( 0, &m_ceQuoteLower );
@@ -271,6 +270,21 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
     m_ceVega.Append( iter->DateTime(), iter->Vega() );
     m_ceRho.Append( iter->DateTime(), iter->Rho() );
   }
+}
+
+// ChartDepths
+
+void ModelChartHdf5::DefineChartDepths( ou::ChartDataView* pChartDataView ) {
+
+  DefineChartEquities( pChartDataView );
+
+  // nothing to chart yet
+}
+
+void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const MarketDepths& depths ) {
+
+  DefineChartOptions( pChartDataView );
+
 }
 
 // Supporting methods

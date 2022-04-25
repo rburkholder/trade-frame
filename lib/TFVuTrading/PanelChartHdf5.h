@@ -22,9 +22,8 @@
 
 #include <wx/treectrl.h>
 
-#include "ModelChartHdf5.h"
-
 #include "WinChartView.h"
+#include "ModelChartHdf5.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -54,7 +53,7 @@ public:
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
+  //wxIcon GetIconResource( const wxString& name );
 
 protected:
 
