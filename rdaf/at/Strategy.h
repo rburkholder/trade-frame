@@ -36,6 +36,8 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include <TFIQFeed/Level2/Symbols.hpp>
+
 class TH2D;
 class TFile;
 class TTree;
@@ -173,6 +175,9 @@ private:
 
   ou::tf::BarFactory m_bfQuotes01Sec;
 
+  using pMarketMaker_t = ou::tf::iqfeed::l2::MarketMaker::pMarketMaker_t;
+  pMarketMaker_t m_pMarketMaker; // used during simulations
+
   // ==
   struct QuoteForBranch {
     double time;
@@ -205,6 +210,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+  void HandleDepth( const ou::tf::MarketDepth& ); // from simulation engine
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

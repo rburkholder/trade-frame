@@ -118,12 +118,15 @@ void Strategy::SetupChart() {
 
 void Strategy::SetPosition( pPosition_t pPosition ) {
 
+  using pProvider_t = ou::tf::Watch::pProvider_t;
+
   assert( pPosition );
 
   Clear();
 
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
+  pProvider_t pDataProvider = pWatch->GetProvider();
 
   m_cdv.SetNames( "AutoTrade", pWatch->GetInstrument()->GetInstrumentName() );
 
@@ -134,6 +137,18 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   //pWatch->RecordSeries( false );
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
+  if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
+    pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepth ) );
+    m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
+    m_pMarketMaker->Set(
+      [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+        HandleUpdateL2Bid( price, volume, bAdd );
+      },
+      [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+        HandleUpdateL2Ask( price, volume, bAdd );
+      }
+    );
+  }
 
 }
 
@@ -155,8 +170,14 @@ void Strategy::LoadHistory( TClass* tc ) {
 }
 
 void Strategy::Clear() {
+  using pProvider_t = ou::tf::Watch::pProvider_t;
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
+    pProvider_t pDataProvider = pWatch->GetProvider();
+    if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
+      m_pMarketMaker.reset();
+      pWatch->OnDepth.Remove( MakeDelegate( this, &Strategy::HandleDepth ) );
+    }
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
     m_cdv.Clear();
@@ -274,6 +295,11 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_pHistVolumeDemo->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
 
+}
+
+void Strategy::HandleDepth( const ou::tf::MarketDepth& depth ) {
+  assert( m_pMarketMaker );
+  m_pMarketMaker->OnMarketDepth( depth );
 }
 
 void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {
