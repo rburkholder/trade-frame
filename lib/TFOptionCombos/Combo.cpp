@@ -83,20 +83,20 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
   if ( LegNote::State::Open == legValues.m_state ) {
 
-    mapLeg_t::iterator iter = m_mapLeg.find( legValues.m_type );
-    if ( m_mapLeg.end() == iter ) {
+    mapLeg_t::iterator iterLeg = m_mapLeg.find( legValues.m_type );
+    if ( m_mapLeg.end() == iterLeg ) {
       using result_t = std::pair<mapLeg_t::iterator, bool>;
       result_t result;
       result = m_mapLeg.emplace( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
       assert( result.second );
-      iter = result.first;
+      iterLeg = result.first;
     }
     else {
-      DeactivatePositionOption( iter->second.GetPosition() ); // old position
-      iter->second = std::move( leg ); // overwrite with new leg
+      DeactivatePositionOption( iterLeg->second.GetPosition() ); // old position
+      iterLeg->second = std::move( leg ); // overwrite with new leg
     }
 
-    iter->second.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
+    iterLeg->second.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
     Init( legValues.m_type );
 
@@ -108,6 +108,13 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
       m_state = State::Positions;
     }
 
+  }
+  else {
+    std::cout
+      << "Combo::SetPosition "
+      << pPositionNew->GetInstrument()->GetInstrumentName()
+      << " not open"
+      << std::endl;
   }
 
   return legValues;
