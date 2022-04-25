@@ -83,6 +83,7 @@ void Watch::Initialize() {
   assert( m_pDataProvider->ProvidesTrades() );
   m_quotes.Reserve( 1024 );  // reduce startup allocations
   m_trades.Reserve( 1024 );  // reduce startup allocations
+  m_depths.Reserve( 1024 );  // reduce startup allocations
   AddEvents();
   // TODO: check that instrument name, or alt instrument name matches provider type:
   //    contract exists for IBTWS provider, IQFeedName exists for IQFeed provider
@@ -163,9 +164,12 @@ void Watch::EnableWatch() {
       std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
     }
 
+    // these two message types come second so that the symbol gets registered in previous statements
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    // these two message types come second so that the symbol gets registered in previous statements
+    if ( m_pDataProvider->ProvidesDepth() ) {
+      m_pDataProvider->AddDepthHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepth ) );
+    }
   }
 }
 
@@ -182,6 +186,9 @@ bool Watch::StartWatch() {
 void Watch::DisableWatch() {
   if ( m_bWatching ) {
     //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+    if ( m_pDataProvider->ProvidesDepth() ) {
+      m_pDataProvider->RemoveDepthHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepth ) );
+    }
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_bWatching = false;
@@ -308,6 +315,11 @@ void Watch::HandleTrade( const Trade& trade ) {
   OnTrade( trade );
 }
 
+void Watch::HandleDepth( const MarketDepth& depth ) {
+  if ( m_bRecordSeries ) m_depths.Append( depth );
+  OnDepth( depth );
+}
+
 void Watch::HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t pFundamentals ) {
   m_pFundamentals = pFundamentals;
   OnFundamentals( *m_pFundamentals );
@@ -358,6 +370,17 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       attrTrades.SetProviderType( m_pDataProvider->ID() );
     }
 
+    if ( 0 != m_depths.Size() ) {
+      sPathName = sPrefix + "/depths/" + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
+      wtsDepths.Write( sPathName, &m_depths );
+      HDF5Attributes attrDepths( dm, sPathName );
+      attrDepths.SetSignature( ou::tf::Trade::Signature() );
+      //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+      //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+      attrDepths.SetProviderType( m_pDataProvider->ID() );
+    }
+
   }
   catch (...) {
     std::cout << "Watch::SaveSeries1 error: " << sPrefix << std::endl;
@@ -399,6 +422,7 @@ void Watch::SaveSeries( const std::string& sPrefix, const std::string& sDaily ) 
 void Watch::ClearSeries() {
   m_quotes.Clear();
   m_trades.Clear();
+  m_depths.Clear();
 }
 
 } // namespace tf

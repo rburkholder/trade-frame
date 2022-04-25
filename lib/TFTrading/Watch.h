@@ -29,8 +29,11 @@
 #include <TFIQFeed/Symbol.h>
 
 // 20151228 convert the delegate to a signal?  a little slower maybe.
-
 // 20160122 will want to set signals on provider so watch/unwatch as provider transitions connection states
+
+// 20220425 marketdepth is supplied via SimluationEngine only currently
+//    TODO: integrate into iqfeed so marketdepth can make use of strands
+//    TODO: use strands in simulation engine, similar to what is done in iqfeed provider & symbols
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -72,28 +75,27 @@ public:
   // TODO: these need spinlocks
   inline const Quote& LastQuote() const { return m_quote; };  // may have thread sync issue
   inline const Trade& LastTrade() const { return m_trade; };  // may have thread sync issue
+  inline const MarketDepth& LastDepth() const { return m_depth; };  // may have thread sync issue
 
   const Fundamentals& GetFundamentals() const { assert( m_pFundamentals ); return *m_pFundamentals; };
   const Summary& GetSummary() const { return m_summary; };
 
   Quotes& GetQuotes() { return m_quotes; }; // not const so can delegate
   Trades& GetTrades() { return m_trades; }; // not const so can delegate
+  MarketDepths& GetDepths() { return m_depths; }; // not const so can delegate
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
-  ou::Delegate<const Fundamentals&> OnFundamentals;
-  ou::Delegate<const Summary&> OnSummary;
-
-  //typedef std::pair<size_t,size_t> stateTimeSeries_t;
-  //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
-  //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeEnd;
+  ou::Delegate<const MarketDepth&> OnDepth;  // simulator
+  ou::Delegate<const Fundamentals&> OnFundamentals; // iqfeed
+  ou::Delegate<const Summary&> OnSummary; // iqfeed
 
   virtual bool StartWatch();
   virtual bool StopWatch();
 
   virtual void EmitValues( bool bEmitName = true ) const;
 
-  void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; }
+  void RecordSeries( bool bRecord ) { m_bRecordSeries = bRecord; } // true by default
   bool RecordingSeries() const { return m_bRecordSeries; }
 
   virtual void SaveSeries( const std::string& sPrefix );
@@ -101,6 +103,7 @@ public:
 
   virtual void ClearSeries();
 
+  // track quotes (maybe rename as such), facilitates order submission with decent spread
   void EnableStatsAdd();
   void EnableStatsRemove();
 
@@ -118,9 +121,11 @@ protected:
 
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
+  ou::tf::MarketDepth m_depth;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
+  ou::tf::MarketDepths m_depths;
 
   pInstrument_t m_pInstrument;
 
@@ -166,6 +171,7 @@ private:
 
   void HandleQuote( const Quote& );
   void HandleTrade( const Trade& );
+  void HandleDepth( const MarketDepth& );
 
   void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );
   void HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t );
