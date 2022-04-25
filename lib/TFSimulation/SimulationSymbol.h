@@ -16,8 +16,6 @@
 
 #include <string>
 
-#include <boost/detail/atomic_count.hpp>
-
 #include "TFTimeSeries/TimeSeries.h"
 
 #include "TFTrading/Symbol.h"
@@ -34,13 +32,10 @@ public:
   using inherited_t = Symbol<SimulationSymbol>;
   using pInstrument_t = inherited_t::pInstrument_t;
   using pInstrument_cref = inherited_t::pInstrument_cref;
-  using trade_t = inherited_t::trade_t;
-  using quote_t = inherited_t::quote_t;
-  using greek_t = inherited_t::greek_t;
 
   SimulationSymbol( const std::string& sSymbol,
                     pInstrument_cref pInstrument,
-                    const std::string& sGroup ); // base with trades/ quotes/, greeks/
+                    const std::string& sGroup ); // base with trades/ quotes/, greeks/, depths/
   virtual ~SimulationSymbol();
 
 protected:
