@@ -55,6 +55,9 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
+  // strong suggestion: set prior to connect
+  //   affects context and optional thread usage (to be implemented
+  //     default 1 thread, then no posting to strands
   void SetThreadCount( size_t nThreads ) { m_nThreads = nThreads; }
 
 protected:
