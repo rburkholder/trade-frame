@@ -86,6 +86,7 @@ using combo_t = ou::tf::option::Collar;
 
 #include <TFVuTrading/TreeItem.hpp>
 
+#include "OptionStatistics.hpp"
 #include "ManageStrategy.h"
 
 namespace {
@@ -109,22 +110,27 @@ namespace {
 class OptionRepository {
 public:
 
+  //using pPosition_t  = ou::tf::Position::pPosition_t;
+  using pWatch_t     = ou::tf::option::Option::pWatch_t;
+  using pOption_t    = ou::tf::option::Option::pOption_t;
+
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+  using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
+
   using fRegisterOption_t = ManageStrategy::fRegisterOption_t;
   using fStartCalc_t = ManageStrategy::fStartCalc_t;
   using fStopCalc_t  = ManageStrategy::fStopCalc_t;
 
-  //using pPosition_t  = ou::tf::Position::pPosition_t;
-  using pWatch_t      = ou::tf::option::Option::pWatch_t;
-  using pOption_t   = ou::tf::option::Option::pOption_t;
-
   OptionRepository(
-    fRegisterOption_t&& fRegisterOption,
-    fStartCalc_t&& fStartCalc,
-    fStopCalc_t&& fStopCalc
+    fRegisterOption_t&& fRegisterOption
+  , fStartCalc_t&& fStartCalc
+  , fStopCalc_t&& fStopCalc
+  , fSetChartDataView_t&& fSetChartDataView
   ) :
-    m_fRegisterOption( std::move( fRegisterOption ) ),
-    m_fStartCalc( std::move( fStartCalc ) ),
-    m_fStopCalc( std::move( fStopCalc ) )
+    m_fRegisterOption( std::move( fRegisterOption ) )
+  , m_fStartCalc( std::move( fStartCalc ) )
+  , m_fStopCalc( std::move( fStopCalc ) )
+  , m_fSetChartDataView( std::move( fSetChartDataView ) )
   {
     assert( nullptr != m_fStartCalc );
     assert( nullptr != m_fStopCalc );
@@ -133,7 +139,7 @@ public:
 
   ~OptionRepository() {
     for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
-      m_fStopCalc( vt.second, m_pWatchUnderlying );
+      m_fStopCalc( vt.second->Option(), m_pWatchUnderlying );
     }
     m_mapOption.clear();
   }
@@ -143,6 +149,10 @@ public:
 
   void AssignWatchUnderlying( pWatch_t pWatchUnderlying ) {
     m_pWatchUnderlying = pWatchUnderlying;
+  }
+
+  void SetTreeItem( ou::tf::TreeItem* ptiParent ) {
+    m_ptiParent = ptiParent;
   }
 
   void Add( pOption_t pOption ) {
@@ -160,7 +170,19 @@ public:
         // simply telling us we are already registered, convert from error to status?
       }
 
-      m_mapOption[ sOptionName ] = pOption;
+      pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
+      m_mapOption[ sOptionName ] = pOptionStatistics;
+      ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
+        pOption->GetInstrumentName(),
+        [this,pOptionStatistics]( ou::tf::TreeItem* ){
+          m_fSetChartDataView( pOptionStatistics->ChartDataView() );
+        },
+        []( ou::tf::TreeItem* ){}
+      );
+      pOptionStatistics->Set( pti );
+
+      std::cout << "OptionRepository::Add " << pOption->GetInstrumentName() << std::endl;
+
       // TODO: activate calc only if option is active
       m_fStartCalc( pOption, m_pWatchUnderlying );
     }
@@ -173,6 +195,7 @@ public:
   void Remove( pOption_t pOption ) {
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+    std::cout << "OptionRepository::Remove: " <<sOptionName << std::endl;
 
     mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
     if ( m_mapOption.end() != iterOption ) {
@@ -196,8 +219,12 @@ private:
   fRegisterOption_t m_fRegisterOption;
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
+  fSetChartDataView_t m_fSetChartDataView;
 
-  using mapOption_t = std::map<std::string,pOption_t>; // for m_fStartCalc, m_fStopCalc
+  ou::tf::TreeItem* m_ptiParent;
+
+  using pOptionStatistics_t = OptionStatistics::pOptionStatistics_t;
+  using mapOption_t = std::map<std::string,pOptionStatistics_t>; // for m_fStartCalc, m_fStopCalc
   mapOption_t m_mapOption;
 
 };
@@ -206,24 +233,25 @@ private:
 
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
-  double dblSlope20DayUnderlying,
-  pWatch_t pWatchUnderlying,
-  pPortfolio_t pPortfolioOwning, // => owning portfolio
-  boost::gregorian::date dateTrading,
-  const ou::tf::option::SpreadSpecs& specSpread,
-  fGatherOptions_t&& fGatherOptions,
+  double dblSlope20DayUnderlying
+, pWatch_t pWatchUnderlying
+, pPortfolio_t pPortfolioOwning // => owning portfolio
+, boost::gregorian::date dateTrading
+, const ou::tf::option::SpreadSpecs& specSpread
+, fGatherOptions_t&& fGatherOptions
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
-  fConstructOption_t&& fConstructOption, // => m_fConstructOption
-  fConstructPosition_t&& fConstructPosition, // => m_fConstructPosition
-  fConstructPortfolio_t&& fConstructPortfolio, // => m_fConstructPortfolio
-  fRegisterOption_t&& fRegisterOption, // => m_fRegisterOption
-  fStartCalc_t&& fStartCalc, // => m_fStartCalc
-  fStopCalc_t&& fStopCalc, // => m_fStopCalc
-  fFirstTrade_t fFirstTrade, // => m_fFirstTrade
-  fAuthorizeUnderlying_t fAuthorizeUnderlying, // => m_fAuthorizeUnderlying
-  fAuthorizeOption_t fAuthorizeOption, // => m_fAuthorizeOption
-  fAuthorizeSimple_t fAuthorizeSimple, // => m_fAuthorizeSimple
-  fBar_t fBar
+, fConstructOption_t&& fConstructOption // => m_fConstructOption
+, fConstructPosition_t&& fConstructPosition // => m_fConstructPosition
+, fConstructPortfolio_t&& fConstructPortfolio // => m_fConstructPortfolio
+, fRegisterOption_t&& fRegisterOption // => m_fRegisterOption
+, fStartCalc_t&& fStartCalc // => m_fStartCalc
+, fStopCalc_t&& fStopCalc // => m_fStopCalc
+, fSetChartDataView_t&& fSetChartDataView // => m_fSetChartDataView
+, fFirstTrade_t fFirstTrade // => m_fFirstTrade
+, fAuthorizeUnderlying_t fAuthorizeUnderlying // => m_fAuthorizeUnderlying
+, fAuthorizeOption_t fAuthorizeOption // => m_fAuthorizeOption
+, fAuthorizeSimple_t fAuthorizeSimple // => m_fAuthorizeSimple
+, fBar_t fBar
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
@@ -235,7 +263,7 @@ ManageStrategy::ManageStrategy(
   m_dateTrading( dateTrading ),
   m_specsSpread( specSpread ),
 
-  m_ptiParent( nullptr ),
+  m_ptiSelf( nullptr ),
 
   m_fConstructOption( std::move( fConstructOption ) ),
   m_fConstructPosition( std::move( fConstructPosition ) ),
@@ -246,6 +274,8 @@ ManageStrategy::ManageStrategy(
   m_fAuthorizeOption( fAuthorizeOption ),
   m_fAuthorizeSimple( fAuthorizeSimple ),
   m_fBar( fBar ),
+
+  m_fSetChartDataView( std::move( fSetChartDataView ) ),
 
   m_eTradeDirection( ETradeDirection::None ),
   m_bfQuotes01Sec( 1 ),
@@ -310,7 +340,10 @@ ManageStrategy::ManageStrategy(
   m_pOptionRepository = std::make_unique<OptionRepository>(
     std::move( fRegisterOption ),
     std::move( fStartCalc ),
-    std::move( fStopCalc )
+    std::move( fStopCalc ),
+    [this]( pChartDataView_t p ){
+      m_fSetChartDataView( p );
+    }
   );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
@@ -400,6 +433,11 @@ ManageStrategy::~ManageStrategy( ) {
   m_vEMA.clear();
 }
 
+void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
+  m_ptiSelf = ptiSelf;
+  m_pOptionRepository->SetTreeItem( ptiSelf );
+  }
+
 void ManageStrategy::Run() {
   assert( m_pWatchUnderlying );
   if ( ETradingState::TSInitializing == m_stateTrading ) {
@@ -470,12 +508,13 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
           const std::string& sNameUnderlying( pInstrumentUnderlying->GetInstrumentName() );
 
           pCombo->SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
+          m_ptiSelf->UpdateText( idPortfolio );
           m_pChartDataView->SetNames( idPortfolio, sNameUnderlying );
 
           // authorizes pre-existing strategy
           //bool bAuthorized = m_fAuthorizeSimple( idPortfolio, sNameUnderlying, true );
 
-        }
+        } // ensure m_pCombo is available
 
         std::cout << "set combo option position existing: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
 
@@ -611,6 +650,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       );
     },
     [this]( pOption_t pOption ) { // fActivateOption_t
+      std::cout << "adding option " << pOption->GetInstrumentName() << std::endl;
       m_pOptionRepository->Add( pOption );
     },
     [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
@@ -691,6 +731,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 }
                 std::cout << sUnderlying << " construct portfolio: " << m_pPortfolioOwning->Id() << " adds " << idPortfolio << std::endl;
                 combo.SetPortfolio( m_fConstructPortfolio( idPortfolio, m_pPortfolioOwning->Id() ) );
+                m_ptiSelf->UpdateText( idPortfolio );
                 m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
                 m_pValidateOptions->Get(

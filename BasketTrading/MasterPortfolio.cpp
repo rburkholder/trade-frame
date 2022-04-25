@@ -185,11 +185,17 @@ MasterPortfolio::~MasterPortfolio() {
   if ( m_worker.joinable() ) {
     m_worker.join();
   }
+
+  // captured pManageStrategy needs to be cleared
+  m_ptiTreeStrategies->Delete();
+  m_ptiTreeUnderlying->Delete();
+  m_ptiTreeRoot->Delete();
+
   //TODO: need to wait for m_pOptionEngine to finish
   //m_mapVolatility.clear();
   m_mapStrategyCache.clear();
   m_mapUnderlyingWithStrategies.clear();
-  m_pOptionEngine.release();
+  m_pOptionEngine.reset();
   m_libor.SetWatchOff();
 
   if ( m_pOptionChainQuery ) {
@@ -665,6 +671,10 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           [this]( pOption_t pOption, pWatch_t pUnderlying ){
             m_pOptionEngine->Remove( pOption, pUnderlying );
           },
+    // ManageStrategy::m_fSetChartDataView
+          [this]( pChartDataView_t p ){
+            m_fSetChartDataView( p );
+          },
     // ManageStrategy::m_fFirstTrade
           [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters
@@ -765,7 +775,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );  // "portfolio-GLD"
 
-  std::cout << "StartUnderlying " << sUnderlying << std::endl;
+  std::cout << "Start Underlying " << sUnderlying << std::endl;
 
   bool bConstructDefaultStrategy( true );
 
@@ -785,18 +795,27 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       mapStrategyCache_iter iterStrategyCache = m_mapStrategyCache.find( idPortfolioStrategy );
       StrategyCache& cacheCombo( iterStrategyCache->second );
       assert( !cacheCombo.m_mapPosition.empty() );
-      pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
 
-      bool bActivated( false );
+      bool bStrategyActive( false ); // test prior to construction
       for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
         if ( vt.second->IsActive() ) {
-          pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
-          bActivated = true;
+          bStrategyActive = true;
         }
       }
-      cacheUnderlying.m_bAccessed = true;
-      if ( bActivated ) {
+
+      if ( bStrategyActive ) {
         bConstructDefaultStrategy = false;
+
+        pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
+        Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
+
+        for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
+          if ( vt.second->IsActive() ) {
+            pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
+          }
+        }
+
+        cacheUnderlying.m_bAccessed = true;
         AddAsActiveStrategy( uws, std::make_unique<Strategy>( std::move( pManageStrategy ) ), idPortfolioStrategy );
       }
     }
@@ -807,9 +826,32 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
     assert( !uws.pStrategyInWaiting );  // need empty location
 
     pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
+    Add_ManageStrategy_ToTree( sUnderlying + "-construction" , pManageStrategy );
     uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
     uws.pStrategyInWaiting->pManageStrategy->Run();
   }
+}
+
+void MasterPortfolio::Add_ManageStrategy_ToTree( const idPortfolio_t& idPortfolioStrategy, pManageStrategy_t pManageStrategy ) {
+
+  // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
+  ou::tf::TreeItem* ptiManageStrategy = m_ptiTreeStrategies->AppendChild(
+    idPortfolioStrategy,
+    [this,pManageStrategy]( ou::tf::TreeItem* pti ){ // OnClick
+      m_fSetChartDataView( pManageStrategy->GetChartDataView() );
+    },
+    [this,pManageStrategy]( ou::tf::TreeItem* pti ){ // OnMenu
+      // todo
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Close",
+        [this,pManageStrategy]( ou::tf::TreeItem* pti){
+          const std::string& idPortfolio( pManageStrategy->GetPortfolio()->GetRow().idPortfolio );
+          std::cout << "Closing: " << idPortfolio << std::endl;
+          pManageStrategy->ClosePositions();
+        });
+    } );
+  pManageStrategy->SetTreeItem( ptiManageStrategy );
 }
 
 void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrategy_t&& pStrategy, const idPortfolio_t& idPortfolioStrategy ) {
@@ -825,31 +867,12 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
   uws.pUnderlying->PopulateChartDataView( pChartDataView ); // add price & volume
 
   // TODO: will need to move this to ConstructPortfolio, and then add an Authorized/Not-Authorized marker
-
   if ( !strategy.bChartActivated ) {
-
-    pManageStrategy_t pManageStrategy = strategy.pManageStrategy;
-
-    // TODO: need to duplicate menu, or turn into a shared ptr to attach to both sub-trees
-    ou::tf::TreeItem* ptiOwner = m_ptiTreeStrategies->AppendChild(
-      idPortfolioStrategy,
-      [this,pChartDataView]( ou::tf::TreeItem* pti ){ // OnClick
-        m_fSetChartDataView( pChartDataView );
-      },
-      [this,pManageStrategy,idPortfolioStrategy]( ou::tf::TreeItem* pti ){ // OnMenu
-        pti->NewMenu();
-        pti->AppendMenuItem(
-          "Close",
-          [this,pManageStrategy, idPortfolioStrategy]( ou::tf::TreeItem* pti){
-            std::cout << "Closing: " << idPortfolioStrategy << std::endl;
-            pManageStrategy->ClosePositions();
-          });
-      } );
-    pManageStrategy->SetTreeItemParent( ptiOwner );
     strategy.bChartActivated = true;
+    std::cout << "MasterPortfolio::AddAsActiveStrategy: " << idPortfolioStrategy << " activated" << std::endl;
   }
   else {
-    std::cout << "MasterPortfolio::AddAsActiveStrategy: when is bChartActivated activated?" << std::endl;
+    std::cout << "MasterPortfolio::AddAsActiveStrategy: " << idPortfolioStrategy << " already activated" << std::endl;
   }
 
   strategy.pManageStrategy->Run();

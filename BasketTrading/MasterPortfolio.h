@@ -207,12 +207,27 @@ private:
     : pUnderlying( std::move( pUnderlying_ ) ) {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
+
+    UnderlyingWithStrategies( UnderlyingWithStrategies&& rhs )
+    : pUnderlying( std::move( rhs.pUnderlying ) )
+    {
+      assert( rhs.mapStrategyActive.empty() );
+      assert( rhs.mapStrategyClosed.empty() );
+    }
+
+    ~UnderlyingWithStrategies() {
+      pStrategyInWaiting.reset();
+      mapStrategyClosed.clear();
+      mapStrategyActive.clear();
+    }
+
     void ClosePositions() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
         pStrategy->pManageStrategy->ClosePositions();
       }
     }
+
     void SaveSeries( const std::string& sPrefix ) {
       pUnderlying->SaveSeries( sPrefix );
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
@@ -259,6 +274,7 @@ private:
     pPortfolio_t m_pPortfolio;  // portfolio for the strategy
     mapPortfolio_t m_mapPortfolio; // sub-portfolios (option combos) -> recursive lookup [or could be a set or vector?]
     mapPosition_t m_mapPosition; // positions associated with portfolio
+
     StrategyCache( pPortfolio_t pPortfolio )
     : m_bAccessed( false ),
       m_pPortfolio( pPortfolio )
@@ -268,6 +284,12 @@ private:
       m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
       m_mapPosition( std::move( rhs.m_mapPosition ) )
     {}
+
+    ~StrategyCache() {
+      m_mapPosition.clear();
+      m_mapPortfolio.clear();
+      m_pPortfolio.reset();
+    }
   };
 
   using mapStrategyCache_t = std::map<ou::tf::Portfolio::idPortfolio_t /* owner */, StrategyCache>;
@@ -300,6 +322,7 @@ private:
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
   pManageStrategy_t ConstructStrategy( UnderlyingWithStrategies& uws );
   void StartUnderlying( UnderlyingWithStrategies& );
+  void Add_ManageStrategy_ToTree( const idPortfolio_t&, pManageStrategy_t );
   void AddAsActiveStrategy( UnderlyingWithStrategies&, pStrategy_t&&, const idPortfolio_t& idPortfolioStrategy );
 
   template<typename Archive>

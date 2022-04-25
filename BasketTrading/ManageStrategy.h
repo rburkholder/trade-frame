@@ -102,29 +102,30 @@ public:
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+  using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,
-    double dblSlopeUnderlying,
-    // TODO: convert these to left assign
-    pWatch_t, // underlying
-    pPortfolio_t, // owning portfolio
-    boost::gregorian::date dateTrading,
-    const ou::tf::option::SpreadSpecs&,
-    fGatherOptions_t&&,
+    double dblSlopeUnderlying
+  , pWatch_t // underlying
+  , pPortfolio_t // owning portfolio
+  , boost::gregorian::date dateTrading
+  , const ou::tf::option::SpreadSpecs&
+  , fGatherOptions_t&&
     //fConstructWatch_t,
-    fConstructOption_t &&,
-    fConstructPosition_t&&,
-    fConstructPortfolio_t&&,
-    fRegisterOption_t&&,
-    fStartCalc_t&&,
-    fStopCalc_t&&,
-    fFirstTrade_t,
-    fAuthorizeUnderlying_t,
-    fAuthorizeOption_t,
-    fAuthorizeSimple_t,
-    fBar_t
-    );
+  , fConstructOption_t &&
+  , fConstructPosition_t&&
+  , fConstructPortfolio_t&&
+  , fRegisterOption_t&&
+  , fStartCalc_t&&
+  , fStopCalc_t&&
+  , fSetChartDataView_t&&
+  , fFirstTrade_t
+  , fAuthorizeUnderlying_t
+  , fAuthorizeOption_t
+  , fAuthorizeSimple_t
+  , fBar_t
+  );
   virtual ~ManageStrategy( );
 
   void Run();
@@ -137,9 +138,9 @@ public:
   void SaveSeries( const std::string& sPrefix );
 
   void AddPosition( pPosition_t ); // add pre-existing position
-  void SetTreeItemParent( ou::tf::TreeItem* pti ) { m_ptiParent = pti; }
+  void SetTreeItem( ou::tf::TreeItem* ptiSelf );
 
-  pChartDataView_t GetChartDataView() { return m_pChartDataView; }
+  pChartDataView_t GetChartDataView() { return m_pChartDataView; } // some attributes populated externally
 
   void Test( void );
 
@@ -185,7 +186,6 @@ private:
 
   using volume_t = ou::tf::DatedDatum::volume_t;
 
-  //std::string m_sUnderlying;
   double m_dblSlope20DayUnderlying;
 
   pWatch_t m_pWatchUnderlying;
@@ -219,7 +219,8 @@ private:
   //const ou::tf::Bar& m_barPriorDaily;
 
   pPortfolio_t m_pPortfolioOwning; // owning portfolio
-  ou::tf::TreeItem* m_ptiParent; // should be strategy list
+  ou::tf::TreeItem* m_ptiSelf; // should be strategy list
+  fSetChartDataView_t m_fSetChartDataView;
 
   //PivotCrossing m_pivotCrossing;
 
