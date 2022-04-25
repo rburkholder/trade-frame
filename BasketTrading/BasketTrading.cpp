@@ -419,6 +419,8 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
+  m_pMasterPortfolio.reset();
+
   if ( m_db.IsOpen() ) m_db.Close();
 
   event.Skip();  // auto followed by Destroy();
