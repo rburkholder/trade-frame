@@ -34,10 +34,10 @@ namespace {
   using EField = ou::tf::l2::DataRow::EField;
 
   const ou::tf::l2::WinRow::vElement_t vElement = {
-     { (int)EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
+     { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
+    ,{ (int)EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
    , { (int)EField::BuyVolume,  45, "BVol",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
    , { (int)EField::BidSize,    45, "BSize",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-   , { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
    , { (int)EField::BidOrder,   40, "Buy",     wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
    , { (int)EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
    , { (int)EField::AskOrder,   40, "Sell",    wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
