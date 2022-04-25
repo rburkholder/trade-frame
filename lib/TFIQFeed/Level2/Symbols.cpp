@@ -130,11 +130,11 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 void MarketMaker::OnMarketDepth( const ou::tf::MarketDepth& depth ) {
   switch ( depth.MsgType() ) {
     //case 3:  doesn't have add
-    case 4: // Update
-    case 6: // Summary
+    case '4': // Update
+    case '6': // Summary
       BidOrAsk_Update( depth );
       break;
-    case 5:
+    case '5':
       BidOrAsk_Delete( depth );
       break;
     default:
