@@ -299,7 +299,7 @@ void Engine::Remove( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
     assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
     OptionEntry oe( pUnderlying, pOption );
-    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
 //  }
 }
