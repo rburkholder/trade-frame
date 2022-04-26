@@ -219,7 +219,6 @@ public:
 protected:
 
   using mapSymbols_t = std::map<idSymbol_t, pSymbol_t>;
-  using pair_mapSymbols_t = std::pair<idSymbol_t, pSymbol_t>;
   mapSymbols_t m_mapSymbols;
 
   //void Connecting( void );
@@ -257,15 +256,6 @@ ProviderInterface<P,S>::ProviderInterface(void)
 
 template <typename P, typename S>
 ProviderInterface<P,S>::~ProviderInterface(void) {
-  /*
-  m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
-  while ( m_mapSymbols.end() != iter ) {
-  // tod:  need to step through and unwatch anything still watching
-    PreSymbolDestroy( iter->second );
-    delete iter->second;
-    ++iter;
-  }
-  */
   m_mapSymbols.clear();
 }
 
@@ -323,7 +313,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( p
 
   typename mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->GetId(), pSymbol ) );
+    m_mapSymbols.insert( typename mapSymbols_t::value_type( pSymbol->GetId(), pSymbol ) );
     iter = m_mapSymbols.find( pSymbol->GetId() );
     assert( m_mapSymbols.end() != iter );
   }
