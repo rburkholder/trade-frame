@@ -85,7 +85,9 @@ void IQFeedProvider::OnIQFeedError( size_t e ) {
 
 IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
-  pSymbol->SetContext( m_srvc );
+  if ( 1 < m_nThreads ) {
+    pSymbol->SetContext( m_srvc );
+  }
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }

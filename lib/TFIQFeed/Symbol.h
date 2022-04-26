@@ -130,6 +130,7 @@ private:
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
 
+  bool m_bStrand;
   std::unique_ptr<boost::asio::io_context::strand> m_pStrand;
 };
 

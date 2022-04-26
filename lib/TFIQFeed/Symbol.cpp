@@ -20,6 +20,32 @@
 
 #include "Symbol.h"
 
+#define STRAND( command ) \
+  if ( m_bStrand ) {      \
+    boost::asio::post(    \
+      *m_pStrand,         \
+      [this](){           \
+        command;          \
+      }                   \
+      );                  \
+  }                       \
+  else {                  \
+    command;              \
+  }
+
+#define STRAND_CAPTURE( command, capture ) \
+  if ( m_bStrand ) {      \
+    boost::asio::post(    \
+      *m_pStrand,         \
+      [this,capture](){   \
+        command;          \
+      }                   \
+      );                  \
+  }                       \
+  else {                  \
+    command;              \
+  }
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
@@ -30,6 +56,7 @@ IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument
 , m_QStatus( qUnknown )
 , m_stateWatch( WatchState::None )
 , m_bWaitForFirstQuote( true )
+, m_bStrand( false )
 {
   m_pFundamentals = std::make_shared<Fundamentals>();
   m_pSummary = std::make_shared<Summary>();
@@ -41,6 +68,7 @@ IQFeedSymbol::~IQFeedSymbol() {
 void IQFeedSymbol::SetContext( boost::asio::io_context& io_context ) {
   assert( !m_pStrand );
   m_pStrand = std::make_unique<boost::asio::io_context::strand>( io_context );
+  m_bStrand = true;
 }
 
 void IQFeedSymbol::HandleFundamentalMessage(
@@ -94,13 +122,7 @@ void IQFeedSymbol::HandleFundamentalMessage(
       break;
     default: {}
   }
-
-  boost::asio::post(
-    *m_pStrand,
-    [this](){
-      OnFundamentalMessage( m_pFundamentals );
-    }
-    );
+  STRAND( OnFundamentalMessage( m_pFundamentals ) )
 }
 
 template <typename T>
@@ -248,24 +270,14 @@ void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage* pMsg ) {
 
   DecodePricingMessage<IQFSummaryMessage>( pMsg );
 
-  boost::asio::post(
-    *m_pStrand,
-    [this](){
-      OnSummaryMessage( m_pSummary );
-    }
-    );
+  STRAND( OnSummaryMessage( m_pSummary ) )
 
   Summary& summary( *m_pSummary );
 
   if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
     ptime dt( ou::TimeSource::Instance().External() );
     Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
-    boost::asio::post(
-      *m_pStrand,
-      [this,quote](){
-        Symbol::m_OnQuote( quote );
-      }
-      );
+    STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
   }
 
 }
@@ -282,12 +294,7 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage* pMsg ) {
   if ( qFound == m_QStatus ) {
     DecodePricingMessage<IQFUpdateMessage>( pMsg );
 
-    boost::asio::post(
-      *m_pStrand,
-      [this](){
-        OnUpdateMessage( m_pSummary );
-      }
-      );
+    STRAND( OnUpdateMessage( m_pSummary ) )
 
     Summary& summary( *m_pSummary );
 
@@ -296,26 +303,14 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage* pMsg ) {
     // quote needs to be sent before the trade
     if ( summary.bNewQuote ) {
       const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
-      boost::asio::post(
-        *m_pStrand,
-        [this,quote](){
-          Symbol::m_OnQuote( quote );
-        }
-        );
+      STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
     }
+
     if ( summary.bNewTrade ) {
       Trade trade( dt, summary.dblTrade, summary.nTradeSize );
-      boost::asio::post(
-        *m_pStrand,
-        [this,trade](){
-          Symbol::m_OnTrade( trade );
-        });
+      STRAND_CAPTURE( (Symbol::m_OnTrade( trade )), trade)
       if ( summary.bNewOpen ) {
-        boost::asio::post(
-          *m_pStrand,
-          [this,trade](){
-            Symbol::m_OnOpen( trade );
-          });
+        STRAND_CAPTURE( (Symbol::m_OnOpen( trade )), trade)
       }
     }
   }
@@ -325,24 +320,14 @@ void IQFeedSymbol::HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage
 
   DecodeDynamicFeedMessage<IQFDynamicFeedSummaryMessage>( pMsg );
 
-  boost::asio::post(
-    *m_pStrand,
-    [this](){
-      OnSummaryMessage( m_pSummary );
-    }
-    );
+  STRAND( OnSummaryMessage( m_pSummary ) )
 
   Summary& summary( *m_pSummary );
 
   if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
     ptime dt( ou::TimeSource::Instance().External() );
     Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
-    boost::asio::post(
-      *m_pStrand,
-      [this,quote](){
-        Symbol::m_OnQuote( quote );
-      }
-      );
+    STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
   }
 
 }
@@ -358,12 +343,7 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
 //  if ( qFound == m_QStatus ) {
     DecodeDynamicFeedMessage<IQFDynamicFeedUpdateMessage>( pMsg );
 
-    boost::asio::post(
-      *m_pStrand,
-      [this](){
-        OnUpdateMessage( m_pSummary );
-      }
-      );
+    STRAND( OnUpdateMessage( m_pSummary ) )
 
     Summary& summary( *m_pSummary );
 
@@ -372,31 +352,15 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
     // quote needs to be sent before the trade
     if ( summary.bNewQuote ) {
       const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
-
-      boost::asio::post(
-        *m_pStrand,
-        [this,quote](){
-          Symbol::m_OnQuote( quote );
-        }
-        );
+      STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
 
     }
     if ( summary.bNewTrade ) {
       Trade trade( dt, summary.dblTrade, summary.nTradeSize );
-
-      boost::asio::post(
-        *m_pStrand,
-        [this,trade](){
-          Symbol::m_OnTrade( trade );
-        }
-        );
+      STRAND_CAPTURE( (Symbol::m_OnTrade( trade )), trade )
 
       if ( summary.bNewOpen ) {
-        boost::asio::post(
-          *m_pStrand,
-          [this,trade](){
-            Symbol::m_OnOpen( trade );
-          });
+        STRAND_CAPTURE( (Symbol::m_OnOpen( trade )), trade )
       }
     }
 //  }
