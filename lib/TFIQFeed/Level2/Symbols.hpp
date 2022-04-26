@@ -59,7 +59,7 @@ public:
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
   void BuildTimeSeries( bool bFlag ) { m_bBuildTimeSeries = bFlag; }
-  void SaveSeries( const std::string& sPrefix, const std::string& sSymbol );
+  virtual void SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {};
 
 protected:
 
@@ -88,8 +88,6 @@ protected:
     mapLimitOrderBook_t&
   );
 
-  ou::tf::MarketDepths m_depths;
-
 private:
 };
 
@@ -110,8 +108,9 @@ public:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
 
-  void OnMarketDepth( const ou::tf::MarketDepth& );
+  void MarketDepth( const ou::tf::MarketDepth& ); // offline message submission
 
+  virtual void SaveSeries( const std::string& sPrefix, const std::string& sSymbol );
   void EmitMarketMakerMaps();
 
 protected:
@@ -132,6 +131,8 @@ private:
   using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
+
+  ou::tf::MarketDepths m_depths;
 
   void BidOrAsk_Update( const ou::tf::MarketDepth& );
   void BidOrAsk_Delete( const ou::tf::MarketDepth& );

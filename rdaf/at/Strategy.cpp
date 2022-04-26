@@ -299,7 +299,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleDepth( const ou::tf::MarketDepth& depth ) {
   assert( m_pMarketMaker );
-  m_pMarketMaker->OnMarketDepth( depth );
+  m_pMarketMaker->MarketDepth( depth );
 }
 
 void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {

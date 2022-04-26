@@ -62,32 +62,6 @@ void L2Base::LimitOrderAdd(
   if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity, true );
 }
 
-void L2Base::SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {
-
-  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
-
-  try {
-
-    std::string sPathName;
-
-    if ( 0 != m_depths.Size() ) {
-      sPathName = sPrefix + "/depths/" + sSymbol;
-      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
-      wtsDepths.Write( sPathName, &m_depths );
-      HDF5Attributes attrQuotes( dm, sPathName );
-      attrQuotes.SetSignature( ou::tf::MarketDepth::Signature() );
-      attrQuotes.SetMultiplier( 1 );  // is this required?
-      //attrQuotes.SetSignificantDigits( 2 ); // is this required? - might use precision from original message
-      attrQuotes.SetProviderType( ou::tf::keytypes::EProviderIQF );
-    }
-
-  }
-  catch (...) {
-    std::cout << "L2Base::SaveSeries depths error: " << sPrefix << std::endl;
-  }
-
-}
-
 // ==== MarketMaker
 
 // for nasdaq LII
@@ -127,7 +101,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
   }
 }
 
-void MarketMaker::OnMarketDepth( const ou::tf::MarketDepth& depth ) {
+void MarketMaker::MarketDepth( const ou::tf::MarketDepth& depth ) {
   switch ( depth.MsgType() ) {
     //case 3:  doesn't have add
     case '4': // Update
@@ -245,6 +219,32 @@ void MarketMaker::MMLimitOrder_Delete(
     }
     else assert( false ); // how inconsistent are things?
     mapMM.erase( mapMM_iter );
+  }
+
+}
+
+void MarketMaker::SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  try {
+
+    std::string sPathName;
+
+    if ( 0 != m_depths.Size() ) {
+      sPathName = sPrefix + "/depths/" + sSymbol;
+      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
+      wtsDepths.Write( sPathName, &m_depths );
+      HDF5Attributes attrQuotes( dm, sPathName );
+      attrQuotes.SetSignature( ou::tf::MarketDepth::Signature() );
+      attrQuotes.SetMultiplier( 1 );  // is this required?
+      //attrQuotes.SetSignificantDigits( 2 ); // is this required? - might use precision from original message
+      attrQuotes.SetProviderType( ou::tf::keytypes::EProviderIQF );
+    }
+
+  }
+  catch (...) {
+    std::cout << "MarketMaker::SaveSeries depths error: " << sPrefix << std::endl;
   }
 
 }
