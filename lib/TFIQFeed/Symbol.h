@@ -17,9 +17,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/io_context_strand.hpp>
-
 #include <OUCommon/Delegate.h>
 
 #include <TFTrading/Symbol.h>
@@ -87,8 +84,6 @@ public:
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
-  void SetContext( boost::asio::io_context& );
-
 protected:
 
   unsigned short m_cnt;  // used for watch/unwatch
@@ -130,8 +125,6 @@ private:
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
 
-  bool m_bStrand;
-  std::unique_ptr<boost::asio::io_context::strand> m_pStrand;
 };
 
 } // namespace iqfeed

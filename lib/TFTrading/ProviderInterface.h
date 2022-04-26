@@ -20,6 +20,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <boost/thread.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+
 #include <OUCommon/Delegate.h>
 
 #include "KeyTypes.h"
@@ -68,13 +74,32 @@ public:
   eidProvider_t ID() const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
 
   ProviderInterfaceBase()
-    : m_nID( keytypes::EProviderUnknown ), m_bConnected( false ),
-      m_pProvidesBrokerInterface( false ),
-      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepths( false )
-    {};
-  virtual ~ProviderInterfaceBase() {};
+  : m_nID( keytypes::EProviderUnknown ), m_bConnected( false )
+  , m_pProvidesBrokerInterface( false )
+  , m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepths( false )
+  , m_nThreads( 0 )
+  {
+    m_srvcWork = boost::asio::require(
+      m_srvc.get_executor(),
+      boost::asio::execution::outstanding_work.tracked );
+  };
 
-  virtual void Connect() {}; // called by inheriting provider
+  virtual ~ProviderInterfaceBase() {
+    m_srvcWork = boost::asio::any_io_executor();
+    m_threads.join_all();
+  };
+
+  virtual void Connect() { // provides a worker thread for each provider
+    if ( 0 < m_nThreads ) {
+      if ( 0 == m_threads.size() ) { // one time initialization
+        std::cout << "ProviderInterfaceBase::Connect using " << m_nThreads << " threads" << std::endl;
+        for ( std::size_t ix = 0; ix < m_nThreads; ix++ ) {
+          m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
+        }
+      }
+    }
+  }; // called by inheriting provider
+
   //virtual void Connecting() {}; // called by inheriting provider
   ou::Delegate<int> OnConnecting;
   ou::Delegate<int> OnConnected;  // could be in another thread
@@ -120,6 +145,13 @@ public:
     OnSecurityDefinitionNotFound = function;
   }
 
+  // strong suggestion: set prior to connect
+  //   affects context and optional thread usage (to be implemented
+  void SetThreadCount( size_t nThreads ) {
+    assert( 0 < nThreads );
+    m_nThreads = nThreads;
+    }
+
 protected:
 
   std::string m_sName;  // name of provider
@@ -133,6 +165,12 @@ protected:
   bool m_bProvidesTrades;
   bool m_bProvidesDepths;
   bool m_bProvidesGreeks;
+
+  size_t m_nThreads;
+
+  boost::asio::io_context m_srvc; // threads for use in symbols
+  boost::asio::any_io_executor m_srvcWork;
+  boost::thread_group m_threads;
 
   OnSecurityDefinitionNotFoundHandler_t OnSecurityDefinitionNotFound;
 
@@ -278,6 +316,11 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::Add( pInstrum
 template <typename P, typename S>
 typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( pSymbol_t pSymbol) {
   // todo:  add an assert to validate acceptable CSymbol type
+
+  if ( 0 < m_nThreads ) {
+    pSymbol->SetContext( m_srvc );
+  }
+
   typename mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
   if ( m_mapSymbols.end() == iter ) {
     m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->GetId(), pSymbol ) );
@@ -287,6 +330,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( p
   else {
     throw std::runtime_error( "AddCSymbol " + pSymbol->GetId() + " symbol already exists in provider" );
   }
+
   return iter->second;
 }
 

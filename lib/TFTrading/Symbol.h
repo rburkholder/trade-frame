@@ -15,6 +15,9 @@
 
 #include <string>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/io_context_strand.hpp>
+
 #include <boost/shared_ptr.hpp>
 
 #include <OUCommon/Delegate.h>
@@ -85,6 +88,8 @@ public:
   bool DepthWatchNeeded() const { return !m_OnDepth.IsEmpty(); };
   bool GreekWatchNeeded() const { return !m_OnGreek.IsEmpty(); };
 
+  void SetContext( boost::asio::io_context& );
+
 protected:
 
   idSymbol_t m_id;  // may be overwritten with provider specific override
@@ -95,6 +100,9 @@ protected:
   ou::Delegate<trade_t> m_OnTrade;
   ou::Delegate<depth_t> m_OnDepth;
   ou::Delegate<greek_t> m_OnGreek;
+
+  bool m_bStrand;
+  std::unique_ptr<boost::asio::io_context::strand> m_pStrand;
 
 private:
 

@@ -25,33 +25,20 @@ namespace iqfeed { // IQFeed
 IQFeedProvider::IQFeedProvider()
 : ProviderInterface<IQFeedProvider,IQFeedSymbol>()
 , IQFeed<IQFeedProvider>()
-, m_nThreads( 1 )
 {
   m_sName = "IQF";
   m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
 
-  m_srvcWork = boost::asio::require(
-    m_srvc.get_executor(),
-    boost::asio::execution::outstanding_work.tracked );
 }
 
 IQFeedProvider::~IQFeedProvider() {
-  m_srvcWork = boost::asio::any_io_executor();
-  m_threads.join_all();
 }
 
 void IQFeedProvider::Connect() {
   if ( !m_bConnected ) {
 
-    if ( 0 == m_threads.size() ) { // one time initialization
-      assert( 0 < m_nThreads );
-      std::cout << "IQFeedProvider::Connect using " << m_nThreads << " threads" << std::endl;
-      for ( std::size_t ix = 0; ix < m_nThreads; ix++ ) {
-        m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
-      }
-    }
 
     ProviderInterfaceBase::OnConnecting( 0 );
     inherited_t::Connect();
@@ -85,9 +72,6 @@ void IQFeedProvider::OnIQFeedError( size_t e ) {
 
 IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
-  if ( 1 < m_nThreads ) {
-    pSymbol->SetContext( m_srvc );
-  }
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }

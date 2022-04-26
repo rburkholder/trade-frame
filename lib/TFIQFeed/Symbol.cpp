@@ -56,19 +56,12 @@ IQFeedSymbol::IQFeedSymbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument
 , m_QStatus( qUnknown )
 , m_stateWatch( WatchState::None )
 , m_bWaitForFirstQuote( true )
-, m_bStrand( false )
 {
   m_pFundamentals = std::make_shared<Fundamentals>();
   m_pSummary = std::make_shared<Summary>();
 }
 
 IQFeedSymbol::~IQFeedSymbol() {
-}
-
-void IQFeedSymbol::SetContext( boost::asio::io_context& io_context ) {
-  assert( !m_pStrand );
-  m_pStrand = std::make_unique<boost::asio::io_context::strand>( io_context );
-  m_bStrand = true;
 }
 
 void IQFeedSymbol::HandleFundamentalMessage(

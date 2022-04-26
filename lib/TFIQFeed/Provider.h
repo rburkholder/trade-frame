@@ -14,13 +14,6 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-
-#include <boost/thread.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/executor_work_guard.hpp>
-
 #include "TFTrading/ProviderInterface.h"
 
 #include "IQFeed.h"
@@ -55,11 +48,6 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
-  // strong suggestion: set prior to connect
-  //   affects context and optional thread usage (to be implemented
-  //     default 1 thread, then no posting to strands
-  void SetThreadCount( size_t nThreads ) { m_nThreads = nThreads; }
-
 protected:
 
   // overridden from ProviderInterface, called when application adds/removes watches
@@ -85,12 +73,6 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
-
-  size_t m_nThreads;
-
-  boost::asio::io_context m_srvc; // threads for use in symbols
-  boost::asio::any_io_executor m_srvcWork;
-  boost::thread_group m_threads;
 
   void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 

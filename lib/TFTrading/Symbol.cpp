@@ -18,20 +18,27 @@ namespace tf { // TradeFrame
 
 SymbolBase::SymbolBase( pInstrument_t pInstrument )
 :
-  m_id( pInstrument->GetInstrumentName() ),  // use the generic name, but in provider, use provider specific name
-  m_pInstrument( pInstrument )
-  {
+  m_id( pInstrument->GetInstrumentName() )  // use the generic name, but in provider, use provider specific name
+, m_pInstrument( pInstrument )
+, m_bStrand( false )
+{
   // need to set using the provider specific from CInstrument, but need provider id to do so. .. see other constructor
 }
 
 SymbolBase::SymbolBase( pInstrument_t pInstrument, const std::string& sName )
 :
-  m_id( sName ),  // use the generic name, but in provider, use provider specific name
-  m_pInstrument( pInstrument )
-  {
+  m_id( sName )  // use the generic name, but in provider, use provider specific name
+, m_pInstrument( pInstrument )
+, m_bStrand( false )
+{}
+
+SymbolBase::~SymbolBase() {
 }
 
-SymbolBase::~SymbolBase(void) {
+void SymbolBase::SetContext( boost::asio::io_context& io_context ) {
+  assert( !m_pStrand );
+  m_pStrand = std::make_unique<boost::asio::io_context::strand>( io_context );
+  m_bStrand = true;
 }
 
 void SymbolBase::AddOnOpenHandler( tradehandler_t handler ) {
