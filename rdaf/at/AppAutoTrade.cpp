@@ -132,8 +132,10 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  if ( 0 < m_choices.sGroupDirectory.size() ) {
-    m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
+  if ( m_choices.bStartSimulator ) {
+    if ( 0 < m_choices.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
+    }
   }
 
   m_tws->SetClientId( m_choices.ib_client_id );
