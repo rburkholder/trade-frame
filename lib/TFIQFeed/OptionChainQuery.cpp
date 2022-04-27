@@ -408,8 +408,10 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << sYears << ","
     << sNearMonths << ","
     << "CFO-" << sSymbol
+    ;
+  std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
+  ss
     << "\n";
-  //std::cout << "request: '" << ss.str() << "'" << std::endl;
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
