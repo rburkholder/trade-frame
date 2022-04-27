@@ -229,9 +229,9 @@ MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, cha
 : DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( mmid )
 {}
 
-MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, const std::string& sMMID )
-: DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( sMMID )
-{}
+//MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, const std::string& sMMID )
+//: DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( sMMID )
+//{}
 
 MarketDepth::~MarketDepth() {}
 

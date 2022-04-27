@@ -190,7 +190,7 @@ public:
   MarketDepth( const MarketDepth& md );
   MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, char* pch );
   MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, const std::string& smmid );
+  //MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, const std::string& smmid );
   ~MarketDepth();
 
   char MsgType() const { return m_chMsgType; }
@@ -219,17 +219,16 @@ public:
 protected:
   union unionMMID {
     MMID_t mmid;
-    char rch[5];
-    unionMMID() { mmid = 0; rch[4] = 0; }
-    unionMMID( MMID_t id ): mmid( id ) { rch[4] = 0; }
-    unionMMID( const unionMMID &u ): mmid( u.mmid ) { rch[4] = 0; }
+    char rch[4];
+    unionMMID() { mmid = 0; }
+    unionMMID( MMID_t id ): mmid( id ) {}
+    unionMMID( const unionMMID &u ): mmid( u.mmid ) {}
     unionMMID( const char* pch ) {
       char* p = rch;
       for ( int ix = 0; ix < 4; ix++ ) {
         *p = *pch;
         p++; pch++;
       }
-      *p = 0;
     }
     unionMMID( const std::string& s ) {
       assert( 4 == s.size() );
@@ -237,7 +236,6 @@ protected:
       rch[1] = s[1];
       rch[2] = s[2];
       rch[3] = s[3];
-      rch[4] = 0;
     }
   } m_uMMID;
 private:
