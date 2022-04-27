@@ -41,7 +41,7 @@ class FrameMain: public wxFrame {
   friend class boost::serialization::access;
 public:
 
-  typedef FastDelegate0<> OnActionHandler_t;
+  using OnActionHandler_t = FastDelegate0<>;
 
   struct structMenuItem: wxObject {
     std::string text;
@@ -54,7 +54,7 @@ public:
       : text( rhs.text ), OnActionHandler( rhs.OnActionHandler ), ix( rhs.ix ) {};
   };
 
-  typedef std::vector<structMenuItem*> vpItems_t;
+  using vpItems_t = std::vector<structMenuItem*>;
 
   FrameMain(void);
   FrameMain(
