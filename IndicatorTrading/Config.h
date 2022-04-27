@@ -34,13 +34,9 @@ struct Options {
 
   int nPeriodWidth;  // units:  seconds
 
-  // shortest EMA
+  // shortest to longest
   int nMA1Periods;
-
-  // shortest EMA
   int nMA2Periods;
-
-  // longest EMA
   int nMA3Periods;
 
   int nStochastic1Periods;
