@@ -157,8 +157,8 @@ bool AppDoM::OnInit() {
     m_vStochastic.emplace_back(
       std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic1Periods, td,
       [this]( ptime dt, double k, double min, double max ){
-        m_pPanelTrade->UpdateDynamicIndicator( "st1u", max );
-        m_pPanelTrade->UpdateDynamicIndicator( "st1l", min );
+        m_pPanelTrade->UpdateDynamicIndicator( "st1u", max ); // upper
+        m_pPanelTrade->UpdateDynamicIndicator( "st1l", min ); // lower
       }
       ) );
     m_vStochastic.emplace_back(
