@@ -120,6 +120,9 @@ bool AppDoM::OnInit() {
           m_cntLoops = 5;
         }
         else m_cntLoops--;
+        for ( const vMA_t::value_type& vt: m_vMA ) {
+          m_pPanelTrade->UpdateDynamicIndicator( vt.sName, vt.Latest() );
+        }
       });
 
 //    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );

@@ -110,21 +110,22 @@ private:
 
   struct MA {
 
+    std::string sName;
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
 
-    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, const std::string& sName )
+    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, const std::string& sName_ )
     : m_ema( quotes, nPeriods, tdPeriod )
     {
-      //m_ceMA.SetName( sName );
+      sName = sName_;
     }
 
     MA( MA&& rhs )
-    : m_ema(  std::move( rhs.m_ema ) )
+    : m_ema( std::move( rhs.m_ema ) ), sName( std::move( rhs.sName ) )
     {}
 
-    void Update( ptime dt ) {
+    //void Update( ptime dt ) {
       //m_ceMA.Append( dt, m_ema.GetEMA() );
-    }
+    //}
 
     double Latest() const { return m_ema.GetEMA(); }
   };
