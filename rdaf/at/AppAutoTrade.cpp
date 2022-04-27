@@ -436,7 +436,7 @@ void AppAutoTrade::HandleMenuActionCloseAndDone() {
 }
 
 void AppAutoTrade::HandleMenuActionSaveValues() {
-  std::cout << "Saving collected values to " << std::endl;
+  std::cout << "Saving collected values to ";
   CallAfter(
     [this](){
       m_nTSDataStreamSequence++; // sequence number on each save
@@ -444,7 +444,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
         "/app/" + sDirectory + "/" +
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
-      std::cout << sPath;
+      std::cout << sPath << std::endl;
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         vt.second->SaveWatch( sPath );
       }
