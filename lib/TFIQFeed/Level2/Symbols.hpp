@@ -128,7 +128,7 @@ private:
     : price( price_ ), volume( volume_ ) {}
   };
 
-  using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
+  using mapMM_t = std::map<MarketDepth::MMID_t,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
@@ -141,7 +141,7 @@ private:
     mapMM_t&, mapLimitOrderBook_t& );
 
   void MMLimitOrder_Update(
-    const std::string& sMarketMaker,
+    MarketDepth::MMID_t, // MMID
     double price, volume_t volume,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
@@ -152,7 +152,7 @@ private:
     mapMM_t&, mapLimitOrderBook_t& );
 
   void MMLimitOrder_Delete(
-    const std::string& sMarketMaker,
+    MarketDepth::MMID_t, // MMID
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
 };
@@ -191,7 +191,9 @@ private:
     : chOrderSide( msg.chOrderSide ),
       dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
       nPriority( msg.nPriority ), nPrecision( msg.nPrecision )
-    { assert( 0 == msg.sMarketMaker.size() ); }
+    { //assert( 0 == msg.sMarketMaker.size() );
+      assert( 0 == msg.rchMMID[0] );
+    }
   };
 
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
@@ -308,11 +310,11 @@ private:
 
     pL2Base_t pL2Base;
     if ( 0 != msg.nOrderId ) {
-      assert( 0 == msg.sMarketMaker.size() );
+      assert( 0 == msg.rchMMID[0] );
       pL2Base = OrderBased::Factory();
     }
     else {
-      assert( 4 == msg.sMarketMaker.size() );
+      //assert( 4 == msg.sMarketMaker.size() ); // TODO: check each character is non-zero
       pL2Base = MarketMaker::Factory();
     }
     m_mapL2Base.emplace( msg.sSymbolName, pL2Base );

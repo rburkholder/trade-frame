@@ -62,7 +62,7 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.sMarketMaker );
+    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.rchMMID );
     m_fMarketDepth( md );
   }
   else {
@@ -81,7 +81,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.sMarketMaker );
+    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.rchMMID );
     m_fMarketDepth( md );
   }
   else {
@@ -114,10 +114,10 @@ void MarketMaker::MarketDepth( const ou::tf::MarketDepth& depth ) {
 void MarketMaker::BidOrAsk_Update( const ou::tf::MarketDepth& depth ) {
   switch ( depth.Side() ) {
     case 'A':
-      MMLimitOrder_Update( depth.MMIDStr(), depth.Price(), depth.Volume(),  m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
+      MMLimitOrder_Update( depth.MMID(), depth.Price(), depth.Volume(),  m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
       break;
     case 'B':
-      MMLimitOrder_Update( depth.MMIDStr(), depth.Price(), depth.Volume(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
+      MMLimitOrder_Update( depth.MMID(), depth.Price(), depth.Volume(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
       break;
   }
 }
@@ -125,10 +125,10 @@ void MarketMaker::BidOrAsk_Update( const ou::tf::MarketDepth& depth ) {
 void MarketMaker::BidOrAsk_Delete( const ou::tf::MarketDepth& depth ) {
   switch ( depth.Side() ) {
     case 'A':
-      MMLimitOrder_Delete( depth.MMIDStr(), m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
+      MMLimitOrder_Delete( depth.MMID(), m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
       break;
     case 'B':
-      MMLimitOrder_Delete( depth.MMIDStr(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
+      MMLimitOrder_Delete( depth.MMID(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
       break;
   }
 }
@@ -138,12 +138,12 @@ void MarketMaker::MMLimitOrder_Update_Live(
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM, mapLimitOrderBook_t& mapLimitOrderBook
 ) {
-  MMLimitOrder_Update( msg.sMarketMaker, msg.dblPrice, msg.nQuantity, f, mapMM, mapLimitOrderBook );
+  MMLimitOrder_Update( ou::tf::MarketDepth::Cast( msg.rchMMID ), msg.dblPrice, msg.nQuantity, f, mapMM, mapLimitOrderBook );
 }
 
 void MarketMaker::MMLimitOrder_Update(
-  const std::string& sMarketMaker,
-    double price, volume_t volume,
+  MarketDepth::MMID_t mmid,
+  double price, volume_t volume,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
@@ -151,9 +151,9 @@ void MarketMaker::MMLimitOrder_Update(
 
   price_level pl( price, volume );
 
-  mapMM_t::iterator mapMM_iter = mapMM.find( sMarketMaker );
+  mapMM_t::iterator mapMM_iter = mapMM.find( mmid );
   if ( mapMM.end() == mapMM_iter ) {
-    auto pair = mapMM.emplace( sMarketMaker, pl );
+    auto pair = mapMM.emplace( mmid, pl );
     assert( pair.second );
     mapMM_iter = pair.first;
   }
@@ -190,17 +190,17 @@ void MarketMaker::MMLimitOrder_Delete_Live(
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
 ) {
-  MMLimitOrder_Delete( msg.sMarketMaker, f, mapMM, mapLimitOrderBook );
+  MMLimitOrder_Delete( ou::tf::MarketDepth::Cast( msg.rchMMID ), f, mapMM, mapLimitOrderBook );
 }
 
 void MarketMaker::MMLimitOrder_Delete(
-  const std::string& sMarketMaker,
+  MarketDepth::MMID_t mmid, // MMID
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
 ) {
 
-  mapMM_t::iterator mapMM_iter = mapMM.find( sMarketMaker );
+  mapMM_t::iterator mapMM_iter = mapMM.find( mmid );
   if ( mapMM.end() == mapMM_iter ) {
     // this should probably be an assert( false )
     // but then will reqquire recovery from stream outages
@@ -243,7 +243,7 @@ void MarketMaker::EmitMarketMakerMaps() {
   mapPriceLevels_t mapPriceMMBid;
 
   for ( const mapMM_t::value_type& vt: m_mapMMAsk ) {
-    price_mm pmm( vt.second.price, vt.first );
+    price_mm pmm( vt.second.price, ou::tf::MarketDepth::Cast( vt.first ) );
     mapPriceMMAsk.emplace( pmm, vt.second.volume );
 
     //std::cout
@@ -255,7 +255,7 @@ void MarketMaker::EmitMarketMakerMaps() {
   }
 
   for ( const mapMM_t::value_type& vt: m_mapMMBid ) {
-    price_mm pmm( vt.second.price, vt.first );
+    price_mm pmm( vt.second.price, ou::tf::MarketDepth::Cast( vt.first ) );
     mapPriceMMBid.emplace( pmm, vt.second.volume );
 
     //std::cout

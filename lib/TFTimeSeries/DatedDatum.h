@@ -183,24 +183,33 @@ private:
 class MarketDepth: public DatedDatum {
 public:
 
-  using MMID_t = unsigned long;
-  enum ESide : char { Bid, Ask, None }; // use global enumerations?
+  using MMID_t = uint32_t;
 
   MarketDepth();
   MarketDepth( const dt_t dt );
   MarketDepth( const MarketDepth& md );
+  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, char* pch );
   MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
   MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, const std::string& smmid );
   ~MarketDepth();
 
   char MsgType() const { return m_chMsgType; }
-  //ESide Side() const { return m_eSide; }
   char Side() const { return m_chSide; }
   volume_t Volume() const { return m_nShares; }
   price_t Price() const { return m_dblPrice; }
 
+  static MMID_t Cast( const char* rchMMID ) {
+    unionMMID ummid( rchMMID );
+    return ummid.mmid;
+  }
+
+  static std::string Cast( MMID_t mmid ) {
+    unionMMID ummid( mmid );
+    std::string s( ummid.rch, 4 );
+    return s;
+  }
+
   MMID_t MMID() const { return m_uMMID.mmid; }
-  //const char& MMIDStr() const { return *m_uMMID.rch; }
   std::string MMIDStr() const { return std::string( m_uMMID.rch, 4 ); }
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
@@ -214,6 +223,14 @@ protected:
     unionMMID() { mmid = 0; rch[4] = 0; }
     unionMMID( MMID_t id ): mmid( id ) { rch[4] = 0; }
     unionMMID( const unionMMID &u ): mmid( u.mmid ) { rch[4] = 0; }
+    unionMMID( const char* pch ) {
+      char* p = rch;
+      for ( int ix = 0; ix < 4; ix++ ) {
+        *p = *pch;
+        p++; pch++;
+      }
+      *p = 0;
+    }
     unionMMID( const std::string& s ) {
       assert( 4 == s.size() );
       rch[0] = s[0];
@@ -227,7 +244,6 @@ private:
   volume_t m_nShares;
   price_t m_dblPrice;
   char m_chMsgType; // 6 is summary, 3 is add, 4 is update
-  //ESide m_eSide;
   char m_chSide; // simplifies insertion into MarketDepth handlers
 };
 

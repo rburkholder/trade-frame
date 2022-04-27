@@ -68,11 +68,14 @@ struct decoded {
   char chMsgType;
   std::string sSymbolName;
   uint64_t nOrderId;
-  std::string sMarketMaker;
+  //std::string sMarketMaker;
+  char rchMMID[ 4 ];
   char chOrderSide;  // 'A' Sell, 'B' Buy
   time_t time;
   date_t date;
-  decoded(): nOrderId {} {}
+  decoded(): nOrderId {} {
+    for ( int ix = 0; ix < 4; ix++ ) { rchMMID[ ix ] = 0;}
+  }
 };
 
 } // namespace OrderDelete
@@ -104,7 +107,11 @@ BOOST_FUSION_ADAPT_STRUCT(
   (char, chMsgType)
   (std::string, sSymbolName)
   (uint64_t, nOrderId)
-  (std::string, sMarketMaker)
+  //(std::string, sMarketMaker)
+  (char, rchMMID[0])
+  (char, rchMMID[1])
+  (char, rchMMID[2])
+  (char, rchMMID[3])
   (char, chOrderSide)
   (msg_delete_t::time_t, time)
   (msg_delete_t::date_t, date)
@@ -134,6 +141,7 @@ namespace OrderDelete {
       ruleUint32 %= qi::ulong_;
       ruleUint64 %= qi::ulong_long;
       ruleString %= *( qi::char_ - qi::char_( ',' ) );
+      ruleMMID %= qi::char_ - qi::char_( ',' );
 
       ruleOrderSide %=
           qi::char_( 'A' ) // Sell
@@ -162,7 +170,8 @@ namespace OrderDelete {
            ruleMsgType >> qi::lit( ',' ) // cMsgType
         >> ruleString >> qi::lit( ',' ) // sSymbolName
         >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
-        >> -ruleString >> qi::lit( ',' ) // market maker for nasdaq LII
+        //>> ruleString >> qi::lit( ',' ) // sMarketMaker
+        >> -ruleMMID >> -ruleMMID >> -ruleMMID >> -ruleMMID >> qi::lit( ',' ) // four character MMID
         >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
         >> -ruleTime >> qi::lit( ',')
         >> ruleDate
@@ -173,6 +182,7 @@ namespace OrderDelete {
 
     qi::rule<Iterator, char()> ruleMsgType;
     qi::rule<Iterator, char()> ruleOrderSide;
+    qi::rule<Iterator, char()> ruleMMID;
     qi::rule<Iterator, uint32_t()> ruleUint32;
     qi::rule<Iterator, uint64_t()> ruleUint64;
     qi::rule<Iterator, std::string()> ruleString;
