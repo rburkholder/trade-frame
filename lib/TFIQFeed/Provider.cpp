@@ -30,6 +30,7 @@ IQFeedProvider::IQFeedProvider()
   m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
+  m_bProvidesDepths = true;
 
 }
 
