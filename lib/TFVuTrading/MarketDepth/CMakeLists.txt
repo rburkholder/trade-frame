@@ -14,6 +14,7 @@ set(
     Ladder/DataRow.hpp
     Ladder/DataRows.hpp
     PanelTrade.hpp
+    PanelSideBySide.hpp
     WinRowElement.hpp
     WinRow.hpp
   )
@@ -24,6 +25,7 @@ set(
     Ladder/DataRow.cpp
     Ladder/DataRows.cpp
     PanelTrade.cpp
+    PanelSideBySide.cpp
     WinRowElement.cpp
     WinRow.cpp
   )
