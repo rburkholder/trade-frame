@@ -25,8 +25,18 @@ namespace config {
 
 struct Options {
   std::string sSymbolName;
-  //size_t ib_client_id;
-  //size_t nThreads;
+
+  int nPeriodWidth;  // units:  seconds
+
+  // shortest to longest
+  int nMA1Periods;
+  int nMA2Periods;
+  int nMA3Periods;
+
+  int nStochastic1Periods;
+  int nStochastic2Periods;
+  int nStochastic3Periods;
+
 };
 
 bool Load( Options& );

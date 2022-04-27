@@ -91,6 +91,7 @@ void DataRowElementIndicatorDynamic::Del( const std::string& sValue ) {
 void DataRowElementIndicatorDynamic::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     if ( m_bListChanged ) {
+      m_sValue.clear();
       bool bSpace( false );
       for ( const setIndicator_t::value_type& vt: m_setIndicator ) {
         if ( bSpace ) {

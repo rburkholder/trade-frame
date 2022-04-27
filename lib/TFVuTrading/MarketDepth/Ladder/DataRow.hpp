@@ -80,6 +80,14 @@ public:
     m_dreIndicatorStatic.Append( sIndicator );
   }
 
+  void AddIndicatorDynamic( const std::string& sIndicator ) {
+    m_dreIndicatorDynamic.Add( sIndicator );
+  }
+
+  void DelIndicatorDynamic( const std::string& sIndicator ) {
+    m_dreIndicatorDynamic.Del( sIndicator );
+  }
+
 protected:
 private:
 

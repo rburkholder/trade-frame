@@ -54,12 +54,12 @@ bool AppDoM::OnInit() {
 
   int code = 1;
 
-  if ( !Load( m_options ) ) {
+  if ( !Load( m_config ) ) {
     code = 0;
   }
   else {
 
-    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_options.sSymbolName );
+    m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_config.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
     //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
     //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -122,24 +122,62 @@ bool AppDoM::OnInit() {
         else m_cntLoops--;
       });
 
-    //wxBoxSizer* sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-    //sizerMain->Add( sizerStatus, 1, wxEXPAND|wxALL, 5 );
-
 //    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
 //    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 //    m_pPanelLogging->Show( true );
 
-    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_options.sSymbolName );
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_config.sSymbolName );
     m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
     m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
     m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
     m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
 
+    assert( 0 < m_config.nPeriodWidth );
+    time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
+
+    using vMAPeriods_t = std::vector<int>;
+    vMAPeriods_t vMAPeriods;
+
+    vMAPeriods.push_back( m_config.nMA1Periods );
+    vMAPeriods.push_back( m_config.nMA2Periods );
+    vMAPeriods.push_back( m_config.nMA3Periods );
+
+    assert( 3 == vMAPeriods.size() );
+    for ( vMAPeriods_t::value_type value: vMAPeriods ) {
+      assert( 0 < value );
+    }
+
+    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[0], td, "ma1" ) );
+    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[1], td, "ma2" ) );
+    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[2], td, "ma3" ) );
+
+    m_vStochastic.emplace_back(
+      std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic1Periods, td,
+      [this]( ptime dt, double k, double min, double max ){
+        m_pPanelTrade->UpdateDynamicIndicator( "st1u", max );
+        m_pPanelTrade->UpdateDynamicIndicator( "st1l", min );
+      }
+      ) );
+    m_vStochastic.emplace_back(
+      std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic2Periods, td,
+      [this]( ptime dt, double k, double min, double max ){
+        m_pPanelTrade->UpdateDynamicIndicator( "st2u", max );
+        m_pPanelTrade->UpdateDynamicIndicator( "st2l", min );
+      }
+      ) );
+    m_vStochastic.emplace_back(
+      std::make_unique<Stochastic>(  m_pWatch->GetQuotes(), m_config.nStochastic3Periods, td,
+      [this]( ptime dt, double k, double min, double max ){
+        m_pPanelTrade->UpdateDynamicIndicator( "st3u", max );
+        m_pPanelTrade->UpdateDynamicIndicator( "st3l", min );
+      }
+      ) );
+
     m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
       [ this ](){
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
-          m_options.sSymbolName,
+          m_config.sSymbolName,
           [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
             m_valuesStatistics.nL2MsgBid++;
             m_valuesStatistics.nL2MsgTtl++;
@@ -152,7 +190,7 @@ bool AppDoM::OnInit() {
           });
       } );
 
-    std::cout << "watching L1/L2: " << m_options.sSymbolName << std::endl;
+    std::cout << "watching L1/L2: " << m_config.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 

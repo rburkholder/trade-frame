@@ -29,6 +29,33 @@ namespace po = boost::program_options;
 
 #include "Config.h"
 
+namespace {
+  static const std::string sFileName( "dom.cfg" );
+
+  static const std::string sOption_SymbolName( "symbol" );
+  static const std::string sOption_PeriodWidth( "period_width" );
+  static const std::string sOption_MA1Periods( "ma1_periods" );
+  static const std::string sOption_MA2Periods( "ma2_periods" );
+  static const std::string sOption_MA3Periods( "ma3_periods" );
+  static const std::string sOption_Stochastic1Periods( "stochastic1_periods" );
+  static const std::string sOption_Stochastic2Periods( "stochastic2_periods" );
+  static const std::string sOption_Stochastic3Periods( "stochastic3_periods" );
+
+  template<typename T>
+  bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
+    bool bOk = true;
+    if ( 0 < vm.count( name ) ) {
+      dest = vm[name].as<T>();
+      BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
+      bOk = false;
+    }
+  return bOk;
+  }
+} // namespace anonymous
+
 namespace config {
 
 bool Load( Options& options ) {
@@ -37,34 +64,48 @@ bool Load( Options& options ) {
 
   try {
 
-    static const std::string sOption_SymbolName( "symbol" );
+    po::options_description config( "Application Depth of Market Config" );
 
-    po::options_description config( "dom" );
     config.add_options()
       ( sOption_SymbolName.c_str(), po::value<std::string>(&options.sSymbolName ), "symbol name")
+
+      ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
+
+      ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods ), "ma1 (#periods)" )
+      ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods ), "ma2 (#periods)" )
+      ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods ), "ma3 (#periods)" )
+
+
+      ( sOption_Stochastic1Periods.c_str(), po::value<int>( &options.nStochastic1Periods ), "stochastic1 (#periods)" )
+      ( sOption_Stochastic2Periods.c_str(), po::value<int>( &options.nStochastic2Periods ), "stochastic2 (#periods)" )
+      ( sOption_Stochastic3Periods.c_str(), po::value<int>( &options.nStochastic3Periods ), "stochastic3 (#periods)" )
       ;
+
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
 
-    static const std::string sFilename( "dom.cfg" );
-
-    std::ifstream ifs( sFilename.c_str() );
+    std::ifstream ifs( sFileName.c_str() );
 
     if ( !ifs ) {
-      BOOST_LOG_TRIVIAL(error) << "depth of market config file " << sFilename << " does not exist";
+      BOOST_LOG_TRIVIAL(error) << "depth of market config file " << sFileName << " does not exist";
       bOk = false;
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
-    }
 
-    if ( 0 < vm.count( sOption_SymbolName ) ) {
-      options.sSymbolName = std::move( vm[sOption_SymbolName].as<std::string>() );
-      BOOST_LOG_TRIVIAL(info) << "symbol name: " << options.sSymbolName;
-    }
-    else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing 'symbol='";
-      bOk = false;
+      bOk &= parse<std::string>( sFileName, vm, sOption_SymbolName, options.sSymbolName );
+      std::replace_if( options.sSymbolName.begin(), options.sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+
+      bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
+
+      bOk &= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
+      bOk &= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
+      bOk &= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
+
+      bOk &= parse<int>( sFileName, vm, sOption_Stochastic1Periods, options.nStochastic1Periods );
+      bOk &= parse<int>( sFileName, vm, sOption_Stochastic2Periods, options.nStochastic2Periods );
+      bOk &= parse<int>( sFileName, vm, sOption_Stochastic3Periods, options.nStochastic3Periods );
+
     }
 
   }

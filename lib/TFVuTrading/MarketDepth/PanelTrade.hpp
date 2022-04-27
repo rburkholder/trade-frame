@@ -68,6 +68,7 @@ public:
   void SetInterval( double );
 
   void AppendStaticIndicator( double, const std::string& );
+  void UpdateDynamicIndicator( const std::string&, double );
 
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
@@ -114,6 +115,9 @@ private:
 
   std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background
+
+  using mapDynamicIndicator_t = std::map<std::string,int>;
+  mapDynamicIndicator_t m_mapDynamicIndicator;
 
   void ReCenterVisible( int ix );
 

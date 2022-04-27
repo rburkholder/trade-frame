@@ -267,6 +267,25 @@ void PanelTrade::AppendStaticIndicator( double price, const std::string& sStatic
   row.AppendIndicatorStatic( sStatic );
 }
 
+void PanelTrade::UpdateDynamicIndicator( const std::string& sIndicator, double value ) {
+  int ix = m_DataRows.Cast( value );
+  mapDynamicIndicator_t::iterator iter = m_mapDynamicIndicator.find( sIndicator );
+  if ( m_mapDynamicIndicator.end() == iter ) {
+    DataRow& row( m_DataRows[ ix ] );
+    row.AddIndicatorDynamic( sIndicator );
+    m_mapDynamicIndicator.emplace( sIndicator, ix );
+  }
+  else {
+    if ( ix != iter->second ) {
+      DataRow& rowOld( m_DataRows[ iter->second ] );
+      rowOld.DelIndicatorDynamic( sIndicator );
+      DataRow& rowNew( m_DataRows[ ix ] );
+      rowNew.AddIndicatorDynamic( sIndicator );
+      iter->second = ix;
+    }
+  }
+}
+
 // l1 update
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   // will need to use quote for tick analysis.
