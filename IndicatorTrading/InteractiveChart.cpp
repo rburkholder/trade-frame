@@ -223,9 +223,6 @@ void InteractiveChart::SetPosition(
 
   m_pOptionChainQuery = pOptionChainQuery;
 
-  using vMAPeriods_t = std::vector<int>;
-  vMAPeriods_t vMAPeriods;
-
   m_pPositionUnderlying = pPosition;
     m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
   pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
@@ -261,9 +258,11 @@ void InteractiveChart::SetPosition(
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
     );
 
+  assert( 0 < config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, config.nPeriodWidth );
 
-  assert( 0 < config.nPeriodWidth );
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t vMAPeriods;
 
   vMAPeriods.push_back( config.nMA1Periods );
   vMAPeriods.push_back( config.nMA2Periods );
