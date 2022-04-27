@@ -176,7 +176,7 @@ private:
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   using pMarketMaker_t = ou::tf::iqfeed::l2::MarketMaker::pMarketMaker_t;
-  pMarketMaker_t m_pMarketMaker; // used during simulations
+  pMarketMaker_t m_pMarketMaker;
 
   // ==
   struct QuoteForBranch {
@@ -210,7 +210,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
-  void HandleDepth( const ou::tf::MarketDepth& ); // from simulation engine
+  void HandleDepth( const ou::tf::MarketDepth& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

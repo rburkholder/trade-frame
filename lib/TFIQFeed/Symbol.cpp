@@ -362,6 +362,10 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
 void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage* pMsg ) {
 }
 
+void IQFeedSymbol::SubmitMarketDepth( const ou::tf::MarketDepth& md ) {
+  STRAND_CAPTURE( (Symbol::m_OnDepth( md )), md )
+}
+
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou

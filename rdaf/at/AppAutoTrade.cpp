@@ -234,7 +234,6 @@ bool AppAutoTrade::OnInit() {
         m_bL2Connected = true;
         ConfirmProviders();
       } );
-    m_pL2Symbols->BuildTimeSeries( true );
   }
 
   // NOTE: during simulation, this subsystem is going to have to be temporary
@@ -446,9 +445,6 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         vt.second->SaveWatch( sPath );
-      }
-      if ( m_pL2Symbols ) {
-        m_pL2Symbols->SaveSeries( sPath );  // the menu item isn't available during simulation
       }
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //  m_pFile->Write();
@@ -685,14 +681,13 @@ void AppAutoTrade::ConfirmProviders() {
           { // capture the Strategy object for specific use
             Strategy& strategy( *vt.second );
             if ( m_pL2Symbols ) {
+              auto symbol = m_iqfeed->GetSymbol( vt.first );
               m_pL2Symbols->WatchAdd(
                 vt.first,
-                [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-                  strategy.HandleUpdateL2Bid( price, volume, bAdd );
-                },
-                [&strategy]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-                  strategy.HandleUpdateL2Ask( price, volume, bAdd );
-                });
+                [symbol]( const ou::tf::MarketDepth& md ){
+                  symbol->SubmitMarketDepth( md );
+                }
+                );
             }
             else {
               assert( false ); // m_pL2Symbols needs to be available

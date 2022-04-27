@@ -44,6 +44,7 @@ public:
 
   using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
+  using fMarketDepth_t = std::function<void(const MarketDepth&)>;
 
   L2Base();
   virtual ~L2Base() {}
@@ -52,21 +53,21 @@ public:
     m_fAskVolumeAtPrice = std::move( fAsk );
     m_fBidVolumeAtPrice = std::move( fBid );
   }
+  void Set( fMarketDepth_t&& fMarketDepth ) {
+    m_fMarketDepth = std::move( fMarketDepth );
+  }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
-  void BuildTimeSeries( bool bFlag ) { m_bBuildTimeSeries = bFlag; }
-  virtual void SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {};
-
 protected:
 
   fVolumeAtPrice_t m_fBidVolumeAtPrice;
   fVolumeAtPrice_t m_fAskVolumeAtPrice;
 
-  bool m_bBuildTimeSeries;
+  fMarketDepth_t m_fMarketDepth;
 
   struct LimitOrder {
     // maintain set of orders?
@@ -110,7 +111,6 @@ public:
 
   void MarketDepth( const ou::tf::MarketDepth& ); // offline message submission
 
-  virtual void SaveSeries( const std::string& sPrefix, const std::string& sSymbol );
   void EmitMarketMakerMaps();
 
 protected:
@@ -131,8 +131,6 @@ private:
   using mapMM_t = std::map<std::string,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
-
-  ou::tf::MarketDepths m_depths;
 
   void BidOrAsk_Update( const ou::tf::MarketDepth& );
   void BidOrAsk_Delete( const ou::tf::MarketDepth& );
@@ -253,12 +251,10 @@ public:
   using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
   void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
+  void WatchAdd( const std::string&, L2Base::fMarketDepth_t&& );
   void WatchDel( const std::string& );
 
   void Single( bool );
-
-  void BuildTimeSeries( bool bFlag );
-  void SaveSeries( const std::string& sPrefix );
 
 protected:
 
@@ -274,8 +270,6 @@ protected:
   void OnMBODelete( const msg::OrderDelete::decoded& );
 
 private:
-
-  bool m_bBuildTimeSeries;
 
   bool m_bSingle;  // don't use m_luSymbol, dedicated to single symbol
   Carrier m_single; // carrier for single symbol
@@ -302,6 +296,9 @@ private:
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions; // temporary entries till symbol encountered & assigned to a carrier
 
+  using mapMarketDepthFunction_t = std::map<std::string, L2Base::fMarketDepth_t>;
+  mapMarketDepthFunction_t m_mapMarketDepthFunction; // temporary entries till symbol encountered & assigned to carrier
+
   using pL2Base_t = std::shared_ptr<L2Base>;
   using mapL2Base_t = std::map<std::string,pL2Base_t>; // symbol name, L2Processing
   mapL2Base_t m_mapL2Base; //used for batch operations
@@ -321,13 +318,18 @@ private:
     m_mapL2Base.emplace( msg.sSymbolName, pL2Base );
     carrier = pL2Base.get();
 
-    pL2Base->BuildTimeSeries( m_bBuildTimeSeries );
-
     // may need mutex on this, vs foreground
     mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
-    assert( m_mapVolumeAtPriceFunctions.end() != iter );
-    carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
-    m_mapVolumeAtPriceFunctions.erase( iter );
+    if ( m_mapVolumeAtPriceFunctions.end() != iter ) {
+      carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
+      m_mapVolumeAtPriceFunctions.erase( iter );
+    }
+
+    mapMarketDepthFunction_t::iterator iterDelegate = m_mapMarketDepthFunction.find( msg.sSymbolName );
+    if ( m_mapMarketDepthFunction.end() != iterDelegate ) {
+      carrier.pL2Base->Set( std::move( iterDelegate->second ) );
+      m_mapMarketDepthFunction.erase( iterDelegate );
+    }
   }
 
   template<typename Msg, typename Function>

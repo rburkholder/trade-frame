@@ -137,18 +137,18 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   //pWatch->RecordSeries( false );
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
-  if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
-    pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepth ) );
-    m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
-    m_pMarketMaker->Set(
-      [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-        HandleUpdateL2Bid( price, volume, bAdd );
-      },
-      [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-        HandleUpdateL2Ask( price, volume, bAdd );
-      }
-    );
-  }
+
+  pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepth ) );
+
+  m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
+  m_pMarketMaker->Set(
+    [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+      HandleUpdateL2Bid( price, volume, bAdd );
+    },
+    [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+      HandleUpdateL2Ask( price, volume, bAdd );
+    }
+  );
 
 }
 

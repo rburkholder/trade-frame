@@ -23,11 +23,6 @@
 
 #include <TFTrading/KeyTypes.h>
 
-#include <TFHDF5TimeSeries/HDF5DataManager.h>
-#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
-#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
-#include <TFHDF5TimeSeries/HDF5Attribute.h>
-
 #include "Symbols.hpp"
 
 namespace ou { // One Unified
@@ -37,9 +32,7 @@ namespace l2 { // level 2 data
 
 // ==== L2Base
 
-L2Base::L2Base()
-: m_bBuildTimeSeries( false )
-{}
+L2Base::L2Base(){}
 
 void L2Base::LimitOrderAdd(
   const msg::OrderArrival::decoded& msg,
@@ -67,37 +60,39 @@ void L2Base::LimitOrderAdd(
 // for nasdaq LII
 void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
-  switch ( msg.chOrderSide ) {
-    case 'A':
-      MMLimitOrder_Update_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
-      break;
-    case 'B':
-      MMLimitOrder_Update_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
-      break;
-  }
-
-  if ( m_bBuildTimeSeries ) {
+  if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.sMarketMaker );
-    m_depths.Append( md );
+    m_fMarketDepth( md );
+  }
+  else {
+    switch ( msg.chOrderSide ) {
+      case 'A':
+        MMLimitOrder_Update_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
+        break;
+      case 'B':
+        MMLimitOrder_Update_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
+        break;
+    }
   }
 }
 
 void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
-  switch ( msg.chOrderSide ) {
-    case 'A':
-      MMLimitOrder_Delete_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
-      break;
-    case 'B':
-      MMLimitOrder_Delete_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
-      break;
-  }
-
-  if ( m_bBuildTimeSeries ) {
+  if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.sMarketMaker );
-    m_depths.Append( md );
+    m_fMarketDepth( md );
+  }
+  else {
+    switch ( msg.chOrderSide ) {
+      case 'A':
+        MMLimitOrder_Delete_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
+        break;
+      case 'B':
+        MMLimitOrder_Delete_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderBookBid );
+        break;
+    }
   }
 }
 
@@ -219,32 +214,6 @@ void MarketMaker::MMLimitOrder_Delete(
     }
     else assert( false ); // how inconsistent are things?
     mapMM.erase( mapMM_iter );
-  }
-
-}
-
-void MarketMaker::SaveSeries( const std::string& sPrefix, const std::string& sSymbol ) {
-
-  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
-
-  try {
-
-    std::string sPathName;
-
-    if ( 0 != m_depths.Size() ) {
-      sPathName = sPrefix + "/depths/" + sSymbol;
-      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
-      wtsDepths.Write( sPathName, &m_depths );
-      HDF5Attributes attrQuotes( dm, sPathName );
-      attrQuotes.SetSignature( ou::tf::MarketDepth::Signature() );
-      attrQuotes.SetMultiplier( 1 );  // is this required?
-      //attrQuotes.SetSignificantDigits( 2 ); // is this required? - might use precision from original message
-      attrQuotes.SetProviderType( ou::tf::keytypes::EProviderIQF );
-    }
-
-  }
-  catch (...) {
-    std::cout << "MarketMaker::SaveSeries depths error: " << sPrefix << std::endl;
   }
 
 }
@@ -453,7 +422,6 @@ using inherited_t = Dispatcher<Symbols>;
 
 Symbols::Symbols( fConnected_t&& fConnected )
 : inherited_t()
-, m_bBuildTimeSeries( false )
 , m_bSingle( false )
 , m_fConnected( std::move( fConnected ) )
 , m_luSymbol( Carrier(), 20 )
@@ -488,13 +456,28 @@ void Symbols::OnL2Initialized() {
 }
 
 void Symbols::WatchAdd( const std::string& sSymbol, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
+  mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
+  assert( m_mapL2Base.end() == iter );
+
   m_mapVolumeAtPriceFunctions.emplace( sSymbol, VolumeAtPriceFunctions( std::move( fBid ), std::move( fAsk) ) );
   StartMarketByOrder( sSymbol );
   // don't add pattern here as Equity/Future is unknown
 }
 
+void Symbols::WatchAdd( const std::string& sSymbol, L2Base::fMarketDepth_t&& fMarketDepth ) {
+  mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
+  assert( m_mapL2Base.end() == iter );
+
+  m_mapMarketDepthFunction.emplace( sSymbol, std::move( fMarketDepth ) );
+  StartMarketByOrder( sSymbol );
+}
+
 void Symbols::WatchDel( const std::string& sSymbol ) {
   StopMarketByOrder( sSymbol );
+  mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
+  //m_mapL2Base.erase( iter );
+  // TODO: need to update m_luSymbol/m_single as well
+  // TODO: may need some sort of sync if values come in during the meantime
 }
 
   // for nasdaq l2 on equities, there is no orderid, so will need to lookup by mmid
@@ -531,19 +514,6 @@ void Symbols::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   assert( '5' == msg.chMsgType );
   Call( msg, &L2Base::OnMBODelete );
-}
-
-void Symbols::BuildTimeSeries( bool bFlag ) {
-  m_bBuildTimeSeries = bFlag;
-  for ( mapL2Base_t::value_type& vt: m_mapL2Base ) {
-    vt.second->BuildTimeSeries( bFlag );
-  }
-}
-
-void Symbols::SaveSeries( const std::string& sPrefix ) {
-  for ( mapL2Base_t::value_type& vt: m_mapL2Base ) {
-    vt.second->SaveSeries( sPrefix, vt.first );
-  }
 }
 
 } // namespace l2

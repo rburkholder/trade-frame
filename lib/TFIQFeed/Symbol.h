@@ -84,6 +84,8 @@ public:
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
+  void SubmitMarketDepth( const ou::tf::MarketDepth& );
+
 protected:
 
   unsigned short m_cnt;  // used for watch/unwatch
