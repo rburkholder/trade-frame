@@ -192,7 +192,7 @@ private:
       dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
       nPriority( msg.nPriority ), nPrecision( msg.nPrecision )
     { //assert( 0 == msg.sMarketMaker.size() );
-      assert( 0 == msg.rchMMID[0] );
+      assert( 0 == msg.mmid.rch[0] );
     }
   };
 
@@ -310,7 +310,7 @@ private:
 
     pL2Base_t pL2Base;
     if ( 0 != msg.nOrderId ) {
-      assert( 0 == msg.rchMMID[0] );
+      assert( 0 == msg.mmid.rch[0] );
       pL2Base = OrderBased::Factory();
     }
     else {

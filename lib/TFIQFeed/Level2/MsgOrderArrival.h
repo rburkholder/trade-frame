@@ -65,8 +65,11 @@ struct decoded {
   char chMsgType;
   std::string sSymbolName;
   uint64_t nOrderId;
-  //std::string sMarketMaker;
-  char rchMMID[ 4 ];
+  union MMID {
+    uint32_t id;
+    char rch[ 4 ];
+    MMID(): id {} {}
+  } mmid;
   char chOrderSide;  // 'A' Sell, 'B' Buy
   double dblPrice;
   uint32_t nQuantity;
@@ -74,9 +77,7 @@ struct decoded {
   uint8_t nPrecision;
   time_t time;
   date_t date;
-  decoded(): nOrderId {}, nQuantity {}, nPriority {} {
-    for ( int ix = 0; ix < 4; ix++ ) { rchMMID[ ix ] = 0;}
-  }
+  decoded(): nOrderId {}, nQuantity {}, nPriority {} {}
 };
 
 } // namespace OrderArrival
@@ -108,11 +109,10 @@ BOOST_FUSION_ADAPT_STRUCT(
   (char, chMsgType)
   (std::string, sSymbolName)
   (uint64_t, nOrderId)
-  //(std::string, sMarketMaker)
-  (char, rchMMID[0])
-  (char, rchMMID[1])
-  (char, rchMMID[2])
-  (char, rchMMID[3])
+  (char, mmid.rch[0])
+  (char, mmid.rch[1])
+  (char, mmid.rch[2])
+  (char, mmid.rch[3])
   (char, chOrderSide)
   (double, dblPrice)
   (uint32_t, nQuantity)
