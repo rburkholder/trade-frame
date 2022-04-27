@@ -1,26 +1,26 @@
 ## AutoTrade
 
-NOTE: turn off the feeds prior to exit.  This prevents updating the structures during save and exit.
+NOTE: turn off the feeds prior to exit or saving.  This prevents updating the structures during save and exit.
+NOTE: this application requires a subscription to Nasdaq LII data via IQFeed
 
 This sample project is composed of current best practicies for building an
 automated trading application.  Some of the features and functions represented:
 
 * parameters supplied by a configuration file
 * live chart being update with quotes, ticks, volume, and trade results
+* market depth is being fed as well
 * state machine to process entries and exits
 * portfolios, positions, instruments, orders and executions are recorded in a sqlite3 database
-* live data is sourced from IQFeed
+* live L1/L2 data is sourced from IQFeed
 * orders are executed at Interactive Brokers (run this as a paper trading example)
 * trading is automatically limited to North America trading hours
-* quotes and ticks can be manually saved to an HDF5 based timeseries database at end of session
+* quotes, ticks and marketdepth can be manually saved to an HDF5 based timeseries database at end of session
 
 This project can be used as a template to try out your own high-frequency trading ideas.
 
 ### x64/debug/rdaf/at/choices.cfg
 
-Note: there is a new name for the configuration file, and there is a new format.
-
-This is a specialization of the AutoTrade project.  This project uses CERN's rdaf (ROOT Data Analysis Framework)
+This is a specialization of the generic AutoTrade project.  This project uses CERN's rdaf (ROOT Data Analysis Framework)
 libraries for analysing live data as it arrives.
 
 The parameters are sourced in the configuration file (as an example):
@@ -64,10 +64,8 @@ For testing purposes, delete or rename the database to start fresh.
 
 ### Simulation
 
-NOTE: I have to test this yet
-
 * collect data during a live session, and at the end of the session, use the Save Values menu item
-* restart the application, and set D1 & X to Sim, and turn on
-* a Simulation menu will appear
-* Simulation->Run to start the simulation
-  * trades should show up in similar time frames
+* change x64/debug/rdaf/at/choices.cfg to have sim_start=on
+* restart the application - simulation mode is auto-started
+* trades should show up in similar time frames
+
