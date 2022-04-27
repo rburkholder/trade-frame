@@ -15,7 +15,6 @@ set(
     MsgOrderDelete.h
     MsgPriceLevelArrival.h
     MsgPriceLevelDelete.h
-    Summary.hpp
     Symbols.hpp
   )
 
@@ -26,7 +25,6 @@ set(
     MsgOrderDelete.cpp
     MsgPriceLevelArrival.cpp
     MsgPriceLevelDelete.cpp
-    Summary.cpp
     Symbols.cpp
   )
 
