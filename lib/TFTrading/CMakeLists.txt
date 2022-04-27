@@ -32,6 +32,7 @@ set(
 #    InstrumentInformation.h
     InstrumentManager.h
     KeyTypes.h
+    MacroStrand.h
     Managers.h
     MonitorOrder.h
     Order.h

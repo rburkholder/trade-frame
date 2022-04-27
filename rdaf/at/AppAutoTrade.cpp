@@ -121,6 +121,7 @@ bool AppAutoTrade::OnInit() {
   }
 
   m_iqfeed->SetThreadCount( m_choices.nThreads );
+  m_sim->SetThreadCount( m_choices.nThreads );
 
   //if ( m_options.bSimStart ) {
     // just always delete it

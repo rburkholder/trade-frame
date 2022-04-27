@@ -18,33 +18,9 @@
 
 #include <OUCommon/TimeSource.h>
 
+#include <TFTrading/MacroStrand.h>
+
 #include "Symbol.h"
-
-#define STRAND( command ) \
-  if ( m_bStrand ) {      \
-    boost::asio::post(    \
-      *m_pStrand,         \
-      [this](){           \
-        command;          \
-      }                   \
-      );                  \
-  }                       \
-  else {                  \
-    command;              \
-  }
-
-#define STRAND_CAPTURE( command, capture ) \
-  if ( m_bStrand ) {      \
-    boost::asio::post(    \
-      *m_pStrand,         \
-      [this,capture](){   \
-        command;          \
-      }                   \
-      );                  \
-  }                       \
-  else {                  \
-    command;              \
-  }
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

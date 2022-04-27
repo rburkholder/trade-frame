@@ -12,8 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "TFHDF5TimeSeries/HDF5IterateGroups.h"
-#include "TFHDF5TimeSeries/HDF5TimeSeriesContainer.h"
+#include <TFTrading/MacroStrand.h>
+
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
 #include "SimulationSymbol.h"
 
@@ -123,19 +125,23 @@ void SimulationSymbol::StopDepthWatch() {
 }
 
 void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
-  m_OnQuote( dynamic_cast<const Quote &>( datum ) );
+  const Quote& quote( dynamic_cast<const Quote &>( datum ) );
+  STRAND_CAPTURE( (m_OnQuote( quote )), quote )
 }
 
 void SimulationSymbol::HandleDepthEvent( const DatedDatum &datum ) {
-  m_OnDepth( dynamic_cast<const MarketDepth &>( datum ) );
+  const MarketDepth& md( dynamic_cast<const MarketDepth &>( datum ) );
+  STRAND_CAPTURE( (m_OnDepth( md )), md )
 }
 
 void SimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
-  m_OnTrade( dynamic_cast<const Trade &>( datum ) );
+  const Trade& trade( dynamic_cast<const Trade &>( datum ) );
+  STRAND_CAPTURE( (m_OnTrade( trade )), trade )
 }
 
 void SimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
-  m_OnGreek( dynamic_cast<const Greek &>( datum ) );
+  const Greek& greek( dynamic_cast<const Greek &>( datum ) );
+  STRAND_CAPTURE( (m_OnGreek( greek )), greek )
 }
 
 } // namespace tf
