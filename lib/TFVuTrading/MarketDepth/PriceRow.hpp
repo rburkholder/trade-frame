@@ -13,23 +13,23 @@
  ************************************************************************/
 
 /*
- * File:    DataRow.h
+ * File:    PriceRow.h
  * Author:  raymond@burkholder.net
- * Project: TFVuTrading/MarketDepth/Ladder
+ * Project: TFVuTrading/MarketDepth
  * Created: November 11, 2021 09:08
  */
 
 #pragma once
 
-#include "../WinRow.hpp"
+#include "WinRow.hpp"
 
-#include "DataRowElement.hpp"
+#include "PriceRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-class DataRow {
+class PriceRow {
 public:
 
   enum class EField: int {
@@ -43,9 +43,9 @@ public:
     };
 
 
-  explicit DataRow( double price );
-  DataRow( const DataRow& );
-  ~DataRow();
+  explicit PriceRow( double price );
+  PriceRow( const PriceRow& );
+  ~PriceRow();
 
   void SetRowElements( WinRow& );
   void DelRowElements();
@@ -97,17 +97,17 @@ private:
 
   // TODO: boost::fusion?  std::tuple?
   //DataRowElement<double>         m_dreAcctPl;
-  DataRowElement<unsigned int>   m_dreBuyCount;
-  DataRowElement<unsigned int>   m_dreBuyVolume;
-  DataRowElement<unsigned int>   m_dreBidSize;
-  DataRowElement<double>         m_drePrice;
-  DataRowElement<unsigned int>   m_dreAskSize;
-  DataRowElement<unsigned int>   m_dreSellVolume;
-  DataRowElement<unsigned int>   m_dreSellCount;
-  DataRowElement<unsigned int>   m_dreTicks;
-  DataRowElement<unsigned int>   m_dreVolume;
-  DataRowElementIndicatorStatic  m_dreIndicatorStatic;
-  DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
+  PriceRowElement<unsigned int>   m_dreBuyCount;
+  PriceRowElement<unsigned int>   m_dreBuyVolume;
+  PriceRowElement<unsigned int>   m_dreBidSize;
+  PriceRowElement<double>         m_drePrice;
+  PriceRowElement<unsigned int>   m_dreAskSize;
+  PriceRowElement<unsigned int>   m_dreSellVolume;
+  PriceRowElement<unsigned int>   m_dreSellCount;
+  PriceRowElement<unsigned int>   m_dreTicks;
+  PriceRowElement<unsigned int>   m_dreVolume;
+  PriceRowElementIndicatorStatic  m_dreIndicatorStatic;
+  PriceRowElementIndicatorDynamic m_dreIndicatorDynamic;
 
   //RowElements* m_pRowElements;  // shared_ptr ?
 

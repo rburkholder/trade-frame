@@ -28,7 +28,7 @@
 #include <wx/window.h>
 
 #include "WinRow.hpp"
-#include "Ladder/DataRows.hpp"
+#include "PriceRows.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -96,8 +96,8 @@ private:
   unsigned int m_cntWinRows_Total; // includes header row: TODO: verify all usage locations are correct
   unsigned int m_cntWinRows_Data; // without header row
 
-  int m_ixFirstDataRow;
-  int m_ixLastDataRow;
+  int m_ixFirstPriceRow;
+  int m_ixLastPriceRow;
 
   int m_ixHiRecenterFrame;
   int m_ixLoRecenterFrame;
@@ -111,7 +111,7 @@ private:
   using vWinRow_t = std::vector<pWinRow_t>;
   vWinRow_t m_vWinRow; // non header rows only
 
-  DataRows m_DataRows;
+  PriceRows m_PriceRows;
 
   std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background

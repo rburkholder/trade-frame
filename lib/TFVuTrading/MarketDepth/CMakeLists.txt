@@ -10,9 +10,9 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
-    Ladder/DataRowElement.hpp
-    Ladder/DataRow.hpp
-    Ladder/DataRows.hpp
+    PriceRowElement.hpp
+    PriceRow.hpp
+    PriceRows.hpp
     PanelTrade.hpp
     PanelSideBySide.hpp
     WinRowElement.hpp
@@ -21,9 +21,9 @@ set(
 
 set(
   file_cpp
-    Ladder/DataRowElement.cpp
-    Ladder/DataRow.cpp
-    Ladder/DataRows.cpp
+    PriceRowElement.cpp
+    PriceRow.cpp
+    PriceRows.cpp
     PanelTrade.cpp
     PanelSideBySide.cpp
     WinRowElement.cpp

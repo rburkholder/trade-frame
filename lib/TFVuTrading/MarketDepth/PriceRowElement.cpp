@@ -13,25 +13,25 @@
  ************************************************************************/
 
 /*
- * File:    DataRowElement.cpp
+ * File:    PriceRowElement.cpp
  * Author:  raymond@burkholder.net
- * Project: TFVuTrading/MarketDepth/Ladder
+ * Project: TFVuTrading/MarketDepth
  * Created: November 10, 2021 17:54
  */
 
-#include "DataRowElement.hpp"
+#include "PriceRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-// class DataRowElementIndicatorStatic
+// class PriceRowElementIndicatorStatic
 
-DataRowElementIndicatorStatic::DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged )
-: DataRowElement<std::string>( sFormat, bChanged )
+PriceRowElementIndicatorStatic::PriceRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged )
+: PriceRowElement<std::string>( sFormat, bChanged )
 {}
 
-void DataRowElementIndicatorStatic::Append( const std::string& sValue ) {
+void PriceRowElementIndicatorStatic::Append( const std::string& sValue ) {
   if ( 0 == m_sValue.size() ) {
     m_sValue = sValue;
   }
@@ -41,20 +41,20 @@ void DataRowElementIndicatorStatic::Append( const std::string& sValue ) {
   m_bChanged = true;
 }
 
-void DataRowElementIndicatorStatic::UpdateWinRowElement() {
+void PriceRowElementIndicatorStatic::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     m_pWinRowElement->SetText( m_sValue );
   }
 }
 
-// class DataRowElementIndicatorDynamic
+// class PriceRowElementIndicatorDynamic
 
-DataRowElementIndicatorDynamic::DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged )
-: DataRowElement<std::string>( sFormat, bChanged )
+PriceRowElementIndicatorDynamic::PriceRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged )
+: PriceRowElement<std::string>( sFormat, bChanged )
 , m_bListChanged( false )
 {}
 
-void DataRowElementIndicatorDynamic::Set( const std::string& sValue ) {
+void PriceRowElementIndicatorDynamic::Set( const std::string& sValue ) {
   bool bSet( false );
   if ( 1 == m_setIndicator.size() ) {
     setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
@@ -70,7 +70,7 @@ void DataRowElementIndicatorDynamic::Set( const std::string& sValue ) {
   }
 }
 
-void DataRowElementIndicatorDynamic::Add( const std::string& sValue ) {
+void PriceRowElementIndicatorDynamic::Add( const std::string& sValue ) {
   setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
   if ( m_setIndicator.end() == iter ) {
     m_setIndicator.insert( sValue );
@@ -79,7 +79,7 @@ void DataRowElementIndicatorDynamic::Add( const std::string& sValue ) {
   }
 }
 
-void DataRowElementIndicatorDynamic::Del( const std::string& sValue ) {
+void PriceRowElementIndicatorDynamic::Del( const std::string& sValue ) {
   setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
   if ( m_setIndicator.end() != iter ) {
     m_setIndicator.erase( iter );
@@ -88,7 +88,7 @@ void DataRowElementIndicatorDynamic::Del( const std::string& sValue ) {
   }
 }
 
-void DataRowElementIndicatorDynamic::UpdateWinRowElement() {
+void PriceRowElementIndicatorDynamic::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     if ( m_bListChanged ) {
       m_sValue.clear();

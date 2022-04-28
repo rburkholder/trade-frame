@@ -15,7 +15,7 @@
 /*
  * File:    DataRows.h
  * Author:  raymond@burkholder.net
- * Project: TFVuTrading/MarketDepth/Ladder
+ * Project: TFVuTrading/MarketDepth
  * Created: November 11, 2021 16:46
  */
 
@@ -24,26 +24,26 @@
 #include <map>
 #include <mutex>
 
-#include "DataRow.hpp"
+#include "PriceRow.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-class DataRows {
+class PriceRows {
 public:
 
-  DataRows();
-  DataRows( double interval );
-  ~DataRows();
+  PriceRows();
+  PriceRows( double interval );
+  ~PriceRows();
 
   void SetInterval( double );
 
   int Cast( double price ) const;
   double Cast( int ix ) const;
 
-  DataRow& operator[]( double );
-  DataRow& operator[]( int );
+  PriceRow& operator[]( double );
+  PriceRow& operator[]( int );
 
 protected:
 private:
@@ -55,7 +55,7 @@ private:
   // however, locks used only on map expansion (for now)
   std::mutex m_mutexMap; // prevent foreground, l1, l2 thread interference
 
-  using mapRow_t = std::map<int,DataRow>;
+  using mapRow_t = std::map<int,PriceRow>;
   mapRow_t m_mapRow;
 
 };

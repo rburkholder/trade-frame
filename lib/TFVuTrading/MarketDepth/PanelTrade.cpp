@@ -30,7 +30,7 @@
 namespace {
 
   using EColour = ou::Colour::wx::EColour;
-  using EField = ou::tf::l2::DataRow::EField;
+  using EField = ou::tf::l2::PriceRow::EField;
 
   const ou::tf::l2::WinRow::vElement_t vElement = {
     { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
@@ -85,8 +85,8 @@ void PanelTrade::Init() {
   m_cntWinRows_Total = 0;
   m_cntWinRows_Data = 0;
 
-  m_ixFirstDataRow = 0; // first visible integerized price
-  m_ixLastDataRow = 0;  // last visible integerized price
+  m_ixFirstPriceRow = 0; // first visible integerized price
+  m_ixLastPriceRow = 0;  // last visible integerized price
 
   m_ixHiRecenterFrame = 0;
   m_ixLoRecenterFrame = 0;
@@ -142,8 +142,8 @@ void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
   if ( m_fTimer ) m_fTimer();
   //std::scoped_lock<std::mutex> lock( m_mutexTimer );
   if ( 0 < m_cntWinRows_Data ) {
-    for ( int ix = m_ixFirstDataRow; ix <= m_ixLastDataRow; ix++ ) {
-      m_DataRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+    for ( int ix = m_ixFirstPriceRow; ix <= m_ixLastPriceRow; ix++ ) {
+      m_PriceRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
     }
   }
 }
@@ -203,11 +203,11 @@ void PanelTrade::DrawWinRows() {
 void PanelTrade::DeleteWinRows() {
 
   for (
-    int ixWinRow = 0, iyDataRow = m_ixFirstDataRow;
+    int ixWinRow = 0, iyPriceRow = m_ixFirstPriceRow;
     ixWinRow < m_cntWinRows_Data;
-    ixWinRow++, iyDataRow++
+    ixWinRow++, iyPriceRow++
   ) {
-    DataRow& rowData( m_DataRows[ iyDataRow ] );
+    PriceRow& rowData( m_PriceRows[ iyPriceRow ] );
     rowData.DelRowElements();
     pWinRow_t pWinRow = std::move( m_vWinRow[ ixWinRow ] );
     //pRow->DestroyWindow();
@@ -216,7 +216,7 @@ void PanelTrade::DeleteWinRows() {
   m_cntWinRows_Total = 1;  // 0 or 1? // header row remains in tact
   m_cntWinRows_Data = 0;
 
-  m_ixFirstDataRow = m_ixLastDataRow = 0;
+  m_ixFirstPriceRow = m_ixLastPriceRow = 0;
   m_ixLoRecenterFrame = m_ixHiRecenterFrame = 0;
 
 }
@@ -258,27 +258,27 @@ void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
 }
 
 void PanelTrade::SetInterval( double interval ) {
-  m_DataRows.SetInterval( interval );
+  m_PriceRows.SetInterval( interval );
 }
 
 void PanelTrade::AppendStaticIndicator( double price, const std::string& sStatic ) {
-  DataRow& row( m_DataRows[ price ] );
+  PriceRow& row( m_PriceRows[ price ] );
   row.AppendIndicatorStatic( sStatic );
 }
 
 void PanelTrade::UpdateDynamicIndicator( const std::string& sIndicator, double value ) {
-  int ix = m_DataRows.Cast( value );
+  int ix = m_PriceRows.Cast( value );
   mapDynamicIndicator_t::iterator iter = m_mapDynamicIndicator.find( sIndicator );
   if ( m_mapDynamicIndicator.end() == iter ) {
-    DataRow& row( m_DataRows[ ix ] );
+    PriceRow& row( m_PriceRows[ ix ] );
     row.AddIndicatorDynamic( sIndicator );
     m_mapDynamicIndicator.emplace( sIndicator, ix );
   }
   else {
     if ( ix != iter->second ) {
-      DataRow& rowOld( m_DataRows[ iter->second ] );
+      PriceRow& rowOld( m_PriceRows[ iter->second ] );
       rowOld.DelIndicatorDynamic( sIndicator );
-      DataRow& rowNew( m_DataRows[ ix ] );
+      PriceRow& rowNew( m_PriceRows[ ix ] );
       rowNew.AddIndicatorDynamic( sIndicator );
       iter->second = ix;
     }
@@ -291,8 +291,8 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   // don't update the ladder, as it interferes with L2
   // maybe use to set the colour for best bid offer
 
-  int ixAskPrice = m_DataRows.Cast( quote.Ask() );
-  int ixBidPrice = m_DataRows.Cast( quote.Bid() );
+  int ixAskPrice = m_PriceRows.Cast( quote.Ask() );
+  int ixBidPrice = m_PriceRows.Cast( quote.Bid() );
 /*
   if ( ( 0 != m_ixLastAsk ) && ( ixAskPrice != m_ixLastAsk ) ) {
     DataRow& row( m_DataRows[ m_ixLastAsk ] );
@@ -333,15 +333,15 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
 
 // l2 update
 void PanelTrade::OnQuoteAsk( double price, int volume ) {
-  int ixPrice = m_DataRows.Cast( price );
-  DataRow& row( m_DataRows[ ixPrice ] );
+  int ixPrice = m_PriceRows.Cast( price );
+  PriceRow& row( m_PriceRows[ ixPrice ] );
   row.SetAskVolume( volume );
 }
 
 // l2 update
 void PanelTrade::OnQuoteBid( double price, int volume ) {
-  int ixPrice = m_DataRows.Cast( price );
-  DataRow& row( m_DataRows[ ixPrice ] );
+  int ixPrice = m_PriceRows.Cast( price );
+  PriceRow& row( m_PriceRows[ ixPrice ] );
   row.SetBidVolume( volume );
 }
 
@@ -349,13 +349,13 @@ void PanelTrade::OnQuoteBid( double price, int volume ) {
 void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
 
   if ( 0.0 != m_dblLastPrice ) {
-    DataRow& row( m_DataRows[ m_dblLastPrice ] );
+    PriceRow& row( m_PriceRows[ m_dblLastPrice ] );
     row.SetPrice( m_dblLastPrice, false ); // TODO: needs to reset back to the price, remove highlight
   }
 
   m_dblLastPrice = trade.Price();
-  int ixPrice = m_DataRows.Cast( m_dblLastPrice );
-  DataRow& rowData( m_DataRows[ ixPrice ] );
+  int ixPrice = m_PriceRows.Cast( m_dblLastPrice );
+  PriceRow& rowData( m_PriceRows[ ixPrice ] );
 
   rowData.SetPrice( trade.Volume(), true ); // need to highlight the price level
   rowData.IncTicks();
@@ -403,28 +403,28 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
     ) {
       //std::scoped_lock<std::mutex> lock( m_mutexTimer );
       // recalibrate mappings
-      if ( m_ixFirstDataRow != m_ixLastDataRow ) {
+      if ( m_ixFirstPriceRow != m_ixLastPriceRow ) {
         // TODO: should this be performed by DeleteWinRows?
-        for ( int iy = m_ixFirstDataRow; iy <= m_ixLastDataRow; iy++ ) {
+        for ( int iy = m_ixFirstPriceRow; iy <= m_ixLastPriceRow; iy++ ) {
           // remove existing string update events
-          DataRow& rowData( m_DataRows[ iy ] );
-          rowData.DelRowElements();
+          PriceRow& rowPrice( m_PriceRows[ iy ] );
+          rowPrice.DelRowElements();
         }
       }
-      m_ixFirstDataRow = ixPrice - ( m_cntWinRows_Data / 2 );
-      m_ixLastDataRow = m_ixFirstDataRow + m_cntWinRows_Data - 1;
-      m_ixHiRecenterFrame = m_ixLastDataRow - m_nFramedRows;
-      m_ixLoRecenterFrame = m_ixFirstDataRow + m_nFramedRows;
+      m_ixFirstPriceRow = ixPrice - ( m_cntWinRows_Data / 2 );
+      m_ixLastPriceRow = m_ixFirstPriceRow + m_cntWinRows_Data - 1;
+      m_ixHiRecenterFrame = m_ixLastPriceRow - m_nFramedRows;
+      m_ixLoRecenterFrame = m_ixFirstPriceRow + m_nFramedRows;
       // need to check that same numbers for each
       for (
-        int ix = 0, iy = m_ixLastDataRow;
+        int ix = 0, iy = m_ixLastPriceRow;
         ix < m_cntWinRows_Data;
         ix++, iy--
       ) {
         pWinRow_t pWinRow = m_vWinRow[ ix ];
-        DataRow& rowData( m_DataRows[ iy ] );
-        rowData.SetRowElements( *pWinRow );
-        rowData.SetPrice( m_DataRows.Cast( iy ), false );
+        PriceRow& rowPrice( m_PriceRows[ iy ] );
+        rowPrice.SetRowElements( *pWinRow );
+        rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
         //rowData.Refresh();  // TODO: refactor out into timer
       }
     }

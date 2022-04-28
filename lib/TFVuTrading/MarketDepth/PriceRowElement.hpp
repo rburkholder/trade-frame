@@ -13,9 +13,9 @@
  ************************************************************************/
 
 /*
- * File:    DataRowElement.h
+ * File:    PriceRowElement.h
  * Author:  raymond@burkholder.net
- * Project: TFVuTrading/MarketDepth/Ladder
+ * Project: TFVuTrading/MarketDepth
  * Created: November 10, 2021 17:54
  */
 
@@ -26,18 +26,18 @@
 
 #include <boost/format.hpp>
 
-#include "../WinRowElement.hpp"
+#include "WinRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 template<typename T>
-class DataRowElement {
+class PriceRowElement {
 public:
 
-  DataRowElement( const std::string& sFormat, bool& bChanged );
-  virtual ~DataRowElement();
+  PriceRowElement( const std::string& sFormat, bool& bChanged );
+  virtual ~PriceRowElement();
 
   void SetWinRowElement( WinRowElement* );
   WinRowElement* GetWinRowElement() { return m_pWinRowElement; }
@@ -66,7 +66,7 @@ private:
 };
 
 template<typename T>
-DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
+PriceRowElement<T>::PriceRowElement( const std::string& sFormat, bool& bChanged )
 : m_bChanged( bChanged )
 , m_bHighlight( false )
 , m_format( sFormat )
@@ -75,45 +75,45 @@ DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
 {}
 
 template<typename T>
-DataRowElement<T>::~DataRowElement() {
+PriceRowElement<T>::~PriceRowElement() {
   m_pWinRowElement = nullptr;
 }
 
 template<typename T>
-void DataRowElement<T>::Set( T value ) {
+void PriceRowElement<T>::Set( T value ) {
   m_value = value;
   m_bChanged = true;
 }
 
 template<typename T>
-void DataRowElement<T>::Set( T value, bool bHighlight ) {
+void PriceRowElement<T>::Set( T value, bool bHighlight ) {
   m_value = value;
   m_bHighlight = bHighlight;
   m_bChanged = true;
 }
 
 template<typename T>
-T DataRowElement<T>::Get() const {
+T PriceRowElement<T>::Get() const {
   return m_value;
 }
 
 template<typename T>
-void DataRowElement<T>::Inc()  {
+void PriceRowElement<T>::Inc()  {
   m_value++;
 }
 
 template<typename T>
-void DataRowElement<T>::Add( T value )  {
+void PriceRowElement<T>::Add( T value )  {
   m_value += value;
 }
 
 template<typename T>
-void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
+void PriceRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
   m_pWinRowElement = pwre;
 }
 
 template<typename T>
-void DataRowElement<T>::UpdateWinRowElement() {
+void PriceRowElement<T>::UpdateWinRowElement() {
   if ( 0 != m_value ) {
     m_format % m_value;
     m_sValue = m_format.str();
@@ -126,30 +126,30 @@ void DataRowElement<T>::UpdateWinRowElement() {
   }
 }
 
-// class DataRowElementPrice
+// class PriceRowElementPrice
 
-class DataRowElementPrice: public DataRowElement<int> {
+class PriceRowElementPrice: public PriceRowElement<int> {
 public:
 protected:
 private:
 };
 
-// class DataRowElementIndicatorStatic
+// class PriceRowElementIndicatorStatic
 
-class DataRowElementIndicatorStatic: public DataRowElement<std::string> {
+class PriceRowElementIndicatorStatic: public PriceRowElement<std::string> {
 public:
-  DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
+  PriceRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
   virtual void UpdateWinRowElement();
   void Append( const std::string& );
 protected:
 private:
 };
 
-// class DataRowElementIndicatorDynamic
+// class PriceRowElementIndicatorDynamic
 
-class DataRowElementIndicatorDynamic: public DataRowElement<std::string> {
+class PriceRowElementIndicatorDynamic: public PriceRowElement<std::string> {
 public:
-  DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged );
+  PriceRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged );
   virtual void UpdateWinRowElement();
   virtual void Set( const std::string& );
   void Add( const std::string& );

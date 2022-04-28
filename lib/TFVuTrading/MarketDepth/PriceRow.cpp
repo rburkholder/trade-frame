@@ -21,7 +21,7 @@
 
  #include <string>
 
-#include "DataRow.hpp"
+#include "PriceRow.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -33,7 +33,7 @@ namespace {
   const std::string sFmtString( "%s" );
 }
 
-DataRow::DataRow( double price )
+PriceRow::PriceRow( double price )
 : m_bChanged( false )
   //m_pRowElements( nullptr ),
   //m_price( price ),
@@ -51,7 +51,7 @@ DataRow::DataRow( double price )
 , m_dreIndicatorDynamic( sFmtString, m_bChanged )
 {}
 
-DataRow::DataRow( const DataRow& rhs ) // don't copy or move anything
+PriceRow::PriceRow( const PriceRow& rhs ) // don't copy or move anything
 : m_bChanged( false )
   //m_pRowElements( nullptr ),
   //m_price( rhs.m_price ),
@@ -69,14 +69,14 @@ DataRow::DataRow( const DataRow& rhs ) // don't copy or move anything
 , m_dreIndicatorDynamic( sFmtString, m_bChanged )
 {}
 
-DataRow::~DataRow() {
+PriceRow::~PriceRow() {
   DelRowElements();
 }
 
 // TODO: convert to;
 //   https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 
-void DataRow::SetRowElements( WinRow& wr ) {
+void PriceRow::SetRowElements( WinRow& wr ) {
   //if ( nullptr != m_pRowElements ) {
     DelRowElements();
   //}
@@ -97,7 +97,7 @@ void DataRow::SetRowElements( WinRow& wr ) {
 
 }
 
-void DataRow::Refresh() {
+void PriceRow::Refresh() {
   //m_dreAcctPl.UpdateWinRowElement();
   m_dreBuyCount.UpdateWinRowElement();
   m_dreBuyVolume.UpdateWinRowElement();
@@ -112,7 +112,7 @@ void DataRow::Refresh() {
   m_dreIndicatorDynamic.UpdateWinRowElement();
 }
 
-void DataRow::DelRowElements() {
+void PriceRow::DelRowElements() {
   //m_pRowElements = nullptr;
   //m_dreAcctPl.SetWinRowElement( nullptr );
   m_dreBuyCount.SetWinRowElement( nullptr );
