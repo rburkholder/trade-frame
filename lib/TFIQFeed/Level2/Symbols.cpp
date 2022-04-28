@@ -44,7 +44,7 @@ void L2Base::LimitOrderAdd(
     map.emplace(
       std::pair(
         msg.dblPrice,
-        LimitOrder( msg )
+        LimitOrderAggregate( msg )
       )
     );
   }
@@ -172,7 +172,7 @@ void MarketMaker::MMLimitOrder_Update(
   // update new price level
   mapLimitOrderBook_t::iterator mapLimitOrderBook_iter = mapLimitOrderBook.find( price );
   if ( mapLimitOrderBook.end() == mapLimitOrderBook_iter ) {
-    auto pair = mapLimitOrderBook.emplace( price, LimitOrder( volume ) ); // provide new price_level
+    auto pair = mapLimitOrderBook.emplace( price, LimitOrderAggregate( volume ) ); // provide new price_level
     assert( pair.second );
     mapLimitOrderBook_iter = pair.first;
   }
@@ -302,7 +302,7 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
   mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
   if ( m_mapOrder.end() != iter ) {
-    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
+//    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
   }
   else {
     m_mapOrder.emplace(

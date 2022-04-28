@@ -69,19 +69,19 @@ protected:
 
   fMarketDepth_t m_fMarketDepth;
 
-  struct LimitOrder {
+  struct LimitOrderAggregate {
     // maintain set of orders?
     volume_t nQuantity;
     int nOrders;
-    LimitOrder( volume_t nQuantity_ )
+    LimitOrderAggregate( volume_t nQuantity_ )
     : nQuantity( nQuantity_ ), nOrders( 1 )  {}
-    LimitOrder( const msg::OrderArrival::decoded& msg )
+    LimitOrderAggregate( const msg::OrderArrival::decoded& msg )
     : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
-  using mapLimitOrderBook_t = std::map<double,LimitOrder>;  // key is price
-  mapLimitOrderBook_t m_mapLimitOrderBookAsk;
-  mapLimitOrderBook_t m_mapLimitOrderBookBid;
+  using mapLimitOrderBook_t = std::map<double,LimitOrderAggregate>;  // double is price level
+  mapLimitOrderBook_t m_mapLimitOrderBookAsk; // lowest value is top of book - begin()
+  mapLimitOrderBook_t m_mapLimitOrderBookBid; // highest value is top of book - rbegin()
 
   void LimitOrderAdd( // used in OrderBased
     const msg::OrderArrival::decoded&,
