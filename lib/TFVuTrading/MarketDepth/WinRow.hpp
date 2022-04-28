@@ -19,6 +19,8 @@
  * Created on April 4, 2022  12:14
  */
 
+// a generic composition of WinRowElements for visual presentation of data
+
 #pragma once
 
 #include <memory>
@@ -41,7 +43,7 @@ public:
 
   using EColour = ou::Colour::wx::EColour;
 
-  struct Element {
+  struct Element { // definition of a row of elements
     int field;
     int width;
     std::string header;

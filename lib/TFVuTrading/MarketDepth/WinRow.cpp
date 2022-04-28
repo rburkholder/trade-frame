@@ -21,8 +21,8 @@
 
 #include <wx/window.h>
 
-#include "WinRowElement.hpp"
 #include "WinRow.hpp"
+#include "WinRowElement.hpp"
 
 namespace { // local variables
 
