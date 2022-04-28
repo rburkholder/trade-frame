@@ -20,7 +20,7 @@
  */
 
 #include <wx/sizer.h>
-#include <wx/tooltip.h>
+//#include <wx/tooltip.h>
 #include <wx/dcclient.h>
 
 #include <TFTimeSeries/DatedDatum.h>
@@ -96,10 +96,10 @@ void PanelTrade::Init() {
   //m_ixLastAsk = 0.0;
   //m_ixLastBid = 0.0;
 
-  wxToolTip::Enable( true );
-  wxToolTip::SetDelay( 500 );
-  wxToolTip::SetAutoPop( 2000 );
-  wxToolTip::SetReshow( 1000 );
+  //wxToolTip::Enable( true );
+  //wxToolTip::SetDelay( 500 );
+  //wxToolTip::SetAutoPop( 2000 );
+  //wxToolTip::SetReshow( 1000 );
 
   m_timerRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
