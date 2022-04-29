@@ -203,10 +203,7 @@ private:
   pTH2D_t m_pHistVolume;
   pTH2D_t m_pHistVolumeDemo;
 
-
   void InitRdaf();
-
-  // ==
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

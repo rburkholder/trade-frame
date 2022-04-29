@@ -74,6 +74,8 @@ private:
   using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using fInstrumentConstructed_t = std::function<void(const std::string&)>;
+
   ou::tf::config::choices_t m_choices;
 
   FrameMain* m_pFrameMain;
@@ -142,7 +144,11 @@ private:
   void HandleMenuActionUtilitySave();
   void HandleMenuActionUtilityClear();
 
-  void ConstructIBInstrument(  const std::string& sNamePortfolio, const std::string& sSymbol );
+  void ConstructIBInstrument(
+    const std::string& sNamePortfolio
+  , const std::string& sSymbol
+  , fInstrumentConstructed_t&&
+    );
   void ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol );
 
   void LoadPortfolio( const std::string& sName );

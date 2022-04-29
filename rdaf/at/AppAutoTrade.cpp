@@ -246,7 +246,8 @@ bool AppAutoTrade::OnInit() {
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol, choices] = vt;
-    std::cout << "creating strategy for: " << sSymbol << std::endl;
+
+    //BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol;
 
     Strategy::config_t config(
       sSymbol,
@@ -271,13 +272,14 @@ bool AppAutoTrade::OnInit() {
     }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
+    BOOST_LOG_TRIVIAL(info) << "strategy installed for: " << sSymbol;
 
     // TODO: use this to add an order list to the instrument: date, direction, type, limit
   }
 
   // does the list need to be sorted?
   for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
-    BOOST_LOG_TRIVIAL(info) << "loading history: " << sPath;
+    BOOST_LOG_TRIVIAL(info) << "loading rdaf history: " << sPath;
     TFile* pFile = new TFile( sPath.c_str(), "READ" );
     assert( pFile->IsOpen() );
 
@@ -458,7 +460,11 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructIBInstrument( const std::string& sNamePortfolio, const std::string& sSymbol ) {
+void AppAutoTrade::ConstructIBInstrument(
+  const std::string& sNamePortfolio
+, const std::string& sSymbol
+, fInstrumentConstructed_t&& fConstructed
+) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -466,13 +472,13 @@ void AppAutoTrade::ConstructIBInstrument( const std::string& sNamePortfolio, con
 
   m_pBuildInstrument->Queue(
     sSymbol,
-    [this,&sNamePortfolio, &sSymbol]( pInstrument_t pInstrument ){
+    [this,&sNamePortfolio, &sSymbol, fConstructed_=std::move( fConstructed )]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       pPosition_t pPosition;
       if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
         pPosition = pm.GetPosition( sNamePortfolio, idInstrument );
-        std::cout << "position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "position loaded " << pPosition->GetInstrument()->GetInstrumentName();
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
@@ -481,11 +487,12 @@ void AppAutoTrade::ConstructIBInstrument( const std::string& sNamePortfolio, con
           "ib01", "iq01", m_pExecutionProvider,
           pWatch
         );
-        std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "position constructed " << pPosition->GetInstrument()->GetInstrumentName();
       }
       mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
       assert( m_mapStrategy.end() != iterStrategy );
       iterStrategy->second->SetPosition( pPosition );
+      fConstructed_( sSymbol );
     } );
 
 }
@@ -681,22 +688,26 @@ void AppAutoTrade::ConfirmProviders() {
         static const std::string sNamePortfolio( "IB" );
         LoadPortfolio( sNamePortfolio );
         for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-          ConstructIBInstrument( sNamePortfolio, vt.first );
-          { // capture the Strategy object for specific use
-            Strategy& strategy( *vt.second );
-            if ( m_pL2Symbols ) {
-              auto symbol = m_iqfeed->GetSymbol( vt.first );
-              m_pL2Symbols->WatchAdd(
-                vt.first,
-                [symbol]( const ou::tf::MarketDepth& md ){
-                  symbol->SubmitMarketDepth( md );
-                }
-                );
-            }
-            else {
-              assert( false ); // m_pL2Symbols needs to be available
-            }
+          ConstructIBInstrument(
+            sNamePortfolio, vt.first
+          , [this]( const std::string& sSymbol ){
+              mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
+              Strategy& strategy( *iter->second );
+              if ( m_pL2Symbols ) {
+                BOOST_LOG_TRIVIAL(info) << "starting L2 for: " << sSymbol;
+                auto symbol = m_iqfeed->GetSymbol( sSymbol );
+                m_pL2Symbols->WatchAdd(
+                  sSymbol,
+                  [symbol]( const ou::tf::MarketDepth& md ){
+                    symbol->SubmitMarketDepth( md );
+                  }
+                  );
+              }
+              else {
+                assert( false ); // m_pL2Symbols needs to be available
+              }
           }
+          );
         }
       }
       else {
