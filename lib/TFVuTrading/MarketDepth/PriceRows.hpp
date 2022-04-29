@@ -39,11 +39,11 @@ public:
 
   void SetInterval( double );
 
-  int Cast( double price ) const;
-  double Cast( int ix ) const;
+  int Cast( double price ) const; // price to index
+  double Cast( int ix ) const;    // index to price
 
-  PriceRow& operator[]( double );
-  PriceRow& operator[]( int );
+  PriceRow& operator[]( double ); // by price
+  PriceRow& operator[]( int );    // by index
 
 protected:
 private:
