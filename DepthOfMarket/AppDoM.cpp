@@ -37,6 +37,12 @@ TODO:
 #include <wx/defs.h>
 #include <wx/sizer.h>
 
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/FrameControls.h>
+
+#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
+#include <TFVuTrading/MarketDepth/PanelSideBySide.hpp>
+
 #include "AppDoM.h"
 
 namespace {
@@ -76,18 +82,11 @@ bool AppDoM::OnInit() {
     m_pFrameMain->Layout();
     m_pFrameMain->Show( true );
 
+    m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Level II Statistics", wxPoint( 10, 10 ) );
+    m_pPanelSideBySide = new ou::tf::l2::PanelSideBySide( m_pFrameControls );
+    m_pFrameControls->Attach( m_pPanelSideBySide );
+
     m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppDoM::OnClose, this );  // start close of windows and controls
-
-    //Bind(
-    //  wxEVT_SIZE,
-    //  [this](wxSizeEvent& event){
-    //    std::cout << "w=" << event.GetSize().GetWidth() << ",h=" << event.GetSize().GetHeight() << std::endl;
-    //    event.Skip();
-    //    }//,
-    //  //idFrameMain
-    //  );
-
-    wxSize size;
 
     wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
     sizerMain->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 4 );
@@ -96,7 +95,7 @@ bool AppDoM::OnInit() {
     sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 4);
     m_pPanelProviderControl->Show( true );
 
-    size = sizerMain->GetSize();
+    wxSize size = sizerMain->GetSize();
 
     LinkToPanelProviderControl();
 
@@ -202,6 +201,10 @@ bool AppDoM::OnInit() {
   //  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
   //  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
     //wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Utility", vItemsLoadSymbols );
+
+    m_pFrameControls->SetAutoLayout( true );
+    m_pFrameControls->Layout();
+    m_pFrameControls->Show( true );
 
     CallAfter(
       [this](){

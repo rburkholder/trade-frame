@@ -39,13 +39,22 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-#include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-
-#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "Config.h"
 #include "PanelStatistics.hpp"
+
+namespace ou {
+namespace tf {
+  class FrameControls;
+namespace l2 {
+  class PanelTrade;
+  class PanelSideBySide;
+}
+}
+}
+
+class FrameMain;
 
 class AppDoM:
   public wxApp,
@@ -60,9 +69,11 @@ private:
   config::Options m_config;
 
   FrameMain* m_pFrameMain;
-  ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::FrameControls* m_pFrameControls;
 
+  ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::l2::PanelTrade* m_pPanelTrade;
+  ou::tf::l2::PanelSideBySide* m_pPanelSideBySide;
 
   int m_cntLoops;
   PanelStatistics::values_t m_valuesStatistics;
@@ -148,17 +159,21 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-  }
+    ar & *m_pFrameControls;
+}
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 <= version ) {
+      ar & *m_pFrameControls;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppDoM, 1)
+BOOST_CLASS_VERSION(AppDoM, 2)
 
 DECLARE_APP(AppDoM)

@@ -24,6 +24,8 @@
 #include <wx/timer.h>
 #include <wx/window.h>
 
+#include "WinRow.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
@@ -34,18 +36,18 @@ namespace l2 { // market depth
 #define SYMBOL_PANEL_SIDEBYSIDE_SIZE wxDefaultSize
 #define SYMBOL_PANEL_SIDEBYSIDE_POSITION wxDefaultPosition
 
-class PanelTrade: public wxWindow {
+class PanelSideBySide: public wxWindow {
 public:
 
-  PanelTrade();
-  PanelTrade(
+  PanelSideBySide();
+  PanelSideBySide(
    wxWindow* parent,
    wxWindowID id = SYMBOL_PANEL_SIDEBYSIDE_IDNAME,
    const wxPoint& pos = SYMBOL_PANEL_SIDEBYSIDE_POSITION,
    const wxSize& size = SYMBOL_PANEL_SIDEBYSIDE_SIZE,
    long style = SYMBOL_PANEL_SIDEBYSIDE_STYLE
    );
-  ~PanelTrade(void);
+  virtual ~PanelSideBySide();
 
   bool Create(
    wxWindow* parent,
@@ -62,9 +64,25 @@ private:
     ID_Null=wxID_HIGHEST, ID_PANEL_SIDEBYSIDE
   };
 
-  //fTimer_t m_fTimer;
+  using pWinRow_t = WinRow::pWinRow_t;
+  pWinRow_t m_pWinRow_Header;
 
+  using vWinRow_t = std::vector<pWinRow_t>;
+  vWinRow_t m_vWinRow; // non header rows only
 
+  unsigned int m_cntWinRows_Total; // includes header row: TODO: verify all usage locations are correct
+  unsigned int m_cntWinRows_Data; // without header row
+
+  void Init();
+  void CreateControls();
+  void DrawWinRows();
+  void DeleteWinRows();
+
+  void OnPaint( wxPaintEvent& );
+
+  void OnResize( wxSizeEvent& );
+  void OnResizing( wxSizeEvent& );
+  void OnDestroy( wxWindowDestroyEvent& );
 
 };
 
