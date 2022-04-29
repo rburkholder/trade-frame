@@ -49,9 +49,9 @@ namespace tf {
   class FrameControls;
   class BuildInstrument;
   class PanelOrderButtons;
-namespace iqfeed { // IQFeed
+namespace iqfeed {
   class OptionChainQuery;
-} // namespace iqfeed
+}
 }
 }
 
@@ -136,7 +136,6 @@ private:
     ar & *m_pFrameMain;
     ar & m_splitterRow->GetSashPosition();
     ar & *m_pFrameControls;
-    //ar & *m_pWinChartView;
   }
 
   template<typename Archive>
@@ -145,9 +144,6 @@ private:
     int x;
     ar & x;
     m_splitterRow->SetSashPosition( x );
-    if ( 2 <= version ) {
-      //ar & *m_pWinChartView;
-    }
     if ( 3 <= version ) {
       ar & *m_pFrameControls;
     }
