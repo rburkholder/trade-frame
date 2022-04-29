@@ -55,7 +55,7 @@ public:
    const wxSize& size = SYMBOL_PANELTRADE_SIZE,
    long style = SYMBOL_PANELTRADE_STYLE
    );
-  ~PanelTrade(void);
+  virtual ~PanelTrade();
 
   bool Create(
    wxWindow* parent,
