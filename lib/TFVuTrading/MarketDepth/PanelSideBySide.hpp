@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <wx/timer.h>
 #include <wx/window.h>
 
@@ -57,6 +59,9 @@ public:
    long style = SYMBOL_PANEL_SIDEBYSIDE_STYLE
    );
 
+  void OnL2Ask( double price, int volume, bool bOnAdd );
+  void OnL2Bid( double price, int volume, bool bOnAdd );
+
 protected:
 private:
 
@@ -73,12 +78,31 @@ private:
   unsigned int m_cntWinRows_Total; // includes header row: TODO: verify all usage locations are correct
   unsigned int m_cntWinRows_Data; // without header row
 
+  struct PriceLevel {
+    int nVolume;
+    int nVolumeAggregate; // may not be needed
+    int nOrders;
+    int nOrdersAggregate; // may not be needed
+    PriceLevel(): nVolume {}, nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+  };
+
+  using mapPriceLevel_t = std::map<double,PriceLevel>;
+
+  mapPriceLevel_t m_mapAskPriceLevel;
+  mapPriceLevel_t m_mapBidPriceLevel;
+
+  wxTimer m_timerRefresh;
+
   void Init();
   void CreateControls();
   void DrawWinRows();
   void DeleteWinRows();
 
-  void OnPaint( wxPaintEvent& );
+  void UpdateMap( mapPriceLevel_t& map, double price, int volume );
+  void CalculateStatistics();
+
+  void HandleTimerRefresh( wxTimerEvent& );
 
   void OnResize( wxSizeEvent& );
   void OnResizing( wxSizeEvent& );

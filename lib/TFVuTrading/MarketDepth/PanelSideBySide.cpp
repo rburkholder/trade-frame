@@ -19,19 +19,21 @@
  * Created: April 27, 2022 16:38
  */
 
+#include <boost/lexical_cast.hpp>
+
 #include <wx/sizer.h>
-#include <wx/tooltip.h>
 #include <wx/dcclient.h>
 
 #include <TFTimeSeries/DatedDatum.h>
 
 #include "WinRow.hpp"
+#include "WinRowElement.hpp"
 #include "PanelSideBySide.hpp"
 
 /*
   TODO:
     calculate order imbalance in L2Base
-    create simple planel to show top of book and imbalance as it changes:
+    create simple panel to show top of book and imbalance as it changes:
       price, imbalance bid <-> ask
     use vector to show value for top n positions
     as bid/ask price levels are updated and cleared, algorithm for entry 0 should be clear, or do we shift?
@@ -40,22 +42,26 @@
     then need to deduce for how long does the signal last?
 */
 
+// 2022/04/29 @ESM22 had 10x to 50x usual message volume at main market close
+//   will the code be able to keep up?
+// will need to watch for disconnect and resync the order list
+
 namespace {
 
   enum class EField: int {
-    BidVol, BidSize, Price, AskSize, AskVol, Imbalance
+    BSizeAgg, BSize, BPrice, APrice, ASize, ASizeAgg, Imbalance
   };
 
   using EColour = ou::Colour::wx::EColour;
   //using EField = ou::tf::l2::DataRow::EField;
 
   const ou::tf::l2::WinRow::vElement_t vElement = {
-    { (int)EField::BidVol,    45, "BVol",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::BidSize,   45, "BSize",  wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::Price,     60, "BPrice", wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::Price,     60, "APrice", wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::AskSize,   45, "ASize",  wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-  , { (int)EField::AskVol,    45, "AVol",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+    { (int)EField::BSizeAgg,  45, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+  , { (int)EField::BSize,     45, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+  , { (int)EField::BPrice,    60, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::APrice,    60, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::ASize,     45, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+  , { (int)EField::ASizeAgg,  45, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   , { (int)EField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
   };
 
@@ -131,6 +137,82 @@ void PanelSideBySide::CreateControls() {
   Bind( wxEVT_SIZING, &PanelSideBySide::OnResizing, this, GetId() );
   Bind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this, GetId() );
 
+  m_timerRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &PanelSideBySide::HandleTimerRefresh, this, m_timerRefresh.GetId() );
+  m_timerRefresh.Start( 200 ); // 5 times a second
+}
+
+void PanelSideBySide::OnL2Ask( double price, int volume, bool bOnAdd ) {
+  UpdateMap( m_mapAskPriceLevel, price, volume );
+}
+
+void PanelSideBySide::OnL2Bid( double price, int volume, bool bOnAdd ) {
+  UpdateMap( m_mapBidPriceLevel, price, volume );
+}
+
+void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume ) {
+  mapPriceLevel_t::iterator iter = map.find( price );
+  if ( map.end() == iter ) {
+    if ( 0 < volume ) {
+      auto result = map.emplace( price, PriceLevel( volume) );
+      assert( result.second );
+    }
+  }
+  else {
+    if ( 0 == volume ) {
+      map.erase( iter );
+    }
+    else {
+      iter->second.nVolume = volume;
+    }
+  }
+}
+
+double Imbalance( int volBid, int volAsk ) {
+  int top = volBid - volAsk;
+  int bot = volBid + volAsk;
+  return ( (double)top / (double)bot );
+}
+
+void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thread problems in the maps exist (add the DataRow thingy)
+  if ( ( 2 <= m_mapAskPriceLevel.size() ) && ( 2 <= m_mapBidPriceLevel.size() ) && ( 2 <= m_vWinRow.size() ) ) { // TODO: tune the test
+    int nVolumeAggregateAsk {};
+    int nVolumeAggregateBid {};
+
+    mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
+    iterMapAsk->second.nVolumeAggregate = 0;
+    mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();
+    iterMapBid->second.nVolumeAggregate = 0;
+    vWinRow_t::iterator iterWinRow = m_vWinRow.begin();
+
+    for ( int ix = 0; ix < 2; ix++ ) {
+      nVolumeAggregateAsk += iterMapAsk->second.nVolume;
+      nVolumeAggregateBid += iterMapBid->second.nVolume;
+      WinRow& row( **iterWinRow );
+      row[ (int)EField::APrice ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->first ) ); // will need to convert to proper data element
+      row[ (int)EField::ASize ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->second.nVolume ) ); // will need to convert to proper data element
+      row[ (int)EField::ASizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateAsk ) ); // will need to convert to proper data element
+      row[ (int)EField::BPrice ]->SetText( boost::lexical_cast<std::string>( iterMapBid->first ) ); // will need to convert to proper data element
+      row[ (int)EField::BSize ]->SetText( boost::lexical_cast<std::string>( iterMapBid->second.nVolume ) ); // will need to convert to proper data element
+      row[ (int)EField::BSizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateBid ) ); // will need to convert to proper data element
+      double imbalance = Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk );
+      row[ (int)EField::Imbalance ]->SetText( boost::lexical_cast<std::string>( imbalance ) ); // will need to convert to proper data element
+      iterMapAsk++;
+      iterMapBid++;
+      iterWinRow++;
+    }
+  }
+}
+
+void PanelSideBySide::HandleTimerRefresh( wxTimerEvent& event ) {
+  //if ( m_fTimer ) m_fTimer();
+  //std::scoped_lock<std::mutex> lock( m_mutexTimer );
+  if ( 0 < m_cntWinRows_Data ) {
+    CalculateStatistics();
+    //for ( int ix = m_ixFirstPriceRow; ix <= m_ixLastPriceRow; ix++ ) {
+    //  m_PriceRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+    //}
+  }
 }
 
 void PanelSideBySide::DrawWinRows() {
@@ -185,8 +267,6 @@ void PanelSideBySide::DrawWinRows() {
 
 void PanelSideBySide::DeleteWinRows() {}
 
-void PanelSideBySide::OnPaint( wxPaintEvent& ) {}
-
 void PanelSideBySide::OnResize( wxSizeEvent& event ) {  // TODO: need to fix this
   CallAfter(
     [this](){
@@ -212,6 +292,8 @@ void PanelSideBySide::OnDestroy( wxWindowDestroyEvent& event ) {
     m_vWinRow.clear();
 
     //Unbind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
+
+    Unbind( wxEVT_TIMER, &PanelSideBySide::HandleTimerRefresh, this, m_timerRefresh.GetId() );
 
     Unbind( wxEVT_SIZE, &PanelSideBySide::OnResize, this, GetId() );
     Unbind( wxEVT_SIZING, &PanelSideBySide::OnResizing, this, GetId() );

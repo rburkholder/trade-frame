@@ -67,10 +67,6 @@ bool AppDoM::OnInit() {
 
     m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_config.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
-    //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
-    //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
-    //m_pFrameMain->Center();
-  //  m_pFrameMain->Move( -2500, 50 );
 
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
     m_pFrameMain->SetSizer( sizerMain );
@@ -184,11 +180,13 @@ bool AppDoM::OnInit() {
             m_valuesStatistics.nL2MsgBid++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteBid( price, volume );
+            m_pPanelSideBySide->OnL2Bid( price, volume, bAdd );
           },
           [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
             m_valuesStatistics.nL2MsgAsk++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteAsk( price, volume );
+            m_pPanelSideBySide->OnL2Ask( price, volume, bAdd );
           });
       } );
 
