@@ -33,11 +33,11 @@ namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 template<typename T>
-class PriceRowElement {
+class DataRowElement {
 public:
 
-  PriceRowElement( const std::string& sFormat, bool& bChanged );
-  virtual ~PriceRowElement();
+  DataRowElement( const std::string& sFormat, bool& bChanged );
+  virtual ~DataRowElement();
 
   void SetWinRowElement( WinRowElement* );
   WinRowElement* GetWinRowElement() { return m_pWinRowElement; }
@@ -66,7 +66,7 @@ private:
 };
 
 template<typename T>
-PriceRowElement<T>::PriceRowElement( const std::string& sFormat, bool& bChanged )
+DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
 : m_bChanged( bChanged )
 , m_bHighlight( false )
 , m_format( sFormat )
@@ -75,45 +75,45 @@ PriceRowElement<T>::PriceRowElement( const std::string& sFormat, bool& bChanged 
 {}
 
 template<typename T>
-PriceRowElement<T>::~PriceRowElement() {
+DataRowElement<T>::~DataRowElement() {
   m_pWinRowElement = nullptr;
 }
 
 template<typename T>
-void PriceRowElement<T>::Set( T value ) {
+void DataRowElement<T>::Set( T value ) {
   m_value = value;
   m_bChanged = true;
 }
 
 template<typename T>
-void PriceRowElement<T>::Set( T value, bool bHighlight ) {
+void DataRowElement<T>::Set( T value, bool bHighlight ) {
   m_value = value;
   m_bHighlight = bHighlight;
   m_bChanged = true;
 }
 
 template<typename T>
-T PriceRowElement<T>::Get() const {
+T DataRowElement<T>::Get() const {
   return m_value;
 }
 
 template<typename T>
-void PriceRowElement<T>::Inc()  {
+void DataRowElement<T>::Inc()  {
   m_value++;
 }
 
 template<typename T>
-void PriceRowElement<T>::Add( T value )  {
+void DataRowElement<T>::Add( T value )  {
   m_value += value;
 }
 
 template<typename T>
-void PriceRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
+void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
   m_pWinRowElement = pwre;
 }
 
 template<typename T>
-void PriceRowElement<T>::UpdateWinRowElement() {
+void DataRowElement<T>::UpdateWinRowElement() {
   if ( 0 != m_value ) {
     m_format % m_value;
     m_sValue = m_format.str();
@@ -126,9 +126,9 @@ void PriceRowElement<T>::UpdateWinRowElement() {
   }
 }
 
-// class PriceRowElementPrice
+// class DataRowElementPrice
 
-class PriceRowElementPrice: public PriceRowElement<int> {
+class DataRowElementPrice: public DataRowElement<int> {
 public:
 protected:
 private:
@@ -136,9 +136,9 @@ private:
 
 // class PriceRowElementIndicatorStatic
 
-class PriceRowElementIndicatorStatic: public PriceRowElement<std::string> {
+class DataRowElementIndicatorStatic: public DataRowElement<std::string> {
 public:
-  PriceRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
+  DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
   virtual void UpdateWinRowElement();
   void Append( const std::string& );
 protected:
@@ -147,9 +147,9 @@ private:
 
 // class PriceRowElementIndicatorDynamic
 
-class PriceRowElementIndicatorDynamic: public PriceRowElement<std::string> {
+class DataRowElementIndicatorDynamic: public DataRowElement<std::string> {
 public:
-  PriceRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged );
+  DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged );
   virtual void UpdateWinRowElement();
   virtual void Set( const std::string& );
   void Add( const std::string& );

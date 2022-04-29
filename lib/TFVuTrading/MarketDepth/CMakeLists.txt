@@ -10,7 +10,7 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
-    PriceRowElement.hpp
+    DataRowElement.hpp
     PriceRow.hpp
     PriceRows.hpp
     PanelTrade.hpp
@@ -21,7 +21,7 @@ set(
 
 set(
   file_cpp
-    PriceRowElement.cpp
+    DataRowElement.cpp
     PriceRow.cpp
     PriceRows.cpp
     PanelTrade.cpp

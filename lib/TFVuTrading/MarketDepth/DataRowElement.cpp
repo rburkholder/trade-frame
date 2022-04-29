@@ -19,7 +19,7 @@
  * Created: November 10, 2021 17:54
  */
 
-#include "PriceRowElement.hpp"
+#include "DataRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -27,11 +27,11 @@ namespace l2 { // market depth
 
 // class PriceRowElementIndicatorStatic
 
-PriceRowElementIndicatorStatic::PriceRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged )
-: PriceRowElement<std::string>( sFormat, bChanged )
+DataRowElementIndicatorStatic::DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged )
+: DataRowElement<std::string>( sFormat, bChanged )
 {}
 
-void PriceRowElementIndicatorStatic::Append( const std::string& sValue ) {
+void DataRowElementIndicatorStatic::Append( const std::string& sValue ) {
   if ( 0 == m_sValue.size() ) {
     m_sValue = sValue;
   }
@@ -41,7 +41,7 @@ void PriceRowElementIndicatorStatic::Append( const std::string& sValue ) {
   m_bChanged = true;
 }
 
-void PriceRowElementIndicatorStatic::UpdateWinRowElement() {
+void DataRowElementIndicatorStatic::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     m_pWinRowElement->SetText( m_sValue );
   }
@@ -49,12 +49,12 @@ void PriceRowElementIndicatorStatic::UpdateWinRowElement() {
 
 // class PriceRowElementIndicatorDynamic
 
-PriceRowElementIndicatorDynamic::PriceRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged )
-: PriceRowElement<std::string>( sFormat, bChanged )
+DataRowElementIndicatorDynamic::DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged )
+: DataRowElement<std::string>( sFormat, bChanged )
 , m_bListChanged( false )
 {}
 
-void PriceRowElementIndicatorDynamic::Set( const std::string& sValue ) {
+void DataRowElementIndicatorDynamic::Set( const std::string& sValue ) {
   bool bSet( false );
   if ( 1 == m_setIndicator.size() ) {
     setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
@@ -70,7 +70,7 @@ void PriceRowElementIndicatorDynamic::Set( const std::string& sValue ) {
   }
 }
 
-void PriceRowElementIndicatorDynamic::Add( const std::string& sValue ) {
+void DataRowElementIndicatorDynamic::Add( const std::string& sValue ) {
   setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
   if ( m_setIndicator.end() == iter ) {
     m_setIndicator.insert( sValue );
@@ -79,7 +79,7 @@ void PriceRowElementIndicatorDynamic::Add( const std::string& sValue ) {
   }
 }
 
-void PriceRowElementIndicatorDynamic::Del( const std::string& sValue ) {
+void DataRowElementIndicatorDynamic::Del( const std::string& sValue ) {
   setIndicator_t::const_iterator iter = m_setIndicator.find( sValue );
   if ( m_setIndicator.end() != iter ) {
     m_setIndicator.erase( iter );
@@ -88,7 +88,7 @@ void PriceRowElementIndicatorDynamic::Del( const std::string& sValue ) {
   }
 }
 
-void PriceRowElementIndicatorDynamic::UpdateWinRowElement() {
+void DataRowElementIndicatorDynamic::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     if ( m_bListChanged ) {
       m_sValue.clear();

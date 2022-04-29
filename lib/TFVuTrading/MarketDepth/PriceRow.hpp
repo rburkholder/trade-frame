@@ -23,7 +23,7 @@
 
 #include "WinRow.hpp"
 
-#include "PriceRowElement.hpp"
+#include "DataRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -97,17 +97,17 @@ private:
 
   // TODO: boost::fusion?  std::tuple?
   //DataRowElement<double>         m_dreAcctPl;
-  PriceRowElement<unsigned int>   m_dreBuyCount;
-  PriceRowElement<unsigned int>   m_dreBuyVolume;
-  PriceRowElement<unsigned int>   m_dreBidSize;
-  PriceRowElement<double>         m_drePrice;
-  PriceRowElement<unsigned int>   m_dreAskSize;
-  PriceRowElement<unsigned int>   m_dreSellVolume;
-  PriceRowElement<unsigned int>   m_dreSellCount;
-  PriceRowElement<unsigned int>   m_dreTicks;
-  PriceRowElement<unsigned int>   m_dreVolume;
-  PriceRowElementIndicatorStatic  m_dreIndicatorStatic;
-  PriceRowElementIndicatorDynamic m_dreIndicatorDynamic;
+  DataRowElement<unsigned int>   m_dreBuyCount;
+  DataRowElement<unsigned int>   m_dreBuyVolume;
+  DataRowElement<unsigned int>   m_dreBidSize;
+  DataRowElement<double>         m_drePrice;
+  DataRowElement<unsigned int>   m_dreAskSize;
+  DataRowElement<unsigned int>   m_dreSellVolume;
+  DataRowElement<unsigned int>   m_dreSellCount;
+  DataRowElement<unsigned int>   m_dreTicks;
+  DataRowElement<unsigned int>   m_dreVolume;
+  DataRowElementIndicatorStatic  m_dreIndicatorStatic;
+  DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
 
   //RowElements* m_pRowElements;  // shared_ptr ?
 
