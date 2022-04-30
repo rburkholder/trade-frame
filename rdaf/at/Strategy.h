@@ -121,7 +121,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Skew, PL, ET };
+  enum EChartSlot { Price, Volume, Skew, PL, ET, MarketDepth };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -169,6 +169,9 @@ private:
   ou::ChartEntryShape m_ceShortExit;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::ChartEntryIndicator m_cdMarketDepthAsk;
+  ou::ChartEntryIndicator m_cdMarketDepthBid;
 
   ou::ChartEntryIndicator m_ceSkewness;
   ou::ChartEntryIndicator m_ceExecutionTime;

@@ -87,6 +87,9 @@ Strategy::Strategy(
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 
+  m_cdMarketDepthAsk.SetName( "MarketDepth Ask" );
+  m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
+
 }
 
 Strategy::~Strategy() {
@@ -113,6 +116,9 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
   m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
+
+  m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthAsk );
+  m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthBid );
 
 }
 
@@ -298,8 +304,21 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleDepth( const ou::tf::MarketDepth& depth ) {
+
   assert( m_pMarketMaker );
   m_pMarketMaker->MarketDepth( depth );
+
+  if ( '4' == depth.MsgType() ) {
+    switch ( depth.Side() ) {
+      case 'A':
+        m_cdMarketDepthAsk.Append( depth.DateTime(), depth.Price() );
+        break;
+      case 'B':
+        m_cdMarketDepthBid.Append( depth.DateTime(), depth.Price() );
+        break;
+    }
+  }
+
 }
 
 void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {
