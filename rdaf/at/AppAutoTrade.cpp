@@ -197,9 +197,11 @@ bool AppAutoTrade::OnInit() {
 
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
-  m_timerOneSecond.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-  m_timerOneSecond.Start( 500 );
+  if ( !m_choices.bStartSimulator ) {
+    m_timerOneSecond.SetOwner( this );
+    Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    m_timerOneSecond.Start( 500 );
+  }
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
@@ -601,8 +603,10 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
-  m_timerOneSecond.Stop();
-  Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  if ( !m_choices.bStartSimulator ) {
+    m_timerOneSecond.Stop();
+    Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  }
 
   // NOTE: when running the simuliation, perform a deletion instead
   //   use the boost file system utilities?
