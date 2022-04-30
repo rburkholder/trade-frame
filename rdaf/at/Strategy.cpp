@@ -88,7 +88,10 @@ Strategy::Strategy(
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 
   m_cdMarketDepthAsk.SetName( "MarketDepth Ask" );
+  m_cdMarketDepthAsk.SetColour( ou::Colour::Red );
+
   m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
+  m_cdMarketDepthBid.SetColour( ou::Colour::Blue );
 
 }
 
