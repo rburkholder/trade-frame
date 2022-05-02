@@ -75,18 +75,18 @@ public:
   // TODO: these need spinlocks
   inline const Quote& LastQuote() const { return m_quote; };  // may have thread sync issue
   inline const Trade& LastTrade() const { return m_trade; };  // may have thread sync issue
-  inline const MarketDepth& LastDepth() const { return m_depth; };  // may have thread sync issue
+  inline const DepthByMM& LastDepth() const { return m_depth; };  // may have thread sync issue
 
   const Fundamentals& GetFundamentals() const { assert( m_pFundamentals ); return *m_pFundamentals; };
   const Summary& GetSummary() const { return m_summary; };
 
   Quotes& GetQuotes() { return m_quotes; }; // not const so can delegate
   Trades& GetTrades() { return m_trades; }; // not const so can delegate
-  MarketDepths& GetDepths() { return m_depths; }; // not const so can delegate
+  DepthsByMM& GetDepths() { return m_depths; }; // not const so can delegate
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
-  ou::Delegate<const MarketDepth&> OnDepth;  // simulator
+  ou::Delegate<const DepthByMM&> OnDepth;  // simulator
   ou::Delegate<const Fundamentals&> OnFundamentals; // iqfeed
   ou::Delegate<const Summary&> OnSummary; // iqfeed
 
@@ -121,11 +121,11 @@ protected:
 
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
-  ou::tf::MarketDepth m_depth;
+  ou::tf::DepthByMM m_depth;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
-  ou::tf::MarketDepths m_depths;
+  ou::tf::DepthsByMM m_depths;
 
   pInstrument_t m_pInstrument;
 
@@ -171,7 +171,7 @@ private:
 
   void HandleQuote( const Quote& );
   void HandleTrade( const Trade& );
-  void HandleDepth( const MarketDepth& );
+  void HandleDepth( const DepthByMM& );
 
   void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );
   void HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t );

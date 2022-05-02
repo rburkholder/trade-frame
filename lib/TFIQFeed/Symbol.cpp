@@ -338,7 +338,7 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
 void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage* pMsg ) {
 }
 
-void IQFeedSymbol::SubmitMarketDepth( const ou::tf::MarketDepth& md ) {
+void IQFeedSymbol::SubmitMarketDepth( const ou::tf::DepthByMM& md ) {
   STRAND_CAPTURE( (Symbol::m_OnDepth( md )), md )
 }
 

@@ -53,8 +53,8 @@ void MergeDatedDatums::Add( TimeSeries<Greek>& series, MergeDatedDatums::OnDatum
   m_mhCarriers.Append( new MergeCarrier<Greek>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<MarketDepth>& series, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new MergeCarrier<MarketDepth>( series, function ) );
+void MergeDatedDatums::Add( TimeSeries<DepthByMM>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<DepthByMM>( series, function ) );
 }
 
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html

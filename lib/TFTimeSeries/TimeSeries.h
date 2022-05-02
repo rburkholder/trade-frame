@@ -475,6 +475,7 @@ public:
   virtual ~Bars() {};
   Bars* Subset( dt_t time ) { return (Bars*) TimeSeries<datum_t>::Subset( time ); }
   Bars* Subset( dt_t time, unsigned int n ) { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/bars/"; }
 protected:
 private:
 };
@@ -489,6 +490,7 @@ public:
   ~Trades() {};
   Trades* Subset( dt_t time ) { return (Trades*) TimeSeries<datum_t>::Subset( time ); }
   Trades* Subset( dt_t time, unsigned int n ) { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/trades/"; }
 protected:
 private:
 };
@@ -503,20 +505,37 @@ public:
   ~Quotes() {};
   Quotes* Subset( dt_t time ) { return (Quotes*) TimeSeries<datum_t>::Subset( time ); }
   Quotes* Subset( dt_t time, unsigned int n ) { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/quotes/"; }
 protected:
 private:
 };
 
-// MarketDepth
+// DepthsByMM
 
-class MarketDepths: public TimeSeries<MarketDepth> {
+class DepthsByMM: public TimeSeries<DepthByMM> {
 public:
-  using datum_t = MarketDepth;
-  MarketDepths() {};
-  MarketDepths( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~MarketDepths() {};
-  MarketDepths* Subset( dt_t time ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); }
-  MarketDepths* Subset( dt_t time, unsigned int n ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); }
+  using datum_t = DepthByMM;
+  DepthsByMM() {};
+  DepthsByMM( size_type size ): TimeSeries<datum_t>( size ) {};
+  ~DepthsByMM() {};
+  DepthsByMM* Subset( dt_t time ) { return (DepthsByMM*) TimeSeries<datum_t>::Subset( time ); }
+  DepthsByMM* Subset( dt_t time, unsigned int n ) { return (DepthsByMM*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/depths_mm/"; }
+protected:
+private:
+};
+
+// DepthsByOrder
+
+class DepthsByOrder: public TimeSeries<DepthByOrder> {
+public:
+  using datum_t = DepthByOrder;
+  DepthsByOrder() {};
+  DepthsByOrder( size_type size ): TimeSeries<datum_t>( size ) {};
+  ~DepthsByOrder() {};
+  DepthsByOrder* Subset( dt_t time ) { return (DepthsByOrder*) TimeSeries<datum_t>::Subset( time ); }
+  DepthsByOrder* Subset( dt_t time, unsigned int n ) { return (DepthsByOrder*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/depths_o/"; }
 protected:
 private:
 };
@@ -531,6 +550,7 @@ public:
   ~Greeks() {};
   Greeks* Subset( dt_t time ) { return (Greeks*) TimeSeries<datum_t>::Subset( time ); }
   Greeks* Subset( dt_t time, unsigned int n ) { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/greeks/"; }
 protected:
 private:
 };

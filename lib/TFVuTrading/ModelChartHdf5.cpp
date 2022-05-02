@@ -281,7 +281,7 @@ void ModelChartHdf5::DefineChartDepths( ou::ChartDataView* pChartDataView ) {
   // nothing to chart yet
 }
 
-void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const MarketDepths& depths ) {
+void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const DepthsByMM& depths ) {
 
   DefineChartOptions( pChartDataView );
 

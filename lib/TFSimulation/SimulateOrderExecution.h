@@ -65,7 +65,7 @@ public:
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
 
   void NewQuote( const Quote& quote );
-  void NewDepth( const MarketDepth& depth ); // has no influence on the self administred order books
+  void NewDepth( const DepthByMM& depth ); // has no influence on the self administred order books
   void NewTrade( const Trade& trade );
 
   void SubmitOrder( pOrder_t pOrder );

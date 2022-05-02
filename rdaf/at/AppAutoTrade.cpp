@@ -702,7 +702,7 @@ void AppAutoTrade::ConfirmProviders() {
                 auto symbol = m_iqfeed->GetSymbol( sSymbol );
                 m_pL2Symbols->WatchAdd(
                   sSymbol,
-                  [symbol]( const ou::tf::MarketDepth& md ){
+                  [symbol]( const ou::tf::DepthByMM& md ){
                     symbol->SubmitMarketDepth( md );
                   }
                   );

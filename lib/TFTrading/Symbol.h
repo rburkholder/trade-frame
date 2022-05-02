@@ -54,7 +54,7 @@ public:
   using trade_t = const Trade&;
   using tradehandler_t = ou::Delegate<trade_t>::OnDispatchHandler;
 
-  using depth_t = const MarketDepth&;
+  using depth_t = const DepthByMM&;
   using depthhandler_t = ou::Delegate<depth_t>::OnDispatchHandler;
 
   using greek_t = const Greek&;

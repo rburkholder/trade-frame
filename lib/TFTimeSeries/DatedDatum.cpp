@@ -158,7 +158,7 @@ H5::CompType* Trade::DefineDataType( H5::CompType* pComp ) {
   return pComp;
 }
 
-// CBar
+// Bar
 
 Bar::Bar()
 : DatedDatum(), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 )
@@ -205,47 +205,77 @@ H5::CompType* Bar::DefineDataType( H5::CompType* pComp ) {
 }
 
 //
-// MarketDepth
+// DepthByMM
 //
 
-MarketDepth::MarketDepth()
+DepthByMM::DepthByMM()
 : DatedDatum(), m_chMsgType( '0' ), m_chSide( ' ' ), m_nShares( 0 ), m_dblPrice( 0 )
 {}
 
-MarketDepth::MarketDepth( const ptime dt )
+DepthByMM::DepthByMM( const ptime dt )
 : DatedDatum( dt ), m_chMsgType( '0' ), m_chSide( ' '), m_nShares( 0 ), m_dblPrice( 0 )
 {}
 
-MarketDepth::MarketDepth( const MarketDepth& md )
+DepthByMM::DepthByMM( const DepthByMM& md )
 : DatedDatum( md.m_dt )
 , m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_uMMID( md.m_uMMID )
 {}
 
-MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, char* pch )
+DepthByMM::DepthByMM( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, char* pch )
 : DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( pch )
 {}
 
-MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid )
+DepthByMM::DepthByMM( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid )
 : DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( mmid )
 {}
 
-//MarketDepth::MarketDepth( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, const std::string& sMMID )
-//: DatedDatum( dt ), m_chMsgType( chMsgType ), m_chSide( chSide ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( sMMID )
-//{}
+DepthByMM::~DepthByMM() {}
 
-MarketDepth::~MarketDepth() {}
-
-H5::CompType* MarketDepth::DefineDataType( H5::CompType* pComp ) {
-  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( MarketDepth ) );
+H5::CompType* DepthByMM::DefineDataType( H5::CompType* pComp ) {
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( DepthByMM ) );
   DatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "MsgType",  HOFFSET( MarketDepth, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "Shares",   HOFFSET( MarketDepth, m_nShares ),      H5::PredType::NATIVE_LONG );
-  pComp->insertMember( "Price",    HOFFSET( MarketDepth, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Side",     HOFFSET( MarketDepth, m_chSide ),       H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID0",    HOFFSET( MarketDepth, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID1",    HOFFSET( MarketDepth, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID2",    HOFFSET( MarketDepth, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID3",    HOFFSET( MarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MsgType",  HOFFSET( DepthByMM, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "Shares",   HOFFSET( DepthByMM, m_nShares ),      H5::PredType::NATIVE_LONG );
+  pComp->insertMember( "Price",    HOFFSET( DepthByMM, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Side",     HOFFSET( DepthByMM, m_chSide ),       H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID0",    HOFFSET( DepthByMM, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID1",    HOFFSET( DepthByMM, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID2",    HOFFSET( DepthByMM, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID3",    HOFFSET( DepthByMM, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );
+  return pComp;
+}
+
+//
+// DepthByOrder
+//
+
+DepthByOrder::DepthByOrder()
+: DatedDatum(), m_nOrderID {}, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
+{}
+
+DepthByOrder::DepthByOrder( const ptime dt )
+: DatedDatum( dt ), m_nOrderID {}, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
+{}
+
+DepthByOrder::DepthByOrder( const DepthByOrder& md )
+: DatedDatum( md.m_dt )
+, m_nOrderID( md.m_nOrderID ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide )
+{}
+
+DepthByOrder::DepthByOrder( const dt_t dt, idorder_t nOrderID, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice)
+: DatedDatum( dt ), m_nOrderID( nOrderID ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
+{}
+
+DepthByOrder::~DepthByOrder() {}
+
+H5::CompType* DepthByOrder::DefineDataType( H5::CompType* pComp ) {
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( DepthByOrder ) );
+  DatedDatum::DefineDataType( pComp );
+  pComp->insertMember( "Depth",    HOFFSET( DepthByOrder, m_nOrderID ),     H5::PredType::NATIVE_UINT64 );
+  pComp->insertMember( "Price",    HOFFSET( DepthByOrder, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Shares",   HOFFSET( DepthByOrder, m_nShares ),      H5::PredType::NATIVE_LONG );
+  pComp->insertMember( "MsgType",  HOFFSET( DepthByOrder, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "Side",     HOFFSET( DepthByOrder, m_chSide ),       H5::PredType::NATIVE_CHAR );
   return pComp;
 }
 

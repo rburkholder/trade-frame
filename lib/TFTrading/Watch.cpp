@@ -315,7 +315,7 @@ void Watch::HandleTrade( const Trade& trade ) {
   OnTrade( trade );
 }
 
-void Watch::HandleDepth( const MarketDepth& depth ) {
+void Watch::HandleDepth( const DepthByMM& depth ) {
   if ( m_bRecordSeries ) m_depths.Append( depth );
   OnDepth( depth );
 }
@@ -349,7 +349,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
     std::string sPathName;
 
     if ( 0 != m_quotes.Size() ) {
-      sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
+      sPathName = sPrefix + Quotes::Directory() + m_pInstrument->GetInstrumentName();
       HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm, true, true, 5, 256 );
       wtsQuotes.Write( sPathName, &m_quotes );
       HDF5Attributes attrQuotes( dm, sPathName );
@@ -360,7 +360,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
     }
 
     if ( 0 != m_trades.Size() ) {
-      sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
+      sPathName = sPrefix + Trades::Directory() + m_pInstrument->GetInstrumentName();
       HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm, true, true, 5, 256 );
       wtsTrades.Write( sPathName, &m_trades );
       HDF5Attributes attrTrades( dm, sPathName );
@@ -371,8 +371,8 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
     }
 
     if ( 0 != m_depths.Size() ) {
-      sPathName = sPrefix + "/depths/" + m_pInstrument->GetInstrumentName();
-      HDF5WriteTimeSeries<ou::tf::MarketDepths> wtsDepths( dm, true, true, 5, 256 );
+      sPathName = sPrefix + DepthsByMM::Directory() + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::DepthsByMM> wtsDepths( dm, true, true, 5, 256 );
       wtsDepths.Write( sPathName, &m_depths );
       HDF5Attributes attrDepths( dm, sPathName );
       attrDepths.SetSignature( ou::tf::Trade::Signature() );
@@ -383,7 +383,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
 
   }
   catch (...) {
-    std::cout << "Watch::SaveSeries1 error: " << sPrefix << std::endl;
+    std::cout << "Watch::SaveSeries error: " << sPrefix << std::endl;
   }
 
 }

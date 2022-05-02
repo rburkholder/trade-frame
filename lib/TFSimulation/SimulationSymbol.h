@@ -63,7 +63,7 @@ private:
 
   Quotes m_quotes;
   Trades m_trades;
-  MarketDepths m_depths;
+  DepthsByMM m_depths;
   Greeks m_greeks;
 
   SimulateOrderExecution m_simExec;

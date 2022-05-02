@@ -210,7 +210,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
-  void HandleDepth( const ou::tf::MarketDepth& );
+  void HandleDepth( const ou::tf::DepthByMM& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

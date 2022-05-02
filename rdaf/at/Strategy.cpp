@@ -306,7 +306,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
-void Strategy::HandleDepth( const ou::tf::MarketDepth& depth ) {
+void Strategy::HandleDepth( const ou::tf::DepthByMM& depth ) {
 
   assert( m_pMarketMaker );
   m_pMarketMaker->MarketDepth( depth );

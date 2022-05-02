@@ -62,7 +62,7 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
+    ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
     m_fMarketDepth( md );
   }
   else {
@@ -81,7 +81,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepth ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::MarketDepth md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
+    ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
     m_fMarketDepth( md );
   }
   else {
@@ -96,7 +96,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
   }
 }
 
-void MarketMaker::MarketDepth( const ou::tf::MarketDepth& depth ) {
+void MarketMaker::MarketDepth( const ou::tf::DepthByMM& depth ) {
   switch ( depth.MsgType() ) {
     //case 3:  doesn't have add
     case '4': // Update
@@ -111,7 +111,7 @@ void MarketMaker::MarketDepth( const ou::tf::MarketDepth& depth ) {
   }
 }
 
-void MarketMaker::BidOrAsk_Update( const ou::tf::MarketDepth& depth ) {
+void MarketMaker::BidOrAsk_Update( const ou::tf::DepthByMM& depth ) {
   switch ( depth.Side() ) {
     case 'A':
       MMLimitOrder_Update( depth.MMID(), depth.Price(), depth.Volume(),  m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
@@ -122,7 +122,7 @@ void MarketMaker::BidOrAsk_Update( const ou::tf::MarketDepth& depth ) {
   }
 }
 
-void MarketMaker::BidOrAsk_Delete( const ou::tf::MarketDepth& depth ) {
+void MarketMaker::BidOrAsk_Delete( const ou::tf::DepthByMM& depth ) {
   switch ( depth.Side() ) {
     case 'A':
       MMLimitOrder_Delete( depth.MMID(), m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderBookAsk );
@@ -142,7 +142,7 @@ void MarketMaker::MMLimitOrder_Update_Live(
 }
 
 void MarketMaker::MMLimitOrder_Update(
-  MarketDepth::MMID_t mmid,
+  DepthByMM::MMID_t mmid,
   double price, volume_t volume,
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
@@ -194,7 +194,7 @@ void MarketMaker::MMLimitOrder_Delete_Live(
 }
 
 void MarketMaker::MMLimitOrder_Delete(
-  MarketDepth::MMID_t mmid, // MMID
+  DepthByMM::MMID_t mmid, // MMID
   fVolumeAtPrice_t& f,
   mapMM_t& mapMM,
   mapLimitOrderBook_t& mapLimitOrderBook
@@ -243,7 +243,7 @@ void MarketMaker::EmitMarketMakerMaps() {
   mapPriceLevels_t mapPriceMMBid;
 
   for ( const mapMM_t::value_type& vt: m_mapMMAsk ) {
-    price_mm pmm( vt.second.price, ou::tf::MarketDepth::Cast( vt.first ) );
+    price_mm pmm( vt.second.price, ou::tf::DepthByMM::Cast( vt.first ) );
     mapPriceMMAsk.emplace( pmm, vt.second.volume );
 
     //std::cout
@@ -255,7 +255,7 @@ void MarketMaker::EmitMarketMakerMaps() {
   }
 
   for ( const mapMM_t::value_type& vt: m_mapMMBid ) {
-    price_mm pmm( vt.second.price, ou::tf::MarketDepth::Cast( vt.first ) );
+    price_mm pmm( vt.second.price, ou::tf::DepthByMM::Cast( vt.first ) );
     mapPriceMMBid.emplace( pmm, vt.second.volume );
 
     //std::cout

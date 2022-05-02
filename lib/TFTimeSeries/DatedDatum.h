@@ -177,21 +177,20 @@ private:
 };
 
 //
-// MarketDepth (equity only)
+// DepthByMM (nasdaq equity only)
 //
 
-class MarketDepth: public DatedDatum {
+class DepthByMM: public DatedDatum {
 public:
 
   using MMID_t = uint32_t;
 
-  MarketDepth();
-  MarketDepth( const dt_t dt );
-  MarketDepth( const MarketDepth& md );
-  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, char* pch );
-  MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  //MarketDepth( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, const std::string& smmid );
-  ~MarketDepth();
+  DepthByMM();
+  DepthByMM( const dt_t dt );
+  DepthByMM( const DepthByMM& md );
+  DepthByMM( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, char* pch );
+  DepthByMM( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
+  ~DepthByMM();
 
   char MsgType() const { return m_chMsgType; }
   char Side() const { return m_chSide; }
@@ -217,6 +216,12 @@ public:
     return DatedDatum::Signature() * 100000000 + 83188888; } // DatedDatum -> MarketDepth
 
 protected:
+private:
+  volume_t m_nShares;
+  price_t m_dblPrice;
+  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
+  char m_chSide; // simplifies insertion into MarketDepth handlers
+
   union unionMMID {
     MMID_t mmid;
     char rch[4];
@@ -238,20 +243,44 @@ protected:
       rch[3] = s[3];
     }
   } m_uMMID;
-private:
-  volume_t m_nShares;
-  price_t m_dblPrice;
-  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
-  char m_chSide; // simplifies insertion into MarketDepth handlers
 };
 
 //
-// MarketDepth (futures, arrival, todo)
+// DepthByOrder (futures)
 //
 
-//
-// MarketDepth (futures, deletion, todo)
-//
+class DepthByOrder: public DatedDatum {
+public:
+
+  using idorder_t = uint64_t;
+
+  DepthByOrder();
+  DepthByOrder( const dt_t dt );
+  DepthByOrder( const DepthByOrder& md );
+  DepthByOrder( const dt_t dt, idorder_t nOrder, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice );
+  ~DepthByOrder();
+
+  static std::string Directory() { return "/depths_o/"; }
+
+  idorder_t OrderID() const { return m_nOrderID; }
+  price_t Price() const { return m_dblPrice; }
+  volume_t Volume() const { return m_nShares; }
+  char MsgType() const { return m_chMsgType; }
+  char Side() const { return m_chSide; }
+
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static uint64_t Signature() {
+    return DatedDatum::Signature() * 100000 + 41388; } // DatedDatum -> MarketDepth
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
+
+protected:
+private:
+  idorder_t m_nOrderID;
+  price_t m_dblPrice;
+  volume_t m_nShares;
+  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
+  char m_chSide; // simplifies insertion into MarketDepth handlers
+};
 
 //
 // Greek

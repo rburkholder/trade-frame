@@ -145,7 +145,7 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
   if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
-  if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData::Depths;
+  if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM;
   m_sCurrentPath = s1;
   m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
   namespace args = boost::phoenix::placeholders;
@@ -244,9 +244,9 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType e
     case CustomItemData::Greeks:
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
       break;
-    case CustomItemData::Depths:
+    case CustomItemData::DepthsByMM:
       std::cout << "MarketDepth will not show data" << std::endl;
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<MarketDepths>( m_pdm, m_pChartDataView, "MarketDepths", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByMM>( m_pdm, m_pChartDataView, "DepthsByMM", sPath );
       break;
     default:
       throw std::runtime_error("unknown CustomItemData");

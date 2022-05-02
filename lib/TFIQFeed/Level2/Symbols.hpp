@@ -44,7 +44,7 @@ public:
 
   using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
-  using fMarketDepth_t = std::function<void(const MarketDepth&)>;
+  using fMarketDepth_t = std::function<void(const DepthByMM&)>;
 
   L2Base();
   virtual ~L2Base() {}
@@ -109,7 +109,7 @@ public:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& );
 
-  void MarketDepth( const ou::tf::MarketDepth& ); // offline message submission
+  void MarketDepth( const ou::tf::DepthByMM& ); // offline message submission
 
   void EmitMarketMakerMaps();
 
@@ -128,12 +128,12 @@ private:
     : price( price_ ), volume( volume_ ) {}
   };
 
-  using mapMM_t = std::map<MarketDepth::MMID_t,price_level>; // key=mm, value=price,volume
+  using mapMM_t = std::map<DepthByMM::MMID_t,price_level>; // key=mm, value=price,volume
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  void BidOrAsk_Update( const ou::tf::MarketDepth& );
-  void BidOrAsk_Delete( const ou::tf::MarketDepth& );
+  void BidOrAsk_Update( const ou::tf::DepthByMM& );
+  void BidOrAsk_Delete( const ou::tf::DepthByMM& );
 
   void MMLimitOrder_Update_Live(
     const msg::OrderArrival::decoded&,
@@ -141,7 +141,7 @@ private:
     mapMM_t&, mapLimitOrderBook_t& );
 
   void MMLimitOrder_Update(
-    MarketDepth::MMID_t, // MMID
+    DepthByMM::MMID_t, // MMID
     double price, volume_t volume,
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
@@ -152,7 +152,7 @@ private:
     mapMM_t&, mapLimitOrderBook_t& );
 
   void MMLimitOrder_Delete(
-    MarketDepth::MMID_t, // MMID
+    DepthByMM::MMID_t, // MMID
     fVolumeAtPrice_t&,
     mapMM_t&, mapLimitOrderBook_t& );
 };

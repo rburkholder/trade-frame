@@ -125,7 +125,7 @@ private:
   void AddChartEntries( ou::ChartDataView*, const ou::tf::Greeks& );
   void AddChartEntries( ou::ChartDataView*, const Equities& );
   void AddChartEntries( ou::ChartDataView*, const Options& );
-  void AddChartEntries( ou::ChartDataView*, const ou::tf::MarketDepths& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::DepthsByMM& );
 
 };
 

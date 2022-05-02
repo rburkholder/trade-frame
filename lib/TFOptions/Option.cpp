@@ -215,17 +215,17 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   // add in option attributes to the already written quotes and trades.
   if ( 0 != m_quotes.Size() ) {
-    sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
+    sPathName = sPrefix + ou::tf::Quotes::Directory() + m_pInstrument->GetInstrumentName();
     HDF5Attributes attrGreeks( dm, sPathName, option );
   }
 
   if ( 0 != m_trades.Size() ) {
-    sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
+    sPathName = sPrefix + ou::tf::Trades::Directory() + m_pInstrument->GetInstrumentName();
     HDF5Attributes attrGreeks( dm, sPathName, option );
   }
 
   if ( 0 != m_greeks.Size() ) {
-    sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
+    sPathName = sPrefix + ou::tf::Greeks::Directory() + m_pInstrument->GetInstrumentName();
     HDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks( dm, true, true, 5, 256 );
     wtsGreeks.Write( sPathName, &m_greeks );
     HDF5Attributes attrGreeks( dm, sPathName, option );

@@ -68,7 +68,7 @@ private:
   class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:
     enum enumNodeType { Root, Group, Object } m_eNodeType;
-    enum enumDatumType { Quotes, Trades, Bars, Greeks, AtmIV, Depths, NoDatum } m_eDatumType;
+    enum enumDatumType { Quotes, Trades, Bars, Greeks, AtmIV, DepthsByMM, NoDatum } m_eDatumType;
     CustomItemData( enumNodeType eNodeType, enumDatumType eDatumType )
       : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };

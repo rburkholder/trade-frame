@@ -43,7 +43,7 @@ SimulationSymbol::~SimulationSymbol() {
 void SimulationSymbol::StartTradeWatch() {
   if ( 0 == m_trades.Size() ) {
     try {
-      std::string sPath( m_sDirectory + "/trades/" + GetId() );
+      std::string sPath( m_sDirectory + Trades::Directory() + GetId() );
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
       HDF5TimeSeriesContainer<Trade> tradeRepository( dm, sPath );
       HDF5TimeSeriesContainer<Trade>::iterator begin, end;
@@ -64,7 +64,7 @@ void SimulationSymbol::StopTradeWatch() {
 void SimulationSymbol::StartQuoteWatch() {
   if ( 0 == m_quotes.Size() ) {
     try {
-      std::string sPath( m_sDirectory + "/quotes/" + GetId() );
+      std::string sPath( m_sDirectory + Quotes::Directory() + GetId() );
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
       HDF5TimeSeriesContainer<Quote> quoteRepository( dm, sPath );
       HDF5TimeSeriesContainer<Quote>::iterator begin, end;
@@ -85,7 +85,7 @@ void SimulationSymbol::StopQuoteWatch() {
 void SimulationSymbol::StartGreekWatch() {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
-      std::string sPath( m_sDirectory + "/greeks/" + GetId() );
+      std::string sPath( m_sDirectory + Greeks::Directory() + GetId() );
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
       HDF5TimeSeriesContainer<Greek> greekRepository( dm, sPath );
       HDF5TimeSeriesContainer<Greek>::iterator begin, end;
@@ -106,10 +106,10 @@ void SimulationSymbol::StopGreekWatch() {
 void SimulationSymbol::StartDepthWatch() {
   if ( 0 == m_depths.Size() )  {
     try {
-      std::string sPath( m_sDirectory + "/depths/" + GetId() );
+      std::string sPath( m_sDirectory + DepthsByMM::Directory() + GetId() );
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
-      HDF5TimeSeriesContainer<MarketDepth> depthRepository( dm, sPath );
-      HDF5TimeSeriesContainer<MarketDepth>::iterator begin, end;
+      HDF5TimeSeriesContainer<DepthByMM> depthRepository( dm, sPath );
+      HDF5TimeSeriesContainer<DepthByMM>::iterator begin, end;
       begin = depthRepository.begin();
       end = depthRepository.end();
       m_depths.Resize( end - begin );
@@ -130,7 +130,7 @@ void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
 }
 
 void SimulationSymbol::HandleDepthEvent( const DatedDatum &datum ) {
-  const MarketDepth& md( dynamic_cast<const MarketDepth &>( datum ) );
+  const DepthByMM& md( dynamic_cast<const DepthByMM &>( datum ) );
   STRAND_CAPTURE( (m_OnDepth( md )), md )
 }
 

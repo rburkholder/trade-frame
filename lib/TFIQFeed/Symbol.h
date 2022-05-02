@@ -84,7 +84,7 @@ public:
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
-  void SubmitMarketDepth( const ou::tf::MarketDepth& );
+  void SubmitMarketDepth( const ou::tf::DepthByMM& );
 
 protected:
 

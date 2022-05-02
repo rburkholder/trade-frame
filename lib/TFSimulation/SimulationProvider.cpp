@@ -221,7 +221,7 @@ void SimulationProvider::Merge() {
           MakeDelegate( iter->second.get(), &SimulationSymbol::HandleQuoteEvent ) );
       }
 
-      MarketDepths& depths( sym->m_depths );
+      DepthsByMM& depths( sym->m_depths );
       if ( 0 != depths.Size() ) {
         m_pMerge -> Add(
           depths,

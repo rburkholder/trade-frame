@@ -34,7 +34,7 @@ void SimulateOrderExecution::NewQuote( const Quote& quote ) {
   m_lastQuote = quote;
 }
 
-void SimulateOrderExecution::NewDepth( const MarketDepth& depth ) {
+void SimulateOrderExecution::NewDepth( const DepthByMM& depth ) {
 //  ProcessOrderQueues( quote );
 //  m_lastQuote = quote;
 }
