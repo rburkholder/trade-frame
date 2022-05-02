@@ -454,12 +454,23 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) { // iqfeed isn't filling strikes properly
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
+          std::string sIQFeedName = pOption->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF );
           TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
             [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-            } );
+            },
+            [this,sIQFeedName_=std::move(sIQFeedName)]( TreeItem* pTreeItem){
+              pTreeItem->NewMenu();
+              pTreeItem->AppendMenuItem(
+                sIQFeedName_,
+                [this,&sIQFeedName_]( TreeItem* pTreeItem ){
+                  std::cout << "IQFeed Name: " << sIQFeedName_ << std::endl;
+                }
+              );
+            }
+            );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
             LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
@@ -472,12 +483,23 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
+          std::string sIQFeedName = pOption->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF );
           TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
             [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-            } );
+            },
+            [this,sIQFeedName_=std::move(sIQFeedName)]( TreeItem* pTreeItem){
+              pTreeItem->NewMenu();
+              pTreeItem->AppendMenuItem(
+                sIQFeedName_,
+                [this,&sIQFeedName_]( TreeItem* pTreeItem ){
+                  std::cout << "IQFeed Name: " << sIQFeedName_ << std::endl;
+                }
+              );
+            }
+            );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
             LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
@@ -491,12 +513,23 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
+          std::string sIQFeedName = pOption->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF );
           TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
             [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-            } );
+            },
+            [this,sIQFeedName_=std::move(sIQFeedName)]( TreeItem* pTreeItem){
+              pTreeItem->NewMenu();
+              pTreeItem->AppendMenuItem(
+                sIQFeedName_,
+                [this,&sIQFeedName_]( TreeItem* pTreeItem ){
+                  std::cout << "IQFeed Name: " << sIQFeedName_ << std::endl;
+                }
+              );
+            }
+            );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
             LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
@@ -509,12 +542,23 @@ void InteractiveChart::CheckOptions() {
       if ( pOption ) {
         pOptionTracker = AddOptionTracker( strike, pOption );
         if ( pOptionTracker ) {
+          std::string sIQFeedName = pOption->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF );
           TreeItem* pTreeItemOption = vt.second.pTreeItem->AppendChild(
             pOption->GetInstrumentName(),
             [this,pOptionTracker](TreeItem* pTreeItem){
               SetChartDataView( pOptionTracker->GetDataViewChart() );
               m_pActiveInstrument = pOptionTracker->GetOption()->GetInstrument();
-            } );
+            },
+            [this,sIQFeedName_=std::move(sIQFeedName)]( TreeItem* pTreeItem){
+              pTreeItem->NewMenu();
+              pTreeItem->AppendMenuItem(
+                sIQFeedName_,
+                [this,&sIQFeedName_]( TreeItem* pTreeItem ){
+                  std::cout << "IQFeed Name: " << sIQFeedName_ << std::endl;
+                }
+              );
+            }
+            );
           m_mapLifeCycleComponents.emplace(
             pOption->GetInstrumentName(),
             LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
