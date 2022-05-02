@@ -125,6 +125,8 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Price, &m_ceSellFill );
   m_dvChart.Add( EChartSlot::Price, &m_ceCancelled );
 
+  m_dvChart.Add( EChartSlot::Price, &m_cemReferenceLevels );
+
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
@@ -305,6 +307,88 @@ void InteractiveChart::SetPosition(
     Connect();
   }
 
+}
+
+void InteractiveChart::LoadDailyHistory() {
+
+  m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
+    [this](){ // fConnected_t
+      pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
+      m_pHistoryRequest->Request(
+        pWatchUnderlying->GetInstrumentName(),
+        200,
+        [this]( const ou::tf::Bar& bar ){
+          m_barsHistory.Append( bar );
+          //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
+        },
+        [this](){
+          const ou::tf::Bar& bar( m_barsHistory.last() );
+
+          pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
+          std::cout
+            << pWatchUnderlying->GetInstrumentName()
+            << ", bar=" << bar.DateTime()
+            << std::endl;
+
+          m_setPivots.CalcPivots( bar );
+          const ou::tf::PivotSet& ps( m_setPivots );
+          using PS = ou::tf::PivotSet;
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R2 ), ou::Colour::LightSlateGray, "r2" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R1 ), ou::Colour::LightSlateGray, "r1" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::PV ), ou::Colour::LightSlateGray, "pv" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S1 ), ou::Colour::LightSlateGray, "s1" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S2 ), ou::Colour::LightSlateGray, "s2" );
+
+          std::cout
+            << "pivots"
+            <<  " r2=" << ps.GetPivotValue( PS::R2 )
+            << ", r1=" << ps.GetPivotValue( PS::R1 )
+            << ", pv=" << ps.GetPivotValue( PS::PV )
+            << ", s1=" << ps.GetPivotValue( PS::S1 )
+            << ", s2=" << ps.GetPivotValue( PS::S2 )
+            << std::endl;
+
+          double dblSum200 {};
+          double dblSum100 {};
+          double dblSum50 {};
+          int ix( 1 );
+
+          m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50]( const ou::tf::Bar& bar ){
+            //std::cout
+            //  << "bar " << ix << " is " << bar.Close()
+            //  << std::endl;
+            if ( 200 >= ix ) {
+              std::string sIx = boost::lexical_cast<std::string>( ix );
+              m_cemReferenceLevels.AddMark( bar.High(), ou::Colour::LightSlateGray, "hi-" + sIx );
+              m_cemReferenceLevels.AddMark( bar.Low(),  ou::Colour::LightSlateGray, "lo-" + sIx );
+            }
+            if ( 200 >= ix ) {
+              dblSum200 += bar.Close() / 200.0;
+            }
+            if ( 100 >= ix ) {
+              dblSum100 += bar.Close() / 100.0;
+            }
+            if ( 50 >= ix ) {
+              dblSum50 += bar.Close() / 50;
+            }
+            ix++;
+          });
+
+          std::cout
+            << "sma"
+            << " 50 day=" << dblSum50
+            << ", 100 day=" << dblSum100
+            << ", 200 day=" << dblSum200
+            << std::endl;
+
+          m_cemReferenceLevels.AddMark(  dblSum50, ou::Colour::LightSlateGray, "50day" );
+          m_cemReferenceLevels.AddMark( dblSum100, ou::Colour::LightSlateGray, "100day" );
+          m_cemReferenceLevels.AddMark( dblSum200, ou::Colour::LightSlateGray, "200day" );
+        }
+      );
+    }
+  );
+  m_pHistoryRequest->Connect();
 }
 
 void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) {
