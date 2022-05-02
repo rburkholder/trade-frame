@@ -67,9 +67,9 @@ private:
   // TODO: convert to TreeItem
   class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:
-    enum enumNodeType { Root, Group, Object } m_eNodeType;
-    enum enumDatumType { Quotes, Trades, Bars, Greeks, AtmIV, DepthsByMM, NoDatum } m_eDatumType;
-    CustomItemData( enumNodeType eNodeType, enumDatumType eDatumType )
+    enum ENodeType { Root, Group, Object } m_eNodeType;
+    enum EDatumType { Quotes, Trades, Bars, Greeks, AtmIV, DepthsByMM, DepthsByOrder, NoDatum } m_eDatumType;
+    CustomItemData( ENodeType eNodeType, EDatumType eDatumType )
       : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };
 
@@ -82,13 +82,13 @@ private:
 
   std::string m_sCurrentPath;  // used while traversing and building tree
   wxTreeItemId m_curTreeItem; // used while traversing and building tree
-  CustomItemData::enumDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
+  CustomItemData::EDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
 
   wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
-  size_t LoadDataAndGenerateChart( CustomItemData::enumDatumType, const std::string& sPath );
+  size_t LoadDataAndGenerateChart( CustomItemData::EDatumType, const std::string& sPath );
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );

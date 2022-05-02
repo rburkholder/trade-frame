@@ -145,7 +145,9 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
   if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
+  if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM; // deprecated style 2022/04/30
   if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM;
+  if ( "depths_o" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByOrder;
   m_sCurrentPath = s1;
   m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
   namespace args = boost::phoenix::placeholders;
@@ -213,7 +215,7 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
 }
 
-size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
+size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::EDatumType edt, const std::string& sPath ) {
 
   if ( nullptr != m_pChartDataView ) {
     m_pWinChartView->SetChartDataView( nullptr );
@@ -245,8 +247,12 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType e
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
       break;
     case CustomItemData::DepthsByMM:
-      std::cout << "MarketDepth will not show data" << std::endl;
+      std::cout << "DepthsByMM will not show data" << std::endl;
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByMM>( m_pdm, m_pChartDataView, "DepthsByMM", sPath );
+      break;
+    case CustomItemData::DepthsByOrder:
+      std::cout << "DepthsByOrder will not show data" << std::endl;
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByOrder>( m_pdm, m_pChartDataView, "DepthsByOrder", sPath );
       break;
     default:
       throw std::runtime_error("unknown CustomItemData");

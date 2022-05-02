@@ -272,9 +272,9 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
   }
 }
 
-// ChartDepths
+// ChartDepthsByMM
 
-void ModelChartHdf5::DefineChartDepths( ou::ChartDataView* pChartDataView ) {
+void ModelChartHdf5::DefineChartDepthsByMM( ou::ChartDataView* pChartDataView ) {
 
   DefineChartEquities( pChartDataView );
 
@@ -282,6 +282,21 @@ void ModelChartHdf5::DefineChartDepths( ou::ChartDataView* pChartDataView ) {
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const DepthsByMM& depths ) {
+
+  DefineChartOptions( pChartDataView );
+
+}
+
+// ChartDepthsByOrder
+
+void ModelChartHdf5::DefineChartDepthsByOrder( ou::ChartDataView* pChartDataView ) {
+
+  DefineChartEquities( pChartDataView );
+
+  // nothing to chart yet
+}
+
+void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const DepthsByOrder& depths ) {
 
   DefineChartOptions( pChartDataView );
 
