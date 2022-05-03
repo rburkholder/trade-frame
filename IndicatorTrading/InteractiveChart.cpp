@@ -190,6 +190,7 @@ void InteractiveChart::Connect() {
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
+      LoadDailyHistory();
     }
   }
 
@@ -202,6 +203,9 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
+      if ( m_pHistoryRequest ) {
+        m_pHistoryRequest.reset();
+      }
     }
   }
 }
@@ -314,14 +318,16 @@ void InteractiveChart::LoadDailyHistory() {
   m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
     [this](){ // fConnected_t
       pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
+      std::string sSymbol( pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
       m_pHistoryRequest->Request(
-        pWatchUnderlying->GetInstrumentName(),
+        sSymbol,
         200,
         [this]( const ou::tf::Bar& bar ){
           m_barsHistory.Append( bar );
           //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
         },
         [this](){
+          ou::Colour::EColour colour( ou::Colour::BlueViolet );
           const ou::tf::Bar& bar( m_barsHistory.last() );
 
           pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
@@ -333,11 +339,11 @@ void InteractiveChart::LoadDailyHistory() {
           m_setPivots.CalcPivots( bar );
           const ou::tf::PivotSet& ps( m_setPivots );
           using PS = ou::tf::PivotSet;
-          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R2 ), ou::Colour::LightSlateGray, "r2" );
-          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R1 ), ou::Colour::LightSlateGray, "r1" );
-          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::PV ), ou::Colour::LightSlateGray, "pv" );
-          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S1 ), ou::Colour::LightSlateGray, "s1" );
-          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S2 ), ou::Colour::LightSlateGray, "s2" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R2 ), colour, "r2" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::R1 ), colour, "r1" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::PV ), colour, "pv" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S1 ), colour, "s1" );
+          m_cemReferenceLevels.AddMark( ps.GetPivotValue( PS::S2 ), colour, "s2" );
 
           std::cout
             << "pivots"
@@ -351,16 +357,18 @@ void InteractiveChart::LoadDailyHistory() {
           double dblSum200 {};
           double dblSum100 {};
           double dblSum50 {};
+          double dblSum21 {};
+          double dblSum7 {};
           int ix( 1 );
 
-          m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50]( const ou::tf::Bar& bar ){
+          m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50,&dblSum21,&dblSum7,colour]( const ou::tf::Bar& bar ){
             //std::cout
             //  << "bar " << ix << " is " << bar.Close()
             //  << std::endl;
             if ( 200 >= ix ) {
               std::string sIx = boost::lexical_cast<std::string>( ix );
-              m_cemReferenceLevels.AddMark( bar.High(), ou::Colour::LightSlateGray, "hi-" + sIx );
-              m_cemReferenceLevels.AddMark( bar.Low(),  ou::Colour::LightSlateGray, "lo-" + sIx );
+              m_cemReferenceLevels.AddMark( bar.High(), colour, "hi-" + sIx );
+              m_cemReferenceLevels.AddMark( bar.Low(),  colour, "lo-" + sIx );
             }
             if ( 200 >= ix ) {
               dblSum200 += bar.Close() / 200.0;
@@ -371,19 +379,29 @@ void InteractiveChart::LoadDailyHistory() {
             if ( 50 >= ix ) {
               dblSum50 += bar.Close() / 50;
             }
+            if ( 21 >= ix ) {
+              dblSum21 += bar.Close() / 21;
+            }
+            if ( 7 >= ix ) {
+              dblSum7 += bar.Close() / 7;
+            }
             ix++;
           });
 
           std::cout
             << "sma"
-            << " 50 day=" << dblSum50
+            << " 7 day=" << dblSum7
+            << ", 21 day=" << dblSum21
+            << ", 50 day=" << dblSum50
             << ", 100 day=" << dblSum100
             << ", 200 day=" << dblSum200
             << std::endl;
 
-          m_cemReferenceLevels.AddMark(  dblSum50, ou::Colour::LightSlateGray, "50day" );
-          m_cemReferenceLevels.AddMark( dblSum100, ou::Colour::LightSlateGray, "100day" );
-          m_cemReferenceLevels.AddMark( dblSum200, ou::Colour::LightSlateGray, "200day" );
+          m_cemReferenceLevels.AddMark(   dblSum7, colour, "7 day" );
+          m_cemReferenceLevels.AddMark(  dblSum21, colour, "21 day" );
+          m_cemReferenceLevels.AddMark(  dblSum50, colour, "50 day" );
+          m_cemReferenceLevels.AddMark( dblSum100, colour, "100 day" );
+          m_cemReferenceLevels.AddMark( dblSum200, colour, "200 day" );
         }
       );
     }
