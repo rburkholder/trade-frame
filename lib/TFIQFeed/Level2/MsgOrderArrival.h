@@ -147,7 +147,7 @@ namespace OrderArrival {
       ruleUint8  %= qi::ushort_;
       ruleUint32 %= qi::ulong_;
       ruleUint64 %= qi::ulong_long;
-      ruleString %= *( qi::char_ - qi::char_( ',' ) );
+      ruleSymbolName %= *( qi::char_ - qi::char_( ',' ) );
       ruleMMID %= qi::char_ - qi::char_( ',' );
 
       ruleOrderSide %=
@@ -175,19 +175,18 @@ namespace OrderArrival {
         ;
 
       start %=
-           ruleMsgType >> qi::lit( ',' ) // cMsgType
-        >> ruleString >> qi::lit( ',' ) // sSymbolName
+            ruleMsgType >> qi::lit( ',' ) // cMsgType
+        >>  ruleSymbolName >> qi::lit( ',' ) // sSymbolName
         >> -ruleUint64 >> qi::lit( ',' ) // nOrderId
-        //>> ruleString >> qi::lit( ',' ) // sMarketMaker
         >> -ruleMMID >> -ruleMMID >> -ruleMMID >> -ruleMMID >> qi::lit( ',' ) // four character MMID
-        >> ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
-        >> rulePrice >> qi::lit( ',' ) // dblPrice
-        >> ruleUint32 >> qi::lit( ',' ) // nQuantity
+        >>  ruleOrderSide >> qi::lit( ',' ) // ruleOrderSide
+        >>  rulePrice >> qi::lit( ',' ) // dblPrice
+        >>  ruleUint32 >> qi::lit( ',' ) // nQuantity
         >> -ruleUint64 >> qi::lit( ',' ) // nPriority
-        >> ruleUint8 >> qi::lit( ',' ) // nPrecision
-        >> -ruleTime >> qi::lit( ',')
-        >> ruleDate
-        >> qi::lit( ',' )
+        >>  ruleUint8 >> qi::lit( ',' ) // nPrecision
+        >> -ruleTime >> qi::lit( ',' ) // when is time not present?
+        >>  ruleDate
+        >>  qi::lit( ',' )
         ;
 
     }
@@ -199,7 +198,7 @@ namespace OrderArrival {
     qi::rule<Iterator, uint32_t()> ruleUint32;
     qi::rule<Iterator, uint64_t()> ruleUint64;
     qi::rule<Iterator, double()> rulePrice;
-    qi::rule<Iterator, std::string()> ruleString;
+    qi::rule<Iterator, std::string()> ruleSymbolName;
     qi::rule<Iterator, time_t()> ruleTime;
     qi::rule<Iterator, date_t()> ruleDate;
 
