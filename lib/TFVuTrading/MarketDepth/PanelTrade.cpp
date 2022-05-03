@@ -38,7 +38,7 @@ namespace {
   , { (int)EField::BuyVolume,  45, "BVol",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
   , { (int)EField::BidSize,    45, "BSize",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EField::BidOrder,   40, "Buy",     wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
-  , { (int)EField::Price,      60, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::Price,      65, "Price",   wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
   , { (int)EField::AskOrder,   40, "Sell",    wxCENTER, EColour::LightYellow,   EColour::Black, EColour::Yellow        }
   , { (int)EField::AskSize,    45, "ASize",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   , { (int)EField::SellVolume, 45, "AVol",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::PaleGoldenrod }
