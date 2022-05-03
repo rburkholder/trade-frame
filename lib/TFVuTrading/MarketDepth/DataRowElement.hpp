@@ -109,6 +109,8 @@ void DataRowElement<T>::Add( T value )  {
 
 template<typename T>
 void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
+  // TODO: is there a way to clear an attached WinRowElement
+  //   will need to reset, refresh, then unattach in caller
   m_pWinRowElement = pwre;
 }
 
