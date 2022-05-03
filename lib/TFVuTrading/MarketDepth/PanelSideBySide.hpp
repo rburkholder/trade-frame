@@ -28,6 +28,7 @@
 #include <wx/window.h>
 
 #include "WinRow.hpp"
+#include "DataRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -81,21 +82,50 @@ private:
 
   // TODO: turn into DataRow, and link WinElement into DataRowElement
   //   remember to blank out WinElement prior to unlink
-  struct PriceLevel {
-    int nVolume;
-    //int nVolumeAggregate; // may not be needed
-    int nOrders;
-    //int nOrdersAggregate; // may not be needed
-    //PriceLevel(): nVolume {}, nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
-    PriceLevel(): nVolume {}, nOrders {} {}
-    //PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
-    PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nOrders {} {}
+
+  static const std::string sFmtInteger;;
+  static const std::string sFmtPrice;;
+  static const std::string sFmtString;;
+
+  struct DataRow_Book { // one for Bid, one for Ask
+    bool m_bChanged;
+    ou::tf::l2::DataRowElement<double> m_drePrice;
+    ou::tf::l2::DataRowElement<unsigned int> m_dreSize;
+    ou::tf::l2::DataRowElement<unsigned int> m_dreSizeAgg;
+    DataRow_Book()
+    : m_bChanged( false )
+    , m_drePrice( sFmtPrice, m_bChanged )
+    , m_dreSize( sFmtInteger, m_bChanged )
+    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    {}
+    DataRow_Book( double price, unsigned int volume )
+    : m_bChanged( false )
+    , m_drePrice( sFmtPrice, m_bChanged )
+    , m_dreSize( sFmtInteger, m_bChanged )
+    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    {
+      m_drePrice.Set( price );
+      m_dreSize.Set( volume );
+    }
+    void Set( unsigned int volume ) { m_dreSize.Set( volume ); }
+    void Update() {
+      m_drePrice.UpdateWinRowElement();
+      m_dreSize.UpdateWinRowElement();
+      m_dreSizeAgg.UpdateWinRowElement();
+    }
   };
 
-  using mapPriceLevel_t = std::map<double,PriceLevel>;
+  struct DataRow_Statistics {
+    ou::tf::l2::DataRowElement<double> m_dreImbalance;
+  };
+
+  using mapPriceLevel_t = std::map<double,DataRow_Book>;
 
   mapPriceLevel_t m_mapAskPriceLevel;
   mapPriceLevel_t m_mapBidPriceLevel;
+
+  using vStatistics_t = std::vector<DataRow_Statistics>;
+  vStatistics_t m_vStatistics;
 
   std::mutex m_mutexMaps;
   wxTimer m_timerRefresh;
