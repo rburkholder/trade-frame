@@ -60,10 +60,10 @@ void L2Base::LimitOrderAdd(
 // for nasdaq LII
 void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
-  if ( nullptr != m_fMarketDepth ) {
+  if ( nullptr != m_fMarketDepthByMM ) {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
-    m_fMarketDepth( md );
+    m_fMarketDepthByMM( md );
   }
   else {
     switch ( msg.chOrderSide ) {
@@ -79,10 +79,10 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
 void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
-  if ( nullptr != m_fMarketDepth ) {
+  if ( nullptr != m_fMarketDepthByMM ) {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
-    m_fMarketDepth( md );
+    m_fMarketDepthByMM( md );
   }
   else {
     switch ( msg.chOrderSide ) {
@@ -464,7 +464,7 @@ void Symbols::WatchAdd( const std::string& sSymbol, fVolumeAtPrice_t&& fBid, fVo
   // don't add pattern here as Equity/Future is unknown
 }
 
-void Symbols::WatchAdd( const std::string& sSymbol, L2Base::fMarketDepth_t&& fMarketDepth ) {
+void Symbols::WatchAdd( const std::string& sSymbol, L2Base::fMarketDepthByMM_t&& fMarketDepth ) {
   mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
   assert( m_mapL2Base.end() == iter );
 

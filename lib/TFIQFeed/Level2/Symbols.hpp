@@ -44,7 +44,7 @@ public:
 
   using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
-  using fMarketDepth_t = std::function<void(const DepthByMM&)>;
+  using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
 
   L2Base();
   virtual ~L2Base() {}
@@ -53,8 +53,8 @@ public:
     m_fAskVolumeAtPrice = std::move( fAsk );
     m_fBidVolumeAtPrice = std::move( fBid );
   }
-  void Set( fMarketDepth_t&& fMarketDepth ) {
-    m_fMarketDepth = std::move( fMarketDepth );
+  void Set( fMarketDepthByMM_t&& fMarketDepth ) {
+    m_fMarketDepthByMM = std::move( fMarketDepth );
   }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
@@ -67,12 +67,18 @@ protected:
   fVolumeAtPrice_t m_fBidVolumeAtPrice;
   fVolumeAtPrice_t m_fAskVolumeAtPrice;
 
-  fMarketDepth_t m_fMarketDepth;
+  fMarketDepthByMM_t m_fMarketDepthByMM;
 
   struct LimitOrderAggregate {
-    // maintain set of orders?
+
     volume_t nQuantity;
     int nOrders;
+
+    // TODO: maintain set of order ids? will require vector/map update on each change
+    //   may need multi-key map:  price/datetime or price/priority
+    //   may need to adjust persisted message to incorporate priority/time/date
+    //   but this may best be maintained in OrderBased
+
     LimitOrderAggregate( volume_t nQuantity_ )
     : nQuantity( nQuantity_ ), nOrders( 1 )  {}
     LimitOrderAggregate( const msg::OrderArrival::decoded& msg )
@@ -253,7 +259,7 @@ public:
   using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
   void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
-  void WatchAdd( const std::string&, L2Base::fMarketDepth_t&& );
+  void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );
   void WatchDel( const std::string& );
 
   void Single( bool );
@@ -298,7 +304,7 @@ private:
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions; // temporary entries till symbol encountered & assigned to a carrier
 
-  using mapMarketDepthFunction_t = std::map<std::string, L2Base::fMarketDepth_t>;
+  using mapMarketDepthFunction_t = std::map<std::string, L2Base::fMarketDepthByMM_t>;
   mapMarketDepthFunction_t m_mapMarketDepthFunction; // temporary entries till symbol encountered & assigned to carrier
 
   using pL2Base_t = std::shared_ptr<L2Base>;
