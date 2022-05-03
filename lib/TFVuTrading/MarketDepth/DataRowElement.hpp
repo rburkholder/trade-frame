@@ -37,6 +37,8 @@ class DataRowElement {
 public:
 
   DataRowElement( const std::string& sFormat, bool& bChanged );
+  //DataRowElement( const DataRowElement & ); // be aware of bChanged when the enclosing structure moves
+  //DataRowElement( DataRowElement && ); // be aware of bChanged when the enclosing structure moves
   virtual ~DataRowElement();
 
   void SetWinRowElement( WinRowElement* );
