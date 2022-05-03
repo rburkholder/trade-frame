@@ -61,8 +61,8 @@ namespace {
   static const ou::tf::l2::WinRow::vElement_t vElement = {
     { (int)EField::BSizeAgg,  45, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EField::BSize,     45, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::BPrice,    60, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::APrice,    60, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
   , { (int)EField::ASize,     45, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   , { (int)EField::ASizeAgg,  45, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   , { (int)EField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
@@ -165,18 +165,19 @@ void PanelSideBySide::OnL2Bid( double price, int volume, bool bOnAdd ) {
 
 void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume ) {
 
-  // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
-  std::scoped_lock<std::mutex> lock( m_mutexMaps );
+  // scoped_lock: brute force & ignorance for now, probably ultimately
 
   mapPriceLevel_t::iterator iter = map.find( price );
   if ( map.end() == iter ) {
     if ( 0 < volume ) {
+      std::scoped_lock<std::mutex> lock( m_mutexMaps );
       auto result = map.emplace( price, PriceLevel( volume) );
       assert( result.second );
     }
   }
   else {
     if ( 0 == volume ) {
+      std::scoped_lock<std::mutex> lock( m_mutexMaps );
       map.erase( iter );
     }
     else {
