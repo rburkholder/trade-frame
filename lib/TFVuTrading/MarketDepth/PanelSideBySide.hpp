@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 
 #include <wx/timer.h>
 #include <wx/window.h>
@@ -78,13 +79,17 @@ private:
   unsigned int m_cntWinRows_Total; // includes header row: TODO: verify all usage locations are correct
   unsigned int m_cntWinRows_Data; // without header row
 
+  // TODO: turn into DataRow, and link WinElement into DataRowElement
+  //   remember to blank out WinElement prior to unlink
   struct PriceLevel {
     int nVolume;
-    int nVolumeAggregate; // may not be needed
+    //int nVolumeAggregate; // may not be needed
     int nOrders;
-    int nOrdersAggregate; // may not be needed
-    PriceLevel(): nVolume {}, nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
-    PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    //int nOrdersAggregate; // may not be needed
+    //PriceLevel(): nVolume {}, nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    PriceLevel(): nVolume {}, nOrders {} {}
+    //PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nOrders {} {}
   };
 
   using mapPriceLevel_t = std::map<double,PriceLevel>;
@@ -92,6 +97,7 @@ private:
   mapPriceLevel_t m_mapAskPriceLevel;
   mapPriceLevel_t m_mapBidPriceLevel;
 
+  std::mutex m_mutexMaps;
   wxTimer m_timerRefresh;
 
   void Init();

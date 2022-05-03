@@ -19,6 +19,8 @@
  * Created: April 27, 2022 16:38
  */
 
+#include <thread>
+
 #include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
@@ -28,6 +30,7 @@
 
 #include "WinRow.hpp"
 #include "WinRowElement.hpp"
+#include "DataRowElement.hpp"
 #include "PanelSideBySide.hpp"
 
 /*
@@ -55,7 +58,7 @@ namespace {
   using EColour = ou::Colour::wx::EColour;
   //using EField = ou::tf::l2::DataRow::EField;
 
-  const ou::tf::l2::WinRow::vElement_t vElement = {
+  static const ou::tf::l2::WinRow::vElement_t vElement = {
     { (int)EField::BSizeAgg,  45, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EField::BSize,     45, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EField::BPrice,    60, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
@@ -72,6 +75,16 @@ namespace {
   };
 
   const ou::tf::l2::WinRow::vElement_t vRight = { // TBD
+  };
+
+  struct DataRow_Book { // one for Bid, one for Ask
+    ou::tf::l2::DataRowElement<double> m_drePrice;
+    ou::tf::l2::DataRowElement<unsigned int> m_dreSize;
+    ou::tf::l2::DataRowElement<unsigned int> m_dreSizeAgg;
+  };
+
+  struct DataRow_Statistics {
+    ou::tf::l2::DataRowElement<double> m_dreImbalance;
   };
 
 } // anonymous
@@ -151,6 +164,10 @@ void PanelSideBySide::OnL2Bid( double price, int volume, bool bOnAdd ) {
 }
 
 void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume ) {
+
+  // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
+  std::scoped_lock<std::mutex> lock( m_mutexMaps );
+
   mapPriceLevel_t::iterator iter = map.find( price );
   if ( map.end() == iter ) {
     if ( 0 < volume ) {
@@ -175,28 +192,36 @@ double Imbalance( int volBid, int volAsk ) {
 }
 
 void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thread problems in the maps exist (add the DataRow thingy)
+
+  // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
+  std::scoped_lock<std::mutex> lock( m_mutexMaps );
+
   if ( ( 2 <= m_mapAskPriceLevel.size() ) && ( 2 <= m_mapBidPriceLevel.size() ) && ( 2 <= m_vWinRow.size() ) ) { // TODO: tune the test
     int nVolumeAggregateAsk {};
     int nVolumeAggregateBid {};
 
     mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
-    iterMapAsk->second.nVolumeAggregate = 0;
+    //iterMapAsk->second.nVolumeAggregate = 0;
     mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();
-    iterMapBid->second.nVolumeAggregate = 0;
+    //iterMapBid->second.nVolumeAggregate = 0;
     vWinRow_t::iterator iterWinRow = m_vWinRow.begin();
 
     for ( int ix = 0; ix < 2; ix++ ) {
       nVolumeAggregateAsk += iterMapAsk->second.nVolume;
       nVolumeAggregateBid += iterMapBid->second.nVolume;
       WinRow& row( **iterWinRow );
+
       row[ (int)EField::APrice ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->first ) ); // will need to convert to proper data element
       row[ (int)EField::ASize ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->second.nVolume ) ); // will need to convert to proper data element
       row[ (int)EField::ASizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateAsk ) ); // will need to convert to proper data element
+
       row[ (int)EField::BPrice ]->SetText( boost::lexical_cast<std::string>( iterMapBid->first ) ); // will need to convert to proper data element
       row[ (int)EField::BSize ]->SetText( boost::lexical_cast<std::string>( iterMapBid->second.nVolume ) ); // will need to convert to proper data element
       row[ (int)EField::BSizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateBid ) ); // will need to convert to proper data element
+
       double imbalance = Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk );
       row[ (int)EField::Imbalance ]->SetText( boost::lexical_cast<std::string>( imbalance ) ); // will need to convert to proper data element
+
       iterMapAsk++;
       iterMapBid++;
       iterWinRow++;
