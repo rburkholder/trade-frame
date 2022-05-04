@@ -36,6 +36,8 @@ struct symbol_t {
   , L2O  // L1 + L2 orders (CME, ICE futures)
   };
 
+  // parsed direct from config file
+
   bool bTradable;
   EFeed eFeed;
 
@@ -47,9 +49,17 @@ struct symbol_t {
   size_t nVolumeUpper;
   size_t nVolumeLower;
 
+  // supplied after parsing
+
+  std::string sSymbol;
+
+  size_t nTimeBins;
+  double dblTimeUpper;
+  double dblTimeLower;
+
   symbol_t()
-  : eFeed( EFeed::L1 )
-  , bTradable( true )
+  : eFeed( EFeed::L1 ) // default
+  , bTradable( true )  // default
   {} // optional for now
 
 };
@@ -71,10 +81,11 @@ struct choices_t {
   boost::posix_time::ptime dtLower;
   double dblTimeLower;
 
-  using mapInstance_t = std::map<std::string,symbol_t>; // std::string = symbol
+  using mapInstance_t = std::map<std::string,symbol_t>; // std::string = symbol name
   mapInstance_t mapInstance;
 
   void Update() {
+
     std::time_t nTime;
 
     dtUpper = boost::posix_time::from_iso_string( sTimeUpper );
@@ -84,6 +95,16 @@ struct choices_t {
     dtLower = boost::posix_time::from_iso_string( sTimeLower );
     nTime = boost::posix_time::to_time_t( dtLower );
     dblTimeLower = (double) nTime / 1000.0;
+
+    for ( mapInstance_t::value_type& vt: mapInstance ) {
+
+      symbol_t& def( vt.second );
+      def.sSymbol = vt.first;
+      def.nTimeBins = nTimeBins;
+      def.dblTimeUpper = dblTimeUpper;
+      def.dblTimeLower = dblTimeLower;
+
+    }
   }
 
 };

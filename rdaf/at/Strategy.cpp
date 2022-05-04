@@ -46,7 +46,7 @@
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
 Strategy::Strategy(
-  const config_t config
+  const ou::tf::config::symbol_t& config
 , TreeItem* pTreeItem
 , pFile_t pFile
 , pFile_t pFileUtility
@@ -264,7 +264,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     m_branchQuote.bidvol = quote.BidSize();
 
     m_pTreeQuote->Fill();
-}
+  }
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the alogorithm
 

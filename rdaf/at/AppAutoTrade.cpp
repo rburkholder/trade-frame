@@ -251,13 +251,6 @@ bool AppAutoTrade::OnInit() {
 
     //BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol;
 
-    Strategy::config_t config(
-      sSymbol,
-      m_choices.nTimeBins, m_choices.dblTimeUpper, m_choices.dblTimeLower,
-      choices.nPriceBins, choices.dblPriceUpper, choices.dblPriceLower,
-      choices.nVolumeBins, choices.nVolumeUpper, choices.nVolumeLower
-      );
-
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       sSymbol,
       [this,sSymbol=vt.first]( TreeItem* pTreeItem ){
@@ -267,7 +260,7 @@ bool AppAutoTrade::OnInit() {
       }
     );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( config, pTreeItem, m_pFile, m_pFileUtility );
+    pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
 
     if ( m_choices.bStartSimulator ) {
       pStrategy->InitForUSEquityExchanges( dateSim );

@@ -47,6 +47,9 @@ namespace ou {
   class ChartDataView;
 namespace tf {
   class TreeItem;
+namespace config {
+  class symbol_t;
+} // namespace config
 } // namespace tf
 } // namespace ou
 
@@ -62,43 +65,8 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pFile_t = std::shared_ptr<TFile>;
 
-  struct config_t {
-
-    std::string sSymbol;
-
-    size_t nTimeBins;
-    double dblTimeUpper;
-    double dblTimeLower;
-
-    size_t nPriceBins;
-    double dblPriceUpper;
-    double dblPriceLower;
-
-    size_t nVolumeBins;
-    size_t nVolumeUpper;
-    size_t nVolumeLower;
-
-    config_t()
-    : nTimeBins {}, dblTimeUpper {}, dblTimeLower {},
-      nPriceBins {}, dblPriceUpper{}, dblPriceLower {},
-      nVolumeBins {}, nVolumeUpper {}, nVolumeLower {}
-    {}
-
-    config_t(
-      const std::string sSymbol_,
-      size_t nTimeBins_, double dblTimeUpper_, double dblTimeLower_,
-      size_t nPriceBins_, double dblPriceUpper_, double dblPriceLower_,
-      size_t nVolumeBins_, size_t nVolumeUpper_, size_t nVolumeLower_
-    )
-    : sSymbol( sSymbol_ ),
-      nTimeBins( nTimeBins_ ), dblTimeUpper( dblTimeUpper_ ), dblTimeLower( dblTimeLower_ ),
-      nPriceBins( nPriceBins_ ), dblPriceUpper( dblPriceUpper_ ), dblPriceLower( dblPriceLower_ ),
-      nVolumeBins( nVolumeBins_ ), nVolumeUpper( nVolumeUpper_ ), nVolumeLower( nVolumeLower_ )
-    {}
-  };
-
   Strategy(
-    const config_t
+    const ou::tf::config::symbol_t&
   , TreeItem*
   , pFile_t
   , pFile_t
@@ -145,7 +113,7 @@ private:
 
   ou::tf::Quote m_quote;
 
-  config_t m_config;
+  const ou::tf::config::symbol_t& m_config;
 
   pFile_t m_pFile;
   pFile_t m_pFileUtility;
