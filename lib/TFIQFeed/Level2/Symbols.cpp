@@ -32,7 +32,11 @@ namespace l2 { // level 2 data
 
 // ==== L2Base
 
-L2Base::L2Base(){}
+L2Base::L2Base()
+: m_fBidVolumeAtPrice( nullptr )
+, m_fAskVolumeAtPrice( nullptr )
+, m_fMarketDepthByMM( nullptr )
+{}
 
 void L2Base::LimitOrderAdd(
   const msg::OrderArrival::decoded& msg,
