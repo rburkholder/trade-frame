@@ -36,6 +36,7 @@ struct per_symbol_choices_t {
   , L2O  // L1 + L2 orders (CME, ICE futures)
   };
 
+  bool bTradable;
   EFeed eFeed;
 
   size_t nPriceBins;
@@ -46,7 +47,10 @@ struct per_symbol_choices_t {
   size_t nVolumeUpper;
   size_t nVolumeLower;
 
-  per_symbol_choices_t(): eFeed( EFeed::L1 ) {} // optional for now
+  per_symbol_choices_t()
+  : eFeed( EFeed::L1 )
+  , bTradable( true )
+  {} // optional for now
 
 };
 

@@ -42,6 +42,7 @@
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::per_symbol_choices_t,
   (ou::tf::config::per_symbol_choices_t::EFeed, eFeed)
+  (bool, bTradable)
   (size_t, nPriceBins)
   (double, dblPriceUpper)
   (double, dblPriceLower)
@@ -78,6 +79,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ( "off", false )
       ( "true", true )
       ( "false", false )
+      ( "yes", true )
+      ( "no", false )
       ;
 
     luFeed.add
@@ -152,6 +155,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> luFeed
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleTradable
+      %= qi::lit("trade")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> luBool
+      >> *qi::lit(' ') >> qi::eol;
+
     rulePriceBins
       %= qi::lit( "price_bins" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -186,6 +195,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     ruleSymbolChoices
       %= -ruleFeed
+      >> -ruleTradable
       >>  rulePriceBins
       >>  rulePriceUpper
       >>  rulePriceLower
@@ -240,6 +250,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleTimeLower;
   qi::rule<Iterator, std::string()> ruleSymbol;
   qi::rule<Iterator, ou::tf::config::per_symbol_choices_t::EFeed()> ruleFeed;
+  qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, size_t()> rulePriceBins;
   qi::rule<Iterator, double()> rulePriceUpper;
   qi::rule<Iterator, double()> rulePriceLower;
