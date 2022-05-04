@@ -20,6 +20,7 @@
  */
 
 #include <thread>
+#include <algorithm>
 
 #include <boost/lexical_cast.hpp>
 
@@ -30,20 +31,7 @@
 
 #include "WinRow.hpp"
 #include "WinRowElement.hpp"
-#include "DataRowElement.hpp"
 #include "PanelSideBySide.hpp"
-
-/*
-  TODO:
-    calculate order imbalance in L2Base
-    create simple panel to show top of book and imbalance as it changes:
-      price, imbalance bid <-> ask
-    use vector to show value for top n positions
-    as bid/ask price levels are updated and cleared, algorithm for entry 0 should be clear, or do we shift?
-      ie, when bid or ask level goes to zero, we get a differnt set of levels to match
-      ie, orders at a level have to 'disappear' in order for bid/ask/spread to move up/down
-    then need to deduce for how long does the signal last?
-*/
 
 // 2022/04/29 @ESM22 had 10x to 50x usual message volume at main market close
 //   will the code be able to keep up?
@@ -52,39 +40,21 @@
 namespace {
 
   enum class EField: int {
-    BSizeAgg, BSize, BPrice, APrice, ASize, ASizeAgg, Imbalance
+    BSizeAgg, BSize, BPrice, Imbalance, APrice, ASize, ASizeAgg
   };
 
   using EColour = ou::Colour::wx::EColour;
   //using EField = ou::tf::l2::DataRow::EField;
 
+  // TODO: this may ultimately be a composite of three structures (try boost::hana)
   static const ou::tf::l2::WinRow::vElement_t vElement = {
-    { (int)EField::BSizeAgg,  45, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::BSize,     45, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+    { (int)EField::BSizeAgg,  40, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+  , { (int)EField::BSize,     40, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::ASize,     45, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-  , { (int)EField::ASizeAgg,  45, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   , { (int)EField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
-  };
-
-  const ou::tf::l2::WinRow::vElement_t vLeft = { // TBD
-  };
-
-  const ou::tf::l2::WinRow::vElement_t vMiddle = { // TBD
-  };
-
-  const ou::tf::l2::WinRow::vElement_t vRight = { // TBD
-  };
-
-  struct DataRow_Book { // one for Bid, one for Ask
-    ou::tf::l2::DataRowElement<double> m_drePrice;
-    ou::tf::l2::DataRowElement<unsigned int> m_dreSize;
-    ou::tf::l2::DataRowElement<unsigned int> m_dreSizeAgg;
-  };
-
-  struct DataRow_Statistics {
-    ou::tf::l2::DataRowElement<double> m_dreImbalance;
+  , { (int)EField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EField::ASize,     40, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+  , { (int)EField::ASizeAgg,  40, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   };
 
 } // anonymous
@@ -99,6 +69,10 @@ namespace {
   const unsigned int BorderWidth = 4; // pixels
   const unsigned int FramedRows = 10; // when to move into frame then recenter
 }
+
+const std::string PanelSideBySide::sFmtInteger( "%i" );
+const std::string PanelSideBySide::sFmtPrice( "%0.2f" );
+const std::string PanelSideBySide::sFmtString( "%s" );
 
 PanelSideBySide::PanelSideBySide(): wxWindow()
 {
@@ -156,34 +130,52 @@ void PanelSideBySide::CreateControls() {
 }
 
 void PanelSideBySide::OnL2Ask( double price, int volume, bool bOnAdd ) {
-  UpdateMap( m_mapAskPriceLevel, price, volume );
+  UpdateMap( m_mapAskPriceLevel, price, volume, bOnAdd );
 }
 
 void PanelSideBySide::OnL2Bid( double price, int volume, bool bOnAdd ) {
-  UpdateMap( m_mapBidPriceLevel, price, volume );
+  UpdateMap( m_mapBidPriceLevel, price, volume, bOnAdd );
 }
 
-void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume ) {
+void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd ) {
 
   // scoped_lock: brute force & ignorance for now, probably ultimately
+  std::scoped_lock<std::mutex> lock( m_mutexMaps );
 
-  mapPriceLevel_t::iterator iter = map.find( price );
-  if ( map.end() == iter ) {
-    if ( 0 < volume ) {
-      std::scoped_lock<std::mutex> lock( m_mutexMaps );
-      auto result = map.emplace( price, PriceLevel( volume) );
-      assert( result.second );
-    }
-  }
-  else {
-    if ( 0 == volume ) {
-      std::scoped_lock<std::mutex> lock( m_mutexMaps );
-      map.erase( iter );
+  try {
+    mapPriceLevel_t::iterator iter = map.find( price );
+    if ( bOnAdd ) {
+      if ( map.end() == iter ) {
+        if ( 0 < volume ) {
+          //auto result = map.emplace( price, PriceLevel( volume) );
+          auto result = map.emplace( price, DataRow_Book( price, volume) );
+          assert( result.second );
+        }
+      }
+      else {
+        if ( 0 == volume ) {
+          map.erase( iter );
+        }
+        else {
+          //iter->second.nVolume = volume;
+          iter->second.m_dreSize.Set( volume );
+        }
+      }
     }
     else {
-      iter->second.nVolume = volume;
+      if ( map.end() != iter ) {
+        map.erase( iter );
+      }
+      else {
+        // because there are some zero volume items above which may eliminated it?
+      }
+
     }
   }
+  catch (...) {
+    std::cout << "problems" << std::endl;
+  }
+
 }
 
 double Imbalance( int volBid, int volAsk ) {
@@ -197,31 +189,46 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
   // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
   std::scoped_lock<std::mutex> lock( m_mutexMaps );
 
-  if ( ( 2 <= m_mapAskPriceLevel.size() ) && ( 2 <= m_mapBidPriceLevel.size() ) && ( 2 <= m_vWinRow.size() ) ) { // TODO: tune the test
+  int nRows( m_cntWinRows_Data );
+  nRows = std::min<int>( nRows, m_mapAskPriceLevel.size() );
+  nRows = std::min<int>( nRows, m_mapBidPriceLevel.size() );
+
+  if ( 0 < nRows ) {
+
     int nVolumeAggregateAsk {};
     int nVolumeAggregateBid {};
 
     mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
-    //iterMapAsk->second.nVolumeAggregate = 0;
     mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();
-    //iterMapBid->second.nVolumeAggregate = 0;
     vWinRow_t::iterator iterWinRow = m_vWinRow.begin();
 
-    for ( int ix = 0; ix < 2; ix++ ) {
-      nVolumeAggregateAsk += iterMapAsk->second.nVolume;
-      nVolumeAggregateBid += iterMapBid->second.nVolume;
+    for ( int ix = 0; ix < nRows; ix++ ) {
+
+      nVolumeAggregateAsk += iterMapAsk->second.m_dreSize.Get();
+      nVolumeAggregateBid += iterMapBid->second.m_dreSize.Get();
       WinRow& row( **iterWinRow );
 
-      row[ (int)EField::APrice ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->first ) ); // will need to convert to proper data element
-      row[ (int)EField::ASize ]->SetText( boost::lexical_cast<std::string>( iterMapAsk->second.nVolume ) ); // will need to convert to proper data element
-      row[ (int)EField::ASizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateAsk ) ); // will need to convert to proper data element
+      DataRow_Book& bookAsk( iterMapAsk->second );
+      DataRow_Book& bookBid( iterMapBid->second );
 
-      row[ (int)EField::BPrice ]->SetText( boost::lexical_cast<std::string>( iterMapBid->first ) ); // will need to convert to proper data element
-      row[ (int)EField::BSize ]->SetText( boost::lexical_cast<std::string>( iterMapBid->second.nVolume ) ); // will need to convert to proper data element
-      row[ (int)EField::BSizeAgg ]->SetText( boost::lexical_cast<std::string>( nVolumeAggregateBid ) ); // will need to convert to proper data element
+      bool bChanged( false );
+      ou::tf::l2::DataRowElement<double> imbalance( sFmtPrice, bChanged );
+      imbalance.Set( Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk ) );
+      imbalance.SetWinRowElement( row[ (int)EField::Imbalance ]);
+      imbalance.UpdateWinRowElement();
 
-      double imbalance = Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk );
-      row[ (int)EField::Imbalance ]->SetText( boost::lexical_cast<std::string>( imbalance ) ); // will need to convert to proper data element
+      bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] );
+      bookAsk.m_dreSize.SetWinRowElement( row[ (int)EField::ASize ] );
+      bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::ASizeAgg ] );
+      bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
+
+      bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] );
+      bookBid.m_dreSize.SetWinRowElement( row[ (int)EField::BSize ] );
+      bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::BSizeAgg ] );
+      bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
+
+      bookAsk.Update();
+      bookBid.Update();
 
       iterMapAsk++;
       iterMapBid++;

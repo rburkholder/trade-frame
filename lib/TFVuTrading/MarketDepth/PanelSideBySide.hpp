@@ -98,6 +98,15 @@ private:
     , m_dreSize( sFmtInteger, m_bChanged )
     , m_dreSizeAgg( sFmtInteger, m_bChanged )
     {}
+    DataRow_Book( const DataRow_Book& rhs )  // don't copy or move anything
+    : m_bChanged( false )
+    , m_drePrice( sFmtPrice, m_bChanged )
+    , m_dreSize( sFmtInteger, m_bChanged )
+    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    {
+      m_drePrice.Set( rhs.m_drePrice.Get() );
+      m_dreSize.Set( rhs.m_dreSize.Get() );
+    }
     DataRow_Book( double price, unsigned int volume )
     : m_bChanged( false )
     , m_drePrice( sFmtPrice, m_bChanged )
@@ -107,6 +116,7 @@ private:
       m_drePrice.Set( price );
       m_dreSize.Set( volume );
     }
+    DataRow_Book( DataRow_Book&& ) = delete; // due to m_bChanged usage
     void Set( unsigned int volume ) { m_dreSize.Set( volume ); }
     void Update() {
       m_drePrice.UpdateWinRowElement();
@@ -117,6 +127,17 @@ private:
 
   struct DataRow_Statistics {
     ou::tf::l2::DataRowElement<double> m_dreImbalance;
+  };
+
+  struct PriceLevel {
+    int nVolume;
+    //int nVolumeAggregate; // may not be needed
+    int nOrders;
+    //int nOrdersAggregate; // may not be needed
+    //PriceLevel(): nVolume {}, nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    PriceLevel(): nVolume {}, nOrders {} {}
+    //PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nVolumeAggregate {}, nOrders {}, nOrdersAggregate {} {}
+    PriceLevel( int nVolume_ ): nVolume( nVolume_ ), nOrders {} {}
   };
 
   using mapPriceLevel_t = std::map<double,DataRow_Book>;
@@ -135,7 +156,7 @@ private:
   void DrawWinRows();
   void DeleteWinRows();
 
-  void UpdateMap( mapPriceLevel_t& map, double price, int volume );
+  void UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd );
   void CalculateStatistics();
 
   void HandleTimerRefresh( wxTimerEvent& );
