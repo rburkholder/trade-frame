@@ -45,6 +45,7 @@ public:
   using pL2Base_t = std::shared_ptr<L2Base>;
   using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
   using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
+  using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
   L2Base();
   virtual ~L2Base() {}
@@ -55,6 +56,9 @@ public:
   }
   void Set( fMarketDepthByMM_t&& fMarketDepth ) {
     m_fMarketDepthByMM = std::move( fMarketDepth );
+  }
+  void Set( fMarketDepthByOrder_t&& fMarketDepth ) {
+    m_fMarketDepthByOrder = std::move( fMarketDepth );
   }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
@@ -68,6 +72,7 @@ protected:
   fVolumeAtPrice_t m_fAskVolumeAtPrice;
 
   fMarketDepthByMM_t m_fMarketDepthByMM;
+  fMarketDepthByOrder_t m_fMarketDepthByOrder;
 
   struct LimitOrderAggregate {
 
@@ -88,12 +93,6 @@ protected:
   using mapLimitOrderBook_t = std::map<double,LimitOrderAggregate>;  // double is price level
   mapLimitOrderBook_t m_mapLimitOrderBookAsk; // lowest value is top of book - begin()
   mapLimitOrderBook_t m_mapLimitOrderBookBid; // highest value is top of book - rbegin()
-
-  void LimitOrderAdd( // used in OrderBased
-    const msg::OrderArrival::decoded&,
-    fVolumeAtPrice_t&,
-    mapLimitOrderBook_t&
-  );
 
 private:
 };
@@ -176,11 +175,11 @@ public:
   static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
 
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& msg );
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
-    OnMBOAdd( msg );
-  } // will this work as expected?
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) {OnMBOAdd( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& msg );
+
+  void MarketDepth( const ou::tf::DepthByOrder& ); // offline message submission
 
 protected:
 private:
@@ -205,6 +204,11 @@ private:
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
   mapOrder_t m_mapOrder;
 
+  void LimitOrderAdd(
+    const msg::OrderArrival::decoded&,
+    fVolumeAtPrice_t&,
+    mapLimitOrderBook_t&
+  );
   void LimitOrderUpdate(
     mapLimitOrderBook_t& map,
     Order& order,
@@ -260,6 +264,7 @@ public:
 
   void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
   void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );
+  void WatchAdd( const std::string&, L2Base::fMarketDepthByOrder_t&& );
   void WatchDel( const std::string& );
 
   void Single( bool );
@@ -304,8 +309,11 @@ private:
   using mapVolumeAtPriceFunctions_t = std::map<std::string,VolumeAtPriceFunctions>;
   mapVolumeAtPriceFunctions_t m_mapVolumeAtPriceFunctions; // temporary entries till symbol encountered & assigned to a carrier
 
-  using mapMarketDepthFunction_t = std::map<std::string, L2Base::fMarketDepthByMM_t>;
-  mapMarketDepthFunction_t m_mapMarketDepthFunction; // temporary entries till symbol encountered & assigned to carrier
+  using mapMarketDepthFunctionByMM_t = std::map<std::string, L2Base::fMarketDepthByMM_t>;
+  mapMarketDepthFunctionByMM_t m_mapMarketDepthFunctionByMM; // temporary entries till symbol encountered & assigned to carrier
+
+  using mapMarketDepthFunctionByOrder_t = std::map<std::string, L2Base::fMarketDepthByOrder_t>;
+  mapMarketDepthFunctionByOrder_t m_mapMarketDepthFunctionByOrder; // temporary entries till symbol encountered & assigned to carrier
 
   using pL2Base_t = std::shared_ptr<L2Base>;
   using mapL2Base_t = std::map<std::string,pL2Base_t>; // symbol name, L2Processing
@@ -333,11 +341,22 @@ private:
       m_mapVolumeAtPriceFunctions.erase( iter );
     }
 
-    mapMarketDepthFunction_t::iterator iterDelegate = m_mapMarketDepthFunction.find( msg.sSymbolName );
-    if ( m_mapMarketDepthFunction.end() != iterDelegate ) {
-      carrier.pL2Base->Set( std::move( iterDelegate->second ) );
-      m_mapMarketDepthFunction.erase( iterDelegate );
+    {
+      mapMarketDepthFunctionByMM_t::iterator iterDelegate = m_mapMarketDepthFunctionByMM.find( msg.sSymbolName );
+      if ( m_mapMarketDepthFunctionByMM.end() != iterDelegate ) {
+        carrier.pL2Base->Set( std::move( iterDelegate->second ) );
+        m_mapMarketDepthFunctionByMM.erase( iterDelegate );
+      }
     }
+
+    {
+      mapMarketDepthFunctionByOrder_t::iterator iterDelegate = m_mapMarketDepthFunctionByOrder.find( msg.sSymbolName );
+      if ( m_mapMarketDepthFunctionByOrder.end() != iterDelegate ) {
+        carrier.pL2Base->Set( std::move( iterDelegate->second ) );
+        m_mapMarketDepthFunctionByOrder.erase( iterDelegate );
+      }
+    }
+
   }
 
   template<typename Msg, typename Function>

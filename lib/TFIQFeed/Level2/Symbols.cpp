@@ -36,32 +36,11 @@ L2Base::L2Base()
 : m_fBidVolumeAtPrice( nullptr )
 , m_fAskVolumeAtPrice( nullptr )
 , m_fMarketDepthByMM( nullptr )
+, m_fMarketDepthByOrder( nullptr )
 {}
 
-void L2Base::LimitOrderAdd(
-  const msg::OrderArrival::decoded& msg,
-  fVolumeAtPrice_t& f,
-  mapLimitOrderBook_t& map
-) {
-  mapLimitOrderBook_t::iterator iterLimitOrderBook = map.find( msg.dblPrice );
-  if ( map.end() == iterLimitOrderBook ) {
-    map.emplace(
-      std::pair(
-        msg.dblPrice,
-        LimitOrderAggregate( msg )
-      )
-    );
-  }
-  else {
-    iterLimitOrderBook->second.nQuantity += msg.nQuantity;
-    iterLimitOrderBook->second.nOrders++;
-  }
-  if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity, true );
-}
+// ==== MarketMaker === for nasdaq equities LII
 
-// ==== MarketMaker
-
-// for nasdaq LII
 void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByMM ) {
@@ -302,69 +281,125 @@ void MarketMaker::EmitMarketMakerMaps() {
 
 // ==== OrderBased
 
-void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
+void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) { // summary calls this as well
 
-  mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
-  if ( m_mapOrder.end() != iter ) {
-//    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
+  if ( nullptr != m_fMarketDepthByOrder ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    m_fMarketDepthByOrder( md );
   }
   else {
-    m_mapOrder.emplace(
-      std::pair(
-        msg.nOrderId,
-        Order( msg ) )
-      );
+    mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
+    if ( m_mapOrder.end() != iter ) {
+  //    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
+    }
+    else {
+      m_mapOrder.emplace( std::pair( msg.nOrderId, Order( msg ) ) );
+    }
+
+    switch ( msg.chOrderSide ) {
+      case 'A':
+        LimitOrderAdd( msg, m_fAskVolumeAtPrice, m_mapLimitOrderBookAsk ); // defaults to L2Base
+        break;
+      case 'B':
+        LimitOrderAdd( msg, m_fBidVolumeAtPrice, m_mapLimitOrderBookBid );  // defaults to L2Base
+        break;
+    }
   }
 
-  switch ( msg.chOrderSide ) {
-    case 'A':
-      LimitOrderAdd( msg, m_fAskVolumeAtPrice, m_mapLimitOrderBookAsk );
-      break;
-    case 'B':
-      LimitOrderAdd( msg, m_fBidVolumeAtPrice, m_mapLimitOrderBookBid );
-      break;
-  }
 }
 
 void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
-  mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
-  if ( m_mapOrder.end() == iter ) {
-    std::cout << "map update order does not exist: " << msg.nOrderId << std::endl;
+  if ( nullptr != m_fMarketDepthByOrder ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    m_fMarketDepthByOrder( md );
   }
   else {
-    switch ( msg.chOrderSide ) {
-      case 'A':
-        LimitOrderUpdate( m_mapLimitOrderBookAsk, iter->second, msg, m_fAskVolumeAtPrice );
-        break;
-      case 'B':
-        LimitOrderUpdate( m_mapLimitOrderBookBid, iter->second, msg, m_fBidVolumeAtPrice );
-        break;
+    mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
+    if ( m_mapOrder.end() == iter ) {
+      std::cout << "map update order does not exist: " << msg.nOrderId << std::endl;
     }
+    else {
+      switch ( msg.chOrderSide ) {
+        case 'A':
+          LimitOrderUpdate( m_mapLimitOrderBookAsk, iter->second, msg, m_fAskVolumeAtPrice );
+          break;
+        case 'B':
+          LimitOrderUpdate( m_mapLimitOrderBookBid, iter->second, msg, m_fBidVolumeAtPrice );
+          break;
+      }
 
-    iter->second.nQuantity = msg.nQuantity;
+      iter->second.nQuantity = msg.nQuantity;
+    }
   }
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
-  mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
-  if ( m_mapOrder.end() == iter ) {
-    std::cout << "map order delete does not exist: " << msg.nOrderId << std::endl;
+  if ( nullptr != m_fMarketDepthByOrder ) {
+    ptime dt( ou::TimeSource::Instance().External() );
+    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, 0.0, 0 );
+    m_fMarketDepthByOrder( md );
   }
   else {
-
-    switch ( msg.chOrderSide ) {
-      case 'A':
-        LimitOrderDel( m_mapLimitOrderBookAsk, iter->second, m_fAskVolumeAtPrice );
-        break;
-      case 'B':
-        LimitOrderDel( m_mapLimitOrderBookBid, iter->second, m_fBidVolumeAtPrice );
-        break;
+    mapOrder_t::iterator iter = m_mapOrder.find( msg.nOrderId );
+    if ( m_mapOrder.end() == iter ) {
+      std::cout << "map order " << msg.nOrderId << " delete does not exist" << std::endl;
     }
+    else {
 
-    m_mapOrder.erase( iter );
+      switch ( msg.chOrderSide ) {
+        case 'A':
+          LimitOrderDel( m_mapLimitOrderBookAsk, iter->second, m_fAskVolumeAtPrice );
+          break;
+        case 'B':
+          LimitOrderDel( m_mapLimitOrderBookBid, iter->second, m_fBidVolumeAtPrice );
+          break;
+      }
+
+      m_mapOrder.erase( iter );
+    }
   }
+
+}
+
+void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
+  switch ( depth.MsgType() ) {
+    case '4': // Update
+      break;
+    case '6': // Summary
+    case '3': // add
+      //BidOrAsk_Update( depth );
+      break;
+    case '5':
+      //BidOrAsk_Delete( depth );
+      break;
+    default:
+      assert( false );
+  }
+}
+
+void OrderBased::LimitOrderAdd(
+  const msg::OrderArrival::decoded& msg,
+  fVolumeAtPrice_t& f,
+  mapLimitOrderBook_t& map
+) {
+  mapLimitOrderBook_t::iterator iterLimitOrderBook = map.find( msg.dblPrice );
+  if ( map.end() == iterLimitOrderBook ) {
+    map.emplace(
+      std::pair(
+        msg.dblPrice,
+        LimitOrderAggregate( msg )
+      )
+    );
+  }
+  else {
+    iterLimitOrderBook->second.nQuantity += msg.nQuantity;
+    iterLimitOrderBook->second.nOrders++;
+  }
+  if ( f ) f( msg.dblPrice, iterLimitOrderBook->second.nQuantity, true );
 }
 
 void OrderBased::LimitOrderUpdate(
@@ -472,7 +507,15 @@ void Symbols::WatchAdd( const std::string& sSymbol, L2Base::fMarketDepthByMM_t&&
   mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
   assert( m_mapL2Base.end() == iter );
 
-  m_mapMarketDepthFunction.emplace( sSymbol, std::move( fMarketDepth ) );
+  m_mapMarketDepthFunctionByMM.emplace( sSymbol, std::move( fMarketDepth ) );
+  StartMarketByOrder( sSymbol );
+}
+
+void Symbols::WatchAdd( const std::string& sSymbol, L2Base::fMarketDepthByOrder_t&& fMarketDepth ) {
+  mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
+  assert( m_mapL2Base.end() == iter );
+
+  m_mapMarketDepthFunctionByOrder.emplace( sSymbol, std::move( fMarketDepth ) );
   StartMarketByOrder( sSymbol );
 }
 
