@@ -28,7 +28,7 @@ namespace ou {
 namespace tf {
 namespace config {
 
-struct per_symbol_choices_t {
+struct symbol_t {
 
   enum EFeed {
     L1   // L1 quotes/trades
@@ -47,7 +47,7 @@ struct per_symbol_choices_t {
   size_t nVolumeUpper;
   size_t nVolumeLower;
 
-  per_symbol_choices_t()
+  symbol_t()
   : eFeed( EFeed::L1 )
   , bTradable( true )
   {} // optional for now
@@ -71,7 +71,7 @@ struct choices_t {
   boost::posix_time::ptime dtLower;
   double dblTimeLower;
 
-  using mapInstance_t = std::map<std::string,per_symbol_choices_t>; // std::string = symbol
+  using mapInstance_t = std::map<std::string,symbol_t>; // std::string = symbol
   mapInstance_t mapInstance;
 
   void Update() {

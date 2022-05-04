@@ -40,8 +40,8 @@
 #include "ConfigParser.hpp"
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::config::per_symbol_choices_t,
-  (ou::tf::config::per_symbol_choices_t::EFeed, eFeed)
+  ou::tf::config::symbol_t,
+  (ou::tf::config::symbol_t::EFeed, eFeed)
   (bool, bTradable)
   (size_t, nPriceBins)
   (double, dblPriceUpper)
@@ -84,12 +84,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ;
 
     luFeed.add
-      ( "l1", ou::tf::config::per_symbol_choices_t::L1 )
-      ( "l2M", ou::tf::config::per_symbol_choices_t::L2M )
-      ( "l2O", ou::tf::config::per_symbol_choices_t::L2O )
-      ( "l1", ou::tf::config::per_symbol_choices_t::L1 )
-      ( "l2m", ou::tf::config::per_symbol_choices_t::L2M )
-      ( "l2o", ou::tf::config::per_symbol_choices_t::L2O )
+      ( "l1", ou::tf::config::symbol_t::L1 )
+      ( "l2M", ou::tf::config::symbol_t::L2M )
+      ( "l2O", ou::tf::config::symbol_t::L2O )
+      ( "l1", ou::tf::config::symbol_t::L1 )
+      ( "l2m", ou::tf::config::symbol_t::L2M )
+      ( "l2o", ou::tf::config::symbol_t::L2O )
       ;
 
     //ruleSeparator = *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ');
@@ -237,7 +237,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   }
 
   qi::symbols<char, bool> luBool;
-  qi::symbols<char, ou::tf::config::per_symbol_choices_t::EFeed> luFeed;
+  qi::symbols<char, ou::tf::config::symbol_t::EFeed> luFeed;
 
   qi::rule<Iterator, size_t()> ruleIbClientId;
   qi::rule<Iterator, size_t()> ruleThreads;
@@ -249,7 +249,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;
   qi::rule<Iterator, std::string()> ruleSymbol;
-  qi::rule<Iterator, ou::tf::config::per_symbol_choices_t::EFeed()> ruleFeed;
+  qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, size_t()> rulePriceBins;
   qi::rule<Iterator, double()> rulePriceUpper;
@@ -257,8 +257,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, size_t()> ruleVolumeBins;
   qi::rule<Iterator, size_t()> ruleVolumeUpper;
   qi::rule<Iterator, size_t()> ruleVolumeLower;
-  qi::rule<Iterator, ou::tf::config::per_symbol_choices_t()> ruleSymbolChoices;
-  qi::rule<Iterator, std::pair<std::string,ou::tf::config::per_symbol_choices_t>()> ruleMapEntry;
+  qi::rule<Iterator, ou::tf::config::symbol_t()> ruleSymbolChoices;
+  qi::rule<Iterator, std::pair<std::string,ou::tf::config::symbol_t>()> ruleMapEntry;
   qi::rule<Iterator, ou::tf::config::choices_t::mapInstance_t()> ruleMap;
   qi::rule<Iterator, ou::tf::config::choices_t()> start;
 
