@@ -145,7 +145,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     ruleSymbol
       %= qi::lit('[')
-      >> qi::char_("A-Z@") >> *qi::char_("A-Z-#")
+      >> -qi::char_('@') >> qi::char_("A-Z") >> *( qi::char_("A-Z0-9" ) )// >> *qi::char_('#')
       >> qi::lit(']')
       >> *qi::lit(' ') >> qi::eol;
 
