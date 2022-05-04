@@ -8,7 +8,7 @@ automated trading application.  Some of the features and functions represented:
 
 * parameters supplied by a configuration file
 * live chart being update with quotes, ticks, volume, and trade results
-* market depth is being fed as well
+* market depth is available for nasdaq equities and CME/ICE futures
 * state machine to process entries and exits
 * portfolios, positions, instruments, orders and executions are recorded in a sqlite3 database
 * live L1/L2 data is sourced from IQFeed
@@ -28,18 +28,45 @@ The parameters are sourced in the configuration file (as an example):
 $ cat x64/debug/rdaf/at/choices.cfg
 ```
 ib_client_id=5
-threads=2
+threads=3
 sim_start=off
-group_directory=/app/rdaf/at/20220311-18:33:33.786804-1
+group_directory=/app/rdaf/at/2022-04-29T17:31:08.783561-1
 time_bins=3600
-time_upper=20220316T000000
-time_lower=20220315T000000
-[SPY]
-price_bins=200
-price_upper=500
+time_upper=20220504T000000
+time_lower=20220502T000000
+[@ESM22]
+feed=l2o
+trade=no
+price_bins=1000
+price_upper=350
 price_lower=300
 volume_bins=100
-volume_upper=10000
+volume_upper=500000
+volume_lower=0
+[@NQM22]
+feed=l2o
+trade=no
+price_bins=1000
+price_upper=350
+price_lower=300
+volume_bins=100
+volume_upper=500000
+volume_lower=0
+[QQQ]
+feed=l2m
+trade=yes
+price_bins=1000
+price_upper=350
+price_lower=300
+volume_bins=100
+volume_upper=500000
+volume_lower=0
+[AMZN]
+price_bins=4800
+price_upper=3200
+price_lower=2600
+volume_bins=100
+volume_upper=500000
 volume_lower=0
 ```
 group_directory is optional if sim_start is off.
