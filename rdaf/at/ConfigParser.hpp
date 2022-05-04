@@ -30,6 +30,14 @@ namespace config {
 
 struct per_symbol_choices_t {
 
+  enum EFeed {
+    L1   // L1 quotes/trades
+  , L2M  // L1 + L2 market maker (nasdaq equities)
+  , L2O  // L1 + L2 orders (CME, ICE futures)
+  };
+
+  EFeed eFeed;
+
   size_t nPriceBins;
   double dblPriceUpper;
   double dblPriceLower;
@@ -37,6 +45,8 @@ struct per_symbol_choices_t {
   size_t nVolumeBins;
   size_t nVolumeUpper;
   size_t nVolumeLower;
+
+  per_symbol_choices_t(): eFeed( EFeed::L1 ) {} // optional for now
 
 };
 
