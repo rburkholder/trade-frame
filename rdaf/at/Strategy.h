@@ -99,8 +99,9 @@ private:
     ShortExit,  // position exists, looking for exit
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
+    NoTrade, // from the config file, no trading, might be a future
     EndOfDayCancel,
-    EndOfDayNeutrall,
+    EndOfDayNeutral,
     Done // no more action
     };
 
@@ -178,7 +179,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
-  void HandleDepth( const ou::tf::DepthByMM& );
+  void HandleDepthByMM( const ou::tf::DepthByMM& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

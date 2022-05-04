@@ -147,17 +147,31 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
 
-  pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepth ) );
+  switch ( m_config.eFeed ) {
+    case ou::tf::config::symbol_t::EFeed::L1:
+      break;
+    case ou::tf::config::symbol_t::EFeed::L2M:  // L2 via MarketMaker (nasdaq equities)
+      pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
 
-  m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
-  m_pMarketMaker->Set(
-    [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-      HandleUpdateL2Bid( price, volume, bAdd );
-    },
-    [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-      HandleUpdateL2Ask( price, volume, bAdd );
-    }
-  );
+      m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
+      m_pMarketMaker->Set(
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+          HandleUpdateL2Bid( price, volume, bAdd );
+        },
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+          HandleUpdateL2Ask( price, volume, bAdd );
+        }
+      );
+
+      break;
+    case ou::tf::config::symbol_t::EFeed::L2O:  // L2 via OrderBased (CME/ICE futures)
+      break;
+  }
+
+  if ( m_config.bTradable ) {}
+  else {
+    m_stateTrade = ETradeState::NoTrade;
+  }
 
 }
 
@@ -183,9 +197,17 @@ void Strategy::Clear() {
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
     pProvider_t pDataProvider = pWatch->GetProvider();
-    if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
-      m_pMarketMaker.reset();
-      pWatch->OnDepth.Remove( MakeDelegate( this, &Strategy::HandleDepth ) );
+    switch ( m_config.eFeed ) {
+      case ou::tf::config::symbol_t::EFeed::L1:
+        break;
+      case ou::tf::config::symbol_t::EFeed::L2M:
+        if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
+          m_pMarketMaker.reset();
+          pWatch->OnDepth.Remove( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
+        }
+        break;
+      case ou::tf::config::symbol_t::EFeed::L2O:
+        break;
     }
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -306,7 +328,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
-void Strategy::HandleDepth( const ou::tf::DepthByMM& depth ) {
+void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
 
   assert( m_pMarketMaker );
   m_pMarketMaker->MarketDepth( depth );
@@ -498,9 +520,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for order to execute
       break;
     case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutrall:
+    case ETradeState::EndOfDayNeutral:
     case ETradeState::Done:
       // quiescent
+      break;
+    case ETradeState::NoTrade:
+      // do nothing for now
       break;
     case ETradeState::Init:
       // market open statistics management here
@@ -523,7 +548,7 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
     case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutrall:
+    case ETradeState::EndOfDayNeutral:
       BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
       break;
     case ETradeState::LongExitSubmitted:
@@ -559,7 +584,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
       m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutrall:
+    case ETradeState::EndOfDayNeutral:
       // figure out what labels to apply
       break;
     case ETradeState::Done:
@@ -578,9 +603,16 @@ void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_dur
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_stateTrade = ETradeState::EndOfDayNeutrall;
-  if ( m_pPosition ) {
-    m_pPosition->ClosePosition();
+  switch ( m_stateTrade ) {
+    case ETradeState::NoTrade:
+      // do nothing
+      break;
+    default:
+      m_stateTrade = ETradeState::EndOfDayNeutral;
+      if ( m_pPosition ) {
+        m_pPosition->ClosePosition();
+      }
+      break;
   }
 }
 
@@ -597,8 +629,15 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 
 void Strategy::CloseAndDone() {
   std::cout << "Sending Close & Done" << std::endl;
-  if ( m_pPosition ) {
-    m_pPosition->ClosePosition();
+  switch ( m_stateTrade ) {
+    case ETradeState::NoTrade:
+      // do nothing
+      break;
+    default:
+      if ( m_pPosition ) {
+        m_pPosition->ClosePosition();
+      }
+      m_stateTrade = ETradeState::Done;
+      break;
   }
-  m_stateTrade = ETradeState::Done;
 }
