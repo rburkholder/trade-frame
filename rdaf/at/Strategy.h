@@ -38,6 +38,8 @@
 
 #include <TFIQFeed/Level2/Symbols.hpp>
 
+#include "ConfigParser.hpp"
+
 class TH2D;
 class TFile;
 class TTree;
@@ -47,9 +49,6 @@ namespace ou {
   class ChartDataView;
 namespace tf {
   class TreeItem;
-namespace config {
-  class symbol_t;
-} // namespace config
 } // namespace tf
 } // namespace ou
 
@@ -74,6 +73,8 @@ public:
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
+
+  ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
   void LoadHistory( TClass* );
 

@@ -40,7 +40,6 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "ConfigParser.hpp"
 #include "Strategy.h"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -180,6 +179,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   if ( m_config.bTradable ) {}
   else {
+    BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition - set " << m_config.sSymbol << " no trading";
     m_stateTrade = ETradeState::NoTrade;
   }
 

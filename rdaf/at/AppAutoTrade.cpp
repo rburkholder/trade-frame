@@ -685,20 +685,37 @@ void AppAutoTrade::ConfirmProviders() {
         static const std::string sNamePortfolio( "IB" );
         LoadPortfolio( sNamePortfolio );
         for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+          Strategy& strategy( *vt.second );
           ConstructIBInstrument(
-            sNamePortfolio, vt.first
-          , [this]( const std::string& sSymbol ){
-              mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
-              Strategy& strategy( *iter->second );
+            sNamePortfolio, vt.first,
+            [this,&strategy]( const std::string& sSymbol ){
+              //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
+              //Strategy& strategy( *iter->second );
+              using EFeed = ou::tf::config::symbol_t::EFeed;
+              auto symbol = m_iqfeed->GetSymbol( sSymbol );
               if ( m_pL2Symbols ) {
-                BOOST_LOG_TRIVIAL(info) << "starting L2 for: " << sSymbol << " ** AppAutoTrade needs fixing";
-                //auto symbol = m_iqfeed->GetSymbol( sSymbol );
-                //m_pL2Symbols->WatchAdd(
-                //  sSymbol,
-                //  [symbol]( const ou::tf::DepthByMM& md ){
-                //    symbol->SubmitMarketDepthByMM( md );
-                //  }
-                //  );
+                switch ( strategy.Feed() ) {
+                  case EFeed::L1:
+                    break;
+                  case EFeed::L2M:
+                    BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2M for: " << sSymbol;
+                    m_pL2Symbols->WatchAdd(
+                      sSymbol,
+                      [symbol]( const ou::tf::DepthByMM& md ){
+                        symbol->SubmitMarketDepthByMM( md );
+                      }
+                      );
+                    break;
+                  case EFeed::L2O:
+                    BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2O for: " << sSymbol;
+                    m_pL2Symbols->WatchAdd(
+                      sSymbol,
+                      [symbol]( const ou::tf::DepthByOrder& md ){
+                        symbol->SubmitMarketDepthByOrder( md );
+                      }
+                      );
+                    break;
+                }
               }
               else {
                 assert( false ); // m_pL2Symbols needs to be available
