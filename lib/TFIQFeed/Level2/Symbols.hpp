@@ -91,9 +91,9 @@ protected:
   };
 
   // TODO: this is actually a price level summary/aggregate, so rename it ... will then make sense elsewhere
-  using mapLimitOrderBook_t = std::map<double,LimitOrderAggregate>;  // double is price level
-  mapLimitOrderBook_t m_mapLimitOrderBookAsk; // lowest value is top of book - begin()
-  mapLimitOrderBook_t m_mapLimitOrderBookBid; // highest value is top of book - rbegin()
+  using mapLimitOrderAggregate_t = std::map<double,LimitOrderAggregate>;  // double is price level
+  mapLimitOrderAggregate_t m_mapLimitOrderAggregateAsk; // lowest value is top of book - begin()
+  mapLimitOrderAggregate_t m_mapLimitOrderAggregateBid; // highest value is top of book - rbegin()
 
 private:
 };
@@ -144,23 +144,23 @@ private:
   void MMLimitOrder_Update_Live(
     const msg::OrderArrival::decoded&,
     fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderBook_t& );
+    mapMM_t&, mapLimitOrderAggregate_t& );
 
   void MMLimitOrder_Update(
     DepthByMM::MMID_t, // MMID
     double price, volume_t volume,
     fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderBook_t& );
+    mapMM_t&, mapLimitOrderAggregate_t& );
 
   void MMLimitOrder_Delete_Live(
     const msg::OrderDelete::decoded&,
     fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderBook_t& );
+    mapMM_t&, mapLimitOrderAggregate_t& );
 
   void MMLimitOrder_Delete(
     DepthByMM::MMID_t, // MMID
     fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderBook_t& );
+    mapMM_t&, mapLimitOrderAggregate_t& );
 };
 
 // ==== OrderBased (Futures, etc)
@@ -221,15 +221,15 @@ private:
   void LimitOrderDelete( uint64_t );
 
   // actual handlers
-  void LimitOrderAdd( const Order&, mapLimitOrderBook_t&, fVolumeAtPrice_t& );
+  void LimitOrderAdd( const Order&, mapLimitOrderAggregate_t&, fVolumeAtPrice_t& );
   void LimitOrderUpdate(
     Order& order,
-    mapLimitOrderBook_t& map,
+    mapLimitOrderAggregate_t& map,
     double dblPrice,
     volume_t nQuantity,
     fVolumeAtPrice_t&
     );
-  void LimitOrderDel( const Order&, mapLimitOrderBook_t& map, fVolumeAtPrice_t& );
+  void LimitOrderDel( const Order&, mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& );
 };
 
 // ==== Carrier for symbol lookup
