@@ -90,6 +90,7 @@ protected:
     : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
+  // TODO: this is actually a price level summary/aggregate, so rename it ... will then make sense elsewhere
   using mapLimitOrderBook_t = std::map<double,LimitOrderAggregate>;  // double is price level
   mapLimitOrderBook_t m_mapLimitOrderBookAsk; // lowest value is top of book - begin()
   mapLimitOrderBook_t m_mapLimitOrderBookBid; // highest value is top of book - rbegin()
@@ -185,37 +186,50 @@ protected:
 private:
 
   struct Order {
-    char chOrderSide;
     double dblPrice;
     volume_t nQuantity;
+    char chOrderSide;
     uint64_t nPriority;
     uint8_t nPrecision;
     // ptime, if needed
-    // note: there is no MarketMaker in messages with an order ID
+
     Order( const msg::OrderArrival::decoded& msg )
-    : chOrderSide( msg.chOrderSide ),
-      dblPrice( msg.dblPrice ), nQuantity( msg.nQuantity ),
-      nPriority( msg.nPriority ), nPrecision( msg.nPrecision )
-    { //assert( 0 == msg.sMarketMaker.size() );
-      assert( 0 == msg.mmid.rch[0] );
+    : dblPrice( msg.dblPrice )
+    , nQuantity( msg.nQuantity )
+    , chOrderSide( msg.chOrderSide )
+    , nPriority( msg.nPriority )
+    , nPrecision( msg.nPrecision )
+    {
+      assert( 0 == msg.mmid.rch[0] ); // note: there is no MarketMaker in messages with an order ID
     }
+
+    Order( const ou::tf::DepthByOrder& depth )
+    : dblPrice( depth.Price() )
+    , nQuantity( depth.Volume() )
+    , chOrderSide( depth.Side() )
+    , nPriority( 0 )
+    , nPrecision( 0 )
+    {}
   };
 
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
   mapOrder_t m_mapOrder;
 
-  void LimitOrderAdd(
-    const msg::OrderArrival::decoded&,
-    fVolumeAtPrice_t&,
-    mapLimitOrderBook_t&
-  );
+   // interface for msg/depth
+  void LimitOrderAdd( uint64_t, const Order& );
+  void LimitOrderUpdate( uint64_t, char chOrderSide, double, volume_t );
+  void LimitOrderDelete( uint64_t );
+
+  // actual handlers
+  void LimitOrderAdd( const Order&, mapLimitOrderBook_t&, fVolumeAtPrice_t& );
   void LimitOrderUpdate(
-    mapLimitOrderBook_t& map,
     Order& order,
-    const msg::OrderArrival::decoded& ,
+    mapLimitOrderBook_t& map,
+    double dblPrice,
+    volume_t nQuantity,
     fVolumeAtPrice_t&
     );
-  void LimitOrderDel( mapLimitOrderBook_t& map, const Order&, fVolumeAtPrice_t& );
+  void LimitOrderDel( const Order&, mapLimitOrderBook_t& map, fVolumeAtPrice_t& );
 };
 
 // ==== Carrier for symbol lookup
@@ -262,12 +276,12 @@ public:
 
   using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
-  void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
-  void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );
-  void WatchAdd( const std::string&, L2Base::fMarketDepthByOrder_t&& );
+  void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );  // process in Symbols
+  void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );     // compose MarketDepth & ship outside
+  void WatchAdd( const std::string&, L2Base::fMarketDepthByOrder_t&& );  // compose MarketDepth & ship outside
   void WatchDel( const std::string& );
 
-  void Single( bool );
+  void Single( bool ); // optimize for a single symbol stream
 
 protected:
 
