@@ -61,7 +61,8 @@ public:
 
   using quotehandler_t = SymbolBase::quotehandler_t;
   using tradehandler_t = SymbolBase::tradehandler_t ;
-  using depthhandler_t = SymbolBase::depthhandler_t;
+  using depthbymmhandler_t = SymbolBase::depthbymmhandler_t;
+  using depthbyorderhandler_t = SymbolBase::depthbyorderhandler_t;
   using greekhandler_t = SymbolBase::greekhandler_t;
 
   using pInstrument_t = SymbolBase::pInstrument_t;
@@ -131,8 +132,11 @@ public:
   virtual void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler ) = 0;
   virtual void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler ) = 0;
 
-  virtual void     AddDepthHandler( pInstrument_cref pInstrument, depthhandler_t handler ) = 0;
-  virtual void  RemoveDepthHandler( pInstrument_cref pInstrument, depthhandler_t handler ) = 0;
+  virtual void     AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
+  virtual void  RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
+
+  virtual void     AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
+  virtual void  RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
 
   virtual void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler ) = 0;
   virtual void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler ) = 0;
@@ -201,8 +205,11 @@ public:
   void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
   void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
 
-  void     AddDepthHandler( pInstrument_cref pInstrument, depthhandler_t handler );
-  void  RemoveDepthHandler( pInstrument_cref pInstrument, depthhandler_t handler );
+  void     AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
+  void  RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
+
+  void     AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
+  void  RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
 
   void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
   void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
@@ -232,11 +239,14 @@ protected:
   virtual void StartTradeWatch( pSymbol_t pSymbol ) {};
   virtual void  StopTradeWatch( pSymbol_t pSymbol ) {};
 
-  virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
-  virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
-
   virtual void StartGreekWatch( pSymbol_t pSymbol ) {};
   virtual void  StopGreekWatch( pSymbol_t pSymbol ) {};
+
+  virtual void StartDepthByMMWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopDepthByMMWatch( pSymbol_t pSymbol ) {};
+
+  virtual void StartDepthByOrderWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopDepthByOrderWatch( pSymbol_t pSymbol ) {};
 
   bool Exists( pInstrument_cref pInstrument, typename mapSymbols_t::iterator& iter );
 
@@ -265,7 +275,8 @@ void ProviderInterface<P,S>::ConnectionComplete() {
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetQuoteHandlerCount() ) StartQuoteWatch( vt.second );
       if ( vt.second->GetTradeHandlerCount() ) StartTradeWatch( vt.second );
-      if ( vt.second->GetDepthHandlerCount() ) StartDepthWatch( vt.second );
+      if ( vt.second->GetDepthByMMHandlerCount() ) StartDepthByMMWatch( vt.second );
+      if ( vt.second->GetDepthByOrderHandlerCount() ) StartDepthByOrderWatch( vt.second );
       if ( vt.second->GetGreekHandlerCount() ) StartGreekWatch( vt.second );
     }
     );
@@ -277,7 +288,8 @@ void ProviderInterface<P,S>::Disconnecting() {
     [this](typename mapSymbols_t::value_type& vt){
       if ( vt.second->GetTradeHandlerCount() ) StopTradeWatch( vt.second );
       if ( vt.second->GetQuoteHandlerCount() ) StopQuoteWatch( vt.second );
-      if ( vt.second->GetDepthHandlerCount() ) StopDepthWatch( vt.second );
+      if ( vt.second->GetDepthByMMHandlerCount() ) StopDepthByMMWatch( vt.second );
+      if ( vt.second->GetDepthByOrderHandlerCount() ) StopDepthByOrderWatch( vt.second );
       if ( vt.second->GetGreekHandlerCount() ) StopGreekWatch( vt.second );
     }
   );
@@ -414,23 +426,45 @@ void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, t
 }
 
 template <typename P, typename S>
-void ProviderInterface<P,S>::AddDepthHandler(pInstrument_cref pInstrument, depthhandler_t handler) {
+void ProviderInterface<P,S>::AddDepthByMMHandler(pInstrument_cref pInstrument, depthbymmhandler_t handler) {
   typename mapSymbols_t::iterator iter = Find( pInstrument );
-  if ( iter->second->AddDepthHandler( handler ) ) {
-    if ( m_bConnected ) StartDepthWatch( iter->second );
+  if ( iter->second->AddDepthByMMHandler( handler ) ) {
+    if ( m_bConnected ) StartDepthByMMWatch( iter->second );
   }
 }
 
 template <typename P, typename S>
-void ProviderInterface<P,S>::RemoveDepthHandler(pInstrument_cref pInstrument, depthhandler_t handler) {
+void ProviderInterface<P,S>::RemoveDepthByMMHandler(pInstrument_cref pInstrument, depthbymmhandler_t handler) {
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
   else {
-    if ( iter->second->RemoveDepthHandler( handler ) ) {
-      if ( m_bConnected ) StopDepthWatch( iter->second );
+    if ( iter->second->RemoveDepthByMMHandler( handler ) ) {
+      if ( m_bConnected ) StopDepthByMMWatch( iter->second );
+    }
+  }
+}
+
+template <typename P, typename S>
+void ProviderInterface<P,S>::AddDepthByOrderHandler(pInstrument_cref pInstrument, depthbyorderhandler_t handler) {
+  typename mapSymbols_t::iterator iter = Find( pInstrument );
+  if ( iter->second->AddDepthByOrderHandler( handler ) ) {
+    if ( m_bConnected ) StartDepthByOrderWatch( iter->second );
+  }
+}
+
+template <typename P, typename S>
+void ProviderInterface<P,S>::RemoveDepthByOrderHandler(pInstrument_cref pInstrument, depthbyorderhandler_t handler) {
+  typename mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( 1 == 0 );
+  }
+  else {
+    if ( iter->second->RemoveDepthByOrderHandler( handler ) ) {
+      if ( m_bConnected ) StopDepthByOrderWatch( iter->second );
     }
   }
 }

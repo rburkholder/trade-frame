@@ -338,8 +338,12 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
 void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage* pMsg ) {
 }
 
-void IQFeedSymbol::SubmitMarketDepth( const ou::tf::DepthByMM& md ) {
-  STRAND_CAPTURE( (Symbol::m_OnDepth( md )), md )
+void IQFeedSymbol::SubmitMarketDepthByMM( const ou::tf::DepthByMM& md ) {
+  STRAND_CAPTURE( (Symbol::m_OnDepthByMM( md )), md )
+}
+
+void IQFeedSymbol::SubmitMarketDepthByOrder( const ou::tf::DepthByOrder& md ) {
+  STRAND_CAPTURE( (Symbol::m_OnDepthByOrder( md )), md )
 }
 
 } // namespace iqfeed

@@ -75,18 +75,21 @@ public:
   // TODO: these need spinlocks
   inline const Quote& LastQuote() const { return m_quote; };  // may have thread sync issue
   inline const Trade& LastTrade() const { return m_trade; };  // may have thread sync issue
-  inline const DepthByMM& LastDepth() const { return m_depth; };  // may have thread sync issue
+  inline const DepthByMM& LastDepthByMM() const { return m_depth_mm; };  // may have thread sync issue
+  inline const DepthByOrder& LastDepthByOrder() const { return m_depth_order; };  // may have thread sync issue
 
   const Fundamentals& GetFundamentals() const { assert( m_pFundamentals ); return *m_pFundamentals; };
   const Summary& GetSummary() const { return m_summary; };
 
   Quotes& GetQuotes() { return m_quotes; }; // not const so can delegate
   Trades& GetTrades() { return m_trades; }; // not const so can delegate
-  DepthsByMM& GetDepths() { return m_depths; }; // not const so can delegate
+  DepthsByMM& GetDepthsByMM() { return m_depths_mm; }; // not const so can delegate
+  DepthsByOrder& GetDepthsByOrder() { return m_depths_order; }; // not const so can delegate
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
-  ou::Delegate<const DepthByMM&> OnDepth;  // simulator
+  ou::Delegate<const DepthByMM&> OnDepthByMM;  // simulator
+  ou::Delegate<const DepthByOrder&> OnDepthByOrder; // simulator
   ou::Delegate<const Fundamentals&> OnFundamentals; // iqfeed
   ou::Delegate<const Summary&> OnSummary; // iqfeed
 
@@ -121,11 +124,13 @@ protected:
 
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
-  ou::tf::DepthByMM m_depth;
+  ou::tf::DepthByMM m_depth_mm;
+  ou::tf::DepthByOrder m_depth_order;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
-  ou::tf::DepthsByMM m_depths;
+  ou::tf::DepthsByMM m_depths_mm;
+  ou::tf::DepthsByOrder m_depths_order;
 
   pInstrument_t m_pInstrument;
 
@@ -171,7 +176,8 @@ private:
 
   void HandleQuote( const Quote& );
   void HandleTrade( const Trade& );
-  void HandleDepth( const DepthByMM& );
+  void HandleDepthByMM( const DepthByMM& );
+  void HandleDepthByOrder( const DepthByOrder& );
 
   void HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t );
   void HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t );

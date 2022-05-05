@@ -54,8 +54,11 @@ public:
   using trade_t = const Trade&;
   using tradehandler_t = ou::Delegate<trade_t>::OnDispatchHandler;
 
-  using depth_t = const DepthByMM&;
-  using depthhandler_t = ou::Delegate<depth_t>::OnDispatchHandler;
+  using depthbymm_t = const DepthByMM&;
+  using depthbymmhandler_t = ou::Delegate<depthbymm_t>::OnDispatchHandler;
+
+  using depthbyorder_t = const DepthByOrder&;
+  using depthbyorderhandler_t = ou::Delegate<depthbyorder_t>::OnDispatchHandler;
 
   using greek_t = const Greek&;
   using greekhandler_t = ou::Delegate<greek_t>::OnDispatchHandler;
@@ -73,19 +76,24 @@ public:
   bool RemoveTradeHandler( tradehandler_t );
   size_t GetTradeHandlerCount() const { return m_OnTrade.Size(); };
 
-  bool AddDepthHandler( depthhandler_t );
-  bool RemoveDepthHandler( depthhandler_t );
-  size_t GetDepthHandlerCount() const { return m_OnDepth.Size(); };
+  bool AddDepthByMMHandler( depthbymmhandler_t );
+  bool RemoveDepthByMMHandler( depthbymmhandler_t );
+  size_t GetDepthByMMHandlerCount() const { return m_OnDepthByMM.Size(); };
+
+  bool AddDepthByOrderHandler( depthbyorderhandler_t );
+  bool RemoveDepthByOrderHandler( depthbyorderhandler_t );
+  size_t GetDepthByOrderHandlerCount() const { return m_OnDepthByOrder.Size(); };
 
   bool AddGreekHandler( greekhandler_t );
   bool RemoveGreekHandler( greekhandler_t );
   size_t GetGreekHandlerCount() const { return m_OnGreek.Size(); };
 
   // these are typically used by the provider only
-  bool  OpenWatchNeeded() const { return !m_OnOpen.IsEmpty(); };
+  bool OpenWatchNeeded() const { return !m_OnOpen.IsEmpty(); };
   bool QuoteWatchNeeded() const { return !m_OnQuote.IsEmpty(); };
   bool TradeWatchNeeded() const { return !m_OnTrade.IsEmpty(); };
-  bool DepthWatchNeeded() const { return !m_OnDepth.IsEmpty(); };
+  bool DepthByMMWatchNeeded() const { return !m_OnDepthByMM.IsEmpty(); };
+  bool DepthByOrderWatchNeeded() const { return !m_OnDepthByOrder.IsEmpty(); };
   bool GreekWatchNeeded() const { return !m_OnGreek.IsEmpty(); };
 
   void SetContext( boost::asio::io_context& );
@@ -98,7 +106,8 @@ protected:
   ou::Delegate<trade_t> m_OnOpen;  // first value upon market opening
   ou::Delegate<quote_t> m_OnQuote;
   ou::Delegate<trade_t> m_OnTrade;
-  ou::Delegate<depth_t> m_OnDepth;
+  ou::Delegate<depthbymm_t> m_OnDepthByMM;
+  ou::Delegate<depthbyorder_t> m_OnDepthByOrder;
   ou::Delegate<greek_t> m_OnGreek;
 
   bool m_bStrand;

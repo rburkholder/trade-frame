@@ -43,19 +43,24 @@ protected:
   void StartQuoteWatch();
   void StopQuoteWatch();
 
-  void StartDepthWatch();
-  void StopDepthWatch();
-
   void StartTradeWatch();
   void StopTradeWatch();
 
   void StartGreekWatch();
   void StopGreekWatch();
 
+  void StartDepthByMMWatch();
+  void StopDepthByMMWatch();
+
+  void StartDepthByOrderWatch();
+  void StopDepthByOrderWatch();
+
   void HandleQuoteEvent( const DatedDatum &datum );
-  void HandleDepthEvent( const DatedDatum &datum );
   void HandleTradeEvent( const DatedDatum &datum );
   void HandleGreekEvent( const DatedDatum &datum );
+
+  void HandleDepthByMMEvent( const DatedDatum &datum );
+  void HandleDepthByOrderEvent( const DatedDatum &datum );
 
 private:
 
@@ -63,7 +68,8 @@ private:
 
   Quotes m_quotes;
   Trades m_trades;
-  DepthsByMM m_depths;
+  DepthsByMM m_depths_mm;
+  DepthsByOrder m_depths_order;
   Greeks m_greeks;
 
   SimulateOrderExecution m_simExec;

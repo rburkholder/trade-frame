@@ -75,17 +75,30 @@ bool SymbolBase::RemoveTradeHandler( tradehandler_t handler ) {
   return ( 0 == m_OnTrade.Size() ); // no more so stop watch
 }
 
-bool SymbolBase::AddDepthHandler( depthhandler_t handler ) {
-  ou::Delegate<depth_t>::vsize_t size = m_OnDepth.Size();
-  m_OnDepth.Add( handler );
-  assert( size == ( m_OnDepth.Size() - 1 ) );
-  return ( 1 == m_OnDepth.Size() );  // when true, start watch
+bool SymbolBase::AddDepthByMMHandler( depthbymmhandler_t handler ) {
+  ou::Delegate<depthbymm_t>::vsize_t size = m_OnDepthByMM.Size();
+  m_OnDepthByMM.Add( handler );
+  assert( size == ( m_OnDepthByMM.Size() - 1 ) );
+  return ( 1 == m_OnDepthByMM.Size() );  // when true, start watch
 }
 
-bool SymbolBase::RemoveDepthHandler( depthhandler_t handler ) {
-  assert( 0 < m_OnDepth.Size() );
-  m_OnDepth.Remove( handler );
-  return ( 0 == m_OnDepth.Size() );  // when true, stop watch
+bool SymbolBase::RemoveDepthByMMHandler( depthbymmhandler_t handler ) {
+  assert( 0 < m_OnDepthByMM.Size() );
+  m_OnDepthByMM.Remove( handler );
+  return ( 0 == m_OnDepthByMM.Size() );  // when true, stop watch
+}
+
+bool SymbolBase::AddDepthByOrderHandler( depthbyorderhandler_t handler ) {
+  ou::Delegate<depthbymm_t>::vsize_t size = m_OnDepthByOrder.Size();
+  m_OnDepthByOrder.Add( handler );
+  assert( size == ( m_OnDepthByOrder.Size() - 1 ) );
+  return ( 1 == m_OnDepthByOrder.Size() );  // when true, start watch
+}
+
+bool SymbolBase::RemoveDepthByOrderHandler( depthbyorderhandler_t handler ) {
+  assert( 0 < m_OnDepthByOrder.Size() );
+  m_OnDepthByOrder.Remove( handler );
+  return ( 0 == m_OnDepthByOrder.Size() );  // when true, stop watch
 }
 
 bool SymbolBase::AddGreekHandler ( greekhandler_t handler ) {

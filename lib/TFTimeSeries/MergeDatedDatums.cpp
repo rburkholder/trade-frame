@@ -25,12 +25,12 @@ namespace tf { // TradeFrame
 // MergeDatedDatums
 //
 
-MergeDatedDatums::MergeDatedDatums(void) 
+MergeDatedDatums::MergeDatedDatums()
 : m_state( eInit ), m_request( eUnknown )
 {
 }
 
-MergeDatedDatums::~MergeDatedDatums(void) {
+MergeDatedDatums::~MergeDatedDatums() {
   while ( !m_mhCarriers.Empty() ) {
     MergeCarrierBase *p = m_mhCarriers.RemoveEnd();
     delete p;
@@ -57,6 +57,10 @@ void MergeDatedDatums::Add( TimeSeries<DepthByMM>& series, MergeDatedDatums::OnD
   m_mhCarriers.Append( new MergeCarrier<DepthByMM>( series, function ) );
 }
 
+void MergeDatedDatums::Add( TimeSeries<DepthByOrder>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<DepthByOrder>( series, function ) );
+}
+
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html
 
 /*
@@ -70,12 +74,12 @@ protected:
 */
 
 // be aware that this maybe running in alternate thread
-// the thread is not created in this class 
+// the thread is not created in this class
 // for example, see CSimulationProvider
 void MergeDatedDatums::Run() {
   m_request = eRun;
   size_t cntCarriers = m_mhCarriers.Size();
-//  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
+//  LOG << "#carriers: " << cntCarriers;  // need cross thread writing
   MergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_state = eRunning;
@@ -97,7 +101,7 @@ void MergeDatedDatums::Run() {
 //  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
 }
 
-void MergeDatedDatums::Stop( void ) {
+void MergeDatedDatums::Stop() {
   m_request = eStop;
 }
 

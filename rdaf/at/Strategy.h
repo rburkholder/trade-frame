@@ -150,6 +150,9 @@ private:
   using pMarketMaker_t = ou::tf::iqfeed::l2::MarketMaker::pMarketMaker_t;
   pMarketMaker_t m_pMarketMaker;
 
+  using pOrderBased_t = ou::tf::iqfeed::l2::OrderBased::pOrderBased_t;
+  pOrderBased_t m_pOrderBased;
+
   // ==
   struct QuoteForBranch {
     double time;
@@ -180,6 +183,7 @@ private:
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
   void HandleDepthByMM( const ou::tf::DepthByMM& );
+  void HandleDepthByOrder( const ou::tf::DepthByOrder& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

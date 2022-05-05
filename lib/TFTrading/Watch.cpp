@@ -83,7 +83,8 @@ void Watch::Initialize() {
   assert( m_pDataProvider->ProvidesTrades() );
   m_quotes.Reserve( 1024 );  // reduce startup allocations
   m_trades.Reserve( 1024 );  // reduce startup allocations
-  m_depths.Reserve( 1024 );  // reduce startup allocations
+  m_depths_mm.Reserve( 1024 );  // reduce startup allocations
+  m_depths_order.Reserve( 1024 );  // reduce startup allocations
   AddEvents();
   // TODO: check that instrument name, or alt instrument name matches provider type:
   //    contract exists for IBTWS provider, IQFeedName exists for IQFeed provider
@@ -168,7 +169,8 @@ void Watch::EnableWatch() {
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     if ( m_pDataProvider->ProvidesDepth() ) {
-      m_pDataProvider->AddDepthHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepth ) );
+      m_pDataProvider->AddDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
+      m_pDataProvider->AddDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
     }
   }
 }
@@ -187,7 +189,8 @@ void Watch::DisableWatch() {
   if ( m_bWatching ) {
     //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     if ( m_pDataProvider->ProvidesDepth() ) {
-      m_pDataProvider->RemoveDepthHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepth ) );
+      m_pDataProvider->RemoveDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
+      m_pDataProvider->RemoveDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
     }
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
@@ -315,9 +318,14 @@ void Watch::HandleTrade( const Trade& trade ) {
   OnTrade( trade );
 }
 
-void Watch::HandleDepth( const DepthByMM& depth ) {
-  if ( m_bRecordSeries ) m_depths.Append( depth );
-  OnDepth( depth );
+void Watch::HandleDepthByMM( const DepthByMM& depth ) {
+  if ( m_bRecordSeries ) m_depths_mm.Append( depth );
+  OnDepthByMM( depth );
+}
+
+void Watch::HandleDepthByOrder( const DepthByOrder& depth ) {
+  if ( m_bRecordSeries ) m_depths_order.Append( depth );
+  OnDepthByOrder( depth );
 }
 
 void Watch::HandleIQFeedFundamentalMessage( ou::tf::iqfeed::IQFeedSymbol::pFundamentals_t pFundamentals ) {
@@ -370,12 +378,23 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       attrTrades.SetProviderType( m_pDataProvider->ID() );
     }
 
-    if ( 0 != m_depths.Size() ) {
+    if ( 0 != m_depths_mm.Size() ) {
       sPathName = sPrefix + DepthsByMM::Directory() + m_pInstrument->GetInstrumentName();
       HDF5WriteTimeSeries<ou::tf::DepthsByMM> wtsDepths( dm, true, true, 5, 256 );
-      wtsDepths.Write( sPathName, &m_depths );
+      wtsDepths.Write( sPathName, &m_depths_mm );
       HDF5Attributes attrDepths( dm, sPathName );
-      attrDepths.SetSignature( ou::tf::Trade::Signature() );
+      attrDepths.SetSignature( ou::tf::DepthByMM::Signature() );
+      //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+      //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+      attrDepths.SetProviderType( m_pDataProvider->ID() );
+    }
+
+    if ( 0 != m_depths_order.Size() ) {
+      sPathName = sPrefix + DepthsByOrder::Directory() + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
+      wtsDepths.Write( sPathName, &m_depths_order );
+      HDF5Attributes attrDepths( dm, sPathName );
+      attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
       //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
       //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
       attrDepths.SetProviderType( m_pDataProvider->ID() );
@@ -422,7 +441,8 @@ void Watch::SaveSeries( const std::string& sPrefix, const std::string& sDaily ) 
 void Watch::ClearSeries() {
   m_quotes.Clear();
   m_trades.Clear();
-  m_depths.Clear();
+  m_depths_mm.Clear();
+  m_depths_order.Clear();
 }
 
 } // namespace tf

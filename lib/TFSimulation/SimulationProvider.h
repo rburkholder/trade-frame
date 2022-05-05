@@ -72,10 +72,13 @@ public:
 
   void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
   void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
-  void AddDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler );
-  void RemoveDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler );
   void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
   void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+
+  void AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
+  void RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
+  void AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
+  void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
 
   void EmitStats( std::stringstream& ss );
 
@@ -109,8 +112,10 @@ protected:
   void StopQuoteWatch( pSymbol_t Symbol );
   void StartTradeWatch( pSymbol_t pSymbol );
   void StopTradeWatch( pSymbol_t pSymbol );
-  void StartDepthWatch( pSymbol_t pSymbol );
-  void StopDepthWatch( pSymbol_t pSymbol );
+  void StartDepthByMMWatch( pSymbol_t pSymbol );
+  void StopDepthByMMWatch( pSymbol_t pSymbol );
+  void StartDepthByOrderWatch( pSymbol_t pSymbol );
+  void StopDepthByOrderWatch( pSymbol_t pSymbol );
   void StartGreekWatch( pSymbol_t pSymbol );
   void StopGreekWatch( pSymbol_t pSymbol );
 

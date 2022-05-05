@@ -494,21 +494,21 @@ void TWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   }
 }
 
-void TWS::StartDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
-  if ( !pIBSymbol->GetDepthWatchInProgress() ) {
-    // start watch
-    pIBSymbol->SetDepthWatchInProgress();
-  }
-}
+//void TWS::StartDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
+//  if ( !pIBSymbol->GetDepthWatchInProgress() ) {
+//    // start watch
+//    pIBSymbol->SetDepthWatchInProgress();
+//  }
+//}
 
-void TWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
-  if ( pIBSymbol->DepthWatchNeeded() ) {
-  }
-  else {
-    // stop watch
-    pIBSymbol->ResetDepthWatchInProgress();
-  }
-}
+//void TWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
+//  if ( pIBSymbol->DepthWatchNeeded() ) {
+//  }
+//  else {
+//    // stop watch
+//    pIBSymbol->ResetDepthWatchInProgress();
+//  }
+//}
 
 // indexed with InstrumentType::EInstrumentType
 const char *TWS::szSecurityType[] = {

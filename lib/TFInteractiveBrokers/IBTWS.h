@@ -203,8 +203,8 @@ protected:
   void StartQuoteTradeWatch( pSymbol_t pSymbol );
   void  StopQuoteTradeWatch( pSymbol_t pSymbol );
 
-  void StartDepthWatch( pSymbol_t pSymbol );
-  void  StopDepthWatch( pSymbol_t pSymbol );
+  //void StartDepthWatch( pSymbol_t pSymbol );
+  //void  StopDepthWatch( pSymbol_t pSymbol );
 
   void StartGreekWatch( pSymbol_t pSymbol );
   void  StopGreekWatch( pSymbol_t pSymbol );

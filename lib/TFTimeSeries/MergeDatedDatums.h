@@ -43,6 +43,7 @@ public:
   void Add( TimeSeries<Bar>& series, OnDatumHandler );
   void Add( TimeSeries<Greek>& series, OnDatumHandler );
   void Add( TimeSeries<DepthByMM>& series, OnDatumHandler );
+  void Add( TimeSeries<DepthByOrder>& series, OnDatumHandler );
   void Run();
   void Stop();
 

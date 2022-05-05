@@ -691,14 +691,14 @@ void AppAutoTrade::ConfirmProviders() {
               mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
               Strategy& strategy( *iter->second );
               if ( m_pL2Symbols ) {
-                BOOST_LOG_TRIVIAL(info) << "starting L2 for: " << sSymbol;
-                auto symbol = m_iqfeed->GetSymbol( sSymbol );
-                m_pL2Symbols->WatchAdd(
-                  sSymbol,
-                  [symbol]( const ou::tf::DepthByMM& md ){
-                    symbol->SubmitMarketDepth( md );
-                  }
-                  );
+                BOOST_LOG_TRIVIAL(info) << "starting L2 for: " << sSymbol << " ** AppAutoTrade needs fixing";
+                //auto symbol = m_iqfeed->GetSymbol( sSymbol );
+                //m_pL2Symbols->WatchAdd(
+                //  sSymbol,
+                //  [symbol]( const ou::tf::DepthByMM& md ){
+                //    symbol->SubmitMarketDepthByMM( md );
+                //  }
+                //  );
               }
               else {
                 assert( false ); // m_pL2Symbols needs to be available

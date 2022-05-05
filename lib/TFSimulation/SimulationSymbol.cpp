@@ -103,8 +103,8 @@ void SimulationSymbol::StartGreekWatch() {
 void SimulationSymbol::StopGreekWatch() {
 }
 
-void SimulationSymbol::StartDepthWatch() {
-  if ( 0 == m_depths.Size() )  {
+void SimulationSymbol::StartDepthByMMWatch() {
+  if ( 0 == m_depths_mm.Size() )  {
     try {
       std::string sPath( m_sDirectory + DepthsByMM::Directory() + GetId() );
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
@@ -112,8 +112,8 @@ void SimulationSymbol::StartDepthWatch() {
       HDF5TimeSeriesContainer<DepthByMM>::iterator begin, end;
       begin = depthRepository.begin();
       end = depthRepository.end();
-      m_depths.Resize( end - begin );
-      depthRepository.Read( begin, end, &m_depths );
+      m_depths_mm.Resize( end - begin );
+      depthRepository.Read( begin, end, &m_depths_mm );
     }
     catch ( std::runtime_error &e ) {
       // couldn't do read, so leave as empty
@@ -121,17 +121,33 @@ void SimulationSymbol::StartDepthWatch() {
   }
 }
 
-void SimulationSymbol::StopDepthWatch() {
+void SimulationSymbol::StopDepthByMMWatch() {
+}
+
+void SimulationSymbol::StartDepthByOrderWatch() {
+  if ( 0 == m_depths_order.Size() )  {
+    try {
+      std::string sPath( m_sDirectory + DepthsByOrder::Directory() + GetId() );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      HDF5TimeSeriesContainer<DepthByOrder> depthRepository( dm, sPath );
+      HDF5TimeSeriesContainer<DepthByOrder>::iterator begin, end;
+      begin = depthRepository.begin();
+      end = depthRepository.end();
+      m_depths_order.Resize( end - begin );
+      depthRepository.Read( begin, end, &m_depths_order );
+    }
+    catch ( std::runtime_error &e ) {
+      // couldn't do read, so leave as empty
+    }
+  }
+}
+
+void SimulationSymbol::StopDepthByOrderWatch() {
 }
 
 void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
   const Quote& quote( dynamic_cast<const Quote &>( datum ) );
   STRAND_CAPTURE( (m_OnQuote( quote )), quote )
-}
-
-void SimulationSymbol::HandleDepthEvent( const DatedDatum &datum ) {
-  const DepthByMM& md( dynamic_cast<const DepthByMM &>( datum ) );
-  STRAND_CAPTURE( (m_OnDepth( md )), md )
 }
 
 void SimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
@@ -143,6 +159,17 @@ void SimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
   const Greek& greek( dynamic_cast<const Greek &>( datum ) );
   STRAND_CAPTURE( (m_OnGreek( greek )), greek )
 }
+
+void SimulationSymbol::HandleDepthByMMEvent( const DatedDatum &datum ) {
+  const DepthByMM& md( dynamic_cast<const DepthByMM &>( datum ) );
+  STRAND_CAPTURE( (m_OnDepthByMM( md )), md )
+}
+
+void SimulationSymbol::HandleDepthByOrderEvent( const DatedDatum &datum ) {
+  const DepthByOrder& md( dynamic_cast<const DepthByOrder &>( datum ) );
+  STRAND_CAPTURE( (m_OnDepthByOrder( md )), md )
+}
+
 
 } // namespace tf
 } // namespace ou

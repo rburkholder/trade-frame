@@ -151,7 +151,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
     case ou::tf::config::symbol_t::EFeed::L1:
       break;
     case ou::tf::config::symbol_t::EFeed::L2M:  // L2 via MarketMaker (nasdaq equities)
-      pWatch->OnDepth.Add( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
+      pWatch->OnDepthByMM.Add( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
 
       m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
       m_pMarketMaker->Set(
@@ -162,9 +162,19 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
           HandleUpdateL2Ask( price, volume, bAdd );
         }
       );
-
       break;
     case ou::tf::config::symbol_t::EFeed::L2O:  // L2 via OrderBased (CME/ICE futures)
+      pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
+
+      m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
+      m_pOrderBased->Set(
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+          HandleUpdateL2Bid( price, volume, bAdd );
+        },
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+          HandleUpdateL2Ask( price, volume, bAdd );
+        }
+      );
       break;
   }
 
@@ -203,7 +213,7 @@ void Strategy::Clear() {
       case ou::tf::config::symbol_t::EFeed::L2M:
         if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
           m_pMarketMaker.reset();
-          pWatch->OnDepth.Remove( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
+          pWatch->OnDepthByMM.Remove( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
         }
         break;
       case ou::tf::config::symbol_t::EFeed::L2O:
@@ -345,6 +355,11 @@ void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
   }
 
 }
+
+void Strategy::HandleDepthByOrder( const ou::tf::DepthByOrder& depth ) {
+  m_pOrderBased->MarketDepth( depth );
+}
+
 
 void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {
 }

@@ -116,32 +116,6 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
   }
 }
 
-void SimulationProvider::AddDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler ) {
-  inherited_t::AddDepthHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t pSymSymbol( iter->second );
-  if ( 1 == iter->second->GetDepthHandlerCount() ) {
-    inherited_t::AddDepthHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepth ) );
-  }
-}
-
-void SimulationProvider::RemoveDepthHandler( pInstrument_cref pInstrument, SimulationSymbol::depthhandler_t handler ) {
-  inherited_t::RemoveDepthHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );  // this shouldn't occur
-  }
-  else {
-    if ( 1 == iter->second->GetDepthHandlerCount() ) {
-      pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveDepthHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepth ) );
-    }
-  }
-}
-
 void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::AddTradeHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
@@ -168,6 +142,58 @@ void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, Simul
   }
 }
 
+void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
+  inherited_t::AddDepthByMMHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  assert( m_mapSymbols.end() != iter );
+  pSymbol_t pSymSymbol( iter->second );
+  if ( 1 == iter->second->GetDepthByMMHandlerCount() ) {
+    inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
+  }
+}
+
+void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
+  inherited_t::RemoveDepthByMMHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );  // this shouldn't occur
+  }
+  else {
+    if ( 1 == iter->second->GetDepthByMMHandlerCount() ) {
+      pSymbol_t pSymSymbol( iter->second );
+      inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
+    }
+  }
+}
+
+void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
+  inherited_t::AddDepthByOrderHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  assert( m_mapSymbols.end() != iter );
+  pSymbol_t pSymSymbol( iter->second );
+  if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) {
+    inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
+  }
+}
+
+void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
+  inherited_t::RemoveDepthByOrderHandler( pInstrument, handler );
+  inherited_t::mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );  // this shouldn't occur
+  }
+  else {
+    if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) {
+      pSymbol_t pSymSymbol( iter->second );
+      inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
+    }
+  }
+}
+
 // these need to open the data file, load the data, and prepare to simulate
 void SimulationProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
   pSymbol->StartQuoteWatch();
@@ -185,12 +211,20 @@ void SimulationProvider::StopTradeWatch( pSymbol_t pSymbol ) {
   pSymbol->StopTradeWatch();
 }
 
-void SimulationProvider::StartDepthWatch( pSymbol_t pSymbol ) {
-  pSymbol->StartDepthWatch();
+void SimulationProvider::StartDepthByMMWatch( pSymbol_t pSymbol ) {
+  pSymbol->StartDepthByMMWatch();
 }
 
-void SimulationProvider::StopDepthWatch( pSymbol_t pSymbol ) {
-  pSymbol->StopDepthWatch();
+void SimulationProvider::StopDepthByMMWatch( pSymbol_t pSymbol ) {
+  pSymbol->StopDepthByMMWatch();
+}
+
+void SimulationProvider::StartDepthByOrderWatch( pSymbol_t pSymbol ) {
+  pSymbol->StartDepthByOrderWatch();
+}
+
+void SimulationProvider::StopDepthByOrderWatch( pSymbol_t pSymbol ) {
+  pSymbol->StopDepthByOrderWatch();
 }
 
 void SimulationProvider::StartGreekWatch( pSymbol_t pSymbol ) {
@@ -221,11 +255,18 @@ void SimulationProvider::Merge() {
           MakeDelegate( iter->second.get(), &SimulationSymbol::HandleQuoteEvent ) );
       }
 
-      DepthsByMM& depths( sym->m_depths );
-      if ( 0 != depths.Size() ) {
+      DepthsByMM& depths_mm( sym->m_depths_mm );
+      if ( 0 != depths_mm.Size() ) {
         m_pMerge -> Add(
-          depths,
-          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleDepthEvent ) );
+          depths_mm,
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleDepthByMMEvent ) );
+      }
+
+      DepthsByOrder& depths_order( sym->m_depths_order );
+      if ( 0 != depths_order.Size() ) {
+        m_pMerge -> Add(
+          depths_order,
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleDepthByOrderEvent ) );
       }
 
       Trades& trades( sym->m_trades );
