@@ -280,6 +280,8 @@ private:
   volume_t m_nShares;
   char m_chMsgType; // 6 is summary, 3 is add, 4 is update
   char m_chSide; // simplifies insertion into MarketDepth handlers
+  // NOTE: may need to add priority from iqfeed message, will need to investigate content
+  // NOTE: probably won't add precision from iqfeed message, seems reduundant
 };
 
 //
