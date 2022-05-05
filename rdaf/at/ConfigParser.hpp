@@ -19,6 +19,8 @@
  * Created: March 15, 2022 12:56
  */
 
+#pragma once
+
 #include <map>
 #include <string>
 
