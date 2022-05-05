@@ -19,6 +19,8 @@
  * Created  April 15, 2022 18:20
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/KeyTypes.h>
@@ -373,13 +375,13 @@ void OrderBased::LimitOrderUpdate( uint64_t nOrderId, char chOrderSide, double d
 
   mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
   if ( m_mapOrder.end() == iter ) {
-    std::cout << "LimitOrderUpdate order does not exist: " << nOrderId << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate order does not exist: " << nOrderId;
   }
   else {
 
     Order& order( iter->second );
     if ( order.chOrderSide != chOrderSide ) {
-      std::cout << "error: LimitOrderUpdate side change " << order.chOrderSide << " to " << chOrderSide << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << chOrderSide;
     }
     else {
       switch ( order.chOrderSide ) {
@@ -404,7 +406,7 @@ void OrderBased::LimitOrderUpdate(
 
   mapLimitOrderAggregate_t::iterator iterLimitOrderBook = map.find( order.dblPrice );
   if ( map.end() == iterLimitOrderBook ) {
-    std::cout << "error LimitOrderUpdate price not found: " << order.dblPrice << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - price not found: " << order.dblPrice << std::endl;
   }
   else {
 
@@ -437,7 +439,7 @@ void OrderBased::LimitOrderDelete( uint64_t nOrderId ) {
 
   mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
   if ( m_mapOrder.end() == iter ) {
-    std::cout << "LimitOrderDelete order " << nOrderId << " does not exist" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << nOrderId << " does not exist" << std::endl;
   }
   else {
     const Order& order( iter->second );
@@ -458,7 +460,7 @@ void OrderBased::LimitOrderDel( const Order& order, mapLimitOrderAggregate_t& ma
 
   mapLimitOrderAggregate_t::iterator iterLimitOrderAggregate = map.find( order.dblPrice );
   if ( map.end() == iterLimitOrderAggregate ) {
-    std::cout << "LimitOrderDel price not found: " << order.dblPrice << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderDel price not found: " << order.dblPrice << std::endl;
   }
   else {
     iterLimitOrderAggregate->second.nQuantity -= order.nQuantity;
