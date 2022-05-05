@@ -43,6 +43,8 @@ BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::symbol_t,
   (ou::tf::config::symbol_t::EFeed, eFeed)
   (bool, bTradable)
+  (std::string, sAlgorithm)
+  (std::string, sSignalFrom)
   (size_t, nPriceBins)
   (double, dblPriceUpper)
   (double, dblPriceLower)
@@ -161,6 +163,18 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> luBool
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleAlgorithm
+      %= qi::lit("algorithm")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +qi::char_("A-Za-z0-9_")
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleSignalFrom
+      %= qi::lit("signal_from")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> -qi::char_('@') >> qi::char_("A-Z") >> *( qi::char_("A-Z0-9" ) )// >> *qi::char_('#')
+      >> *qi::lit(' ') >> qi::eol;
+
     rulePriceBins
       %= qi::lit( "price_bins" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -196,6 +210,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleSymbolChoices
       %= -ruleFeed
       >> -ruleTradable
+      >> -ruleAlgorithm
+      >> -ruleSignalFrom
       >>  rulePriceBins
       >>  rulePriceUpper
       >>  rulePriceLower
@@ -242,9 +258,10 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, size_t()> ruleIbClientId;
   qi::rule<Iterator, size_t()> ruleThreads;
   qi::rule<Iterator, bool()> ruleStartSimulator;
-  //qi::rule<Iterator, ()> ruleSeparator;
   qi::rule<Iterator, std::string()> ruleGroupDirectory;
   qi::rule<Iterator, size_t()> ruleTimeBins;
+  qi::rule<Iterator, std::string()> ruleSignalFrom;
+  qi::rule<Iterator, std::string()> ruleAlgorithm;
   qi::rule<Iterator, std::string()> ruleDateTime;
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;

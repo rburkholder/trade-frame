@@ -40,8 +40,11 @@ struct symbol_t {
 
   // parsed direct from config file
 
-  bool bTradable;
   EFeed eFeed;
+  bool bTradable;
+
+  std::string sAlgorithm;
+  std::string sSignalFrom; // link one instrument to another
 
   size_t nPriceBins;
   double dblPriceUpper;

@@ -179,9 +179,16 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   if ( m_config.bTradable ) {}
   else {
-    BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition - set " << m_config.sSymbol << " no trading";
+    BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition " << m_config.sSymbol << ": no trading";
     m_stateTrade = ETradeState::NoTrade;
   }
+
+  BOOST_LOG_TRIVIAL(info)
+    << "Strategy::SetPosition " << m_config.sSymbol
+    << ": algorithm='" << m_config.sAlgorithm
+    << "' signal_from='" <<m_config.sSignalFrom
+    << "'"
+    ;
 
 }
 
