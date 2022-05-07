@@ -311,7 +311,7 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, 0.0, 0 );
+    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide );
     m_fMarketDepthByOrder( md );
   }
   else {

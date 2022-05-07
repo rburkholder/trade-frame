@@ -257,7 +257,7 @@ public:
   DepthByOrder();
   DepthByOrder( const dt_t dt );
   DepthByOrder( const DepthByOrder& md );
-  DepthByOrder( const dt_t dt, idorder_t nOrder, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares );
+  DepthByOrder( const dt_t dt, idorder_t nOrder, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
   ~DepthByOrder();
 
   static std::string Directory() { return "/depths_o/"; }
