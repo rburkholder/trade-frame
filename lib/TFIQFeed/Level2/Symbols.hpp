@@ -48,7 +48,7 @@ public:
   L2Base();
   virtual ~L2Base() {}
 
-  using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
+  using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
   using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
   using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
@@ -59,7 +59,7 @@ public:
   void Set( fMarketDepthByMM_t&& fMarketDepth ) {  // callback for mm structure
     m_fMarketDepthByMM = std::move( fMarketDepth );
   }
-  void Set( fMarketDepthByOrder_t&& fMarketDepth ) { // callback for lob structure
+  void Set( fMarketDepthByOrder_t&& fMarketDepth ) { // callback for limit order based structure
     m_fMarketDepthByOrder = std::move( fMarketDepth );
   }
 
