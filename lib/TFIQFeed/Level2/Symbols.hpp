@@ -35,36 +35,33 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
+class Symbols;
+
 using volume_t = ou::tf::Trade::volume_t;
 
 // ==== L2Base
 
 class L2Base {  // TODO: convert to CRTP?
+  friend class Symbols;
 public:
-
-  using pL2Base_t = std::shared_ptr<L2Base>;
-  using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
-  using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
-  using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
   L2Base();
   virtual ~L2Base() {}
 
-  void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
+  using fVolumeAtPrice_t = std::function<void(double,int,bool)>;
+  using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
+  using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
+
+  void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) { // simple callback, to be deprecated
     m_fAskVolumeAtPrice = std::move( fAsk );
     m_fBidVolumeAtPrice = std::move( fBid );
   }
-  void Set( fMarketDepthByMM_t&& fMarketDepth ) {
+  void Set( fMarketDepthByMM_t&& fMarketDepth ) {  // callback for mm structure
     m_fMarketDepthByMM = std::move( fMarketDepth );
   }
-  void Set( fMarketDepthByOrder_t&& fMarketDepth ) {
+  void Set( fMarketDepthByOrder_t&& fMarketDepth ) { // callback for lob structure
     m_fMarketDepthByOrder = std::move( fMarketDepth );
   }
-
-  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
 protected:
 
@@ -74,7 +71,13 @@ protected:
   fMarketDepthByMM_t m_fMarketDepthByMM;
   fMarketDepthByOrder_t m_fMarketDepthByOrder;
 
-  struct LimitOrderAggregate {
+  // called from Symbols
+  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
+
+  struct LimitOrderAggregate { // aggregates limit orders at each level
 
     volume_t nQuantity;
     int nOrders;
@@ -267,14 +270,13 @@ class Symbols
 public:
 
   using fConnected_t = std::function<void()>;
+  using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
   Symbols( fConnected_t&& );
   virtual ~Symbols();
 
   void Connect();
   void Disconnect();
-
-  using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
   void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );  // process in Symbols
   void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );     // compose MarketDepth & ship outside
