@@ -262,7 +262,7 @@ DepthByOrder::DepthByOrder( const DepthByOrder& md )
 , m_nOrderID( md.m_nOrderID ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide )
 {}
 
-DepthByOrder::DepthByOrder( const dt_t dt, idorder_t nOrderID, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice)
+DepthByOrder::DepthByOrder( const dt_t dt, idorder_t nOrderID, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares)
 : DatedDatum( dt ), m_nOrderID( nOrderID ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
 {}
 
@@ -271,11 +271,11 @@ DepthByOrder::~DepthByOrder() {}
 H5::CompType* DepthByOrder::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( DepthByOrder ) );
   DatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "Depth",    HOFFSET( DepthByOrder, m_nOrderID ),     H5::PredType::NATIVE_UINT64 );
-  pComp->insertMember( "Price",    HOFFSET( DepthByOrder, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Shares",   HOFFSET( DepthByOrder, m_nShares ),      H5::PredType::NATIVE_LONG );
-  pComp->insertMember( "MsgType",  HOFFSET( DepthByOrder, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "Side",     HOFFSET( DepthByOrder, m_chSide ),       H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "OrderId",  HOFFSET( DepthByOrder, m_nOrderID ),   H5::PredType::NATIVE_UINT64 );
+  pComp->insertMember( "Price",    HOFFSET( DepthByOrder, m_dblPrice ),   H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Shares",   HOFFSET( DepthByOrder, m_nShares ),    H5::PredType::NATIVE_LONG );
+  pComp->insertMember( "MsgType",  HOFFSET( DepthByOrder, m_chMsgType ),  H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "Side",     HOFFSET( DepthByOrder, m_chSide ),     H5::PredType::NATIVE_CHAR );
   return pComp;
 }
 
