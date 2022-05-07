@@ -305,7 +305,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     m_pTreeQuote->Fill();
   }
 
-  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the alogorithm
+  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
 }
 
@@ -547,7 +547,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // quiescent
       break;
     case ETradeState::NoTrade:
-      // do nothing for now
+      // do nothing based upon config file
       break;
     case ETradeState::Init:
       // market open statistics management here
