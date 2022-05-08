@@ -307,7 +307,7 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) { // summary 
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
   }
   else {
@@ -319,7 +319,7 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
   }
   else {
@@ -331,7 +331,7 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.nOrderId, msg.chMsgType, msg.chOrderSide );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide );
     m_fMarketDepthByOrder( md );
   }
   else {
@@ -386,6 +386,10 @@ void OrderBased::LimitOrderUpdate( uint64_t nOrderId, char chOrderSide, double d
   }
   else {
 
+    if ( 0 == nQuantityNew ) {
+      BOOST_LOG_TRIVIAL(warning) << "LimitOrderUpdate order " << nOrderId << " warning - zero new quantity";
+    }
+
     Order& order( iter->second );
     if ( order.chOrderSide != chOrderSide ) {
       BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << chOrderSide;
@@ -422,7 +426,7 @@ void OrderBased::LimitOrderDelete( uint64_t nOrderId ) {
 
   mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
   if ( m_mapOrder.end() == iter ) {
-    BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << nOrderId << " does not exist" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << nOrderId << " does not exist";
   }
   else {
     const Order& order( iter->second );

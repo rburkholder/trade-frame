@@ -25,8 +25,7 @@
 
 #include <string>
 
-//#include <boost/date_time/gregorian/gregorian_types.hpp>
-//#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -39,8 +38,7 @@ namespace l2 { // level 2 data
 namespace msg { // message
 namespace OrderArrival {
 
-//using date_t = boost::gregorian::date;
-//using time_t = boost::posix_time::time_duration;
+using td_t = boost::posix_time::time_duration;
 
 struct time_t {
   int32_t hours;
@@ -50,7 +48,10 @@ struct time_t {
   time_t(): hours {}, minutes {}, seconds {}, fractional {} {}
   time_t( int32_t hours_, int32_t minutes_, int32_t seconds_, int32_t fractional_ )
   : hours( hours_ ), minutes( minutes_ ), seconds( seconds_ ), fractional( fractional_ ) {}
+  td_t time() const { return td_t( hours, minutes, seconds, fractional ); }
 };
+
+using gd_t = boost::gregorian::date;
 
 struct date_t {
   int32_t year;
@@ -59,7 +60,10 @@ struct date_t {
   date_t(): year {}, month {}, day {} {}
   date_t( int32_t year_, int32_t month_, int32_t day_ )
   : year( year_ ), month( month_ ), day( day_ ) {}
+  gd_t date() const { return gd_t( year, month, day ); }
 };
+
+using ptime = boost::posix_time::ptime;
 
 struct decoded {
   char chMsgType;
@@ -78,6 +82,7 @@ struct decoded {
   time_t time;
   date_t date;
   decoded(): nOrderId {}, nQuantity {}, nPriority {} {}
+  ptime dt() const { return ptime( date.date(), time.time() ); }
 };
 
 } // namespace OrderArrival
