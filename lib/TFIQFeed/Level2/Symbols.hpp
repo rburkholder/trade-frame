@@ -203,7 +203,7 @@ private:
     uint8_t nPrecision;
     // ptime, if needed
 
-    Order( const msg::OrderArrival::decoded& msg ) // summary, add, update
+    Order( const msg::OrderArrival::decoded& msg )
     : dblPrice( msg.dblPrice )
     , nQuantity( msg.nQuantity )
     , chOrderSide( msg.chOrderSide )
@@ -213,11 +213,11 @@ private:
       assert( 0 == msg.mmid.rch[0] ); // note: there is no MarketMaker in messages with an order ID
     }
 
-    Order( const ou::tf::DepthByOrder& depth ) // delete
+    Order( const ou::tf::DepthByOrder& depth )
     : dblPrice( depth.Price() )
     , nQuantity( depth.Volume() )
     , chOrderSide( depth.Side() )
-    , nPriority( 0 )
+    , nPriority( depth.Priority() )
     , nPrecision( 0 )
     {}
   };

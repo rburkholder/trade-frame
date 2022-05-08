@@ -75,9 +75,14 @@ void L2Base::Delete( mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& f, price_t
   else {
     iterLimitOrderAggregate->second.nQuantity -= volume;
     iterLimitOrderAggregate->second.nOrders--;
-    // TODO: test that there are zero orders remaining
+
+    if ( f ) f( price, iterLimitOrderAggregate->second.nQuantity, false );
+
+    if ( 0 == iterLimitOrderAggregate->second.nQuantity ) {
+      assert( 0 == iterLimitOrderAggregate->second.nOrders );
+      map.erase( iterLimitOrderAggregate );
+    }
   }
-  if ( f ) f( price, iterLimitOrderAggregate->second.nQuantity, false );
 
 }
 
