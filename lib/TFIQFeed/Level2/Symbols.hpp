@@ -37,6 +37,7 @@ namespace l2 { // level 2 data
 
 class Symbols;
 
+using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
 // ==== L2Base
@@ -65,22 +66,10 @@ public:
 
 protected:
 
-  fVolumeAtPrice_t m_fBidVolumeAtPrice;
-  fVolumeAtPrice_t m_fAskVolumeAtPrice;
-
-  fMarketDepthByMM_t m_fMarketDepthByMM;
-  fMarketDepthByOrder_t m_fMarketDepthByOrder;
-
-  // called from Symbols
-  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
-  virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
-
   struct LimitOrderAggregate { // aggregates limit orders at each level
 
     volume_t nQuantity;
-    int nOrders;
+    int nOrders;  // currently used in OrderBased only
 
     // TODO: maintain set of order ids? will require vector/map update on each change
     //   may need multi-key map:  price/datetime or price/priority
@@ -93,12 +82,29 @@ protected:
     : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
   };
 
-  // TODO: this is actually a price level summary/aggregate, so rename it ... will then make sense elsewhere
   using mapLimitOrderAggregate_t = std::map<double,LimitOrderAggregate>;  // double is price level
+
+  fVolumeAtPrice_t m_fBidVolumeAtPrice;
+  fVolumeAtPrice_t m_fAskVolumeAtPrice;
+
+  fMarketDepthByMM_t m_fMarketDepthByMM;
+  fMarketDepthByOrder_t m_fMarketDepthByOrder;
+
   mapLimitOrderAggregate_t m_mapLimitOrderAggregateAsk; // lowest value is top of book - begin()
   mapLimitOrderAggregate_t m_mapLimitOrderAggregateBid; // highest value is top of book - rbegin()
 
+  // called from Symbols
+  virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
+  virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
+
+  void Add( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t, volume_t );
+  void Update( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
+  void Delete( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t, volume_t );
+
 private:
+
 };
 
 // ==== MarketMaker (Equities, etc)
@@ -224,7 +230,6 @@ private:
   void LimitOrderDelete( uint64_t );
 
   // actual handlers
-  void LimitOrderAdd( const Order&, mapLimitOrderAggregate_t&, fVolumeAtPrice_t& );
   void LimitOrderUpdate(
     Order& order,
     mapLimitOrderAggregate_t& map,
@@ -232,7 +237,6 @@ private:
     volume_t nQuantity,
     fVolumeAtPrice_t&
     );
-  void LimitOrderDel( const Order&, mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& );
 };
 
 // ==== Carrier for symbol lookup
