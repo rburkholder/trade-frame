@@ -307,7 +307,7 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) { // summary 
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
   }
   else {
@@ -319,7 +319,7 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
   }
   else {
@@ -331,7 +331,7 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.chMsgType, msg.chOrderSide );
+    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
     m_fMarketDepthByOrder( md );
   }
   else {

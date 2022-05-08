@@ -252,27 +252,32 @@ H5::CompType* DepthByMM::DefineDataType( H5::CompType* pComp ) {
 DepthByOrder::DepthByOrder()
 : DatedDatum()
 , m_dtMarket( boost::posix_time::not_a_date_time )
-, m_nOrderID {}, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
+, m_nOrderID {}, m_nPriority {}
+, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
 {}
 
 DepthByOrder::DepthByOrder( const ptime dt )
 : DatedDatum( dt )
 , m_dtMarket( boost::posix_time::not_a_date_time )
-, m_nOrderID {}, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
+, m_nOrderID {}, m_nPriority {}
+, m_dblPrice {}, m_nShares {}, m_chMsgType( '0' ), m_chSide( ' ' )
 {}
 
 DepthByOrder::DepthByOrder( const DepthByOrder& md )
 : DatedDatum( md.m_dt )
 , m_dtMarket( md.m_dtMarket )
-, m_nOrderID( md.m_nOrderID ), m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide )
+, m_nOrderID( md.m_nOrderID ), m_nPriority( md.m_nPriority )
+, m_nShares( md.m_nShares ), m_dblPrice( md.m_dblPrice ), m_chMsgType( md.m_chMsgType ), m_chSide( md.m_chSide )
 {}
 
 //DepthByOrder::DepthByOrder( const dt_t dt, idorder_t nOrderID, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares)
 //: DatedDatum( dt ), m_nOrderID( nOrderID ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
 //{}
 
-DepthByOrder::DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrderID, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares)
-: DatedDatum( dt ), m_dtMarket( dtMarket ), m_nOrderID( nOrderID ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
+DepthByOrder::DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrderID, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares)
+: DatedDatum( dt ), m_dtMarket( dtMarket )
+, m_nOrderID( nOrderID ), m_nPriority( nPriority )
+, m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
 {}
 
 DepthByOrder::~DepthByOrder() {}
@@ -282,6 +287,7 @@ H5::CompType* DepthByOrder::DefineDataType( H5::CompType* pComp ) {
   DatedDatum::DefineDataType( pComp );
   pComp->insertMember( "MarketDT", HOFFSET( DepthByOrder, m_dtMarket ),   H5::PredType::NATIVE_LLONG );
   pComp->insertMember( "OrderId",  HOFFSET( DepthByOrder, m_nOrderID ),   H5::PredType::NATIVE_UINT64 );
+  pComp->insertMember( "Priority", HOFFSET( DepthByOrder, m_nPriority ),  H5::PredType::NATIVE_UINT64 );
   pComp->insertMember( "Price",    HOFFSET( DepthByOrder, m_dblPrice ),   H5::PredType::NATIVE_DOUBLE );
   pComp->insertMember( "Shares",   HOFFSET( DepthByOrder, m_nShares ),    H5::PredType::NATIVE_LONG );
   pComp->insertMember( "MsgType",  HOFFSET( DepthByOrder, m_chMsgType ),  H5::PredType::NATIVE_CHAR );

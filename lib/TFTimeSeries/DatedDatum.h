@@ -258,12 +258,13 @@ public:
   DepthByOrder( const dt_t dt );
   DepthByOrder( const DepthByOrder& md );
   //DepthByOrder( const dt_t dt, idorder_t nOrder, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
-  DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrder, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
+  DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrder, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
   ~DepthByOrder();
 
   static std::string Directory() { return "/depths_o/"; }
 
   idorder_t OrderID() const { return m_nOrderID; }
+  uint64_t Priority() const { return m_nPriority; }
   price_t Price() const { return m_dblPrice; }
   volume_t Volume() const { return m_nShares; }
   char MsgType() const { return m_chMsgType; }
@@ -271,13 +272,14 @@ public:
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() {
-    return DatedDatum::Signature() * 1000000 + 941388; } // DatedDatum -> MarketDepth
+    return DatedDatum::Signature() * 10000000 + 9441388; } // DatedDatum -> MarketDepth
   // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
 private:
   dt_t m_dtMarket; // market supplied datetime
   idorder_t m_nOrderID;
+  uint64_t m_nPriority;
   price_t m_dblPrice;
   volume_t m_nShares;
   char m_chMsgType; // 6 is summary, 3 is add, 4 is update
