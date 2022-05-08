@@ -195,14 +195,15 @@ protected:
 private:
 
   struct Order {
+
     double dblPrice;
+    uint64_t nPriority;
     volume_t nQuantity;
     char chOrderSide;
-    uint64_t nPriority;
     uint8_t nPrecision;
     // ptime, if needed
 
-    Order( const msg::OrderArrival::decoded& msg )
+    Order( const msg::OrderArrival::decoded& msg ) // summary, add, update
     : dblPrice( msg.dblPrice )
     , nQuantity( msg.nQuantity )
     , chOrderSide( msg.chOrderSide )
@@ -212,7 +213,7 @@ private:
       assert( 0 == msg.mmid.rch[0] ); // note: there is no MarketMaker in messages with an order ID
     }
 
-    Order( const ou::tf::DepthByOrder& depth )
+    Order( const ou::tf::DepthByOrder& depth ) // delete
     : dblPrice( depth.Price() )
     , nQuantity( depth.Volume() )
     , chOrderSide( depth.Side() )

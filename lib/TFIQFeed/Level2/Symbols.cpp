@@ -310,37 +310,37 @@ void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 
 void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
-  if ( nullptr != m_fMarketDepthByOrder ) {
+  if ( nullptr == m_fMarketDepthByOrder ) {
+    LimitOrderAdd( msg.nOrderId, Order( msg ) );
+  }
+  else {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
-  }
-  else {
-    LimitOrderAdd( msg.nOrderId, Order( msg ) );
   }
 }
 
 void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
-  if ( nullptr != m_fMarketDepthByOrder ) {
+  if ( nullptr == m_fMarketDepthByOrder ) {
+    LimitOrderUpdate( msg.nOrderId, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+  }
+  else {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
     m_fMarketDepthByOrder( md );
-  }
-  else {
-    LimitOrderUpdate( msg.nOrderId, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
   }
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
-  if ( nullptr != m_fMarketDepthByOrder ) {
+  if ( nullptr == m_fMarketDepthByOrder ) {
+    LimitOrderDelete( msg.nOrderId );
+  }
+  else {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
     m_fMarketDepthByOrder( md );
-  }
-  else {
-    LimitOrderDelete( msg.nOrderId );
   }
 
 }
