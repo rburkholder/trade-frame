@@ -184,8 +184,8 @@ public:
 
   static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
 
+  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg );
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& msg );
-  virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) {OnMBOAdd( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg );
   virtual void OnMBODelete( const msg::OrderDelete::decoded& msg );
 

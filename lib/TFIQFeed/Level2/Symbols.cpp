@@ -303,7 +303,12 @@ void MarketMaker::EmitMarketMakerMaps() {
 
 // ==== OrderBased
 
-void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) { // summary calls this as well
+// this may require special processing
+void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
+  OnMBOAdd( msg );
+}
+
+void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
   if ( nullptr != m_fMarketDepthByOrder ) {
     ptime dt( ou::TimeSource::Instance().External() );
@@ -345,7 +350,9 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
     case '4': // Update
       LimitOrderUpdate( depth.OrderID(), depth.Side(), depth.Price(), depth.Volume() );
       break;
-    case '6': // Summary
+    case '6': // Summary - will need to categorize this properly
+      LimitOrderAdd( depth.OrderID(), Order( depth ) );
+      break;
     case '3': // add
       LimitOrderAdd( depth.OrderID(), Order( depth ) );
       break;
