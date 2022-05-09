@@ -23,6 +23,8 @@
 
 #include <memory>
 
+#include <boost/log/trivial.hpp>
+
 #include <OUCommon/KeyWordMatch.h>
 
 #include <TFTimeSeries/DatedDatum.h>
@@ -40,6 +42,95 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
+template<typename Compare>  // ask is std::less<key>, bid is std::greater<key>, where key is currently double
+class MapLevelAggregate {
+  friend class Symbols;
+public:
+
+  static const unsigned int max_ix = 10;
+
+  //using fVolumeAtPrice_t = std::function<void(unsigned int,unsigned int, double,int,bool)>; // old level, new level, price, volume, add
+  using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
+
+  MapLevelAggregate()
+  : m_fVolumeAtPrice( nullptr )
+  {}
+
+  void Set( fVolumeAtPrice_t&& fVolumeAtPrice ) { // simple callback
+    m_fVolumeAtPrice = std::move( fVolumeAtPrice );
+  }
+
+  void Add( price_t price, volume_t volume ) {
+
+    typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
+    if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
+      auto pair = m_mapLevelAggregate.emplace( std::pair( price, LevelAggregate( volume ) ) );
+      assert( pair.second );
+      iterLevelAggregate = pair.first;
+    }
+    else {
+      iterLevelAggregate->second.nQuantity += volume;
+      iterLevelAggregate->second.nOrders++;
+    }
+
+    if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, true );
+  }
+
+  void Update(
+    price_t old_price, volume_t old_volume,
+    price_t new_price, volume_t new_volume
+  ) {
+    Delete( old_price, old_volume );
+    Add( new_price, new_volume );
+  }
+
+  void Delete( price_t price, volume_t volume ) {
+
+    typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
+    if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
+      BOOST_LOG_TRIVIAL(error) << "MapLevelAggregate::Delete price not found: " << price;
+    }
+    else {
+      assert( volume <= iterLevelAggregate->second.nQuantity ); // ensure no wrap around
+      iterLevelAggregate->second.nQuantity -= volume;
+      iterLevelAggregate->second.nOrders--;
+
+      if (m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, false );
+
+      if ( 0 == iterLevelAggregate->second.nQuantity ) {
+        assert( 0 == iterLevelAggregate->second.nOrders );
+        m_mapLevelAggregate.erase( iterLevelAggregate );
+      }
+    }
+  }
+
+protected:
+
+  struct LevelAggregate { // aggregates limit orders at each level
+
+    unsigned int ixLevel; // maitain index of first n levels of order book, starts at 1, zero is dead
+    volume_t nQuantity;
+    int nOrders;  // currently used in OrderBased only
+
+    // TODO: maintain set of order ids? will require vector/map update on each change
+    //   may need multi-key map:  price/datetime or price/priority
+    //   may need to adjust persisted message to incorporate priority/time/date
+    //   but this may best be maintained in OrderBased
+
+    LevelAggregate( volume_t nQuantity_ )
+    : ixLevel {}, nQuantity( nQuantity_ ), nOrders( 1 )  {}
+    LevelAggregate( const msg::OrderArrival::decoded& msg )
+    : ixLevel {}, nQuantity( msg.nQuantity ), nOrders( 1 ) {}
+  };
+
+  using mapLevelAggregate_t = std::map<double,LevelAggregate,Compare>;
+
+  mapLevelAggregate_t m_mapLevelAggregate;
+
+private:
+  fVolumeAtPrice_t m_fVolumeAtPrice;
+};
+
 // ==== L2Base
 
 class L2Base {  // TODO: convert to CRTP?
@@ -54,8 +145,8 @@ public:
   using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
   void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) { // simple callback, to be deprecated
-    m_fAskVolumeAtPrice = std::move( fAsk );
-    m_fBidVolumeAtPrice = std::move( fBid );
+    m_LevelAggregateAsk.Set( std::move( fAsk ) );
+    m_LevelAggregateBid.Set( std::move( fBid ) );
   }
   void Set( fMarketDepthByMM_t&& fMarketDepth ) {  // callback for mm structure
     m_fMarketDepthByMM = std::move( fMarketDepth );
@@ -66,32 +157,14 @@ public:
 
 protected:
 
-  struct LimitOrderAggregate { // aggregates limit orders at each level
+  using MapLevelAggregateAsk_t = MapLevelAggregate<std::less<double> >;
+  using MapLevelAggregateBid_t = MapLevelAggregate<std::greater<double> >;
 
-    volume_t nQuantity;
-    int nOrders;  // currently used in OrderBased only
-
-    // TODO: maintain set of order ids? will require vector/map update on each change
-    //   may need multi-key map:  price/datetime or price/priority
-    //   may need to adjust persisted message to incorporate priority/time/date
-    //   but this may best be maintained in OrderBased
-
-    LimitOrderAggregate( volume_t nQuantity_ )
-    : nQuantity( nQuantity_ ), nOrders( 1 )  {}
-    LimitOrderAggregate( const msg::OrderArrival::decoded& msg )
-    : nQuantity( msg.nQuantity ), nOrders( 1 ) {}
-  };
-
-  using mapLimitOrderAggregate_t = std::map<double,LimitOrderAggregate>;  // double is price level
-
-  fVolumeAtPrice_t m_fBidVolumeAtPrice;
-  fVolumeAtPrice_t m_fAskVolumeAtPrice;
+  MapLevelAggregateAsk_t m_LevelAggregateAsk;
+  MapLevelAggregateBid_t m_LevelAggregateBid;
 
   fMarketDepthByMM_t m_fMarketDepthByMM;
   fMarketDepthByOrder_t m_fMarketDepthByOrder;
-
-  mapLimitOrderAggregate_t m_mapLimitOrderAggregateAsk; // lowest value is top of book - begin()
-  mapLimitOrderAggregate_t m_mapLimitOrderAggregateBid; // highest value is top of book - rbegin()
 
   // called from Symbols
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
@@ -99,9 +172,9 @@ protected:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
-  void Add( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t, volume_t );
-  void Update( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
-  void Delete( mapLimitOrderAggregate_t&, fVolumeAtPrice_t&, price_t, volume_t );
+  void Add( char chSide, price_t, volume_t );
+  void Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
+  void Delete( char chSide, price_t, volume_t );
 
 private:
 
@@ -147,29 +220,28 @@ private:
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  void BidOrAsk_Update( const ou::tf::DepthByMM& );
-  void BidOrAsk_Delete( const ou::tf::DepthByMM& );
-
   void MMLimitOrder_Update_Live(
-    const msg::OrderArrival::decoded&,
-    fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderAggregate_t& );
+    const msg::OrderArrival::decoded&
+  );
+
+  void DepthByMM_Update( const ou::tf::DepthByMM& );
 
   void MMLimitOrder_Update(
+    char chSide,
     DepthByMM::MMID_t, // MMID
     double price, volume_t volume,
-    fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderAggregate_t& );
+    mapMM_t& );
 
   void MMLimitOrder_Delete_Live(
-    const msg::OrderDelete::decoded&,
-    fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderAggregate_t& );
+    const msg::OrderDelete::decoded&
+  );
+
+  void DepthByMM_Delete( const ou::tf::DepthByMM& );
 
   void MMLimitOrder_Delete(
+    char chSide,
     DepthByMM::MMID_t, // MMID
-    fVolumeAtPrice_t&,
-    mapMM_t&, mapLimitOrderAggregate_t& );
+    mapMM_t& );
 };
 
 // ==== OrderBased (Futures, etc)
@@ -233,10 +305,8 @@ private:
   // actual handlers
   void LimitOrderUpdate(
     Order& order,
-    mapLimitOrderAggregate_t& map,
     double dblPrice,
-    volume_t nQuantity,
-    fVolumeAtPrice_t&
+    volume_t nQuantity
     );
 };
 

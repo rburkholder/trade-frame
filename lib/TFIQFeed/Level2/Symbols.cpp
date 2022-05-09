@@ -19,8 +19,6 @@
  * Created  April 15, 2022 18:20
  */
 
-#include <boost/log/trivial.hpp>
-
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/KeyTypes.h>
@@ -35,55 +33,41 @@ namespace l2 { // level 2 data
 // ==== L2Base
 
 L2Base::L2Base()
-: m_fBidVolumeAtPrice( nullptr )
-, m_fAskVolumeAtPrice( nullptr )
-, m_fMarketDepthByMM( nullptr )
+: m_fMarketDepthByMM( nullptr )
 , m_fMarketDepthByOrder( nullptr )
 {}
 
-void L2Base::Add( mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& f, price_t price, volume_t volume ) {
-
-  mapLimitOrderAggregate_t::iterator iterLimitOrderAggregate = map.find( price );
-  if ( map.end() == iterLimitOrderAggregate ) {
-    auto pair = map.emplace( std::pair( price, LimitOrderAggregate( volume ) ) );
-    assert( pair.second );
-    iterLimitOrderAggregate = pair.first;
+void L2Base::Add( char chSide, price_t price, volume_t volume ) {
+  switch ( chSide ) {
+    case 'A':
+      m_LevelAggregateAsk.Add( price, volume );
+      break;
+    case 'B':
+      m_LevelAggregateBid.Add( price, volume );
+      break;
   }
-  else {
-    iterLimitOrderAggregate->second.nQuantity += volume;
-    iterLimitOrderAggregate->second.nOrders++;
-  }
-
-  if ( f ) f( price, iterLimitOrderAggregate->second.nQuantity, true );
 }
 
-void L2Base::Update(
-  mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& f,
-  price_t old_price, volume_t old_volume,
-  price_t new_price, volume_t new_volume
-) {
-  Delete( map, f, old_price, old_volume );
-  Add( map, f, new_price, new_volume );
+void L2Base::Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv ) {
+  switch ( chSide ) {
+    case 'A':
+      m_LevelAggregateAsk.Update( oldp, oldv, newp, newv );
+      break;
+    case 'B':
+      m_LevelAggregateBid.Update( oldp, oldv, newp, newv );
+      break;
+  }
 }
 
-void L2Base::Delete( mapLimitOrderAggregate_t& map, fVolumeAtPrice_t& f, price_t price, volume_t volume ) {
-
-  mapLimitOrderAggregate_t::iterator iterLimitOrderAggregate = map.find( price );
-  if ( map.end() == iterLimitOrderAggregate ) {
-    BOOST_LOG_TRIVIAL(error) << "L2Base::Delete price not found: " << price;
+void L2Base::Delete( char chSide, price_t price, volume_t volume ) {
+  switch ( chSide ) {
+    case 'A':
+      m_LevelAggregateAsk.Delete( price, volume );
+      break;
+    case 'B':
+      m_LevelAggregateBid.Delete( price, volume );
+      break;
   }
-  else {
-    iterLimitOrderAggregate->second.nQuantity -= volume;
-    iterLimitOrderAggregate->second.nOrders--;
-
-    if ( f ) f( price, iterLimitOrderAggregate->second.nQuantity, false );
-
-    if ( 0 == iterLimitOrderAggregate->second.nQuantity ) {
-      assert( 0 == iterLimitOrderAggregate->second.nOrders );
-      map.erase( iterLimitOrderAggregate );
-    }
-  }
-
 }
 
 // ==== MarketMaker === for nasdaq equities LII
@@ -96,14 +80,7 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
     m_fMarketDepthByMM( md );
   }
   else {
-    switch ( msg.chOrderSide ) {
-      case 'A':
-        MMLimitOrder_Update_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderAggregateAsk );
-        break;
-      case 'B':
-        MMLimitOrder_Update_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderAggregateBid );
-        break;
-    }
+    MMLimitOrder_Update_Live( msg );
   }
 }
 
@@ -115,14 +92,7 @@ void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
     m_fMarketDepthByMM( md );
   }
   else {
-    switch ( msg.chOrderSide ) {
-      case 'A':
-        MMLimitOrder_Delete_Live( msg, m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderAggregateAsk );
-        break;
-      case 'B':
-        MMLimitOrder_Delete_Live( msg, m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderAggregateBid );
-        break;
-    }
+    MMLimitOrder_Delete_Live( msg );
   }
 }
 
@@ -131,41 +101,45 @@ void MarketMaker::MarketDepth( const ou::tf::DepthByMM& depth ) {
     //case 3:  doesn't have add
     case '4': // Update
     case '6': // Summary
-      BidOrAsk_Update( depth );
+      DepthByMM_Update( depth );
       break;
     case '5':
-      BidOrAsk_Delete( depth );
+      DepthByMM_Delete( depth );
       break;
     default:
       assert( false );
   }
 }
 
-void MarketMaker::BidOrAsk_Update( const ou::tf::DepthByMM& depth ) {
+void MarketMaker::DepthByMM_Update( const ou::tf::DepthByMM& depth ) { // TODO: redo this, has redundant test
   switch ( depth.Side() ) {
     case 'A':
-      MMLimitOrder_Update( depth.MMID(), depth.Price(), depth.Volume(),  m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderAggregateAsk );
+      MMLimitOrder_Update( depth.Side(), depth.MMID(), depth.Price(), depth.Volume(),  m_mapMMAsk );
       break;
     case 'B':
-      MMLimitOrder_Update( depth.MMID(), depth.Price(), depth.Volume(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderAggregateBid );
+      MMLimitOrder_Update( depth.Side(), depth.MMID(), depth.Price(), depth.Volume(), m_mapMMBid );
       break;
   }
 }
 
 void MarketMaker::MMLimitOrder_Update_Live(
-  const msg::OrderArrival::decoded& msg,
-  fVolumeAtPrice_t& f,
-  mapMM_t& mapMM, mapLimitOrderAggregate_t& mapLimitOrderAggregate
+  const msg::OrderArrival::decoded& msg
 ) {
-  MMLimitOrder_Update( msg.mmid.id, msg.dblPrice, msg.nQuantity, f, mapMM, mapLimitOrderAggregate );
+  switch ( msg.chOrderSide ) {
+    case 'A':
+      MMLimitOrder_Update( msg.chOrderSide, msg.mmid.id, msg.dblPrice, msg.nQuantity, m_mapMMAsk );
+      break;
+    case 'B':
+      MMLimitOrder_Update( msg.chOrderSide, msg.mmid.id, msg.dblPrice, msg.nQuantity, m_mapMMBid );
+      break;
+  }
 }
 
 void MarketMaker::MMLimitOrder_Update(
+  char chSide,
   DepthByMM::MMID_t mmid,
   double price, volume_t volume,
-  fVolumeAtPrice_t& f,
-  mapMM_t& mapMM,
-  mapLimitOrderAggregate_t& mapLimitOrderAggregate
+  mapMM_t& mapMM
 ) {
 
   price_level pl( price, volume );
@@ -178,41 +152,44 @@ void MarketMaker::MMLimitOrder_Update(
   }
   else {
     // remove volume from existing price level
-    Delete( mapLimitOrderAggregate, f, mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( chSide, mapMM_iter->second.price, mapMM_iter->second.volume );
     // assign new price level
     mapMM_iter->second = pl;
   }
 
   // update new price level
-  Add( mapLimitOrderAggregate, f, price, volume );
+  Add( chSide, price, volume );
 
 }
 
 void MarketMaker::MMLimitOrder_Delete_Live(
-  const msg::OrderDelete::decoded& msg,
-  fVolumeAtPrice_t& f,
-  mapMM_t& mapMM,
-  mapLimitOrderAggregate_t& mapLimitOrderAggregate
+  const msg::OrderDelete::decoded& msg
 ) {
-  MMLimitOrder_Delete( msg.mmid.id, f, mapMM, mapLimitOrderAggregate );
-}
-
-void MarketMaker::BidOrAsk_Delete( const ou::tf::DepthByMM& depth ) {
-  switch ( depth.Side() ) {
+  switch ( msg.chOrderSide ) {
     case 'A':
-      MMLimitOrder_Delete( depth.MMID(), m_fAskVolumeAtPrice, m_mapMMAsk, m_mapLimitOrderAggregateAsk );
+      MMLimitOrder_Delete( msg.chOrderSide, msg.mmid.id, m_mapMMAsk );
       break;
     case 'B':
-      MMLimitOrder_Delete( depth.MMID(), m_fBidVolumeAtPrice, m_mapMMBid, m_mapLimitOrderAggregateBid );
+      MMLimitOrder_Delete( msg.chOrderSide, msg.mmid.id, m_mapMMBid );
+      break;
+  }
+}
+
+void MarketMaker::DepthByMM_Delete( const ou::tf::DepthByMM& depth ) {
+  switch ( depth.Side() ) {
+    case 'A':
+      MMLimitOrder_Delete( depth.Side(), depth.MMID(), m_mapMMAsk );
+      break;
+    case 'B':
+      MMLimitOrder_Delete( depth.Side(), depth.MMID(), m_mapMMBid );
       break;
   }
 }
 
 void MarketMaker::MMLimitOrder_Delete(
+  char chSide,
   DepthByMM::MMID_t mmid, // MMID
-  fVolumeAtPrice_t& f,
-  mapMM_t& mapMM,
-  mapLimitOrderAggregate_t& mapLimitOrderAggregate
+  mapMM_t& mapMM
 ) {
 
   mapMM_t::iterator mapMM_iter = mapMM.find( mmid );
@@ -222,7 +199,7 @@ void MarketMaker::MMLimitOrder_Delete(
   }
   else {
     // remove volume from existing price level
-    Delete( mapLimitOrderAggregate, f, mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( chSide, mapMM_iter->second.price, mapMM_iter->second.volume );
     mapMM.erase( mapMM_iter );
   }
 
@@ -379,14 +356,7 @@ void OrderBased::LimitOrderAdd( uint64_t nOrderId, const Order& order ) {
     m_mapOrder.emplace( std::pair( nOrderId, order ) );
   }
 
-  switch ( order.chOrderSide ) {
-    case 'A':
-      Add( m_mapLimitOrderAggregateAsk, m_fAskVolumeAtPrice, order.dblPrice, order.nQuantity );
-      break;
-    case 'B':
-      Add( m_mapLimitOrderAggregateBid, m_fBidVolumeAtPrice, order.dblPrice, order.nQuantity );
-      break;
-  }
+  Add( order.chOrderSide, order.dblPrice, order.nQuantity );
 
 }
 
@@ -407,30 +377,21 @@ void OrderBased::LimitOrderUpdate( uint64_t nOrderId, char chOrderSide, double d
       BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << chOrderSide;
     }
     else {
-      switch ( order.chOrderSide ) {
-        case 'A':
-          LimitOrderUpdate( order, m_mapLimitOrderAggregateAsk, dblPriceNew, nQuantityNew, m_fAskVolumeAtPrice );
-          break;
-        case 'B':
-          LimitOrderUpdate( order, m_mapLimitOrderAggregateBid, dblPriceNew, nQuantityNew, m_fBidVolumeAtPrice );
-          break;
-      }
+      LimitOrderUpdate( order, dblPriceNew, nQuantityNew );
     }
   }
 }
 
 void OrderBased::LimitOrderUpdate(
   Order& order,
-  mapLimitOrderAggregate_t& map,
   double dblPriceNew,
-  volume_t nQuantityNew,
-  fVolumeAtPrice_t& f
+  volume_t nQuantityNew
 ) {
   // TODO: can this be refactored with caller to minimize the call overhead?
-  Delete( map, f, order.dblPrice, order.nQuantity );
+  Delete( order.chOrderSide, order.dblPrice, order.nQuantity );
   order.dblPrice = dblPriceNew;
   order.nQuantity = nQuantityNew;
-  Add( map, f, dblPriceNew, nQuantityNew );
+  Add( order.chOrderSide, dblPriceNew, nQuantityNew );
 
 }
 
@@ -442,14 +403,7 @@ void OrderBased::LimitOrderDelete( uint64_t nOrderId ) {
   }
   else {
     const Order& order( iter->second );
-    switch ( order.chOrderSide ) {
-      case 'A':
-        Delete( m_mapLimitOrderAggregateAsk, m_fAskVolumeAtPrice, order.dblPrice, order.nQuantity );
-        break;
-      case 'B':
-        Delete( m_mapLimitOrderAggregateBid, m_fBidVolumeAtPrice, order.dblPrice, order.nQuantity );
-        break;
-    }
+    Delete( order.chOrderSide, order.dblPrice, order.nQuantity );
 
     m_mapOrder.erase( iter );
   }
