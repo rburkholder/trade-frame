@@ -97,24 +97,27 @@ public:
       assert( pair.second );
       iterLevelAggregate = pair.first;
 
-      if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {}
-      else {
-        typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
-        iterIx--;
-        ix = iterIx->second.ixLevel;
-        ix++;
-      }
-      while ( max_ix >= ix ) {
-        if ( m_fBookChanges ) m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, true );
-        iterLevelAggregate->second.ixLevel = ix;
-        ix++;
-        iterLevelAggregate++;
-        if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
-          break;
+      if ( m_fBookChanges ) { // this chunk needed for fBookChanges only
+        // TODO: change the while loop as FeatureSet is now self-levelling
+        if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {}
+        else {
+          typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
+          iterIx--;
+          ix = iterIx->second.ixLevel;
+          ix++;
         }
-      }
-      if ( m_mapLevelAggregate.end() != iterLevelAggregate ) { // important to be 0 for the delete side
-        iterLevelAggregate->second.ixLevel = 0;
+        while ( max_ix >= ix ) {
+          m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, true );
+          iterLevelAggregate->second.ixLevel = ix;
+          ix++;
+          iterLevelAggregate++;
+          if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
+            break;
+          }
+        }
+        if ( m_mapLevelAggregate.end() != iterLevelAggregate ) { // important to be 0 for the delete side
+          iterLevelAggregate->second.ixLevel = 0;
+        }
       }
     }
     else {
