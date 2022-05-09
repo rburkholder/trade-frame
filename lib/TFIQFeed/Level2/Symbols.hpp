@@ -42,15 +42,38 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
+//using fVolumeAtPrice_t = std::function<void(unsigned int,unsigned int,double,int,bool)>; // old level, new level, price, volume, add
+using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
+
 template<typename Compare>  // ask is std::less<key>, bid is std::greater<key>, where key is currently double
 class MapLevelAggregate {
   friend class Symbols;
+private:
+
+  struct LevelAggregate { // aggregates limit orders at each level
+
+    unsigned int ixLevel; // maitain index of first n levels of order book, starts at 1, zero is dead
+    volume_t nQuantity;
+    int nOrders;  // currently used in OrderBased only
+
+    // TODO: maintain set of order ids? will require vector/map update on each change
+    //   may need multi-key map:  price/datetime or price/priority
+    //   may need to adjust persisted message to incorporate priority/time/date
+    //   but this may best be maintained in OrderBased
+
+    LevelAggregate( volume_t nQuantity_ )
+    : ixLevel {}, nQuantity( nQuantity_ ), nOrders( 1 ) {}
+    LevelAggregate( const msg::OrderArrival::decoded& msg )
+    : ixLevel {}, nQuantity( msg.nQuantity ), nOrders( 1 ) {}
+    LevelAggregate( const LevelAggregate& rhs )
+    : ixLevel{ rhs.ixLevel }, nQuantity( rhs.nQuantity ), nOrders( rhs.nOrders ) {}
+  };
+
+  using mapLevelAggregate_t = std::map<double,LevelAggregate,Compare>;
+
 public:
 
   static const unsigned int max_ix = 10;
-
-  //using fVolumeAtPrice_t = std::function<void(unsigned int,unsigned int, double,int,bool)>; // old level, new level, price, volume, add
-  using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
 
   MapLevelAggregate()
   : m_fVolumeAtPrice( nullptr )
@@ -61,6 +84,8 @@ public:
   }
 
   void Add( price_t price, volume_t volume ) {
+
+    //unsigned int ix { 1 };
 
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
@@ -95,7 +120,9 @@ public:
       iterLevelAggregate->second.nQuantity -= volume;
       iterLevelAggregate->second.nOrders--;
 
-      if (m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, false );
+      //unsigned int ix {};
+      //if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( ix, ix, price, iterLevelAggregate->second.nQuantity, false );
+      if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, false );
 
       if ( 0 == iterLevelAggregate->second.nQuantity ) {
         assert( 0 == iterLevelAggregate->second.nOrders );
@@ -105,25 +132,6 @@ public:
   }
 
 protected:
-
-  struct LevelAggregate { // aggregates limit orders at each level
-
-    unsigned int ixLevel; // maitain index of first n levels of order book, starts at 1, zero is dead
-    volume_t nQuantity;
-    int nOrders;  // currently used in OrderBased only
-
-    // TODO: maintain set of order ids? will require vector/map update on each change
-    //   may need multi-key map:  price/datetime or price/priority
-    //   may need to adjust persisted message to incorporate priority/time/date
-    //   but this may best be maintained in OrderBased
-
-    LevelAggregate( volume_t nQuantity_ )
-    : ixLevel {}, nQuantity( nQuantity_ ), nOrders( 1 )  {}
-    LevelAggregate( const msg::OrderArrival::decoded& msg )
-    : ixLevel {}, nQuantity( msg.nQuantity ), nOrders( 1 ) {}
-  };
-
-  using mapLevelAggregate_t = std::map<double,LevelAggregate,Compare>;
 
   mapLevelAggregate_t m_mapLevelAggregate;
 
@@ -140,7 +148,6 @@ public:
   L2Base();
   virtual ~L2Base() {}
 
-  using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
   using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
   using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
@@ -345,7 +352,6 @@ class Symbols
 public:
 
   using fConnected_t = std::function<void()>;
-  using fVolumeAtPrice_t = L2Base::fVolumeAtPrice_t;
 
   Symbols( fConnected_t&& );
   virtual ~Symbols();
