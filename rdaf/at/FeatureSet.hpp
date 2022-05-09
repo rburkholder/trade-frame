@@ -26,6 +26,9 @@
 
  // will need to determine limit orders (easy), market orders (hard), cancel orders (easy + market)
 
+ // not really integrated into L2Base, as we only need n levels here, not all levels in the real book
+ // need a signal for level deleted
+
 #pragma once
 
 #include <TFTimeSeries/DatedDatum.h>
@@ -33,71 +36,117 @@
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
-class FeatureSet {
-public:
-protected:
-private:
+struct FeatureSet {
 
-  struct v1 { // absolute
+  // if a level changes, change those plus deeper
+  // if a level is added / removed, recalc all levels
+
+  struct V1 { // absolute
     price_t priceAsk;
     volume_t volumeAsk;
     price_t priceBid;
     volume_t volumeBid;
-  };
 
-  struct v2 {
+    volume_t aggregateVolumeAsk;
+    volume_t aggregateVolumeBid;
+
+    price_t aggregatePriceAsk;
+    price_t aggregatePriceBid;
+
+    bool bNew; // can't tell a removal, but an addition might be significant
+    V1()
+    : priceAsk {}, volumeAsk {}, priceBid {}, volumeBid {}
+    , aggregateVolumeAsk {}, aggregateVolumeBid {}
+    , aggregatePriceAsk {}, aggregatePriceBid {}
+    , bNew( false ) {}
+  } v1;
+
+  struct V2 {
     price_t spread; // diff
     price_t mid;    // absolute
-    double imbalance;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
-  };
+    double imbalanceLvl;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
+    double imbalanceAgg;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
+    V2(): spread {}, mid {}, imbalanceLvl {}, imbalanceAgg {} {}
+  } v2;
 
-  struct v3 { // diff
+  struct V3 { // diff
     price_t diffToTopAsk;
     price_t diffToTopBid;
     price_t diffToAdjacentAsk;
     price_t diffToAdjacentBid;
-  };
+    V3(): diffToTopAsk {}, diffToTopBid {}, diffToAdjacentAsk {}, diffToAdjacentBid {} {}
+  } v3;
 
-  struct v4 { // absolute
+  struct V4 { // absolute
     price_t meanPriceAsk;
     price_t meanPriceBid;
     volume_t meanVolumeAsk;
     volume_t meanVolumeBid;
-  };
+    V4(): meanPriceAsk {}, meanPriceBid {}, meanVolumeAsk {}, meanVolumeBid {} {}
+  } v4;
 
-  struct v5 { // sum(diff)
+  struct V5 { // sum(diff)
     price_t sumPriceSpreads;
     volume_t sumVolumeSpreads;
-  };
+    V5(): sumPriceSpreads {}, sumVolumeSpreads {} {}
+  } v5;
 
-  struct v6 { // derivative per unit time (1 sec)
+  struct V6 { // derivative per unit time (1 sec)
     price_t dPriceAsk_dt;
     price_t dPriceBid_dt;
     volume_t dVolumeAsk_dt;
     volume_t dVolumeBid_dt;
-  };
+    V6(): dPriceAsk_dt {}, dPriceBid_dt {}, dVolumeAsk_dt{}, dVolumeBid_dt {} {}
+  } v6;
 
-  struct v7 { // intensity over per unit time (1 sec)
+  struct V7 { // intensity over per unit time (1 sec)
     double intensityLimitAsk;
     double intensityLimtBid;
     double intensityMarketAsk;
     double intensityMarketBid;
     double intensityCancelAsk;
     double intensityCancelBid;
-  };
+    V7()
+    : intensityLimitAsk {}, intensityLimtBid {}
+    , intensityMarketAsk {}, intensityMarketBid {}
+    , intensityCancelAsk {}, intensityCancelBid {}
+    {}
+  } v7;
 
-  struct v8 { // relative intensity of short period vs long period (10s vs 900s)
+  struct V8 { // relative intensity of short period vs long period (10s vs 900s)
     double relativeLimitAsk;
     double relativeLimitBid;
     double relativeaMarketAsk;
     double relativeMarketBid;
-  };
+    V8(): relativeLimitAsk {}, relativeLimitBid {}, relativeaMarketAsk {}, relativeMarketBid {} {}
+  } v8;
 
-  struct v9 { // accelleration of trading type per unit time (vs previous 1 sec)
-    double accellLimitAsk;
+  struct V9 { // accelleration of trading type per unit time (vs previous 1 sec)
+    double BookChangeFunctions;
     double accellLimitBid;
     double accellMarketAsk;
     double accellMarketBid;
-  };
+    V9(): BookChangeFunctions {}, accellLimitBid {}, accellMarketAsk {}, accellMarketBid {} {}
+  } v9;
+
+  int m_ix;
+
+  FeatureSet* m_pTop;
+  FeatureSet* m_pNext;
+
+  FeatureSet();
+
+  void Set( int ix, FeatureSet* pTop, FeatureSet* pNext );
+
+  void QuoteAsk( price_t price, volume_t volume );
+  void QuoteBid( price_t price, volume_t volume );
+  void QuotePriceUpdates();
+  void QuoteVolumeUpdates();
+  void PriceAsk( price_t aggregate ); // aggregate price from previous level
+  void PriceBid( price_t aggregate ); // aggregate price from previous level
+  void VolumeAsk( volume_t aggregate );  // aggregate volume from previous level
+  void VolumeBid( volume_t aggregate );  // aggregate volume from previous level
+  void Diff();
+  void ImbalanceOnAggregate();
 
 };

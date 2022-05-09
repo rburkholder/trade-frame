@@ -42,7 +42,7 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
-//using fVolumeAtPrice_t = std::function<void(unsigned int,unsigned int,double,int,bool)>; // old level, new level, price, volume, add
+using fBookChanges_t = std::function<void(unsigned int,unsigned int,double,int,bool)>; // old level, new level, price, volume, add
 using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
 
 template<typename Compare>  // ask is std::less<key>, bid is std::greater<key>, where key is currently double
@@ -83,19 +83,45 @@ public:
     m_fVolumeAtPrice = std::move( fVolumeAtPrice );
   }
 
+  void Set( fBookChanges_t&& fBookChanges ) {
+    m_fBookChanges = std::move( fBookChanges );
+  }
+
   void Add( price_t price, volume_t volume ) {
 
-    //unsigned int ix { 1 };
+    unsigned int ix { 1 };
 
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
       auto pair = m_mapLevelAggregate.emplace( std::pair( price, LevelAggregate( volume ) ) );
       assert( pair.second );
       iterLevelAggregate = pair.first;
+
+      if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {}
+      else {
+        typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
+        iterIx--;
+        ix = iterIx->second.ixLevel;
+        ix++;
+      }
+      while ( max_ix >= ix ) {
+        if ( m_fBookChanges ) m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, true );
+        iterLevelAggregate->second.ixLevel = ix;
+        ix++;
+        iterLevelAggregate++;
+        if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
+          break;
+        }
+      }
+      if ( m_mapLevelAggregate.end() != iterLevelAggregate ) { // important to be 0 for the delete side
+        iterLevelAggregate->second.ixLevel = 0;
+      }
     }
     else {
       iterLevelAggregate->second.nQuantity += volume;
       iterLevelAggregate->second.nOrders++;
+      ix = iterLevelAggregate->second.ixLevel;
+      if ( m_fBookChanges ) m_fBookChanges( ix, ix, price, iterLevelAggregate->second.nQuantity, true );
     }
 
     if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, true );
@@ -120,13 +146,31 @@ public:
       iterLevelAggregate->second.nQuantity -= volume;
       iterLevelAggregate->second.nOrders--;
 
-      //unsigned int ix {};
-      //if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( ix, ix, price, iterLevelAggregate->second.nQuantity, false );
       if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, false );
 
-      if ( 0 == iterLevelAggregate->second.nQuantity ) {
+      unsigned int ix { iterLevelAggregate->second.ixLevel };
+
+      if ( 0 == iterLevelAggregate->second.nQuantity ) { // level to be removed
         assert( 0 == iterLevelAggregate->second.nOrders );
+
+        if ( 0 == ix ) {}
+        else {
+          auto iterIx = iterLevelAggregate;
+          iterIx++;
+          while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+            if ( m_fBookChanges ) m_fBookChanges( iterIx->second.ixLevel, ix, iterIx->first, iterIx->second.nQuantity, false );
+            iterIx->second.ixLevel = ix;
+            ix++;
+            iterIx++;
+          }
+          // TODO: need to signal possibly one fewer levels
+        }
+
         m_mapLevelAggregate.erase( iterLevelAggregate );
+      }
+      else { // level changes but is not removed
+        ix = iterLevelAggregate->second.ixLevel;
+        if ( m_fBookChanges ) m_fBookChanges( ix, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, false );
       }
     }
   }
@@ -136,6 +180,7 @@ protected:
   mapLevelAggregate_t m_mapLevelAggregate;
 
 private:
+  fBookChanges_t m_fBookChanges;
   fVolumeAtPrice_t m_fVolumeAtPrice;
 };
 
@@ -151,7 +196,11 @@ public:
   using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
   using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
-  void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) { // simple callback, to be deprecated
+  void Set( fBookChanges_t&& fBid, fBookChanges_t&& fAsk ) {
+    m_LevelAggregateAsk.Set( std::move( fAsk ) );
+    m_LevelAggregateBid.Set( std::move( fBid ) );
+  }
+  void Set( fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {
     m_LevelAggregateAsk.Set( std::move( fAsk ) );
     m_LevelAggregateBid.Set( std::move( fBid ) );
   }
@@ -359,7 +408,8 @@ public:
   void Connect();
   void Disconnect();
 
-  void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );  // process in Symbols
+  void WatchAdd( const std::string&, fBookChanges_t&& fBid, fBookChanges_t&& fAsk );
+  void WatchAdd( const std::string&, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk );
   void WatchAdd( const std::string&, L2Base::fMarketDepthByMM_t&& );     // compose MarketDepth & ship outside
   void WatchAdd( const std::string&, L2Base::fMarketDepthByOrder_t&& );  // compose MarketDepth & ship outside
   void WatchDel( const std::string& );
@@ -387,6 +437,24 @@ private:
   fConnected_t m_fConnected;
 
   ou::KeyWordMatch<Carrier> m_luSymbol; // contains the carrier as destination for inbound records
+
+  struct BookChangeFunctions {
+
+    fBookChanges_t fBid;
+    fBookChanges_t fAsk;
+
+    BookChangeFunctions(
+      fBookChanges_t&& fBid_,
+      fBookChanges_t&& fAsk_
+    ): fBid( std::move( fBid_ ) ), fAsk( std::move( fAsk_ ) )
+    {}
+
+    BookChangeFunctions( BookChangeFunctions&& rhs )
+    : fBid( std::move( rhs.fBid ) ), fAsk( std::move( rhs.fAsk ) ) {}
+  }; // struct BookChangeFunctions
+
+  using mapBookChangeFunctions_t = std::map<std::string,BookChangeFunctions>;
+  mapBookChangeFunctions_t m_mapBookChangeFunctions; // temporary entries till symbol encountered & assigned to a carrier
 
   struct VolumeAtPriceFunctions {
 
@@ -431,11 +499,22 @@ private:
     m_mapL2Base.emplace( msg.sSymbolName, pL2Base );
     carrier = pL2Base.get();
 
-    // may need mutex on this, vs foreground
-    mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
-    if ( m_mapVolumeAtPriceFunctions.end() != iter ) {
-      carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
-      m_mapVolumeAtPriceFunctions.erase( iter );
+    {
+      // may need mutex on this, vs foreground
+      mapBookChangeFunctions_t::iterator iter = m_mapBookChangeFunctions.find( msg.sSymbolName );
+      if ( m_mapBookChangeFunctions.end() != iter ) {
+        carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
+        m_mapBookChangeFunctions.erase( iter );
+      }
+    }
+
+    {
+      // may need mutex on this, vs foreground
+      mapVolumeAtPriceFunctions_t::iterator iter = m_mapVolumeAtPriceFunctions.find( msg.sSymbolName );
+      if ( m_mapVolumeAtPriceFunctions.end() != iter ) {
+        carrier.pL2Base->Set( std::move( iter->second.fBid ), std::move( iter->second.fAsk ) );
+        m_mapVolumeAtPriceFunctions.erase( iter );
+      }
     }
 
     {

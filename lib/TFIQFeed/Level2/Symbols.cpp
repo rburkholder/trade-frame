@@ -285,13 +285,13 @@ void MarketMaker::EmitMarketMakerMaps() {
 
 // ==== OrderBased
 
-// this may require special processing
-void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
+// Live Messages
+
+void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) { // TODO: this may require special processing
   OnMBOAdd( msg );
 }
 
 void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
-
   if ( nullptr == m_fMarketDepthByOrder ) {
     LimitOrderAdd( msg.nOrderId, Order( msg ) );
   }
@@ -303,7 +303,6 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
-
   if ( nullptr == m_fMarketDepthByOrder ) {
     LimitOrderUpdate( msg.nOrderId, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
   }
@@ -315,7 +314,6 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
-
   if ( nullptr == m_fMarketDepthByOrder ) {
     LimitOrderDelete( msg.nOrderId );
   }
@@ -324,8 +322,9 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
     ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
     m_fMarketDepthByOrder( md );
   }
-
 }
+
+// Replay from Simulation
 
 void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
   switch ( depth.MsgType() ) {
@@ -345,6 +344,8 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
       assert( false );
   }
 }
+
+// Processing
 
 void OrderBased::LimitOrderAdd( uint64_t nOrderId, const Order& order ) {
 
@@ -446,6 +447,15 @@ void Symbols::OnNetworkConnected() {
 
 void Symbols::OnL2Initialized() {
   if ( m_fConnected ) m_fConnected();
+}
+
+void Symbols::WatchAdd( const std::string& sSymbol, fBookChanges_t&& fBid, fBookChanges_t&& fAsk ) {
+  mapL2Base_t::iterator iter = m_mapL2Base.find( sSymbol );
+  assert( m_mapL2Base.end() == iter );
+
+  m_mapBookChangeFunctions.emplace( sSymbol, BookChangeFunctions( std::move( fBid ), std::move( fAsk) ) );
+  StartMarketByOrder( sSymbol );
+  // don't add pattern here as Equity/Future is unknown
 }
 
 void Symbols::WatchAdd( const std::string& sSymbol, fVolumeAtPrice_t&& fBid, fVolumeAtPrice_t&& fAsk ) {

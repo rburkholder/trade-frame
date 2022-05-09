@@ -166,12 +166,30 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
       pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
 
       m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
+      //m_pOrderBased->Set(
+      //  [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+      //    HandleUpdateL2Bid( price, volume, bAdd );
+      //  },
+      //  [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+      //    HandleUpdateL2Ask( price, volume, bAdd );
+      //  }
+      //);
+
+      // TODO: may require a completion flag as some number of levels can change due to one change
+      static const int max_ix = 10;
+      m_vLevels.resize( max_ix + 1 );  // level 0 not used, levels numbered 1 - 10
+      for ( int ix = 2; ix < max_ix; ix++ ) {
+        m_vLevels[ ix ].Set( ix, &m_vLevels[ 1 ], &m_vLevels[ ix + 1 ] );
+      }
+      m_vLevels[      1 ].Set(      1, nullptr, &m_vLevels[ 2 ] );
+      m_vLevels[ max_ix ].Set( max_ix, &m_vLevels[ 1 ], nullptr );
+
       m_pOrderBased->Set(
-        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-          HandleUpdateL2Bid( price, volume, bAdd );
+        [this]( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ){ // fBookChanges_t&& fBid_
+          HandleBookChangesBid( oldIx, newIx, price, volume, bAdd );
         },
-        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-          HandleUpdateL2Ask( price, volume, bAdd );
+        [this]( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ){ // fBookChanges_t&& fAsk_
+          HandleBookChangesAsk( oldIx, newIx, price, volume, bAdd );
         }
       );
       break;
@@ -368,10 +386,18 @@ void Strategy::HandleDepthByOrder( const ou::tf::DepthByOrder& depth ) {
 }
 
 
-void Strategy::HandleUpdateL2Ask( double price, int volume, bool bAdd ) {
+void Strategy::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
 }
 
-void Strategy::HandleUpdateL2Bid( double price, int volume, bool bAdd ) {
+void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
+}
+
+void Strategy::HandleBookChangesAsk( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ) {
+  m_vLevels[ newIx ].QuoteAsk( price, volume );
+}
+
+void Strategy::HandleBookChangesBid( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ) {
+  m_vLevels[ newIx ].QuoteBid( price, volume );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {

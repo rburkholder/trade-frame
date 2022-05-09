@@ -38,6 +38,7 @@
 
 #include <TFIQFeed/Level2/Symbols.hpp>
 
+#include "FeatureSet.hpp"
 #include "ConfigParser.hpp"
 
 class TH2D;
@@ -78,8 +79,8 @@ public:
 
   void LoadHistory( TClass* );
 
-  void HandleUpdateL2Ask( double price, int volume, bool bAdd );
-  void HandleUpdateL2Bid( double price, int volume, bool bAdd );
+  void HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd );
+  void HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd );
 
   void SaveWatch( const std::string& );
 
@@ -179,12 +180,18 @@ private:
   pTH2D_t m_pHistVolume;
   pTH2D_t m_pHistVolumeDemo;
 
+  using vLevels_t = std::vector<FeatureSet>;
+  vLevels_t m_vLevels;
+
   void InitRdaf();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
   void HandleDepthByMM( const ou::tf::DepthByMM& );
   void HandleDepthByOrder( const ou::tf::DepthByOrder& );
+
+  void HandleBookChangesAsk( unsigned int, unsigned int, price_t, volume_t, bool );
+  void HandleBookChangesBid( unsigned int, unsigned int, price_t, volume_t, bool );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 
