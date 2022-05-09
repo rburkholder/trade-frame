@@ -41,7 +41,7 @@ void FeatureSet::QuoteAsk( price_t price, volume_t volume ) {
   if ( v1.volumeAsk != volume ) {
     v1.volumeAsk = volume;
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->VolumeAsk( v1.volumeAsk + v1.aggregateVolumeAsk );
+    if ( m_pNext ) m_pNext->AggregateAsk( v1.volumeAsk + v1.aggregateVolumeAsk );
   }
 }
 
@@ -54,7 +54,7 @@ void FeatureSet::QuoteBid( price_t price, volume_t volume ) {
   if ( v1.volumeBid != volume ) {
     v1.volumeBid = volume;
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->VolumeBid( v1.volumeBid + v1.aggregateVolumeBid );
+    if ( m_pNext ) m_pNext->AggregateBid( v1.volumeBid + v1.aggregateVolumeBid );
   }
 }
 
@@ -91,36 +91,62 @@ void FeatureSet::Diff() { // if not all levels present, then some bad numbers?
   }
 }
 
-void FeatureSet::PriceAsk( price_t aggregate ) {
+void FeatureSet::AggregateAsk( price_t aggregate ) {
   v1.aggregatePriceAsk = aggregate;
   price_t sum( v1.priceAsk + aggregate );
   v4.meanPriceAsk = sum / m_ix;
   v5.sumPriceSpreads =  sum - ( v1.priceBid + v1.aggregatePriceBid );
-  if ( m_pNext ) m_pNext->PriceAsk( sum );
+  if ( m_pNext ) m_pNext->AggregateAsk( sum );
 }
 
-void FeatureSet::PriceBid( price_t aggregate ) {
+void FeatureSet::AggregateBid( price_t aggregate ) {
   v1.aggregatePriceBid = aggregate;
   price_t sum( v1.priceBid + aggregate );
   v4.meanPriceBid = sum / m_ix;
   v5.sumPriceSpreads = ( v1.priceAsk + v1.aggregatePriceAsk ) - sum;
-  if (m_pNext ) m_pNext->PriceBid( sum );
+  if (m_pNext ) m_pNext->AggregateBid( sum );
 }
 
-void FeatureSet::VolumeAsk( volume_t aggregate ) {
+void FeatureSet::AggregateAsk( volume_t aggregate ) {
   v1.aggregateVolumeAsk = aggregate;
   volume_t sum( v1.volumeAsk + aggregate );
   v4.meanVolumeAsk = sum / m_ix;
   v5.sumVolumeSpreads = sum - ( v1.volumeBid + v1.aggregateVolumeBid );
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->VolumeAsk( sum );
+  if ( m_pNext ) m_pNext->AggregateAsk( sum );
 }
 
-void FeatureSet::VolumeBid( volume_t aggregate ) {
+void FeatureSet::AggregateBid( volume_t aggregate ) {
   v1.aggregateVolumeBid = aggregate;
   volume_t sum( v1.volumeBid + aggregate );
   v4.meanVolumeBid = sum / m_ix;
   v5.sumVolumeSpreads = ( v1.volumeAsk + v1.aggregateVolumeAsk ) - sum;
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->VolumeBid( sum );
+  if ( m_pNext ) m_pNext->AggregateBid( sum );
 }
+
+FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
+  if ( this != &rhs ) {
+    v1 = rhs.v1;
+    v2 = rhs.v2;
+    v3 = rhs.v3;
+    v4 = rhs.v4;
+    v5 = rhs.v5;
+    v6 = rhs.v6;
+    v7 = rhs.v7;
+    v8 = rhs.v8;
+    v9 = rhs.v9;
+  }
+  return *this;
+}
+
+void FeatureSet::CopyFromHere( const FeatureSet& rhs ) {
+  if ( m_pNext ) m_pNext->CopyFromHere( *this );
+  *this = rhs;
+}
+
+void FeatureSet::CopyToHere( FeatureSet& lhs ) {
+  lhs = *this;
+  if ( m_pNext ) m_pNext->CopyToHere( *this );
+ }
+

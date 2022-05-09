@@ -91,7 +91,7 @@ struct FeatureSet {
     V5(): sumPriceSpreads {}, sumVolumeSpreads {} {}
   } v5;
 
-  struct V6 { // derivative per unit time (1 sec)
+  struct V6 { // derivative per unit time
     price_t dPriceAsk_dt;
     price_t dPriceBid_dt;
     volume_t dVolumeAsk_dt;
@@ -138,14 +138,19 @@ struct FeatureSet {
 
   void Set( int ix, FeatureSet* pTop, FeatureSet* pNext );
 
+  FeatureSet& operator=( const FeatureSet& );
+
+  void CopyFromHere( const FeatureSet& ); // make room for insertion
+  void CopyToHere( FeatureSet& ); // deletion
+
   void QuoteAsk( price_t price, volume_t volume );
   void QuoteBid( price_t price, volume_t volume );
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();
-  void PriceAsk( price_t aggregate ); // aggregate price from previous level
-  void PriceBid( price_t aggregate ); // aggregate price from previous level
-  void VolumeAsk( volume_t aggregate );  // aggregate volume from previous level
-  void VolumeBid( volume_t aggregate );  // aggregate volume from previous level
+  void AggregateAsk( price_t aggregate ); // aggregate price from previous level
+  void AggregateBid( price_t aggregate ); // aggregate price from previous level
+  void AggregateAsk( volume_t aggregate );  // aggregate volume from previous level
+  void AggregateBid( volume_t aggregate );  // aggregate volume from previous level
   void Diff();
   void ImbalanceOnAggregate();
 
