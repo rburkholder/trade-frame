@@ -222,6 +222,14 @@ Depth::Depth( const Depth& depth )
 , m_chMsgType( depth.m_chMsgType ), m_chSide( depth.m_chSide )
 {}
 
+Depth::Depth( const dt_t dt, price_t dblPrice, quotesize_t nShares )
+: DatedDatum( dt ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( '0' ), m_chSide( '0' )
+{}
+
+Depth::Depth( const dt_t dt, char chSide, price_t dblPrice, quotesize_t nShares )
+: DatedDatum( dt ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( '0' ), m_chSide( chSide )
+{}
+
 Depth::Depth( const dt_t dt, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares )
 : DatedDatum( dt ), m_dblPrice( dblPrice ), m_nShares( nShares ), m_chMsgType( chMsgType ), m_chSide( chSide )
 {}

@@ -184,9 +184,11 @@ class Depth: public DatedDatum {
 public:
 
   Depth();
-  Depth( const dt_t);
+  Depth( const dt_t );
   Depth( const Depth& );
-  Depth( const dt_t dt, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares );
+  explicit Depth( const dt_t, price_t, volume_t ); // quicky temp build
+  explicit Depth( const dt_t, char chSide, price_t, volume_t ); // quicky temp build
+  explicit Depth( const dt_t, char chMsgType, char chSide, price_t, quotesize_t );
   virtual ~Depth();
 
   char MsgType() const { return m_chMsgType; }
@@ -217,10 +219,10 @@ public:
   using MMID_t = uint32_t;
 
   DepthByMM();
-  DepthByMM( const dt_t dt );
-  DepthByMM( const DepthByMM& md );
-  DepthByMM( const dt_t dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, char* pch );
-  DepthByMM( const dt_t dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid );
+  DepthByMM( const dt_t );
+  DepthByMM( const DepthByMM& );
+  explicit DepthByMM( const dt_t, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, char* pch );
+  explicit DepthByMM( const dt_t, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid );
   virtual ~DepthByMM();
 
   static MMID_t Cast( const char* rchMMID ) {
@@ -278,9 +280,9 @@ public:
   using idorder_t = uint64_t;
 
   DepthByOrder();
-  DepthByOrder( const dt_t dt );
-  DepthByOrder( const DepthByOrder& md );
-  DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrder, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice = 0.0, volume_t nShares = 0 );
+  DepthByOrder( const dt_t );
+  DepthByOrder( const DepthByOrder& );
+  explicit DepthByOrder( const dt_t, const dt_t dtMarket, idorder_t, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice = 0.0, volume_t nShares = 0 );
   virtual ~DepthByOrder();
 
   idorder_t OrderID() const { return m_nOrderID; }
