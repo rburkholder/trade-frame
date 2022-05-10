@@ -123,8 +123,10 @@ public:
     else {
       iterLevelAggregate->second.nQuantity += volume;
       iterLevelAggregate->second.nOrders++;
-      ix = iterLevelAggregate->second.ixLevel;
-      if ( m_fBookChanges ) m_fBookChanges( ix, ix, price, iterLevelAggregate->second.nQuantity, true );
+      if ( m_fBookChanges ) {
+        ix = iterLevelAggregate->second.ixLevel;
+        m_fBookChanges( ix, ix, price, iterLevelAggregate->second.nQuantity, true );
+      }
     }
 
     if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, true );
@@ -231,6 +233,7 @@ protected:
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
+  // local bid / ask dispatch into proper book
   void Add( char chSide, price_t, volume_t );
   void Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
   void Delete( char chSide, price_t, volume_t );
