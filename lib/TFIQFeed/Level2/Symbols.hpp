@@ -87,7 +87,10 @@ public:
     m_fBookChanges = std::move( fBookChanges );
   }
 
-  void Add( price_t price, volume_t volume ) {
+  void Add( const ou::tf::Depth& depth ) {
+
+    price_t price( depth.Price() );
+    volume_t volume( depth.Volume() );
 
     unsigned int ix { 1 };
 
@@ -132,13 +135,7 @@ public:
     if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, true );
   }
 
-  void Update(
-    price_t old_price, volume_t old_volume,
-    price_t new_price, volume_t new_volume
-  ) {
-    Delete( old_price, old_volume );
-    Add( new_price, new_volume );
-  }
+  // TODO: convert to ou::tf::Depth usage
 
   void Delete( price_t price, volume_t volume ) {
 
@@ -234,9 +231,13 @@ protected:
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
   // local bid / ask dispatch into proper book
-  void Add( char chSide, price_t, volume_t );
+  // deprecated
   void Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
   void Delete( char chSide, price_t, volume_t );
+  // use these
+  void Add( const ou::tf::Depth& );
+  void Update( const ou::tf::Depth&, price_t oldp, volume_t oldv );
+  void Delete( const ou::tf::Depth& );
 
 private:
 
@@ -282,27 +283,16 @@ private:
   mapMM_t m_mapMMAsk;
   mapMM_t m_mapMMBid;
 
-  void MMLimitOrder_Update_Live(
-    const msg::OrderArrival::decoded&
-  );
-
   void DepthByMM_Update( const ou::tf::DepthByMM& );
 
   void MMLimitOrder_Update(
-    char chSide,
-    DepthByMM::MMID_t, // MMID
-    double price, volume_t volume,
+    const ou::tf::DepthByMM&,
     mapMM_t& );
-
-  void MMLimitOrder_Delete_Live(
-    const msg::OrderDelete::decoded&
-  );
 
   void DepthByMM_Delete( const ou::tf::DepthByMM& );
 
   void MMLimitOrder_Delete(
-    char chSide,
-    DepthByMM::MMID_t, // MMID
+    const ou::tf::DepthByMM&,
     mapMM_t& );
 };
 
@@ -360,16 +350,10 @@ private:
   mapOrder_t m_mapOrder;
 
    // interface for msg/depth
-  void LimitOrderAdd( uint64_t, const Order& );
-  void LimitOrderUpdate( uint64_t, char chOrderSide, double, volume_t );
-  void LimitOrderDelete( uint64_t );
+  void LimitOrderAdd( const ou::tf::DepthByOrder& );
+  void LimitOrderUpdate( const ou::tf::DepthByOrder& );
+  void LimitOrderDelete( const ou::tf::DepthByOrder& );
 
-  // actual handlers
-  void LimitOrderUpdate(
-    Order& order,
-    double dblPrice,
-    volume_t nQuantity
-    );
 };
 
 // ==== Carrier for symbol lookup

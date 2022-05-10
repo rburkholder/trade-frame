@@ -37,28 +37,21 @@ L2Base::L2Base()
 , m_fMarketDepthByOrder( nullptr )
 {}
 
-void L2Base::Add( char chSide, price_t price, volume_t volume ) {
-  switch ( chSide ) {
+void L2Base::Add( const ou::tf::Depth& depth ) {
+  switch ( depth.Side() ) {
     case 'A':
-      m_LevelAggregateAsk.Add( price, volume );
+      m_LevelAggregateAsk.Add( depth );
       break;
     case 'B':
-      m_LevelAggregateBid.Add( price, volume );
+      m_LevelAggregateBid.Add( depth );
+      break;
+    default:
+      assert( false );
       break;
   }
 }
 
-void L2Base::Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv ) {
-  switch ( chSide ) {
-    case 'A':
-      m_LevelAggregateAsk.Update( oldp, oldv, newp, newv );
-      break;
-    case 'B':
-      m_LevelAggregateBid.Update( oldp, oldv, newp, newv );
-      break;
-  }
-}
-
+// deprecated - note this may need to be retained
 void L2Base::Delete( char chSide, price_t price, volume_t volume ) {
   switch ( chSide ) {
     case 'A':
@@ -66,6 +59,23 @@ void L2Base::Delete( char chSide, price_t price, volume_t volume ) {
       break;
     case 'B':
       m_LevelAggregateBid.Delete( price, volume );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+}
+
+void L2Base::Delete( const ou::tf::Depth& depth ) {
+  switch ( depth.Side() ) {
+    case 'A':
+      m_LevelAggregateAsk.Delete( depth.Price(), depth.Volume() );
+      break;
+    case 'B':
+      m_LevelAggregateBid.Delete( depth.Price(), depth.Volume() );
+      break;
+    default:
+      assert( false );
       break;
   }
 }
@@ -78,25 +88,27 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
   //  BOOST_LOG_TRIVIAL(info) << "MarketMaker::OnMBOUpdate priority is in use: " << msg.nPriority;
   //}
 
+  ptime dt( ou::TimeSource::Instance().External() );
+  ou::tf::DepthByMM depth( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
+
   if ( nullptr != m_fMarketDepthByMM ) {
-    ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
-    m_fMarketDepthByMM( md );
+    m_fMarketDepthByMM( depth );
   }
   else {
-    MMLimitOrder_Update_Live( msg );
+    DepthByMM_Update( depth );
   }
 }
 
 void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
+  ptime dt( ou::TimeSource::Instance().External() );
+  ou::tf::DepthByMM depth( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
+
   if ( nullptr != m_fMarketDepthByMM ) {
-    ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
-    m_fMarketDepthByMM( md );
+    m_fMarketDepthByMM( depth );
   }
   else {
-    MMLimitOrder_Delete_Live( msg );
+    DepthByMM_Delete( depth );
   }
 }
 
@@ -112,98 +124,70 @@ void MarketMaker::MarketDepth( const ou::tf::DepthByMM& depth ) {
       break;
     default:
       assert( false );
+      break;
   }
 }
 
 void MarketMaker::DepthByMM_Update( const ou::tf::DepthByMM& depth ) { // TODO: redo this, has redundant test
   switch ( depth.Side() ) {
     case 'A':
-      MMLimitOrder_Update( depth.Side(), depth.MMID(), depth.Price(), depth.Volume(),  m_mapMMAsk );
+      MMLimitOrder_Update( depth, m_mapMMAsk );
       break;
     case 'B':
-      MMLimitOrder_Update( depth.Side(), depth.MMID(), depth.Price(), depth.Volume(), m_mapMMBid );
+      MMLimitOrder_Update( depth, m_mapMMBid );
+      break;
+    default:
+      assert( false );
       break;
   }
 }
 
-void MarketMaker::MMLimitOrder_Update_Live(
-  const msg::OrderArrival::decoded& msg
-) {
-  switch ( msg.chOrderSide ) {
-    case 'A':
-      MMLimitOrder_Update( msg.chOrderSide, msg.mmid.id, msg.dblPrice, msg.nQuantity, m_mapMMAsk );
-      break;
-    case 'B':
-      MMLimitOrder_Update( msg.chOrderSide, msg.mmid.id, msg.dblPrice, msg.nQuantity, m_mapMMBid );
-      break;
-  }
-}
+void MarketMaker::MMLimitOrder_Update( const ou::tf::DepthByMM& depth, mapMM_t& mapMM ) {
 
-void MarketMaker::MMLimitOrder_Update(
-  char chSide,
-  DepthByMM::MMID_t mmid,
-  double price, volume_t volume,
-  mapMM_t& mapMM
-) {
+  price_level pl( depth.Price(), depth.Volume() );
 
-  price_level pl( price, volume );
-
-  mapMM_t::iterator mapMM_iter = mapMM.find( mmid );
+  mapMM_t::iterator mapMM_iter = mapMM.find( depth.MMID() );
   if ( mapMM.end() == mapMM_iter ) {
-    auto pair = mapMM.emplace( mmid, pl );
+    auto pair = mapMM.emplace( depth.MMID(), pl );
     assert( pair.second );
     //mapMM_iter = pair.first;
   }
   else {
     // remove volume from existing price level
-    Delete( chSide, mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
     // assign new price level
     mapMM_iter->second = pl;
   }
 
   // update new price level
-  Add( chSide, price, volume );
+  Add( depth );
 
-}
-
-void MarketMaker::MMLimitOrder_Delete_Live(
-  const msg::OrderDelete::decoded& msg
-) {
-  switch ( msg.chOrderSide ) {
-    case 'A':
-      MMLimitOrder_Delete( msg.chOrderSide, msg.mmid.id, m_mapMMAsk );
-      break;
-    case 'B':
-      MMLimitOrder_Delete( msg.chOrderSide, msg.mmid.id, m_mapMMBid );
-      break;
-  }
 }
 
 void MarketMaker::DepthByMM_Delete( const ou::tf::DepthByMM& depth ) {
   switch ( depth.Side() ) {
     case 'A':
-      MMLimitOrder_Delete( depth.Side(), depth.MMID(), m_mapMMAsk );
+      MMLimitOrder_Delete( depth, m_mapMMAsk );
       break;
     case 'B':
-      MMLimitOrder_Delete( depth.Side(), depth.MMID(), m_mapMMBid );
+      MMLimitOrder_Delete( depth, m_mapMMBid );
+      break;
+    default:
+      assert( false );
       break;
   }
 }
 
-void MarketMaker::MMLimitOrder_Delete(
-  char chSide,
-  DepthByMM::MMID_t mmid, // MMID
-  mapMM_t& mapMM
-) {
+void MarketMaker::MMLimitOrder_Delete( const ou::tf::DepthByMM& depth, mapMM_t& mapMM ) {
 
-  mapMM_t::iterator mapMM_iter = mapMM.find( mmid );
+  mapMM_t::iterator mapMM_iter = mapMM.find( depth.MMID() );
   if ( mapMM.end() == mapMM_iter ) {
     // this should probably be an assert( false )
     // but then will reqquire recovery from stream outages
   }
   else {
     // remove volume from existing price level
-    Delete( chSide, mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
     mapMM.erase( mapMM_iter );
   }
 
@@ -298,13 +282,15 @@ void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
+
+  ptime dt( ou::TimeSource::Instance().External() );
+  ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+
   if ( nullptr == m_fMarketDepthByOrder ) {
-    LimitOrderAdd( msg.nOrderId, Order( msg ) );
+    LimitOrderAdd( depth );
   }
   else {
-    ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
-    m_fMarketDepthByOrder( md );
+    m_fMarketDepthByOrder( depth );
   }
 }
 
@@ -314,42 +300,44 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
   //   order 649948133402 priority 12440218202
   //   order 649948113561 priority 12440218206
 
+  ptime dt( ou::TimeSource::Instance().External() );
+  ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+
  if ( nullptr == m_fMarketDepthByOrder ) {
-    LimitOrderUpdate( msg.nOrderId, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
+    LimitOrderUpdate( depth );
   }
   else {
-    ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
-    m_fMarketDepthByOrder( md );
+    m_fMarketDepthByOrder( depth );
   }
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
+
+  ptime dt( ou::TimeSource::Instance().External() );
+  ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
+
   if ( nullptr == m_fMarketDepthByOrder ) {
-    LimitOrderDelete( msg.nOrderId );
+    LimitOrderDelete( depth );
   }
   else {
-    ptime dt( ou::TimeSource::Instance().External() );
-    ou::tf::DepthByOrder md( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
-    m_fMarketDepthByOrder( md );
+    m_fMarketDepthByOrder( depth );
   }
 }
 
-// Replay from Simulation
-
 void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
+
   switch ( depth.MsgType() ) {
     case '4': // Update
-      LimitOrderUpdate( depth.OrderID(), depth.Side(), depth.Price(), depth.Volume() );
+      LimitOrderUpdate( depth );
       break;
     case '6': // Summary - will need to categorize this properly
-      LimitOrderAdd( depth.OrderID(), Order( depth ) );
+      LimitOrderAdd( depth );
       break;
     case '3': // add
-      LimitOrderAdd( depth.OrderID(), Order( depth ) );
+      LimitOrderAdd( depth );
       break;
     case '5':
-      LimitOrderDelete( depth.OrderID() );
+      LimitOrderDelete( depth );
       break;
     default:
       assert( false );
@@ -358,60 +346,54 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
 
 // Processing
 
-void OrderBased::LimitOrderAdd( uint64_t nOrderId, const Order& order ) {
+void OrderBased::LimitOrderAdd( const ou::tf::DepthByOrder& depth ) {
 
-  mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
+  Order order( depth );
+
+  mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() != iter ) {
     //    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
   }
   else {
-    m_mapOrder.emplace( std::pair( nOrderId, order ) );
+    m_mapOrder.emplace( std::pair( depth.OrderID(), order ) );
   }
 
-  Add( order.chOrderSide, order.dblPrice, order.nQuantity );
+  Add( depth );
 
 }
 
-void OrderBased::LimitOrderUpdate( uint64_t nOrderId, char chOrderSide, double dblPriceNew, volume_t nQuantityNew ) {
+void OrderBased::LimitOrderUpdate( const ou::tf::DepthByOrder& depth ) {
 
-  mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
+  mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() == iter ) {
-    BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate order does not exist: " << nOrderId;
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate order does not exist: " << depth.OrderID();
   }
   else {
 
-    if ( 0 == nQuantityNew ) {
-      BOOST_LOG_TRIVIAL(warning) << "LimitOrderUpdate order " << nOrderId << " warning - zero new quantity";
+    if ( 0 == depth.Volume() ) {
+      BOOST_LOG_TRIVIAL(warning) << "LimitOrderUpdate order " << depth.OrderID() << " warning - zero new quantity";
     }
 
     Order& order( iter->second );
-    if ( order.chOrderSide != chOrderSide ) {
-      BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << chOrderSide;
+    if ( order.chOrderSide != depth.Side() ) {
+      BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << depth.Side();
     }
     else {
-      LimitOrderUpdate( order, dblPriceNew, nQuantityNew );
+      //LimitOrderUpdate( order, depth.Price(), depth.Volume() );
+      Delete( order.chOrderSide, order.dblPrice, order.nQuantity ); // old quantities
+      order.dblPrice = depth.Price();
+      order.nQuantity = depth.Volume();
+      Add( depth );
     }
   }
-}
-
-void OrderBased::LimitOrderUpdate(
-  Order& order,
-  double dblPriceNew,
-  volume_t nQuantityNew
-) {
-  // TODO: can this be refactored with caller to minimize the call overhead?
-  Delete( order.chOrderSide, order.dblPrice, order.nQuantity );
-  order.dblPrice = dblPriceNew;
-  order.nQuantity = nQuantityNew;
-  Add( order.chOrderSide, dblPriceNew, nQuantityNew );
 
 }
 
-void OrderBased::LimitOrderDelete( uint64_t nOrderId ) {
+void OrderBased::LimitOrderDelete( const ou::tf::DepthByOrder& depth ) {
 
-  mapOrder_t::iterator iter = m_mapOrder.find( nOrderId );
+  mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() == iter ) {
-    BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << nOrderId << " does not exist";
+    BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << depth.OrderID() << " does not exist";
   }
   else {
     const Order& order( iter->second );
