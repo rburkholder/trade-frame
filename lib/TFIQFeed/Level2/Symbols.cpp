@@ -74,6 +74,10 @@ void L2Base::Delete( char chSide, price_t price, volume_t volume ) {
 
 void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
+  //if ( 0 != msg.nPriority ) { // does not appear to be in use for MM style messages
+  //  BOOST_LOG_TRIVIAL(info) << "MarketMaker::OnMBOUpdate priority is in use: " << msg.nPriority;
+  //}
+
   if ( nullptr != m_fMarketDepthByMM ) {
     ptime dt( ou::TimeSource::Instance().External() );
     ou::tf::DepthByMM md( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
@@ -287,7 +291,9 @@ void MarketMaker::EmitMarketMakerMaps() {
 
 // Live Messages
 
-void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) { // TODO: this may require special processing
+void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
+  // TODO: will need to trigger order book reset to rebuild
+  //   may require a state machine to track once summary messages complete
   OnMBOAdd( msg );
 }
 
@@ -303,7 +309,12 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
-  if ( nullptr == m_fMarketDepthByOrder ) {
+
+  // priority is in use, and currently has high numbers, maybe reset at begin of each session?
+  //   order 649948133402 priority 12440218202
+  //   order 649948113561 priority 12440218206
+
+ if ( nullptr == m_fMarketDepthByOrder ) {
     LimitOrderUpdate( msg.nOrderId, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
   }
   else {
