@@ -42,6 +42,7 @@ struct FeatureSet {
   // if a level is added / removed, recalc all levels
 
   struct V1 { // absolute
+
     price_t priceAsk;
     volume_t volumeAsk;
     price_t priceBid;
@@ -92,11 +93,23 @@ struct FeatureSet {
   } v5;
 
   struct V6 { // derivative per unit time
+
+    ptime dtLastAsk;
+    double deltaArrivalAsk;
+
+    ptime dtLastBid;
+    double deltaArrivalBid;
+
     price_t dPriceAsk_dt;
     price_t dPriceBid_dt;
+
     volume_t dVolumeAsk_dt;
     volume_t dVolumeBid_dt;
-    V6(): dPriceAsk_dt {}, dPriceBid_dt {}, dVolumeAsk_dt{}, dVolumeBid_dt {} {}
+
+    V6()
+    : dtLastAsk( boost::posix_time::not_a_date_time ), deltaArrivalAsk {}
+    , dtLastBid( boost::posix_time::not_a_date_time ), deltaArrivalBid {}
+    , dPriceAsk_dt {}, dPriceBid_dt {}, dVolumeAsk_dt{}, dVolumeBid_dt {} {}
   } v6;
 
   struct V7 { // intensity over per unit time (1 sec)
@@ -143,8 +156,8 @@ struct FeatureSet {
   void CopyFromHere( const FeatureSet& ); // make room for insertion
   void CopyToHere( FeatureSet& ); // deletion
 
-  void QuoteAsk( price_t price, volume_t volume );
-  void QuoteBid( price_t price, volume_t volume );
+  void QuoteAsk( const ou::tf::Depth& );
+  void QuoteBid( const ou::tf::Depth& );
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();
   void AggregateAsk( price_t aggregate ); // aggregate price from previous level
@@ -153,5 +166,7 @@ struct FeatureSet {
   void AggregateBid( volume_t aggregate );  // aggregate volume from previous level
   void Diff();
   void ImbalanceOnAggregate();
+  void DerivativesAsk( const ou::tf::Depth& );
+  void DerivativesBid( const ou::tf::Depth& );
 
 };

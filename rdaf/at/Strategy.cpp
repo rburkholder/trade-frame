@@ -185,11 +185,11 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
       m_vLevels[ max_ix ].Set( max_ix, &m_vLevels[ 1 ], nullptr );
 
       m_pOrderBased->Set(
-        [this]( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ){ // fBookChanges_t&& fBid_
-          HandleBookChangesBid( oldIx, newIx, price, volume, bAdd );
+        [this]( unsigned int oldIx, unsigned int newIx, const ou::tf::Depth& depth, bool bAdd ){ // fBookChanges_t&& fBid_
+          HandleBookChangesBid( oldIx, newIx, depth, bAdd );
         },
-        [this]( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ){ // fBookChanges_t&& fAsk_
-          HandleBookChangesAsk( oldIx, newIx, price, volume, bAdd );
+        [this]( unsigned int oldIx, unsigned int newIx, const ou::tf::Depth& depth, bool bAdd ){ // fBookChanges_t&& fAsk_
+          HandleBookChangesAsk( oldIx, newIx, depth, bAdd );
         }
       );
       break;
@@ -392,12 +392,12 @@ void Strategy::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
 void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
 }
 
-void Strategy::HandleBookChangesAsk( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ) {
-  m_vLevels[ newIx ].QuoteAsk( price, volume );
+void Strategy::HandleBookChangesAsk( unsigned int oldIx, unsigned int newIx, const ou::tf::Depth& depth, bool bAdd ) {
+  m_vLevels[ newIx ].QuoteAsk( depth );
 }
 
-void Strategy::HandleBookChangesBid( unsigned int oldIx, unsigned int newIx, price_t price, volume_t volume, bool bAdd ) {
-  m_vLevels[ newIx ].QuoteBid( price, volume );
+void Strategy::HandleBookChangesBid( unsigned int oldIx, unsigned int newIx, const ou::tf::Depth& depth, bool bAdd ) {
+  m_vLevels[ newIx ].QuoteBid( depth );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {

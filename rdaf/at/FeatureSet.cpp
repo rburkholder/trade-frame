@@ -32,7 +32,13 @@ void FeatureSet::Set( int ix, FeatureSet* pTop, FeatureSet* pNext ) {
   m_pNext = pNext;
 }
 
-void FeatureSet::QuoteAsk( price_t price, volume_t volume ) {
+void FeatureSet::QuoteAsk( const ou::tf::Depth& depth ) {
+
+  price_t price( depth.Price() );
+  volume_t volume( depth.Volume() );
+
+  DerivativesAsk( depth ); // requires use of current value for
+
   if ( v1.priceAsk != price ) {
     v1.priceAsk = price;
     QuotePriceUpdates();
@@ -45,7 +51,13 @@ void FeatureSet::QuoteAsk( price_t price, volume_t volume ) {
   }
 }
 
-void FeatureSet::QuoteBid( price_t price, volume_t volume ) {
+void FeatureSet::QuoteBid( const ou::tf::Depth& depth ) {
+
+  price_t price( depth.Price() );
+  volume_t volume( depth.Volume() );
+
+  DerivativesBid( depth ); // requires use of current value for
+
   if ( v1.priceBid != price ) {
     v1.priceBid = price;
     QuotePriceUpdates();
@@ -123,6 +135,44 @@ void FeatureSet::AggregateBid( volume_t aggregate ) {
   v5.sumVolumeSpreads = ( v1.volumeAsk + v1.aggregateVolumeAsk ) - sum;
   ImbalanceOnAggregate();
   if ( m_pNext ) m_pNext->AggregateBid( sum );
+}
+
+namespace {
+  // exponential sliding window over 20 values
+  static const double dblWeightTail = 19.0 / 20.0;
+  static const double dblWeightHead =  1.0 / 20.0;
+}
+
+void FeatureSet::DerivativesAsk( const ou::tf::Depth& depth ) {
+
+  if ( boost::posix_time::not_a_date_time == v6.dtLastAsk ) {
+    v6.deltaArrivalAsk = 0.0;
+  }
+  else {
+    auto diff = ( depth.DateTime() - v6.dtLastAsk ).total_microseconds(); // might be delete -> update
+    if ( 0 < diff ) {
+      v6.deltaArrivalAsk = (double)diff;
+      v6.dPriceAsk_dt  = dblWeightTail * v6.dPriceAsk_dt  + dblWeightHead * ( depth.Price()  / v6.deltaArrivalAsk ); // slope = rise / run
+      v6.dVolumeAsk_dt = dblWeightTail * v6.dVolumeAsk_dt + dblWeightHead * ( depth.Volume() / v6.deltaArrivalAsk ); // slope = rise / run
+    }
+  }
+  v6.dtLastAsk = depth.DateTime();
+}
+
+void FeatureSet::DerivativesBid( const ou::tf::Depth& depth ) {
+
+  if ( boost::posix_time::not_a_date_time == v6.dtLastBid ) {
+    v6.deltaArrivalBid = 0.0;
+  }
+  else {
+    auto diff = ( depth.DateTime() - v6.dtLastBid ).total_microseconds(); // might be delete -> update
+    if ( 0 < diff ) {
+      v6.deltaArrivalBid = (double)diff;
+      v6.dPriceBid_dt  = dblWeightTail * v6.dPriceBid_dt  + dblWeightHead * ( depth.Price()  / v6.deltaArrivalBid ); // slope = rise / run
+      v6.dVolumeBid_dt = dblWeightTail * v6.dVolumeBid_dt + dblWeightHead * ( depth.Volume() / v6.deltaArrivalBid ); // slope = rise / run
+    }
+  }
+  v6.dtLastBid = depth.DateTime();
 }
 
 FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {

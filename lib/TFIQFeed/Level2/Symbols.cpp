@@ -51,28 +51,13 @@ void L2Base::Add( const ou::tf::Depth& depth ) {
   }
 }
 
-// deprecated - note this may need to be retained
-void L2Base::Delete( char chSide, price_t price, volume_t volume ) {
-  switch ( chSide ) {
-    case 'A':
-      m_LevelAggregateAsk.Delete( price, volume );
-      break;
-    case 'B':
-      m_LevelAggregateBid.Delete( price, volume );
-      break;
-    default:
-      assert( false );
-      break;
-  }
-}
-
 void L2Base::Delete( const ou::tf::Depth& depth ) {
   switch ( depth.Side() ) {
     case 'A':
-      m_LevelAggregateAsk.Delete( depth.Price(), depth.Volume() );
+      m_LevelAggregateAsk.Delete( depth );
       break;
     case 'B':
-      m_LevelAggregateBid.Delete( depth.Price(), depth.Volume() );
+      m_LevelAggregateBid.Delete( depth );
       break;
     default:
       assert( false );
@@ -154,7 +139,8 @@ void MarketMaker::MMLimitOrder_Update( const ou::tf::DepthByMM& depth, mapMM_t& 
   }
   else {
     // remove volume from existing price level
-    Delete( depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
+    ou::tf::Depth depth_( depth.DateTime(), depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( depth_ );
     // assign new price level
     mapMM_iter->second = pl;
   }
@@ -187,7 +173,8 @@ void MarketMaker::MMLimitOrder_Delete( const ou::tf::DepthByMM& depth, mapMM_t& 
   }
   else {
     // remove volume from existing price level
-    Delete( depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
+    ou::tf::Depth depth_( depth.DateTime(), depth.Side(), mapMM_iter->second.price, mapMM_iter->second.volume );
+    Delete( depth_ );
     mapMM.erase( mapMM_iter );
   }
 
@@ -380,7 +367,8 @@ void OrderBased::LimitOrderUpdate( const ou::tf::DepthByOrder& depth ) {
     }
     else {
       //LimitOrderUpdate( order, depth.Price(), depth.Volume() );
-      Delete( order.chOrderSide, order.dblPrice, order.nQuantity ); // old quantities
+      ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
+      Delete( depth_ ); // old quantities
       order.dblPrice = depth.Price();
       order.nQuantity = depth.Volume();
       Add( depth );
@@ -397,7 +385,8 @@ void OrderBased::LimitOrderDelete( const ou::tf::DepthByOrder& depth ) {
   }
   else {
     const Order& order( iter->second );
-    Delete( order.chOrderSide, order.dblPrice, order.nQuantity );
+    ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
+    Delete(  depth_ );
 
     m_mapOrder.erase( iter );
   }

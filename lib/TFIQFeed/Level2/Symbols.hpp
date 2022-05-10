@@ -42,7 +42,7 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
-using fBookChanges_t = std::function<void(unsigned int,unsigned int,double,int,bool)>; // old level, new level, price, volume, add
+using fBookChanges_t = std::function<void(unsigned int,unsigned int,const ou::tf::Depth&,bool)>; // old level, new level, price, volume, add
 using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
 
 template<typename Compare>  // ask is std::less<key>, bid is std::greater<key>, where key is currently double
@@ -110,7 +110,8 @@ public:
           ix++;
         }
         while ( max_ix >= ix ) {
-          m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, true );
+          ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
+          m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, depth_, true );
           iterLevelAggregate->second.ixLevel = ix;
           ix++;
           iterLevelAggregate++;
@@ -128,16 +129,18 @@ public:
       iterLevelAggregate->second.nOrders++;
       if ( m_fBookChanges ) {
         ix = iterLevelAggregate->second.ixLevel;
-        m_fBookChanges( ix, ix, price, iterLevelAggregate->second.nQuantity, true );
+        ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
+        m_fBookChanges( ix, ix, depth_, true );
       }
     }
 
     if ( m_fVolumeAtPrice ) m_fVolumeAtPrice( price, iterLevelAggregate->second.nQuantity, true );
   }
 
-  // TODO: convert to ou::tf::Depth usage
+  void Delete( const ou::tf::Depth& depth ) {
 
-  void Delete( price_t price, volume_t volume ) {
+    price_t price( depth.Price() );
+    volume_t volume( depth.Volume() );
 
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
@@ -160,7 +163,8 @@ public:
           auto iterIx = iterLevelAggregate;
           iterIx++;
           while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
-            if ( m_fBookChanges ) m_fBookChanges( iterIx->second.ixLevel, ix, iterIx->first, iterIx->second.nQuantity, false );
+            ou::tf::Depth depth_( depth.DateTime(), iterIx->first, iterIx->second.nQuantity );
+            if ( m_fBookChanges ) m_fBookChanges( iterIx->second.ixLevel, ix, depth_, false );
             iterIx->second.ixLevel = ix;
             ix++;
             iterIx++;
@@ -172,7 +176,8 @@ public:
       }
       else { // level changes but is not removed
         ix = iterLevelAggregate->second.ixLevel;
-        if ( m_fBookChanges ) m_fBookChanges( ix, ix, iterLevelAggregate->first, iterLevelAggregate->second.nQuantity, false );
+        ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
+        if ( m_fBookChanges ) m_fBookChanges( ix, ix, depth_, false );
       }
     }
   }
@@ -231,10 +236,6 @@ protected:
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
   // local bid / ask dispatch into proper book
-  // deprecated
-  void Update( char chSide, price_t oldp, volume_t oldv, price_t newp, volume_t newv );
-  void Delete( char chSide, price_t, volume_t );
-  // use these
   void Add( const ou::tf::Depth& );
   void Update( const ou::tf::Depth&, price_t oldp, volume_t oldv );
   void Delete( const ou::tf::Depth& );
