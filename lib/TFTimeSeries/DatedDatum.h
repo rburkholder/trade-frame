@@ -123,7 +123,7 @@ public:
   Trade( const Trade &trade );
   Trade( const dt_t dt, price_t dblTrade, volume_t nTradeSize );
   Trade( const std::string& dt, const std::string& trade, const std::string& size );
-  ~Trade();
+  virtual ~Trade();
 
   price_t Price() const { return m_dblPrice; }  // 20120715 was Trace, may cause problems in other areas.
   volume_t Volume() const { return m_nTradeSize; }
@@ -150,7 +150,7 @@ public:
   Bar( const dt_t dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
   Bar( const std::string& dt, const std::string& open, const std::string& high,
     const std::string& low, const std::string& close, const std::string& volume );
-  ~Bar();
+  virtual ~Bar();
 
   price_t Open() const { return m_dblOpen; }
   price_t High() const { return m_dblHigh; }
@@ -177,10 +177,41 @@ private:
 };
 
 //
+// Depth (common structure to DepthByMM, DepthByOrder)
+//
+
+class Depth: public DatedDatum {
+public:
+
+  Depth();
+  Depth( const dt_t);
+  Depth( const Depth& );
+  Depth( const dt_t dt, char chMsgType, char chSide, price_t dblPrice, quotesize_t nShares );
+  virtual ~Depth();
+
+  char MsgType() const { return m_chMsgType; }
+  char Side() const { return m_chSide; }
+  volume_t Volume() const { return m_nShares; }
+  price_t Price() const { return m_dblPrice; }
+
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static uint64_t Signature() {
+    return DatedDatum::Signature() * 10000 + 8813; } // DatedDatum -> Depth
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
+
+protected:
+private:
+  price_t m_dblPrice;
+  volume_t m_nShares;
+  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
+  char m_chSide; // simplifies insertion into MarketDepth handlers
+};
+
+//
 // DepthByMM (nasdaq equity only)
 //
 
-class DepthByMM: public DatedDatum {
+class DepthByMM: public Depth {
 public:
 
   using MMID_t = uint32_t;
@@ -188,14 +219,9 @@ public:
   DepthByMM();
   DepthByMM( const dt_t dt );
   DepthByMM( const DepthByMM& md );
-  DepthByMM( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, char* pch );
-  DepthByMM( const dt_t dt, char chMsgType, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  ~DepthByMM();
-
-  char MsgType() const { return m_chMsgType; }
-  char Side() const { return m_chSide; }
-  volume_t Volume() const { return m_nShares; }
-  price_t Price() const { return m_dblPrice; }
+  DepthByMM( const dt_t dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, char* pch );
+  DepthByMM( const dt_t dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid );
+  virtual ~DepthByMM();
 
   static MMID_t Cast( const char* rchMMID ) {
     unionMMID ummid( rchMMID );
@@ -213,14 +239,11 @@ public:
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() {
-    return DatedDatum::Signature() * 100000000 + 83188888; } // DatedDatum -> MarketDepth
+    return DatedDatum::Signature() * 10000 + 8888; } // Depth -> DepthByMM
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
 private:
-  volume_t m_nShares;
-  price_t m_dblPrice;
-  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
-  char m_chSide; // simplifies insertion into MarketDepth handlers
 
   union unionMMID {
     MMID_t mmid;
@@ -249,7 +272,7 @@ private:
 // DepthByOrder (futures)
 //
 
-class DepthByOrder: public DatedDatum {
+class DepthByOrder: public Depth {
 public:
 
   using idorder_t = uint64_t;
@@ -257,22 +280,16 @@ public:
   DepthByOrder();
   DepthByOrder( const dt_t dt );
   DepthByOrder( const DepthByOrder& md );
-  //DepthByOrder( const dt_t dt, idorder_t nOrder, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
-  DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrder, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice = 0.0, quotesize_t nShares = 0 );
-  ~DepthByOrder();
-
-  static std::string Directory() { return "/depths_o/"; }
+  DepthByOrder( const dt_t dt, const dt_t dtMarket, idorder_t nOrder, uint64_t nPriority, char chMsgType, char chSide, price_t dblPrice = 0.0, volume_t nShares = 0 );
+  virtual ~DepthByOrder();
 
   idorder_t OrderID() const { return m_nOrderID; }
   uint64_t Priority() const { return m_nPriority; }
-  price_t Price() const { return m_dblPrice; }
-  volume_t Volume() const { return m_nShares; }
-  char MsgType() const { return m_chMsgType; }
-  char Side() const { return m_chSide; }
+  ptime MarketTimeStamp() const { return m_dtMarket; }
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() {
-    return DatedDatum::Signature() * 10000000 + 9441388; } // DatedDatum -> MarketDepth
+    return DatedDatum::Signature() * 1000 + 944; } // Depth -> DepthByOrder
   // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
@@ -280,12 +297,7 @@ private:
   dt_t m_dtMarket; // market supplied datetime
   idorder_t m_nOrderID;
   uint64_t m_nPriority;
-  price_t m_dblPrice;
-  volume_t m_nShares;
-  char m_chMsgType; // 6 is summary, 3 is add, 4 is update
-  char m_chSide; // simplifies insertion into MarketDepth handlers
-  // NOTE: may need to add priority from iqfeed message, will need to investigate content
-  // NOTE: probably won't add precision from iqfeed message, seems reduundant
+  // NOTE: probably won't add precision from iqfeed message, seems reduundantly supplied information
 };
 
 //
@@ -309,7 +321,7 @@ public:
   Greek( const Greek& greeks );
   Greek( const dt_t dt, double dblImpliedVolatility, const greeks_t& greeks );
   Greek( const dt_t dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
-  ~Greek();
+  virtual ~Greek();
 
   double ImpliedVolatility() const { return m_dblImpliedVolatility; }
   double Delta() const { return m_dblDelta; }
@@ -362,7 +374,7 @@ public:
   Price( const Price& price );
   Price( const dt_t dt, price_t dblPrice );
   Price( const std::string &dt, const std::string& price );
-  ~Price();
+  virtual ~Price();
 
   price_t Value() const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
 
@@ -384,7 +396,7 @@ public:
   PriceIV( const dt_t dt );
   PriceIV( const PriceIV& rhs );
   PriceIV( const dt_t dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut );
-  ~PriceIV() {};
+  virtual ~PriceIV() {};
 
   double IVCall() const { return m_dblIVCall; }
   double IVPut() const { return m_dblIVPut; }
@@ -410,7 +422,7 @@ public:
   PriceIVExpiry( const dt_t dt );
   PriceIVExpiry( const PriceIVExpiry& rhs );
   PriceIVExpiry( const dt_t dtSampled, price_t dblPrice, const dt_t& dtExpiry, double dblIVCall, double dblIVPut );
-  ~PriceIVExpiry() {};
+  virtual ~PriceIVExpiry() {};
 
   double IVCall() const { return m_dblIVCall; };
   double IVPut() const { return m_dblIVPut; };
