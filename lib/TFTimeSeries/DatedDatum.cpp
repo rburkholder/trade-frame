@@ -229,7 +229,7 @@ Depth::Depth( const dt_t dt, char chMsgType, char chSide, price_t dblPrice, quot
 Depth::~Depth() {}
 
 H5::CompType* Depth::DefineDataType( H5::CompType* pComp ) {
-  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( DepthByMM ) );
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( Depth ) );
   DatedDatum::DefineDataType( pComp );
   pComp->insertMember( "MsgType",  HOFFSET( Depth, m_chMsgType ),    H5::PredType::NATIVE_CHAR );
   pComp->insertMember( "Side",     HOFFSET( Depth, m_chSide ),       H5::PredType::NATIVE_CHAR );
@@ -255,7 +255,7 @@ DepthByMM::DepthByMM( const boost::posix_time::ptime dt, char chMsgType, char ch
 {}
 
 DepthByMM::DepthByMM( const boost::posix_time::ptime dt, char chMsgType, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid )
-: Depth( dt, dblPrice, nShares, chMsgType, chSide ), m_uMMID( mmid )
+: Depth( dt, chMsgType, chSide, dblPrice, nShares ), m_uMMID( mmid )
 {}
 
 DepthByMM::~DepthByMM() {}
