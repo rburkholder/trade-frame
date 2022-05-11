@@ -33,13 +33,18 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
-using price_t = ou::tf::Trade::price_t;
-using volume_t = ou::tf::Trade::volume_t;
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+namespace l2 { // level 2 data
 
 struct FeatureSet {
 
   // if a level changes, change those plus deeper
   // if a level is added / removed, recalc all levels
+
+  using price_t = ou::tf::Trade::price_t;
+  using volume_t = ou::tf::Trade::volume_t;
 
   struct V1 { // absolute
 
@@ -194,3 +199,8 @@ struct FeatureSet {
   void Bid_Derivatives( const ou::tf::Depth& );
 
 };
+
+} // namespace l2
+} // namesapce iqfeed
+} // namespace tf
+} // namespace ou

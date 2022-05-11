@@ -60,6 +60,9 @@ class Strategy:
   friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
+  using price_t = ou::tf::Trade::price_t;
+  using volume_t = ou::tf::Trade::volume_t;
+
   using TreeItem = ou::tf::TreeItem;
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
@@ -180,7 +183,7 @@ private:
   pTH2D_t m_pHistVolume;
   pTH2D_t m_pHistVolumeDemo;
 
-  using vLevels_t = std::vector<FeatureSet>;
+  using vLevels_t = std::vector<ou::tf::iqfeed::l2::FeatureSet>;
   vLevels_t m_vLevels;
 
   void InitRdaf();

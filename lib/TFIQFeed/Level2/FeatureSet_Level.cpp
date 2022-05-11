@@ -21,6 +21,11 @@
 
 #include "FeatureSet_Level.hpp"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+namespace l2 { // level 2 data
+
 FeatureSet::FeatureSet()
 : m_ix {}
 , m_pTop( nullptr )
@@ -240,3 +245,7 @@ void FeatureSet::Bid_CopyTo( FeatureSet& lhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 
+} // namespace l2
+} // namesapce iqfeed
+} // namespace tf
+} // namespace ou
