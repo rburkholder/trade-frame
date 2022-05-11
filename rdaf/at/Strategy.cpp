@@ -397,16 +397,16 @@ void Strategy::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix
   switch ( op ) {
     case ou::tf::iqfeed::l2::EOp::Insert:
       if ( max_ix > ix ) {
-        m_vLevels[ ix + 1 ].CopyFrom( m_vLevels[ ix ] );
+        m_vLevels[ ix + 1 ].Ask_CopyFrom( m_vLevels[ ix ] );
       }
-      m_vLevels[ ix ].QuoteAsk( depth );
+      m_vLevels[ ix ].Ask_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].QuoteAsk( depth );
+      m_vLevels[ ix ].Ask_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Delete:
       if ( max_ix >= ix ) {
-        m_vLevels[ ix + 1 ].CopyTo( m_vLevels[ ix ] );
+        m_vLevels[ ix + 1 ].Ask_CopyTo( m_vLevels[ ix ] );
       }
       break;
   }
@@ -416,16 +416,16 @@ void Strategy::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix
   switch ( op ) {
     case ou::tf::iqfeed::l2::EOp::Insert:
       if ( max_ix > ix ) {
-        m_vLevels[ ix + 1 ].CopyFrom( m_vLevels[ ix ] );
+        m_vLevels[ ix + 1 ].Bid_CopyFrom( m_vLevels[ ix ] );
       }
-      m_vLevels[ ix ].QuoteBid( depth );
+      m_vLevels[ ix ].Bid_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].QuoteBid( depth );
+      m_vLevels[ ix ].Bid_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Delete:
       if ( max_ix >= ix ) {
-        m_vLevels[ ix + 1 ].CopyTo( m_vLevels[ ix ] );
+        m_vLevels[ ix + 1 ].Bid_CopyTo( m_vLevels[ ix ] );
       }
       break;
   }

@@ -22,7 +22,8 @@
 #include "FeatureSet.hpp"
 
 FeatureSet::FeatureSet()
-: m_pTop( nullptr )
+: m_ix {}
+, m_pTop( nullptr )
 , m_pNext( nullptr )
 {}
 
@@ -32,109 +33,127 @@ void FeatureSet::Set( int ix, FeatureSet* pTop, FeatureSet* pNext ) {
   m_pNext = pNext;
 }
 
-void FeatureSet::QuoteAsk( const ou::tf::Depth& depth ) {
+void FeatureSet::Ask_Quote( const ou::tf::Depth& depth ) {
 
   price_t price( depth.Price() );
   volume_t volume( depth.Volume() );
 
-  DerivativesAsk( depth ); // requires use of current value for
+  Ask_Derivatives( depth ); // requires use of current value for
 
-  if ( v1.priceAsk != price ) {
-    v1.priceAsk = price;
+  if ( ask.v1.price != price ) {
+    ask.v1.price = price;
     QuotePriceUpdates();
-    Diff();
+    Ask_Diff();
   }
-  if ( v1.volumeAsk != volume ) {
-    v1.volumeAsk = volume;
+  if ( ask.v1.volume != volume ) {
+    ask.v1.volume = volume;
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->AggregateAsk( v1.volumeAsk + v1.aggregateVolumeAsk );
+    if ( m_pNext ) m_pNext->Ask_Aggregate( ask.v1.volume + ask.v1.aggregateVolume );
   }
 }
 
-void FeatureSet::QuoteBid( const ou::tf::Depth& depth ) {
+void FeatureSet::Bid_Quote( const ou::tf::Depth& depth ) {
 
   price_t price( depth.Price() );
   volume_t volume( depth.Volume() );
 
-  DerivativesBid( depth ); // requires use of current value for
+  Bid_Derivatives( depth ); // requires use of current value for
 
-  if ( v1.priceBid != price ) {
-    v1.priceBid = price;
+  if ( bid.v1.price != price ) {
+    bid.v1.price = price;
     QuotePriceUpdates();
-    Diff();
+    Bid_Diff();
   }
-  if ( v1.volumeBid != volume ) {
-    v1.volumeBid = volume;
+  if ( bid.v1.volume != volume ) {
+    bid.v1.volume = volume;
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->AggregateBid( v1.volumeBid + v1.aggregateVolumeBid );
+    if ( m_pNext ) m_pNext->Bid_Aggregate( bid.v1.volume + bid.v1.aggregateVolume );
   }
 }
 
 void FeatureSet::QuotePriceUpdates() {
-  v2.spread = v1.priceAsk - v1.priceBid;
-  v2.mid = ( v1.priceAsk + v1.priceBid ) / 2.0;
+  cross.v2.spread = ask.v1.price - bid.v1.price;
+  cross.v2.mid = ( ask.v1.price + bid.v1.price ) / 2.0;
 }
 
 void FeatureSet::QuoteVolumeUpdates() {
-  v2.imbalanceLvl = (double)( v1.volumeBid - v1.volumeAsk ) / (double)( v1.volumeBid + v1.volumeAsk );
+  cross.v2.imbalanceLvl
+    = (double)( bid.v1.volume - ask.v1.volume )
+    / (double)( bid.v1.volume + ask.v1.volume );
 }
 
 void FeatureSet::ImbalanceOnAggregate() {
-  volume_t sumAsk = v1.volumeAsk + v1.aggregateVolumeAsk;
-  volume_t sumBid = v1.volumeBid + v1.aggregateVolumeBid;
-  v2.imbalanceAgg = (double)( sumBid - sumAsk ) / (double)( sumBid + sumAsk );
+  volume_t sumAsk = ask.v1.volume + ask.v1.aggregateVolume;
+  volume_t sumBid = bid.v1.volume + bid.v1.aggregateVolume;
+  cross.v2.imbalanceAgg = (double)( sumBid - sumAsk ) / (double)( sumBid + sumAsk );
 }
 
-void FeatureSet::Diff() { // if not all levels present, then some bad numbers?
+void FeatureSet::Ask_Diff() {
+  // if not all levels present, then some bad numbers?
   if ( m_pTop ) {
-    v3.diffToTopAsk = v1.priceAsk - m_pTop->v1.priceAsk;
-    v3.diffToTopBid = m_pTop->v1.priceBid - v1.priceBid;
+    ask.v3.diffToTop = ask.v1.price - m_pTop->ask.v1.price;
   }
   else {
-    v3.diffToTopAsk = v3.diffToTopBid = 0.0;
+    ask.v3.diffToTop = 0.0;
   }
 
   if ( m_pNext ) {
-    v3.diffToAdjacentAsk = m_pNext->v1.priceAsk - v1.priceAsk;
-    v3.diffToAdjacentBid = v1.priceBid - m_pNext->v1.priceBid;
+    ask.v3.diffToAdjacent = m_pNext->ask.v1.price - ask.v1.price;
   }
   else {
-    v3.diffToAdjacentAsk = v3.diffToAdjacentBid = 0.0;
+    ask.v3.diffToAdjacent = 0.0;
   }
 }
 
-void FeatureSet::AggregateAsk( price_t aggregate ) {
-  v1.aggregatePriceAsk = aggregate;
-  price_t sum( v1.priceAsk + aggregate );
-  v4.meanPriceAsk = sum / m_ix;
-  v5.sumPriceSpreads =  sum - ( v1.priceBid + v1.aggregatePriceBid );
-  if ( m_pNext ) m_pNext->AggregateAsk( sum );
+void FeatureSet::Bid_Diff() {
+  // if not all levels present, then some bad numbers?
+  if ( m_pTop ) {
+    bid.v3.diffToTop = m_pTop->bid.v1.price - bid.v1.price;
+  }
+  else {
+    bid.v3.diffToTop = 0.0;
+  }
+
+  if ( m_pNext ) {
+    bid.v3.diffToAdjacent = bid.v1.price - m_pNext->bid.v1.price;
+  }
+  else {
+    bid.v3.diffToAdjacent = 0.0;
+  }
 }
 
-void FeatureSet::AggregateBid( price_t aggregate ) {
-  v1.aggregatePriceBid = aggregate;
-  price_t sum( v1.priceBid + aggregate );
-  v4.meanPriceBid = sum / m_ix;
-  v5.sumPriceSpreads = ( v1.priceAsk + v1.aggregatePriceAsk ) - sum;
-  if (m_pNext ) m_pNext->AggregateBid( sum );
+void FeatureSet::Ask_Aggregate( price_t aggregate ) {
+  ask.v1.aggregatePrice = aggregate;
+  price_t sum( ask.v1.price + aggregate );
+  ask.v4.meanPrice = sum / m_ix;
+  cross.v5.sumPriceSpreads =  sum - ( bid.v1.price + bid.v1.aggregatePrice );
+  if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
 }
 
-void FeatureSet::AggregateAsk( volume_t aggregate ) {
-  v1.aggregateVolumeAsk = aggregate;
-  volume_t sum( v1.volumeAsk + aggregate );
-  v4.meanVolumeAsk = sum / m_ix;
-  v5.sumVolumeSpreads = sum - ( v1.volumeBid + v1.aggregateVolumeBid );
+void FeatureSet::Bid_Aggregate( price_t aggregate ) {
+  bid.v1.aggregatePrice = aggregate;
+  price_t sum( bid.v1.price + aggregate );
+  bid.v4.meanPrice = sum / m_ix;
+  cross.v5.sumPriceSpreads = ( ask.v1.price + ask.v1.aggregatePrice ) - sum;
+  if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
+}
+
+void FeatureSet::Ask_Aggregate( volume_t aggregate ) {
+  ask.v1.aggregateVolume = aggregate;
+  volume_t sum( ask.v1.volume + aggregate );
+  ask.v4.meanVolume = sum / m_ix;
+  cross.v5.sumVolumeSpreads = sum - ( bid.v1.volume + bid.v1.aggregateVolume );
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->AggregateAsk( sum );
+  if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
 }
 
-void FeatureSet::AggregateBid( volume_t aggregate ) {
-  v1.aggregateVolumeBid = aggregate;
-  volume_t sum( v1.volumeBid + aggregate );
-  v4.meanVolumeBid = sum / m_ix;
-  v5.sumVolumeSpreads = ( v1.volumeAsk + v1.aggregateVolumeAsk ) - sum;
+void FeatureSet::Bid_Aggregate( volume_t aggregate ) {
+  bid.v1.aggregateVolume = aggregate;
+  volume_t sum( bid.v1.volume + aggregate );
+  bid.v4.meanVolume = sum / m_ix;
+  cross.v5.sumVolumeSpreads = ( ask.v1.volume + ask.v1.aggregateVolume ) - sum;
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->AggregateBid( sum );
+  if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
 }
 
 namespace {
@@ -143,45 +162,51 @@ namespace {
   static const double dblWeightHead =  1.0 / 20.0;
 }
 
-void FeatureSet::DerivativesAsk( const ou::tf::Depth& depth ) {
+void FeatureSet::Ask_Derivatives( const ou::tf::Depth& depth ) {
 
-  if ( boost::posix_time::not_a_date_time == v6.dtLastAsk ) {
-    v6.deltaArrivalAsk = 0.0;
+  if ( boost::posix_time::not_a_date_time == ask.v6.dtLast ) {
+    ask.v6.deltaArrival = 0.0;
   }
   else {
-    auto diff = ( depth.DateTime() - v6.dtLastAsk ).total_microseconds(); // might be delete -> update
+    auto diff = ( depth.DateTime() - ask.v6.dtLast ).total_microseconds(); // might be delete -> update
     if ( 0 < diff ) {
-      v6.deltaArrivalAsk = (double)diff;
-      v6.dPriceAsk_dt  = dblWeightTail * v6.dPriceAsk_dt  + dblWeightHead * ( depth.Price()  / v6.deltaArrivalAsk ); // slope = rise / run
-      v6.dVolumeAsk_dt = dblWeightTail * v6.dVolumeAsk_dt + dblWeightHead * ( depth.Volume() / v6.deltaArrivalAsk ); // slope = rise / run
+      ask.v6.deltaArrival = (double)diff / 1000000.0; // rate per second
+      ask.v6.dPrice_dt  = dblWeightTail * ask.v6.dPrice_dt  + dblWeightHead * ( depth.Price()  / ask.v6.deltaArrival ); // slope = rise / run
+      ask.v6.dVolume_dt = dblWeightTail * ask.v6.dVolume_dt + dblWeightHead * ( depth.Volume() / ask.v6.deltaArrival ); // slope = rise / run
     }
   }
-  v6.dtLastAsk = depth.DateTime();
+  ask.v6.dtLast = depth.DateTime();
 }
 
-void FeatureSet::DerivativesBid( const ou::tf::Depth& depth ) {
+void FeatureSet::Bid_Derivatives( const ou::tf::Depth& depth ) {
 
-  if ( boost::posix_time::not_a_date_time == v6.dtLastBid ) {
-    v6.deltaArrivalBid = 0.0;
+  if ( boost::posix_time::not_a_date_time == bid.v6.dtLast ) {
+    bid.v6.deltaArrival = 0.0;
   }
   else {
-    auto diff = ( depth.DateTime() - v6.dtLastBid ).total_microseconds(); // might be delete -> update
+    auto diff = ( depth.DateTime() - bid.v6.dtLast ).total_microseconds(); // might be delete -> update
     if ( 0 < diff ) {
-      v6.deltaArrivalBid = (double)diff;
-      v6.dPriceBid_dt  = dblWeightTail * v6.dPriceBid_dt  + dblWeightHead * ( depth.Price()  / v6.deltaArrivalBid ); // slope = rise / run
-      v6.dVolumeBid_dt = dblWeightTail * v6.dVolumeBid_dt + dblWeightHead * ( depth.Volume() / v6.deltaArrivalBid ); // slope = rise / run
+      bid.v6.deltaArrival = (double)diff / 1000000.0; // rate per second
+      bid.v6.dPrice_dt  = dblWeightTail * bid.v6.dPrice_dt  + dblWeightHead * ( depth.Price()  / bid.v6.deltaArrival ); // slope = rise / run
+      bid.v6.dVolume_dt = dblWeightTail * bid.v6.dVolume_dt + dblWeightHead * ( depth.Volume() / bid.v6.deltaArrival ); // slope = rise / run
     }
   }
-  v6.dtLastBid = depth.DateTime();
+  bid.v6.dtLast = depth.DateTime();
 }
 
 FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
   if ( this != &rhs ) {
+    ask = rhs.ask;
+    bid = rhs.bid;
+  }
+  return *this;
+}
+
+FeatureSet::BookLevel& FeatureSet::BookLevel::operator=( const FeatureSet::BookLevel& rhs ) {
+  if ( this != &rhs ) {
     v1 = rhs.v1;
-    v2 = rhs.v2;
     v3 = rhs.v3;
     v4 = rhs.v4;
-    v5 = rhs.v5;
     v6 = rhs.v6;
     v7 = rhs.v7;
     v8 = rhs.v8;
@@ -190,13 +215,27 @@ FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
   return *this;
 }
 
-void FeatureSet::CopyFromHere( const FeatureSet& rhs ) {
-  if ( m_pNext ) m_pNext->CopyFromHere( *this );
+// prepare for insertion, shuffle all upwards
+void FeatureSet::Ask_CopyFrom( const FeatureSet& rhs ) {
+  if ( m_pNext ) m_pNext->Ask_CopyFrom( *this );
   *this = rhs;
 }
 
-void FeatureSet::CopyToHere( FeatureSet& lhs ) {
+// after deletion, shuffle all downwards
+void FeatureSet::Ask_CopyTo( FeatureSet& lhs ) {
   lhs = *this;
-  if ( m_pNext ) m_pNext->CopyToHere( *this );
+  if ( m_pNext ) m_pNext->Ask_CopyTo( *this );
+ }
+
+// prepare for insertion, shuffle all upwards
+void FeatureSet::Bid_CopyFrom( const FeatureSet& rhs ) {
+  if ( m_pNext ) m_pNext->Bid_CopyFrom( *this );
+  *this = rhs;
+}
+
+// after deletion, shuffle all downwards
+void FeatureSet::Bid_CopyTo( FeatureSet& lhs ) {
+  lhs = *this;
+  if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 

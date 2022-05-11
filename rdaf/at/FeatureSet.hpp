@@ -43,24 +43,95 @@ struct FeatureSet {
 
   struct V1 { // absolute
 
-    price_t priceAsk;
-    volume_t volumeAsk;
-    price_t priceBid;
-    volume_t volumeBid;
+    price_t price;
+    volume_t volume;
 
-    volume_t aggregateVolumeAsk;
-    volume_t aggregateVolumeBid;
+    volume_t aggregateVolume;
 
-    price_t aggregatePriceAsk;
-    price_t aggregatePriceBid;
+    price_t aggregatePrice;
 
     bool bNew; // can't tell a removal, but an addition might be significant
     V1()
-    : priceAsk {}, volumeAsk {}, priceBid {}, volumeBid {}
-    , aggregateVolumeAsk {}, aggregateVolumeBid {}
-    , aggregatePriceAsk {}, aggregatePriceBid {}
+    : price {}, volume {}
+    , aggregateVolume {}
+    , aggregatePrice {}
     , bNew( false ) {}
-  } v1;
+  };
+
+  struct V3 { // diff
+    price_t diffToTop;
+    price_t diffToAdjacent;
+    V3(): diffToTop {}, diffToAdjacent {}
+    {}
+  };
+
+  struct V4 { // absolute
+    price_t meanPrice;
+    volume_t meanVolume;
+    V4(): meanPrice {}, meanVolume {}
+    {}
+  };
+
+  struct V6 { // derivative per unit time
+
+    ptime dtLast;
+    double deltaArrival;
+
+    price_t dPrice_dt;
+
+    volume_t dVolume_dt;
+
+    V6()
+    : dtLast( boost::posix_time::not_a_date_time )
+    , deltaArrival {}
+    , dPrice_dt {}, dVolume_dt{}
+    {}
+  };
+
+  struct V7 { // intensity over per unit time (1 sec)
+    double intensityLimit;
+    double intensityMarket;
+    double intensityCancel;
+    V7()
+    : intensityLimit {}
+    , intensityMarket {}
+    , intensityCancel {}
+    {}
+  };
+
+  struct V8 { // relative intensity of short period vs long period (10s vs 900s)
+    double relativeLimit;
+    double relativeMarket;
+    V8()
+    : relativeLimit {}
+    , relativeMarket {}
+    {}
+  };
+
+  struct V9 { // accelleration of trading type per unit time (vs previous 1 sec)
+    double BookChangeFunctions;
+    double accellLimit;
+    double accellMarket;
+    V9()
+    : BookChangeFunctions {}
+    , accellLimit {}
+    , accellMarket {}
+    {}
+  };
+
+  struct BookLevel {
+    V1 v1;
+    V3 v3;
+    V4 v4;
+    V6 v6;
+    V7 v7;
+    V8 v8;
+    V9 v9;
+    BookLevel& operator=( const BookLevel& );
+  };
+
+  BookLevel ask;
+  BookLevel bid;
 
   struct V2 {
     price_t spread; // diff
@@ -68,79 +139,20 @@ struct FeatureSet {
     double imbalanceLvl;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
     double imbalanceAgg;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
     V2(): spread {}, mid {}, imbalanceLvl {}, imbalanceAgg {} {}
-  } v2;
-
-  struct V3 { // diff
-    price_t diffToTopAsk;
-    price_t diffToTopBid;
-    price_t diffToAdjacentAsk;
-    price_t diffToAdjacentBid;
-    V3(): diffToTopAsk {}, diffToTopBid {}, diffToAdjacentAsk {}, diffToAdjacentBid {} {}
-  } v3;
-
-  struct V4 { // absolute
-    price_t meanPriceAsk;
-    price_t meanPriceBid;
-    volume_t meanVolumeAsk;
-    volume_t meanVolumeBid;
-    V4(): meanPriceAsk {}, meanPriceBid {}, meanVolumeAsk {}, meanVolumeBid {} {}
-  } v4;
+  };
 
   struct V5 { // sum(diff)
     price_t sumPriceSpreads;
     volume_t sumVolumeSpreads;
     V5(): sumPriceSpreads {}, sumVolumeSpreads {} {}
-  } v5;
+  };
 
-  struct V6 { // derivative per unit time
+  struct CrossLevel {
+    V2 v2;
+    V5 v5;
+  };
 
-    ptime dtLastAsk;
-    double deltaArrivalAsk;
-
-    ptime dtLastBid;
-    double deltaArrivalBid;
-
-    price_t dPriceAsk_dt;
-    price_t dPriceBid_dt;
-
-    volume_t dVolumeAsk_dt;
-    volume_t dVolumeBid_dt;
-
-    V6()
-    : dtLastAsk( boost::posix_time::not_a_date_time ), deltaArrivalAsk {}
-    , dtLastBid( boost::posix_time::not_a_date_time ), deltaArrivalBid {}
-    , dPriceAsk_dt {}, dPriceBid_dt {}, dVolumeAsk_dt{}, dVolumeBid_dt {} {}
-  } v6;
-
-  struct V7 { // intensity over per unit time (1 sec)
-    double intensityLimitAsk;
-    double intensityLimtBid;
-    double intensityMarketAsk;
-    double intensityMarketBid;
-    double intensityCancelAsk;
-    double intensityCancelBid;
-    V7()
-    : intensityLimitAsk {}, intensityLimtBid {}
-    , intensityMarketAsk {}, intensityMarketBid {}
-    , intensityCancelAsk {}, intensityCancelBid {}
-    {}
-  } v7;
-
-  struct V8 { // relative intensity of short period vs long period (10s vs 900s)
-    double relativeLimitAsk;
-    double relativeLimitBid;
-    double relativeaMarketAsk;
-    double relativeMarketBid;
-    V8(): relativeLimitAsk {}, relativeLimitBid {}, relativeaMarketAsk {}, relativeMarketBid {} {}
-  } v8;
-
-  struct V9 { // accelleration of trading type per unit time (vs previous 1 sec)
-    double BookChangeFunctions;
-    double accellLimitBid;
-    double accellMarketAsk;
-    double accellMarketBid;
-    V9(): BookChangeFunctions {}, accellLimitBid {}, accellMarketAsk {}, accellMarketBid {} {}
-  } v9;
+  CrossLevel cross;
 
   int m_ix;
 
@@ -153,20 +165,23 @@ struct FeatureSet {
 
   FeatureSet& operator=( const FeatureSet& );
 
-  void CopyFromHere( const FeatureSet& ); // make room for insertion
-  void CopyToHere( FeatureSet& ); // deletion
+  void Ask_CopyFrom( const FeatureSet& ); // shuffle for insertion
+  void Ask_CopyTo( FeatureSet& ); // shuffle after deletion
+  void Bid_CopyFrom( const FeatureSet& ); // shuffle for insertion
+  void Bid_CopyTo( FeatureSet& ); // shuffle after deletion
 
-  void QuoteAsk( const ou::tf::Depth& );
-  void QuoteBid( const ou::tf::Depth& );
+  void Ask_Quote( const ou::tf::Depth& );
+  void Bid_Quote( const ou::tf::Depth& );
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();
-  void AggregateAsk( price_t aggregate ); // aggregate price from previous level
-  void AggregateBid( price_t aggregate ); // aggregate price from previous level
-  void AggregateAsk( volume_t aggregate );  // aggregate volume from previous level
-  void AggregateBid( volume_t aggregate );  // aggregate volume from previous level
-  void Diff();
+  void Ask_Aggregate( price_t aggregate ); // aggregate price from previous level
+  void Bid_Aggregate( price_t aggregate ); // aggregate price from previous level
+  void Ask_Aggregate( volume_t aggregate );  // aggregate volume from previous level
+  void Bid_Aggregate( volume_t aggregate );  // aggregate volume from previous level
+  void Ask_Diff();
+  void Bid_Diff();
   void ImbalanceOnAggregate();
-  void DerivativesAsk( const ou::tf::Depth& );
-  void DerivativesBid( const ou::tf::Depth& );
+  void Ask_Derivatives( const ou::tf::Depth& );
+  void Bid_Derivatives( const ou::tf::Depth& );
 
 };
