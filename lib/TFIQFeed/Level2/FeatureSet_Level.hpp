@@ -38,7 +38,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
-struct FeatureSet_Level {
+class FeatureSet_Level {
+public:
 
   // if a level changes, change those plus deeper
   // if a level is added / removed, recalc all levels
@@ -165,19 +166,12 @@ struct FeatureSet_Level {
 
   CrossLevel cross;
 
-  int m_ix; // used as diviser for levell number
-
-  FeatureSet_Level* m_pTop;
-  FeatureSet_Level* m_pNext;
-
   FeatureSet_Level();
 
   void Set( int ix, FeatureSet_Level* pTop, FeatureSet_Level* pNext );
 
   void Ask_Activate( bool bActive ) { ask.bActive = bActive; }
   void Bid_Activate( bool bActive ) { bid.bActive = bActive; }
-
-  FeatureSet_Level& operator=( const FeatureSet_Level& ) = delete;
 
   void Ask_CopyFrom( const FeatureSet_Level& ); // shuffle for insertion
   void Ask_CopyTo( FeatureSet_Level& ); // shuffle after deletion
@@ -186,6 +180,17 @@ struct FeatureSet_Level {
 
   void Ask_Quote( const ou::tf::Depth& );
   void Bid_Quote( const ou::tf::Depth& );
+
+protected:
+private:
+
+  int m_ix; // used as diviser for levell number
+
+  FeatureSet_Level* m_pTop;
+  FeatureSet_Level* m_pNext;
+
+  FeatureSet_Level& operator=( const FeatureSet_Level& ) = delete;
+
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();
   void Ask_Aggregate( price_t aggregate ); // aggregate price from previous level
