@@ -194,16 +194,17 @@ void FeatureSet::Bid_Derivatives( const ou::tf::Depth& depth ) {
   bid.v6.dtLast = depth.DateTime();
 }
 
-FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
-  if ( this != &rhs ) {
-    ask = rhs.ask;
-    bid = rhs.bid;
-  }
-  return *this;
-}
+//FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
+//  if ( this != &rhs ) {
+//    ask = rhs.ask;
+//    bid = rhs.bid;
+//  }
+//  return *this;
+//}
 
 FeatureSet::BookLevel& FeatureSet::BookLevel::operator=( const FeatureSet::BookLevel& rhs ) {
   if ( this != &rhs ) {
+    bActive = rhs.bActive;
     v1 = rhs.v1;
     v3 = rhs.v3;
     v4 = rhs.v4;
@@ -218,24 +219,24 @@ FeatureSet::BookLevel& FeatureSet::BookLevel::operator=( const FeatureSet::BookL
 // prepare for insertion, shuffle all upwards
 void FeatureSet::Ask_CopyFrom( const FeatureSet& rhs ) {
   if ( m_pNext ) m_pNext->Ask_CopyFrom( *this );
-  *this = rhs;
+  this->ask = rhs.ask;
 }
 
 // after deletion, shuffle all downwards
 void FeatureSet::Ask_CopyTo( FeatureSet& lhs ) {
-  lhs = *this;
+  lhs.ask = this->ask;
   if ( m_pNext ) m_pNext->Ask_CopyTo( *this );
  }
 
 // prepare for insertion, shuffle all upwards
 void FeatureSet::Bid_CopyFrom( const FeatureSet& rhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyFrom( *this );
-  *this = rhs;
+  this->bid = rhs.bid;
 }
 
 // after deletion, shuffle all downwards
 void FeatureSet::Bid_CopyTo( FeatureSet& lhs ) {
-  lhs = *this;
+  lhs.bid = this->bid;
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 

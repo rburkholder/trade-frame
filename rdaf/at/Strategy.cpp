@@ -394,11 +394,14 @@ void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
 }
 
 void Strategy::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
+  assert( 0 != ix );
+  assert( max_ix >= ix );
   switch ( op ) {
     case ou::tf::iqfeed::l2::EOp::Insert:
       if ( max_ix > ix ) {
         m_vLevels[ ix + 1 ].Ask_CopyFrom( m_vLevels[ ix ] );
       }
+      m_vLevels[ ix ].Ask_Activate( true );
       m_vLevels[ ix ].Ask_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Update:
@@ -408,16 +411,20 @@ void Strategy::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix
       if ( max_ix >= ix ) {
         m_vLevels[ ix + 1 ].Ask_CopyTo( m_vLevels[ ix ] );
       }
+      m_vLevels[ max_ix ].Ask_Activate( false );
       break;
   }
 }
 
 void Strategy::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
+  assert( 0 != ix );
+  assert( max_ix >= ix );
   switch ( op ) {
     case ou::tf::iqfeed::l2::EOp::Insert:
       if ( max_ix > ix ) {
         m_vLevels[ ix + 1 ].Bid_CopyFrom( m_vLevels[ ix ] );
       }
+      m_vLevels[ ix ].Bid_Activate( true );
       m_vLevels[ ix ].Bid_Quote( depth );
       break;
     case ou::tf::iqfeed::l2::EOp::Update:
@@ -427,6 +434,7 @@ void Strategy::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix
       if ( max_ix >= ix ) {
         m_vLevels[ ix + 1 ].Bid_CopyTo( m_vLevels[ ix ] );
       }
+      m_vLevels[ max_ix ].Bid_Activate( false );
       break;
   }
 }

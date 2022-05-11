@@ -51,6 +51,7 @@ struct FeatureSet {
     price_t aggregatePrice;
 
     bool bNew; // can't tell a removal, but an addition might be significant
+
     V1()
     : price {}, volume {}
     , aggregateVolume {}
@@ -120,6 +121,9 @@ struct FeatureSet {
   };
 
   struct BookLevel {
+
+    bool bActive; // level has data
+
     V1 v1;
     V3 v3;
     V4 v4;
@@ -127,6 +131,8 @@ struct FeatureSet {
     V7 v7;
     V8 v8;
     V9 v9;
+
+    BookLevel(): bActive( false ) {}
     BookLevel& operator=( const BookLevel& );
   };
 
@@ -154,7 +160,7 @@ struct FeatureSet {
 
   CrossLevel cross;
 
-  int m_ix;
+  int m_ix; // used as diviser for levell number
 
   FeatureSet* m_pTop;
   FeatureSet* m_pNext;
@@ -163,7 +169,10 @@ struct FeatureSet {
 
   void Set( int ix, FeatureSet* pTop, FeatureSet* pNext );
 
-  FeatureSet& operator=( const FeatureSet& );
+  void Ask_Activate( bool bActive ) { ask.bActive = bActive; }
+  void Bid_Activate( bool bActive ) { bid.bActive = bActive; }
+
+  FeatureSet& operator=( const FeatureSet& ) = delete;
 
   void Ask_CopyFrom( const FeatureSet& ); // shuffle for insertion
   void Ask_CopyTo( FeatureSet& ); // shuffle after deletion
