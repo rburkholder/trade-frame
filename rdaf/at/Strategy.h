@@ -37,8 +37,8 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
+#include <TFIQFeed/Level2/FeatureSet_Level.hpp>
 
-#include "FeatureSet.hpp"
 #include "ConfigParser.hpp"
 
 class TH2D;

@@ -11,6 +11,7 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 set(
   file_h
     Dispatcher.h
+    FeatureSet_Level.hpp
     MsgOrderArrival.h
     MsgOrderDelete.h
     MsgPriceLevelArrival.h
@@ -21,6 +22,7 @@ set(
 set(
   file_cpp
     Dispatcher.cpp
+    FeatureSet_Level.cpp
     MsgOrderArrival.cpp
     MsgOrderDelete.cpp
     MsgPriceLevelArrival.cpp
