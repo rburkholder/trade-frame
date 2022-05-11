@@ -170,28 +170,13 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
       pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
 
       m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
-      //m_pOrderBased->Set(
-      //  [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-      //    HandleUpdateL2Bid( price, volume, bAdd );
-      //  },
-      //  [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-      //    HandleUpdateL2Ask( price, volume, bAdd );
-      //  }
-      //);
 
-      // TODO: may require a completion flag as some number of levels can change due to one change
-      m_vLevels.resize( max_ix + 1 );  // level 0 not used, levels numbered 1 - 10
-
-      m_vLevels[ 1 ].Set( 1, nullptr, &m_vLevels[ 2 ] );
-      for ( int ix = 2; ix < max_ix; ix++ ) {
-        m_vLevels[ ix ].Set( ix, &m_vLevels[ 1 ], &m_vLevels[ ix + 1 ] );
-      }
-      m_vLevels[ max_ix ].Set( max_ix, &m_vLevels[ 1 ], nullptr );
+      m_FeatureSet.Set( 10 );
 
       namespace ph = std::placeholders;
       m_pOrderBased->Set( // maybe just do a bind
-        std::bind( &Strategy::HandleBookChangesBid, this, ph::_1, ph::_2, ph::_3 ),
-        std::bind( &Strategy::HandleBookChangesAsk, this, ph::_1, ph::_2, ph::_3 )
+        std::bind( &ou::tf::iqfeed::l2::FeatureSet::HandleBookChangesBid, &m_FeatureSet, ph::_1, ph::_2, ph::_3 ),
+        std::bind( &ou::tf::iqfeed::l2::FeatureSet::HandleBookChangesAsk, &m_FeatureSet, ph::_1, ph::_2, ph::_3 )
       );
       break;
   }
@@ -391,52 +376,6 @@ void Strategy::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
 }
 
 void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
-}
-
-void Strategy::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  assert( 0 != ix );
-  assert( max_ix >= ix );
-  switch ( op ) {
-    case ou::tf::iqfeed::l2::EOp::Insert:
-      if ( max_ix > ix ) {
-        m_vLevels[ ix + 1 ].Ask_CopyFrom( m_vLevels[ ix ] );
-      }
-      m_vLevels[ ix ].Ask_Activate( true );
-      m_vLevels[ ix ].Ask_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].Ask_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Delete:
-      if ( max_ix >= ix ) {
-        m_vLevels[ ix + 1 ].Ask_CopyTo( m_vLevels[ ix ] );
-      }
-      m_vLevels[ max_ix ].Ask_Activate( false );
-      break;
-  }
-}
-
-void Strategy::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  assert( 0 != ix );
-  assert( max_ix >= ix );
-  switch ( op ) {
-    case ou::tf::iqfeed::l2::EOp::Insert:
-      if ( max_ix > ix ) {
-        m_vLevels[ ix + 1 ].Bid_CopyFrom( m_vLevels[ ix ] );
-      }
-      m_vLevels[ ix ].Bid_Activate( true );
-      m_vLevels[ ix ].Bid_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].Bid_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Delete:
-      if ( max_ix >= ix ) {
-        m_vLevels[ ix + 1 ].Bid_CopyTo( m_vLevels[ ix ] );
-      }
-      m_vLevels[ max_ix ].Bid_Activate( false );
-      break;
-  }
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {

@@ -38,7 +38,7 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
-struct FeatureSet {
+struct FeatureSet_Level {
 
   // if a level changes, change those plus deeper
   // if a level is added / removed, recalc all levels
@@ -167,22 +167,22 @@ struct FeatureSet {
 
   int m_ix; // used as diviser for levell number
 
-  FeatureSet* m_pTop;
-  FeatureSet* m_pNext;
+  FeatureSet_Level* m_pTop;
+  FeatureSet_Level* m_pNext;
 
-  FeatureSet();
+  FeatureSet_Level();
 
-  void Set( int ix, FeatureSet* pTop, FeatureSet* pNext );
+  void Set( int ix, FeatureSet_Level* pTop, FeatureSet_Level* pNext );
 
   void Ask_Activate( bool bActive ) { ask.bActive = bActive; }
   void Bid_Activate( bool bActive ) { bid.bActive = bActive; }
 
-  FeatureSet& operator=( const FeatureSet& ) = delete;
+  FeatureSet_Level& operator=( const FeatureSet_Level& ) = delete;
 
-  void Ask_CopyFrom( const FeatureSet& ); // shuffle for insertion
-  void Ask_CopyTo( FeatureSet& ); // shuffle after deletion
-  void Bid_CopyFrom( const FeatureSet& ); // shuffle for insertion
-  void Bid_CopyTo( FeatureSet& ); // shuffle after deletion
+  void Ask_CopyFrom( const FeatureSet_Level& ); // shuffle for insertion
+  void Ask_CopyTo( FeatureSet_Level& ); // shuffle after deletion
+  void Bid_CopyFrom( const FeatureSet_Level& ); // shuffle for insertion
+  void Bid_CopyTo( FeatureSet_Level& ); // shuffle after deletion
 
   void Ask_Quote( const ou::tf::Depth& );
   void Bid_Quote( const ou::tf::Depth& );

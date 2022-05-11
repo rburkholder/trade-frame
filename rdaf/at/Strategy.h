@@ -37,7 +37,7 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
-#include <TFIQFeed/Level2/FeatureSet_Level.hpp>
+#include <TFIQFeed/Level2/FeatureSet.hpp>
 
 #include "ConfigParser.hpp"
 
@@ -183,8 +183,7 @@ private:
   pTH2D_t m_pHistVolume;
   pTH2D_t m_pHistVolumeDemo;
 
-  using vLevels_t = std::vector<ou::tf::iqfeed::l2::FeatureSet>;
-  vLevels_t m_vLevels;
+  ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
   void InitRdaf();
 
@@ -192,9 +191,6 @@ private:
   void HandleTrade( const ou::tf::Trade& );
   void HandleDepthByMM( const ou::tf::DepthByMM& );
   void HandleDepthByOrder( const ou::tf::DepthByOrder& );
-
-  void HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
-  void HandleBookChangesBid( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

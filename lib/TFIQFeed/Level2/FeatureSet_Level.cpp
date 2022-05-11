@@ -26,19 +26,19 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
-FeatureSet::FeatureSet()
+FeatureSet_Level::FeatureSet_Level()
 : m_ix {}
 , m_pTop( nullptr )
 , m_pNext( nullptr )
 {}
 
-void FeatureSet::Set( int ix, FeatureSet* pTop, FeatureSet* pNext ) {
+void FeatureSet_Level::Set( int ix, FeatureSet_Level* pTop, FeatureSet_Level* pNext ) {
   m_ix = ix;
   m_pTop = pTop;
   m_pNext = pNext;
 }
 
-void FeatureSet::Ask_Quote( const ou::tf::Depth& depth ) {
+void FeatureSet_Level::Ask_Quote( const ou::tf::Depth& depth ) {
 
   price_t price( depth.Price() );
   volume_t volume( depth.Volume() );
@@ -57,7 +57,7 @@ void FeatureSet::Ask_Quote( const ou::tf::Depth& depth ) {
   }
 }
 
-void FeatureSet::Bid_Quote( const ou::tf::Depth& depth ) {
+void FeatureSet_Level::Bid_Quote( const ou::tf::Depth& depth ) {
 
   price_t price( depth.Price() );
   volume_t volume( depth.Volume() );
@@ -76,24 +76,24 @@ void FeatureSet::Bid_Quote( const ou::tf::Depth& depth ) {
   }
 }
 
-void FeatureSet::QuotePriceUpdates() {
+void FeatureSet_Level::QuotePriceUpdates() {
   cross.v2.spread = ask.v1.price - bid.v1.price;
   cross.v2.mid = ( ask.v1.price + bid.v1.price ) / 2.0;
 }
 
-void FeatureSet::QuoteVolumeUpdates() {
+void FeatureSet_Level::QuoteVolumeUpdates() {
   cross.v2.imbalanceLvl
     = (double)( bid.v1.volume - ask.v1.volume )
     / (double)( bid.v1.volume + ask.v1.volume );
 }
 
-void FeatureSet::ImbalanceOnAggregate() {
+void FeatureSet_Level::ImbalanceOnAggregate() {
   volume_t sumAsk = ask.v1.volume + ask.v1.aggregateVolume;
   volume_t sumBid = bid.v1.volume + bid.v1.aggregateVolume;
   cross.v2.imbalanceAgg = (double)( sumBid - sumAsk ) / (double)( sumBid + sumAsk );
 }
 
-void FeatureSet::Ask_Diff() {
+void FeatureSet_Level::Ask_Diff() {
   // if not all levels present, then some bad numbers?
   if ( m_pTop ) {
     ask.v3.diffToTop = ask.v1.price - m_pTop->ask.v1.price;
@@ -110,7 +110,7 @@ void FeatureSet::Ask_Diff() {
   }
 }
 
-void FeatureSet::Bid_Diff() {
+void FeatureSet_Level::Bid_Diff() {
   // if not all levels present, then some bad numbers?
   if ( m_pTop ) {
     bid.v3.diffToTop = m_pTop->bid.v1.price - bid.v1.price;
@@ -127,7 +127,7 @@ void FeatureSet::Bid_Diff() {
   }
 }
 
-void FeatureSet::Ask_Aggregate( price_t aggregate ) {
+void FeatureSet_Level::Ask_Aggregate( price_t aggregate ) {
   ask.v1.aggregatePrice = aggregate;
   price_t sum( ask.v1.price + aggregate );
   ask.v4.meanPrice = sum / m_ix;
@@ -135,7 +135,7 @@ void FeatureSet::Ask_Aggregate( price_t aggregate ) {
   if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
 }
 
-void FeatureSet::Bid_Aggregate( price_t aggregate ) {
+void FeatureSet_Level::Bid_Aggregate( price_t aggregate ) {
   bid.v1.aggregatePrice = aggregate;
   price_t sum( bid.v1.price + aggregate );
   bid.v4.meanPrice = sum / m_ix;
@@ -143,7 +143,7 @@ void FeatureSet::Bid_Aggregate( price_t aggregate ) {
   if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
 }
 
-void FeatureSet::Ask_Aggregate( volume_t aggregate ) {
+void FeatureSet_Level::Ask_Aggregate( volume_t aggregate ) {
   ask.v1.aggregateVolume = aggregate;
   volume_t sum( ask.v1.volume + aggregate );
   ask.v4.meanVolume = sum / m_ix;
@@ -152,7 +152,7 @@ void FeatureSet::Ask_Aggregate( volume_t aggregate ) {
   if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
 }
 
-void FeatureSet::Bid_Aggregate( volume_t aggregate ) {
+void FeatureSet_Level::Bid_Aggregate( volume_t aggregate ) {
   bid.v1.aggregateVolume = aggregate;
   volume_t sum( bid.v1.volume + aggregate );
   bid.v4.meanVolume = sum / m_ix;
@@ -167,7 +167,7 @@ namespace {
   static const double dblWeightHead =  1.0 / 20.0;
 }
 
-void FeatureSet::Ask_Derivatives( const ou::tf::Depth& depth ) {
+void FeatureSet_Level::Ask_Derivatives( const ou::tf::Depth& depth ) {
 
   if ( boost::posix_time::not_a_date_time == ask.v6.dtLast ) {
     ask.v6.deltaArrival = 0.0;
@@ -183,7 +183,7 @@ void FeatureSet::Ask_Derivatives( const ou::tf::Depth& depth ) {
   ask.v6.dtLast = depth.DateTime();
 }
 
-void FeatureSet::Bid_Derivatives( const ou::tf::Depth& depth ) {
+void FeatureSet_Level::Bid_Derivatives( const ou::tf::Depth& depth ) {
 
   if ( boost::posix_time::not_a_date_time == bid.v6.dtLast ) {
     bid.v6.deltaArrival = 0.0;
@@ -207,7 +207,7 @@ void FeatureSet::Bid_Derivatives( const ou::tf::Depth& depth ) {
 //  return *this;
 //}
 
-FeatureSet::BookLevel& FeatureSet::BookLevel::operator=( const FeatureSet::BookLevel& rhs ) {
+FeatureSet_Level::BookLevel& FeatureSet_Level::BookLevel::operator=( const FeatureSet_Level::BookLevel& rhs ) {
   if ( this != &rhs ) {
     bActive = rhs.bActive;
     v1 = rhs.v1;
@@ -222,25 +222,25 @@ FeatureSet::BookLevel& FeatureSet::BookLevel::operator=( const FeatureSet::BookL
 }
 
 // prepare for insertion, shuffle all upwards
-void FeatureSet::Ask_CopyFrom( const FeatureSet& rhs ) {
+void FeatureSet_Level::Ask_CopyFrom( const FeatureSet_Level& rhs ) {
   if ( m_pNext ) m_pNext->Ask_CopyFrom( *this );
   this->ask = rhs.ask;
 }
 
 // after deletion, shuffle all downwards
-void FeatureSet::Ask_CopyTo( FeatureSet& lhs ) {
+void FeatureSet_Level::Ask_CopyTo( FeatureSet_Level& lhs ) {
   lhs.ask = this->ask;
   if ( m_pNext ) m_pNext->Ask_CopyTo( *this );
  }
 
 // prepare for insertion, shuffle all upwards
-void FeatureSet::Bid_CopyFrom( const FeatureSet& rhs ) {
+void FeatureSet_Level::Bid_CopyFrom( const FeatureSet_Level& rhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyFrom( *this );
   this->bid = rhs.bid;
 }
 
 // after deletion, shuffle all downwards
-void FeatureSet::Bid_CopyTo( FeatureSet& lhs ) {
+void FeatureSet_Level::Bid_CopyTo( FeatureSet_Level& lhs ) {
   lhs.bid = this->bid;
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
