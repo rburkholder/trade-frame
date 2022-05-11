@@ -42,7 +42,9 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
-using fBookChanges_t = std::function<void(unsigned int,unsigned int,const ou::tf::Depth&,bool)>; // old level, new level, price, volume, add
+enum class EOp { Insert, Update, Delete };
+
+using fBookChanges_t = std::function<void(EOp,unsigned int,const ou::tf::Depth&)>; // operation, level, attributes
 using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
 
 template<typename Compare>  // ask is std::less<key>, bid is std::greater<key>, where key is currently double
@@ -96,31 +98,28 @@ public:
 
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
+
       auto pair = m_mapLevelAggregate.emplace( std::pair( price, LevelAggregate( volume ) ) );
       assert( pair.second );
       iterLevelAggregate = pair.first;
 
       if ( m_fBookChanges ) { // this chunk needed for fBookChanges only
         // TODO: change the while loop as FeatureSet is now self-levelling
-        if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {}
+
+        // determine ix for inserted entry
+        if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {} // ix is 1
         else {
           typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
           iterIx--;
           ix = iterIx->second.ixLevel;
           ix++;
         }
-        while ( max_ix >= ix ) {
-          ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
-          m_fBookChanges( iterLevelAggregate->second.ixLevel, ix, depth_, true );
-          iterLevelAggregate->second.ixLevel = ix;
-          ix++;
-          iterLevelAggregate++;
-          if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
-            break;
-          }
-        }
-        if ( m_mapLevelAggregate.end() != iterLevelAggregate ) { // important to be 0 for the delete side
-          iterLevelAggregate->second.ixLevel = 0;
+
+        // insert entry
+        iterLevelAggregate->second.ixLevel = ix;
+        if ( max_ix >= ix ) {
+          ou::tf::Depth depth_( depth.DateTime(), price, volume );
+          m_fBookChanges( EOp::Insert, ix, depth_ );
         }
       }
     }
@@ -130,7 +129,7 @@ public:
       if ( m_fBookChanges ) {
         ix = iterLevelAggregate->second.ixLevel;
         ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
-        m_fBookChanges( ix, ix, depth_, true );
+        m_fBookChanges( EOp::Update, ix, depth_ );
       }
     }
 
@@ -158,26 +157,27 @@ public:
       if ( 0 == iterLevelAggregate->second.nQuantity ) { // level to be removed
         assert( 0 == iterLevelAggregate->second.nOrders );
 
-        if ( 0 == ix ) {}
-        else {
-          auto iterIx = iterLevelAggregate;
-          iterIx++;
-          while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
-            ou::tf::Depth depth_( depth.DateTime(), iterIx->first, iterIx->second.nQuantity );
-            if ( m_fBookChanges ) m_fBookChanges( iterIx->second.ixLevel, ix, depth_, false );
-            iterIx->second.ixLevel = ix;
-            ix++;
+        if ( m_fBookChanges ) {
+          if ( 0 == ix ) {}
+          else {
+            auto iterIx = iterLevelAggregate;
             iterIx++;
+            while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+              iterIx->second.ixLevel = ix;
+              ix++;
+              iterIx++;
+            }
+            m_fBookChanges( EOp::Delete, ix, depth );
           }
-          // TODO: need to signal possibly one fewer levels
         }
 
         m_mapLevelAggregate.erase( iterLevelAggregate );
       }
       else { // level changes but is not removed
-        ix = iterLevelAggregate->second.ixLevel;
-        ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
-        if ( m_fBookChanges ) m_fBookChanges( ix, ix, depth_, false );
+        if ( m_fBookChanges ) {
+          ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
+          m_fBookChanges( EOp::Update, ix, depth_ );
+        }
       }
     }
   }

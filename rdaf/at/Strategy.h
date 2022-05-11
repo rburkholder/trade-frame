@@ -190,8 +190,8 @@ private:
   void HandleDepthByMM( const ou::tf::DepthByMM& );
   void HandleDepthByOrder( const ou::tf::DepthByOrder& );
 
-  void HandleBookChangesAsk( unsigned int, unsigned int, const ou::tf::Depth&, bool );
-  void HandleBookChangesBid( unsigned int, unsigned int, const ou::tf::Depth&, bool );
+  void HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
+  void HandleBookChangesBid( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 
