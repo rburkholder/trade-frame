@@ -260,6 +260,11 @@ void MarketMaker::EmitMarketMakerMaps() {
 
 // ==== OrderBased
 
+OrderBased::OrderBased()
+: L2Base()
+, m_state( EState::Ready )
+{}
+
 // Live Messages
 
 void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
@@ -269,7 +274,6 @@ void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
-
   ptime dt( ou::TimeSource::Instance().External() );
   ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
 
@@ -282,7 +286,6 @@ void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
-
   // priority is in use, and currently has high numbers, maybe reset at begin of each session?
   //   order 649948133402 priority 12440218202
   //   order 649948113561 priority 12440218206
@@ -299,7 +302,6 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
-
   ptime dt( ou::TimeSource::Instance().External() );
   ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
 
@@ -336,22 +338,25 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
 // Processing
 
 void OrderBased::LimitOrderAdd( const ou::tf::DepthByOrder& depth ) {
+  m_state = EState::Add;
 
   Order order( depth );
 
   mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() != iter ) {
-    //    std::cout << "map add order already exists: " << msg.nOrderId << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << "LimitOrderAdd re-add order skipped: " << depth.OrderID();
   }
   else {
-    m_mapOrder.emplace( std::pair( depth.OrderID(), order ) );
+    auto result = m_mapOrder.emplace( std::pair( depth.OrderID(), order ) );
+    assert( result.second );
+    m_idOrder = depth.OrderID();
+    Add( depth );
   }
-
-  Add( depth );
-
+  m_state = EState::Ready;
 }
 
 void OrderBased::LimitOrderUpdate( const ou::tf::DepthByOrder& depth ) {
+  m_state = EState::Update;
 
   mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() == iter ) {
@@ -368,7 +373,7 @@ void OrderBased::LimitOrderUpdate( const ou::tf::DepthByOrder& depth ) {
       BOOST_LOG_TRIVIAL(error) << "LimitOrderUpdate error - side change " << order.chOrderSide << " to " << depth.Side();
     }
     else {
-      //LimitOrderUpdate( order, depth.Price(), depth.Volume() );
+      m_idOrder = depth.OrderID();
       ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
       Delete( depth_ ); // old quantities
       order.dblPrice = depth.Price();
@@ -376,22 +381,25 @@ void OrderBased::LimitOrderUpdate( const ou::tf::DepthByOrder& depth ) {
       Add( depth );
     }
   }
-
+  m_state = EState::Ready;
 }
 
 void OrderBased::LimitOrderDelete( const ou::tf::DepthByOrder& depth ) {
+  m_state = EState::Delete;
 
   mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() == iter ) {
     BOOST_LOG_TRIVIAL(error) << "LimitOrderDelete order " << depth.OrderID() << " does not exist";
   }
   else {
+    m_idOrder = depth.OrderID();
     const Order& order( iter->second );
     ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
     Delete(  depth_ );
 
     m_mapOrder.erase( iter );
   }
+  m_state = EState::Ready;
 }
 
 // ==== Symbols

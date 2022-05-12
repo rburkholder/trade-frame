@@ -322,9 +322,12 @@ private:
 class OrderBased: public L2Base {
 public:
 
+  using idOrder_t = uint64_t;
   using pOrderBased_t = std::shared_ptr<OrderBased>;
 
-  OrderBased(): L2Base() {}
+  enum class EState { Ready, Add, Update, Delete };
+
+  OrderBased();
   virtual ~OrderBased() {}
 
   static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
@@ -335,6 +338,8 @@ public:
   virtual void OnMBODelete( const msg::OrderDelete::decoded& msg );
 
   void MarketDepth( const ou::tf::DepthByOrder& ); // offline message submission
+
+  EState State() const { return m_state; }
 
 protected:
 private:
@@ -369,6 +374,9 @@ private:
 
   using mapOrder_t = std::map<uint64_t,Order>; // key is order id
   mapOrder_t m_mapOrder;
+
+  EState m_state;
+  idOrder_t m_idOrder;  // active when m_state other than Ready
 
    // interface for msg/depth
   void LimitOrderAdd( const ou::tf::DepthByOrder& );
