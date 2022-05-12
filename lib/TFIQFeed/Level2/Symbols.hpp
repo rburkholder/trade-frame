@@ -42,7 +42,7 @@ class Symbols;
 using price_t = ou::tf::Trade::price_t;
 using volume_t = ou::tf::Trade::volume_t;
 
-enum class EOp { Insert, Update, Delete };
+enum class EOp { Insert, Increase, Decrease, Delete };
 
 using fBookChanges_t = std::function<void(EOp,unsigned int,const ou::tf::Depth&)>; // operation, level, attributes
 using fVolumeAtPrice_t = std::function<void(double,int,bool)>; // price, volume, add
@@ -142,7 +142,7 @@ public:
       if ( m_fBookChanges ) {
         ix = iterLevelAggregate->second.ixLevel;
         ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
-        m_fBookChanges( EOp::Update, ix, depth_ );
+        m_fBookChanges( EOp::Increase, ix, depth_ );
       }
     }
 
@@ -179,6 +179,9 @@ public:
           iterIx++;
           while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
             iterIx->second.ixLevel = ix;
+            if ( max_ix == ix ) {
+              // TODO: need to back fill last entry
+            }
             ix++;
             iterIx++;
           }
@@ -193,7 +196,7 @@ public:
         if ( m_fBookChanges ) {
           // need to pass in deletion message type so can match against ticks? or performed elsewhere?
           ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
-          m_fBookChanges( EOp::Update, ix, depth_ );
+          m_fBookChanges( EOp::Decrease, ix, depth_ );
         }
       }
     }

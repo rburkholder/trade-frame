@@ -60,7 +60,8 @@ void FeatureSet::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int 
         m_vLevels[ ix ].Ask_Activate( true );
         m_vLevels[ ix ].Ask_Quote( depth );
         break;
-      case ou::tf::iqfeed::l2::EOp::Update:
+      case ou::tf::iqfeed::l2::EOp::Increase:
+      case ou::tf::iqfeed::l2::EOp::Decrease:
         m_vLevels[ ix ].Ask_Quote( depth );
         break;
       case ou::tf::iqfeed::l2::EOp::Delete:
@@ -84,7 +85,8 @@ void FeatureSet::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int 
         m_vLevels[ ix ].Bid_Activate( true );
         m_vLevels[ ix ].Bid_Quote( depth );
         break;
-      case ou::tf::iqfeed::l2::EOp::Update:
+      case ou::tf::iqfeed::l2::EOp::Increase:
+      case ou::tf::iqfeed::l2::EOp::Decrease:
         m_vLevels[ ix ].Bid_Quote( depth );
         break;
       case ou::tf::iqfeed::l2::EOp::Delete:
