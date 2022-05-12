@@ -311,20 +311,22 @@ void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
   }
 }
 
+// Point of dispatch
+
 void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
 
   switch ( depth.MsgType() ) {
     case '4': // Update
       LimitOrderUpdate( depth );
       break;
-    case '6': // Summary - will need to categorize this properly
-      LimitOrderAdd( depth );
-      break;
     case '3': // add
       LimitOrderAdd( depth );
       break;
     case '5':
       LimitOrderDelete( depth );
+      break;
+    case '6': // Summary - will need to categorize this properly
+      LimitOrderAdd( depth );
       break;
     default:
       assert( false );

@@ -35,61 +35,65 @@ FeatureSet::~FeatureSet()
 
 void FeatureSet::Set( size_t nLevels ) {
 
+  assert( 0 < nLevels );
   assert( 0 == m_nLevels );
+  m_nLevels = nLevels;
 
-  m_vLevels.resize( nLevels + 1 );  // level 0 not used, levels numbered 1 - 10
+  m_vLevels.resize( m_nLevels + 1 );  // level 0 not used, levels numbered 1 - 10
 
   m_vLevels[ 1 ].Set( 1, nullptr, &m_vLevels[ 2 ] );
-  for ( int ix = 2; ix < nLevels; ix++ ) {
+  for ( int ix = 2; ix < m_nLevels; ix++ ) {
     m_vLevels[ ix ].Set( ix, &m_vLevels[ 1 ], &m_vLevels[ ix + 1 ] );
   }
-  m_vLevels[ nLevels ].Set( nLevels, &m_vLevels[ 1 ], nullptr );
+  m_vLevels[ m_nLevels ].Set( m_nLevels, &m_vLevels[ 1 ], nullptr );
 
 }
 
 void FeatureSet::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  assert( 0 != ix );
-  assert( m_nLevels >= ix );
-  switch ( op ) {
-    case ou::tf::iqfeed::l2::EOp::Insert:
-      if ( m_nLevels > ix ) {
-        m_vLevels[ ix + 1 ].Ask_CopyFrom( m_vLevels[ ix ] );
-      }
-      m_vLevels[ ix ].Ask_Activate( true );
-      m_vLevels[ ix ].Ask_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].Ask_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Delete:
-      if ( m_nLevels >= ix ) {
-        m_vLevels[ ix + 1 ].Ask_CopyTo( m_vLevels[ ix ] );
-      }
-      m_vLevels[ m_nLevels ].Ask_Activate( false );
-      break;
+  if ( 0 != ix ) {
+    assert( m_nLevels >= ix );
+    switch ( op ) {
+      case ou::tf::iqfeed::l2::EOp::Insert:
+        if ( m_nLevels > ix ) {
+          m_vLevels[ ix + 1 ].Ask_CopyFrom( m_vLevels[ ix ] );
+        }
+        m_vLevels[ ix ].Ask_Activate( true );
+        m_vLevels[ ix ].Ask_Quote( depth );
+        break;
+      case ou::tf::iqfeed::l2::EOp::Update:
+        m_vLevels[ ix ].Ask_Quote( depth );
+        break;
+      case ou::tf::iqfeed::l2::EOp::Delete:
+        if ( m_nLevels > ix ) {
+          m_vLevels[ ix + 1 ].Ask_CopyTo( m_vLevels[ ix ] );
+        }
+        m_vLevels[ m_nLevels ].Ask_Activate( false );
+        break;
+    }
   }
 }
 
 void FeatureSet::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  assert( 0 != ix );
-  assert( m_nLevels >= ix );
-  switch ( op ) {
-    case ou::tf::iqfeed::l2::EOp::Insert:
-      if ( m_nLevels > ix ) {
-        m_vLevels[ ix + 1 ].Bid_CopyFrom( m_vLevels[ ix ] );
-      }
-      m_vLevels[ ix ].Bid_Activate( true );
-      m_vLevels[ ix ].Bid_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Update:
-      m_vLevels[ ix ].Bid_Quote( depth );
-      break;
-    case ou::tf::iqfeed::l2::EOp::Delete:
-      if ( m_nLevels >= ix ) {
-        m_vLevels[ ix + 1 ].Bid_CopyTo( m_vLevels[ ix ] );
-      }
-      m_vLevels[ m_nLevels ].Bid_Activate( false );
-      break;
+  if ( 0 != ix ) {
+    assert( m_nLevels >= ix );
+    switch ( op ) {
+      case ou::tf::iqfeed::l2::EOp::Insert:
+        if ( m_nLevels > ix ) {
+          m_vLevels[ ix + 1 ].Bid_CopyFrom( m_vLevels[ ix ] );
+        }
+        m_vLevels[ ix ].Bid_Activate( true );
+        m_vLevels[ ix ].Bid_Quote( depth );
+        break;
+      case ou::tf::iqfeed::l2::EOp::Update:
+        m_vLevels[ ix ].Bid_Quote( depth );
+        break;
+      case ou::tf::iqfeed::l2::EOp::Delete:
+        if ( m_nLevels > ix ) {
+          m_vLevels[ ix + 1 ].Bid_CopyTo( m_vLevels[ ix ] );
+        }
+        m_vLevels[ m_nLevels ].Bid_Activate( false );
+        break;
+    }
   }
 }
 

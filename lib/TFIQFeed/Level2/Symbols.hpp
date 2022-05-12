@@ -94,7 +94,7 @@ public:
     price_t price( depth.Price() );
     volume_t volume( depth.Volume() );
 
-    unsigned int ix { 1 };
+    unsigned int ix {};
 
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
@@ -104,26 +104,39 @@ public:
       iterLevelAggregate = pair.first;
 
       if ( m_fBookChanges ) { // this chunk needed for fBookChanges only
-        // TODO: change the while loop as FeatureSet is now self-levelling
 
         // determine ix for inserted entry
-        if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {} // ix is 1
-        else {
+        if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {
+          ix = 1;
+        }
+        else { // pickup ix from predecessor
           typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
           iterIx--;
           ix = iterIx->second.ixLevel;
-          ix++;
+          if ( 0 == ix ) {} // outside of range
+          else {
+            if ( max_ix == ix ) {
+              ix = 0;   // reached max_ix already, so outside of range
+            }
+            else {
+              ix++;
+            }
+          }
         }
 
         // insert entry
-        iterLevelAggregate->second.ixLevel = ix;
-        if ( max_ix >= ix ) {
-          ou::tf::Depth depth_( depth.DateTime(), price, volume );
-          m_fBookChanges( EOp::Insert, ix, depth_ );
+        //iterLevelAggregate->second.ixLevel = ix;
+        m_fBookChanges( EOp::Insert, ix, depth );
+        for ( // renumber within range
+          typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
+          ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx );
+          iterIx++, ix++
+        ) {
+          iterIx->second.ixLevel = ix;
         }
       }
     }
-    else {
+    else { // exising level
       iterLevelAggregate->second.nQuantity += volume;
       iterLevelAggregate->second.nOrders++;
       if ( m_fBookChanges ) {
@@ -158,16 +171,19 @@ public:
         assert( 0 == iterLevelAggregate->second.nOrders );
 
         if ( m_fBookChanges ) {
-          if ( 0 == ix ) {}
-          else {
-            auto iterIx = iterLevelAggregate;
+
+          ou::tf::Depth depth_( depth.DateTime(), price, 0 );
+          m_fBookChanges( EOp::Delete, ix, depth_ );
+
+          auto iterIx = iterLevelAggregate;
+          iterIx++;
+          while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+            iterIx->second.ixLevel = ix;
+            ix++;
             iterIx++;
-            while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
-              iterIx->second.ixLevel = ix;
-              ix++;
-              iterIx++;
-            }
-            m_fBookChanges( EOp::Delete, ix, depth );
+          }
+          if ( ( max_ix < ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+            iterIx->second.ixLevel = 0;
           }
         }
 
@@ -175,7 +191,8 @@ public:
       }
       else { // level changes but is not removed
         if ( m_fBookChanges ) {
-          ou::tf::Depth depth_( depth.DateTime(), iterLevelAggregate->first, iterLevelAggregate->second.nQuantity );
+          // need to pass in deletion message type so can match against ticks? or performed elsewhere?
+          ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
           m_fBookChanges( EOp::Update, ix, depth_ );
         }
       }

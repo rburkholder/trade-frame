@@ -173,21 +173,41 @@ bool AppDoM::OnInit() {
 
     m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
       [ this ](){
+        m_FeatureSet.Set( 10 );
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
           m_config.sSymbolName,
-          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+          [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+            ou::tf::Trade::price_t price( depth.Price() );
+            ou::tf::Trade::volume_t volume( depth.Volume() );
             m_valuesStatistics.nL2MsgBid++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteBid( price, volume );
-            m_pPanelSideBySide->OnL2Bid( price, volume, bAdd );
+            m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+            m_FeatureSet.HandleBookChangesBid( op, ix, depth );
           },
-          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+          [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+            ou::tf::Trade::price_t price( depth.Price() );
+            ou::tf::Trade::volume_t volume( depth.Volume() );
             m_valuesStatistics.nL2MsgAsk++;
             m_valuesStatistics.nL2MsgTtl++;
             m_pPanelTrade->OnQuoteAsk( price, volume );
-            m_pPanelSideBySide->OnL2Ask( price, volume, bAdd );
-          });
+            m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+            m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+          }
+//          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+//            m_valuesStatistics.nL2MsgBid++;
+//            m_valuesStatistics.nL2MsgTtl++;
+//            m_pPanelTrade->OnQuoteBid( price, volume );
+//            m_pPanelSideBySide->OnL2Bid( price, volume, bAdd );
+//          },
+//          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+//            m_valuesStatistics.nL2MsgAsk++;
+//            m_valuesStatistics.nL2MsgTtl++;
+//            m_pPanelTrade->OnQuoteAsk( price, volume );
+//            m_pPanelSideBySide->OnL2Ask( price, volume, bAdd );
+//          }
+          );
       } );
 
     std::cout << "watching L1/L2: " << m_config.sSymbolName << std::endl;
