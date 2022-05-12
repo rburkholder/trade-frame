@@ -51,9 +51,9 @@ namespace tf {
 namespace l2 {
   class PanelTrade;
   class PanelSideBySide;
-}
-}
-}
+} // namespace l2
+} // namespace tf
+} // namespace ou
 
 class FrameMain;
 
@@ -84,6 +84,8 @@ private:
 
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
+
+  ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
   ou::tf::Watch::pWatch_t m_pWatch;
