@@ -58,6 +58,18 @@ public:
     size_t nL2DelAsk;
     size_t nL2DelTtl;
 
+    size_t nLvl1AskTick;
+    size_t nLvl1AskAdd;
+    size_t nLvl1AskDel;
+
+    size_t nLvl1UnkTick;
+    size_t nLvl1UnkAdd;
+    size_t nLvl1UnkDel;
+
+    size_t nLvl1BidTick;
+    size_t nLvl1BidAdd;
+    size_t nLvl1BidDel;
+
     values_t() { Zero(); }
     void Zero() {
       nTicks = 0;
@@ -66,6 +78,10 @@ public:
       nL2AddBid = nL2AddAsk = nL2AddTtl = 0;
       nL2UpdBid = nL2UpdAsk = nL2UpdTtl = 0;
       nL2DelBid = nL2DelAsk = nL2DelTtl = 0;
+
+      nLvl1AskTick = nLvl1AskAdd = nLvl1AskDel = 0;
+      nLvl1UnkTick = nLvl1UnkAdd = nLvl1UnkDel = 0;
+      nLvl1BidTick = nLvl1BidAdd = nLvl1BidDel = 0;
     }
   };
 
@@ -101,6 +117,10 @@ private:
   , id_txtL2AddBid, id_txtL2AddAsk, id_txtL2AddTtl
   , id_txtL2UpdBid, id_txtL2UpdAsk, id_txtL2UpdTtl
   , id_txtL2DelBid, id_txtL2DelAsk, id_txtL2DelTtl
+
+  , id_txtLvl1AskTick, id_txtLvl1AskAdd, id_txtLvl1AskDel
+  , id_txtLvl1UknTick, id_txtLvl1UknAdd, id_txtLvl1UknDel
+  , id_txtLvl1BidTick, id_txtLvl1BidAdd, id_txtLvl1BidDel
   };
 
     wxTextCtrl* m_txtTicks;
@@ -123,6 +143,18 @@ private:
     wxTextCtrl* m_txtL2DelBid;
     wxTextCtrl* m_txtL2DelAsk;
     wxTextCtrl* m_txtL2DelTtl;
+
+    wxTextCtrl* m_txtLvl1AskTick;
+    wxTextCtrl* m_txtLvl1AskAdd;
+    wxTextCtrl* m_txtLvl1AskDel;
+
+    wxTextCtrl* m_txtLvl1UknTick;
+    wxTextCtrl* m_txtLvl1UknAdd;
+    wxTextCtrl* m_txtLvl1UknDel;
+
+    wxTextCtrl* m_txtLvl1BidTick;
+    wxTextCtrl* m_txtLvl1BidAdd;
+    wxTextCtrl* m_txtLvl1BidDel;
 
   void Init();
   void CreateControls();

@@ -180,6 +180,22 @@ bool AppDoM::OnInit() {
         ou::tf::Trade::volume_t volume( depth.Volume() );
         m_valuesStatistics.nL2MsgBid++;
         m_valuesStatistics.nL2MsgTtl++;
+
+        if ( 1 == ix ) {
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              m_valuesStatistics.nLvl1BidAdd++;
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              m_valuesStatistics.nLvl1BidDel++;
+              break;
+            default:
+              assert( false );
+          }
+        }
+
         m_pPanelTrade->OnQuoteBid( price, volume );
         m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
         m_FeatureSet.HandleBookChangesBid( op, ix, depth );
@@ -189,6 +205,23 @@ bool AppDoM::OnInit() {
         ou::tf::Trade::volume_t volume( depth.Volume() );
         m_valuesStatistics.nL2MsgAsk++;
         m_valuesStatistics.nL2MsgTtl++;
+
+
+        if ( 1 == ix ) {
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              m_valuesStatistics.nLvl1AskAdd++;
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              m_valuesStatistics.nLvl1AskDel++;
+              break;
+            default:
+              assert( false );
+          }
+        }
+
         m_pPanelTrade->OnQuoteAsk( price, volume );
         m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
         m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
@@ -344,6 +377,10 @@ void AppDoM::OnFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
 }
 
 void AppDoM::OnQuote( const ou::tf::Quote& quote ) {
+
+  m_dblLastAsk = quote.Ask();
+  m_dblLastBid = quote.Bid();
+
   m_valuesStatistics.nL1MsgBid++;
   m_valuesStatistics.nL1MsgAsk++;
   m_valuesStatistics.nL1MsgTtl++;
@@ -353,7 +390,23 @@ void AppDoM::OnQuote( const ou::tf::Quote& quote ) {
 }
 
 void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
+
   m_valuesStatistics.nTicks++;
+
+  const double price = trade.Price();
+  const double mid = ( m_dblLastAsk + m_dblLastBid ) / 2.0;
+  if ( mid == price ) {
+    m_valuesStatistics.nLvl1UnkTick++;
+  }
+  else {
+    if ( mid < price ) {
+      m_valuesStatistics.nLvl1BidTick++;
+    }
+    else {
+      m_valuesStatistics.nLvl1AskTick++;
+    }
+  }
+
   if ( m_pPanelTrade ) {
     m_pPanelTrade->OnTrade( trade );
   }

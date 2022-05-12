@@ -68,18 +68,6 @@ void PanelStatistics::CreateControls() {
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(itemBoxSizer2);
 
-    wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer1, 0, wxALIGN_LEFT|wxALL, 1);
-
-    wxStaticText* itemStaticText1 = new wxStaticText( itemPanel1, wxID_STATIC, wxEmptyString, wxDefaultPosition, wxSize(55, -1), 0 );
-    itemBoxSizer1->Add(itemStaticText1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
-
-    m_txtTicks = new wxTextCtrl( itemPanel1, id_txtTicks, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
-    itemBoxSizer1->Add(m_txtTicks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
-
-    wxStaticText* itemStaticText4 = new wxStaticText( itemPanel1, wxID_STATIC, _("ticks"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer1->Add(itemStaticText4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
-
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer4, 0, wxALIGN_LEFT|wxALL, 1);
 
@@ -200,6 +188,90 @@ void PanelStatistics::CreateControls() {
     wxStaticText* itemStaticText24 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer16->Add(itemStaticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
+    wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer5, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText23 = new wxStaticText( itemPanel1, wxID_STATIC, _("bst ask:"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer5->Add(itemStaticText23, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1AskTick = new wxTextCtrl( itemPanel1, id_txtLvl1AskTick, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer5->Add(m_txtLvl1AskTick, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel1, wxID_STATIC, _("tick"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer5->Add(itemStaticText25, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1AskAdd = new wxTextCtrl( itemPanel1, id_txtLvl1AskAdd, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer5->Add(m_txtLvl1AskAdd, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText27 = new wxStaticText( itemPanel1, wxID_STATIC, _("add"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer5->Add(itemStaticText27, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1AskDel = new wxTextCtrl( itemPanel1, id_txtLvl1AskDel, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer5->Add(m_txtLvl1AskDel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel1, wxID_STATIC, _("del"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer5->Add(itemStaticText29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxBoxSizer* itemBoxSizer30 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer30, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText31 = new wxStaticText( itemPanel1, wxID_STATIC, _("unkn:"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer30->Add(itemStaticText31, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1UknTick = new wxTextCtrl( itemPanel1, id_txtLvl1UknTick, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer30->Add(m_txtLvl1UknTick, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText33 = new wxStaticText( itemPanel1, wxID_STATIC, _("tick"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer30->Add(itemStaticText33, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1UknAdd = new wxTextCtrl( itemPanel1, id_txtLvl1UknAdd, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer30->Add(m_txtLvl1UknAdd, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText35 = new wxStaticText( itemPanel1, wxID_STATIC, _("add"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer30->Add(itemStaticText35, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1UknDel = new wxTextCtrl( itemPanel1, id_txtLvl1UknDel, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer30->Add(m_txtLvl1UknDel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText37 = new wxStaticText( itemPanel1, wxID_STATIC, _("del"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer30->Add(itemStaticText37, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxBoxSizer* itemBoxSizer38 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer38, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText39 = new wxStaticText( itemPanel1, wxID_STATIC, _("bst bid:"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer38->Add(itemStaticText39, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1BidTick = new wxTextCtrl( itemPanel1, id_txtLvl1BidTick, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer38->Add(m_txtLvl1BidTick, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText41 = new wxStaticText( itemPanel1, wxID_STATIC, _("tick"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer38->Add(itemStaticText41, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1BidAdd = new wxTextCtrl( itemPanel1, id_txtLvl1BidAdd, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer38->Add(m_txtLvl1BidAdd, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText43 = new wxStaticText( itemPanel1, wxID_STATIC, _("add"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer38->Add(itemStaticText43, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtLvl1BidDel = new wxTextCtrl( itemPanel1, id_txtLvl1BidDel, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer38->Add(m_txtLvl1BidDel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText45 = new wxStaticText( itemPanel1, wxID_STATIC, _("del"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer38->Add(itemStaticText45, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer1, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText2 = new wxStaticText( itemPanel1, wxID_STATIC, _("ticks"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer1->Add(itemStaticText2, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtTicks = new wxTextCtrl( itemPanel1, id_txtTicks, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer1->Add(m_txtTicks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText4 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer1->Add(itemStaticText4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
 }
 
 void PanelStatistics::Update( const values_t& values ) {
@@ -223,4 +295,16 @@ void PanelStatistics::Update( const values_t& values ) {
   m_txtL2DelBid->SetValue( boost::lexical_cast<std::string>( values.nL2DelBid ) );
   m_txtL2DelAsk->SetValue( boost::lexical_cast<std::string>( values.nL2DelAsk ) );
   m_txtL2DelTtl->SetValue( boost::lexical_cast<std::string>( values.nL2DelTtl ) );
+
+  m_txtLvl1AskTick->SetValue( boost::lexical_cast<std::string>( values.nLvl1AskTick ) );
+  m_txtLvl1AskAdd->SetValue( boost::lexical_cast<std::string>( values.nLvl1AskAdd ) );
+  m_txtLvl1AskDel->SetValue( boost::lexical_cast<std::string>( values.nLvl1AskDel ) );
+
+  m_txtLvl1UknTick->SetValue( boost::lexical_cast<std::string>( values.nLvl1UnkTick ) );
+  //m_txtLvl1UknAdd->SetValue( boost::lexical_cast<std::string>( values.nLvl1UnkAdd ) );
+  //m_txtLvl1UknDel->SetValue( boost::lexical_cast<std::string>( values.nLvl1UnkDel ) );
+
+  m_txtLvl1BidTick->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidTick ) );
+  m_txtLvl1BidAdd->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidAdd ) );
+  m_txtLvl1BidDel->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidDel ) );
 }

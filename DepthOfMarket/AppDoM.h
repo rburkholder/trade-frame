@@ -141,6 +141,9 @@ private:
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
 
+  double m_dblLastAsk;
+  double m_dblLastBid;
+
   void EmitMarketMakerMaps();
 
   virtual bool OnInit();
