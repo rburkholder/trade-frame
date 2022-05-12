@@ -195,18 +195,6 @@ bool AppDoM::OnInit() {
             m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
             m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
           }
-//          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
-//            m_valuesStatistics.nL2MsgBid++;
-//            m_valuesStatistics.nL2MsgTtl++;
-//            m_pPanelTrade->OnQuoteBid( price, volume );
-//            m_pPanelSideBySide->OnL2Bid( price, volume, bAdd );
-//          },
-//          [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
-//            m_valuesStatistics.nL2MsgAsk++;
-//            m_valuesStatistics.nL2MsgTtl++;
-//            m_pPanelTrade->OnQuoteAsk( price, volume );
-//            m_pPanelSideBySide->OnL2Ask( price, volume, bAdd );
-//          }
           );
       } );
 
