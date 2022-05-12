@@ -50,6 +50,10 @@ public:
     size_t nL2AddAsk;
     size_t nL2AddTtl;
 
+    size_t nL2UpdBid;
+    size_t nL2UpdAsk;
+    size_t nL2UpdTtl;
+
     size_t nL2DelBid;
     size_t nL2DelAsk;
     size_t nL2DelTtl;
@@ -60,6 +64,7 @@ public:
       nL1MsgBid = nL1MsgAsk = nL1MsgTtl = 0;
       nL2MsgBid = nL2MsgAsk = nL2MsgTtl = 0;
       nL2AddBid = nL2AddAsk = nL2AddTtl = 0;
+      nL2UpdBid = nL2UpdAsk = nL2UpdTtl = 0;
       nL2DelBid = nL2DelAsk = nL2DelTtl = 0;
     }
   };
@@ -94,6 +99,7 @@ private:
   , id_txtL1MsgBid, id_txtL1MsgAsk, id_txtL1MsgTtl
   , id_txtL2MsgBid, id_txtL2MsgAsk, id_txtL2MsgTtl
   , id_txtL2AddBid, id_txtL2AddAsk, id_txtL2AddTtl
+  , id_txtL2UpdBid, id_txtL2UpdAsk, id_txtL2UpdTtl
   , id_txtL2DelBid, id_txtL2DelAsk, id_txtL2DelTtl
   };
 
@@ -101,12 +107,19 @@ private:
     wxTextCtrl* m_txtL1MsgBid;
     wxTextCtrl* m_txtL1MsgAsk;
     wxTextCtrl* m_txtL1MsgTtl;
+
     wxTextCtrl* m_txtL2MsgBid;
     wxTextCtrl* m_txtL2MsgAsk;
     wxTextCtrl* m_txtL2MsgTtl;
+
     wxTextCtrl* m_txtL2AddBid;
     wxTextCtrl* m_txtL2AddAsk;
     wxTextCtrl* m_txtL2AddTtl;
+
+    wxTextCtrl* m_txtL2UpdBid;
+    wxTextCtrl* m_txtL2UpdAsk;
+    wxTextCtrl* m_txtL2UpdTtl;
+
     wxTextCtrl* m_txtL2DelBid;
     wxTextCtrl* m_txtL2DelAsk;
     wxTextCtrl* m_txtL2DelTtl;

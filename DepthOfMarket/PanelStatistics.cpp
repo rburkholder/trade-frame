@@ -152,29 +152,53 @@ void PanelStatistics::CreateControls() {
     wxStaticText* itemStaticText20 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer20->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer28 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer28, 0, wxALIGN_LEFT|wxALL, 1);
+    wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_LEFT|wxALL, 1);
 
-    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel1, wxID_STATIC, _("l2 del:"), wxDefaultPosition, wxSize(55, -1), 0 );
-    itemBoxSizer28->Add(itemStaticText29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText7 = new wxStaticText( itemPanel1, wxID_STATIC, _("l2 upd:"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer3->Add(itemStaticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtL2UpdBid = new wxTextCtrl( itemPanel1, id_txtL2UpdBid, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer3->Add(m_txtL2UpdBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText9 = new wxStaticText( itemPanel1, wxID_STATIC, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(itemStaticText9, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtL2UpdAsk = new wxTextCtrl( itemPanel1, id_txtL2UpdAsk, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer3->Add(m_txtL2UpdAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel1, wxID_STATIC, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(itemStaticText11, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtL2UpdTtl = new wxTextCtrl( itemPanel1, id_txtL2UpdTtl, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer3->Add(m_txtL2UpdTtl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText15 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(itemStaticText15, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxBoxSizer* itemBoxSizer16 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer16, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText17 = new wxStaticText( itemPanel1, wxID_STATIC, _("l2 del:"), wxDefaultPosition, wxSize(55, -1), 0 );
+    itemBoxSizer16->Add(itemStaticText17, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtL2DelBid = new wxTextCtrl( itemPanel1, id_txtL2DelBid, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
-    itemBoxSizer28->Add(m_txtL2DelBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer16->Add(m_txtL2DelBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText22 = new wxStaticText( itemPanel1, wxID_STATIC, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer28->Add(itemStaticText22, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText19 = new wxStaticText( itemPanel1, wxID_STATIC, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(itemStaticText19, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtL2DelAsk = new wxTextCtrl( itemPanel1, id_txtL2DelAsk, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
-    itemBoxSizer28->Add(m_txtL2DelAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer16->Add(m_txtL2DelAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText24 = new wxStaticText( itemPanel1, wxID_STATIC, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer28->Add(itemStaticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText22 = new wxStaticText( itemPanel1, wxID_STATIC, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(itemStaticText22, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtL2DelTtl = new wxTextCtrl( itemPanel1, id_txtL2DelTtl, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
-    itemBoxSizer28->Add(m_txtL2DelTtl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer16->Add(m_txtL2DelTtl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer28->Add(itemStaticText26, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText24 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add(itemStaticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
 }
 
@@ -183,12 +207,19 @@ void PanelStatistics::Update( const values_t& values ) {
   m_txtL1MsgBid->SetValue( boost::lexical_cast<std::string>( values.nL1MsgBid ) );
   m_txtL1MsgAsk->SetValue( boost::lexical_cast<std::string>( values.nL1MsgAsk ) );
   m_txtL1MsgTtl->SetValue( boost::lexical_cast<std::string>( values.nL1MsgTtl ) );
+
   m_txtL2MsgBid->SetValue( boost::lexical_cast<std::string>( values.nL2MsgBid ) );
   m_txtL2MsgAsk->SetValue( boost::lexical_cast<std::string>( values.nL2MsgAsk ) );
   m_txtL2MsgTtl->SetValue( boost::lexical_cast<std::string>( values.nL2MsgTtl ) );
+
   m_txtL2AddBid->SetValue( boost::lexical_cast<std::string>( values.nL2AddBid ) );
   m_txtL2AddAsk->SetValue( boost::lexical_cast<std::string>( values.nL2AddAsk ) );
   m_txtL2AddTtl->SetValue( boost::lexical_cast<std::string>( values.nL2AddTtl ) );
+
+  m_txtL2UpdBid->SetValue( boost::lexical_cast<std::string>( values.nL2UpdBid ) );
+  m_txtL2UpdAsk->SetValue( boost::lexical_cast<std::string>( values.nL2UpdAsk ) );
+  m_txtL2UpdTtl->SetValue( boost::lexical_cast<std::string>( values.nL2UpdTtl ) );
+
   m_txtL2DelBid->SetValue( boost::lexical_cast<std::string>( values.nL2DelBid ) );
   m_txtL2DelAsk->SetValue( boost::lexical_cast<std::string>( values.nL2DelAsk ) );
   m_txtL2DelTtl->SetValue( boost::lexical_cast<std::string>( values.nL2DelTtl ) );

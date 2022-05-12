@@ -171,6 +171,9 @@ bool AppDoM::OnInit() {
       }
       ) );
 
+    // TODO: make conditional on config file parameter for MM or OrderBased
+    //   review old config from 2022/05/10 - 12
+
     m_OrderBased.Set(
       [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
         ou::tf::Trade::price_t price( depth.Price() );
@@ -199,7 +202,59 @@ bool AppDoM::OnInit() {
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
           m_config.sSymbolName,
-          std::bind( &ou::tf::iqfeed::l2::OrderBased::MarketDepth, &m_OrderBased, ph::_1 )
+          //std::bind( &ou::tf::iqfeed::l2::OrderBased::MarketDepth, &m_OrderBased, ph::_1 )
+          [this]( const ou::tf::DepthByOrder& depth ){
+            switch ( depth.MsgType() ) {
+              case '4': // Update
+                switch ( depth.Side() ) {
+                  case 'A':
+                    m_valuesStatistics.nL2UpdAsk++;
+                    break;
+                  case 'B':
+                    m_valuesStatistics.nL2UpdBid++;
+                    break;
+                  default:
+                    assert( false );
+                    break;
+                }
+                m_valuesStatistics.nL2UpdTtl++;
+                break;
+              case '3': // add
+                switch ( depth.Side() ) {
+                  case 'A':
+                    m_valuesStatistics.nL2AddAsk++;
+                    break;
+                  case 'B':
+                    m_valuesStatistics.nL2AddBid++;
+                    break;
+                  default:
+                    assert( false );
+                    break;
+                }
+                m_valuesStatistics.nL2AddTtl++;
+                break;
+              case '5':
+                switch ( depth.Side() ) {
+                  case 'A':
+                    m_valuesStatistics.nL2DelAsk++;
+                    break;
+                  case 'B':
+                    m_valuesStatistics.nL2DelBid++;
+                    break;
+                  default:
+                    assert( false );
+                    break;
+                }
+                m_valuesStatistics.nL2DelTtl++;
+                break;
+              case '6': // Summary - will need to categorize this properly
+                m_valuesStatistics.nL2AddTtl++;
+                break;
+              default:
+                assert( false );
+            }
+            m_OrderBased.MarketDepth( depth );
+          }
           );
       } );
 
