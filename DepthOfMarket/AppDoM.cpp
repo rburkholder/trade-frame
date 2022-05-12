@@ -206,7 +206,6 @@ bool AppDoM::OnInit() {
         m_valuesStatistics.nL2MsgAsk++;
         m_valuesStatistics.nL2MsgTtl++;
 
-
         if ( 1 == ix ) {
           switch ( op ) {
             case ou::tf::iqfeed::l2::EOp::Increase:
@@ -400,10 +399,10 @@ void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
   }
   else {
     if ( mid < price ) {
-      m_valuesStatistics.nLvl1BidTick++;
+      m_valuesStatistics.nLvl1AskTick++;
     }
     else {
-      m_valuesStatistics.nLvl1AskTick++;
+      m_valuesStatistics.nLvl1BidTick++;
     }
   }
 
