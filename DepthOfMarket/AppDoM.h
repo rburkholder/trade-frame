@@ -21,6 +21,7 @@
  * Created on October 12, 2021, 23:04
  */
 
+#include <atomic>
 #include <memory>
 
 #include <boost/serialization/version.hpp>
@@ -143,6 +144,9 @@ private:
 
   double m_dblLastAsk;
   double m_dblLastBid;
+
+  std::atomic_uint32_t m_nMarketOrdersAsk;
+  std::atomic_uint32_t m_nMarketOrdersBid;
 
   void EmitMarketMakerMaps();
 

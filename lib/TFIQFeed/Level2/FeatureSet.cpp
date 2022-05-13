@@ -99,6 +99,33 @@ void FeatureSet::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int 
   }
 }
 
+  // v7 Ask
+  void FeatureSet::Ask_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Ask_IncLimit( depth );
+  }
+
+  void FeatureSet::Ask_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Ask_IncMarket( depth );
+  }
+
+  void FeatureSet::Ask_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Ask_IncCancel( depth );
+  }
+
+  // v7 Bid
+  void FeatureSet::Bid_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Bid_IncLimit( depth );
+  }
+
+  void FeatureSet::Bid_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Bid_IncMarket( depth );
+  }
+
+  void FeatureSet::Bid_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
+    m_vLevels[ ix ].Bid_IncCancel( depth );
+  }
+
+
 } // namespace l2
 } // namesapce iqfeed
 } // namespace tf

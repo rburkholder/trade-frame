@@ -96,13 +96,18 @@ public:
   };
 
   struct V7 { // intensity over per unit time (1 sec)
+    ptime dtLastLimit;
     double intensityLimit;
+
+    ptime dtLastMarket;
     double intensityMarket;
+
+    ptime dtLastCancel;
     double intensityCancel;
     V7()
-    : intensityLimit {}
-    , intensityMarket {}
-    , intensityCancel {}
+    : dtLastLimit(  boost::posix_time::not_a_date_time ), intensityLimit  {}
+    , dtLastMarket( boost::posix_time::not_a_date_time ), intensityMarket {}
+    , dtLastCancel( boost::posix_time::not_a_date_time ), intensityCancel {}
     {}
   };
 
@@ -181,6 +186,16 @@ public:
   void Ask_Quote( const ou::tf::Depth& );
   void Bid_Quote( const ou::tf::Depth& );
 
+  // v7 Ask
+  void Ask_IncLimit(  const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastLimit,  ask.v7.intensityLimit  ); }
+  void Ask_IncMarket( const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket ); }
+  void Ask_IncCancel( const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel ); }
+
+  // v7 Bid
+  void Bid_IncLimit(  const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastLimit,  bid.v7.intensityLimit  ); }
+  void Bid_IncMarket( const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket ); }
+  void Bid_IncCancel( const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel ); }
+
 protected:
 private:
 
@@ -202,6 +217,9 @@ private:
   void ImbalanceOnAggregate();
   void Ask_Derivatives( const ou::tf::Depth& );
   void Bid_Derivatives( const ou::tf::Depth& );
+
+  // v7 - common code
+  void Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensity );
 
 };
 

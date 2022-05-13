@@ -245,6 +245,20 @@ void FeatureSet_Level::Bid_CopyTo( FeatureSet_Level& lhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 
+// v7 - common code
+void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensity ) {
+  if ( boost::posix_time::not_a_date_time == dtLast ) {
+  }
+  else {
+    auto diff = ( depth.DateTime() - dtLast).total_microseconds();
+    if ( 0 < diff ) {
+      double deltaArrival = (double)diff / 1000000.0; // rate per second
+      intensity  = dblWeightTail * intensity  + dblWeightHead / deltaArrival;
+    }
+  }
+  dtLast = depth.DateTime();
+}
+
 } // namespace l2
 } // namesapce iqfeed
 } // namespace tf

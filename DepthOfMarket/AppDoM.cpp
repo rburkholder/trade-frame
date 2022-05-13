@@ -183,28 +183,45 @@ bool AppDoM::OnInit() {
         m_valuesStatistics.nL2MsgBid++;
         m_valuesStatistics.nL2MsgTtl++;
 
-        if ( 1 == ix ) {
-          auto state = m_OrderBased.State();
-          assert( EState::Ready != state );
-          if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-            switch ( op ) {
-              case ou::tf::iqfeed::l2::EOp::Increase:
-              case ou::tf::iqfeed::l2::EOp::Insert:
+        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+        auto state = m_OrderBased.State();
+        assert( EState::Ready != state );
+        if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1BidAdd++;
-                break;
-              case ou::tf::iqfeed::l2::EOp::Decrease:
-              case ou::tf::iqfeed::l2::EOp::Delete:
+              }
+              m_FeatureSet.Bid_IncLimit( ix, depth );
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1BidDel++;
-                break;
-              default:
-                assert( false );
-            }
+
+                uint32_t nTicks = m_nMarketOrdersBid.exchange( 0 );
+                if ( 1 < nTicks ) {
+                  std::cout << "HandleBookChangesBid warning nTicks is " << nTicks << std::endl;
+                }
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Bid_IncCancel( 1, depth );
+                }
+                else {
+                  m_FeatureSet.Bid_IncMarket( 1, depth );
+                }
+              }
+              else { // 1 < ix
+                m_FeatureSet.Bid_IncCancel( 1, depth );
+              }
+              break;
+            default:
+              break;
           }
         }
 
         m_pPanelTrade->OnQuoteBid( price, volume );
         m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
-        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
       },
       [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
         ou::tf::Trade::price_t price( depth.Price() );
@@ -212,39 +229,54 @@ bool AppDoM::OnInit() {
         m_valuesStatistics.nL2MsgAsk++;
         m_valuesStatistics.nL2MsgTtl++;
 
-        if ( 1 == ix ) {
-          auto state = m_OrderBased.State();
-          assert( EState::Ready != state );
-          if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-            switch ( op ) {
-              case ou::tf::iqfeed::l2::EOp::Increase:
-              case ou::tf::iqfeed::l2::EOp::Insert:
+        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+        auto state = m_OrderBased.State();
+        assert( EState::Ready != state );
+        if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1AskAdd++;
-                break;
-              case ou::tf::iqfeed::l2::EOp::Decrease:
-              case ou::tf::iqfeed::l2::EOp::Delete:
+              }
+              m_FeatureSet.Ask_IncLimit( ix, depth );
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1AskDel++;
-                break;
-              default:
-                assert( false );
-            }
+
+                uint32_t nTicks = m_nMarketOrdersAsk.exchange( 0 );
+                if ( 1 < nTicks ) {
+                  std::cout << "HandleBookChangesAsk warning nTicks is " << nTicks << std::endl;
+                }
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Ask_IncCancel( 1, depth );
+                }
+                else {
+                  m_FeatureSet.Ask_IncMarket( 1, depth );
+                }
+              }
+              else { // 1 < ix
+                m_FeatureSet.Ask_IncCancel( 1, depth );
+              }
+              break;
+            default:
+              break;
           }
         }
 
         m_pPanelTrade->OnQuoteAsk( price, volume );
         m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
-        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
       }
     );
 
-    namespace ph = std::placeholders;
     m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
       [ this ](){
         m_FeatureSet.Set( 10 );
         m_pDispatch->Single( true );
         m_pDispatch->WatchAdd(
           m_config.sSymbolName,
-          //std::bind( &ou::tf::iqfeed::l2::OrderBased::MarketDepth, &m_OrderBased, ph::_1 )
           [this]( const ou::tf::DepthByOrder& depth ){
             switch ( depth.MsgType() ) {
               case '4': // Update
@@ -402,6 +434,10 @@ void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
 
   m_valuesStatistics.nTicks++;
 
+  // TODO: track when bid == ask, examine which closes the gap
+  //   the side not moving has the order,
+  //   the side moving is the execution side
+
   const double price = trade.Price();
   const double mid = ( m_dblLastAsk + m_dblLastBid ) / 2.0;
   if ( mid == price ) {
@@ -410,9 +446,11 @@ void AppDoM::OnTrade( const ou::tf::Trade& trade ) {
   else {
     if ( mid < price ) {
       m_valuesStatistics.nLvl1AskTick++;
+      m_nMarketOrdersAsk++;
     }
     else {
       m_valuesStatistics.nLvl1BidTick++;
+      m_nMarketOrdersBid++;
     }
   }
 

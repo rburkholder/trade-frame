@@ -50,6 +50,16 @@ public:
   void HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
   void HandleBookChangesBid( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
 
+  // v7 Ask
+  void Ask_IncLimit(  unsigned int, const ou::tf::Depth& );
+  void Ask_IncMarket( unsigned int, const ou::tf::Depth& );
+  void Ask_IncCancel( unsigned int, const ou::tf::Depth& );
+
+  // v7 Bid
+  void Bid_IncLimit(  unsigned int, const ou::tf::Depth& );
+  void Bid_IncMarket( unsigned int, const ou::tf::Depth& );
+  void Bid_IncCancel( unsigned int, const ou::tf::Depth& );
+
 protected:
 private:
 
