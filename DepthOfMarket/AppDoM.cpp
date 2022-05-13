@@ -174,6 +174,8 @@ bool AppDoM::OnInit() {
     // TODO: make conditional on config file parameter for MM or OrderBased
     //   review old config from 2022/05/10 - 12
 
+    using EState = ou::tf::iqfeed::l2::OrderBased::EState;
+
     m_OrderBased.Set(
       [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
         ou::tf::Trade::price_t price( depth.Price() );
@@ -182,17 +184,21 @@ bool AppDoM::OnInit() {
         m_valuesStatistics.nL2MsgTtl++;
 
         if ( 1 == ix ) {
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              m_valuesStatistics.nLvl1BidAdd++;
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              m_valuesStatistics.nLvl1BidDel++;
-              break;
-            default:
-              assert( false );
+          auto state = m_OrderBased.State();
+          assert( EState::Ready != state );
+          if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+            switch ( op ) {
+              case ou::tf::iqfeed::l2::EOp::Increase:
+              case ou::tf::iqfeed::l2::EOp::Insert:
+                m_valuesStatistics.nLvl1BidAdd++;
+                break;
+              case ou::tf::iqfeed::l2::EOp::Decrease:
+              case ou::tf::iqfeed::l2::EOp::Delete:
+                m_valuesStatistics.nLvl1BidDel++;
+                break;
+              default:
+                assert( false );
+            }
           }
         }
 
@@ -207,17 +213,21 @@ bool AppDoM::OnInit() {
         m_valuesStatistics.nL2MsgTtl++;
 
         if ( 1 == ix ) {
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              m_valuesStatistics.nLvl1AskAdd++;
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              m_valuesStatistics.nLvl1AskDel++;
-              break;
-            default:
-              assert( false );
+          auto state = m_OrderBased.State();
+          assert( EState::Ready != state );
+          if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+            switch ( op ) {
+              case ou::tf::iqfeed::l2::EOp::Increase:
+              case ou::tf::iqfeed::l2::EOp::Insert:
+                m_valuesStatistics.nLvl1AskAdd++;
+                break;
+              case ou::tf::iqfeed::l2::EOp::Decrease:
+              case ou::tf::iqfeed::l2::EOp::Delete:
+                m_valuesStatistics.nLvl1AskDel++;
+                break;
+              default:
+                assert( false );
+            }
           }
         }
 
