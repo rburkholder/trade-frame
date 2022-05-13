@@ -244,58 +244,62 @@ void FeatureSet_Level::Bid_CopyTo( FeatureSet_Level& lhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 
-// v7, v8 - common code
-void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensityShort, double& intensityLong ) {
+// v7, v8, v9 - common code
+void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensityShort, double& intensityLong, double& accelShort ) {
   if ( boost::posix_time::not_a_date_time == dtLast ) {
   }
   else {
     auto diff = ( depth.DateTime() - dtLast).total_microseconds();
     if ( 0 < diff ) {
+      double intensityShortPrevious = intensityShort;
       double deltaArrival = (double)diff / 1000000.0; // rate per second
       intensityShort = dblWeightTailShort * intensityShort + dblWeightHeadShort / deltaArrival;
       intensityLong  = dblWeightTailLong  * intensityLong  + dblWeightHeadLong  / deltaArrival;
+
+      double diffIntensity = intensityShort - intensityShortPrevious;
+      accelShort     = dblWeightTailShort * accelShort     + dblWeightHeadShort * diffIntensity / deltaArrival;
     }
   }
   dtLast = depth.DateTime();
 }
 
 void FeatureSet_Level::Ask_IncLimit(  const ou::tf::Depth& depth ) {
-  Intensity( depth, ask.v7.dtLastLimit, ask.v7.intensityLimit, ask.v8.intensityLimit );
+  Intensity( depth, ask.v7.dtLastLimit, ask.v7.intensityLimit, ask.v8.intensityLimit, ask.v9.accelLimit );
   if ( 0.0 < ask.v8.intensityLimit ) {
     ask.v8.relativeLimit = ask.v7.intensityLimit / ask.v8.intensityLimit;
   }
 }
 
 void FeatureSet_Level::Ask_IncMarket( const ou::tf::Depth& depth ) {
-  Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket, ask.v8.intensityMarket );
+  Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket, ask.v8.intensityMarket, ask.v9.accelMarket );
   if ( 0.0 < ask.v8.intensityMarket ) {
     ask.v8.relativeMarket = ask.v7.intensityMarket / ask.v8.intensityMarket;
   }
 }
 
 void FeatureSet_Level::Ask_IncCancel( const ou::tf::Depth& depth ) {
-  Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel, ask.v8.intensityCancel );
+  Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel, ask.v8.intensityCancel, ask.v9.accelCancel );
   if ( 0.0 < ask.v8.intensityCancel ) {
     ask.v8.relativeCancel = ask.v7.intensityCancel / ask.v8.intensityCancel;
   }
 }
 
 void FeatureSet_Level::Bid_IncLimit(  const ou::tf::Depth& depth ) {
-  Intensity( depth, bid.v7.dtLastLimit, bid.v7.intensityLimit, bid.v8.intensityLimit  );
+  Intensity( depth, bid.v7.dtLastLimit, bid.v7.intensityLimit, bid.v8.intensityLimit, bid.v9.accelLimit  );
   if ( 0.0 < bid.v8.intensityLimit ) {
     bid.v8.relativeLimit = bid.v7.intensityLimit / bid.v8.intensityLimit;
   }
 }
 
 void FeatureSet_Level::Bid_IncMarket( const ou::tf::Depth& depth ) {
-  Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket, bid.v8.intensityMarket );
+  Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket, bid.v8.intensityMarket, bid.v9.accelMarket );
   if ( 0.0 < bid.v8.intensityMarket ) {
     bid.v8.relativeMarket = bid.v7.intensityMarket / bid.v8.intensityMarket;
   }
 }
 
 void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
-  Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel, bid.v8.intensityCancel );
+  Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel, bid.v8.intensityCancel, bid.v9.accelCancel );
   if ( 0.0 < bid.v8.intensityCancel ) {
     bid.v8.relativeCancel = bid.v7.intensityCancel / bid.v8.intensityCancel;
   }

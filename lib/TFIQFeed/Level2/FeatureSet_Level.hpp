@@ -130,14 +130,14 @@ public:
     {}
   };
 
-  struct V9 { // accelleration of trading type per unit time (vs previous 1 sec)
-    double BookChangeFunctions;
-    double accellLimit;
-    double accellMarket;
+  struct V9 { // accelleration of trading type per unit time (vs previous 1 sec) - accel( v7 )
+    double accelLimit;
+    double accelMarket;
+    double accelCancel;
     V9()
-    : BookChangeFunctions {}
-    , accellLimit {}
-    , accellMarket {}
+    : accelLimit {}
+    , accelMarket {}
+    , accelCancel {}
     {}
   };
 
@@ -227,7 +227,7 @@ private:
   void Bid_Derivatives( const ou::tf::Depth& );
 
   // v7 - common code
-  void Intensity( const ou::tf::Depth&, ptime&, double&, double& );
+  void Intensity( const ou::tf::Depth&, ptime&, double&, double&, double& );
 
 };
 
