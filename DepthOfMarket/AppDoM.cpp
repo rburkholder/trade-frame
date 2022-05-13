@@ -200,20 +200,18 @@ bool AppDoM::OnInit() {
               if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1BidDel++;
 
-                uint32_t nTicks = m_nMarketOrdersBid.exchange( 0 );
-                if ( 1 < nTicks ) {
-                  std::cout << "HandleBookChangesBid warning nTicks is " << nTicks << std::endl;
-                }
+                uint32_t nTicks = m_nMarketOrdersBid.load();
                 // TODO: does arrival rate of deletions affect overall Market rate?
                 if ( 0 == nTicks ) {
                   m_FeatureSet.Bid_IncCancel( 1, depth );
                 }
                 else {
+                  m_nMarketOrdersBid--;
                   m_FeatureSet.Bid_IncMarket( 1, depth );
                 }
               }
               else { // 1 < ix
-                m_FeatureSet.Bid_IncCancel( 1, depth );
+                m_FeatureSet.Bid_IncCancel( ix, depth );
               }
               break;
             default:
@@ -247,19 +245,17 @@ bool AppDoM::OnInit() {
               if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1AskDel++;
 
-                uint32_t nTicks = m_nMarketOrdersAsk.exchange( 0 );
-                if ( 1 < nTicks ) {
-                  std::cout << "HandleBookChangesAsk warning nTicks is " << nTicks << std::endl;
-                }
+                uint32_t nTicks = m_nMarketOrdersAsk.load();
                 if ( 0 == nTicks ) {
                   m_FeatureSet.Ask_IncCancel( 1, depth );
                 }
                 else {
+                  m_nMarketOrdersAsk--;
                   m_FeatureSet.Ask_IncMarket( 1, depth );
                 }
               }
               else { // 1 < ix
-                m_FeatureSet.Ask_IncCancel( 1, depth );
+                m_FeatureSet.Ask_IncCancel( ix, depth );
               }
               break;
             default:
