@@ -161,10 +161,17 @@ void FeatureSet_Level::Bid_Aggregate( volume_t aggregate ) {
   if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
 }
 
-namespace {
-  // exponential sliding window over 20 values
-  static const double dblWeightTail = 19.0 / 20.0;
-  static const double dblWeightHead =  1.0 / 20.0;
+namespace { // TODO turn into constexpr
+
+  // exponential over 20 values
+  static const double dblWeightShort = 20.0;
+  static const double dblWeightHeadShort =                    1.0   / dblWeightShort;
+  static const double dblWeightTailShort = ( dblWeightShort - 1.0 ) / dblWeightShort;
+
+  // exponential over 200 values
+  static const double dblWeightLong = 200.0;
+  static const double dblWeightHeadLong =                   1.0   / dblWeightLong;
+  static const double dblWeightTailLong = ( dblWeightLong - 1.0 ) / dblWeightLong;
 }
 
 void FeatureSet_Level::Ask_Derivatives( const ou::tf::Depth& depth ) {
@@ -176,8 +183,8 @@ void FeatureSet_Level::Ask_Derivatives( const ou::tf::Depth& depth ) {
     auto diff = ( depth.DateTime() - ask.v6.dtLast ).total_microseconds(); // might be delete -> update
     if ( 0 < diff ) {
       ask.v6.deltaArrival = (double)diff / 1000000.0; // rate per second
-      ask.v6.dPrice_dt  = dblWeightTail * ask.v6.dPrice_dt  + dblWeightHead * ( depth.Price()  / ask.v6.deltaArrival ); // slope = rise / run
-      ask.v6.dVolume_dt = dblWeightTail * ask.v6.dVolume_dt + dblWeightHead * ( depth.Volume() / ask.v6.deltaArrival ); // slope = rise / run
+      ask.v6.dPrice_dt  = dblWeightTailShort * ask.v6.dPrice_dt  + dblWeightHeadShort * ( depth.Price()  / ask.v6.deltaArrival ); // slope = rise / run
+      ask.v6.dVolume_dt = dblWeightTailShort * ask.v6.dVolume_dt + dblWeightHeadShort * ( depth.Volume() / ask.v6.deltaArrival ); // slope = rise / run
     }
   }
   ask.v6.dtLast = depth.DateTime();
@@ -192,20 +199,12 @@ void FeatureSet_Level::Bid_Derivatives( const ou::tf::Depth& depth ) {
     auto diff = ( depth.DateTime() - bid.v6.dtLast ).total_microseconds(); // might be delete -> update
     if ( 0 < diff ) {
       bid.v6.deltaArrival = (double)diff / 1000000.0; // rate per second
-      bid.v6.dPrice_dt  = dblWeightTail * bid.v6.dPrice_dt  + dblWeightHead * ( depth.Price()  / bid.v6.deltaArrival ); // slope = rise / run
-      bid.v6.dVolume_dt = dblWeightTail * bid.v6.dVolume_dt + dblWeightHead * ( depth.Volume() / bid.v6.deltaArrival ); // slope = rise / run
+      bid.v6.dPrice_dt  = dblWeightTailShort * bid.v6.dPrice_dt  + dblWeightHeadShort * ( depth.Price()  / bid.v6.deltaArrival ); // slope = rise / run
+      bid.v6.dVolume_dt = dblWeightTailShort * bid.v6.dVolume_dt + dblWeightHeadShort * ( depth.Volume() / bid.v6.deltaArrival ); // slope = rise / run
     }
   }
   bid.v6.dtLast = depth.DateTime();
 }
-
-//FeatureSet& FeatureSet::operator=( const FeatureSet& rhs ) {
-//  if ( this != &rhs ) {
-//    ask = rhs.ask;
-//    bid = rhs.bid;
-//  }
-//  return *this;
-//}
 
 FeatureSet_Level::BookLevel& FeatureSet_Level::BookLevel::operator=( const FeatureSet_Level::BookLevel& rhs ) {
   if ( this != &rhs ) {
@@ -245,18 +244,61 @@ void FeatureSet_Level::Bid_CopyTo( FeatureSet_Level& lhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 
-// v7 - common code
-void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensity ) {
+// v7, v8 - common code
+void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensityShort, double& intensityLong ) {
   if ( boost::posix_time::not_a_date_time == dtLast ) {
   }
   else {
     auto diff = ( depth.DateTime() - dtLast).total_microseconds();
     if ( 0 < diff ) {
       double deltaArrival = (double)diff / 1000000.0; // rate per second
-      intensity  = dblWeightTail * intensity  + dblWeightHead / deltaArrival;
+      intensityShort = dblWeightTailShort * intensityShort + dblWeightHeadShort / deltaArrival;
+      intensityLong  = dblWeightTailLong  * intensityLong  + dblWeightHeadLong  / deltaArrival;
     }
   }
   dtLast = depth.DateTime();
+}
+
+void FeatureSet_Level::Ask_IncLimit(  const ou::tf::Depth& depth ) {
+  Intensity( depth, ask.v7.dtLastLimit, ask.v7.intensityLimit, ask.v8.intensityLimit );
+  if ( 0.0 < ask.v8.intensityLimit ) {
+    ask.v8.relativeLimit = ask.v7.intensityLimit / ask.v8.intensityLimit;
+  }
+}
+
+void FeatureSet_Level::Ask_IncMarket( const ou::tf::Depth& depth ) {
+  Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket, ask.v8.intensityMarket );
+  if ( 0.0 < ask.v8.intensityMarket ) {
+    ask.v8.relativeMarket = ask.v7.intensityMarket / ask.v8.intensityMarket;
+  }
+}
+
+void FeatureSet_Level::Ask_IncCancel( const ou::tf::Depth& depth ) {
+  Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel, ask.v8.intensityCancel );
+  if ( 0.0 < ask.v8.intensityCancel ) {
+    ask.v8.relativeCancel = ask.v7.intensityCancel / ask.v8.intensityCancel;
+  }
+}
+
+void FeatureSet_Level::Bid_IncLimit(  const ou::tf::Depth& depth ) {
+  Intensity( depth, bid.v7.dtLastLimit, bid.v7.intensityLimit, bid.v8.intensityLimit  );
+  if ( 0.0 < bid.v8.intensityLimit ) {
+    bid.v8.relativeLimit = bid.v7.intensityLimit / bid.v8.intensityLimit;
+  }
+}
+
+void FeatureSet_Level::Bid_IncMarket( const ou::tf::Depth& depth ) {
+  Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket, bid.v8.intensityMarket );
+  if ( 0.0 < bid.v8.intensityMarket ) {
+    bid.v8.relativeMarket = bid.v7.intensityMarket / bid.v8.intensityMarket;
+  }
+}
+
+void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
+  Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel, bid.v8.intensityCancel );
+  if ( 0.0 < bid.v8.intensityCancel ) {
+    bid.v8.relativeCancel = bid.v7.intensityCancel / bid.v8.intensityCancel;
+  }
 }
 
 } // namespace l2

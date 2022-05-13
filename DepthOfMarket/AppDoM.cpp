@@ -204,6 +204,7 @@ bool AppDoM::OnInit() {
                 if ( 1 < nTicks ) {
                   std::cout << "HandleBookChangesBid warning nTicks is " << nTicks << std::endl;
                 }
+                // TODO: does arrival rate of deletions affect overall Market rate?
                 if ( 0 == nTicks ) {
                   m_FeatureSet.Bid_IncCancel( 1, depth );
                 }

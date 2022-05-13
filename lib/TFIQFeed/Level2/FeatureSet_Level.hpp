@@ -96,14 +96,15 @@ public:
   };
 
   struct V7 { // intensity over per unit time (1 sec)
+
     ptime dtLastLimit;
-    double intensityLimit;
+    double intensityLimit; // short term intensity
 
     ptime dtLastMarket;
-    double intensityMarket;
+    double intensityMarket; // short term intensity
 
     ptime dtLastCancel;
-    double intensityCancel;
+    double intensityCancel; // short term intensity
     V7()
     : dtLastLimit(  boost::posix_time::not_a_date_time ), intensityLimit  {}
     , dtLastMarket( boost::posix_time::not_a_date_time ), intensityMarket {}
@@ -112,11 +113,20 @@ public:
   };
 
   struct V8 { // relative intensity of short period vs long period (10s vs 900s)
-    double relativeLimit;
-    double relativeMarket;
+
+    double intensityLimit; // long term intensity
+    double relativeLimit; // ratio of short term intensity vs long term intensity
+
+    double intensityMarket; // long term intensity
+    double relativeMarket; // ratio of short term intensity vs long term intensity
+
+    double intensityCancel; // long term intensity
+    double relativeCancel; // ratio of short term intensity vs long term intensity
+
     V8()
-    : relativeLimit {}
-    , relativeMarket {}
+    : intensityLimit {},  relativeLimit {}
+    , intensityMarket {}, relativeMarket {}
+    , intensityCancel {}, relativeCancel {}
     {}
   };
 
@@ -186,20 +196,18 @@ public:
   void Ask_Quote( const ou::tf::Depth& );
   void Bid_Quote( const ou::tf::Depth& );
 
-  // v7 Ask
-  void Ask_IncLimit(  const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastLimit,  ask.v7.intensityLimit  ); }
-  void Ask_IncMarket( const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket ); }
-  void Ask_IncCancel( const ou::tf::Depth& depth ) { Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel ); }
+  void Ask_IncLimit(  const ou::tf::Depth& depth );
+  void Ask_IncMarket( const ou::tf::Depth& depth );
+  void Ask_IncCancel( const ou::tf::Depth& depth );
 
-  // v7 Bid
-  void Bid_IncLimit(  const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastLimit,  bid.v7.intensityLimit  ); }
-  void Bid_IncMarket( const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket ); }
-  void Bid_IncCancel( const ou::tf::Depth& depth ) { Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel ); }
+  void Bid_IncLimit(  const ou::tf::Depth& depth );
+  void Bid_IncMarket( const ou::tf::Depth& depth );
+  void Bid_IncCancel( const ou::tf::Depth& depth );
 
 protected:
 private:
 
-  int m_ix; // used as diviser for levell number
+  int m_ix; // used as diviser for level number
 
   FeatureSet_Level* m_pTop;
   FeatureSet_Level* m_pNext;
@@ -219,7 +227,7 @@ private:
   void Bid_Derivatives( const ou::tf::Depth& );
 
   // v7 - common code
-  void Intensity( const ou::tf::Depth& depth, ptime& dtLast, double& intensity );
+  void Intensity( const ou::tf::Depth&, ptime&, double&, double& );
 
 };
 
