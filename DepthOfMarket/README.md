@@ -5,6 +5,7 @@
 
 ```
 symbol = <symbol name>
+depth = <mm|order>
 period_width=7
 ma1_periods=5
 ma2_periods=8

@@ -171,163 +171,12 @@ bool AppDoM::OnInit() {
       }
       ) );
 
-    // TODO: make conditional on config file parameter for MM or OrderBased
-    //   review old config from 2022/05/10 - 12
-
-    using EState = ou::tf::iqfeed::l2::OrderBased::EState;
-
-    m_OrderBased.Set(
-      [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
-        ou::tf::Trade::price_t price( depth.Price() );
-        ou::tf::Trade::volume_t volume( depth.Volume() );
-        m_valuesStatistics.nL2MsgBid++;
-        m_valuesStatistics.nL2MsgTtl++;
-
-        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-        auto state = m_OrderBased.State();
-        assert( EState::Ready != state );
-        if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              if ( 1 == ix ) {
-                m_valuesStatistics.nLvl1BidAdd++;
-              }
-              m_FeatureSet.Bid_IncLimit( ix, depth );
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              if ( 1 == ix ) {
-                m_valuesStatistics.nLvl1BidDel++;
-
-                uint32_t nTicks = m_nMarketOrdersBid.load();
-                // TODO: does arrival rate of deletions affect overall Market rate?
-                if ( 0 == nTicks ) {
-                  m_FeatureSet.Bid_IncCancel( 1, depth );
-                }
-                else {
-                  m_nMarketOrdersBid--;
-                  m_FeatureSet.Bid_IncMarket( 1, depth );
-                }
-              }
-              else { // 1 < ix
-                m_FeatureSet.Bid_IncCancel( ix, depth );
-              }
-              break;
-            default:
-              break;
-          }
-        }
-
-        m_pPanelTrade->OnQuoteBid( price, volume );
-        m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
-      },
-      [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
-        ou::tf::Trade::price_t price( depth.Price() );
-        ou::tf::Trade::volume_t volume( depth.Volume() );
-        m_valuesStatistics.nL2MsgAsk++;
-        m_valuesStatistics.nL2MsgTtl++;
-
-        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-        auto state = m_OrderBased.State();
-        assert( EState::Ready != state );
-        if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              if ( 1 == ix ) {
-                m_valuesStatistics.nLvl1AskAdd++;
-              }
-              m_FeatureSet.Ask_IncLimit( ix, depth );
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              if ( 1 == ix ) {
-                m_valuesStatistics.nLvl1AskDel++;
-
-                uint32_t nTicks = m_nMarketOrdersAsk.load();
-                if ( 0 == nTicks ) {
-                  m_FeatureSet.Ask_IncCancel( 1, depth );
-                }
-                else {
-                  m_nMarketOrdersAsk--;
-                  m_FeatureSet.Ask_IncMarket( 1, depth );
-                }
-              }
-              else { // 1 < ix
-                m_FeatureSet.Ask_IncCancel( ix, depth );
-              }
-              break;
-            default:
-              break;
-          }
-        }
-
-        m_pPanelTrade->OnQuoteAsk( price, volume );
-        m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
-      }
-    );
-
-    m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-      [ this ](){
-        m_FeatureSet.Set( 10 );
-        m_pDispatch->Single( true );
-        m_pDispatch->WatchAdd(
-          m_config.sSymbolName,
-          [this]( const ou::tf::DepthByOrder& depth ){
-            switch ( depth.MsgType() ) {
-              case '4': // Update
-                switch ( depth.Side() ) {
-                  case 'A':
-                    m_valuesStatistics.nL2UpdAsk++;
-                    break;
-                  case 'B':
-                    m_valuesStatistics.nL2UpdBid++;
-                    break;
-                  default:
-                    assert( false );
-                    break;
-                }
-                m_valuesStatistics.nL2UpdTtl++;
-                break;
-              case '3': // add
-                switch ( depth.Side() ) {
-                  case 'A':
-                    m_valuesStatistics.nL2AddAsk++;
-                    break;
-                  case 'B':
-                    m_valuesStatistics.nL2AddBid++;
-                    break;
-                  default:
-                    assert( false );
-                    break;
-                }
-                m_valuesStatistics.nL2AddTtl++;
-                break;
-              case '5':
-                switch ( depth.Side() ) {
-                  case 'A':
-                    m_valuesStatistics.nL2DelAsk++;
-                    break;
-                  case 'B':
-                    m_valuesStatistics.nL2DelBid++;
-                    break;
-                  default:
-                    assert( false );
-                    break;
-                }
-                m_valuesStatistics.nL2DelTtl++;
-                break;
-              case '6': // Summary - will need to categorize this properly
-                m_valuesStatistics.nL2AddTtl++;
-                break;
-              default:
-                assert( false );
-            }
-            m_OrderBased.MarketDepth( depth );
-          }
-          );
-      } );
+    if ( "mm" == m_config.sDepthType ) StartDepthByMM();
+    else if ( "order" == m_config.sDepthType ) StartDepthByOrder();
+    else {
+      std::cout << "l2 needs to be identified with 'mm' or 'order', supplied: " << m_config.sDepthType << std::endl;
+      assert( false );
+    }
 
     std::cout << "watching L1/L2: " << m_config.sSymbolName << std::endl;
 
@@ -354,6 +203,188 @@ bool AppDoM::OnInit() {
   }
 
   return code;
+}
+
+void AppDoM::StartDepthByMM() {
+
+  m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+    [ this ](){
+      m_pDispatch->Single( true );
+      m_pDispatch->WatchAdd(
+        m_config.sSymbolName,
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fBid_
+          m_valuesStatistics.nL2MsgBid++;
+          m_valuesStatistics.nL2MsgTtl++;
+          m_pPanelTrade->OnQuoteBid( price, volume );
+          m_pPanelSideBySide->OnL2Bid( price, volume, bAdd );
+        },
+        [this]( double price, int volume, bool bAdd ){ // fVolumeAtPrice_t&& fAsk_
+          m_valuesStatistics.nL2MsgAsk++;
+          m_valuesStatistics.nL2MsgTtl++;
+          m_pPanelTrade->OnQuoteAsk( price, volume );
+          m_pPanelSideBySide->OnL2Ask( price, volume, bAdd );
+        });
+    } );
+
+}
+
+void AppDoM::StartDepthByOrder() {
+
+  using EState = ou::tf::iqfeed::l2::OrderBased::EState;
+
+  m_OrderBased.Set(
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+      m_valuesStatistics.nL2MsgBid++;
+      m_valuesStatistics.nL2MsgTtl++;
+
+      m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+      auto state = m_OrderBased.State();
+      assert( EState::Ready != state );
+      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+        switch ( op ) {
+          case ou::tf::iqfeed::l2::EOp::Increase:
+          case ou::tf::iqfeed::l2::EOp::Insert:
+            if ( 1 == ix ) {
+              m_valuesStatistics.nLvl1BidAdd++;
+            }
+            m_FeatureSet.Bid_IncLimit( ix, depth );
+            break;
+          case ou::tf::iqfeed::l2::EOp::Decrease:
+          case ou::tf::iqfeed::l2::EOp::Delete:
+            if ( 1 == ix ) {
+              m_valuesStatistics.nLvl1BidDel++;
+
+              uint32_t nTicks = m_nMarketOrdersBid.load();
+              // TODO: does arrival rate of deletions affect overall Market rate?
+              if ( 0 == nTicks ) {
+                m_FeatureSet.Bid_IncCancel( 1, depth );
+              }
+              else {
+                m_nMarketOrdersBid--;
+                m_FeatureSet.Bid_IncMarket( 1, depth );
+              }
+            }
+            else { // 1 < ix
+              m_FeatureSet.Bid_IncCancel( ix, depth );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+
+      m_pPanelTrade->OnQuoteBid( price, volume );
+      m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+    },
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+      m_valuesStatistics.nL2MsgAsk++;
+      m_valuesStatistics.nL2MsgTtl++;
+
+      m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+      auto state = m_OrderBased.State();
+      assert( EState::Ready != state );
+      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+        switch ( op ) {
+          case ou::tf::iqfeed::l2::EOp::Increase:
+          case ou::tf::iqfeed::l2::EOp::Insert:
+            if ( 1 == ix ) {
+              m_valuesStatistics.nLvl1AskAdd++;
+            }
+            m_FeatureSet.Ask_IncLimit( ix, depth );
+            break;
+          case ou::tf::iqfeed::l2::EOp::Decrease:
+          case ou::tf::iqfeed::l2::EOp::Delete:
+            if ( 1 == ix ) {
+              m_valuesStatistics.nLvl1AskDel++;
+
+              uint32_t nTicks = m_nMarketOrdersAsk.load();
+              if ( 0 == nTicks ) {
+                m_FeatureSet.Ask_IncCancel( 1, depth );
+              }
+              else {
+                m_nMarketOrdersAsk--;
+                m_FeatureSet.Ask_IncMarket( 1, depth );
+              }
+            }
+            else { // 1 < ix
+              m_FeatureSet.Ask_IncCancel( ix, depth );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+
+      m_pPanelTrade->OnQuoteAsk( price, volume );
+      m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+    }
+  );
+
+  m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+    [ this ](){
+      m_FeatureSet.Set( 10 );
+      m_pDispatch->Single( true );
+      m_pDispatch->WatchAdd(
+        m_config.sSymbolName,
+        [this]( const ou::tf::DepthByOrder& depth ){
+          switch ( depth.MsgType() ) {
+            case '4': // Update
+              switch ( depth.Side() ) {
+                case 'A':
+                  m_valuesStatistics.nL2UpdAsk++;
+                  break;
+                case 'B':
+                  m_valuesStatistics.nL2UpdBid++;
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              m_valuesStatistics.nL2UpdTtl++;
+              break;
+            case '3': // add
+              switch ( depth.Side() ) {
+                case 'A':
+                  m_valuesStatistics.nL2AddAsk++;
+                  break;
+                case 'B':
+                  m_valuesStatistics.nL2AddBid++;
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              m_valuesStatistics.nL2AddTtl++;
+              break;
+            case '5':
+              switch ( depth.Side() ) {
+                case 'A':
+                  m_valuesStatistics.nL2DelAsk++;
+                  break;
+                case 'B':
+                  m_valuesStatistics.nL2DelBid++;
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              m_valuesStatistics.nL2DelTtl++;
+              break;
+            case '6': // Summary - will need to categorize this properly
+              m_valuesStatistics.nL2AddTtl++;
+              break;
+            default:
+              assert( false );
+          }
+          m_OrderBased.MarketDepth( depth );
+        }
+        );
+    } );
+
 }
 
 void AppDoM::EmitMarketMakerMaps() {

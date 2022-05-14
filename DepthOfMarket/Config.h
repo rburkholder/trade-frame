@@ -24,7 +24,10 @@
 namespace config {
 
 struct Options {
+
   std::string sSymbolName;
+
+  std::string sDepthType;
 
   int nPeriodWidth;  // units:  seconds
 

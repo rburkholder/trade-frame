@@ -33,6 +33,7 @@ namespace {
   static const std::string sFileName( "dom.cfg" );
 
   static const std::string sOption_SymbolName( "symbol" );
+  static const std::string sOption_DepthType( "depth" );
   static const std::string sOption_PeriodWidth( "period_width" );
   static const std::string sOption_MA1Periods( "ma1_periods" );
   static const std::string sOption_MA2Periods( "ma2_periods" );
@@ -68,13 +69,13 @@ bool Load( Options& options ) {
 
     config.add_options()
       ( sOption_SymbolName.c_str(), po::value<std::string>(&options.sSymbolName ), "symbol name")
+      ( sOption_DepthType.c_str(),  po::value<std::string>(&options.sDepthType ), "depth type" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
 
       ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods ), "ma1 (#periods)" )
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods ), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods ), "ma3 (#periods)" )
-
 
       ( sOption_Stochastic1Periods.c_str(), po::value<int>( &options.nStochastic1Periods ), "stochastic1 (#periods)" )
       ( sOption_Stochastic2Periods.c_str(), po::value<int>( &options.nStochastic2Periods ), "stochastic2 (#periods)" )
@@ -95,6 +96,8 @@ bool Load( Options& options ) {
 
       bOk &= parse<std::string>( sFileName, vm, sOption_SymbolName, options.sSymbolName );
       std::replace_if( options.sSymbolName.begin(), options.sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+
+      bOk &= parse<std::string>( sFileName, vm, sOption_DepthType, options.sDepthType );
 
       bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
 

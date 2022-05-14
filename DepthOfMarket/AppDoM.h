@@ -158,6 +158,9 @@ private:
   void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
 
+  void StartDepthByMM();
+  void StartDepthByOrder();
+
   void OnFundamentals( const ou::tf::Watch::Fundamentals& );
   void OnQuote( const ou::tf::Quote& );
   void OnTrade( const ou::tf::Trade& );
