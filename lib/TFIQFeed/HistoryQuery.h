@@ -244,7 +244,6 @@ namespace HistoryStructs {
 
 } // namespace HistoryStructs
 
-
 // T: CRTP inheriting class
 template <typename T>
 class HistoryQuery: public ou::Network<HistoryQuery<T> > {
@@ -257,6 +256,14 @@ public:
 
   HistoryQuery( void );
   ~HistoryQuery( void );
+
+  // http://www.iqfeed.net/dev/api/docs/docsBeta/HistoricalviaTCPIP.cfm
+  // HTX: Retrieves up to [MaxDatapoints] number of trades for the specified [Symbol].
+  // HTD: Retrieves trades for the previous [Days] days for the specified [Symbol].
+  // HTT: Retrieves trade data between [BeginDate BeginTime] and [EndDate EndTime] for the specified [Symbol].
+  // HIX: Retrieves [MaxDatapoints] number of Intervals of data for the specified [Symbol].
+  // HID: Retrieves [Days] days of interval data for the specified [Symbol].
+  // HDX: Retrieves up to [MaxDatapoints] number of End-Of-Day Data for the specified [Symbol].
 
   // start a query with one of these commands
   void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n );  // HTX ticks
@@ -278,12 +285,12 @@ protected:
   using inherited_t = typename ou::Network<HistoryQuery<T> >;
   using linebuffer_t = typename inherited_t::linebuffer_t;
 
-  enum enumRetrievalState {  // activity in progress on this port
-    RETRIEVE_IDLE = 0,  // no retrievals in progress
-    RETRIEVE_HISTORY_DATAPOINTS,  // RequestID='D', data points are arriving
-    RETRIEVE_HISTORY_INTERVALS,  // RequestID='I', interval data is arriving
-    RETRIEVE_HISTORY_SUMMARY,  // RequestID='E', eod data is arriving
-    RETRIEVE_DONE  // end marker arrived and is awaiting processing
+  enum RetrievalState {  // activity in progress on this port 
+    Idle = 0,  // no retrievals in progress
+    RetrieveDataPoints,  // RequestID='D', data points are arriving
+    RetrieveIntervals,  // RequestID='I', interval data is arriving
+    RetrieveEndOfDays,  // RequestID='E', eod data is arriving 
+    Done  // end marker arrived and is awaiting processing  
   } m_stateRetrieval;
 
   // called by Network via CRTP
@@ -345,7 +352,7 @@ private:
 template <typename T>
 HistoryQuery<T>::HistoryQuery( void )
 : Network<HistoryQuery<T> >( "127.0.0.1", 9100 ),
-  m_stateRetrieval( RETRIEVE_IDLE )
+  m_stateRetrieval( RetrievalState::Idle )
 {
   m_ruleEndMsg = qi::lit( "!ENDMSG!" );
   m_ruleErrorInvalidSymbol = qi::lit( "E,Invalid symbol" );
@@ -370,22 +377,22 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 #endif
 
   switch ( m_stateRetrieval ) {
-    case RETRIEVE_HISTORY_DATAPOINTS:
-    case RETRIEVE_HISTORY_INTERVALS:
-    case RETRIEVE_HISTORY_SUMMARY:
+    case RetrievalState::RetrieveDataPoints:
+    case RetrievalState::RetrieveIntervals:
+    case RetrievalState::RetrieveEndOfDays:
       ProcessHistoryRetrieval( buf );
       //ReturnLineBuffer( wParam );
       break;
-    case RETRIEVE_DONE:
+    case RetrievalState::Done:
       // it is an error to land here
-      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_DONE\n" );
-      //throw std::logic_error( "RETRIEVE_DONE");
+      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RetrievalState::Done\n" );
+      //throw std::logic_error( "RetrievalState::Done");
       //ReturnLineBuffer( wParam );
       break;
-    case RETRIEVE_IDLE:
+    case RetrievalState::Idle:
       // it is an error to land here
-      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_IDLE\n" );
-      //throw std::logic_error( "RETRIEVE_IDLE");
+      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RetrievalState::Idle\n" );
+      //throw std::logic_error( "RetrievalState::Idle");
       //ReturnLineBuffer( wParam );
       break;
   }
@@ -395,11 +402,11 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
 template <typename T>
 void HistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned int n ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveNDataPoints: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
+    m_stateRetrieval = RetrievalState::RetrieveDataPoints;
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HTX," << sSymbol << "," << n << ",1,D\n";
@@ -409,11 +416,11 @@ void HistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned 
 
 template <typename T>
 void HistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveNDaysOfDataPoints: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
+    m_stateRetrieval = RetrievalState::RetrieveDataPoints;
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
@@ -423,11 +430,11 @@ void HistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, uns
 
 template <typename T>
 void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, posix_time::ptime dtStart, posix_time::ptime dtEnd ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveDatedRangeOfDataPoints: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
+    m_stateRetrieval = RetrievalState::RetrieveDataPoints;
 
     // http://rhubbarb.wordpress.com/2009/10/17/boost-datetime-locales-and-facets/#more-944
     std::stringstream ss;
@@ -448,11 +455,11 @@ void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol
 
 template <typename T>
 void HistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveNIntervals: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
+    m_stateRetrieval = RetrievalState::RetrieveIntervals;
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
@@ -462,11 +469,11 @@ void HistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned i
 
 template <typename T>
 void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveNDaysOfIntervals: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
+    m_stateRetrieval = RetrievalState::RetrieveIntervals;
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
@@ -476,11 +483,11 @@ void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsi
 
 template <typename T>
 void HistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n ) {
-  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveNEndOfDays: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
+    m_stateRetrieval = RetrievalState::RetrieveEndOfDays;
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HDX," << sSymbol << "," << n << ",1,E\n";
@@ -503,7 +510,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   bool b = false;
   switch ( chRequestID ) {
     case 'D': {
-        assert ( RETRIEVE_HISTORY_DATAPOINTS == m_stateRetrieval );
+        assert ( RetrievalState::RetrieveDataPoints == m_stateRetrieval );
         structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
@@ -520,7 +527,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       }
       break;
     case 'I': {
-        assert ( RETRIEVE_HISTORY_INTERVALS == m_stateRetrieval );
+        assert ( RetrievalState::RetrieveIntervals == m_stateRetrieval );
         structInterval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
@@ -537,7 +544,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       }
       break;
     case 'E': {
-        assert ( RETRIEVE_HISTORY_SUMMARY == m_stateRetrieval );
+        assert ( RetrievalState::RetrieveEndOfDays == m_stateRetrieval );
         structSummary* pDP = m_reposSummary.CheckOutL();
         b = parse( bgn, end, m_grammarSummary, *pDP );
         if ( b && ( bgn == end ) ) {
@@ -562,7 +569,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       b = parse( bgn2, end, m_ruleErrorInvalidSymbol );
       if ( b ) {
         DEBUGOUT( "Invalid Symbol\n" );
-        m_stateRetrieval = RETRIEVE_IDLE;
+        m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
             static_cast<T*>( this )->OnHistoryRequestDone();
           }
@@ -571,7 +578,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     else {
       b = parse( bgn2, end, m_ruleEndMsg );
       if ( b ) {
-        m_stateRetrieval = RETRIEVE_IDLE;
+        m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
             static_cast<T*>( this )->OnHistoryRequestDone();
           }
