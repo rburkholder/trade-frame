@@ -51,17 +51,17 @@ public:
   HistoryQueryTag( T* t, U tagUser ) : m_t( t ), m_tagUser( tagUser ), m_bActivated( false ) {
   };
 
-  ~HistoryQueryTag( void ) {
+  virtual ~HistoryQueryTag() {
   };
 
   void SetUserTag( U tagUser ) { m_tagUser = tagUser; };
-  U GetUserTag( void ) { return m_tagUser; };
+  U GetUserTag() { return m_tagUser; };
 
   void SetT( T* t ) { m_t = t; };
   T* GetT( void ) { return m_t; };
 
-  void Activate( void ) { m_bActivated = true; };
-  bool Activated( void ) { return m_bActivated; };
+  void Activate() { m_bActivated = true; };
+  bool Activated() { return m_bActivated; };
 
 protected:
 
@@ -76,43 +76,43 @@ protected:
 //  void OnHistoryRequestDone( U ) {};
 
   // CRTP based callbacks;
-  void OnHistoryConnected( void ) {
-    assert( NULL != m_t );
+  void OnHistoryConnected() {
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryConnected( m_tagUser );
   };
 
-  void OnHistoryDisconnected( void ) {
-    assert( NULL != m_t );
+  void OnHistoryDisconnected() {
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryDisconnected( m_tagUser );
   };
 
   void OnHistoryError( size_t e ) {
-    assert( NULL != m_t );
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryError( m_tagUser, e );
   };
 
-  void OnHistorySendDone( void ) {
-    assert( NULL != m_t );
+  void OnHistorySendDone() {
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistorySendDone( m_tagUser );
   };
 
   void OnHistoryTickDataPoint( HistoryStructs::TickDataPoint* pDP ) {
-    assert( NULL != m_t );
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryTickDataPoint( m_tagUser, pDP );
   };
 
   void OnHistoryIntervalData( HistoryStructs::Interval* pDP ) {
-    assert( NULL != m_t );
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryIntervalData( m_tagUser, pDP );
   };
 
   void OnHistoryEndOfDayData( HistoryStructs::EndOfDay* pDP ) {
-    assert( NULL != m_t );
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryEndOfDayData( m_tagUser, pDP );
   };
 
-  void OnHistoryRequestDone( void ) {
-    assert( NULL != m_t );
+  void OnHistoryRequestDone() {
+    assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryRequestDone( m_tagUser );
   };
 
@@ -150,8 +150,8 @@ public:
     };
   };
 
-  HistoryBulkQuery( void );
-  virtual ~HistoryBulkQuery( void );
+  HistoryBulkQuery();
+  virtual ~HistoryBulkQuery();
 
   template<typename Iter>
   void SetSymbols( Iter begin, Iter end );
@@ -160,18 +160,17 @@ public:
     assert( n > 0 );
     m_nMaxSimultaneousQueries = n;
   };
-  size_t GetMaxSimultaneousQueries( void ) const { return m_nMaxSimultaneousQueries; };
+  size_t GetMaxSimultaneousQueries() const { return m_nMaxSimultaneousQueries; };
 
   // first of a series of requests to be built
   void DailyBars( size_t n );
-  void Block( void ) { boost::mutex::scoped_lock lock( m_mutexHistoryBulkQueryCompletion ); };
+  void Block() { boost::mutex::scoped_lock lock( m_mutexHistoryBulkQueryCompletion ); };
 
   void ReQueueBars( structResultBar* bars ) { bars->Clear(); m_reposBars.CheckInL( bars ); };
   void ReQueueTicks( structResultTicks* ticks ) { ticks->Clear(); m_reposTicks.CheckInL( ticks ); };
 
   struct structQueryState;  // forward reference
-  //typedef typename HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
-  typedef HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
+  using query_t = HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*>;
 
   struct structQueryState {
     bool b;
@@ -194,16 +193,16 @@ public:
   void OnHistoryEndOfDayData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::EndOfDay* pDP ); // for per bar processing
   void OnHistoryRequestDone( structQueryState* pqs ); // for processing finished ticks, bars
 
-  void OnCompletion( void );  // this needs to have an over ride to find out when all symbols are complete, needs to friend this class
+  void OnCompletion();  // this needs to have an over ride to find out when all symbols are complete, needs to friend this class
 
 
 protected:
 
-  enum enumProcessingState {
-    EConstructing, EQuiescent, ESymbolListBuilt, ERetrievingWithMoreInQ, ERetrievingWithQEmpty, EInDestruction
+  enum EProcessingState {
+    Constructing, Quiescent, SymbolListBuilt, RetrievingWithMoreInQ, RetrievingWithQEmpty, InDestruction
     } m_stateBulkQuery;
-  enum enumResultType {
-    EUnknown, EBars, ETicks
+  enum EResultType {
+    Unknown, Bars, Ticks
   } m_ResultType;
 
   // CRTP callbacks for inheriting class
@@ -219,7 +218,7 @@ protected:
   // CRTP based callbacks from HistoryQueryTag
 private:
 
-  typedef std::vector<std::string> symbol_list_t;
+  using symbol_list_t = std::vector<std::string>;
   symbol_list_t m_listSymbols;
   size_t m_n;  // number of data points to retrieve
 
@@ -235,32 +234,32 @@ private:
   boost::mutex m_mutexHistoryBulkQueryCompletion;
   boost::mutex m_mutexProcessSymbolListScopeLock;
 
-  void ProcessSymbolList( void );
-  void GenerateQueries( void );
+  void ProcessSymbolList();
+  void GenerateQueries();
 
 };
 
 template <typename T>
-HistoryBulkQuery<T>::HistoryBulkQuery( void )
+HistoryBulkQuery<T>::HistoryBulkQuery()
 :
-  m_stateBulkQuery( EConstructing ),
+  m_stateBulkQuery( EProcessingState::Constructing ),
   m_nMaxSimultaneousQueries( 10 ),
   m_nCurSimultaneousQueries( 0 ),
-  m_ResultType( EUnknown )
+  m_ResultType( EResultType::Unknown )
 {
-  m_stateBulkQuery = EQuiescent;
+  m_stateBulkQuery = EProcessingState::Quiescent;
 }
 
 template <typename T>
 HistoryBulkQuery<T>::~HistoryBulkQuery() {
-  assert( EQuiescent == m_stateBulkQuery );
+  assert( EProcessingState::Quiescent == m_stateBulkQuery );
 }
 
 template <typename T>
 template<typename Iter>
 void HistoryBulkQuery<T>::SetSymbols (Iter begin, Iter end ) {
 
-  assert( EQuiescent == m_stateBulkQuery );
+  assert( EProcessingState::Quiescent == m_stateBulkQuery );
 
   m_listSymbols.clear();
   while ( begin != end ) {
@@ -268,20 +267,20 @@ void HistoryBulkQuery<T>::SetSymbols (Iter begin, Iter end ) {
     begin++;
   }
   std::sort( m_listSymbols.begin(), m_listSymbols.end() );
-  m_stateBulkQuery = ESymbolListBuilt;
+  m_stateBulkQuery = EProcessingState::SymbolListBuilt;
 
 }
 
 template <typename T>
 void HistoryBulkQuery<T>::DailyBars( size_t n ) {
   m_n = n;
-  m_ResultType = EBars;
+  m_ResultType = EResultType::Bars;
   GenerateQueries();
 }
 
 template <typename T>
-void HistoryBulkQuery<T>::GenerateQueries( void ) {
-  assert( ESymbolListBuilt == m_stateBulkQuery );
+void HistoryBulkQuery<T>::GenerateQueries() {
+  assert( EProcessingState::SymbolListBuilt == m_stateBulkQuery );
   m_mutexHistoryBulkQueryCompletion.lock();
   m_nCurSimultaneousQueries = 0;
   m_iterSymbols = m_listSymbols.begin();
@@ -306,10 +305,10 @@ forum: http://forums.iqfeed.net/index.cfm?page=topic&topicID=5832
 */
 
 template <typename T>
-void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
+void HistoryBulkQuery<T>::ProcessSymbolList() {
   boost::mutex::scoped_lock lock( m_mutexProcessSymbolListScopeLock );  // lock for the scope
   structQueryState* pqs;
-  m_stateBulkQuery = ERetrievingWithMoreInQ;
+  m_stateBulkQuery = EProcessingState::RetrievingWithMoreInQ;
   while ( ( m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
     // generate another query
     m_nCurSimultaneousQueries.fetch_add( 1, boost::memory_order_acquire );
@@ -322,11 +321,11 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
     }
 
     switch ( m_ResultType ) {
-      case ETicks:
+      case EResultType::Ticks:
         pqs->ticks = m_reposTicks.CheckOutL();
         pqs->ticks->sSymbol = *m_iterSymbols;
         break;
-      case EBars:
+      case EResultType::Bars:
         pqs->bars = m_reposBars.CheckOutL();
         pqs->bars->sSymbol = *m_iterSymbols;
         break;
@@ -339,11 +338,11 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
   }
 
   if ( m_listSymbols.end() == m_iterSymbols ) {
-    m_stateBulkQuery = ERetrievingWithQEmpty;
+    m_stateBulkQuery = EProcessingState::RetrievingWithQEmpty;
   }
 
   if ( 0 == m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) ) { // no more queries outstanding so finish up
-    m_stateBulkQuery = EQuiescent; // can now initiate another round of queries
+    m_stateBulkQuery = EProcessingState::Quiescent; // can now initiate another round of queries
     m_listSymbols.clear();
     static_cast<T*>( this )->OnCompletion();  // indicate total completion
     m_mutexHistoryBulkQueryCompletion.unlock();
@@ -416,11 +415,11 @@ void HistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
 
   // clean up.
   switch ( m_ResultType ) {
-    case ETicks:
+    case EResultType::Ticks:
       static_cast<T*>( this )->OnTicks( pqs->ticks );  // structure is reclaimed later
       pqs->ticks = NULL;
       break;
-    case EBars:
+    case EResultType::Bars:
       static_cast<T*>( this )->OnBars( pqs->bars );  // structure is reclaimed later
       pqs->bars = NULL;
       break;

@@ -255,7 +255,7 @@ public:
   using EndOfDay      = ou::tf::iqfeed::HistoryStructs::EndOfDay;
 
   HistoryQuery();
-  ~HistoryQuery();
+  virtual ~HistoryQuery();
 
   // http://www.iqfeed.net/dev/api/docs/docsBeta/HistoricalviaTCPIP.cfm
   // HTX: Retrieves up to [MaxDatapoints] number of trades for the specified [Symbol].

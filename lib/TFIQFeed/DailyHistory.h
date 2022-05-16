@@ -40,7 +40,7 @@ public:
   using fDone_t = std::function<void()>;
 
   DailyHistory( fConnected_t&&, fBar_t&&, fDone_t&& );
-  ~DailyHistory() {}
+  virtual ~DailyHistory() {}
   void Connect();
   void Request( const std::string& sSymbol, unsigned int nDays );
   void Disconnect();
