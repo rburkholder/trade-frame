@@ -118,7 +118,7 @@ namespace HistoryStructs {
     unsigned long PeriodVolume;
   };
 
-  struct Summary {
+  struct EndOfDay {
     unsigned short Year;
     unsigned short Month;
     unsigned short Day;
@@ -176,7 +176,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::iqfeed::HistoryStructs::Summary,
+  ou::tf::iqfeed::HistoryStructs::EndOfDay,
   (unsigned short, Year)
   (unsigned short, Month)
   (unsigned short, Day)
@@ -228,8 +228,8 @@ namespace HistoryStructs {
   };
 
   template <typename Iterator>
-  struct SummaryParser: qi::grammar<Iterator, Summary()> {
-    SummaryParser(): SummaryParser::base_type(start) {
+  struct EndOfDayParser: qi::grammar<Iterator, EndOfDay()> {
+    EndOfDayParser(): EndOfDayParser::base_type(start) {
       start %=
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
@@ -239,7 +239,7 @@ namespace HistoryStructs {
         >> ','
         ;
     }
-    qi::rule<Iterator, Summary()> start;
+    qi::rule<Iterator, EndOfDay()> start;
   };
 
 } // namespace HistoryStructs
@@ -250,12 +250,12 @@ class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
 public:
 
-  using structTickDataPoint = ou::tf::iqfeed::HistoryStructs::TickDataPoint;
-  using structInterval =  ou::tf::iqfeed::HistoryStructs::Interval;
-  using structSummary =  ou::tf::iqfeed::HistoryStructs::Summary;
+  using TickDataPoint = ou::tf::iqfeed::HistoryStructs::TickDataPoint;
+  using Interval      = ou::tf::iqfeed::HistoryStructs::Interval;
+  using EndOfDay      = ou::tf::iqfeed::HistoryStructs::EndOfDay;
 
-  HistoryQuery( void );
-  ~HistoryQuery( void );
+  HistoryQuery();
+  ~HistoryQuery();
 
   // http://www.iqfeed.net/dev/api/docs/docsBeta/HistoricalviaTCPIP.cfm
   // HTX: Retrieves up to [MaxDatapoints] number of trades for the specified [Symbol].
@@ -276,9 +276,9 @@ public:
   void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n );  // HDX  (bars)
 
   // once data is extracted, return the buffer for reuse
-  void ReQueueTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
-  void ReQueueInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
-  void ReQueueSummary( structSummary* pDP ) { m_reposSummary.CheckInL( pDP ); }
+  void ReQueueTickDataPoint( TickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
+  void ReQueueInterval( Interval* pDP ) { m_reposInterval.CheckInL( pDP ); }
+  void ReQueueEndOfDay( EndOfDay* pDP ) { m_reposEndOfDay.CheckInL( pDP ); }
 
 protected:
 
@@ -317,14 +317,14 @@ protected:
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
   // CRTP based dummy callbacks;
-  void OnHistoryConnected( void ) {};
-  void OnHistoryDisconnected( void ) {};
+  void OnHistoryConnected() {};
+  void OnHistoryDisconnected() {};
   void OnHistoryError( size_t e ) {};
-  void OnHistorySendDone( void ) {};
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) { ReQueueTickDataPoint( pDP ); };
-  void OnHistoryIntervalData( structInterval* pDP ) { ReQueueInterval( pDP ); };
-  void OnHistorySummaryData( structSummary* pDP ) { ReQueueSummary( pDP ); };
-  void OnHistoryRequestDone( void ) {};
+  void OnHistorySendDone() {};
+  void OnHistoryTickDataPoint( TickDataPoint* pDP ) { ReQueueTickDataPoint( pDP ); };
+  void OnHistoryIntervalData( Interval* pDP ) { ReQueueInterval( pDP ); };
+  void OnHistoryEndOfDayData( EndOfDay* pDP ) { ReQueueEndOfDay( pDP ); };
+  void OnHistoryRequestDone() {};
 
 private:
 
@@ -333,13 +333,13 @@ private:
   static const size_t m_nMillisecondsToSleep;
 
   // used for containing parsed data and passing it on
-  ou::BufferRepository<structTickDataPoint> m_reposTickDataPoint;
-  ou::BufferRepository<structInterval> m_reposInterval;
-  ou::BufferRepository<structSummary> m_reposSummary;
+  ou::BufferRepository<TickDataPoint> m_reposTickDataPoint;
+  ou::BufferRepository<Interval> m_reposInterval;
+  ou::BufferRepository<EndOfDay> m_reposEndOfDay;
 
   ou::tf::iqfeed::HistoryStructs::DataPointParser<const_iterator_t> m_grammarDataPoint;
   ou::tf::iqfeed::HistoryStructs::IntervalParser<const_iterator_t> m_grammarInterval;
-  ou::tf::iqfeed::HistoryStructs::SummaryParser<const_iterator_t> m_grammarSummary;
+  ou::tf::iqfeed::HistoryStructs::EndOfDayParser<const_iterator_t> m_grammarEndOfDay;
 
   qi::rule<const_iterator_t> m_ruleEndMsg;
   qi::rule<const_iterator_t> m_ruleErrorInvalidSymbol;
@@ -350,7 +350,7 @@ private:
 };
 
 template <typename T>
-HistoryQuery<T>::HistoryQuery( void )
+HistoryQuery<T>::HistoryQuery()
 : Network<HistoryQuery<T> >( "127.0.0.1", 9100 ),
   m_stateRetrieval( RetrievalState::Idle )
 {
@@ -385,13 +385,13 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
     case RetrievalState::Done:
       // it is an error to land here
-      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RetrievalState::Done\n" );
+      DEBUGOUT( "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Done\n" );
       //throw std::logic_error( "RetrievalState::Done");
       //ReturnLineBuffer( wParam );
       break;
     case RetrievalState::Idle:
       // it is an error to land here
-      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RetrievalState::Idle\n" );
+      DEBUGOUT( "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle\n" );
       //throw std::logic_error( "RetrievalState::Idle");
       //ReturnLineBuffer( wParam );
       break;
@@ -511,7 +511,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   switch ( chRequestID ) {
     case 'D': {
         assert ( RetrievalState::RetrieveDataPoints == m_stateRetrieval );
-        structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
+        TickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = posix_time::ptime(
@@ -528,7 +528,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       break;
     case 'I': {
         assert ( RetrievalState::RetrieveIntervals == m_stateRetrieval );
-        structInterval* pDP = m_reposInterval.CheckOutL();
+        Interval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = posix_time::ptime(
@@ -545,23 +545,23 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       break;
     case 'E': {
         assert ( RetrievalState::RetrieveEndOfDays == m_stateRetrieval );
-        structSummary* pDP = m_reposSummary.CheckOutL();
-        b = parse( bgn, end, m_grammarSummary, *pDP );
+        EndOfDay* pDP = m_reposEndOfDay.CheckOutL();
+        b = parse( bgn, end, m_grammarEndOfDay, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
-            static_cast<T*>( this )->OnHistorySummaryData( pDP );
+            static_cast<T*>( this )->OnHistoryEndOfDayData( pDP );
           //}
         }
         else {
-          m_reposSummary.CheckInL( pDP );
+          m_reposEndOfDay.CheckInL( pDP );
         }
       }
       break;
     default:
-      throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval unknown record");
+      throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval unknown record");
   }
 
   if ( !b ) {

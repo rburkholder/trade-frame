@@ -57,11 +57,11 @@ void DailyHistory::OnHistorySendDone() {
   m_fDone();
 }
 
-void DailyHistory::OnHistorySummaryData( structSummary* pDP ) {
-  //std::cout << "OnHistorySummaryData: " << pDP->Close << std::endl;
+void DailyHistory::OnHistoryEndOfDayData( EndOfDay* pDP ) {
+  //std::cout << "OnHistoryEndOfDayData: " << pDP->Close << std::endl;
   ou::tf::Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   m_fBar( bar );
-  ou::tf::iqfeed::HistoryQuery<DailyHistory>::OnHistorySummaryData( pDP );
+  ou::tf::iqfeed::HistoryQuery<DailyHistory>::OnHistoryEndOfDayData( pDP );
 };
 
 void DailyHistory::OnHistoryRequestDone() {

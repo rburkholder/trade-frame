@@ -72,7 +72,7 @@ protected:
 //  void OnHistorySendDone( U ) {};
 //  void OnHistoryTickDataPoint( U, HistoryStructs::structTickDataPoint* ) {};
 //  void OnHistoryIntervalData( U, HistoryStructs::structInterval* ) {};
-//  void OnHistorySummaryData( U, HistoryStructs::structSummary ) {};
+//  void OnHistoryEndOfDayData( U, HistoryStructs::structEndOfDay ) {};
 //  void OnHistoryRequestDone( U ) {};
 
   // CRTP based callbacks;
@@ -106,9 +106,9 @@ protected:
     static_cast<T*>( m_t )->OnHistoryIntervalData( m_tagUser, pDP );
   };
 
-  void OnHistorySummaryData( HistoryStructs::Summary* pDP ) {
+  void OnHistoryEndOfDayData( HistoryStructs::EndOfDay* pDP ) {
     assert( NULL != m_t );
-    static_cast<T*>( m_t )->OnHistorySummaryData( m_tagUser, pDP );
+    static_cast<T*>( m_t )->OnHistoryEndOfDayData( m_tagUser, pDP );
   };
 
   void OnHistoryRequestDone( void ) {
@@ -191,7 +191,7 @@ public:
   void OnHistorySendDone( structQueryState* pqs ); // optional
   void OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::TickDataPoint* pDP ); // for per tick processing
   void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Interval* pDP ); // for per bar processing
-  void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Summary* pDP ); // for per bar processing
+  void OnHistoryEndOfDayData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::EndOfDay* pDP ); // for per bar processing
   void OnHistoryRequestDone( structQueryState* pqs ); // for processing finished ticks, bars
 
   void OnCompletion( void );  // this needs to have an over ride to find out when all symbols are complete, needs to friend this class
@@ -395,16 +395,16 @@ void HistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, ou::tf::
 }
 
 template <typename T>
-void HistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Summary* pDP ) {
+void HistoryBulkQuery<T>::OnHistoryEndOfDayData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::EndOfDay* pDP ) {
 
   Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
 
-  if ( &HistoryBulkQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
-    static_cast<T*>( this )->OnHistorySummaryData( pqs, pDP );
+  if ( &HistoryBulkQuery<T>::OnHistoryEndOfDayData != &T::OnHistoryEndOfDayData ) {
+    static_cast<T*>( this )->OnHistoryEndOfDayData( pqs, pDP );
   }
 
-  pqs->query.ReQueueSummary( pDP );
+  pqs->query.ReQueueEndOfDay( pDP );
 }
 
 template <typename T>

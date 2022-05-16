@@ -46,7 +46,7 @@ public:
   void Disconnect();
 protected:
   void OnHistoryConnected();
-  void OnHistorySummaryData( structSummary* pDP );
+  void OnHistoryEndOfDayData( EndOfDay* pDP );
   void OnHistoryRequestDone();
   void OnHistorySendDone();
   void OnHistoryError( size_t e );
