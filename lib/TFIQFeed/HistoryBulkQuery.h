@@ -96,17 +96,17 @@ protected:
     static_cast<T*>( m_t )->OnHistorySendDone( m_tagUser );
   };
 
-  void OnHistoryTickDataPoint( HistoryStructs::structTickDataPoint* pDP ) {
+  void OnHistoryTickDataPoint( HistoryStructs::TickDataPoint* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistoryTickDataPoint( m_tagUser, pDP );
   };
 
-  void OnHistoryIntervalData( HistoryStructs::structInterval* pDP ) {
+  void OnHistoryIntervalData( HistoryStructs::Interval* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistoryIntervalData( m_tagUser, pDP );
   };
 
-  void OnHistorySummaryData( HistoryStructs::structSummary* pDP ) {
+  void OnHistorySummaryData( HistoryStructs::Summary* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistorySummaryData( m_tagUser, pDP );
   };
@@ -189,9 +189,9 @@ public:
   void OnHistoryDisconnected( structQueryState* pqs ); // optional
   void OnHistoryError( structQueryState* pqs, size_t e ); // optional
   void OnHistorySendDone( structQueryState* pqs ); // optional
-  void OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structTickDataPoint* pDP ); // for per tick processing
-  void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structInterval* pDP ); // for per bar processing
-  void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP ); // for per bar processing
+  void OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::TickDataPoint* pDP ); // for per tick processing
+  void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Interval* pDP ); // for per bar processing
+  void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Summary* pDP ); // for per bar processing
   void OnHistoryRequestDone( structQueryState* pqs ); // for processing finished ticks, bars
 
   void OnCompletion( void );  // this needs to have an over ride to find out when all symbols are complete, needs to friend this class
@@ -367,7 +367,7 @@ void HistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 }
 
 template <typename T>
-void HistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structTickDataPoint* pDP ) {
+void HistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::TickDataPoint* pDP ) {
 
   Quote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
   pqs->ticks->quotes.Append( quote );
@@ -382,7 +382,7 @@ void HistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, ou::tf:
 }
 
 template <typename T>
-void HistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structInterval* pDP ) {
+void HistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Interval* pDP ) {
 
   Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
@@ -395,7 +395,7 @@ void HistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, ou::tf::
 }
 
 template <typename T>
-void HistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP ) {
+void HistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::Summary* pDP ) {
 
   Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );

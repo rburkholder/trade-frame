@@ -23,13 +23,13 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <cassert>
 
-#include <boost/config/warning_disable.hpp>
+#include <boost/thread/thread.hpp>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+#include <boost/date_time/posix_time/posix_time.hpp>
+namespace posix_time = boost::posix_time;
+
+#include <boost/fusion/include/adapt_struct.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -37,12 +37,8 @@ using namespace boost::gregorian;
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
-#include <boost/thread/thread.hpp>
-
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
-
-#include <boost/fusion/include/adapt_struct.hpp>
 
 #include <OUCommon/ReusableBuffers.h>
 #include <OUCommon/Network.h>
@@ -87,14 +83,14 @@ namespace iqfeed { // IQFeed
 
 namespace HistoryStructs {
 
-  struct structTickDataPoint {
+  struct TickDataPoint {
     unsigned short Year;
     unsigned short Month;
     unsigned short Day;
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-    ptime DateTime;
+    posix_time::ptime DateTime;
     double Last;
     long  LastSize;
     unsigned long TotalVolume;
@@ -106,14 +102,14 @@ namespace HistoryStructs {
     char BasisForLast;  // 'C' normal, 'E' extended
   };
 
-  struct structInterval {
+  struct Interval {
     unsigned short Year;
     unsigned short Month;
     unsigned short Day;
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-    ptime DateTime;
+    posix_time::ptime DateTime;
     double High;
     double Low;
     double Open;
@@ -122,14 +118,14 @@ namespace HistoryStructs {
     unsigned long PeriodVolume;
   };
 
-  struct structSummary {
+  struct Summary {
     unsigned short Year;
     unsigned short Month;
     unsigned short Day;
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-    ptime DateTime;
+    posix_time::ptime DateTime;
     double High;
     double Low;
     double Open;
@@ -145,7 +141,7 @@ namespace HistoryStructs {
 
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::iqfeed::HistoryStructs::structTickDataPoint,
+  ou::tf::iqfeed::HistoryStructs::TickDataPoint,
   (unsigned short, Year)
   (unsigned short, Month)
   (unsigned short, Day)
@@ -164,7 +160,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::iqfeed::HistoryStructs::structInterval,
+  ou::tf::iqfeed::HistoryStructs::Interval,
   (unsigned short, Year)
   (unsigned short, Month)
   (unsigned short, Day)
@@ -180,7 +176,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  ou::tf::iqfeed::HistoryStructs::structSummary,
+  ou::tf::iqfeed::HistoryStructs::Summary,
   (unsigned short, Year)
   (unsigned short, Month)
   (unsigned short, Day)
@@ -202,7 +198,7 @@ namespace iqfeed { // IQFeed
 namespace HistoryStructs {
 
   template <typename Iterator>
-  struct DataPointParser: qi::grammar<Iterator, structTickDataPoint()> {
+  struct DataPointParser: qi::grammar<Iterator, TickDataPoint()> {
     DataPointParser(): DataPointParser::base_type(start) {
       start %=
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
@@ -213,11 +209,11 @@ namespace HistoryStructs {
         >> ','
         ;
     }
-    qi::rule<Iterator, structTickDataPoint()> start;
+    qi::rule<Iterator, TickDataPoint()> start;
   };
 
   template <typename Iterator>
-  struct IntervalParser: qi::grammar<Iterator, structInterval()> {
+  struct IntervalParser: qi::grammar<Iterator, Interval()> {
     IntervalParser(): IntervalParser::base_type(start) {
       start %=
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
@@ -228,11 +224,11 @@ namespace HistoryStructs {
         >> ','
         ;
     }
-    qi::rule<Iterator, structInterval()> start;
+    qi::rule<Iterator, Interval()> start;
   };
 
   template <typename Iterator>
-  struct SummaryParser: qi::grammar<Iterator, structSummary()> {
+  struct SummaryParser: qi::grammar<Iterator, Summary()> {
     SummaryParser(): SummaryParser::base_type(start) {
       start %=
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
@@ -243,7 +239,7 @@ namespace HistoryStructs {
         >> ','
         ;
     }
-    qi::rule<Iterator, structSummary()> start;
+    qi::rule<Iterator, Summary()> start;
   };
 
 } // namespace HistoryStructs
@@ -255,9 +251,9 @@ class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
 public:
 
-  using structTickDataPoint = ou::tf::iqfeed::HistoryStructs::structTickDataPoint;
-  using structInterval =  ou::tf::iqfeed::HistoryStructs::structInterval;
-  using structSummary =  ou::tf::iqfeed::HistoryStructs::structSummary;
+  using structTickDataPoint = ou::tf::iqfeed::HistoryStructs::TickDataPoint;
+  using structInterval =  ou::tf::iqfeed::HistoryStructs::Interval;
+  using structSummary =  ou::tf::iqfeed::HistoryStructs::Summary;
 
   HistoryQuery( void );
   ~HistoryQuery( void );
@@ -265,7 +261,7 @@ public:
   // start a query with one of these commands
   void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n );  // HTX ticks
   void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ); // HTD ticks
-  void RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, ptime dtStart, ptime dtEnd ); // HTT ticks
+  void RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, posix_time::ptime dtStart, posix_time::ptime dtEnd ); // HTT ticks
 
   void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n );  // HIX i=interval in seconds  (bars)
   void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ); // HID i=interval in seconds (bars)
@@ -426,7 +422,7 @@ void HistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, uns
 }
 
 template <typename T>
-void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, ptime dtStart, ptime dtEnd ) {
+void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, posix_time::ptime dtStart, posix_time::ptime dtEnd ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "HistoryQuery<T>::RetrieveDatedRangeOfDataPoints: not in IDLE");
   }
@@ -511,7 +507,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime(
+          pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           //if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
@@ -528,7 +524,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structInterval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime(
+          pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           //if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
@@ -545,7 +541,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         structSummary* pDP = m_reposSummary.CheckOutL();
         b = parse( bgn, end, m_grammarSummary, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = ptime(
+          pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
