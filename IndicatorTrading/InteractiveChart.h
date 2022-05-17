@@ -35,12 +35,10 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFIndicators/TSEMA.h>
-#include <TFIndicators/Pivots.h>
 #include <TFIndicators/TSSWStochastic.h>
 
 #include <TFTimeSeries/BarFactory.h>
 
-#include <TFIQFeed/HistoryRequest.h>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFTrading/Order.h>
@@ -52,6 +50,7 @@
 #include <TFVuTrading/WinChartView.h>
 
 #include "Indicators.hpp"
+#include "DailyHistory.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -369,9 +368,11 @@ private:
   using mapLifeCycle_t = std::map<idOrder_t,LifeCycle>;
   mapLifeCycle_t m_mapLifeCycle;
 
-  ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
-  ou::tf::Bars m_barsHistory;
-  ou::tf::PivotSet m_setPivots;
+  //ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
+  //ou::tf::Bars m_barsHistory;
+  //ou::tf::PivotSet m_setPivots;
+
+  DailyHistory m_DailyHistory;
 
   void Init();
 
