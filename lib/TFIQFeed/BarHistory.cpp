@@ -39,11 +39,26 @@ BarHistory::BarHistory(
   assert( m_fDone );
 }
 
+void BarHistory::Set( fBar_t&& fBar, fDone_t&& fDone ) {
+  assert( fBar );
+  assert( fDone );
+  m_fBar = std::move( fBar );
+  m_fDone = std::move( fDone );
+}
+
 void BarHistory::Connect() {
   ou::tf::iqfeed::HistoryQuery<BarHistory>::Connect();
 }
 
-void BarHistory::Request( const std::string& sSymbol, unsigned int nDays ) {
+void BarHistory::RequestNBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nBars ) {
+  RetrieveNIntervals( sSymbol, nSeconds, nBars );
+}
+
+void BarHistory::RequestNDaysOfBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nDays ) {
+  RetrieveNDaysOfIntervals( sSymbol, nSeconds, nDays );
+}
+
+void BarHistory::RequestNEndOfDay( const std::string& sSymbol, unsigned int nDays ) {
   RetrieveNEndOfDays( sSymbol, nDays );
 }
 
@@ -55,6 +70,12 @@ void BarHistory::OnHistoryConnected() {
 void BarHistory::OnHistorySendDone() {
   //std::cout << "OnHistorySendDone" << std::endl;
   m_fDone();
+}
+
+void BarHistory::OnHistoryIntervalData( Interval* pDP ) {
+  ou::tf::Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
+  m_fBar( bar );
+  ou::tf::iqfeed::HistoryQuery<BarHistory>::OnHistoryIntervalData( pDP );
 }
 
 void BarHistory::OnHistoryEndOfDayData( EndOfDay* pDP ) {
@@ -70,7 +91,7 @@ void BarHistory::OnHistoryRequestDone() {
 };
 
 void BarHistory::OnHistoryError( size_t e ) {
-  std::cout << "OnHistoryError: " << e << std::endl;
+  std::cout << "BarHistory::OnHistoryError: " << e << std::endl;
 };
 
 void BarHistory::Disconnect() {

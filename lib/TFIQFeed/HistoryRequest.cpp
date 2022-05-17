@@ -79,7 +79,7 @@ void HistoryRequest::Request( const std::string& sSymbol_, uint16_t nBar, fBar_t
 
 void HistoryRequest::NextRequest( Entry&& entry ) {
   m_entryCurrent = std::move( entry );
-  m_pHistory->Request( m_entryCurrent.sSymbol, m_entryCurrent.nBar );
+  m_pHistory->RequestNEndOfDay( m_entryCurrent.sSymbol, m_entryCurrent.nBar );
 }
 
 } // namespace iqfeed

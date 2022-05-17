@@ -41,16 +41,24 @@ public:
 
   BarHistory( fConnected_t&&, fBar_t&&, fDone_t&& );
   virtual ~BarHistory() {}
-  
+
+  void Set( fBar_t&&, fDone_t&& ); // subsequent request
+
   void Connect();
-  void Request( const std::string& sSymbol, unsigned int nDays );
+  void RequestNBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nBars );
+  void RequestNDaysOfBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nDays );
+  void RequestNEndOfDay( const std::string& sSymbol, unsigned int nDays );
   void Disconnect();
+
 protected:
+
   void OnHistoryConnected();
+  void OnHistoryIntervalData( Interval* pDP );
   void OnHistoryEndOfDayData( EndOfDay* pDP );
   void OnHistoryRequestDone();
   void OnHistorySendDone();
   void OnHistoryError( size_t e );
+  
 private:
   fConnected_t m_fConnected;
   fBar_t m_fBar;
