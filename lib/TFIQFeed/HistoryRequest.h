@@ -25,11 +25,13 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 
+// HistoryRequest allows queuing up multiple DailyHistory requests
+
 namespace ou {
 namespace tf {
 namespace iqfeed {
 
-class DailyHistory;
+class BarHistory;
 
 class HistoryRequest {
 public:
@@ -60,7 +62,7 @@ private:
   fConnected_t m_fConnected;
 
   std::mutex m_mutexHistorySlots;
-  std::unique_ptr<DailyHistory> m_pHistory;
+  std::unique_ptr<BarHistory> m_pHistory;
   bool m_bInProcess;
 
   struct Entry {
@@ -68,21 +70,27 @@ private:
     uint16_t nBar;
     fBar_t fBar;
     fDone_t fDone;
+
     Entry() {}
-    Entry( const Entry&& rhs )
-    : fBar( std::move( rhs.fBar ) ), fDone( std::move( rhs.fDone ) ),
-      sSymbol( std::move( rhs.sSymbol ) ), nBar( rhs.nBar )
+
+    Entry( Entry&& rhs )
+    : fBar( std::move( rhs.fBar ) ), fDone( std::move( rhs.fDone ) )
+    , sSymbol( std::move( rhs.sSymbol ) ), nBar( rhs.nBar )
     {}
-    Entry& operator=( const Entry&& rhs ) {
+
+    Entry& operator=( Entry&& rhs ) {
       sSymbol = std::move( rhs.sSymbol );
       nBar = rhs.nBar;
       fBar = std::move( rhs.fBar );
       fDone = std::move( rhs.fDone );
       return *this;
     }
+
     Entry( const std::string&& sSymbol_, uint16_t nBar_, fBar_t&& fBar_, fDone_t&& fDone_ )
-    : sSymbol( std::move( sSymbol_ ) ), nBar( nBar_ ),
-      fBar( std::move( fBar_ ) ), fDone( std::move( fDone_ ) ) {}
+    : sSymbol( std::move( sSymbol_ ) ), nBar( nBar_ )
+    , fBar( std::move( fBar_ ) ), fDone( std::move( fDone_ ) ) 
+    {}
+
     void Clear() {
       sSymbol.clear();
       fBar = nullptr;

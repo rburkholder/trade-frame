@@ -244,8 +244,7 @@ namespace HistoryStructs {
 
 } // namespace HistoryStructs
 
-// T: CRTP inheriting class
-template <typename T>
+template <typename T> // T: CRTP inheriting class
 class HistoryQuery: public ou::Network<HistoryQuery<T> > {
   friend ou::Network<HistoryQuery<T> >;
 public:

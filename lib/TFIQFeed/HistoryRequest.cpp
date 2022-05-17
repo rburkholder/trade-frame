@@ -19,7 +19,7 @@
  * Created  2021/09/06 21:09
  */
 
-#include "DailyHistory.h"
+#include "BarHistory.h"
 #include "HistoryRequest.h"
 
 namespace ou {
@@ -32,7 +32,7 @@ HistoryRequest::HistoryRequest(
 : m_bInProcess( false ),
   m_fConnected( std::move( fConnected ) )
 {
-  m_pHistory = std::make_unique<DailyHistory>(
+  m_pHistory = std::make_unique<BarHistory>(
     [this](){ // fConnected_t
       m_fConnected();
     },

@@ -10,10 +10,10 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
+    BarHistory.h
     BuildInstrument.h
     BuildSymbolName.h
     CurlGetMktSymbols.h
-    DailyHistory.h
     HistoryRequest.h
     InMemoryMktSymbolList.h
     IQFeed.h
@@ -48,10 +48,10 @@ set(
 
 set(
   file_cpp
+    BarHistory.cpp
     BuildInstrument.cpp
     BuildSymbolName.cpp
     CurlGetMktSymbols.cpp
-    DailyHistory.cpp
     HistoryRequest.cpp
     InMemoryMktSymbolList.cpp
     IQFeed.cpp

@@ -12,7 +12,7 @@
  ************************************************************************/
 
 /*
- * File:    DailyHistory.h
+ * File:    BarHistory.h
  * Author:  raymond@burkholder.net
  * Project: lib/TFIQFeed
  * Created: August 7, 2021, 19:06
@@ -31,16 +31,17 @@ namespace ou {
 namespace tf {
 namespace iqfeed {
 
-class DailyHistory: HistoryQuery<DailyHistory> {
-  friend HistoryQuery<DailyHistory>;
+class BarHistory: HistoryQuery<BarHistory> {
+  friend HistoryQuery<BarHistory>;
 public:
 
   using fConnected_t = std::function<void(void)>;
   using fBar_t = std::function<void(const ou::tf::Bar&)>;
   using fDone_t = std::function<void()>;
 
-  DailyHistory( fConnected_t&&, fBar_t&&, fDone_t&& );
-  virtual ~DailyHistory() {}
+  BarHistory( fConnected_t&&, fBar_t&&, fDone_t&& );
+  virtual ~BarHistory() {}
+  
   void Connect();
   void Request( const std::string& sSymbol, unsigned int nDays );
   void Disconnect();
