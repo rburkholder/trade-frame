@@ -26,22 +26,60 @@ namespace ou {
 namespace tf {
 namespace iqfeed {
 
+BarHistory::BarHistory()
+: ou::tf::iqfeed::HistoryQuery<BarHistory>()
+, m_bConnected( false )
+, m_fConnected( nullptr )
+, m_fBar( nullptr )
+, m_fDone( nullptr )
+{}
+
+BarHistory::BarHistory(
+  fConnected_t&& fConnected
+)
+: ou::tf::iqfeed::HistoryQuery<BarHistory>()
+, m_bConnected( false )
+, m_fConnected( std::move( fConnected ) )
+, m_fBar( nullptr )
+, m_fDone( nullptr )
+{
+  assert( m_fConnected );
+}
+
 BarHistory::BarHistory(
   fConnected_t&& fConnected, fBar_t&& fBar, fDone_t&& fDone
 )
-: ou::tf::iqfeed::HistoryQuery<BarHistory>(),
-  m_fConnected( std::move( fConnected ) ),
-  m_fBar( std::move( fBar ) ),
-  m_fDone( std::move( fDone ) )
+: ou::tf::iqfeed::HistoryQuery<BarHistory>()
+, m_bConnected( false )
+, m_fConnected( std::move( fConnected ) )
+, m_fBar( std::move( fBar ) )
+, m_fDone( std::move( fDone ) )
 {
   assert( m_fConnected );
   assert( m_fBar );
   assert( m_fDone );
 }
 
+BarHistory::~BarHistory() {
+  if ( m_bConnected ) {
+    //m_bConnected = false;
+    Disconnect();
+  }
+}
+
 void BarHistory::Set( fBar_t&& fBar, fDone_t&& fDone ) {
   assert( fBar );
   assert( fDone );
+  m_fBar = std::move( fBar );
+  m_fDone = std::move( fDone );
+}
+
+void BarHistory::Set( fConnected_t&& fConnected, fBar_t&& fBar, fDone_t&& fDone ) {
+  assert( !m_bConnected );
+  assert( fConnected );
+  assert( fBar );
+  assert( fDone );
+  m_fConnected = std::move( fConnected );
   m_fBar = std::move( fBar );
   m_fDone = std::move( fDone );
 }
@@ -64,7 +102,13 @@ void BarHistory::RequestNEndOfDay( const std::string& sSymbol, unsigned int nDay
 
 void BarHistory::OnHistoryConnected() {
   //std::cout << "OnHistoryConnected" << std::endl;
+  m_bConnected = true;
   m_fConnected();
+};
+
+void BarHistory::OnHistoryDisconnected() {
+  //std::cout << "OnHistoryDisconnected" << std::endl;
+  m_bConnected = false;
 };
 
 void BarHistory::OnHistorySendDone() {

@@ -39,10 +39,18 @@ public:
   using fBar_t = std::function<void(const ou::tf::Bar&)>;
   using fDone_t = std::function<void()>;
 
-  BarHistory( fConnected_t&&, fBar_t&&, fDone_t&& );
-  virtual ~BarHistory() {}
+  using pBarHistory_t = std::unique_ptr<BarHistory>;
+  static pBarHistory_t Construct( fConnected_t&& fConnected ) {
+    return std::make_unique<BarHistory>( std::move( fConnected ) );
+  }
 
-  void Set( fBar_t&&, fDone_t&& ); // subsequent request
+  BarHistory();
+  BarHistory( fConnected_t&& ); // multiple requests
+  BarHistory( fConnected_t&&, fBar_t&&, fDone_t&& ); // single request
+  virtual ~BarHistory();
+
+  void Set( fBar_t&&, fDone_t&& );
+  void Set( fConnected_t&&, fBar_t&&, fDone_t&& );
 
   void Connect();
   void RequestNBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nBars );
@@ -53,6 +61,7 @@ public:
 protected:
 
   void OnHistoryConnected();
+  void OnHistoryDisconnected();
   void OnHistoryIntervalData( Interval* pDP );
   void OnHistoryEndOfDayData( EndOfDay* pDP );
   void OnHistoryRequestDone();
@@ -60,6 +69,7 @@ protected:
   void OnHistoryError( size_t e );
   
 private:
+  bool m_bConnected;
   fConnected_t m_fConnected;
   fBar_t m_fBar;
   fDone_t m_fDone;
