@@ -79,22 +79,6 @@ class InteractiveChart:
 {
 public:
 
-  using TreeItem = ou::tf::TreeItem;
-
-  using idOrder_t = ou::tf::Order::idOrder_t;
-
-  using pOrder_t = ou::tf::Order::pOrder_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
-  using pOption_t = ou::tf::option::Option::pOption_t;
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
-  using fOption_t = std::function<void(pOption_t)>;
-  using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
-
-  using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
-
-  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
-
   InteractiveChart();
   InteractiveChart(
     wxWindow* parent,
@@ -111,6 +95,22 @@ public:
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
 
   virtual ~InteractiveChart();
+
+  using TreeItem = ou::tf::TreeItem;
+
+  using idOrder_t = ou::tf::Order::idOrder_t;
+
+  using pOrder_t = ou::tf::Order::pOrder_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  using fOption_t = std::function<void(pOption_t)>;
+  using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
+
+  using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
+
+  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
   void SetPosition(
      pPosition_t

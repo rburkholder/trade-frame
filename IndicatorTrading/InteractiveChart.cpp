@@ -42,7 +42,7 @@ namespace {
 }
 
 InteractiveChart::InteractiveChart()
-: WinChartView::WinChartView()
+: ou::tf::WinChartView()
 , m_bConnected( false )
 , m_bOptionsReady( false )
 
@@ -71,7 +71,7 @@ InteractiveChart::InteractiveChart(
   wxWindow* parent, wxWindowID id,
   const wxPoint& pos, const wxSize& size, long style
   )
-: WinChartView::WinChartView( parent, id, pos, size, style )
+: ou::tf::WinChartView( parent, id, pos, size, style )
 , m_bConnected( false )
 , m_bOptionsReady( false )
 
@@ -788,6 +788,7 @@ void InteractiveChart::UnBindEvents() {
 }
 
 void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
+  SetChartDataView( nullptr );
   UnBindEvents();
   event.Skip();  // auto followed by Destroy();
 }
