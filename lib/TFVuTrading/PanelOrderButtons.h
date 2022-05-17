@@ -48,6 +48,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELORDERBUTTONS_POSITION wxDefaultPosition
 
 class PanelOrderButtons: public wxPanel {
+  friend class boost::serialization::access;
 public:
 
   PanelOrderButtons();
