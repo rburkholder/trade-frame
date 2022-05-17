@@ -35,17 +35,7 @@ ChartMaster::~ChartMaster() {
 }
 
 void ChartMaster::Initialize() {
-  //bool b;
-  //char code[2048];
-  //bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1", &code );
-  //bool b = Chart::setLicenseCode( "UDEV-23FP-5DWS-X22U-BBBD-FBD8", &code );
-  //b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1 UDEV-23FP-5DWS-X22U-BBBD-FBD8", code );
-  //b = Chart::setLicenseCode( "UDEV-2459-7TE9-9NBT-3914-9844", code ); // 2021/11/06
-  //if ( !b ) {
-  //  char s[4096];
-  //  Chart::getBootLog(s);
-  //  std::cout << "ChartDirector error: " << s << std::endl;
-  //}
+  // NOTE license is now found in /etc/chartdir.lic
 }
 
 void ChartMaster::SetChartDataView( ChartDataView* pcdv ) {
