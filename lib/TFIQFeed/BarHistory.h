@@ -35,7 +35,7 @@ class BarHistory: HistoryQuery<BarHistory> {
   friend HistoryQuery<BarHistory>;
 public:
 
-  using fConnected_t = std::function<void(void)>;
+  using fConnected_t = std::function<void()>;
   using fBar_t = std::function<void(const ou::tf::Bar&)>;
   using fDone_t = std::function<void()>;
 
