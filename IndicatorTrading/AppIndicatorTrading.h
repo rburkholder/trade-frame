@@ -40,6 +40,7 @@ class wxTreeCtrl;
 class wxTreeEvent;
 
 class FrameMain;
+class SessionChart;
 class InteractiveChart;
 
 namespace ou {
@@ -72,9 +73,11 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
-  ou::tf::FrameControls* m_pFrameControls;
+  ou::tf::FrameControls* m_pFrameOrderButtons;
   ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
   InteractiveChart* m_pInteractiveChart;
+  ou::tf::FrameControls* m_pFrameSessionChart;
+  SessionChart* m_pSessionChart;
 
   std::string m_sTSDataStreamStarted;
 
@@ -135,7 +138,10 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & m_splitterRow->GetSashPosition();
-    ar & *m_pFrameControls;
+    ar & *m_pFrameOrderButtons;
+    ar & *m_pPanelOrderButtons;
+    ar & *m_pFrameSessionChart;
+    ar & *m_pSessionChart;
   }
 
   template<typename Archive>
@@ -145,7 +151,14 @@ private:
     ar & x;
     m_splitterRow->SetSashPosition( x );
     if ( 3 <= version ) {
-      ar & *m_pFrameControls;
+      ar & *m_pFrameOrderButtons;
+      if ( 4 <= version ) {
+        ar & *m_pPanelOrderButtons;
+      }
+    }
+    if ( 4 <= version ) {
+      ar & *m_pFrameSessionChart;
+      ar & *m_pSessionChart;
     }
   }
 
@@ -153,7 +166,7 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 3)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 4)
 
 DECLARE_APP(AppIndicatorTrading)
 

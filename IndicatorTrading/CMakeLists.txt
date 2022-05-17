@@ -30,6 +30,7 @@ set(
     Indicators.hpp
     InteractiveChart.h
     OptionTracker.hpp
+    SessionChart.hpp
     TradeLifeTime.h
   )
 
@@ -39,6 +40,7 @@ set(
     Config.cpp
     InteractiveChart.cpp
     OptionTracker.cpp
+    SessionChart.cpp
     TradeLifeTime.cpp
   )
 

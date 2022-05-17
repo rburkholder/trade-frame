@@ -40,6 +40,7 @@
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
 
+#include "SessionChart.hpp"
 #include "InteractiveChart.h"
 #include "AppIndicatorTrading.h"
 
@@ -142,13 +143,25 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
 
-  m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
-  m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameControls );
-  m_pFrameControls->Attach( m_pPanelOrderButtons );
+  m_pFrameOrderButtons = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
+  m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameOrderButtons );
+  m_pFrameOrderButtons->Attach( m_pPanelOrderButtons );
 
-  m_pFrameControls->SetAutoLayout( true );
-  m_pFrameControls->Layout();
-  m_pFrameControls->Show( true );
+  m_pFrameSessionChart = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Chart" );
+  m_pSessionChart = new SessionChart( m_pFrameSessionChart );
+  m_pFrameSessionChart->Attach( m_pSessionChart );
+
+  m_pFrameOrderButtons->SetAutoLayout( true );
+  m_pFrameOrderButtons->Layout();
+  m_pFrameOrderButtons->Show( true );
+
+  m_pFrameSessionChart = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Chart" );
+  m_pSessionChart = new SessionChart( m_pFrameSessionChart );
+  m_pFrameSessionChart->Attach( m_pSessionChart );
+
+  m_pFrameSessionChart->SetAutoLayout( true );
+  m_pFrameSessionChart->Layout();
+  m_pFrameSessionChart->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIndicatorTrading::OnClose, this );  // start close of windows and controls
 
@@ -322,6 +335,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ), // fBuildPosition_t
     m_pTreeItemRoot
   );
+  m_pSessionChart->SetPosition( pPosition );
 
   m_ptreeTradables->ExpandAll();
 
