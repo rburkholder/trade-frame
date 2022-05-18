@@ -28,7 +28,7 @@ PanelLogging::PanelLogging() {
 
 PanelLogging::PanelLogging( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
   Init();
-  Create(parent, id, pos, size, style);
+  Create( parent, id, pos, size, style );
 }
 
 PanelLogging::~PanelLogging() {
@@ -100,6 +100,7 @@ void PanelLogging::OnDestroy( wxWindowDestroyEvent& event ) {
   //Unbind( wxEVT_CLOSE_WINDOW, &PanelLogging::OnClose, this );
   Unbind( wxEVT_DESTROY, &PanelLogging::OnDestroy, this );
 
+  m_csb.SetOnEmitString( nullptr );
   if ( nullptr != m_pOldStreamBuf ) {
     std::cout.rdbuf( m_pOldStreamBuf );
     m_pOldStreamBuf = nullptr;
