@@ -19,10 +19,9 @@
  * Created: May 16, 2022 20:03
  */
 
+#include <OUCommon/TimeSource.h>
+
 #include "SessionChart.hpp"
-#include <TFIQFeed/BarHistory.h>
-#include <TFTrading/KeyTypes.h>
-#include <TFTrading/Watch.h>
 
 // TODO: add pivots, day range marks
 
@@ -81,11 +80,11 @@ void SessionChart::SetPosition( pPosition_t pPosition ) {
     [this,sIQFeedName](){
       m_pBarHistory->RequestNDaysOfBars( sIQFeedName, 60,  1 );
     },
-    [this](const ou::tf::Bar& bar ){
+    [this](const ou::tf::Bar& bar_ ){
       //m_barsSessionHistory.Append( bar );
+      ptime dtUtc = ou::TimeSource::ConvertRegionalToUtc( bar_.DateTime(), "America/Chicago", true );
+      ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
       HandleBarCompletionPrice( bar );
-      //m_cePriceBars.AppendBar( bar );
-      //m_ceVolume.Append( bar );
     },
     [this](){
       m_bWatchStarted = true;
