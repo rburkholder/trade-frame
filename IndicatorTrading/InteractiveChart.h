@@ -50,7 +50,6 @@
 #include <TFVuTrading/WinChartView.h>
 
 #include "Indicators.hpp"
-#include "DailyHistory.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -118,6 +117,7 @@ public:
    , fBuildOption_t&&
    , fBuildPosition_t&&
    , TreeItem*
+   , ou::ChartEntryMark& cemReferenceLevels
     );
 
   void EmitChainFull() const {
@@ -222,8 +222,6 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::ChartEntryMark m_cemStochastic;
-
-  ou::ChartEntryMark m_cemReferenceLevels;
 
   ou::tf::Quote m_quote;
 
@@ -372,8 +370,6 @@ private:
   //ou::tf::Bars m_barsHistory;
   //ou::tf::PivotSet m_setPivots;
 
-  DailyHistory m_DailyHistory;
-
   void Init();
 
   void BindEvents();
@@ -382,8 +378,6 @@ private:
   void OnKey( wxKeyEvent& );
   void OnChar( wxKeyEvent& );
   void OnDestroy( wxWindowDestroyEvent& );
-
-  void LoadDailyHistory();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

@@ -125,8 +125,6 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Price, &m_ceSellFill );
   m_dvChart.Add( EChartSlot::Price, &m_ceCancelled );
 
-  m_dvChart.Add( EChartSlot::Price, &m_cemReferenceLevels );
-
   //m_dvChart.Add( 1, &m_ceVolume );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
@@ -183,17 +181,14 @@ void InteractiveChart::Init() {
 }
 
 void InteractiveChart::Connect() {
-
   if ( m_pPositionUnderlying ) {
     if ( !m_bConnected ) {
       m_bConnected = true;
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
-      LoadDailyHistory();
     }
   }
-
 }
 
 void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
@@ -203,7 +198,6 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
       m_bConnected = false;
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
-      m_DailyHistory.Close();
     }
   }
 }
@@ -215,12 +209,15 @@ void InteractiveChart::SetPosition(
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition
 , TreeItem* pTreeItemParent
+, ou::ChartEntryMark& cemReferenceLevels
 ) {
 
   bool bConnected = m_bConnected;
   Disconnect();
 
   // --
+
+  m_dvChart.Add( EChartSlot::Price, &cemReferenceLevels );
 
   m_fBuildOption = std::move( fBuildOption );
   m_fBuildPosition = std::move( fBuildPosition );
@@ -308,15 +305,6 @@ void InteractiveChart::SetPosition(
   if ( bConnected ) {
     Connect();
   }
-
-}
-
-void InteractiveChart::LoadDailyHistory() {
-
-  pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
-  const std::string& sSymbol( pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
-
-  m_DailyHistory.Load( sSymbol, m_cemReferenceLevels, [](){} );
 
 }
 

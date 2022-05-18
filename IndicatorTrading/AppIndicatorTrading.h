@@ -29,11 +29,14 @@
 #include <wx/app.h>
 #include <wx/splitter.h>
 
+#include <OUCharting/ChartEntryMark.h>
+
 #include <TFTrading/DBWrapper.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include "Config.h"
+#include "DailyHistory.hpp"
 
 class wxBoxSizer;
 class wxTreeCtrl;
@@ -99,6 +102,10 @@ private:
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
+  DailyHistory m_DailyHistory;
+  ou::ChartEntryMark m_cemReferenceLevels;
+  void LoadDailyHistory( pPosition_t );
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
@@ -128,8 +135,9 @@ private:
   void StartChainQuery();
   void ConstructUnderlying();
   void InitializeUnderlying( pInstrument_t pInstrument );
-  pPosition_t ConstructPosition( pInstrument_t );
   void SetInteractiveChart( pPosition_t );
+
+  pPosition_t ConstructPosition( pInstrument_t );
 
   void SaveState();
   void LoadState();

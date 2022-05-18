@@ -58,9 +58,6 @@ SessionChart::~SessionChart() {
 
 void SessionChart::Init() {
 
-  m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
-  m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
-
   m_cePriceBars.SetName( "Trades" );
 
   m_bfPrice1Minute.SetOnBarComplete( MakeDelegate( this, &SessionChart::HandleBarCompletionPrice ) );
@@ -71,7 +68,13 @@ void SessionChart::Init() {
 
 }
 
-void SessionChart::SetPosition( pPosition_t pPosition ) {
+void SessionChart::SetPosition( pPosition_t pPosition, ou::ChartEntryMark& cem ) {
+
+  m_dvChart.Add( EChartSlot::Price, &cem );
+
+  m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
+  m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
+
   m_pPosition = pPosition;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t pWatch = m_pPosition->GetWatch();
@@ -82,8 +85,9 @@ void SessionChart::SetPosition( pPosition_t pPosition ) {
     },
     [this](const ou::tf::Bar& bar_ ){
       //m_barsSessionHistory.Append( bar );
-      ptime dtUtc = ou::TimeSource::ConvertRegionalToUtc( bar_.DateTime(), "America/Chicago", true );
+      ptime dtUtc = ou::TimeSource::ConvertEasternToUtc( bar_.DateTime() );
       ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
+      std::cout << "bar close " << bar.Close() << "@" << dtUtc << std::endl;
       HandleBarCompletionPrice( bar );
     },
     [this](){

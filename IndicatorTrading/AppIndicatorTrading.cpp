@@ -333,9 +333,12 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       );
     },
     std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ), // fBuildPosition_t
-    m_pTreeItemRoot
+    m_pTreeItemRoot,
+    m_cemReferenceLevels
   );
-  m_pSessionChart->SetPosition( pPosition );
+  m_pSessionChart->SetPosition( pPosition, m_cemReferenceLevels );
+
+  LoadDailyHistory( pPosition );
 
   m_ptreeTradables->ExpandAll();
 
@@ -431,6 +434,19 @@ void AppIndicatorTrading::HandleMenuActionOptionEmit() {
   );
 }
 
+void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  pWatch_t pWatchUnderlying = pPosition->GetWatch();
+  const std::string& sSymbol( pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+
+  std::cout << "daily history for " << sSymbol << std::endl;
+
+  m_DailyHistory.Load( sSymbol, m_cemReferenceLevels, [](){} );
+
+}
+
 int AppIndicatorTrading::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
@@ -446,6 +462,8 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   //m_pChartData = nullptr;
 
   //m_pFrameControls->Close();
+
+  m_DailyHistory.Close();
 
   SaveState();
 

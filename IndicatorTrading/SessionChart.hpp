@@ -27,6 +27,7 @@
 #include <OUCharting/ChartDataView.h>
 
 #include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
 //#include <OUCharting/ChartEntryIndicator.h>
 
@@ -64,7 +65,7 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  void SetPosition( pPosition_t );
+  void SetPosition( pPosition_t, ou::ChartEntryMark& );
 
 protected:
 private:
