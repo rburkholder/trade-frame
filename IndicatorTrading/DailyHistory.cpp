@@ -72,14 +72,14 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             << ", s2=" << ps.GetPivotValue( PS::S2 )
             << std::endl;
 
-          double dblSum200 {};
-          double dblSum100 {};
-          double dblSum50 {};
-          double dblSum21 {};
-          double dblSum7 {};
+          double dblAvg200 {};
+          double dblAvg100 {};
+          double dblAvg50 {};
+          double dblAvg21 {};
+          double dblAvg7 {};
           int ix( 1 );
 
-          m_barsHistory.ForEachReverse( [this,&ix,&cem,&dblSum200,&dblSum100,&dblSum50,&dblSum21,&dblSum7,colour]( const ou::tf::Bar& bar ){
+          m_barsHistory.ForEachReverse( [this,&ix,&cem,&dblAvg200,&dblAvg100,&dblAvg50,&dblAvg21,&dblAvg7,colour]( const ou::tf::Bar& bar ){
             //std::cout
             //  << "bar " << ix << " is " << bar.Close()
             //  << std::endl;
@@ -89,37 +89,37 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
               cem.AddMark( bar.Low(),  colour, "lo-" + sIx );
             }
             if ( 200 >= ix ) {
-              dblSum200 += bar.Close() / 200.0;
+              dblAvg200 += bar.Close() / 200.0;
             }
             if ( 100 >= ix ) {
-              dblSum100 += bar.Close() / 100.0;
+              dblAvg100 += bar.Close() / 100.0;
             }
             if ( 50 >= ix ) {
-              dblSum50 += bar.Close() / 50;
+              dblAvg50 += bar.Close() / 50;
             }
             if ( 21 >= ix ) {
-              dblSum21 += bar.Close() / 21;
+              dblAvg21 += bar.Close() / 21;
             }
             if ( 7 >= ix ) {
-              dblSum7 += bar.Close() / 7;
+              dblAvg7 += bar.Close() / 7;
             }
             ix++;
           });
 
           std::cout
             << "sma"
-            << " 7 day=" << dblSum7
-            << ", 21 day=" << dblSum21
-            << ", 50 day=" << dblSum50
-            << ", 100 day=" << dblSum100
-            << ", 200 day=" << dblSum200
+            << " 7 day=" << dblAvg7
+            << ", 21 day=" << dblAvg21
+            << ", 50 day=" << dblAvg50
+            << ", 100 day=" << dblAvg100
+            << ", 200 day=" << dblAvg200
             << std::endl;
 
-          cem.AddMark(   dblSum7, colour, "7 day" );
-          cem.AddMark(  dblSum21, colour, "21 day" );
-          cem.AddMark(  dblSum50, colour, "50 day" );
-          cem.AddMark( dblSum100, colour, "100 day" );
-          cem.AddMark( dblSum200, colour, "200 day" );
+          cem.AddMark(   dblAvg7, colour, "7 day" );
+          cem.AddMark(  dblAvg21, colour, "21 day" );
+          cem.AddMark(  dblAvg50, colour, "50 day" );
+          cem.AddMark( dblAvg100, colour, "100 day" );
+          cem.AddMark( dblAvg200, colour, "200 day" );
 
           fDone__();
         }

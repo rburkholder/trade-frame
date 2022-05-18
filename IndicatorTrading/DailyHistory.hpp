@@ -23,6 +23,8 @@
 
 #include <OUCharting/ChartEntryMark.h>
 
+#include <TFTimeSeries/TimeSeries.h>
+
 #include <TFIQFeed/BarHistory.h>
 
 class DailyHistory {
