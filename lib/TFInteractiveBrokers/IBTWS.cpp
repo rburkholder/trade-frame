@@ -1385,7 +1385,7 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
           if ( "US/Central" == tz ) tz = "America/Chicago";
           if ( "US/Mountain" == tz ) tz = "America/Edmonton";
           if ( "US/Pacific" == tz ) tz = "America/Vancouver";
-          dtExpiry = ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, tz, true );
+          dtExpiry = ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, tz );
         }
 
         if ( 0 == pInstrument.get() ) {

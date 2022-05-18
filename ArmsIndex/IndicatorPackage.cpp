@@ -51,9 +51,9 @@ IndicatorPackage::IndicatorPackage(
 
   ptime now = ou::TimeSource::Instance().External();
   ptime dtBegin( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York", true ) );
+        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York" ) );
   ptime dtEnd( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York", true ) );
+        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York" ) );
 
   m_ctViewBegin = m_ctDayBegin = Chart::chartTime( dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
                                      dtBegin.time_of_day().hours(), dtBegin.time_of_day().minutes(), dtBegin.time_of_day().seconds() );

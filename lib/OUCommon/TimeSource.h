@@ -76,27 +76,22 @@ public:
   void ReleaseSimulationContext( SimulationContext* );
 
   static boost::posix_time::ptime ConvertEasternToUtc( boost::posix_time::ptime dt ) {
-    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), m_tzNewYork, false );
+    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), m_tzNewYork, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
     return lt.utc_time();
   }
 
-  static boost::posix_time::ptime ConvertRegionalToUtc( boost::posix_time::ptime dt, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
+  static boost::posix_time::ptime ConvertRegionalToUtc( boost::posix_time::ptime dt, const std::string& sRegion ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
-    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), tz, bDst );
+    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
     return lt.utc_time();
   }
 
   static boost::posix_time::ptime ConvertRegionalToUtc(
-          boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
+          boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion 
+  ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
-    try {
-      boost::local_time::local_date_time lt( date, time, tz, bDst );
-      return lt.utc_time();
-    }
-    catch (...) {
-      boost::local_time::local_date_time lt( date, time, tz, !bDst );
-      return lt.utc_time();
-    }
+    boost::local_time::local_date_time lt( date, time, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+    return lt.utc_time();
   }
 
   static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }

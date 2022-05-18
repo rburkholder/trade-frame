@@ -389,9 +389,9 @@ void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrument
   // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
 
   ptime dtFrontMonthExpiryUtc(
-    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateFrontMonthOption, time_duration( 13, 30, 0 ), "America/New_York", true ) );
+    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateFrontMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
   ptime dtSecondMonthExpiryUtc(
-    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateSecondMonthOption, time_duration( 13, 30, 0 ), "America/New_York", true ) );
+    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateSecondMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
 
   std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
   std::cout << "Expiry strings: " << m_dateFrontMonthOption << ", " << m_dateSecondMonthOption << std::endl;

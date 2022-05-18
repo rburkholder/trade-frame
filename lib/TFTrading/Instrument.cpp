@@ -282,7 +282,7 @@ boost::posix_time::ptime Instrument::GetExpiryUtc() const {
       }
       else {
         return ou::TimeSource::Instance().
-              ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
+              ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York" );
       }
       break;
     case InstrumentType::FuturesOption:  // for metals options
@@ -292,17 +292,17 @@ boost::posix_time::ptime Instrument::GetExpiryUtc() const {
       else {
         if ( "GLOBEX" == m_row.idExchange ) { // ES symbols
           return ou::TimeSource::Instance().
-                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago", true );
+                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago" );
         }
         else {
           return ou::TimeSource::Instance().
-                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York", true );
+                ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York" );
         }
       }
       break;
   }
   return ou::TimeSource::Instance().
-         ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York", true );
+         ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York" );
 }
 
 double Instrument::NormalizeOrderPrice( double price ) const {
