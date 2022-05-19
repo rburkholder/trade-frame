@@ -25,13 +25,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-//#include "boost/date_time/posix_time/posix_time.hpp"
-
-//#include <boost/bind/bind.hpp>
-
-//#include <boost/thread.hpp>
-//#include <boost/thread/mutex.hpp>
-
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
 
@@ -226,18 +219,23 @@ private:
 
   void DecodeMarketHours( const std::string&, ptime& dtOpen, ptime& dtClose );
 
+  // ===
+
   struct Request {
     reqId_t id;
-    size_t nPasses; 
+    size_t cntEvictionType1;  // subsequent requests suggest to expire this one
+    size_t cntEvictionType2;  // last ditch timed eviction
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
     fOnContractDetail_t fOnContractDetail;
     fOnContractDetailDone_t fOnContractDetailDone;
     Contract contract; // used when having to resubmit
+    std::chrono::time_point<std::chrono::system_clock> submitted; // submission turn-around calculation
 
     Request( 
       reqId_t id_, fOnContractDetail_t&& fProcess_, fOnContractDetailDone_t&& fDone_, pInstrument_t pInstrument_ )
       : id( id_ )
-      , nPasses {}
+      , cntEvictionType1 {}
+      , cntEvictionType2 {}
       , fOnContractDetail( std::move( fProcess_ ) )
       , fOnContractDetailDone( std::move( fDone_ ) )
       , pInstrument( pInstrument_ )
@@ -245,7 +243,8 @@ private:
 
     void Clear() {
       // id = 0; // don't do this
-      nPasses = 0;
+      cntEvictionType1 = 0;
+      cntEvictionType2 = 0;
       pInstrument.reset();
       fOnContractDetail = nullptr;
       fOnContractDetailDone = nullptr;
@@ -253,6 +252,9 @@ private:
   };
 
   reqId_t m_nxtReqId;
+  bool m_bEvictorStarted;
+  std::thread m_thrdRequestEvictor;
+  std::mutex m_mutexContractRequest;
 
   using vRequest_t = std::vector<Request*>;
   vRequest_t m_vRequestRecycling;
@@ -260,7 +262,7 @@ private:
   using mapActiveRequests_t = std::map<reqId_t, Request*>;
   mapActiveRequests_t m_mapActiveRequests;
 
-  boost::mutex m_mutexContractRequest;
+  // ====
 
   using mapExchangeMarketRule_t = std::map<std::string,std::string>;  // exchange name, rule id -- needs to be changed to reflect retrieval
   mapExchangeMarketRule_t m_mapExchangeMarketRule;
