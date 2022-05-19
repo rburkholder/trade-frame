@@ -64,6 +64,8 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
   }
   else { // build a new instrument
 
+    //std::cout << "BuildInstrument::Build new: " << sIQFeedSymbol << std::endl;
+
     {
       std::lock_guard<std::mutex> lock( m_mutexMap );
       m_mapSymbol.emplace( std::make_pair( sIQFeedSymbol, std::move( fInstrument ) ) );
@@ -112,9 +114,9 @@ void BuildInstrument::Update() {
           bDoBuild = true;
         }
 
+        //std::cout << "BuildInstrument::Update erase " << iterSymbol->first << std::endl;
         m_mapSymbol.erase( iterSymbol );
 
-        //std::cout << "BuildInstrument::Update " << sSymbol << std::endl;
       }
     }
   }
@@ -139,6 +141,8 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
     = std::make_shared<AcquireFundamentals>(
         std::move( pWatch ),
         [this,iterInProgress]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
+
+          //std::cout << "AcquireFundamentals_done enter: " << iterInProgress->first << std::endl;
 
           const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
           pInstrument_t pInstrument
@@ -207,8 +211,9 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             pInstrument.reset();
             Update( iterInProgress );
           }
-          //std::cout << "BuildInstrument::Build begin: " << iterInProgress->first << std::endl;
+          //std::cout << "AcquireFundamentals_done exit: " << iterInProgress->first << std::endl;
         }
+
       );
 
   iterInProgress->second.pAcquireFundamentals = pAcquireFundamentals;
