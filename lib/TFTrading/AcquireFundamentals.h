@@ -34,7 +34,7 @@ public:
   using pAcquireFundamentals_t = std::shared_ptr<AcquireFundamentals>;
   using fDone_t = std::function<void(pWatch_t)>;
 
-  AcquireFundamentals( pWatch_t&& pWatch_, fDone_t&& fDone_ );
+  AcquireFundamentals( pWatch_t&&, fDone_t&& );
   ~AcquireFundamentals();
 
   static pAcquireFundamentals_t Factory( pWatch_t&& pWatch, fDone_t&& fDone ) {
@@ -45,11 +45,11 @@ public:
 
 private:
 
-  pWatch_t pWatch;
-  fDone_t fDone;
+  pWatch_t m_pWatch;
+  fDone_t  m_fDone;
 
-  void HandleFundamentals( const Watch::Fundamentals& fundamentals );
-  void HandleTrade( const Trade& trade );
+  void HandleFundamentals( const Watch::Fundamentals& );
+  void HandleTrade( const Trade& );
 
 };
 
