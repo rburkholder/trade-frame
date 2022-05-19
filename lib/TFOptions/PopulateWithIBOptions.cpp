@@ -59,11 +59,11 @@ void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian
   }
   m_contract.lastTradeDateOrContractMonth = boost::gregorian::to_iso_string( dateExpiry );
 
-  // delete any pre-existing first?
-  m_pProvider->RequestContractDetails(
+  namespace ph = std::placeholders;
+  m_pProvider->RequestContractDetails( // delete any pre-existing first?
     m_contract,
-    MakeDelegate( this, &PopulateOptions::HandleOptionContractDetails ),
-    MakeDelegate( this, &PopulateOptions::HandleOptionContractDetailsDone )
+    std::bind( &PopulateOptions::HandleOptionContractDetails, this, ph::_1, ph::_2 ),
+    std::bind( &PopulateOptions::HandleOptionContractDetailsDone, this, ph::_1, ph::_2 )
   );
 }
 
@@ -75,12 +75,12 @@ void PopulateOptions::HandleOptionContractDetails( const ContractDetails& detail
   if ( 0 != OnInstrumentBuilt ) OnInstrumentBuilt( pInstrument );
 }
 
-void PopulateOptions::HandleOptionContractDetailsDone( void ) {
+void PopulateOptions::HandleOptionContractDetailsDone( bool, pInstrument_t& ) {
   if ( 0 != OnPopulateComplete ) OnPopulateComplete( m_cntInstruments );
   m_bActive = false;
 }
 
-void PopulateOptions::HandleOptionContractNotFound( void ) {
+void PopulateOptions::HandleOptionContractNotFound() {
   if ( 0 != OnPopulateComplete ) OnPopulateComplete( m_cntInstruments );
   m_bActive = false;
 }

@@ -107,11 +107,11 @@ TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int 
 
 TWS::~TWS() {
 
-  for ( vInActiveRequest_t::value_type& vt: m_vInActiveRequestId ) {
+  for ( vRequest_t::value_type& vt: m_vRequestRecycling ) {
     delete vt;
     vt = nullptr;
   }
-  m_vInActiveRequestId.clear();
+  m_vRequestRecycling.clear();
 
   m_vTickerToSymbol.clear();
   m_mapContractToSymbol.clear();
@@ -275,30 +275,10 @@ void TWS::DisconnectCommon( bool bSignalEnd ){
 
 // ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
 
-// deprecated
-void TWS::RequestContractDetails(
-  const std::string& sSymbolBaseName, pInstrument_t pInstrument,
-  OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone
-) {
-  RequestContractDetails(
-    sSymbolBaseName, pInstrument,
-    [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-      if ( nullptr != fProcess ) {
-        fProcess( details, pInstrument );
-      }
-    },
-    [fDone](){
-      if ( nullptr != fDone ) {
-        fDone();
-      }
-    });
-}
-
-// new and better
 // need fixups for std::move: https://github.com/rburkholder/trade-frame/commit/95aa00c9178467c2bcf53d10358b90a506092440
 void TWS::RequestContractDetails(
-                                   const std::string& sSymbolBaseName, const pInstrument_t pInstrument,
-                                   fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone
+                                   const std::string& sSymbolBaseName, pInstrument_t& pInstrument,
+                                   fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone
 ) {
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
@@ -341,90 +321,49 @@ void TWS::RequestContractDetails(
     if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
     break;
   }
-  RequestContractDetails( contract, fProcess, fDone, pInstrument );
+  RequestContractDetails( contract, std::move( fProcess ), std::move( fDone ), pInstrument );
 }
 
-// deprecated
-void TWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {  // results supplied at contractDetails()
-  //pInstrument_t pInstrument;  // just allocate, and pass as empty
-  //RequestContractDetails( contract, fProcess, fDone, pInstrument );
-  RequestContractDetails(
-    contract,
-    [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-      if ( nullptr != fProcess ) {
-        fProcess( details, pInstrument );
-      }
-    },
-    [fDone](){
-      if ( nullptr != fDone ) {
-        fDone();
-      }
-    }
-    );
-}
-
-// new and better
-void TWS::RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone ) {
+void TWS::RequestContractDetails( const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone ) {
   // results supplied at contractDetails()
   pInstrument_t pInstrument;  // just allocate, and pass as empty
-  RequestContractDetails( contract, fProcess, fDone, pInstrument );
+  RequestContractDetails( contract, std::move( fProcess ), std::move( fDone ), pInstrument );
 }
 
-// deprecated
 void TWS::RequestContractDetails(
-  const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
-  RequestContractDetails(
-    contract,
-    [fProcess](const ContractDetails& details, pInstrument_t& pInstrument){
-      if ( nullptr != fProcess ) {
-        fProcess( details, pInstrument );
-      }
-    },
-    [fDone](){
-      if ( nullptr != fDone ) {
-        fDone();
-      }
-    },
-    pInstrument
-    );
-}
-
-// new and better
-void TWS::RequestContractDetails(
-  const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t pInstrument ) {
+  const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone, pInstrument_t& pInstrument 
+) {
 
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
   // pInstrument can be empty, or can have an instrument
   // results supplied at contractDetails()
 
-  structRequest_t* pRequest = nullptr;
+  Request* pRequest = nullptr;
 
   boost::mutex::scoped_lock lock(m_mutexContractRequest);
 
-  if ( 0 == m_vInActiveRequestId.size() ) {
-    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone, pInstrument );
+  if ( 0 == m_vRequestRecycling.size() ) {
+    pRequest = new Request( m_nxtReqId++,std::move( fProcess ), std::move( fDone ), pInstrument );
   }
   else {
-    pRequest = m_vInActiveRequestId.back();
-    m_vInActiveRequestId.pop_back();
+    pRequest = m_vRequestRecycling.back();
+    m_vRequestRecycling.pop_back();
     pRequest->id = m_nxtReqId++;
     pRequest->contract = contract;
-    pRequest->fOnContractDetail = fProcess;
-    pRequest->fOnContractDetailDone = fDone;
+    pRequest->fOnContractDetail = std::move( fProcess );
+    pRequest->fOnContractDetailDone = std::move( fDone );
     pRequest->pInstrument = pInstrument;
-    pRequest->bResubmitContract = false;
   }
 
-  m_mapActiveRequestId[ pRequest->id ] = pRequest;
+  m_mapActiveRequests[ pRequest->id ] = pRequest;
 
-  if ( 5 < m_mapActiveRequestId.size() ) {
+  if ( 5 < m_mapActiveRequests.size() ) {
     std::cout
       << pRequest->id << ": "
-      << "m_mapActiveRequestId size=" << m_mapActiveRequestId.size()
+      << "m_mapActiveRequests size=" << m_mapActiveRequests.size()
       << ", " << pInstrument->GetInstrumentName( )
       << " submission delayed"
       << std::endl;
-    pRequest->bResubmitContract = true;
   }
   else {
     m_pTWS->reqContractDetails( pRequest->id, contract );
@@ -1048,10 +987,10 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   pInstrument_t pInstrument;
 
   {
-    mapActiveRequestId_t::iterator iterRequest;
+    mapActiveRequests_t::iterator iterRequest;
     boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
-    iterRequest = m_mapActiveRequestId.find( reqId );  // entry removed with contractDetailsEnd
-    if ( m_mapActiveRequestId.end() == iterRequest ) {
+    iterRequest = m_mapActiveRequests.find( reqId );  // entry removed with contractDetailsEnd
+    if ( m_mapActiveRequests.end() == iterRequest ) {
       throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
     }
     handler = std::move( iterRequest->second->fOnContractDetail );
@@ -1196,7 +1135,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
       handler( contractDetails, pInstrument );
   }
   catch ( std::runtime_error& e ) {
-    std::cout << "IBTWS::contractDetails exception: " << e.what() << std::endl;
+    std::cout << "IBTWS::contractDetails handler exception: " << e.what() << std::endl;
   }
   catch (...) {
     std::cout << "IBTWS unknown error when delegating contractDetails" << std::endl;
@@ -1204,66 +1143,89 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 
 }
 
-void TWS::contractDetailsEnd( int reqId ) {
-  // not called when no symbol available
+void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symbol available
 
+  //std::cout << "contractDetailsEnd request " << reqId << std::endl;
+
+  pInstrument_t pInstrument;
   fOnContractDetailDone_t handler = nullptr;
+
+  vRequest_t vAbandonedRequests; // IB can't find the symbol
+  bool bFound( false );
 
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
 
-    mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
-    if ( m_mapActiveRequestId.end() == iterRequest ) {
-      throw std::runtime_error( "contractDetailsEnd out of sync" );
-    }
-    //reqId_t id = iterRequest->second->id;
-    handler = std::move( iterRequest->second->fOnContractDetailDone );
-
-    iterRequest->second->fOnContractDetail = nullptr;
-    iterRequest->second->fOnContractDetailDone = nullptr;
-    iterRequest->second->pInstrument.reset();
-
-    m_vInActiveRequestId.push_back( iterRequest->second );
-    m_mapActiveRequestId.erase( iterRequest );
-
-    for ( mapActiveRequestId_t::value_type& vt: m_mapActiveRequestId ) {
-      if ( vt.first < reqId ) {
-        if ( !vt.second->bResubmitContract ) {
-          // TODO: look into this, this was tripped once, and created an exception
-          std::cout << "IB details retry on " << vt.second->pInstrument->GetInstrumentName() << "?" << std::endl;
-          //vt.second->bResubmitContract = true; // perform a retry on a symbol
+    for ( mapActiveRequests_t::value_type& vt: m_mapActiveRequests ) {
+      if ( reqId > vt.first ) {
+        assert( vt.first == vt.second->id );
+        vt.second->nPasses++;
+        if ( 4 <= vt.second->nPasses ) {
+          std::cout 
+            << "IB details failed on " 
+            << reqId << ","
+            << vt.first << "," 
+            << vt.second->pInstrument->GetInstrumentName() << ","
+            << vt.second->nPasses
+            << "." << std::endl;
+          vAbandonedRequests.push_back( vt.second );
+          //m_mapActiveRequests.erase( vt.first );
         }
       }
-    }
+      else {
+        if ( reqId == vt.first ) {
+          //std::cout 
+          //  << "contractDetailsEnd found " 
+          //  << reqId << "," 
+          //  << vt.first << ","
+          //  << vt.second->pInstrument->GetInstrumentName() 
+          //  << std::endl;
 
-    // TODO: put a count on the re-request, and knock out if too many
-    for ( mapActiveRequestId_t::value_type& vt: m_mapActiveRequestId ) {
-      // find first available contract to submit, should be first come first served
-      auto [key, request ] = vt;
-      if ( request->bResubmitContract ) {
-        request->bResubmitContract = false;
-        std::cout
-          << request->id << ": "
-          << "m_mapActiveRequestId size=" << m_mapActiveRequestId.size()
-          << ", " << request->pInstrument->GetInstrumentName( )
-          << " resubmitted"
-          << std::endl;
-        m_pTWS->reqContractDetails( request->id, request->contract );
-        break;
+          pInstrument = std::move( vt.second->pInstrument );
+          handler = std::move( vt.second->fOnContractDetailDone );
+
+          vt.second->Clear();
+
+          m_vRequestRecycling.push_back( vt.second );
+          m_mapActiveRequests.erase( vt.first );
+
+          bFound = true;
+        }
+        else { // should be unreachable
+          std::cout 
+            << "contractDetailsEnd remain " 
+            << reqId << ","
+            << vt.first
+            << std::endl;
+        }
+        break; // clear out dead, process expected one
       }
     }
+  }
 
-//    while ( 0 != m_mapActiveRequestId.size() ) {
-      // check for expired / ignored requests
-//      iterRequest = m_mapActiveRequestId.begin();
-//      if ( id < iterRequest->second->id ) break;
-//      m_vInActiveRequestId.push_back( iterRequest->second );
-//      m_mapActiveRequestId.erase( iterRequest );
-//    }
+  if ( !bFound ) {
+    std::cout
+      << "contractDetailsEnd was evicted too early "
+      << reqId
+      << "?"
+      << std::endl;
+  }
+
+  for ( vRequest_t::value_type& vt: vAbandonedRequests ) {
+    if ( nullptr != vt->fOnContractDetailDone ) {
+      vt->fOnContractDetailDone( false, vt->pInstrument );
+    }
+    vt->Clear();
+    {
+      boost::mutex::scoped_lock lock(m_mutexContractRequest);
+      m_mapActiveRequests.erase( vt->id );
+      m_vRequestRecycling.push_back( vt );
+      vt = nullptr;
+    }
   }
 
   if ( nullptr != handler )
-    handler();
+    handler( true, pInstrument );
 }
 
 void TWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {

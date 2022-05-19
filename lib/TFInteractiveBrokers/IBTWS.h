@@ -94,25 +94,15 @@ public:
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
 
-  // old, deprecated set of event based handling, these are forwarded to the new set of handlers
-
-  using OnContractDetailsHandler_t = FastDelegate2<const ContractDetails&, pInstrument_t&>;
-  using OnContractDetailsDoneHandler_t = FastDelegate0<void> ;
-
-  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,
-                                                         OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
-  void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
-  void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
-
   // new set of event based handling
 
   using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
-  using fOnContractDetailDone_t = std::function<void(void)>;
+  using fOnContractDetailDone_t = std::function<void(bool,pInstrument_t&)>; // true if success, false if stuck in queue; 
 
-  void RequestContractDetails( const std::string& sSymbolBaseName, const pInstrument_t,
-                                                         fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
-  void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone );
-  void RequestContractDetails( const Contract& contract, fOnContractDetail_t fProcess, fOnContractDetailDone_t fDone, pInstrument_t );
+  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t&,
+                                                         fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );
+  void RequestContractDetails( const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );
+  void RequestContractDetails( const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone, pInstrument_t& );
 
   struct PositionDetail {
     std::string sSymbol;
@@ -223,9 +213,6 @@ private:
 
   std::stringstream m_ss;  // for OutputDebugStrings in background thread
 
-  OnContractDetailsHandler_t OnContractDetails;
-  OnContractDetailsDoneHandler_t OnContractDetailsDone;
-
   // stuff comes back from IB with ticker id so use this to look up symbol,
   //    which is stored in the map of the class from which we inherited
   std::vector<pSymbol_t> m_vTickerToSymbol;
@@ -241,26 +228,39 @@ private:
 
   void DecodeMarketHours( const std::string&, ptime& dtOpen, ptime& dtClose );
 
-  struct structRequest_t {
+  struct Request {
     reqId_t id;
-    bool bResubmitContract;
+    size_t nPasses; 
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
     fOnContractDetail_t fOnContractDetail;
     fOnContractDetailDone_t fOnContractDetailDone;
     Contract contract; // used when having to resubmit
-    structRequest_t( reqId_t id_, fOnContractDetail_t fProcess_, fOnContractDetailDone_t fDone_, pInstrument_t pInstrument_ )
-      : id( id_ ), fOnContractDetail( fProcess_ ), fOnContractDetailDone( fDone_ ), pInstrument( pInstrument_ ),
-        bResubmitContract( false )
+
+    Request( 
+      reqId_t id_, fOnContractDetail_t&& fProcess_, fOnContractDetailDone_t&& fDone_, pInstrument_t pInstrument_ )
+      : id( id_ )
+      , nPasses {}
+      , fOnContractDetail( std::move( fProcess_ ) )
+      , fOnContractDetailDone( std::move( fDone_ ) )
+      , pInstrument( pInstrument_ )
       {};
+
+    void Clear() {
+      // id = 0; // don't do this
+      nPasses = 0;
+      pInstrument.reset();
+      fOnContractDetail = nullptr;
+      fOnContractDetailDone = nullptr;
+    }
   };
 
   reqId_t m_nxtReqId;
 
-  using vInActiveRequest_t = std::vector<structRequest_t*>;
-  vInActiveRequest_t m_vInActiveRequestId;  // used for recycling requests
+  using vRequest_t = std::vector<Request*>;
+  vRequest_t m_vRequestRecycling;
 
-  using mapActiveRequestId_t = std::map<reqId_t, structRequest_t*>;
-  mapActiveRequestId_t m_mapActiveRequestId;
+  using mapActiveRequests_t = std::map<reqId_t, Request*>;
+  mapActiveRequests_t m_mapActiveRequests;
 
   boost::mutex m_mutexContractRequest;
 

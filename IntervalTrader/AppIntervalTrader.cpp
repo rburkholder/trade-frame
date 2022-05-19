@@ -316,9 +316,10 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
         m_pActivePosition = pNewPosition;
         if ( 0 == m_pActivePosition->GetInstrument()->GetContract() ) {
           assert( m_pIB );
+          pInstrument_t pInstrument = m_pActivePosition->GetInstrument();
           m_pIB->RequestContractDetails(
-            m_pActivePosition->GetInstrument()->GetInstrumentName(),
-            m_pActivePosition->GetInstrument(),
+            pInstrument->GetInstrumentName(),
+            pInstrument,
             [this](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
               assert( 0 != pInstrument->GetContract() );
               // TODO: refactor the common bits out - see below

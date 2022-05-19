@@ -124,28 +124,28 @@ private:
 
   void CalcIV( ptime dt );
 
-  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
-  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
-  void HandleMenuAction2LoadIQFeedSymbolList( void );
-  void HandleMenuActionInitializeSymbolSet( void );
-  void HandleMenuActionSaveSymbolSubset( void );
-  void HandleMenuActionLoadSymbolSubset( void );
-  void HandleMenuActionStartWatch( void );
-  void HandleMenuActionStopWatch( void );
-  void HandleMenuActionSaveValues( void );
-  void HandleMenuActionEmitYieldCurve( void );
-  void HandleMenuActionStartChart( void );
-  void HandleMenuActionStopChart( void );
-  void HandleMenuActionEmitStrategyValues( void );
+  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote();
+  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal();
+  void HandleMenuAction2LoadIQFeedSymbolList();
+  void HandleMenuActionInitializeSymbolSet();
+  void HandleMenuActionSaveSymbolSubset();
+  void HandleMenuActionLoadSymbolSubset();
+  void HandleMenuActionStartWatch();
+  void HandleMenuActionStopWatch();
+  void HandleMenuActionSaveValues();
+  void HandleMenuActionEmitYieldCurve();
+  void HandleMenuActionStartChart();
+  void HandleMenuActionStopChart();
+  void HandleMenuActionEmitStrategyValues();
 
   void HandleIBUnderlyingContractDetails( const ou::tf::ib::TWS::ContractDetails&, pInstrument_t& );
-  void HandleIBUnderlyingContractDetailsDone( void );
+  void HandleIBUnderlyingContractDetailsDone( bool, pInstrument_t& );
   void FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying );
 
-  void HandleObtainNewIQFeedSymbolListRemote( void );
-  void HandleObtainNewIQFeedSymbolListLocal( void );
-  void HandleLoadIQFeedSymbolList( void );
-  void HandleSaveValues( void );
+  void HandleObtainNewIQFeedSymbolListRemote();
+  void HandleObtainNewIQFeedSymbolListLocal();
+  void HandleLoadIQFeedSymbolList();
+  void HandleSaveValues();
 
 //  void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );

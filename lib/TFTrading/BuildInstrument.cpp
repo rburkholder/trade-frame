@@ -144,13 +144,21 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           pInstrument_t pInstrument
             = ou::tf::iqfeed::BuildInstrument( fundamentals );
 
+          std::string sWaiting;
+          if ( 0 < m_mapInProgress.size() ) {
+            for ( mapInProgress_t::value_type& vt: m_mapInProgress ) {
+              sWaiting += "," + vt.first;
+            }
+          }
+
           BOOST_LOG_TRIVIAL(info)
             << "BuildInstrument: "
             << m_mapSymbol.size() << ","
             << m_mapInProgress.size() << ","
             << fundamentals.sExchangeRoot << ","
-            << iterInProgress->first << ","
+            //<< iterInProgress->first << ","
             << pInstrument->GetInstrumentName()
+            << sWaiting
             ;
 
           if ( m_pIB ) {
@@ -177,9 +185,13 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 iterInProgress->second.fInstrument( pInstrument );
               },
-              [this,iterInProgress](){
-                // TODO: how to test for incomplete done?
-                //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
+              [this,iterInProgress]( bool bStatus, pInstrument_t& pInstrument ) {
+                if ( bStatus ) {
+                  //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
+                }
+                else {
+                  std::cout << "BuildInstrument::Build failed: " << iterInProgress->first << std::endl;
+                }
                 {
                   std::lock_guard<std::mutex> lock( m_mutexMap );
                   m_mapInProgress.erase( iterInProgress );

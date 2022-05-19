@@ -439,8 +439,9 @@ void AppComboTrading::BuildFrameCharts( void ) {
           [this, pOptionInstrument, pUnderlyingInstrument, f](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
             // the resulting symbol can then be used to plug into the final option request to obtain
             //   the contract details for the option
+            pInstrument_t pOptionInstrument_ = pOptionInstrument; // bypasses a const problem through the capture
             m_tws->RequestContractDetails(
-              details.contract.symbol, pOptionInstrument,
+              details.contract.symbol, pOptionInstrument_,
               [this, pUnderlyingInstrument, f](const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument){
                 // the contract details fill in the contract in the instrument, which can then be passed back to the caller
                 //   as a fully defined, registered instrument
@@ -904,7 +905,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
           callback( pInstrument );
         });
       },
-      [](){}
+      []( bool, pInstrument_t& ){}
       );
   }
   else {

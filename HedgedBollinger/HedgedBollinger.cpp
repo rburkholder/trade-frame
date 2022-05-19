@@ -347,10 +347,12 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
           m_tws->ContractExpiryField( contract, m_dateSecondMonthOption.year(), m_dateSecondMonthOption.month() );
           //contract.secType = "OPT";
           //contract.secType = "FOP";
+          namespace ph = std::placeholders;
           m_tws->RequestContractDetails(
             contract,
-            MakeDelegate( this, &AppHedgedBollinger::HandleIBUnderlyingContractDetails ),
-            MakeDelegate( this, &AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone ) );
+            std::bind( &AppHedgedBollinger::HandleIBUnderlyingContractDetails, this, ph::_1, ph::_2 ),
+            std::bind( &AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone, this, ph::_1, ph::_2 )
+          );
           break;
         }
 
@@ -369,7 +371,7 @@ void AppHedgedBollinger::HandleIBUnderlyingContractDetails( const ou::tf::ib::TW
   FinishStrategyInitialization( pInstrumentUnderlying );
 }
 
-void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( void ) {
+void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( bool, pInstrument_t& ) {
 }
 
 void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying ) {
