@@ -44,6 +44,8 @@
 
 namespace {
 
+  const unsigned int maxRequestsInTransit( 5 );
+
 // TODO: use spirit to parse?  will it be faster?
 struct DecodeStatusWord {
   enum EStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
@@ -159,7 +161,7 @@ void TWS::Connect() {
         std::unique_lock lock( m_mutexThreadSync );
 
         m_bThreadSync = false;
-        m_thrdIBMessages = std::move( boost::thread( boost::bind( &TWS::processMessages, this ) ) );
+        m_thrdIBMessages = std::move( std::thread( std::bind( &TWS::processMessages, this ) ) );
         m_cvThreadSync.wait(
           lock,
           [this](){
@@ -273,12 +275,10 @@ void TWS::DisconnectCommon( bool bSignalEnd ){
 
 }
 
-// ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
-
-// need fixups for std::move: https://github.com/rburkholder/trade-frame/commit/95aa00c9178467c2bcf53d10358b90a506092440
 void TWS::RequestContractDetails(
-                                   const std::string& sSymbolBaseName, pInstrument_t& pInstrument,
-                                   fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone
+  const std::string& sSymbolBaseName
+, pInstrument_t& pInstrument
+, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone
 ) {
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
@@ -334,7 +334,6 @@ void TWS::RequestContractDetails(
   const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone, pInstrument_t& pInstrument 
 ) {
 
-  // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
   // pInstrument can be empty, or can have an instrument
   // results supplied at contractDetails()
 
@@ -357,7 +356,7 @@ void TWS::RequestContractDetails(
 
   m_mapActiveRequests[ pRequest->id ] = pRequest;
 
-  if ( 5 < m_mapActiveRequests.size() ) {
+  if ( maxRequestsInTransit < m_mapActiveRequests.size() ) {
     std::cout
       << pRequest->id << ": "
       << "m_mapActiveRequests size=" << m_mapActiveRequests.size()
@@ -883,6 +882,7 @@ void TWS::currentTime( long time ) {
 }
 
 void TWS::updateAccountTime (const std::string& timeStamp) {
+  // about once a minute
 }
 
 void TWS::position( const std::string& account, const Contract & contract, Decimal position, double avgCost ) {
@@ -1159,7 +1159,7 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
       if ( reqId > vt.first ) {
         assert( vt.first == vt.second->id );
         vt.second->nPasses++;
-        if ( 4 <= vt.second->nPasses ) {
+        if ( ( maxRequestsInTransit - 1 ) <= vt.second->nPasses ) {
           std::cout 
             << "IB details failed on " 
             << reqId << ","

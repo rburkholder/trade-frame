@@ -15,22 +15,22 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
+#include <thread>
 #include <sstream>
 #include <functional>
 #include <condition_variable>
 
 #include <boost/shared_ptr.hpp>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <boost/bind/bind.hpp>
+//#include <boost/bind/bind.hpp>
 
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
+//#include <boost/thread.hpp>
+//#include <boost/thread/mutex.hpp>
 
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
@@ -93,8 +93,6 @@ public:
 
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
-
-  // new set of event based handling
 
   using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
   using fOnContractDetailDone_t = std::function<void(bool)>; // true if success, false if stuck in queue; 
@@ -208,6 +206,11 @@ private:
   std::condition_variable m_cvThreadSync;
   bool m_bThreadSync;
 
+  std::thread m_thrdIBMessages;
+
+  void ConnectOptions( const std::string& );
+  void processMessages();
+
   long m_time;
   int m_idClient; // for session uniqueness when multiple applications are connected to TWS
 
@@ -220,11 +223,6 @@ private:
   // given a contract id, see if we have a symbol assigned
   using mapContractToSymbol_t = std::map<long, pSymbol_t>;
   mapContractToSymbol_t m_mapContractToSymbol;
-
-  boost::thread m_thrdIBMessages;
-
-  void ConnectOptions( const std::string& );
-  void processMessages();
 
   void DecodeMarketHours( const std::string&, ptime& dtOpen, ptime& dtClose );
 
