@@ -905,7 +905,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
           callback( pInstrument );
         });
       },
-      []( bool, pInstrument_t& ){}
+      []( bool ){}
       );
   }
   else {

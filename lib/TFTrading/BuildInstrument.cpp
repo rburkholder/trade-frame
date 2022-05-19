@@ -185,7 +185,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 iterInProgress->second.fInstrument( pInstrument );
               },
-              [this,iterInProgress]( bool bStatus, pInstrument_t& pInstrument ) {
+              [this,iterInProgress]( bool bStatus ) {
                 if ( bStatus ) {
                   //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
                 }

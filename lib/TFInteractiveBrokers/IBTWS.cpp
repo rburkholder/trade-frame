@@ -1147,7 +1147,6 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
 
   //std::cout << "contractDetailsEnd request " << reqId << std::endl;
 
-  pInstrument_t pInstrument;
   fOnContractDetailDone_t handler = nullptr;
 
   vRequest_t vAbandonedRequests; // IB can't find the symbol
@@ -1181,7 +1180,6 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
           //  << vt.second->pInstrument->GetInstrumentName() 
           //  << std::endl;
 
-          pInstrument = std::move( vt.second->pInstrument );
           handler = std::move( vt.second->fOnContractDetailDone );
 
           vt.second->Clear();
@@ -1213,7 +1211,7 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
 
   for ( vRequest_t::value_type& vt: vAbandonedRequests ) {
     if ( nullptr != vt->fOnContractDetailDone ) {
-      vt->fOnContractDetailDone( false, vt->pInstrument );
+      vt->fOnContractDetailDone( false );
     }
     vt->Clear();
     {
@@ -1225,7 +1223,7 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
   }
 
   if ( nullptr != handler )
-    handler( true, pInstrument );
+    handler( true );
 }
 
 void TWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {

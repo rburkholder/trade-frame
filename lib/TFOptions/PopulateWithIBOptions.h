@@ -74,7 +74,7 @@ private:
 
   void HandleOptionContractNotFound( void );
   void HandleOptionContractDetails( const ContractDetails& details, pInstrument_t& pInstrument );
-  void HandleOptionContractDetailsDone( bool, pInstrument_t& );
+  void HandleOptionContractDetailsDone( bool );
 
 };
 

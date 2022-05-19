@@ -63,7 +63,7 @@ void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian
   m_pProvider->RequestContractDetails( // delete any pre-existing first?
     m_contract,
     std::bind( &PopulateOptions::HandleOptionContractDetails, this, ph::_1, ph::_2 ),
-    std::bind( &PopulateOptions::HandleOptionContractDetailsDone, this, ph::_1, ph::_2 )
+    std::bind( &PopulateOptions::HandleOptionContractDetailsDone, this, ph::_1 )
   );
 }
 
@@ -75,7 +75,7 @@ void PopulateOptions::HandleOptionContractDetails( const ContractDetails& detail
   if ( 0 != OnInstrumentBuilt ) OnInstrumentBuilt( pInstrument );
 }
 
-void PopulateOptions::HandleOptionContractDetailsDone( bool, pInstrument_t& ) {
+void PopulateOptions::HandleOptionContractDetailsDone( bool ) {
   if ( 0 != OnPopulateComplete ) OnPopulateComplete( m_cntInstruments );
   m_bActive = false;
 }

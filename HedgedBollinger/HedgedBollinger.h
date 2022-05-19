@@ -139,7 +139,7 @@ private:
   void HandleMenuActionEmitStrategyValues();
 
   void HandleIBUnderlyingContractDetails( const ou::tf::ib::TWS::ContractDetails&, pInstrument_t& );
-  void HandleIBUnderlyingContractDetailsDone( bool, pInstrument_t& );
+  void HandleIBUnderlyingContractDetailsDone( bool );
   void FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying );
 
   void HandleObtainNewIQFeedSymbolListRemote();

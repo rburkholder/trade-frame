@@ -174,7 +174,7 @@ void AppESBracketOrder::HandleIBConnected( int ) {
         StartWatch(); // need to wait for contract id on first time around
         }
       ,
-      []( bool, pInstrument_t& ){}
+      []( bool ){}
       );
     m_bInitialized = true;
   }

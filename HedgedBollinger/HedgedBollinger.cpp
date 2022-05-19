@@ -351,7 +351,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
           m_tws->RequestContractDetails(
             contract,
             std::bind( &AppHedgedBollinger::HandleIBUnderlyingContractDetails, this, ph::_1, ph::_2 ),
-            std::bind( &AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone, this, ph::_1, ph::_2 )
+            std::bind( &AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone, this, ph::_1 )
           );
           break;
         }
@@ -371,7 +371,7 @@ void AppHedgedBollinger::HandleIBUnderlyingContractDetails( const ou::tf::ib::TW
   FinishStrategyInitialization( pInstrumentUnderlying );
 }
 
-void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( bool, pInstrument_t& ) {
+void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( bool ) {
 }
 
 void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying ) {

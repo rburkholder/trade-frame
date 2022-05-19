@@ -97,7 +97,7 @@ public:
   // new set of event based handling
 
   using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
-  using fOnContractDetailDone_t = std::function<void(bool,pInstrument_t&)>; // true if success, false if stuck in queue; 
+  using fOnContractDetailDone_t = std::function<void(bool)>; // true if success, false if stuck in queue; 
 
   void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t&,
                                                          fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );

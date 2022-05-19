@@ -195,7 +195,7 @@ void AppMultipleFutures::ConstructInstance( boost::uint16_t nSecPerBar, boost::u
       pWatch->StartWatch(); // need to wait for contract id on first time around
       }
     ,
-    []( bool, pInstrument_t& ){}
+    []( bool ){}
     );
 }
 
