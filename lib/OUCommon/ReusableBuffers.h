@@ -82,7 +82,7 @@ private:
 };
 
 
-template<typename bufferT> BufferRepository<bufferT>::BufferRepository(void) 
+template<typename bufferT> BufferRepository<bufferT>::BufferRepository() 
 : cntCheckins( 0 ), cntCheckouts( 0 )
 #ifdef _DEBUG
   , cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 ),
@@ -94,7 +94,7 @@ template<typename bufferT> BufferRepository<bufferT>::BufferRepository(void)
 #endif
 }
 
-template<typename bufferT> BufferRepository<bufferT>::~BufferRepository(void) {
+template<typename bufferT> BufferRepository<bufferT>::~BufferRepository() {
   bufferT* pBuffer;
   boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a lock
   while ( !m_vStack.empty() ) {
