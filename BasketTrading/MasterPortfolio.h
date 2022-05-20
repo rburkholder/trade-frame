@@ -202,14 +202,18 @@ private:
     ou::tf::TreeItem* pti;
     Statistics statistics;
     ou::tf::Bars m_barsHistory;
+    std::atomic_uint32_t m_nQuery;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
-    : pUnderlying( std::move( pUnderlying_ ) ) {}
+    : pUnderlying( std::move( pUnderlying_ ) ) 
+    , m_nQuery {}
+    {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
 
     UnderlyingWithStrategies( UnderlyingWithStrategies&& rhs )
     : pUnderlying( std::move( rhs.pUnderlying ) )
+    , m_nQuery {}
     {
       assert( rhs.mapStrategyActive.empty() );
       assert( rhs.mapStrategyClosed.empty() );

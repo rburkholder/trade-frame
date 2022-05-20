@@ -514,7 +514,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           });
 
         // TODO: run this in a thread, takes a while to process large option lists
-
+        uws.m_nQuery = 1; // initial lock of the loop, process each option, sync or async depending if cached
         uws.pUnderlying->PopulateChains(
           [this,&uws](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
             using query_t = ou::tf::iqfeed::OptionChainQuery;
@@ -530,21 +530,25 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   << std::endl;
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
-                // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
                 for ( const query_t::vSymbol_t::value_type& value: list.vSymbol ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
+                  uws.m_nQuery++;
                   m_pBuildInstrument->Queue(
                     value,
                     [this,&uws,fOption_]( pInstrument_t pInstrument ) {
-                      //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
-                      fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
-                      if ( m_pBuildInstrument->Done() ) {
+                      if ( pInstrument ) {
+                        //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
+                        fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
+                      }
+                      auto previous = uws.m_nQuery.fetch_sub( 1 );
+                      if ( 1 == previous ) {
                         StartUnderlying( uws );
                         ProcessSeedList();  // continue processing list of underlying
                       }
                     } );
                 }
-                if ( m_pBuildInstrument->Done() ) {
+                auto previous = uws.m_nQuery.fetch_sub( 1 );
+                if ( 1 == previous ) {
                   StartUnderlying( uws );
                   ProcessSeedList();  // continue processing list of underlying
                 }
