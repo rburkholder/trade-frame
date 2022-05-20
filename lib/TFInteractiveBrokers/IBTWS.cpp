@@ -347,7 +347,7 @@ void TWS::RequestContractDetails(
   Request* pRequest = nullptr;
   mapActiveRequests_t::size_type size {};
 
-  std::cout << "Requesting " << pInstrument->GetInstrumentName() << std::endl;
+  //std::cout << "Requesting " << pInstrument->GetInstrumentName() << std::endl;
 
   {
     std::scoped_lock<std::mutex> lock( m_mutexContractRequest );
@@ -377,7 +377,7 @@ void TWS::RequestContractDetails(
   }
 
   if ( bStartEvictor ) {
-    std::cout << "Evictor starting" << std::endl;
+    //std::cout << "Evictor starting" << std::endl;
 
     if ( m_thrdRequestEvictor.joinable() ) {
       m_thrdRequestEvictor.join();
@@ -395,13 +395,13 @@ void TWS::RequestContractDetails(
             if ( 0 < m_mapActiveRequests.size() ) {
               Request* pRequest = m_mapActiveRequests.begin()->second;
               pRequest->cntEvictionType2++;
-              if ( 10 < pRequest->cntEvictionType2 ) {
-                std::cout 
-                  << "IB details failed (2) on " 
-                  << pRequest->cntEvictionType2 << ","
-                  << pRequest->id << ","
-                  << pRequest->pInstrument->GetInstrumentName()
-                  << "." << std::endl;
+              if ( 12 < pRequest->cntEvictionType2 ) {
+                //std::cout 
+                //  << "IB details failed (2) on " 
+                //  << pRequest->cntEvictionType2 << ","
+                //  << pRequest->id << ","
+                //  << pRequest->pInstrument->GetInstrumentName()
+                //  << "." << std::endl;
                 fOnContractDetailDone = std::move( pRequest->fOnContractDetailDone );
                 pRequest->Clear();
                 m_mapActiveRequests.erase( pRequest->id );
@@ -419,7 +419,7 @@ void TWS::RequestContractDetails(
           }
         }
         while ( bContinue );
-        std::cout << "Evictor stopping" << std::endl;
+        //std::cout << "Evictor stopping" << std::endl;
       }
     ));
   }

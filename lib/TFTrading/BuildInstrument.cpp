@@ -48,14 +48,6 @@ BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed )
   assert( m_pIQ );
 }
 
-bool BuildInstrument::Done() {
-  bool bDone( true );
-  std::lock_guard<std::mutex> lock( m_mutexMap );
-  bDone &= ( 0 == m_mapSymbol.size() );
-  bDone &= ( 0 == m_mapInProgress.size() );
-  return bDone;
-}
-
 void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
 
   pInstrument_t pInstrument;
@@ -202,12 +194,14 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                   //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
                 }
                 else {
-                  std::cout << "BuildInstrument::Build failed: " << iterInProgress->first << std::endl;
+                  //std::cout << "BuildInstrument::Build failed: " << iterInProgress->first << std::endl;
+                  iterInProgress->second.fInstrument( nullptr );
                 }
                 {
                   std::lock_guard<std::mutex> lock( m_mutexMap );
                   m_mapInProgress.erase( iterInProgress );
                 }
+                //iterInProgress->second.
                 Update();
               }
               );

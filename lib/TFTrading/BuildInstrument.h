@@ -39,6 +39,7 @@ public:
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   using fInstrument_t = std::function<void(pInstrument_t)>;
+  using fDone_t = std::function<void()>;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
@@ -48,8 +49,6 @@ public:
 
   void Queue( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();
-
-  bool Done();
 
 protected:
 private:
