@@ -441,7 +441,7 @@ void AppBasketTrading::HandleRegisterRows(  ou::db::Session& session ) {
   //std::cout << "AppBasketTrading::HandleRegisterRows placeholder" << std::endl;
 }
 
-void AppBasketTrading::HandlePopulateDatabase( void ) {
+void AppBasketTrading::HandlePopulateDatabase() {
 
   std::cout << "AppBasketTrading::HandlePopulateDatabase" << std::endl;
 
@@ -479,7 +479,7 @@ void AppBasketTrading::HandleDbOnPopulate(  ou::db::Session& session ) {
   //std::cout << "AppBasketTrading::HandleDbOnPopulate placeholder" << std::endl;
 }
 
-void AppBasketTrading::HandleLoadDatabase( void ) {
+void AppBasketTrading::HandleLoadDatabase() {
   std::cout << "AppBasketTrading::HandleLoadDatabase ..." << std::endl;
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.LoadActivePortfolios();

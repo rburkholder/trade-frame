@@ -106,7 +106,7 @@ public:
 
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,
-    double dblSlopeUnderlying
+    double dblPivot
   , pWatch_t // underlying
   , pPortfolio_t // owning portfolio
   , boost::gregorian::date dateTrading
@@ -186,7 +186,8 @@ private:
 
   using volume_t = ou::tf::DatedDatum::volume_t;
 
-  double m_dblSlope20DayUnderlying;
+  double m_dblPivot; // used for generating a buy or a sell entry
+  //double m_dblSlope20DayUnderlying;
 
   pWatch_t m_pWatchUnderlying;
 

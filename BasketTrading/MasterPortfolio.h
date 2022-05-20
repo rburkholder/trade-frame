@@ -296,7 +296,6 @@ private:
   using mapStrategyCache_iter = mapStrategyCache_t::iterator;
   mapStrategyCache_t m_mapStrategyCache;
 
-  std::atomic_uint32_t m_nQuery;
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument

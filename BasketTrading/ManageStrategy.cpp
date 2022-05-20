@@ -233,7 +233,7 @@ private:
 
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
-  double dblSlope20DayUnderlying
+  double dblPivot
 , pWatch_t pWatchUnderlying
 , pPortfolio_t pPortfolioOwning // => owning portfolio
 , boost::gregorian::date dateTrading
@@ -255,7 +255,7 @@ ManageStrategy::ManageStrategy(
   )
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
   m_dblOpen {},
-  m_dblSlope20DayUnderlying( dblSlope20DayUnderlying ),
+  m_dblPivot( dblPivot ),
   //m_barPriorDaily( barPriorDaily ),
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
@@ -699,7 +699,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
           try {
             const ou::tf::option::Combo::E20DayDirection direction
-              = ( 0.0 <= m_dblSlope20DayUnderlying )
+              = ( m_dblPivot <= mid )
               ? ou::tf::option::Combo::E20DayDirection::Rising
               : ou::tf::option::Combo::E20DayDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
@@ -717,7 +717,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
-                std::cout << sUnderlying << ": bid/ask spread ok, opening positions (slope=" << m_dblSlope20DayUnderlying << ")" << std::endl;
+                std::cout << sUnderlying << ": bid/ask spread ok, opening positions (pivot=" << m_dblPivot << "/" << mid << ")" << std::endl;
 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );

@@ -33,6 +33,7 @@
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
+#include "TFIndicators/Pivots.h"
 
 namespace {
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
@@ -73,7 +74,6 @@ MasterPortfolio::MasterPortfolio(
 , fSetChartDataView_t&& fSetChartDataView
 )
 : m_bStarted( false )
-, m_nQuery {}
 , m_nSharesTrading( 0 )
 , m_dateTrading( dateTrading )
 , m_spread_specs( spread_specs )
@@ -531,24 +531,20 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
                 // TODO: will have to do this during/after chains for all underlyings are retrieved
                 // TODO: provide a fDone_t function to StartStrategies ne StartUnderlying?
-                m_nQuery = 1; // iniial lock of the loop, process each option, sync or async dependin gif cached
                 for ( const query_t::vSymbol_t::value_type& value: list.vSymbol ) {
                   //std::cout << "MasterPortfolio::AddUnderlying option: " << value << std::endl;
-                  m_nQuery++;
                   m_pBuildInstrument->Queue(
                     value,
                     [this,&uws,fOption_]( pInstrument_t pInstrument ) {
                       //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
                       fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
-                      auto previous = m_nQuery.fetch_sub( 1 );
-                      if ( 1 == previous ) {
+                      if ( m_pBuildInstrument->Done() ) {
                         StartUnderlying( uws );
                         ProcessSeedList();  // continue processing list of underlying
                       }
                     } );
                 }
-                auto previous = m_nQuery.fetch_sub( 1 );
-                if ( 1 == previous ) {
+                if ( m_pBuildInstrument->Done() ) {
                   StartUnderlying( uws );
                   ProcessSeedList();  // continue processing list of underlying
                 }
@@ -564,10 +560,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
 MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws ) {
 
-  //const IIPivot& iip_( uws.iip );
+  const double dblPivot = uws.statistics.setPivots.GetPivotValue( ou::tf::PivotSet::EPivots::PV );
+  assert( 0 < dblPivot );
 
   const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
-
   const idPortfolio_t& idPortfolioUnderlying( uws.pUnderlying->GetPortfolio()->Id() );
 
   //mapSpecs_t::const_iterator iterSpreadSpecs
@@ -576,9 +572,9 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
   namespace ph = std::placeholders;
 
   pManageStrategy_t pManageStrategy = std::make_shared<ManageStrategy>(
-        //iip.sPath, // TODO: supply to Underlying instead
-        //iip_.bar,
-        1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
+        //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
+        //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
+        dblPivot, // gt is long, lt is short
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
         m_dateTrading,
