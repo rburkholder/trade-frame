@@ -49,6 +49,8 @@ public:
   void Queue( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();
 
+  bool Done();
+
 protected:
 private:
 
