@@ -7,6 +7,10 @@ project(trade-frame)
 add_definitions(-march=native)
 add_definitions(-pthread)
 
+# can't use 20 yet, seems to be many errors created
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
+
 add_subdirectory(ArmsIndex)
 add_subdirectory(AutoTrade)
 add_subdirectory(BasketTrading)
