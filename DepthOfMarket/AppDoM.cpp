@@ -37,6 +37,11 @@ TODO:
 #include <wx/defs.h>
 #include <wx/sizer.h>
 
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/FrameControls.h>
 
@@ -52,18 +57,36 @@ namespace {
   //static const std::string sDbName( sDirectory + "/example.db" );
   static const std::string sStateFileName( sDirectory + "/dom.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+  static const std::string sSaveValuesRoot( "/app/appDoM" );
 }
 
 IMPLEMENT_APP(AppDoM)
 
 bool AppDoM::OnInit() {
 
-  int code = 1;
+  wxApp::SetAppDisplayName( sAppName );
+  wxApp::SetVendorName( "One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
+
+  m_bRecordDepths = false;
+
+  int code = true;
 
   if ( !Load( m_config ) ) {
-    code = 0;
+    code = false;
   }
   else {
+
+    {
+      std::stringstream ss;
+      auto dt = ou::TimeSource::Instance().External();
+      ss
+        << ou::tf::Instrument::BuildDate( dt.date() )
+        << "-"
+        << dt.time_of_day()
+        ;
+      m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+    }
 
     m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_config.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -187,6 +210,13 @@ bool AppDoM::OnInit() {
   //  vItemsLoadSymbols.push_back( new mi( "New Symbol List Local", MakeDelegate( this, &AppIQFeedGetHistory::HandleNewSymbolListLocal ) ) );
   //  vItemsLoadSymbols.push_back( new mi( "Local Binary Symbol List", MakeDelegate( this, &AppIQFeedGetHistory::HandleLocalBinarySymbolList ) ) );
     //wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Utility", vItemsLoadSymbols );
+
+    FrameMain::vpItems_t vItems;
+    vItems.push_back( new mi( "Start", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Start ) ) );
+    vItems.push_back( new mi( "Status", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Status ) ) );
+    vItems.push_back( new mi( "Stop", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Stop ) ) );
+    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Save ) ) );
+    wxMenu* pMenu = m_pFrameMain->AddDynamicMenu( "Market Depth", vItems );
 
     m_pFrameControls->SetAutoLayout( true );
     m_pFrameControls->Layout();
@@ -326,11 +356,16 @@ void AppDoM::StartDepthByOrder() {
 
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
     [ this ](){
-      m_FeatureSet.Set( 10 );
+      m_FeatureSet.Set( 10 );  // use this many levels in the order book for feature vector set
       m_pDispatch->Single( true );
       m_pDispatch->WatchAdd(
         m_config.sSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
+
+          if ( m_bRecordDepths ) {
+            m_depths_byorder.Append( depth );
+          }
+
           switch ( depth.MsgType() ) {
             case '4': // Update
               switch ( depth.Side() ) {
@@ -385,6 +420,54 @@ void AppDoM::StartDepthByOrder() {
         );
     } );
 
+}
+
+void AppDoM::MenuItem_PersistMarketDepth_Start() {
+  if ( "order" == m_config.sDepthType ) {
+    m_bRecordDepths = true;
+    std::cout << "Depth recording enabled" << std::endl;
+  }
+  else {
+    std::cout << "depth recording available for 'depth by order' only" << std::endl;
+  }
+}
+
+void AppDoM::MenuItem_PersistMarketDepth_Status() {
+  CallAfter(
+    [this](){
+      std::cout << "Time Series: "
+        << ( m_bRecordDepths ? "is" : "not" ) << " being recorded, "
+        << m_depths_byorder.Size() << " elements, "
+        << sizeof( ou::tf::DepthsByOrder ) << " bytes each"
+        << std::endl;
+    }
+  );
+}
+
+void AppDoM::MenuItem_PersistMarketDepth_Stop() {
+  m_bRecordDepths = false;
+  std::cout << "Depth recording disabled" << std::endl;
+}
+
+void AppDoM::MenuItem_PersistMarketDepth_Save() {
+  std::cout << "Saving collected values ... " << std::endl;
+  CallAfter(
+    [this](){
+      if ( 0 != m_depths_byorder.Size() ) {
+        ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+        std::string sPathName = sSaveValuesRoot + "/" + m_sTSDataStreamStarted;
+        sPathName += ou::tf::DepthsByOrder::Directory() + m_pWatch->GetInstrumentName();
+        ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
+        wtsDepths.Write( sPathName, &m_depths_byorder );
+        ou::tf::HDF5Attributes attrDepths( dm, sPathName );
+        attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
+        //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+        //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+        attrDepths.SetProviderType( m_pWatch->GetProvider()->ID() );
+      }
+      std::cout << "  ... Done " << std::endl;
+    }
+  );
 }
 
 void AppDoM::EmitMarketMakerMaps() {

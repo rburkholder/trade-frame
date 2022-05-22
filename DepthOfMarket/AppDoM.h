@@ -46,6 +46,8 @@
 #include "Config.h"
 #include "PanelStatistics.hpp"
 
+class FrameMain;
+
 namespace ou {
 namespace tf {
   class FrameControls;
@@ -56,8 +58,6 @@ namespace l2 {
 } // namespace tf
 } // namespace ou
 
-class FrameMain;
-
 class AppDoM:
   public wxApp,
   public ou::tf::FrameWork01<AppDoM>
@@ -67,6 +67,8 @@ class AppDoM:
 public:
 protected:
 private:
+
+  std::string m_sTSDataStreamStarted;
 
   config::Options m_config;
 
@@ -81,8 +83,6 @@ private:
   PanelStatistics::values_t m_valuesStatistics;
   PanelStatistics* m_pPanelStatistics;
 
-  //wxMenu* m_pMenuLoadDays;
-
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
@@ -90,6 +90,9 @@ private:
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
   ou::tf::Watch::pWatch_t m_pWatch;
+
+  bool m_bRecordDepths;
+  ou::tf::DepthsByOrder m_depths_byorder;
 
   ou::tf::Bars m_barsHistory;
   ou::tf::PivotSet m_setPivots;
@@ -166,6 +169,11 @@ private:
   void OnTrade( const ou::tf::Trade& );
 
   void LoadDailyHistory();
+
+  void MenuItem_PersistMarketDepth_Start();
+  void MenuItem_PersistMarketDepth_Status();
+  void MenuItem_PersistMarketDepth_Stop();
+  void MenuItem_PersistMarketDepth_Save();
 
   void SaveState();
   void LoadState();
