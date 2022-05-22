@@ -74,7 +74,7 @@ bool AppIndicatorTrading::OnInit() {
     auto dt = ou::TimeSource::Instance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
-      << " "
+      << "-"
       << dt.time_of_day()
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
