@@ -30,6 +30,7 @@
 #include <wx/app.h>
 
 #include <TFTrading/Watch.h>
+#include <TFTrading/DBWrapper.h>
 
 #include <TFIndicators/TSEMA.h>
 #include <TFIndicators/Pivots.h>
@@ -54,6 +55,7 @@ namespace tf {
 namespace l2 {
   class PanelTrade;
   class PanelSideBySide;
+  class PanelLevelIIButtons;
 } // namespace l2
 } // namespace tf
 } // namespace ou
@@ -72,11 +74,14 @@ private:
 
   config::Options m_config;
 
+  //std::unique_ptr<ou::tf::db> m_pdb;
+
   FrameMain* m_pFrameMain;
   ou::tf::FrameControls* m_pFrameControls;
 
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::l2::PanelTrade* m_pPanelTrade;
+  ou::tf::l2::PanelLevelIIButtons* m_pPanelLevelIIButtons;
   ou::tf::l2::PanelSideBySide* m_pPanelSideBySide;
 
   int m_cntLoops;
@@ -150,6 +155,8 @@ private:
 
   std::atomic_uint32_t m_nMarketOrdersAsk;
   std::atomic_uint32_t m_nMarketOrdersBid;
+
+  bool m_bArmed;
 
   void EmitMarketMakerMaps();
 

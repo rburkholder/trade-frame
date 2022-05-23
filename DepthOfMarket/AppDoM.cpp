@@ -46,6 +46,7 @@ TODO:
 #include <TFVuTrading/FrameControls.h>
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
+#include <TFVuTrading/MarketDepth/PanelLevelIIButtons.hpp>
 #include <TFVuTrading/MarketDepth/PanelSideBySide.hpp>
 
 #include "AppDoM.h"
@@ -54,7 +55,7 @@ namespace {
   static const std::string sDirectory( "." );
   static const std::string sAppName( "Depth of Market" );
   static const std::string sChoicesFilename( sDirectory + "/dom.cfg" );
-  //static const std::string sDbName( sDirectory + "/example.db" );
+  //static const std::string sDbName( sDirectory + "/dom.db" );
   static const std::string sStateFileName( sDirectory + "/dom.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
   static const std::string sSaveValuesRoot( "/app/appDoM" );
@@ -68,6 +69,7 @@ bool AppDoM::OnInit() {
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
 
+  m_bArmed = false;
   m_bRecordDepths = false;
 
   int code = true;
@@ -87,6 +89,8 @@ bool AppDoM::OnInit() {
         ;
       m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
     }
+
+    //m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
     m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_config.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -110,8 +114,8 @@ bool AppDoM::OnInit() {
     wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
     sizerMain->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 4 );
 
-    m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-    sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 4);
+    m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
+    sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_CENTER|wxRIGHT, 4);
     m_pPanelProviderControl->Show( true );
 
     wxSize size = sizerMain->GetSize();
@@ -119,8 +123,12 @@ bool AppDoM::OnInit() {
     LinkToPanelProviderControl();
 
     m_pPanelStatistics = new PanelStatistics( m_pFrameMain, wxID_ANY );
-    sizerControls->Add( m_pPanelStatistics, 0, wxALIGN_LEFT, 4);
+    sizerControls->Add( m_pPanelStatistics, 0, wxALIGN_LEFT|wxRIGHT, 4);
     m_pPanelStatistics->Show( true );
+
+    m_pPanelLevelIIButtons = new ou::tf::l2::PanelLevelIIButtons( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
+    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_CENTER, 0);
+    m_pPanelLevelIIButtons->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
     sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 4 );
@@ -128,6 +136,17 @@ bool AppDoM::OnInit() {
     m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain );
     sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND, 4 );
     m_pPanelTrade->Show( true );
+
+    m_pPanelLevelIIButtons->Set(
+      [this](bool) { // m_fButtonArmed
+      },
+      [this]() { // m_fButtonReCenter
+      },
+      [this]() { // m_fButtonCancel
+      },
+      [this]() { // m_fButtonClose
+      }
+    );
 
     m_cntLoops = 0;
     m_pPanelTrade->SetOnTimer(
