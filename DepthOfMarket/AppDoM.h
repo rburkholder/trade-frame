@@ -74,7 +74,7 @@ private:
 
   config::Options m_config;
 
-  //std::unique_ptr<ou::tf::db> m_pdb;
+  std::unique_ptr<ou::tf::db> m_pdb;
 
   FrameMain* m_pFrameMain;
   ou::tf::FrameControls* m_pFrameControls;

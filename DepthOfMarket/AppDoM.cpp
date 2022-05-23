@@ -55,7 +55,7 @@ namespace {
   static const std::string sDirectory( "." );
   static const std::string sAppName( "Depth of Market" );
   static const std::string sChoicesFilename( sDirectory + "/dom.cfg" );
-  //static const std::string sDbName( sDirectory + "/dom.db" );
+  static const std::string sDbName( sDirectory + "/dom.db" );
   static const std::string sStateFileName( sDirectory + "/dom.state" );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
   static const std::string sSaveValuesRoot( "/app/appDoM" );
@@ -90,7 +90,7 @@ bool AppDoM::OnInit() {
       m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
     }
 
-    //m_pdb = std::make_unique<ou::tf::db>( sDbName );
+    m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
     m_tws->SetClientId( m_config.ib_client_id );
 

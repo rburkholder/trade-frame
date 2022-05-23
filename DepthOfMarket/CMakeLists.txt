@@ -77,6 +77,7 @@ target_link_libraries(
       MarketDepth
       TFIQFeedLevel2
       TFTrading
+      TFOptions
       TFTimeSeries
       TFHDF5TimeSeries
       OUStatistics
