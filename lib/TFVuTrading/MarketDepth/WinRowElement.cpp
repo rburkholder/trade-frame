@@ -19,6 +19,8 @@
  * Created on October 28, 2021, 16:29
  */
 
+ //#include <iostream>
+
 //#include <wx/sizer.h>
 #include <wx/event.h>
 //#include <wx/tooltip.h>
@@ -65,6 +67,8 @@ bool WinRowElement::Create(
 void WinRowElement::Init() {
   m_bFocusSet = false;
   m_bCanHaveFocus = false;
+  m_fMouseClick_Left = nullptr;
+  m_fMouseClick_Right = nullptr;
   //m_ColourBackground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOW ).GetRGB();
   //m_ColourForeground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOWTEXT ).GetRGB();
 }
@@ -129,6 +133,11 @@ void WinRowElement::SetColours( EColour colourB, EColour colourF, EColour colour
   SetColourHighlight( colourH );
 }
 
+void WinRowElement::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
+  m_fMouseClick_Left = std::move( fLeft );
+  m_fMouseClick_Right = std::move( fRight );
+}
+
 void WinRowElement::Paint() {
   wxWindowDC dc( this );
   Render( dc );
@@ -180,10 +189,14 @@ void WinRowElement::OnFocusKill( wxFocusEvent& event ) {
 }
 
 void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
+  //std::cout << "left click" << std::endl;
+  if ( m_fMouseClick_Left ) m_fMouseClick_Left();
   event.Skip();
 }
 
 void WinRowElement::OnMouseRightUp( wxMouseEvent& event ) {
+  //std::cout << "right click" << std::endl;
+  if ( m_fMouseClick_Right ) m_fMouseClick_Right();
   event.Skip();
 }
 

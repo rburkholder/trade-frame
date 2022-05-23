@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <wx/window.h>
 
 #include <OUCommon/Colour.h>
@@ -45,7 +47,7 @@ public:
 
   WinRowElement(
     wxWindow* parent,
-    wxWindowID id = SYMBOL_WINELEMENT_IDNAME,
+    wxWindowID id = SYMBOL_WINELEMENT_ID,
     const wxPoint& pos = SYMBOL_WINELEMENT_POSITION,
     const wxSize& size = SYMBOL_WINELEMENT_SIZE,
     long style = SYMBOL_WINELEMENT_STYLE
@@ -55,13 +57,14 @@ public:
 
   bool Create(
     wxWindow* parent,
-    wxWindowID id = SYMBOL_WINELEMENT_IDNAME,
+    wxWindowID id = SYMBOL_WINELEMENT_ID,
     const wxPoint& pos = SYMBOL_WINELEMENT_POSITION,
     const wxSize& size = SYMBOL_WINELEMENT_SIZE,
     long style = SYMBOL_WINELEMENT_STYLE
     );
 
   using EColour = ou::Colour::wx::EColour;
+  using fMouseClick_t = std::function<void()>;
 
   void SetText( const std::string& );
   void SetText( const std::string&, bool bHighlight );
@@ -72,10 +75,12 @@ public:
   void SetColourHighlight( EColour colour );
   void SetColours( EColour colourB, EColour colourF, EColour colourH );
 
+  void Set( fMouseClick_t&& left, fMouseClick_t&& right );
+
 protected:
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_WINELEMENT
+  enum { ID_Null=wxID_HIGHEST, SYMBOL_WINELEMENT_ID
   };
 
   bool m_bCanHaveFocus;
@@ -88,6 +93,9 @@ private:
   EColour m_colourHighlight;
 
   long m_style;  // wxCENTER, wxLEFT, wxRIGHT
+
+  fMouseClick_t m_fMouseClick_Left;
+  fMouseClick_t m_fMouseClick_Right;
 
   void Init();
   void CreateControls();

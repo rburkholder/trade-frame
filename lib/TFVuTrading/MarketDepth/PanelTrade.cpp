@@ -424,6 +424,38 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         PriceRow& rowPrice( m_PriceRows[ iy ] );
         rowPrice.SetRowElements( *pWinRow );
         rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
+        rowPrice.Set( // TODO: make these as bind statements to methods
+          [this,&rowPrice](double dblPrice, PriceRow::EField field){
+            switch ( field ) {
+              case PriceRow::EField::AskOrder:
+                std::cout << "ask place order @ " << dblPrice << std::endl;
+                rowPrice.SetAskOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                break;
+              case PriceRow::EField::BidOrder:
+                std::cout << "bid place order @ " << dblPrice << std::endl;
+                rowPrice.SetBidOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                break;
+              default:
+                assert( false );
+                break;
+            }
+          },
+          [this,&rowPrice](double dblPrice, PriceRow::EField field){
+            switch ( field ) {
+              case PriceRow::EField::AskOrder:
+                std::cout << "ask cancel order @ " << dblPrice << std::endl;
+                rowPrice.SetAskOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                break;
+              case PriceRow::EField::BidOrder:
+                std::cout << "bid cancel order @ " << dblPrice << std::endl;
+                rowPrice.SetBidOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                break;
+              default:
+                assert( false );
+                break;
+            }
+          }
+        );
         //rowData.Refresh();  // TODO: refactor out into timer
       }
     }

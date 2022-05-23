@@ -52,7 +52,7 @@ public:
 
   void Refresh();
 
-  // doesn't work - cna't do partial specialization, try fusion?
+  // the following does not work - can't do partial specialization, try fusion?
   //template<typename T>
   //void Set(WinRow::EField field, T t ) {}
   //template <> void Set<double>( WinRow::EField field, double value ) {
@@ -88,6 +88,12 @@ public:
     m_dreIndicatorDynamic.Del( sIndicator );
   }
 
+  using fMouseClick_t = std::function<void(double,EField)>; // returns the price at this level
+  void Set( fMouseClick_t&& left, fMouseClick_t&& right );
+
+  void SetAskOrderSize( unsigned int );
+  void SetBidOrderSize( unsigned int );
+
 protected:
 private:
 
@@ -100,7 +106,9 @@ private:
   DataRowElement<unsigned int>   m_dreBuyCount;
   DataRowElement<unsigned int>   m_dreBuyVolume;
   DataRowElement<unsigned int>   m_dreBidSize;
+  DataRowElement<unsigned int>   m_dreBidOrder;
   DataRowElement<double>         m_drePrice;
+  DataRowElement<unsigned int>   m_dreAskOrder;
   DataRowElement<unsigned int>   m_dreAskSize;
   DataRowElement<unsigned int>   m_dreSellVolume;
   DataRowElement<unsigned int>   m_dreSellCount;
@@ -108,6 +116,9 @@ private:
   DataRowElement<unsigned int>   m_dreVolume;
   DataRowElementIndicatorStatic  m_dreIndicatorStatic;
   DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
+
+  fMouseClick_t m_fMouseClick_Left;
+  fMouseClick_t m_fMouseClick_Right;
 
   //RowElements* m_pRowElements;  // shared_ptr ?
 
