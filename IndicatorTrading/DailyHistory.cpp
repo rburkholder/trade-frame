@@ -115,9 +115,9 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             << ", 200 day=" << dblAvg200
             << std::endl;
 
-          cem.AddMark(   dblAvg7, colour, "7 day" );
-          cem.AddMark(  dblAvg21, colour, "21 day" );
-          cem.AddMark(  dblAvg50, colour, "50 day" );
+          cem.AddMark(   dblAvg7, colour,   "7 day" );
+          cem.AddMark(  dblAvg21, colour,  "21 day" );
+          cem.AddMark(  dblAvg50, colour,  "50 day" );
           cem.AddMark( dblAvg100, colour, "100 day" );
           cem.AddMark( dblAvg200, colour, "200 day" );
 
