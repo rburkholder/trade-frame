@@ -92,6 +92,8 @@ bool AppDoM::OnInit() {
 
     //m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
+    m_tws->SetClientId( m_config.ib_client_id );
+
     m_pFrameMain = new FrameMain( nullptr, wxID_ANY, sAppName + " - " + m_config.sSymbolName );
     wxWindowID idFrameMain = m_pFrameMain->GetId();
 

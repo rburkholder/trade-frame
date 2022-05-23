@@ -33,6 +33,7 @@ namespace {
   static const std::string sFileName( "dom.cfg" );
 
   static const std::string sOption_SymbolName( "symbol" );
+  static const std::string sOption_IbClientId( "ib_client_id" );
   static const std::string sOption_DepthType( "depth" );
   static const std::string sOption_PeriodWidth( "period_width" );
   static const std::string sOption_MA1Periods( "ma1_periods" );
@@ -69,6 +70,7 @@ bool Load( Options& options ) {
 
     config.add_options()
       ( sOption_SymbolName.c_str(), po::value<std::string>(&options.sSymbolName ), "symbol name")
+      ( sOption_IbClientId.c_str(), po::value<int>( &options.ib_client_id )->default_value( 1 ), "IB Client ID" )
       ( sOption_DepthType.c_str(),  po::value<std::string>(&options.sDepthType ), "depth type" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
@@ -97,6 +99,7 @@ bool Load( Options& options ) {
       bOk &= parse<std::string>( sFileName, vm, sOption_SymbolName, options.sSymbolName );
       std::replace_if( options.sSymbolName.begin(), options.sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
+      bOk &= parse<int>( sFileName, vm, sOption_IbClientId, options.ib_client_id );
       bOk &= parse<std::string>( sFileName, vm, sOption_DepthType, options.sDepthType );
 
       bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );

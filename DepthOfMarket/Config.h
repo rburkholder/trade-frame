@@ -27,6 +27,9 @@ struct Options {
 
   std::string sSymbolName;
 
+  // Interactive Brokers api instance
+  int ib_client_id;
+
   std::string sDepthType;
 
   int nPeriodWidth;  // units:  seconds
