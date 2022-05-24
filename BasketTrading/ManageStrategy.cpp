@@ -110,9 +110,9 @@ namespace {
 class OptionRepository {
 public:
 
-  //using pPosition_t  = ou::tf::Position::pPosition_t;
   using pWatch_t     = ou::tf::option::Option::pWatch_t;
   using pOption_t    = ou::tf::option::Option::pOption_t;
+  using pPosition_t  = ou::tf::Position::pPosition_t;
 
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
@@ -155,7 +155,7 @@ public:
     m_ptiParent = ptiParent;
   }
 
-  void Add( pOption_t pOption ) {
+  void Add( pOption_t pOption, pPosition_t pPosition ) {
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
 
@@ -180,6 +180,7 @@ public:
         []( ou::tf::TreeItem* ){}
       );
       pOptionStatistics->Set( pti );
+      pOptionStatistics->Set( pPosition );
 
       std::cout << "OptionRepository::Add " << pOption->GetInstrumentName() << std::endl;
 
@@ -649,9 +650,9 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
     },
-    [this]( pOption_t pOption ) { // fActivateOption_t
-      std::cout << "adding option " << pOption->GetInstrumentName() << std::endl;
-      m_pOptionRepository->Add( pOption );
+    [this]( pOption_t pOption, pPosition_t pPosition ) { // fActivateOption_t
+      //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
+      m_pOptionRepository->Add( pOption, pPosition );
     },
     [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
       combo_t* pCombo = reinterpret_cast<combo_t*>( p );
@@ -662,6 +663,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       return pPosition;
     },
     [this]( pOption_t pOption ){ // fDeactivateOption
+      //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
       //assert( pWatch->GetInstrument()->IsOption() );
       //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
       m_pOptionRepository->Remove( pOption );

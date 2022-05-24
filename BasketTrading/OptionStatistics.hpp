@@ -24,6 +24,7 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFOptions/Option.h>
+#include <TFTrading/Position.h>
 
 namespace ou {
 namespace tf {
@@ -36,6 +37,7 @@ public:
 
   using pWatch_t     = ou::tf::option::Option::pWatch_t;
   using pOption_t    = ou::tf::option::Option::pOption_t;
+  using pPosition_t  = ou::tf::Position::pPosition_t;
 
   using pChartDataView_t =ou::ChartDataView::pChartDataView_t;
 
@@ -49,13 +51,15 @@ public:
   pChartDataView_t ChartDataView() { return m_pdvChart; }
 
   void Set( ou::tf::TreeItem* pti ) { m_ptiSelf = pti; }
+  void Set( pPosition_t pPosition ) { m_pPosition = pPosition; }
 
 protected:
 private:
 
-  enum ChartSlot { Price, Volume, Spread, IV, Delta, Gamma, Theta, Rho, Vega };
+  enum ChartSlot { Price, Volume, Spread, PL, IV, Delta, Gamma, Theta, Rho, Vega };
 
   pOption_t m_pOption;
+  pPosition_t m_pPosition;
 
   pChartDataView_t m_pdvChart; // the data
 
@@ -69,6 +73,8 @@ private:
   ou::ChartEntryVolume m_ceBidVolume;
 
   ou::ChartEntryIndicator m_ceSpread;
+
+  ou::ChartEntryIndicator m_cePLTotal;
 
   ou::ChartEntryIndicator m_ceImpliedVolatility;
   ou::ChartEntryIndicator m_ceDelta;

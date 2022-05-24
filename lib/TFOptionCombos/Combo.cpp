@@ -102,7 +102,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     pWatch_t pWatch = pPositionNew->GetWatch();
     pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-    m_fActivateOption( pOption );
+    m_fActivateOption( pOption, pPositionNew );
 
     if ( State::Initializing == m_state ) {
       m_state = State::Positions;

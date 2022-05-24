@@ -44,6 +44,8 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
 
   m_pdvChart->Add( ChartSlot::Spread, &m_ceSpread );
 
+  m_pdvChart->Add( ChartSlot::PL, &m_cePLTotal );
+
   m_pdvChart->Add( ChartSlot::IV, &m_ceImpliedVolatility );
   m_pdvChart->Add( ChartSlot::Delta, &m_ceDelta );
   m_pdvChart->Add( ChartSlot::Gamma, &m_ceGamma );
@@ -63,6 +65,8 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
   m_ceSpread.SetName( "Spread" );
 
   m_ceVolume.SetName( "Volume" );
+
+  m_cePLTotal.SetName( "P/L Position" );
 
   m_ceDelta.SetName( "Delta" );
   m_ceGamma.SetName( "Gamma" );
@@ -90,6 +94,15 @@ void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceAskVolume.Append( quote.DateTime(), +quote.AskSize() );
   m_ceBidVolume.Append( quote.DateTime(), -quote.BidSize() );
   m_ceSpread.Append( quote.DateTime(), quote.Ask() - quote.Bid() );
+
+  if ( m_pPosition ) {
+    double dblUnRealized;
+    double dblRealized;
+    double dblCommissionsPaid;
+    double dblTotal;
+    m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+    m_cePLTotal.Append( quote.DateTime(), dblTotal );
+  }
 }
 
 void OptionStatistics::HandleTrade( const ou::tf::Trade& trade ) {
