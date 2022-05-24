@@ -53,6 +53,8 @@ public:
   void Set( ou::tf::TreeItem* pti ) { m_ptiSelf = pti; }
   void Set( pPosition_t pPosition ) { m_pPosition = pPosition; }
 
+  ou::tf::TreeItem* GetTreeItem() { return m_ptiSelf; }
+
 protected:
 private:
 

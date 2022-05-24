@@ -184,7 +184,6 @@ public:
 
       std::cout << "OptionRepository::Add " << pOption->GetInstrumentName() << std::endl;
 
-      // TODO: activate calc only if option is active
       m_fStartCalc( pOption, m_pWatchUnderlying );
     }
     else {
@@ -202,7 +201,7 @@ public:
     if ( m_mapOption.end() != iterOption ) {
 
       m_fStopCalc( pOption, m_pWatchUnderlying );
-      // TODO: stop calc only if option is active
+      //iterOption->second->GetTreeItem()->Delete(); // this needs to be tested prior to activation, what happens if this treeitem is visible?
       m_mapOption.erase( iterOption );
 
     }

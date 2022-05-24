@@ -40,7 +40,9 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
   m_pdvChart->Add( ChartSlot::Price, &m_ceAsk );
   m_pdvChart->Add( ChartSlot::Price, &m_ceBid );
 
-  m_pdvChart->Add( ChartSlot::Volume, &m_ceVolume );
+  m_pdvChart->Add( ChartSlot::Volume, &m_ceAskVolume );
+  m_pdvChart->Add( ChartSlot::Volume, &m_ceBidVolume );
+  //m_pdvChart->Add( ChartSlot::Volume, &m_ceVolume );
 
   m_pdvChart->Add( ChartSlot::Spread, &m_ceSpread );
 
@@ -82,10 +84,13 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
 }
 
 OptionStatistics::~OptionStatistics() {
-  // need to be able to dynamically remove tree item?
   m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionStatistics::HandleQuote ) );
   m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionStatistics::HandleTrade ) );
   m_pOption->OnGreek.Remove( MakeDelegate( this, &OptionStatistics::HandleGreek ) );
+  m_ptiSelf = nullptr; // need to be able to dynamically remove tree item?
+  m_pdvChart.reset();
+  m_pPosition.reset();
+  m_pOption.reset();
 }
 
 void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {
