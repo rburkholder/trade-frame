@@ -327,8 +327,13 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       m_pBuildInstrument->Queue(
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
-          fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
-          // TODO: need to register in database
+          if ( pInstrument ) {
+            fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
+            // instrument is registered during transit through BuildInstrument
+          }
+          else {
+            //std::cout << "SetInteractiveChart couldn't BuildInstrument" << std::endl;
+          }
         }
       );
     },
