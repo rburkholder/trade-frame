@@ -35,8 +35,8 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {},
   m_bEventsAttached( false )
 {
-  assert( 0 != pInstrument.get() );
-  assert( 0 != pDataProvider.get() );
+  assert( pInstrument );
+  assert( pDataProvider );
   Initialize();
 }
 
@@ -77,8 +77,8 @@ Watch& Watch::operator=( const Watch& rhs ) {
 }
 
 void Watch::Initialize() {
-  assert( 0 != m_pInstrument.get() );
-  assert( 0 != m_pDataProvider.get() );
+  assert( m_pInstrument );
+  assert( m_pDataProvider );
   assert( m_pDataProvider->ProvidesQuotes() );
   assert( m_pDataProvider->ProvidesTrades() );
   m_quotes.Reserve( 1024 );  // reduce startup allocations
