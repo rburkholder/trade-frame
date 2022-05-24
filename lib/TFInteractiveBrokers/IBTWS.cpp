@@ -1298,7 +1298,7 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
     std::chrono::time_point<std::chrono::system_clock> finished
       = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli> elapsed = finished - submitted;
-    std::cout << "IB request roundtrip = " << elapsed.count() << std::endl;
+    // std::cout << "IB request roundtrip = " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
   }
 }
 
