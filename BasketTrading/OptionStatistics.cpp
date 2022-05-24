@@ -57,7 +57,12 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
 
   m_ceAsk.SetColour( ou::Colour::Red );
   m_ceBid.SetColour( ou::Colour::Blue );
+
+  m_ceAskVolume.SetColour( ou::Colour::Red );
+  m_ceBidVolume.SetColour( ou::Colour::Blue );
+
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
+
   m_ceSpread.SetColour( ou::Colour::Black );
 
   m_ceAsk.SetName( "Ask" );
