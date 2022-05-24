@@ -317,13 +317,13 @@ ManageStrategy::ManageStrategy(
 
   //m_ceUpReturn.SetName( "Up Return" );
   //m_ceDnReturn.SetName( "Dn Return" );
-  m_ceProfitLossPortfolio.SetName( "P/L Portfolio" );
+  m_ceProfitLossStrategy.SetName( "P/L Strategy" );
 
   //m_ceUpReturn.SetColour( ou::Colour::Red );
   //m_ceDnReturn.SetColour( ou::Colour::Blue );
-  m_ceProfitLossPortfolio.SetColour( ou::Colour::Fuchsia );
+  m_ceProfitLossStrategy.SetColour( ou::Colour::Fuchsia );
 
-  m_pChartDataView->Add( EChartSlot::PL, &m_ceProfitLossPortfolio );
+  m_pChartDataView->Add( EChartSlot::PL, &m_ceProfitLossStrategy );
 
   //pChartDataView->Add( EChartSlot::Tick, &m_ceTickCount );
 
@@ -1039,8 +1039,13 @@ void ManageStrategy::HandleBarTrades06Sec( const ou::tf::Bar& bar ) {
   double dblCommissionsPaid;
   double dblTotal;
 
-  m_pPortfolioOwning->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLossPortfolio.Append( bar.DateTime(), dblTotal );
+  if ( m_pCombo ) {
+    pPortfolio_t pPortfolioStrategy = m_pCombo->GetPortfolio();
+    if ( pPortfolioStrategy ) {
+      pPortfolioStrategy->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+      m_ceProfitLossStrategy.Append( bar.DateTime(), dblTotal );
+    }
+  }
 
 //  if ( m_pPositionCall ) {
 //    m_pPositionCall->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );

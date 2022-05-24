@@ -245,7 +245,7 @@ private:
 
   ou::ChartEntryVolume m_ceTickCount;
 
-  ou::ChartEntryIndicator m_ceProfitLossPortfolio;
+  ou::ChartEntryIndicator m_ceProfitLossStrategy;
 
 //  ou::ChartEntryIndicator m_ceDiffDelta;
 //  ou::ChartEntryIndicator m_ceDiffGamma;
