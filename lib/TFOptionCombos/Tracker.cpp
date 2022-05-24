@@ -216,7 +216,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
   switch ( m_transition ) {
     case ETransition::Track:
       {
-        if ( m_compare( 0.0, m_dblUnderlyingSlope ) ) {
+        if ( m_compare( m_dblUnderlyingSlope, 0.0 ) ) {
           // nothing if the slope is going in the right direction
           // positive for long call, negative for long put
         }
@@ -225,7 +225,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
           //double diff = m_pPosition->GetUnRealizedPL() - quote.Ask();  // buy new at the ask
           double diff = m_pPosition->GetUnRealizedPL() /  // calc per share
             ( m_pPosition->GetActiveSize() * m_pPosition->GetInstrument()->GetMultiplier() );
-          diff -= quote.Spread();  // unrealized p/l incorporates entry spread, this calculates exit spread
+          diff -= ( 2.0 * quote.Spread() );  // unrealized p/l incorporates entry spread, this calculates exit spread
           diff -= 0.10;  // subtract estimated commissions plus some spare change
           if ( 0.10 < diff ) { // desire at least 10 cents on the roll
             if ( ( 0 == quote.BidSize() ) || ( 0.0 == quote.Bid() ) ) {
@@ -241,7 +241,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
                 << ",new=" << m_pOption->GetInstrument()->GetInstrumentName()
                 << ",b=" << m_pOption->LastQuote().Bid()
                 << ",a=" << m_pOption->LastQuote().Ask()
-                << ",roll,per-share-diff=" << diff
+                << ",roll-per-share-diff=" << diff
                 << ",underlying=" << m_dblUnderlyingPrice
                 << ",slope=" << m_dblUnderlyingSlope
                 << std::endl;
