@@ -56,7 +56,7 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
 
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
-    //std::cout << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName() << std::endl;
+    //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build existing: " << pInstrument->GetInstrumentName();
     if ( m_pIB ) {
       m_pIB->Sync( pInstrument );
     }
@@ -64,7 +64,7 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
   }
   else { // build a new instrument
 
-    //std::cout << "BuildInstrument::Build new: " << sIQFeedSymbol << std::endl;
+    //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build new: " << sIQFeedSymbol;
 
     {
       std::lock_guard<std::mutex> lock( m_mutexMap );
@@ -114,7 +114,7 @@ void BuildInstrument::Update() {
           bDoBuild = true;
         }
 
-        //std::cout << "BuildInstrument::Update erase " << iterSymbol->first << std::endl;
+        //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Update erase " << iterSymbol->first;
         m_mapSymbol.erase( iterSymbol );
 
       }
@@ -142,7 +142,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
         std::move( pWatch ),
         [this,iterInProgress]( pWatch_t pWatchOld ) { // async call once fundamentals arrive
 
-          //std::cout << "AcquireFundamentals_done enter: " << iterInProgress->first << std::endl;
+          //BOOST_LOG_TRIVIAL(debug) << "AcquireFundamentals_done enter: " << iterInProgress->first;
 
           const ou::tf::Watch::Fundamentals& fundamentals( pWatchOld->GetFundamentals() );
           pInstrument_t pInstrument
@@ -182,7 +182,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
               sName,  // needs to be the IB base name
               pInstrument,  // this is a filled-in, prepared instrument
               [this,iterInProgress]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                //std::cout << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName() << std::endl;
+                //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName();
                 assert( 0 != pInstrument->GetContract() );
                 m_pIB->Sync( pInstrument );
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
@@ -191,17 +191,18 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
               },
               [this,iterInProgress]( bool bStatus ) {
                 if ( bStatus ) {
-                  //std::cout << "BuildInstrument::Build done: " << iterInProgress->first << std::endl;
+                  //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build done: " << iterInProgress->first;
                 }
                 else {
-                  //std::cout << "BuildInstrument::Build failed: " << iterInProgress->first << std::endl;
+                  BOOST_LOG_TRIVIAL(warning)
+                    << "BuildInstrument::Build failed: "
+                    << iterInProgress->first;
                   iterInProgress->second.fInstrument( nullptr );
                 }
                 {
                   std::lock_guard<std::mutex> lock( m_mutexMap );
                   m_mapInProgress.erase( iterInProgress );
                 }
-                //iterInProgress->second.
                 Update();
               }
               );
@@ -213,7 +214,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             pInstrument.reset();
             Update( iterInProgress );
           }
-          //std::cout << "AcquireFundamentals_done exit: " << iterInProgress->first << std::endl;
+          //BOOST_LOG_TRIVIAL(debug) << "AcquireFundamentals_done exit: " << iterInProgress->first;
         }
 
       );
