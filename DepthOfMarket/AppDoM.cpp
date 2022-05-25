@@ -126,7 +126,7 @@ bool AppDoM::OnInit() {
     m_pPanelStatistics->Show( true );
 
     m_pPanelLevelIIButtons = new ou::tf::l2::PanelLevelIIButtons( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
-    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_BOTTOM, 4);
+    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);
     m_pPanelLevelIIButtons->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
@@ -444,9 +444,17 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
         mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
         if ( m_mapBidOrders.end() == iterOrders ) {
           pOrder_t pOrder = m_pPosition->PlaceOrder( 
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, price );
-          m_mapBidOrders[ price ] = pOrder;
-          m_pPanelTrade->SetBid( price, m_config.nBlockSize );
+            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_config.nBlockSize, price );
+          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
+          auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
+          assert( pair.second );
+          PriceLevelOrder& plo( pair.first->second );
+          plo.Set(
+            [this,price]( unsigned int quantity ){
+              m_pPanelTrade->SetBid( price, m_config.nBlockSize );
+            }
+          );
+          plo = pOrder;
         }
         else {
         }
@@ -455,9 +463,9 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
         mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
         if ( m_mapBidOrders.end() == iterOrders ) {}
         else {
-          pOrder_t pOrder = iterOrders->second;
+          pOrder_t pOrder = iterOrders->second.m_pOrder;
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapBidOrders.erase( iterOrders );
+          m_mapBidOrders.erase( iterOrders ); // need elegant way to do this after cancellation
           m_pPanelTrade->SetBid( price, 0 );
         }
       },
@@ -465,9 +473,17 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
         mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
         if ( m_mapAskOrders.end() == iterOrders ) {
           pOrder_t pOrder = m_pPosition->PlaceOrder( 
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, price );
-          m_mapAskOrders[ price ] = pOrder;
-          m_pPanelTrade->SetAsk( price, m_config.nBlockSize );
+            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_config.nBlockSize, price );
+          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
+          auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
+          assert( pair.second );
+          PriceLevelOrder& plo( pair.first->second );
+          plo.Set(
+            [this,price]( unsigned int quantity ){
+              m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
+            }
+          );
+          plo = pOrder;
         }
         else {
         }
@@ -476,9 +492,9 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
         mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
         if ( m_mapAskOrders.end() == iterOrders ) {}
         else {
-          pOrder_t pOrder = iterOrders->second;
+          pOrder_t pOrder = iterOrders->second.m_pOrder;
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapAskOrders.erase( iterOrders );
+          m_mapAskOrders.erase( iterOrders ); // need elegant way to do this after cancellation
           m_pPanelTrade->SetAsk( price, 0 );
         }
       }
