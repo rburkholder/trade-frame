@@ -30,6 +30,8 @@
 #include <wx/app.h>
 
 #include <TFTrading/Watch.h>
+#include <TFTrading/Position.h>
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/DBWrapper.h>
 
 #include <TFIndicators/TSEMA.h>
@@ -52,6 +54,7 @@ class FrameMain;
 namespace ou {
 namespace tf {
   class FrameControls;
+  class BuildInstrument;
 namespace l2 {
   class PanelTrade;
   class PanelSideBySide;
@@ -69,6 +72,11 @@ class AppDoM:
 public:
 protected:
 private:
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   std::string m_sTSDataStreamStarted;
 
@@ -91,10 +99,14 @@ private:
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
-  ou::tf::Watch::pWatch_t m_pWatch;
+  pWatch_t m_pWatch;
+  pPosition_t m_pPosition;
+  pPortfolio_t m_pPortfolio;
 
   bool m_bRecordDepths;
   ou::tf::DepthsByOrder m_depths_byorder;
@@ -167,6 +179,12 @@ private:
   void OnData1Connected( int );
   void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
+
+  void OnExecConnected( int );
+  void OnExecDisconnected( int );
+
+  void BuildPosition();
+  void InitializePosition( pInstrument_t );
 
   void StartDepthByMM();
   void StartDepthByOrder();

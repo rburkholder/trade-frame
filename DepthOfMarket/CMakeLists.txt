@@ -69,7 +69,6 @@ target_link_libraries(
       TFInteractiveBrokers
       ib_client
       bidgcc000
-      TFIQFeed
       TFSimulation
       TFStatistics
       TFIndicators
@@ -77,6 +76,7 @@ target_link_libraries(
       MarketDepth
       TFIQFeedLevel2
       TFTrading
+      TFIQFeed
       TFOptions
       TFTimeSeries
       TFHDF5TimeSeries

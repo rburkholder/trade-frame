@@ -42,6 +42,8 @@ TODO:
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
+#include <TFTrading/BuildInstrument.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/FrameControls.h>
 
@@ -167,62 +169,6 @@ bool AppDoM::OnInit() {
 //    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
 //    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
 //    m_pPanelLogging->Show( true );
-
-    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_config.sSymbolName );
-    m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-    m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
-    m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
-    m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
-
-    assert( 0 < m_config.nPeriodWidth );
-    time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
-
-    using vMAPeriods_t = std::vector<int>;
-    vMAPeriods_t vMAPeriods;
-
-    vMAPeriods.push_back( m_config.nMA1Periods );
-    vMAPeriods.push_back( m_config.nMA2Periods );
-    vMAPeriods.push_back( m_config.nMA3Periods );
-
-    assert( 3 == vMAPeriods.size() );
-    for ( vMAPeriods_t::value_type value: vMAPeriods ) {
-      assert( 0 < value );
-    }
-
-    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[0], td, "ma1" ) );
-    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[1], td, "ma2" ) );
-    m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[2], td, "ma3" ) );
-
-    m_vStochastic.emplace_back(
-      std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic1Periods, td,
-      [this]( ptime dt, double k, double min, double max ){
-        m_pPanelTrade->UpdateDynamicIndicator( "st1u", max ); // upper
-        m_pPanelTrade->UpdateDynamicIndicator( "st1l", min ); // lower
-      }
-      ) );
-    m_vStochastic.emplace_back(
-      std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic2Periods, td,
-      [this]( ptime dt, double k, double min, double max ){
-        m_pPanelTrade->UpdateDynamicIndicator( "st2u", max );
-        m_pPanelTrade->UpdateDynamicIndicator( "st2l", min );
-      }
-      ) );
-    m_vStochastic.emplace_back(
-      std::make_unique<Stochastic>(  m_pWatch->GetQuotes(), m_config.nStochastic3Periods, td,
-      [this]( ptime dt, double k, double min, double max ){
-        m_pPanelTrade->UpdateDynamicIndicator( "st3u", max );
-        m_pPanelTrade->UpdateDynamicIndicator( "st3l", min );
-      }
-      ) );
-
-    if ( "mm" == m_config.sDepthType ) StartDepthByMM();
-    else if ( "order" == m_config.sDepthType ) StartDepthByOrder();
-    else {
-      std::cout << "l2 needs to be identified with 'mm' or 'order', supplied: " << m_config.sDepthType << std::endl;
-      assert( false );
-    }
-
-    std::cout << "watching L1/L2: " << m_config.sSymbolName << std::endl;
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -499,7 +445,9 @@ void AppDoM::EmitMarketMakerMaps() {
 void AppDoM::OnClose( wxCloseEvent& event ) {
 
   if ( m_bData1Connected ) { // TODO: fix this logic to work with OnData1Disconnecting
-    m_pDispatch->Disconnect();
+    if ( m_pDispatch ) {
+      m_pDispatch->Disconnect();
+    }
   }
 
   // m_pDispatch.reset(); // TODO: need to do this in a callback?
@@ -525,19 +473,129 @@ int AppDoM::OnExit() {
 }
 
 void AppDoM::OnData1Connected( int ) {
-  std::cout << "Depth of Market connected" << std::endl;
-  m_pWatch->StartWatch();
-  m_pDispatch->Connect();
-  LoadDailyHistory();
+  std::cout << "L1 Data connected" << std::endl;
+  BuildPosition();
 }
 
 void AppDoM::OnData1Disconnecting( int ) {
+  std::cout << "L1 Data disconnecting" << std::endl;
   m_pDispatch->Disconnect();
   m_pWatch->StopWatch();
 }
 
 void AppDoM::OnData1Disconnected( int ) {
-  std::cout << "Depth of Market disconnected" << std::endl;
+  std::cout << "L1 Data disconnected" << std::endl;
+}
+
+void AppDoM::OnExecConnected( int ) {
+  std::cout << "Exec connected" << std::endl;
+  BuildPosition();
+}
+
+void AppDoM::OnExecDisconnected( int ) {
+  std::cout << "Exec disconnected" << std::endl;
+}
+
+void AppDoM::BuildPosition() {
+  if ( m_tws->Connected() && m_iqfeed->Connected() ) {
+    if ( m_pPosition ) {}
+    else { // build position
+      m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+      m_pBuildInstrument->Queue(
+        m_config.sSymbolName,
+        [this]( pInstrument_t pInstrument ){
+          if ( pInstrument ) {
+            InitializePosition( pInstrument );
+          }
+          else {
+            std::cout << "Instrument Not Found" << std::endl;
+          }
+        } );
+    }
+  }
+}
+
+void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
+
+  m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+  m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
+  m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
+  m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
+
+  assert( 0 < m_config.nPeriodWidth );
+  time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
+
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t vMAPeriods;
+
+  vMAPeriods.push_back( m_config.nMA1Periods );
+  vMAPeriods.push_back( m_config.nMA2Periods );
+  vMAPeriods.push_back( m_config.nMA3Periods );
+
+  assert( 3 == vMAPeriods.size() );
+  for ( vMAPeriods_t::value_type value: vMAPeriods ) {
+    assert( 0 < value );
+  }
+
+  m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[0], td, "ma1" ) );
+  m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[1], td, "ma2" ) );
+  m_vMA.emplace_back( MA( m_pWatch->GetQuotes(), vMAPeriods[2], td, "ma3" ) );
+
+  m_vStochastic.emplace_back(
+    std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic1Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_pPanelTrade->UpdateDynamicIndicator( "st1u", max ); // upper
+      m_pPanelTrade->UpdateDynamicIndicator( "st1l", min ); // lower
+    }
+    ) );
+  m_vStochastic.emplace_back(
+    std::make_unique<Stochastic>( m_pWatch->GetQuotes(), m_config.nStochastic2Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_pPanelTrade->UpdateDynamicIndicator( "st2u", max );
+      m_pPanelTrade->UpdateDynamicIndicator( "st2l", min );
+    }
+    ) );
+  m_vStochastic.emplace_back(
+    std::make_unique<Stochastic>(  m_pWatch->GetQuotes(), m_config.nStochastic3Periods, td,
+    [this]( ptime dt, double k, double min, double max ){
+      m_pPanelTrade->UpdateDynamicIndicator( "st3u", max );
+      m_pPanelTrade->UpdateDynamicIndicator( "st3l", min );
+    }
+    ) );
+
+  if ( "mm" == m_config.sDepthType ) StartDepthByMM();
+  else if ( "order" == m_config.sDepthType ) StartDepthByOrder();
+  else {
+    std::cout << "l2 needs to be identified with 'mm' or 'order', supplied: " << m_config.sDepthType << std::endl;
+    assert( false );
+  }
+
+  std::cout << "watching L1/L2: " << m_config.sSymbolName << std::endl;
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  if ( pm.PortfolioExists( idInstrument ) ) {
+    m_pPortfolio = pm.GetPortfolio( idInstrument );
+  }
+  else {
+    m_pPortfolio
+      = pm.ConstructPortfolio(
+          idInstrument, "tf01", "USD",
+          ou::tf::Portfolio::EPortfolioType::Standard,
+          ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
+  }
+
+  m_pPosition = pm.ConstructPosition(
+    idInstrument, idInstrument, "dom", "ib01", "iq01", m_tws, m_pWatch 
+  );
+
+  LoadDailyHistory();
+
+  m_pWatch->StartWatch();
+  std::cout << "Depth of Market connecting" << std::endl;
+  m_pDispatch->Connect();
+
 }
 
 // TODO: there is an order interval, and there is a quote interval
@@ -686,6 +744,10 @@ void AppDoM::LoadDailyHistory() {
           m_pPanelTrade->AppendStaticIndicator( dblSum50, "50day" );
         }
       );
+      CallAfter(
+        [this](){
+          m_pHistoryRequest.reset();
+        });
     }
   );
   m_pHistoryRequest->Connect();
