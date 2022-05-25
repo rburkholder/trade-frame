@@ -105,10 +105,6 @@ bool AppDoM::OnInit() {
     m_pFrameMain->SetSize( 675, 800 );
     SetTopWindow( m_pFrameMain );
 
-    m_pFrameMain->SetAutoLayout( true );
-    m_pFrameMain->Layout();
-    m_pFrameMain->Show( true );
-
     m_pFrameControls = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Level II Statistics", wxPoint( 10, 10 ) );
     m_pPanelSideBySide = new ou::tf::l2::PanelSideBySide( m_pFrameControls );
     m_pFrameControls->Attach( m_pPanelSideBySide );
@@ -126,20 +122,28 @@ bool AppDoM::OnInit() {
 
     LinkToPanelProviderControl();
 
-    m_pPanelStatistics = new PanelStatistics( m_pFrameMain, wxID_ANY );
+    m_pPanelStatistics = new PanelStatistics( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
     sizerControls->Add( m_pPanelStatistics, 0, wxALIGN_LEFT|wxRIGHT, 4);
     m_pPanelStatistics->Show( true );
 
     m_pPanelLevelIIButtons = new ou::tf::l2::PanelLevelIIButtons( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
-    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_CENTER, 0);
+    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_BOTTOM, 4);
     m_pPanelLevelIIButtons->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );
-    sizerMain->Add( sizerTrade, 1, wxEXPAND|wxALL, 4 );
+    sizerMain->Add( sizerTrade, 10, wxEXPAND|wxALL, 4 );
 
     m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameMain );
-    sizerTrade->Add( m_pPanelTrade, 1, wxALL | wxEXPAND, 4 );
+    sizerTrade->Add( m_pPanelTrade, 1, wxEXPAND, 0 );
     m_pPanelTrade->Show( true );
+
+    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize( 100, 100 ) );
+    sizerMain->Add( m_pPanelLogging, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 4);
+    m_pPanelLogging->Show( true );
+
+    m_pFrameMain->SetAutoLayout( true );
+    m_pFrameMain->Layout();
+    m_pFrameMain->Show( true );
 
     m_pPanelLevelIIButtons->Set(
       [this](bool) { // m_fButtonArmed
@@ -165,10 +169,6 @@ bool AppDoM::OnInit() {
           m_pPanelTrade->UpdateDynamicIndicator( vt.sName, vt.Latest() );
         }
       });
-
-//    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-//    sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-//    m_pPanelLogging->Show( true );
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
