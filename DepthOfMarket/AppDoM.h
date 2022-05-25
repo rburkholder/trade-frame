@@ -170,8 +170,6 @@ private:
   std::atomic_uint32_t m_nMarketOrdersAsk;
   std::atomic_uint32_t m_nMarketOrdersBid;
 
-  bool m_bArmed;
-
   using mapOrders_t = std::map<double,pOrder_t>;
   // note only one side can have orders at any moment in time
   mapOrders_t m_mapAskOrders;
@@ -206,6 +204,8 @@ private:
   void MenuItem_PersistMarketDepth_Status();
   void MenuItem_PersistMarketDepth_Stop();
   void MenuItem_PersistMarketDepth_Save();
+
+  void HandleArmedFlag( bool );
 
   void SaveState();
   void LoadState();

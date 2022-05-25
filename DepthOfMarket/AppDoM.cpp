@@ -71,7 +71,6 @@ bool AppDoM::OnInit() {
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
 
-  m_bArmed = false;
   m_bRecordDepths = false;
 
   int code = true;
@@ -146,7 +145,8 @@ bool AppDoM::OnInit() {
     m_pFrameMain->Show( true );
 
     m_pPanelLevelIIButtons->Set(
-      [this](bool) { // m_fButtonArmed
+      [this](bool bArm) { // m_fButtonArmed
+        HandleArmedFlag( bArm );
       },
       [this]() { // m_fButtonReCenter
       },
@@ -169,52 +169,6 @@ bool AppDoM::OnInit() {
           m_pPanelTrade->UpdateDynamicIndicator( vt.sName, vt.Latest() );
         }
       });
-
-    // TODO: need config for order increment
-    m_pPanelTrade->Set( // TODO set only one map is active
-      [this](double price){ // fBidPlace
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder( 
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, price );
-          m_mapBidOrders[ price ] = pOrder;
-          m_pPanelTrade->SetBid( price, m_config.nBlockSize );
-        }
-        else {
-        }
-      },
-      [this](double price){ // fBidCancel
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second;
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapBidOrders.erase( iterOrders );
-          m_pPanelTrade->SetBid( price, 0 );
-        }
-      },
-      [this](double price){ // fAskPlace
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder( 
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, price );
-          m_mapAskOrders[ price ] = pOrder;
-          m_pPanelTrade->SetAsk( price, m_config.nBlockSize );
-        }
-        else {
-        }
-      },
-      [this](double price){ // fAskCancel
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second;
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapAskOrders.erase( iterOrders );
-          m_pPanelTrade->SetAsk( price, 0 );
-        }
-      }
-    );
 
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -481,6 +435,58 @@ void AppDoM::MenuItem_PersistMarketDepth_Save() {
       std::cout << "  ... Done " << std::endl;
     }
   );
+}
+
+void AppDoM::HandleArmedFlag( bool bArm ) {
+  if ( bArm ) {
+    m_pPanelTrade->Set( // TODO set only one map is active
+      [this](double price){ // fBidPlace
+        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
+        if ( m_mapBidOrders.end() == iterOrders ) {
+          pOrder_t pOrder = m_pPosition->PlaceOrder( 
+            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, price );
+          m_mapBidOrders[ price ] = pOrder;
+          m_pPanelTrade->SetBid( price, m_config.nBlockSize );
+        }
+        else {
+        }
+      },
+      [this](double price){ // fBidCancel
+        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
+        if ( m_mapBidOrders.end() == iterOrders ) {}
+        else {
+          pOrder_t pOrder = iterOrders->second;
+          m_pPosition->CancelOrder( pOrder->GetOrderId() );
+          m_mapBidOrders.erase( iterOrders );
+          m_pPanelTrade->SetBid( price, 0 );
+        }
+      },
+      [this](double price){ // fAskPlace
+        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
+        if ( m_mapAskOrders.end() == iterOrders ) {
+          pOrder_t pOrder = m_pPosition->PlaceOrder( 
+            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, price );
+          m_mapAskOrders[ price ] = pOrder;
+          m_pPanelTrade->SetAsk( price, m_config.nBlockSize );
+        }
+        else {
+        }
+      },
+      [this](double price){ // fAskCancel
+        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
+        if ( m_mapAskOrders.end() == iterOrders ) {}
+        else {
+          pOrder_t pOrder = iterOrders->second;
+          m_pPosition->CancelOrder( pOrder->GetOrderId() );
+          m_mapAskOrders.erase( iterOrders );
+          m_pPanelTrade->SetAsk( price, 0 );
+        }
+      }
+    );
+  }
+  else {
+    m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
+  }
 }
 
 void AppDoM::EmitMarketMakerMaps() {

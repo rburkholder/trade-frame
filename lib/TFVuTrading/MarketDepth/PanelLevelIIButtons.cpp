@@ -82,7 +82,6 @@ void PanelLevelIIButtons::CreateControls( void ) {
     m_cbArm->SetValue(false);
     if (PanelLevelIIButtons::ShowToolTips())
         m_cbArm->SetToolTip(_("Arm For Trading"));
-    m_cbArm->Enable(false);
     itemBoxSizer1->Add(m_cbArm, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
     m_btnCancel = new wxButton( itemPanel1, ID_BTN_Cancel, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -107,10 +106,10 @@ void PanelLevelIIButtons::CreateControls( void ) {
   //Bind( wxEVT_SIZING, &PanelTrade::OnResizing, this, GetId() );
   //Bind( wxEVT_CLOSE, &PanelLevelIIButtons::OnDestroy, this, GetId() );
   Bind( wxEVT_DESTROY, &PanelLevelIIButtons::OnDestroy, this, GetId() );
-  Bind( wxEVT_CHECKBOX, &PanelLevelIIButtons::OnCBArmClick, this, GetId() );
-  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNCancelClick, this, GetId() );
-  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNCloseClick, this, GetId() );
-  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNReCenterClick, this, GetId() );
+  Bind( wxEVT_CHECKBOX, &PanelLevelIIButtons::OnCBArmClick, this, ID_CB_Arm );
+  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNCancelClick, this, ID_BTN_Cancel );
+  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNCloseClick, this, ID_BTN_Close );
+  Bind( wxEVT_BUTTON, &PanelLevelIIButtons::OnBTNReCenterClick, this, ID_BTN_ReCenter );
 
 }
 
