@@ -586,9 +586,16 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
           ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
   }
 
-  m_pPosition = pm.ConstructPosition(
-    idInstrument, idInstrument, "dom", "ib01", "iq01", m_tws, m_pWatch 
-  );
+  if ( pm.PositionExists( idInstrument, idInstrument ) ) {
+    m_pPosition = pm.GetPosition( idInstrument, idInstrument );
+  }
+  else {
+    m_pPosition = pm.ConstructPosition(
+      idInstrument, idInstrument, "dom", "ib01", "iq01", m_tws, m_pWatch 
+    );
+  }
+
+  assert( m_pPosition );
 
   LoadDailyHistory();
 
