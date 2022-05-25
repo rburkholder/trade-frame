@@ -32,6 +32,8 @@ struct Options {
 
   std::string sDepthType;
 
+  unsigned int nBlockSize; // delta per click
+
   int nPeriodWidth;  // units:  seconds
 
   // shortest to longest
@@ -42,6 +44,8 @@ struct Options {
   int nStochastic1Periods;
   int nStochastic2Periods;
   int nStochastic3Periods;
+
+  Options(): nBlockSize {} {}
 
 };
 

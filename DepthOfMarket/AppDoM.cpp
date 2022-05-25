@@ -178,7 +178,7 @@ bool AppDoM::OnInit() {
           pOrder_t pOrder = m_pPosition->PlaceOrder( 
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, price );
           m_mapBidOrders[ price ] = pOrder;
-          m_pPanelTrade->SetBid( price, 1 );
+          m_pPanelTrade->SetBid( price, m_config.nBlockSize );
         }
         else {
         }
@@ -199,7 +199,7 @@ bool AppDoM::OnInit() {
           pOrder_t pOrder = m_pPosition->PlaceOrder( 
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, price );
           m_mapAskOrders[ price ] = pOrder;
-          m_pPanelTrade->SetAsk( price, 1 );
+          m_pPanelTrade->SetAsk( price, m_config.nBlockSize );
         }
         else {
         }
