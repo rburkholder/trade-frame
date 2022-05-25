@@ -65,6 +65,8 @@ public:
    long style = SYMBOL_PANELTRADE_STYLE
    );
 
+  using fTrigger_t = std::function<void(double)>;
+
   void SetInterval( double );
 
   void AppendStaticIndicator( double, const std::string& );
@@ -78,6 +80,10 @@ public:
 
   using fTimer_t = std::function<void()>;
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
+
+  void Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel );
+  void SetAsk( double, int ); // price, quantity
+  void SetBid( double, int ); // price, quantity
 
 protected:
 private:
@@ -115,6 +121,11 @@ private:
 
   std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background
+
+  fTrigger_t m_fAskPlace;
+  fTrigger_t m_fAskCancel;
+  fTrigger_t m_fBidPlace;
+  fTrigger_t m_fBidCancel;
 
   using mapDynamicIndicator_t = std::map<std::string,int>;
   mapDynamicIndicator_t m_mapDynamicIndicator;

@@ -92,8 +92,10 @@ void PanelTrade::Init() {
 
   m_dblLastPrice = 0.0;
 
-  //m_ixLastAsk = 0.0;
-  //m_ixLastBid = 0.0;
+  m_fAskPlace = nullptr;
+  m_fAskCancel = nullptr;
+  m_fBidPlace = nullptr;
+  m_fBidCancel = nullptr;
 
   //wxToolTip::Enable( true );
   //wxToolTip::SetDelay( 500 );
@@ -429,11 +431,13 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
             switch ( field ) {
               case PriceRow::EField::AskOrder:
                 std::cout << "ask place order @ " << dblPrice << std::endl;
-                rowPrice.SetAskOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                //rowPrice.SetAskOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                if ( m_fAskPlace ) m_fAskPlace( dblPrice );
                 break;
               case PriceRow::EField::BidOrder:
                 std::cout << "bid place order @ " << dblPrice << std::endl;
-                rowPrice.SetBidOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                //rowPrice.SetBidOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
+                if ( m_fBidPlace ) m_fBidPlace( dblPrice );
                 break;
               default:
                 assert( false );
@@ -444,11 +448,13 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
             switch ( field ) {
               case PriceRow::EField::AskOrder:
                 std::cout << "ask cancel order @ " << dblPrice << std::endl;
-                rowPrice.SetAskOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                //rowPrice.SetAskOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                if ( m_fAskCancel ) m_fAskCancel( dblPrice );
                 break;
               case PriceRow::EField::BidOrder:
                 std::cout << "bid cancel order @ " << dblPrice << std::endl;
-                rowPrice.SetBidOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                //rowPrice.SetBidOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
+                if ( m_fBidCancel ) m_fBidCancel( dblPrice );
                 break;
               default:
                 assert( false );
@@ -460,6 +466,23 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
       }
     }
   }
+}
+
+void PanelTrade::Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel ) {
+  m_fAskPlace = std::move( fAskPlace );
+  m_fAskCancel = std::move( fAskCancel );
+  m_fBidPlace = std::move( fBidPlace );
+  m_fBidCancel = std::move( fBidCancel );
+}
+
+void PanelTrade::SetAsk( double price, int n ) {
+  PriceRow& rowPrice( m_PriceRows[ price ] );
+  rowPrice.SetAskOrderSize( n );
+}
+
+void PanelTrade::SetBid( double price, int n ) {
+  PriceRow& rowPrice( m_PriceRows[ price ] );
+  rowPrice.SetBidOrderSize( n );
 }
 
 } // market depth

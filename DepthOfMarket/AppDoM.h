@@ -29,6 +29,7 @@
 
 #include <wx/app.h>
 
+#include <TFTrading/Order.h>
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
@@ -73,6 +74,7 @@ public:
 protected:
 private:
 
+  using pOrder_t = ou::tf::Order::pOrder_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
@@ -169,6 +171,11 @@ private:
   std::atomic_uint32_t m_nMarketOrdersBid;
 
   bool m_bArmed;
+
+  using mapOrders_t = std::map<double,pOrder_t>;
+  // note only one side can have orders at any moment in time
+  mapOrders_t m_mapAskOrders;
+  mapOrders_t m_mapBidOrders;
 
   void EmitMarketMakerMaps();
 
