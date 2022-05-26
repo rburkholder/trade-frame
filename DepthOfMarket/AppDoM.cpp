@@ -197,6 +197,9 @@ bool AppDoM::OnInit() {
       }
     );
 
+    std::cout << "** turn on IB prior to iqfeed" << std::endl;
+    std::cout << "** recording l2 is default to off, enable in menu" << std::endl; 
+
   }
 
   return code;
@@ -323,7 +326,7 @@ void AppDoM::StartDepthByOrder() {
 
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
     [ this ](){
-      m_FeatureSet.Set( 10 );  // use this many levels in the order book for feature vector set
+      m_FeatureSet.Set( m_config.nLevels );  // use this many levels in the order book for feature vector set
       m_pDispatch->Single( true );
       m_pDispatch->WatchAdd(
         m_config.sSymbolName,
@@ -402,10 +405,14 @@ void AppDoM::MenuItem_PersistMarketDepth_Start() {
 void AppDoM::MenuItem_PersistMarketDepth_Status() {
   CallAfter(
     [this](){
-      std::cout << "Time Series: "
+      std::cout << "L2 Time Series: "
         << ( m_bRecordDepths ? "is" : "not" ) << " being recorded, "
         << m_depths_byorder.Size() << " elements, "
         << sizeof( ou::tf::DepthsByOrder ) << " bytes each"
+        << std::endl;
+      std::cout
+        << "Feature Vector Set is " << sizeof( ou::tf::iqfeed::l2::FeatureSet_Level) << " bytes "
+        << "per each of " << m_config.nLevels << " levels"
         << std::endl;
     }
   );
@@ -417,6 +424,7 @@ void AppDoM::MenuItem_PersistMarketDepth_Stop() {
 }
 
 void AppDoM::MenuItem_PersistMarketDepth_Save() {
+  MenuItem_PersistMarketDepth_Status();
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){

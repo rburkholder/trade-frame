@@ -31,6 +31,7 @@ struct Options {
   int ib_client_id;
 
   std::string sDepthType;
+  size_t nLevels;
 
   unsigned int nBlockSize; // delta per click
 
@@ -45,7 +46,10 @@ struct Options {
   int nStochastic2Periods;
   int nStochastic3Periods;
 
-  Options(): nBlockSize {} {}
+  Options()
+  : nBlockSize {} 
+  , nLevels( 10 )
+  {}
 
 };
 
