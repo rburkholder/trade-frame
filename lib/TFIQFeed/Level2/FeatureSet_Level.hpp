@@ -19,12 +19,10 @@
  * Created: May 7, 2022 15:39
  */
 
- // based upon the ppaper:
+ // based upon the paper:
  // Modeling high-frequency limit order book dynamics with support vector machines
  // October 24, 2013, Alec N.Kercheval, Yuan Zhang
  // page 16, table 2, Feature Vector Sets
-
- // will need to determine limit orders (easy), market orders (hard), cancel orders (easy + market)
 
  // not really integrated into L2Base, as we only need n levels here, not all levels in the real book
  // need a signal for level deleted
@@ -209,8 +207,8 @@ private:
 
   int m_ix; // used as diviser for level number
 
-  FeatureSet_Level* m_pTop;
-  FeatureSet_Level* m_pNext;
+  FeatureSet_Level* m_pTop;  // pointer only, no memory
+  FeatureSet_Level* m_pNext; // pointer only, no memory
 
   FeatureSet_Level& operator=( const FeatureSet_Level& ) = delete;
 
