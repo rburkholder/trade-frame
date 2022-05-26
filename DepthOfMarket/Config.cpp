@@ -36,6 +36,7 @@ namespace {
   static const std::string sOption_IbClientId( "ib_client_id" );
   static const std::string sOption_DepthType( "depth" );
   static const std::string sOption_BlockSize( "block_size" );
+  static const std::string sOption_Levels( "levels" );
   static const std::string sOption_PeriodWidth( "period_width" );
   static const std::string sOption_MA1Periods( "ma1_periods" );
   static const std::string sOption_MA2Periods( "ma2_periods" );
@@ -74,6 +75,7 @@ bool Load( Options& options ) {
       ( sOption_IbClientId.c_str(), po::value<int>( &options.ib_client_id )->default_value( 1 ), "IB Client ID" )
       ( sOption_DepthType.c_str(),  po::value<std::string>(&options.sDepthType ), "depth type" )
       ( sOption_BlockSize.c_str(),  po::value<unsigned int>( &options.nBlockSize ), "block size" )
+      ( sOption_Levels.c_str(),     po::value<size_t>(&options.nLevels), "number of levels" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
 
@@ -104,6 +106,7 @@ bool Load( Options& options ) {
       bOk &= parse<int>( sFileName, vm, sOption_IbClientId, options.ib_client_id );
       bOk &= parse<std::string>( sFileName, vm, sOption_DepthType, options.sDepthType );
       bOk &= parse<unsigned int>( sFileName, vm, sOption_BlockSize, options.nBlockSize );
+      bOk &= parse<size_t>( sFileName, vm, sOption_Levels, options.nLevels );
 
       bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
 
