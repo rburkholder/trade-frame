@@ -20047,21 +20047,13 @@
             <long name="is-transient">0</long>
             <long name="locked">0</long>
             <long name="owns-file">1</long>
-            <string name="proxy-AlignH">"Centre"</string>
-            <string name="proxy-AlignV">"Centre"</string>
-            <long name="proxy-Border">5</long>
             <string name="proxy-Member variable name">"sizerMain"</string>
             <string name="proxy-Orientation">"Vertical"</string>
             <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
-            <long name="proxy-Stretch factor">0</long>
             <bool name="proxy-wxADJUST_MINSIZE">0</bool>
-            <bool name="proxy-wxBOTTOM">1</bool>
             <bool name="proxy-wxFIXED_MINSIZE">0</bool>
-            <bool name="proxy-wxLEFT">1</bool>
             <bool name="proxy-wxRESERVE_SPACE_EVEN_IF_HIDDEN">0</bool>
-            <bool name="proxy-wxRIGHT">1</bool>
             <bool name="proxy-wxSHAPED">0</bool>
-            <bool name="proxy-wxTOP">1</bool>
             <string name="title">"wxBoxSizer V: sizerMain"</string>
             <long name="title-mode">0</long>
             <string name="type">"dialog-control-document"</string>
@@ -21137,7 +21129,7 @@
                 <long name="proxy-Id value">10015</long>
                 <string name="proxy-Implementation filename">""</string>
                 <long name="proxy-Initial value">0</long>
-                <string name="proxy-Items">"&amp;Market|&amp;Limit|&amp;Stoch"</string>
+                <string name="proxy-Items">"&amp;Market|&amp;Limit|&amp;LmtTO|&amp;Stoch"</string>
                 <string name="proxy-Label">"Position Entry"</string>
                 <long name="proxy-Major dimension count">1</long>
                 <string name="proxy-Member variable name">"m_radioPositionEntry"</string>
@@ -21147,6 +21139,7 @@
                 <long name="proxy-Stretch factor">1</long>
                 <string name="proxy-Tooltip text">"Market
 Limit
+Limit with Timeout
 Stochastic"</string>
                 <long name="proxy-Width">-1</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
@@ -23811,21 +23804,13 @@ Stop"</string>
             <long name="is-transient">0</long>
             <long name="locked">0</long>
             <long name="owns-file">1</long>
-            <string name="proxy-AlignH">"Centre"</string>
-            <string name="proxy-AlignV">"Centre"</string>
-            <long name="proxy-Border">5</long>
             <string name="proxy-Member variable name">"m_sizerFrame"</string>
             <string name="proxy-Orientation">"Vertical"</string>
             <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
-            <long name="proxy-Stretch factor">0</long>
             <bool name="proxy-wxADJUST_MINSIZE">1</bool>
-            <bool name="proxy-wxBOTTOM">1</bool>
             <bool name="proxy-wxFIXED_MINSIZE">0</bool>
-            <bool name="proxy-wxLEFT">1</bool>
             <bool name="proxy-wxRESERVE_SPACE_EVEN_IF_HIDDEN">0</bool>
-            <bool name="proxy-wxRIGHT">1</bool>
             <bool name="proxy-wxSHAPED">0</bool>
-            <bool name="proxy-wxTOP">1</bool>
             <string name="title">"wxBoxSizer V: m_sizerFrame"</string>
             <long name="title-mode">0</long>
             <string name="type">"dialog-control-document"</string>

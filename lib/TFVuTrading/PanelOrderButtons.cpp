@@ -156,11 +156,12 @@ void PanelOrderButtons::CreateControls() {
     wxArrayString m_radioPositionEntryStrings;
     m_radioPositionEntryStrings.Add(_("&Market"));
     m_radioPositionEntryStrings.Add(_("&Limit"));
+    m_radioPositionEntryStrings.Add(_("&LmtTO"));
     m_radioPositionEntryStrings.Add(_("&Stoch"));
     m_radioPositionEntry = new wxRadioBox( itemPanel1, ID_RADIO_PositionEntry, _("Position Entry"), wxDefaultPosition, wxDefaultSize, m_radioPositionEntryStrings, 1, wxRA_SPECIFY_ROWS );
     m_radioPositionEntry->SetSelection(0);
     if (PanelOrderButtons::ShowToolTips())
-        m_radioPositionEntry->SetToolTip(_("Market\nLimit\nStochastic"));
+        m_radioPositionEntry->SetToolTip(_("Market\nLimit\nLimit with Timeout\nStochastic"));
     sizerPositionEntry->Add(m_radioPositionEntry, 1, wxGROW|wxLEFT, 2);
 
     sizerPositionExitProfit = new wxBoxSizer(wxHORIZONTAL);
@@ -392,7 +393,15 @@ void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 bool PanelOrderButtons::ValidateFields() {
   bool bOk( true );
   if ( m_order.m_bPositionEntryEnable ) {
-    if ( PanelOrderButtons_Order::EPositionEntryMethod::Limit == m_order.m_ePositionEntryMethod ) {
+    if ( PanelOrderButtons_Order::EPositionEntryMethod::LimitOnly == m_order.m_ePositionEntryMethod ) {
+      if ( 0 == m_order.m_sPositionEntryValue.size() ) {
+        std::cout << "position entry: requires value" << std::endl;
+        bOk = false;
+      }
+    }
+  }
+  if ( m_order.m_bPositionEntryEnable ) {
+    if ( PanelOrderButtons_Order::EPositionEntryMethod::LimitTimeOut == m_order.m_ePositionEntryMethod ) {
       if ( 0 == m_order.m_sPositionEntryValue.size() ) {
         std::cout << "position entry: requires value" << std::endl;
         bOk = false;
@@ -531,9 +540,12 @@ void PanelOrderButtons::OnRADIOPositionEntrySelected( wxCommandEvent& event ) {
       m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::Market;
       break;
     case 1:
-      m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::Limit;
+      m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::LimitOnly;
       break;
     case 2:
+      m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::LimitTimeOut;
+      break;
+    case 3:
       m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::Stoch;
       break;
   }

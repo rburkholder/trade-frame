@@ -277,7 +277,17 @@ TradeWithABuy::TradeWithABuy(
           m_ceBuySubmit.AddLabel( dtConstructed, quote.Midpoint(), "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
-      case EPositionEntryMethod::Limit:
+      case EPositionEntryMethod::LimitOnly:
+        {
+          double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
+
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
+
+          m_ceBuySubmit.AddLabel( dtConstructed, price, "Buy Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        }
+        break;
+      case EPositionEntryMethod::LimitTimeOut:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
@@ -488,7 +498,17 @@ TradeWithASell::TradeWithASell(
           m_ceSellSubmit.AddLabel( dtConstructed, quote.Midpoint(), "Sell Submit " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
         }
         break;
-      case EPositionEntryMethod::Limit:
+      case EPositionEntryMethod::LimitOnly:
+        {
+          double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
+
+          boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
+
+          m_ceSellSubmit.AddLabel( dtConstructed, price, "Sell Submit" + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+        }
+        break;
+      case EPositionEntryMethod::LimitTimeOut:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
