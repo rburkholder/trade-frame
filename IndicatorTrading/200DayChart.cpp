@@ -25,14 +25,12 @@
 
 Chart200Day::Chart200Day()
 : ou::tf::WinChartView()
-{
-  Init();
-}
+{}
 
 Chart200Day::Chart200Day(
   wxWindow* parent, wxWindowID id,
   const wxPoint& pos, const wxSize& size, long style
-  )
+)
 : ou::tf::WinChartView( parent, id, pos, size, style )
 {
   Init();
@@ -40,8 +38,8 @@ Chart200Day::Chart200Day(
 
 bool Chart200Day::Create(
   wxWindow* parent, wxWindowID id,
-  const wxPoint& pos, const wxSize& size, long style )
-{
+  const wxPoint& pos, const wxSize& size, long style 
+) {
   bool bOk = WinChartView::Create( parent, id, pos, size, style );
   Init();
   return bOk;
@@ -77,13 +75,14 @@ void Chart200Day::BindEvents() {
   //Bind( wxEVT_CHAR, &SessionChart::OnChar, this );
 }
 
-void Chart200Day::HandleOnResize( wxSizeEvent& ) {
+void Chart200Day::HandleOnResize( wxSizeEvent& event ) {
   DrawChart();
+  event.Skip();
 }
 
 void Chart200Day::UnBindEvents() {
   Unbind( wxEVT_DESTROY, &Chart200Day::OnDestroy, this );
-  assert( Unbind( wxEVT_SIZE, &Chart200Day::HandleOnResize, this ) );
+  Unbind( wxEVT_SIZE, &Chart200Day::HandleOnResize, this );
   //Unbind( wxEVT_KEY_UP, &SessionChart::OnKey, this );
   //Unbind( wxEVT_CHAR, &SessionChart::OnChar, this );
 }
