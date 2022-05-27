@@ -234,7 +234,7 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
-void WinChartView::DrawChart( void ) {
+void WinChartView::DrawChart() {
   if ( m_bThreadDrawChartActive ) {
     m_bInDrawChart = true;
     m_cvThreadDrawChart.notify_one();
@@ -310,7 +310,7 @@ void WinChartView::UpdateChartMaster() {
       });
     });
 
-  m_chartMaster.DrawChart( );
+  m_chartMaster.DrawChart();
 }
 
 void WinChartView::UnbindEvents() {
