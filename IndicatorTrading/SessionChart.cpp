@@ -29,14 +29,12 @@ SessionChart::SessionChart()
 : ou::tf::WinChartView()
 , m_bWatchStarted( false )
 , m_bfPrice1Minute( 60 )
-{
-  Init();
-}
+{}
 
 SessionChart::SessionChart(
   wxWindow* parent, wxWindowID id,
   const wxPoint& pos, const wxSize& size, long style
-  )
+)
 : ou::tf::WinChartView( parent, id, pos, size, style )
 , m_bWatchStarted( false )
 , m_bfPrice1Minute( 60 )
@@ -46,8 +44,8 @@ SessionChart::SessionChart(
 
 bool SessionChart::Create(
   wxWindow* parent, wxWindowID id,
-  const wxPoint& pos, const wxSize& size, long style )
-{
+  const wxPoint& pos, const wxSize& size, long style 
+) {
   bool bOk = WinChartView::Create( parent, id, pos, size, style );
   Init();
   return bOk;
