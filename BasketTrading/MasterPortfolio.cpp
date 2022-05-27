@@ -124,8 +124,8 @@ MasterPortfolio::MasterPortfolio(
   m_pChartDataView = std::make_shared<ou::ChartDataView>();
   m_pChartDataView->Add( 0, &m_cePLCurrent );
   m_pChartDataView->Add( 0, &m_cePLUnRealized );
-  m_pChartDataView->Add( 0, &m_cePLRealized );
-  m_pChartDataView->Add( 2, &m_ceCommissionPaid );
+//  m_pChartDataView->Add( 0, &m_cePLRealized );
+//  m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
   m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
@@ -907,6 +907,20 @@ void MasterPortfolio::EmitInfo( void ) {
       dblNet += uws.EmitInfo();
     } );
   std::cout << "Active Portfolios net: " << dblNet << std::endl;
+  
+  double dblPLUnRealized {};
+  double dblPLRealized {};
+  double dblCommissionPaid {};
+  double dblPLCurrent {};
+
+  m_pMasterPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
+  std::cout 
+    << "Master Portfolio: "
+    << "unrealized=" << dblPLUnRealized
+    << ",realized=" << dblPLRealized
+    << ",commission" << dblCommissionPaid
+    << ",current" << dblPLCurrent
+    << std::endl;
 }
 
 void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
