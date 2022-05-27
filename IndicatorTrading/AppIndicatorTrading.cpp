@@ -40,6 +40,7 @@
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
 
+#include "200DayChart.hpp"
 #include "SessionChart.hpp"
 #include "InteractiveChart.h"
 #include "AppIndicatorTrading.h"
@@ -147,21 +148,25 @@ bool AppIndicatorTrading::OnInit() {
   m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameOrderButtons );
   m_pFrameOrderButtons->Attach( m_pPanelOrderButtons );
 
-  m_pFrameSessionChart = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Chart" );
-  m_pSessionChart = new SessionChart( m_pFrameSessionChart );
-  m_pFrameSessionChart->Attach( m_pSessionChart );
-
   m_pFrameOrderButtons->SetAutoLayout( true );
   m_pFrameOrderButtons->Layout();
   m_pFrameOrderButtons->Show( true );
 
-  m_pFrameSessionChart = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Chart" );
+  m_pFrameSessionChart = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Bars (1min)" );
   m_pSessionChart = new SessionChart( m_pFrameSessionChart );
   m_pFrameSessionChart->Attach( m_pSessionChart );
 
   m_pFrameSessionChart->SetAutoLayout( true );
   m_pFrameSessionChart->Layout();
   m_pFrameSessionChart->Show( true );
+
+  m_pFrameChart200Day = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "200 Days" );
+  m_pChart200Day = new Chart200Day( m_pFrameChart200Day );
+  m_pFrameChart200Day->Attach( m_pChart200Day );
+
+  m_pFrameChart200Day->SetAutoLayout( true );
+  m_pFrameChart200Day->Layout();
+  m_pFrameChart200Day->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIndicatorTrading::OnClose, this );  // start close of windows and controls
 
@@ -448,7 +453,11 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 
   std::cout << "daily history for " << sSymbol << std::endl;
 
-  m_DailyHistory.Load( sSymbol, m_cemReferenceLevels, [](){} );
+  m_DailyHistory.Load( 
+    sSymbol, m_cemReferenceLevels, 
+    [this](const ou::tf::Bars& bars){
+      m_pChart200Day->Add( bars );
+    } );
 
 }
 

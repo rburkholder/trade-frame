@@ -43,6 +43,7 @@ class wxTreeCtrl;
 class wxTreeEvent;
 
 class FrameMain;
+class Chart200Day;
 class SessionChart;
 class InteractiveChart;
 
@@ -81,6 +82,8 @@ private:
   InteractiveChart* m_pInteractiveChart;
   ou::tf::FrameControls* m_pFrameSessionChart;
   SessionChart* m_pSessionChart;
+  ou::tf::FrameControls* m_pFrameChart200Day;
+  Chart200Day* m_pChart200Day;
 
   std::string m_sTSDataStreamStarted;
 
@@ -150,6 +153,8 @@ private:
     ar & *m_pPanelOrderButtons;
     ar & *m_pFrameSessionChart;
     ar & *m_pSessionChart;
+    ar & *m_pFrameChart200Day;
+    ar & *m_pChart200Day;
   }
 
   template<typename Archive>
@@ -168,13 +173,17 @@ private:
       ar & *m_pFrameSessionChart;
       ar & *m_pSessionChart;
     }
+    if ( 5 <= version ) {
+      ar & *m_pFrameChart200Day;
+      ar & *m_pChart200Day;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 4)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 5)
 
 DECLARE_APP(AppIndicatorTrading)
 

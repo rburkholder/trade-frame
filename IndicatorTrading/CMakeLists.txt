@@ -33,6 +33,7 @@ set(
     OptionTracker.hpp
     SessionChart.hpp
     TradeLifeTime.h
+    200DayChart.hpp
   )
 
 set(
@@ -44,6 +45,7 @@ set(
     OptionTracker.cpp
     SessionChart.cpp
     TradeLifeTime.cpp
+    200DayChart.cpp
   )
 
 add_executable(

@@ -30,7 +30,7 @@
 class DailyHistory {
 public:
 
-  using fDone_t = std::function<void()>;
+  using fDone_t = std::function<void(const ou::tf::Bars&)>;
 
   ~DailyHistory();
 
@@ -40,6 +40,6 @@ public:
 protected:
 private:
   using pBarHistory_t = ou::tf::iqfeed::BarHistory::pBarHistory_t;
-  pBarHistory_t m_pBarHistory;;
+  pBarHistory_t m_pBarHistory;
   ou::tf::Bars m_barsHistory;
 };

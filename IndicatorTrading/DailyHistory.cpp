@@ -77,9 +77,20 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
           double dblAvg50 {};
           double dblAvg21 {};
           double dblAvg7 {};
+
+          double dblAvgRange200 {};
+          double dblAvgRange100 {};
+          double dblAvgRange50 {};
+          double dblAvgRange21 {};
+          double dblAvgRange7 {};
+
           int ix( 1 );
 
-          m_barsHistory.ForEachReverse( [this,&ix,&cem,&dblAvg200,&dblAvg100,&dblAvg50,&dblAvg21,&dblAvg7,colour]( const ou::tf::Bar& bar ){
+          m_barsHistory.ForEachReverse( 
+            [this,&ix,&cem,colour
+             , &dblAvg200,&dblAvg100,&dblAvg50,&dblAvg21,&dblAvg7
+             , &dblAvgRange200,&dblAvgRange100,&dblAvgRange50,&dblAvgRange21,&dblAvgRange7
+            ]( const ou::tf::Bar& bar ){
             //std::cout
             //  << "bar " << ix << " is " << bar.Close()
             //  << std::endl;
@@ -90,18 +101,23 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             }
             if ( 200 >= ix ) {
               dblAvg200 += bar.Close() / 200.0;
+              dblAvgRange200 += ( bar.High() - bar.Low() ) / 200.0;
             }
             if ( 100 >= ix ) {
               dblAvg100 += bar.Close() / 100.0;
+              dblAvgRange100 += ( bar.High() - bar.Low() ) / 100.0;
             }
             if ( 50 >= ix ) {
               dblAvg50 += bar.Close() / 50;
+              dblAvgRange50 += ( bar.High() - bar.Low() ) / 50;
             }
             if ( 21 >= ix ) {
               dblAvg21 += bar.Close() / 21;
+              dblAvgRange21 += ( bar.High() - bar.Low() ) / 21;
             }
             if ( 7 >= ix ) {
               dblAvg7 += bar.Close() / 7;
+              dblAvgRange7 += ( bar.High() - bar.Low() ) / 7;
             }
             ix++;
           });
@@ -115,13 +131,22 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             << ", 200 day=" << dblAvg200
             << std::endl;
 
+          std::cout
+            << "range"
+            << " 7 day=" << dblAvgRange7
+            << ", 21 day=" << dblAvgRange21
+            << ", 50 day=" << dblAvgRange50
+            << ", 100 day=" << dblAvgRange100
+            << ", 200 day=" << dblAvgRange200
+            << std::endl;
+
           cem.AddMark(   dblAvg7, colour,   "7 day" );
           cem.AddMark(  dblAvg21, colour,  "21 day" );
           cem.AddMark(  dblAvg50, colour,  "50 day" );
           cem.AddMark( dblAvg100, colour, "100 day" );
           cem.AddMark( dblAvg200, colour, "200 day" );
 
-          fDone__();
+          fDone__(m_barsHistory);
         }
       );
       m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 200 );
