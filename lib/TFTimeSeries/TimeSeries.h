@@ -176,15 +176,15 @@ public:
   bool AppendEnabled() const { return m_bAppendToVector; }  // affects Append(...) only
 
   using fForEach_t = std::function<void(const T&)>;
-  void ForEach( fForEach_t&& f ) {
+  void ForEach( fForEach_t&& f ) const {
     for ( const typename vTimeSeries_t::value_type& vt: m_vSeries ) {
       f( vt );
     }
   }
 
-  void ForEachReverse( fForEach_t&& f ) {
+  void ForEachReverse( fForEach_t&& f ) const {
     for (
-      typename vTimeSeries_t::reverse_iterator iter = m_vSeries.rbegin();
+      typename vTimeSeries_t::const_reverse_iterator iter = m_vSeries.rbegin();
       iter != m_vSeries.rend();
       iter++
     ) {
