@@ -37,6 +37,12 @@
 #define PANEL_200DAYCHART_SIZE wxDefaultSize
 #define PANEL_200DAYCHART_POSITION wxDefaultPosition
 
+namespace ou {
+namespace tf {
+  class Bars;
+}
+}
+
 class Chart200Day:
   public ou::tf::WinChartView
 {
