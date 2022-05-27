@@ -40,6 +40,12 @@
 
 #include <TFVuTrading/WinChartView.h>
 
+#define PANEL_SESSION1MINCHART_STYLE wxTAB_TRAVERSAL
+#define PANEL_SESSION1MINCHART_TITLE _("Panel Session 1 Minute Bars")
+#define PANEL_SESSION1MINCHART_IDNAME ID_PANEL_SESSION1MINCHART
+#define PANEL_SESSION1MINCHART_SIZE wxDefaultSize
+#define PANEL_SESSION1MINCHART_POSITION wxDefaultPosition
+
 class SessionChart:
   public ou::tf::WinChartView
 {
@@ -49,17 +55,17 @@ public:
   SessionChart();
   SessionChart(
     wxWindow* parent,
-    wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME,
-    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION,
-    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE,
-    long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
+    wxWindowID id = PANEL_SESSION1MINCHART_IDNAME,
+    const wxPoint& pos = PANEL_SESSION1MINCHART_POSITION,
+    const wxSize& size = PANEL_SESSION1MINCHART_SIZE,
+    long style = PANEL_SESSION1MINCHART_STYLE );
 
   bool Create(
     wxWindow* parent,
-    wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME,
-    const wxPoint& pos = SYMBOL_WIN_CHARTINTERACTIVE_POSITION,
-    const wxSize& size = SYMBOL_WIN_CHARTINTERACTIVE_SIZE,
-    long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
+    wxWindowID id = PANEL_SESSION1MINCHART_IDNAME,
+    const wxPoint& pos = PANEL_SESSION1MINCHART_POSITION,
+    const wxSize& size = PANEL_SESSION1MINCHART_SIZE,
+    long style = PANEL_SESSION1MINCHART_STYLE );
 
   virtual ~SessionChart();
 
@@ -70,6 +76,9 @@ public:
 protected:
 private:
 
+  enum {
+    ID_Null=wxID_HIGHEST, ID_PANEL_SESSION1MINCHART
+  };
   enum EChartSlot { Price, Volume };
 
   bool m_bWatchStarted;

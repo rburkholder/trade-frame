@@ -23,7 +23,7 @@
 
 #include "SessionChart.hpp"
 
-// TODO: add pivots, day range marks
+// TODO: add pivots
 
 SessionChart::SessionChart()
 : ou::tf::WinChartView()
@@ -87,7 +87,7 @@ void SessionChart::SetPosition( pPosition_t pPosition, ou::ChartEntryMark& cem )
       //m_barsSessionHistory.Append( bar );
       ptime dtUtc = ou::TimeSource::ConvertEasternToUtc( bar_.DateTime() );
       ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
-      std::cout << "bar close " << bar.Close() << "@" << dtUtc << std::endl;
+      //std::cout << "bar close " << bar.Close() << "@" << dtUtc << std::endl;
       HandleBarCompletionPrice( bar );
     },
     [this](){
