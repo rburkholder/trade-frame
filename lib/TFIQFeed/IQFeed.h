@@ -106,11 +106,13 @@ protected:
     m_pSymbolLookup = std::make_unique<SymbolLookup>(
       m_mapListedMarket,
       m_mapSecurityType,
+      m_mapTradeCondition,
       [this](){
         std::cout
           << "IQF Lookup Tables: "
           << "ListedMarkets=" << m_mapListedMarket.size()
           << ", SecurityTypes=" << m_mapSecurityType.size()
+          << ", TradeConditions=" << m_mapTradeCondition.size()
           << std::endl;
         //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
         //m_pSymbolLookup.reset();
@@ -189,6 +191,7 @@ private:
 
   SymbolLookup::mapListedMarket_t m_mapListedMarket;
   SymbolLookup::mapSecurityType_t m_mapSecurityType;
+  SymbolLookup::mapTradeCondition_t m_mapTradeCondition;
 
 };
 

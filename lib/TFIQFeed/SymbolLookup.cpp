@@ -29,7 +29,8 @@
 
 #include "SymbolLookup.h"
 
-// TODO: SLM, SST requests, parse and map to callers process
+// TODO: in addition to numerations, use keyword look up to obtain the numeric value for symbol lookups
+//    perform a validation of enum in map
 
 // SLM: Listed Markets  http://www.iqfeed.net/dev/api/docs/ListedMarkets.cfm
 // [RequestID (if specified)],LS,[Listed Market ID],[Short Name],[Long Name],[Group ID],[Short Group Name],<CR><LF>
@@ -46,13 +47,19 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sLongName)
   (std::string, idGroup)
   (std::string, sGroupName)
-  )
+)
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::SymbolLookup::SecurityType,
   (std::string, sShortName)
   (std::string, sLongName)
-  )
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+  ou::tf::iqfeed::SymbolLookup::TradeCondition,
+  (std::string, sShortName)
+  (std::string, sLongName)
+)
 
 namespace qi = boost::spirit::qi;
 
@@ -96,7 +103,7 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
 
   SecurityTypeParser(): SecurityTypeParser::base_type( start ) {
 
-    id = qi::int_;
+    id = qi::uint_;
     name %= ( +( qi::char_ - qi::char_(",") ) );
 
     structure %=
@@ -110,15 +117,47 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
 
   }
 
-  qi::rule<Iterator, int()> id;
+  qi::rule<Iterator, uint16_t()> id;
   qi::rule<Iterator, std::string()> name;
   qi::rule<Iterator, SymbolLookup::SecurityType()> structure;
-  qi::rule<Iterator, std::pair<int,SymbolLookup::SecurityType>()> pair;
+  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::SecurityType>()> pair;
   qi::rule<Iterator, SymbolLookup::mapSecurityType_t()> start;
 
 };
 
-enum class ECommand { unknown, protocol, lm, st, end_lm, end_st };
+template<typename Iterator>
+struct TradeConditionParser: qi::grammar<Iterator, SymbolLookup::mapTradeCondition_t()> {
+
+  TradeConditionParser(): TradeConditionParser::base_type( start ) {
+
+    id = qi::uint_;
+    name %= ( +( qi::char_ - qi::char_(",") ) );
+
+    structure %=
+                           name // shart name
+      >> qi::lit( ',' ) >> name // long name
+      ;
+
+    pair %= qi::lit( "TC,LS," ) >> id >> qi::lit( ',' ) >> structure >> qi::lit( ',' );
+
+    start %= pair;
+
+  }
+
+  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, std::string()> name;
+  qi::rule<Iterator, SymbolLookup::TradeCondition()> structure;
+  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::TradeCondition>()> pair;
+  qi::rule<Iterator, SymbolLookup::mapTradeCondition_t()> start;
+
+};
+
+enum class ECommand { 
+  unknown, protocol
+, lm, end_lm // listed markets
+, st, end_st // security types
+, tc, end_tc // trade conditions
+};
 
 template<typename Iterator>
 struct CommandParser: qi::grammar<Iterator, ECommand()> {
@@ -130,6 +169,8 @@ struct CommandParser: qi::grammar<Iterator, ECommand()> {
       ( "LM,!ENDMSG!", ECommand::end_lm )
       ( "ST,LS", ECommand::st )
       ( "ST,!ENDMSG!", ECommand::end_st )
+      ( "TC,LS", ECommand::tc )
+      ( "TC,!ENDMSG!", ECommand::end_tc )
       ( "S,CURRENT PROTOCOL", ECommand::protocol )
       ;
 
@@ -146,6 +187,7 @@ namespace {
   CommandParser<SymbolLookup::linebuffer_t::const_iterator> grammarCommandParser;
   ListedMarketParser<SymbolLookup::linebuffer_t::const_iterator> grammarListedMarketParser;
   SecurityTypeParser<SymbolLookup::linebuffer_t::const_iterator> grammarSecurityTypeParser;
+  TradeConditionParser<SymbolLookup::linebuffer_t::const_iterator> grammarTradeConditionParser;
 } // anonymous
 
 // http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
@@ -153,12 +195,14 @@ namespace {
 SymbolLookup::SymbolLookup(
   mapListedMarket_t& mapListedMarket,
   mapSecurityType_t& mapSecurityType,
+  mapTradeCondition_t& mapTradeCondition,
   fDone_t&& fDone
 )
 : Network<SymbolLookup>( "127.0.0.1", 9100 ),
   m_fDone( std::move( fDone ) ),
   m_mapListedMarket( mapListedMarket ),
-  m_mapSecurityType( mapSecurityType )
+  m_mapSecurityType( mapSecurityType ),
+  m_mapTradeCondition( mapTradeCondition )
 {
   assert( m_fDone );
 }
@@ -198,8 +242,8 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
   const_iterator_t bgn( (*buffer).begin() );
   const_iterator_t end( (*buffer).end() );
 
-  //std::string line( bgn, end );
-  //std::cout << "SymbolLookup line: " << line << std::endl;
+  std::string line( bgn, end );
+  std::cout << "SymbolLookup line: " << line << std::endl;
 
   bool bOk;
 
@@ -225,6 +269,12 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         bOk = parse( bgn, end, grammarSecurityTypeParser, m_mapSecurityType );
       }
       break;
+    case ECommand::tc:
+      {
+        bgn = (*buffer).begin();
+        bOk = parse( bgn, end, grammarTradeConditionParser, m_mapTradeCondition );
+      }
+      break;
     case ECommand::protocol:
       Send( "SLM,LM\n" );
       break;
@@ -232,6 +282,9 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
       Send( "SST,ST\n" );
       break;
     case ECommand::end_st:
+      Send( "STC,TC\n" );
+      break;
+    case ECommand::end_tc:
       MapSecurityTypes();
       m_fDone();
       break;

@@ -57,13 +57,22 @@ public:
     std::string sLongName;
   };
 
-  using mapSecurityType_t = std::map<int,SecurityType>; // key = idSecurityType
+  using mapSecurityType_t = std::map<uint16_t,SecurityType>; // key = idSecurityType
+
+  struct TradeCondition {
+    // uint16_t idTradeCondition
+    std::string sShortName;
+    std::string sLongName;
+  };
+
+  using mapTradeCondition_t = std::map<uint16_t,TradeCondition>; // key = idTradeCondition
 
   using fDone_t = std::function<void()>;
 
   SymbolLookup(
     mapListedMarket_t&,
     mapSecurityType_t&,
+    mapTradeCondition_t&,
     fDone_t&&
     );
   virtual ~SymbolLookup();
@@ -84,6 +93,7 @@ private:
 
   mapListedMarket_t& m_mapListedMarket;
   mapSecurityType_t& m_mapSecurityType;
+  mapTradeCondition_t& m_mapTradeCondition;
 
   fDone_t m_fDone;
 
