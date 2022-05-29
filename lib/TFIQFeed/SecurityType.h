@@ -21,11 +21,13 @@
 #ifndef IQFEED_SECURITY_TYPE_H
 #define IQFEED_SECURITY_TYPE_H
 
+#include <cstdint>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-enum class ESecurityType: std::uint32_t { // bits in bitmap of stored data record
+enum class ESecurityType: uint32_t {
   Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread,
     IEOption, Index, MktRpt, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
     _Count
