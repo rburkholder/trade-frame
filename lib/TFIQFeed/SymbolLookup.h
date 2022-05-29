@@ -25,6 +25,7 @@
 #include <functional>
 
 #include <OUCommon/Network.h>
+#include <OUCommon/KeyWordMatch.h>
 
 #include "SecurityType.h"
 
@@ -80,6 +81,13 @@ public:
   void Connect();
   void Disconnect();
 
+  using setNames_t = std::set<std::string>;
+  using fSymbol_t = std::function<void(std::string)>;
+  void SymbolList( 
+    const setNames_t& setExchangeFilter, const setNames_t& setSecurityTypeFilter,
+    fSymbol_t&&, fDone_t&&
+    );
+
 protected:
 
   // called by Network via CRTP
@@ -91,13 +99,23 @@ protected:
 
 private:
 
+  ou::KeyWordMatch<uint16_t> m_kwmListedMarket;
+  ou::KeyWordMatch<uint16_t> m_kwmSecurityType;
+  ou::KeyWordMatch<uint16_t> m_kwmTradeCondition;
+
   mapListedMarket_t& m_mapListedMarket;
   mapSecurityType_t& m_mapSecurityType;
   mapTradeCondition_t& m_mapTradeCondition;
 
+  using setIdSecurityType_t = std::set<uint16_t>;
+  setIdSecurityType_t m_setIdSecurityType; // computed for each SBF query
+
+  fSymbol_t m_fSymbol;
   fDone_t m_fDone;
 
   void MapSecurityTypes();
+
+  void BuildKeyWords();
 
 };
 

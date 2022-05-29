@@ -21,6 +21,8 @@
 
 #include <sstream>
 
+#include <boost/lexical_cast.hpp>
+
 #define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/fusion/include/std_pair.hpp>
@@ -40,6 +42,22 @@
 
 // both end with
 // !ENDMSG!,<CR><LF>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+
+struct SymbolByFilter {
+  uint16_t idListedMarket;
+  uint16_t idSecurityType;
+  std::string sShortName;
+  std::string sLongName;
+};
+
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou
+
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::SymbolLookup::ListedMarket,
@@ -61,6 +79,14 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sLongName)
 )
 
+BOOST_FUSION_ADAPT_STRUCT(
+  ou::tf::iqfeed::SymbolByFilter,
+  (uint16_t, idListedMarket)
+  (uint16_t, idSecurityType)
+  (std::string, sShortName)
+  (std::string, sLongName)
+)
+
 namespace qi = boost::spirit::qi;
 
 namespace ou { // One Unified
@@ -78,7 +104,7 @@ struct ListedMarketParser: qi::grammar<Iterator, SymbolLookup::mapListedMarket_t
     name %= ( +( qi::char_ - qi::char_(",") ) );
 
     structure %=
-                           name // shart name
+                           name // short name
       >> qi::lit( ',' ) >> name // long name
       >> qi::lit( ',' ) >> name // group id
       >> qi::lit( ',' ) >> name // short group name
@@ -107,7 +133,7 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
     name %= ( +( qi::char_ - qi::char_(",") ) );
 
     structure %=
-                           name // shart name
+                           name // short name
       >> qi::lit( ',' ) >> name // long name
       ;
 
@@ -134,7 +160,7 @@ struct TradeConditionParser: qi::grammar<Iterator, SymbolLookup::mapTradeConditi
     name %= ( +( qi::char_ - qi::char_(",") ) );
 
     structure %=
-                           name // shart name
+                           name // short name
       >> qi::lit( ',' ) >> name // long name
       ;
 
@@ -152,11 +178,37 @@ struct TradeConditionParser: qi::grammar<Iterator, SymbolLookup::mapTradeConditi
 
 };
 
+template<typename Iterator>
+struct SymbolByFilterParser: qi::grammar<Iterator, ou::tf::iqfeed::SymbolByFilter()> {
+
+  SymbolByFilterParser(): SymbolByFilterParser::base_type( start ) {
+
+    id = qi::uint_;
+    nameShort %= ( +( qi::char_ - qi::char_(",") ) );
+    nameLong  %= ( +( qi::char_ - qi::eol ) );
+
+    start %=
+                           id // idListedMarket
+      >> qi::lit( ',' ) >> id // idSecurityType
+      >> qi::lit( ',' ) >> nameShort // symbol
+      >> qi::lit( ',' ) >> nameLong // long name
+      ;
+
+  }
+
+  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, std::string()> nameShort;
+  qi::rule<Iterator, std::string()> nameLong;
+  qi::rule<Iterator, ou::tf::iqfeed::SymbolByFilter()> start;
+
+};
+
 enum class ECommand { 
   unknown, protocol
 , lm, end_lm // listed markets
 , st, end_st // security types
 , tc, end_tc // trade conditions
+, bf, end_bf // symbols by filter
 };
 
 template<typename Iterator>
@@ -171,6 +223,8 @@ struct CommandParser: qi::grammar<Iterator, ECommand()> {
       ( "ST,!ENDMSG!", ECommand::end_st )
       ( "TC,LS", ECommand::tc )
       ( "TC,!ENDMSG!", ECommand::end_tc )
+      ( "BF,LS", ECommand::bf )
+      ( "BF,!ENDMSG!", ECommand::end_bf )
       ( "S,CURRENT PROTOCOL", ECommand::protocol )
       ;
 
@@ -188,9 +242,8 @@ namespace {
   ListedMarketParser<SymbolLookup::linebuffer_t::const_iterator> grammarListedMarketParser;
   SecurityTypeParser<SymbolLookup::linebuffer_t::const_iterator> grammarSecurityTypeParser;
   TradeConditionParser<SymbolLookup::linebuffer_t::const_iterator> grammarTradeConditionParser;
+  SymbolByFilterParser<SymbolLookup::linebuffer_t::const_iterator> grammarSymbolByFilterParser;
 } // anonymous
-
-// http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
 
 SymbolLookup::SymbolLookup(
   mapListedMarket_t& mapListedMarket,
@@ -198,11 +251,14 @@ SymbolLookup::SymbolLookup(
   mapTradeCondition_t& mapTradeCondition,
   fDone_t&& fDone
 )
-: Network<SymbolLookup>( "127.0.0.1", 9100 ),
-  m_fDone( std::move( fDone ) ),
-  m_mapListedMarket( mapListedMarket ),
-  m_mapSecurityType( mapSecurityType ),
-  m_mapTradeCondition( mapTradeCondition )
+: Network<SymbolLookup>( "127.0.0.1", 9100 )
+, m_kwmListedMarket( 0, 200 )
+, m_kwmSecurityType( 0, 200 )
+, m_kwmTradeCondition( 0, 200 )
+, m_mapListedMarket( mapListedMarket )
+, m_mapSecurityType( mapSecurityType )
+, m_mapTradeCondition( mapTradeCondition )
+, m_fDone( std::move( fDone ) )
 {
   assert( m_fDone );
 }
@@ -242,8 +298,8 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
   const_iterator_t bgn( (*buffer).begin() );
   const_iterator_t end( (*buffer).end() );
 
-  std::string line( bgn, end );
-  std::cout << "SymbolLookup line: " << line << std::endl;
+  //std::string line( bgn, end );
+  //std::cout << "SymbolLookup line: " << line << std::endl;
 
   bool bOk;
 
@@ -275,6 +331,23 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         bOk = parse( bgn, end, grammarTradeConditionParser, m_mapTradeCondition );
       }
       break;
+    case ECommand::bf:
+      {
+        SymbolByFilter sbf;
+        bgn = (*buffer).begin();
+        bOk = parse( bgn, end, grammarSymbolByFilterParser, sbf );
+        if ( bOk ) {
+          setIdSecurityType_t::const_iterator iter = m_setIdSecurityType.find( sbf.idSecurityType );
+          if ( m_setIdSecurityType.end() != iter ) {
+            m_fSymbol( sbf.sShortName );
+          }
+        }
+        else {
+          std::string line( bgn, end );
+          std::cout << "SymbolByFilter error: " << line << std::endl;
+        }
+      }
+      break;
     case ECommand::protocol:
       Send( "SLM,LM\n" );
       break;
@@ -287,6 +360,13 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
     case ECommand::end_tc:
       MapSecurityTypes();
       m_fDone();
+      m_fDone = nullptr;
+      break;
+    case ECommand::end_bf:
+      m_fDone();
+      m_fDone = nullptr;
+      m_fSymbol = nullptr;
+      m_setIdSecurityType.clear();
       break;
   }
 
@@ -342,6 +422,55 @@ void SymbolLookup::MapSecurityTypes() {
   for ( mapSecurityType_t::value_type& vt: m_mapSecurityType ) {
     parse( vt.second.sShortName.begin(), vt.second.sShortName.end(), types, vt.second.eSecurityType );
   }
+}
+
+void SymbolLookup::BuildKeyWords() {
+  for ( const mapListedMarket_t::value_type& vt: m_mapListedMarket ) {
+    m_kwmListedMarket.AddPattern( vt.second.sShortName, vt.first );
+  }
+  for ( const mapSecurityType_t::value_type& vt: m_mapSecurityType ) {
+    m_kwmSecurityType.AddPattern( vt.second.sShortName, vt.first );
+  }
+  for ( const mapTradeCondition_t::value_type& vt: m_mapTradeCondition ) {
+    m_kwmTradeCondition.AddPattern( vt.second.sShortName, vt.first );
+  }
+}
+
+void SymbolLookup::SymbolList( 
+  const setNames_t& setExchangeFilter, const setNames_t& setSecurityTypeFilter,
+  fSymbol_t&& fSymbol, fDone_t&& fDone
+) {
+
+  assert( nullptr == m_fSymbol );
+  m_fSymbol = std::move( fSymbol );
+  assert( m_fSymbol );
+
+  assert( nullptr == m_fDone );
+  m_fDone = std::move( fDone ); // over-writes what should already be completed
+  assert( m_fDone );
+  
+  m_setIdSecurityType.clear(); // build filter for during retrieval
+  for ( const setNames_t::value_type& name: setSecurityTypeFilter ) {
+    uint16_t id = m_kwmSecurityType.FindMatch( name );
+    assert( 0 != id );
+    m_setIdSecurityType.emplace( id );
+  }
+
+  bool bAddSpace( false );
+  std::string sExchangeList;
+
+  for ( const setNames_t::value_type& name: setExchangeFilter ) {
+    if ( bAddSpace ) {
+      sExchangeList += ' ';
+    }
+    else bAddSpace = true;
+    
+    uint16_t id = m_kwmListedMarket.FindMatch( name );
+    assert( 0 != id );
+    sExchangeList += boost::lexical_cast<std::string>( id );
+  }
+
+  Send( "SBF,s,,e," + sExchangeList + ",BF\n" );  
 }
 
 } // namespace iqfeed
