@@ -19,6 +19,8 @@
  * Created: October 24, 2021 21:25
  */
 
+#pragma once
+
 #include <string>
 #include <vector>
 
