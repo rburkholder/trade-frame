@@ -76,7 +76,6 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods ), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods ), "ma3 (#periods)" )
 
-
       ( sOption_Stochastic1Periods.c_str(), po::value<int>( &options.nStochastic1Periods ), "stochastic1 (#periods)" )
       ( sOption_Stochastic2Periods.c_str(), po::value<int>( &options.nStochastic2Periods ), "stochastic2 (#periods)" )
       ( sOption_Stochastic3Periods.c_str(), po::value<int>( &options.nStochastic3Periods ), "stochastic3 (#periods)" )
