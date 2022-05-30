@@ -10,6 +10,7 @@
   },
   "configurations": [
 
+
     {
       "name": "(gdb) BasketTrading",
       "type": "cppdbg",
@@ -74,27 +75,6 @@
     },
 
     {
-      "name": "(gdb) rdaf/at",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/rdaf/at/rdaf_at",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/x64/debug",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "miDebuggerPath": "/usr/bin/gdb"
-    },
-
-    {
       "name": "(gdb) Dividend",
       "type": "cppdbg",
       "request": "launch",
@@ -116,10 +96,52 @@
     },
 
     {
+      "name": "(gdb) rdaf/dl/download",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/rdaf/dl/download",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) rdaf/at",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/rdaf/at",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
       "name": "(gdb) rdaf/l1",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/rdaf/l1/rdaf_l1",
+      "program": "${workspaceFolder}/build/rdaf/l1",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",
