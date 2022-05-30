@@ -90,8 +90,21 @@ public:
     m_reposErrorMessages.CheckInL( msg );
   }
 
-  void SetNewsOn( void );
-  void SetNewsOff( void );
+  void SetNewsOn();
+  void SetNewsOff();
+
+  using setNames_t = SymbolLookup::setNames_t;
+  using fSymbol_t = SymbolLookup::fSymbol_t;
+  using fDone_t = SymbolLookup::fDone_t;
+  void SymbolList(
+    const setNames_t& setExchangeFilter, const setNames_t& setSecurityTypeFilter,
+    fSymbol_t&& fSymbol, fDone_t&& fDone
+  ) {
+    m_pSymbolLookup->SymbolList( 
+      setExchangeFilter, setSecurityTypeFilter,
+      std::move( fSymbol ), std::move( fDone )
+      );
+  }
 
 protected:
 
@@ -101,7 +114,13 @@ protected:
   } m_stateNews;
 
   // called by Network via CRTP
-  void OnNetworkConnected(void) {
+  void OnNetworkConnected() {
+
+    // may redo on reconnect
+    m_mapListedMarket.clear();
+    m_mapSecurityType.clear();
+    m_mapTradeCondition.clear();
+
     // TODO: offer up connected after lookup tables retreived?
     m_pSymbolLookup = std::make_unique<SymbolLookup>(
       m_mapListedMarket,
@@ -128,7 +147,7 @@ protected:
     //  static_cast<T*>( this )->OnIQFeedConnected();
     //}
   };
-  void OnNetworkDisconnected(void) {
+  void OnNetworkDisconnected() {
     if ( &IQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
       static_cast<T*>( this )->OnIQFeedDisConnected();
     }
@@ -138,7 +157,7 @@ protected:
       static_cast<T*>( this )->OnIQFeedError(e);
     }
   };
-  void OnNetworkSendDone(void) {
+  void OnNetworkSendDone() {
     if ( &IQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
       static_cast<T*>( this )->OnIQFeedSendDone();
     }
@@ -159,9 +178,9 @@ protected:
 
   // CRTP based dummy callbacks
   void OnIQFeedError( size_t ) {};
-  void OnIQFeedConnected( void ) {};
-  void OnIQFeedDisConnected( void ) {};
-  void OnIQFeedSendDone( void ) {};
+  void OnIQFeedConnected() {};
+  void OnIQFeedDisConnected() {};
+  void OnIQFeedSendDone() {};
   void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage* msg) {};
   void OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage* msg) {};
   void OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage* msg) {};

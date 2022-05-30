@@ -19,6 +19,8 @@
  * Created: May 29, 2022  14:42
  */
 
+#include <future> 
+
 #include <TFIQFeed/Provider.h>
 #include <TFIQFeed/SymbolLookup.h>
 
@@ -26,18 +28,74 @@
 
 #include "Config.hpp"
 
+using setNames_t = ou::tf::iqfeed::SymbolLookup::setNames_t;
+
 namespace {
+
 const size_t nInTransit = 40;
+
+setNames_t setExchanges;
+setNames_t setSecurityTypes;
+
 }
 
-void HandleConnected( int ) {
+class Symbols {
+public:
+  Symbols() {
+    m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
 
-}
+    m_piqfeed->OnConnected.Add( MakeDelegate( this, &Symbols::HandleConnected ) );
+    m_piqfeed->Connect();
+
+    future = promise.get_future();
+    future.wait();
+
+    std::cout << "symbol list done " << count << std::endl;
+
+  }
+protected:
+private:
+
+  using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  pIQFeed_t m_piqfeed;
+
+  std::promise<int> promise;
+  std::future<int> future;
+
+  size_t count {};
+
+  void HandleConnected( int ) {
+    std::cout << "connected" << std::endl;
+    m_piqfeed->SymbolList(
+      setExchanges, setSecurityTypes,
+      [this](const std::string& sSymbol){
+        std::cout << sSymbol << std::endl;
+        count++;
+      },
+      [this](){
+        promise.set_value( 0 );
+      }
+    );
+  }
+};
+
 
 int main( int argc, char* argv[] ) {
 
   config::Choices choices;
-  config::Load( "rdaf/rdaf_dl.cfg", choices );
+  if ( config::Load( "rdaf/download.cfg", choices ) ) {
+
+    for ( const config::vName_t::value_type& vt: choices.m_vExchange ) {
+      setExchanges.emplace( vt );
+    }
+
+    for ( const config::vName_t::value_type& vt: choices.m_vSecurityType ) {
+      setSecurityTypes.emplace( vt );
+    }
+
+    Symbols symbols;
+
+  }
 
   //using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
   //std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_live;
@@ -47,13 +105,6 @@ int main( int argc, char* argv[] ) {
     //pAcquireFundamentals_t pAcquireFundamentals;
   };
 
-  using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
-  pIQFeed_t m_piqfeed;
-
-  m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
-
-//  m_piqfeed->OnConnected.Add( &HandleConnected );
-//  m_piqfeed->Connect();
 
   return 0;
 }

@@ -1,5 +1,5 @@
 ```
-$ cat x64/debug/rdaf/rdaf_dl.cfg
+$ cat x64/debug/rdaf/download.cfg
 exchange=NYSE
 exchange=NYSE_ARCA
 exchange=NYSE_AMERICAN
