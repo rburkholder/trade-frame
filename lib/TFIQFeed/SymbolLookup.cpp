@@ -81,9 +81,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::SymbolByFilter,
+  (std::string, sShortName)
   (uint16_t, idListedMarket)
   (uint16_t, idSecurityType)
-  (std::string, sShortName)
   (std::string, sLongName)
 )
 
@@ -188,10 +188,12 @@ struct SymbolByFilterParser: qi::grammar<Iterator, ou::tf::iqfeed::SymbolByFilte
     nameLong  %= ( +( qi::char_ - qi::eol ) );
 
     start %=
-                           id // idListedMarket
+      qi::lit( "BF,LS," )
+      >>                   nameShort // symbol
+      >> qi::lit( ',' ) >> id // idListedMarket
       >> qi::lit( ',' ) >> id // idSecurityType
-      >> qi::lit( ',' ) >> nameShort // symbol
       >> qi::lit( ',' ) >> nameLong // long name
+      //>> qi::lit( ',' )
       ;
 
   }
@@ -205,10 +207,10 @@ struct SymbolByFilterParser: qi::grammar<Iterator, ou::tf::iqfeed::SymbolByFilte
 
 enum class ECommand { 
   unknown, protocol
-, lm, end_lm // listed markets
-, st, end_st // security types
-, tc, end_tc // trade conditions
-, bf, end_bf // symbols by filter
+, lm, lm_end // listed markets
+, st, st_end // security types
+, tc, tc_end // trade conditions
+, bf, bf_end, bf_nodata // symbols by filter
 };
 
 template<typename Iterator>
@@ -218,13 +220,14 @@ struct CommandParser: qi::grammar<Iterator, ECommand()> {
 
     symbols.add
       ( "LM,LS", ECommand::lm )
-      ( "LM,!ENDMSG!", ECommand::end_lm )
+      ( "LM,!ENDMSG!", ECommand::lm_end )
       ( "ST,LS", ECommand::st )
-      ( "ST,!ENDMSG!", ECommand::end_st )
+      ( "ST,!ENDMSG!", ECommand::st_end )
       ( "TC,LS", ECommand::tc )
-      ( "TC,!ENDMSG!", ECommand::end_tc )
+      ( "TC,!ENDMSG!", ECommand::tc_end )
       ( "BF,LS", ECommand::bf )
-      ( "BF,!ENDMSG!", ECommand::end_bf )
+      ( "BF,!ENDMSG!", ECommand::bf_end )
+      ( "BF,E,!NO_DATA!", ECommand::bf_nodata)
       ( "S,CURRENT PROTOCOL", ECommand::protocol )
       ;
 
@@ -253,14 +256,14 @@ SymbolLookup::SymbolLookup(
 )
 : Network<SymbolLookup>( "127.0.0.1", 9100 )
 , m_kwmListedMarket( 0, 200 )
-, m_kwmSecurityType( 0, 200 )
-, m_kwmTradeCondition( 0, 200 )
+, m_kwmSecurityType( 0, 60 )
+, m_kwmTradeCondition( 0, 180 )
 , m_mapListedMarket( mapListedMarket )
 , m_mapSecurityType( mapSecurityType )
 , m_mapTradeCondition( mapTradeCondition )
-, m_fDone( std::move( fDone ) )
+, m_fDoneConnection( std::move( fDone ) )
 {
-  assert( m_fDone );
+  assert( m_fDoneConnection );
 }
 
 SymbolLookup::~SymbolLookup() {
@@ -351,20 +354,22 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
     case ECommand::protocol:
       Send( "SLM,LM\n" );
       break;
-    case ECommand::end_lm:
+    case ECommand::lm_end:
       Send( "SST,ST\n" );
       break;
-    case ECommand::end_st:
+    case ECommand::st_end:
       Send( "STC,TC\n" );
       break;
-    case ECommand::end_tc:
+    case ECommand::tc_end:
       MapSecurityTypes();
-      m_fDone();
-      m_fDone = nullptr;
+      BuildKeyWords();
+      m_fDoneConnection();
+      m_fDoneConnection = nullptr;
       break;
-    case ECommand::end_bf:
-      m_fDone();
-      m_fDone = nullptr;
+    case ECommand::bf_end:
+    case ECommand::bf_nodata:
+      m_fDoneSymbolList();
+      m_fDoneSymbolList = nullptr;
       m_fSymbol = nullptr;
       m_setIdSecurityType.clear();
       break;
@@ -426,13 +431,24 @@ void SymbolLookup::MapSecurityTypes() {
 
 void SymbolLookup::BuildKeyWords() {
   for ( const mapListedMarket_t::value_type& vt: m_mapListedMarket ) {
-    m_kwmListedMarket.AddPattern( vt.second.sShortName, vt.first );
+    try {
+      m_kwmListedMarket.AddPattern( vt.second.sShortName, vt.first );
+    }
+    catch ( std::domain_error& e ) {
+      std::cout << "m_mapListedMarket duplicate: " << e.what() << std::endl;
+    }
   }
   for ( const mapSecurityType_t::value_type& vt: m_mapSecurityType ) {
     m_kwmSecurityType.AddPattern( vt.second.sShortName, vt.first );
   }
   for ( const mapTradeCondition_t::value_type& vt: m_mapTradeCondition ) {
-    m_kwmTradeCondition.AddPattern( vt.second.sShortName, vt.first );
+    try {
+      m_kwmTradeCondition.AddPattern( vt.second.sShortName, vt.first );
+    }
+    catch ( std::domain_error& e ) {
+      std::cout << "m_mapTradeCondition duplicate: " << e.what() << std::endl;
+    }
+    
   }
 }
 
@@ -445,9 +461,9 @@ void SymbolLookup::SymbolList(
   m_fSymbol = std::move( fSymbol );
   assert( m_fSymbol );
 
-  assert( nullptr == m_fDone );
-  m_fDone = std::move( fDone ); // over-writes what should already be completed
-  assert( m_fDone );
+  assert( nullptr == m_fDoneSymbolList );
+  m_fDoneSymbolList = std::move( fDone ); // over-writes what should already be completed
+  assert( m_fDoneSymbolList );
   
   m_setIdSecurityType.clear(); // build filter for during retrieval
   for ( const setNames_t::value_type& name: setSecurityTypeFilter ) {
@@ -469,8 +485,10 @@ void SymbolLookup::SymbolList(
     assert( 0 != id );
     sExchangeList += boost::lexical_cast<std::string>( id );
   }
-
-  Send( "SBF,s,,e," + sExchangeList + ",BF\n" );  
+  
+  std::string send( "SBF,s,*,e," + sExchangeList + ",BF" );
+  std::cout << "sending '" << send << "'" << std::endl;
+  Send( send + "\n" );  
 }
 
 } // namespace iqfeed

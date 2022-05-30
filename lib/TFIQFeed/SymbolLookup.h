@@ -82,7 +82,7 @@ public:
   void Disconnect();
 
   using setNames_t = std::set<std::string>;
-  using fSymbol_t = std::function<void(std::string)>;
+  using fSymbol_t = std::function<void(const std::string&)>;
   void SymbolList( 
     const setNames_t& setExchangeFilter, const setNames_t& setSecurityTypeFilter,
     fSymbol_t&&, fDone_t&&
@@ -111,7 +111,8 @@ private:
   setIdSecurityType_t m_setIdSecurityType; // computed for each SBF query
 
   fSymbol_t m_fSymbol;
-  fDone_t m_fDone;
+  fDone_t m_fDoneConnection;
+  fDone_t m_fDoneSymbolList;
 
   void MapSecurityTypes();
 
