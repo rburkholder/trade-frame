@@ -32,6 +32,7 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_Exchange( "exchange" );
   static const std::string sChoice_SecurityType( "security_type" );
+  static const std::string sChoice_MinimumPrice( "minimum_price" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -60,6 +61,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_Exchange.c_str(), po::value<vName_t>( &choices.m_vExchange ), "exchange" )
       ( sChoice_SecurityType.c_str(), po::value<vName_t>( &choices.m_vSecurityType ), "security type" )
+      ( sChoice_MinimumPrice.c_str(), po::value<double>( &choices.m_dblMinPrice ), "minimum price" )
       ;
     po::variables_map vm;
 
@@ -74,6 +76,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       bOk &= parse<vName_t>( sFileName, vm, sChoice_Exchange, choices.m_vExchange );
       bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, choices.m_vSecurityType );
+      bOk &= parse<double>( sFileName, vm, sChoice_MinimumPrice, choices.m_dblMinPrice );
 
     }
 

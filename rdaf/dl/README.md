@@ -9,4 +9,5 @@ exchange=NGM
 exchange=NGSM
 
 security_type=EQUITY
+minimum_price=5.0
 ```

@@ -41,7 +41,9 @@ setNames_t setSecurityTypes;
 
 class Symbols {
 public:
-  Symbols() {
+  Symbols( double dblMinPrice ) {
+
+    m_dblMinPrice = dblMinPrice;
     m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
 
     m_piqfeed->OnConnected.Add( MakeDelegate( this, &Symbols::HandleConnected ) );
@@ -55,6 +57,8 @@ public:
   }
 protected:
 private:
+
+  double m_dblMinPrice;
 
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   pIQFeed_t m_piqfeed;
@@ -162,7 +166,7 @@ private:
               << std::endl;
             if ( 0 < instrument.dblCommonSharesOutstanding ) {
               countNonZeroCommonShares++;
-              if ( 5.0 < fundamentals.dbl52WkLo ) {
+              if ( m_dblMinPrice < fundamentals.dbl52WkLo ) {
                 countMinimumPrice++;
               }
             }
@@ -211,7 +215,7 @@ int main( int argc, char* argv[] ) {
       setSecurityTypes.emplace( vt );
     }
 
-    Symbols symbols;
+    Symbols symbols( choices.m_dblMinPrice );
 
   }
 
