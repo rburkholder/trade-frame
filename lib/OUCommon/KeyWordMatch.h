@@ -123,7 +123,7 @@ template<typename T> void KeyWordMatch<T>::AddPattern(
     ++iter;
     if ( sPattern.end() == iter ) {
       if ( m_Initializer != m_vNodes[ ixNode ].object ) {
-        throw std::domain_error( "Pattern already present" );
+        throw std::domain_error( "Pattern already present: " + sPattern );
       }
       m_vNodes[ ixNode ].object = object;  // assign and finish
       bDone = true;
