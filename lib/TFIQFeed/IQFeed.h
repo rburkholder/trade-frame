@@ -121,7 +121,7 @@ protected:
     m_mapSecurityType.clear();
     m_mapTradeCondition.clear();
 
-    // TODO: offer up connected after lookup tables retreived?
+    // TODO: offer up connected after lookup tables retrieved?
     m_pSymbolLookup = std::make_unique<SymbolLookup>(
       m_mapListedMarket,
       m_mapSecurityType,
@@ -133,6 +133,8 @@ protected:
           << ", SecurityTypes=" << m_mapSecurityType.size()
           << ", TradeConditions=" << m_mapTradeCondition.size()
           << std::endl;
+        // TODO: disconnect when iqfeed is closed.
+        //   leave open for use of SymbolList lookups
         //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
         //m_pSymbolLookup.reset();
 
@@ -164,13 +166,13 @@ protected:
   };
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
-  ESecurityType LookupSecurityType( int nSecurityType ) const {
+  ESecurityType LookupSecurityType( key_t nSecurityType ) const {
     SymbolLookup::mapSecurityType_t::const_iterator iter = m_mapSecurityType.find( nSecurityType );
     assert( m_mapSecurityType.end() != iter );
     return iter->second.eSecurityType;
   }
 
-  std::string LookupListedMarket( int nListedMarket ) const {
+  std::string LookupListedMarket( key_t nListedMarket ) const {
     SymbolLookup::mapListedMarket_t::const_iterator iter = m_mapListedMarket.find( nListedMarket );
     assert( m_mapListedMarket.end() != iter );
     return iter->second.sShortName;
