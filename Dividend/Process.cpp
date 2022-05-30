@@ -25,7 +25,7 @@
 #include "TFTrading/Watch.h"
 
 namespace {
-  const size_t nInTransit = 40;
+  const size_t nMaxInTransit = 40;
 }
 
 Process::Process( vSymbols_t& vSymbols )
@@ -42,7 +42,7 @@ Process::Process( vSymbols_t& vSymbols )
 void Process::HandleConnected( int ) {
 
   m_iterSymbols = m_vSymbols.begin();
-  while ( ( nInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
+  while ( ( nMaxInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
     Lookup();
   }
 
@@ -50,9 +50,9 @@ void Process::HandleConnected( int ) {
 
 void Process::Lookup() {
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using Fundamentals = ou::tf::Watch::Fundamentals;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   const std::string sSymbol( m_iterSymbols->sSymbol );
   //std::cout << "lookup " << sSymbol << std::endl;
@@ -88,7 +88,7 @@ void Process::Lookup() {
         //    << " div.yield=" << fundamentals.dblDividendYield
         //    << std::endl;
         //}
-        m_pAcquireFundamentals_dead = std::move( iterInProgress->second.pAcquireFundamentals );
+        m_pAcquireFundamentals_burial = std::move( iterInProgress->second.pAcquireFundamentals );
         m_mapInProgress.erase( iterInProgress ); // needs to come before the lookup
         if ( m_vSymbols.end() == m_iterSymbols ) {
           if  ( 0 == m_mapInProgress.size() ) {

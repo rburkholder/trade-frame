@@ -64,9 +64,7 @@ private:
   vSymbols_t& m_vSymbols;
   vSymbols_iter m_iterSymbols;
 
-
   using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
-  //std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_live;
 
   struct InProgress {
     vSymbols_iter iterSymbols;
@@ -77,7 +75,7 @@ private:
   mapInProgress_t m_mapInProgress;
 
   // assumes single thread
-  std::shared_ptr<ou::tf::AcquireFundamentals> m_pAcquireFundamentals_dead;
+  pAcquireFundamentals_t m_pAcquireFundamentals_burial;
 
   bool m_bDone;
   std::mutex m_mutexWait;
