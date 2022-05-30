@@ -61,6 +61,9 @@ void IQFeedSymbol::HandleFundamentalMessage(
   fundamentals.dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
   fundamentals.dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
   fundamentals.dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPriceEarnings );
+  fundamentals.dblAssets = pMsg->Double( IQFFundamentalMessage::FCurAssets );
+  fundamentals.dblLiabilities = pMsg->Double( IQFFundamentalMessage::FCurLiab );
+  fundamentals.dblCommonSharesOutstanding = pMsg->Double( IQFFundamentalMessage::FCommonShares );
   fundamentals.dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
   fundamentals.dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
   fundamentals.dblDividendAmount = pMsg->Double( IQFFundamentalMessage::FDivAmt );

@@ -29,7 +29,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-struct Fundamentals {
+struct Fundamentals { // filled by TFIQFeed/Symbol.cpp
   std::string sSymbolName;
   std::string sCompanyName;
   std::string sExchangeRoot; // usable for IB?
@@ -44,6 +44,9 @@ struct Fundamentals {
   double dblHistoricalVolatility;
   double dblStrikePrice;
   double dblPriceEarnings;
+  double dblAssets;
+  double dblLiabilities;
+  double dblCommonSharesOutstanding; // 1000's of shares
   double dbl52WkHi;
   double dbl52WkLo;
   double dblDividendAmount; // current actual dividend
@@ -56,15 +59,17 @@ struct Fundamentals {
   boost::posix_time::time_duration timeSessionOpen; // futures, futures options
   boost::posix_time::time_duration timeSessionClose; // futures, futures options
   Fundamentals()
-  : nAverageVolume {}, nPrecision {}, nFormatCode {},
-    eSecurityType( ESecurityType::Unknown ),
-    dblHistoricalVolatility {}, dblStrikePrice {}, dblPriceEarnings {},
-    dbl52WkHi {}, dbl52WkLo {},
-    dblDividendAmount {}, dblDividendRate {}, dblDividendYield {},
-    dblTickSize {},
-    datePayed( boost::posix_time::not_a_date_time ),
-    dateExDividend( boost::posix_time::not_a_date_time ),
-    dateExpiration( boost::posix_time::not_a_date_time )
+  : nAverageVolume {}, nPrecision {}, nFormatCode {}
+  , eSecurityType( ESecurityType::Unknown )
+  , dblHistoricalVolatility {}, dblStrikePrice {}
+  , dblPriceEarnings {}, dblAssets {}, dblLiabilities {}
+  , dblCommonSharesOutstanding {}
+  , dbl52WkHi {}, dbl52WkLo {}
+  , dblDividendAmount {}, dblDividendRate {}, dblDividendYield {}
+  , dblTickSize {}
+  , datePayed( boost::posix_time::not_a_date_time )
+  , dateExDividend( boost::posix_time::not_a_date_time )
+  , dateExpiration( boost::posix_time::not_a_date_time )
     {}
 };
 
