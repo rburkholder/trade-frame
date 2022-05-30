@@ -38,7 +38,7 @@ struct Fundamentals { // filled by TFIQFeed/Symbol.cpp
   int nPrecision;
   int nFormatCode;
   int nContractSize;
-  int nAverageVolume; // multiply by 1000
+  int nAverageVolume; // multiply by 1000, over four weeks
   ESecurityType eSecurityType;
   ou::tf::OptionSide::EOptionSide eOptionSide;
   double dblHistoricalVolatility;
