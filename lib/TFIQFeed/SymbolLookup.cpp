@@ -48,8 +48,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 struct SymbolByFilter {
-  uint16_t idListedMarket;
-  uint16_t idSecurityType;
+  key_t idListedMarket;
+  key_t idSecurityType;
   std::string sShortName;
   std::string sLongName;
 };
@@ -82,8 +82,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::SymbolByFilter,
   (std::string, sShortName)
-  (uint16_t, idListedMarket)
-  (uint16_t, idSecurityType)
+  (key_t, idListedMarket)
+  (key_t, idSecurityType)
   (std::string, sLongName)
 )
 
@@ -116,10 +116,10 @@ struct ListedMarketParser: qi::grammar<Iterator, SymbolLookup::mapListedMarket_t
 
   }
 
-  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, key_t()> id;
   qi::rule<Iterator, std::string()> name;
   qi::rule<Iterator, SymbolLookup::ListedMarket()> structure;
-  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::ListedMarket>()> pair;
+  qi::rule<Iterator, std::pair<key_t,SymbolLookup::ListedMarket>()> pair;
   qi::rule<Iterator, SymbolLookup::mapListedMarket_t()> start;
 
 };
@@ -143,10 +143,10 @@ struct SecurityTypeParser: qi::grammar<Iterator, SymbolLookup::mapSecurityType_t
 
   }
 
-  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, key_t()> id;
   qi::rule<Iterator, std::string()> name;
   qi::rule<Iterator, SymbolLookup::SecurityType()> structure;
-  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::SecurityType>()> pair;
+  qi::rule<Iterator, std::pair<key_t,SymbolLookup::SecurityType>()> pair;
   qi::rule<Iterator, SymbolLookup::mapSecurityType_t()> start;
 
 };
@@ -170,10 +170,10 @@ struct TradeConditionParser: qi::grammar<Iterator, SymbolLookup::mapTradeConditi
 
   }
 
-  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, key_t()> id;
   qi::rule<Iterator, std::string()> name;
   qi::rule<Iterator, SymbolLookup::TradeCondition()> structure;
-  qi::rule<Iterator, std::pair<uint16_t,SymbolLookup::TradeCondition>()> pair;
+  qi::rule<Iterator, std::pair<key_t,SymbolLookup::TradeCondition>()> pair;
   qi::rule<Iterator, SymbolLookup::mapTradeCondition_t()> start;
 
 };
@@ -198,7 +198,7 @@ struct SymbolByFilterParser: qi::grammar<Iterator, ou::tf::iqfeed::SymbolByFilte
 
   }
 
-  qi::rule<Iterator, uint16_t()> id;
+  qi::rule<Iterator, key_t()> id;
   qi::rule<Iterator, std::string()> nameShort;
   qi::rule<Iterator, std::string()> nameLong;
   qi::rule<Iterator, ou::tf::iqfeed::SymbolByFilter()> start;
@@ -342,7 +342,7 @@ void SymbolLookup::OnNetworkLineBuffer( linebuffer_t* buffer ) {
         if ( bOk ) {
           setIdSecurityType_t::const_iterator iter = m_setIdSecurityType.find( sbf.idSecurityType );
           if ( m_setIdSecurityType.end() != iter ) {
-            m_fSymbol( sbf.sShortName );
+            m_fSymbol( sbf.sShortName, sbf.idListedMarket );
           }
         }
         else {
@@ -467,7 +467,7 @@ void SymbolLookup::SymbolList(
   
   m_setIdSecurityType.clear(); // build filter for during retrieval
   for ( const setNames_t::value_type& name: setSecurityTypeFilter ) {
-    uint16_t id = m_kwmSecurityType.FindMatch( name );
+    key_t id = m_kwmSecurityType.FindMatch( name );
     assert( 0 != id );
     m_setIdSecurityType.emplace( id );
   }
@@ -481,7 +481,7 @@ void SymbolLookup::SymbolList(
     }
     else bAddSpace = true;
     
-    uint16_t id = m_kwmListedMarket.FindMatch( name );
+    key_t id = m_kwmListedMarket.FindMatch( name );
     assert( 0 != id );
     sExchangeList += boost::lexical_cast<std::string>( id );
   }
