@@ -48,6 +48,8 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
+  std::string ListedMarket( key_t nListedMarket ) const { return LookupListedMarket( nListedMarket ); }
+
 protected:
 
   // overridden from ProviderInterface, called when application adds/removes watches
