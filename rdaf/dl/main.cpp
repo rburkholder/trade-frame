@@ -43,15 +43,15 @@ namespace {
 
 struct Security {
   std::string sName;
-  key_t keyListedMarket;
+  std::string sListedMarket;
   double dblPriceEarnings;
   size_t nAverageVolume;
   double dblAssets;
   double dblLiabilities;
   double dblCommonSharesOutstanding;
   size_t nTicks;
-  Security( const std::string& sName_, key_t keyListedMarket_ )
-  : sName( sName_ ), keyListedMarket( keyListedMarket_ )
+  Security( const std::string& sName_, const std::string& sListedMarket_ )
+  : sName( sName_ ), sListedMarket( sListedMarket_ )
   , dblPriceEarnings {}, nAverageVolume {}
   , dblAssets {}, dblLiabilities {}
   , dblCommonSharesOutstanding {}
@@ -117,8 +117,9 @@ private:
         //std::cout << sSymbol << std::endl;
         bool bGetFundamentals( false );
         {
+          const std::string sListedMarket( m_piqfeed->ListedMarket( keyListedMarket ) );
           std::lock_guard<std::mutex> lock( m_mutex );
-          m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, keyListedMarket ) );
+          m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, sListedMarket ) );
           if ( nMaxInTransit > m_mapAcquire.size() ) {
             bGetFundamentals = true;
           }
@@ -413,7 +414,7 @@ int main( int argc, char* argv[] ) {
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
         std::cout
-          << security.keyListedMarket << ","
+          << security.sListedMarket << ","
           << security.sName << ","
           << security.dblCommonSharesOutstanding << ","
           //<< pWatch->LastTrade().Price() << ","
