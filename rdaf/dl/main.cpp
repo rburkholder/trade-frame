@@ -22,6 +22,15 @@
 #include <mutex>
 #include <future>
 
+#include <boost/filesystem.hpp>
+
+#include <boost/log/trivial.hpp>
+
+#include <rdaf/TRint.h>
+#include <rdaf/TROOT.h>
+#include <rdaf/TFile.h>
+#include <rdaf/TTree.h>
+
 #include <TFIQFeed/Provider.h>
 #include <TFIQFeed/SymbolLookup.h>
 #include <TFIQFeed/HistoryQuery.h>
@@ -36,8 +45,13 @@ namespace {
 
   static const size_t nMaxInTransit = 40;
 
+  static const std::string sDirectory( "rdaf/dl" );
+
   setNames_t setExchanges;
   setNames_t setSecurityTypes;
+
+  std::unique_ptr<TRint> m_prdafApp;
+  std::shared_ptr<TFile> m_pFile; // primary timeseries
 
 }
 
@@ -50,13 +64,73 @@ struct Security {
   double dblLiabilities;
   double dblCommonSharesOutstanding;
   size_t nTicks;
+
+  struct QuoteForBranch {
+    double time;
+    double ask;
+    uint64_t askvol;
+    double bid;
+    uint64_t bidvol;
+  } m_branchQuote;
+
+  struct TradeForBranch {
+    double time;
+    double price;
+    uint64_t vol;
+    int64_t direction;
+  } m_branchTrade;
+
+  // https://root.cern/doc/master/classTTree.html
+  using pTTree_t = std::shared_ptr<TTree>;
+  pTTree_t m_pTreeQuote;
+  pTTree_t m_pTreeTrade;
+
+  TBranch* pBranchQuote;
+  TBranch* pBranchTrade;
+
   Security( const std::string& sName_, const std::string& sListedMarket_ )
   : sName( sName_ ), sListedMarket( sListedMarket_ )
   , dblPriceEarnings {}, nAverageVolume {}
   , dblAssets {}, dblLiabilities {}
   , dblCommonSharesOutstanding {}
   , nTicks {}
-  {}
+  {
+  }
+
+  void RdafInit() {
+
+    m_pTreeQuote = std::make_shared<TTree>(
+      ( sName + "_quotes" ).c_str(), ( sName + " quotes" ).c_str(), 99, m_pFile.get()
+    );
+    if ( !m_pTreeQuote ) {
+      BOOST_LOG_TRIVIAL(error) << "problems m_pTreeQuote";
+    }
+    else {
+      pBranchQuote
+        = m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+      //pBranchQuote->SetFile( m_pFile.get() );
+      //m_pTreeQuote->SetDirectory( m_pFile.get() );
+    }
+
+    m_pTreeTrade = std::make_shared<TTree>(
+      ( sName + "_trades" ).c_str(), ( sName + " trades" ).c_str(), 99, m_pFile.get()
+    );
+    if ( !m_pTreeTrade ) {
+      BOOST_LOG_TRIVIAL(error) << "problems m_pTreeTrade";
+    }
+    else {
+      pBranchTrade
+        = m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
+      //pBranchTrade->SetFile( m_pFile.get() );
+      //m_pTreeTrade->SetDirectory( m_pFile.get() );
+    }
+  }
+
+  void RdafDirectory() { // called from thread in which pFile was created
+    m_pTreeQuote->SetDirectory( m_pFile.get() );
+    m_pTreeTrade->SetDirectory( m_pFile.get() );
+  }
+
 };
 
 using pSecurity_t = std::shared_ptr<Security>;
@@ -103,10 +177,6 @@ private:
 
   using key_t = ou::tf::iqfeed::SymbolLookup::key_t;
 
-  //using vSecurity_t = std::vector<Security>;
-  //vSecurity_t m_vSecurity;
-  //vSecurity_t::size_type m_ixSecurity {}; // feeds the acquisition process
-
   mapSecurity_t m_mapSecurity;
 
   void HandleConnected( int ) {
@@ -129,7 +199,6 @@ private:
       },
       [this](){
         //std::cout << "added " << countSymbols << " symbols" << std::endl;
-        //promise.set_value( 0 ); // TODO: this will need to be moved to later in the pipeline
       }
     );
   }
@@ -185,6 +254,7 @@ private:
               countNonZeroCommonShares++;
 
               if ( m_dblMinPrice < fundamentals.dbl52WkLo ) {
+
                 countMinimumPrice++;
 
                 security.dblAssets = fundamentals.dblAssets;
@@ -192,7 +262,11 @@ private:
                 security.nAverageVolume = fundamentals.nAverageVolume;
                 security.dblPriceEarnings = fundamentals.dblPriceEarnings;
                 security.dblCommonSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
-                m_fSecurity( iterAcquire->second.pSecurity );
+
+                security.RdafInit();
+
+                pSecurity_t pSecurity = iterAcquire->second.pSecurity;
+                m_fSecurity( pSecurity );
               }
             }
 
@@ -205,7 +279,6 @@ private:
             GetFundamentals();  // this is outside of construction thread
           }
         );
-
       iterAcquire->second.pAcquireFundamentals->Start();
     }
     else {
@@ -292,19 +365,22 @@ public:
   , m_fSecurity( std::move( fSecurity ) )
   {
     assert( m_fSecurity );
+
+    futureDone = promiseDone.get_future();
+    futureStart = promiseStart.get_future();
+
     for ( uint32_t count = 0; count < maxStarts; count++ ) {
       m_vRetrieveTicks_Avail.emplace_back(
         std::make_shared<RetrieveTicks>(
           [this](){
             m_countStarted++;
             if ( maxStarts == m_countStarted ) {
-              promise.set_value( 1 );
+              promiseStart.set_value( 1 );
             }
           } )
         );
     }
-    future = promise.get_future();
-    future.wait();
+    futureStart.wait();
     assert( maxStarts == m_countStarted );  // assumes sync startup, use future/promise if async
   }
 
@@ -317,8 +393,9 @@ public:
   }
 
   void Wait() {
-    //future = promise.get_future();
-    future.wait();
+    futureDone.wait();
+    auto result = futureDone.get();
+    assert( 2 == result );
   }
 
 protected:
@@ -329,15 +406,17 @@ private:
 
   std::mutex m_mutex;
 
-  static const uint32_t maxStarts = 10;
+  static const uint32_t maxStarts = 5;
   int m_countStarted {};
   using pRetrieveTicks_t = std::shared_ptr<RetrieveTicks>;
   using vRetrieveTicks_t = std::vector<pRetrieveTicks_t>;
   vRetrieveTicks_t m_vRetrieveTicks_Avail;
-  //vRetrieveTicks_t m_vRetrieveTicks_Running;
 
-  std::promise<int> promise;
-  std::future<int> future;
+  std::promise<int> promiseStart;
+  std::future<int> futureStart;
+
+  std::promise<int> promiseDone;
+  std::future<int> futureDone;
 
   mapSecurity_t m_mapSecurity_Waiting;
 
@@ -370,15 +449,47 @@ private:
         pRetrieveTicks->RequestNDaysOfTicks(
           pSecurity->sName, m_nDays,
           [pSecurity](const ou::tf::iqfeed::HistoryStructs::TickDataPoint& tdp){  // fTick_t
+
             pSecurity->nTicks++;
+
+            double mid {};
+            std::time_t nTime = boost::posix_time::to_time_t( tdp.DateTime );
+
+            Security::QuoteForBranch& qfb( pSecurity->m_branchQuote );
+
+            qfb.time = (double)nTime / 1000.0;
+            qfb.ask = tdp.Ask;
+            qfb.askvol = tdp.AskSize;
+            qfb.bid = tdp.Bid;
+            qfb.bidvol = tdp.BidSize;
+
+            mid = ( tdp.Ask - tdp.Bid ) / 2.0;
+
+            pSecurity->m_pTreeQuote->Fill();
+
+            Security::TradeForBranch& tfb( pSecurity->m_branchTrade );
+
+            const double price = tdp.Last;
+            const uint64_t volume = tdp.TotalVolume;
+
+            tfb.time = (double)nTime / 1000.0;
+            tfb.price = price;
+            tfb.vol = volume;
+            if ( mid == price ) {
+              tfb.direction = 0;
+            }
+            else {
+              tfb.direction = ( mid < price ) ? volume : -volume;
+            }
+
+            pSecurity->m_pTreeTrade->Fill();
+
           },
           [this,iter=result.first](){ // fDone_t
             pSecurity_t pSecurity = iter->second.pSecurity;
-            //std::cout << pSecurity->sName << " has " << pSecurity->nTicks << " ticks" << std::endl;
-            m_fSecurity( iter->second.pSecurity );
+            m_fSecurity( pSecurity );
             {
               std::lock_guard<std::mutex> lock( m_mutex );
-
               m_vRetrieveTicks_Avail.push_back( iter->second.pRetrieveTicks );
               m_mapRetrieveTicks.erase( iter );
             }
@@ -388,12 +499,44 @@ private:
       else {
         assert( 0 == m_mapSecurity_Waiting.size() );
         if ( maxStarts == m_vRetrieveTicks_Avail.size() ) {
-          promise.set_value( 2 );
+          if ( 0 == m_mapRetrieveTicks.size() ) {
+            promiseDone.set_value( 2 );
+          }
         }
       }
     }
   }
 };
+
+// ==========
+
+void StartRdaf( const std::string& sFileName ) {
+
+  int argc {};
+  char** argv = nullptr;
+
+  std::string sPath( sFileName + ".root" );
+
+  if ( boost::filesystem::exists( sPath ) ) {
+    boost::filesystem::remove( sPath );
+  }
+
+  m_prdafApp = std::make_unique<TRint>( sPath.c_str(), &argc, argv );
+  ROOT::EnableImplicitMT();
+  ROOT::EnableThreadSafety();
+
+  // open file after directory scan, so it is not included in the list
+  m_pFile = std::make_shared<TFile>(
+    sPath.c_str(),
+    "RECREATE",
+    "tradeframe rdaf/dl quotes, trades"
+  );
+
+  //m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
+
+}
+
+// ==========
 
 int main( int argc, char* argv[] ) {
 
@@ -408,9 +551,16 @@ int main( int argc, char* argv[] ) {
       setSecurityTypes.emplace( vt );
     }
 
+    StartRdaf( "rdaf_dl" );
+
+    using vSecurity_t = std::vector<pSecurity_t>;
+    vSecurity_t vSecurity;
+
+    std::mutex mutex;
+
     ControlTickRetrieval control(
       choices.m_nDays,
-      []( pSecurity_t pSecurity ){ // finished securities
+      [&vSecurity,&mutex]( pSecurity_t pSecurity ){ // finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
         std::cout
@@ -422,6 +572,8 @@ int main( int argc, char* argv[] ) {
           //<< fundamentals.dbl52WkLo
           << security.nTicks
           << std::endl;
+        std::lock_guard<std::mutex> lock( mutex );
+        vSecurity.push_back( pSecurity );
       });
 
     Symbols symbols(
@@ -434,6 +586,22 @@ int main( int argc, char* argv[] ) {
 
     control.Wait();
 
+    for ( pSecurity_t pSecurity: vSecurity ) {
+      // Set directory in primary thread as file was created in this thread
+      pSecurity->RdafDirectory();
+      //pSecurity->m_pTreeQuote->Write();
+      //pSecurity->m_pTreeTrade->Write();
+    }
+
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      m_pFile->Write();
+      m_pFile->Close();
+      m_pFile.reset();
+    }
+
+    if ( m_prdafApp ) {
+      m_prdafApp = nullptr;
+    }
   }
 
   return 0;

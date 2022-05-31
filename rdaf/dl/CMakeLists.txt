@@ -58,6 +58,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_include_directories(
   ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
+    "/usr/local/include/rdaf"
 #    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
 #    "/usr/local/include/wx-3.0"
   )
@@ -65,6 +66,7 @@ target_include_directories(
 target_link_directories(
   ${PROJECT_NAME} PUBLIC
     /usr/local/lib
+    /usr/local/lib/rdaf
   )
 
 target_link_libraries(
@@ -99,5 +101,13 @@ target_link_libraries(
 #      wx_gtk3u_core-3.0
 #      wx_baseu-3.0
       pthread
+# rdaf components:
+    Core
+    Gpad
+    Hist
+    Rint
+    Thread
+    Tree
+    RIO
   )
 
