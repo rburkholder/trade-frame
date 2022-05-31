@@ -53,6 +53,10 @@ namespace {
   std::unique_ptr<TRint> m_prdafApp;
   std::shared_ptr<TFile> m_pFile; // primary timeseries
 
+  using pTTree_t = std::shared_ptr<TTree>;
+
+  pTTree_t m_pTreeStatistics;
+
 }
 
 struct Security {
@@ -81,7 +85,6 @@ struct Security {
   } m_branchTrade;
 
   // https://root.cern/doc/master/classTTree.html
-  using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
   pTTree_t m_pTreeTrade;
 
@@ -432,10 +435,9 @@ private:
   mapRetrieveTicks_t m_mapRetrieveTicks;
 
   void StartRetrieval() {
+    std::lock_guard<std::mutex> lock( m_mutex );
     if ( 0 < m_vRetrieveTicks_Avail.size() ) {
       if ( 0 < m_mapSecurity_Waiting.size() ) {
-
-        std::lock_guard<std::mutex> lock( m_mutex );
 
         pRetrieveTicks_t pRetrieveTicks = m_vRetrieveTicks_Avail.back();
         m_vRetrieveTicks_Avail.pop_back();
@@ -540,6 +542,28 @@ void StartRdaf( const std::string& sFileName ) {
 
 int main( int argc, char* argv[] ) {
 
+  struct StatsForBranch {
+    const char* name;
+    const char* market;
+    double pe;
+    size_t volume;
+    double assets;
+    double liabilities;
+    double shares;
+    size_t ticks;
+
+    void Set(const Security& security ) {
+      name = security.sName.c_str();
+      market = security.sListedMarket.c_str();
+      pe = security.dblPriceEarnings;
+      volume = security.nAverageVolume;
+      assets = security.dblAssets;
+      liabilities = security.dblLiabilities;
+      shares = security.dblCommonSharesOutstanding;
+      ticks = security.nTicks;
+    }
+  } m_branchStatistics;
+
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
 
@@ -553,6 +577,20 @@ int main( int argc, char* argv[] ) {
 
     StartRdaf( "rdaf_dl" );
 
+    m_pTreeStatistics = std::make_shared<TTree>(
+      "statistics", "symbol statistics", 99, m_pFile.get()
+    );
+    if ( !m_pTreeStatistics ) {
+      BOOST_LOG_TRIVIAL(error) << "problems m_pTreeStatistics";
+    }
+    else {
+      TBranch* pBranchStatistics
+        = m_pTreeStatistics->Branch(
+          "statistics", &m_branchStatistics,
+          "name/C:market/C:pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l"
+        );
+    }
+
     using vSecurity_t = std::vector<pSecurity_t>;
     vSecurity_t vSecurity;
 
@@ -560,7 +598,7 @@ int main( int argc, char* argv[] ) {
 
     ControlTickRetrieval control(
       choices.m_nDays,
-      [&vSecurity,&mutex]( pSecurity_t pSecurity ){ // finished securities
+      [&vSecurity,&mutex,&m_branchStatistics]( pSecurity_t pSecurity ){ // finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
         std::cout
@@ -574,6 +612,8 @@ int main( int argc, char* argv[] ) {
           << std::endl;
         std::lock_guard<std::mutex> lock( mutex );
         vSecurity.push_back( pSecurity );
+        m_branchStatistics.Set( *pSecurity );
+        m_pTreeStatistics->Fill();
       });
 
     Symbols symbols(
@@ -585,6 +625,8 @@ int main( int argc, char* argv[] ) {
     );
 
     control.Wait();
+
+    m_pTreeStatistics->SetDirectory( m_pFile.get() );
 
     for ( pSecurity_t pSecurity: vSecurity ) {
       // Set directory in primary thread as file was created in this thread
