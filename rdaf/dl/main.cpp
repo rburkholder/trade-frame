@@ -19,7 +19,8 @@
  * Created: May 29, 2022  14:42
  */
 
-#include <future> 
+#include <mutex>
+#include <future>
 
 #include <TFIQFeed/Provider.h>
 #include <TFIQFeed/SymbolLookup.h>
@@ -62,6 +63,8 @@ using pSecurity_t = std::shared_ptr<Security>;
 using mapSecurity_t = std::map<std::string,pSecurity_t>;
 using fSecurity_t = std::function<void(pSecurity_t)>;
 
+// ==========
+
 class Symbols {
 public:
 
@@ -96,6 +99,8 @@ private:
   size_t countNonZeroCommonShares {};
   size_t countMinimumPrice {};
 
+  std::mutex m_mutex;
+
   using key_t = ou::tf::iqfeed::SymbolLookup::key_t;
 
   //using vSecurity_t = std::vector<Security>;
@@ -110,11 +115,16 @@ private:
       setExchanges, setSecurityTypes,
       [this](const std::string& sSymbol, key_t keyListedMarket){
         //std::cout << sSymbol << std::endl;
-        m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, keyListedMarket ) );
-        if ( nMaxInTransit > m_mapAcquire.size() ) {
-          GetFundamentals();
+        bool bGetFundamentals( false );
+        {
+          std::lock_guard<std::mutex> lock( m_mutex );
+          m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, keyListedMarket ) );
+          if ( nMaxInTransit > m_mapAcquire.size() ) {
+            bGetFundamentals = true;
+          }
+          countSymbols++;
         }
-        countSymbols++;
+        if (bGetFundamentals ) GetFundamentals();
       },
       [this](){
         std::cout << "added " << countSymbols << " symbols" << std::endl;
@@ -144,6 +154,8 @@ private:
     using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
     if ( 0 < m_mapSecurity.size() ) {
+
+      std::lock_guard<std::mutex> lock( m_mutex );
 
       mapSecurity_t::iterator iterSecurity = m_mapSecurity.begin();
       pSecurity_t pSecurity = iterSecurity->second;
@@ -179,15 +191,6 @@ private:
                 security.nAverageVolume = fundamentals.nAverageVolume;
                 security.dblPriceEarnings = fundamentals.dblPriceEarnings;
                 security.dblCommonSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
-                std::cout
-                  << security.keyListedMarket << ","
-                  << security.sName << ","
-                  << security.dblCommonSharesOutstanding << ","
-                  << pWatch->LastTrade().Price() << ","
-                  << security.nAverageVolume << ","
-                  << fundamentals.dbl52WkLo
-                  << std::endl;
-
                 m_fSecurity( iterAcquire->second.pSecurity );
               }
             }
@@ -195,7 +198,7 @@ private:
             m_pAcquireFundamentals_burial = std::move( iterAcquire->second.pAcquireFundamentals );
             m_mapAcquire.erase( iterAcquire ); // needs to come before the lookup
 
-            GetFundamentals();
+            GetFundamentals();  // this is outside of construction thread
           }
         );
 
@@ -204,11 +207,11 @@ private:
     else {
       // TODO: finish up
       if ( 0 == m_mapAcquire.size() ) {
-        std::cout 
-          << countNonZeroCommonShares 
+        std::cout
+          << countNonZeroCommonShares
           << " with outstanding shares, "
           << countMinimumPrice
-          << " with minimum price"
+          << " meeting minimum price"
           << std::endl;
         promise.set_value( 0 );
       }
@@ -216,6 +219,8 @@ private:
   }
 
 };
+
+// ==========
 
 // alternative to this might have been HistoryBulkQuery
 class RetrieveTicks: ou::tf::iqfeed::HistoryQuery<RetrieveTicks> {
@@ -238,10 +243,10 @@ public:
 
   using fTick_t = std::function<void(const ou::tf::iqfeed::HistoryStructs::TickDataPoint& )>;
   using fDone_t = std::function<void()>;
-  void RequestNDaysOfTicks( 
+  void RequestNDaysOfTicks(
     const std::string& sName
   , unsigned int nDays
-  , fTick_t&& fTick, fDone_t&& fDone 
+  , fTick_t&& fTick, fDone_t&& fDone
   ) {
     assert( fTick );
     assert( fDone );
@@ -270,11 +275,13 @@ private:
   fDone_t m_fDone;
 };
 
+// ==========
+
 class ControlTickRetrieval {
 public:
-  ControlTickRetrieval( 
+  ControlTickRetrieval(
     unsigned int nDays
-  , fSecurity_t&& fSecurity 
+  , fSecurity_t&& fSecurity
   )
   : m_nDays( nDays )
   , m_fSecurity( std::move( fSecurity ) )
@@ -297,7 +304,10 @@ public:
   }
 
   void Retrieve( pSecurity_t pSecurity ) {
-    m_mapSecurity_Waiting.emplace( pSecurity->sName, pSecurity );
+    {
+      std::lock_guard<std::mutex> lock( m_mutex );
+      m_mapSecurity_Waiting.emplace( pSecurity->sName, pSecurity );
+    }
     StartRetrieval();
   }
 
@@ -311,6 +321,8 @@ private:
 
   unsigned int m_nDays;
   fSecurity_t m_fSecurity;
+
+  std::mutex m_mutex;
 
   static const uint32_t maxStarts = 10;
   int m_countStarted {};
@@ -338,6 +350,9 @@ private:
   void StartRetrieval() {
     if ( 0 < m_vRetrieveTicks_Avail.size() ) {
       if ( 0 < m_mapSecurity_Waiting.size() ) {
+
+        std::lock_guard<std::mutex> lock( m_mutex );
+
         pRetrieveTicks_t pRetrieveTicks = m_vRetrieveTicks_Avail.back();
         m_vRetrieveTicks_Avail.pop_back();
         mapSecurity_t::iterator iterSecurity = m_mapSecurity_Waiting.begin();
@@ -354,10 +369,14 @@ private:
           },
           [this,iter=result.first](){ // fDone_t
             pSecurity_t pSecurity = iter->second.pSecurity;
-            std::cout << pSecurity->sName << " has " << pSecurity->nTicks << " ticks" << std::endl;
+            //std::cout << pSecurity->sName << " has " << pSecurity->nTicks << " ticks" << std::endl;
             m_fSecurity( iter->second.pSecurity );
-            m_vRetrieveTicks_Avail.push_back( iter->second.pRetrieveTicks );
-            m_mapRetrieveTicks.erase( iter );
+            {
+              std::lock_guard<std::mutex> lock( m_mutex );
+
+              m_vRetrieveTicks_Avail.push_back( iter->second.pRetrieveTicks );
+              m_mapRetrieveTicks.erase( iter );
+            }
             StartRetrieval();
           });
       }
@@ -388,6 +407,16 @@ int main( int argc, char* argv[] ) {
       choices.m_nDays,
       []( pSecurity_t pSecurity ){ // finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
+        const Security& security( *pSecurity );
+        std::cout
+          << security.keyListedMarket << ","
+          << security.sName << ","
+          << security.dblCommonSharesOutstanding << ","
+          //<< pWatch->LastTrade().Price() << ","
+          << security.nAverageVolume << ","
+          //<< fundamentals.dbl52WkLo
+          << security.nTicks
+          << std::endl;
       });
 
     Symbols symbols(
