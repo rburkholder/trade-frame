@@ -110,7 +110,7 @@ private:
   mapSecurity_t m_mapSecurity;
 
   void HandleConnected( int ) {
-    std::cout << "connected" << std::endl;
+    //std::cout << "connected" << std::endl;
     m_piqfeed->SymbolList(
       setExchanges, setSecurityTypes,
       [this](const std::string& sSymbol, key_t keyListedMarket){
@@ -127,7 +127,7 @@ private:
         if (bGetFundamentals ) GetFundamentals();
       },
       [this](){
-        std::cout << "added " << countSymbols << " symbols" << std::endl;
+        //std::cout << "added " << countSymbols << " symbols" << std::endl;
         //promise.set_value( 0 ); // TODO: this will need to be moved to later in the pipeline
       }
     );
@@ -196,7 +196,10 @@ private:
             }
 
             m_pAcquireFundamentals_burial = std::move( iterAcquire->second.pAcquireFundamentals );
-            m_mapAcquire.erase( iterAcquire ); // needs to come before the lookup
+            {
+              std::lock_guard<std::mutex> lock( m_mutex );
+              m_mapAcquire.erase( iterAcquire );
+            }
 
             GetFundamentals();  // this is outside of construction thread
           }
@@ -243,6 +246,7 @@ public:
 
   using fTick_t = std::function<void(const ou::tf::iqfeed::HistoryStructs::TickDataPoint& )>;
   using fDone_t = std::function<void()>;
+
   void RequestNDaysOfTicks(
     const std::string& sName
   , unsigned int nDays
@@ -257,7 +261,7 @@ public:
 
 protected:
   void OnHistoryConnected() {
-    std::cout << "History Connected" << std::endl;
+    //std::cout << "History Connected" << std::endl;
     m_fConnected();
   }
   void OnHistoryDisconnected() {}
