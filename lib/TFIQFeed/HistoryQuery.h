@@ -293,12 +293,12 @@ protected:
   } m_stateRetrieval;
 
   // called by Network via CRTP
-  void OnNetworkConnected(void) {
+  void OnNetworkConnected() {
     if ( &HistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
     }
   };
-  void OnNetworkDisconnected(void) {
+  void OnNetworkDisconnected() {
     if ( &HistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
       static_cast<T*>( this )->OnHistoryDisconnected();
     }
@@ -308,7 +308,7 @@ protected:
       static_cast<T*>( this )->OnHistoryError(e);
     }
   };
-  void OnNetworkSendDone(void) {
+  void OnNetworkSendDone() {
     if ( &HistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
       static_cast<T*>( this )->OnHistorySendDone();
     }
