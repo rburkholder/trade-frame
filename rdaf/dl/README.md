@@ -10,4 +10,5 @@ exchange=NGSM
 
 security_type=EQUITY
 minimum_price=5.0
+number_of_days=1
 ```

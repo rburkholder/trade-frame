@@ -238,12 +238,16 @@ public:
 
   using fTick_t = std::function<void(const ou::tf::iqfeed::HistoryStructs::TickDataPoint& )>;
   using fDone_t = std::function<void()>;
-  void RequestOneDayOfTicks( const std::string& sName, fTick_t&& fTick, fDone_t&& fDone ) {
+  void RequestNDaysOfTicks( 
+    const std::string& sName
+  , unsigned int nDays
+  , fTick_t&& fTick, fDone_t&& fDone 
+  ) {
     assert( fTick );
     assert( fDone );
     m_fTick = std::move( fTick );
     m_fDone = std::move( fDone );
-    RetrieveNDaysOfDataPoints( sName, 4 );
+    RetrieveNDaysOfDataPoints( sName, nDays );
   }
 
 protected:
@@ -268,8 +272,12 @@ private:
 
 class ControlTickRetrieval {
 public:
-  ControlTickRetrieval( fSecurity_t&& fSecurity )
-  : m_fSecurity( std::move( fSecurity ) )
+  ControlTickRetrieval( 
+    unsigned int nDays
+  , fSecurity_t&& fSecurity 
+  )
+  : m_nDays( nDays )
+  , m_fSecurity( std::move( fSecurity ) )
   {
     assert( m_fSecurity );
     for ( uint32_t count = 0; count < maxStarts; count++ ) {
@@ -301,6 +309,7 @@ public:
 protected:
 private:
 
+  unsigned int m_nDays;
   fSecurity_t m_fSecurity;
 
   static const uint32_t maxStarts = 10;
@@ -338,8 +347,8 @@ private:
         auto result = m_mapRetrieveTicks.emplace( pSecurity->sName, Running( pRetrieveTicks, pSecurity ) );
         assert( result.second );
 
-        pRetrieveTicks->RequestOneDayOfTicks(
-          pSecurity->sName,
+        pRetrieveTicks->RequestNDaysOfTicks(
+          pSecurity->sName, m_nDays,
           [pSecurity](const ou::tf::iqfeed::HistoryStructs::TickDataPoint& tdp){  // fTick_t
             pSecurity->nTicks++;
           },
@@ -376,6 +385,7 @@ int main( int argc, char* argv[] ) {
     }
 
     ControlTickRetrieval control(
+      choices.m_nDays,
       []( pSecurity_t pSecurity ){ // finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
       });

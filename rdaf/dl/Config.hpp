@@ -34,6 +34,7 @@ struct Choices {
   vName_t m_vSecurityType;
 
   double m_dblMinPrice; // based upon 52 wk low
+  unsigned int m_nDays;
 
 };
 
