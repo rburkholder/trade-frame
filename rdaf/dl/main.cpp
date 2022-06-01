@@ -549,12 +549,14 @@ int main( int argc, char* argv[] ) {
     double liabilities;
     double shares;
     size_t ticks;
-    const char* name;
-    const char* market;
+    //const char* name;
+    //const char* market;
+    //const char name[6] = { "test1" };
+    //const char market[6] = { "test2" };
 
     void Set(const Security& security ) {
-      name = security.sName.c_str();
-      market = security.sListedMarket.c_str();
+      //name = security.sName.c_str();
+      //market = security.sListedMarket.c_str();
       pe = security.dblPriceEarnings;
       volume = security.nAverageVolume;
       assets = security.dblAssets;
@@ -565,6 +567,11 @@ int main( int argc, char* argv[] ) {
   } m_branchStatistics;
 
   TBranch* pBranchStatistics;
+  TBranch* pBranchName;
+  TBranch* pBranchMarket;
+
+  std::string sSecurityName;
+  std::string sSecurityListedMarket;
 
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
@@ -589,8 +596,10 @@ int main( int argc, char* argv[] ) {
       pBranchStatistics
         = m_pTreeStatistics->Branch(
           "statistics", &m_branchStatistics,
-          "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l:name/C:market/C"
+          "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l"
         );
+      pBranchName = m_pTreeStatistics->Branch( "name", &sSecurityName );
+      pBranchMarket = m_pTreeStatistics->Branch( "market", &sSecurityListedMarket );
     }
 
     using vSecurity_t = std::vector<pSecurity_t>;
@@ -631,6 +640,8 @@ int main( int argc, char* argv[] ) {
       // Set directory in primary thread as file was created in this thread
       pSecurity->RdafDirectory();
       m_branchStatistics.Set( *pSecurity );
+      sSecurityName = pSecurity->sName;
+      sSecurityListedMarket = pSecurity->sListedMarket;
       m_pTreeStatistics->Fill();
       //pSecurity->m_pTreeQuote->Write();
       //pSecurity->m_pTreeTrade->Write();
