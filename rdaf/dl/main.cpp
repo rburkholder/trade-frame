@@ -543,14 +543,14 @@ void StartRdaf( const std::string& sFileName ) {
 int main( int argc, char* argv[] ) {
 
   struct StatsForBranch {
-    const char* name;
-    const char* market;
     double pe;
     size_t volume;
     double assets;
     double liabilities;
     double shares;
     size_t ticks;
+    const char* name;
+    const char* market;
 
     void Set(const Security& security ) {
       name = security.sName.c_str();
@@ -563,6 +563,8 @@ int main( int argc, char* argv[] ) {
       ticks = security.nTicks;
     }
   } m_branchStatistics;
+
+  TBranch* pBranchStatistics;
 
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
@@ -584,10 +586,10 @@ int main( int argc, char* argv[] ) {
       BOOST_LOG_TRIVIAL(error) << "problems m_pTreeStatistics";
     }
     else {
-      TBranch* pBranchStatistics
+      pBranchStatistics
         = m_pTreeStatistics->Branch(
           "statistics", &m_branchStatistics,
-          "name/C:market/C:pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l"
+          "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l:name/C:market/C"
         );
     }
 
@@ -612,8 +614,6 @@ int main( int argc, char* argv[] ) {
           << std::endl;
         std::lock_guard<std::mutex> lock( mutex );
         vSecurity.push_back( pSecurity );
-        m_branchStatistics.Set( *pSecurity );
-        m_pTreeStatistics->Fill();
       });
 
     Symbols symbols(
@@ -626,17 +626,26 @@ int main( int argc, char* argv[] ) {
 
     control.Wait();
 
-    m_pTreeStatistics->SetDirectory( m_pFile.get() );
-
+    //m_pTreeStatistics->SetDirectory( m_pFile.get() );
     for ( pSecurity_t pSecurity: vSecurity ) {
       // Set directory in primary thread as file was created in this thread
       pSecurity->RdafDirectory();
+      m_branchStatistics.Set( *pSecurity );
+      m_pTreeStatistics->Fill();
       //pSecurity->m_pTreeQuote->Write();
       //pSecurity->m_pTreeTrade->Write();
     }
 
+    //m_pTreeStatistics->SetDirectory( m_pFile.get() );
+
+    //m_pTreeStatistics->Write();
+    m_pTreeStatistics->FlushBaskets();
+    //pBranchStatistics->FlushBaskets();
+    //m_pTreeStatistics.reset();
+
     if ( m_pFile ) { // performed at exit to ensure no duplication in file
       m_pFile->Write();
+      m_pFile->Flush();
       m_pFile->Close();
       m_pFile.reset();
     }
