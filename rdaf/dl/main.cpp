@@ -22,6 +22,11 @@
 #include <mutex>
 #include <future>
 
+//#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/execution/context.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <boost/log/trivial.hpp>
@@ -56,6 +61,8 @@ namespace {
   using pTTree_t = std::shared_ptr<TTree>;
 
   pTTree_t m_pTreeStatistics;
+
+  boost::asio::io_context context; // attempt to move this into main, depends upon where posts are occurring
 
 }
 
@@ -131,7 +138,18 @@ struct Security {
 
   void RdafDirectory() { // called from thread in which pFile was created
     m_pTreeQuote->SetDirectory( m_pFile.get() );
+    m_pTreeQuote->FlushBaskets();
+    m_pTreeQuote->Write( "", TObject::kOverwrite );
+    //m_pFile->Write();
+    //m_pFile->Flush();
+    m_pTreeQuote.reset();
+
     m_pTreeTrade->SetDirectory( m_pFile.get() );
+    m_pTreeTrade->FlushBaskets();
+    m_pTreeTrade->Write( "", TObject::kOverwrite );
+    //m_pFile->Write();
+    //m_pFile->Flush();
+    m_pTreeTrade.reset();
   }
 
 };
@@ -139,6 +157,7 @@ struct Security {
 using pSecurity_t = std::shared_ptr<Security>;
 using mapSecurity_t = std::map<std::string,pSecurity_t>;
 using fSecurity_t = std::function<void(pSecurity_t)>;
+using fRetrievalDone_t = std::function<void()>;
 
 // ==========
 
@@ -363,13 +382,16 @@ public:
   ControlTickRetrieval(
     unsigned int nDays
   , fSecurity_t&& fSecurity
+  , fRetrievalDone_t&& fRetrievalDone
   )
   : m_nDays( nDays )
   , m_fSecurity( std::move( fSecurity ) )
+  , m_fRetrievalDone( std::move( fRetrievalDone ) )
   {
     assert( m_fSecurity );
+    assert( m_fRetrievalDone );
 
-    futureDone = promiseDone.get_future();
+    //futureDone = promiseDone.get_future();
     futureStart = promiseStart.get_future();
 
     for ( uint32_t count = 0; count < maxStarts; count++ ) {
@@ -395,17 +417,18 @@ public:
     StartRetrieval();
   }
 
-  void Wait() {
-    futureDone.wait();
-    auto result = futureDone.get();
-    assert( 2 == result );
-  }
+  //void Wait() {
+  //  futureDone.wait();
+  //  auto result = futureDone.get();
+  //  assert( 2 == result );
+  //}
 
 protected:
 private:
 
   unsigned int m_nDays;
   fSecurity_t m_fSecurity;
+  fRetrievalDone_t m_fRetrievalDone;
 
   std::mutex m_mutex;
 
@@ -418,8 +441,8 @@ private:
   std::promise<int> promiseStart;
   std::future<int> futureStart;
 
-  std::promise<int> promiseDone;
-  std::future<int> futureDone;
+  //std::promise<int> promiseDone;
+  //std::future<int> futureDone;
 
   mapSecurity_t m_mapSecurity_Waiting;
 
@@ -502,7 +525,8 @@ private:
         assert( 0 == m_mapSecurity_Waiting.size() );
         if ( maxStarts == m_vRetrieveTicks_Avail.size() ) {
           if ( 0 == m_mapRetrieveTicks.size() ) {
-            promiseDone.set_value( 2 );
+            //promiseDone.set_value( 2 );
+            m_fRetrievalDone();
           }
         }
       }
@@ -542,6 +566,10 @@ void StartRdaf( const std::string& sFileName ) {
 
 int main( int argc, char* argv[] ) {
 
+  std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
+  m_pWork
+    = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( context ) );
+
   struct StatsForBranch {
     double pe;
     size_t volume;
@@ -554,6 +582,9 @@ int main( int argc, char* argv[] ) {
     //const char name[6] = { "test1" };
     //const char market[6] = { "test2" };
 
+    std::string sSecurityName;
+    std::string sSecurityListedMarket;
+
     void Set(const Security& security ) {
       //name = security.sName.c_str();
       //market = security.sListedMarket.c_str();
@@ -563,15 +594,15 @@ int main( int argc, char* argv[] ) {
       liabilities = security.dblLiabilities;
       shares = security.dblCommonSharesOutstanding;
       ticks = security.nTicks;
+
+      sSecurityName = security.sName;
+      sSecurityListedMarket = security.sListedMarket;
     }
   } m_branchStatistics;
 
   TBranch* pBranchStatistics;
   TBranch* pBranchName;
   TBranch* pBranchMarket;
-
-  std::string sSecurityName;
-  std::string sSecurityListedMarket;
 
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
@@ -598,8 +629,8 @@ int main( int argc, char* argv[] ) {
           "statistics", &m_branchStatistics,
           "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l"
         );
-      pBranchName = m_pTreeStatistics->Branch( "name", &sSecurityName );
-      pBranchMarket = m_pTreeStatistics->Branch( "market", &sSecurityListedMarket );
+      pBranchName = m_pTreeStatistics->Branch( "name", &m_branchStatistics.sSecurityName );
+      pBranchMarket = m_pTreeStatistics->Branch( "market", &m_branchStatistics.sSecurityListedMarket );
     }
 
     using vSecurity_t = std::vector<pSecurity_t>;
@@ -609,7 +640,7 @@ int main( int argc, char* argv[] ) {
 
     ControlTickRetrieval control(
       choices.m_nDays,
-      [&vSecurity,&mutex,&m_branchStatistics]( pSecurity_t pSecurity ){ // finished securities
+      [&vSecurity,&mutex,&m_branchStatistics]( pSecurity_t pSecurity ){ // fSecurity_t, finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
         std::cout
@@ -621,9 +652,21 @@ int main( int argc, char* argv[] ) {
           //<< fundamentals.dbl52WkLo
           << security.nTicks
           << std::endl;
-        std::lock_guard<std::mutex> lock( mutex );
-        vSecurity.push_back( pSecurity );
-      });
+        context.post( // run in main thread
+          [pSecurity,&m_branchStatistics](){
+            pSecurity->RdafDirectory(); // set directory, flush, and remove from memory
+
+            m_branchStatistics.Set( *pSecurity );
+            m_pTreeStatistics->Fill();
+          }
+        );
+        //std::lock_guard<std::mutex> lock( mutex );
+        //vSecurity.push_back( pSecurity );
+      },
+      [&m_pWork](){ // fRetrievalDone_t
+        m_pWork.reset();
+      }
+      );
 
     Symbols symbols(
       choices.m_dblMinPrice
@@ -633,19 +676,23 @@ int main( int argc, char* argv[] ) {
       }
     );
 
-    control.Wait();
+    context.run();  // falls through when m_pWork reset
+
+    //control.Wait(); // this goes away, use the pwork reset instead
+
+    //m_pWork->reset();
 
     //m_pTreeStatistics->SetDirectory( m_pFile.get() );
-    for ( pSecurity_t pSecurity: vSecurity ) {
-      // Set directory in primary thread as file was created in this thread
-      pSecurity->RdafDirectory();
-      m_branchStatistics.Set( *pSecurity );
-      sSecurityName = pSecurity->sName;
-      sSecurityListedMarket = pSecurity->sListedMarket;
-      m_pTreeStatistics->Fill();
+//    for ( pSecurity_t pSecurity: vSecurity ) {
+//      // Set directory in primary thread as file was created in this thread
+//      pSecurity->RdafDirectory();
+//      m_branchStatistics.Set( *pSecurity );
+//      sSecurityName = pSecurity->sName;
+//      sSecurityListedMarket = pSecurity->sListedMarket;
+//      m_pTreeStatistics->Fill();
       //pSecurity->m_pTreeQuote->Write();
       //pSecurity->m_pTreeTrade->Write();
-    }
+//    }
 
     //m_pTreeStatistics->SetDirectory( m_pFile.get() );
 
@@ -655,16 +702,18 @@ int main( int argc, char* argv[] ) {
     //m_pTreeStatistics.reset();
 
     if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      m_pFile->Write();
       m_pFile->Flush();
+      m_pFile->Write();
       m_pFile->Close();
       m_pFile.reset();
     }
 
     if ( m_prdafApp ) {
-      m_prdafApp = nullptr;
+      m_prdafApp.reset();
     }
   }
+
+
 
   return 0;
 }
