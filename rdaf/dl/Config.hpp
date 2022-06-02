@@ -19,7 +19,7 @@
  * Created: May 29, 2022 19:07:15
  */
 
-#pragma once 
+#pragma once
 
 #include <vector>
 #include <string>
@@ -35,6 +35,7 @@ struct Choices {
 
   double m_dblMinPrice; // based upon 52 wk low
   unsigned int m_nDays;
+  unsigned int m_nSimultaneousRetrievals;
 
 };
 

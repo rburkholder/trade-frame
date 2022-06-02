@@ -34,6 +34,7 @@ namespace {
   static const std::string sChoice_SecurityType( "security_type" );
   static const std::string sChoice_MinimumPrice( "minimum_price" );
   static const std::string sChoice_NumberOfDays( "number_of_days" );
+  static const std::string sChoice_NumberOfRetrievals( "number_of_retrievals" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
@@ -64,6 +65,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       ( sChoice_SecurityType.c_str(), po::value<vName_t>( &choices.m_vSecurityType ), "security type" )
       ( sChoice_MinimumPrice.c_str(), po::value<double>( &choices.m_dblMinPrice ), "minimum price" )
       ( sChoice_NumberOfDays.c_str(), po::value<unsigned int>( &choices.m_nDays ), "number of days" )
+      ( sChoice_NumberOfRetrievals.c_str(), po::value<unsigned int>( &choices.m_nSimultaneousRetrievals ), "number of simultaneous retrievals" );
       ;
     po::variables_map vm;
 
@@ -80,6 +82,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, choices.m_vSecurityType );
       bOk &= parse<double>( sFileName, vm, sChoice_MinimumPrice, choices.m_dblMinPrice );
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfDays, choices.m_nDays );
+      bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfRetrievals, choices.m_nSimultaneousRetrievals );
 
     }
 

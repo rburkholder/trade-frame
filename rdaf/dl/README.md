@@ -11,6 +11,7 @@ exchange=NGSM
 security_type=EQUITY
 minimum_price=5.0
 number_of_days=1
+number_of_retrievals=5
 ```
 
 To read the string branches, something like:

@@ -371,10 +371,12 @@ class ControlTickRetrieval {
 public:
   ControlTickRetrieval(
     unsigned int nDays
+  , unsigned int nSimultaneousRetrievals
   , fSecurity_t&& fSecurity
   , fRetrievalDone_t&& fRetrievalDone
   )
   : m_nDays( nDays )
+  , m_nSimultaneousRetrievals( nSimultaneousRetrievals )
   , m_fSecurity( std::move( fSecurity ) )
   , m_fRetrievalDone( std::move( fRetrievalDone ) )
   {
@@ -384,19 +386,19 @@ public:
     //futureDone = promiseDone.get_future();
     futureStart = promiseStart.get_future();
 
-    for ( uint32_t count = 0; count < maxStarts; count++ ) {
+    for ( uint32_t count = 0; count < m_nSimultaneousRetrievals; count++ ) {
       m_vRetrieveTicks_Avail.emplace_back(
         std::make_shared<RetrieveTicks>(
           [this](){
             m_countStarted++;
-            if ( maxStarts == m_countStarted ) {
+            if ( m_nSimultaneousRetrievals == m_countStarted ) {
               promiseStart.set_value( 1 );
             }
           } )
         );
     }
     futureStart.wait();
-    assert( maxStarts == m_countStarted );  // assumes sync startup, use future/promise if async
+    assert( m_nSimultaneousRetrievals == m_countStarted );  // assumes sync startup, use future/promise if async
   }
 
   void Retrieve( pSecurity_t pSecurity ) {
@@ -411,12 +413,12 @@ protected:
 private:
 
   unsigned int m_nDays;
+  unsigned int m_nSimultaneousRetrievals;
   fSecurity_t m_fSecurity;
   fRetrievalDone_t m_fRetrievalDone;
 
   std::mutex m_mutex;
 
-  static const uint32_t maxStarts = 5;
   int m_countStarted {};
   using pRetrieveTicks_t = std::shared_ptr<RetrieveTicks>;
   using vRetrieveTicks_t = std::vector<pRetrieveTicks_t>;
@@ -504,7 +506,7 @@ private:
       }
       else {
         assert( 0 == m_mapSecurity_Waiting.size() );
-        if ( maxStarts == m_vRetrieveTicks_Avail.size() ) {
+        if ( m_nSimultaneousRetrievals == m_vRetrieveTicks_Avail.size() ) {
           if ( 0 == m_mapRetrieveTicks.size() ) {
             m_fRetrievalDone();
           }
@@ -609,6 +611,7 @@ int main( int argc, char* argv[] ) {
 
     ControlTickRetrieval control(
       choices.m_nDays,
+      choices.m_nSimultaneousRetrievals,
       [&m_branchStatistics,&m_context]( pSecurity_t pSecurity ){ // fSecurity_t, finished securities
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
