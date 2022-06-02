@@ -39,6 +39,8 @@ struct Fundamentals { // filled by TFIQFeed/Symbol.cpp
   int nFormatCode;
   int nContractSize;
   int nAverageVolume; // multiply by 1000, over four weeks
+  uint64_t nSIC;
+  uint64_t nNAICS;  // https://www.census.gov/naics/
   ESecurityType eSecurityType;
   ou::tf::OptionSide::EOptionSide eOptionSide;
   double dblHistoricalVolatility;
@@ -60,6 +62,7 @@ struct Fundamentals { // filled by TFIQFeed/Symbol.cpp
   boost::posix_time::time_duration timeSessionClose; // futures, futures options
   Fundamentals()
   : nAverageVolume {}, nPrecision {}, nFormatCode {}
+  , nSIC {}, nNAICS {}
   , eSecurityType( ESecurityType::Unknown )
   , dblHistoricalVolatility {}, dblStrikePrice {}
   , dblPriceEarnings {}, dblAssets {}, dblLiabilities {}

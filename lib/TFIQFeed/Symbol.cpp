@@ -57,6 +57,8 @@ void IQFeedSymbol::HandleFundamentalMessage(
   fundamentals.nFormatCode = pMsg->Integer( IQFFundamentalMessage::FFormatCode );
   fundamentals.nContractSize = pMsg->Integer( IQFFundamentalMessage::FContractSize );
   fundamentals.nAverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
+  fundamentals.nSIC = pMsg->Integer( IQFFundamentalMessage::FSIC );
+  fundamentals.nNAICS = pMsg->Integer( IQFFundamentalMessage::FNAICS );
   fundamentals.eSecurityType = fLookupSecurityType( pMsg->Integer( IQFFundamentalMessage::FSecurityType ) );
   fundamentals.dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
   fundamentals.dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );

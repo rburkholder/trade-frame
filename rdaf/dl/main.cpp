@@ -73,6 +73,8 @@ struct Security {
   double dblLiabilities;
   double dblCommonSharesOutstanding;
   size_t nTicks;
+  size_t nSIC;
+  size_t nNAICS;
 
   struct QuoteForBranch {
     double time;
@@ -102,6 +104,7 @@ struct Security {
   , dblAssets {}, dblLiabilities {}
   , dblCommonSharesOutstanding {}
   , nTicks {}
+  , nSIC {}, nNAICS {}
   {
   }
 
@@ -274,6 +277,8 @@ private:
                 security.nAverageVolume = fundamentals.nAverageVolume;
                 security.dblPriceEarnings = fundamentals.dblPriceEarnings;
                 security.dblCommonSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
+                security.nSIC = fundamentals.nSIC;
+                security.nNAICS = fundamentals.nNAICS;
 
                 security.RdafInit();
 
@@ -560,6 +565,8 @@ int main( int argc, char* argv[] ) {
     double liabilities;
     double shares;
     size_t ticks;
+    size_t sic;
+    size_t naics;
 
     std::string sSecurityName;
     std::string sSecurityListedMarket;
@@ -571,6 +578,8 @@ int main( int argc, char* argv[] ) {
       liabilities = security.dblLiabilities;
       shares = security.dblCommonSharesOutstanding;
       ticks = security.nTicks;
+      sic = security.nSIC;
+      naics = security.nNAICS;
 
       sSecurityName = security.sName;
       sSecurityListedMarket = security.sListedMarket;
@@ -604,7 +613,7 @@ int main( int argc, char* argv[] ) {
       pBranchStatistics
         = m_pTreeStatistics->Branch(
           "statistics", &m_branchStatistics,
-          "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l"
+          "pe/D:volume/l:assets/D:liabilities/D:shares/D:ticks/l:sic/l:naics/l"
         );
       pBranchName = m_pTreeStatistics->Branch( "name", &m_branchStatistics.sSecurityName );
       pBranchMarket = m_pTreeStatistics->Branch( "market", &m_branchStatistics.sSecurityListedMarket );
