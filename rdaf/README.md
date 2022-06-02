@@ -18,6 +18,9 @@ Some Document references:
 
 * https://root.cern/root/htmldoc/guides/users-guide/
 
+* Tutorial
+** https://agnieszkamucha.github.io/ParticlePhysics/Files/Tutorial-ROOT.pdf
+
 Some contrary comments on ROOT (from the cint days, not the recent cling):
 * http://insectnation.org/articles/basic-root.html
 * http://insectnation.org/articles/problems-with-root.html
