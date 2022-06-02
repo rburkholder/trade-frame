@@ -471,18 +471,19 @@ private:
             qfb.bid = tdp.Bid;
             qfb.bidvol = tdp.BidSize;
 
-            mid = ( tdp.Ask - tdp.Bid ) / 2.0;
+            mid = ( tdp.Ask + tdp.Bid ) / 2.0;
 
             pSecurity->m_pTreeQuote->Fill();
 
             Security::TradeForBranch& tfb( pSecurity->m_branchTrade );
 
             const double price = tdp.Last;
-            const uint64_t volume = tdp.TotalVolume;
+            const int64_t volume = tdp.TotalVolume;
 
             tfb.time = (double)nTime / 1000.0;
             tfb.price = price;
             tfb.vol = volume;
+
             if ( mid == price ) {
               tfb.direction = 0;
             }
