@@ -1,12 +1,12 @@
 ```
 $ cat x64/debug/rdaf/download.cfg
-exchange=NYSE
-exchange=NYSE_ARCA
-exchange=NYSE_AMERICAN
-exchange=NASDAQ
-exchange=NCM
-exchange=NGM
-exchange=NGSM
+#listed_market=NYSE
+#listed_market=NYSE_ARCA
+listed_market=NYSE_AMERICAN
+#listed_market=NASDAQ
+#Listed_market=NCM
+#listed_market=NGM
+#listed_market=NGSM
 
 security_type=EQUITY
 minimum_price=5.0

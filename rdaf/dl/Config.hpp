@@ -30,7 +30,7 @@ using vName_t = std::vector<std::string>; // program options won't work with std
 
 struct Choices {
 
-  vName_t m_vExchange;
+  vName_t m_vListedMarket;
   vName_t m_vSecurityType;
 
   double m_dblMinPrice; // based upon 52 wk low

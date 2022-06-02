@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_Exchange( "exchange" );
+  static const std::string sChoice_ListedMarket( "listed_market" );
   static const std::string sChoice_SecurityType( "security_type" );
   static const std::string sChoice_MinimumPrice( "minimum_price" );
   static const std::string sChoice_NumberOfDays( "number_of_days" );
@@ -61,7 +61,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "rdaf/dl config" );
     config.add_options()
-      ( sChoice_Exchange.c_str(), po::value<vName_t>( &choices.m_vExchange ), "exchange" )
+      ( sChoice_ListedMarket.c_str(), po::value<vName_t>( &choices.m_vListedMarket ), "listed market" )
       ( sChoice_SecurityType.c_str(), po::value<vName_t>( &choices.m_vSecurityType ), "security type" )
       ( sChoice_MinimumPrice.c_str(), po::value<double>( &choices.m_dblMinPrice ), "minimum price" )
       ( sChoice_NumberOfDays.c_str(), po::value<unsigned int>( &choices.m_nDays ), "number of days" )
@@ -78,7 +78,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<vName_t>( sFileName, vm, sChoice_Exchange, choices.m_vExchange );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_ListedMarket, choices.m_vListedMarket );
       bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, choices.m_vSecurityType );
       bOk &= parse<double>( sFileName, vm, sChoice_MinimumPrice, choices.m_dblMinPrice );
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfDays, choices.m_nDays );

@@ -52,7 +52,7 @@ namespace {
 
   static const std::string sDirectory( "rdaf/dl" );
 
-  setNames_t setExchanges;
+  setNames_t setListedMarket;
   setNames_t setSecurityTypes;
 
   std::unique_ptr<TRint> m_prdafApp;
@@ -197,7 +197,7 @@ private:
   void HandleConnected( int ) {
     //std::cout << "connected" << std::endl;
     m_piqfeed->SymbolList(
-      setExchanges, setSecurityTypes,
+      setListedMarket, setSecurityTypes,
       [this](const std::string& sSymbol, key_t keyListedMarket){
         //std::cout << sSymbol << std::endl;
         bool bGetFundamentals( false );
@@ -593,8 +593,8 @@ int main( int argc, char* argv[] ) {
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
 
-    for ( const config::vName_t::value_type& vt: choices.m_vExchange ) {
-      setExchanges.emplace( vt );
+    for ( const config::vName_t::value_type& vt: choices.m_vListedMarket ) {
+      setListedMarket.emplace( vt );
     }
 
     for ( const config::vName_t::value_type& vt: choices.m_vSecurityType ) {
