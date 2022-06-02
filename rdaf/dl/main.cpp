@@ -661,7 +661,7 @@ int main( int argc, char* argv[] ) {
     m_pTreeStatistics->FlushBaskets();
 
     if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      m_pFile->Flush();
+      //m_pFile->Flush();  // probably not needed.
       m_pFile->Write();
       m_pFile->Close();
       m_pFile.reset();
