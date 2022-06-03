@@ -19,7 +19,7 @@
  * Created: May 17, 2022 16:24
  */
 
- #include <functional>
+#include <functional>
 
 #include <OUCharting/ChartEntryMark.h>
 
