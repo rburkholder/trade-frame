@@ -100,7 +100,7 @@ public:
     const setNames_t& setExchangeFilter, const setNames_t& setSecurityTypeFilter,
     fSymbol_t&& fSymbol, fDone_t&& fDone
   ) {
-    m_pSymbolLookup->SymbolList( 
+    m_pSymbolLookup->SymbolList(
       setExchangeFilter, setSecurityTypeFilter,
       std::move( fSymbol ), std::move( fDone )
       );
@@ -403,10 +403,36 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'E':
       {
+        std::string str( iter, end );
+        std::cout << "IQFeed error message: '" << str << "'" << std::endl;
+
         IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
         msg->Assign( iter, end );
-        std::cout << "IQFeed error message: " << pBuffer << std::endl;
-        ErrorDone( pBuffer, msg );
+
+        if ( &IQFeed<T>::OnIQFeedErrorMessage != &T::OnIQFeedErrorMessage ) {
+          static_cast<T*>( this )->OnIQFeedErrorMessage( pBuffer, msg);
+        }
+        else {
+          ErrorDone( pBuffer, msg );
+        }
+
+      }
+      break;
+    case 'n':
+      {
+        std::string str( iter, end );
+        std::cout << "IQFeed symbol not found: '" << str << "'" << std::endl;
+
+        IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
+        msg->Assign( iter, end );
+
+        if ( &IQFeed<T>::OnIQFeedErrorMessage != &T::OnIQFeedErrorMessage ) {
+          static_cast<T*>( this )->OnIQFeedErrorMessage( pBuffer, msg);
+        }
+        else {
+          ErrorDone( pBuffer, msg );
+        }
+
       }
       break;
     default:
