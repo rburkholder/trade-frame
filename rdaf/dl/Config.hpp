@@ -32,6 +32,7 @@ struct Choices {
 
   vName_t m_vListedMarket;
   vName_t m_vSecurityType;
+  vName_t m_vIgnoreNames;
 
   double m_dblMinPrice; // based upon 52 wk low
   unsigned int m_nDays;

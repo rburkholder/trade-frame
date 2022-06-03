@@ -54,6 +54,7 @@ namespace {
 
   setNames_t setListedMarket;
   setNames_t setSecurityTypes;
+  setNames_t setIgnoreNames;
 
   std::unique_ptr<TRint> m_prdafApp;
   std::shared_ptr<TFile> m_pFile; // primary timeseries
@@ -173,6 +174,9 @@ public:
 
   }
 protected:
+
+
+setNames_t setIgnoreNames;
 private:
 
   double m_dblMinPrice;
@@ -200,17 +204,22 @@ private:
       setListedMarket, setSecurityTypes,
       [this](const std::string& sSymbol, key_t keyListedMarket){
         //std::cout << sSymbol << std::endl;
-        bool bGetFundamentals( false );
-        {
-          const std::string sListedMarket( m_piqfeed->ListedMarket( keyListedMarket ) );
-          std::lock_guard<std::mutex> lock( m_mutex );
-          m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, sListedMarket ) );
-          if ( nMaxInTransit > m_mapAcquire.size() ) {
-            bGetFundamentals = true;
-          }
-          countSymbols++;
+        if ( setIgnoreNames.end() != setIgnoreNames.find( sSymbol ) ) {
+          std::cout << "ignored " << sSymbol << std::endl;
         }
-        if (bGetFundamentals ) GetFundamentals();
+        else {
+          bool bGetFundamentals( false );
+          {
+            const std::string sListedMarket( m_piqfeed->ListedMarket( keyListedMarket ) );
+            std::lock_guard<std::mutex> lock( m_mutex );
+            m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, sListedMarket ) );
+            if ( nMaxInTransit > m_mapAcquire.size() ) {
+              bGetFundamentals = true;
+            }
+            countSymbols++;
+          }
+          if (bGetFundamentals ) GetFundamentals();
+        }
       },
       [this](){
         //std::cout << "added " << countSymbols << " symbols" << std::endl;
@@ -261,30 +270,34 @@ private:
         = ou::tf::AcquireFundamentals::Factory(
           std::move( pWatch ),
           [this,iterAcquire]( pWatch_t pWatch ){
+            if ( pWatch ) {
+              const Fundamentals& fundamentals( pWatch->GetFundamentals() );
+              Security& security( *iterAcquire->second.pSecurity.get() );
 
-            const Fundamentals& fundamentals( pWatch->GetFundamentals() );
-            Security& security( *iterAcquire->second.pSecurity.get() );
+              if ( 0 < fundamentals.dblCommonSharesOutstanding ) {
+                countNonZeroCommonShares++;
 
-            if ( 0 < fundamentals.dblCommonSharesOutstanding ) {
-              countNonZeroCommonShares++;
+                if ( m_dblMinPrice < fundamentals.dbl52WkLo ) {
 
-              if ( m_dblMinPrice < fundamentals.dbl52WkLo ) {
+                  countMinimumPrice++;
 
-                countMinimumPrice++;
+                  security.dblAssets = fundamentals.dblAssets;
+                  security.dblLiabilities = fundamentals.dblLiabilities;
+                  security.nAverageVolume = fundamentals.nAverageVolume;
+                  security.dblPriceEarnings = fundamentals.dblPriceEarnings;
+                  security.dblCommonSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
+                  security.nSIC = fundamentals.nSIC;
+                  security.nNAICS = fundamentals.nNAICS;
 
-                security.dblAssets = fundamentals.dblAssets;
-                security.dblLiabilities = fundamentals.dblLiabilities;
-                security.nAverageVolume = fundamentals.nAverageVolume;
-                security.dblPriceEarnings = fundamentals.dblPriceEarnings;
-                security.dblCommonSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
-                security.nSIC = fundamentals.nSIC;
-                security.nNAICS = fundamentals.nNAICS;
+                  security.RdafInit();
 
-                security.RdafInit();
-
-                pSecurity_t pSecurity = iterAcquire->second.pSecurity;
-                m_fSecurity( pSecurity );
+                  pSecurity_t pSecurity = iterAcquire->second.pSecurity;
+                  m_fSecurity( pSecurity );
+                }
               }
+            }
+            else {
+              std::cout << "GetFundamentals() error acquiring " << iterAcquire->first << std::endl;
             }
 
             m_pAcquireFundamentals_burial = std::move( iterAcquire->second.pAcquireFundamentals );
@@ -599,6 +612,11 @@ int main( int argc, char* argv[] ) {
 
     for ( const config::vName_t::value_type& vt: choices.m_vSecurityType ) {
       setSecurityTypes.emplace( vt );
+    }
+
+    for ( const config::vName_t::value_type& vt: choices.m_vIgnoreNames ) {
+      std::cout << "ignoring " << vt << std::endl;
+      setIgnoreNames.emplace( vt );
     }
 
     StartRdaf( "rdaf_dl" );

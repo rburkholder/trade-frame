@@ -32,20 +32,23 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_ListedMarket( "listed_market" );
   static const std::string sChoice_SecurityType( "security_type" );
+  static const std::string sChoice_IgnoreName( "ignore_name" );
   static const std::string sChoice_MinimumPrice( "minimum_price" );
   static const std::string sChoice_NumberOfDays( "number_of_days" );
   static const std::string sChoice_NumberOfRetrievals( "number_of_retrievals" );
 
   template<typename T>
-  bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, T& dest ) {
+  bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bOptional, T& dest ) {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
       //BOOST_LOG_TRIVIAL(info) << name << " = " << dest; // can't log a vector?
     }
     else {
-      BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
-      bOk = false;
+      if ( !bOptional ) {
+        BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
+        bOk = false;
+      }
     }
   return bOk;
   }
@@ -63,6 +66,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_ListedMarket.c_str(), po::value<vName_t>( &choices.m_vListedMarket ), "listed market" )
       ( sChoice_SecurityType.c_str(), po::value<vName_t>( &choices.m_vSecurityType ), "security type" )
+      ( sChoice_IgnoreName.c_str(), po::value<vName_t>( &choices.m_vIgnoreNames ) , "ignore names" )
       ( sChoice_MinimumPrice.c_str(), po::value<double>( &choices.m_dblMinPrice ), "minimum price" )
       ( sChoice_NumberOfDays.c_str(), po::value<unsigned int>( &choices.m_nDays ), "number of days" )
       ( sChoice_NumberOfRetrievals.c_str(), po::value<unsigned int>( &choices.m_nSimultaneousRetrievals ), "number of simultaneous retrievals" );
@@ -78,11 +82,12 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<vName_t>( sFileName, vm, sChoice_ListedMarket, choices.m_vListedMarket );
-      bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, choices.m_vSecurityType );
-      bOk &= parse<double>( sFileName, vm, sChoice_MinimumPrice, choices.m_dblMinPrice );
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfDays, choices.m_nDays );
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfRetrievals, choices.m_nSimultaneousRetrievals );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_ListedMarket, false, choices.m_vListedMarket );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, false, choices.m_vSecurityType );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_IgnoreName, true, choices.m_vIgnoreNames );
+      bOk &= parse<double>( sFileName, vm, sChoice_MinimumPrice, false, choices.m_dblMinPrice );
+      bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfDays, false, choices.m_nDays );
+      bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfRetrievals, false, choices.m_nSimultaneousRetrievals );
 
     }
 
