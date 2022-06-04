@@ -11,6 +11,7 @@ add_definitions(-pthread)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
+add_subdirectory(Alpaca)
 add_subdirectory(ArmsIndex)
 add_subdirectory(AutoTrade)
 add_subdirectory(BasketTrading)
