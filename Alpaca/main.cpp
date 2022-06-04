@@ -27,6 +27,8 @@
 
 #include <TFAlpaca/root_certificates.hpp>
 
+#include "Config.hpp"
+
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
@@ -52,8 +54,7 @@ class session : public std::enable_shared_from_this<session>
     http::response<http::string_body> res_;
 
 public:
-    explicit
-    session(
+    explicit session(
         net::any_io_executor ex,
         ssl::context& ctx)
     : resolver_(ex)
@@ -62,15 +63,16 @@ public:
     }
 
     // Start the asynchronous operation
-    void
-    run(
-        char const* host,
-        char const* port,
-        char const* target,
-        int version)
-    {
+    void run(
+        const std::string& sHost,
+        const std::string& sPort,
+        const std::string& sTarget,
+        int version,
+        const std::string& sAlpacaKey,
+        const std::string& sAlpacaSecret
+    ) {
         // Set SNI Hostname (many hosts need this to handshake successfully)
-        if(! SSL_set_tlsext_host_name(stream_.native_handle(), host))
+        if(! SSL_set_tlsext_host_name(stream_.native_handle(), sHost.c_str()))
         {
             beast::error_code ec{static_cast<int>(::ERR_get_error()), net::error::get_ssl_category()};
             std::cerr << ec.message() << "\n";
@@ -80,21 +82,22 @@ public:
         // Set up an HTTP GET request message
         req_.version(version);
         req_.method(http::verb::get);
-        req_.target(target);
-        req_.set(http::field::host, host);
+        req_.target(sTarget);
+        req_.set(http::field::host, sHost);
         req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        req_.set( "APCA-API-KEY-ID", sAlpacaKey );
+        req_.set( "APCA-API-SECRET-KEY", sAlpacaSecret );
 
         // Look up the domain name
         resolver_.async_resolve(
-            host,
-            port,
+            sHost,
+            sPort,
             beast::bind_front_handler(
                 &session::on_resolve,
                 shared_from_this()));
     }
 
-    void
-    on_resolve(
+    void on_resolve(
         beast::error_code ec,
         tcp::resolver::results_type results)
     {
@@ -203,19 +206,27 @@ public:
 int main(int argc, char** argv)
 {
     // Check command line arguments.
-    if(argc != 4 && argc != 5)
-    {
-        std::cerr <<
-            "Usage: http-client-async-ssl <host> <port> <target> [<HTTP version: 1.0 or 1.1(default)>]\n" <<
-            "Example:\n" <<
-            "    http-client-async-ssl www.example.com 443 /\n" <<
-            "    http-client-async-ssl www.example.com 443 / 1.0\n";
-        return EXIT_FAILURE;
-    }
-    auto const host = argv[1];
-    auto const port = argv[2];
-    auto const target = argv[3];
-    int version = argc == 5 && !std::strcmp("1.0", argv[4]) ? 10 : 11;
+//    if(argc != 4 && argc != 5)
+//    {
+//        std::cerr <<
+//            "Usage: http-client-async-ssl <host> <port> <target> [<HTTP version: 1.0 or 1.1(default)>]\n" <<
+//            "Example:\n" <<
+//            "    http-client-async-ssl www.example.com 443 /\n" <<
+//            "    http-client-async-ssl www.example.com 443 / 1.0\n";
+//        return EXIT_FAILURE;
+//    }
+    //auto const host = argv[1];
+    //auto const port = argv[2];
+    //auto const target = argv[3];
+
+    const std::string sVersion( "1.0" );
+    int version = argc == 5 && !std::strcmp("1.0", sVersion.c_str()) ? 10 : 11;
+
+    config::Choices choices;
+    config::Load( "alpaca.cfg", choices );
+
+    const std::string sPort( "443" );
+    const std::string sTarget( "/v2/assets/GLD" );
 
     // The io_context is required for all I/O
     net::io_context ioc;
@@ -235,7 +246,7 @@ int main(int argc, char** argv)
     std::make_shared<session>(
         net::make_strand(ioc),
         ctx
-        )->run(host, port, target, version);
+        )->run(choices.m_sAlpacaDomain, sPort, sTarget, version, choices.m_sAlpacaKey, choices.m_sAlpacaSecret);
 
     // Run the I/O service. The call will return when
     // the get operation is complete.

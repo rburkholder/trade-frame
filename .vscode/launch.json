@@ -10,6 +10,26 @@
   },
   "configurations": [
 
+    {
+      "name": "(gdb) Alpaca",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Alpaca/Alpaca",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
 
     {
       "name": "(gdb) BasketTrading",
