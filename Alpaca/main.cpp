@@ -20,10 +20,9 @@
 #include <iostream>
 #include <functional>
 
-
+#include <boost/beast/ssl.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 
 #include <boost/asio/strand.hpp>
@@ -94,6 +93,7 @@ class session : public std::enable_shared_from_this<session>
     beast::ssl_stream<beast::tcp_stream> stream_;
     beast::flat_buffer buffer_; // (Must persist between reads)
     http::request<http::empty_body> req_;
+    //http::request<http::string_body> req_;
     http::response<http::string_body> res_;
 
 public:
@@ -122,6 +122,17 @@ public:
           return;
       }
 
+      //json::value jv = {
+      //  { "status", "active" },
+      //  { "asset_class", "crypto" }
+      //};
+
+      //std::cout
+      //  << "request '"
+      //  << json::serialize( jv )
+      //  << "'"
+      //  << std::endl;
+
       // Set up an HTTP GET request message
       req_.version( version );
       req_.method( http::verb::get );
@@ -130,6 +141,8 @@ public:
       req_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
       req_.set( "APCA-API-KEY-ID", sAlpacaKey );
       req_.set( "APCA-API-SECRET-KEY", sAlpacaSecret );
+      //req_.body() = json::serialize( jv );
+      //req_.prepare_payload();
 
       // Look up the domain name
       resolver_.async_resolve(
@@ -214,15 +227,13 @@ public:
 
     //std::cout << res_.body() << std::endl;
 
-
-
     json::error_code ec2;
     json::value jv = json::parse( res_.body(), ec2 );
     if ( ec2.failed() ) {
       return fail( ec2, "parse" );
     }
 
-    //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) );
+    //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
     using vAsset_t = std::vector<alpaca::Asset>;
     vAsset_t vAsset = json::value_to<vAsset_t>( jv );
 
@@ -231,7 +242,10 @@ public:
         //<< vt.id << ","
         << vt.class_ << ","
         << vt.exchange << ","
-        << vt.symbol
+        << vt.symbol << ","
+        << "trade=" << vt.tradable << ","
+        << "short=" << vt.shortable << ","
+        << "margin=" << vt.marginable
         << std::endl;
     }
 
@@ -286,8 +300,9 @@ int main(int argc, char** argv)
     config::Load( "alpaca.cfg", choices );
 
     const std::string sPort( "443" );
+    //const std::string sTarget( "/v2/assets" );
     //const std::string sTarget( "/v2/assets/GLD" );
-    const std::string sTarget( "/v2/assets" );
+    const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
 
     // The io_context is required for all I/O
     net::io_context ioc;
