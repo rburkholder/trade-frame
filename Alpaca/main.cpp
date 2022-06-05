@@ -13,9 +13,10 @@
 //
 //------------------------------------------------------------------------------
 
-#include <cstdlib>
 #include <memory>
 #include <string>
+#include <vector>
+#include <cstdlib>
 #include <iostream>
 #include <functional>
 
@@ -71,11 +72,11 @@ namespace alpaca {
   Asset tag_invoke( json::value_to_tag<Asset>, json::value const& jv ) {
     Asset asset;
     json::object const& obj = jv.as_object();
-    extract( obj, asset.id, "id" );
-    extract( obj, asset.class_, "class" );
-    extract( obj, asset.exchange, "exchange" );
+    extract( obj, asset.id, "id" ); // uuid
+    extract( obj, asset.class_, "class" );  // us_equity or crypto
+    extract( obj, asset.exchange, "exchange" ); // AMEX, ARCA, BATS, NYSE, NASDAQ, NYSEARCA, OTC
     extract( obj, asset.symbol, "symbol" );
-    extract( obj, asset.status, "status" );
+    extract( obj, asset.status, "status" ); // active or inactive
     extract( obj, asset.tradable, "tradable" );
     extract( obj, asset.marginable, "marginable" );
     extract( obj, asset.shortable, "shortable" );
@@ -211,7 +212,7 @@ public:
     // Write the message to standard out
     //std::cout << res_ << std::endl;
 
-    std::cout << res_.body() << std::endl;
+    //std::cout << res_.body() << std::endl;
 
 
 
@@ -221,8 +222,20 @@ public:
       return fail( ec2, "parse" );
     }
 
-    alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) );
+    //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) );
+    using vAsset_t = std::vector<alpaca::Asset>;
+    vAsset_t vAsset = json::value_to<vAsset_t>( jv );
 
+    for ( const vAsset_t::value_type& vt: vAsset ) {
+      std::cout
+        //<< vt.id << ","
+        << vt.class_ << ","
+        << vt.exchange << ","
+        << vt.symbol
+        << std::endl;
+    }
+
+    std::cout << "found " << vAsset.size() << " assets" << std::endl;
 
     // Set a timeout on the operation
     beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
@@ -273,7 +286,8 @@ int main(int argc, char** argv)
     config::Load( "alpaca.cfg", choices );
 
     const std::string sPort( "443" );
-    const std::string sTarget( "/v2/assets/GLD" );
+    //const std::string sTarget( "/v2/assets/GLD" );
+    const std::string sTarget( "/v2/assets" );
 
     // The io_context is required for all I/O
     net::io_context ioc;
