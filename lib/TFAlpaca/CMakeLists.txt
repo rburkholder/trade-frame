@@ -9,10 +9,14 @@ PROJECT(TFAlpaca)
 set(
   file_h
     root_certificates.hpp
+    Provider.hpp
+    Asset.hpp
   )
 
 set(
   file_cpp
+    Provider.cpp
+    Asset.cpp
   )
 
 add_library(
