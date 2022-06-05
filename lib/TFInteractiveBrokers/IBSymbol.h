@@ -36,14 +36,14 @@ public:
   //IBSymbol( TickerId id, pInstrument_t pInstrument );
   Symbol( inherited_t::idSymbol_t, pInstrument_t pInstrument, TickerId id );
   Symbol( pInstrument_t pInstrument, TickerId id );
-  virtual ~Symbol(void);
+  virtual ~Symbol();
 
-  TickerId GetTickerId( void ) { return m_TickerId; };
+  TickerId GetTickerId() { return m_TickerId; };
 
   void Greeks( double optPrice, double undPrice, double pvDividend,
     double impliedVol, double delta, double gamma, double vega, double theta );
 
-  double OptionPrice( void ) { return m_dblOptionPrice; };
+  double OptionPrice() { return m_dblOptionPrice; };
 
 protected:
 
@@ -75,26 +75,24 @@ protected:
   double m_dblUnderlyingPrice;
   double m_dblPvDividend;
 
-  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
-  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
-  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
+  void SetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = true; };
+  void ResetQuoteTradeWatchInProgress() { m_bQuoteTradeWatchInProgress = false; };
+  bool GetQuoteTradeWatchInProgress() { return m_bQuoteTradeWatchInProgress; };
   bool m_bQuoteTradeWatchInProgress;
 
-  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
-  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
-  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
+  void SetDepthWatchInProgress() { m_bDepthWatchInProgress = true; };
+  void ResetDepthWatchInProgress() { m_bDepthWatchInProgress = false; };
+  bool GetDepthWatchInProgress() { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
   void AcceptTickPrice( TickType tickType, double price );
   void AcceptTickSize( TickType tickType, Decimal size );
   void AcceptTickString( TickType tickType, const std::string& value );
 
-  void BuildQuote( void );
-  void BuildTrade( void );
+  void BuildQuote();
+  void BuildTrade();
 
 private:
-
-  long m_conId;  // matches IB contract id
 
 };
 

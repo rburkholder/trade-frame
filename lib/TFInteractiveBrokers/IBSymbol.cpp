@@ -23,7 +23,7 @@ namespace ib { // Interactive Brokers
 Symbol::Symbol( inherited_t::idSymbol_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 :
   ou::tf::Symbol<Symbol>( pInstrument, idSym ),
-    m_TickerId( idTicker ), m_conId( 0 ),
+    m_TickerId( idTicker ),
     m_bAskFound( false ), m_bAskSizeFound( false ),
     m_bBidFound( false ), m_bBidSizeFound( false ),
     m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
@@ -40,7 +40,7 @@ Symbol::Symbol( inherited_t::idSymbol_t idSym, pInstrument_t pInstrument, Ticker
 Symbol::Symbol( pInstrument_t pInstrument, TickerId idTicker )
 :
   ou::tf::Symbol<Symbol>( pInstrument ),
-    m_TickerId( idTicker ), m_conId( 0 ),
+    m_TickerId( idTicker ),
     m_bAskFound( false ), m_bAskSizeFound( false ),
     m_bBidFound( false ), m_bBidSizeFound( false ),
     m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
