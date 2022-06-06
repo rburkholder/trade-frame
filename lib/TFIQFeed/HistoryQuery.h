@@ -92,13 +92,13 @@ namespace HistoryStructs {
     unsigned short Second;
     posix_time::ptime DateTime;
     double Last;
-    long  LastSize;
+    unsigned long LastSize;
     unsigned long TotalVolume;
     double Bid;
     double Ask;
     unsigned long TickID;
-    long BidSize;
-    long AskSize;
+    unsigned long BidSize;
+    unsigned long AskSize;
     char BasisForLast;  // 'C' normal, 'E' extended
   };
 
@@ -149,13 +149,13 @@ BOOST_FUSION_ADAPT_STRUCT(
   (unsigned short, Minute)
   (unsigned short, Second)
   (double, Last)
-  (long, LastSize)
+  (unsigned long, LastSize)
   (unsigned long, TotalVolume)
   (double, Bid)
   (double, Ask)
   (unsigned long, TickID)
-  (long, BidSize)
-  (long, AskSize)
+  (unsigned long, BidSize)
+  (unsigned long, AskSize)
   (char, BasisForLast)
   )
 
@@ -203,9 +203,9 @@ namespace HistoryStructs {
       start %=
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::long_   >> ',' >> qi::ulong_
+        >> ',' >> qi::double_ >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
         >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::ulong_
-        >> ',' >> qi::long_   >> ',' >> qi::long_   >> ',' >> ascii::char_
+        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_  >> ',' >> ascii::char_
         >> ','
         ;
     }
@@ -220,7 +220,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
         >> ',' >> qi::double_ >> ',' >> qi::double_
         >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_
+        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
         >> ','
         ;
     }
@@ -235,7 +235,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
         >> ',' >> qi::double_ >> ',' >> qi::double_
         >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_
+        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
         >> ','
         ;
     }
@@ -284,12 +284,12 @@ protected:
   using inherited_t = typename ou::Network<HistoryQuery<T> >;
   using linebuffer_t = typename inherited_t::linebuffer_t;
 
-  enum RetrievalState {  // activity in progress on this port 
+  enum RetrievalState {  // activity in progress on this port
     Idle = 0,  // no retrievals in progress
     RetrieveDataPoints,  // RequestID='D', data points are arriving
     RetrieveIntervals,  // RequestID='I', interval data is arriving
-    RetrieveEndOfDays,  // RequestID='E', eod data is arriving 
-    Done  // end marker arrived and is awaiting processing  
+    RetrieveEndOfDays,  // RequestID='E', eod data is arriving
+    Done  // end marker arrived and is awaiting processing
   } m_stateRetrieval;
 
   // called by Network via CRTP
