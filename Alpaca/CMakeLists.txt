@@ -79,6 +79,7 @@ target_link_libraries(
 #      OUCharting
 #      TFIndicators
       TFIQFeed
+      TFAlpaca
       TFTimeSeries
       TFTrading
       OUCommon
