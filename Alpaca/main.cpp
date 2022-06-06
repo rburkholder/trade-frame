@@ -33,12 +33,14 @@
 
 #include "Config.hpp"
 
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
-namespace json = boost::json;           // from <boost/json.hpp>
-using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+namespace json  = boost::json;      // from <boost/json.hpp>
+namespace asio  = boost::asio;      // from <boost/asio.hpp>
+namespace ssl   = asio::ssl;        // from <boost/asio/ssl.hpp>
+
+namespace beast = boost::beast;     // from <boost/beast.hpp>
+namespace http  = beast::http;      // from <boost/beast/http.hpp>
+
+using tcp = boost::asio::ip::tcp;   // from <boost/asio/ip/tcp.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -86,22 +88,27 @@ namespace alpaca {
 
 } // namespace asset
 
+// ====
+
+// re-use the stream?  use websocket instead then?
+// pass in command, body, and response processing?
+
 // Performs an HTTP GET and prints the response
 class session : public std::enable_shared_from_this<session>
 {
     tcp::resolver resolver_;
     beast::ssl_stream<beast::tcp_stream> stream_;
     beast::flat_buffer buffer_; // (Must persist between reads)
-    http::request<http::empty_body> req_;
+    http::request<http::empty_body> request_;
     //http::request<http::string_body> req_;
-    http::response<http::string_body> res_;
+    http::response<http::string_body> response_;
 
 public:
   explicit session(
-      net::any_io_executor ex,
-      ssl::context& ctx)
-  : resolver_(ex)
-  , stream_(ex, ctx)
+      asio::any_io_executor ex,
+      ssl::context& ssl_ctx)
+  : resolver_( ex )
+  , stream_( ex, ssl_ctx )
   {
   }
 
@@ -115,9 +122,9 @@ public:
       const std::string& sAlpacaSecret
   ) {
       // Set SNI Hostname (many hosts need this to handshake successfully)
-      if(! SSL_set_tlsext_host_name(stream_.native_handle(), sHost.c_str()))
+      if( !SSL_set_tlsext_host_name( stream_.native_handle(), sHost.c_str() ) )
       {
-          beast::error_code ec{static_cast<int>(::ERR_get_error()), net::error::get_ssl_category()};
+          beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
           std::cerr << ec.message() << "\n";
           return;
       }
@@ -134,13 +141,13 @@ public:
       //  << std::endl;
 
       // Set up an HTTP GET request message
-      req_.version( version );
-      req_.method( http::verb::get );
-      req_.target( sTarget );
-      req_.set( http::field::host, sHost );
-      req_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
-      req_.set( "APCA-API-KEY-ID", sAlpacaKey );
-      req_.set( "APCA-API-SECRET-KEY", sAlpacaSecret );
+      request_.version( version );
+      request_.method( http::verb::get );
+      request_.target( sTarget );
+      request_.set( http::field::host, sHost );
+      request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
+      request_.set( "APCA-API-KEY-ID", sAlpacaKey );
+      request_.set( "APCA-API-SECRET-KEY", sAlpacaSecret );
       //req_.body() = json::serialize( jv );
       //req_.prepare_payload();
 
@@ -150,87 +157,93 @@ public:
           sPort,
           beast::bind_front_handler(
               &session::on_resolve,
-              shared_from_this()));
+              shared_from_this() ) );
   }
 
   void on_resolve(
-      beast::error_code ec,
-      tcp::resolver::results_type results)
-  {
-      if(ec)
-          return fail(ec, "resolve");
+    beast::error_code ec,
+    tcp::resolver::results_type results
+  ) {
+    if ( ec )
+      return fail(ec, "resolve");
 
-      // Set a timeout on the operation
-      beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
+    // Set a timeout on the operation
+    beast::get_lowest_layer( stream_ ).expires_after( std::chrono::seconds( 15 ) );
 
-      // Make the connection on the IP address we get from a lookup
-      beast::get_lowest_layer(stream_).async_connect(
-          results,
-          beast::bind_front_handler(
-              &session::on_connect,
-              shared_from_this()));
+    // Make the connection on the IP address we get from a lookup
+    beast::get_lowest_layer( stream_ ).async_connect(
+      results,
+      beast::bind_front_handler(
+        &session::on_connect,
+        shared_from_this() )
+      );
   }
 
-  void on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type)
-  {
-      if(ec)
-          return fail(ec, "connect");
+  void on_connect( beast::error_code ec, tcp::resolver::results_type::endpoint_type ) {
+    if ( ec )
+      return fail(ec, "connect");
 
-      // Perform the SSL handshake
-      stream_.async_handshake(
-          ssl::stream_base::client,
-          beast::bind_front_handler(
-              &session::on_handshake,
-              shared_from_this()));
+    // Perform the SSL handshake
+    stream_.async_handshake(
+      ssl::stream_base::client,
+      beast::bind_front_handler(
+        &session::on_handshake,
+        shared_from_this()
+      )
+    );
   }
 
-  void on_handshake(beast::error_code ec)
-  {
-      if(ec)
-          return fail(ec, "handshake");
+  void on_handshake( beast::error_code ec ) {
 
-      // Set a timeout on the operation
-      beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
+    if ( ec )
+        return fail(ec, "handshake");
 
-      // Send the HTTP request to the remote host
-      http::async_write(stream_, req_,
-          beast::bind_front_handler(
-              &session::on_write,
-              shared_from_this()));
+    // Set a timeout on the operation
+    beast::get_lowest_layer( stream_ ).expires_after( std::chrono::seconds( 15 ) );
+
+    // Send the HTTP request to the remote host
+    http::async_write( stream_, request_,
+      beast::bind_front_handler(
+        &session::on_write,
+        shared_from_this()
+      )
+    );
   }
 
   void on_write(
-      beast::error_code ec,
-      std::size_t bytes_transferred)
-  {
-      boost::ignore_unused(bytes_transferred);
+    beast::error_code ec,
+    std::size_t bytes_transferred
+  ) {
+    boost::ignore_unused(bytes_transferred);
 
-      if(ec)
-          return fail(ec, "write");
+    if ( ec )
+      return fail( ec, "write" );
 
-      // Receive the HTTP response
-      http::async_read(stream_, buffer_, res_,
-          beast::bind_front_handler(
-              &session::on_read,
-              shared_from_this()));
+    // Receive the HTTP response
+    http::async_read(stream_, buffer_, response_,
+      beast::bind_front_handler(
+        &session::on_read,
+        shared_from_this()
+      )
+    );
   }
 
   void on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 
-    boost::ignore_unused(bytes_transferred);
+    boost::ignore_unused( bytes_transferred );
 
-    if(ec)
-        return fail(ec, "read");
+    if ( ec )
+      return fail(ec, "read");
 
     // Write the message to standard out
     //std::cout << res_ << std::endl;
 
     //std::cout << res_.body() << std::endl;
 
-    json::error_code ec2;
-    json::value jv = json::parse( res_.body(), ec2 );
-    if ( ec2.failed() ) {
-      return fail( ec2, "parse" );
+    json::error_code jec;
+    json::value jv = json::parse( response_.body(), jec );
+    if ( jec.failed() ) {
+      return fail( jec, "parse" );
     }
 
     //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
@@ -252,24 +265,25 @@ public:
     std::cout << "found " << vAsset.size() << " assets" << std::endl;
 
     // Set a timeout on the operation
-    beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
+    beast::get_lowest_layer( stream_ ).expires_after( std::chrono::seconds( 15 ) );
 
-    // Gracefully close the stream
+    // Gracefully close the stream - can the stream be re-used?
     stream_.async_shutdown(
-        beast::bind_front_handler(
-            &session::on_shutdown,
-            shared_from_this()));
+      beast::bind_front_handler(
+        &session::on_shutdown,
+        shared_from_this()
+      )
+    );
   }
 
-  void on_shutdown(beast::error_code ec) {
-    if(ec == net::error::eof)
-    {
+  void on_shutdown( beast::error_code ec ) {
+    if ( ec == asio::error::eof ) {
         // Rationale:
         // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
         ec = {};
     }
     if(ec)
-        return fail(ec, "shutdown");
+      return fail( ec, "shutdown" );
 
     // If we get here then the connection is closed gracefully
   }
@@ -277,7 +291,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-int main(int argc, char** argv)
+int main( int argc, char** argv )
 {
     // Check command line arguments.
 //    if(argc != 4 && argc != 5)
@@ -293,8 +307,9 @@ int main(int argc, char** argv)
     //auto const port = argv[2];
     //auto const target = argv[3];
 
-    const std::string sVersion( "1.0" );
-    int version = argc == 5 && !std::strcmp("1.0", sVersion.c_str()) ? 10 : 11;
+    //const std::string sVersion( "1.0" );
+    //int version = ( argc == 5 && !std::strcmp( "1.0", sVersion.c_str() ) ) ? 10 : 11;
+    int version = 11;
 
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
@@ -304,25 +319,25 @@ int main(int argc, char** argv)
     //const std::string sTarget( "/v2/assets/GLD" );
     const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
 
-    // The io_context is required for all I/O
-    net::io_context ioc;
-
     // The SSL context is required, and holds certificates
-    ssl::context ctx{ssl::context::tlsv12_client};
+    ssl::context ssl_ctx{ ssl::context::tlsv12_client };
 
     // This holds the root certificate used for verification
-    load_root_certificates(ctx);
+    load_root_certificates( ssl_ctx );
 
     // Verify the remote server's certificate
-    ctx.set_verify_mode(ssl::verify_peer);
+    ssl_ctx.set_verify_mode( ssl::verify_peer );
+
+    // The io_context is required for all I/O
+    asio::io_context ioc;
 
     // Launch the asynchronous operation
     // The session is constructed with a strand to
     // ensure that handlers do not execute concurrently.
     std::make_shared<session>(
-        net::make_strand(ioc),
-        ctx
-        )->run(choices.m_sAlpacaDomain, sPort, sTarget, version, choices.m_sAlpacaKey, choices.m_sAlpacaSecret);
+      asio::make_strand( ioc ),
+      ssl_ctx
+      )->run( choices.m_sAlpacaDomain, sPort, sTarget, version, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
 
     // Run the I/O service. The call will return when
     // the get operation is complete.
