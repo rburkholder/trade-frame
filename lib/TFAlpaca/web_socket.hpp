@@ -23,16 +23,12 @@
 
 #include <memory>
 #include <string>
-
-#include <boost/asio/strand.hpp>
+#include <functional>
 
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
 
 #include <boost/beast/websocket.hpp>
-#include <boost/beast/websocket/ssl.hpp>
 
 namespace asio  = boost::asio;      // from <boost/asio.hpp>
 namespace ssl   = asio::ssl;        // from <boost/asio/ssl.hpp>
@@ -52,51 +48,70 @@ namespace session {
 // Sends a WebSocket message and prints the response
 class web_socket : public std::enable_shared_from_this<web_socket>
 {
-  tcp::resolver resolver_;
-  websocket::stream<
-      beast::ssl_stream<beast::tcp_stream>> ws_;
-  beast::flat_buffer buffer_;
-  std::string host_;
-
-  std::string key_;
-  std::string secret_;
-
 public:
 
   // Resolver and socket require an io_context
-  explicit web_socket( asio::io_context& ioc, ssl::context& ssl_ctx );
+  explicit web_socket( asio::io_context&, ssl::context& );
+
+  using fConnected_t = std::function<void(bool)>;
 
   // Start the asynchronous operation
-  void run(
+  void connect(
     const std::string& host,
     const std::string& port,
     const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret
+    const std::string& sAlpacaSecret,
+    fConnected_t&&
   );
+  void disconnect();
+
+  void trade_updates( bool );
 
 private:
+
+  tcp::resolver m_resolver;
+  websocket::stream<
+      beast::ssl_stream<beast::tcp_stream>> m_ws;
+  beast::flat_buffer m_buffer;
+
+  std::string m_host;
+
+  std::string m_key;
+  std::string m_secret;
+
+  fConnected_t m_fConnected;
 
   void on_resolve(
     beast::error_code ec,
     tcp::resolver::results_type results
   );
 
-  void on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type ep );
+  void on_connect(beast::error_code, tcp::resolver::results_type::endpoint_type );
 
-  void on_ssl_handshake( beast::error_code ec );
-  void on_handshake(beast::error_code ec);
+  void on_ssl_handshake( beast::error_code );
+  void on_handshake( beast::error_code );
 
-  void on_write(
-    beast::error_code ec,
+  void on_write_auth(
+    beast::error_code,
     std::size_t bytes_transferred
   );
 
-  void on_read(
-      beast::error_code ec,
+  void on_read_auth(
+      beast::error_code,
       std::size_t bytes_transferred
   );
 
-  void on_close( beast::error_code ec );
+  void on_write_listen(
+    beast::error_code,
+    std::size_t bytes_transferred
+  );
+
+  void on_read_listen(
+      beast::error_code,
+      std::size_t bytes_transferred
+  );
+
+  void on_close( beast::error_code );
 
 };
 

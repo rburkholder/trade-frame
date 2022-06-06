@@ -20,6 +20,8 @@
 #include <iostream>
 #include <functional>
 
+#include <boost/asio/strand.hpp>
+
 #include <TFAlpaca/root_certificates.hpp>
 
 #include <TFAlpaca/one_shot.hpp>
@@ -70,15 +72,30 @@ int main( int argc, char** argv )
     // Launch the asynchronous operation
     // The session is constructed with a strand to
     // ensure that handlers do not execute concurrently.
-    std::make_shared<ou::tf::alpaca::session::one_shot>(
+    auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
       asio::make_strand( ioc ),
       ssl_ctx
-      )->run( choices.m_sAlpacaDomain, sPort, sTarget, version, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+      );
+    os->run(
+      choices.m_sAlpacaDomain, sPort,
+      sTarget,
+      version,
+      choices.m_sAlpacaKey, choices.m_sAlpacaSecret
+    );
 
-    std::make_shared<ou::tf::alpaca::session::web_socket>(
+    auto ws = std::make_shared<ou::tf::alpaca::session::web_socket>(
       ioc,
       ssl_ctx
-      )->run( choices.m_sAlpacaDomain, sPort, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+      );
+    ws->connect(
+      choices.m_sAlpacaDomain, sPort,
+      choices.m_sAlpacaKey, choices.m_sAlpacaSecret,
+      [ws](bool){
+        ws->trade_updates( true );
+        //ws->trade_updates( false );
+        //ws->disconnect();
+        }
+    );
 
     // Run the I/O service. The call will return when
     // the get operation is complete.
