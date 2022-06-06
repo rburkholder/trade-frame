@@ -90,11 +90,10 @@ namespace alpaca {
 
 // ====
 
-// re-use the stream?  use websocket instead then?
-// pass in command, body, and response processing?
+namespace session { // contains one_shot, and web_socket
 
 // Performs an HTTP GET and prints the response
-class session : public std::enable_shared_from_this<session>
+class one_shot : public std::enable_shared_from_this<one_shot>
 {
     tcp::resolver resolver_;
     beast::ssl_stream<beast::tcp_stream> stream_;
@@ -104,7 +103,7 @@ class session : public std::enable_shared_from_this<session>
     http::response<http::string_body> response_;
 
 public:
-  explicit session(
+  explicit one_shot(
       asio::any_io_executor ex,
       ssl::context& ssl_ctx)
   : resolver_( ex )
@@ -156,7 +155,7 @@ public:
           sHost,
           sPort,
           beast::bind_front_handler(
-              &session::on_resolve,
+              &one_shot::on_resolve,
               shared_from_this() ) );
   }
 
@@ -174,7 +173,7 @@ public:
     beast::get_lowest_layer( stream_ ).async_connect(
       results,
       beast::bind_front_handler(
-        &session::on_connect,
+        &one_shot::on_connect,
         shared_from_this() )
       );
   }
@@ -187,7 +186,7 @@ public:
     stream_.async_handshake(
       ssl::stream_base::client,
       beast::bind_front_handler(
-        &session::on_handshake,
+        &one_shot::on_handshake,
         shared_from_this()
       )
     );
@@ -204,7 +203,7 @@ public:
     // Send the HTTP request to the remote host
     http::async_write( stream_, request_,
       beast::bind_front_handler(
-        &session::on_write,
+        &one_shot::on_write,
         shared_from_this()
       )
     );
@@ -222,7 +221,7 @@ public:
     // Receive the HTTP response
     http::async_read(stream_, buffer_, response_,
       beast::bind_front_handler(
-        &session::on_read,
+        &one_shot::on_read,
         shared_from_this()
       )
     );
@@ -270,7 +269,7 @@ public:
     // Gracefully close the stream - can the stream be re-used?
     stream_.async_shutdown(
       beast::bind_front_handler(
-        &session::on_shutdown,
+        &one_shot::on_shutdown,
         shared_from_this()
       )
     );
@@ -288,6 +287,10 @@ public:
     // If we get here then the connection is closed gracefully
   }
 };
+
+
+} // namespace session
+
 
 //------------------------------------------------------------------------------
 
@@ -334,7 +337,7 @@ int main( int argc, char** argv )
     // Launch the asynchronous operation
     // The session is constructed with a strand to
     // ensure that handlers do not execute concurrently.
-    std::make_shared<session>(
+    std::make_shared<session::one_shot>(
       asio::make_strand( ioc ),
       ssl_ctx
       )->run( choices.m_sAlpacaDomain, sPort, sTarget, version, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
