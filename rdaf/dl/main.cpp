@@ -496,7 +496,7 @@ private:
             Security::TradeForBranch& tfb( pSecurity->m_branchTrade );
 
             const double price = tdp.Last;
-            const int64_t volume = tdp.TotalVolume;
+            const int64_t volume = tdp.LastSize;
 
             tfb.time = (double)nTime / 1000.0;
             tfb.price = price;
