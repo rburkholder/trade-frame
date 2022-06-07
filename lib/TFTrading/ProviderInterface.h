@@ -35,8 +35,6 @@
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
 
-// Store CInstrument in CSymbol<S>?  <= use this with smart_ptr on CInstrument.
-
 /*
 Discussion of calling sequence for open, quote, trade, depth handlers:
 * client application calls Provider to add a handler
@@ -150,11 +148,13 @@ public:
   }
 
   // strong suggestion: set prior to connect
-  //   affects context and optional thread usage (to be implemented
+  //   affects context and optional thread usage
   void SetThreadCount( size_t nThreads ) {
     assert( 0 < nThreads );
     m_nThreads = nThreads;
-    }
+  }
+
+  size_t GetThreadCount() const { return m_nThreads; }
 
 protected:
 
@@ -173,12 +173,12 @@ protected:
   size_t m_nThreads;
 
   boost::asio::io_context m_srvc; // threads for use in symbols
-  boost::asio::any_io_executor m_srvcWork;
-  boost::thread_group m_threads;
-
   OnSecurityDefinitionNotFoundHandler_t OnSecurityDefinitionNotFound;
 
 private:
+
+  boost::asio::any_io_executor m_srvcWork;
+  boost::thread_group m_threads;
 
 };
 
