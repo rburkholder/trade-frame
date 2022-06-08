@@ -313,7 +313,6 @@ void web_socket::on_read_listen(
 
 }
 
-
 void web_socket::disconnect() {
 
   // Close the WebSocket connection

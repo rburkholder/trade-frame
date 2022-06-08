@@ -71,7 +71,7 @@ private:
 
   tcp::resolver m_resolver;
   websocket::stream<
-      beast::ssl_stream<beast::tcp_stream>> m_ws;
+    beast::ssl_stream<beast::tcp_stream>> m_ws;
   beast::flat_buffer m_buffer;
 
   std::string m_host;
@@ -91,24 +91,26 @@ private:
   void on_ssl_handshake( beast::error_code );
   void on_handshake( beast::error_code );
 
+  // m_fConnected call back on completion - needs positive & negative calc
   void on_write_auth(
     beast::error_code,
     std::size_t bytes_transferred
   );
 
   void on_read_auth(
-      beast::error_code,
-      std::size_t bytes_transferred
+    beast::error_code,
+    std::size_t bytes_transferred
   );
 
+  // use callback for completion?
   void on_write_listen(
     beast::error_code,
     std::size_t bytes_transferred
   );
 
   void on_read_listen(
-      beast::error_code,
-      std::size_t bytes_transferred
+    beast::error_code,
+    std::size_t bytes_transferred
   );
 
   void on_close( beast::error_code );
