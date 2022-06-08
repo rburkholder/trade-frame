@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Symbol.hpp
+ * File:    Asset.cpp
  * Author:  raymond@burkholder.net
  * Project: lib/TFAlpaca
  * Created: June 5, 2022 16:08
@@ -25,29 +25,17 @@
 
 namespace json = boost::json;           // from <boost/json.hpp>
 
-namespace {
-
-// https://alpaca.markets/docs/api-references/trading-api/assets/
-struct AssetMessage {
-  std::string id;
-  std::string class_;
-  std::string exchange;
-  std::string symbol;
-  std::string status;
-  bool        tradable;
-  bool        marginable;
-  bool        shortable;
-  bool        easy_to_borrow;
-  bool        fractionable;
-};
+namespace ou {
+namespace tf {
+namespace alpaca {
 
 template<class T>
 void extract( json::object const& obj, T& t, json::string_view key ) {
     t = json::value_to<T>( obj.at( key ) );
 }
 
-AssetMessage tag_invoke( json::value_to_tag<AssetMessage>, json::value const& jv ) {
-  AssetMessage msg;
+ou::tf::alpaca::Asset::Message tag_invoke( json::value_to_tag<ou::tf::alpaca::Asset::Message>, json::value const& jv ) {
+  ou::tf::alpaca::Asset::Message msg;
   json::object const& obj = jv.as_object();
   extract( obj, msg.id, "id" ); // uuid
   extract( obj, msg.class_, "class" );  // us_equity or crypto
@@ -62,12 +50,6 @@ AssetMessage tag_invoke( json::value_to_tag<AssetMessage>, json::value const& jv
   return msg;
 }
 
-} // namespace anonymous
-
-namespace ou {
-namespace tf {
-namespace alpaca {
-
 Asset::Asset( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 : ou::tf::Symbol<Asset>( pInstrument, sSymbol )
 {
@@ -76,7 +58,24 @@ Asset::Asset( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 Asset::~Asset() {
 }
 
+void Asset::Decode( const std::string& sMessage, vMessage_t& vMessage ) {
+
+  json::error_code jec;
+  json::value jv = json::parse( sMessage, jec );
+  if ( jec.failed() ) {
+    std::cout << "failed to parse vector of Asset::Message" << std::endl;
+  }
+  else {
+
+    vMessage_t v;
+    //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
+    v = json::value_to<vMessage_t>( jv );
+  }
+}
 
 } // namespace alpaca
 } // namespace tf
 } // namespace ou
+
+// https://alpaca.markets/docs/api-references/broker-api/trading/orders/
+// https://alpaca.markets/docs/api-references/trading-api/orders/

@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Symbol.hpp
+ * File:    Asset.hpp
  * Author:  raymond@burkholder.net
  * Project: lib/TFAlpaca
  * Created: June 5, 2022 16:08
@@ -38,8 +38,25 @@ public:
   using inherited_t = ou::tf::Symbol<Asset>;
   using pInstrument_t = inherited_t::pInstrument_t;
 
+  // https://alpaca.markets/docs/api-references/trading-api/assets/
+  struct Message {
+    std::string id;
+    std::string class_;
+    std::string exchange;
+    std::string symbol;
+    std::string status;
+    bool        tradable;
+    bool        marginable;
+    bool        shortable;
+    bool        easy_to_borrow;
+    bool        fractionable;
+  };
+
   Asset( const std::string &sName, pInstrument_t pInstrument );
   virtual ~Asset();
+
+  using vMessage_t = std::vector<Message>;
+  static void Decode( const std::string&, vMessage_t& );
 
 protected:
 private:

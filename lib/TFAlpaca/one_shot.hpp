@@ -42,23 +42,17 @@ namespace alpaca {
 namespace session {
 
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/http/client/async-ssl/http_client_async_ssl.cpp
-class one_shot : public std::enable_shared_from_this<one_shot>
-{
-    tcp::resolver resolver_;
-    beast::ssl_stream<beast::tcp_stream> stream_;
-    beast::flat_buffer buffer_; // (Must persist between reads)
-    http::request<http::empty_body> request_;
-    //http::request<http::string_body> req_;
-    http::response<http::string_body> response_;
-
+class one_shot : public std::enable_shared_from_this<one_shot> {
 public:
 
   explicit one_shot(
     asio::any_io_executor ex,
     ssl::context& ssl_ctx
   );
+  virtual ~one_shot();
 
-  // Start the asynchronous operation
+  using fDone_t = std::function<void(bool,const std::string&)>; // false, not ok; true, fine
+
   void run(
     const std::string& sHost,
     const std::string& sPort,
@@ -68,22 +62,71 @@ public:
     const std::string& sAlpacaSecret
   );
 
+  void get(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    fDone_t&&
+  );
+
+  void post(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    const std::string& sBody,
+    fDone_t&&
+  );
+
+  void patch(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    const std::string& sBody,
+    fDone_t&&
+  );
+
+  void delete_(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    fDone_t&&
+  );
+
 private:
 
-  void on_resolve(
-    beast::error_code ec,
-    tcp::resolver::results_type results
-  );
+  tcp::resolver m_resolver;
+  beast::flat_buffer m_buffer; // (Must persist between reads)
+  beast::ssl_stream<beast::tcp_stream> m_stream;
 
-  void on_connect( beast::error_code ec, tcp::resolver::results_type::endpoint_type );
+  http::request<http::empty_body> m_request_empty; // one or the other
+  http::request<http::string_body> m_request_body; // one or the other
 
-  void on_handshake( beast::error_code ec );
+  http::response<http::string_body> m_response;
 
-  void on_write(
-    beast::error_code ec,
-    std::size_t bytes_transferred
-  );
-  void on_read( beast::error_code ec, std::size_t bytes_transferred );
+  using fWriteRequest_t = std::function<void()>;
+  fWriteRequest_t m_fWriteRequest;
+
+  fDone_t m_fDone;
+
+  void on_resolve( beast::error_code, tcp::resolver::results_type );
+
+  void on_connect( beast::error_code, tcp::resolver::results_type::endpoint_type );
+
+  void on_handshake( beast::error_code );
+
+  void write_empty();
+  void write_body();
+
+  void on_write( beast::error_code, std::size_t bytes_transferred );
+  void on_read( beast::error_code, std::size_t bytes_transferred );
 
   void on_shutdown( beast::error_code ec );
 
