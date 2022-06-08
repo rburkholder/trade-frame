@@ -47,7 +47,7 @@ int main( int argc, char** argv )
 
     //const std::string sVersion( "1.0" );
     //int version = ( argc == 5 && !std::strcmp( "1.0", sVersion.c_str() ) ) ? 10 : 11;
-    int version = 11;
+    static const int version = 11;
 
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
