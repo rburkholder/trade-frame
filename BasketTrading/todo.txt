@@ -1,0 +1,29 @@
+2020/11/17
+* roll a particular option
+* on expiry, remove from active duty
+  roll with no order
+* for expired options, remove with no order
+* will need account for assigned options
+
+* perform optimized leg oriented automation
+  * synthetic long:  roll up
+  * synthetic short: exit at 0.10
+  * covering short: exit at 0.10, on recovery to original, enter again?
+  * protective long: roll down, roll across, on recovery to original, enter again, keep original
+
+Therefore need to mark as to leg type, and apply appropriate algorithms
+
+Exit the whole thing on appropriate over all profit
+
+ie, extend one direction, then revert, then exit? or re-use some of the legs?
+
+At expiry:
+  * near options: roll forward
+  * far options: close out everything?
+
+* always have the 0.10 exit orders in place, in order to be first served
+  cancel at session end
+
+* at 0.10 on shorts, use that as location for new over-all entry?
+
+* state machine for tracking option roll
