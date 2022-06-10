@@ -36,12 +36,14 @@ void extract( json::object const& obj, T& t, json::string_view key ) {
     t = json::value_to<T>( obj.at( key ) );
 }
 
-Message_Request tag_invoke( json::value_to_tag<Message_Request>, json::value const& jv ) {
-  Message_Request msg;
+Order_Request tag_invoke( json::value_to_tag<Order_Request>, json::value const& jv ) {
+  Order_Request msg;
   json::object const& obj = jv.as_object();
   extract( obj, msg.symbol, "symbol" );
-  extract( obj, msg.quantity, "quantity" );
+  extract( obj, msg.quantity, "qty" );
   extract( obj, msg.notional, "notional" );
+  extract( obj, msg.side, "side" );
+  extract( obj, msg.type, "type" );
   extract( obj, msg.time_in_force, "time_in_force" );
   extract( obj, msg.limit_price, "limit_price" );
   extract( obj, msg.stop_price, "stop_price" );
@@ -52,7 +54,6 @@ Message_Request tag_invoke( json::value_to_tag<Message_Request>, json::value con
   extract( obj, msg.order_class, "order_class" );
   return msg;
 }
-
 
 } // namespace anonymous
 
