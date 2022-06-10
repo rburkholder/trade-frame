@@ -7,6 +7,7 @@
   "C_Cpp.errorSquiggles": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
   "C_Cpp.default.intelliSenseMode": "clang-x64",
+  "C_Cpp.codeAnalysis.runAutomatically": "false",
   "editor.tabSize": 2,
   "files.associations": {
     "*.ipp": "cpp"
