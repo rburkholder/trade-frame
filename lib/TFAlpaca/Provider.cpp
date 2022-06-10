@@ -19,15 +19,18 @@
  * Created: June 5, 2022 16:04
  */
 
-// TODO: obtain list of assets in background thread?
+#include <boost/json.hpp>
 
 #include <boost/asio/strand.hpp>
 
 #include "one_shot.hpp"
 #include "root_certificates.hpp"
 
-#include "Asset.cpp"
+#include "Asset.hpp"
+#include "Order.hpp"
 #include "Provider.hpp"
+
+namespace json = boost::json;           // from <boost/json.hpp>
 
 namespace ou {
 namespace tf {
@@ -106,7 +109,6 @@ void Provider::Connect() {
           std::cout << "found " << vMessage.size() << " assets" << std::endl;
 
         }
-
       }
     }
   );
@@ -120,6 +122,66 @@ Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
 
 void Provider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
+
+  const ou::tf::Order& order(*pOrder);
+  const ou::tf::Order::TableRowDef& trd( order.GetRow() );
+  json::object request;
+  request[ "symbol" ] = trd.idInstrument;
+  request[ "quantity" ] = trd.nOrderQuantity;
+  switch ( trd.eOrderSide ) {
+    case OrderSide::Buy:
+      request[ "side" ] = "buy";
+      break;
+    case OrderSide::Sell:
+      request[ "side" ] = "sell";
+      break;
+    default:
+      assert( false );
+      break;
+  }
+  switch ( trd.eOrderType ) {
+    case OrderType::Market:
+      request[ "type" ] = "market";
+      break;
+    case OrderType::Limit:
+      request[ "type" ] = "limit";
+      request[ "limit_price"] = trd.dblPrice1;
+      break;
+    case OrderType::Stop:
+      request[ "type" ] = "stop";
+      request[ "stop_price" ] = trd.dblPrice1;
+      break;
+    case OrderType::StopLimit:
+      request[ "type" ] = "stop_limit";
+      request[ "limit_price" ] = trd.dblPrice1;
+      request[ "stop_price"] = trd.dblPrice2;
+      break;
+    default:
+      assert( false );
+      break;
+  }
+  request[ "time_in_force" ] = "day";
+  request[ "client_order_id" ] = trd.idOrder;
+  request[ "order_class" ] = "simple";
+
+  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
+    asio::make_strand( m_srvc ),
+    m_ssl_context
+  );
+  os->post(
+    m_sHost, m_sPort,
+    m_sAlpacaKeyId, m_sAlpacaSecret,
+    "/v2/orders", json::serialize( request ),
+    []( bool bResult, const std::string& s ) {
+      if ( bResult ) {
+        std::cout << "place order error: " << s << std::endl;
+      }
+      else {
+        std::cout << "place order result: " << s << std::endl;
+      }
+
+    }
+  );
 }
 
 void Provider::CancelOrder( pOrder_t pOrder ) {

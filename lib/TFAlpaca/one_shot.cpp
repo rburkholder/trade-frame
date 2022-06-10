@@ -46,7 +46,8 @@ void fail( beast::error_code ec, char const* what ) {
 
 one_shot::one_shot(
   asio::any_io_executor ex,
-  ssl::context& ssl_ctx)
+  ssl::context& ssl_ctx
+)
 : m_resolver( ex )
 , m_stream( ex, ssl_ctx )
 , m_fWriteRequest( nullptr )
@@ -134,6 +135,53 @@ void one_shot::get(
   m_request_empty.set( sFieldAlpacaSecret, sAlpacaSecret );
 
   m_fWriteRequest = [this](){ write_empty(); };
+
+  // Look up the domain name
+  m_resolver.async_resolve(
+    sHost, sPort,
+    beast::bind_front_handler(
+      &one_shot::on_resolve,
+      shared_from_this()
+    )
+  );
+}
+
+void one_shot::post(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    const std::string& sBody,
+    fDone_t&& fDone
+) {
+
+  m_fDone = std::move( fDone );
+  assert( m_fDone );
+
+  // Set SNI Hostname (many hosts need this to handshake successfully)
+  if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
+  {
+      beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
+      std::cerr << ec.message() << "\n";
+      m_fDone( false, ec.message() );
+      return;
+  }
+
+  // Set up an HTTP GET request message
+  m_request_body.version( nVersion );
+  m_request_body.method( http::verb::post );
+  m_request_body.set( http::field::host, sHost );
+  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
+  m_request_body.set( http::field::user_agent, sUserAgent );
+
+  m_request_body.target( sTarget );
+  m_request_body.set( sFieldAlpacaKeyId, sAlpacaKey );
+  m_request_body.set( sFieldAlpacaSecret, sAlpacaSecret );
+
+  m_request_body.body() = sBody;
+
+  m_fWriteRequest = [this](){ write_body(); };
 
   // Look up the domain name
   m_resolver.async_resolve(
