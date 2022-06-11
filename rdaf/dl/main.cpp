@@ -94,10 +94,12 @@ struct Security {
 
   // https://root.cern/doc/master/classTTree.html
   pTTree_t m_pTreeQuote;
-  pTTree_t m_pTreeTrade;
-
   TBranch* pBranchQuote;
+  TBasket* pBasketQuote;
+
+  pTTree_t m_pTreeTrade;
   TBranch* pBranchTrade;
+  TBasket* pBasketTrade;
 
   Security( const std::string& sName_, const std::string& sListedMarket_ )
   : sName( sName_ ), sListedMarket( sListedMarket_ )
@@ -120,6 +122,7 @@ struct Security {
     else {
       pBranchQuote
         = m_pTreeQuote->Branch( "quote", &m_branchQuote, "time/D:ask/D:askvol/l:bid/D:bidvol/l" );
+      pBasketQuote = m_pTreeQuote->CreateBasket( pBranchQuote );
     }
 
     m_pTreeTrade = std::make_shared<TTree>(
@@ -131,6 +134,7 @@ struct Security {
     else {
       pBranchTrade
         = m_pTreeTrade->Branch( "trade", &m_branchTrade, "time/D:price/D:vol/l:direction/L" );
+      pBasketTrade = m_pTreeTrade->CreateBasket( pBranchTrade );
     }
   }
 
