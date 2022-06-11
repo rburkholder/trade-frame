@@ -21,9 +21,12 @@
 
 #include <boost/json.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <boost/asio/strand.hpp>
 
 #include "one_shot.hpp"
+#include "web_socket.hpp"
 #include "root_certificates.hpp"
 
 #include "Asset.hpp"
@@ -62,23 +65,30 @@ Provider::Provider( const std::string& sHost, const std::string& sKey, const std
 }
 
 Provider::~Provider() {
+  m_pTradeUpdates->trade_updates( false );
+  m_pTradeUpdates->disconnect();
 }
 
 void Provider::Connect() {
+
+  inherited_t::Connect();
+
+  // The session is constructed with a strand to
+  // ensure that handlers do not execute concurrently.
   auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
   os->get(
     m_sHost, m_sPort,
-    "/v2/assets",
     m_sAlpacaKeyId, m_sAlpacaSecret,
-    [this]( bool bStatus, const std::string& body ){
+    "/v2/assets",
+    [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
         // decode the body
 
         json::error_code jec;
-        json::value jv = json::parse( body, jec );
+        json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
           std::cout << "failed to parse /v2/assets" << std::endl;
         }
@@ -86,31 +96,46 @@ void Provider::Connect() {
           // Write the message to standard out
           //std::cout << res_ << std::endl;
 
-          std::cout << body << std::endl;
-
+          //std::cout << message << std::endl;
 
           //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
           //Asset::vMessage_t vMessage = json::value_to<Asset::vMessage_t>( jv );
           Asset::vMessage_t vMessage;
-          Asset::Decode( body, vMessage );
+          Asset::Decode( message, vMessage );
 
           for ( const Asset::vMessage_t::value_type& vt: vMessage ) {
-            std::cout
-              //<< vt.id << ","
-              << vt.class_ << ","
-              << vt.exchange << ","
-              << vt.symbol << ","
-              << "trade=" << vt.tradable << ","
-              << "short=" << vt.shortable << ","
-              << "margin=" << vt.marginable
-              << std::endl;
+            if ( "GLD" == vt.symbol ) {
+              std::cout
+                << vt.id << ","
+                << vt.class_ << ","
+                << vt.exchange << ","
+                << vt.symbol << ","
+                << "trade=" << vt.tradable << ","
+                << "short=" << vt.shortable << ","
+                << "margin=" << vt.marginable
+                << std::endl;
+            }
           }
 
           std::cout << "found " << vMessage.size() << " assets" << std::endl;
 
         }
       }
+      else {
+        std::cout << "one shot problems: " << message << std::endl;
+      }
     }
+  );
+
+  m_pTradeUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
+    m_srvc, m_ssl_context
+  );
+  m_pTradeUpdates->connect(
+    m_sHost, m_sPort,
+    m_sAlpacaKeyId, m_sAlpacaSecret,
+    [this] (bool ){
+      m_pTradeUpdates->trade_updates( true );
+      }
   );
 }
 
@@ -121,13 +146,15 @@ Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
 }
 
 void Provider::PlaceOrder( pOrder_t pOrder ) {
+
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
 
   const ou::tf::Order& order(*pOrder);
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
   json::object request;
-  request[ "symbol" ] = trd.idInstrument;
-  request[ "quantity" ] = trd.nOrderQuantity;
+  request[ "symbol" ] = "675f7911-9aca-418a-acd5-07cfacb9d32b"; //trd.idInstrument;
+  request[ "qty" ] = boost::lexical_cast<std::string>( trd.nOrderQuantity );
+  request[ "notional" ] = nullptr;
   switch ( trd.eOrderSide ) {
     case OrderSide::Buy:
       request[ "side" ] = "buy";
@@ -142,6 +169,10 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
   switch ( trd.eOrderType ) {
     case OrderType::Market:
       request[ "type" ] = "market";
+      //request[ "limit_price" ] = nullptr;
+      //request[ "stop_price" ] = nullptr;
+      //request[ "trail_price" ] = nullptr;
+      //request[ "trail_percent" ] = nullptr;
       break;
     case OrderType::Limit:
       request[ "type" ] = "limit";
@@ -161,23 +192,24 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
       break;
   }
   request[ "time_in_force" ] = "day";
-  request[ "client_order_id" ] = trd.idOrder;
+  //request[ "client_order_id" ] = "1";
   request[ "order_class" ] = "simple";
 
   auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
   );
+  std::cout << "order '" << json::serialize( request ) << "'" << std::endl;
   os->post(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/orders", json::serialize( request ),
     []( bool bResult, const std::string& s ) {
       if ( bResult ) {
-        std::cout << "place order error: " << s << std::endl;
+        std::cout << "place order result: " << s << std::endl;
       }
       else {
-        std::cout << "place order result: " << s << std::endl;
+        std::cout << "place order error: " << s << std::endl;
       }
 
     }

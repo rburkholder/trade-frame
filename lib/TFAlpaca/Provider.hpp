@@ -34,6 +34,10 @@ namespace ou {
 namespace tf {
 namespace alpaca {
 
+namespace session {
+  class web_socket;
+} // namespace session
+
 class Provider:
   public ProviderInterface<Provider, Asset>
 {
@@ -73,6 +77,10 @@ private:
   std::string m_sPort;
   std::string m_sAlpacaKeyId;
   std::string m_sAlpacaSecret;
+
+  using pTradeUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
+
+  pTradeUpdates_t m_pTradeUpdates;
 
 };
 

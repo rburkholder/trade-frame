@@ -22,10 +22,7 @@
 
 #include <boost/asio/strand.hpp>
 
-#include <TFAlpaca/root_certificates.hpp>
-
-#include <TFAlpaca/one_shot.hpp>
-#include <TFAlpaca/web_socket.hpp>
+#include <TFAlpaca/Provider.hpp>
 
 #include "Config.hpp"
 
@@ -53,53 +50,27 @@ int main( int argc, char** argv )
     config::Load( "alpaca.cfg", choices );
 
     const std::string sPort( "443" );
-    //const std::string sTarget( "/v2/assets" );
-    //const std::string sTarget( "/v2/assets/GLD" );
-    const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
+    //const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
 
-    // The SSL context is required, and holds certificates
-    ssl::context ssl_ctx{ ssl::context::tlsv12_client };
-
-    // This holds the root certificate used for verification
-    load_root_certificates( ssl_ctx );
-
-    // Verify the remote server's certificate
-    ssl_ctx.set_verify_mode( ssl::verify_peer );
-
-    // The io_context is required for all I/O
-    asio::io_context ioc;
-
-    // Launch the asynchronous operation
-    // The session is constructed with a strand to
-    // ensure that handlers do not execute concurrently.
-    auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
-      asio::make_strand( ioc ),
-      ssl_ctx
-      );
-    os->run(
-      choices.m_sAlpacaDomain, sPort,
-      sTarget,
-      version,
-      choices.m_sAlpacaKey, choices.m_sAlpacaSecret
+    auto pProvider = ou::tf::alpaca::Provider::Factory(
+      choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret
     );
+    pProvider->Connect();
 
-    auto ws = std::make_shared<ou::tf::alpaca::session::web_socket>(
-      ioc,
-      ssl_ctx
-      );
-    ws->connect(
-      choices.m_sAlpacaDomain, sPort,
-      choices.m_sAlpacaKey, choices.m_sAlpacaSecret,
-      [ws](bool){
-        ws->trade_updates( true );
-        //ws->trade_updates( false );
-        //ws->disconnect();
-        }
+    sleep( 4 );
+
+    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+    auto pInstrument = std::make_shared<ou::tf::Instrument>( "GLD" );
+    auto pOrder = std::make_shared<ou::tf::Order>(
+      pInstrument,
+      ou::tf::OrderType::Market,
+      ou::tf::OrderSide::Buy,
+      100
     );
+    pProvider->PlaceOrder( pOrder );
 
-    // Run the I/O service. The call will return when
-    // the get operation is complete.
-    ioc.run();
+    sleep( 20 );
 
     return EXIT_SUCCESS;
 }

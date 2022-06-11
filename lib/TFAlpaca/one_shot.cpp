@@ -174,12 +174,16 @@ void one_shot::post(
   m_request_body.set( http::field::host, sHost );
   //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_body.set( http::field::user_agent, sUserAgent );
+  //m_request_body.set( http::field::content_type, "application/json" );
 
   m_request_body.target( sTarget );
   m_request_body.set( sFieldAlpacaKeyId, sAlpacaKey );
   m_request_body.set( sFieldAlpacaSecret, sAlpacaSecret );
 
-  m_request_body.body() = sBody;
+  m_request_body.body() = sBody;// + "\n";
+  m_request_body.prepare_payload();
+
+  std::cout << m_request_body << std::endl;
 
   m_fWriteRequest = [this](){ write_body(); };
 
@@ -199,11 +203,13 @@ void one_shot::on_resolve(
 ) {
   if ( ec ) {
     fail( ec, "resolve");
-    m_fDone( false, "resolve" );
+    m_fDone( false, "os.resolve" );
   }
   else {
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
+
+    std::cout << "os.on_resolve" << std::endl;
 
     // Make the connection on the IP address we get from a lookup
     beast::get_lowest_layer( m_stream ).async_connect(
@@ -218,9 +224,12 @@ void one_shot::on_resolve(
 void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::endpoint_type et ) {
   if ( ec ) {
     fail( ec, "connect" );
-    m_fDone( false, "connect" );
+    m_fDone( false, "os.connect" );
   }
   else {
+
+    std::cout << "os.on_connect" << std::endl;
+
     // Perform the SSL handshake
     m_stream.async_handshake(
       ssl::stream_base::client,
@@ -235,10 +244,13 @@ void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::en
 void one_shot::on_handshake( beast::error_code ec ) {
 
   if ( ec ) {
-    fail( ec, "handshake" );
-    m_fDone( false, "handshake" );
+    fail( ec, "ssl_handshake" );
+    m_fDone( false, "os.ssl_handshake" );
   }
   else {
+
+    std::cout << "os.ssl_handshake" << std::endl;
+
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 
@@ -248,6 +260,9 @@ void one_shot::on_handshake( beast::error_code ec ) {
 }
 
 void one_shot::write_empty() {
+
+  std::cout << "os.write_empty" << std::endl;
+
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_empty,
     beast::bind_front_handler(
@@ -258,6 +273,9 @@ void one_shot::write_empty() {
 }
 
 void one_shot::write_body() {
+
+  std::cout << "os.write_body" << std::endl;
+
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_body,
     beast::bind_front_handler(
@@ -275,9 +293,12 @@ void one_shot::on_write(
 
   if ( ec ) {
     fail( ec, "write" );
-    m_fDone( false, "write" );
+    m_fDone( false, "os.write" );
   }
   else {
+
+    std::cout << "os.on_write" << std::endl;
+
     // Receive the HTTP response
     http::async_read(
       m_stream, m_buffer, m_response,
@@ -295,9 +316,12 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 
   if ( ec ) {
     fail( ec, "read" );
-    m_fDone( false, "read" );
+    m_fDone( false, "os.read" );
   }
   else {
+
+    std::cout << "os.on_read" << std::endl;
+
     m_fDone( true, m_response.body() );
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
@@ -313,13 +337,14 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 }
 
 void one_shot::on_shutdown( beast::error_code ec ) {
+  std::cout << "os.on_shutdown" << std::endl;
   if ( ec == asio::error::eof ) {
       // Rationale:
       // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
       ec = {};
   }
   if(ec)
-    return fail( ec, "shutdown" );
+    return fail( ec, "os.shutdown" );
 
   // If we get here then the connection is closed gracefully
 }
