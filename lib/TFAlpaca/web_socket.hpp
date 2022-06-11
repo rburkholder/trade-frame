@@ -52,6 +52,7 @@ public:
 
   // Resolver and socket require an io_context
   explicit web_socket( asio::io_context&, ssl::context& );
+  ~web_socket();
 
   using fConnected_t = std::function<void(bool)>;
 

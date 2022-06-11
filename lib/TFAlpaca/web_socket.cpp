@@ -52,7 +52,13 @@ void fail( beast::error_code ec, char const* what ) {
 web_socket::web_socket( asio::io_context& ioc, ssl::context& ssl_ctx )
   : m_resolver( asio::make_strand( ioc ) )
   , m_ws( asio::make_strand(ioc), ssl_ctx )
-{}
+{
+  std::cout << "alpaca::web_socket construction" << std::endl; // ensuring proper timing of handling
+}
+
+web_socket::~web_socket() {
+  std::cout << "alpaca::web_socket destruction" << std::endl; // ensuring proper timing of handling
+}
 
 // Start the asynchronous operation
 void web_socket::connect(
