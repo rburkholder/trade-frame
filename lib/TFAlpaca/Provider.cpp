@@ -152,7 +152,8 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
   const ou::tf::Order& order(*pOrder);
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
   json::object request;
-  request[ "symbol" ] = "675f7911-9aca-418a-acd5-07cfacb9d32b"; //trd.idInstrument;
+  //request[ "symbol" ] = "675f7911-9aca-418a-acd5-07cfacb9d32b"; //trd.idInstrument; GLD
+  request[ "symbol" ] = trd.idInstrument;
   request[ "qty" ] = boost::lexical_cast<std::string>( trd.nOrderQuantity );
   request[ "notional" ] = nullptr;
   switch ( trd.eOrderSide ) {
