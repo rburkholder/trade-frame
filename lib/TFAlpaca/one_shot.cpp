@@ -180,10 +180,10 @@ void one_shot::post(
   m_request_body.set( sFieldAlpacaKeyId, sAlpacaKey );
   m_request_body.set( sFieldAlpacaSecret, sAlpacaSecret );
 
-  m_request_body.body() = sBody;// + "\n";
+  m_request_body.body() = sBody;
   m_request_body.prepare_payload();
 
-  std::cout << m_request_body << std::endl;
+  //std::cout << m_request_body << std::endl;
 
   m_fWriteRequest = [this](){ write_body(); };
 
@@ -209,7 +209,7 @@ void one_shot::on_resolve(
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 
-    std::cout << "os.on_resolve" << std::endl;
+    //std::cout << "os.on_resolve" << std::endl;
 
     // Make the connection on the IP address we get from a lookup
     beast::get_lowest_layer( m_stream ).async_connect(
@@ -228,7 +228,7 @@ void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::en
   }
   else {
 
-    std::cout << "os.on_connect" << std::endl;
+    //std::cout << "os.on_connect" << std::endl;
 
     // Perform the SSL handshake
     m_stream.async_handshake(
@@ -249,7 +249,7 @@ void one_shot::on_handshake( beast::error_code ec ) {
   }
   else {
 
-    std::cout << "os.ssl_handshake" << std::endl;
+    //std::cout << "os.ssl_handshake" << std::endl;
 
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
@@ -261,7 +261,7 @@ void one_shot::on_handshake( beast::error_code ec ) {
 
 void one_shot::write_empty() {
 
-  std::cout << "os.write_empty" << std::endl;
+  //std::cout << "os.write_empty" << std::endl;
 
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_empty,
@@ -274,7 +274,7 @@ void one_shot::write_empty() {
 
 void one_shot::write_body() {
 
-  std::cout << "os.write_body" << std::endl;
+  //std::cout << "os.write_body" << std::endl;
 
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_body,
@@ -297,7 +297,7 @@ void one_shot::on_write(
   }
   else {
 
-    std::cout << "os.on_write" << std::endl;
+    //std::cout << "os.on_write" << std::endl;
 
     // Receive the HTTP response
     http::async_read(
@@ -320,7 +320,7 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
   }
   else {
 
-    std::cout << "os.on_read" << std::endl;
+    //std::cout << "os.on_read" << std::endl;
 
     m_fDone( true, m_response.body() );
     // Set a timeout on the operation
@@ -337,7 +337,7 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 }
 
 void one_shot::on_shutdown( beast::error_code ec ) {
-  std::cout << "os.on_shutdown" << std::endl;
+  //std::cout << "os.on_shutdown" << std::endl;
   if ( ec == asio::error::eof ) {
       // Rationale:
       // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error

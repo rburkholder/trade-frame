@@ -93,7 +93,7 @@ void web_socket::on_resolve(
   if ( ec )
     return fail(ec, "resolve");
   else {
-    std::cout << "ws.on_resolve" << std::endl;
+    //std::cout << "ws.on_resolve" << std::endl;
   }
 
   // Set a timeout on the operation
@@ -114,7 +114,7 @@ void web_socket::on_connect(beast::error_code ec, tcp::resolver::results_type::e
   if ( ec )
     return fail(ec, "connect");
   else {
-    std::cout << "ws.on_connect" << std::endl;
+    //std::cout << "ws.on_connect" << std::endl;
   }
 
   // Set a timeout on the operation
@@ -127,7 +127,7 @@ void web_socket::on_connect(beast::error_code ec, tcp::resolver::results_type::e
   ) {
     ec = beast::error_code(static_cast<int>(::ERR_get_error()),
         asio::error::get_ssl_category());
-    return fail(ec, "connect");
+    return fail( ec, "connect" );
   }
 
   // Update the host_ string. This will provide the value of the
@@ -150,7 +150,7 @@ void web_socket::on_ssl_handshake( beast::error_code ec ) {
   if ( ec )
     return fail( ec, "ssl_handshake" );
   else {
-    std::cout << "ws.on_ssl_handshake" << std::endl;
+    //std::cout << "ws.on_ssl_handshake" << std::endl;
   }
 
   // Turn off the timeout on the tcp_stream, because
@@ -187,7 +187,7 @@ void web_socket::on_handshake(beast::error_code ec) {
   if ( ec )
     return fail( ec, "handshake" );
   else {
-    std::cout << "ws.on_handshake" << std::endl;
+    //std::cout << "ws.on_handshake" << std::endl;
   }
 
   // https://alpaca.markets/deprecated/docs/api-documentation/api-v2/streaming/
@@ -223,7 +223,7 @@ void web_socket::on_write_auth(
   if ( ec )
     return fail( ec, "write" );
   else {
-    std::cout << "ws.on_write_auth" << std::endl;
+    //std::cout << "ws.on_write_auth" << std::endl;
   }
 
   // Read a message into our buffer
@@ -245,10 +245,10 @@ void web_socket::on_read_auth(
   if ( ec )
     return fail( ec, "read" );
   else {
-    std::cout << "ws.on_read_auth" << std::endl;
+    //std::cout << "ws.on_read_auth" << std::endl;
 
     // The make_printable() function helps print a ConstBufferSequence
-    std::cout << beast::make_printable( m_buffer.data() ) << std::endl;
+    std::cout << "ws.on_read_auth: " << beast::make_printable( m_buffer.data() ) << std::endl;
 
     if ( m_fConnected ) m_fConnected( true );
   }
@@ -266,7 +266,7 @@ void web_socket::trade_updates( bool bEnable ) {
     listen[ "data" ].emplace_object()[ "streams" ].emplace_array();
   }
 
-  std::cout << "listen: '" << listen << "'" << std::endl;
+  std::cout << "ws.listen: '" << listen << "'" << std::endl;
 
   // Send the message
   m_ws.async_write(
@@ -287,7 +287,7 @@ void web_socket::on_write_listen(
   if ( ec )
     return fail(ec, "write");
   else {
-    std::cout << "ws.on_write_listen" << std::endl;
+    //std::cout << "ws.on_write_listen" << std::endl;
   }
 
   // Read a message into our buffer
@@ -309,12 +309,12 @@ void web_socket::on_read_listen(
   if ( ec )
     return fail( ec, "read" );
   else {
-    std::cout << "ws.on_read_listen" << std::endl;
+    //std::cout << "ws.on_read_listen" << std::endl;
 
     //if ( m_fConnected ) m_fConnected( true );
 
     // The make_printable() function helps print a ConstBufferSequence
-    std::cout << beast::make_printable( m_buffer.data() ) << std::endl;
+    std::cout << "ws.on_read_listen: " << beast::make_printable( m_buffer.data() ) << std::endl;
   }
 
 }
