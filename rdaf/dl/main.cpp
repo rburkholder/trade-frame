@@ -111,6 +111,9 @@ struct Security {
   {
   }
 
+  ~Security() { // manually delete anything?  branches? baskets? or is that automatically performed via the shared_ptr
+  }
+
   void RdafInit() {
 
     m_pTreeQuote = std::make_shared<TTree>(
