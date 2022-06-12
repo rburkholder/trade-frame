@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <boost/asio/ssl.hpp>
 
 #include <TFTrading/ProviderInterface.h>
@@ -78,9 +80,11 @@ private:
   std::string m_sAlpacaKeyId;
   std::string m_sAlpacaSecret;
 
-  using pTradeUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
+  using pOrderUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
+  pOrderUpdates_t m_pOrderUpdates;
 
-  pTradeUpdates_t m_pTradeUpdates;
+  using mapAssetId_t = std::map<std::string,std::string>; // normal name, uuid
+  mapAssetId_t m_mapAssetId;
 
 };
 

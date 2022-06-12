@@ -65,8 +65,8 @@ Provider::Provider( const std::string& sHost, const std::string& sKey, const std
 }
 
 Provider::~Provider() {
-  m_pTradeUpdates->trade_updates( false );
-  m_pTradeUpdates->disconnect();
+  m_pOrderUpdates->trade_updates( false );
+  m_pOrderUpdates->disconnect();
 }
 
 void Provider::Connect() {
@@ -102,9 +102,9 @@ void Provider::Connect() {
           //Asset::vMessage_t vMessage = json::value_to<Asset::vMessage_t>( jv );
           Asset::vMessage_t vMessage;
           Asset::Decode( message, vMessage );
-
           for ( const Asset::vMessage_t::value_type& vt: vMessage ) {
-            if ( "GLD" == vt.symbol ) {
+/*
+            //if ( "GLD" == vt.symbol ) {
               std::cout
                 << vt.id << ","
                 << vt.class_ << ","
@@ -114,6 +114,14 @@ void Provider::Connect() {
                 << "short=" << vt.shortable << ","
                 << "margin=" << vt.marginable
                 << std::endl;
+            //}
+*/
+            mapAssetId_t::const_iterator iter = m_mapAssetId.find( vt.symbol );
+            if ( m_mapAssetId.end() != iter ) {
+              std::cout << "asset: " << vt.symbol << " already exists with " << iter->second << std::endl;
+            }
+            else {
+              m_mapAssetId[ vt.symbol ] = vt.id;
             }
           }
 
@@ -127,16 +135,18 @@ void Provider::Connect() {
     }
   );
 
-  m_pTradeUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
+  m_pOrderUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
     m_srvc, m_ssl_context
   );
-  m_pTradeUpdates->connect(
+  m_pOrderUpdates->connect(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     [this] (bool ){
-      m_pTradeUpdates->trade_updates( true );
+      m_pOrderUpdates->trade_updates( true );
       }
   );
+
+  // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );
 }
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
