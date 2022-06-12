@@ -116,6 +116,8 @@ struct Security {
 
   void RdafInit() {
 
+    // https://root.cern.ch/doc/master/classTTree.html
+
     m_pTreeQuote = std::make_shared<TTree>(
       ( sName + "_quotes" ).c_str(), ( sName + " quotes" ).c_str(), 99, m_pFile.get()
     );
@@ -180,10 +182,11 @@ public:
     std::cout << countSymbols << " symbols processed"  << std::endl;
 
   }
+
 protected:
 
+  setNames_t setIgnoreNames;
 
-setNames_t setIgnoreNames;
 private:
 
   double m_dblMinPrice;
@@ -467,6 +470,10 @@ private:
 
   void StartRetrieval() {
     std::lock_guard<std::mutex> lock( m_mutex );
+    //std::cout << "StartRetrieval: "
+    //  << m_vRetrieveTicks_Avail.size()
+    //  << "," << m_mapSecurity_Waiting.size()
+    //  << std::endl;
     if ( 0 < m_vRetrieveTicks_Avail.size() ) {
       if ( 0 < m_mapSecurity_Waiting.size() ) {
 
@@ -485,7 +492,6 @@ private:
 
             pSecurity->nTicks++;
 
-            double mid {};
             std::time_t nTime = boost::posix_time::to_time_t( tdp.DateTime );
 
             Security::QuoteForBranch& qfb( pSecurity->m_branchQuote );
@@ -496,7 +502,7 @@ private:
             qfb.bid = tdp.Bid;
             qfb.bidvol = tdp.BidSize;
 
-            mid = ( tdp.Ask + tdp.Bid ) / 2.0;
+            const double mid = ( tdp.Ask + tdp.Bid ) / 2.0;
 
             pSecurity->m_pTreeQuote->Fill();
 
@@ -644,6 +650,8 @@ int main( int argc, char* argv[] ) {
       pBranchMarket = m_pTreeStatistics->Branch( "market", &m_branchStatistics.sSecurityListedMarket );
     }
 
+    bool bSelectionComplete( false );
+
     ControlTickRetrieval control(
       choices.m_nDays,
       choices.m_nSimultaneousRetrievals,
@@ -668,8 +676,10 @@ int main( int argc, char* argv[] ) {
           }
         );
       },
-      [&m_pWork](){ // fRetrievalDone_t
-        m_pWork.reset();
+      [&m_pWork,&bSelectionComplete](){ // fRetrievalDone_t
+        if ( bSelectionComplete ) {
+          m_pWork.reset();
+        }
       }
       );
 
@@ -680,6 +690,8 @@ int main( int argc, char* argv[] ) {
         control.Retrieve( pSecurity );
       }
     );
+
+    bSelectionComplete = true; // symbol selection is complete
 
     m_context.run();  // falls through when m_pWork reset
 
