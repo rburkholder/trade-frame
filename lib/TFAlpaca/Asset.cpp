@@ -67,9 +67,8 @@ void Asset::Decode( const std::string& sMessage, vMessage_t& vMessage ) {
   }
   else {
 
-    vMessage_t v;
     //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
-    v = json::value_to<vMessage_t>( jv );
+    vMessage = json::value_to<vMessage_t>( jv );
   }
 }
 
