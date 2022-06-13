@@ -37,6 +37,8 @@ namespace session {
 
 namespace {
 
+const static std::string sUserAgent( "ounl.tradeframe/1.0" );
+
 // Report a failure
 void fail( beast::error_code ec, char const* what ) {
   std::cerr << what << ": " << ec.message() << "\n";
@@ -171,8 +173,7 @@ void web_socket::on_ssl_handshake( beast::error_code ec ) {
     []( websocket::request_type& request )
     {
       request.set(http::field::user_agent,
-          std::string(BOOST_BEAST_VERSION_STRING) +
-              " websocket-client-async-ssl");
+        std::string( sUserAgent ) + " websocket-client-async-ssl");
     })
   );
 
