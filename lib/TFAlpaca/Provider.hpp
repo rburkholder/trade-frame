@@ -83,7 +83,16 @@ private:
   using pOrderUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
   pOrderUpdates_t m_pOrderUpdates;
 
-  using mapAssetId_t = std::map<std::string,std::string>; // normal name, uuid
+  struct AssetMatch {
+    std::string sId;
+    std::string sClass;
+    std::string sExchange;
+    AssetMatch() {};
+    AssetMatch( const std::string& sId_, const std::string& sClass_, const std::string& sExchange_ )
+    : sId( sId_ ), sClass( sClass_ ), sExchange( sExchange_ ) {}
+  };
+
+  using mapAssetId_t = std::map<std::string,AssetMatch>; // normal name, uuid
   mapAssetId_t m_mapAssetId;
 
 };

@@ -75,11 +75,11 @@ void Provider::Connect() {
 
   // The session is constructed with a strand to
   // ensure that handlers do not execute concurrently.
-  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
+  auto osList = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  os->get(
+  osList->get(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/assets",
@@ -100,6 +100,7 @@ void Provider::Connect() {
 
           //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
           //Asset::vMessage_t vMessage = json::value_to<Asset::vMessage_t>( jv );
+          size_t nIdMisMatch {};
           Asset::vMessage_t vMessage;
           Asset::Decode( message, vMessage );
           for ( const Asset::vMessage_t::value_type& vt: vMessage ) {
@@ -116,9 +117,29 @@ void Provider::Connect() {
                 << std::endl;
             //}
 */
+            mapAssetId_t::const_iterator iter = m_mapAssetId.find( vt.symbol );
+            if ( m_mapAssetId.end() != iter ) {
+              const AssetMatch& am( iter->second );
+              if ( ( am.sClass != vt.class_ ) && ( am.sExchange != vt.exchange ) ) {
+                std::cout
+                  << "asset exists: "
+                  << vt.symbol
+                  << "," << iter->second.sClass << "," << vt.class_
+                  << "," << iter->second.sExchange << "," << vt.exchange
+                  << "," << iter->second.sId << "," << vt.id
+                  << std::endl;
+              }
+              ++nIdMisMatch;
+            }
+            else {
+              m_mapAssetId.emplace( vt.symbol, AssetMatch( vt.id, vt.class_, vt.exchange ) );
+            }
           }
 
-          std::cout << "found " << vMessage.size() << " assets" << std::endl;
+          std::cout
+            << "found " << vMessage.size() << " assets, "
+            << nIdMisMatch << " duplicated"
+            << std::endl;
 
         }
       }
