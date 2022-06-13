@@ -262,6 +262,7 @@ void web_socket::on_read_auth(
 
     if ( m_fConnected ) m_fConnected( true );
     if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
+    m_buffer.clear();
 
     // wait for more reads
     m_ws.async_read(
@@ -286,7 +287,7 @@ void web_socket::trade_updates( bool bEnable ) {
     listen[ "data" ].emplace_object()[ "streams" ].emplace_array();
   }
 
-  std::cout << "ws.listen: '" << listen << "'" << std::endl;
+  //std::cout << "ws.listen: '" << listen << "'" << std::endl;
 
   // Send the message
   m_ws.async_write(
@@ -339,6 +340,7 @@ void web_socket::on_read_listen(
     //std::cout << "ws.on_read_listen: " << sMessage << std::endl;
 
     if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
+    m_buffer.clear();
 
     if ( m_bConnected ) {
       // wait for more reads
