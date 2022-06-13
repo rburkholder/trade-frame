@@ -202,8 +202,8 @@ void one_shot::on_resolve(
   tcp::resolver::results_type results
 ) {
   if ( ec ) {
-    fail( ec, "resolve");
-    m_fDone( false, "os.resolve" );
+    fail( ec, "os.on_resolve");
+    m_fDone( false, "os.on_resolve" );
   }
   else {
     // Set a timeout on the operation
@@ -223,8 +223,8 @@ void one_shot::on_resolve(
 
 void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::endpoint_type et ) {
   if ( ec ) {
-    fail( ec, "connect" );
-    m_fDone( false, "os.connect" );
+    fail( ec, "os.on_connect" );
+    m_fDone( false, "os.on_connect" );
   }
   else {
 
@@ -244,8 +244,8 @@ void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::en
 void one_shot::on_handshake( beast::error_code ec ) {
 
   if ( ec ) {
-    fail( ec, "ssl_handshake" );
-    m_fDone( false, "os.ssl_handshake" );
+    fail( ec, "os.on_handshake" );
+    m_fDone( false, "os.on_handshake" );
   }
   else {
 
@@ -292,8 +292,8 @@ void one_shot::on_write(
   boost::ignore_unused(bytes_transferred);
 
   if ( ec ) {
-    fail( ec, "write" );
-    m_fDone( false, "os.write" );
+    fail( ec, "os.on_write" );
+    m_fDone( false, "os.on_write" );
   }
   else {
 
@@ -315,8 +315,8 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
   boost::ignore_unused( bytes_transferred );
 
   if ( ec ) {
-    fail( ec, "read" );
-    m_fDone( false, "os.read" );
+    fail( ec, "os.on_read" );
+    m_fDone( false, "os.on_read" );
   }
   else {
 
