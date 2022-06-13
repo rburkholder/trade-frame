@@ -50,7 +50,8 @@ void fail( beast::error_code ec, char const* what ) {
 
 // Resolver and socket require an io_context
 web_socket::web_socket( asio::io_context& ioc, ssl::context& ssl_ctx )
-  : m_resolver( asio::make_strand( ioc ) )
+  : m_bConnected( false )
+  , m_resolver( asio::make_strand( ioc ) )
   , m_ws( asio::make_strand(ioc), ssl_ctx )
 {
   std::cout << "alpaca::web_socket construction" << std::endl; // ensuring proper timing of handling
@@ -67,13 +68,15 @@ void web_socket::connect(
 , const std::string& sAlpacaKey
 , const std::string& sAlpacaSecret
 , fConnected_t&& fConnected
+, fMessage_t&& fMessage
 ) {
-  // Save these for later
   m_host = host;
-  m_fConnected = std::move( fConnected );
 
   m_key = sAlpacaKey;
   m_secret = sAlpacaSecret;
+
+  m_fConnected = std::move( fConnected );
+  m_fMessage = std::move( fMessage );
 
   // Look up the domain name
   m_resolver.async_resolve(
@@ -91,7 +94,7 @@ void web_socket::on_resolve(
   tcp::resolver::results_type results
 ) {
   if ( ec )
-    return fail(ec, "resolve");
+    return fail(ec, "ws.on_resolve");
   else {
     //std::cout << "ws.on_resolve" << std::endl;
   }
@@ -112,7 +115,7 @@ void web_socket::on_resolve(
 void web_socket::on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type ep ) {
 
   if ( ec )
-    return fail(ec, "connect");
+    return fail(ec, "ws.on_connect 1");
   else {
     //std::cout << "ws.on_connect" << std::endl;
   }
@@ -127,7 +130,7 @@ void web_socket::on_connect(beast::error_code ec, tcp::resolver::results_type::e
   ) {
     ec = beast::error_code(static_cast<int>(::ERR_get_error()),
         asio::error::get_ssl_category());
-    return fail( ec, "connect" );
+    return fail( ec, "ws.on_connect 2" );
   }
 
   // Update the host_ string. This will provide the value of the
@@ -148,7 +151,7 @@ void web_socket::on_connect(beast::error_code ec, tcp::resolver::results_type::e
 void web_socket::on_ssl_handshake( beast::error_code ec ) {
 
   if ( ec )
-    return fail( ec, "ssl_handshake" );
+    return fail( ec, "ws.on_ssl_handshake" );
   else {
     //std::cout << "ws.on_ssl_handshake" << std::endl;
   }
@@ -164,17 +167,18 @@ void web_socket::on_ssl_handshake( beast::error_code ec ) {
     );
 
   // Set a decorator to change the User-Agent of the handshake
-  m_ws.set_option(websocket::stream_base::decorator(
-    [](websocket::request_type& request )
+  m_ws.set_option( websocket::stream_base::decorator(
+    []( websocket::request_type& request )
     {
-        request.set(http::field::user_agent,
-            std::string(BOOST_BEAST_VERSION_STRING) +
-                " websocket-client-async-ssl");
+      request.set(http::field::user_agent,
+          std::string(BOOST_BEAST_VERSION_STRING) +
+              " websocket-client-async-ssl");
     })
   );
 
   // Perform the websocket handshake
-  m_ws.async_handshake( m_host, "/stream",
+  m_ws.async_handshake(
+    m_host, "/stream",
     beast::bind_front_handler(
       &web_socket::on_handshake,
       shared_from_this()
@@ -182,10 +186,10 @@ void web_socket::on_ssl_handshake( beast::error_code ec ) {
   );
 }
 
-void web_socket::on_handshake(beast::error_code ec) {
+void web_socket::on_handshake( beast::error_code ec ) {
 
   if ( ec )
-    return fail( ec, "handshake" );
+    return fail( ec, "ws.on_handshake" );
   else {
     //std::cout << "ws.on_handshake" << std::endl;
   }
@@ -221,7 +225,7 @@ void web_socket::on_write_auth(
   boost::ignore_unused(bytes_transferred);
 
   if ( ec )
-    return fail( ec, "write" );
+    return fail( ec, "ws.on_write_auth" );
   else {
     //std::cout << "ws.on_write_auth" << std::endl;
   }
@@ -237,20 +241,35 @@ void web_socket::on_write_auth(
 }
 
 void web_socket::on_read_auth(
-    beast::error_code ec,
-    std::size_t bytes_transferred
+  beast::error_code ec,
+  std::size_t bytes_transferred
 ) {
   boost::ignore_unused( bytes_transferred );
 
   if ( ec )
-    return fail( ec, "read" );
+    return fail( ec, "ws.on_read_auth" );
   else {
     //std::cout << "ws.on_read_auth" << std::endl;
 
     // The make_printable() function helps print a ConstBufferSequence
-    std::cout << "ws.on_read_auth: " << beast::make_printable( m_buffer.data() ) << std::endl;
+    //std::cout << "ws.on_read_auth: " << beast::make_printable( m_buffer.data() ) << std::endl;
+
+    std::string sMessage( beast::buffers_to_string( m_buffer.data() ) );
+    //std::cout << "ws.on_read_auth: " << sMessage << std::endl;
+
+    m_bConnected = true;
 
     if ( m_fConnected ) m_fConnected( true );
+    if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
+
+    // wait for more reads
+    m_ws.async_read(
+      m_buffer,
+      beast::bind_front_handler(
+        &web_socket::on_read_listen,
+        shared_from_this()
+      )
+    );
   }
 
 }
@@ -285,19 +304,20 @@ void web_socket::on_write_listen(
   boost::ignore_unused(bytes_transferred);
 
   if ( ec )
-    return fail(ec, "write");
+    return fail(ec, "ws.on_write_listen");
   else {
     //std::cout << "ws.on_write_listen" << std::endl;
   }
 
+  // already primed
   // Read a message into our buffer
-  m_ws.async_read(
-    m_buffer,
-    beast::bind_front_handler(
-      &web_socket::on_read_listen,
-      shared_from_this()
-    )
-  );
+  //m_ws.async_read(
+  //  m_buffer,
+  //  beast::bind_front_handler(
+  //    &web_socket::on_read_listen,
+  //    shared_from_this()
+  //  )
+  //);
 }
 
 void web_socket::on_read_listen(
@@ -307,14 +327,28 @@ void web_socket::on_read_listen(
   boost::ignore_unused( bytes_transferred );
 
   if ( ec )
-    return fail( ec, "read" );
+    return fail( ec, "ws.on_read_listen" );
   else {
     //std::cout << "ws.on_read_listen" << std::endl;
 
-    //if ( m_fConnected ) m_fConnected( true );
-
     // The make_printable() function helps print a ConstBufferSequence
-    std::cout << "ws.on_read_listen: " << beast::make_printable( m_buffer.data() ) << std::endl;
+    //std::cout << "ws.on_read_listen: " << beast::make_printable( m_buffer.data() ) << std::endl;
+
+    std::string sMessage( beast::buffers_to_string( m_buffer.data() ) );
+    //std::cout << "ws.on_read_listen: " << sMessage << std::endl;
+
+    if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
+
+    if ( m_bConnected ) {
+      // wait for more reads
+      m_ws.async_read(
+        m_buffer,
+        beast::bind_front_handler(
+          &web_socket::on_read_listen,
+          shared_from_this()
+        )
+      );
+    }
   }
 
 }
@@ -332,7 +366,7 @@ void web_socket::disconnect() {
 
 void web_socket::on_close(beast::error_code ec) {
   if( ec )
-    return fail(ec, "close");
+    return fail(ec, "ws.on_close");
   else
     std::cout << "ws.on_close" << std::endl;
 

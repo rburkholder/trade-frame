@@ -116,13 +116,6 @@ void Provider::Connect() {
                 << std::endl;
             //}
 */
-            mapAssetId_t::const_iterator iter = m_mapAssetId.find( vt.symbol );
-            if ( m_mapAssetId.end() != iter ) {
-              std::cout << "asset: " << vt.symbol << " already exists with " << iter->second << std::endl;
-            }
-            else {
-              m_mapAssetId[ vt.symbol ] = vt.id;
-            }
           }
 
           std::cout << "found " << vMessage.size() << " assets" << std::endl;
@@ -143,7 +136,10 @@ void Provider::Connect() {
     m_sAlpacaKeyId, m_sAlpacaSecret,
     [this] (bool ){
       m_pOrderUpdates->trade_updates( true );
-      }
+    },
+    []( std::string&& sMessage){
+      std::cout << "order update message: " << sMessage << std::endl;
+    }
   );
 
   // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );

@@ -55,6 +55,7 @@ public:
   ~web_socket();
 
   using fConnected_t = std::function<void(bool)>;
+  using fMessage_t = std::function<void(std::string&&)>;
 
   // Start the asynchronous operation
   void connect(
@@ -62,13 +63,16 @@ public:
     const std::string& port,
     const std::string& sAlpacaKey,
     const std::string& sAlpacaSecret,
-    fConnected_t&&
+    fConnected_t&&,
+    fMessage_t&&
   );
   void disconnect();
 
   void trade_updates( bool );
 
 private:
+
+  bool m_bConnected;
 
   tcp::resolver m_resolver;
   websocket::stream<
@@ -81,6 +85,7 @@ private:
   std::string m_secret;
 
   fConnected_t m_fConnected;
+  fMessage_t m_fMessage;
 
   void on_resolve(
     beast::error_code ec,
