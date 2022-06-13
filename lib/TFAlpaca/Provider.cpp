@@ -34,7 +34,7 @@
 #include "Position.hpp"
 #include "Provider.hpp"
 
-namespace json = boost::json;           // from <boost/json.hpp>
+namespace json = boost::json;
 
 namespace ou {
 namespace tf {
@@ -42,6 +42,7 @@ namespace alpaca {
 
 Provider::Provider( const std::string& sHost, const std::string& sKey, const std::string& sSecret )
 : ProviderInterface<Provider,Asset>()
+, m_state( EState::start )
 , m_ssl_context( ssl::context::tlsv12_client )
 , m_sHost( sHost )
 , m_sPort( "443" )
@@ -66,14 +67,34 @@ Provider::Provider( const std::string& sHost, const std::string& sKey, const std
 }
 
 Provider::~Provider() {
-  m_pOrderUpdates->trade_updates( false );
-  m_pOrderUpdates->disconnect();
+  if ( EState::start != m_state ) {
+    Disconnect();
+  }
 }
 
 void Provider::Connect() {
 
-  inherited_t::Connect();
+  if ( EState::start == m_state ) {
 
+    m_state = EState::connect;
+
+    inherited_t::Connect();
+
+    Assets();
+    Positions();
+    OrderUpdates();
+  }
+
+  // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );
+}
+
+void Provider::Disconnect() {
+  m_state = EState::start;
+  m_pOrderUpdates->trade_updates( false ); // may need some state refinement for calling this
+  m_pOrderUpdates->disconnect();
+}
+
+void Provider::Assets() {
   // The session is constructed with a strand to
   // ensure that handlers do not execute concurrently.
   auto osSymbols = std::make_shared<ou::tf::alpaca::session::one_shot>(
@@ -133,7 +154,9 @@ void Provider::Connect() {
       }
     }
   );
+}
 
+void Provider::Positions() {
   auto osPositions = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
@@ -169,7 +192,9 @@ void Provider::Connect() {
       }
     }
   );
+}
 
+void Provider::OrderUpdates() {
   m_pOrderUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
     m_srvc, m_ssl_context
   );
@@ -183,8 +208,6 @@ void Provider::Connect() {
       std::cout << "order update message: " << sMessage << std::endl;
     }
   );
-
-  // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );
 }
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
