@@ -26,8 +26,9 @@
 namespace ou {
 namespace tf {
 namespace alpaca {
+namespace order {
 
-struct OrderRequest {
+struct Request {
   std::string symbol;  // required
   uint32_t quantity;  // required  - does this need to handle numbers with a decimal place for crypto?
   double notional;  // required, dollar amount to trade, not used if nQuantity is supplied, use for fractional quantities
@@ -45,6 +46,11 @@ struct OrderRequest {
   // object stop_loss;    // optional, advanced formatting, tbd
 };
 
+struct Status {
+
+};
+
+} // namespace order
 } // namespace alpaca
 } // namespace tf
 } // namespace ou

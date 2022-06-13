@@ -28,6 +28,7 @@ namespace json = boost::json;
 namespace ou {
 namespace tf {
 namespace alpaca {
+namespace order {
 
 namespace {
 
@@ -36,8 +37,8 @@ void extract( json::object const& obj, T& t, json::string_view key ) {
   t = json::value_to<T>( obj.at( key ) );
 }
 
-OrderRequest tag_invoke( json::value_to_tag<OrderRequest>, json::value const& jv ) {
-  OrderRequest msg;
+Request tag_invoke( json::value_to_tag<Request>, json::value const& jv ) {
+  Request msg;
   json::object const& obj = jv.as_object();
   extract( obj, msg.symbol, "symbol" );
   extract( obj, msg.quantity, "qty" );
@@ -57,6 +58,7 @@ OrderRequest tag_invoke( json::value_to_tag<OrderRequest>, json::value const& jv
 
 } // namespace anonymous
 
+} // namespace order
 } // namespace alpaca
 } // namespace tf
 } // namespace ou
