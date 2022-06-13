@@ -31,6 +31,7 @@
 
 #include "Asset.hpp"
 #include "Order.hpp"
+#include "Position.hpp"
 #include "Provider.hpp"
 
 namespace json = boost::json;           // from <boost/json.hpp>
@@ -75,17 +76,16 @@ void Provider::Connect() {
 
   // The session is constructed with a strand to
   // ensure that handlers do not execute concurrently.
-  auto osList = std::make_shared<ou::tf::alpaca::session::one_shot>(
+  auto osSymbols = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  osList->get(
+  osSymbols->get(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/assets",
     [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
-        // decode the body
 
         json::error_code jec;
         json::value jv = json::parse( message, jec );
@@ -93,30 +93,12 @@ void Provider::Connect() {
           std::cout << "failed to parse /v2/assets" << std::endl;
         }
         else {
-          // Write the message to standard out
-          //std::cout << res_ << std::endl;
-
           //std::cout << message << std::endl;
-
           //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
-          //Asset::vMessage_t vMessage = json::value_to<Asset::vMessage_t>( jv );
           size_t nIdMisMatch {};
           Asset::vMessage_t vMessage;
           Asset::Decode( message, vMessage );
           for ( const Asset::vMessage_t::value_type& vt: vMessage ) {
-/*
-            //if ( "GLD" == vt.symbol ) {
-              std::cout
-                << vt.id << ","
-                << vt.class_ << ","
-                << vt.exchange << ","
-                << vt.symbol << ","
-                << "trade=" << vt.tradable << ","
-                << "short=" << vt.shortable << ","
-                << "margin=" << vt.marginable
-                << std::endl;
-            //}
-*/
             mapAssetId_t::const_iterator iter = m_mapAssetId.find( vt.symbol );
             if ( m_mapAssetId.end() != iter ) {
               const AssetMatch& am( iter->second );
@@ -127,6 +109,9 @@ void Provider::Connect() {
                   << "," << iter->second.sClass << "," << vt.class_
                   << "," << iter->second.sExchange << "," << vt.exchange
                   << "," << iter->second.sId << "," << vt.id
+                  //<< "trade=" << vt.tradable << ","
+                  //<< "short=" << vt.shortable << ","
+                  //<< "margin=" << vt.marginable
                   << std::endl;
               }
               ++nIdMisMatch;
@@ -144,7 +129,43 @@ void Provider::Connect() {
         }
       }
       else {
-        std::cout << "one shot problems: " << message << std::endl;
+        std::cout << "os Symbol List Retrieval problems: " << message << std::endl;
+      }
+    }
+  );
+
+  auto osPositions = std::make_shared<ou::tf::alpaca::session::one_shot>(
+    asio::make_strand( m_srvc ),
+    m_ssl_context
+    );
+  osPositions->get(
+    m_sHost, m_sPort,
+    m_sAlpacaKeyId, m_sAlpacaSecret,
+    "/v2/positions",
+    [this]( bool bStatus, const std::string& message ){
+      if ( bStatus ) {
+        //std::cout << "positions: " << message << std::endl;
+        json::error_code jec;
+        json::value jv = json::parse( message, jec );
+        if ( jec.failed() ) {
+          std::cout << "failed to parse /v2/positions" << std::endl;
+        }
+        else {
+          position::vCurrent_t vPositions;
+          position::Decode( message, vPositions );
+          for ( const position::vCurrent_t::value_type& position: vPositions ) {
+            std::cout
+              << "position " << position.symbol
+              << " " << position.qty << " " << position.side
+              << ", market value=" << position.market_value
+              << ", current price=" << position.current_price
+              << ", unrealized pl=" << position.unrealized_pl
+              << std::endl;
+          }
+        }
+      }
+      else {
+        std::cout << "os Position List Retrieval problems: " << message << std::endl;
       }
     }
   );

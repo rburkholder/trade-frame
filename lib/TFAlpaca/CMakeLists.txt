@@ -13,6 +13,7 @@ set(
     web_socket.hpp
     Asset.hpp
     Order.hpp
+    Position.hpp
     Provider.hpp
   )
 
@@ -22,6 +23,7 @@ set(
     web_socket.cpp
     Asset.cpp
     Order.cpp
+    Position.cpp
     Provider.cpp
   )
 
