@@ -58,6 +58,18 @@ Asset::Asset( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 Asset::~Asset() {
 }
 
+void Asset::Decode( const std::string& sMessage, Message& message ) {
+
+  json::error_code jec;
+  json::value jv = json::parse( sMessage, jec );
+  if ( jec.failed() ) {
+    std::cout << "failed to parse Asset::Message" << std::endl;
+  }
+  else {
+    message = json::value_to<Message>( jv );
+  }
+}
+
 void Asset::Decode( const std::string& sMessage, vMessage_t& vMessage ) {
 
   json::error_code jec;
@@ -66,8 +78,6 @@ void Asset::Decode( const std::string& sMessage, vMessage_t& vMessage ) {
     std::cout << "failed to parse vector of Asset::Message" << std::endl;
   }
   else {
-
-    //alpaca::Asset asset( json::value_to<alpaca::Asset>( jv ) ); // single asset
     vMessage = json::value_to<vMessage_t>( jv );
   }
 }

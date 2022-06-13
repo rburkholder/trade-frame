@@ -56,6 +56,7 @@ public:
   virtual ~Asset();
 
   using vMessage_t = std::vector<Message>;
+  static void Decode( const std::string&, Message& );
   static void Decode( const std::string&, vMessage_t& );
 
 protected:
