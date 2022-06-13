@@ -23,7 +23,7 @@
 
 #include "Order.hpp"
 
-namespace json = boost::json;           // from <boost/json.hpp>
+namespace json = boost::json;
 
 namespace ou {
 namespace tf {
@@ -33,11 +33,11 @@ namespace {
 
 template<class T>
 void extract( json::object const& obj, T& t, json::string_view key ) {
-    t = json::value_to<T>( obj.at( key ) );
+  t = json::value_to<T>( obj.at( key ) );
 }
 
-Order_Request tag_invoke( json::value_to_tag<Order_Request>, json::value const& jv ) {
-  Order_Request msg;
+OrderRequest tag_invoke( json::value_to_tag<OrderRequest>, json::value const& jv ) {
+  OrderRequest msg;
   json::object const& obj = jv.as_object();
   extract( obj, msg.symbol, "symbol" );
   extract( obj, msg.quantity, "qty" );
