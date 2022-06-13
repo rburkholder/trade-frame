@@ -40,6 +40,14 @@ namespace ou {
 namespace tf {
 namespace alpaca {
 
+namespace {
+  template<class T>
+  void extract( json::object const& obj, T& t, json::string_view key ) {
+    t = json::value_to<T>( obj.at( key ) );
+  }
+} // namespace anonymous
+
+
 Provider::Provider( const std::string& sHost, const std::string& sKey, const std::string& sSecret )
 : ProviderInterface<Provider,Asset>()
 , m_state( EState::start )
@@ -204,8 +212,69 @@ void Provider::OrderUpdates() {
     [this] (bool ){
       m_pOrderUpdates->trade_updates( true );
     },
-    []( std::string&& sMessage){
+    [this]( std::string&& sMessage){
       std::cout << "order update message: " << sMessage << std::endl;
+      json::error_code jec;
+      json::value jv = json::parse( sMessage, jec );
+      if ( jec.failed() ) {
+        std::cout << "failed to parse web_socket stream" << std::endl;
+      }
+      else {
+
+        // TODO: encase in try/catch
+
+        struct Stream {
+          std::string sType;
+          json::object object;
+        } stream;
+
+        json::object const& obj = jv.as_object();
+        extract( obj, stream.sType, "stream" );
+        extract( obj, stream.object, "data" );
+
+        // todo use kvm or spirit to parse
+        bool bFound( false );
+
+        if ( "authorization" == stream.sType ) {
+          bFound = true;
+          std::cout << "authorization: " << stream.object << std::endl;
+          // {"stream":"authorization","data":{"action":"authenticate","status":"authorized"}}
+
+          struct Auth {
+            std::string sAction;
+            std::string sStatus;
+          } auth;
+
+          extract( stream.object, auth.sAction, "action" );
+          assert( "authenticate" == auth.sAction );
+          extract( stream.object, auth.sStatus, "status" );
+          assert( "authorized" == auth.sStatus );
+
+          m_state = EState::authorized;
+        }
+
+        if ( "listening" == stream.sType ) {
+          bFound = true;
+          std::cout << "listening status: " << stream.object << std::endl;
+          // {"stream":"listening","data":{"streams":["trade_updates"]}}
+
+          json::array objStreams;
+          extract( stream.object, objStreams, "streams" );
+          //assert( "[\"trade_updates\"]" == json::to( objStreams ) );
+
+          m_state = EState::listening;
+        }
+
+        if ( "trade_updates" == stream.sType ) {
+          bFound = true;
+          std::cout << "trade update: " << stream.object << std::endl;
+          // {"stream":"trade_updates","data":{"event":"new",
+          // {"stream":"trade_updates","data":{"event":"fill",
+        }
+        if ( !bFound ) {
+          std::cout << "unknown order update message: " << sMessage << std::endl;
+        }
+      }
     }
   );
 }

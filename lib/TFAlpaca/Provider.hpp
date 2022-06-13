@@ -73,7 +73,7 @@ protected:
 
 private:
 
-  enum EState { start, connect, authorize, updates, listening, error } m_state;
+  enum EState { start, connect, authorized, listening, error } m_state;
 
   ssl::context m_ssl_context;
 
