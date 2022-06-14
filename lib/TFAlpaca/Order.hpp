@@ -23,6 +23,13 @@
 
 #include <string>
 
+namespace boost {
+namespace json {
+  class object;
+  class value;
+}
+}
+
 namespace ou {
 namespace tf {
 namespace alpaca {
@@ -47,8 +54,43 @@ struct Request {
 };
 
 struct Status {
-
+  std::string asset_class;
+  std::string asset_id;
+  std::string cancel_requested_at;
+  std::string canceled_at;
+  std::string client_order_id;
+  std::string created_at;
+  std::string expired_at;
+  bool extended_hours;
+  std::string failed_at;
+  std::string filled_at;
+  std::string filled_avg_price;
+  std::string filled_qty;
+  std::string hwm;
+  std::string id;
+  std::string legs;
+  std::string limit_price;
+  std::string notional;
+  std::string order_class;
+  std::string order_type;
+  std::string qty;
+  std::string replaced_at;
+  std::string replaced_by;
+  std::string replaces;
+  std::string side;
+  std::string status;
+  std::string stop_price;
+  std::string submitted_at;
+  std::string symbol;
+  std::string time_in_force;
+  std::string trail_percent;
+  std::string trail_price;
+  std::string type;
+  std::string updated_at;
 };
+
+void Decode( const std::string&, Status& );
+void Decode( boost::json::value const&, Status& );
 
 } // namespace order
 } // namespace alpaca

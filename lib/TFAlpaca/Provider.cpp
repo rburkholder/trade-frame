@@ -270,6 +270,7 @@ void Provider::OrderUpdates() {
           std::cout << "trade update: " << stream.object << std::endl;
           // {"stream":"trade_updates","data":{"event":"new",
           // {"stream":"trade_updates","data":{"event":"fill",
+          OrderUpdate( stream.object );
         }
         if ( !bFound ) {
           std::cout << "unknown order update message: " << sMessage << std::endl;
@@ -277,6 +278,31 @@ void Provider::OrderUpdates() {
       }
     }
   );
+}
+
+void Provider::OrderUpdate( const json::object& obj ) {
+
+  struct Update {
+    std::string event;
+    std::string execution_id;
+    json::value order;
+    std::string position_qty;
+    std::string price;
+    std::string qty;
+    std::string timestamp;
+  } update;
+
+  extract( obj, update.event, "event" );
+  extract( obj, update.execution_id, "execution_id" );
+  extract( obj, update.order, "order" );
+  extract( obj, update.position_qty, "position_qty" );
+  extract( obj, update.price, "price" );
+  extract( obj, update.qty, "qty" );
+  extract( obj, update.timestamp, "timestamp" );
+
+  order::Status status;
+  order::Decode( update.order, status );
+
 }
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {

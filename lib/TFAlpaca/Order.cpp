@@ -37,6 +37,8 @@ void extract( json::object const& obj, T& t, json::string_view key ) {
   t = json::value_to<T>( obj.at( key ) );
 }
 
+} // namespace anonymous
+
 Request tag_invoke( json::value_to_tag<Request>, json::value const& jv ) {
   Request msg;
   json::object const& obj = jv.as_object();
@@ -56,7 +58,48 @@ Request tag_invoke( json::value_to_tag<Request>, json::value const& jv ) {
   return msg;
 }
 
-} // namespace anonymous
+Status tag_invoke( json::value_to_tag<Status>, json::value const& jv ) {
+  Status msg;
+  json::object const& obj = jv.as_object();
+  extract( obj, msg.asset_class, "asset_class" );
+  extract( obj, msg.asset_id, "asset_id" );
+  extract( obj, msg.cancel_requested_at, "cancel_requested_at" );
+  extract( obj, msg.canceled_at, "canceled_at" );
+  extract( obj, msg.client_order_id, "client_order_id" );
+  extract( obj, msg.created_at, "created_at" );
+  extract( obj, msg.expired_at, "expired_at" );
+  extract( obj, msg.extended_hours, "extended_hours" );
+  extract( obj, msg.failed_at, "failed_at" );
+  extract( obj, msg.filled_at, "filled_at" );
+  extract( obj, msg.filled_avg_price, "filled_avg_price" );
+  extract( obj, msg.filled_qty, "filled_qty" );
+  extract( obj, msg.hwm, "hwm" );
+  extract( obj, msg.id, "id" );
+  extract( obj, msg.legs, "legs" );
+  extract( obj, msg.limit_price, "limit_price" );
+  extract( obj, msg.notional, "notional" );
+  extract( obj, msg.order_class, "order_class" );
+  extract( obj, msg.order_type, "order_type" );
+  extract( obj, msg.qty, "qty" );
+  extract( obj, msg.replaced_at, "replaced_at" );
+  extract( obj, msg.replaced_by, "replaced_by" );
+  extract( obj, msg.replaces, "replaces" );
+  extract( obj, msg.side, "side" );
+  extract( obj, msg.status, "status" );
+  extract( obj, msg.stop_price, "stop_price" );
+  extract( obj, msg.submitted_at, "submitted_at" );
+  extract( obj, msg.symbol, "symbol" );
+  extract( obj, msg.time_in_force, "time_in_force" );
+  extract( obj, msg.trail_percent, "trail_percent" );
+  extract( obj, msg.trail_price, "trail_price" );
+  extract( obj, msg.type, "type" );
+  extract( obj, msg.updated_at, "updated_at" );
+  return msg;
+}
+
+void Decode( boost::json::value const& jv, Status& status ) {
+  status = json::value_to<Status>( jv );
+}
 
 } // namespace order
 } // namespace alpaca

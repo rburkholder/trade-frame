@@ -32,6 +32,12 @@
 namespace asio  = boost::asio; // from <boost/asio.hpp>
 namespace ssl   = asio::ssl;   // from <boost/asio/ssl.hpp>
 
+namespace boost {
+namespace json {
+  class object;
+}
+}
+
 namespace ou {
 namespace tf {
 namespace alpaca {
@@ -100,6 +106,8 @@ private:
   void Assets();
   void Positions();
   void OrderUpdates();
+
+  void OrderUpdate( const boost::json::object& obj );
 
 };
 
