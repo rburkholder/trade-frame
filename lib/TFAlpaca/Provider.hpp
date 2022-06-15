@@ -25,6 +25,8 @@
 
 #include <boost/asio/ssl.hpp>
 
+#include <OUCommon/KeyWordMatch.h>
+
 #include <TFTrading/ProviderInterface.h>
 
 #include "Asset.hpp"
@@ -81,6 +83,15 @@ private:
 
   enum EState { start, connect, authorized, listening, error } m_state;
 
+  // https://alpaca.markets/deprecated/docs/api-documentation/api-v2/streaming/
+  enum EEvent { new_, fill, partial_fill, canceled, expired, done_for_day
+              , replaced, rejected, pending_new, stopped, pending_cancel
+              , pending_replace, calculated, suspended
+              , order_replace_rejected, order_cancel_rejected
+              , unknown };
+
+  ou::KeyWordMatch<EEvent> m_kwmEvent;
+
   ssl::context m_ssl_context;
 
   std::string m_sHost;
@@ -88,8 +99,8 @@ private:
   std::string m_sAlpacaKeyId;
   std::string m_sAlpacaSecret;
 
-  using pOrderUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
-  pOrderUpdates_t m_pOrderUpdates;
+  using pTradeUpdates_t = std::shared_ptr<ou::tf::alpaca::session::web_socket>;
+  pTradeUpdates_t m_pTradeUpdates;
 
   struct AssetMatch {
     std::string sId;
@@ -105,9 +116,9 @@ private:
 
   void Assets();
   void Positions();
-  void OrderUpdates();
+  void TradeUpdates();
 
-  void OrderUpdate( const boost::json::object& obj );
+  void TradeUpdate( const boost::json::object& obj );
 
 };
 

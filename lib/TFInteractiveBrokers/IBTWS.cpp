@@ -337,7 +337,7 @@ void TWS::RequestContractDetails( const Contract& contract, fOnContractDetail_t&
 }
 
 void TWS::RequestContractDetails(
-  const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone, pInstrument_t& pInstrument 
+  const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone, pInstrument_t& pInstrument
 ) {
 
   // pInstrument can be empty, or can have an instrument
@@ -382,7 +382,7 @@ void TWS::RequestContractDetails(
     if ( m_thrdRequestEvictor.joinable() ) {
       m_thrdRequestEvictor.join();
     }
-    
+
     m_thrdRequestEvictor = std::move( std::thread(
       [this](){
         bool bContinue( true );
@@ -396,8 +396,8 @@ void TWS::RequestContractDetails(
               Request* pRequest = m_mapActiveRequests.begin()->second;
               pRequest->cntEvictionType2++;
               if ( 12 < pRequest->cntEvictionType2 ) {
-                //std::cout 
-                //  << "IB details failed (2) on " 
+                //std::cout
+                //  << "IB details failed (2) on "
                 //  << pRequest->cntEvictionType2 << ","
                 //  << pRequest->id << ","
                 //  << pRequest->pInstrument->GetInstrumentName()
@@ -573,7 +573,7 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
     default:
       break;
   }
-  switch ( pOrder->GetTimeInForce() ) { // will need to convfirm how this is signalled
+  switch ( pOrder->GetTimeInForce() ) { // will need to confirm how this is signalled
     case ou::tf::ETimeInForce::GoodAfterTime:
       {
         //twsorder.goodAfterTime = "20080625 09:30:00";
@@ -1230,10 +1230,10 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
         assert( vt.first == vt.second->id );
         vt.second->cntEvictionType1++;
         if ( ( maxRequestsInTransit - 1 ) <= vt.second->cntEvictionType1 ) {
-          std::cout 
-            << "IB details failed (1) on " 
+          std::cout
+            << "IB details failed (1) on "
             << reqId << ","
-            << vt.first << "," 
+            << vt.first << ","
             << vt.second->pInstrument->GetInstrumentName() << ","
             << vt.second->cntEvictionType1
             << "." << std::endl;
@@ -1243,11 +1243,11 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
       }
       else {
         if ( reqId == vt.first ) {
-          //std::cout 
-          //  << "contractDetailsEnd found " 
-          //  << reqId << "," 
+          //std::cout
+          //  << "contractDetailsEnd found "
+          //  << reqId << ","
           //  << vt.first << ","
-          //  << vt.second->pInstrument->GetInstrumentName() 
+          //  << vt.second->pInstrument->GetInstrumentName()
           //  << std::endl;
 
           submitted = vt.second->submitted;
@@ -1261,8 +1261,8 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symb
           bFound = true;
         }
         else { // should be unreachable
-          std::cout 
-            << "contractDetailsEnd remain " 
+          std::cout
+            << "contractDetailsEnd remain "
             << reqId << ","
             << vt.first
             << std::endl;

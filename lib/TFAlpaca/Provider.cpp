@@ -50,6 +50,7 @@ namespace {
 
 Provider::Provider( const std::string& sHost, const std::string& sKey, const std::string& sSecret )
 : ProviderInterface<Provider,Asset>()
+, m_kwmEvent( EEvent::unknown, 20 )
 , m_state( EState::start )
 , m_ssl_context( ssl::context::tlsv12_client )
 , m_sHost( sHost )
@@ -60,6 +61,23 @@ Provider::Provider( const std::string& sHost, const std::string& sKey, const std
   m_sName = "Alpaca";
   m_nID = keytypes::EProviderAlpaca;
   m_pProvidesBrokerInterface = true;
+
+  m_kwmEvent.AddPattern( "new", EEvent::new_ );
+  m_kwmEvent.AddPattern( "fill", EEvent::fill );
+  m_kwmEvent.AddPattern( "partial_fill", EEvent::partial_fill );
+  m_kwmEvent.AddPattern( "canceled", EEvent::canceled );
+  m_kwmEvent.AddPattern( "expired", EEvent::expired );
+  m_kwmEvent.AddPattern( "done_for_day", EEvent::done_for_day );
+  m_kwmEvent.AddPattern( "replaced", EEvent::replaced );
+  m_kwmEvent.AddPattern( "rejected", EEvent::rejected );
+  m_kwmEvent.AddPattern( "pending_new", EEvent::pending_new );
+  m_kwmEvent.AddPattern( "stopped", EEvent::stopped );
+  m_kwmEvent.AddPattern( "pending_cancel", EEvent::pending_cancel );
+  m_kwmEvent.AddPattern( "pending_replace", EEvent::pending_replace );
+  m_kwmEvent.AddPattern( "calculated", EEvent::calculated );
+  m_kwmEvent.AddPattern( "suspended", EEvent::suspended );
+  m_kwmEvent.AddPattern( "order_replace_rejected", EEvent::order_replace_rejected );
+  m_kwmEvent.AddPattern( "order_cancel_rejected", EEvent::order_cancel_rejected );
 
   if ( 0 == GetThreadCount() ) {
     SetThreadCount( 1 ); // need at least one thread for websocket processing
@@ -90,7 +108,7 @@ void Provider::Connect() {
 
     Assets();
     Positions();
-    OrderUpdates();
+    TradeUpdates();
   }
 
   // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );
@@ -98,8 +116,8 @@ void Provider::Connect() {
 
 void Provider::Disconnect() {
   m_state = EState::start;
-  m_pOrderUpdates->trade_updates( false ); // may need some state refinement for calling this
-  m_pOrderUpdates->disconnect();
+  m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
+  m_pTradeUpdates->disconnect();
 }
 
 void Provider::Assets() {
@@ -202,15 +220,15 @@ void Provider::Positions() {
   );
 }
 
-void Provider::OrderUpdates() {
-  m_pOrderUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
+void Provider::TradeUpdates() {
+  m_pTradeUpdates = std::make_shared<ou::tf::alpaca::session::web_socket>(
     m_srvc, m_ssl_context
   );
-  m_pOrderUpdates->connect(
+  m_pTradeUpdates->connect(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     [this] (bool ){
-      m_pOrderUpdates->trade_updates( true );
+      m_pTradeUpdates->trade_updates( true );
     },
     [this]( std::string&& sMessage){
       std::cout << "order update message: " << sMessage << std::endl;
@@ -270,7 +288,7 @@ void Provider::OrderUpdates() {
           std::cout << "trade update: " << stream.object << std::endl;
           // {"stream":"trade_updates","data":{"event":"new",
           // {"stream":"trade_updates","data":{"event":"fill",
-          OrderUpdate( stream.object );
+          TradeUpdate( stream.object );
         }
         if ( !bFound ) {
           std::cout << "unknown order update message: " << sMessage << std::endl;
@@ -280,28 +298,72 @@ void Provider::OrderUpdates() {
   );
 }
 
-void Provider::OrderUpdate( const json::object& obj ) {
+void Provider::TradeUpdate( const json::object& obj ) {
 
   struct Update {
     std::string event;
     std::string execution_id;
-    json::value order;
+    std::string timestamp;
+
     std::string position_qty;
     std::string price;
     std::string qty;
-    std::string timestamp;
   } update;
+
+  json::value order;
+  order::Status status;
 
   extract( obj, update.event, "event" );
   extract( obj, update.execution_id, "execution_id" );
-  extract( obj, update.order, "order" );
-  extract( obj, update.position_qty, "position_qty" );
-  extract( obj, update.price, "price" );
-  extract( obj, update.qty, "qty" );
   extract( obj, update.timestamp, "timestamp" );
 
-  order::Status status;
-  order::Decode( update.order, status );
+  EEvent event = m_kwmEvent.FindMatch( update.event );
+  switch ( event ) {
+    case EEvent::new_:
+      // TODO: pull out broker supplied order id
+      break;
+    case EEvent::fill:
+      extract( obj, update.position_qty, "position_qty" );
+      extract( obj, update.price, "price" );
+      extract( obj, update.qty, "qty" );
+
+      extract( obj, order, "order" );
+      order::Decode( order, status );
+      break;
+    case EEvent::partial_fill:
+      extract( obj, order, "order" );
+      order::Decode( order, status );
+      break;
+    case EEvent::canceled:
+      break;
+    case EEvent::expired:
+      break;
+    case EEvent::done_for_day:
+      break;
+    case EEvent::replaced:
+      break;
+    case EEvent::rejected:
+      break;
+    case EEvent::pending_new:
+      break;
+    case EEvent::stopped:
+      break;
+    case EEvent::pending_cancel:
+      break;
+    case EEvent::pending_replace:
+      break;
+    case EEvent::calculated:
+      break;
+    case EEvent::suspended:
+      break;
+    case EEvent::order_replace_rejected:
+      break;
+    case EEvent::order_cancel_rejected:
+      break;
+    case EEvent::unknown:
+      assert( false );
+      break;
+  }
 
 }
 
@@ -312,8 +374,6 @@ Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
 }
 
 void Provider::PlaceOrder( pOrder_t pOrder ) {
-
-  inherited_t::PlaceOrder( pOrder ); // any underlying initialization
 
   const ou::tf::Order& order(*pOrder);
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
@@ -362,6 +422,8 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
   //request[ "client_order_id" ] = "1";
   request[ "order_class" ] = "simple";
 
+  inherited_t::PlaceOrder( pOrder ); // any underlying initialization
+
   auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
@@ -378,15 +440,32 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
       else {
         std::cout << "place order error: " << s << std::endl;
       }
-
     }
   );
 }
 
 void Provider::CancelOrder( pOrder_t pOrder ) {
+
+  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
+    asio::make_strand( m_srvc ),
+    m_ssl_context
+  );
+  assert( false ); // TODO need to fix the order id
+  os->delete_(
+    m_sHost, m_sPort,
+    m_sAlpacaKeyId, m_sAlpacaSecret,
+    "/v2/orders/", // TODO: need broker supplied order id
+    []( bool bResult, const std::string& s ) {
+      if ( bResult ) {
+        std::cout << "cancel order result: " << s << std::endl;
+      }
+      else {
+        std::cout << "cancel order error: " << s << std::endl;
+      }
+    }
+  );
   inherited_t::CancelOrder( pOrder );
 }
-
 
 } // namespace alpaca
 } // namespace tf
