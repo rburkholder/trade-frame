@@ -163,11 +163,48 @@ using fRetrievalDone_t = std::function<void()>;
 
 // ==========
 
+struct end_check {
+
+  using fTest_t = std::function<bool()>;
+  boost::asio::steady_timer m_timer;
+  fTest_t m_fTest;
+
+  end_check( boost::asio::io_context& context, fTest_t&& fTest )
+  : m_timer( context )
+  , m_fTest( std::move( fTest ) )
+  {
+    wait();
+  }
+
+  void wait() {
+    m_timer.expires_after( std::chrono::seconds( 5 ) );
+    m_timer.async_wait( [this]( const boost::system::error_code& error ){
+      if ( !error ) {
+        if ( m_fTest() ) {
+          wait();
+        }
+      }
+    });
+  }
+
+};
+
+// ==========
+
 class Symbols {
 public:
 
-  Symbols( double dblMinPrice, setNames_t&& setNames, fSecurity_t&& fSecurity )
-  : m_setIgnoreNames( std::move( setNames ) )
+  Symbols( boost::asio::io_context& context, bool& bDone, double dblMinPrice, setNames_t&& setNames, fSecurity_t&& fSecurity )
+  : m_context( context )
+  , m_bDone( bDone )
+  , m_setIgnoreNames( std::move( setNames ) )
+  , m_nEndStateLastAcquire {}
+  , m_bCheckProcessing( false )
+  , m_ec (
+      m_context,
+      [this]()->bool{
+        return Processing();
+      })
   {
 
     m_dblMinPrice = dblMinPrice;
@@ -177,11 +214,16 @@ public:
     m_piqfeed->OnConnected.Add( MakeDelegate( this, &Symbols::HandleConnected ) );
     m_piqfeed->Connect();
 
-    future = promise.get_future();
-    future.wait();
+  }
 
-    std::cout << countSymbols << " symbols processed"  << std::endl;
-
+  void Statistics() {
+    std::cout
+      << m_countSymbols << " symbols processed, "
+      << m_countNonZeroCommonShares
+      << " with outstanding shares, "
+      << m_countMinimumPrice
+      << " meeting minimum price"
+      << std::endl;
   }
 
 protected:
@@ -190,20 +232,25 @@ protected:
 
 private:
 
+  boost::asio::io_context& m_context;
+
+  end_check m_ec;
+
   double m_dblMinPrice;
   fSecurity_t m_fSecurity;
 
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
-  std::promise<int> promise;
-  std::future<int> future;
-
-  size_t countSymbols {};
-  size_t countNonZeroCommonShares {};
-  size_t countMinimumPrice {};
+  size_t m_countSymbols {};
+  size_t m_countNonZeroCommonShares {};
+  size_t m_countMinimumPrice {};
 
   std::mutex m_mutex;
+
+  bool& m_bDone;
+  bool m_bCheckProcessing;
+  size_t m_nEndStateLastAcquire;
 
   using key_t = ou::tf::iqfeed::SymbolLookup::key_t;
 
@@ -224,16 +271,17 @@ private:
             const std::string sListedMarket( m_piqfeed->ListedMarket( keyListedMarket ) );
             std::lock_guard<std::mutex> lock( m_mutex );
             m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, sListedMarket ) );
+            m_bCheckProcessing = true;
             if ( nMaxInTransit > m_mapAcquire.size() ) {
               bGetFundamentals = true;
             }
-            countSymbols++;
+            m_countSymbols++;
           }
-          if (bGetFundamentals ) GetFundamentals();
+          if ( bGetFundamentals ) GetFundamentals();
         }
       },
       [this](){
-        //std::cout << "added " << countSymbols << " symbols" << std::endl;
+        //std::cout << "added " << m_countSymbols << " symbols" << std::endl;
       }
     );
   }
@@ -286,11 +334,11 @@ private:
               Security& security( *iterAcquire->second.pSecurity.get() );
 
               if ( 0 < fundamentals.dblCommonSharesOutstanding ) {
-                countNonZeroCommonShares++;
+                m_countNonZeroCommonShares++;
 
                 if ( m_dblMinPrice < fundamentals.dbl52WkLo ) {
 
-                  countMinimumPrice++;
+                  m_countMinimumPrice++;
 
                   security.dblAssets = fundamentals.dblAssets;
                   security.dblLiabilities = fundamentals.dblLiabilities;
@@ -322,18 +370,32 @@ private:
         );
       iterAcquire->second.pAcquireFundamentals->Start();
     }
-    else {
-      // TODO: finish up
-      if ( 0 == m_mapAcquire.size() ) {
-        std::cout
-          << countNonZeroCommonShares
-          << " with outstanding shares, "
-          << countMinimumPrice
-          << " meeting minimum price"
-          << std::endl;
-        promise.set_value( 0 );
+  }
+
+  bool Processing() {
+    bool bProcessing( true );
+    if ( m_bCheckProcessing ) {
+      if ( 0 == m_mapSecurity.size() ) { // assumes more threads than #problem symbols
+        const size_t n = m_mapAcquire.size();
+        if ( 0 == n ) {
+          m_nEndStateLastAcquire = 0;
+          bProcessing = false;
+          m_bDone = true;
+        }
+        else {
+          //if ( n != m_nEndStateLastAcquire ) {
+            std::lock_guard<std::mutex> lock( m_mutex );
+            std::cout << "** waiting on:";
+            for ( const mapAcquire_t::value_type& vt: m_mapAcquire ) {
+              std::cout << " " << vt.first;
+            }
+            std::cout << std::endl;
+            m_nEndStateLastAcquire = n;
+          //}
+        }
       }
     }
+    return bProcessing;
   }
 
 };
@@ -687,7 +749,9 @@ int main( int argc, char* argv[] ) {
       );
 
     Symbols symbols(
-      choices.m_dblMinPrice
+      m_context
+    , bSelectionComplete
+    , choices.m_dblMinPrice
     , std::move( setIgnoreNames )
     , [&control]( pSecurity_t pSecurity ) {
         //std::cout << pSecurity->sName << " sent to history" << std::endl;
@@ -695,9 +759,11 @@ int main( int argc, char* argv[] ) {
       }
     );
 
-    bSelectionComplete = true; // symbol selection is complete
+    // known issue:  failed symbols, with no successful symbols, will hang
 
     m_context.run();  // falls through when m_pWork reset
+
+    symbols.Statistics();
 
     m_pTreeStatistics->FlushBaskets();
 
