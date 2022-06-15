@@ -34,7 +34,16 @@ namespace {
 
 template<class T>
 void extract( json::object const& obj, T& t, json::string_view key ) {
-  t = json::value_to<T>( obj.at( key ) );
+  if ( obj.at( key ).is_null() ) {
+    if ( obj.at( key ).is_string() ) {}
+    else {
+      T init {};
+      t = init;
+    }
+  }
+  else {
+    t = json::value_to<T>( obj.at( key ) );
+  }
 }
 
 } // namespace anonymous
