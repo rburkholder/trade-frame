@@ -54,7 +54,6 @@ namespace {
 
   setNames_t setListedMarket;
   setNames_t setSecurityTypes;
-  setNames_t setIgnoreNames;
 
   std::unique_ptr<TRint> m_prdafApp;
   std::shared_ptr<TFile> m_pFile; // primary timeseries
@@ -167,7 +166,9 @@ using fRetrievalDone_t = std::function<void()>;
 class Symbols {
 public:
 
-  Symbols( double dblMinPrice, fSecurity_t&& fSecurity ) {
+  Symbols( double dblMinPrice, setNames_t&& setNames, fSecurity_t&& fSecurity )
+  : m_setIgnoreNames( std::move( setNames ) )
+  {
 
     m_dblMinPrice = dblMinPrice;
     m_fSecurity = std::move( fSecurity );
@@ -185,7 +186,7 @@ public:
 
 protected:
 
-  setNames_t setIgnoreNames;
+  setNames_t m_setIgnoreNames;
 
 private:
 
@@ -214,7 +215,7 @@ private:
       setListedMarket, setSecurityTypes,
       [this](const std::string& sSymbol, key_t keyListedMarket){
         //std::cout << sSymbol << std::endl;
-        if ( setIgnoreNames.end() != setIgnoreNames.find( sSymbol ) ) {
+        if ( m_setIgnoreNames.end() != m_setIgnoreNames.find( sSymbol ) ) {
           std::cout << "ignored " << sSymbol << std::endl;
         }
         else {
@@ -627,6 +628,8 @@ int main( int argc, char* argv[] ) {
       setSecurityTypes.emplace( vt );
     }
 
+    setNames_t setIgnoreNames;
+
     for ( const config::vName_t::value_type& vt: choices.m_vIgnoreNames ) {
       std::cout << "ignoring " << vt << std::endl;
       setIgnoreNames.emplace( vt );
@@ -685,6 +688,7 @@ int main( int argc, char* argv[] ) {
 
     Symbols symbols(
       choices.m_dblMinPrice
+    , std::move( setIgnoreNames )
     , [&control]( pSecurity_t pSecurity ) {
         //std::cout << pSecurity->sName << " sent to history" << std::endl;
         control.Retrieve( pSecurity );
