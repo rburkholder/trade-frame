@@ -415,7 +415,6 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         else {
           ErrorDone( pBuffer, msg );
         }
-
       }
       break;
     case 'n':
@@ -432,7 +431,6 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         else {
           ErrorDone( pBuffer, msg );
         }
-
       }
       break;
     default:
