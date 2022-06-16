@@ -39,11 +39,11 @@ DBOps::~DBOps(void) {
 }
 
 void DBOps::HandlePopulateTables( ou::db::Session& session ) {
-  if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
+  if ( nullptr != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
 }
 
 void DBOps::HandleLoadTables( ou::db::Session& session ) {
-  if ( 0 != OnLoadDatabaseHandler ) OnLoadDatabaseHandler();
+  if ( nullptr != OnLoadDatabaseHandler ) OnLoadDatabaseHandler();
 }
 
 //struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
