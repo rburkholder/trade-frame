@@ -58,6 +58,11 @@ one_shot::one_shot(
 
 one_shot::~one_shot() {
   std::cout << "alpaca::one_shot destruction" << std::endl;  // ensuring proper timing of handling
+  m_stream.shutdown();
+  m_buffer.clear();
+  m_response.clear();
+  m_fWriteRequest = nullptr;
+  m_fDone = nullptr;
 }
 
 void one_shot::run(
