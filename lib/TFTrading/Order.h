@@ -49,6 +49,7 @@ public:
       ou::db::Field( a, "orderid", idOrder );
       ou::db::Field( a, "positionid", idPosition );
       ou::db::Field( a, "instrumentid", idInstrument );
+      ou::db::Field( a, "reference", sReference );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "timeinforce", eTimeInForce );
       ou::db::Field( a, "goodtilldate", dtGoodTillDate );
@@ -77,6 +78,7 @@ public:
     idOrder_t idOrder;
     idPosition_t idPosition;
     idInstrument_t idInstrument;
+    std::string sReference; // typically, unique order id from broker
     std::string sDescription;
     ETimeInForce eTimeInForce;
     ptime dtGoodTillDate;
@@ -207,6 +209,9 @@ public:
 
   void SetParentOrderId( idOrder_t idParent ) { m_row.idParent = idParent; }
   idOrder_t GetParentOrderId() const { return m_row.idParent; }
+
+  void SetReference( const std::string& sReference ) { m_row.sReference = sReference; }
+  const std::string& GetReference() const { return m_row.sReference; }
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_row.bOutsideRTH = bOutsideRTH; }; // need to persist to db
   bool GetOutsideRTH() const { return m_row.bOutsideRTH; };
