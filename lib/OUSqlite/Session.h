@@ -32,15 +32,15 @@ namespace db {
 
 // this is an example of how to integrate everything together for session management.
 
-class Session: 
+class Session:
   public SessionImpl<ISqlite3>,  // various session functionality
   public SessionBase<SessionImpl<ISqlite3>, Session> {  // session open/close control
 public:
 
   typedef boost::shared_ptr<Session> pSession_t;
 
-  Session( void );
-  virtual ~Session( void );
+  Session();
+  virtual ~Session();
 
   ou::Delegate<Session*> OnInitializeManagers;  // various managers to be initialized with db pointers
   ou::Delegate<Session&> OnRegisterTables;  // get callbacks to register their tables
@@ -48,13 +48,13 @@ public:
   ou::Delegate<Session&> OnPopulate;  // get callbacks to populate their tables
   ou::Delegate<Session&> OnLoad;  // Either populate (database initialization) or Load (subseqent startups)
   ou::Delegate<Session&> OnDenitializeManagers; //
-  
-  void InitializeManagers( void );  // called by inherited SessionBase.h
-  void RegisterRowDefinitions( void );  // called by inherited SessionBase.h
-  void RegisterTablesForCreation( void );  // called by inherited SessionBase.h
-  void PopulateTables( void );  // called by inherited SessionBase.h
-  void LoadTables( void );      // called by inherited SessionBase.h
-  void DenitializeManagers( void );  // called by inherieted SessionBase.h
+
+  void InitializeManagers();  // called by inherited SessionBase.h
+  void RegisterRowDefinitions();  // called by inherited SessionBase.h
+  void RegisterTablesForCreation();  // called by inherited SessionBase.h
+  void PopulateTables();  // called by inherited SessionBase.h
+  void LoadTables();      // called by inherited SessionBase.h
+  void DenitializeManagers();  // called by inherieted SessionBase.h
 
 protected:
 private:

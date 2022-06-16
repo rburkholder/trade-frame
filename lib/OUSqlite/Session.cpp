@@ -17,35 +17,35 @@
 namespace ou {
 namespace db {
 
-Session::Session( void )
+Session::Session()
   : SessionImpl<ISqlite3>(),
     SessionBase<SessionImpl<ISqlite3>, Session>() {
 }
 
-Session::~Session( void ) {
+Session::~Session() {
 }
 
-void Session::InitializeManagers( void ) {
+void Session::InitializeManagers() {
   OnInitializeManagers( this );
 }
 
-void Session::RegisterTablesForCreation( void ) {
+void Session::RegisterTablesForCreation() {
   OnRegisterTables( *this );
 }
 
-void Session::RegisterRowDefinitions( void ) {
+void Session::RegisterRowDefinitions() {
   OnRegisterRows( *this );
 }
 
-void Session::PopulateTables( void ) {
+void Session::PopulateTables() {
   OnPopulate( *this );
 }
 
-void Session::LoadTables( void ) {
+void Session::LoadTables() {
   OnLoad( *this );
 }
 
-void Session::DenitializeManagers( void ) {
+void Session::DenitializeManagers() {
   OnDenitializeManagers( *this );
 }
 
