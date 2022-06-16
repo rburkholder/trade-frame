@@ -38,7 +38,7 @@ SimulationProvider::SimulationProvider()
   m_bProvidesDepths = true;
   m_bProvidesTrades = true;
   m_bProvidesGreeks = true;
-  m_pProvidesBrokerInterface = true;
+  m_bProvidesBrokerInterface = true;
 }
 
 SimulationProvider::~SimulationProvider() {

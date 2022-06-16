@@ -106,7 +106,7 @@ TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int 
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesGreeks = true;
-  m_pProvidesBrokerInterface = true;
+  m_bProvidesBrokerInterface = true;
 }
 
 TWS::~TWS() {

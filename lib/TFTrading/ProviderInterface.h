@@ -74,7 +74,7 @@ public:
 
   ProviderInterfaceBase()
   : m_nID( keytypes::EProviderUnknown ), m_bConnected( false )
-  , m_pProvidesBrokerInterface( false )
+  , m_bProvidesBrokerInterface( false )
   , m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepths( false )
   , m_nThreads( 0 )
   {
@@ -114,7 +114,7 @@ public:
 
   bool Connected() const { return m_bConnected; };
 
-  bool ProvidesBrokerInterface() const { return m_pProvidesBrokerInterface; };
+  bool ProvidesBrokerInterface() const { return m_bProvidesBrokerInterface; };
 
   bool ProvidesQuotes() const { return m_bProvidesQuotes; };
   bool ProvidesTrades() const { return m_bProvidesTrades; };
@@ -163,7 +163,7 @@ protected:
 
   bool m_bConnected;
 
-  bool m_pProvidesBrokerInterface;
+  bool m_bProvidesBrokerInterface;
 
   bool m_bProvidesQuotes;
   bool m_bProvidesTrades;
