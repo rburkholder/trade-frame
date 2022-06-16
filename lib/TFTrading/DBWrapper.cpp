@@ -107,18 +107,18 @@ void db::HandlePopulateDatabase() {
 
 }
 
-void db::HandleDbOnPopulate(  ou::db::Session& session ) {
+void db::HandleDbOnPopulate( ou::db::Session& session ) {
   // called when db created, after HandlePopulateDatabase
   //std::cout << "AppBasketTrading::HandleDbOnPopulate placeholder" << std::endl;
 }
 
-void db::HandleLoadDatabase( void ) {
+void db::HandleLoadDatabase() {
   std::cout << "db::HandleLoadDatabase ..." << std::endl;
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.LoadActivePortfolios();
 }
 
-void db::HandleDbOnLoad(  ou::db::Session& session ) {
+void db::HandleDbOnLoad( ou::db::Session& session ) {
   // called when db exists, after HandleLoadDatabase
    //std::cout << "db::HandleDbOnLoad placeholder" << std::endl;
 }
