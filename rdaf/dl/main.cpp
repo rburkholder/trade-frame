@@ -160,6 +160,7 @@ using pSecurity_t = std::shared_ptr<Security>;
 using mapSecurity_t = std::map<std::string,pSecurity_t>;
 using fSecurity_t = std::function<void(pSecurity_t)>;
 using fRetrievalDone_t = std::function<void()>;
+using fDone_t = std::function<void()>;
 
 // ==========
 
@@ -179,9 +180,15 @@ struct end_check {
   void wait() {
     m_timer.expires_after( std::chrono::seconds( 5 ) );
     m_timer.async_wait( [this]( const boost::system::error_code& error ){
-      if ( !error ) {
+      if ( error ) {
+        std::cout << "wait error: " << error.message() << std::endl;
+      }
+      else {
         if ( m_fTest() ) {
           wait();
+        }
+        else {
+          //std::cout << "wait done" << std::endl;
         }
       }
     });
@@ -194,7 +201,13 @@ struct end_check {
 class Symbols {
 public:
 
-  Symbols( boost::asio::io_context& context, bool& bDone, double dblMinPrice, setNames_t&& setNames, fSecurity_t&& fSecurity )
+  Symbols(
+    boost::asio::io_context& context
+  , bool& bDone, double dblMinPrice
+  , setNames_t&& setNames
+  , fSecurity_t&& fSecurity
+  , fDone_t&& fDone
+  )
   : m_context( context )
   , m_bDone( bDone )
   , m_setIgnoreNames( std::move( setNames ) )
@@ -209,6 +222,7 @@ public:
 
     m_dblMinPrice = dblMinPrice;
     m_fSecurity = std::move( fSecurity );
+    m_fDone = std::move( fDone );
 
     m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
     m_piqfeed->OnConnected.Add( MakeDelegate( this, &Symbols::HandleConnected ) );
@@ -238,6 +252,7 @@ private:
 
   double m_dblMinPrice;
   fSecurity_t m_fSecurity;
+  fDone_t m_fDone;
 
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   pIQFeed_t m_piqfeed;
@@ -381,6 +396,7 @@ private:
           m_nEndStateLastAcquire = 0;
           bProcessing = false;
           m_bDone = true;
+          if ( m_fDone ) m_fDone();
         }
         else {
           //if ( n != m_nEndStateLastAcquire ) {
@@ -500,6 +516,16 @@ public:
     StartRetrieval();
   }
 
+  void CheckDone() {
+    if ( 0 == m_mapSecurity_Waiting.size() ) {
+      if ( m_nSimultaneousRetrievals == m_vRetrieveTicks_Avail.size() ) {
+        if ( 0 == m_mapRetrieveTicks.size() ) {
+          m_fRetrievalDone();
+        }
+      }
+    }
+  }
+
 protected:
 private:
 
@@ -601,14 +627,11 @@ private:
       }
       else {
         assert( 0 == m_mapSecurity_Waiting.size() );
-        if ( m_nSimultaneousRetrievals == m_vRetrieveTicks_Avail.size() ) {
-          if ( 0 == m_mapRetrieveTicks.size() ) {
-            m_fRetrievalDone();
-          }
-        }
+        CheckDone();
       }
     }
   }
+
 };
 
 // ==========
@@ -753,9 +776,12 @@ int main( int argc, char* argv[] ) {
     , bSelectionComplete
     , choices.m_dblMinPrice
     , std::move( setIgnoreNames )
-    , [&control]( pSecurity_t pSecurity ) {
+    , [&control]( pSecurity_t pSecurity ) { // fSecurity_t
         //std::cout << pSecurity->sName << " sent to history" << std::endl;
         control.Retrieve( pSecurity );
+      }
+    , [&control](){ // fDone_t
+        control.CheckDone();
       }
     );
 
