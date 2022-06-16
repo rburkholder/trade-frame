@@ -94,11 +94,11 @@ public:
     boost::uint16_t nDay; // future, option
     double dblStrike;
     OptionSide::EOptionSide eOptionSide;
-    boost::int32_t nIBContract; // used with CIBTWS
+    boost::int32_t nIBContract; // used with IBTWS
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
     double dblMinTick;
     boost::uint8_t nSignificantDigits;
-    std::string sExchangeRules;  // from ib, one or more exchange:ruleid
+    std::string sExchangeRules;  // from IB, one or more exchange:ruleid
 
     TableRowDef() // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
