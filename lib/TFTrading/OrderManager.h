@@ -84,6 +84,8 @@ public:
   void ReportCommission( idOrder_t nOrderId, double dblCommission );  // feedback from provider
   void ReportErrors( idOrder_t nOrderId, OrderError::EOrderError eError );  // feedback from provider
 
+  void UpdateReference( idOrder_t nOrderId, const std::string& sReference );
+
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 
   // need a query to find pending orders like GTC, etc
@@ -123,7 +125,7 @@ protected:
 
 private:
 
-  //CAutoIncKey m_orderIds;  // may need to worry about multi-threading at some point in time
+  // AutoIncKey m_orderIds;  // may need to worry about multi-threading at some point in time
   // ToDo:  migrate away from this later on, may need to deal with multiple programs interacting with same
   //  database table, and will need to auto-key from the order table instead.
 
@@ -147,6 +149,7 @@ private:
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
   void HandlePopulateTables( ou::db::Session& session );
+  void HandleLoadTables( ou::db::Session& session );
 
 };
 

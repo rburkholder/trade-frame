@@ -528,6 +528,42 @@ void OrderManager::ReportErrors( idOrder_t nOrderId, OrderError::EOrderError eEr
   }
 }
 
+namespace OrderManagerQueries {
+  struct UpdateReference {
+    template<typename A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "reference", sReference );
+      ou::db::Field( a, "orderid", idOrder );
+    }
+    Order::idOrder_t idOrder;
+    const std::string& sReference;
+    UpdateReference( Order::idOrder_t idOrder_, const std::string& sReference_ )
+    : idOrder( idOrder_ ), sReference( sReference_ ) {}
+  };
+}
+
+void OrderManager::UpdateReference( idOrder_t idOrder, const std::string& sReference ) {
+  try {
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( idOrder, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      pOrder->SetReference( sReference );
+      if ( nullptr != m_pSession ) {
+        OrderManagerQueries::UpdateReference reference( idOrder, sReference );
+        ou::db::QueryFields<OrderManagerQueries::UpdateReference>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateReference>( // todo:  cache this query
+            "update orders set reference=?", reference ).Where( "orderid=?" );
+      }
+    }
+    else {
+      std::cout << "OrderManager::UpdateReference: idOrder not found: " << idOrder << std::endl;
+    }
+  }
+  catch (...) {
+    std::cout << "OrderManager::UpdateReference: major error with " << idOrder << std::endl;
+  }
+}
+
 void OrderManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<Order::TableCreateDef>( tablenames::sOrder );
   session.RegisterTable<Execution::TableCreateDef>( tablenames::sExecution );
@@ -542,13 +578,33 @@ void OrderManager::HandleRegisterRows( ou::db::Session& session ) {
 void OrderManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
+namespace OrderManagerQueries {
+  struct ColumnMaxOrderId {
+    template<typename A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "orderid", idOrder );
+    }
+    Order::idOrder_t idOrder;
+  };
+}
+
+void OrderManager::HandleLoadTables( ou::db::Session& session ) {
+  ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pQuery
+    = m_pSession->SQL<ou::db::NoBind>( "select max(orderid) as orderid from orders;" );
+  if ( m_pSession->Execute( pQuery ) ) {
+    OrderManagerQueries::ColumnMaxOrderId result;
+    m_pSession->Columns<ou::db::NoBind,OrderManagerQueries::ColumnMaxOrderId>( pQuery, result );
+    ou::tf::Order::idOrder_t id = CheckOrderId( result.idOrder );
+  }
+}
+
 // this stuff could probably be rolled into Session with a template
 void OrderManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
   pSession->OnRegisterTables.Add( MakeDelegate( this, &OrderManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &OrderManager::HandleRegisterRows ) );
   pSession->OnPopulate.Add( MakeDelegate( this, &OrderManager::HandlePopulateTables ) );
-
+  pSession->OnLoad.Add( MakeDelegate( this, &OrderManager::HandleLoadTables ) );
 }
 
 void OrderManager::DetachFromSession( ou::db::Session* pSession ) {
