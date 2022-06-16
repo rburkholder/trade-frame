@@ -25,9 +25,13 @@
 
 #include <boost/asio/strand.hpp>
 
+// this comes before OrderManager due to 'namespace detail' conflict
+#include "root_certificates.hpp"
+
+#include <TFTrading/OrderManager.h>
+
 #include "one_shot.hpp"
 #include "web_socket.hpp"
-#include "root_certificates.hpp"
 
 #include "Asset.hpp"
 #include "Order.hpp"
@@ -301,6 +305,7 @@ void Provider::TradeUpdates() {
 void Provider::TradeUpdate( const json::object& obj ) {
 
   struct Update {
+    std::string id;
     std::string event;
     std::string execution_id;
     std::string timestamp;
@@ -320,21 +325,57 @@ void Provider::TradeUpdate( const json::object& obj ) {
   EEvent event = m_kwmEvent.FindMatch( update.event );
   switch ( event ) {
     case EEvent::new_:
-      // TODO: pull out broker supplied order id
+      {
+        extract( obj, update.id, "id" );
+        ou::tf::Order::idOrder_t idOrder;
+        extract( obj, idOrder, "client_order_id " );
+        OrderManager::Instance().UpdateReference( idOrder, update.id );
+      }
       break;
-    case EEvent::fill:
-      extract( obj, update.position_qty, "position_qty" );
+    case EEvent::partial_fill:
       extract( obj, update.price, "price" );
       extract( obj, update.qty, "qty" );
 
       extract( obj, order, "order" );
       order::Decode( order, status );
+      {
+        OrderSide::EOrderSide side( OrderSide::Unknown );
+        if ( "sell" == status.side ) side = OrderSide::Sell;
+        if ( "buy"  == status.side ) side = OrderSide::Buy;
+        ou::tf::Execution exec(
+          boost::lexical_cast<double>( update.price ),
+          boost::lexical_cast<ou::tf::Price::volume_t>( update.qty ),
+          side,
+          "alpaca",
+          update.execution_id
+        );
+      }
       break;
-    case EEvent::partial_fill:
+    case EEvent::fill:
+      extract( obj, update.price, "price" );
+      extract( obj, update.qty, "qty" );
+
       extract( obj, order, "order" );
       order::Decode( order, status );
+      {
+        OrderSide::EOrderSide side( OrderSide::Unknown );
+        if ( "sell" == status.side ) side = OrderSide::Sell;
+        if ( "buy"  == status.side ) side = OrderSide::Buy;
+        ou::tf::Execution exec(
+          boost::lexical_cast<double>( update.price ),
+          boost::lexical_cast<ou::tf::Price::volume_t>( update.qty ),
+          side,
+          "alpaca",
+          update.execution_id
+        );
+      }
       break;
     case EEvent::canceled:
+      {
+        ou::tf::Order::idOrder_t idOrder;
+        extract( obj, idOrder, "client_order_id " );
+        OrderManager::Instance().ReportCancellation( idOrder );
+      }
       break;
     case EEvent::expired:
       break;
@@ -378,6 +419,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
   const ou::tf::Order& order(*pOrder);
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
   json::object request;
+  request[ "client_order_id" ] = boost::lexical_cast<std::string>( trd.idOrder );
   //request[ "symbol" ] = "675f7911-9aca-418a-acd5-07cfacb9d32b"; //trd.idInstrument; GLD
   request[ "symbol" ] = trd.idInstrument;
   request[ "qty" ] = boost::lexical_cast<std::string>( trd.nOrderQuantity );
@@ -419,7 +461,6 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
       break;
   }
   request[ "time_in_force" ] = "day";
-  //request[ "client_order_id" ] = "1";
   request[ "order_class" ] = "simple";
 
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization

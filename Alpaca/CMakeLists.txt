@@ -70,9 +70,9 @@ target_link_libraries(
       TFInteractiveBrokers
       ib_client
       bidgcc000
-#      TFSimulation
+      TFSimulation
 #      TFVuTrading
-#      TFOptions
+      TFOptions
       TFHDF5TimeSeries
       OUSQL
       OUSqlite

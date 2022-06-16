@@ -22,6 +22,8 @@
 
 #include <boost/asio/strand.hpp>
 
+#include <TFTrading/DBWrapper.h>
+
 #include <TFAlpaca/Provider.hpp>
 
 #include "Config.hpp"
@@ -46,6 +48,9 @@ int main( int argc, char** argv )
     //int version = ( argc == 5 && !std::strcmp( "1.0", sVersion.c_str() ) ) ? 10 : 11;
     static const int version = 11;
 
+    static const std::string sDbName( "alpaca.db" );
+    std::unique_ptr<ou::tf::db>  m_pdb = std::make_unique<ou::tf::db>( sDbName );
+
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
 
@@ -65,10 +70,10 @@ int main( int argc, char** argv )
     auto pOrder = std::make_shared<ou::tf::Order>(
       pInstrument,
       ou::tf::OrderType::Market,
-      ou::tf::OrderSide::Buy,
+      ou::tf::OrderSide::Sell,
       100
     );
-    pProvider->PlaceOrder( pOrder );
+    //pProvider->PlaceOrder( pOrder );
 
     sleep( 20 );
 
