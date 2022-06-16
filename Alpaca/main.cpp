@@ -82,30 +82,41 @@ int main( int argc, char** argv )
       ou::tf::InstrumentManager::Instance().Register( pInstrument );
     }
 
-    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
     ou::tf::Position::pPosition_t pPosition;
-    if ( pm.PositionExists( sPortfolio, sSymbol ) ) {
-      pPosition = pm.GetPosition( sPortfolio, sSymbol );
+    {
+      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+      if ( pm.PositionExists( sPortfolio, sSymbol ) ) {
+        pPosition = pm.GetPosition( sPortfolio, sSymbol );
+      }
+      else {
+        pPosition = pm.ConstructPosition(
+          sPortfolio, sSymbol, "manual",
+          "alpaca", "alpaca", pProvider, pProvider, pInstrument
+        );
+      }
     }
-    else {
-      pPosition = pm.ConstructPosition(
-        sPortfolio, sSymbol, "manual",
-        "alpaca", "alpaca", pProvider, pProvider, pInstrument
+
+    ou::tf::Order::pOrder_t pOrder;
+    {
+      ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+      om.CheckOrderId( 32 ); // put this into state file
+
+      pOrder = pPosition->ConstructOrder(
+        ou::tf::OrderType::Market,
+        ou::tf::OrderSide::Buy,
+        100
       );
+
+      om.PlaceOrder( pProvider.get(), pOrder );
     }
 
-    ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
-    om.CheckOrderId( 28 ); // put this into state file
-
-    auto pOrder = pPosition->ConstructOrder(
-      ou::tf::OrderType::Market,
-      ou::tf::OrderSide::Buy,
-      100
-    );
-
-    om.PlaceOrder( pProvider.get(), pOrder );
 
     sleep( 20 );
+
+    pOrder.reset();
+    pPosition.reset();
+    pInstrument.reset();
+    pProvider.reset();
 
     return EXIT_SUCCESS;
 }
