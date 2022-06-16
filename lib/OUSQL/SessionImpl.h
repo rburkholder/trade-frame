@@ -40,15 +40,15 @@
 // not necessarily a good thing all the time.
 
 
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 #include <vector>
-#include <stdexcept>
 #include <typeinfo>
+#include <stdexcept>
 
-#include <boost/cstdint.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include "Constants.h"
 #include "Actions.h"
@@ -76,27 +76,27 @@ public:
 
   using pQueryBase_t = boost::intrusive_ptr<QueryBase>;
 
-  QueryBase( void ): m_clause( EClauseNone ), m_bHasFields( false ), m_cntRef( 0 ), m_bPrepared( false ) {};
-  virtual ~QueryBase( void ) {};
+  QueryBase(): m_clause( EClauseNone ), m_bHasFields( false ), m_cntRef( 0 ), m_bPrepared( false ) {};
+  virtual ~QueryBase() {};
 
-  void SetHasFields( void ) { m_bHasFields = true; };
-  inline bool HasFields( void ) const { return m_bHasFields; };
+  void SetHasFields() { m_bHasFields = true; };
+  inline bool HasFields() const { return m_bHasFields; };
 
-  void SetPrepared( void ) { m_bPrepared = true; };
-  inline bool IsPrepared( void ) const { return m_bPrepared; };
+  void SetPrepared() { m_bPrepared = true; };
+  inline bool IsPrepared() const { return m_bPrepared; };
 
   // instrusive reference counting
-  size_t RefCnt( void ) const { return m_cntRef; };
-  void Ref( void ) { ++m_cntRef; };
-  size_t UnRef( void ) { --m_cntRef; return m_cntRef; };
+  size_t RefCnt() const { return m_cntRef; };
+  void Ref() { ++m_cntRef; };
+  size_t UnRef() { --m_cntRef; return m_cntRef; };
 
-  std::string& UpdateQueryText( void ) {
+  std::string& UpdateQueryText() {
 //    assert( EClauseQuery >= m_clause );
 //    m_clause = EClauseQuery;
     return m_sQueryText;
   };
 
-  const std::string& QueryText( void ) const { return m_sQueryText; };
+  const std::string& QueryText() const { return m_sQueryText; };
 
 protected:
   enumClause m_clause;
@@ -116,7 +116,7 @@ class QueryFields:
 public:
   using pQueryFields_t = boost::intrusive_ptr<QueryFields<F> >;
   explicit QueryFields( F& f ): QueryBase(), var( f ) {};
-  virtual ~QueryFields( void ) {};
+  virtual ~QueryFields() {};
   F& var;  // 2011/03/07  I want to make this a reference to a constant var at some point
    // will require mods to Bind, and will need Fields( A& a ) const, hopefully will work with the Actions passed in
 protected:
@@ -133,7 +133,7 @@ public:
   : m_bExecuteOneTime( false ), QueryFields<F>( f ) {
 
   };
-  ~Query( void ) {};
+  ~Query() {};
 
   Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
     assert( QueryBase::EClauseWhere > QueryBase::m_clause );
@@ -156,7 +156,7 @@ public:
     return *this;
   }
 
-  Query& NoExecute( void ) {
+  Query& NoExecute() {
     assert( QueryBase::EClauseNoExecute > QueryBase::m_clause );
     m_bExecuteOneTime = false; // don't execute on the conversion
     QueryBase::m_clause = QueryBase::EClauseNoExecute;
@@ -202,10 +202,10 @@ public:
     return p;
   }
 
-  void SetExecuteOneTime( void ) { m_bExecuteOneTime = true; };
+  void SetExecuteOneTime() { m_bExecuteOneTime = true; };
 
 protected:
-  virtual void ProcessInQueryState( void ) {};
+  virtual void ProcessInQueryState() {};
   bool m_bExecuteOneTime;
 private:
 };
@@ -235,13 +235,13 @@ class QueryState:
 public:
 
   QueryState( S& session, F& f ): Query<F>( f ), m_session( session ) {};
-  virtual ~QueryState( void ) {
+  virtual ~QueryState() {
     m_session.Release( *this );
   };
 
 protected:
 
-  void ProcessInQueryState( void ) {
+  void ProcessInQueryState() {
     if ( QueryBase::HasFields() ) {  // who calls this, there fore had to virtual the destructor
       m_session.Bind( *this );
     }
@@ -262,19 +262,19 @@ template<class IDatabase> // IDatabase is a the specific handler type:  sqlite3 
 class SessionImpl: boost::noncopyable {
 public:
 
-  typedef SessionImpl<IDatabase> session_t;
-  typedef boost::shared_ptr<session_t> pSession_t;
-  typedef QueryBase::pQueryBase_t pQueryBase_t;
+  using session_t = SessionImpl<IDatabase>;
+  using pSession_t = std::shared_ptr<session_t>;
+  using pQueryBase_t = QueryBase::pQueryBase_t;
 
-  SessionImpl( void );
-  virtual ~SessionImpl( void );
+  SessionImpl();
+  virtual ~SessionImpl();
 
   void ImplOpen( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
-  void ImplClose( void );
+  void ImplClose();
 
-  void CreateTables( void );
+  void CreateTables();
 
-  boost::int64_t GetLastRowId( void ) { return m_db.GetLastRowId(); };
+  int64_t GetLastRowId() { return m_db.GetLastRowId(); };  // call after an auto-increment insertion
 
   template<class F>
   void Bind( QueryFields<F>& qf ) {
@@ -418,7 +418,7 @@ public:
 protected:
 
   template<class F>
-  const std::string& GetTableName( void ) {
+  const std::string& GetTableName() {
     std::string t( typeid( F ).name() );
     mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
     if ( m_mapFieldsToTable.end() == iter ) {
@@ -464,12 +464,12 @@ private:
 
 // Constructor
 template<class IDatabase>
-SessionImpl<IDatabase>::SessionImpl( void ): m_bOpened( false ) {
+SessionImpl<IDatabase>::SessionImpl(): m_bOpened( false ) {
 }
 
 // Destructor
 template<class IDatabase>
-SessionImpl<IDatabase>::~SessionImpl(void) {
+SessionImpl<IDatabase>::~SessionImpl() {
   ImplClose();
 }
 
@@ -488,7 +488,7 @@ void SessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpenF
 
 // Close
 template<class IDatabase>
-void SessionImpl<IDatabase>::ImplClose( void ) {
+void SessionImpl<IDatabase>::ImplClose() {
   if ( m_bOpened ) {
     m_bOpened = false;
     m_db.SessionClose();
@@ -499,7 +499,7 @@ void SessionImpl<IDatabase>::ImplClose( void ) {
 
 // CreateTables
 template<class IDatabase>
-void SessionImpl<IDatabase>::CreateTables( void ) {
+void SessionImpl<IDatabase>::CreateTables() {
   // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
     Execute( iter->second );
