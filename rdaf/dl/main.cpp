@@ -222,7 +222,7 @@ public:
       << m_countNonZeroCommonShares
       << " with outstanding shares, "
       << m_countMinimumPrice
-      << " meeting minimum price"
+      << " with minimum price of $" << m_dblMinPrice
       << std::endl;
   }
 
