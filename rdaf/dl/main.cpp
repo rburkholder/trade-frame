@@ -785,8 +785,6 @@ int main( int argc, char* argv[] ) {
       }
     );
 
-    // known issue:  failed symbols, with no successful symbols, will hang
-
     m_context.run();  // falls through when m_pWork reset
 
     symbols.Statistics();
