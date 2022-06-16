@@ -102,6 +102,8 @@ Provider::~Provider() {
   if ( EState::start != m_state ) {
     Disconnect();
   }
+  m_pTradeUpdates.reset();
+  m_mapAssetId.clear();
 }
 
 void Provider::Connect() {
