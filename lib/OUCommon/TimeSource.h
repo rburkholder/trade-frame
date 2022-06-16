@@ -15,12 +15,11 @@
 
 #include <cassert>
 
+#include <mutex>
 #include <vector>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
-
-#include <boost/thread/mutex.hpp>
 
 #include "Singleton.h"
 #include "ReusableBuffers.h"
@@ -87,7 +86,7 @@ public:
   }
 
   static boost::posix_time::ptime ConvertRegionalToUtc(
-          boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion 
+          boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& sRegion
   ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
     boost::local_time::local_date_time lt( date, time, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
@@ -110,7 +109,7 @@ private:
   static boost::local_time::tz_database m_tzDb;
   static boost::local_time::time_zone_ptr m_tzNewYork;
 
-  boost::mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // ou

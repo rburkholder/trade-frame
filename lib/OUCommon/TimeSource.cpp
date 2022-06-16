@@ -45,7 +45,7 @@ boost::local_time::time_zone_ptr TimeSource::LoadTimeZone( const std::string& sR
 boost::posix_time::ptime TimeSource::External( boost::posix_time::ptime* dt ) {
   // this ensures we always have a monotonically increasing time (for use in simulations and time time stamping )
   // TODO:  can this be rewritten without a mutex?  maybe with an atomic increment?
-  boost::mutex::scoped_lock lock( m_mutex );
+  std::scoped_lock<std::mutex> lock( m_mutex );
   boost::posix_time::ptime& dt_ = *dt;  // create reference to existing location for ease of use
 //  dt_ = boost::posix_time::microsec_clock::local_time();
   dt_ = boost::posix_time::microsec_clock::universal_time(); // changed 2013/08/29
