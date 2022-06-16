@@ -64,7 +64,9 @@ Provider::Provider( const std::string& sHost, const std::string& sKey, const std
 {
   m_sName = "Alpaca";
   m_nID = keytypes::EProviderAlpaca;
-  m_pProvidesBrokerInterface = true;
+  m_bProvidesBrokerInterface = true;
+  m_bProvidesQuotes = true;  // fake this for now
+  m_bProvidesTrades = true;  // fake this for now
 
   m_kwmEvent.AddPattern( "new", EEvent::new_ );
   m_kwmEvent.AddPattern( "fill", EEvent::fill );
@@ -326,10 +328,14 @@ void Provider::TradeUpdate( const json::object& obj ) {
   switch ( event ) {
     case EEvent::new_:
       {
-        extract( obj, update.id, "id" );
+        //extract( obj, update.id, "id" );
+        extract( obj, order, "order" );
+        order::Decode( order, status );
+        //std::string sIdOrder;
+        //extract( order, sIdOrder, "client_order_id" );
         ou::tf::Order::idOrder_t idOrder;
-        extract( obj, idOrder, "client_order_id " );
-        OrderManager::Instance().UpdateReference( idOrder, update.id );
+        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        OrderManager::GlobalInstance().UpdateReference( idOrder, status.id );
       }
       break;
     case EEvent::partial_fill:
@@ -342,32 +348,45 @@ void Provider::TradeUpdate( const json::object& obj ) {
         OrderSide::EOrderSide side( OrderSide::Unknown );
         if ( "sell" == status.side ) side = OrderSide::Sell;
         if ( "buy"  == status.side ) side = OrderSide::Buy;
+        auto price = boost::lexical_cast<double>( update.price );
+        auto volume = boost::lexical_cast<ou::tf::Price::volume_t>( update.qty );
         ou::tf::Execution exec(
-          boost::lexical_cast<double>( update.price ),
-          boost::lexical_cast<ou::tf::Price::volume_t>( update.qty ),
+          price,
+          volume,
           side,
-          "alpaca",
+          std::string( "alpaca" ),
           update.execution_id
         );
+        ou::tf::Order::idOrder_t idOrder;
+        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        OrderManager::Instance().ReportExecution( idOrder, exec );
       }
       break;
     case EEvent::fill:
-      extract( obj, update.price, "price" );
-      extract( obj, update.qty, "qty" );
+      try {
+        extract( obj, update.price, "price" );
+        extract( obj, update.qty, "qty" );
 
-      extract( obj, order, "order" );
-      order::Decode( order, status );
-      {
+        extract( obj, order, "order" );
+        order::Decode( order, status );
         OrderSide::EOrderSide side( OrderSide::Unknown );
         if ( "sell" == status.side ) side = OrderSide::Sell;
         if ( "buy"  == status.side ) side = OrderSide::Buy;
+        auto price = boost::lexical_cast<double>( update.price );
+        auto volume = boost::lexical_cast<ou::tf::Price::volume_t>( update.qty );
         ou::tf::Execution exec(
-          boost::lexical_cast<double>( update.price ),
-          boost::lexical_cast<ou::tf::Price::volume_t>( update.qty ),
+          price,
+          volume,
           side,
-          "alpaca",
+          std::string( "alpaca" ),
           update.execution_id
         );
+        ou::tf::Order::idOrder_t idOrder;
+        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        OrderManager::Instance().ReportExecution( idOrder, exec );
+      }
+      catch(...) {
+        std::cout << "EEVent::fill broke" << std::endl;
       }
       break;
     case EEvent::canceled:
@@ -477,6 +496,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
     []( bool bResult, const std::string& s ) {
       if ( bResult ) {
         std::cout << "place order result: " << s << std::endl;
+        // TODO: extract alpaca order id here?
       }
       else {
         std::cout << "place order error: " << s << std::endl;

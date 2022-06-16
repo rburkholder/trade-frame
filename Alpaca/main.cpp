@@ -23,6 +23,9 @@
 #include <boost/asio/strand.hpp>
 
 #include <TFTrading/DBWrapper.h>
+#include <TFTrading/OrderManager.h>
+#include <TFTrading/PortfolioManager.h>
+#include <TFTrading/InstrumentManager.h>
 
 #include <TFAlpaca/Provider.hpp>
 
@@ -49,7 +52,7 @@ int main( int argc, char** argv )
     static const int version = 11;
 
     static const std::string sDbName( "alpaca.db" );
-    std::unique_ptr<ou::tf::db>  m_pdb = std::make_unique<ou::tf::db>( sDbName );
+    std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
@@ -64,16 +67,43 @@ int main( int argc, char** argv )
 
     sleep( 4 );
 
-    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+    const std::string sSymbol( "GLD" );
+    const std::string sPortfolio( "USD" );
 
-    auto pInstrument = std::make_shared<ou::tf::Instrument>( "GLD" );
-    auto pOrder = std::make_shared<ou::tf::Order>(
-      pInstrument,
+    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+    ou::tf::Instrument::pInstrument_t pInstrument;
+
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+    if ( im.Exists( sSymbol ) ) {
+      pInstrument = im.Get( sSymbol );
+    }
+    else {
+      pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "alpaca" );
+      ou::tf::InstrumentManager::Instance().Register( pInstrument );
+    }
+
+    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+    ou::tf::Position::pPosition_t pPosition;
+    if ( pm.PositionExists( sPortfolio, sSymbol ) ) {
+      pPosition = pm.GetPosition( sPortfolio, sSymbol );
+    }
+    else {
+      pPosition = pm.ConstructPosition(
+        sPortfolio, sSymbol, "manual",
+        "alpaca", "alpaca", pProvider, pProvider, pInstrument
+      );
+    }
+
+    ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+    om.CheckOrderId( 28 ); // put this into state file
+
+    auto pOrder = pPosition->ConstructOrder(
       ou::tf::OrderType::Market,
-      ou::tf::OrderSide::Sell,
+      ou::tf::OrderSide::Buy,
       100
     );
-    //pProvider->PlaceOrder( pOrder );
+
+    om.PlaceOrder( pProvider.get(), pOrder );
 
     sleep( 20 );
 
