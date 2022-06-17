@@ -58,7 +58,7 @@ Provider::Provider()
 , m_state( EState::start )
 , m_ssl_context( ssl::context::tlsv12_client )
 {
-  m_sName = "Alpaca";
+  m_sName = "alpaca"; // this needs to match provider used in the database
   m_nID = keytypes::EProviderAlpaca;
   m_bProvidesBrokerInterface = true;
   m_bProvidesQuotes = true;  // fake this for now
