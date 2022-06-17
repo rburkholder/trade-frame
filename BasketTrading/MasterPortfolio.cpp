@@ -97,7 +97,7 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
-      m_pIB = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( pExec );  // TODO: convert to boost:: to std::
+      m_pIB = ou::tf::ib::TWS::Cast( pExec );
       break;
     default:
       assert( false ); // need the IB provider, or at least some provider
@@ -105,7 +105,7 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pData1->ID() ) {
     case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( pData1 );  // TODO: convert to boost:: to std::
+      m_pIQ = ou::tf::iqfeed::IQFeedProvider::Cast( pData1 );
       break;
     default:
       assert( false ); // need the iqfeed provider

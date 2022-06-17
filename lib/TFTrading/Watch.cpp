@@ -155,7 +155,7 @@ void Watch::EnableWatch() {
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) { // hook up prior to watch start
       // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
       ou::tf::iqfeed::IQFeedProvider::pProvider_t pIQFeedProvider
-        = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( m_pDataProvider );
+        = ou::tf::iqfeed::IQFeedProvider::Cast( m_pDataProvider );
       ou::tf::iqfeed::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument );
       pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
@@ -198,7 +198,7 @@ void Watch::DisableWatch() {
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::iqfeed::IQFeedProvider::pProvider_t pIQFeedProvider;
       // NOTE: if there are link errors for this, re-order TFIQFeed to after TFTrading
-      pIQFeedProvider = boost::dynamic_pointer_cast<ou::tf::iqfeed::IQFeedProvider>( m_pDataProvider );
+      pIQFeedProvider = ou::tf::iqfeed::IQFeedProvider::Cast( m_pDataProvider );
       ou::tf::iqfeed::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument );
       pSymbol->OnSummaryMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );

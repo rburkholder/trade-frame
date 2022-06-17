@@ -67,7 +67,7 @@ Strategy::Strategy( pWatch_t pWatch )
   }
 
   m_bfBar.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarComplete ) );
-  m_pIB = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( pWatch->GetProvider() );
+  m_pIB = ou::tf::ib::TWS::Cast( pWatch->GetProvider() );
   m_pWatch = pWatch;
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );

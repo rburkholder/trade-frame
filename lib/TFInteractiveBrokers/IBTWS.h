@@ -23,8 +23,6 @@
 #include <functional>
 #include <condition_variable>
 
-#include <boost/shared_ptr.hpp>
-
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
 
@@ -56,8 +54,9 @@ class TWS :
 {
 public:
 
-  using pProvider_t = boost::shared_ptr<TWS>;
+  using pProvider_t = std::shared_ptr<TWS>;
   using ProviderInterface_t = ProviderInterface<TWS, Symbol>;
+  using inherited_t = ProviderInterface_t;
   using pSymbol_t = Symbol::pSymbol_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pOrder_t = ou::tf::Order::pOrder_t;
@@ -71,6 +70,10 @@ public:
 
   TWS( const std::string& acctCode = "", const std::string& address = "127.0.0.1", unsigned int port = 7496 );
   virtual ~TWS();
+
+  static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
+    return std::dynamic_pointer_cast<TWS>( pProvider );
+  }
 
   // From ProviderInterface:
   void Connect();
@@ -88,7 +91,7 @@ public:
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
 
   using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
-  using fOnContractDetailDone_t = std::function<void(bool)>; // true if success, false if stuck in queue; 
+  using fOnContractDetailDone_t = std::function<void(bool)>; // true if success, false if stuck in queue;
 
   void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t&,
                                                          fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );
@@ -231,7 +234,7 @@ private:
     Contract contract; // used when having to resubmit
     std::chrono::time_point<std::chrono::system_clock> submitted; // submission turn-around calculation
 
-    Request( 
+    Request(
       reqId_t id_, fOnContractDetail_t&& fProcess_, fOnContractDetailDone_t&& fDone_, pInstrument_t pInstrument_ )
       : id( id_ )
       , cntEvictionType1 {}

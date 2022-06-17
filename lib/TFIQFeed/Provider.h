@@ -30,7 +30,7 @@ class IQFeedProvider :
   friend IQFeed<IQFeedProvider>;
 public:
 
-  using pProvider_t = boost::shared_ptr<IQFeedProvider>;
+  using pProvider_t = std::shared_ptr<IQFeedProvider>;
   using inherited_t = ProviderInterface<IQFeedProvider,IQFeedSymbol>;
   using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
@@ -41,7 +41,11 @@ public:
   virtual ~IQFeedProvider();
 
   static pProvider_t Factory() {
-    return boost::make_shared<IQFeedProvider>();
+    return std::make_shared<IQFeedProvider>();
+  }
+
+  static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
+    return std::dynamic_pointer_cast<IQFeedProvider>( pProvider );
   }
 
   // do these need to be virtual?  use crtp?

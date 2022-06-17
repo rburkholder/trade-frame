@@ -147,7 +147,7 @@ bool AppIntervalTrader::OnInit() {
           "trader", "self", "aggregate", ou::tf::Portfolio::EPortfolioType::Basket, "USD", "aggregate" );
 
       m_bIQFeedConnected = false;
-      m_pIQFeed = boost::make_shared<ou::tf::iqfeed::IQFeedProvider>();
+      m_pIQFeed = std::make_shared<ou::tf::iqfeed::IQFeedProvider>(); // use ProviderManager::Construct?
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnecting ) );
       m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnected ) );
       m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnecting ) );
@@ -156,7 +156,7 @@ bool AppIntervalTrader::OnInit() {
       m_pIQFeed->Connect();
 
       m_bIBConnected = false;
-      m_pIB = boost::make_shared<ou::tf::ib::TWS>();
+      m_pIB = std::make_shared<ou::tf::ib::TWS>(); // use ProviderManager::Construct?
       m_pIB->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnecting ) );
       m_pIB->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBConnected ) );
       m_pIB->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIBDisconnecting ) );

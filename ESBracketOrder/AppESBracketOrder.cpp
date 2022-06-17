@@ -102,7 +102,7 @@ bool AppESBracketOrder::OnInit() {
   Bind( wxEVT_TIMER, &AppESBracketOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_bIBConnected = false;
-  m_pIB = boost::make_shared<ou::tf::ib::TWS>();
+  m_pIB = std::make_shared<ou::tf::ib::TWS>();
   m_pIB->SetClientId( 6 );
   m_pIB->OnConnecting.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnecting ) );
   m_pIB->OnConnected.Add( MakeDelegate( this, &AppESBracketOrder::HandleIBConnected ) );

@@ -353,7 +353,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
     itemBoxSizer2->Add(m_splitPanels, 1, wxGROW|wxALL, 2);
 
   if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
-    ou::tf::ib::TWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pExecutionProvider );
+    ou::tf::ib::TWS::pProvider_t pProviderIB = ou::tf::ib::TWS::Cast( m_pExecutionProvider );
     pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::GridIBPositionDetails::UpdatePositionDetailRow );
     pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::GridIBAccountValues::UpdateAccountValueRow );
   }

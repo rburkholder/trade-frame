@@ -15,10 +15,9 @@
 
 #include <map>
 #include <string>
+#include <memory>
 #include <stdexcept>
 #include <algorithm>
-
-#include <boost/shared_ptr.hpp>
 
 #include <boost/thread.hpp>
 #include <boost/bind/bind.hpp>
@@ -52,7 +51,7 @@ namespace tf { // TradeFrame
 class ProviderInterfaceBase {
 public:
 
-  using pProvider_t = boost::shared_ptr<ProviderInterfaceBase>;
+  using pProvider_t = std::shared_ptr<ProviderInterfaceBase>;
 
   using pOrder_t = Order::pOrder_t;
 //  typedef keytypes::idProvider_t idProvider_t;

@@ -19,7 +19,6 @@
 
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind/bind.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -49,7 +48,7 @@ class SimulationProvider
 {
 public:
 
-  using pProvider_t = boost::shared_ptr<SimulationProvider>;
+  using pProvider_t = std::shared_ptr<SimulationProvider>;
   using inherited_t = ProviderInterface<SimulationProvider,SimulationSymbol>;
   using pInstrument_t = Instrument::pInstrument_t;
   using pInstrument_cref = Instrument::pInstrument_cref;
@@ -58,6 +57,10 @@ public:
 
   SimulationProvider();
   virtual ~SimulationProvider();
+
+  static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
+    return std::dynamic_pointer_cast<SimulationProvider>( pProvider );
+  }
 
   virtual void Connect();
   virtual void Disconnect();

@@ -88,7 +88,7 @@ void TradeLifeTime::ClearOrders() {
 // see TFTrading/MonitorOrder.cpp
 double TradeLifeTime::PriceInterval( double price ) const {
   auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
-  double interval = boost::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+  double interval = ou::tf::ib::TWS::Cast( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
   return interval;
 }
 

@@ -39,7 +39,7 @@ public:
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
   ProviderManager() {};
-  ~ProviderManager() {};
+  virtual ~ProviderManager() {};
 
   // when to use Construct and when to use Get?
   pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
@@ -47,6 +47,9 @@ public:
   void Register( const idProvider_t& key,  pProvider_t pProvider );
   void Release( const idProvider_t& key );  // should we check for close or anything?  need to keep a lock count.
   pProvider_t Get( const idProvider_t& key );
+
+  template<class P> pProvider_t Construct();
+  void Register( pProvider_t pProvider );
 
 protected:
 
@@ -60,10 +63,16 @@ private:
 
 };
 
+template<class P> ProviderManager::pProvider_t ProviderManager::Construct() {
+  // need to perform some construction asssertions to ensure P is of a valid type
+  pProvider_t pProvider = std::make_shared<P>();
+  Register( pProvider );
+  return pProvider;
+}
+
 template<class P> ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key ) {
   // need to perform some construction asssertions to ensure P is of a valid type
-  pProvider_t pProvider;
-  pProvider.reset( new P() );
+  pProvider_t pProvider = std::make_shared<P>();
   Register( key, pProvider );
   return pProvider;
 }

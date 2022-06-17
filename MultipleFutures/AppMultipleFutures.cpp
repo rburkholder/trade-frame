@@ -105,7 +105,7 @@ bool AppMultipleFutures::OnInit() {
   m_nbStrategy->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &AppMultipleFutures::OnNotebookPageChanged, this );
 
   m_bIBConnected = false;
-  m_pIB = boost::make_shared<ou::tf::ib::TWS>();
+  m_pIB = std::make_shared<ou::tf::ib::TWS>(); // use ProviderManager::Construct?
   m_pIB->SetClientId( 6 );
   m_pIB->OnConnecting.Add( MakeDelegate( this, &AppMultipleFutures::HandleIBConnecting ) );
   m_pIB->OnConnected.Add( MakeDelegate( this, &AppMultipleFutures::HandleIBConnected ) );

@@ -234,7 +234,7 @@ void Strategy::Start( void ) {  // live trading
 
 void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 
-  m_sim = boost::dynamic_pointer_cast<ou::tf::SimulationProvider>( m_pExecutionProvider );
+  m_sim = ou::tf::SimulationProvider::Cast( m_pExecutionProvider );
 
   m_sim->SetGroupDirectory( "/app/semiauto/2012-Jul-22 18:08:14.285807" );
 

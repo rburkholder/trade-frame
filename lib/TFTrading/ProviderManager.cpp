@@ -42,13 +42,24 @@ ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key
 }
 
 void ProviderManager::Register( const idProvider_t& key, pProvider_t pProvider ) {
-
   if ( m_mapProviders.end() != m_mapProviders.find( key ) ) {
     throw std::runtime_error( "ProviderManager::Register, provider already exists" );
   }
   pProvider->SetName( key );
   m_mapProviders.insert( mapProviders_pair_t( key, pProvider ) );
+}
 
+void ProviderManager::Register( pProvider_t pProvider ) {
+
+  const idProvider_t& key( pProvider->GetName() );
+  assert( 0 < key.size() );
+
+  if ( m_mapProviders.end() == m_mapProviders.find( key ) ) {
+    m_mapProviders.insert( mapProviders_pair_t( key, pProvider ) );
+  }
+  else {
+    throw std::runtime_error( "ProviderManager::Register, provider already exists" );
+  }
 }
 
 void ProviderManager::Release( const idProvider_t& key ) {
