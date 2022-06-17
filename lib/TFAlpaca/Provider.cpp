@@ -111,6 +111,11 @@ void Provider::Set( const std::string& sHost, const std::string& sKey, const std
 
 void Provider::Connect() {
 
+  assert( 0 < m_sHost.size() );
+  assert( 0 < m_sPort.size() );
+  assert( 0 < m_sAlpacaKeyId.size() );
+  assert( 0 < m_sAlpacaSecret.size() );
+
   if ( EState::start == m_state ) {
 
     m_state = EState::connect;
