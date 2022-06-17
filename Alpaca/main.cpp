@@ -48,6 +48,9 @@ int main( int argc, char** argv )
     //auto const port = argv[2];
     //auto const target = argv[3];
 
+    // 'get' to obtain crypto asset list
+    //const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
+
     // 1. load choices
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
