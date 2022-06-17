@@ -25,6 +25,7 @@
 #include <TFTrading/DBWrapper.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
+#include <TFTrading/ProviderManager.h>
 #include <TFTrading/InstrumentManager.h>
 
 #include <TFAlpaca/Provider.hpp>
@@ -47,23 +48,20 @@ int main( int argc, char** argv )
     //auto const port = argv[2];
     //auto const target = argv[3];
 
-    //const std::string sVersion( "1.0" );
-    //int version = ( argc == 5 && !std::strcmp( "1.0", sVersion.c_str() ) ) ? 10 : 11;
-    static const int version = 11;
-
-    static const std::string sDbName( "alpaca.db" );
-    std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
-
+    // 1. load choices
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
 
-    //const std::string sPort( "443" );
-    //const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
-
+    // 2. construct manager & register
     using pProvider_t = ou::tf::alpaca::Provider::pProvider_t;
     pProvider_t pProvider = std::make_shared<ou::tf::alpaca::Provider>();
+    ou::tf::ProviderManager::GlobalInstance().Register( pProvider );
 
     pProvider->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+
+    // 3. database can then use the registered provider
+    static const std::string sDbName( "alpaca.db" );
+    std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
     pProvider->Connect();
 
