@@ -28,9 +28,9 @@ namespace tf { // TradeFrame
 class DBOps: public ou::db::Session {
 public:
 
-  DBOps(void);
-  ~DBOps(void);
-  
+  DBOps();
+  virtual ~DBOps();
+
   typedef Instrument::idInstrument_cref idInstrument_cref;
   //typedef Instrument::idInstrument_t idInstrument_t;
 

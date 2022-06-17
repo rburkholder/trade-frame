@@ -24,14 +24,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-DBOps::DBOps(void): ou::db::Session() {
+DBOps::DBOps(): ou::db::Session() {
   OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
   OnDenitializeManagers.Add( &ou::tf::HandleDenitializeManagers );
   OnPopulate.Add( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
   OnLoad.Add( MakeDelegate( this, &DBOps::HandleLoadTables ) );
 }
 
-DBOps::~DBOps(void) {
+DBOps::~DBOps() {
   OnLoad.Remove( MakeDelegate( this, &DBOps::HandleLoadTables ) );
   OnPopulate.Remove( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
   OnInitializeManagers.Remove( &ou::tf::HandleInitializeManagers );
