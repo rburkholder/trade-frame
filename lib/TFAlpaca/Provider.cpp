@@ -52,15 +52,11 @@ namespace {
 } // namespace anonymous
 
 
-Provider::Provider( const std::string& sHost, const std::string& sKey, const std::string& sSecret )
+Provider::Provider()
 : ProviderInterface<Provider,Asset>()
 , m_kwmEvent( EEvent::unknown, 20 )
 , m_state( EState::start )
 , m_ssl_context( ssl::context::tlsv12_client )
-, m_sHost( sHost )
-, m_sPort( "443" )
-, m_sAlpacaKeyId( sKey )
-, m_sAlpacaSecret( sSecret )
 {
   m_sName = "Alpaca";
   m_nID = keytypes::EProviderAlpaca;
@@ -104,6 +100,13 @@ Provider::~Provider() {
   }
   m_pTradeUpdates.reset();
   m_mapAssetId.clear();
+}
+
+void Provider::Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret ) {
+  m_sHost = sHost;
+  m_sPort = "443";
+  m_sAlpacaKeyId = sKey;
+  m_sAlpacaSecret = sSecret;
 }
 
 void Provider::Connect() {

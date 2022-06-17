@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include <boost/asio/ssl.hpp>
 
@@ -53,19 +54,17 @@ class Provider:
 {
 public:
 
-  using pProvider_t = boost::shared_ptr<Provider>;
+  using pProvider_t = std::shared_ptr<Provider>;
   using inherited_t = ProviderInterface<Provider,Asset>;
   using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
   using pInstrument_t = inherited_t::pInstrument_t;
   using pOrder_t = ou::tf::Order::pOrder_t;
 
-  Provider( const std::string& sHost, const std::string& sKey, const std::string& sSecret );
+  Provider(); // for auto construction by ProviderManager
   virtual ~Provider();
 
-  static pProvider_t Factory( const std::string& sHost, const std::string& sKey, const std::string& sSecret ) {
-    return boost::make_shared<Provider>( sHost, sKey, sSecret );
-  }
+  void Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret );
 
   // do these need to be virtual?  use crtp?
   virtual void Connect();

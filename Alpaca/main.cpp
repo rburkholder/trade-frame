@@ -57,12 +57,14 @@ int main( int argc, char** argv )
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
 
-    const std::string sPort( "443" );
+    //const std::string sPort( "443" );
     //const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
 
-    auto pProvider = ou::tf::alpaca::Provider::Factory(
-      choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret
-    );
+    using pProvider_t = ou::tf::alpaca::Provider::pProvider_t;
+    pProvider_t pProvider = std::make_shared<ou::tf::alpaca::Provider>();
+
+    pProvider->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+
     pProvider->Connect();
 
     sleep( 4 );
@@ -107,7 +109,7 @@ int main( int argc, char** argv )
         100
       );
 
-      om.PlaceOrder( pProvider.get(), pOrder );
+      //om.PlaceOrder( pProvider.get(), pOrder );
     }
 
 
@@ -117,6 +119,8 @@ int main( int argc, char** argv )
     pPosition.reset();
     pInstrument.reset();
     pProvider.reset();
+
+    m_pdb.reset();
 
     return EXIT_SUCCESS;
 }
