@@ -11,15 +11,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <stdexcept>
-
-#include "ProviderManager.h"
 
 #include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.h>
+
+#include "ProviderManager.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 
 #include <OUCommon/ManagerBase.h>
 
@@ -26,7 +26,7 @@
 
 // key might be account or other similar globally known identifier
 
-// map could be converted over to boost::fusion for storing full types and values for the 
+// map could be converted over to boost::fusion for storing full types and values for the
 // various providers, and then have specialized algorithms for processing the tuples of providers.
 
 namespace ou { // One Unified
@@ -38,8 +38,8 @@ public:
   typedef keytypes::idProvider_t idProvider_t;
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  ProviderManager(void) {};
-  ~ProviderManager(void) {};
+  ProviderManager() {};
+  ~ProviderManager() {};
 
   // when to use Construct and when to use Get?
   pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
