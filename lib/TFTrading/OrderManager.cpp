@@ -589,12 +589,15 @@ namespace OrderManagerQueries {
 }
 
 void OrderManager::HandleLoadTables( ou::db::Session& session ) {
-  ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pQuery
-    = m_pSession->SQL<ou::db::NoBind>( "select max(orderid) as orderid from orders;" );
-  if ( m_pSession->Execute( pQuery ) ) {
+  try {
+    ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pQuery
+      = m_pSession->SQL<ou::db::NoBind>( "select max(orderid) as orderid from orders;" ); // immediately executed
     OrderManagerQueries::ColumnMaxOrderId result;
     m_pSession->Columns<ou::db::NoBind,OrderManagerQueries::ColumnMaxOrderId>( pQuery, result );
-    ou::tf::Order::idOrder_t id = CheckOrderId( result.idOrder );
+    ou::tf::Order::idOrder_t id = CheckOrderId( result.idOrder ); // produces 0 when no orders present
+  }
+  catch ( const std::runtime_error& error ) {
+    std::cout << "OrderManager::HandleLoadTables: no orders found, " << error.what() << std::endl;
   }
 }
 
