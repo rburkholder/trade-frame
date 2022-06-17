@@ -11,13 +11,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "Managers.h"
-
 #include "ProviderManager.h"
 #include "InstrumentManager.h"
 #include "AccountManager.h"
 #include "PortfolioManager.h"
 #include "OrderManager.h"
+
+#include "Managers.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -50,8 +50,8 @@ void HandleInitializeManagers( ou::db::Session* pSession ) {
 
 void HandleDenitializeManagers( ou::db::Session& session ) {
   // take down the links
-  OrderManager::Instance().SetOnOrderNeedsDetails( 0 );
-  PortfolioManager::Instance().SetOnPositionNeedDetails( 0 );
+  OrderManager::Instance().SetOnOrderNeedsDetails( nullptr );
+  PortfolioManager::Instance().SetOnPositionNeedDetails( nullptr );
 
   ProviderManager::Instance().DetachFromSession( &session );
   InstrumentManager::Instance().DetachFromSession( &session );
