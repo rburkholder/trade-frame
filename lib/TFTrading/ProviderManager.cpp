@@ -14,6 +14,7 @@
 #include <stdexcept>
 
 #include <TFIQFeed/Provider.h>
+//#include <TFAlpaca/Provider.hpp>
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.h>
 
@@ -34,6 +35,9 @@ ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key
   case keytypes::EProviderSimulator:
     pProvider = Construct<SimulationProvider>( key );
     break;
+  //case keytypes::EProviderAlpaca: // use manual registration instead
+  //  pProvider = Construct<ou::tf::alpaca::Provider>( key );
+  //  break;
   case keytypes::EProviderGNDT:
     throw std::runtime_error( "GNDT not implemented" );
     break;
