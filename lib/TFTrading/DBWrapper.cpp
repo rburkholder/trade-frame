@@ -47,6 +47,9 @@ db::db( const std::string& sFileName ) {
 
     m_db.Open( sFileName );
   }
+  catch( std::runtime_error& e ) {
+    std::cout << "database startup error: " << e.what() << std::endl;
+  }
   catch(...) {
     std::cout << "database fault on " << sFileName << std::endl;
   }
