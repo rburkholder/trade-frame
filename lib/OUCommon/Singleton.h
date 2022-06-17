@@ -15,11 +15,10 @@
 
 #include <stdexcept>
 
-#include <boost/thread/tss.hpp>
 #include <boost/utility.hpp>
+#include <boost/thread/tss.hpp>
 
 // other classes to fix:
-//   IQFeedProviderSingleton
 //   TimeSource
 
 // http://www.oneunified.net/blog/Personal/SoftwareDevelopment/CPP/Singleton.article
@@ -46,7 +45,7 @@ protected:
 private:
 };
 
-template<typename T> 
+template<typename T>
 class Singleton: boost::noncopyable, public SingletonBase {
 public:
   static T& Instance() { return GlobalInstance(); }  // to be deprecated
@@ -74,19 +73,19 @@ public:
       break;
     case Assigned:
       t = m_pT.get();
-      if ( 0 == t ) 
+      if ( 0 == t )
         throw std::runtime_error( "LocalCommonInstance not available" );
       return *t;
       break;
-    default: 
-      throw std::runtime_error( "m_source mis-assigned" );
+    default:
+      throw std::runtime_error( "LocalCommonInstance mis-assigned" );
       break;
     }
   }
   static void SetLocalCommonInstance( T* t ) {
     m_pT.reset( t );
   }
-  static void ClearLocalCommonInstance( void ) {
+  static void ClearLocalCommonInstance() {
     m_pT.reset();
   }
 
@@ -113,7 +112,7 @@ boost::thread_specific_ptr<T> Singleton<T>::m_pT;
 template<typename T>
 class MultipleInstanceTest {
 public:
-  MultipleInstanceTest( void ) {
+  MultipleInstanceTest() {
 #ifdef _DEBUG
     ++m_ref;
     // this may be changed to handle multi thread stuff, Dr. Dobbs has a solution
