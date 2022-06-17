@@ -86,26 +86,26 @@ void db::HandlePopulateDatabase() {
   std::cout << "db::HandlePopulateDatabase" << std::endl;
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
-    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaTF", "Primary User", "TradeFrame" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountAdvisor( "aaTF", "Primary User", "TradeFrame" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoTF", "aaTF", "Primary", "User" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountOwner( "aoTF", "aaTF", "Primary", "User" );
 
   ou::tf::AccountManager::pAccount_t pAccountIB
-    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoTF", "Primary User", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "ib01", "aoTF", "Primary User", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoTF", "Primary User", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "iq01", "aoTF", "Primary User", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountSimulator
-    = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoTF", "Primary User", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "sim01", "aoTF", "Primary User", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster  // owning portfolio: -none-
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "Master", "aoTF", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Master of all Portfolios" );
 
   m_pPortfolioCurrencyUSD  // owning portfolio: Master
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "USD", "aoTF", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "CurrencySummary of USD Portfolios" );
 
 }

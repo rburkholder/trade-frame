@@ -72,7 +72,7 @@ bool AppIndicatorTrading::OnInit() {
 
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
+    auto dt = ou::TimeSource::GlobalInstance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << "-"

@@ -77,8 +77,8 @@ Strategy::Strategy( pWatch_t pWatch, uint16_t nSecondsPerBar )
   //dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed1 ) );
   dynamic_cast<ou::tf::Prices&>( m_smaK ).OnAppend.Add( MakeDelegate( this, &Strategy::UpdateStochasticSmoothed2 ) );
 
-  ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
-  std::cout << "ou::TimeSource::Instance().External(): " << dtNow << std::endl;
+  ptime dtNow( ou::TimeSource::GlobalInstance().External() );  // provided in utc
+  std::cout << "ou::TimeSource::GlobalInstance().External(): " << dtNow << std::endl;
   boost::gregorian::date dateMarketOpen( MarketOpenDate( dtNow ) );
   std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
   InitForUS24HourFutures( dateMarketOpen );

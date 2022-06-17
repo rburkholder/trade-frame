@@ -312,7 +312,7 @@ void AppBasketTrading::HandleButtonLoad() {
       //if ( m_pPortfolioStrategyAggregate ) {  // if not newly created in HandlePopulateDatabase, then load previously created portfolio
         // code currently does not allow a restart of session
         //std::cout << "Cannot create new portfolio: " << m_sPortfolioStrategyAggregate << std::endl;
-        //m_pPortfolio = ou::tf::PortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
+        //m_pPortfolio = ou::tf::PortfolioManager::GlobalInstance().GetPortfolio( sDbPortfolioName );
         // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
         // 2019/05/22: in process of fixing this
       //}
@@ -446,30 +446,30 @@ void AppBasketTrading::HandlePopulateDatabase() {
   std::cout << "AppBasketTrading::HandlePopulateDatabase" << std::endl;
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
-    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
   ou::tf::AccountManager::pAccount_t pAccountIB
-    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountSimulator
-    = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Master of all Portfolios" );
 
   m_pPortfolioCurrencyUSD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "CurrencySummary of USD Portfolios" );
 
   m_pPortfolioStrategyAggregate
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     m_sPortfolioStrategyAggregate, "aoRay", "USD", ou::tf::Portfolio::Basket, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Underlying Instances" );
 
 }

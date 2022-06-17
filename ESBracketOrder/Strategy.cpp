@@ -75,8 +75,8 @@ Strategy::Strategy( pWatch_t pWatch )
   m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Strategy::HandleUnRealizedPL ) );
   m_pPosition->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
 
-  ptime dtNow( ou::TimeSource::Instance().External() );  // provided in utc
-  std::cout << "ou::TimeSource::Instance().External(): " << dtNow << std::endl;
+  ptime dtNow( ou::TimeSource::GlobalInstance().External() );  // provided in utc
+  std::cout << "ou::TimeSource::GlobalInstance().External(): " << dtNow << std::endl;
   boost::gregorian::date dateMarketOpen( MarketOpenDate( dtNow ) );
   std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
   InitForUS24HourFutures( dateMarketOpen );

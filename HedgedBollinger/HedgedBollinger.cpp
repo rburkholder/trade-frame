@@ -268,7 +268,7 @@ void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
   m_bIVCalcActive = false;
 
   ptime dt;
-  ou::TimeSource::Instance().Internal( &dt );
+  ou::TimeSource::GlobalInstance().Internal( &dt );
   m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds() );
   m_timerGuiRefresh.Start( 250 );
 
@@ -377,13 +377,13 @@ void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( bool ) {
 void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying ) {
 
   // instrument needs to be registered with InstrumentManager
-  ou::tf::InstrumentManager::Instance().Register( pInstrumentUnderlying );
+  ou::tf::InstrumentManager::GlobalInstance().Register( pInstrumentUnderlying );
 
   // tradeable options will need to be registered with the InstrumentManager
   // suitable portfolios and positions need to be managed with PortfolioManager
 
   // work out current expiry and next expiry
-  ptime now = ou::TimeSource::Instance().External();
+  ptime now = ou::TimeSource::GlobalInstance().External();
 
   assert( m_dateFrontMonthOption > now.date() );
 
@@ -391,9 +391,9 @@ void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrument
   // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
 
   ptime dtFrontMonthExpiryUtc(
-    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateFrontMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
+    ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( m_dateFrontMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
   ptime dtSecondMonthExpiryUtc(
-    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateSecondMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
+    ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( m_dateSecondMonthOption, time_duration( 13, 30, 0 ), "America/New_York" ) );
 
   std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
   std::cout << "Expiry strings: " << m_dateFrontMonthOption << ", " << m_dateSecondMonthOption << std::endl;
@@ -412,7 +412,7 @@ void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrument
 
   m_pBundle->Portfolio() = m_pPortfolioGC;
 //  m_pBundle->Portfolio()
-//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
   m_pStrategy = new Strategy( m_pBundle, m_pPortfolioGCLongs, m_pPortfolioGCShorts, m_pExecutionProvider );
@@ -512,7 +512,7 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
         m_cntIVCalc = m_nthIVCalc;
         if ( 0 != m_pthreadIVCalc ) delete m_pthreadIVCalc;
         m_bIVCalcActive = true;
-        m_pthreadIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, ou::TimeSource::Instance().External() ) );
+        m_pthreadIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, ou::TimeSource::GlobalInstance().External() ) );
       }
     }
   //}
@@ -642,42 +642,42 @@ void AppHedgedBollinger::HandleRegisterRows(  ou::db::Session& session ) {
 void AppHedgedBollinger::HandlePopulateDatabase( void ) {
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
-    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
   ou::tf::AccountManager::pAccount_t pAccountIB
-    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountSimulator
-    = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Master Summary" );
 
   m_pPortfolioCurrencyUSD
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "USD Master" );
 
   m_pPortfolioGC
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "GC", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
   m_pPortfolioGCLongs
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "GCLong", "aoRay", "GC", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Longs" );
 
   m_pPortfolioGCShorts
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     "GCShort", "aoRay", "GC", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Shorts" );
 
 //  m_pPortfolioShorts
-//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //    "Shorts", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
 

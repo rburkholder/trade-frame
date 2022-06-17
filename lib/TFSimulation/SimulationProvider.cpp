@@ -286,7 +286,7 @@ void SimulationProvider::Merge() {
   }
 
   m_nProcessedDatums = 0;
-  m_dtSimStart = ou::TimeSource::Instance().External();
+  m_dtSimStart = ou::TimeSource::GlobalInstance().External();
 
   bool bOldMode = ou::TimeSource::LocalCommonInstance().GetSimulationMode();
   ou::TimeSource::LocalCommonInstance().SetSimulationMode();

@@ -71,9 +71,9 @@ bool AppScanner::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   ptime dt;
-  ou::TimeSource::Instance().External( &dt );
+  ou::TimeSource::GlobalInstance().External( &dt );
 
-  std::cout << "UTC: " << dt << " Local: " << ou::TimeSource::Instance().Local() << std::endl;
+  std::cout << "UTC: " << dt << " Local: " << ou::TimeSource::GlobalInstance().Local() << std::endl;
 
   return 1;
 

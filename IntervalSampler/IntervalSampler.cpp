@@ -158,7 +158,7 @@ bool AppIntervalSampler::OnInit() {
           }
           else {
             std::string sTimeZoneRegion = vm[ sNameRegion ].as<std::string>();
-            m_ptz = ou::TimeSource::Instance().LoadTimeZone( sTimeZoneRegion );
+            m_ptz = ou::TimeSource::GlobalInstance().LoadTimeZone( sTimeZoneRegion );
             std::cout << sTimeZoneRegion << ": offset=" << m_ptz->base_utc_offset() << ", dst=" << m_ptz->dst_offset() << std::endl;
           }
           for ( auto& sCollectAt: vm[sNameCollectAt].as<std::vector<std::string> >() ) {
@@ -300,7 +300,7 @@ void AppIntervalSampler::OutputFileCheck( boost::gregorian::date date ) {
 
 void AppIntervalSampler::CalcNextPollTime() {
   bool bFound( false );
-  boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+  boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().External();
   boost::posix_time::time_duration offset = m_ptz->base_utc_offset();
   if ( m_ptz->has_dst() ) { // not the most precise of calculations
     const boost::posix_time::ptime dst_bgn = m_ptz->dst_local_start_time( now.date().year() );
@@ -396,7 +396,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
 
   switch ( m_eCollectionMethod ) {
     case ECollectionMethod::interval: {
-      boost::posix_time::ptime now( ou::TimeSource::Instance().External() );
+      boost::posix_time::ptime now( ou::TimeSource::GlobalInstance().External() );
       m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
       while ( m_dtInterval <= now ) {
         m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );

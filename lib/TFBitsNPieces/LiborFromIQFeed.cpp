@@ -47,7 +47,7 @@ void Initialize( pProvider_t pProvider ) {
   vLibor.push_back( structLibor( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ) ); // 11 month
   vLibor.push_back( structLibor( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ) ); //  1 year 
 
-  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::GlobalInstance() );
   ou::tf::Instrument::pInstrument_t pInstrument;
   for ( vLibor_t::iterator iter = vLibor.begin(); vLibor.end() != iter; ++iter ) {
     // need to check if it already exists

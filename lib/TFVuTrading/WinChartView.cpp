@@ -252,7 +252,7 @@ void WinChartView::ThreadDrawChart() {
 
     if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
       //if ( m_bReCalcViewPort ) {
-        boost::posix_time::ptime now = ou::TimeSource::Instance().Internal(); // works with real vs simulation time
+        boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
 
         static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
         auto now_ = now;

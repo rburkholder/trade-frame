@@ -149,7 +149,7 @@ void Symbol::BuildQuote() {
     if ( m_bAskFound || m_bBidFound ) {
     //boost::local_time::local_date_time ldt =
     //  boost::local_time::local_microsec_clock::local_time();
-    Quote quote( ou::TimeSource::Instance().External(), m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    Quote quote( ou::TimeSource::GlobalInstance().External(), m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
     //std::cout << "Q:" << quote.m_dt << " "
     //  << quote.m_nBidSize << "@" << quote.m_dblBid << " "
     //  << quote.m_nAskSize << "@" << quote.m_dblAsk
@@ -168,7 +168,7 @@ void Symbol::BuildTrade() {
   //}
   //if ( m_bLastTimeStampFound && m_bLastFound && m_bLastSizeFound ) {
   if ( m_bLastFound && m_bLastSizeFound ) {
-    Trade trade( ou::TimeSource::Instance().External(), m_dblLast, m_nLastSize );
+    Trade trade( ou::TimeSource::GlobalInstance().External(), m_dblLast, m_nLastSize );
     //std::cout << "T:" << trade.m_dt << " " << trade.m_nTradeSize << "@" << trade.m_dblTrade << std::endl;
     m_OnTrade( trade );
     //m_bLastTimeStampFound = m_bLastFound = m_bLastSizeFound = false;
@@ -184,7 +184,7 @@ void Symbol::Greeks( double optPrice, double undPrice, double pvDividend,
   m_dblPvDividend = pvDividend;
 
   ptime dt;
-  ou::TimeSource::Instance().External( &dt );
+  ou::TimeSource::GlobalInstance().External( &dt );
 
   Greek greek( dt, impliedVol, delta, gamma, theta, vega, 0 );
 

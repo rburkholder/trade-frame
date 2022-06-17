@@ -54,7 +54,7 @@ bool AppRdafL1::OnInit() {
   m_nTSDataStreamSequence = 0;
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
+    auto dt = ou::TimeSource::GlobalInstance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << "-"

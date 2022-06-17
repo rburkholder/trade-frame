@@ -249,7 +249,7 @@ void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage* pMsg ) {
   Summary& summary( *m_pSummary );
 
   if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
-    ptime dt( ou::TimeSource::Instance().External() );
+    ptime dt( ou::TimeSource::GlobalInstance().External() );
     Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
     STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
   }
@@ -273,7 +273,7 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage* pMsg ) {
     Summary& summary( *m_pSummary );
 
     //ptime dt( microsec_clock::local_time() );
-    ptime dt( ou::TimeSource::Instance().External() );
+    ptime dt( ou::TimeSource::GlobalInstance().External() );
     // quote needs to be sent before the trade
     if ( summary.bNewQuote ) {
       const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
@@ -299,7 +299,7 @@ void IQFeedSymbol::HandleDynamicFeedSummaryMessage( IQFDynamicFeedSummaryMessage
   Summary& summary( *m_pSummary );
 
   if ( summary.bNewQuote ) { // before or after OnSummaryMessage? UpdateMessage has it after
-    ptime dt( ou::TimeSource::Instance().External() );
+    ptime dt( ou::TimeSource::GlobalInstance().External() );
     Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );
     STRAND_CAPTURE( (Symbol::m_OnQuote( quote )), quote )
   }
@@ -322,7 +322,7 @@ void IQFeedSymbol::HandleDynamicFeedUpdateMessage( IQFDynamicFeedUpdateMessage* 
     Summary& summary( *m_pSummary );
 
     //ptime dt( microsec_clock::local_time() );
-    ptime dt( ou::TimeSource::Instance().External() );
+    ptime dt( ou::TimeSource::GlobalInstance().External() );
     // quote needs to be sent before the trade
     if ( summary.bNewQuote ) {
       const Quote quote( dt, summary.dblBid, summary.nBidSize, summary.dblAsk, summary.nAskSize );

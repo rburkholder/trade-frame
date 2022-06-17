@@ -221,7 +221,7 @@ void Combo::ClosePositions() {
     Leg& leg( entry.second );
     if ( leg.IsActive() ) {
       pPosition_t pPosition = leg.ClosePosition();
-      auto& instance( ou::tf::PortfolioManager::Instance() ); // NOTE this direct call!!
+      auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
       instance.PositionUpdateNotes( pPosition );
     }
   }

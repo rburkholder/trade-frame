@@ -152,7 +152,7 @@ Collar::CollarLeg& Collar::InitTracker(
       values.m_state = LegNote::State::Closed;
       ln.Assign( values );
       pPositionOld->SetNotes( ln.Encode() );
-      auto& instance( ou::tf::PortfolioManager::Instance() ); // NOTE this direct call!!
+      auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
       instance.PositionUpdateNotes( pPositionOld );
 
       cleg.m_monitor.SetPosition( pPositionOld );

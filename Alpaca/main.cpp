@@ -82,7 +82,7 @@ int main( int argc, char** argv )
     }
     else {
       pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "alpaca" );
-      ou::tf::InstrumentManager::Instance().Register( pInstrument );
+      ou::tf::InstrumentManager::GlobalInstance().Register( pInstrument );
     }
 
     ou::tf::Position::pPosition_t pPosition;

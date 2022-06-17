@@ -180,7 +180,7 @@ void Provider::Assets() {
           }
 
           std::cout
-            << "found " << vMessage.size() << " assets, "
+            << "alpaca found " << vMessage.size() << " assets, "
             << nIdMisMatch << " duplicated"
             << std::endl;
 
@@ -208,14 +208,14 @@ void Provider::Positions() {
         json::error_code jec;
         json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
-          std::cout << "failed to parse /v2/positions" << std::endl;
+          std::cout << "alpaca failed to parse /v2/positions" << std::endl;
         }
         else {
           position::vCurrent_t vPositions;
           position::Decode( message, vPositions );
           for ( const position::vCurrent_t::value_type& position: vPositions ) {
             std::cout
-              << "position " << position.symbol
+              << "alpaca position " << position.symbol
               << " " << position.qty << " " << position.side
               << ", market value=" << position.market_value
               << ", current price=" << position.current_price
@@ -364,7 +364,7 @@ void Provider::TradeUpdate( const json::object& obj ) {
         );
         ou::tf::Order::idOrder_t idOrder;
         idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::Instance().ReportExecution( idOrder, exec );
+        OrderManager::GlobalInstance().ReportExecution( idOrder, exec );
       }
       break;
     case EEvent::fill:
@@ -388,7 +388,7 @@ void Provider::TradeUpdate( const json::object& obj ) {
         );
         ou::tf::Order::idOrder_t idOrder;
         idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::Instance().ReportExecution( idOrder, exec );
+        OrderManager::GlobalInstance().ReportExecution( idOrder, exec );
       }
       catch(...) {
         std::cout << "EEVent::fill broke" << std::endl;
@@ -396,9 +396,11 @@ void Provider::TradeUpdate( const json::object& obj ) {
       break;
     case EEvent::canceled:
       {
+        extract( obj, order, "order" );
+        order::Decode( order, status );
         ou::tf::Order::idOrder_t idOrder;
-        extract( obj, idOrder, "client_order_id " );
-        OrderManager::Instance().ReportCancellation( idOrder );
+        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        OrderManager::GlobalInstance().ReportCancellation( idOrder );
       }
       break;
     case EEvent::expired:

@@ -180,7 +180,7 @@ FrameWork01<CRTP>::FrameWork01() :
   // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/date_time_io.html
   boost::posix_time::time_facet* pFacet( new boost::posix_time::time_facet( "%Y-%m-%d %H:%M:%S%F" ) );
   ss.imbue( std::locale( ss.getloc(), pFacet ) );
-  ss << ou::TimeSource::Instance().External();
+  ss << ou::TimeSource::GlobalInstance().External();
   m_sTSDataStreamStarted = ss.str();
 
   // this is where we select which provider we will be working with on this run

@@ -70,7 +70,7 @@ ControllerPortfolioPositionOrderExecution::~ControllerPortfolioPositionOrderExec
 }
 
 void ControllerPortfolioPositionOrderExecution::LoadInitialData( void ) {
-  ou::tf::PortfolioManager::Instance().LoadActivePortfolios();
+  ou::tf::PortfolioManager::GlobalInstance().LoadActivePortfolios();
 }
 
 void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {

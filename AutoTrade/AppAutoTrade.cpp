@@ -72,7 +72,7 @@ bool AppAutoTrade::OnInit() {
 
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::Instance().External();
+    auto dt = ou::TimeSource::GlobalInstance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << " "
@@ -243,7 +243,7 @@ void AppAutoTrade::ConstructSimInstrument() {
 
   ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_sSymbol );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );

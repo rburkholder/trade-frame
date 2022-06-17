@@ -49,11 +49,11 @@ IndicatorPackage::IndicatorPackage(
   m_pProvider->AddTradeHandler( m_pTick, MakeDelegate( this, &IndicatorPackage::HandleOnTick ) );
   m_pProvider->AddTradeHandler( m_pIndex, MakeDelegate( this, &IndicatorPackage::HandleOnIndex ) );
 
-  ptime now = ou::TimeSource::Instance().External();
+  ptime now = ou::TimeSource::GlobalInstance().External();
   ptime dtBegin( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York" ) );
+        ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York" ) );
   ptime dtEnd( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York" ) );
+        ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York" ) );
 
   m_ctViewBegin = m_ctDayBegin = Chart::chartTime( dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
                                      dtBegin.time_of_day().hours(), dtBegin.time_of_day().minutes(), dtBegin.time_of_day().seconds() );

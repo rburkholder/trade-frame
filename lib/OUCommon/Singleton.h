@@ -48,11 +48,11 @@ private:
 template<typename T>
 class Singleton: boost::noncopyable, public SingletonBase {
 public:
-  static T& Instance() { return GlobalInstance(); }  // to be deprecated
   static T& GlobalInstance() {  // global to whole program
     static T _instance;
     return _instance;
   }
+
   static T& LocalUniqueInstance() {  // unique to this thread instance
     T* t( 0 );
     if ( 0 == m_pT.get() ) {
@@ -65,6 +65,7 @@ public:
     }
     return *t;
   }
+
   static T& LocalCommonInstance() { // unique to a number of thread instances, set with SetLocalCommonInstance
     T* t;
     switch ( m_source ) {
@@ -82,9 +83,11 @@ public:
       break;
     }
   }
+
   static void SetLocalCommonInstance( T* t ) {
     m_pT.reset( t );
   }
+
   static void ClearLocalCommonInstance() {
     m_pT.reset();
   }

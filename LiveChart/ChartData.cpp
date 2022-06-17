@@ -26,8 +26,8 @@ ChartData::ChartData( pProvider_t pProvider )
   static const std::string name( "TST$Y" );
   this->GetChartDataView()->SetNames( "LiveChart", name );
   ou::tf::Instrument::pInstrument_t pInstrument
-//    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Stock );
-    = ou::tf::InstrumentManager::Instance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Future );
+//    = ou::tf::InstrumentManager::GlobalInstance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Stock );
+    = ou::tf::InstrumentManager::GlobalInstance().ConstructInstrument( name, "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
@@ -42,4 +42,3 @@ ChartData::~ChartData(void) {
   delete m_pWatch;
 }
 
-// C:\Data\Projects\VSC++\TradeFrame\LiveChart\Chart.cpp

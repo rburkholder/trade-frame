@@ -25,39 +25,39 @@ namespace tf { // TradeFrame
 // providers need to have been opened elsewhere, as this is a lookup into the provider map only
 void HandlePositionDetails( Position::pPosition_t& pPosition ) {
   const Position::TableRowDef& row( pPosition->GetRow() );
-  Instrument::pInstrument_t pInstrument = InstrumentManager::Instance().Get( row.idInstrument );
-  Position::pProvider_t pExecutionProvider = ProviderManager::Instance().Get( row.idExecutionAccount );
-  Position::pProvider_t pDataProvider = ProviderManager::Instance().Get( row.idDataAccount );
+  Instrument::pInstrument_t pInstrument = InstrumentManager::GlobalInstance().Get( row.idInstrument );
+  Position::pProvider_t pExecutionProvider = ProviderManager::GlobalInstance().Get( row.idExecutionAccount );
+  Position::pProvider_t pDataProvider = ProviderManager::GlobalInstance().Get( row.idDataAccount );
   pPosition->Set( pInstrument, pExecutionProvider, pDataProvider );
 }
 
 void HandleOrderDetails( Instrument::idInstrument_t idInstrument, Instrument::pInstrument_t& pInstrument ) {
-  pInstrument = InstrumentManager::Instance().Get( idInstrument );
+  pInstrument = InstrumentManager::GlobalInstance().Get( idInstrument );
 }
 
 void HandleInitializeManagers( ou::db::Session* pSession ) {
-  ProviderManager::Instance().AttachToSession( pSession );
-  InstrumentManager::Instance().AttachToSession( pSession );
-  AccountManager::Instance().AttachToSession( pSession );
-  PortfolioManager::Instance().AttachToSession( pSession );
-  OrderManager::Instance().AttachToSession( pSession );
+  ProviderManager::GlobalInstance().AttachToSession( pSession );
+  InstrumentManager::GlobalInstance().AttachToSession( pSession );
+  AccountManager::GlobalInstance().AttachToSession( pSession );
+  PortfolioManager::GlobalInstance().AttachToSession( pSession );
+  OrderManager::GlobalInstance().AttachToSession( pSession );
 
   // link up with PortfolioManager for call back
-  PortfolioManager::Instance().SetOnPositionNeedDetails( &HandlePositionDetails );
+  PortfolioManager::GlobalInstance().SetOnPositionNeedDetails( &HandlePositionDetails );
   // link up with OrderManager for call back
-  OrderManager::Instance().SetOnOrderNeedsDetails( &HandleOrderDetails );
+  OrderManager::GlobalInstance().SetOnOrderNeedsDetails( &HandleOrderDetails );
 }
 
 void HandleDenitializeManagers( ou::db::Session& session ) {
   // take down the links
-  OrderManager::Instance().SetOnOrderNeedsDetails( nullptr );
-  PortfolioManager::Instance().SetOnPositionNeedDetails( nullptr );
+  OrderManager::GlobalInstance().SetOnOrderNeedsDetails( nullptr );
+  PortfolioManager::GlobalInstance().SetOnPositionNeedDetails( nullptr );
 
-  ProviderManager::Instance().DetachFromSession( &session );
-  InstrumentManager::Instance().DetachFromSession( &session );
-  AccountManager::Instance().DetachFromSession( &session );
-  PortfolioManager::Instance().DetachFromSession( &session );
-  OrderManager::Instance().DetachFromSession( &session );
+  ProviderManager::GlobalInstance().DetachFromSession( &session );
+  InstrumentManager::GlobalInstance().DetachFromSession( &session );
+  AccountManager::GlobalInstance().DetachFromSession( &session );
+  PortfolioManager::GlobalInstance().DetachFromSession( &session );
+  OrderManager::GlobalInstance().DetachFromSession( &session );
 }
 
 } // namespace tf

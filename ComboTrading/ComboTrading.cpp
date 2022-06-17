@@ -421,7 +421,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
       ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd( m_listIQFeedSymbols.GetTrd( sIQFeedOptionName ) ); // TODO: check for errors
       std::string sGenericOptionName = ou::tf::Instrument::BuildGenericOptionName( pUnderlyingInstrument->GetInstrumentName(), date.year(), date.month(), date.day(), trd.eOptionSide, strike );
 
-      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
       pInstrument_t pOptionInstrument;
       if ( im.Exists( sGenericOptionName, pOptionInstrument ) ) {
         if ( nullptr != f ) {
@@ -494,7 +494,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::string& name ) {
   //std::cout << "AppComboTrading::LoadInstrument: " << name << std::endl;
   pInstrument_t p;
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   if ( !im.Exists( name, p ) ) {  // the call will supply instrument if it exists
     throw std::runtime_error( "instrument does not exist" );
   }
@@ -508,7 +508,7 @@ AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::strin
 
 void AppComboTrading::BuildInstrument( ou::tf::IQFeedInstrumentBuild::ValuesForBuildInstrument& values, fInstrumentFromIB_t callback ) {
   std::cout << "AppComboTrading::BuildInstrument: " << values.sKey << " ";
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
     std::cout << "exists ..." << std::endl;
     callback( values.pInstrument );
@@ -639,7 +639,7 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
       = [this](pInstrument_t pOptionInstrument, pInstrument_t pUnderlyingInstrument, pPortfolioGreek_t pPortfolioGreek, ou::tf::PanelOptionCombo::fAddPositionGreek_t f) {
         // convert OptionInstrument to option_t, convert UnderlyingInstrument to watch_t
         // register with engine
-    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
     if ( im.Exists( pOptionInstrument ) ) {
       // is typically built at the m_pPanelCharts->m_fBuildOptionInstrument point in time
       //std::cout << "### verify the code at m_fConstructPositionGreek as instrument exists: " << pInstrument->GetInstrumentName() << " ###" << std::endl;
@@ -693,7 +693,7 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
   pPanelOptionCombo->m_fRemoveFromEngine = std::bind( &ou::tf::option::Engine::Remove, m_pOptionEngine.get(), ph::_1, ph::_2 );
 
   pPanelOptionCombo->m_fLookUpInstrument = [this](const idInstrument_t& idInstrument, pInstrument_t& pInstrument)->pInstrument_t {
-    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
     if ( im.Exists( idInstrument, pInstrument ) ) {
       // all is good, pInstrument is assigned
     }
@@ -868,7 +868,7 @@ void AppComboTrading::TestSymbols( void ) {
           GetInstrument( const list_t& list_, cbInstrument_t cbContract, cbInstrument_t cbBundle_ ): build( list_, cbContract ), cbBundle( cbBundle_ ) {}
           void operator()( const Symbol& u ) {
             // see if the instrument already exists,
-            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
             ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
             if ( im.Exists( u.sName, pInstrument ) ) {  // the call will supply instrument if it exists
               cbBundle( pInstrument );
@@ -920,7 +920,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
 
 void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
   //std::cout << "AppComboTrading::RegisterInstrument: " << pInstrument->GetInstrumentName() << std::endl;
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   if ( im.Exists( pInstrument ) ) {
     //std::cout << "Info: Instrument already registered: " << pInstrument->GetInstrumentName() << std::endl;
     // now there are duplicate instruments.  replace inbound with the one registered?
@@ -1045,7 +1045,7 @@ void AppComboTrading::ConstructEquityPosition1a( const std::string& sName, pPort
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.fAddPosition = function;
 
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
 
   // 20151025
@@ -1128,7 +1128,7 @@ void AppComboTrading::ConstructEquityPosition1b( pInstrument_t pInstrument, pPor
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.fAddPosition = function;
 
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
   if ( im.Exists( pInstrument ) ) {
@@ -1142,7 +1142,7 @@ void AppComboTrading::ConstructEquityPosition1b( pInstrument_t pInstrument, pPor
 
 // 20151025 problem with portfolio is 0 in m_EquityPositionCallbackInfo
 void AppComboTrading::ConstructEquityPosition2( pInstrument_t& pInstrument ) {
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   try {
     pPosition_t pPosition( pm.ConstructPosition(
       m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
@@ -1169,11 +1169,11 @@ void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& 
     std::cout << "no portfolio id supplied" << std::endl;
   }
   else {
-    if ( ou::tf::PortfolioManager::Instance().PortfolioExists( sPortfolioId ) ) {
+    if ( ou::tf::PortfolioManager::GlobalInstance().PortfolioExists( sPortfolioId ) ) {
       std::cout << "PortfolioId " << sPortfolioId << " already exists." << std::endl;
     }
     else {
-      ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+      ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
         sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
     }
   }
@@ -1237,35 +1237,35 @@ void AppComboTrading::HandleRegisterRows(  ou::db::Session& session ) {
 void AppComboTrading::HandlePopulateDatabase( void ) {
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
-    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::AccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
   ou::tf::AccountManager::pAccount_t pAccountIB
-    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
   ou::tf::AccountManager::pAccount_t pAccountSimulator
-    = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
+    = ou::tf::AccountManager::GlobalInstance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
   std::string sNull;
 
   m_pPortfolioMaster
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
       m_idPortfolioMaster, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "ComboTrading" );
 
-  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+  ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
     ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolioMaster, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
-//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//  ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "Currency Monitor" );
-//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//  ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "Currency Monitor" );
-//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//  ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "Currency Monitor" );
-//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//  ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
 
 }
@@ -1278,17 +1278,17 @@ void AppComboTrading::HandleLoadDatabase( void ) {
 // copied from StickShift2, maybe put in common place
 void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order ) {
   try {
-    ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
+    ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::GlobalInstance() );
     //pInstrument_t pInstrument = m_vManualOrders[ m_curDialogManualOrder ].pInstrument;
     pInstrument_t pInstrument = m_IBInstrumentInfo.pInstrument;
     if ( !mgr.Exists( pInstrument ) ) {
       mgr.Register( pInstrument );
     }
 //    if ( 0 == m_pPosition.get() ) {
-//      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition(
+//      m_pPosition = ou::tf::PortfolioManager::GlobalInstance().ConstructPosition(
 //        m_idPortfolioMaster, pInstrument->GetInstrumentName(), "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
 //    }
-    ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
+    ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
     ou::tf::OrderManager::pOrder_t pOrder;
     switch ( order.eOrderType ) {
     case ou::tf::OrderType::Market:

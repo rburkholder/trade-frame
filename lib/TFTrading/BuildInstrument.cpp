@@ -52,7 +52,7 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
 
   pInstrument_t pInstrument;
 
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
   pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sIQFeedSymbol );
   if ( pInstrument ) { // skip the build
@@ -185,7 +185,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName();
                 assert( 0 != pInstrument->GetContract() );
                 m_pIB->Sync( pInstrument );
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 iterInProgress->second.fInstrument( pInstrument );
               },
@@ -208,7 +208,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
               );
           }
           else {
-            //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+            //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
             //im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
             iterInProgress->second.fInstrument( pInstrument );
             pInstrument.reset();

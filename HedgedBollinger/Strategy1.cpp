@@ -70,7 +70,7 @@ Strategy::Strategy(
 
   //std::stringstream ss;
 
-  ptime dt( ou::TimeSource::Instance().External() );  // provided in utc
+  ptime dt( ou::TimeSource::GlobalInstance().External() );  // provided in utc
   boost::gregorian::date date( MarketOpenDate( dt ) );
   InitForUS24HourFutures( date );
   // this may be offset incorrectly.
@@ -102,11 +102,11 @@ Strategy::Strategy(
   }
 
 //  m_pBundle->Portfolio()
-//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
 //      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
   m_pPositionLongs =
-      ou::tf::PortfolioManager::Instance().ConstructPosition(
+      ou::tf::PortfolioManager::GlobalInstance().ConstructPosition(
         m_pPortfolioLongs->Id(),
         "gclongs",
         "auto",
@@ -122,7 +122,7 @@ Strategy::Strategy(
   m_pOrdersOutstandingLongs = new ou::tf::OrdersOutstandingLongs( m_pPositionLongs );
 
   m_pPositionShorts =
-      ou::tf::PortfolioManager::Instance().ConstructPosition(
+      ou::tf::PortfolioManager::GlobalInstance().ConstructPosition(
         m_pPortfolioShorts->Id(),
         "gcshorts",
         "auto",
@@ -673,7 +673,7 @@ PositionState& Strategy::GetAPositionState( void ) {
     std::string seq( boost::lexical_cast<std::string>( ++m_nPositions ) );
     while ( 3 > seq.length() ) seq = '0' + seq;
     pPosition_t pPosition(
-      ou::tf::PortfolioManager::Instance().ConstructPosition(
+      ou::tf::PortfolioManager::GlobalInstance().ConstructPosition(
         m_pPortfolio->Id(),
         "gc" + seq,
         "auto",

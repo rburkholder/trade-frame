@@ -44,7 +44,7 @@ public:
 
   boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt ) const;
   boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) const {
-    return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone );
+    return ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( date, time, zone );
   }
 
   void InitForUSEquityExchanges( boost::gregorian::date ); // can be used by simulation
@@ -109,7 +109,7 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
   : m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {
-  InitForUSEquityExchanges( ou::TimeSource::Instance().External().date() );
+  InitForUSEquityExchanges( ou::TimeSource::GlobalInstance().External().date() );
 };
 
 template<class T>

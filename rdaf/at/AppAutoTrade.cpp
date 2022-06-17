@@ -108,7 +108,7 @@ bool AppAutoTrade::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  auto dt = ou::TimeSource::Instance().External();
+  auto dt = ou::TimeSource::GlobalInstance().External();
   m_nTSDataStreamSequence = 0;
   {
     std::stringstream ss;
@@ -355,7 +355,7 @@ void AppAutoTrade::HandleOneSecondTimer( wxTimerEvent& event ) {
   if ( m_pPortfolioUSD ) {
     m_pPortfolioUSD->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
 
-    ptime dt = ou::TimeSource::Instance().Internal();
+    ptime dt = ou::TimeSource::GlobalInstance().Internal();
 
     m_ceUnRealized.Append( dt, dblUnRealized );
     m_ceRealized.Append( dt, dblRealized );
@@ -500,7 +500,7 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, co
 
   ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );

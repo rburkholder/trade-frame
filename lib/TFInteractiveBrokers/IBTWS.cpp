@@ -749,7 +749,7 @@ void TWS::openOrder( ::OrderId orderId, const ::Contract& contract, const ::Orde
     //if ( std::numeric_limits<double>::max(0) != state.commission )
     if ( 1e308 > state.commission )
       // reports total commission for order rather than increment
-      OrderManager::Instance().ReportCommission( orderId, state.commission );
+      OrderManager::GlobalInstance().ReportCommission( orderId, state.commission );
     // use spirit to do this to make it faster with a trie, or use keyword match
     DecodeStatusWord::EStatus status = dsw.Match( state.status );
     switch ( status ) {
@@ -758,7 +758,7 @@ void TWS::openOrder( ::OrderId orderId, const ::Contract& contract, const ::Orde
       case DecodeStatusWord::Filled:
         break;
       case DecodeStatusWord::Cancelled:
-        OrderManager::Instance().ReportCancellation( order.orderId );
+        OrderManager::GlobalInstance().ReportCancellation( order.orderId );
         break;
       case DecodeStatusWord::Inactive:
         break;
@@ -804,7 +804,7 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
   DecodeStatusWord::EStatus status_ = dsw.Match( status );
   switch ( status_ ) {
     case DecodeStatusWord::Cancelled:
-      OrderManager::Instance().ReportCancellation( orderId );
+      OrderManager::GlobalInstance().ReportCancellation( orderId );
       break;
     case DecodeStatusWord::Submitted:
     case DecodeStatusWord::Filled:
@@ -846,7 +846,7 @@ void TWS::execDetails( int reqId, const ::Contract& contract, const ::Execution&
   }
   else {
     ou::tf::Execution exec( execution.price, execution.shares, side, execution.exchange, execution.execId );
-    OrderManager::Instance().ReportExecution( execution.orderId, exec );
+    OrderManager::GlobalInstance().ReportExecution( execution.orderId, exec );
   }
 }
 
@@ -908,7 +908,7 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
       break;
     case 110: // The price does not conform to the minimum price variation for this contract.
         // id is the order number
-        // TODO something like:  OrderManager::Instance().ReportCancellation( orderId );
+        // TODO something like:  OrderManager::GlobalInstance().ReportCancellation( orderId );
       std::cout << "IB error (2)" << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
     case 1102: // Connectivity has been restored
@@ -1308,7 +1308,7 @@ void TWS::bondContractDetails( int reqId, const ContractDetails& contractDetails
 void TWS::nextValidId( OrderId orderId) {
   // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  ou::tf::Order::idOrder_t id = OrderManager::Instance().CheckOrderId( orderId );
+  ou::tf::Order::idOrder_t id = OrderManager::GlobalInstance().CheckOrderId( orderId );
   if ( orderId > id ) {
     m_ss << "old order id (" << id << "), new order id (" << orderId << ")";
   }
@@ -1421,7 +1421,7 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
           if ( "US/Central" == tz ) tz = "America/Chicago";
           if ( "US/Mountain" == tz ) tz = "America/Edmonton";
           if ( "US/Pacific" == tz ) tz = "America/Vancouver";
-          dtExpiry = ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, tz );
+          dtExpiry = ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( date, time, tz );
         }
 
         if ( 0 == pInstrument.get() ) {

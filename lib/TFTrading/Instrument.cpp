@@ -281,7 +281,7 @@ boost::posix_time::ptime Instrument::GetExpiryUtc() const {
         return m_row.dtExpiry;
       }
       else {
-        return ou::TimeSource::Instance().
+        return ou::TimeSource::GlobalInstance().
               ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York" );
       }
       break;
@@ -291,17 +291,17 @@ boost::posix_time::ptime Instrument::GetExpiryUtc() const {
       }
       else {
         if ( "GLOBEX" == m_row.idExchange ) { // ES symbols
-          return ou::TimeSource::Instance().
+          return ou::TimeSource::GlobalInstance().
                 ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 15, 0, 0 ), "America/Chicago" );
         }
         else {
-          return ou::TimeSource::Instance().
+          return ou::TimeSource::GlobalInstance().
                 ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 13, 30, 0 ), "America/New_York" );
         }
       }
       break;
   }
-  return ou::TimeSource::Instance().
+  return ou::TimeSource::GlobalInstance().
          ConvertRegionalToUtc( dateExpiry, boost::posix_time::time_duration( 16, 0, 0 ), "America/New_York" );
 }
 

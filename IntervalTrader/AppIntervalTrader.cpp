@@ -252,7 +252,7 @@ void AppIntervalTrader::StartPoll() {
   if ( !m_bPolling ) {
     if ( m_bIQFeedConnected && m_bIBConnected ) {
 
-      boost::posix_time::ptime now = ou::TimeSource::Instance().External();
+      boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().External();
       m_dtInterval = boost::posix_time::ptime( now.date(), boost::posix_time::time_duration( now.time_of_day().hours(), 0, 0 ) );
       while ( m_dtInterval <= now ) {
         m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );

@@ -29,7 +29,7 @@ namespace tf { // TradeFrame
 
 ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
   : ModelBase<ModelPortfolioPositionOrderExecution>(),
-  m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() ),
+  m_PortfolioManager( ou::tf::PortfolioManager::GlobalInstance() ), m_OrderManager( ou::tf::OrderManager::GlobalInstance() ),
   m_pItemPortfolioMaster( 0 )
 {
 

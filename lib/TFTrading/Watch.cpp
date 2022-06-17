@@ -343,8 +343,8 @@ void Watch::HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t
     m_PriceMax = m_PriceMin = summary.dblOpen;
   }
   m_summary.dblOpen = summary.dblOpen;
-  m_quote = ou::tf::Quote( ou::TimeSource::Instance().External(), summary.dblBid, 0, summary.dblAsk, 0 );
-  m_trade = ou::tf::Trade( ou::TimeSource::Instance().External(), summary.dblTrade, 0 );
+  m_quote = ou::tf::Quote( ou::TimeSource::GlobalInstance().External(), summary.dblBid, 0, summary.dblAsk, 0 );
+  m_trade = ou::tf::Trade( ou::TimeSource::GlobalInstance().External(), summary.dblTrade, 0 );
   OnSummary( m_summary );
 }
 

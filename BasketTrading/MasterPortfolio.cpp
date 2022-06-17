@@ -150,7 +150,7 @@ MasterPortfolio::MasterPortfolio(
 
   std::stringstream ss;
   //ss.str( "" );
-  auto dt = ou::TimeSource::Instance().External();
+  auto dt = ou::TimeSource::GlobalInstance().External();
   ss
     << ou::tf::Instrument::BuildDate( dt.date() )
     << "-"
@@ -303,7 +303,7 @@ double MasterPortfolio::UpdateChart() { // called for GUI refresh
   double dblCommissionPaid {};
   double dblPLCurrent {};
 
-  boost::posix_time::ptime dt( ou::TimeSource::Instance().External() );
+  boost::posix_time::ptime dt( ou::TimeSource::GlobalInstance().External() );
 
   m_pMasterPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
   //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
@@ -450,7 +450,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
     else { // create new portfolio
       ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "aoRay" );  // TODO: need bring account owner from caller
       pPortfolioUnderlying
-        = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+        = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
             idPortfolioUnderlying, idAccountOwner, m_pMasterPortfolio->Id(), ou::tf::Portfolio::EPortfolioType::Aggregate, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Underlying Aggregate"
         );
       Add( pPortfolioUnderlying );  // update the archive
@@ -626,7 +626,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
                 }
               }
 
-              auto& manager( ou::tf::PortfolioManager::Instance() );
+              auto& manager( ou::tf::PortfolioManager::GlobalInstance() );
               if ( !pPosition ) {
                 const std::string& sInstrumentName( pWatch->GetInstrumentName() );
                 pPosition = manager.ConstructPosition(
@@ -654,7 +654,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
             else {
               ou::tf::Portfolio::idAccountOwner_t idAccountOwner( "basket" ); // need to re-factor this with the other instance
               pPortfolio
-                = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+                = ou::tf::PortfolioManager::GlobalInstance().ConstructPortfolio(
                     idPortfolioNew, idAccountOwner, idPortfolioOwner, ou::tf::Portfolio::EPortfolioType::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Combo"
                 );
               Add( pPortfolio );  // update the archive

@@ -33,7 +33,7 @@ NoRiskInterestRateSeries::~NoRiskInterestRateSeries() {
 
 void NoRiskInterestRateSeries::Initialize() {
 
-  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::GlobalInstance() );
   ou::tf::Instrument::pInstrument_t pInstrument;
   for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++iter ) {
     // need to check if it already exists

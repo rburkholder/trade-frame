@@ -26,7 +26,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 ModelPortfolio::ModelPortfolio(void) 
-  : ModelBase<ModelPortfolio>(), m_mgrPortfolio( ou::tf::PortfolioManager::Instance() )
+  : ModelBase<ModelPortfolio>(), m_mgrPortfolio( ou::tf::PortfolioManager::GlobalInstance() )
 {
   m_vColumnNames += "Name", "Rlzd PL", "Comm.", "Net";
 //  m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );

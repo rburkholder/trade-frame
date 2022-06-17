@@ -73,7 +73,7 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
   //  BOOST_LOG_TRIVIAL(info) << "MarketMaker::OnMBOUpdate priority is in use: " << msg.nPriority;
   //}
 
-  ptime dt( ou::TimeSource::Instance().External() );
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
   ou::tf::DepthByMM depth( dt, msg.chMsgType, msg.chOrderSide, msg.nQuantity, msg.dblPrice, msg.mmid.id );
 
   if ( nullptr != m_fMarketDepthByMM ) {
@@ -86,7 +86,7 @@ void MarketMaker::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
 void MarketMaker::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
 
-  ptime dt( ou::TimeSource::Instance().External() );
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
   ou::tf::DepthByMM depth( dt, msg.chMsgType, msg.chOrderSide, 0, 0.0, msg.mmid.id );
 
   if ( nullptr != m_fMarketDepthByMM ) {
@@ -274,7 +274,7 @@ void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
-  ptime dt( ou::TimeSource::Instance().External() );
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
   ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
 
   if ( nullptr == m_fMarketDepthByOrder ) {
@@ -290,7 +290,7 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
   //   order 649948133402 priority 12440218202
   //   order 649948113561 priority 12440218206
 
-  ptime dt( ou::TimeSource::Instance().External() );
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
   ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, msg.nPriority, msg.chMsgType, msg.chOrderSide, msg.dblPrice, msg.nQuantity );
 
  if ( nullptr == m_fMarketDepthByOrder ) {
@@ -302,7 +302,7 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 }
 
 void OrderBased::OnMBODelete( const msg::OrderDelete::decoded& msg ) {
-  ptime dt( ou::TimeSource::Instance().External() );
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
   ou::tf::DepthByOrder depth( dt, msg.dt(), msg.nOrderId, 0, msg.chMsgType, msg.chOrderSide );
 
   if ( nullptr == m_fMarketDepthByOrder ) {
