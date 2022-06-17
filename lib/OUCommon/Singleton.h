@@ -106,31 +106,4 @@ std::size_t Singleton<T>::m_nLUI( 0 );
 template<typename T>
 boost::thread_specific_ptr<T> Singleton<T>::m_pT;
 
-//
-// CMultipleInstanceTest
-//
-
-// a CRTP class to ensure Singleton'd class isn't multiply defined
-// see CBerkeleyDBEnvManager as an example
-template<typename T>
-class MultipleInstanceTest {
-public:
-  MultipleInstanceTest() {
-#ifdef _DEBUG
-    ++m_ref;
-    // this may be changed to handle multi thread stuff, Dr. Dobbs has a solution
-    if ( 1 != m_ref ) throw std::runtime_error( "too many instances of Singleton typename T" );
-#endif
-  }
-protected:
-private:
-#ifdef _DEBUG
-  static int m_ref;  // validation that only one instance has been created
-#endif
-};
-
-#ifdef _DEBUG
-template<typename T> int MultipleInstanceTest<T>::m_ref = 0;
-#endif
-
 } // ou
