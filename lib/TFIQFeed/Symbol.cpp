@@ -138,8 +138,8 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
         if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
           summary.dblOpen = dblOpen;
           summary.bNewOpen = true;
-            BOOST_LOG_TRIVIAL(info)
-              << "IQF new open 1: " << GetId() << "=" << summary.dblOpen;
+            //BOOST_LOG_TRIVIAL(info)
+            //  << "IQF new open 1: " << GetId() << "=" << summary.dblOpen;
         };
         break;
       case 'E':

@@ -517,6 +517,11 @@ public:
   }
 
   void CheckDone() {
+    std::cout
+      << "CheckDone "
+      << m_mapSecurity_Waiting.size()
+      << "," << m_vRetrieveTicks_Avail.size()
+      << std::endl;
     if ( 0 == m_mapSecurity_Waiting.size() ) {
       if ( m_nSimultaneousRetrievals == m_vRetrieveTicks_Avail.size() ) {
         if ( 0 == m_mapRetrieveTicks.size() ) {
@@ -705,18 +710,24 @@ int main( int argc, char* argv[] ) {
   config::Choices choices;
   if ( config::Load( "rdaf/download.cfg", choices ) ) {
 
+    std::cout << "choices min price:  " << choices.m_dblMinPrice << std::endl;
+    std::cout << "choices #days:      " << choices.m_nDays << std::endl;
+    std::cout << "choices retrievals: " << choices.m_nSimultaneousRetrievals << std::endl;
+
     for ( const config::vName_t::value_type& vt: choices.m_vListedMarket ) {
+      std::cout << "choices listed market: " << vt << std::endl;
       setListedMarket.emplace( vt );
     }
 
     for ( const config::vName_t::value_type& vt: choices.m_vSecurityType ) {
+      std::cout << "choices security type: " << vt << std::endl;
       setSecurityTypes.emplace( vt );
     }
 
     setNames_t setIgnoreNames;
 
     for ( const config::vName_t::value_type& vt: choices.m_vIgnoreNames ) {
-      std::cout << "ignoring " << vt << std::endl;
+      std::cout << "choices ignoring:      " << vt << std::endl;
       setIgnoreNames.emplace( vt );
     }
 
@@ -777,10 +788,11 @@ int main( int argc, char* argv[] ) {
     , choices.m_dblMinPrice
     , std::move( setIgnoreNames )
     , [&control]( pSecurity_t pSecurity ) { // fSecurity_t
-        //std::cout << pSecurity->sName << " sent to history" << std::endl;
+        std::cout << "Symbols: " << pSecurity->sName << " sent to history" << std::endl;
         control.Retrieve( pSecurity );
       }
     , [&control](){ // fDone_t
+        std::cout << "Symbols: CheckDone" << std::endl;
         control.CheckDone();
       }
     );
