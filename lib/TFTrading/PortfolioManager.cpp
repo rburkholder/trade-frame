@@ -390,7 +390,7 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
     Position::TableRowDef rowPosition;
     m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, Position::TableRowDef>( pPositionQuery, rowPosition );
     pPosition_t pPosition( new Position( rowPosition ) );
-    if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, execution, data
+    if ( nullptr == OnPositionNeedsDetails ) {  // fill in instrument, execution, data
       throw std::runtime_error( "PortfolioManager::LoadPositions has no Details Callback" );
     }
     OnPositionNeedsDetails( pPosition );
