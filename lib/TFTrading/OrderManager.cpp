@@ -611,6 +611,7 @@ void OrderManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &OrderManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &OrderManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &OrderManager::HandlePopulateTables ) );
+  pSession->OnLoad.Remove( MakeDelegate( this, &OrderManager::HandleLoadTables ) );
   ManagerBase::DetachFromSession( pSession );
 }
 
