@@ -140,7 +140,7 @@
       "name": "(gdb) rdaf/at",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/rdaf/at",
+      "program": "${workspaceFolder}/build/rdaf/at/rdaf_at",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",
