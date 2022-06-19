@@ -162,7 +162,7 @@ private:
 template<typename CRTP>
 FrameWork01<CRTP>::FrameWork01() :
   m_mode( EModeUnknown ),
-  m_pPanelProviderControl( 0 ),
+  m_pPanelProviderControl( nullptr ),
   m_tws( new ou::tf::ib::TWS( "U000000" ) ), m_bIBConnected( false ),
   m_iqfeed( new ou::tf::iqfeed::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
@@ -187,32 +187,22 @@ FrameWork01<CRTP>::FrameWork01() :
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
   // ensure providers have been initialized above first
-  pProvider_t p;
 
-  p = m_iqfeed;
-  //p = boost::static_pointer_cast<pProvider_t>( m_iqfeed );
-  ProviderManager::LocalCommonInstance().Register(  "iq01", p );
-
-  p = m_tws;
-  //p = boost::static_pointer_cast<pProvider_t>( m_tws );
-  ProviderManager::LocalCommonInstance().Register(  "ib01", p );
-
-  p = m_sim;
-  //p = boost::static_pointer_cast<pProvider_t>( m_sim );
-  ProviderManager::LocalCommonInstance().Register( "sim01", p );
-
+  ProviderManager::LocalCommonInstance().Register(  "iq01", m_iqfeed );
   m_iqfeed->OnConnecting.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnecting ) );
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnecting.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisconnecting ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisconnected ) );
   m_iqfeed->OnError.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedError ) );
 
+  ProviderManager::LocalCommonInstance().Register(  "ib01", m_tws );
   m_tws->OnConnecting.Add( MakeDelegate( this, &FrameWork01::HandleIBConnecting ) );
   m_tws->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIBConnected ) );
   m_tws->OnDisconnecting.Add( MakeDelegate( this, &FrameWork01::HandleIBDisconnecting ) );
   m_tws->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIBDisconnected ) );
   m_tws->OnError.Add( MakeDelegate( this, &FrameWork01::HandleIBError ) );
 
+  ProviderManager::LocalCommonInstance().Register( "sim01", m_sim );
   m_sim->OnConnecting.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorConnecting ) );
   m_sim->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnecting.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorDisconnecting ) );
@@ -228,21 +218,20 @@ FrameWork01<CRTP>::~FrameWork01() {
   m_iqfeed->OnDisconnecting.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedDisconnecting ) );
   m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedDisconnected ) );
   m_iqfeed->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedError ) );
+  ou::tf::ProviderManager::LocalCommonInstance().Release( "iq01" );
 
   m_tws->OnConnecting.Remove( MakeDelegate( this, &FrameWork01::HandleIBConnecting ) );
   m_tws->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleIBConnected ) );
   m_tws->OnDisconnecting.Remove( MakeDelegate( this, &FrameWork01::HandleIBDisconnecting ) );
   m_tws->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleIBDisconnected ) );
   m_tws->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleIBError ) );
+  ou::tf::ProviderManager::LocalCommonInstance().Release( "ib01" );
 
   m_sim->OnConnecting.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorConnecting ) );
   m_sim->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnecting.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorDisconnecting ) );
   m_sim->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorDisconnected ) );
   m_sim->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorError ) );
-
-  ou::tf::ProviderManager::LocalCommonInstance().Release( "iq01" );
-  ou::tf::ProviderManager::LocalCommonInstance().Release( "ib01" );
   ou::tf::ProviderManager::LocalCommonInstance().Release( "sim01" );
 
 }
