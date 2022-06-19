@@ -89,6 +89,11 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfDays, false, choices.m_nDays );
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfRetrievals, false, choices.m_nSimultaneousRetrievals );
 
+      if ( 10 < choices.m_nSimultaneousRetrievals ) {
+        bOk = false;
+        BOOST_LOG_TRIVIAL(error) << sChoice_NumberOfRetrievals << " needs to be <= 10" << std::endl;
+      }
+
     }
 
   }
