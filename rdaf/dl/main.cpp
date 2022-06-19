@@ -797,7 +797,7 @@ int main( int argc, char* argv[] ) {
     , choices.m_dblMinPrice
     , std::move( setIgnoreNames )
     , [&control]( pSecurity_t pSecurity ) { // fSecurity_t
-        std::cout << "Symbols: " << pSecurity->sName << " sent to history" << std::endl;
+        //std::cout << "Symbols: " << pSecurity->sName << " sent to history" << std::endl;
         control.Retrieve( pSecurity );
       }
     , [&control](){ // fDone_t

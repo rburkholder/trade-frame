@@ -91,7 +91,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       if ( 10 < choices.m_nSimultaneousRetrievals ) {
         bOk = false;
-        BOOST_LOG_TRIVIAL(error) << sChoice_NumberOfRetrievals << " needs to be <= 10" << std::endl;
+        BOOST_LOG_TRIVIAL(error) << sChoice_NumberOfRetrievals << " max 10" << std::endl;
       }
 
     }
