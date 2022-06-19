@@ -278,7 +278,7 @@ private:
       [this](const std::string& sSymbol, key_t keyListedMarket){
         //std::cout << sSymbol << std::endl;
         if ( m_setIgnoreNames.end() != m_setIgnoreNames.find( sSymbol ) ) {
-          std::cout << "ignored " << sSymbol << std::endl;
+          //std::cout << "ignored " << sSymbol << std::endl;
         }
         else {
           bool bGetFundamentals( false );
@@ -521,7 +521,16 @@ public:
       << "CheckDone "
       << m_mapSecurity_Waiting.size()
       << "," << m_vRetrieveTicks_Avail.size()
-      << std::endl;
+      << "," << m_mapRetrieveTicks.size()
+      ;
+    if ( 0 != m_mapRetrieveTicks.size() ) {
+      //std::lock_guard<std::mutex> lock( m_mutex ); // can't lock, already in a lock
+      //if ( 0 != m_mapRetrieveTicks.size() ) {
+        std::cout << "," << m_mapRetrieveTicks.begin()->second.pSecurity->sName;
+        if ( 1 < m_mapRetrieveTicks.size() ) std::cout << " ...";
+      //}
+    }
+    std::cout << std::endl;
     if ( 0 == m_mapSecurity_Waiting.size() ) {
       if ( m_nSimultaneousRetrievals == m_vRetrieveTicks_Avail.size() ) {
         if ( 0 == m_mapRetrieveTicks.size() ) {
