@@ -170,7 +170,6 @@ void PanelProviderControl::CreateControls() {
 }
 
 void PanelProviderControl::OnClose( wxCloseEvent& event ) {
-  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();

@@ -65,7 +65,7 @@ wxDECLARE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
 //#define SYMBOL_PANELPROVIDERCONTROL_SIZE wxSize(400, 300)
 #define SYMBOL_PANELPROVIDERCONTROL_SIZE wxDefaultSize
 
-class PanelProviderControl:  public wxPanel {
+class PanelProviderControl: public wxPanel {
 public:
 
   enum Provider_t {
@@ -79,7 +79,7 @@ public:
     const wxPoint& pos = SYMBOL_PANELPROVIDERCONTROL_POSITION,
     const wxSize& size = SYMBOL_PANELPROVIDERCONTROL_SIZE,
     long style = SYMBOL_PANELPROVIDERCONTROL_STYLE );
-  ~PanelProviderControl();
+  virtual ~PanelProviderControl();
 
   bool Create(
     wxWindow* parent,
@@ -124,11 +124,6 @@ public:
 
   void SyncInitialState();
 
-  using OnPanelClosing_t = FastDelegate0<>;
-  void SetOnPanelClosingHandler( OnPanelClosing_t function ) {
-    OnPanelClosing = function;
-  }
-
 protected:
 private:
 
@@ -168,8 +163,6 @@ private:
   OnProviderSelect_t OnProviderSelectD1;
   OnProviderSelect_t OnProviderSelectD2;
   OnProviderSelect_t OnProviderSelectX;
-
-  OnPanelClosing_t OnPanelClosing;
 
   void SetState( wxButton* btn, eProviderState_t state );
 
