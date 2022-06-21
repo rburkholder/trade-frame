@@ -47,11 +47,13 @@
 
 namespace {
   static const std::string sAppName( "Indicator Trading" );
-  static const std::string sDbName( "IndicatorTrading.db" );
-  static const std::string sConfigFilename( "IndicatorTrading.cfg" );
-  static const std::string sStateFileName( "IndicatorTrading.state" );
+  static const std::string sFileNameBase( "IndicatorTrading" );
+  static const std::string sDbName( sFileNameBase + ".db" );
+  static const std::string sConfigFilename( sFileNameBase + ".cfg" );
+  static const std::string sStateFileName( sFileNameBase + ".state" );
+  static const std::string sSaveValuesRoot( "/app/" + sFileNameBase );
   static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
-  static const std::string sSaveValuesRoot( "/app/IndicatorTrading" );
+  static const std::string sVendorName( "One Unified Net Limited" );
 }
 
 IMPLEMENT_APP(AppIndicatorTrading)
@@ -59,8 +61,8 @@ IMPLEMENT_APP(AppIndicatorTrading)
 bool AppIndicatorTrading::OnInit() {
 
   wxApp::SetAppDisplayName( sAppName );
-  wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
+  wxApp::SetVendorName( sVendorName );
+  wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
 
   wxApp::OnInit();
 
@@ -453,8 +455,8 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 
   std::cout << "daily history for " << sSymbol << std::endl;
 
-  m_DailyHistory.Load( 
-    sSymbol, m_cemReferenceLevels, 
+  m_DailyHistory.Load(
+    sSymbol, m_cemReferenceLevels,
     [this](const ou::tf::Bars& bars){
       m_pChart200Day->Add( bars );
     } );
