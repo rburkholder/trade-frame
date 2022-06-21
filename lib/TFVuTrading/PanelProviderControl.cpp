@@ -223,17 +223,17 @@ void PanelProviderControl::UpdateProviderButtons() {
 }
 
 void PanelProviderControl::SyncInitialState() {
-  if ( m_cbIQFeedD1->IsChecked() ) if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
-  if ( m_cbIQFeedD2->IsChecked() ) if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
-  if ( m_cbIQFeedX->IsChecked() ) if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIQFeed );
+  if ( m_cbIQFeedD1->IsChecked() ) if ( nullptr != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
+  if ( m_cbIQFeedD2->IsChecked() ) if ( nullptr != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
+  if ( m_cbIQFeedX->IsChecked() )  if ( nullptr != OnProviderSelectX  ) OnProviderSelectX( EIQFeed );
 
-  if ( m_cbIBD1->IsChecked() ) if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIB );
-  if ( m_cbIBD2->IsChecked() ) if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIB );
-  if ( m_cbIBX->IsChecked() ) if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIB );
+  if ( m_cbIBD1->IsChecked() ) if ( nullptr != OnProviderSelectD1 ) OnProviderSelectD1( EIB );
+  if ( m_cbIBD2->IsChecked() ) if ( nullptr != OnProviderSelectD2 ) OnProviderSelectD2( EIB );
+  if ( m_cbIBX->IsChecked() )  if ( nullptr != OnProviderSelectX  ) OnProviderSelectX( EIB );
 
-  if ( m_cbSimD1->IsChecked() ) if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( ESim );
-  if ( m_cbSimD2->IsChecked() ) if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( ESim );
-  if ( m_cbSimX->IsChecked() ) if ( 0 != OnProviderSelectX ) OnProviderSelectX( ESim );
+  if ( m_cbSimD1->IsChecked() ) if ( nullptr != OnProviderSelectD1 ) OnProviderSelectD1( ESim );
+  if ( m_cbSimD2->IsChecked() ) if ( nullptr != OnProviderSelectD2 ) OnProviderSelectD2( ESim );
+  if ( m_cbSimX->IsChecked() )  if ( nullptr != OnProviderSelectX  ) OnProviderSelectX( ESim );
 
   UpdateProviderButtons();
 }

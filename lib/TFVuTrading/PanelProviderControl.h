@@ -44,7 +44,7 @@ public:
 
   ~UpdateProviderStatusEvent() {};
 
-  UpdateProviderStatusEvent* Clone( void ) const { return new UpdateProviderStatusEvent( *this ); }
+  UpdateProviderStatusEvent* Clone() const { return new UpdateProviderStatusEvent( *this ); }
   eProviderState_t GetState() const { return m_state; };
 
 protected:
