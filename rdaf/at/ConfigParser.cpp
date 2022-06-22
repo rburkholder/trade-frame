@@ -56,6 +56,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::choices_t,
   (size_t, ib_client_id)
+  (std::string, m_sAlpacaKey)
+  (std::string, m_sAlpacaSecret)
+  (std::string, m_sAlpacaDomain)
   (size_t, nThreads)
   (bool, bStartSimulator)
   (std::string, sGroupDirectory)
@@ -127,6 +130,21 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> +( qi::char_("a-zA-Z0-9/") | qi::char_( '-' ) | qi::char_(':') | qi::char_('.') )
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleAlpacaKey
+      %=  qi::lit( "alpaca_key" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +( qi::char_("A-Z0-9") )
+      >> *qi::lit(' ') >> qi::eol;
+    ruleAlpacaSecret
+      %=  qi::lit( "alpaca_secret" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +( qi::char_("a-zA-Z0-9") )
+      >> *qi::lit(' ') >> qi::eol;
+    ruleAlpacaDomain
+      %=  qi::lit( "alpaca_domain" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +( qi::char_("a-z0-9") | qi::char_( '-' ) | qi::char_( '.' ) )
+      >> *qi::lit(' ') >> qi::eol;
 
     ruleTimeBins
       %= qi::lit("time_bins" )
@@ -228,6 +246,9 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     start
       %= ruleIbClientId
+      >> ruleAlpacaKey
+      >> ruleAlpacaSecret
+      >> ruleAlpacaDomain
       >> ruleThreads
       >> ruleStartSimulator
       >> -ruleGroupDirectory
@@ -266,6 +287,9 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;
   qi::rule<Iterator, std::string()> ruleSymbol;
+  qi::rule<Iterator, std::string()> ruleAlpacaKey;
+  qi::rule<Iterator, std::string()> ruleAlpacaSecret;
+  qi::rule<Iterator, std::string()> ruleAlpacaDomain;
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, size_t()> rulePriceBins;

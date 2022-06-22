@@ -73,8 +73,14 @@ struct choices_t {
 
   bool bStartSimulator;
   std::string sGroupDirectory;
-  size_t ib_client_id;
+
   size_t nThreads;
+
+  size_t ib_client_id;
+
+  std::string m_sAlpacaKey;
+  std::string m_sAlpacaSecret;
+  std::string m_sAlpacaDomain; // paper-api.alpaca.markets or api.alpaca.markets
 
   size_t nTimeBins;
 
