@@ -58,6 +58,10 @@ public:
   SimulationProvider();
   virtual ~SimulationProvider();
 
+  static pProvider_t Factory() {
+    return std::make_shared<SimulationProvider>();
+  }
+
   static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
     return std::dynamic_pointer_cast<SimulationProvider>( pProvider );
   }

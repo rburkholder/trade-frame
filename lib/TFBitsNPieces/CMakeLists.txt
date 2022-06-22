@@ -14,6 +14,7 @@ set(
     BollingerTransitions.h
     FirstOrDefaultCombiner.h
     FrameWork01.h
+    FrameWork02.hpp
     GridColumnSizer.h
     InstrumentFilter.h
     InstrumentSelection.h

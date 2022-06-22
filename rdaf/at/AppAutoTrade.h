@@ -35,9 +35,14 @@
 
 #include <TFTrading/DBWrapper.h>
 
+#include <TFAlpaca/Provider.hpp>
+
+#include <TFIQFeed/Provider.h>
 #include <TFIQFeed/Level2/Symbols.hpp>
 
-#include <TFBitsNPieces/FrameWork01.h>
+#include <TFSimulation/SimulationProvider.h>
+
+#include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "ConfigParser.hpp"
 
@@ -58,14 +63,17 @@ namespace tf {
   class PanelLogging;
   class WinChartView;
   class BuildInstrument;
+namespace v2 {
+  class PanelProviderControl;
 }
-}
+} // namespace tf
+} // namespace ou
 
 class AppAutoTrade:
   public wxApp,
-  public ou::tf::FrameWork01<AppAutoTrade>
+  public ou::tf::FrameWork02<AppAutoTrade>
 {
-  friend ou::tf::FrameWork01<AppAutoTrade>;
+  friend ou::tf::FrameWork02<AppAutoTrade>;
   friend class boost::serialization::access;
 public:
 protected:
@@ -74,6 +82,10 @@ private:
   using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
+  using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
 
   ou::tf::config::choices_t m_choices;
@@ -81,6 +93,7 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
+  ou::tf::v2::PanelProviderControl* m_pPanelProviderControl;
 
   wxSplitterWindow* m_splitterData;
 
@@ -90,8 +103,9 @@ private:
 
   wxTimer m_timerOneSecond;
 
-  std::string m_sTSDataStreamStarted;
-  int m_nTSDataStreamSequence;
+  pProviderSim_t m_sim;  // simulation
+  pProviderAlpaca_t m_alpaca; // live - execution
+  pProviderIQFeed_t m_iqfeed; // live - data
 
   bool m_bL2Connected;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
@@ -128,10 +142,10 @@ private:
 
   void OnData1Connected( int );
   void OnData2Connected( int );
-  void OnExecConnected( int );
+  void OnExec1Connected( int );
   void OnData1Disconnected( int );
   void OnData2Disconnected( int );
-  void OnExecDisconnected( int );
+  void OnExec1Disconnected( int );
 
   void HandleOneSecondTimer( wxTimerEvent& event );
 

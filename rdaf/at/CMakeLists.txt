@@ -19,7 +19,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup)
+find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup json)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -69,9 +69,6 @@ target_link_directories(
 target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
-      TFInteractiveBrokers
-      ib_client
-      bidgcc000
       TFSimulation
       TFVuTrading
       TFTrading
@@ -79,6 +76,10 @@ target_link_libraries(
       TFTrading
       TFIQFeed
       TFIQFeedLevel2
+      TFAlpaca
+      TFInteractiveBrokers
+      ib_client
+      bidgcc000
       TFHDF5TimeSeries
       OUCommon
       OUSQL
@@ -103,6 +104,9 @@ target_link_libraries(
 #      wx_baseu_net-3.0
       wx_baseu-3.0
       pthread
+# alpaca components:
+      crypto
+      ssl
 # rdaf components:
       Core
       Gpad

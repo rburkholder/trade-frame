@@ -64,6 +64,14 @@ public:
   Provider(); // for auto construction by ProviderManager
   virtual ~Provider();
 
+  static pProvider_t Factory() {
+    return std::make_shared<Provider>();
+  }
+
+  static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
+    return std::dynamic_pointer_cast<Provider>( pProvider );
+  }
+
   void Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret );
 
   // do these need to be virtual?  use crtp?

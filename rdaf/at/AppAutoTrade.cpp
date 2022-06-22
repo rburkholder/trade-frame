@@ -53,19 +53,20 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "Strategy.h"
 #include "AppAutoTrade.h"
 
 namespace {
-  static const std::string sDirectory( "rdaf/at" );
-  static const std::string sFileNameUtility( sDirectory + "/utility.root" );
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
-  static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
+  static const std::string sVendorName( "One Unified Net Limited" );
+
+  static const std::string sDirectory( "rdaf/at" );
   static const std::string sDbName( sDirectory + "/example.db" );
   static const std::string sStateFileName( sDirectory + "/example.state" );
-  static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
-  static const std::string sVendorName( "One Unified Net Limited" );
+  static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
+  static const std::string sFileNameUtility( sDirectory + "/utility.root" );
 
   static const std::string sMenuItemPortfolio( "_USD" );
 }
@@ -96,54 +97,33 @@ IMPLEMENT_APP(AppAutoTrade)
 
 bool AppAutoTrade::OnInit() {
 
-  wxApp::SetAppDisplayName( sAppName );
   wxApp::SetVendorName( sVendorName );
+  wxApp::SetAppDisplayName( sAppName );
   wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
 
   wxApp::OnInit();
 
   m_bL2Connected = false;
 
-  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
-    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
-  }
-
-  auto dt = ou::TimeSource::GlobalInstance().External();
-  m_nTSDataStreamSequence = 0;
-  {
-    std::stringstream ss;
-    ss << boost::posix_time::to_iso_extended_string( dt );
-    m_sTSDataStreamStarted = ss.str();
-  }
-
   if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
     return 0;
   }
 
+  m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  m_alpaca = ou::tf::alpaca::Provider::Factory();
+
   m_iqfeed->SetThreadCount( m_choices.nThreads );
-  m_sim->SetThreadCount( m_choices.nThreads );
+  m_alpaca->Set( m_choices.m_sAlpacaDomain, m_choices.m_sAlpacaKey, m_choices.m_sAlpacaSecret );
 
-  //if ( m_options.bSimStart ) {
-    // just always delete it
-    if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
-    }
-  //}
-
-  m_pdb = std::make_unique<ou::tf::db>( sDbName );
-
-  if ( m_choices.bStartSimulator ) {
-    if ( 0 < m_choices.sGroupDirectory.size() ) {
-      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
-    }
-  }
-
-  m_tws->SetClientId( m_choices.ib_client_id );
+  // keep this commented here in case it needs to be resurrected
+  //m_tws->SetClientId( m_choices.ib_client_id );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
   m_pFrameMain->SetSize( 800, 500 );
+  m_pFrameMain->SetAutoLayout( true );
+
   SetTopWindow( m_pFrameMain );
 
     wxBoxSizer* sizerFrame;
@@ -153,19 +133,46 @@ bool AppAutoTrade::OnInit() {
     sizerFrame = new wxBoxSizer(wxVERTICAL);
     m_pFrameMain->SetSizer(sizerFrame);
 
-    sizerUpper = new wxBoxSizer(wxHORIZONTAL);
-    sizerFrame->Add(sizerUpper, 0, wxGROW, 2);
 
-    m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    sizerUpper->Add(m_pPanelProviderControl, 0, wxALIGN_CENTER_VERTICAL, 2);
 
-    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    sizerUpper->Add(m_pPanelLogging, 1, wxGROW, 2);
+  m_pPanelProviderControl->Add(
+    m_iqfeed,
+    true, false, false, false,
+    [](){},
+    [](){},
+    [](){},
+    [](){}
+  );
+
+  m_pPanelProviderControl->Add(
+    m_alpaca,
+    false, false, true, false,
+    [](){},
+    [](){},
+    [](){},
+    [](){}
+  );
+
+  //m_pPanelProviderControl->Layout();
+  //m_pPanelProviderControl->Show( true );
+
+    sizerUpper = new wxBoxSizer(wxHORIZONTAL);
+    sizerUpper->Add(m_pPanelProviderControl, 0, wxEXPAND, 2);
+    sizerFrame->Add(sizerUpper, 0, wxEXPAND, 2);
+
+  sizerUpper->Layout();
+  sizerUpper->Show( true );
+
+
+
+//    m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+//    m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+//    sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
 
     sizerLower = new wxBoxSizer(wxVERTICAL);
-    sizerFrame->Add(sizerLower, 1, wxGROW, 2);
+    sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
 
     m_splitterData = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
     m_splitterData->SetMinimumPaneSize(20);
@@ -178,7 +185,16 @@ bool AppAutoTrade::OnInit() {
     m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
     sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
-  LinkToPanelProviderControl();
+  //if ( m_options.bSimStart ) {
+    // just always delete it
+    if ( boost::filesystem::exists( sDbName ) ) {
+    boost::filesystem::remove( sDbName );
+    }
+  //}
+
+  // this needs to be placed after the providers are
+  //   registered in ProviderManager via m_pPanelProviderControl
+  m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
   m_ceUnRealized.SetName( "unrealized" );
   m_ceRealized.SetName( "realized" );
@@ -197,10 +213,41 @@ bool AppAutoTrade::OnInit() {
 
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
-  if ( !m_choices.bStartSimulator ) {
+  // will need to change the date selection in the file, maybe use date from upperTime
+  // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
+  //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
+  auto dt = ou::TimeSource::GlobalInstance().External();
+  boost::gregorian::date dateSim( dt.date() ); // dateSim used later on in a loop
+  if ( m_choices.bStartSimulator ) {
+    // m_sim does not need to be in PanelProviderControl
+    m_sim = ou::tf::SimulationProvider::Factory();
+    m_sim->SetThreadCount( m_choices.nThreads );
+    if ( 0 < m_choices.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
+    }
+
+    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    boost::smatch what;
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
+      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      std::cout << "simulation date " << dateSim << std::endl;
+    }
+    // need to be able to hookup simulation depth to the algo
+    // does the symbol pump the depth through the same fibre/thread?
+    // need to turn off m_pL2Symbols when running a simulation
+    // need to feed the algo, not from m_pL2Symbols
+    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
+  }
+  else {
     m_timerOneSecond.SetOwner( this );
     Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
     m_timerOneSecond.Start( 500 );
+
+    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+      [this](){
+        m_bL2Connected = true;
+        ConfirmProviders();
+      } );
   }
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
@@ -215,31 +262,6 @@ bool AppAutoTrade::OnInit() {
       m_pWinChartView->SetChartDataView( &m_dvChart );
     }
   );
-
-  // will need to change the date selection in the file, maybe use date from upperTime
-  // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
-  //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
-  boost::gregorian::date dateSim( dt.date() );
-  if ( m_choices.bStartSimulator ) {
-    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
-    boost::smatch what;
-    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
-      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
-      std::cout << "simulation date " << dateSim << std::endl;
-    }
-    // need to be able to hookup simulation depth to the algo
-    // does the symbol pump the depth through the same fibre/thread?
-    // need to turn off m_pL2Symbols when running a simulation
-    // need to feed the algo, not from m_pL2Symbols
-    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
-  }
-  else {
-    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-      [this](){
-        m_bL2Connected = true;
-        ConfirmProviders();
-      } );
-  }
 
   // NOTE: during simulation, this subsystem is going to have to be temporary
   //   otherwise, the same data is read in multiple times when the simulation is run multiple times
@@ -298,7 +320,9 @@ bool AppAutoTrade::OnInit() {
 
   m_treeSymbols->ExpandAll();
 
-  m_pFrameMain->SetAutoLayout( true );
+  //m_pPanelLogging->Layout();
+  //m_pPanelLogging->Show( true );
+
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
 
@@ -323,7 +347,8 @@ bool AppAutoTrade::OnInit() {
     m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
   }
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
 
   CallAfter(
     [this](){
@@ -334,9 +359,9 @@ bool AppAutoTrade::OnInit() {
   if ( m_choices.bStartSimulator ) {
     CallAfter(
       [this](){
-        using Provider_t = ou::tf::PanelProviderControl::Provider_t;
-        m_pPanelProviderControl->SetProvider( Provider_t::ESim, Provider_t::ESim, Provider_t::ESim );
-        m_pPanelProviderControl->SetSimulatorState( ou::tf::ProviderOn );
+        using pProvider_t = ou::tf::v2::PanelProviderControl::pProvider_t;
+        //m_pPanelProviderControl->SetProvider( pProvider_t::ESim, pProvider_t::ESim, pProvider_t::ESim );
+        //m_pPanelProviderControl->SetSimulatorState( ou::tf::ProviderOn );
         m_sim->Connect();
       }
     );
@@ -479,7 +504,7 @@ void AppAutoTrade::ConstructIBInstrument(
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
           sNamePortfolio, idInstrument, "rdaf",
-          "ib01", "iq01", m_pExecutionProvider,
+          "alpaca", "iq01", m_alpaca,
           pWatch
         );
         BOOST_LOG_TRIVIAL(info) << "position constructed " << pPosition->GetInstrument()->GetInstrumentName();
@@ -502,7 +527,7 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, co
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPosition_t pPosition;
   if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
@@ -511,10 +536,10 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, co
     std::cout << "sim: position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
     pPosition = pm.ConstructPosition(
       sNamePortfolio, idInstrument, "rdaf",
-      "sim01", "sim01", m_pExecutionProvider,
+      "sim01", "sim01", m_sim,
       pWatch
     );
     std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
@@ -615,7 +640,6 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
     }
   }
 
-  DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
@@ -636,7 +660,7 @@ void AppAutoTrade::OnData2Connected( int ) {
   // Data2 Connection not used
 }
 
-void AppAutoTrade::OnExecConnected( int ) {
+void AppAutoTrade::OnExec1Connected( int ) {
   //m_bExecConnected = true;
   ConfirmProviders();
 }
@@ -652,7 +676,7 @@ void AppAutoTrade::OnData2Disconnected( int ) {
   //m_bData2Connected = false;
 }
 
-void AppAutoTrade::OnExecDisconnected( int ) {
+void AppAutoTrade::OnExec1Disconnected( int ) {
   //m_bExecConnected = false;
 }
 
@@ -673,12 +697,28 @@ void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
 }
 
 void AppAutoTrade::ConfirmProviders() {
-  if ( m_bData1Connected && m_bExecConnected ) {
-    bool bValidCombo( false );
-    if (
-         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
-      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
-    ) {
+
+  bool bValidCombo( false );
+
+  if ( m_choices.bStartSimulator ) {
+    bValidCombo = true;
+    static const std::string sNamePortfolio( "SIM" );
+    LoadPortfolio( sNamePortfolio );
+    for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+      ConstructSimInstrument( sNamePortfolio, vt.first );
+    }
+
+    FrameMain::vpItems_t vItems;
+    using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+    vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStart ) ) );
+    vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
+    vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
+    m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+
+    m_sim->Run();
+  }
+  else {
+    if ( m_iqfeed->Connected() && m_alpaca->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;
         std::cout << "ConfirmProviders: using iqfeed and tws for data/execution" << std::endl;
@@ -728,31 +768,10 @@ void AppAutoTrade::ConfirmProviders() {
         std::cout << "ConfirmProviders: waiting for iqfeed level 2 connection" << std::endl;
       }
     }
+  }
 
-    if (
-         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
-      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
-    ) {
-      bValidCombo = true;
-      static const std::string sNamePortfolio( "SIM" );
-      LoadPortfolio( sNamePortfolio );
-      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        ConstructSimInstrument( sNamePortfolio, vt.first );
-      }
-
-      FrameMain::vpItems_t vItems;
-      using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-      vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStart ) ) );
-      vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimStop ) ) );
-      vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
-      m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
-
-      m_sim->Run();
-
-    }
-    if ( !bValidCombo ) {
-      std::cout << "ConfirmProviders: waiting for data and execution providers" << std::endl;
-    }
+  if ( !bValidCombo ) {
+    std::cout << "ConfirmProviders: waiting for data and execution providers" << std::endl;
   }
 }
 

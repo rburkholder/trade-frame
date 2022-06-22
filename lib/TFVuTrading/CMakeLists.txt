@@ -55,6 +55,7 @@ set(
     PanelPortfolioPosition_impl.h
     PanelPortfolioPositionOrderExecution.h
     PanelProviderControl.h
+    PanelProviderControlv2.hpp
     TreeItem.hpp
     ValidatorInstrumentName.h
 #    VisibleItemAttributes.h
@@ -111,6 +112,7 @@ set(
     PanelPortfolioPosition_impl.cpp
     PanelPortfolioPositionOrderExecution.cpp
     PanelProviderControl.cpp
+    PanelProviderControlv2.cpp
     TreeItem.cpp
     ValidatorInstrumentName.cpp
 #    VisibleItemAttributes.cpp
