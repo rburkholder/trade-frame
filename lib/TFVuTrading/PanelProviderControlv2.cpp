@@ -166,9 +166,12 @@ struct ProviderWidgets {
     }
   }
 
-  void UpdateProviderButton() {
-    if ( m_cbD1->IsEnabled() || m_cbD2->IsEnabled() || m_cbX1->IsEnabled() || m_cbX2->IsEnabled() ) {
-      m_btnState->Enable( m_cbD1->IsChecked() || m_cbD2->IsChecked() || m_cbX1->IsChecked() || m_cbX2->IsChecked() );
+  void UpdateProviderButton() { // TODO: disable if connected
+    bool bAnyEnabled = m_cbD1->IsEnabled() || m_cbD2->IsEnabled() || m_cbX1->IsEnabled() || m_cbX2->IsEnabled();
+    if ( bAnyEnabled ) {
+      bool bAnyChecked = m_cbD1->IsChecked() || m_cbD2->IsChecked() || m_cbX1->IsChecked() || m_cbX2->IsChecked();
+      m_btnState->Enable( bAnyChecked );
+      //std::cout << m_pProvider->GetName() << " " << bAnyChecked << std::endl;
     }
   }
 };
@@ -259,41 +262,36 @@ void PanelProviderControl::Add(
   );
 
   widgets.m_sizer = new wxBoxSizer(wxHORIZONTAL);
-  m_sizerPanel->Add(widgets.m_sizer, 0, wxALL, 2);
+  m_sizerPanel->Add(widgets.m_sizer, 0, wxLEFT|wxTOP|wxBOTTOM, 2);
 
   widgets.m_cbD1 = new wxCheckBox( this, wxID_ANY, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
-  widgets.m_sizer->Add(widgets.m_cbD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 3);
+  widgets.m_sizer->Add(widgets.m_cbD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2);
   widgets.m_cbD1->Enable( false );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD1( widgets ); }, widgets.m_cbD1->GetId() );
 
   widgets.m_cbD2 = new wxCheckBox( this, wxID_ANY, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
-  widgets.m_sizer->Add(widgets.m_cbD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
+  widgets.m_sizer->Add(widgets.m_cbD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbD2->Enable( false );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD2( widgets ); }, widgets.m_cbD2->GetId() );
 
   widgets.m_cbX1 = new wxCheckBox( this, wxID_ANY, _("X1"), wxDefaultPosition, wxDefaultSize, 0 );
-  widgets.m_sizer->Add(widgets.m_cbX1, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
+  widgets.m_sizer->Add(widgets.m_cbX1, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbX1->Enable( false );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX1( widgets ); }, widgets.m_cbX1->GetId() );
 
   widgets.m_cbX2 = new wxCheckBox( this, wxID_ANY, _("X2"), wxDefaultPosition, wxDefaultSize, 0 );
-  widgets.m_sizer->Add(widgets.m_cbX2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
+  widgets.m_sizer->Add(widgets.m_cbX2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbX2->Enable( false );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX2( widgets ); }, widgets.m_cbX2->GetId() );
 
   widgets.m_btnState = new wxToggleButton( this, wxID_ANY, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
-  widgets.m_sizer->Add(widgets.m_btnState, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3);
+  widgets.m_sizer->Add(widgets.m_btnState, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxRIGHT, 2 );
   widgets.m_btnState->Enable( false );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.OnBtn( event ); }, widgets.m_btnState->GetId() );
   // TODO: set value based upon current provider state
 
   widgets.m_textProvider = new wxStaticText( this, wxID_ANY, _(pProvider->GetName()), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_textProvider, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-
-  if ( bD1 ) widgets.m_fSetD1( widgets );
-  if ( bD2 ) widgets.m_fSetD2( widgets );
-  if ( bX1 ) widgets.m_fSetX1( widgets );
-  if ( bX2 ) widgets.m_fSetX2( widgets );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
@@ -304,6 +302,11 @@ void PanelProviderControl::Add(
   , std::move( fConnecting ), std::move( fConnected )
   , std::move( fDisconnecting ), std::move( fDisconnected )
   );
+
+  if ( bD1 ) widgets.m_fSetD1( widgets );
+  if ( bD2 ) widgets.m_fSetD2( widgets );
+  if ( bX1 ) widgets.m_fSetX1( widgets );
+  if ( bX2 ) widgets.m_fSetX2( widgets );
 
   // TODO: if any provider button enabled, disable all radio buttons
 
