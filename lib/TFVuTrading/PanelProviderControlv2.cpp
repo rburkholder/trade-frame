@@ -42,6 +42,8 @@ struct ProviderWidgets {
 
   pProvider_t m_pProvider;
 
+  wxWindow* m_owner;
+
   wxBoxSizer* m_sizer;
   wxCheckBox* m_cbD1;
   wxCheckBox* m_cbD2;
@@ -71,10 +73,12 @@ struct ProviderWidgets {
   }
 
   void Set(
-    pProvider_t pProvider
+    wxWindow* owner
+  , pProvider_t pProvider
   , fCallBack_t&& fConnecting, fCallBack_t&& fConnected
   , fCallBack_t&& fDisconnecting, fCallBack_t&& fDisconnected
 ) {
+    m_owner = owner;
 
     m_fConnecting = std::move( fConnecting );
     m_fConnected = std::move( fConnected );
@@ -114,7 +118,6 @@ struct ProviderWidgets {
     switch ( m_state ) {
     case ProviderState::Off:
       m_btnState->SetLabelText( "Off->On" );
-      m_btnState->SetValue( true );
       m_btnState->Enable();
       //if ( ( ProviderOff == m_stateIQFeed ) && ( ProviderOff == m_stateIB ) && ( ProviderOff == m_stateSimulator ) ) {
       //  EnableAllRadio();
@@ -122,7 +125,6 @@ struct ProviderWidgets {
       break;
     case ProviderState::GoingOn:
       m_btnState->SetLabelText( "Going On" );
-      m_btnState->SetValue( true );
       m_btnState->Disable();
       //if ( ( ProviderOff != m_stateIQFeed ) || ( ProviderOff != m_stateIB ) || ( ProviderOff != m_stateSimulator ) ) {
       //  DisableAllRadio();
@@ -130,39 +132,37 @@ struct ProviderWidgets {
       break;
     case ProviderState::On:
       m_btnState->SetLabelText( "On->Off" );
-      m_btnState->SetValue( false );
       m_btnState->Enable();
       break;
     case ProviderState::GoingOff:
       m_btnState->SetLabelText( "Going Off" );
-      m_btnState->SetValue( false );
       m_btnState->Disable();
       break;
     }
   }
 
   void Connecting( int ) { // handle event
-    SetState( ProviderState::On );
+    m_owner->CallAfter( [this](){ SetState( ProviderState::GoingOn ); });
   }
 
   void Connected( int ) { // handle event
-    SetState( ProviderState::On );
+    m_owner->CallAfter( [this](){ SetState( ProviderState::On ); });
   }
 
   void Disconnecting( int ) { // handle event
-    SetState( ProviderState::On );
+    m_owner->CallAfter( [this](){ SetState( ProviderState::GoingOff ); });
   }
 
   void Disonnected( int ) { // handle event
-    SetState( ProviderState::On );
+    m_owner->CallAfter( [this](){ SetState( ProviderState::Off ); });
   }
 
   void OnBtn( wxCommandEvent& event ) {
     if ( m_btnState->GetValue() ) {
-      m_pProvider->Disconnect();
+      m_pProvider->Connect();
     }
     else {
-      m_pProvider->Connect();
+      m_pProvider->Disconnect();
     }
   }
 
@@ -267,28 +267,34 @@ void PanelProviderControl::Add(
   widgets.m_cbD1 = new wxCheckBox( this, wxID_ANY, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2);
   widgets.m_cbD1->Enable( false );
-  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD1( widgets ); }, widgets.m_cbD1->GetId() );
+  Bind( wxEVT_CHECKBOX, [&widgets](wxCommandEvent& event){ widgets.m_fSetD1( widgets ); }, widgets.m_cbD1->GetId() );
 
   widgets.m_cbD2 = new wxCheckBox( this, wxID_ANY, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbD2->Enable( false );
-  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD2( widgets ); }, widgets.m_cbD2->GetId() );
+  Bind( wxEVT_CHECKBOX, [&widgets](wxCommandEvent& event){ widgets.m_fSetD2( widgets ); }, widgets.m_cbD2->GetId() );
 
   widgets.m_cbX1 = new wxCheckBox( this, wxID_ANY, _("X1"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbX1, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbX1->Enable( false );
-  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX1( widgets ); }, widgets.m_cbX1->GetId() );
+  Bind( wxEVT_CHECKBOX, [&widgets](wxCommandEvent& event){ widgets.m_fSetX1( widgets ); }, widgets.m_cbX1->GetId() );
 
   widgets.m_cbX2 = new wxCheckBox( this, wxID_ANY, _("X2"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbX2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 2);
   widgets.m_cbX2->Enable( false );
-  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX2( widgets ); }, widgets.m_cbX2->GetId() );
+  Bind( wxEVT_CHECKBOX, [&widgets](wxCommandEvent& event){ widgets.m_fSetX2( widgets ); }, widgets.m_cbX2->GetId() );
 
   widgets.m_btnState = new wxToggleButton( this, wxID_ANY, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_btnState, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxRIGHT, 2 );
   widgets.m_btnState->Enable( false );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.OnBtn( event ); }, widgets.m_btnState->GetId() );
-  // TODO: set value based upon current provider state
+  Bind(
+    wxEVT_TOGGLEBUTTON,
+    [&widgets](wxCommandEvent& event){
+      widgets.OnBtn( event );
+      event.Skip();
+    },
+    widgets.m_btnState->GetId()
+  );
 
   widgets.m_textProvider = new wxStaticText( this, wxID_ANY, _(pProvider->GetName()), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_textProvider, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
@@ -298,7 +304,8 @@ void PanelProviderControl::Add(
   }
 
   widgets.Set(
-    pProvider
+    this
+  , pProvider
   , std::move( fConnecting ), std::move( fConnected )
   , std::move( fDisconnecting ), std::move( fDisconnected )
   );
