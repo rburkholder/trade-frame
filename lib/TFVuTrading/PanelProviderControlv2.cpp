@@ -167,7 +167,7 @@ struct ProviderWidgets {
   }
 
   void UpdateProviderButton() {
-    if ( m_cbD1->IsEnabled() && m_cbD2->IsEnabled() && m_cbX1->IsEnabled() && m_cbX2->IsEnabled() ) {
+    if ( m_cbD1->IsEnabled() || m_cbD2->IsEnabled() || m_cbX1->IsEnabled() || m_cbX2->IsEnabled() ) {
       m_btnState->Enable( m_cbD1->IsChecked() || m_cbD2->IsChecked() || m_cbX1->IsChecked() || m_cbX2->IsChecked() );
     }
   }
@@ -223,6 +223,7 @@ void PanelProviderControl::Add(
     [this]( ProviderWidgets& pw ){ // m_fD1
       for ( mapProviderWidgets_t::value_type& vt : m_mapProviderWidgets ) {
         vt.second->m_cbD1->SetValue( false );
+        vt.second->UpdateProviderButton();
       }
       pw.m_cbD1->SetValue( true );
       pw.UpdateProviderButton();
@@ -231,6 +232,7 @@ void PanelProviderControl::Add(
     [this]( ProviderWidgets& pw ){ // m_fD2
       for ( mapProviderWidgets_t::value_type& vt : m_mapProviderWidgets ) {
         vt.second->m_cbD2->SetValue( false );
+        vt.second->UpdateProviderButton();
       }
       pw.m_cbD2->SetValue( true );
       pw.UpdateProviderButton();
@@ -239,6 +241,7 @@ void PanelProviderControl::Add(
     [this]( ProviderWidgets& pw ){ // m_fX1
       for ( mapProviderWidgets_t::value_type& vt : m_mapProviderWidgets ) {
         vt.second->m_cbX1->SetValue( false );
+        vt.second->UpdateProviderButton();
       }
       pw.m_cbX1->SetValue( true );
       pw.UpdateProviderButton();
@@ -247,6 +250,7 @@ void PanelProviderControl::Add(
     [this]( ProviderWidgets& pw ){ // m_fX2
       for ( mapProviderWidgets_t::value_type& vt : m_mapProviderWidgets ) {
         vt.second->m_cbX2->SetValue( false );
+        vt.second->UpdateProviderButton();
       }
       pw.m_cbX2->SetValue( true );
       pw.UpdateProviderButton();
@@ -260,26 +264,22 @@ void PanelProviderControl::Add(
   widgets.m_cbD1 = new wxCheckBox( this, wxID_ANY, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 3);
   widgets.m_cbD1->Enable( false );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD1( widgets ); }, widgets.m_cbD1->GetId() );
-  if ( bD1 ) widgets.m_fSetD1( widgets );
+  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD1( widgets ); }, widgets.m_cbD1->GetId() );
 
   widgets.m_cbD2 = new wxCheckBox( this, wxID_ANY, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
   widgets.m_cbD2->Enable( false );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD2( widgets ); }, widgets.m_cbD2->GetId() );
-  if ( bD2 ) widgets.m_fSetD2( widgets );
+  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetD2( widgets ); }, widgets.m_cbD2->GetId() );
 
   widgets.m_cbX1 = new wxCheckBox( this, wxID_ANY, _("X1"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbX1, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
   widgets.m_cbX1->Enable( false );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX1( widgets ); }, widgets.m_cbX1->GetId() );
-  if ( bX1 ) widgets.m_fSetX1( widgets );
+  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX1( widgets ); }, widgets.m_cbX1->GetId() );
 
   widgets.m_cbX2 = new wxCheckBox( this, wxID_ANY, _("X2"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_cbX2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 3);
   widgets.m_cbX2->Enable( false );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX2( widgets ); }, widgets.m_cbX2->GetId() );
-  if ( bX2 ) widgets.m_fSetX2( widgets );
+  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, [&widgets](wxCommandEvent& event){ widgets.m_fSetX2( widgets ); }, widgets.m_cbX2->GetId() );
 
   widgets.m_btnState = new wxToggleButton( this, wxID_ANY, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_btnState, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3);
@@ -289,6 +289,11 @@ void PanelProviderControl::Add(
 
   widgets.m_textProvider = new wxStaticText( this, wxID_ANY, _(pProvider->GetName()), wxDefaultPosition, wxDefaultSize, 0 );
   widgets.m_sizer->Add(widgets.m_textProvider, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+  if ( bD1 ) widgets.m_fSetD1( widgets );
+  if ( bD2 ) widgets.m_fSetD2( widgets );
+  if ( bX1 ) widgets.m_fSetX1( widgets );
+  if ( bX2 ) widgets.m_fSetX2( widgets );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
