@@ -18,6 +18,7 @@
  */
 
 ////@begin includes
+#include "wx/tglbtn.h"
 ////@end includes
 
 /*!
@@ -37,6 +38,7 @@
 #define ID_CB_IQF_D2 10061
 #define ID_CB_IQF_X 10062
 #define ID_BtnIQFeed 10022
+#define ID_TOGGLEBUTTON 10001
 #define wxID_LblIQFeed 10019
 #define ID_CB_IB_D1 10018
 #define ID_CB_IB_D2 10023

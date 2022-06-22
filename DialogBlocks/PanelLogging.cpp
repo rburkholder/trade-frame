@@ -120,7 +120,7 @@ void PanelLogging::CreateControls()
     itemPanel1->SetSizer(itemBoxSizer2);
 
     m_txtLogging = new wxTextCtrl( itemPanel1, ID_TEXTLOGGING, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-    itemBoxSizer2->Add(m_txtLogging, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer2->Add(m_txtLogging, 1, wxGROW|wxALL, 3);
 
 ////@end PanelLogging content construction
 }
