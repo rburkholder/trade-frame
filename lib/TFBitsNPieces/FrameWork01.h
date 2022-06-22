@@ -456,7 +456,7 @@ void FrameWork01<CRTP>::HandleOnData2Disconnected(int e) {
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleOnExecConnecting( int e ) {  // cross thread event
-  static_cast<CRTP*>(this)->OnData1Connecting( e );
+  static_cast<CRTP*>(this)->OnExecConnecting( e );
 }
 
 template<typename CRTP>
