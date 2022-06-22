@@ -124,11 +124,11 @@ bool AppIndicatorTrading::OnInit() {
 
   // m_pPanelProviderControl
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( panelSplitterRight, wxID_ANY );
-  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 1);
+  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 1);
 
   // m_pPanelLogging
   m_pPanelLogging = new ou::tf::PanelLogging( panelSplitterRight, wxID_ANY );
-  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
+  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 1);
 
   // startup splitter
   m_splitterRow->SplitVertically( m_ptreeTradables, panelSplitterRight, 10);

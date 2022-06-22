@@ -135,10 +135,10 @@ struct GridIBPositionDetails_impl {
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);
-    int cnt = m_pad.GetCols();
+    int cnt = m_pad.GetNumberCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_pad.GetColumnWidth( ix );
+      ar & m_pad.GetColSize( ix );
     }
   }
 
@@ -147,11 +147,11 @@ struct GridIBPositionDetails_impl {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
     int cnt;
     ar & cnt;
-    assert( cnt == m_pad.GetCols() );
+    assert( cnt == m_pad.GetNumberCols() );
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
-      m_pad.SetColumnWidth( ix, width );
+      m_pad.SetColSize( ix, width );
     }
   }
 

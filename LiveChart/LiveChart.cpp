@@ -95,7 +95,7 @@ bool AppLiveChart::OnInit() {
   LinkToPanelProviderControl();
 
   m_pPanelLogging = new ou::tf::PanelLogging( panelSplitterRightPanel, wxID_ANY );
-  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
 //  m_pPanelLogging->Show( true );
 
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );

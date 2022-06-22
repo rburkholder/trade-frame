@@ -50,7 +50,7 @@ bool AppTestWx::OnInit() {
   //sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
 //  m_pPanelLogging->Show( true );
 
   m_pPanel = new wxPanel( m_pFrameMain, wxID_ANY );

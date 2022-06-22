@@ -130,7 +130,7 @@ void DialogNewPortfolio::CreateControls()
     itemFlexGridSizer3->Add(itemStaticText4, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_txtPortfolioId = new wxTextCtrl( itemDialog1, ID_TxtPortfolioId, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer3->Add(m_txtPortfolioId, 1, wxALIGN_LEFT|wxGROW|wxALL, 2);
+    itemFlexGridSizer3->Add(m_txtPortfolioId, 1, wxGROW|wxALL, 2);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, ID_LblDescription, _("Description:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
     itemFlexGridSizer3->Add(itemStaticText6, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL, 5);

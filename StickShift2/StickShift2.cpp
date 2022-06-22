@@ -61,7 +61,7 @@ bool AppStickShift::OnInit() {
 
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   m_tws->SetClientId( 1 );
@@ -69,13 +69,13 @@ bool AppStickShift::OnInit() {
   LinkToPanelProviderControl();
 
   m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxRIGHT, 5);
   m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
   m_pPanelManualOrder->Show( true );
 
 /*
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
+  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND, 0);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
@@ -88,7 +88,7 @@ bool AppStickShift::OnInit() {
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  //m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  //m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->Show( true );
 

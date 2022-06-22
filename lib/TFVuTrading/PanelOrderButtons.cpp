@@ -104,7 +104,7 @@ void PanelOrderButtons::CreateControls() {
     sizerCockForCursor->Add(m_cbCockForCursor, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
     sizerQuantity = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerQuantity, 0, wxGROW|wxLEFT|wxRIGHT|wxADJUST_MINSIZE, 2);
+    sizerMain->Add(sizerQuantity, 0, wxGROW|wxLEFT|wxRIGHT, 2);
 
     labelQuantity = new wxStaticText( itemPanel1, wxID_STATIC, _("Quantity:"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerQuantity->Add(labelQuantity, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);

@@ -51,8 +51,8 @@ bool AppIQFeedMarketSymbols::OnInit() {
 
   // m_pPanelLogging
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  //m_sizerSplitterRight->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
-  m_sizerFrame->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
+  //m_sizerSplitterRight->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 1);
+  m_sizerFrame->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 1);
 
   //LinkToPanelProviderControl();
 

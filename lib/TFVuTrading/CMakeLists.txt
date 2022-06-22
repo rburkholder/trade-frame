@@ -67,7 +67,6 @@ set(
     VuPositions.h
     VuTreePortfolioPositionOrder.h
     WinChartView.h
-    wxETKBaseValidator.h
   )
 
 set(
@@ -123,7 +122,6 @@ set(
     VuPositions.cpp
     VuTreePortfolioPositionOrder.cpp
     WinChartView.cpp
-    wxETKBaseValidator.cpp
   )
 
 add_library(
@@ -142,7 +140,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
     ".."
-    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
-    "/usr/local/include/wx-3.0"
+    "/usr/local/lib/wx/include/gtk3-unicode-3.1"
+    "/usr/local/include/wx-3.1"
   )
 

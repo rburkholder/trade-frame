@@ -97,11 +97,11 @@ bool AppHedgedBollinger::OnInit() {
 
   // m_pPanelProviderControl
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_panelSplitterRight, wxID_ANY );
-  m_sizerSplitterRight->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 1);
+  m_sizerSplitterRight->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 1);
 
   // m_pPanelLogging
   m_pPanelLogging = new ou::tf::PanelLogging( m_panelSplitterRight, wxID_ANY );
-  m_sizerSplitterRight->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
+  m_sizerSplitterRight->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 1);
 
   // startup splitter
   m_splitterRow1->SplitVertically(m_ptreeChartables, m_panelSplitterRight, 10);
@@ -112,12 +112,12 @@ bool AppHedgedBollinger::OnInit() {
   LinkToPanelProviderControl();
 
 //  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
-//  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+//  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxRIGHT, 5);
 //  m_pPanelManualOrder->Show( true );
 
 /*
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
+  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND, 0);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );

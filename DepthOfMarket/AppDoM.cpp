@@ -114,7 +114,7 @@ bool AppDoM::OnInit() {
     sizerMain->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 4 );
 
     m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
-    sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_CENTER|wxRIGHT, 4);
+    sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxRIGHT, 4);
     m_pPanelProviderControl->Show( true );
 
     wxSize size = sizerMain->GetSize();
@@ -126,7 +126,7 @@ bool AppDoM::OnInit() {
     m_pPanelStatistics->Show( true );
 
     m_pPanelLevelIIButtons = new ou::tf::l2::PanelLevelIIButtons( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
-    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);
+    sizerControls->Add( m_pPanelLevelIIButtons, 0, wxEXPAND, 4);
     m_pPanelLevelIIButtons->Show( true );
 
     wxBoxSizer* sizerTrade = new wxBoxSizer( wxHORIZONTAL );

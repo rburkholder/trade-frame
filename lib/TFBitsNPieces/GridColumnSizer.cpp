@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   GridColumnSizer.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on August 9, 2018, 2:07 PM
  */
 
@@ -31,7 +31,7 @@ GridColumnSizer::~GridColumnSizer( ) { }
 
 void GridColumnSizer::SaveColumnSizes( const wxGrid& grid ) {
   m_vColumnSize.clear();
-  int size = grid.GetCols();
+  int size = grid.GetNumberCols();
   m_vColumnSize.reserve( size );
   for ( int ix = 0; ix < size; ix++ ) {
     m_vColumnSize.push_back( grid.GetColSize( ix ) );
@@ -44,12 +44,12 @@ void GridColumnSizer::SetColumnSizes( wxGrid& grid ) {
     SaveColumnSizes( grid );
   }
   else {
-    if ( size != grid.GetCols() ) {
+    if ( size != grid.GetNumberCols() ) {
       std::runtime_error( "column counts don't match" );
     }
     else {
       for ( size_t ix = 0; ix < size; ix++ ) {
-        grid.SetColumnWidth( ix, m_vColumnSize[ ix ] );
+        grid.SetColSize( ix, m_vColumnSize[ ix ] );
       }
     }
   }

@@ -110,10 +110,10 @@ struct GridIBAccountValues_impl {
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    int cnt = m_pav.GetCols();
+    int cnt = m_pav.GetNumberCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_pav.GetColumnWidth( ix );
+      ar & m_pav.GetColSize( ix );
     }
   }
 
@@ -121,11 +121,11 @@ struct GridIBAccountValues_impl {
   void load( Archive& ar, const unsigned int version ) {
     int cnt;
     ar & cnt;
-    assert( cnt == m_pav.GetCols() );
+    assert( cnt == m_pav.GetNumberCols() );
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
-      m_pav.SetColumnWidth( ix, width );
+      m_pav.SetColSize( ix, width );
     }
   }
 

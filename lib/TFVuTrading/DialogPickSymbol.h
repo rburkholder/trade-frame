@@ -20,16 +20,17 @@
 
 #include <functional>
 
-#include <wx/button.h>
-#include <wx/radiobut.h>
-#include <wx/stattext.h>
-#include <wx/textctrl.h>
-#include <wx/datectrl.h>
 #include <wx/dateevt.h>
 
 #include <TFTrading/TradingEnumerations.h>
 
 #include "DialogBase.h"
+
+class wxButton;
+class wxTextCtrl;
+class wxStaticText;
+class wxRadioButton;
+class wxDatePickerCtrl;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

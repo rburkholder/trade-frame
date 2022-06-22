@@ -53,7 +53,7 @@ bool AppWeeklies::OnInit() {
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->Show( true );
 
   m_pFrameMain->Show( true );

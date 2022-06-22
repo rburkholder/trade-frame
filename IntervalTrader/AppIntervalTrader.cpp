@@ -119,7 +119,7 @@ bool AppIntervalTrader::OnInit() {
   m_pFrameMain->SetSizer( sizerMain );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIntervalTrader::OnClose, this );  // start close of windows and controls

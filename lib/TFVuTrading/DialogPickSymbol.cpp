@@ -16,15 +16,21 @@
  * Created on December 22, 2015, 3:04 PM
  */
 
+#include <boost/lexical_cast.hpp>
+
 #include <wx/sizer.h>
 #include <wx/icon.h>
 #include <wx/textentry.h>
 #include <wx/valnum.h>
 #include <wx/valgen.h>
 
+#include <wx/button.h>
+#include <wx/radiobut.h>
+#include <wx/stattext.h>
+#include <wx/textctrl.h>
+#include <wx/datectrl.h>
+
 #include <TFVuTrading/ValidatorInstrumentName.h>
-#include <wx-3.0/wx/textctrl.h>
-#include <boost/lexical_cast.hpp>
 
 #include "DialogPickSymbol.h"
 

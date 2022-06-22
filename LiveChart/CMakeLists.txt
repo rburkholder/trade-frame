@@ -52,8 +52,8 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
     "../lib"
-    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
-    "/usr/local/include/wx-3.0"
+    "/usr/local/lib/wx/include/gtk3-unicode-3.1"
+    "/usr/local/include/wx-3.1"
   )
 
 target_link_directories(
@@ -87,14 +87,9 @@ target_link_libraries(
       curl
       chartdir
       ${Boost_LIBRARIES}
-#      wx_gtk3u_xrc-3.0
-#      wx_gtk3u_html-3.0 
-#      wx_gtk3u_qa-3.0
-      wx_gtk3u_adv-3.0
-      wx_gtk3u_core-3.0
-#      wx_baseu_xml-3.0
-#      wx_baseu_net-3.0
-      wx_baseu-3.0
+      wx_gtk3u_adv-3.1
+      wx_gtk3u_core-3.1
+      wx_baseu-3.1
       pthread
   )
 

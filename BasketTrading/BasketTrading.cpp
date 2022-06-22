@@ -110,17 +110,17 @@ void AppBasketTrading::Init() {
 
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   //m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
-  //m_sizerControls->Add( m_pPanelBasketTradingMain, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  //m_sizerControls->Add( m_pPanelBasketTradingMain, 0, wxEXPAND|wxRIGHT, 5);
   //m_pPanelBasketTradingMain->Show( true );
 
   LinkToPanelProviderControl();
 
   m_pPanelPortfolioStats = new PanelPortfolioStats( m_pFrameMain, wxID_ANY );
-  //m_sizerMain->Add( m_pPanelPortfolioStats, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  //m_sizerMain->Add( m_pPanelPortfolioStats, 1, wxEXPAND|wxRIGHT, 5);
   sizerLeft->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);
   m_pPanelPortfolioStats->Show( true );
 
@@ -128,7 +128,7 @@ void AppBasketTrading::Init() {
   sizerLeft->Add( m_sizerLogger, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerLogger->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerLogger->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->Show( true );
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain, wxID_ANY );

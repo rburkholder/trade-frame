@@ -55,12 +55,12 @@ bool AppHdf5Chart::OnInit() {
   //sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->SetMinSize( wxSize( 100, 100 ) );
 //  m_pPanelLogging->Show( true );
 
   m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_pFrameMain, wxID_ANY );
-  sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND, 0);
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );

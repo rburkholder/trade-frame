@@ -77,7 +77,7 @@ bool AppMultipleFutures::OnInit() {
 
   m_splitLogGraph->SplitVertically( m_pPanelLogging, m_nbStrategy, m_splitLogGraph->GetSize().GetWidth() / 4 );
 
-  //sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  //sizerMain->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   //m_pPanelLogging->Show( true );
 
   sizerMain->Add( m_splitLogGraph, 1, wxGROW|wxALL, 2 );
