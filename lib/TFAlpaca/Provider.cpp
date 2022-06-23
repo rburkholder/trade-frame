@@ -25,13 +25,11 @@
 
 #include <boost/asio/strand.hpp>
 
-// this comes before OrderManager due to 'namespace detail' conflict
-#include "root_certificates.hpp"
-
 #include <TFTrading/OrderManager.h>
 
 #include "one_shot.hpp"
 #include "web_socket.hpp"
+#include "root_certificates.hpp"
 
 #include "Asset.hpp"
 #include "Order.hpp"
@@ -85,7 +83,7 @@ Provider::Provider()
 
   // This holds the root certificate used for verification
   // NOTE: this needs to be fixed, based upon comments in the include header
-  load_root_certificates( m_ssl_context );
+  ou::load_root_certificates( m_ssl_context );
 
   // Verify the remote server's certificate
   m_ssl_context.set_verify_mode( ssl::verify_peer );
@@ -109,29 +107,38 @@ void Provider::Set( const std::string& sHost, const std::string& sKey, const std
 
 void Provider::Connect() {
 
-  assert( 0 < m_sHost.size() );
-  assert( 0 < m_sPort.size() );
-  assert( 0 < m_sAlpacaKeyId.size() );
-  assert( 0 < m_sAlpacaSecret.size() );
+  if ( !m_bConnected ) {
 
-  if ( EState::start == m_state ) {
+    ProviderInterfaceBase::OnConnecting( 0 );
 
-    m_state = EState::connect;
+    assert( 0 < m_sHost.size() );
+    assert( 0 < m_sPort.size() );
+    assert( 0 < m_sAlpacaKeyId.size() );
+    assert( 0 < m_sAlpacaSecret.size() );
 
-    inherited_t::Connect();
+    if ( EState::start == m_state ) {
 
-    Assets();
-    Positions();
-    TradeUpdates();
+      m_state = EState::connect;
+
+      inherited_t::Connect();
+
+      Assets();
+      Positions();
+      TradeUpdates();
+    }
+
   }
-
-  // TODO: indicate connected with m_bConnected = true;, OnConnected( 0 );
 }
 
 void Provider::Disconnect() {
-  m_state = EState::start;
-  m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
-  m_pTradeUpdates->disconnect();
+  if ( m_bConnected ) {
+    ProviderInterfaceBase::OnDisconnecting( 0 );
+    m_state = EState::start;
+    m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
+    m_pTradeUpdates->disconnect();
+    m_bConnected = false;
+    ProviderInterfaceBase::OnDisconnected( 0 );
+  }
 }
 
 void Provider::Assets() {
@@ -243,6 +250,8 @@ void Provider::TradeUpdates() {
     m_sAlpacaKeyId, m_sAlpacaSecret,
     [this] (bool ){
       m_pTradeUpdates->trade_updates( true );
+      m_bConnected = true;
+      ProviderInterfaceBase::OnConnected( 0 );
     },
     [this]( std::string&& sMessage){
       std::cout << "order update message: " << sMessage << std::endl;

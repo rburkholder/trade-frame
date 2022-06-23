@@ -41,6 +41,7 @@
 
 namespace ssl = boost::asio::ssl; // from <boost/asio/ssl.hpp>
 
+namespace ou {
 namespace detail {
 
 inline
@@ -3960,5 +3961,7 @@ load_root_certificates(ssl::context& ctx)
     if(ec)
         throw boost::system::system_error{ec};
 }
+
+} // namespace ou
 
 #endif
