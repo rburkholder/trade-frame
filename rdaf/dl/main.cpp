@@ -526,8 +526,14 @@ public:
     if ( 0 != m_mapRetrieveTicks.size() ) {
       //std::lock_guard<std::mutex> lock( m_mutex ); // can't lock, already in a lock
       //if ( 0 != m_mapRetrieveTicks.size() ) {
-        std::cout << "," << m_mapRetrieveTicks.begin()->second.pSecurity->sName;
-        if ( 1 < m_mapRetrieveTicks.size() ) std::cout << " ...";
+        auto p = m_mapRetrieveTicks.begin()->second.pSecurity;
+        std::cout
+          << "," << p->sName
+          << "," << p->nTicks
+          ;
+        if ( 1 < m_mapRetrieveTicks.size() ) {
+          std::cout << " - " << m_mapRetrieveTicks.size() << " remaining";
+        }
       //}
     }
     std::cout << std::endl;
@@ -676,6 +682,40 @@ void StartRdaf( const std::string& sFileName ) {
 
 // ==========
 
+void clean_up() {
+
+    m_pTreeStatistics->FlushBaskets();
+
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      //m_pFile->Flush();  // probably not needed.
+      m_pFile->Write();
+      m_pFile->Close();
+      m_pFile.reset();
+    }
+
+    if ( m_prdafApp ) {
+      m_prdafApp.reset();
+    }
+}
+
+// ==========
+
+void signal_handler(
+  const boost::system::error_code& error_code,
+  int signal_number
+) {
+  if ( !error_code ) {
+    std::cout
+      << "signal(" << error_code << "): "
+      << error_code.message() << ", clean up"
+      << std::endl;
+    clean_up();
+    std::terminate();
+}  }
+
+
+// ==========
+
 int main( int argc, char* argv[] ) {
 
   boost::asio::io_context m_context;
@@ -758,6 +798,10 @@ int main( int argc, char* argv[] ) {
       pBranchMarket = m_pTreeStatistics->Branch( "market", &m_branchStatistics.sSecurityListedMarket );
     }
 
+    // https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio/reference/signal_set.html
+    boost::asio::signal_set signals( m_context, SIGINT, SIGTERM, SIGQUIT );
+    signals.async_wait( signal_handler );
+
     bool bSelectionComplete( false );
 
     ControlTickRetrieval control(
@@ -767,8 +811,8 @@ int main( int argc, char* argv[] ) {
         //std::cout << pSecurity->sName << " history processed." << std::endl;
         const Security& security( *pSecurity );
         std::cout
-          << security.sListedMarket << ","
           << security.sName << ","
+          << security.sListedMarket << ","
           << security.dblCommonSharesOutstanding << ","
           //<< pWatch->LastTrade().Price() << ","
           << security.nAverageVolume << ","
@@ -784,8 +828,10 @@ int main( int argc, char* argv[] ) {
           }
         );
       },
-      [&m_pWork,&bSelectionComplete](){ // fRetrievalDone_t
+      [&m_pWork,&signals,&bSelectionComplete](){ // fRetrievalDone_t
         if ( bSelectionComplete ) {
+          signals.clear();
+          signals.cancel();
           m_pWork.reset();
         }
       }
@@ -810,18 +856,8 @@ int main( int argc, char* argv[] ) {
 
     symbols.Statistics();
 
-    m_pTreeStatistics->FlushBaskets();
+    clean_up();
 
-    if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      //m_pFile->Flush();  // probably not needed.
-      m_pFile->Write();
-      m_pFile->Close();
-      m_pFile.reset();
-    }
-
-    if ( m_prdafApp ) {
-      m_prdafApp.reset();
-    }
   }
 
   return 0;
