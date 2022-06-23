@@ -145,19 +145,19 @@ bool AppAutoTrade::OnInit() {
   m_pPanelProviderControl->Add(
     m_iqfeed,
     true, false, false, false,
-    [](){},
-    [](){},
-    [](){},
-    [](){}
+    [](){}, // fConnecting
+    [](){}, // fConnected
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
   );
 
   m_pPanelProviderControl->Add(
     m_alpaca,
     false, false, true, false,
-    [](){},
-    [](){},
-    [](){},
-    [](){}
+    [](){}, // fConnecting
+    [](){}, // fConnected
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
   );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
@@ -313,12 +313,6 @@ bool AppAutoTrade::OnInit() {
 
   m_treeSymbols->ExpandAll();
 
-  //m_pPanelLogging->Layout();
-  //m_pPanelLogging->Show( true );
-
-  m_pFrameMain->Layout();
-  m_pFrameMain->Show( true );
-
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
 
   FrameMain::vpItems_t vItems;
@@ -353,12 +347,12 @@ bool AppAutoTrade::OnInit() {
     CallAfter(
       [this](){
         using pProvider_t = ou::tf::v2::PanelProviderControl::pProvider_t;
-        //m_pPanelProviderControl->SetProvider( pProvider_t::ESim, pProvider_t::ESim, pProvider_t::ESim );
-        //m_pPanelProviderControl->SetSimulatorState( ou::tf::ProviderOn );
         m_sim->Connect();
       }
     );
   }
+
+  m_pFrameMain->Show( true );
 
   return 1;
 }
