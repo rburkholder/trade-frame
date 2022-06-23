@@ -90,6 +90,19 @@ struct ProviderWidgets {
     m_pProvider->OnConnected.Add( MakeDelegate( this, &ProviderWidgets::Connected ) );
     m_pProvider->OnDisconnecting.Add( MakeDelegate( this, &ProviderWidgets::Disconnecting ) );
     m_pProvider->OnDisconnected.Add( MakeDelegate( this, &ProviderWidgets::Disonnected ) );
+    ou::tf::ProviderManager::GlobalInstance().Register( m_pProvider );
+    Enable();
+  }
+
+  void Disable() {
+    m_cbD1->Enable( false );
+    m_cbD2->Enable( false );
+    m_cbX1->Enable( false );
+    m_cbX2->Enable( false );
+    //UpdateProviderButton();
+  }
+
+  void Enable() {
     if ( m_pProvider->ProvidesBrokerInterface() ) {
       m_cbX1->Enable( true );
       m_cbX2->Enable( true );
@@ -98,7 +111,7 @@ struct ProviderWidgets {
       m_cbD1->Enable( true );
       m_cbD2->Enable( true );
     }
-    ou::tf::ProviderManager::GlobalInstance().Register( m_pProvider );
+    UpdateProviderButton();
   }
 
   void Set(
