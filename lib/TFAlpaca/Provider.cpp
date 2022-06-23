@@ -61,8 +61,6 @@ Provider::Provider()
   m_sName = "alpaca"; // this needs to match provider used in the database
   m_nID = keytypes::EProviderAlpaca;
   m_bProvidesBrokerInterface = true;
-  m_bProvidesQuotes = true;  // fake this for now
-  m_bProvidesTrades = true;  // fake this for now
 
   m_kwmEvent.AddPattern( "new", EEvent::new_ );
   m_kwmEvent.AddPattern( "fill", EEvent::fill );

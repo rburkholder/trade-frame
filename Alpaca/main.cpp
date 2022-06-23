@@ -28,6 +28,8 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/InstrumentManager.h>
 
+#include <TFIQFeed/Provider.h>
+
 #include <TFAlpaca/Provider.hpp>
 
 #include "Config.hpp"
@@ -56,17 +58,24 @@ int main( int argc, char** argv )
     config::Load( "alpaca.cfg", choices );
 
     // 2. construct manager & register
-    using pProvider_t = ou::tf::alpaca::Provider::pProvider_t;
-    pProvider_t pProvider = std::make_shared<ou::tf::alpaca::Provider>();
-    ou::tf::ProviderManager::GlobalInstance().Register( pProvider );
+    using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
+    pProviderAlpaca_t pProviderAlpaca = ou::tf::alpaca::Provider::Factory();
+    pProviderAlpaca->SetName( "alpaca" );  // may already be set to this
+    ou::tf::ProviderManager::GlobalInstance().Register( pProviderAlpaca );
 
-    pProvider->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+    pProviderAlpaca->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
+    pProviderAlpaca->Connect();
+
+    using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+    pProviderIQFeed_t pProviderIQFeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+    pProviderIQFeed->SetName( "iqfeed" ); // needs to match name in database
+    ou::tf::ProviderManager::GlobalInstance().Register( pProviderIQFeed );
+    pProviderIQFeed->Connect();
 
     // 3. database can then use the registered provider
     static const std::string sDbName( "alpaca.db" );
     std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-    pProvider->Connect();
 
     sleep( 4 );
 
@@ -94,8 +103,10 @@ int main( int argc, char** argv )
       else {
         pPosition = pm.ConstructPosition(
           sPortfolio, sSymbol, "manual",
-          "alpaca", "alpaca", pProvider, pProvider, pInstrument
+          "alpaca", "iqfeed", pProviderAlpaca, pProviderIQFeed,
+          pInstrument
         );
+        // TODO: will need to confirm names are ok, iqfeed might need to be changed in provider
       }
     }
 
@@ -116,10 +127,14 @@ int main( int argc, char** argv )
 
     sleep( 20 );
 
+    pProviderAlpaca->Disconnect();
+    pProviderIQFeed->Disconnect();
+
     pOrder.reset();
     pPosition.reset();
     pInstrument.reset();
-    pProvider.reset();
+    pProviderAlpaca.reset();
+    pProviderIQFeed.reset();
 
     m_pdb.reset();
 
