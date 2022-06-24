@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace boost {
 namespace json {
@@ -89,8 +90,17 @@ struct Status {
   std::string updated_at;
 };
 
+struct OrderId {
+  std::string client_order_id;
+  std::string id;
+};
+
 void Decode( const std::string&, Status& );
 void Decode( boost::json::value const&, Status& );
+
+using vOrderId_t = std::vector<OrderId>;
+void Decode( const std::string&, vOrderId_t& );
+
 
 } // namespace order
 } // namespace alpaca

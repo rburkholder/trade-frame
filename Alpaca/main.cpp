@@ -76,7 +76,6 @@ int main( int argc, char** argv )
     static const std::string sDbName( "alpaca.db" );
     std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-
     sleep( 4 );
 
     const std::string sSymbol( "GLD" );
@@ -112,16 +111,13 @@ int main( int argc, char** argv )
 
     ou::tf::Order::pOrder_t pOrder;
     {
-      ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
-      om.CheckOrderId( 32 ); // put this into state file
-
       pOrder = pPosition->ConstructOrder(
         ou::tf::OrderType::Market,
         ou::tf::OrderSide::Buy,
         100
       );
 
-      //om.PlaceOrder( pProvider.get(), pOrder );
+      //om.PlaceOrder( pProviderAlpaca.get(), pOrder );
     }
 
 

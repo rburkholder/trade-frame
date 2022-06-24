@@ -19,6 +19,8 @@
  * Created: June 7, 2022 12:48
  */
 
+#include <iostream>
+
 #include <boost/json.hpp>
 
 #include "Order.hpp"
@@ -106,9 +108,30 @@ Status tag_invoke( json::value_to_tag<Status>, json::value const& jv ) {
   return msg;
 }
 
+OrderId tag_invoke( json::value_to_tag<OrderId>, json::value const& jv ) {
+  OrderId msg;
+  json::object const& obj = jv.as_object();
+  extract( obj, msg.client_order_id, "client_order_id" );
+  extract( obj, msg.id, "id" );
+  return msg;
+}
+
 void Decode( boost::json::value const& jv, Status& status ) {
   status = json::value_to<Status>( jv );
 }
+
+void Decode( const std::string& sMessage, vOrderId_t& vOrderId ) {
+
+  json::error_code jec;
+  json::value jv = json::parse( sMessage, jec );
+  if ( jec.failed() ) {
+    std::cout << "failed to parse current order id" << std::endl;
+  }
+  else {
+    vOrderId = json::value_to<vOrderId_t>( jv );
+  }
+}
+
 
 } // namespace order
 } // namespace alpaca

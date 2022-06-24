@@ -122,6 +122,7 @@ void Provider::Connect() {
 
       inherited_t::Connect();
 
+      LastOrderId();
       Assets();
       Positions();
       TradeUpdates();
@@ -450,6 +451,48 @@ Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new Asset( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
+}
+
+void Provider::LastOrderId() {
+  json::object request;
+  request[ "status" ] = "all";
+  //request[ "limit" ] = 10;
+  //request[ "direction" ] = "desc";
+  std::cout
+    << "order id request: "
+    << json::serialize( request )
+    << std::endl;
+
+  auto osPositions = std::make_shared<ou::tf::alpaca::session::one_shot>(
+    asio::make_strand( m_srvc ),
+    m_ssl_context
+    );
+  osPositions->get(
+    m_sHost, m_sPort,
+    m_sAlpacaKeyId, m_sAlpacaSecret,
+    "/v2/orders?status=all&limit=1&direction=desc",
+    [this]( bool bStatus, const std::string& message ){
+      if ( bStatus ) {
+        //std::cout << "order list for id: " << message << std::endl;
+        order::vOrderId_t vOrderId;
+        order::Decode( message, vOrderId );
+        if ( 1 < vOrderId.size() ) {
+          std::cout << "alpaca order id decode has more than 1 entry" << std::endl;
+        }
+        else {
+          if ( 1 == vOrderId.size() ) {
+            auto idOrder = boost::lexical_cast<ou::tf::OrderManager::idOrder_t>( vOrderId[ 0 ].client_order_id );
+            ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+            om.CheckOrderId( idOrder ); // put this into state file
+            std::cout << "OrderManager assigned idOrder: " << idOrder << std::endl;
+          }
+        }
+      }
+      else {
+        std::cout << "os Order List Retrieval problems: " << message << std::endl;
+      }
+    }
+  );
 }
 
 void Provider::PlaceOrder( pOrder_t pOrder ) {

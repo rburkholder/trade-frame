@@ -122,6 +122,7 @@ private:
   mapAssetId_t m_mapAssetId;
 
   void Assets();
+  void LastOrderId();
   void Positions();
   void TradeUpdates();
 
