@@ -39,8 +39,6 @@ IQFeedProvider::~IQFeedProvider() {
 
 void IQFeedProvider::Connect() {
   if ( !m_bConnected ) {
-
-
     ProviderInterfaceBase::OnConnecting( 0 );
     inherited_t::Connect();
     IQFeed_t::Connect();
