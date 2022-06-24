@@ -71,6 +71,16 @@ public:
     fDone_t&&
   );
 
+  void get(
+    const std::string& sHost,
+    const std::string& sPort,
+    const std::string& sAlpacaKey,
+    const std::string& sAlpacaSecret,
+    const std::string& sTarget,
+    const std::string& sBody,
+    fDone_t&&
+  );
+
   void post(
     const std::string& sHost,
     const std::string& sPort,
