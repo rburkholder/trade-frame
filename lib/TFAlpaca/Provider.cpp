@@ -19,6 +19,8 @@
  * Created: June 5, 2022 16:04
  */
 
+#include <stdexcept>
+
 #include <boost/json.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -557,8 +559,42 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
     "/v2/orders", json::serialize( request ),
     []( bool bResult, const std::string& s ) {
       if ( bResult ) {
-        std::cout << "place order result: " << s << std::endl;
-        // TODO: extract alpaca order id here?
+        //std::cout << "place order result: " << s << std::endl;
+
+
+        json::error_code jec;
+        json::value jv = json::parse( s, jec );
+        if ( jec.failed() ) {
+          std::cout << "failed to parse order result: " << s << std::endl;
+        }
+        else {
+          // TODO: encase in try/catch: one of two results:  code, or order confirmation
+          // order '{"client_order_id":"35","symbol":"GLD","qty":"100","notional":null,"side":"buy","type":"market","time_in_force":"day","order_class":"simple"}'
+          // place order result: {"code":40010001,"message":"client_order_id must be unique"}
+          try {
+            struct ResultDecoded {
+              uint64_t code;
+              std::string message;
+            } result;
+
+            json::object const& obj = jv.as_object();
+            extract( obj, result.code, "code" );
+            extract( obj, result.message, "message" );
+
+            switch ( result.code ) {
+              case 40010001:
+                std::cout << "order not placed: " << result.message << std::endl;
+                // TODO: need to cancel the order locally
+                break;
+              default:
+                assert( false );  // abort to catch other possibilities
+                break;
+            }
+          }
+          catch ( std::out_of_range& error ) {
+            // should be a normal order response
+          }
+        }
       }
       else {
         std::cout << "place order error: " << s << std::endl;

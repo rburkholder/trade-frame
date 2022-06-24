@@ -117,7 +117,8 @@ int main( int argc, char** argv )
         100
       );
 
-      //om.PlaceOrder( pProviderAlpaca.get(), pOrder );
+      ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+      om.PlaceOrder( pProviderAlpaca.get(), pOrder );
     }
 
 
