@@ -54,20 +54,22 @@ int main( int argc, char* argv[] ) {
   vSymbols_t vSymbols;
 
   ou::KeyWordMatch<bool> kwm( true, 20 ); // scan can't find these
-  kwm.AddPattern( "ORPH", false );
-  kwm.AddPattern( "DBBPF", false );
-  kwm.AddPattern( "UELMO", false );
-  kwm.AddPattern( "GRZZU", false );
-  kwm.AddPattern( "PB", false );
-  kwm.AddPattern( "ELSBF", false );
-  kwm.AddPattern( "LIBC", false );
-  kwm.AddPattern( "SSDT", false );
   kwm.AddPattern( "BSCE", false );
+  kwm.AddPattern( "DBBPF", false );
+  kwm.AddPattern( "ELMSW", false );
+  kwm.AddPattern( "ELSBF", false );
   kwm.AddPattern( "GLMGF", false );
+  kwm.AddPattern( "GRZZU", false );
   kwm.AddPattern( "HUICF", false );
-  kwm.AddPattern( "RTWRF", false );
-  kwm.AddPattern( "SBEAU", false );
+  kwm.AddPattern( "LIBC", false );
+  kwm.AddPattern( "ORPH", false );
+  kwm.AddPattern( "PB", false );
   kwm.AddPattern( "PFH", false ); // this one works, bug somewhere?
+  kwm.AddPattern( "PGTRF", false );
+  kwm.AddPattern( "RTWRF", false );
+  kwm.AddPattern( "SSDT", false );
+  kwm.AddPattern( "SBEAU", false );
+  kwm.AddPattern( "UELMO", false );
 
   list.SelectSymbolsByExchange(
     vExchanges.begin(), vExchanges.end(),
@@ -93,8 +95,8 @@ int main( int argc, char* argv[] ) {
   for ( vSymbols_t::value_type& vt: vSymbols ) {
     if ( ( 7.0 < vt.yield ) && ( 5000 <= vt.nAverageVolume ) ) {
       std::cout
-               << vt.sExchange
-        << "," << vt.sSymbol
+               << vt.sSymbol
+        << "," << vt.sExchange
         << "," << vt.yield
         << "," << vt.rate
         << "," << vt.amount
