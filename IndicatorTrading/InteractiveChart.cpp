@@ -361,17 +361,24 @@ void InteractiveChart::ProcessChains() {
   if ( 0 == m_mapExpiries.size() ) {
 
     for ( const mapChains_t::value_type& vt: m_mapChains ) {
-      size_t nStrikes {};
+      size_t nTotalStrikes {};
+      size_t nCompleteStrikes {};
       vt.second.Strikes(
-        [&nStrikes]( double strike, const chain_t::strike_t& options ){
+        [&nTotalStrikes,&nCompleteStrikes]( double strike, const chain_t::strike_t& options ){
+          ++nTotalStrikes;
           if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
-            nStrikes++;
+            ++nCompleteStrikes;
           }
       } );
 
-      std::cout << "chain " << vt.first << " with " << nStrikes << " matching call/puts" << std::endl;
-      if ( 20 < nStrikes ) {
-        std::cout << "chain " << vt.first << " marked" << std::endl;
+      std::cout
+        << "chain " << vt.first
+        << " with " << nCompleteStrikes << " matching call/puts"
+        << " out of " << nTotalStrikes << " total"
+        //<< std::endl
+        ;
+      if ( 20 < nCompleteStrikes ) {
+        std::cout << ", marked";
         auto [iter, result ] = m_mapExpiries.emplace( std::make_pair( vt.first, Expiry() ) );
         assert( result );
 
@@ -383,6 +390,7 @@ void InteractiveChart::ProcessChains() {
           }
         );
       }
+      std::cout << std::endl;
     }
 
     m_bOptionsReady = true;
