@@ -419,31 +419,31 @@ void Provider::TradeUpdate( const json::object& obj ) {
       }
       break;
     case EEvent::expired:
-      break;
+      //break;
     case EEvent::done_for_day:
-      break;
+      //break;
     case EEvent::replaced:
-      break;
+      //break;
     case EEvent::rejected:
-      break;
+      //break;
     case EEvent::pending_new:
-      break;
+      //break;
     case EEvent::stopped:
-      break;
+      //break;
     case EEvent::pending_cancel:
-      break;
+      //break;
     case EEvent::pending_replace:
-      break;
+      //break;
     case EEvent::calculated:
-      break;
+      //break;
     case EEvent::suspended:
-      break;
+      //break;
     case EEvent::order_replace_rejected:
-      break;
+      //break;
     case EEvent::order_cancel_rejected:
-      break;
+      //break;
     case EEvent::unknown:
-      assert( false );
+      assert( false ); // fix as they occur
       break;
   }
 
