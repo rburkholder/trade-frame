@@ -122,11 +122,8 @@ private:
       m_drePrice.UpdateWinRowElement();
       m_dreSize.UpdateWinRowElement();
       m_dreSizeAgg.UpdateWinRowElement();
+      m_bChanged = false;
     }
-  };
-
-  struct DataRow_Statistics {
-    ou::tf::l2::DataRowElement<double> m_dreImbalance;
   };
 
   struct PriceLevel {
@@ -145,6 +142,19 @@ private:
   mapPriceLevel_t m_mapAskPriceLevel;
   mapPriceLevel_t m_mapBidPriceLevel;
 
+  struct DataRow_Statistics {
+    bool m_bChanged;
+    ou::tf::l2::DataRowElement<double> m_dreImbalance;
+    DataRow_Statistics()
+    : m_bChanged( false )
+    , m_dreImbalance( sFmtPrice, m_bChanged )
+    {}
+    void Update() {
+      m_dreImbalance.UpdateWinRowElement();
+      m_bChanged = false;
+    }
+  };
+
   using vStatistics_t = std::vector<DataRow_Statistics>;
   vStatistics_t m_vStatistics;
 
@@ -156,6 +166,7 @@ private:
   void DrawWinRows();
   void DeleteWinRows();
 
+  void LinkDataToWinRows();
   void UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd );
   void CalculateStatistics();
 

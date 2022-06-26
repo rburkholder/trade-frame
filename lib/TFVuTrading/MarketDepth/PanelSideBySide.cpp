@@ -184,6 +184,10 @@ double Imbalance( int volBid, int volAsk ) {
   return ( (double)top / (double)bot );
 }
 
+void PanelSideBySide::LinkDataToWinRows() {
+
+}
+
 void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thread problems in the maps exist (add the DataRow thingy)
 
   // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
@@ -211,18 +215,16 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
       DataRow_Book& bookAsk( iterMapAsk->second );
       DataRow_Book& bookBid( iterMapBid->second );
 
-      bool bChanged( false );
-      ou::tf::l2::DataRowElement<double> imbalance( sFmtPrice, bChanged );
-      imbalance.Set( Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk ) );
-      imbalance.SetWinRowElement( row[ (int)EField::Imbalance ]);
-      imbalance.UpdateWinRowElement();
+      DataRow_Statistics& stats( m_vStatistics[ ix ] );
+      stats.m_dreImbalance.Set( Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk ) );
+      stats.Update();
 
-      bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] );
+      bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] ); // can this be performed during map update?
       bookAsk.m_dreSize.SetWinRowElement( row[ (int)EField::ASize ] );
       bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::ASizeAgg ] );
       bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
 
-      bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] );
+      bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] ); // can this be performed during map update?
       bookBid.m_dreSize.SetWinRowElement( row[ (int)EField::BSize ] );
       bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::BSizeAgg ] );
       bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
@@ -282,10 +284,14 @@ void PanelSideBySide::DrawWinRows() {
 
       int ixWinRow = 0;
       m_vWinRow.resize( m_cntWinRows_Data );
+      m_vStatistics.resize( m_cntWinRows_Data );
 
       while ( ixWinRow < m_cntWinRows_Data ) {
         pWinRow_t pWinRow = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
         m_vWinRow[ ixWinRow ] = pWinRow;
+
+        m_vStatistics[ ixWinRow ].m_dreImbalance.SetWinRowElement( (*pWinRow)[ (int)EField::Imbalance ]);
+
         yOffset += RowHeight;
         ixWinRow++;
       }
