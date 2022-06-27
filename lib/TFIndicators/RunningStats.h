@@ -32,8 +32,8 @@ public:
   void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
   double GetBBMultiplier() const { return m_BBMultiplier; };
 
-  void Add( double, double );
-  void Remove( double, double );
+  void Add( double x, double y );
+  void Remove( double x, double y );
   virtual void CalcStats();
   void Reset();
 

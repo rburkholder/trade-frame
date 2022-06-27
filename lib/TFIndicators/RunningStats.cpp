@@ -20,7 +20,8 @@
 
 // TODO: incorporate:
 // https://stats.stackexchange.com/questions/111851/standard-deviation-of-an-exponentially-weighted-mean
-// http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf
+// http://people.ds.cam.ac.uk/fanf2/hermes/doc/antiforgery/stats.pdf - no longer available
+// https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf - available here
 // implemented in BasketTrading::ManageStrategy - to be refactored
 
 namespace ou { // One Unified
@@ -135,8 +136,8 @@ void RunningStats::CalcStats() {
 //    bbUpper = meanY + BBOffset;
 //    bbLower = meanY - BBOffset;
 
-    b1 = ( nX > 1 ) ? Sxy / Sxx : 0;
-    b0 = (1 / nX) * ( SumY - b1 * SumX );
+    b1 = ( nX > 1 ) ? Sxy / Sxx : 0.0;
+    b0 = ( 1.0 / (double)nX ) * ( SumY - b1 * SumX );
 //    b2 = b1 - oldb1;  // *** do this differently
   }
 }
