@@ -31,6 +31,7 @@
 
 class wxPoint;
 class wxWindow;
+class wxWindowDestroyEvent;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -71,7 +72,11 @@ private:
   using vWinRowElement_t = std::vector<WinRowElement*>;
   vWinRowElement_t m_vWinRowElement;
 
+  bool m_bParentIsAlive;
+
   void Clear();
+
+  void OnDestroy( wxWindowDestroyEvent& event );
 };
 
 } // market depth

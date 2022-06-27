@@ -59,6 +59,9 @@ WinRow::WinRow( wxWindow* parent, const vElement_t& vElement, const wxPoint& ori
     xPos += element.width; // maybe +1 for a border
   }
 
+  m_bParentIsAlive = true;
+  parent->Bind( wxEVT_DESTROY, &WinRow::OnDestroy, this, parent->GetId() );
+
 }
 
 WinRow::pWinRow_t WinRow::Construct( wxWindow* parent, const vElement_t& vElement, const wxPoint& origin, int RowHeight, bool bIsHeader ) {
@@ -83,16 +86,20 @@ WinRowElement* WinRow::operator[]( int ix ) {
 }
 
 void WinRow::Clear() {
-  // TODO: interaction with parent?
-  for ( vWinRowElement_t::value_type& element: m_vWinRowElement ) {
-    if ( nullptr != element ) {
-      bool bOk = element->Destroy();
-      assert( bOk );
-      element = nullptr;
+  if ( m_bParentIsAlive ) {
+    for ( vWinRowElement_t::value_type& element: m_vWinRowElement ) {
+      if ( nullptr != element ) {
+        bool bOk = element->Destroy();
+        assert( bOk );
+        element = nullptr;
+      }
     }
   }
 }
 
+void WinRow::OnDestroy( wxWindowDestroyEvent& event ) {
+  m_bParentIsAlive = false;
+}
 
 } // market depth
 } // namespace tf
