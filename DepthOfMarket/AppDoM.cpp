@@ -198,7 +198,7 @@ bool AppDoM::OnInit() {
     );
 
     std::cout << "** turn on IB prior to iqfeed" << std::endl;
-    std::cout << "** recording l2 is default to off, enable in menu" << std::endl; 
+    std::cout << "** recording l2 is default to off, enable in menu" << std::endl;
 
   }
 
@@ -321,6 +321,14 @@ void AppDoM::StartDepthByOrder() {
 
       m_pPanelTrade->OnQuoteAsk( price, volume );
       m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+    }
+  );
+
+  m_pPanelSideBySide->Set(
+    [this](double b0, double b1, double r ){
+      m_valuesStatistics.dblB0 = b0;
+      m_valuesStatistics.dblB1 = b1;
+      m_valuesStatistics.dblR  = r;
     }
   );
 
@@ -451,7 +459,7 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
       [this](double price){ // fBidPlace
         mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
         if ( m_mapBidOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder( 
+          pOrder_t pOrder = m_pPosition->PlaceOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_config.nBlockSize, price );
           std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
           auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
@@ -480,7 +488,7 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
       [this](double price){ // fAskPlace
         mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
         if ( m_mapAskOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder( 
+          pOrder_t pOrder = m_pPosition->PlaceOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_config.nBlockSize, price );
           std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
           auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
@@ -667,7 +675,7 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
   }
   else {
     m_pPosition = pm.ConstructPosition(
-      idInstrument, idInstrument, "dom", "ib01", "iq01", m_tws, m_pWatch 
+      idInstrument, idInstrument, "dom", "ib01", "iq01", m_tws, m_pWatch
     );
   }
 

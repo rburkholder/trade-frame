@@ -70,6 +70,10 @@ public:
     size_t nLvl1BidAdd;
     size_t nLvl1BidDel;
 
+    double dblB0;
+    double dblB1;
+    double dblR;
+
     values_t() { Zero(); }
     void Zero() {
       nTicks = 0;
@@ -82,6 +86,8 @@ public:
       nLvl1AskTick = nLvl1AskAdd = nLvl1AskDel = 0;
       nLvl1UnkTick = nLvl1UnkAdd = nLvl1UnkDel = 0;
       nLvl1BidTick = nLvl1BidAdd = nLvl1BidDel = 0;
+
+      dblB0 = dblB1 = dblR = 0.0;
     }
   };
 
@@ -121,6 +127,8 @@ private:
   , id_txtLvl1AskTick, id_txtLvl1AskAdd, id_txtLvl1AskDel
   , id_txtLvl1UknTick, id_txtLvl1UknAdd, id_txtLvl1UknDel
   , id_txtLvl1BidTick, id_txtLvl1BidAdd, id_txtLvl1BidDel
+
+  , id_txtB0, id_txtB1, id_txtR
   };
 
     wxTextCtrl* m_txtTicks;
@@ -155,6 +163,10 @@ private:
     wxTextCtrl* m_txtLvl1BidTick;
     wxTextCtrl* m_txtLvl1BidAdd;
     wxTextCtrl* m_txtLvl1BidDel;
+
+    wxTextCtrl* m_txtB0;
+    wxTextCtrl* m_txtB1;
+    wxTextCtrl* m_txtR;
 
   void Init();
   void CreateControls();

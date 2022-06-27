@@ -29,6 +29,8 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
+#include <TFIndicators/RunningStats.h>
+
 #include "WinRow.hpp"
 #include "WinRowElement.hpp"
 #include "PanelSideBySide.hpp"
@@ -94,6 +96,7 @@ PanelSideBySide::~PanelSideBySide() {}
 
 void PanelSideBySide::Init() {
   m_cntWinRows_Data = 0;
+  m_fImbalanceStats = nullptr;
 }
 
 bool PanelSideBySide::Create(
@@ -173,7 +176,7 @@ void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume,
     }
   }
   catch (...) {
-    std::cout << "problems" << std::endl;
+    std::cout << "PanelSideBySide::UpdateMap problems" << std::endl;
   }
 
 }
@@ -184,58 +187,70 @@ double Imbalance( int volBid, int volAsk ) {
   return ( (double)top / (double)bot );
 }
 
-void PanelSideBySide::LinkDataToWinRows() {
-
-}
-
 void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thread problems in the maps exist (add the DataRow thingy)
 
   // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
-  std::scoped_lock<std::mutex> lock( m_mutexMaps );
 
-  int nRows( m_cntWinRows_Data );
-  nRows = std::min<int>( nRows, m_mapAskPriceLevel.size() );
-  nRows = std::min<int>( nRows, m_mapBidPriceLevel.size() );
+  size_t nRows;
+  ou::tf::RunningStats rs;
+
+  {
+    std::scoped_lock<std::mutex> lock( m_mutexMaps );
+
+    nRows = m_cntWinRows_Data;
+    nRows = std::min<int>( nRows, m_mapAskPriceLevel.size() );
+    nRows = std::min<int>( nRows, m_mapBidPriceLevel.size() );
+
+    if ( 0 < nRows ) {
+
+      int nVolumeAggregateAsk {};
+      int nVolumeAggregateBid {};
+
+      mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
+      mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();
+      vWinRow_t::iterator iterWinRow = m_vWinRow.begin();
+
+      for ( size_t ix = 0; ix < nRows; ix++ ) {
+
+        nVolumeAggregateAsk += iterMapAsk->second.m_dreSize.Get();
+        nVolumeAggregateBid += iterMapBid->second.m_dreSize.Get();
+        WinRow& row( **iterWinRow );
+
+        DataRow_Book& bookAsk( iterMapAsk->second );
+        DataRow_Book& bookBid( iterMapBid->second );
+
+        DataRow_Statistics& stats( m_vStatistics[ ix ] );
+        double imbalance = Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk );
+        stats.m_dreImbalance.Set( imbalance );
+        stats.Update();
+
+        rs.Add( ix, imbalance );
+
+        bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] ); // can this be performed during map update?
+        bookAsk.m_dreSize.SetWinRowElement( row[ (int)EField::ASize ] );
+        bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::ASizeAgg ] );
+        bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
+
+        bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] ); // can this be performed during map update?
+        bookBid.m_dreSize.SetWinRowElement( row[ (int)EField::BSize ] );
+        bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::BSizeAgg ] );
+        bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
+
+        // can't take these out of the lock as the maps are async updated
+        // would need to create a second map
+        bookAsk.Update();
+        bookBid.Update();
+
+        iterMapAsk++;
+        iterMapBid++;
+        iterWinRow++;
+      } // end of for nRows
+    }
+  }
 
   if ( 0 < nRows ) {
-
-    int nVolumeAggregateAsk {};
-    int nVolumeAggregateBid {};
-
-    mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
-    mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();
-    vWinRow_t::iterator iterWinRow = m_vWinRow.begin();
-
-    for ( int ix = 0; ix < nRows; ix++ ) {
-
-      nVolumeAggregateAsk += iterMapAsk->second.m_dreSize.Get();
-      nVolumeAggregateBid += iterMapBid->second.m_dreSize.Get();
-      WinRow& row( **iterWinRow );
-
-      DataRow_Book& bookAsk( iterMapAsk->second );
-      DataRow_Book& bookBid( iterMapBid->second );
-
-      DataRow_Statistics& stats( m_vStatistics[ ix ] );
-      stats.m_dreImbalance.Set( Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk ) );
-      stats.Update();
-
-      bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] ); // can this be performed during map update?
-      bookAsk.m_dreSize.SetWinRowElement( row[ (int)EField::ASize ] );
-      bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::ASizeAgg ] );
-      bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
-
-      bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] ); // can this be performed during map update?
-      bookBid.m_dreSize.SetWinRowElement( row[ (int)EField::BSize ] );
-      bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::BSizeAgg ] );
-      bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
-
-      bookAsk.Update();
-      bookBid.Update();
-
-      iterMapAsk++;
-      iterMapBid++;
-      iterWinRow++;
-    }
+    rs.CalcStats(); // obtain b0, b1, will want to turn this into an indicator elsewhere
+    if ( m_fImbalanceStats ) m_fImbalanceStats( rs.Offset(), rs.Slope(), rs.R() );
   }
 }
 
@@ -327,9 +342,6 @@ void PanelSideBySide::OnDestroy( wxWindowDestroyEvent& event ) {
 
   if ( event.GetId() == GetId() ) {
 
-    m_pWinRow_Header.reset();
-    m_vWinRow.clear();
-
     //Unbind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
 
     Unbind( wxEVT_TIMER, &PanelSideBySide::HandleTimerRefresh, this, m_timerRefresh.GetId() );
@@ -338,6 +350,9 @@ void PanelSideBySide::OnDestroy( wxWindowDestroyEvent& event ) {
     Unbind( wxEVT_SIZING, &PanelSideBySide::OnResizing, this, GetId() );
     Unbind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this, GetId() );
     //Unbind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
+
+    m_pWinRow_Header.reset();
+    m_vWinRow.clear();
 
     //event.Skip();  // do not put this in
   }

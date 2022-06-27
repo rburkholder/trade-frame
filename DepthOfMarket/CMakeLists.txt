@@ -80,6 +80,7 @@ target_link_libraries(
       TFOptions
       TFTimeSeries
       TFHDF5TimeSeries
+      TFIndicators
       OUStatistics
       OUCharting
       OUCommon

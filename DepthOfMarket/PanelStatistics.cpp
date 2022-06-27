@@ -19,6 +19,8 @@
  * Created: April 11, 2022  13:01
  */
 
+#include <boost/format.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
@@ -272,6 +274,30 @@ void PanelStatistics::CreateControls() {
     wxStaticText* itemStaticText4 = new wxStaticText( itemPanel1, wxID_STATIC, _("ttl"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer1->Add(itemStaticText4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
+    wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer6, 0, wxALIGN_LEFT|wxALL, 1);
+
+    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel1, wxID_STATIC, _("imbalance:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer6->Add(itemStaticText26, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtB0 = new wxTextCtrl( itemPanel1, id_txtB0, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer6->Add(m_txtB0, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText28 = new wxStaticText( itemPanel1, wxID_STATIC, _("b0"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer6->Add(itemStaticText28, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtB1 = new wxTextCtrl( itemPanel1, id_txtB1, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer6->Add(m_txtB1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText30 = new wxStaticText( itemPanel1, wxID_STATIC, _("b1"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer6->Add(itemStaticText30, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    m_txtR = new wxTextCtrl( itemPanel1, id_txtR, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT|wxNO_BORDER );
+    itemBoxSizer6->Add(m_txtR, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxStaticText* itemStaticText32 = new wxStaticText( itemPanel1, wxID_STATIC, _("r"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer6->Add(itemStaticText32, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
 }
 
 void PanelStatistics::Update( const values_t& values ) {
@@ -307,4 +333,13 @@ void PanelStatistics::Update( const values_t& values ) {
   m_txtLvl1BidTick->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidTick ) );
   m_txtLvl1BidAdd->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidAdd ) );
   m_txtLvl1BidDel->SetValue( boost::lexical_cast<std::string>( values.nLvl1BidDel ) );
+
+  boost::format format( "%0.3f" );
+
+  format % values.dblB0;
+  m_txtB0->SetValue( format.str() );
+  format % values.dblB1;
+  m_txtB1->SetValue( format.str() );
+  format % values.dblR;
+  m_txtR->SetValue( format.str() );
 }

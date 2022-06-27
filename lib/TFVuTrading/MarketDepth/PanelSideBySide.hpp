@@ -64,6 +64,11 @@ public:
   void OnL2Ask( double price, int volume, bool bOnAdd );
   void OnL2Bid( double price, int volume, bool bOnAdd );
 
+  using fImbalanceStats_t = std::function<void(double,double,double)>; // b0, b1, variance
+  void Set( fImbalanceStats_t&& f ) {
+    m_fImbalanceStats = std::move( f );
+  }
+
 protected:
 private:
 
@@ -161,12 +166,13 @@ private:
   std::mutex m_mutexMaps;
   wxTimer m_timerRefresh;
 
+  fImbalanceStats_t m_fImbalanceStats;
+
   void Init();
   void CreateControls();
   void DrawWinRows();
   void DeleteWinRows();
 
-  void LinkDataToWinRows();
   void UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd );
   void CalculateStatistics();
 
