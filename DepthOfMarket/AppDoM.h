@@ -41,6 +41,7 @@
 #include <TFIndicators/TSSWStochastic.h>
 
 #include <TFIQFeed/HistoryRequest.h>
+
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
@@ -104,11 +105,14 @@ private:
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
   bool m_bRecordDepths;
-  ou::tf::DepthsByOrder m_depths_byorder;
+  ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
 
-  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
+  std::atomic_uint32_t m_nMarketOrdersAsk;
+  std::atomic_uint32_t m_nMarketOrdersBid;
+
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
   pWatch_t m_pWatch;
   pPosition_t m_pPosition;
@@ -167,9 +171,6 @@ private:
 
   double m_dblLastAsk;
   double m_dblLastBid;
-
-  std::atomic_uint32_t m_nMarketOrdersAsk;
-  std::atomic_uint32_t m_nMarketOrdersBid;
 
   struct PriceLevelOrder {
 
