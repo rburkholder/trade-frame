@@ -579,6 +579,24 @@ void InteractiveChart::CheckOptions() {
   }
 }
 
+void InteractiveChart::TrackCombo() {
+
+  if ( m_bOptionsReady ) {
+
+    double mid( m_quote.Midpoint() );
+    for ( const mapExpiries_t::value_type& vt : m_mapExpiries ) {
+
+      mapChains_t::iterator iterChains = m_mapChains.find( vt.first );
+      assert( m_mapChains.end() != iterChains );
+      chain_t& chain( iterChains->second );
+
+      double strike;
+      pOption_t pOption;
+      pOptionTracker_t pOptionTracker;
+    }
+  }
+}
+
 // adds to mapOptionTracker if it doesn't already exist, and starts watch
 InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double strike, pOption_t pOption ) {
 
@@ -619,7 +637,7 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
-  CheckOptions();
+  //CheckOptions(); // do this differently
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
@@ -890,3 +908,4 @@ void InteractiveChart::OptionWatchStop() {
 
 void InteractiveChart::OptionEmit() {
 }
+

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <functional>
 
 #include <boost/serialization/version.hpp>
@@ -395,6 +396,8 @@ private:
 
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );
+
+  void TrackCombo();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
