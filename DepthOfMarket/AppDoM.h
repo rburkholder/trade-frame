@@ -100,19 +100,19 @@ private:
   PanelStatistics* m_pPanelStatistics;
 
   ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
-  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
+  bool m_bRecordDepths;
+  ou::tf::DepthsByOrder m_depths_byorder;
+
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
   pWatch_t m_pWatch;
   pPosition_t m_pPosition;
   pPortfolio_t m_pPortfolio;
-
-  bool m_bRecordDepths;
-  ou::tf::DepthsByOrder m_depths_byorder;
 
   ou::tf::Bars m_barsHistory;
   ou::tf::PivotSet m_setPivots;
@@ -184,7 +184,7 @@ private:
     : m_pOrder( pOrder )
     {
       if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
-      SetEvents();      
+      SetEvents();
     }
 
     PriceLevelOrder( PriceLevelOrder&& rhs ) {
