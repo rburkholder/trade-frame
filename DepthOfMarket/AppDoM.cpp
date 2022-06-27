@@ -267,7 +267,7 @@ void AppDoM::StartDepthByOrder() {
               }
             }
             else { // 1 < ix
-              m_FeatureSet.Bid_IncCancel( ix, depth );
+              m_FeatureSet.Bid_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
             }
             break;
           default:
@@ -302,6 +302,7 @@ void AppDoM::StartDepthByOrder() {
               m_valuesStatistics.nLvl1AskDel++;
 
               uint32_t nTicks = m_nMarketOrdersAsk.load();
+              // TODO: does arrival rate of deletions affect overall Market rate?
               if ( 0 == nTicks ) {
                 m_FeatureSet.Ask_IncCancel( 1, depth );
               }
@@ -311,7 +312,7 @@ void AppDoM::StartDepthByOrder() {
               }
             }
             else { // 1 < ix
-              m_FeatureSet.Ask_IncCancel( ix, depth );
+              m_FeatureSet.Ask_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
             }
             break;
           default:
