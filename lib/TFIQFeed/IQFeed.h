@@ -116,54 +116,58 @@ protected:
   // called by Network via CRTP
   void OnNetworkConnected() {
 
-    // may redo on reconnect
-    m_mapListedMarket.clear();
-    m_mapSecurityType.clear();
-    m_mapTradeCondition.clear();
+    if ( ( 0 == m_mapListedMarket.size() )
+      && ( 0 == m_mapSecurityType.size() )
+      && ( 0 == m_mapTradeCondition.size() )
+    ) {
+      // TODO: offer up connected after lookup tables retrieved?
+      m_pSymbolLookup = std::make_unique<SymbolLookup>(
+        m_mapListedMarket,
+        m_mapSecurityType,
+        m_mapTradeCondition,
+        [this](){
+          std::cout
+            << "IQF Lookup Tables: "
+            << "ListedMarkets=" << m_mapListedMarket.size()
+            << ", SecurityTypes=" << m_mapSecurityType.size()
+            << ", TradeConditions=" << m_mapTradeCondition.size()
+            << std::endl;
+          // TODO: disconnect when iqfeed is closed.
+          //   leave open for use of SymbolList lookups
+          //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
+          //m_pSymbolLookup.reset();
 
-    // TODO: offer up connected after lookup tables retrieved?
-    m_pSymbolLookup = std::make_unique<SymbolLookup>(
-      m_mapListedMarket,
-      m_mapSecurityType,
-      m_mapTradeCondition,
-      [this](){
-        std::cout
-          << "IQF Lookup Tables: "
-          << "ListedMarkets=" << m_mapListedMarket.size()
-          << ", SecurityTypes=" << m_mapSecurityType.size()
-          << ", TradeConditions=" << m_mapTradeCondition.size()
-          << std::endl;
-        // TODO: disconnect when iqfeed is closed.
-        //   leave open for use of SymbolList lookups
-        //m_pSymbolLookup->Disconnect(); // will need to delay this to out-of-thread
-        //m_pSymbolLookup.reset();
-
-        if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
-          static_cast<T*>( this )->OnIQFeedConnected();
+          if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
+            static_cast<T*>( this )->OnIQFeedConnected();
+          }
         }
-      }
-    );
-    m_pSymbolLookup->Connect();
+      );
+      m_pSymbolLookup->Connect();
+    }
 
     //if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
     //  static_cast<T*>( this )->OnIQFeedConnected();
     //}
   };
+
   void OnNetworkDisconnected() {
     if ( &IQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
       static_cast<T*>( this )->OnIQFeedDisConnected();
     }
   };
+
   void OnNetworkError( size_t e ) {
     if ( &IQFeed<T>::OnIQFeedError != &T::OnIQFeedError ) {
       static_cast<T*>( this )->OnIQFeedError(e);
     }
   };
+
   void OnNetworkSendDone() {
     if ( &IQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
       static_cast<T*>( this )->OnIQFeedSendDone();
     }
   };
+
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
   ESecurityType LookupSecurityType( key_t nSecurityType ) const {
