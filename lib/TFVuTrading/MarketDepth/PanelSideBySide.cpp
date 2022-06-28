@@ -190,6 +190,7 @@ double Imbalance( int volBid, int volAsk ) {
 void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thread problems in the maps exist (add the DataRow thingy)
 
   // brute force & ignorance for now, probably ultimately, just need lock on the map add/delete portions
+  // alternative:  optimized to pull values from lib/TFIQFeed/Level2/FeatureSet_Level.hpp
 
   size_t nRows;
   ou::tf::RunningStats rs;
