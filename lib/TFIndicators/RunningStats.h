@@ -23,6 +23,21 @@ namespace tf { // TradeFrame
 class RunningStats {
 public:
 
+  struct Stats {
+    double b1; // slope
+    double b0; // offset
+    double meanY;
+    double rr;
+    double r;
+    double sd;
+    Stats(): b1 {}, b0 {}, meanY {}, rr {}, r {}, sd {} {}
+    Stats( const Stats& rhs )
+    : b1( rhs.b1 ), b0( rhs.b0 ), meanY( rhs.meanY ), rr( rhs.rr ), r( rhs.r ), sd( rhs.sd ) {}
+    void Reset() {
+      b1 = b0 = meanY = rr = r = sd = 0.0;
+    }
+  };
+
   RunningStats();
   RunningStats( double BBMultiplier );
   RunningStats( const RunningStats& );
@@ -35,38 +50,27 @@ public:
   void Add( double x, double y );
   void Remove( double x, double y );
   virtual void CalcStats();
+  const Stats& CalcStats_v2(); // assumes single thread call
   void Reset();
 
-//  double B2() const { return b2; }; // acceleration
-  double Slope() const { return b1; }; // slope  B1  termios.h has this as #define
-  double Offset() const { return b0; }; // offset B0
+  double Slope() const { return m_stats.b1; }; // slope  B1  termios.h has this as #define
+  double Offset() const { return m_stats.b0; }; // offset B0
 
-  double MeanY() const { return meanY; };
+  double MeanY() const { return m_stats.meanY; };
 
-  double RR() const { return rr; };
-  double R() const { return r; };
+  double RR() const { return m_stats.rr; };
+  double R() const { return m_stats.r; };
 
-  double SD() const { return sd; };
+  double SD() const { return m_stats.sd; };
 
-  double BBOffset() const { return sd * m_BBMultiplier; };
-  double BBUpper() const { return meanY + sd * m_BBMultiplier; };
-  double BBLower() const { return  meanY - sd * m_BBMultiplier; };
+  double BBOffset() const { return m_stats.sd * m_BBMultiplier; };
+  double BBUpper() const { return m_stats.meanY + m_stats.sd * m_BBMultiplier; };
+  double BBLower() const { return  m_stats.meanY - m_stats.sd * m_BBMultiplier; };
 
 protected:
 private:
 
-//  double b2; // acceleration
-  double b1; // slope
-  double b0; // offset
-
-  double meanY;
-
-  double rr;
-  double r;
-
-  double sd;
-
-//  double bbUpper, bbLower;
+  Stats m_stats;
 
   unsigned int nX, nY;
   double SumXX, SumX, SumXY, SumY, SumYY;
