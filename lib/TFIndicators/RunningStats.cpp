@@ -26,22 +26,22 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 RunningStats::RunningStats()
-: SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 )
-, nX( 0 ), m_BBMultiplier( 2.0 )
+: m_SumXX {}, m_SumX {}, m_SumXY {}, m_SumY {}, m_SumYY {}
+, m_nX( 0 ), m_BBMultiplier( 2.0 )
 {}
 
 RunningStats::RunningStats( double BBMultiplier )
-: SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 )
-, nX( 0 ), m_BBMultiplier( BBMultiplier )
+: m_SumXX {}, m_SumX {}, m_SumXY {}, m_SumY {}, m_SumYY {}
+, m_nX{}, m_BBMultiplier( BBMultiplier )
 {}
 
 RunningStats::RunningStats( const RunningStats& rhs )
 :
   m_stats( rhs.m_stats )
-, SumXX( rhs.SumXX ), SumX( rhs.SumX )
-, SumYY( rhs.SumYY ), SumY( rhs.SumY )
-, SumXY( rhs.SumXY )
-, nX( rhs.nX ), nY( rhs.nY )
+, m_SumXX( rhs.m_SumXX ), m_SumX( rhs.m_SumX )
+, m_SumYY( rhs.m_SumYY ), m_SumY( rhs.m_SumY )
+, m_SumXY( rhs.m_SumXY )
+, m_nX( rhs.m_nX )
 , m_BBMultiplier( rhs.m_BBMultiplier )
 {}
 
@@ -49,10 +49,10 @@ RunningStats::RunningStats( const RunningStats& rhs )
 RunningStats::RunningStats( const RunningStats&& rhs )
 :
   m_stats( rhs.m_stats )
-, SumXX( rhs.SumXX ), SumX( rhs.SumX )
-, SumYY( rhs.SumYY ), SumY( rhs.SumY )
-, SumXY( rhs.SumXY )
-, nX( rhs.nX ), nY( rhs.nY )
+, m_SumXX( rhs.m_SumXX ), m_SumX( rhs.m_SumX )
+, m_SumYY( rhs.m_SumYY ), m_SumY( rhs.m_SumY )
+, m_SumXY( rhs.m_SumXY )
+, m_nX( rhs.m_nX )
 , m_BBMultiplier( rhs.m_BBMultiplier )
 {}
 
@@ -63,68 +63,67 @@ RunningStats::~RunningStats() {
 void RunningStats::Reset() {
   /*b2 = */
     m_stats.Reset();
-    nX = nY = 0;
-    SumXX = SumX = SumXY = SumY = SumYY = 0.0;
+    m_nX = 0;
+    m_SumXX = m_SumX = m_SumXY = m_SumY = m_SumYY = 0.0;
 }
 
 void RunningStats::Add( double x, double y ) {
-  SumXX += x * x;
-  SumX += x;
-  SumXY += x * y;
-  SumY += y;
-  SumYY += y * y;
-  nX++;
+  m_SumXX += x * x;
+  m_SumX += x;
+  m_SumXY += x * y;
+  m_SumY += y;
+  m_SumYY += y * y;
+  m_nX++;
 }
 
 void RunningStats::Remove( double x, double y ) {
-  SumXX -= x * x;
-  SumX -= x;
-  SumXY -= x * y;
-  SumY -= y;
-  SumYY -= y * y;
-  nX--;
+  m_SumXX -= x * x;
+  m_SumX -= x;
+  m_SumXY -= x * y;
+  m_SumY -= y;
+  m_SumYY -= y * y;
+  m_nX--;
 }
 
 void RunningStats::CalcStats() {
+  CalcStats( m_stats );
+}
 
-  if ( 0 == nX ) {
-    SumXX = SumX = 0;
-    SumXY = 0;
-    SumY = SumYY = 0;
-    m_stats.Reset();
+void RunningStats::CalcStats( Stats& stats ) {
+
+  if ( 0 == m_nX ) {
+    m_SumXX = m_SumX = 0;
+    m_SumXY = 0;
+    m_SumY = m_SumYY = 0;
+    stats.Reset();
   }
   else {
 
-    const double nX_( nX );
+    const double nX( m_nX );
 
-    const double Sxx = SumXX - ( SumX * SumX ) / nX_;
-    const double Sxy = SumXY - ( SumX * SumY ) / nX_;
-    const double Syy = SumYY - ( SumY * SumY ) / nX_;
+    const double Sxx = m_SumXX - ( m_SumX * m_SumX ) / nX;
+    const double Sxy = m_SumXY - ( m_SumX * m_SumY ) / nX;
+    const double Syy = m_SumYY - ( m_SumY * m_SumY ) / nX;
 
     const double SST = Syy;
     const double SSR = ( Sxy * Sxy ) / Sxx;
     const double SSE = SST - SSR;
 
-    m_stats.rr = SSR / SST;
-    m_stats.r = Sxy / sqrt( Sxx * Syy );
+    stats.rr = SSR / SST;
+    stats.r = Sxy / sqrt( Sxx * Syy );
 
-    m_stats.sd = sqrt( Syy / nX_ );
+    stats.sd = sqrt( Syy / nX );
 
-    m_stats.meanY = SumY / nX_;
+    stats.meanY = m_SumY / nX;
 
 //    double BBOffset = m_BBMultiplier * sd;
 //    bbUpper = meanY + BBOffset;
 //    bbLower = meanY - BBOffset;
 
-    m_stats.b1 = ( nX > 1 ) ? Sxy / Sxx : 0.0;
-    m_stats.b0 = ( 1.0 / nX_ ) * ( SumY - m_stats.b1 * SumX );
-//    b2 = b1 - oldb1;  // *** do this differently
+    stats.b1 = ( nX > 1 ) ? Sxy / Sxx : 0.0;
+    stats.b0 = ( m_SumY - stats.b1 * m_SumX ) / nX;
+//    b2 = b1 - oldb1;  // TODO: do this differently
   }
-}
-
-const RunningStats::Stats& RunningStats::CalcStats_v2() {
-  CalcStats();
-  return m_stats;
 }
 
 } // namespace tf

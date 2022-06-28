@@ -50,7 +50,7 @@ public:
   void Add( double x, double y );
   void Remove( double x, double y );
   virtual void CalcStats();
-  const Stats& CalcStats_v2(); // assumes single thread call
+  void CalcStats( Stats& );
   void Reset();
 
   double Slope() const { return m_stats.b1; }; // slope  B1  termios.h has this as #define
@@ -72,8 +72,8 @@ private:
 
   Stats m_stats;
 
-  unsigned int nX, nY;
-  double SumXX, SumX, SumXY, SumY, SumYY;
+  unsigned int m_nX;
+  double m_SumXX, m_SumX, m_SumXY, m_SumY, m_SumYY;
   double m_BBMultiplier;
 };
 
