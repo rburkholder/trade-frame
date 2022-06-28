@@ -187,6 +187,8 @@ void InteractiveChart::Connect() {
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
+      assert( m_pDispatch );
+      m_pDispatch->Connect();
     }
   }
 }
@@ -196,6 +198,8 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
     if ( m_bConnected ) {
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       m_bConnected = false;
+      assert( m_pDispatch );
+      m_pDispatch->Disconnect();
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -212,7 +216,7 @@ void InteractiveChart::SetPosition(
 , ou::ChartEntryMark& cemReferenceLevels
 ) {
 
-  bool bConnected = m_bConnected;
+  bool bWasConnected = m_bConnected;
   Disconnect();
 
   // --
@@ -225,7 +229,7 @@ void InteractiveChart::SetPosition(
   m_pOptionChainQuery = pOptionChainQuery;
 
   m_pPositionUnderlying = pPosition;
-    m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
+  m_pActiveInstrument = m_pPositionUnderlying->GetInstrument();
   pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
 
   m_pTreeItemUnderlying = pTreeItemParent->AppendChild(
@@ -258,6 +262,8 @@ void InteractiveChart::SetPosition(
       m_pPositionUnderlying,
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
     );
+
+  StartDepthByOrder( config.nL2Levels );
 
   assert( 0 < config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, config.nPeriodWidth );
@@ -302,7 +308,7 @@ void InteractiveChart::SetPosition(
 
   // --
 
-  if ( bConnected ) {
+  if ( bWasConnected ) {
     Connect();
   }
 
@@ -422,20 +428,22 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
   ptime dt( trade.DateTime() );
   ou::tf::Trade::price_t price = trade.Price();
 
-  double volume = (double)trade.Volume();
+  const double volume = (double)trade.Volume();
   m_dblSumVolume += volume;
   m_dblSumVolumePrice += volume * trade.Price();
 
   m_ceTrade.Append( dt, price );
 
-  double mid = m_quote.Midpoint();
+  const double mid = m_quote.Midpoint();
 
   m_bfPrice.Add( dt, price, trade.Volume() );
   if ( price >= mid ) {
     m_bfPriceUp.Add( dt, price, trade.Volume() );
+    m_nMarketOrdersAsk++;
   }
   else {
     m_bfPriceDn.Add( dt, price, -trade.Volume() );
+    m_nMarketOrdersBid++;
   }
 
 }
@@ -444,7 +452,7 @@ void InteractiveChart::CheckOptions() {
 
   if ( m_bOptionsReady ) {
 
-    double mid( m_quote.Midpoint() );
+    const double mid( m_quote.Midpoint() );
     for ( const mapExpiries_t::value_type& vt : m_mapExpiries ) {
 
       mapChains_t::iterator iterChains = m_mapChains.find( vt.first );
@@ -907,5 +915,104 @@ void InteractiveChart::OptionWatchStop() {
 }
 
 void InteractiveChart::OptionEmit() {
+}
+
+void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
+
+  using EState = ou::tf::iqfeed::l2::OrderBased::EState;
+
+  m_OrderBased.Set(
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+
+      m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+      auto state = m_OrderBased.State();
+      assert( EState::Ready != state );
+      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+        switch ( op ) {
+          case ou::tf::iqfeed::l2::EOp::Increase:
+          case ou::tf::iqfeed::l2::EOp::Insert:
+            m_FeatureSet.Bid_IncLimit( ix, depth );
+            break;
+          case ou::tf::iqfeed::l2::EOp::Decrease:
+          case ou::tf::iqfeed::l2::EOp::Delete:
+            if ( 1 == ix ) {
+
+              uint32_t nTicks = m_nMarketOrdersBid.load();
+              // TODO: does arrival rate of deletions affect overall Market rate?
+              if ( 0 == nTicks ) {
+                m_FeatureSet.Bid_IncCancel( 1, depth );
+              }
+              else {
+                m_nMarketOrdersBid--;
+                m_FeatureSet.Bid_IncMarket( 1, depth );
+              }
+            }
+            else { // 1 < ix
+              m_FeatureSet.Bid_IncCancel( ix, depth );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+
+    },
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+
+      m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+      auto state = m_OrderBased.State();
+      assert( EState::Ready != state );
+      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
+        switch ( op ) {
+          case ou::tf::iqfeed::l2::EOp::Increase:
+          case ou::tf::iqfeed::l2::EOp::Insert:
+            m_FeatureSet.Ask_IncLimit( ix, depth );
+            break;
+          case ou::tf::iqfeed::l2::EOp::Decrease:
+          case ou::tf::iqfeed::l2::EOp::Delete:
+            if ( 1 == ix ) {
+
+              uint32_t nTicks = m_nMarketOrdersAsk.load();
+              if ( 0 == nTicks ) {
+                m_FeatureSet.Ask_IncCancel( 1, depth );
+              }
+              else {
+                m_nMarketOrdersAsk--;
+                m_FeatureSet.Ask_IncMarket( 1, depth );
+              }
+            }
+            else { // 1 < ix
+              m_FeatureSet.Ask_IncCancel( ix, depth );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+
+    }
+  );
+
+  m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+    [ this, nLevels ](){
+      m_FeatureSet.Set( nLevels );  // use this many levels in the order book for feature vector set
+      m_pDispatch->Single( true );
+      m_pDispatch->WatchAdd(
+        m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ),
+        [this]( const ou::tf::DepthByOrder& depth ){
+
+          if ( m_bRecordDepths ) {
+            m_depths_byorder.Append( depth );
+          }
+
+          m_OrderBased.MarketDepth( depth );
+        }
+        );
+    } );
+
 }
 

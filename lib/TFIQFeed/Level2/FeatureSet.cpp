@@ -36,7 +36,7 @@ FeatureSet::~FeatureSet()
 void FeatureSet::Set( size_t nLevels ) {
 
   assert( 0 < nLevels );
-  assert( 0 == m_nLevels );
+  assert( 0 == m_nLevels );  // one time set only
   m_nLevels = nLevels;
 
   m_vLevels.resize( m_nLevels + 1 );  // level 0 not used, levels numbered 1 - 10

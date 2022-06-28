@@ -87,6 +87,7 @@ target_link_libraries(
       bidgcc000
       TFSimulation
       TFVuTrading
+      TFIQFeedLevel2
       TFTrading
       TFOptions
       TFTrading

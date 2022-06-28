@@ -42,6 +42,9 @@
 
 #include <TFIQFeed/OptionChainQuery.h>
 
+#include <TFIQFeed/Level2/Symbols.hpp>
+#include <TFIQFeed/Level2/FeatureSet.hpp>
+
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
@@ -371,6 +374,16 @@ private:
   //ou::tf::Bars m_barsHistory;
   //ou::tf::PivotSet m_setPivots;
 
+  bool m_bRecordDepths;
+  ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
+
+  std::atomic_uint32_t m_nMarketOrdersAsk; // pull from InteractiveChart
+  std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
+
+  ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
+  ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
+
   void Init();
 
   void BindEvents();
@@ -398,6 +411,8 @@ private:
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );
 
   void TrackCombo();
+
+  void StartDepthByOrder( size_t nLevels );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

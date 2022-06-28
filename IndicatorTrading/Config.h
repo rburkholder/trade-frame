@@ -25,12 +25,14 @@ namespace config {
 
 struct Options {
 
-  std::string sSymbol;
+  std::string sSymbol; // this probably will be the general symbol, not a specific instrument
 
   // Interactive Brokers api instance
   int ib_client_id;
 
   size_t nThreads; // iqfeed multiple symbols
+
+  size_t nL2Levels;
 
   int nPeriodWidth;  // units:  seconds
 
