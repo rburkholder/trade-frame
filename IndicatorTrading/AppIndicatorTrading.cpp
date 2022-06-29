@@ -187,6 +187,10 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Stop Watch", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionOptionWatchStop ) ) );
   m_pFrameMain->AddDynamicMenu( "Option Quotes", vItems );
 
+  vItems.clear();
+  vItems.push_back( new mi( "FeatureSet Dump", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionFeatureSetDump ) ) );
+  m_pFrameMain->AddDynamicMenu( "Debug", vItems );
+
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
@@ -442,6 +446,14 @@ void AppIndicatorTrading::HandleMenuActionOptionEmit() {
   CallAfter(
     [this](){
       m_pInteractiveChart->OptionEmit();
+    }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionFeatureSetDump() {
+  CallAfter(
+    [this](){
+      m_pInteractiveChart->FeatureSetDump();
     }
   );
 }

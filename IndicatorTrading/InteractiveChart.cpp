@@ -23,6 +23,7 @@
  //   indicate support/resistance as the day progresses
  // 2022/03/21 perform a roll down on put, roll up on call?
 
+#include <TFIndicators/RunningStats.h>
 #include <memory>
 
 //#include <TFOptions/Engine.h>
@@ -45,6 +46,7 @@ InteractiveChart::InteractiveChart()
 : ou::tf::WinChartView()
 , m_bConnected( false )
 , m_bOptionsReady( false )
+, m_bTriggerFeatureSetDump( false )
 
 , m_dblSumVolume {}
 , m_dblSumVolumePrice {}
@@ -129,6 +131,10 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
 
+  //m_dvChart.Add( EChartSlot::ImbalanceB0, &m_ceImbalanceB0 );
+  //m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceB1 );
+  //m_dvChart.Add( EChartSlot::ImbalanceR, &m_ceImbalanceR );
+
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
@@ -168,6 +174,13 @@ void InteractiveChart::Init() {
   m_ceVolumeUp.SetName( "Volume Up" );
   m_ceVolumeDn.SetColour( ou::Colour::Red );
   m_ceVolumeDn.SetName( "Volume Down" );
+
+  m_ceImbalanceB0.SetName( "b0" );
+  m_ceImbalanceB0.SetColour( ou::Colour::Red );
+  m_ceImbalanceB1.SetName( "b1" );
+  m_ceImbalanceB1.SetColour( ou::Colour::Blue );
+  m_ceImbalanceR.SetName( "r" );
+  m_ceImbalanceR.SetColour( ou::Colour::Green );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -917,6 +930,10 @@ void InteractiveChart::OptionWatchStop() {
 void InteractiveChart::OptionEmit() {
 }
 
+void InteractiveChart::FeatureSetDump() {
+  m_bTriggerFeatureSetDump = true;
+}
+
 void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
@@ -926,7 +943,26 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
+      // ix is 0 sometimes, is this legal?
+
+      if ( m_bTriggerFeatureSetDump ) {
+        std::cout << "fs dump (bid) "
+          << (int)op
+          << "," << ix
+          << "," << depth.MsgType()
+          << "," << depth.Price() << "," << depth.Volume()
+          << "," << depth.Side()
+          << std::endl;
+        m_FeatureSet.Emit();
+      }
+
       m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+
+      if ( m_bTriggerFeatureSetDump ) {
+        m_FeatureSet.Emit();
+        m_bTriggerFeatureSetDump = false;
+      }
+
       auto state = m_OrderBased.State();
       assert( EState::Ready != state );
       if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
@@ -945,7 +981,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
                 m_FeatureSet.Bid_IncCancel( 1, depth );
               }
               else {
-                m_nMarketOrdersBid--;
+                --m_nMarketOrdersBid;
                 m_FeatureSet.Bid_IncMarket( 1, depth );
               }
             }
@@ -957,13 +993,39 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
             break;
         }
       }
-
+//      if ( 0 == ix ) { // may need to recalculate at any level change instead
+//        // doesn't seem to be working
+//        ou::tf::RunningStats::Stats stats;
+//        m_FeatureSet.ImbalanceSummary( stats );
+//        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
+//        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+//        m_ceImbalanceR.Append( depth.DateTime(), stats.r );
+//      }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
+      // ix is 0 sometimes, is this legal?
+
+      if ( m_bTriggerFeatureSetDump ) {
+        std::cout << "fs dump (ask) "
+          << (int)op
+          << "," << ix
+          << "," << depth.MsgType()
+          << "," << depth.Price() << "," << depth.Volume()
+          << "," << depth.Side()
+          << std::endl;
+        m_FeatureSet.Emit();
+      }
+
       m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+
+      if ( m_bTriggerFeatureSetDump ) {
+        m_FeatureSet.Emit();
+        m_bTriggerFeatureSetDump = false;
+      }
+
       auto state = m_OrderBased.State();
       assert( EState::Ready != state );
       if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
@@ -981,7 +1043,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
                 m_FeatureSet.Ask_IncCancel( 1, depth );
               }
               else {
-                m_nMarketOrdersAsk--;
+                --m_nMarketOrdersAsk;
                 m_FeatureSet.Ask_IncMarket( 1, depth );
               }
             }
@@ -993,7 +1055,14 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
             break;
         }
       }
-
+//      if ( 0 == ix ) { // may need to recalculate at any level change instead
+//        // doesn't seem to be working
+//        ou::tf::RunningStats::Stats stats;
+//        m_FeatureSet.ImbalanceSummary( stats );
+//        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
+//        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+//        m_ceImbalanceR.Append( depth.DateTime(), stats.r );
+//      }
     }
   );
 

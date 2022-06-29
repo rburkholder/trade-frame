@@ -135,6 +135,8 @@ private:
   void HandleMenuActionOptionWatchStop();
   void HandleMenuActionOptionEmit();
 
+  void HandleMenuActionFeatureSetDump();
+
   void StartChainQuery();
   void ConstructUnderlying();
   void InitializeUnderlying( pInstrument_t pInstrument );

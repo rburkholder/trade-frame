@@ -169,6 +169,7 @@ public:
   void DeleteLifeCycle( idOrder_t );
 
   void EmitStatus();
+  void FeatureSetDump();
 
   void Connect();
   void Disconnect();
@@ -176,13 +177,14 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, StochInd, Sentiment, PL, Spread }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, StochInd, ImbalanceB0, ImbalanceB1, ImbalanceR, Sentiment, PL, Spread }; // IndMA = moving averate indicator
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   bool m_bConnected;
   bool m_bOptionsReady;
+  bool m_bTriggerFeatureSetDump;
 
   ou::ChartDataView m_dvChart; // the data
 
@@ -222,6 +224,10 @@ private:
   ou::ChartEntryShape m_ceBullPut;
   ou::ChartEntryShape m_ceBearCall;
   ou::ChartEntryShape m_ceBearPut;
+
+  ou::ChartEntryIndicator m_ceImbalanceB0;
+  ou::ChartEntryIndicator m_ceImbalanceB1;
+  ou::ChartEntryIndicator m_ceImbalanceR;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
