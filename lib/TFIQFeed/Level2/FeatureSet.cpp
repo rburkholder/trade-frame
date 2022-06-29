@@ -20,6 +20,7 @@
  */
 
 #include "FeatureSet.hpp"
+#include "TFIndicators/RunningStats.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -99,32 +100,48 @@ void FeatureSet::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int 
   }
 }
 
-  // v7 Ask
-  void FeatureSet::Ask_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Ask_IncLimit( depth );
-  }
+// v7 Ask
+void FeatureSet::Ask_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Ask_IncLimit( depth );
+}
 
-  void FeatureSet::Ask_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Ask_IncMarket( depth );
-  }
+void FeatureSet::Ask_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Ask_IncMarket( depth );
+}
 
-  void FeatureSet::Ask_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Ask_IncCancel( depth );
-  }
+void FeatureSet::Ask_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Ask_IncCancel( depth );
+}
 
-  // v7 Bid
-  void FeatureSet::Bid_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Bid_IncLimit( depth );
-  }
+// v7 Bid
+void FeatureSet::Bid_IncLimit(  unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Bid_IncLimit( depth );
+}
 
-  void FeatureSet::Bid_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Bid_IncMarket( depth );
-  }
+void FeatureSet::Bid_IncMarket( unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Bid_IncMarket( depth );
+}
 
-  void FeatureSet::Bid_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
-    m_vLevels[ ix ].Bid_IncCancel( depth );
-  }
+void FeatureSet::Bid_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
+  m_vLevels[ ix ].Bid_IncCancel( depth );
+}
 
+void FeatureSet::ImbalanceSummary( ou::tf::RunningStats::Stats& stats ) {
+  double ix( 1.0 );
+  ou::tf::RunningStats rs;
+  for ( vLevels_t::value_type& vt: m_vLevels ) {
+    rs.Add( ix, vt.cross.v2.imbalanceAgg );  // not sure which of the two are most appropriate
+    //rs.Add( ix, vt.cross.v2.imbalanceLvl );
+    ix += 1.0;
+  }
+  rs.CalcStats( stats );
+}
+
+void FeatureSet::Emit() const {
+  for ( const vLevels_t::value_type& vt: m_vLevels ) {
+    vt.Emit();
+  }
+}
 
 } // namespace l2
 } // namesapce iqfeed

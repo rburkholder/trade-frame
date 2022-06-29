@@ -19,7 +19,7 @@
  * Created: May 11, 2022 15:24
  */
 
- // based upon the ppaper:
+ // based upon the paper:
  // Modeling high-frequency limit order book dynamics with support vector machines
  // October 24, 2013, Alec N.Kercheval, Yuan Zhang
  // page 16, table 2, Feature Vector Sets
@@ -27,6 +27,8 @@
 #pragma once
 
 #include <vector>
+
+#include <TFIndicators/RunningStats.h>
 
 #include "Symbols.hpp"
 #include "FeatureSet_Level.hpp"
@@ -59,6 +61,10 @@ public:
   void Bid_IncLimit(  unsigned int, const ou::tf::Depth& );
   void Bid_IncMarket( unsigned int, const ou::tf::Depth& );
   void Bid_IncCancel( unsigned int, const ou::tf::Depth& );
+
+  void ImbalanceSummary( ou::tf::RunningStats::Stats& );
+
+  void Emit() const;
 
 protected:
 private:
