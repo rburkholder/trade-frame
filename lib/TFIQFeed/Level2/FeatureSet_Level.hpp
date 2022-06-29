@@ -50,7 +50,7 @@ public:
     price_t price;
     volume_t volume;
 
-    volume_t aggregateVolume;
+    double aggregateVolume;
 
     price_t aggregatePrice;
 
@@ -60,7 +60,8 @@ public:
     : price {}, volume {}
     , aggregateVolume {}
     , aggregatePrice {}
-    , bNew( false ) {}
+    , bNew( false )
+    {}
   };
 
   struct V3 { // diff
@@ -103,6 +104,7 @@ public:
 
     ptime dtLastCancel;
     double intensityCancel; // short term intensity
+
     V7()
     : dtLastLimit(  boost::posix_time::not_a_date_time ), intensityLimit  {}
     , dtLastMarket( boost::posix_time::not_a_date_time ), intensityMarket {}
@@ -168,7 +170,7 @@ public:
 
   struct V5 { // sum(diff)
     price_t sumPriceSpreads;
-    volume_t sumVolumeSpreads;
+    double sumVolumeSpreads;
     V5(): sumPriceSpreads {}, sumVolumeSpreads {} {}
   };
 
@@ -202,6 +204,8 @@ public:
   void Bid_IncMarket( const ou::tf::Depth& depth );
   void Bid_IncCancel( const ou::tf::Depth& depth );
 
+  void Emit() const;
+
 protected:
 private:
 
@@ -214,10 +218,10 @@ private:
 
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();
-  void Ask_Aggregate( price_t aggregate ); // aggregate price from previous level
-  void Bid_Aggregate( price_t aggregate ); // aggregate price from previous level
-  void Ask_Aggregate( volume_t aggregate );  // aggregate volume from previous level
-  void Bid_Aggregate( volume_t aggregate );  // aggregate volume from previous level
+  void Ask_AggregateP( price_t aggregate ); // aggregate price from previous level
+  void Bid_AggregateP( price_t aggregate ); // aggregate price from previous level
+  void Ask_AggregateV( double aggregate );  // aggregate volume from previous level
+  void Bid_AggregateV( double aggregate );  // aggregate volume from previous level
   void Ask_Diff();
   void Bid_Diff();
   void ImbalanceOnAggregate();

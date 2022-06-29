@@ -52,8 +52,11 @@ void FeatureSet_Level::Ask_Quote( const ou::tf::Depth& depth ) {
   }
   if ( ask.v1.volume != volume ) {
     ask.v1.volume = volume;
+    if ( 1 == m_ix ) {
+      ask.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+    }
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->Ask_Aggregate( ask.v1.volume + ask.v1.aggregateVolume );
+    if ( m_pNext ) m_pNext->Ask_AggregateV( ask.v1.volume + ask.v1.aggregateVolume );
   }
 }
 
@@ -71,8 +74,11 @@ void FeatureSet_Level::Bid_Quote( const ou::tf::Depth& depth ) {
   }
   if ( bid.v1.volume != volume ) {
     bid.v1.volume = volume;
+    if ( 1 == m_ix ) {
+      bid.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+    }
     QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->Bid_Aggregate( bid.v1.volume + bid.v1.aggregateVolume );
+    if ( m_pNext ) m_pNext->Bid_AggregateV( bid.v1.volume + bid.v1.aggregateVolume );
   }
 }
 
@@ -83,14 +89,14 @@ void FeatureSet_Level::QuotePriceUpdates() {
 
 void FeatureSet_Level::QuoteVolumeUpdates() {
   cross.v2.imbalanceLvl
-    = (double)( bid.v1.volume - ask.v1.volume )
+    = ( (double)bid.v1.volume - (double)ask.v1.volume )
     / (double)( bid.v1.volume + ask.v1.volume );
 }
 
 void FeatureSet_Level::ImbalanceOnAggregate() {
-  volume_t sumAsk = ask.v1.volume + ask.v1.aggregateVolume;
-  volume_t sumBid = bid.v1.volume + bid.v1.aggregateVolume;
-  cross.v2.imbalanceAgg = (double)( sumBid - sumAsk ) / (double)( sumBid + sumAsk );
+  double sumAsk = ask.v1.volume + ask.v1.aggregateVolume;
+  double sumBid = bid.v1.volume + bid.v1.aggregateVolume;
+  cross.v2.imbalanceAgg = ( sumBid - sumAsk ) / ( sumBid + sumAsk );
 }
 
 void FeatureSet_Level::Ask_Diff() {
@@ -127,38 +133,38 @@ void FeatureSet_Level::Bid_Diff() {
   }
 }
 
-void FeatureSet_Level::Ask_Aggregate( price_t aggregate ) {
+void FeatureSet_Level::Ask_AggregateP( price_t aggregate ) {
   ask.v1.aggregatePrice = aggregate;
   price_t sum( ask.v1.price + aggregate );
   ask.v4.meanPrice = sum / m_ix;
   cross.v5.sumPriceSpreads =  sum - ( bid.v1.price + bid.v1.aggregatePrice );
-  if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
+  if ( m_pNext ) m_pNext->Ask_AggregateP( sum );
 }
 
-void FeatureSet_Level::Bid_Aggregate( price_t aggregate ) {
+void FeatureSet_Level::Bid_AggregateP( price_t aggregate ) {
   bid.v1.aggregatePrice = aggregate;
   price_t sum( bid.v1.price + aggregate );
   bid.v4.meanPrice = sum / m_ix;
   cross.v5.sumPriceSpreads = ( ask.v1.price + ask.v1.aggregatePrice ) - sum;
-  if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
+  if ( m_pNext ) m_pNext->Bid_AggregateP( sum );
 }
 
-void FeatureSet_Level::Ask_Aggregate( volume_t aggregate ) {
+void FeatureSet_Level::Ask_AggregateV( double aggregate ) {
   ask.v1.aggregateVolume = aggregate;
-  volume_t sum( ask.v1.volume + aggregate );
+  double sum( ask.v1.volume + aggregate );
   ask.v4.meanVolume = sum / m_ix;
   cross.v5.sumVolumeSpreads = sum - ( bid.v1.volume + bid.v1.aggregateVolume );
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->Ask_Aggregate( sum );
+  if ( m_pNext ) m_pNext->Ask_AggregateV( sum );
 }
 
-void FeatureSet_Level::Bid_Aggregate( volume_t aggregate ) {
+void FeatureSet_Level::Bid_AggregateV( double aggregate ) {
   bid.v1.aggregateVolume = aggregate;
-  volume_t sum( bid.v1.volume + aggregate );
+  double sum( bid.v1.volume + aggregate );
   bid.v4.meanVolume = sum / m_ix;
   cross.v5.sumVolumeSpreads = ( ask.v1.volume + ask.v1.aggregateVolume ) - sum;
   ImbalanceOnAggregate();
-  if ( m_pNext ) m_pNext->Bid_Aggregate( sum );
+  if ( m_pNext ) m_pNext->Bid_AggregateV( sum );
 }
 
 namespace { // TODO turn into constexpr
@@ -303,6 +309,20 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
   if ( 0.0 < bid.v8.intensityCancel ) {
     bid.v8.relativeCancel = bid.v7.intensityCancel / bid.v8.intensityCancel;
   }
+}
+
+void FeatureSet_Level::Emit() const {
+  std::cout
+    << "lvl " << m_ix
+    << " ask: "
+    << ask.v1.volume << "@" << ask.v1.price
+    << "=>" << ask.v1.aggregateVolume
+    << " bid: "
+    << bid.v1.volume << "@" << bid.v1.price
+    << "=>" << bid.v1.aggregateVolume
+    << ",cross: "
+    << "lvl=" << cross.v2.imbalanceLvl << ",agg=" << cross.v2.imbalanceAgg
+    << std::endl;
 }
 
 } // namespace l2
