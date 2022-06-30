@@ -110,6 +110,8 @@ private:
   std::atomic_uint32_t m_nMarketOrdersAsk;
   std::atomic_uint32_t m_nMarketOrdersBid;
 
+  bool m_bTriggerFeatureSetDump;
+
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
@@ -283,6 +285,8 @@ private:
   void MenuItem_PersistMarketDepth_Status();
   void MenuItem_PersistMarketDepth_Stop();
   void MenuItem_PersistMarketDepth_Save();
+
+  void MenuItem_FeatureSet_Dump();
 
   void HandleArmedFlag( bool );
 

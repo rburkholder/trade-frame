@@ -72,6 +72,7 @@ bool AppDoM::OnInit() {
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
 
   m_bRecordDepths = false;
+  m_bTriggerFeatureSetDump = false;
 
   int code = true;
 
@@ -185,6 +186,10 @@ bool AppDoM::OnInit() {
     vItems.push_back( new mi( "Save", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Save ) ) );
     wxMenu* pMenu = m_pFrameMain->AddDynamicMenu( "Market Depth", vItems );
 
+    vItems.clear();
+    vItems.push_back( new mi( "FeatureSet Dump", MakeDelegate( this, &AppDoM::MenuItem_FeatureSet_Dump ) ) );
+    m_pFrameMain->AddDynamicMenu( "Debug", vItems );
+
     m_pFrameControls->SetAutoLayout( true );
     m_pFrameControls->Layout();
     m_pFrameControls->Show( true );
@@ -239,7 +244,24 @@ void AppDoM::StartDepthByOrder() {
       m_valuesStatistics.nL2MsgBid++;
       m_valuesStatistics.nL2MsgTtl++;
 
+      if ( m_bTriggerFeatureSetDump ) {
+        std::cout << "fs dump (bid) "
+          << (int)op
+          << "," << ix
+          << "," << depth.MsgType()
+          << "," << depth.Price() << "," << depth.Volume()
+          << "," << depth.Side()
+          << std::endl;
+        m_FeatureSet.Emit();
+      }
+
       m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+
+      if ( m_bTriggerFeatureSetDump ) {
+        m_FeatureSet.Emit();
+        m_bTriggerFeatureSetDump = false;
+      }
+
       auto state = m_OrderBased.State();
       assert( EState::Ready != state );
       if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
@@ -284,7 +306,24 @@ void AppDoM::StartDepthByOrder() {
       m_valuesStatistics.nL2MsgAsk++;
       m_valuesStatistics.nL2MsgTtl++;
 
+      if ( m_bTriggerFeatureSetDump ) {
+        std::cout << "fs dump (ask) "
+          << (int)op
+          << "," << ix
+          << "," << depth.MsgType()
+          << "," << depth.Price() << "," << depth.Volume()
+          << "," << depth.Side()
+          << std::endl;
+        m_FeatureSet.Emit();
+      }
+
       m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+
+      if ( m_bTriggerFeatureSetDump ) {
+        m_FeatureSet.Emit();
+        m_bTriggerFeatureSetDump = false;
+      }
+
       auto state = m_OrderBased.State();
       assert( EState::Ready != state );
       if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
@@ -452,6 +491,10 @@ void AppDoM::MenuItem_PersistMarketDepth_Save() {
       std::cout << "  ... Done " << std::endl;
     }
   );
+}
+
+void AppDoM::MenuItem_FeatureSet_Dump() {
+  m_bTriggerFeatureSetDump = true;
 }
 
 void AppDoM::HandleArmedFlag( bool bArm ) {
