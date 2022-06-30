@@ -74,7 +74,6 @@ PanelTrade::PanelTrade(
 : wxWindow( parent, id, pos, size, style )
 {
   Init();
-  Create( parent, id, pos, size, style );
 }
 
 PanelTrade::~PanelTrade() {}
@@ -147,7 +146,10 @@ void PanelTrade::HandleTimerRefresh( wxTimerEvent& event ) {
   //std::scoped_lock<std::mutex> lock( m_mutexTimer );
   if ( 0 < m_cntWinRows_Data ) {
     for ( int ix = m_ixFirstPriceRow; ix <= m_ixLastPriceRow; ix++ ) {
-      m_PriceRows[ ix ].Refresh(); // TODO: this requires a lookup, maybe do an interation instead
+      // TODO: this requires a lookup, maybe do an iteration instead
+      //   had an exception from here, segmentation fault on a WinRowElement
+      //   probably stomped on from elsewhere
+      m_PriceRows[ ix ].Refresh();
     }
   }
 }
