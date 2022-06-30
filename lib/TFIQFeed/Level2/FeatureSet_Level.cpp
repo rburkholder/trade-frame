@@ -52,11 +52,14 @@ void FeatureSet_Level::Ask_Quote( const ou::tf::Depth& depth ) {
   }
   if ( ask.v1.volume != volume ) {
     ask.v1.volume = volume;
+    QuoteVolumeUpdates(); // updates imbalanceLvl
     if ( 1 == m_ix ) {
-      ask.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+      //ask.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+      Ask_AggregateV( 0.0 );
     }
-    QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->Ask_AggregateV( ask.v1.volume + ask.v1.aggregateVolume );
+    else {
+      if ( m_pNext ) m_pNext->Ask_AggregateV( ask.v1.volume + ask.v1.aggregateVolume );
+    }
   }
 }
 
@@ -74,11 +77,14 @@ void FeatureSet_Level::Bid_Quote( const ou::tf::Depth& depth ) {
   }
   if ( bid.v1.volume != volume ) {
     bid.v1.volume = volume;
+    QuoteVolumeUpdates(); // updates imbalanceLvl
     if ( 1 == m_ix ) {
-      bid.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+      //bid.v1.aggregateVolume = 0.0; // TODO: fix, should always be 0.0 (something about level changing)
+      Bid_AggregateV( 0.0 );
     }
-    QuoteVolumeUpdates();
-    if ( m_pNext ) m_pNext->Bid_AggregateV( bid.v1.volume + bid.v1.aggregateVolume );
+    else {
+      if ( m_pNext ) m_pNext->Bid_AggregateV( bid.v1.volume + bid.v1.aggregateVolume );
+    }
   }
 }
 
