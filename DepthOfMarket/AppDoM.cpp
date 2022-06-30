@@ -262,45 +262,53 @@ void AppDoM::StartDepthByOrder() {
         m_bTriggerFeatureSetDump = false;
       }
 
-      auto state = m_OrderBased.State();
-      assert( EState::Ready != state );
-      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-        switch ( op ) {
-          case ou::tf::iqfeed::l2::EOp::Increase:
-          case ou::tf::iqfeed::l2::EOp::Insert:
-            if ( 1 == ix ) {
-              m_valuesStatistics.nLvl1BidAdd++;
-            }
-            m_FeatureSet.Bid_IncLimit( ix, depth );
-            break;
-          case ou::tf::iqfeed::l2::EOp::Decrease:
-          case ou::tf::iqfeed::l2::EOp::Delete:
-            if ( 1 == ix ) {
-              m_valuesStatistics.nLvl1BidDel++;
+      switch ( m_OrderBased.State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 1 == ix ) {
+                m_valuesStatistics.nLvl1BidAdd++;
+              }
+              m_FeatureSet.Bid_IncLimit( ix, depth );
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                m_valuesStatistics.nLvl1BidDel++;
 
-              uint32_t nTicks = m_nMarketOrdersBid.load();
-              // TODO: does arrival rate of deletions affect overall Market rate?
-              if ( 0 == nTicks ) {
-                m_FeatureSet.Bid_IncCancel( 1, depth );
+                uint32_t nTicks = m_nMarketOrdersBid.load();
+                // TODO: does arrival rate of deletions affect overall Market rate?
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Bid_IncCancel( 1, depth );
+                }
+                else {
+                  m_nMarketOrdersBid--;
+                  m_FeatureSet.Bid_IncMarket( 1, depth );
+                }
               }
-              else {
-                m_nMarketOrdersBid--;
-                m_FeatureSet.Bid_IncMarket( 1, depth );
+              else { // 1 < ix
+                m_FeatureSet.Bid_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
               }
-            }
-            else { // 1 < ix
-              m_FeatureSet.Bid_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
-            }
-            break;
-          default:
-            break;
-        }
+              break;
+            default:
+              break;
+          }
+          break;
+        case EState::Update:
+          assert( false );  // TODO: this might need to be proceseed
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
       }
 
       m_pPanelTrade->OnQuoteBid( price, volume );
       m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
       m_valuesStatistics.nL2MsgAsk++;
@@ -324,39 +332,46 @@ void AppDoM::StartDepthByOrder() {
         m_bTriggerFeatureSetDump = false;
       }
 
-      auto state = m_OrderBased.State();
-      assert( EState::Ready != state );
-      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-        switch ( op ) {
-          case ou::tf::iqfeed::l2::EOp::Increase:
-          case ou::tf::iqfeed::l2::EOp::Insert:
-            if ( 1 == ix ) {
-              m_valuesStatistics.nLvl1AskAdd++;
-            }
-            m_FeatureSet.Ask_IncLimit( ix, depth );
-            break;
-          case ou::tf::iqfeed::l2::EOp::Decrease:
-          case ou::tf::iqfeed::l2::EOp::Delete:
-            if ( 1 == ix ) {
-              m_valuesStatistics.nLvl1AskDel++;
+      switch ( m_OrderBased.State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 1 == ix ) {
+                m_valuesStatistics.nLvl1AskAdd++;
+              }
+              m_FeatureSet.Ask_IncLimit( ix, depth );
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                m_valuesStatistics.nLvl1AskDel++;
 
-              uint32_t nTicks = m_nMarketOrdersAsk.load();
-              // TODO: does arrival rate of deletions affect overall Market rate?
-              if ( 0 == nTicks ) {
-                m_FeatureSet.Ask_IncCancel( 1, depth );
+                uint32_t nTicks = m_nMarketOrdersAsk.load();
+                // TODO: does arrival rate of deletions affect overall Market rate?
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Ask_IncCancel( 1, depth );
+                }
+                else {
+                  m_nMarketOrdersAsk--;
+                  m_FeatureSet.Ask_IncMarket( 1, depth );
+                }
               }
-              else {
-                m_nMarketOrdersAsk--;
-                m_FeatureSet.Ask_IncMarket( 1, depth );
+              else { // 1 < ix
+                m_FeatureSet.Ask_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
               }
-            }
-            else { // 1 < ix
-              m_FeatureSet.Ask_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
-            }
-            break;
-          default:
-            break;
-        }
+              break;
+            default:
+              break;
+          }
+          break;
+        case EState::Update:
+          assert( false );  // TODO: this might need to be proceseed
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
       }
 
       m_pPanelTrade->OnQuoteAsk( price, volume );
