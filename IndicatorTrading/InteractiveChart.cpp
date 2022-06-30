@@ -76,6 +76,7 @@ InteractiveChart::InteractiveChart(
 : ou::tf::WinChartView( parent, id, pos, size, style )
 , m_bConnected( false )
 , m_bOptionsReady( false )
+, m_bTriggerFeatureSetDump( false )
 
 , m_dblSumVolume {}
 , m_dblSumVolumePrice {}
