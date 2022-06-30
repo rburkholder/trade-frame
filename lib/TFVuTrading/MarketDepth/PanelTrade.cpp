@@ -62,14 +62,17 @@ namespace {
   const unsigned int FramedRows = 10; // when to move into frame then recenter
 }
 
-PanelTrade::PanelTrade(): wxWindow()
+PanelTrade::PanelTrade()
+: wxWindow()
 {
   Init();
 };
 
-PanelTrade::PanelTrade( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
+PanelTrade::PanelTrade(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-) {
+)
+: wxWindow( parent, id, pos, size, style )
+{
   Init();
   Create( parent, id, pos, size, style );
 }
