@@ -62,9 +62,10 @@ public:
   void Bid_IncMarket( unsigned int, const ou::tf::Depth& );
   void Bid_IncCancel( unsigned int, const ou::tf::Depth& );
 
-  void ImbalanceSummary( ou::tf::RunningStats::Stats& );
+  void ImbalanceSummary( ou::tf::RunningStats::Stats& ) const;
 
   void Emit() const;
+  bool IntegrityCheck() const;
 
 protected:
 private:

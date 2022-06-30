@@ -37,6 +37,7 @@ FeatureSet::~FeatureSet()
 void FeatureSet::Set( size_t nLevels ) {
 
   assert( 0 < nLevels );
+  assert( 3 <= nLevels );  // need at least 3 levels
   assert( 0 == m_nLevels );  // one time set only
   m_nLevels = nLevels;
 
@@ -51,8 +52,11 @@ void FeatureSet::Set( size_t nLevels ) {
 }
 
 void FeatureSet::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  if ( 0 != ix ) {
-    assert( m_nLevels >= ix );
+  if ( ( 0 == ix ) || ( m_nLevels < ix ) ) {
+    assert( 0 != ix );
+    assert( m_nLevels > ix  );
+  }
+  else {
     switch ( op ) {
       case ou::tf::iqfeed::l2::EOp::Insert:
         if ( m_nLevels > ix ) {
@@ -76,8 +80,11 @@ void FeatureSet::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int 
 }
 
 void FeatureSet::HandleBookChangesBid( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
-  if ( 0 != ix ) {
-    assert( m_nLevels >= ix );
+  if ( ( 0 == ix ) || ( m_nLevels < ix ) ) {
+    assert( 0 != ix );
+    assert( m_nLevels > ix  );
+  }
+  else {
     switch ( op ) {
       case ou::tf::iqfeed::l2::EOp::Insert:
         if ( m_nLevels > ix ) {
@@ -126,10 +133,10 @@ void FeatureSet::Bid_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
   m_vLevels[ ix ].Bid_IncCancel( depth );
 }
 
-void FeatureSet::ImbalanceSummary( ou::tf::RunningStats::Stats& stats ) {
+void FeatureSet::ImbalanceSummary( ou::tf::RunningStats::Stats& stats ) const {
   double ix( 1.0 );
   ou::tf::RunningStats rs;
-  for ( vLevels_t::value_type& vt: m_vLevels ) {
+  for ( const vLevels_t::value_type& vt: m_vLevels ) {
     rs.Add( ix, vt.cross.v2.imbalanceAgg );  // not sure which of the two are most appropriate
     //rs.Add( ix, vt.cross.v2.imbalanceLvl );
     ix += 1.0;
@@ -141,6 +148,54 @@ void FeatureSet::Emit() const {
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
     vt.Emit();
   }
+}
+
+bool FeatureSet::IntegrityCheck() const {
+
+  bool bFine( true );
+
+  double bidPrice {}, askPrice {};
+  bool bidActive( false ), askActive( false );
+
+  enum ELevel { Zero, One, Remaining } level( Zero );
+
+  for ( const vLevels_t::value_type& vt: m_vLevels ) {
+    switch ( level ) {
+      case ELevel::Zero:
+        assert( vt.ask.v1.price == 0.0 );
+        assert( !vt.ask.bActive );
+        assert( vt.bid.v1.price == 0.0 );
+        assert( !vt.bid.bActive );
+        level = ELevel::One;
+        break;
+      case ELevel::One:
+        if ( vt.ask.bActive ) {
+          askActive = true;
+          askPrice = vt.ask.v1.price;
+        }
+        if ( vt.bid.bActive ) {
+          bidActive = true;
+          bidPrice = vt.bid.v1.price;
+        }
+        level = ELevel::Remaining;
+        break;
+      case ELevel::Remaining:
+        if ( vt.ask.bActive ) {
+          assert( askActive ); // prior needs to be active
+          assert( askPrice < vt.ask.v1.price );
+          askPrice = vt.ask.v1.price;
+          askActive = true;
+        }
+        if ( vt.bid.bActive ) {
+          assert( bidActive ); // prior needs to be active
+          assert( bidPrice > vt.bid.v1.price );
+          bidPrice = vt.bid.v1.price;
+          bidActive = true;
+        }
+        break;
+    }
+  }
+  return bFine;
 }
 
 } // namespace l2

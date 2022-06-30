@@ -957,7 +957,9 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         m_FeatureSet.Emit();
       }
 
+      //m_FeatureSet.IntegrityCheck();
       m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+      //m_FeatureSet.IntegrityCheck();
 
       if ( m_bTriggerFeatureSetDump ) {
         m_FeatureSet.Emit();
@@ -1020,7 +1022,9 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         m_FeatureSet.Emit();
       }
 
+      //m_FeatureSet.IntegrityCheck();
       m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+      //m_FeatureSet.IntegrityCheck();
 
       if ( m_bTriggerFeatureSetDump ) {
         m_FeatureSet.Emit();
