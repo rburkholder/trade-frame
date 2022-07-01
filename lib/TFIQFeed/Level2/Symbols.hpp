@@ -94,8 +94,6 @@ public:
     price_t price( depth.Price() );
     volume_t volume( depth.Volume() );
 
-    unsigned int ix {};
-
     typename mapLevelAggregate_t::iterator iterLevelAggregate = m_mapLevelAggregate.find( price );
     if ( m_mapLevelAggregate.end() == iterLevelAggregate ) {
 
@@ -105,42 +103,61 @@ public:
 
       if ( m_fBookChanges ) { // this chunk needed for fBookChanges only
 
+        unsigned int ix {};
+
         // determine ix for inserted entry
         if ( m_mapLevelAggregate.begin() == iterLevelAggregate ) {
           ix = 1;
         }
-        else { // pickup ix from predecessor
+        else {
+
+          // pickup ix from predecessor, calculate for new insertion
           typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
           iterIx--;
           ix = iterIx->second.ixLevel;
           if ( 0 == ix ) {} // outside of range
           else {
             if ( max_ix == ix ) {
-              ix = 0;   // reached max_ix already, so outside of range
+              ix = 0;   // reached max_ix already, so follow on will be outside of range
             }
             else {
-              ix++;
+              ix++; // set ix for iterLevelAggregate
             }
           }
         }
 
-        // insert entry
-        //iterLevelAggregate->second.ixLevel = ix;
-        m_fBookChanges( EOp::Insert, ix, depth );
-        for ( // renumber within range
-          typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
-          ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx );
-          iterIx++, ix++
-        ) {
-          iterIx->second.ixLevel = ix;
+        assert( max_ix >= ix );
+
+        auto ix_( ix );  // ix prime for use in the call
+
+        // fix existing entries
+        if ( 0 == ix ) {
+          // don't do anything
         }
+        else {
+          typename mapLevelAggregate_t::iterator iterIx = iterLevelAggregate;
+          while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+            iterIx->second.ixLevel = ix;
+            iterIx++;
+            ix++;
+          }
+          if ( m_mapLevelAggregate.end() != iterIx ) {
+            iterIx->second.ixLevel = 0;
+          }
+        }
+
+        assert( ix_ == iterLevelAggregate->second.ixLevel );
+
+        // insert entry
+        m_fBookChanges( EOp::Insert, ix_, depth );
+
       }
     }
     else { // exising level
       iterLevelAggregate->second.nQuantity += volume;
       iterLevelAggregate->second.nOrders++;
       if ( m_fBookChanges ) {
-        ix = iterLevelAggregate->second.ixLevel;
+        unsigned int ix = iterLevelAggregate->second.ixLevel;
         ou::tf::Depth depth_( depth.DateTime(), price, iterLevelAggregate->second.nQuantity );
         m_fBookChanges( EOp::Increase, ix, depth_ );
       }
