@@ -181,13 +181,13 @@ bool FeatureSet::IntegrityCheck() const {
         break;
       case ELevel::Remaining:
         if ( vt.ask.bActive ) {
-          assert( askActive ); // prior needs to be active
+          //assert( askActive ); // prior needs to be active, may need to deal with fill-in after delete
           assert( askPrice < vt.ask.v1.price );
           askPrice = vt.ask.v1.price;
           askActive = true;
         }
         if ( vt.bid.bActive ) {
-          assert( bidActive ); // prior needs to be active
+          //assert( bidActive ); // prior needs to be active, may need to deal with fill-in after delete
           assert( bidPrice > vt.bid.v1.price );
           bidPrice = vt.bid.v1.price;
           bidActive = true;
