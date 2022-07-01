@@ -256,9 +256,9 @@ void AppDoM::StartDepthByOrder() {
           m_FeatureSet.Emit();
         }
 
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
         m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
           m_FeatureSet.Emit();
@@ -334,9 +334,9 @@ void AppDoM::StartDepthByOrder() {
           m_FeatureSet.Emit();
         }
 
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
         m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
           m_FeatureSet.Emit();
