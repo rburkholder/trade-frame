@@ -138,9 +138,13 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
       boost::gregorian::date date = dt.date();
       boost::posix_time::time_duration time = dt.time_of_day();
 
-      double converted =  Chart::chartTime(
+      static const double divisor( time.ticks_per_second() );
+      double dfrac = time.fractional_seconds();
+      dfrac /= divisor;
+      double converted = Chart::chartTime(
           date.year(), date.month(), date.day(),
           time.hours(), time.minutes(), time.seconds() )
+          + dfrac
         ;
 
       // do these go in with IncCntElements instead?
