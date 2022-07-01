@@ -181,6 +181,7 @@ private:
   void OnResize( wxSizeEvent& );
   void OnResizing( wxSizeEvent& );
   void OnDestroy( wxWindowDestroyEvent& );
+  void OnCloseWindow( wxCloseEvent& );
 
 };
 

@@ -125,7 +125,8 @@ void PanelSideBySide::CreateControls() {
 
   Bind( wxEVT_SIZE, &PanelSideBySide::OnResize, this, GetId() );
   Bind( wxEVT_SIZING, &PanelSideBySide::OnResizing, this, GetId() );
-  Bind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this, GetId() );
+  Bind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this );
+  Bind( wxEVT_CLOSE_WINDOW, &PanelSideBySide::OnCloseWindow, this );
 
   m_timerRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &PanelSideBySide::HandleTimerRefresh, this, m_timerRefresh.GetId() );
@@ -342,6 +343,13 @@ void PanelSideBySide::OnResizing( wxSizeEvent& event ) {
 void PanelSideBySide::OnDestroy( wxWindowDestroyEvent& event ) {
 
   if ( event.GetId() == GetId() ) {
+  }
+
+}
+
+void PanelSideBySide::OnCloseWindow( wxCloseEvent& event ) {
+
+  if ( event.GetId() == GetId() ) {
 
     //Unbind( wxEVT_PAINT, &PanelTrade::OnPaint, this, GetId() );
 
@@ -349,9 +357,13 @@ void PanelSideBySide::OnDestroy( wxWindowDestroyEvent& event ) {
 
     Unbind( wxEVT_SIZE, &PanelSideBySide::OnResize, this, GetId() );
     Unbind( wxEVT_SIZING, &PanelSideBySide::OnResizing, this, GetId() );
-    Unbind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this, GetId() );
+    Unbind( wxEVT_DESTROY, &PanelSideBySide::OnDestroy, this );
+    Unbind( wxEVT_CLOSE_WINDOW, &PanelSideBySide::OnCloseWindow, this );
     //Unbind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
 
+    m_mapAskPriceLevel.clear();
+    m_mapBidPriceLevel.clear();
+    m_vStatistics.clear();
     m_pWinRow_Header.reset();
     m_vWinRow.clear();
 
