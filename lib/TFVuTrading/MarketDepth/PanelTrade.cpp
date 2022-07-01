@@ -70,10 +70,9 @@ PanelTrade::PanelTrade()
 
 PanelTrade::PanelTrade(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
-)
-: wxWindow( parent, id, pos, size, style )
-{
+) {
   Init();
+  Create( parent, id, pos, size, style );
 }
 
 PanelTrade::~PanelTrade() {}
