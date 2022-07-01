@@ -192,18 +192,20 @@ public:
           ou::tf::Depth depth_( depth.DateTime(), price, 0 );
           m_fBookChanges( EOp::Delete, ix, depth_ );
 
-          auto iterIx = iterLevelAggregate;
-          iterIx++;
-          while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
-            iterIx->second.ixLevel = ix;
-            if ( max_ix == ix ) {
-              // TODO: need to back fill last entry
-            }
-            ix++;
+          if ( 0 != ix ) {
+            auto iterIx = iterLevelAggregate;
             iterIx++;
-          }
-          if ( ( max_ix < ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
-            iterIx->second.ixLevel = 0;
+            while ( ( max_ix >= ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+              iterIx->second.ixLevel = ix;
+              if ( max_ix == ix ) {
+                // TODO: need to back fill last entry
+              }
+              ix++;
+              iterIx++;
+            }
+            if ( ( max_ix < ix ) && ( m_mapLevelAggregate.end() != iterIx ) ) {
+              iterIx->second.ixLevel = 0;
+            }
           }
         }
 
