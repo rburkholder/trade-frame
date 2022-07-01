@@ -944,26 +944,26 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
-      // ix is 0 sometimes, is this legal?
+      if ( 0 != ix ) {
+        if ( m_bTriggerFeatureSetDump ) {
+          std::cout << "fs dump (bid) "
+            << (int)op
+            << "," << ix
+            << "," << depth.MsgType()
+            << "," << depth.Price() << "," << depth.Volume()
+            << "," << depth.Side()
+            << std::endl;
+          m_FeatureSet.Emit();
+        }
 
-      if ( m_bTriggerFeatureSetDump ) {
-        std::cout << "fs dump (bid) "
-          << (int)op
-          << "," << ix
-          << "," << depth.MsgType()
-          << "," << depth.Price() << "," << depth.Volume()
-          << "," << depth.Side()
-          << std::endl;
-        m_FeatureSet.Emit();
-      }
+        m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+        m_FeatureSet.IntegrityCheck();
 
-      //m_FeatureSet.IntegrityCheck();
-      m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-      //m_FeatureSet.IntegrityCheck();
-
-      if ( m_bTriggerFeatureSetDump ) {
-        m_FeatureSet.Emit();
-        m_bTriggerFeatureSetDump = false;
+        if ( m_bTriggerFeatureSetDump ) {
+          m_FeatureSet.Emit();
+          m_bTriggerFeatureSetDump = false;
+        }
       }
 
       auto state = m_OrderBased.State();
@@ -972,12 +972,13 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         switch ( op ) {
           case ou::tf::iqfeed::l2::EOp::Increase:
           case ou::tf::iqfeed::l2::EOp::Insert:
-            m_FeatureSet.Bid_IncLimit( ix, depth );
+            if ( 0 != ix ) {
+              m_FeatureSet.Bid_IncLimit( ix, depth );
+            }
             break;
           case ou::tf::iqfeed::l2::EOp::Decrease:
           case ou::tf::iqfeed::l2::EOp::Delete:
             if ( 1 == ix ) {
-
               uint32_t nTicks = m_nMarketOrdersBid.load();
               // TODO: does arrival rate of deletions affect overall Market rate?
               if ( 0 == nTicks ) {
@@ -989,15 +990,16 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
               }
             }
             else { // 1 < ix
-              m_FeatureSet.Bid_IncCancel( ix, depth );
+              if ( 0 != ix ) {
+                m_FeatureSet.Bid_IncCancel( ix, depth );
+              }
             }
             break;
           default:
             break;
         }
       }
-//      if ( 0 == ix ) { // may need to recalculate at any level change instead
-//        // doesn't seem to be working
+//      if ( 1 == ix ) { // may need to recalculate at any level change instead
 //        ou::tf::RunningStats::Stats stats;
 //        m_FeatureSet.ImbalanceSummary( stats );
 //        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
@@ -1009,26 +1011,26 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
-      // ix is 0 sometimes, is this legal?
+      if ( 0 != ix ) {
+        if ( m_bTriggerFeatureSetDump ) {
+          std::cout << "fs dump (ask) "
+            << (int)op
+            << "," << ix
+            << "," << depth.MsgType()
+            << "," << depth.Price() << "," << depth.Volume()
+            << "," << depth.Side()
+            << std::endl;
+          m_FeatureSet.Emit();
+        }
 
-      if ( m_bTriggerFeatureSetDump ) {
-        std::cout << "fs dump (ask) "
-          << (int)op
-          << "," << ix
-          << "," << depth.MsgType()
-          << "," << depth.Price() << "," << depth.Volume()
-          << "," << depth.Side()
-          << std::endl;
-        m_FeatureSet.Emit();
-      }
+        m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+        m_FeatureSet.IntegrityCheck();
 
-      //m_FeatureSet.IntegrityCheck();
-      m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-      //m_FeatureSet.IntegrityCheck();
-
-      if ( m_bTriggerFeatureSetDump ) {
-        m_FeatureSet.Emit();
-        m_bTriggerFeatureSetDump = false;
+        if ( m_bTriggerFeatureSetDump ) {
+          m_FeatureSet.Emit();
+          m_bTriggerFeatureSetDump = false;
+        }
       }
 
       auto state = m_OrderBased.State();
@@ -1037,12 +1039,12 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         switch ( op ) {
           case ou::tf::iqfeed::l2::EOp::Increase:
           case ou::tf::iqfeed::l2::EOp::Insert:
-            m_FeatureSet.Ask_IncLimit( ix, depth );
+            if ( 0 != ix ) {
+              m_FeatureSet.Ask_IncLimit( ix, depth );            }
             break;
           case ou::tf::iqfeed::l2::EOp::Decrease:
           case ou::tf::iqfeed::l2::EOp::Delete:
             if ( 1 == ix ) {
-
               uint32_t nTicks = m_nMarketOrdersAsk.load();
               if ( 0 == nTicks ) {
                 m_FeatureSet.Ask_IncCancel( 1, depth );
@@ -1053,15 +1055,16 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
               }
             }
             else { // 1 < ix
-              m_FeatureSet.Ask_IncCancel( ix, depth );
+              if ( 0 != ix ) {
+                m_FeatureSet.Ask_IncCancel( ix, depth );
+              }
             }
             break;
           default:
             break;
         }
       }
-//      if ( 0 == ix ) { // may need to recalculate at any level change instead
-//        // doesn't seem to be working
+//      if ( 1 == ix ) { // may need to recalculate at any level change instead
 //        ou::tf::RunningStats::Stats stats;
 //        m_FeatureSet.ImbalanceSummary( stats );
 //        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
