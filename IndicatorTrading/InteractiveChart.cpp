@@ -132,9 +132,12 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeUp );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolumeDn );
 
-  //m_dvChart.Add( EChartSlot::ImbalanceB0, &m_ceImbalanceB0 );
-  //m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceB1 );
-  //m_dvChart.Add( EChartSlot::ImbalanceR, &m_ceImbalanceR );
+  m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
+  m_dvChart.Add( EChartSlot::ImbalanceMean, &m_cemZero );
+  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_cemZero );
+
+  m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceMean );
+  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceB1 );
 
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
@@ -176,12 +179,10 @@ void InteractiveChart::Init() {
   m_ceVolumeDn.SetColour( ou::Colour::Red );
   m_ceVolumeDn.SetName( "Volume Down" );
 
-  m_ceImbalanceB0.SetName( "b0" );
-  m_ceImbalanceB0.SetColour( ou::Colour::Red );
-  m_ceImbalanceB1.SetName( "b1" );
-  m_ceImbalanceB1.SetColour( ou::Colour::Blue );
-  m_ceImbalanceR.SetName( "r" );
-  m_ceImbalanceR.SetColour( ou::Colour::Green );
+  m_ceImbalanceMean.SetName( "imbalance mean" );
+  m_ceImbalanceMean.SetColour( ou::Colour::Green );
+  m_ceImbalanceB1.SetName( "imbalance slope" );
+  m_ceImbalanceB1.SetColour( ou::Colour::Green );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -956,9 +957,9 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
           m_FeatureSet.Emit();
         }
 
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
         m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
           m_FeatureSet.Emit();
@@ -999,13 +1000,12 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
             break;
         }
       }
-//      if ( 1 == ix ) { // may need to recalculate at any level change instead
-//        ou::tf::RunningStats::Stats stats;
-//        m_FeatureSet.ImbalanceSummary( stats );
-//        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
-//        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
-//        m_ceImbalanceR.Append( depth.DateTime(), stats.r );
-//      }
+      if ( 1 == ix ) { // may need to recalculate at any level change instead
+        ou::tf::RunningStats::Stats stats;
+        m_FeatureSet.ImbalanceSummary( stats );
+        m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
+        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+      }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
       ou::tf::Trade::price_t price( depth.Price() );
@@ -1023,9 +1023,9 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
           m_FeatureSet.Emit();
         }
 
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
         m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-        m_FeatureSet.IntegrityCheck();
+        //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
           m_FeatureSet.Emit();
@@ -1064,13 +1064,12 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
             break;
         }
       }
-//      if ( 1 == ix ) { // may need to recalculate at any level change instead
-//        ou::tf::RunningStats::Stats stats;
-//        m_FeatureSet.ImbalanceSummary( stats );
-//        m_ceImbalanceB0.Append( depth.DateTime(), stats.b0 );
-//        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
-//        m_ceImbalanceR.Append( depth.DateTime(), stats.r );
-//      }
+      if ( 1 == ix ) { // may need to recalculate at any level change instead
+        ou::tf::RunningStats::Stats stats;
+        m_FeatureSet.ImbalanceSummary( stats );
+        m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
+        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+      }
     }
   );
 
