@@ -244,24 +244,26 @@ void AppDoM::StartDepthByOrder() {
       m_valuesStatistics.nL2MsgBid++;
       m_valuesStatistics.nL2MsgTtl++;
 
-      if ( m_bTriggerFeatureSetDump ) {
-        std::cout << "fs dump (bid) "
-          << (int)op
-          << "," << ix
-          << "," << depth.MsgType()
-          << "," << depth.Price() << "," << depth.Volume()
-          << "," << depth.Side()
-          << std::endl;
-        m_FeatureSet.Emit();
-      }
+      if ( 0 != ix ) {
+        if ( m_bTriggerFeatureSetDump ) {
+          std::cout << "fs dump (bid) "
+            << (int)op
+            << "," << ix
+            << "," << depth.MsgType()
+            << "," << depth.Price() << "," << depth.Volume()
+            << "," << depth.Side()
+            << std::endl;
+          m_FeatureSet.Emit();
+        }
 
-      m_FeatureSet.IntegrityCheck();
-      m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-      m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+        m_FeatureSet.IntegrityCheck();
 
-      if ( m_bTriggerFeatureSetDump ) {
-        m_FeatureSet.Emit();
-        m_bTriggerFeatureSetDump = false;
+        if ( m_bTriggerFeatureSetDump ) {
+          m_FeatureSet.Emit();
+          m_bTriggerFeatureSetDump = false;
+        }
       }
 
       switch ( m_OrderBased.State() ) {
@@ -273,7 +275,9 @@ void AppDoM::StartDepthByOrder() {
               if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1BidAdd++;
               }
-              m_FeatureSet.Bid_IncLimit( ix, depth );
+              if ( 0 != ix ) {
+                m_FeatureSet.Bid_IncLimit( ix, depth );
+              }
               break;
             case ou::tf::iqfeed::l2::EOp::Decrease:
             case ou::tf::iqfeed::l2::EOp::Delete:
@@ -291,7 +295,9 @@ void AppDoM::StartDepthByOrder() {
                 }
               }
               else { // 1 < ix
-                m_FeatureSet.Bid_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
+                if ( 0 != ix ) {
+                  m_FeatureSet.Bid_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
+                }
               }
               break;
             default:
@@ -299,7 +305,7 @@ void AppDoM::StartDepthByOrder() {
           }
           break;
         case EState::Update:
-          assert( false );  // TODO: this might need to be proceseed
+          // simply a change, no interesting statistics
           break;
         case EState::Ready:
           assert( false ); // not allowed
@@ -316,24 +322,26 @@ void AppDoM::StartDepthByOrder() {
       m_valuesStatistics.nL2MsgAsk++;
       m_valuesStatistics.nL2MsgTtl++;
 
-      if ( m_bTriggerFeatureSetDump ) {
-        std::cout << "fs dump (ask) "
-          << (int)op
-          << "," << ix
-          << "," << depth.MsgType()
-          << "," << depth.Price() << "," << depth.Volume()
-          << "," << depth.Side()
-          << std::endl;
-        m_FeatureSet.Emit();
-      }
+      if ( 0 != ix ) {
+        if ( m_bTriggerFeatureSetDump ) {
+          std::cout << "fs dump (ask) "
+            << (int)op
+            << "," << ix
+            << "," << depth.MsgType()
+            << "," << depth.Price() << "," << depth.Volume()
+            << "," << depth.Side()
+            << std::endl;
+          m_FeatureSet.Emit();
+        }
 
-      m_FeatureSet.IntegrityCheck();
-      m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-      m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+        m_FeatureSet.IntegrityCheck();
 
-      if ( m_bTriggerFeatureSetDump ) {
-        m_FeatureSet.Emit();
-        m_bTriggerFeatureSetDump = false;
+        if ( m_bTriggerFeatureSetDump ) {
+          m_FeatureSet.Emit();
+          m_bTriggerFeatureSetDump = false;
+        }
       }
 
       switch ( m_OrderBased.State() ) {
@@ -345,7 +353,9 @@ void AppDoM::StartDepthByOrder() {
               if ( 1 == ix ) {
                 m_valuesStatistics.nLvl1AskAdd++;
               }
-              m_FeatureSet.Ask_IncLimit( ix, depth );
+              if ( 0 != ix ) {
+                m_FeatureSet.Ask_IncLimit( ix, depth );
+              }
               break;
             case ou::tf::iqfeed::l2::EOp::Decrease:
             case ou::tf::iqfeed::l2::EOp::Delete:
@@ -363,7 +373,9 @@ void AppDoM::StartDepthByOrder() {
                 }
               }
               else { // 1 < ix
-                m_FeatureSet.Ask_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
+                if ( 0 != ix ) {
+                  m_FeatureSet.Ask_IncCancel( ix, depth ); // TODO: use order id to determine cancel/change
+              }
               }
               break;
             default:
@@ -371,7 +383,7 @@ void AppDoM::StartDepthByOrder() {
           }
           break;
         case EState::Update:
-          assert( false );  // TODO: this might need to be proceseed
+          // simply a change, no interesting statistics
           break;
         case EState::Ready:
           assert( false ); // not allowed
