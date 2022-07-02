@@ -41,7 +41,6 @@ set(
     PortfolioGreek.h
     Portfolio.h
     PortfolioManager.h
-    PositionCombo.h
     PositionGreek.h
     Position.h
     ProviderInterface.h
@@ -86,7 +85,6 @@ set(
     Portfolio.cpp
     PortfolioGreek.cpp
     PortfolioManager.cpp
-    PositionCombo.cpp
     Position.cpp
     PositionGreek.cpp
     ProviderManager.cpp
