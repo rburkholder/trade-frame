@@ -137,9 +137,11 @@ void FeatureSet::ImbalanceSummary( ou::tf::RunningStats::Stats& stats ) const {
   double ix( 1.0 );
   ou::tf::RunningStats rs;
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
-    rs.Add( ix, vt.cross.v2.imbalanceAgg );  // not sure which of the two are most appropriate
-    //rs.Add( ix, vt.cross.v2.imbalanceLvl );
-    ix += 1.0;
+    //if ( vt.ask.bActive && vt.bid.bActive ) {
+      rs.Add( ix, vt.cross.v2.imbalanceAgg );  // not sure which of the two are most appropriate
+      //rs.Add( ix, vt.cross.v2.imbalanceLvl );
+      ix += 1.0;
+    //}
   }
   rs.CalcStats( stats );
 }
