@@ -314,6 +314,13 @@ void AppDoM::StartDepthByOrder() {
 
       m_pPanelTrade->OnQuoteBid( price, volume );
       m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+
+      if ( 1 == ix ) { // may need to recalculate at any level change instead
+        ou::tf::RunningStats::Stats stats;
+        m_FeatureSet.ImbalanceSummary( stats );
+        m_valuesStatistics.dblFvsMean = stats.meanY;
+        m_valuesStatistics.dblFvsSlope = stats.b1;
+      }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
 
@@ -392,14 +399,21 @@ void AppDoM::StartDepthByOrder() {
 
       m_pPanelTrade->OnQuoteAsk( price, volume );
       m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+
+      if ( 1 == ix ) { // may need to recalculate at any level change instead
+        ou::tf::RunningStats::Stats stats;
+        m_FeatureSet.ImbalanceSummary( stats );
+        m_valuesStatistics.dblFvsMean = stats.meanY;
+        m_valuesStatistics.dblFvsSlope = stats.b1;
+        //m_valuesStatistics.dblFvsSlope = m_FeatureSet.;
+      }
     }
   );
 
   m_pPanelSideBySide->Set(
-    [this](double b0, double b1, double r ){
-      m_valuesStatistics.dblB0 = b0;
-      m_valuesStatistics.dblB1 = b1;
-      m_valuesStatistics.dblR  = r;
+    [this](double mean, double slope ){
+      m_valuesStatistics.dblRawMean = mean;
+      m_valuesStatistics.dblRawSlope = slope;
     }
   );
 

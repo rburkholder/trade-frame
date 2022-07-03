@@ -64,7 +64,7 @@ public:
   void OnL2Ask( double price, int volume, bool bOnAdd );
   void OnL2Bid( double price, int volume, bool bOnAdd );
 
-  using fImbalanceStats_t = std::function<void(double,double,double)>; // b0, b1, variance
+  using fImbalanceStats_t = std::function<void(double,double)>; // mean, slope
   void Set( fImbalanceStats_t&& f ) {
     m_fImbalanceStats = std::move( f );
   }

@@ -252,7 +252,7 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
 
   if ( 0 < nRows ) {
     rs.CalcStats(); // obtain b0, b1, will want to turn this into an indicator elsewhere
-    if ( m_fImbalanceStats ) m_fImbalanceStats( rs.Offset(), rs.Slope(), rs.R() );
+    if ( m_fImbalanceStats ) m_fImbalanceStats( rs.MeanY(), rs.Slope() );
   }
 }
 

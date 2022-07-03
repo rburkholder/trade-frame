@@ -70,9 +70,12 @@ public:
     size_t nLvl1BidAdd;
     size_t nLvl1BidDel;
 
-    double dblB0;
-    double dblB1;
-    double dblR;
+    double dblRawMean;
+    double dblRawSlope;
+
+    double dblFvsMean;
+    double dblFvsSlope;
+    double dblAccel;
 
     values_t() { Zero(); }
     void Zero() {
@@ -87,7 +90,8 @@ public:
       nLvl1UnkTick = nLvl1UnkAdd = nLvl1UnkDel = 0;
       nLvl1BidTick = nLvl1BidAdd = nLvl1BidDel = 0;
 
-      dblB0 = dblB1 = dblR = 0.0;
+      dblRawMean = dblRawSlope = 0.0;
+      dblFvsMean = dblFvsSlope = dblAccel = 0.0;
     }
   };
 
@@ -128,7 +132,8 @@ private:
   , id_txtLvl1UknTick, id_txtLvl1UknAdd, id_txtLvl1UknDel
   , id_txtLvl1BidTick, id_txtLvl1BidAdd, id_txtLvl1BidDel
 
-  , id_txtB0, id_txtB1, id_txtR
+  , id_txtRawMean, id_txtRawSlope
+  , id_txtFvsMean, id_txtFvsSlope, id_txtFvsAccel
   };
 
     wxTextCtrl* m_txtTicks;
@@ -164,9 +169,12 @@ private:
     wxTextCtrl* m_txtLvl1BidAdd;
     wxTextCtrl* m_txtLvl1BidDel;
 
-    wxTextCtrl* m_txtB0;
-    wxTextCtrl* m_txtB1;
-    wxTextCtrl* m_txtR;
+    wxTextCtrl* m_txtRawMean;
+    wxTextCtrl* m_txtRawSlope;
+
+    wxTextCtrl* m_txtFvsMean;
+    wxTextCtrl* m_txtFvsSlope;
+    wxTextCtrl* m_txtFvsAccel;
 
   void Init();
   void CreateControls();
