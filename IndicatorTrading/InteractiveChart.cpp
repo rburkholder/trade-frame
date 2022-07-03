@@ -967,39 +967,47 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         }
       }
 
-      auto state = m_OrderBased.State();
-      assert( EState::Ready != state );
-      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-        switch ( op ) {
-          case ou::tf::iqfeed::l2::EOp::Increase:
-          case ou::tf::iqfeed::l2::EOp::Insert:
-            if ( 0 != ix ) {
-              m_FeatureSet.Bid_IncLimit( ix, depth );
-            }
-            break;
-          case ou::tf::iqfeed::l2::EOp::Decrease:
-          case ou::tf::iqfeed::l2::EOp::Delete:
-            if ( 1 == ix ) {
-              uint32_t nTicks = m_nMarketOrdersBid.load();
-              // TODO: does arrival rate of deletions affect overall Market rate?
-              if ( 0 == nTicks ) {
-                m_FeatureSet.Bid_IncCancel( 1, depth );
-              }
-              else {
-                --m_nMarketOrdersBid;
-                m_FeatureSet.Bid_IncMarket( 1, depth );
-              }
-            }
-            else { // 1 < ix
+      switch ( m_OrderBased.State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
               if ( 0 != ix ) {
-                m_FeatureSet.Bid_IncCancel( ix, depth );
+                m_FeatureSet.Bid_IncLimit( ix, depth );
               }
-            }
-            break;
-          default:
-            break;
-        }
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                uint32_t nTicks = m_nMarketOrdersBid.load();
+                // TODO: does arrival rate of deletions affect overall Market rate?
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Bid_IncCancel( 1, depth );
+                }
+                else {
+                  --m_nMarketOrdersBid;
+                  m_FeatureSet.Bid_IncMarket( 1, depth );
+                }
+              }
+              else { // 1 < ix
+                if ( 0 != ix ) {
+                  m_FeatureSet.Bid_IncCancel( ix, depth );
+                }
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        case EState::Update:
+          // simply a change, no interesting statistics
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
       }
+
       if ( 1 == ix ) { // may need to recalculate at any level change instead
         ou::tf::RunningStats::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
@@ -1033,37 +1041,44 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         }
       }
 
-      auto state = m_OrderBased.State();
-      assert( EState::Ready != state );
-      if ( ( EState::Add == state ) || ( EState::Delete == state ) ) {
-        switch ( op ) {
-          case ou::tf::iqfeed::l2::EOp::Increase:
-          case ou::tf::iqfeed::l2::EOp::Insert:
-            if ( 0 != ix ) {
-              m_FeatureSet.Ask_IncLimit( ix, depth );            }
-            break;
-          case ou::tf::iqfeed::l2::EOp::Decrease:
-          case ou::tf::iqfeed::l2::EOp::Delete:
-            if ( 1 == ix ) {
-              uint32_t nTicks = m_nMarketOrdersAsk.load();
-              if ( 0 == nTicks ) {
-                m_FeatureSet.Ask_IncCancel( 1, depth );
-              }
-              else {
-                --m_nMarketOrdersAsk;
-                m_FeatureSet.Ask_IncMarket( 1, depth );
-              }
-            }
-            else { // 1 < ix
+      switch ( m_OrderBased.State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
               if ( 0 != ix ) {
-                m_FeatureSet.Ask_IncCancel( ix, depth );
+                m_FeatureSet.Ask_IncLimit( ix, depth );            }
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                uint32_t nTicks = m_nMarketOrdersAsk.load();
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Ask_IncCancel( 1, depth );
+                }
+                else {
+                  --m_nMarketOrdersAsk;
+                  m_FeatureSet.Ask_IncMarket( 1, depth );
+                }
               }
-            }
-            break;
-          default:
-            break;
-        }
+              else { // 1 < ix
+                if ( 0 != ix ) {
+                  m_FeatureSet.Ask_IncCancel( ix, depth );
+                }
+              }
+              break;
+            default:
+              break;
+          }
+        case EState::Update:
+          // simply a change, no interesting statistics
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
       }
+
       if ( 1 == ix ) { // may need to recalculate at any level change instead
         ou::tf::RunningStats::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
