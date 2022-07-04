@@ -156,7 +156,7 @@ void AppESBracketOrder::HandleIBConnected( int ) {
 
   if ( !m_bInitialized ) {
     static const std::string sBaseName( "ES" );
-    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "GLOBEX", 2020, 3, 20 );
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sBaseName, ou::tf::InstrumentType::Future, "GLOBEX", 2022, 9, 16 );
     m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIB );
 
     m_pIB->RequestContractDetails(
