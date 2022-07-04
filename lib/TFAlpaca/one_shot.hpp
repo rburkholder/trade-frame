@@ -120,6 +120,7 @@ private:
   http::request<http::string_body> m_request_body; // one or the other
 
   http::response<http::string_body> m_response;
+  http::response_parser<http::string_body> m_parser;
 
   using fWriteRequest_t = std::function<void()>;
   fWriteRequest_t m_fWriteRequest;

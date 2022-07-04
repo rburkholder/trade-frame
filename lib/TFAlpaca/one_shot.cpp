@@ -54,7 +54,10 @@ one_shot::one_shot(
 , m_fDone( nullptr )
 {
   std::cout << "alpaca::one_shot construction" << std::endl; // ensuring proper timing of handling
-}
+
+  // Allow for an unlimited body size
+  m_parser.body_limit( ( std::numeric_limits<std::uint64_t>::max )() );
+  }
 
 one_shot::~one_shot() {
   std::cout << "alpaca::one_shot destruction" << std::endl;  // ensuring proper timing of handling
@@ -354,7 +357,8 @@ void one_shot::on_write(
 
     // Receive the HTTP response
     http::async_read(
-      m_stream, m_buffer, m_response,
+//      m_stream, m_buffer, m_response,
+      m_stream, m_buffer, m_parser,
       beast::bind_front_handler(
         &one_shot::on_read,
         shared_from_this()
@@ -362,6 +366,24 @@ void one_shot::on_write(
     );
   }
 }
+
+/*
+   If more parser work required;
+
+   initial inspiration:
+   https://stackoverflow.com/questions/50348516/boost-beast-message-with-body-limit
+
+   docs
+   https://www.boost.org/doc/libs/1_79_0/libs/beast/doc/html/beast/using_http/parser_stream_operations.html
+
+   https://www.vitaltrades.com/2018/12/28/reading-an-http-stream-using-c-boost-beast/ refers to the following:
+   https://github.com/AndrewAMD/blog/tree/master/oanda_demo_stream
+
+  handle chunks directly if things go horibbly wrong
+   https://www.boost.org/doc/libs/1_79_0/libs/beast/doc/html/beast/ref/boost__beast__http__basic_parser.html
+   https://www.boost.org/doc/libs/1_79_0/libs/beast/doc/html/beast/ref/boost__beast__http__async_read_some.html
+
+*/
 
 void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 
@@ -374,8 +396,12 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
   else {
 
     //std::cout << "os.on_read" << std::endl;
+    //std::cout << "get():" << m_parser.get() << std::endl;
+    auto body = m_parser.get().body();
+    //std::cout << "body():" << m_parser.get().body() << std::endl;
 
-    m_fDone( true, m_response.body() );
+    //m_fDone( true, m_response.body() );
+    m_fDone( true, body );
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 

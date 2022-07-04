@@ -147,6 +147,7 @@ void Provider::Disconnect() {
 void Provider::Assets() {
   // The session is constructed with a strand to
   // ensure that handlers do not execute concurrently.
+  m_mapAssetId.clear();
   auto osSymbols = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
