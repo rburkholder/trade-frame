@@ -147,7 +147,11 @@ void Provider::Disconnect() {
 void Provider::Assets() {
   // The session is constructed with a strand to
   // ensure that handlers do not execute concurrently.
+
   m_mapAssetId.clear();
+  m_setExchange.clear();
+  m_setClass.clear();
+
   auto osSymbols = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
@@ -190,6 +194,12 @@ void Provider::Assets() {
             }
             else {
               m_mapAssetId.emplace( vt.symbol, AssetMatch( vt.id, vt.class_, vt.exchange ) );
+              if ( m_setExchange.end() == m_setExchange.find( vt.exchange ) ) {
+                m_setExchange.emplace( vt.exchange );
+              }
+              if ( m_setClass.end() == m_setClass.find( vt.class_ ) ) {
+                m_setClass.emplace( vt.class_ );
+              }
             }
           }
 
@@ -197,6 +207,24 @@ void Provider::Assets() {
             << "alpaca found " << vMessage.size() << " assets, "
             << nIdMisMatch << " duplicated"
             << std::endl;
+
+          std::cout << "exchanges: ";
+          bool bComma( false );
+          for ( const setExchange_t::value_type& vt: m_setExchange ) {
+            if ( bComma ) std::cout << ',';
+            else bComma = true;
+            std::cout << vt;
+          }
+          std::cout << std::endl;
+
+          std::cout << "classes: ";
+          bComma = false;
+          for ( const setClass_t::value_type& vt: m_setClass ) {
+            if ( bComma ) std::cout << ',';
+            else bComma = true;
+            std::cout << vt;
+          }
+          std::cout << std::endl;
 
         }
       }

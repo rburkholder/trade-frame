@@ -121,6 +121,12 @@ private:
   using mapAssetId_t = std::map<std::string,AssetMatch>; // normal name
   mapAssetId_t m_mapAssetId;
 
+  using setExchange_t = std::set<std::string>;
+  setExchange_t m_setExchange;
+
+  using setClass_t = std::set<std::string>;
+  setClass_t m_setClass;
+
   void Assets();
   void LastOrderId();
   void Positions();
