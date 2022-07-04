@@ -32,6 +32,7 @@
 
 class wxButton;
 class wxListCtrl;
+class wxRadioButton;
 class wxCheckBox;
 class wxTextCtrl;
 class wxRadioBox;
@@ -69,8 +70,6 @@ public:
    long style = SYMBOL_PANELORDERBUTTONS_STYLE
    );
 
-   enum class EInstrumentType { Underlying=0, Call1=1, Put1=2, Call2=3, Put3=4 };
-
    using fBtnDone_t = std::function<void()>; // undo state set for the button while 'latched'
    using fBtnOrder_t = std::function<void( const PanelOrderButtons_Order&, fBtnDone_t&& )>;
 
@@ -102,6 +101,9 @@ private:
   , ID_RADIO_PositionExitProfit
   , ID_RADIO_PositionExitTop
   , ID_RADIO_Instrument
+  , id_radioBase
+  , id_radioSynthLong, id_radioCallItm, id_radioPutOtm
+  , id_radioSynthShort, id_radioPutItm, id_radioCallOtm
   , ID_TXT_Base, ID_TXT_BaseAsk, ID_TXT_BaseBid
   , ID_TXT_Call1, ID_TXT_Call1Ask, ID_TXT_Call1Bid
   , ID_TXT_Put1, ID_TXT_Put1Ask, ID_TXT_Put1Bid
@@ -126,26 +128,36 @@ private:
     wxCheckBox* m_cbEnableStopExit;
     wxTextCtrl* m_txtPriceStopExit;
     wxRadioBox* m_radioExitStop;
+
     wxButton* m_btnBuy;
     wxButton* m_btnSell;
     wxButton* m_btnClose;
     wxButton* m_btnCancel;
-    wxRadioBox* m_radioInstrument;
+
+    wxRadioButton* m_radioBase;
+    wxRadioButton* m_radioSynthLong;
+    wxRadioButton* m_radioCallItm;
+    wxRadioButton* m_radioPutOtm;
+    wxRadioButton* m_radioSynthShort;
+    wxRadioButton* m_radioPutItm;
+    wxRadioButton* m_radioCallOtm;
+
     wxStaticText* m_txtBase;
     wxStaticText* m_txtBaseAsk;
     wxStaticText* m_txtBaseBid;
-    wxStaticText* m_txtCall1;
-    wxStaticText* m_txtCall1Ask;
-    wxStaticText* m_txtCall1Bid;
-    wxStaticText* m_txtPut1;
-    wxStaticText* m_txtPut1Ask;
-    wxStaticText* m_txtPut1Bid;
-    wxStaticText* m_txtCall2;
-    wxStaticText* m_txtCall2Ask;
-    wxStaticText* m_txtCall2Bid;
-    wxStaticText* m_txtPut2;
-    wxStaticText* m_txtPut2Ask;
-    wxStaticText* m_txtPut2Bid;
+    wxStaticText* m_txtCallItm;
+    wxStaticText* m_txtCallItmAsk;
+    wxStaticText* m_txtCallItmBid;
+    wxStaticText* m_txtPutOtm;
+    wxStaticText* m_txtPutOtmAsk;
+    wxStaticText* m_txtPutOtmBid;
+    wxStaticText* m_txtCallOtm;
+    wxStaticText* m_txtCallOtmAsk;
+    wxStaticText* m_txtCallOtmBid;
+    wxStaticText* m_txtPutItm;
+    wxStaticText* m_txtPutItmAsk;
+    wxStaticText* m_txtPutItmBid;
+
     wxCheckBox* m_cbEnableStoch1;
     wxCheckBox* m_cbEnableStoch2;
     wxCheckBox* m_cbEnableStoch3;
@@ -210,14 +222,32 @@ private:
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnSell
     void OnBtnSellClick( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnClose
-    void OnBtnCloseClick( wxCommandEvent& event );
-
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnCancel
     void OnBtnCancelClick( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_Instrument
-    void OnRADIOInstrumentSelected( wxCommandEvent& event );
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BtnClose
+    void OnBtnCloseClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioBase
+    void OnIdRadioBaseSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioSynthLong
+    void OnIdRadioSynthLongSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioCallItm
+    void OnIdRadioCallItmSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioPutOtm
+    void OnIdRadioPutOtmSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioSynthShort
+    void OnIdRadioSynthShortSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioPutItm
+    void OnIdRadioPutItmSelected( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_RADIOBUTTON_SELECTED event handler for id_radioCallOtm
+    void OnIdRadioCallOtmSelected( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch1
     void OnCBStoch1Click( wxCommandEvent& event );
@@ -227,6 +257,8 @@ private:
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch3
     void OnCBStoch3Click( wxCommandEvent& event );
+
+  void ClearInstrumentRadioButtons();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

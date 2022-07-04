@@ -31,7 +31,11 @@ struct PanelOrderButtons_Order {
   enum class EPositionEntryMethod { Market=1, LimitOnly=2, LimitTimeOut=3, Stoch=4 };
   enum class EPositionExitProfitMethod { Relative=1, Absolute=2, Stoch=3 };
   enum class EPositionExitStopMethod { TrailingAbsolute=1, TrailingPercent=2, Stop=3 };
-  enum class EInstrument { Underlying=1, Call1=11, Put1=12, Call2=21, Put2=22 };
+  enum class EInstrument {
+    Underlying=100,
+    SynthLong=31, CallItm=11, PutOtm=22,
+    SynthShort=32, CallOtm=12, PutItm=21
+    };
 
   bool m_bCockForCursor;
 
