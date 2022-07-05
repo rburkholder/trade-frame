@@ -136,6 +136,7 @@ bool AppAutoTrade::OnInit() {
   sizerUpper = new wxBoxSizer(wxHORIZONTAL);
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
+  // TODO: make the panel conditional on simulation flag
   m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
   m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
   m_pPanelProviderControl->Show();
@@ -159,6 +160,45 @@ bool AppAutoTrade::OnInit() {
     [](){}, // fDisconnecting
     [](){}  // fDisconnected
   );
+
+  // will need to change the date selection in the file, maybe use date from upperTime
+  // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
+  //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
+  auto dt = ou::TimeSource::GlobalInstance().External();
+  boost::gregorian::date dateSim( dt.date() ); // dateSim used later in a loop
+  if ( m_choices.bStartSimulator ) {
+    // m_sim does not need to be in PanelProviderControl
+    m_sim = ou::tf::SimulationProvider::Factory();
+    m_sim->SetThreadCount( m_choices.nThreads );
+    if ( 0 < m_choices.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
+    }
+
+    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    boost::smatch what;
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
+      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      std::cout << "simulation date " << dateSim << std::endl;
+    }
+    // need to be able to hookup simulation depth to the algo
+    // does the symbol pump the depth through the same fibre/thread?
+    // need to turn off m_pL2Symbols when running a simulation
+    // need to feed the algo, not from m_pL2Symbols
+    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
+  }
+  else {
+    m_timerOneSecond.SetOwner( this );
+    Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    m_timerOneSecond.Start( 500 );
+
+    // perform this with iqfeed connection instead?
+    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+      [this](){
+        m_bL2Connected = true;
+        ConfirmProviders();
+      } );
+    m_pL2Symbols->Connect();
+  }
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -185,8 +225,7 @@ bool AppAutoTrade::OnInit() {
     }
   //}
 
-  // this needs to be placed after the providers are
-  //   registered in ProviderManager via m_pPanelProviderControl
+  // this needs to be placed after the providers are registered
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
   m_ceUnRealized.SetName( "unrealized" );
@@ -206,43 +245,6 @@ bool AppAutoTrade::OnInit() {
 
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
-  // will need to change the date selection in the file, maybe use date from upperTime
-  // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
-  //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
-  auto dt = ou::TimeSource::GlobalInstance().External();
-  boost::gregorian::date dateSim( dt.date() ); // dateSim used later on in a loop
-  if ( m_choices.bStartSimulator ) {
-    // m_sim does not need to be in PanelProviderControl
-    m_sim = ou::tf::SimulationProvider::Factory();
-    m_sim->SetThreadCount( m_choices.nThreads );
-    if ( 0 < m_choices.sGroupDirectory.size() ) {
-      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
-    }
-
-    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
-    boost::smatch what;
-    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
-      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
-      std::cout << "simulation date " << dateSim << std::endl;
-    }
-    // need to be able to hookup simulation depth to the algo
-    // does the symbol pump the depth through the same fibre/thread?
-    // need to turn off m_pL2Symbols when running a simulation
-    // need to feed the algo, not from m_pL2Symbols
-    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
-  }
-  else {
-    m_timerOneSecond.SetOwner( this );
-    Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-    m_timerOneSecond.Start( 500 );
-
-    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-      [this](){
-        m_bL2Connected = true;
-        ConfirmProviders();
-      } );
-  }
-
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
   //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
@@ -260,6 +262,7 @@ bool AppAutoTrade::OnInit() {
   //   otherwise, the same data is read in multiple times when the simulation is run multiple times
   StartRdaf( sDirectory + m_sTSDataStreamStarted );
 
+  // construct strategy for each symbol name in the configuration file
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol, choices] = vt;
@@ -287,7 +290,8 @@ bool AppAutoTrade::OnInit() {
     // TODO: use this to add an order list to the instrument: date, direction, type, limit
   }
 
-  // does the list need to be sorted?
+  // load list of rdaf files for historical use
+  // does the list need to be sorted?  can this be loaded in StartRdaf?
   for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
     BOOST_LOG_TRIVIAL(info) << "loading rdaf history: " << sPath;
     TFile* pFile = new TFile( sPath.c_str(), "READ" );
@@ -334,7 +338,7 @@ bool AppAutoTrade::OnInit() {
     m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
   }
 
-  //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws ); // replaced with alpaca
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
 
   CallAfter(
@@ -346,7 +350,6 @@ bool AppAutoTrade::OnInit() {
   if ( m_choices.bStartSimulator ) {
     CallAfter(
       [this](){
-        using pProvider_t = ou::tf::v2::PanelProviderControl::pProvider_t;
         m_sim->Connect();
       }
     );
