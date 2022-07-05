@@ -73,6 +73,8 @@ namespace config {
   class Options;
 }
 
+class Strategy;
+
 class OptionTracker;
 class TradeLifeTime;
 
@@ -258,9 +260,9 @@ private:
         quotes, nPeriods, td,
         [this,sIx]( ptime dt, double k, double min, double max ){
           //std::cout << sIx << " is " << k << "," << max << "," << min << std::endl;
-          m_ceStochastic.Append( dt, k );
           m_ceStochasticMax.Append( dt, max );
           m_ceStochasticMin.Append( dt, min );
+          m_ceStochastic.Append( dt, k ); // resides on top of min/max
         }
       );
     }
@@ -389,6 +391,8 @@ private:
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
+
+  std::unique_ptr<Strategy> m_pStrategy;
 
   void Init();
 

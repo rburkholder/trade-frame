@@ -296,7 +296,8 @@ void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
           ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
   }
 
-  SetInteractiveChart( ConstructPosition( pInstrument ) );
+  pPosition_t pPosition = ConstructPosition( pInstrument );
+  SetInteractiveChart( pPosition );
 
 }
 

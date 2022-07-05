@@ -33,6 +33,7 @@
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Config.h"
+#include "Strategy.hpp"
 #include "TradeLifeTime.h"
 #include "OptionTracker.hpp"
 #include "InteractiveChart.h"
@@ -109,6 +110,7 @@ bool InteractiveChart::Create(
 }
 
 InteractiveChart::~InteractiveChart() {
+  m_pStrategy.reset();
   Disconnect();
   m_bfPrice.SetOnBarComplete( nullptr );
   m_mapLifeCycle.clear();
@@ -320,6 +322,8 @@ void InteractiveChart::SetPosition(
   OptionChainQuery(
     pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     );
+
+  m_pStrategy = std::make_unique<Strategy>( m_pPositionUnderlying );
 
   // --
 
@@ -1013,6 +1017,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         m_FeatureSet.ImbalanceSummary( stats );
         m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
         m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+        m_pStrategy->SetImbalance( stats.meanY, stats.b1 );
       }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
@@ -1084,6 +1089,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
         m_FeatureSet.ImbalanceSummary( stats );
         m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
         m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
+        m_pStrategy->SetImbalance( stats.meanY, stats.b1 );
       }
     }
   );
