@@ -53,6 +53,11 @@ int main( int argc, char** argv )
     // 'get' to obtain crypto asset list
     //const std::string sTarget( "/v2/assets?status=active&asset_class=crypto" );
 
+    ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+    ou::tf::ProviderManager& providers( ou::tf::ProviderManager::GlobalInstance() );
+
     // 1. load choices
     config::Choices choices;
     config::Load( "alpaca.cfg", choices );
@@ -61,7 +66,7 @@ int main( int argc, char** argv )
     using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
     pProviderAlpaca_t pProviderAlpaca = ou::tf::alpaca::Provider::Factory();
     pProviderAlpaca->SetName( "alpaca" );  // may already be set to this
-    ou::tf::ProviderManager::GlobalInstance().Register( pProviderAlpaca );
+    providers.Register( pProviderAlpaca );
 
     pProviderAlpaca->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
     pProviderAlpaca->Connect();
@@ -69,7 +74,7 @@ int main( int argc, char** argv )
     using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
     pProviderIQFeed_t pProviderIQFeed = ou::tf::iqfeed::IQFeedProvider::Factory();
     pProviderIQFeed->SetName( "iqfeed" ); // needs to match name in database
-    ou::tf::ProviderManager::GlobalInstance().Register( pProviderIQFeed );
+    providers.Register( pProviderIQFeed );
     pProviderIQFeed->Connect();
 
     // 3. database can then use the registered provider
@@ -82,20 +87,18 @@ int main( int argc, char** argv )
     const std::string sPortfolio( "USD" );
 
     using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-    ou::tf::Instrument::pInstrument_t pInstrument;
+    pInstrument_t pInstrument;
 
-    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
     if ( im.Exists( sSymbol ) ) {
       pInstrument = im.Get( sSymbol );
     }
     else {
       pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "alpaca" );
-      ou::tf::InstrumentManager::GlobalInstance().Register( pInstrument );
+      im.Register( pInstrument );
     }
 
     ou::tf::Position::pPosition_t pPosition;
     {
-      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       if ( pm.PositionExists( sPortfolio, sSymbol ) ) {
         pPosition = pm.GetPosition( sPortfolio, sSymbol );
       }
@@ -117,10 +120,8 @@ int main( int argc, char** argv )
         100
       );
 
-      ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
       om.PlaceOrder( pProviderAlpaca.get(), pOrder );
     }
-
 
     sleep( 20 );
 
@@ -137,3 +138,4 @@ int main( int argc, char** argv )
 
     return EXIT_SUCCESS;
 }
+
