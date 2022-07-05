@@ -227,8 +227,13 @@ private:
   ou::ChartEntryShape m_ceBearCall;
   ou::ChartEntryShape m_ceBearPut;
 
-  ou::ChartEntryIndicator m_ceImbalanceMean;
-  ou::ChartEntryIndicator m_ceImbalanceB1;
+  ou::ChartEntryIndicator m_ceImbalanceRawMean;
+  ou::ChartEntryIndicator m_ceImbalanceRawB1;
+
+  double m_dblImbalanceMean, m_dblImbalanceSlope;
+
+  ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
+  ou::ChartEntryIndicator m_ceImbalanceSmoothB1;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 

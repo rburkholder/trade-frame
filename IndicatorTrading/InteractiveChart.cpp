@@ -56,6 +56,8 @@ InteractiveChart::InteractiveChart()
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
 
+, m_dblImbalanceMean {}, m_dblImbalanceSlope {}
+
 , m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 , m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
 , m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
@@ -85,6 +87,8 @@ InteractiveChart::InteractiveChart(
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
+
+, m_dblImbalanceMean {}, m_dblImbalanceSlope {}
 
 , m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 , m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -138,8 +142,11 @@ void InteractiveChart::Init() {
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_cemZero );
   m_dvChart.Add( EChartSlot::ImbalanceB1, &m_cemZero );
 
-  m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceMean );
-  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceB1 );
+  m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
+  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceRawB1 );
+
+  m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
+  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceSmoothB1 );
 
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
@@ -181,10 +188,13 @@ void InteractiveChart::Init() {
   m_ceVolumeDn.SetColour( ou::Colour::Red );
   m_ceVolumeDn.SetName( "Volume Down" );
 
-  m_ceImbalanceMean.SetName( "imbalance mean" );
-  m_ceImbalanceMean.SetColour( ou::Colour::Green );
-  m_ceImbalanceB1.SetName( "imbalance slope" );
-  m_ceImbalanceB1.SetColour( ou::Colour::Green );
+  m_ceImbalanceRawMean.SetName( "imbalance mean" );
+  m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+  m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
+
+  m_ceImbalanceRawB1.SetName( "imbalance slope" );
+  m_ceImbalanceRawB1.SetColour( ou::Colour::LightGreen );
+  m_ceImbalanceSmoothB1.SetColour( ou::Colour::DarkGreen );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -944,6 +954,9 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
+  static const double w1( 0.9 );
+  static const double w2( 1.0 - w1 );
+
   m_OrderBased.Set(
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
       ou::tf::Trade::price_t price( depth.Price() );
@@ -1015,9 +1028,17 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       if ( 1 == ix ) { // may need to recalculate at any level change instead
         ou::tf::RunningStats::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
-        m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
-        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
-        m_pStrategy->SetImbalance( stats.meanY, stats.b1 );
+
+        m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
+        m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+
+        m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
+        m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
+
+        m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
+        m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
+
+        m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
       }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
@@ -1087,9 +1108,17 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       if ( 1 == ix ) { // may need to recalculate at any level change instead
         ou::tf::RunningStats::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
-        m_ceImbalanceMean.Append( depth.DateTime(), stats.meanY );
-        m_ceImbalanceB1.Append( depth.DateTime(), stats.b1 );
-        m_pStrategy->SetImbalance( stats.meanY, stats.b1 );
+
+        m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
+        m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+
+        m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
+        m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
+
+        m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
+        m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
+
+        m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
       }
     }
   );
