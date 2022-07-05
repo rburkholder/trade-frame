@@ -16,8 +16,6 @@
 
 #include <functional>
 
-#include "TFTimeSeries/DatedDatum.h"
-
 #include "RunningMinMax.h"
 #include "TimeSeriesSlidingWindow.h"
 
@@ -26,6 +24,7 @@ namespace tf { // TradeFrame
 
 // 14,3,1 is standard  14 periods, 3 slow average, 1 fast average
 // TODO: implement the averaging
+// TODO: implement CRTP?
 
 class TSSWStochastic:
   public RunningMinMax<TSSWStochastic,double>,
