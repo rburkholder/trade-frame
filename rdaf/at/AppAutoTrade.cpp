@@ -689,8 +689,8 @@ void AppAutoTrade::ConfirmProviders() {
     if ( m_iqfeed->Connected() && m_alpaca->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;
-        std::cout << "ConfirmProviders: using iqfeed and tws for data/execution" << std::endl;
-        static const std::string sNamePortfolio( "IB" );
+        std::cout << "ConfirmProviders: using iqfeed and alpaca for data/execution" << std::endl;
+        static const std::string sNamePortfolio( "alpaca" );
         LoadPortfolio( sNamePortfolio );
         for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
           Strategy& strategy( *vt.second );
