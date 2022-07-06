@@ -229,6 +229,9 @@ void PanelOrderButtons::CreateControls() {
     m_btnClose->Enable(false);
     sizerBtnOrderTypes->Add(m_btnClose, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 4);
 
+    wxStaticLine* itemStaticLine2 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine2, 0, wxGROW|wxTOP|wxBOTTOM, 1);
+
     sizerCombos = new wxBoxSizer(wxHORIZONTAL);
     sizerMain->Add(sizerCombos, 0, wxALIGN_CENTER_HORIZONTAL, 1);
 
@@ -248,24 +251,24 @@ void PanelOrderButtons::CreateControls() {
     m_txtBaseBid = new wxStaticText( itemPanel1, ID_TXT_BaseBid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerMDBase->Add(m_txtBaseBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
-    wxStaticLine* itemStaticLine2 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-    sizerCombos->Add(itemStaticLine2, 0, wxGROW|wxLEFT|wxRIGHT, 1);
+    wxStaticLine* itemStaticLine13 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
+    sizerCombos->Add(itemStaticLine13, 0, wxGROW|wxLEFT|wxRIGHT, 1);
 
     sizerSynthLong = new wxBoxSizer(wxVERTICAL);
     sizerCombos->Add(sizerSynthLong, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
-    wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxHORIZONTAL);
-    sizerSynthLong->Add(itemBoxSizer11, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxHORIZONTAL);
+    sizerSynthLong->Add(itemBoxSizer15, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
     m_radioSynthLong = new wxRadioButton( itemPanel1, id_radioSynthLong, _("synth long"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioSynthLong->SetValue(false);
-    itemBoxSizer11->Add(m_radioSynthLong, 0, wxALIGN_CENTER_VERTICAL, 1);
+    itemBoxSizer15->Add(m_radioSynthLong, 0, wxALIGN_CENTER_VERTICAL, 1);
 
-    wxBoxSizer* itemBoxSizer14 = new wxBoxSizer(wxHORIZONTAL);
-    sizerSynthLong->Add(itemBoxSizer14, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
+    sizerSynthLong->Add(itemBoxSizer17, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
     sizerMDCall1 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer14->Add(sizerMDCall1, 1, wxALIGN_CENTER_VERTICAL, 2);
+    itemBoxSizer17->Add(sizerMDCall1, 1, wxALIGN_CENTER_VERTICAL, 2);
 
     m_radioCallItm = new wxRadioButton( itemPanel1, id_radioCallItm, _("itm call"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioCallItm->SetValue(false);
@@ -278,7 +281,7 @@ void PanelOrderButtons::CreateControls() {
     sizerMDCall1->Add(m_txtCallItmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
     sizerMDPut1 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer14->Add(sizerMDPut1, 1, wxALIGN_CENTER_VERTICAL, 2);
+    itemBoxSizer17->Add(sizerMDPut1, 1, wxALIGN_CENTER_VERTICAL, 2);
 
     m_radioPutOtm = new wxRadioButton( itemPanel1, id_radioPutOtm, _("otm put"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioPutOtm->SetValue(false);
@@ -290,24 +293,24 @@ void PanelOrderButtons::CreateControls() {
     m_txtPutOtmBid = new wxStaticText( itemPanel1, ID_TXT_Put1Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerMDPut1->Add(m_txtPutOtmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
-    wxStaticLine* itemStaticLine23 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-    sizerCombos->Add(itemStaticLine23, 0, wxGROW|wxLEFT|wxRIGHT, 1);
+    wxStaticLine* itemStaticLine26 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
+    sizerCombos->Add(itemStaticLine26, 0, wxGROW|wxLEFT|wxRIGHT, 1);
 
     sizerSynthShort = new wxBoxSizer(wxVERTICAL);
     sizerCombos->Add(sizerSynthShort, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
-    wxBoxSizer* itemBoxSizer26 = new wxBoxSizer(wxHORIZONTAL);
-    sizerSynthShort->Add(itemBoxSizer26, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
-
-    m_radioSynthShort = new wxRadioButton( itemPanel1, id_radioSynthShort, _("synth short"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_radioSynthShort->SetValue(false);
-    itemBoxSizer26->Add(m_radioSynthShort, 0, wxALIGN_CENTER_VERTICAL, 1);
-
     wxBoxSizer* itemBoxSizer28 = new wxBoxSizer(wxHORIZONTAL);
     sizerSynthShort->Add(itemBoxSizer28, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
+    m_radioSynthShort = new wxRadioButton( itemPanel1, id_radioSynthShort, _("synth short"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_radioSynthShort->SetValue(false);
+    itemBoxSizer28->Add(m_radioSynthShort, 0, wxALIGN_CENTER_VERTICAL, 1);
+
+    wxBoxSizer* itemBoxSizer30 = new wxBoxSizer(wxHORIZONTAL);
+    sizerSynthShort->Add(itemBoxSizer30, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+
     sizerMDPut2 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer28->Add(sizerMDPut2, 1, wxALIGN_CENTER_VERTICAL, 2);
+    itemBoxSizer30->Add(sizerMDPut2, 1, wxALIGN_CENTER_VERTICAL, 2);
 
     m_radioPutItm = new wxRadioButton( itemPanel1, id_radioPutItm, _("itm put"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioPutItm->SetValue(false);
@@ -320,7 +323,7 @@ void PanelOrderButtons::CreateControls() {
     sizerMDPut2->Add(m_txtPutItmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
     sizerMDCall2 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer28->Add(sizerMDCall2, 1, wxALIGN_CENTER_VERTICAL, 2);
+    itemBoxSizer30->Add(sizerMDCall2, 1, wxALIGN_CENTER_VERTICAL, 2);
 
     m_radioCallOtm = new wxRadioButton( itemPanel1, id_radioCallOtm, _("otm call"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioCallOtm->SetValue(false);
@@ -332,23 +335,23 @@ void PanelOrderButtons::CreateControls() {
     m_txtCallOtmBid = new wxStaticText( itemPanel1, ID_TXT_Call2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerMDCall2->Add(m_txtCallOtmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
 
-    wxStaticLine* itemStaticLine3 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-    sizerMain->Add(itemStaticLine3, 0, wxGROW|wxTOP|wxBOTTOM, 1);
+    wxStaticLine* itemStaticLine39 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    sizerMain->Add(itemStaticLine39, 0, wxGROW|wxTOP|wxBOTTOM, 1);
 
     sizerStochastic = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerStochastic, 1, wxALIGN_CENTER_HORIZONTAL|wxTOP|wxBOTTOM, 2);
+    sizerMain->Add(sizerStochastic, 0, wxALIGN_CENTER_HORIZONTAL|wxTOP|wxBOTTOM, 2);
 
     m_cbEnableStoch1 = new wxCheckBox( itemPanel1, ID_CB_Stoch1, _("Stoch 1"), wxDefaultPosition, wxDefaultSize, 0 );
     m_cbEnableStoch1->SetValue(false);
-    sizerStochastic->Add(m_cbEnableStoch1, 1, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
+    sizerStochastic->Add(m_cbEnableStoch1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
     m_cbEnableStoch2 = new wxCheckBox( itemPanel1, ID_CB_Stoch2, _("Stoch 2"), wxDefaultPosition, wxDefaultSize, 0 );
     m_cbEnableStoch2->SetValue(false);
-    sizerStochastic->Add(m_cbEnableStoch2, 1, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
+    sizerStochastic->Add(m_cbEnableStoch2, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
     m_cbEnableStoch3 = new wxCheckBox( itemPanel1, ID_CB_Stoch3, _("Stoch 3"), wxDefaultPosition, wxDefaultSize, 0 );
     m_cbEnableStoch3->SetValue(false);
-    sizerStochastic->Add(m_cbEnableStoch3, 1, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
+    sizerStochastic->Add(m_cbEnableStoch3, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
   Bind( wxEVT_DESTROY, &PanelOrderButtons::OnDestroy, this );
 

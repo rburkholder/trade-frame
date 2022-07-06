@@ -22061,6 +22061,63 @@ Stop"</string>
               </document>
             </document>
             <document>
+              <string name="proxy-type">"wbStaticLineProxy"</string>
+              <string name="filename">""</string>
+              <string name="icon-name">"staticline"</string>
+              <string name="identifier">"itemStaticLine2"</string>
+              <long name="is-transient">0</long>
+              <long name="locked">0</long>
+              <long name="owns-file">1</long>
+              <string name="proxy-AlignH">"Expand"</string>
+              <string name="proxy-AlignV">"Centre"</string>
+              <string name="proxy-Background colour">""</string>
+              <string name="proxy-Base class">"wxStaticLine"</string>
+              <long name="proxy-Border">1</long>
+              <string name="proxy-Class">"wxStaticLine"</string>
+              <string name="proxy-Custom styles">""</string>
+              <bool name="proxy-Enabled">1</bool>
+              <bool name="proxy-External implementation">1</bool>
+              <string name="proxy-Font">""</string>
+              <string name="proxy-Foreground colour">""</string>
+              <string name="proxy-Header filename">""</string>
+              <long name="proxy-Height">-1</long>
+              <bool name="proxy-Hidden">0</bool>
+              <string name="proxy-Id name">"wxID_STATIC"</string>
+              <long name="proxy-Id value">5105</long>
+              <string name="proxy-Implementation filename">""</string>
+              <string name="proxy-Member variable name">""</string>
+              <string name="proxy-Name">""</string>
+              <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
+              <bool name="proxy-Separate files">0</bool>
+              <long name="proxy-Stretch factor">0</long>
+              <long name="proxy-Width">-1</long>
+              <bool name="proxy-wxADJUST_MINSIZE">0</bool>
+              <bool name="proxy-wxBORDER_THEME">0</bool>
+              <bool name="proxy-wxBOTTOM">1</bool>
+              <bool name="proxy-wxDOUBLE_BORDER">0</bool>
+              <bool name="proxy-wxFIXED_MINSIZE">0</bool>
+              <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
+              <bool name="proxy-wxLEFT">0</bool>
+              <bool name="proxy-wxLI_HORIZONTAL">1</bool>
+              <bool name="proxy-wxLI_VERTICAL">0</bool>
+              <bool name="proxy-wxNO_BORDER">0</bool>
+              <bool name="proxy-wxNO_FULL_REPAINT_ON_RESIZE">0</bool>
+              <bool name="proxy-wxRAISED_BORDER">0</bool>
+              <bool name="proxy-wxRESERVE_SPACE_EVEN_IF_HIDDEN">0</bool>
+              <bool name="proxy-wxRIGHT">0</bool>
+              <bool name="proxy-wxSHAPED">0</bool>
+              <bool name="proxy-wxSIMPLE_BORDER">0</bool>
+              <bool name="proxy-wxSTATIC_BORDER">0</bool>
+              <bool name="proxy-wxSUNKEN_BORDER">0</bool>
+              <bool name="proxy-wxTOP">1</bool>
+              <bool name="proxy-wxWANTS_CHARS">0</bool>
+              <long name="proxy-X">-1</long>
+              <long name="proxy-Y">-1</long>
+              <string name="title">"wxStaticLine: wxID_STATIC"</string>
+              <long name="title-mode">0</long>
+              <string name="type">"dialog-control-document"</string>
+            </document>
+            <document>
               <string name="proxy-type">"wbBoxSizerProxy"</string>
               <string name="filename">""</string>
               <string name="icon-name">"sizer"</string>
@@ -22352,7 +22409,7 @@ Stop"</string>
                 <string name="proxy-type">"wbStaticLineProxy"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"staticline"</string>
-                <string name="identifier">"itemStaticLine2"</string>
+                <string name="identifier">"itemStaticLine13"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -22409,7 +22466,7 @@ Stop"</string>
                 <string name="proxy-type">"wbBoxSizerProxy"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"sizer"</string>
-                <string name="identifier">"itemBoxSizer10"</string>
+                <string name="identifier">"itemBoxSizer14"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -22435,7 +22492,7 @@ Stop"</string>
                   <string name="proxy-type">"wbBoxSizerProxy"</string>
                   <string name="filename">""</string>
                   <string name="icon-name">"sizer"</string>
-                  <string name="identifier">"itemBoxSizer11"</string>
+                  <string name="identifier">"itemBoxSizer15"</string>
                   <long name="is-transient">0</long>
                   <long name="locked">0</long>
                   <long name="owns-file">1</long>
@@ -22462,7 +22519,7 @@ Stop"</string>
                     <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioSynthLongSelected|NONE||PanelOrderButtons"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"radiobutton"</string>
-                    <string name="identifier">"itemRadioButton12"</string>
+                    <string name="identifier">"itemRadioButton16"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -22526,7 +22583,7 @@ Stop"</string>
                   <string name="proxy-type">"wbBoxSizerProxy"</string>
                   <string name="filename">""</string>
                   <string name="icon-name">"sizer"</string>
-                  <string name="identifier">"itemBoxSizer14"</string>
+                  <string name="identifier">"itemBoxSizer17"</string>
                   <long name="is-transient">0</long>
                   <long name="locked">0</long>
                   <long name="owns-file">1</long>
@@ -22552,7 +22609,7 @@ Stop"</string>
                     <string name="proxy-type">"wbBoxSizerProxy"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"sizer"</string>
-                    <string name="identifier">"itemBoxSizer15"</string>
+                    <string name="identifier">"itemBoxSizer18"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -22579,7 +22636,7 @@ Stop"</string>
                       <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioCallItmSelected|NONE||PanelOrderButtons"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"radiobutton"</string>
-                      <string name="identifier">"itemRadioButton16"</string>
+                      <string name="identifier">"itemRadioButton19"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -22642,7 +22699,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText17"</string>
+                      <string name="identifier">"itemStaticText20"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -22714,7 +22771,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText18"</string>
+                      <string name="identifier">"itemStaticText21"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -22787,7 +22844,7 @@ Stop"</string>
                     <string name="proxy-type">"wbBoxSizerProxy"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"sizer"</string>
-                    <string name="identifier">"itemBoxSizer19"</string>
+                    <string name="identifier">"itemBoxSizer22"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -22814,7 +22871,7 @@ Stop"</string>
                       <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioPutOtmSelected|NONE||PanelOrderButtons"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"radiobutton"</string>
-                      <string name="identifier">"itemRadioButton20"</string>
+                      <string name="identifier">"itemRadioButton23"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -22877,7 +22934,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText21"</string>
+                      <string name="identifier">"itemStaticText24"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -22949,7 +23006,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText22"</string>
+                      <string name="identifier">"itemStaticText25"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23024,7 +23081,7 @@ Stop"</string>
                 <string name="proxy-type">"wbStaticLineProxy"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"staticline"</string>
-                <string name="identifier">"itemStaticLine23"</string>
+                <string name="identifier">"itemStaticLine26"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -23081,7 +23138,7 @@ Stop"</string>
                 <string name="proxy-type">"wbBoxSizerProxy"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"sizer"</string>
-                <string name="identifier">"itemBoxSizer25"</string>
+                <string name="identifier">"itemBoxSizer27"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -23107,7 +23164,7 @@ Stop"</string>
                   <string name="proxy-type">"wbBoxSizerProxy"</string>
                   <string name="filename">""</string>
                   <string name="icon-name">"sizer"</string>
-                  <string name="identifier">"itemBoxSizer26"</string>
+                  <string name="identifier">"itemBoxSizer28"</string>
                   <long name="is-transient">0</long>
                   <long name="locked">0</long>
                   <long name="owns-file">1</long>
@@ -23134,7 +23191,7 @@ Stop"</string>
                     <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioSynthShortSelected|NONE||PanelOrderButtons"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"radiobutton"</string>
-                    <string name="identifier">"itemRadioButton27"</string>
+                    <string name="identifier">"itemRadioButton29"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -23198,7 +23255,7 @@ Stop"</string>
                   <string name="proxy-type">"wbBoxSizerProxy"</string>
                   <string name="filename">""</string>
                   <string name="icon-name">"sizer"</string>
-                  <string name="identifier">"itemBoxSizer28"</string>
+                  <string name="identifier">"itemBoxSizer30"</string>
                   <long name="is-transient">0</long>
                   <long name="locked">0</long>
                   <long name="owns-file">1</long>
@@ -23224,7 +23281,7 @@ Stop"</string>
                     <string name="proxy-type">"wbBoxSizerProxy"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"sizer"</string>
-                    <string name="identifier">"itemBoxSizer29"</string>
+                    <string name="identifier">"itemBoxSizer31"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -23251,7 +23308,7 @@ Stop"</string>
                       <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioPutItmSelected|NONE||PanelOrderButtons"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"radiobutton"</string>
-                      <string name="identifier">"itemRadioButton30"</string>
+                      <string name="identifier">"itemRadioButton32"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23314,7 +23371,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText31"</string>
+                      <string name="identifier">"itemStaticText33"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23386,7 +23443,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText32"</string>
+                      <string name="identifier">"itemStaticText34"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23459,7 +23516,7 @@ Stop"</string>
                     <string name="proxy-type">"wbBoxSizerProxy"</string>
                     <string name="filename">""</string>
                     <string name="icon-name">"sizer"</string>
-                    <string name="identifier">"itemBoxSizer33"</string>
+                    <string name="identifier">"itemBoxSizer35"</string>
                     <long name="is-transient">0</long>
                     <long name="locked">0</long>
                     <long name="owns-file">1</long>
@@ -23486,7 +23543,7 @@ Stop"</string>
                       <string name="event-handler-0">"wxEVT_COMMAND_RADIOBUTTON_SELECTED|OnIdRadioCallOtmSelected|NONE||PanelOrderButtons"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"radiobutton"</string>
-                      <string name="identifier">"itemRadioButton34"</string>
+                      <string name="identifier">"itemRadioButton36"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23549,7 +23606,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText35"</string>
+                      <string name="identifier">"itemStaticText37"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23621,7 +23678,7 @@ Stop"</string>
                       <string name="proxy-type">"wbStaticTextProxy"</string>
                       <string name="filename">""</string>
                       <string name="icon-name">"statictext"</string>
-                      <string name="identifier">"itemStaticText36"</string>
+                      <string name="identifier">"itemStaticText38"</string>
                       <long name="is-transient">0</long>
                       <long name="locked">0</long>
                       <long name="owns-file">1</long>
@@ -23697,7 +23754,7 @@ Stop"</string>
               <string name="proxy-type">"wbStaticLineProxy"</string>
               <string name="filename">""</string>
               <string name="icon-name">"staticline"</string>
-              <string name="identifier">"itemStaticLine3"</string>
+              <string name="identifier">"itemStaticLine39"</string>
               <long name="is-transient">0</long>
               <long name="locked">0</long>
               <long name="owns-file">1</long>
@@ -23754,7 +23811,7 @@ Stop"</string>
               <string name="proxy-type">"wbBoxSizerProxy"</string>
               <string name="filename">""</string>
               <string name="icon-name">"sizer"</string>
-              <string name="identifier">"itemBoxSizer12"</string>
+              <string name="identifier">"itemBoxSizer40"</string>
               <long name="is-transient">0</long>
               <long name="locked">0</long>
               <long name="owns-file">1</long>
@@ -23764,7 +23821,7 @@ Stop"</string>
               <string name="proxy-Member variable name">"sizerStochastic"</string>
               <string name="proxy-Orientation">"Horizontal"</string>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
-              <long name="proxy-Stretch factor">1</long>
+              <long name="proxy-Stretch factor">0</long>
               <bool name="proxy-wxADJUST_MINSIZE">0</bool>
               <bool name="proxy-wxBOTTOM">1</bool>
               <bool name="proxy-wxFIXED_MINSIZE">0</bool>
@@ -23781,7 +23838,7 @@ Stop"</string>
                 <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnCBStoch1Click|NONE||PanelOrderButtons"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"checkbox"</string>
-                <string name="identifier">"itemCheckBox13"</string>
+                <string name="identifier">"itemCheckBox41"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -23818,7 +23875,7 @@ Stop"</string>
                 <string name="proxy-Name">""</string>
                 <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                 <bool name="proxy-Separate files">0</bool>
-                <long name="proxy-Stretch factor">1</long>
+                <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
                 <long name="proxy-Width">-1</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
@@ -23847,7 +23904,7 @@ Stop"</string>
                 <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnCBStoch2Click|NONE||PanelOrderButtons"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"checkbox"</string>
-                <string name="identifier">"itemCheckBox14"</string>
+                <string name="identifier">"itemCheckBox42"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -23884,7 +23941,7 @@ Stop"</string>
                 <string name="proxy-Name">""</string>
                 <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                 <bool name="proxy-Separate files">0</bool>
-                <long name="proxy-Stretch factor">1</long>
+                <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
                 <long name="proxy-Width">-1</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
@@ -23913,7 +23970,7 @@ Stop"</string>
                 <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnCBStoch3Click|NONE||PanelOrderButtons"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"checkbox"</string>
-                <string name="identifier">"itemCheckBox15"</string>
+                <string name="identifier">"itemCheckBox43"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
@@ -23950,7 +24007,7 @@ Stop"</string>
                 <string name="proxy-Name">""</string>
                 <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                 <bool name="proxy-Separate files">0</bool>
-                <long name="proxy-Stretch factor">1</long>
+                <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
                 <long name="proxy-Width">-1</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
