@@ -81,7 +81,9 @@ int main( int argc, char** argv )
     static const std::string sDbName( "alpaca.db" );
     std::unique_ptr<ou::tf::db> m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-    sleep( 4 );
+    sleep( 10 ); // TODO: improve by responding to provider events instead
+
+    std::cout << "construct symbol: " << std::endl;
 
     const std::string sSymbol( "GLD" );
     const std::string sPortfolio( "USD" );
@@ -96,6 +98,8 @@ int main( int argc, char** argv )
       pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol, ou::tf::InstrumentType::Stock, "alpaca" );
       im.Register( pInstrument );
     }
+
+    std::cout << "construct position: " << std::endl;
 
     ou::tf::Position::pPosition_t pPosition;
     {
@@ -112,18 +116,35 @@ int main( int argc, char** argv )
       }
     }
 
+    std::cout << "construct / transmit limit buy: " << std::endl;
+
     ou::tf::Order::pOrder_t pOrder;
-    {
-      pOrder = pPosition->ConstructOrder(
-        ou::tf::OrderType::Market,
-        ou::tf::OrderSide::Buy,
-        100
-      );
 
-      om.PlaceOrder( pProviderAlpaca.get(), pOrder );
-    }
+    pOrder = pPosition->ConstructOrder(
+      ou::tf::OrderType::Limit,
+      ou::tf::OrderSide::Buy,
+      100,
+      170.0
+    );
+    om.PlaceOrder( pProviderAlpaca.get(), pOrder );
 
-    sleep( 20 );
+    sleep( 4 );
+
+    std::cout << "construct / transmit limit sell: " << std::endl;
+
+    pOrder = pPosition->ConstructOrder(
+      ou::tf::OrderType::Limit,
+      ou::tf::OrderSide::Sell,
+      100,
+      150.0
+    );
+    om.PlaceOrder( pProviderAlpaca.get(), pOrder );
+
+    std::cout << "wait for completion" << std::endl;
+
+    sleep( 10 );
+
+    std::cout << "disconnection: " << std::endl;
 
     pProviderAlpaca->Disconnect();
     pProviderIQFeed->Disconnect();
