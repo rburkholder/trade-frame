@@ -42,11 +42,11 @@ public:
   struct Buf {
     size_t n;
     charT buf[ nCharT ];
-    Buf( void ): n( 0 ) {};
+    Buf(): n( 0 ) {};
   };
 
-  ConsoleStreamBuf(void);
-  virtual ~ConsoleStreamBuf(void);
+  ConsoleStreamBuf();
+  virtual ~ConsoleStreamBuf();
 
   typedef FastDelegate1<Buf*> OnEmitStringHandler;
   void SetOnEmitString( OnEmitStringHandler function ) {
@@ -60,7 +60,7 @@ public:
   void ReturnBuffer( Buf* buf ) { buf->n = 0; m_buffers.CheckInL( buf ); };
 protected:
   virtual int_type overflow( int_type meta );
-  virtual int_type sync( void );
+  virtual int_type sync();
 private:
 
   //charT m_buf[ nBufSize ]; // arbitrary length sized to get most console length stuff
@@ -72,27 +72,27 @@ private:
 };
 
 template <typename charT, typename traits>
-ConsoleStreamBuf<charT,traits>::ConsoleStreamBuf( void ): std::basic_streambuf<charT, traits>() {
+ConsoleStreamBuf<charT,traits>::ConsoleStreamBuf(): std::basic_streambuf<charT, traits>() {
   m_pBuf = m_buffers.CheckOutL();
   this->setp( m_pBuf->buf, m_pBuf->buf + nCharT - 1 );  // allow for one of our own terminating characters
 }
 
 template <typename charT, typename traits>
-ConsoleStreamBuf<charT,traits>::~ConsoleStreamBuf( void ) {
+ConsoleStreamBuf<charT,traits>::~ConsoleStreamBuf() {
   if ( 0 != m_pBuf->n ) {
-    m_pBuf->n = 0; 
+    m_pBuf->n = 0;
   }
   m_buffers.CheckInL( m_pBuf );
 }
 
 template <typename charT, typename traits>
-typename ConsoleStreamBuf<charT, traits>::int_type 
+typename ConsoleStreamBuf<charT, traits>::int_type
 ConsoleStreamBuf<charT,traits>::sync() {
   return traits_type::eq_int_type( this->overflow(traits_type::eof() ), traits_type::eof() ) ? -1 : 0;
 }
 
 template <typename charT, typename traits>
-typename ConsoleStreamBuf<charT, traits>::int_type 
+typename ConsoleStreamBuf<charT, traits>::int_type
 ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, traits>::int_type meta ) {
 
 //  charT* ibegin = this->out_buf_;
@@ -107,7 +107,7 @@ ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, trait
 
   m_pBuf->n = iend - this->pbase();
   //if ( NULL != OnNewString ) OnNewString( pbase(), (int) ( pptr() - pbase() - 1 ) ); // assumes CR at end
-  if ( NULL != OnEmitString ) OnEmitString( m_pBuf ); 
+  if ( NULL != OnEmitString ) OnEmitString( m_pBuf );
   //if ( NULL != OnFlushString ) OnFlushString();
   //setp( pbase(), epptr() );  // had this first but following line just resets everything.  better?  does the same thing?
   m_pBuf = m_buffers.CheckOutL();
@@ -115,7 +115,7 @@ ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, trait
 //  if ( NULL != OnFlushString ) OnFlushString();
 
   return traits_type::not_eof( meta );
-  
+
 }
 
 } // ou
