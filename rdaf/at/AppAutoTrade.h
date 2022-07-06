@@ -140,13 +140,6 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void OnData1Connected( int );
-  void OnData2Connected( int );
-  void OnExec1Connected( int );
-  void OnData1Disconnected( int );
-  void OnData2Disconnected( int );
-  void OnExec1Disconnected( int );
-
   void HandleOneSecondTimer( wxTimerEvent& event );
 
   void HandleMenuActionCloseAndDone();

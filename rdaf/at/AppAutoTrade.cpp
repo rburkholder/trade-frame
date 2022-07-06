@@ -147,16 +147,27 @@ bool AppAutoTrade::OnInit() {
     m_iqfeed,
     true, false, false, false,
     [](){}, // fConnecting
-    [](){}, // fConnected
+    [this](){ // fConnected
+      if (m_pL2Symbols ) {
+        m_pL2Symbols->Connect();
+      }
+      ConfirmProviders();
+    },
     [](){}, // fDisconnecting
-    [](){}  // fDisconnected
+    [this](){ // fDisconnected
+      if ( m_pL2Symbols ) {
+        m_pL2Symbols->Disconnect();
+      }
+    }
   );
 
   m_pPanelProviderControl->Add(
     m_alpaca,
     false, false, true, false,
     [](){}, // fConnecting
-    [](){}, // fConnected
+    [this](){ // fConnected
+      ConfirmProviders();
+    },
     [](){}, // fDisconnecting
     [](){}  // fDisconnected
   );
@@ -197,7 +208,7 @@ bool AppAutoTrade::OnInit() {
         m_bL2Connected = true;
         ConfirmProviders();
       } );
-    m_pL2Symbols->Connect();
+    //m_pL2Symbols->Connect();
   }
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
@@ -635,39 +646,6 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   // event.CanVeto(); // if not a
   SaveState();
   event.Skip();  // auto followed by Destroy();
-}
-
-void AppAutoTrade::OnData1Connected( int ) {
-  //m_bData1Connected = true;
-  if (m_pL2Symbols ) {
-    m_pL2Symbols->Connect();
-  }
-  ConfirmProviders();
-}
-
-void AppAutoTrade::OnData2Connected( int ) {
-  //m_bData2Connected = true;
-  // Data2 Connection not used
-}
-
-void AppAutoTrade::OnExec1Connected( int ) {
-  //m_bExecConnected = true;
-  ConfirmProviders();
-}
-
-void AppAutoTrade::OnData1Disconnected( int ) {
-  if ( m_pL2Symbols ) {
-    m_pL2Symbols->Disconnect();
-  }
-  //m_bData1Connected = false;
-}
-
-void AppAutoTrade::OnData2Disconnected( int ) {
-  //m_bData2Connected = false;
-}
-
-void AppAutoTrade::OnExec1Disconnected( int ) {
-  //m_bExecConnected = false;
 }
 
 void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
