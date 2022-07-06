@@ -173,10 +173,17 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
       m_FeatureSet.Set( 10 );
 
-      namespace ph = std::placeholders;
       m_pOrderBased->Set( // maybe just do a bind
-        std::bind( &ou::tf::iqfeed::l2::FeatureSet::HandleBookChangesBid, &m_FeatureSet, ph::_1, ph::_2, ph::_3 ),
-        std::bind( &ou::tf::iqfeed::l2::FeatureSet::HandleBookChangesAsk, &m_FeatureSet, ph::_1, ph::_2, ph::_3 )
+        [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+          if ( 0 < ix ) {
+            m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+          }
+        },
+        [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+          if ( 0 < ix ) {
+            m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+          }
+        }
       );
       break;
   }
