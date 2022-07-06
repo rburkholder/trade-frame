@@ -126,7 +126,7 @@ public:
   , fAuthorizeSimple_t
   , fBar_t
   );
-  virtual ~ManageStrategy( );
+  virtual ~ManageStrategy();
 
   void Run();
 
