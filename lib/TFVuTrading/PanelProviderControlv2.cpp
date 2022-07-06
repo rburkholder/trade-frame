@@ -77,7 +77,7 @@ struct ProviderWidgets {
   , pProvider_t pProvider
   , fCallBack_t&& fConnecting, fCallBack_t&& fConnected
   , fCallBack_t&& fDisconnecting, fCallBack_t&& fDisconnected
-) {
+  ) {
     m_owner = owner;
 
     m_fConnecting = std::move( fConnecting );
@@ -156,18 +156,22 @@ struct ProviderWidgets {
 
   void Connecting( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::GoingOn ); });
+    if ( m_fConnecting ) m_fConnecting();
   }
 
   void Connected( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::On ); });
+    if ( m_fConnected ) m_fConnected();
   }
 
   void Disconnecting( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::GoingOff ); });
+    if ( m_fDisconnecting ) m_fDisconnecting();
   }
 
   void Disonnected( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::Off ); });
+    if ( m_fDisconnected ) m_fDisconnected();
   }
 
   void OnBtn( wxCommandEvent& event ) {

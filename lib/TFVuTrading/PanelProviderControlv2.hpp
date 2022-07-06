@@ -27,10 +27,6 @@
 
 #include <TFTrading/ProviderInterface.h>
 
-// D1: data provider 1, could be iqfeed, regular data
-// D2: data provider 2, could be ib, typically option info
-// X: execution provider, typically IB or Sim
-
 class wxBoxSizer;
 
 namespace ou { // One Unified
