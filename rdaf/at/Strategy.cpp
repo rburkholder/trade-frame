@@ -123,8 +123,8 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
-  m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthAsk );
-  m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthBid );
+  //m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthAsk );
+  //m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthBid );
 
 }
 
