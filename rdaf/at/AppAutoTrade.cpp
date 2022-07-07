@@ -606,48 +606,6 @@ void AppAutoTrade::HandleMenuActionSimEmitStats() {
   std::cout << "Stats: " << ss.str() << std::endl;
 }
 
-int AppAutoTrade::OnExit() {
-  // Exit Steps: #4
-//  DelinkFromPanelProviderControl();  generates stack errors
-
-  return wxAppConsole::OnExit();
-}
-
-void AppAutoTrade::OnClose( wxCloseEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-
-  //m_pWinChartView->SetChartDataView( nullptr, false );
-  //delete m_pChartData;
-  //m_pChartData = nullptr;
-
-  //m_pFrameControls->Close();
-
-  if ( !m_choices.bStartSimulator ) {
-    m_timerOneSecond.Stop();
-    Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-  }
-
-  // NOTE: when running the simuliation, perform a deletion instead
-  //   use the boost file system utilities?
-  //   or the object Delete() operator may work
-  if ( m_choices.bStartSimulator ) {
-    if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      //m_pFile->Delete(); // double free or corruption here
-    }
-  }
-  else {
-    if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      m_pFile->Write();
-    }
-  }
-
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a
-  SaveState();
-  event.Skip();  // auto followed by Destroy();
-}
-
 void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
@@ -762,4 +720,48 @@ void AppAutoTrade::LoadState() {
   catch(...) {
     std::cout << "load exception" << std::endl;
   }
+}
+
+int AppAutoTrade::OnExit() {
+  // Exit Steps: #4
+//  DelinkFromPanelProviderControl();  generates stack errors
+
+  return wxAppConsole::OnExit();
+}
+
+void AppAutoTrade::OnClose( wxCloseEvent& event ) {
+  // Exit Steps: #2 -> FrameMain::OnClose
+
+  //m_pWinChartView->SetChartDataView( nullptr, false );
+  //delete m_pChartData;
+  //m_pChartData = nullptr;
+
+  //m_pFrameControls->Close();
+
+  if ( !m_choices.bStartSimulator ) {
+    m_timerOneSecond.Stop();
+    Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  }
+
+  if ( m_pdb ) m_pdb.reset();
+
+  // NOTE: when running the simuliation, perform a deletion instead
+  //   use the boost file system utilities?
+  //   or the object Delete() operator may work
+  if ( m_choices.bStartSimulator ) {
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      //m_pFile->Delete(); // double free or corruption here
+    }
+  }
+  else {
+    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+      m_pFile->Write();
+    }
+  }
+
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a
+  SaveState();
+  event.Skip();  // auto followed by Destroy();
 }
