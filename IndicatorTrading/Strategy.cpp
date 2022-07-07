@@ -31,6 +31,25 @@ Strategy::Strategy(
 , m_k {}, m_kMin {}, m_kMax {}
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
 {
+
+  ptime dt( ou::TimeSource::GlobalInstance().External() );  // provided in utc
+  boost::gregorian::date date( MarketOpenDate( dt ) );
+  InitForUS24HourFutures( date );
+
+  // this may be offset incorrectly.
+  //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
+  ptime dtMo( GetMarketOpen() );
+  if ( dt > dtMo ) {
+    SetRegularHoursOpen( dt );  // collect some data first
+    // change later to 10 to collect enough data to start trading:
+    //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
+    SetStartTrading( dt + boost::posix_time::minutes( 2 ) );  // collect some data first
+  }
+  else {
+    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 10 ) );  // collect some data first
+    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
+  }
+
   pWatch_t pWatch = m_pPosition->GetWatch();
 
   m_pTSSWStochastic = std::make_unique<ou::tf::TSSWStochastic>(
