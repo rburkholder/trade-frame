@@ -382,9 +382,14 @@ void Provider::TradeUpdate( const json::object& obj ) {
         order::Decode( order, status );
         //std::string sIdOrder;
         //extract( order, sIdOrder, "client_order_id" );
-        ou::tf::Order::idOrder_t idOrder;
-        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::GlobalInstance().UpdateReference( idOrder, status.id );
+        try {
+          ou::tf::Order::idOrder_t idOrder;
+          idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+          OrderManager::GlobalInstance().UpdateReference( idOrder, status.id );
+        }
+        catch ( boost::bad_lexical_cast& e ) {
+          std::cout << "alpaca provider: can not decode order " << status.client_order_id << std::endl;
+        }
       }
       break;
     case EEvent::partial_fill:
@@ -512,10 +517,15 @@ void Provider::LastOrderId() {
         }
         else {
           if ( 1 == vOrderId.size() ) {
-            auto idOrder = boost::lexical_cast<ou::tf::OrderManager::idOrder_t>( vOrderId[ 0 ].client_order_id );
-            ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
-            om.CheckOrderId( idOrder ); // put this into state file
-            std::cout << "OrderManager assigned idOrder: " << idOrder << std::endl;
+            try {
+              auto idOrder = boost::lexical_cast<ou::tf::OrderManager::idOrder_t>( vOrderId[ 0 ].client_order_id );
+              ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+              om.CheckOrderId( idOrder ); // put this into state file
+              std::cout << "OrderManager assigned idOrder: " << idOrder << std::endl;
+            }
+            catch ( boost::bad_lexical_cast& e ) {
+              std::cout << "alpaca provider LastOrderId: can not decode order " << vOrderId[ 0 ].client_order_id << std::endl;
+            }
           }
         }
       }
