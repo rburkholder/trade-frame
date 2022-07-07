@@ -141,12 +141,14 @@ void InteractiveChart::Init() {
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_cemZero );
   m_dvChart.Add( EChartSlot::ImbalanceB1, &m_cemZero );
+  m_dvChart.Add( EChartSlot::ImbalanceState, &m_cemZero );
 
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
   m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceRawB1 );
 
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
   m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceSmoothB1 );
+  m_dvChart.Add( EChartSlot::ImbalanceState, &m_ceImbalanceState );
 
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
   m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
@@ -195,6 +197,9 @@ void InteractiveChart::Init() {
   m_ceImbalanceRawB1.SetName( "imbalance slope" );
   m_ceImbalanceRawB1.SetColour( ou::Colour::LightGreen );
   m_ceImbalanceSmoothB1.SetColour( ou::Colour::DarkGreen );
+
+  m_ceImbalanceState.SetName( "imbalance state" );
+  m_ceImbalanceState.SetColour( ou::Colour::Green );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -954,9 +959,6 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
-  static const double w1( 0.9 );
-  static const double w2( 1.0 - w1 );
-
   m_OrderBased.Set(
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
       ou::tf::Trade::price_t price( depth.Price() );
@@ -1026,19 +1028,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       }
 
       if ( 1 == ix ) { // may need to recalculate at any level change instead
-        ou::tf::RunningStats::Stats stats;
-        m_FeatureSet.ImbalanceSummary( stats );
-
-        m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
-        m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
-
-        m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
-        m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
-
-        m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
-        m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
-
-        m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
+        Imbalance( depth );
       }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
@@ -1106,19 +1096,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
       }
 
       if ( 1 == ix ) { // may need to recalculate at any level change instead
-        ou::tf::RunningStats::Stats stats;
-        m_FeatureSet.ImbalanceSummary( stats );
-
-        m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
-        m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
-
-        m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
-        m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
-
-        m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
-        m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
-
-        m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
+        Imbalance( depth );
       }
     }
   );
@@ -1142,3 +1120,37 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
 
 }
 
+void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
+
+  static const double w1( 0.9 );
+  assert( 1.0 > w1 );
+  static const double w2( 1.0 - w1 );
+
+  ou::tf::RunningStats::Stats stats;
+  m_FeatureSet.ImbalanceSummary( stats );
+
+  m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
+  m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+
+  m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
+  m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
+
+  m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
+  m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
+
+  double state = 0.0;
+  if ( ( 0.0 == m_dblImbalanceMean ) || ( 0.0 == m_dblImbalanceSlope ) ) {} // nothing
+  else {
+    if ( 0.0 < m_dblImbalanceMean ) {
+      if ( 0.0 < m_dblImbalanceSlope ) state = 1.0;
+      else state = 2.0;
+    }
+    else {
+      if ( 0.0 < m_dblImbalanceSlope ) state = -1.0;
+      else state = -2.0;
+    }
+  }
+  m_ceImbalanceState.Append( depth.DateTime(), state );
+
+  m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
+}
