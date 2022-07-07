@@ -23,17 +23,20 @@ This project can be used as a template to try out your own high-frequency tradin
 This is a specialization of the generic AutoTrade project.  This project uses CERN's rdaf (ROOT Data Analysis Framework)
 libraries for analysing live data as it arrives.
 
-The parameters are sourced in the configuration file (as an example):
+The parameters are sourced in the configuration file (as an example): 
 
 $ cat x64/debug/rdaf/at/choices.cfg
 ```
 ib_client_id=5
+alpaca_key=PKSQI.....
+alpaca_secret=OUCNIm26.....
+alpaca_domain=paper-api.alpaca.markets
 threads=3
 sim_start=off
 group_directory=/app/rdaf/at/2022-04-29T17:31:08.783561-1
 time_bins=3600
-time_upper=20220506T000000
-time_lower=20220505T000000
+time_upper=20220707T000000
+time_lower=20220706T000000
 [@ESM22]
 feed=l2o
 trade=no
@@ -73,7 +76,8 @@ volume_bins=100
 volume_upper=500000
 volume_lower=0
 ```
-group_directory is optional if sim_start is off.
+* Substitute 'alpaca_domain=api.alpaca.markets' for live trading.
+* group_directory is optional if sim_start is off.
 
 ### x64/debug/rdaf/at/example.db
 
