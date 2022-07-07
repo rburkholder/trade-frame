@@ -78,6 +78,10 @@ protected:
 
   void DrawChart();
 
+  virtual void LeftClick( int nChart, double value ) {}
+  virtual void RightClick( int nChart, double value ) {}
+  //virtual void LiveY( int nChart, double value ) {}
+
 private:
 
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
@@ -122,6 +126,9 @@ private:
   void HandleMouseEnter( wxMouseEvent& event );
   void HandleMouseLeave( wxMouseEvent& event );
   void HandleMouseWheel( wxMouseEvent& event );
+
+  void HandleMouseLeftClick( wxMouseEvent& event );
+  void HandleMouseRightClick( wxMouseEvent& event );
 
   void OnDestroy( wxWindowDestroyEvent& event );
 

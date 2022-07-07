@@ -80,6 +80,8 @@ public:
      fBtnOrder_t&&  // Cancel
    );
 
+   void SetPricePositionEntry( const std::string );
+
    void Update( const PanelOrderButtons_MarketData& );
 
 protected:

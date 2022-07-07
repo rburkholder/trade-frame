@@ -89,6 +89,9 @@ void WinChartView::BindEvents() {
     Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
     Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
+    Bind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this );
+    Bind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this );
+
     // this GuiRefresh initialization should come after all else
     m_timerGuiRefresh.SetOwner( this );
     Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
@@ -146,6 +149,20 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
   m_chartMaster.CrossHairPosition( x, y );
   // TODO: translate into a price
   //event.Skip();
+}
+
+void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
+  int nChart;
+  double dblY;
+  m_chartMaster.WorldCoord( nChart, dblY );
+  LeftClick( nChart, dblY );
+}
+
+void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
+  int nChart;
+  double dblY;
+  m_chartMaster.WorldCoord( nChart, dblY );
+  RightClick( nChart, dblY );
 }
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
@@ -330,6 +347,9 @@ void WinChartView::UnbindEvents() {
     assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this ) );
     assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this ) );
     assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this ) );
+
+    Unbind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this );
+    Unbind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this );
 
     m_bBound = false;
   }

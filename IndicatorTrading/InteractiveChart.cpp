@@ -244,6 +244,8 @@ void InteractiveChart::SetPosition(
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition
+, fClick_t&& fClickLeft
+, fClick_t&& fClickRight
 , TreeItem* pTreeItemParent
 , ou::ChartEntryMark& cemReferenceLevels
 ) {
@@ -257,6 +259,9 @@ void InteractiveChart::SetPosition(
 
   m_fBuildOption = std::move( fBuildOption );
   m_fBuildPosition = std::move( fBuildPosition );
+
+  m_fClickLeft = std::move( fClickLeft );
+  m_fClickRight = std::move( fClickRight );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
@@ -1135,7 +1140,7 @@ void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
   m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
   //m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
 
-  //m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
+  m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
   //m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
 
   //double state = 0.0;
@@ -1153,4 +1158,18 @@ void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
   //m_ceImbalanceState.Append( depth.DateTime(), state );
 
   m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
+}
+
+void InteractiveChart::LeftClick( int nChart, double value ) {
+  std::cout << "left click: " << nChart << "," << value << std::endl;
+  if ( 0 == nChart ) {
+    if ( m_fClickLeft ) m_fClickLeft( value );
+  }
+}
+
+void InteractiveChart::RightClick( int nChart, double value ) {
+  std::cout << "right click: " << nChart << "," << value << std::endl;
+  if ( 0 == nChart ) {
+    if ( m_fClickRight ) m_fClickRight( value );
+  }
 }

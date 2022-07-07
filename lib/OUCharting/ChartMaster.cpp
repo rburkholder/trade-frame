@@ -14,9 +14,8 @@
 //#include <sstream>
 #include <boost/format.hpp>
 
-#include "ChartDataView.h"
 #include "ChartMaster.h"
-#include "OUCommon/Colour.h"
+#include "ChartDataView.h"
 
 namespace ou { // One Unified
 
@@ -258,7 +257,7 @@ bool ChartMaster::DrawDynamicLayer() {
     BaseChart* p;
     int top, left, right, bottom;
 
-    XYChart* pChartFocus;
+    XYChart* pChartFocus( nullptr );
 
     for ( int ix = 0; ix < n; ix++ ) {
 
@@ -278,6 +277,7 @@ bool ChartMaster::DrawDynamicLayer() {
 
       if ( pxChartTop < m_intCrossHairY ) {
         pChartFocus = pChart;
+        m_nChart = ix;
       }
 
     } // end for ix
@@ -292,9 +292,9 @@ bool ChartMaster::DrawDynamicLayer() {
       bCrossHairs = true;
 
       assert( nullptr != pChartFocus );
-      double value = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
+      m_dblY = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
       static boost::format fmter( "%.2f" );
-      std::string sValue = ( fmter % value ).str();
+      std::string sValue = ( fmter % m_dblY ).str();
 
       // chartdir does not like taking a c_str() of anything, so need to perform a copy
       char sz[100];

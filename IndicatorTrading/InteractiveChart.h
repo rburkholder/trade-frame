@@ -114,6 +114,8 @@ public:
 
   using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
 
+  using fClick_t = std::function<void(double)>; // price level
+
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
   void SetPosition(
@@ -122,6 +124,8 @@ public:
    , pOptionChainQuery_t
    , fBuildOption_t&&
    , fBuildPosition_t&&
+   , fClick_t&& left
+   , fClick_t&& right
    , TreeItem*
    , ou::ChartEntryMark& cemReferenceLevels
     );
@@ -179,6 +183,10 @@ public:
   void Disconnect();
 
 protected:
+
+  virtual void LeftClick( int nChart, double value );
+  virtual void RightClick( int nChart, double value );
+
 private:
 
   enum EChartSlot { Price, Volume, StochInd, ImbalanceMean, ImbalanceB1, ImbalanceState, Sentiment, PL, Spread }; // IndMA = moving averate indicator
@@ -191,6 +199,9 @@ private:
   bool m_bTriggerFeatureSetDump;
 
   ou::ChartDataView m_dvChart; // the data
+
+  fClick_t m_fClickLeft;
+  fClick_t m_fClickRight;
 
   TreeItem* m_pTreeItemUnderlying;
 

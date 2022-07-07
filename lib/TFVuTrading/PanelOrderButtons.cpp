@@ -406,6 +406,11 @@ void PanelOrderButtons::Set(
   m_fBtnOrderCancel = std::move( fBtnOrderCancel );
 }
 
+void PanelOrderButtons::SetPricePositionEntry( const std::string sText ) {
+  m_txtPricePositionEntry->SetValue( sText );
+  m_radioPositionEntry->SetSelection( 1 );
+}
+
 void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
   m_txtBase->SetLabel( data.m_sBase );
