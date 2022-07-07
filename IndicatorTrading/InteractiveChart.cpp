@@ -140,22 +140,22 @@ void InteractiveChart::Init() {
 
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_cemZero );
-  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_cemZero );
-  m_dvChart.Add( EChartSlot::ImbalanceState, &m_cemZero );
+  //m_dvChart.Add( EChartSlot::ImbalanceB1, &m_cemZero );
+  //m_dvChart.Add( EChartSlot::ImbalanceState, &m_cemZero );
 
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
-  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceRawB1 );
+  //m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceRawB1 );
 
   m_dvChart.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
-  m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceSmoothB1 );
-  m_dvChart.Add( EChartSlot::ImbalanceState, &m_ceImbalanceState );
+  //m_dvChart.Add( EChartSlot::ImbalanceB1, &m_ceImbalanceSmoothB1 );
+  //m_dvChart.Add( EChartSlot::ImbalanceState, &m_ceImbalanceState );
 
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearPut );
+  //m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullCall );
+  //m_dvChart.Add( EChartSlot::Sentiment, &m_ceBullPut );
+  //m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearCall );
+  //m_dvChart.Add( EChartSlot::Sentiment, &m_ceBearPut );
 
-  m_dvChart.Add( EChartSlot::Sentiment, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
+  //m_dvChart.Add( EChartSlot::Sentiment, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
 
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
@@ -198,8 +198,8 @@ void InteractiveChart::Init() {
   m_ceImbalanceRawB1.SetColour( ou::Colour::LightGreen );
   m_ceImbalanceSmoothB1.SetColour( ou::Colour::DarkGreen );
 
-  m_ceImbalanceState.SetName( "imbalance state" );
-  m_ceImbalanceState.SetColour( ou::Colour::Green );
+  //m_ceImbalanceState.SetName( "imbalance state" );
+  //m_ceImbalanceState.SetColour( ou::Colour::Green );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -331,7 +331,7 @@ void InteractiveChart::SetPosition(
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_dvChart );
   }
-  m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
+  //m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
   // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
 
   OptionChainQuery(
@@ -673,7 +673,7 @@ InteractiveChart::pOptionTracker_t InteractiveChart::AddOptionTracker( double st
 void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
 
   //m_ceVolume.Append( bar );
-  m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
+  //m_ceVWAP.Append( bar.DateTime(), m_dblSumVolumePrice / m_dblSumVolume );
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
@@ -1027,7 +1027,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
           break;
       }
 
-      if ( 1 == ix ) { // may need to recalculate at any level change instead
+      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
       }
     },
@@ -1095,7 +1095,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
           break;
       }
 
-      if ( 1 == ix ) { // may need to recalculate at any level change instead
+      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
       }
     }
@@ -1122,7 +1122,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
 
 void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
 
-  static const double w1( 0.9 );
+  static const double w1( 19.0 / 20.0 );
   assert( 1.0 > w1 );
   static const double w2( 1.0 - w1 );
 
@@ -1130,27 +1130,27 @@ void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
   m_FeatureSet.ImbalanceSummary( stats );
 
   m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
-  m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+  //m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
 
   m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
-  m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
+  //m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
 
-  m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
-  m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
+  //m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
+  //m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
 
-  double state = 0.0;
-  if ( ( 0.0 == m_dblImbalanceMean ) || ( 0.0 == m_dblImbalanceSlope ) ) {} // nothing
-  else {
-    if ( 0.0 < m_dblImbalanceMean ) {
-      if ( 0.0 < m_dblImbalanceSlope ) state = 1.0;
-      else state = 2.0;
-    }
-    else {
-      if ( 0.0 < m_dblImbalanceSlope ) state = -1.0;
-      else state = -2.0;
-    }
-  }
-  m_ceImbalanceState.Append( depth.DateTime(), state );
+  //double state = 0.0;
+  //if ( ( 0.0 == m_dblImbalanceMean ) || ( 0.0 == m_dblImbalanceSlope ) ) {} // nothing
+  //else {
+  //  if ( 0.0 < m_dblImbalanceMean ) {
+  //    if ( 0.0 < m_dblImbalanceSlope ) state = 1.0;
+  //    else state = 2.0;
+  //  }
+  //  else {
+  //    if ( 0.0 < m_dblImbalanceSlope ) state = -1.0;
+  //    else state = -2.0;
+  //  }
+  //}
+  //m_ceImbalanceState.Append( depth.DateTime(), state );
 
   m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
 }

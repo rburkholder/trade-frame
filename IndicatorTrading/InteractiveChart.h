@@ -236,7 +236,7 @@ private:
 
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothB1;
-  ou::ChartEntryIndicator m_ceImbalanceState;
+  //ou::ChartEntryIndicator m_ceImbalanceState;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
