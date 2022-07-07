@@ -47,22 +47,31 @@ public:
   FeatureSet();
   ~FeatureSet();
 
+  // Initialization
+
   void Set( size_t nLevels );
+
+  // Queries
+
+  using vLevels_t = std::vector<FeatureSet_Level>;
+  const vLevels_t& FVS() const { return m_vLevels; }
+
+  void ImbalanceSummary( ou::tf::RunningStats::Stats& ) const;
+
+  // Assignment / Update
 
   void HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
   void HandleBookChangesBid( ou::tf::iqfeed::l2::EOp, unsigned int, const ou::tf::Depth& );
 
-  // v7 Ask
-  void Ask_IncLimit(  unsigned int, const ou::tf::Depth& );
+  void Ask_IncLimit(  unsigned int, const ou::tf::Depth& ); // v7 ask
   void Ask_IncMarket( unsigned int, const ou::tf::Depth& );
   void Ask_IncCancel( unsigned int, const ou::tf::Depth& );
 
-  // v7 Bid
-  void Bid_IncLimit(  unsigned int, const ou::tf::Depth& );
+  void Bid_IncLimit(  unsigned int, const ou::tf::Depth& ); // v7 bid
   void Bid_IncMarket( unsigned int, const ou::tf::Depth& );
   void Bid_IncCancel( unsigned int, const ou::tf::Depth& );
 
-  void ImbalanceSummary( ou::tf::RunningStats::Stats& ) const;
+  // Diagnostic
 
   void Emit() const;
   bool IntegrityCheck() const;
@@ -72,7 +81,6 @@ private:
 
   size_t m_nLevels;
 
-  using vLevels_t = std::vector<FeatureSet_Level>;
   vLevels_t m_vLevels;
 
 };
