@@ -277,6 +277,7 @@ TradeWithABuy::TradeWithABuy(
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
 
   uint32_t quantity = Quantity( pPosition, selectors );
+  double priceBasis {}; // used by profit/stop calcs
 
   assert( selectors.m_bPositionEntryEnable );
   {
@@ -286,11 +287,13 @@ TradeWithABuy::TradeWithABuy(
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, quantity );
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
           m_ceBuySubmit.AddLabel( dtConstructed, quote.Midpoint(), boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " mkt buy send" );
+          priceBasis = quote.Midpoint();
         }
         break;
       case EPositionEntryMethod::LimitOnly:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          priceBasis =  price;
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
 
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
@@ -301,6 +304,7 @@ TradeWithABuy::TradeWithABuy(
       case EPositionEntryMethod::LimitTimeOut:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          priceBasis = price;
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, price );
 
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
@@ -341,7 +345,7 @@ TradeWithABuy::TradeWithABuy(
         break;
       case EPositionExitProfitMethod::Relative:
         {
-          double value = NormalizePrice( quote.Midpoint() + selectors.PositionExitProfitValue() );
+          double value = NormalizePrice( priceBasis + selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, value );
         }
@@ -361,7 +365,7 @@ TradeWithABuy::TradeWithABuy(
       case EPositionExitStopMethod::TrailingAbsolute:
         {
           m_dblStopTrailDelta = selectors.PositionExitStopValue();
-          m_dblStopCurrent = NormalizePrice( quote.Midpoint() - selectors.PositionExitStopValue() );
+          m_dblStopCurrent = NormalizePrice( priceBasis - selectors.PositionExitStopValue() );
           m_pOrderStop = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Stop, ou::tf::OrderSide::Sell, quantity, m_dblStopCurrent );
         }
@@ -499,6 +503,7 @@ TradeWithASell::TradeWithASell(
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
 
   uint32_t quantity = Quantity( pPosition, selectors );
+  double priceBasis {}; // used by profit/stop calcs
 
   assert( selectors.m_bPositionEntryEnable );
   {
@@ -508,11 +513,13 @@ TradeWithASell::TradeWithASell(
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, quantity );
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
           m_ceSellSubmit.AddLabel( dtConstructed, quote.Midpoint(), boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " mkt sell send");
+          priceBasis = quote.Midpoint();
         }
         break;
       case EPositionEntryMethod::LimitOnly:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          priceBasis = price;
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
 
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
@@ -523,6 +530,7 @@ TradeWithASell::TradeWithASell(
       case EPositionEntryMethod::LimitTimeOut:
         {
           double price( NormalizePrice( selectors.PositionEntryValue() ) );
+          priceBasis = price;
           m_pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, quantity, price );
 
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
@@ -563,7 +571,7 @@ TradeWithASell::TradeWithASell(
         break;
       case EPositionExitProfitMethod::Relative:
         {
-          double value = NormalizePrice( quote.Midpoint() - selectors.PositionExitProfitValue() );
+          double value = NormalizePrice( priceBasis - selectors.PositionExitProfitValue() );
           m_pOrderProfit = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, quantity, value );
         }
@@ -583,7 +591,7 @@ TradeWithASell::TradeWithASell(
       case EPositionExitStopMethod::TrailingAbsolute:
         {
           m_dblStopTrailDelta = selectors.PositionExitStopValue();
-          m_dblStopCurrent = NormalizePrice( quote.Midpoint() + selectors.PositionExitStopValue() );
+          m_dblStopCurrent = NormalizePrice( priceBasis + selectors.PositionExitStopValue() );
           m_pOrderStop = m_pPosition->ConstructOrder(
             ou::tf::OrderType::Stop, ou::tf::OrderSide::Buy, quantity, m_dblStopCurrent );
         }
