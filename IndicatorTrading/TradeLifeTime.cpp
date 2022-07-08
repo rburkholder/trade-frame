@@ -242,8 +242,9 @@ void TradeLifeTime::BuildTreeItem( TreeItem* pTreeItemParent, const std::string&
       pTreeItem->AppendMenuItem(
         "Delete",
         [this]( TreeItem* pTreeItem){
-          std::cout << "deletion todo: delete structure and delete tree item" << std::endl;
-          // m_pInteractiveChart->DeleteLifeCycle( id );
+          if ( m_fDone ) {
+            m_fDone( *this );
+          }
         }
         );
     }
