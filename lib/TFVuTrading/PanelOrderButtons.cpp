@@ -409,6 +409,7 @@ void PanelOrderButtons::Set(
 void PanelOrderButtons::SetPricePositionEntry( const std::string sText ) {
   m_txtPricePositionEntry->SetValue( sText );
   m_radioPositionEntry->SetSelection( 1 );
+  m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::LimitOnly;
 }
 
 void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
