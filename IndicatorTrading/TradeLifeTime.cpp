@@ -201,10 +201,10 @@ void TradeLifeTime::EmitStatus() {
   }
   if ( m_pOrderStop ) {
     sStatus
-      += " stop order " + boost::lexical_cast<std::string>( m_pOrderProfit->GetOrderId() )
+      += " stop order " + boost::lexical_cast<std::string>( m_pOrderStop->GetOrderId() )
       +  " has "
       ;
-    if ( ou::tf::OrderStatus::Created == m_pOrderProfit->OrderStatus() ) {
+    if ( ou::tf::OrderStatus::Created == m_pOrderStop->OrderStatus() ) {
       sStatus += "not be submitted";
     }
     else {
