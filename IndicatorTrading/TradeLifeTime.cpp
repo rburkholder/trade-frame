@@ -100,7 +100,7 @@ double TradeLifeTime::NormalizePrice( double price ) const {
 
 void TradeLifeTime::HandleQuote( const ou::tf::Quote& quote ) {
   // TODO: fix this for stop
-  //m_quote = quote;
+  m_quote = quote;
 }
 
 uint32_t TradeLifeTime::Quantity( pPosition_t pPosition, const ou::tf::PanelOrderButtons_Order& selectors ) const {
@@ -154,7 +154,7 @@ void TradeLifeTime::Cancel() {
   if ( bCancelled ) {
     // this will need to be marked from the orders which were cancelled
     // need to run m_quote continuously first
-    //m_ceCancelled.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), sCancelled );
+    m_ceCancelled.AddLabel( m_quote.DateTime(), m_quote.Midpoint(), sCancelled );
   }
   else {
     std::cout << "TradeLifeTime::Cancel - nothing cancelled - " << m_pOrderEntry->GetOrderId() << std::endl;
