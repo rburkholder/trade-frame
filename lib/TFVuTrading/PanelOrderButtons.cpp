@@ -99,15 +99,6 @@ void PanelOrderButtons::CreateControls() {
     sizerMain = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(sizerMain);
 
-    sizerCockForCursor = new wxBoxSizer(wxHORIZONTAL);
-    sizerMain->Add(sizerCockForCursor, 0, wxGROW, 2);
-
-    m_cbCockForCursor = new wxCheckBox( itemPanel1, ID_CB_CockForCursor, _("Cock for Cursor"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_cbCockForCursor->SetValue(false);
-    if (PanelOrderButtons::ShowToolTips())
-        m_cbCockForCursor->SetToolTip(_("Price point by mouse"));
-    sizerCockForCursor->Add(m_cbCockForCursor, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
-
     sizerQuantity = new wxBoxSizer(wxHORIZONTAL);
     sizerMain->Add(sizerQuantity, 0, wxGROW|wxLEFT|wxRIGHT, 2);
 
@@ -367,7 +358,6 @@ void PanelOrderButtons::CreateControls() {
   Bind( wxEVT_RADIOBOX, &PanelOrderButtons::OnRADIOPositionExitProfitSelected, this, ID_RADIO_PositionExitProfit );
   Bind( wxEVT_RADIOBOX, &PanelOrderButtons::OnRADIOPositionExitTopSelected, this, ID_RADIO_PositionExitTop );
 
-  Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBCockForCursorClick, this, ID_CB_CockForCursor );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBPositionEntryClick, this, ID_CB_PositionEntry );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBPositionExitProfitClick, this, ID_CB_PositionExitProfit );
   Bind( wxEVT_COMMAND_CHECKBOX_CLICKED, &PanelOrderButtons::OnCBPositionExitStopClick, this, ID_CB_PositionExitStop );
@@ -557,13 +547,6 @@ void PanelOrderButtons::OnDestroy( wxWindowDestroyEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
-}
-
-// == Cock For Cursor
-
-void PanelOrderButtons::OnCBCockForCursorClick( wxCommandEvent& event ) {
-  m_order.m_bCockForCursor = m_cbCockForCursor->IsChecked();
-  event.Skip();
 }
 
 // == Position Entry

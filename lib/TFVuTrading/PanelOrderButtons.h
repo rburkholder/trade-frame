@@ -91,7 +91,6 @@ private:
     ID_Null=wxID_HIGHEST
   , ID_PanelOrderButtons
   , ID_BtnBuy, ID_BtnSell, ID_BtnClose, ID_BtnCancel
-  , ID_CB_CockForCursor
   , ID_CB_PositionEntry
   , ID_CB_PositionExitProfit
   , ID_CB_PositionExitStop
@@ -117,7 +116,6 @@ private:
   PanelOrderButtons_Order m_order;
   PanelOrderButtons_MarketData m_data;
 
-    wxCheckBox* m_cbCockForCursor;
     wxTextCtrl* m_txtQuanStock;
     wxTextCtrl* m_txtQuanFuture;
     wxTextCtrl* m_txtQuanOption;
@@ -178,9 +176,6 @@ private:
   void OnFocusChange( wxFocusEvent& event );
 
   void OnDestroy( wxWindowDestroyEvent& event );
-
-    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_CockForCursor
-    void OnCBCockForCursorClick( wxCommandEvent& event );
 
     /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_QuanStock
     void OnTXTQuanStockTextUpdated( wxCommandEvent& event );
