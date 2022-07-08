@@ -80,7 +80,7 @@ public:
      fBtnOrder_t&&  // Cancel
    );
 
-   void SetPricePositionEntry( const std::string );
+   void SetPriceAtFocus( const std::string& );
 
    void Update( const PanelOrderButtons_MarketData& );
 
@@ -112,6 +112,8 @@ private:
   , ID_TXT_Put2, ID_TXT_Put2Ask, ID_TXT_Put2Bid
   , ID_CB_Stoch1, ID_CB_Stoch2, ID_CB_Stoch3
   };
+
+  enum EFocus { None, Price, Profit, Stop } m_eFocus;
 
   PanelOrderButtons_Order m_order;
   PanelOrderButtons_MarketData m_data;
@@ -192,6 +194,9 @@ private:
     /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionEntry
     void OnTXTPositionEntryTextUpdated( wxCommandEvent& event );
 
+    /// wxEVT_SET_FOCUS event handler for ID_TXT_PositionEntry
+    void OnSetFocus_PositionEntry( wxFocusEvent& event );
+
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionEntry
     void OnRADIOPositionEntrySelected( wxCommandEvent& event );
 
@@ -201,6 +206,9 @@ private:
     /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionExitProfit
     void OnTXTPositionExitProfitTextUpdated( wxCommandEvent& event );
 
+    /// wxEVT_SET_FOCUS event handler for ID_TXT_PositionExitProfit
+    void OnSetFocus_PositionExitProfit( wxFocusEvent& event );
+
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitProfit
     void OnRADIOPositionExitProfitSelected( wxCommandEvent& event );
 
@@ -209,6 +217,9 @@ private:
 
     /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_TXT_PositionExitStop
     void OnTXTPositionExitStopTextUpdated( wxCommandEvent& event );
+
+    /// wxEVT_SET_FOCUS event handler for ID_TXT_PositionExitStop
+    void OnSetFocus_PositionExitStop( wxFocusEvent& event );
 
     /// wxEVT_COMMAND_RADIOBOX_SELECTED event handler for ID_RADIO_PositionExitTop
     void OnRADIOPositionExitTopSelected( wxCommandEvent& event );

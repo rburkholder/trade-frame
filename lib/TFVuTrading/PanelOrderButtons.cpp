@@ -66,6 +66,7 @@ PanelOrderButtons::~PanelOrderButtons() {
 }
 
 void PanelOrderButtons::Init() {
+  m_eFocus = EFocus::None;
 }
 
 void PanelOrderButtons::CreateControls() {
@@ -344,6 +345,10 @@ void PanelOrderButtons::CreateControls() {
     m_cbEnableStoch3->SetValue(false);
     sizerStochastic->Add(m_cbEnableStoch3, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
+  m_txtPricePositionEntry->Connect(ID_TXT_PositionEntry, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionEntry), NULL, this);
+  m_txtPriceProfitExit->Connect(ID_TXT_PositionExitProfit, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitProfit), NULL, this);
+  m_txtPriceStopExit->Connect(ID_TXT_PositionExitStop, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitStop), NULL, this);
+
   Bind( wxEVT_DESTROY, &PanelOrderButtons::OnDestroy, this );
 
   Bind( wxEVT_SET_FOCUS, &PanelOrderButtons::OnFocusChange, this );
@@ -396,10 +401,28 @@ void PanelOrderButtons::Set(
   m_fBtnOrderCancel = std::move( fBtnOrderCancel );
 }
 
-void PanelOrderButtons::SetPricePositionEntry( const std::string sText ) {
-  m_txtPricePositionEntry->SetValue( sText );
-  m_radioPositionEntry->SetSelection( 1 );
-  m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::LimitOnly;
+void PanelOrderButtons::SetPriceAtFocus( const std::string& sText ) {
+  switch ( m_eFocus ) {
+    case EFocus::Price:
+      m_txtPricePositionEntry->SetValue( sText );
+      m_radioPositionEntry->SetSelection( 1 );
+      m_order.m_ePositionEntryMethod = PanelOrderButtons_Order::EPositionEntryMethod::LimitOnly;
+      break;
+    case EFocus::Profit:
+      m_txtPriceProfitExit->SetValue( sText );
+      m_radioExitProfit->SetSelection( 1 );
+      m_cbEnableProfitExit->SetValue( true );
+      m_order.m_ePositionExitProfitMethod = PanelOrderButtons_Order::EPositionExitProfitMethod::Absolute;
+      break;
+    case EFocus::Stop:
+      m_txtPriceStopExit->SetValue( sText );
+      m_radioExitStop->SetSelection( 2 );
+      m_cbEnableStopExit->SetValue( true );
+      m_order.m_ePositionExitStopMethod = PanelOrderButtons_Order::EPositionExitStopMethod::Stop;
+      break;
+    case EFocus::None:
+      break;
+  }
 }
 
 void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
@@ -720,6 +743,21 @@ void PanelOrderButtons::OnTXTQuanFutureTextUpdated( wxCommandEvent& event ) {
 
 void PanelOrderButtons::OnTXTQuanOptionTextUpdated( wxCommandEvent& event ) {
   m_order.m_sQuanOption = m_txtQuanOption->GetValue();
+  event.Skip();
+}
+
+void PanelOrderButtons::OnSetFocus_PositionEntry( wxFocusEvent& event ) {
+  m_eFocus = EFocus::Price;
+  event.Skip();
+}
+
+void PanelOrderButtons::OnSetFocus_PositionExitProfit( wxFocusEvent& event ) {
+  m_eFocus = EFocus::Profit;
+  event.Skip();
+}
+
+void PanelOrderButtons::OnSetFocus_PositionExitStop( wxFocusEvent& event ) {
+  m_eFocus = EFocus::Stop;
   event.Skip();
 }
 

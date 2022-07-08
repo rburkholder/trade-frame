@@ -353,7 +353,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     [this]( double value ) { // m_fClickLeft
       std::string s;
       s = boost::lexical_cast<std::string>( value );
-      m_pPanelOrderButtons->SetPricePositionEntry( s );
+      m_pPanelOrderButtons->SetPriceAtFocus( s );
     },
     [this]( double value ) { // m_fClickRight
 
