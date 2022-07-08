@@ -36,9 +36,11 @@ namespace {
   const int secondsGTD( 10 );
 }
 
-TradeLifeTime::TradeLifeTime( pPosition_t pPosition, Indicators& indicators )
+TradeLifeTime::TradeLifeTime( pPosition_t pPosition, Indicators& indicators, fDone_t&& fDone )
 : m_statePosition( EPositionState::InitializeEntry )
 , m_pPosition( pPosition )
+, m_fDone( std::move( fDone ) )
+, m_pTreeItem( nullptr )
 , m_bWatching( false )
 , m_bWatchStop( false )
 , m_dblStopCurrent {}
@@ -52,6 +54,10 @@ TradeLifeTime::TradeLifeTime( pPosition_t pPosition, Indicators& indicators )
 
 TradeLifeTime::~TradeLifeTime() {
   StopWatch();
+  if ( m_pTreeItem ) {
+    m_pTreeItem->Delete();
+    m_pTreeItem = nullptr;
+  }
   m_pPosition.reset();
 }
 
@@ -155,6 +161,9 @@ void TradeLifeTime::Cancel() {
     // this will need to be marked from the orders which were cancelled
     ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() );
     m_ceCancelled.AddLabel( quote.DateTime(), quote.Midpoint(), sCancelled );
+    if ( m_fDone ) {
+      m_fDone( *this );
+    }
   }
   else {
     std::cout << "TradeLifeTime::Cancel - nothing cancelled - " << m_pOrderEntry->GetOrderId() << std::endl;
@@ -258,9 +267,10 @@ TradeWithABuy::TradeWithABuy(
 , TreeItem* pTreeItemParent
 , const ou::tf::PanelOrderButtons_Order& selectors
 , Indicators& indicators
+, fDone_t&& fDone
 )
-: TradeLifeTime( pPosition, indicators
-) {
+: TradeLifeTime( pPosition, indicators, std::move( fDone ) )
+{
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " buying" << std::endl;
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet
@@ -479,9 +489,10 @@ TradeWithASell::TradeWithASell(
 , TreeItem* pTreeItemParent
 , const ou::tf::PanelOrderButtons_Order& selectors
 , Indicators& indicators
+, fDone_t&& fDone
 )
-: TradeLifeTime( pPosition, indicators
-) {
+: TradeLifeTime( pPosition, indicators, std::move( fDone ) )
+{
   std::cout << pPosition->GetInstrument()->GetInstrumentName() << " selling" << std::endl;
 
   ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() ); // probably no quotes yet

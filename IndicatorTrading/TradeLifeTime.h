@@ -42,10 +42,10 @@ public:
 
   using TreeItem = ou::tf::TreeItem;
 
-  using fDone_t = std::function<void()>;
+  using fDone_t = std::function<void(TradeLifeTime&)>;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  TradeLifeTime( pPosition_t, Indicators& );
+  TradeLifeTime( pPosition_t, Indicators&, fDone_t&& );
   TradeLifeTime( TradeLifeTime&& ) = delete;
   TradeLifeTime( const TradeLifeTime& ) = delete;
   virtual ~TradeLifeTime();
@@ -95,6 +95,8 @@ protected:
   ou::ChartEntryShape& m_ceSellFill;
   ou::ChartEntryShape& m_ceCancelled;
 
+  fDone_t m_fDone;
+
   void StartWatch();
   void StopWatch();
 
@@ -120,7 +122,7 @@ private:
 
 class TradeWithABuy: public TradeLifeTime {
 public:
-  TradeWithABuy( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeWithABuy( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators&, fDone_t&& );
   virtual ~TradeWithABuy();
 
   virtual void Cancel();
@@ -144,7 +146,7 @@ private:
 
 class TradeWithASell: public TradeLifeTime {
 public:
-  TradeWithASell( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators& );
+  TradeWithASell( pPosition_t, TreeItem*, const ou::tf::PanelOrderButtons_Order&, Indicators&, fDone_t&& );
   virtual ~TradeWithASell();
 
   virtual void Cancel();

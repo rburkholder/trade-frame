@@ -805,7 +805,16 @@ InteractiveChart::LifeCycle_Position& InteractiveChart::Lookup_LifeCycle_Positio
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators );
+    pTradeLifeTime_t pTradeLifeTime
+      = std::make_shared<TradeWithABuy>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators
+      , [this]( TradeLifeTime& tlt ){ // fDone_t
+          CallAfter( [this,&tlt](){
+            mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
+            assert( m_mapLifeCycle_Trade.end() != iter );
+            m_mapLifeCycle_Trade.erase( iter );
+          } );
+      }
+    );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle_Trade.emplace( std::make_pair( id, std::move( LifeCycle_Trade( pTradeLifeTime ) ) ) );
   }
@@ -814,7 +823,16 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators );
+    pTradeLifeTime_t pTradeLifeTime
+      = std::make_shared<TradeWithASell>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators
+      , [this]( TradeLifeTime& tlt ){ // fDone_t
+          CallAfter( [this,&tlt](){
+            mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
+            assert( m_mapLifeCycle_Trade.end() != iter );
+            m_mapLifeCycle_Trade.erase( iter );
+          } );
+      }
+      );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
     auto pair = m_mapLifeCycle_Trade.emplace( std::make_pair( id, std::move( LifeCycle_Trade( pTradeLifeTime ) ) ) );
   }
