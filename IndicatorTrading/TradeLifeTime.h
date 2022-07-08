@@ -53,6 +53,7 @@ public:
   ou::tf::Order::idOrder_t Id() const { return m_pOrderEntry->GetOrderId(); }
 
   virtual void Cancel();
+  virtual void Close();
   virtual void EmitStatus();
   //virtual void Close();  // doesn't make sense here, too many moving parts
 

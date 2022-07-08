@@ -162,12 +162,16 @@ void TradeLifeTime::Cancel() {
     ou::tf::Quote quote( m_pPosition->GetWatch()->LastQuote() );
     m_ceCancelled.AddLabel( quote.DateTime(), quote.Midpoint(), sCancelled );
     if ( m_fDone ) {
-      m_fDone( *this );
+      m_fDone( *this ); // TODO: perform once orders confirmed cancelled?
     }
   }
   else {
     std::cout << "TradeLifeTime::Cancel - nothing cancelled - " << m_pOrderEntry->GetOrderId() << std::endl;
   }
+}
+
+void TradeLifeTime::Close() {
+  std::cout << "TradeLifeTime::Close to be implemented" << std::endl;
 }
 
 void TradeLifeTime::EmitStatus() {
@@ -234,6 +238,12 @@ void TradeLifeTime::BuildTreeItem( TreeItem* pTreeItemParent, const std::string&
         }
         );
       pTreeItem->AppendMenuItem(
+        "Close",
+        [this]( TreeItem* pTreeItem){
+          Close();
+        }
+        );
+      pTreeItem->AppendMenuItem(
         "Status",
         [this]( TreeItem* pTreeItem){
           EmitStatus();
@@ -243,7 +253,7 @@ void TradeLifeTime::BuildTreeItem( TreeItem* pTreeItemParent, const std::string&
         "Delete",
         [this]( TreeItem* pTreeItem){
           if ( m_fDone ) {
-            m_fDone( *this );
+            m_fDone( *this ); // TODO: perform after confirming orders are no longer active
           }
         }
         );
