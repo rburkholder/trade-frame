@@ -42,6 +42,7 @@ public:
 
   using TreeItem = ou::tf::TreeItem;
 
+  using fDone_t = std::function<void()>;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   TradeLifeTime( pPosition_t, Indicators& );
@@ -76,7 +77,7 @@ protected:
 
   TreeItem* m_pTreeItem;
 
-  ou::tf::Quote m_quote;
+  //ou::tf::Quote m_quote;
 
   pOrder_t m_pOrderProfit;
   pOrder_t m_pOrderEntry;
