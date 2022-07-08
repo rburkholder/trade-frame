@@ -372,30 +372,30 @@ private:
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
 
-  struct LifeCycleComponents {
+  struct LifeCycle_Position {
     TreeItem* pTreeItem;
     pPosition_t pPosition;
     Indicators indicators;
-    LifeCycleComponents( TreeItem* pTreeItem_, Indicators indicators_ )
+    LifeCycle_Position( TreeItem* pTreeItem_, Indicators indicators_ )
     : pTreeItem( pTreeItem_ ), indicators( indicators_ ) {}
-    LifeCycleComponents( TreeItem* pTreeItem_, pPosition_t pPosition_, Indicators indicators_ )
+    LifeCycle_Position( TreeItem* pTreeItem_, pPosition_t pPosition_, Indicators indicators_ )
     : pTreeItem( pTreeItem_ ), pPosition( pPosition_ ), indicators( indicators_ ) {}
   };
 
-  using mapLifeCycleComponents_t = std::map<std::string,LifeCycleComponents>;
-  mapLifeCycleComponents_t m_mapLifeCycleComponents;
+  using mapLifeCycle_Position_t = std::map<std::string,LifeCycle_Position>;
+  mapLifeCycle_Position_t m_mapLifeCycle_Position;
 
   using pTradeLifeTime_t = std::shared_ptr<TradeLifeTime>;
 
-  struct LifeCycle {
+  struct LifeCycle_Trade {
     pTradeLifeTime_t pTradeLifeTime;
-    LifeCycle( pTradeLifeTime_t pTradeLifeTime_ )
+    LifeCycle_Trade( pTradeLifeTime_t pTradeLifeTime_ )
     : pTradeLifeTime( pTradeLifeTime_ )
     {}
   };
 
-  using mapLifeCycle_t = std::map<idOrder_t,LifeCycle>;
-  mapLifeCycle_t m_mapLifeCycle;
+  using mapLifeCycle_Trade_t = std::map<idOrder_t,LifeCycle_Trade>;
+  mapLifeCycle_Trade_t m_mapLifeCycle_Trade;
 
   //ou::tf::iqfeed::HistoryRequest::pHistoryRequest_t m_pHistoryRequest;
   //ou::tf::Bars m_barsHistory;
@@ -434,7 +434,7 @@ private:
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );
 
-  LifeCycleComponents& LookupLifeCycleComponents();
+  LifeCycle_Position& Lookup_LifeCycle_Position();
 
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );

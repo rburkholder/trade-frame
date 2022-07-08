@@ -117,7 +117,7 @@ InteractiveChart::~InteractiveChart() {
   m_pStrategy.reset();
   Disconnect();
   m_bfPrice.SetOnBarComplete( nullptr );
-  m_mapLifeCycle.clear();
+  m_mapLifeCycle_Trade.clear();
 }
 
 void InteractiveChart::Init() {
@@ -292,9 +292,9 @@ void InteractiveChart::SetPosition(
     }
     );
 
-  m_mapLifeCycleComponents.emplace(
+  m_mapLifeCycle_Position.emplace(
     m_pActiveInstrument->GetInstrumentName(),
-    LifeCycleComponents(
+    LifeCycle_Position(
       m_pTreeItemUnderlying,
       m_pPositionUnderlying,
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
@@ -527,9 +527,9 @@ void InteractiveChart::CheckOptions() {
               );
             }
             );
-          m_mapLifeCycleComponents.emplace(
+          m_mapLifeCycle_Position.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycle_Position( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -556,9 +556,9 @@ void InteractiveChart::CheckOptions() {
               );
             }
             );
-          m_mapLifeCycleComponents.emplace(
+          m_mapLifeCycle_Position.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycle_Position( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -586,9 +586,9 @@ void InteractiveChart::CheckOptions() {
               );
             }
             );
-          m_mapLifeCycleComponents.emplace(
+          m_mapLifeCycle_Position.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycle_Position( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -615,9 +615,9 @@ void InteractiveChart::CheckOptions() {
               );
             }
             );
-          m_mapLifeCycleComponents.emplace(
+          m_mapLifeCycle_Position.emplace(
             pOption->GetInstrumentName(),
-            LifeCycleComponents( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
+            LifeCycle_Position( pTreeItemOption, Indicators( pOptionTracker->GetIndicators() ))
             );
         }
       }
@@ -788,12 +788,12 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   event.Skip();
 }
 
-InteractiveChart::LifeCycleComponents& InteractiveChart::LookupLifeCycleComponents() {
+InteractiveChart::LifeCycle_Position& InteractiveChart::Lookup_LifeCycle_Position() {
   assert( m_pActiveInstrument );
   const std::string& sInstrumentName( m_pActiveInstrument->GetInstrumentName() );
-  mapLifeCycleComponents_t::iterator iter = m_mapLifeCycleComponents.find( sInstrumentName );
-  assert( m_mapLifeCycleComponents.end() != iter );
-  mapLifeCycleComponents_t::mapped_type& lcc( iter->second );
+  mapLifeCycle_Position_t::iterator iter = m_mapLifeCycle_Position.find( sInstrumentName );
+  assert( m_mapLifeCycle_Position.end() != iter );
+  mapLifeCycle_Position_t::mapped_type& lcc( iter->second );
   if ( lcc.pPosition ) {}
   else {
     lcc.pPosition = m_fBuildPosition( m_pActiveInstrument );
@@ -804,19 +804,19 @@ InteractiveChart::LifeCycleComponents& InteractiveChart::LookupLifeCycleComponen
 
 void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
-    LifeCycleComponents& lcc( LookupLifeCycleComponents() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcc.pPosition, lcc.pTreeItem, buttons, lcc.indicators );
+    LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithABuy>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-    auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+    auto pair = m_mapLifeCycle_Trade.emplace( std::make_pair( id, std::move( LifeCycle_Trade( pTradeLifeTime ) ) ) );
   }
 }
 
 void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons ) {
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
-    LifeCycleComponents& lcc( LookupLifeCycleComponents() );
-    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcc.pPosition, lcc.pTreeItem, buttons, lcc.indicators );
+    LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
+    pTradeLifeTime_t pTradeLifeTime = std::make_shared<TradeWithASell>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
-    auto pair = m_mapLifeCycle.emplace( std::make_pair( id, std::move( LifeCycle( pTradeLifeTime ) ) ) );
+    auto pair = m_mapLifeCycle_Trade.emplace( std::make_pair( id, std::move( LifeCycle_Trade( pTradeLifeTime ) ) ) );
   }
 }
 
@@ -829,14 +829,14 @@ void InteractiveChart::OrderCancel( const ou::tf::PanelOrderButtons_Order& butto
 }
 
 void InteractiveChart::CancelOrders() {
-  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
+  for ( mapLifeCycle_Trade_t::value_type& vt: m_mapLifeCycle_Trade ) {
     OrderCancel( vt.second.pTradeLifeTime->Id() );
   }
 }
 
 void InteractiveChart::OrderCancel( idOrder_t id ) {
-  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
-  if ( m_mapLifeCycle.end() == iter ) {
+  mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( id );
+  if ( m_mapLifeCycle_Trade.end() == iter ) {
     std::cout << "OrderCancel: can not find idOrder=" << id << std::endl;
   }
   else {
@@ -845,15 +845,15 @@ void InteractiveChart::OrderCancel( idOrder_t id ) {
 }
 
 void InteractiveChart::EmitStatus() {
-  for ( mapLifeCycle_t::value_type& vt: m_mapLifeCycle ) {
+  for ( mapLifeCycle_Trade_t::value_type& vt: m_mapLifeCycle_Trade ) {
     // TODO: require a way to skip finished TradeLifeTimes
     vt.second.pTradeLifeTime->EmitStatus();
   }
 }
 
 void InteractiveChart::EmitOrderStatus( idOrder_t id ) {
-  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
-  if ( m_mapLifeCycle.end() == iter ) {
+  mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( id );
+  if ( m_mapLifeCycle_Trade.end() == iter ) {
     std::cout << "OrderStatus: can not find idOrder=" << id << std::endl;
   }
   else {
@@ -862,14 +862,14 @@ void InteractiveChart::EmitOrderStatus( idOrder_t id ) {
 }
 
 void InteractiveChart::DeleteLifeCycle( idOrder_t id ) {
-  mapLifeCycle_t::iterator iter = m_mapLifeCycle.find( id );
-  if ( m_mapLifeCycle.end() == iter ) {
+  mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( id );
+  if ( m_mapLifeCycle_Trade.end() == iter ) {
     std::cout << "DeleteLifeCycle: can not find idOrder=" << id << std::endl;
   }
   else {
     // TODO: need to perform some validation that nothing is in progress.
     //iter->second.fDeleteLifeCycle();
-    m_mapLifeCycle.erase( iter );
+    m_mapLifeCycle_Trade.erase( iter );
   }
 }
 
