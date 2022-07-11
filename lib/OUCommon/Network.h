@@ -488,8 +488,16 @@ void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, 
       }
       if ( 0x0a == ch ) {
         // send the buffer off
-        if ( &Network<ownerT, charT>::OnNetworkLineBuffer != &ownerT::OnNetworkLineBuffer ) {
-          static_cast<ownerT*>( this )->OnNetworkLineBuffer( m_pline );
+        try {
+          if ( &Network<ownerT, charT>::OnNetworkLineBuffer != &ownerT::OnNetworkLineBuffer ) {
+            static_cast<ownerT*>( this )->OnNetworkLineBuffer( m_pline );
+          }
+        }
+        catch( const std::logic_error& e ) {
+          std::cerr << "Network<>::OnReadDone caught: " << e.what() << std::endl;
+        }
+        catch(...) {
+          std::cerr << "Network<>::OnReadDone default exception handler" << std::endl;
         }
         ++m_cntLinesProcessed;
         // and allocate another buffer
@@ -567,7 +575,7 @@ void Network<ownerT,charT>::OnSendDoneCommon(
   m_reposSendBuffers.CheckInL( pbuffer );
   //assert( bytes_transferred == pbuffer->size() );
   if ( bytes_transferred != pbuffer->size() ) {
-    std::cout << "network.h::OnSendDoneCommon bt=" << bytes_transferred << ", size=" << pbuffer->size() << std::endl;
+    std::cerr << "network::OnSendDoneCommon bt=" << bytes_transferred << ", size=" << pbuffer->size() << std::endl;
     //std::cout << "network.h::OnSendDoneCommon lb=" << pbuffer->
   }
   m_cntBytesTransferred_send += bytes_transferred;
