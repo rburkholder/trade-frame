@@ -64,10 +64,10 @@ protected:
   void OnHistoryDisconnected();
   void OnHistoryIntervalData( Interval* pDP );
   void OnHistoryEndOfDayData( EndOfDay* pDP );
-  void OnHistoryRequestDone();
+  void OnHistoryRequestDone( bool );
   void OnHistorySendDone();
   void OnHistoryError( size_t e );
-  
+
 private:
   bool m_bConnected;
   fConnected_t m_fConnected;

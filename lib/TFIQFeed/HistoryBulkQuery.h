@@ -111,7 +111,8 @@ protected:
     static_cast<T*>( m_t )->OnHistoryEndOfDayData( m_tagUser, pDP );
   };
 
-  void OnHistoryRequestDone() {
+  void OnHistoryRequestDone( bool bStatus ) {
+    assert( bStatus );
     assert( nullptr != m_t );
     static_cast<T*>( m_t )->OnHistoryRequestDone( m_tagUser );
   };

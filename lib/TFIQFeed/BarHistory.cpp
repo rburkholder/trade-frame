@@ -129,8 +129,9 @@ void BarHistory::OnHistoryEndOfDayData( EndOfDay* pDP ) {
   ou::tf::iqfeed::HistoryQuery<BarHistory>::OnHistoryEndOfDayData( pDP );
 };
 
-void BarHistory::OnHistoryRequestDone() {
+void BarHistory::OnHistoryRequestDone( bool bStatus ) {
   //std::cout << "OnHistoryRequestDone" << std::endl;
+  assert( bStatus );
   m_fDone();
 };
 

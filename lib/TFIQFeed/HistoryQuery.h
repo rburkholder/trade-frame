@@ -323,7 +323,7 @@ protected:
   void OnHistoryTickDataPoint( TickDataPoint* pDP ) { ReQueueTickDataPoint( pDP ); };
   void OnHistoryIntervalData( Interval* pDP ) { ReQueueInterval( pDP ); };
   void OnHistoryEndOfDayData( EndOfDay* pDP ) { ReQueueEndOfDay( pDP ); };
-  void OnHistoryRequestDone() {};
+  void OnHistoryRequestDone( bool ) {};
 
 private:
 
@@ -570,7 +570,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         DEBUGOUT( "Invalid Symbol\n" );
         m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
-            static_cast<T*>( this )->OnHistoryRequestDone();
+            static_cast<T*>( this )->OnHistoryRequestDone( false );
           }
       }
     }
@@ -579,10 +579,13 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       if ( b ) {
         m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
-            static_cast<T*>( this )->OnHistoryRequestDone();
+            static_cast<T*>( this )->OnHistoryRequestDone( true );
           }
       }
       else {
+        if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+          static_cast<T*>( this )->OnHistoryRequestDone( false );
+        }
         throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval no endmessage");
       }
     }

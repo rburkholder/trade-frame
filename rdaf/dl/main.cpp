@@ -62,6 +62,8 @@ namespace {
 
   pTTree_t m_pTreeStatistics;
 
+  size_t nErrors {};
+
 }
 
 struct Security {
@@ -72,9 +74,10 @@ struct Security {
   double dblAssets;
   double dblLiabilities;
   double dblCommonSharesOutstanding;
-  size_t nTicks;
   size_t nSIC;
   size_t nNAICS;
+
+  size_t nTicks; // local counter
 
   struct QuoteForBranch {
     double time;
@@ -438,7 +441,7 @@ public:
   }
 
   using fTick_t = std::function<void(const ou::tf::iqfeed::HistoryStructs::TickDataPoint& )>;
-  using fDone_t = std::function<void()>;
+  using fDone_t = std::function<void(bool)>;
 
   void RequestNDaysOfTicks(
     const std::string& sName
@@ -463,8 +466,8 @@ protected:
     m_fTick( *pDP );
     ReQueueTickDataPoint( pDP );
   };
-  void OnHistoryRequestDone() {
-    m_fDone();
+  void OnHistoryRequestDone( bool bStatus ) {
+    m_fDone( bStatus );
   };
 private:
   fConnected_t m_fConnected;
@@ -519,9 +522,9 @@ public:
   void CheckDone() {
     std::cout
       << "CheckDone "
-      << m_mapSecurity_Waiting.size()
+      << nErrors
+      << "," << m_mapSecurity_Waiting.size()
       << "," << m_vRetrieveTicks_Avail.size()
-      << "," << m_mapRetrieveTicks.size()
       ;
     if ( 0 != m_mapRetrieveTicks.size() ) {
       //std::lock_guard<std::mutex> lock( m_mutex ); // can't lock, already in a lock
@@ -529,10 +532,10 @@ public:
         auto p = m_mapRetrieveTicks.begin()->second.pSecurity;
         std::cout
           << "," << p->sName
-          << "," << p->nTicks
+          << "," << p->nTicks << " ticks"
           ;
-        if ( 1 < m_mapRetrieveTicks.size() ) {
-          std::cout << " - " << m_mapRetrieveTicks.size() << " remaining";
+        if ( 0 < m_mapRetrieveTicks.size() ) {
+          std::cout << "," << m_mapRetrieveTicks.size() << " retrieval in progress";
         }
       //}
     }
@@ -634,7 +637,8 @@ private:
             pSecurity->m_pTreeTrade->Fill();
 
           },
-          [this,iter=result.first](){ // fDone_t
+          [this,iter=result.first]( bool bStatus ){ // fDone_t
+            if ( !bStatus ) ++nErrors;
             pSecurity_t pSecurity = iter->second.pSecurity;
             m_fSecurity( pSecurity );
             {
