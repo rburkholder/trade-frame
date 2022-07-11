@@ -528,16 +528,16 @@ public:
       ;
     if ( 0 != m_mapRetrieveTicks.size() ) {
       //std::lock_guard<std::mutex> lock( m_mutex ); // can't lock, already in a lock
-      //if ( 0 != m_mapRetrieveTicks.size() ) {
-        auto p = m_mapRetrieveTicks.begin()->second.pSecurity;
+      for ( const mapRetrieveTicks_t::value_type& vt: m_mapRetrieveTicks ) {
+        auto pSecurity = vt.second.pSecurity;
         std::cout
-          << "," << p->sName
-          << "," << p->nTicks << " ticks"
+          << "," << pSecurity->sName
+          << ":" << pSecurity->nTicks << " ticks"
           ;
-        if ( 0 < m_mapRetrieveTicks.size() ) {
-          std::cout << "," << m_mapRetrieveTicks.size() << " retrieval in progress";
-        }
-      //}
+      }
+      if ( 0 < m_mapRetrieveTicks.size() ) {
+        std::cout << "," << m_mapRetrieveTicks.size() << " in progress";
+      }
     }
     std::cout << std::endl;
     if ( 0 == m_mapSecurity_Waiting.size() ) {
