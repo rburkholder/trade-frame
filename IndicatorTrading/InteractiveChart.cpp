@@ -1179,14 +1179,14 @@ void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
 }
 
 void InteractiveChart::LeftClick( int nChart, double value ) {
-  std::cout << "left click: " << nChart << "," << value << std::endl;
+  //std::cout << "left click: " << nChart << "," << value << std::endl;
   if ( 0 == nChart ) {
     if ( m_fClickLeft ) m_fClickLeft( value );
   }
 }
 
 void InteractiveChart::RightClick( int nChart, double value ) {
-  std::cout << "right click: " << nChart << "," << value << std::endl;
+  //std::cout << "right click: " << nChart << "," << value << std::endl;
   if ( 0 == nChart ) {
     if ( m_fClickRight ) m_fClickRight( value );
   }
