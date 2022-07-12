@@ -23,6 +23,7 @@
 
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 #include <boost/asio/ssl.hpp>
 
@@ -59,6 +60,7 @@ public:
   using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
   using pInstrument_t = inherited_t::pInstrument_t;
+  using idOrder_t = ou::tf::Order::idOrder_t;
   using pOrder_t = ou::tf::Order::pOrder_t;
 
   Provider(); // for auto construction by ProviderManager
@@ -126,6 +128,10 @@ private:
 
   using setClass_t = std::set<std::string>;
   setClass_t m_setClass;
+
+  // TODO: remove lookup on fill or cancel
+  using umapOrderLookup_t = std::unordered_map<std::string,pOrder_t>;
+  umapOrderLookup_t m_umapOrderLookup;
 
   void Assets();
   void LastOrderId();

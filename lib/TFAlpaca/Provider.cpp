@@ -98,6 +98,7 @@ Provider::~Provider() {
   }
   m_pTradeUpdates.reset();
   m_mapAssetId.clear();
+  m_umapOrderLookup.clear();
 }
 
 void Provider::Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret ) {
@@ -286,7 +287,7 @@ void Provider::TradeUpdates() {
       ProviderInterfaceBase::OnConnected( 0 );
     },
     [this]( std::string&& sMessage){
-      std::cout << "order update message: " << sMessage << std::endl;
+      //std::cout << "order update message: " << sMessage << std::endl;
       json::error_code jec;
       json::value jv = json::parse( sMessage, jec );
       if ( jec.failed() ) {
@@ -366,11 +367,10 @@ void Provider::TradeUpdate( const json::object& obj ) {
     std::string qty;
   } update;
 
-  json::value order;
+  //json::value order;
   order::Status status;
 
   extract( obj, update.event, "event" );
-  extract( obj, update.execution_id, "execution_id" );
   extract( obj, update.timestamp, "timestamp" );
 
   EEvent event = m_kwmEvent.FindMatch( update.event );
@@ -378,27 +378,36 @@ void Provider::TradeUpdate( const json::object& obj ) {
     case EEvent::new_:
       {
         //extract( obj, update.id, "id" );
+        json::object order;
         extract( obj, order, "order" );
-        order::Decode( order, status );
+        //order::Decode( order, status ); // is the full decode necessary, just extract other desired fields?
+        std::string id;
+        extract( order, id, "id" );
         //std::string sIdOrder;
         //extract( order, sIdOrder, "client_order_id" );
-        try {
+        //try {
           ou::tf::Order::idOrder_t idOrder;
-          idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-          OrderManager::GlobalInstance().UpdateReference( idOrder, status.id );
-        }
-        catch ( boost::bad_lexical_cast& e ) {
-          std::cout << "alpaca provider: can not decode order " << status.client_order_id << std::endl;
-        }
+          //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+
+          //umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( id );
+          //assert( m_umapOrderLookup.end() != iter );
+          //OrderManager::GlobalInstance().UpdateReference( iter->second, id );
+        //}
+        //catch ( boost::bad_lexical_cast& e ) {
+        //  std::cout << "alpaca provider: can not decode order " << status.client_order_id << std::endl;
+        //}
       }
       break;
     case EEvent::partial_fill:
-      extract( obj, update.price, "price" );
-      extract( obj, update.qty, "qty" );
-
-      extract( obj, order, "order" );
-      order::Decode( order, status );
       {
+        json::value order;
+
+        extract( obj, update.qty, "qty" );
+        extract( obj, update.price, "price" );
+        extract( obj, update.execution_id, "execution_id" );
+
+        extract( obj, order, "order" );
+        order::Decode( order, status );
         OrderSide::EOrderSide side( OrderSide::Unknown );
         if ( "sell" == status.side ) side = OrderSide::Sell;
         if ( "buy"  == status.side ) side = OrderSide::Buy;
@@ -411,15 +420,20 @@ void Provider::TradeUpdate( const json::object& obj ) {
           std::string( "alpaca" ),
           update.execution_id
         );
-        ou::tf::Order::idOrder_t idOrder;
-        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::GlobalInstance().ReportExecution( idOrder, exec );
+        //ou::tf::Order::idOrder_t idOrder;
+        //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
+        assert( m_umapOrderLookup.end() != iter );
+        OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
       }
       break;
     case EEvent::fill:
       try {
-        extract( obj, update.price, "price" );
+        json::value order; // TODO: use object instead like with new_?
+
         extract( obj, update.qty, "qty" );
+        extract( obj, update.price, "price" );
+        extract( obj, update.execution_id, "execution_id" );
 
         extract( obj, order, "order" );
         order::Decode( order, status );
@@ -435,9 +449,11 @@ void Provider::TradeUpdate( const json::object& obj ) {
           std::string( "alpaca" ),
           update.execution_id
         );
-        ou::tf::Order::idOrder_t idOrder;
-        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::GlobalInstance().ReportExecution( idOrder, exec );
+        //ou::tf::Order::idOrder_t idOrder;
+        //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
+        assert( m_umapOrderLookup.end() != iter );
+        OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
       }
       catch(...) {
         std::cout << "EEVent::fill broke" << std::endl;
@@ -445,11 +461,14 @@ void Provider::TradeUpdate( const json::object& obj ) {
       break;
     case EEvent::canceled:
       {
+        json::value order; // TODO: use object instead?
         extract( obj, order, "order" );
         order::Decode( order, status );
-        ou::tf::Order::idOrder_t idOrder;
-        idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
-        OrderManager::GlobalInstance().ReportCancellation( idOrder );
+        //ou::tf::Order::idOrder_t idOrder;
+        //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
+        umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
+        assert( m_umapOrderLookup.end() != iter );
+        OrderManager::GlobalInstance().ReportCancellation( iter->second->GetOrderId() );
       }
       break;
     case EEvent::expired:
@@ -518,10 +537,12 @@ void Provider::LastOrderId() {
         else {
           if ( 1 == vOrderId.size() ) {
             try {
-              auto idOrder = boost::lexical_cast<ou::tf::OrderManager::idOrder_t>( vOrderId[ 0 ].client_order_id );
-              ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
-              om.CheckOrderId( idOrder ); // put this into state file
-              std::cout << "OrderManager assigned idOrder: " << idOrder << std::endl;
+              // as we can't maintain uniqueness of our own order id, don't bother trying to decode what comes back
+              //auto idOrder = boost::lexical_cast<ou::tf::OrderManager::idOrder_t>( vOrderId[ 0 ].client_order_id );
+              //ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+              //om.CheckOrderId( idOrder ); // put this into state file
+              //std::cout << "OrderManager assigned idOrder: " << idOrder << std::endl;
+              std::cout << "OrderManager last client_order_id: " << vOrderId[ 0 ].client_order_id << std::endl;
             }
             catch ( boost::bad_lexical_cast& e ) {
               std::cout << "alpaca provider LastOrderId: can not decode order " << vOrderId[ 0 ].client_order_id << std::endl;
@@ -541,7 +562,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
   const ou::tf::Order& order(*pOrder);
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
   json::object request;
-  request[ "client_order_id" ] = boost::lexical_cast<std::string>( trd.idOrder );
+  //request[ "client_order_id" ] = boost::lexical_cast<std::string>( trd.idOrder ); // don't send this
   //request[ "symbol" ] = "675f7911-9aca-418a-acd5-07cfacb9d32b"; //trd.idInstrument; GLD
   request[ "symbol" ] = trd.idInstrument;
   request[ "qty" ] = boost::lexical_cast<std::string>( trd.nOrderQuantity );
@@ -596,10 +617,10 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/orders", json::serialize( request ),
-    []( bool bResult, const std::string& s ) {
+    [this,pOrder]( bool bResult, const std::string& s ) {
       if ( bResult ) {
-        //std::cout << "place order result: " << s << std::endl;
 
+        // std::cout << "place order result: " << s << std::endl;
 
         json::error_code jec;
         json::value jv = json::parse( s, jec );
@@ -607,36 +628,53 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
           std::cout << "failed to parse order result: " << s << std::endl;
         }
         else {
-          // TODO: encase in try/catch: one of two results:  code, or order confirmation
-          // order '{"client_order_id":"35","symbol":"GLD","qty":"100","notional":null,"side":"buy","type":"market","time_in_force":"day","order_class":"simple"}'
-          // place order result: {"code":40010001,"message":"client_order_id must be unique"}
           try {
-            struct ResultDecoded {
-              uint64_t code;
-              std::string message;
-            } result;
 
             json::object const& obj = jv.as_object();
-            extract( obj, result.code, "code" );
-            extract( obj, result.message, "message" );
 
-            switch ( result.code ) {
-              case 40010001:
-                std::cout << "order not placed: " << result.message << std::endl;
-                // TODO: need to cancel the order locally
-                break;
-              default:
-                assert( false );  // abort to catch other possibilities
-                break;
+            if ( obj.contains( "code" ) ) { // has an error
+
+              struct ResultDecoded {
+                uint64_t code;
+                std::string message;
+              } result;
+
+              extract( obj, result.code, "code" );
+              extract( obj, result.message, "message" );
+
+              switch ( result.code ) {
+                case 40010001: // client_order_id must be unique
+                case 40310000: //
+                  std::cout << "order not placed: (" << result.code << ") " << result.message << std::endl;
+                  // TODO: need to cancel the order locally
+                  break;
+                default:
+                  std::cout << "place order unhandled error: " << s << std::endl;
+                  assert( false );  // abort to catch other possibilities
+                  break;
+              }
             }
+            else { // has order status
+              order::Status status;
+              extract( obj, status.id, "id" );
+              extract( obj, status.status, "status" );
+              m_umapOrderLookup.emplace( status.id, pOrder );  // use this when trade lifecycle processing
+              idOrder_t idOrder( pOrder->GetOrderId() );
+              std::cout << "order id " << idOrder << " has reference " << status.id << std::endl;
+              //umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( id );
+              //assert( m_umapOrderLookup.end() != iter );
+              OrderManager::GlobalInstance().UpdateReference( idOrder, status.id );
+            }
+
           }
           catch ( std::out_of_range& error ) {
-            // should be a normal order response
+            std::cout << "place order exception: " << s << std::endl;
+            assert( false );
           }
         }
       }
       else {
-        std::cout << "place order error: " << s << std::endl;
+        std::cout << "place order one_shot error: " << s << std::endl;
       }
     }
   );
@@ -644,17 +682,21 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
 
 void Provider::CancelOrder( pOrder_t pOrder ) {
 
+  const ou::tf::Order& order( *pOrder ); // need to check the reference exists
+  assert( 0 < order.GetRow().sReference.size() );
+
   auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
   );
-  assert( false ); // TODO need to fix the order id
+
   os->delete_(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
-    "/v2/orders/", // TODO: need broker supplied order id
-    []( bool bResult, const std::string& s ) {
-      if ( bResult ) {
+    std::string( "/v2/orders/" + order.GetRow().sReference ),
+    //"/v2/orders/", // TODO: need broker supplied order id
+    []( bool bResult, const std::string& s ) { // TODO: decode the result here, probably won't show up in the stream?
+      if ( bResult ) { // there is
         std::cout << "cancel order result: " << s << std::endl;
       }
       else {

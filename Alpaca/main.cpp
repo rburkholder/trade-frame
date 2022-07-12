@@ -124,21 +124,21 @@ int main( int argc, char** argv )
       ou::tf::OrderType::Limit,
       ou::tf::OrderSide::Buy,
       100,
-      170.0
-    );
-    om.PlaceOrder( pProviderAlpaca.get(), pOrder );
-
-    sleep( 4 );
-
-    std::cout << "construct / transmit limit sell: " << std::endl;
-
-    pOrder = pPosition->ConstructOrder(
-      ou::tf::OrderType::Limit,
-      ou::tf::OrderSide::Sell,
-      100,
       150.0
     );
     om.PlaceOrder( pProviderAlpaca.get(), pOrder );
+    sleep( 4 );
+    om.CancelOrder( pOrder->GetOrderId() );
+
+    //std::cout << "construct / transmit limit sell: " << std::endl;
+
+    //pOrder = pPosition->ConstructOrder(
+    //  ou::tf::OrderType::Limit,
+    //  ou::tf::OrderSide::Sell,
+    //  100,
+    //  150.0
+    //);
+    //om.PlaceOrder( pProviderAlpaca.get(), pOrder );
 
     std::cout << "wait for completion" << std::endl;
 
