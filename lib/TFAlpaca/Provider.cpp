@@ -424,8 +424,9 @@ void Provider::TradeUpdate( const json::object& obj ) {
         //ou::tf::Order::idOrder_t idOrder;
         //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
         umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
-        assert( m_umapOrderLookup.end() != iter );
-        OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
+        if ( m_umapOrderLookup.end() != iter ) { // there may be unknown manual orders
+          OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
+        }
       }
       break;
     case EEvent::fill:
@@ -453,8 +454,9 @@ void Provider::TradeUpdate( const json::object& obj ) {
         //ou::tf::Order::idOrder_t idOrder;
         //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
         umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
-        assert( m_umapOrderLookup.end() != iter );
-        OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
+        if ( m_umapOrderLookup.end() != iter ) { // there may be unknown manual orders
+          OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
+        }
       }
       catch(...) {
         BOOST_LOG_TRIVIAL(error) << "provider/alpaca EEVent::fill broke";
@@ -468,8 +470,9 @@ void Provider::TradeUpdate( const json::object& obj ) {
         //ou::tf::Order::idOrder_t idOrder;
         //idOrder = boost::lexical_cast<ou::tf::Order::idOrder_t>( status.client_order_id );
         umapOrderLookup_t::iterator iter = m_umapOrderLookup.find( status.id );
-        assert( m_umapOrderLookup.end() != iter );
-        OrderManager::GlobalInstance().ReportCancellation( iter->second->GetOrderId() );
+        if ( m_umapOrderLookup.end() != iter ) { // there may be unknown manual orders
+          OrderManager::GlobalInstance().ReportCancellation( iter->second->GetOrderId() );
+        }
       }
       break;
     case EEvent::expired:
