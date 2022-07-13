@@ -22,8 +22,8 @@
 #include <stdexcept>
 
 #include <boost/json.hpp>
+#include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
-
 #include <boost/lexical_cast.hpp>
 
 #include <boost/asio/strand.hpp>
@@ -592,16 +592,29 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
       break;
     case OrderType::Limit:
       request[ "type" ] = "limit";
-      request[ "limit_price"] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
+      {
+        boost::format format( "%0.2f" ); // TODO: refactor this
+        format % ( std::round( trd.dblPrice1 / 0.01 ) * 0.01 );
+        request[ "limit_price"] = format.str();
+      }
       break;
     case OrderType::Stop:
       request[ "type" ] = "stop";
-      request[ "stop_price" ] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
+      {
+        boost::format format( "%0.2f" ); // TODO: refactor this
+        format % ( std::round( trd.dblPrice1 / 0.01 ) * 0.01 );
+        request[ "stop_price" ] = format.str();
+      }
       break;
     case OrderType::StopLimit:
       request[ "type" ] = "stop_limit";
-      request[ "limit_price" ] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
-      request[ "stop_price"]   = std::round( trd.dblPrice2 / 0.01 ) * 0.01;
+      {
+        boost::format format( "%0.2f" ); // TODO: refactor this
+        format % ( std::round( trd.dblPrice1 / 0.01 ) * 0.01 );
+        request[ "limit_price" ] = format.str();
+        format % ( std::round( trd.dblPrice2 / 0.01 ) * 0.01 );
+        request[ "stop_price"]   = format.str();
+      }
       break;
     default:
       assert( false );
