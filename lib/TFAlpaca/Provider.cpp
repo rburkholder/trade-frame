@@ -22,6 +22,7 @@
 #include <stdexcept>
 
 #include <boost/json.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -167,7 +168,7 @@ void Provider::Assets() {
         json::error_code jec;
         json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
-          std::cout << "failed to parse /v2/assets" << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "provder/alpaca failed to parse /v2/assets";
         }
         else {
           //std::cout << message << std::endl;
@@ -180,8 +181,8 @@ void Provider::Assets() {
             if ( m_mapAssetId.end() != iter ) {
               const AssetMatch& am( iter->second );
               if ( ( am.sClass != vt.class_ ) && ( am.sExchange != vt.exchange ) ) {
-                std::cout
-                  << "asset exists: "
+                BOOST_LOG_TRIVIAL(warning)
+                  << "provider/alpaca asset exists: "
                   << vt.symbol
                   << "," << iter->second.sClass << "," << vt.class_
                   << "," << iter->second.sExchange << "," << vt.exchange
@@ -189,7 +190,7 @@ void Provider::Assets() {
                   //<< "trade=" << vt.tradable << ","
                   //<< "short=" << vt.shortable << ","
                   //<< "margin=" << vt.marginable
-                  << std::endl;
+                  ;
               }
               ++nIdMisMatch;
             }
@@ -230,7 +231,7 @@ void Provider::Assets() {
         }
       }
       else {
-        std::cout << "os Symbol List Retrieval problems: " << message << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca Symbol List Retrieval problems: " << message;
       }
     }
   );
@@ -251,7 +252,7 @@ void Provider::Positions() {
         json::error_code jec;
         json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
-          std::cout << "alpaca failed to parse /v2/positions" << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "provider/alpaca failed to parse /v2/positions";
         }
         else {
           position::vCurrent_t vPositions;
@@ -268,7 +269,7 @@ void Provider::Positions() {
         }
       }
       else {
-        std::cout << "os Position List Retrieval problems: " << message << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca Position List Retrieval problems: " << message;
       }
     }
   );
@@ -291,7 +292,7 @@ void Provider::TradeUpdates() {
       json::error_code jec;
       json::value jv = json::parse( sMessage, jec );
       if ( jec.failed() ) {
-        std::cout << "failed to parse web_socket stream" << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca failed to parse web_socket stream: " << sMessage;
       }
       else {
 
@@ -311,7 +312,7 @@ void Provider::TradeUpdates() {
 
         if ( "authorization" == stream.sType ) {
           bFound = true;
-          std::cout << "authorization: " << stream.object << std::endl;
+          BOOST_LOG_TRIVIAL(info) << "authorization: " << stream.object;
           // {"stream":"authorization","data":{"action":"authenticate","status":"authorized"}}
 
           struct Auth {
@@ -329,7 +330,7 @@ void Provider::TradeUpdates() {
 
         if ( "listening" == stream.sType ) {
           bFound = true;
-          std::cout << "listening status: " << stream.object << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "listening status: " << stream.object << std::endl;
           // {"stream":"listening","data":{"streams":["trade_updates"]}}
 
           json::array objStreams;
@@ -347,7 +348,7 @@ void Provider::TradeUpdates() {
           TradeUpdate( stream.object );
         }
         if ( !bFound ) {
-          std::cout << "unknown order update message: " << sMessage << std::endl;
+          BOOST_LOG_TRIVIAL(warning) << "provider/alpaca unknown order update message: " << sMessage << std::endl;
         }
       }
     }
@@ -456,7 +457,7 @@ void Provider::TradeUpdate( const json::object& obj ) {
         OrderManager::GlobalInstance().ReportExecution( iter->second->GetOrderId(), exec );
       }
       catch(...) {
-        std::cout << "EEVent::fill broke" << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca EEVent::fill broke";
       }
       break;
     case EEvent::canceled:
@@ -532,7 +533,7 @@ void Provider::LastOrderId() {
         order::vOrderId_t vOrderId;
         order::Decode( message, vOrderId );
         if ( 1 < vOrderId.size() ) {
-          std::cout << "alpaca order id decode has more than 1 entry" << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "provider/alpaca order id decode has more than 1 entry";
         }
         else {
           if ( 1 == vOrderId.size() ) {
@@ -545,13 +546,13 @@ void Provider::LastOrderId() {
               std::cout << "OrderManager last client_order_id: " << vOrderId[ 0 ].client_order_id << std::endl;
             }
             catch ( boost::bad_lexical_cast& e ) {
-              std::cout << "alpaca provider LastOrderId: can not decode order " << vOrderId[ 0 ].client_order_id << std::endl;
+              BOOST_LOG_TRIVIAL(error) << "provider/alpaca LastOrderId: can not decode order " << vOrderId[ 0 ].client_order_id;
             }
           }
         }
       }
       else {
-        std::cout << "os Order List Retrieval problems: " << message << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca Order List Retrieval problems: " << message;
       }
     }
   );
@@ -612,7 +613,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
     asio::make_strand( m_srvc ),
     m_ssl_context
   );
-  std::cout << "order '" << json::serialize( request ) << "'" << std::endl;
+  std::cout << "provider/alpaca order '" << json::serialize( request ) << "'" << std::endl;
   os->post(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
@@ -625,7 +626,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
         json::error_code jec;
         json::value jv = json::parse( s, jec );
         if ( jec.failed() ) {
-          std::cout << "failed to parse order result: " << s << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "provider/alpaca - failed to parse order result: " << s;
         }
         else {
           try {
@@ -645,12 +646,14 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
               switch ( result.code ) {
                 case 40010001: // client_order_id must be unique
                 case 40310000: //
-                  std::cout << "order not placed: (" << result.code << ") " << result.message << std::endl;
+                case 42210000: // sub-penny problems on an equity, need to perform rounding
+                  BOOST_LOG_TRIVIAL(warning) << "provider/alpaca - order not placed: (" << result.code << ") " << result.message;
                   // TODO: need to cancel the order locally
                   break;
+                  //assert( false );
                 default:
-                  std::cout << "place order unhandled error: " << s << std::endl;
-                  assert( false );  // abort to catch other possibilities
+                  BOOST_LOG_TRIVIAL(error) << "provider/alpaca - place order unhandled error: " << s;
+                  //assert( false );  // abort to catch other possibilities
                   break;
               }
             }
@@ -668,13 +671,13 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
 
           }
           catch ( std::out_of_range& error ) {
-            std::cout << "place order exception: " << s << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "provider/alpaca place order exception: " << s;
             assert( false );
           }
         }
       }
       else {
-        std::cout << "place order one_shot error: " << s << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca - place order one_shot error: " << s;
       }
     }
   );
@@ -696,11 +699,11 @@ void Provider::CancelOrder( pOrder_t pOrder ) {
     std::string( "/v2/orders/" + order.GetRow().sReference ),
     //"/v2/orders/", // TODO: need broker supplied order id
     []( bool bResult, const std::string& s ) { // TODO: decode the result here, probably won't show up in the stream?
-      if ( bResult ) { // there is
-        std::cout << "cancel order result: " << s << std::endl;
+      if ( bResult ) { // any processing required on either true/false side?
+        BOOST_LOG_TRIVIAL(info) << "provider/alpaca cancel order result: " << s;
       }
       else {
-        std::cout << "cancel order error: " << s << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "provider/alpaca cancel order error: " << s;
       }
     }
   );
