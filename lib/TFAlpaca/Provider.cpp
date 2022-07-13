@@ -589,16 +589,16 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
       break;
     case OrderType::Limit:
       request[ "type" ] = "limit";
-      request[ "limit_price"] = trd.dblPrice1;
+      request[ "limit_price"] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
       break;
     case OrderType::Stop:
       request[ "type" ] = "stop";
-      request[ "stop_price" ] = trd.dblPrice1;
+      request[ "stop_price" ] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
       break;
     case OrderType::StopLimit:
       request[ "type" ] = "stop_limit";
-      request[ "limit_price" ] = trd.dblPrice1;
-      request[ "stop_price"] = trd.dblPrice2;
+      request[ "limit_price" ] = std::round( trd.dblPrice1 / 0.01 ) * 0.01;
+      request[ "stop_price"]   = std::round( trd.dblPrice2 / 0.01 ) * 0.01;
       break;
     default:
       assert( false );
