@@ -457,15 +457,23 @@ public:
 
 protected:
   void OnHistoryConnected() {
-    //std::cout << "History Connected" << std::endl;
+    std::cout << "History Connected" << std::endl;
     m_fConnected();
   }
-  void OnHistoryDisconnected() {}
-  void OnHistoryError( size_t e ) {}
+
+  void OnHistoryDisconnected() {
+    std::cout << "History DisConnected" << std::endl;
+  }
+
+  void OnHistoryError( size_t e ) {
+    std::cout << "RetrieveTicks::OnHistoryError " << e << " *********" << std::endl;
+  }
+
   void OnHistoryTickDataPoint( TickDataPoint* pDP ) {
     m_fTick( *pDP );
     ReQueueTickDataPoint( pDP );
   };
+
   void OnHistoryRequestDone( bool bStatus ) {
     m_fDone( bStatus );
   };
@@ -493,7 +501,6 @@ public:
     assert( m_fSecurity );
     assert( m_fRetrievalDone );
 
-    //futureDone = promiseDone.get_future();
     futureStart = promiseStart.get_future();
 
     for ( uint32_t count = 0; count < m_nSimultaneousRetrievals; count++ ) {
@@ -507,6 +514,7 @@ public:
           } )
         );
     }
+
     futureStart.wait();
     assert( m_nSimultaneousRetrievals == m_countStarted );  // assumes sync startup, use future/promise if async
   }

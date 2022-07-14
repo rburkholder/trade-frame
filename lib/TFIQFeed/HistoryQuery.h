@@ -384,13 +384,13 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
     case RetrievalState::Done:
       // it is an error to land here
-      DEBUGOUT( "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Done\n" );
+      std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Done" << std::endl;
       //throw std::logic_error( "RetrievalState::Done");
       //ReturnLineBuffer( wParam );
       break;
     case RetrievalState::Idle:
       // it is an error to land here
-      DEBUGOUT( "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle\n" );
+      std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle"  << std::endl;
       //throw std::logic_error( "RetrievalState::Idle");
       //ReturnLineBuffer( wParam );
       break;
@@ -567,7 +567,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     if ( 'E' == *bgn2 ) { // indication of an error
       b = parse( bgn2, end, m_ruleErrorInvalidSymbol );
       if ( b ) {
-        DEBUGOUT( "Invalid Symbol\n" );
+        std::cout << "Invalid Symbol" << std::endl;
         m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
             static_cast<T*>( this )->OnHistoryRequestDone( false );
