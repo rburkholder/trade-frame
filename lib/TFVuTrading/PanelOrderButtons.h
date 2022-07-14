@@ -90,6 +90,7 @@ private:
   enum {
     ID_Null=wxID_HIGHEST
   , ID_PanelOrderButtons
+  , ID_TXT_Symbol, ID_TXT_Quantity, ID_TXT_ProfitLoss
   , ID_BtnBuy, ID_BtnSell, ID_BtnClose, ID_BtnCancel
   , ID_CB_PositionEntry
   , ID_CB_PositionExitProfit
@@ -117,6 +118,10 @@ private:
 
   PanelOrderButtons_Order m_order;
   PanelOrderButtons_MarketData m_data;
+
+    wxTextCtrl* m_txtSymbol;
+    wxTextCtrl* m_txtQuantity;
+    wxTextCtrl* m_txtProfitLoss;
 
     wxTextCtrl* m_txtQuanStock;
     wxTextCtrl* m_txtQuanFuture;
