@@ -287,7 +287,7 @@ private:
           bool bGetFundamentals( false );
           {
             const std::string sListedMarket( m_piqfeed->ListedMarket( keyListedMarket ) );
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::scoped_lock<std::mutex> lock( m_mutex );
             m_mapSecurity.emplace( sSymbol, std::make_shared<Security>( sSymbol, sListedMarket ) );
             m_bCheckProcessing = true;
             if ( nMaxInTransit > m_mapAcquire.size() ) {
@@ -326,7 +326,7 @@ private:
 
     if ( 0 < m_mapSecurity.size() ) {
 
-      std::lock_guard<std::mutex> lock( m_mutex );
+      std::scoped_lock<std::mutex> lock( m_mutex );
 
       mapSecurity_t::iterator iterSecurity = m_mapSecurity.begin();
       pSecurity_t pSecurity = iterSecurity->second;
@@ -379,7 +379,7 @@ private:
 
             m_pAcquireFundamentals_burial = std::move( iterAcquire->second.pAcquireFundamentals );
             {
-              std::lock_guard<std::mutex> lock( m_mutex );
+              std::scoped_lock<std::mutex> lock( m_mutex );
               m_mapAcquire.erase( iterAcquire );
             }
 
@@ -403,7 +403,7 @@ private:
         }
         else {
           //if ( n != m_nEndStateLastAcquire ) {
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::scoped_lock<std::mutex> lock( m_mutex );
             std::cout << "** waiting on:";
             for ( const mapAcquire_t::value_type& vt: m_mapAcquire ) {
               std::cout << " " << vt.first;
@@ -521,7 +521,7 @@ public:
 
   void Retrieve( pSecurity_t pSecurity ) {
     {
-      std::lock_guard<std::mutex> lock( m_mutex );
+      std::scoped_lock<std::mutex> lock( m_mutex );
       m_mapSecurity_Waiting.emplace( pSecurity->sName, pSecurity );
     }
     StartRetrieval();
@@ -535,7 +535,7 @@ public:
       << "," << m_vRetrieveTicks_Avail.size()
       ;
     if ( 0 != m_mapRetrieveTicks.size() ) {
-      //std::lock_guard<std::mutex> lock( m_mutex ); // can't lock, already in a lock
+      //std::scoped_lock<std::mutex> lock( m_mutex ); // can't lock, already in a lock
       for ( const mapRetrieveTicks_t::value_type& vt: m_mapRetrieveTicks ) {
         auto pSecurity = vt.second.pSecurity;
         std::cout
@@ -589,7 +589,7 @@ private:
   mapRetrieveTicks_t m_mapRetrieveTicks;
 
   void StartRetrieval() {
-    std::lock_guard<std::mutex> lock( m_mutex );
+    std::scoped_lock<std::mutex> lock( m_mutex );
     //std::cout << "StartRetrieval: "
     //  << m_vRetrieveTicks_Avail.size()
     //  << "," << m_mapSecurity_Waiting.size()
@@ -650,7 +650,7 @@ private:
             pSecurity_t pSecurity = iter->second.pSecurity;
             m_fSecurity( pSecurity );
             {
-              std::lock_guard<std::mutex> lock( m_mutex );
+              std::scoped_lock<std::mutex> lock( m_mutex );
               m_vRetrieveTicks_Avail.push_back( iter->second.pRetrieveTicks );
               m_mapRetrieveTicks.erase( iter );
             }
