@@ -23,8 +23,9 @@
  //   indicate support/resistance as the day progresses
  // 2022/03/21 perform a roll down on put, roll up on call?
 
-#include <TFIndicators/RunningStats.h>
 #include <memory>
+
+#include <boost/format.hpp>
 
 //#include <TFOptions/Engine.h>
 #include <TFOptions/GatherOptions.h>
@@ -85,10 +86,6 @@ bool InteractiveChart::Create(
 }
 
 InteractiveChart::~InteractiveChart() {
-  m_pStrategy.reset();
-  Disconnect();
-  m_bfPrice.SetOnBarComplete( nullptr );
-  m_mapLifeCycle_Trade.clear();
 }
 
 void InteractiveChart::Init() {
@@ -217,6 +214,7 @@ void InteractiveChart::SetPosition(
 , fBuildPosition_t&& fBuildPosition
 , fClick_t&& fClickLeft
 , fClick_t&& fClickRight
+, fUpdatePosition_t&& fUpdatePosition
 , TreeItem* pTreeItemParent
 , ou::ChartEntryMark& cemReferenceLevels
 ) {
@@ -233,6 +231,7 @@ void InteractiveChart::SetPosition(
 
   m_fClickLeft = std::move( fClickLeft );
   m_fClickRight = std::move( fClickRight );
+  m_fUpdatePosition = std::move( fUpdatePosition );
 
   m_pOptionChainQuery = pOptionChainQuery;
 
@@ -655,6 +654,30 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
+  if ( m_fUpdatePosition ) {
+    ou::tf::PanelOrderButtons_PositionData data;
+    data.m_sSymbol = m_pPositionUnderlying->GetInstrument()->GetInstrumentName();
+
+    boost::format format( "%0.2f" ); // TODO: refactor this
+    format % dblTotal;
+    data.m_sProfitLoss = format.str();
+
+    auto n = m_pPositionUnderlying->GetActiveSize();
+    if ( 0 < n ) {
+      switch ( m_pPositionUnderlying->GetRow().eOrderSideActive ) {
+        case ou::tf::OrderSide::Buy:
+          data.m_sQuantity = "+" + boost::lexical_cast<std::string>( n );;
+          break;
+        case ou::tf::OrderSide::Sell:
+          data.m_sQuantity = "-" + boost::lexical_cast<std::string>( n );;
+          break;
+        default:
+          break;
+      }
+    }
+    m_fUpdatePosition( data );
+  }
+
   //CheckOptions(); // do this differently
 }
 
@@ -732,6 +755,10 @@ void InteractiveChart::UnBindEvents() {
 
 void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
   SetChartDataView( nullptr );
+  m_pStrategy.reset();
+  Disconnect();
+  m_bfPrice.SetOnBarComplete( nullptr );
+  m_mapLifeCycle_Trade.clear();
   UnBindEvents();
   event.Skip();  // auto followed by Destroy();
 }

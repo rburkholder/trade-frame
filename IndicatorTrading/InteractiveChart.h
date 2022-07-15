@@ -66,6 +66,7 @@ namespace option {
 } // namespace option
   struct PanelOrderButtons_Order;
   struct PanelOrderButtons_MarketData;
+  struct PanelOrderButtons_PositionData;
 } // namespace tf
 } // namespace ou
 
@@ -115,6 +116,8 @@ public:
 
   using fClick_t = std::function<void(double)>; // price level
 
+  using fUpdatePosition_t = std::function<void(const ou::tf::PanelOrderButtons_PositionData&)>;
+
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
   void SetPosition(
@@ -125,6 +128,7 @@ public:
    , fBuildPosition_t&&
    , fClick_t&& left
    , fClick_t&& right
+   , fUpdatePosition_t&&
    , TreeItem*
    , ou::ChartEntryMark& cemReferenceLevels
     );
@@ -201,6 +205,7 @@ private:
 
   fClick_t m_fClickLeft;
   fClick_t m_fClickRight;
+  fUpdatePosition_t m_fUpdatePosition;
 
   TreeItem* m_pTreeItemUnderlying;
 

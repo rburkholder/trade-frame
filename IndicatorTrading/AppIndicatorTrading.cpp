@@ -356,7 +356,9 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
       m_pPanelOrderButtons->SetPriceAtFocus( s );
     },
     [this]( double value ) { // m_fClickRight
-
+    },
+    [this]( const ou::tf::PanelOrderButtons_PositionData& data ){ // m_fUpdatePosition
+      m_pPanelOrderButtons->Update( data );
     },
     m_pTreeItemRoot,
     m_cemReferenceLevels

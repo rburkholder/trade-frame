@@ -20248,7 +20248,7 @@
                 <bool name="proxy-Separate files">0</bool>
                 <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
-                <long name="proxy-Width">-1</long>
+                <long name="proxy-Width">110</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
                 <bool name="proxy-wxBORDER_THEME">0</bool>
                 <bool name="proxy-wxBOTTOM">1</bool>
@@ -20404,7 +20404,7 @@
                 <bool name="proxy-Separate files">0</bool>
                 <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
-                <long name="proxy-Width">50</long>
+                <long name="proxy-Width">65</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
                 <bool name="proxy-wxBORDER_THEME">0</bool>
                 <bool name="proxy-wxBOTTOM">1</bool>
@@ -20560,7 +20560,7 @@
                 <bool name="proxy-Separate files">0</bool>
                 <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
-                <long name="proxy-Width">-1</long>
+                <long name="proxy-Width">70</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
                 <bool name="proxy-wxBORDER_THEME">0</bool>
                 <bool name="proxy-wxBOTTOM">1</bool>
