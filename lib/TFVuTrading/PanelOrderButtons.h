@@ -83,6 +83,7 @@ public:
    void SetPriceAtFocus( const std::string& );
 
    void Update( const PanelOrderButtons_MarketData& );
+   void Update( const PanelOrderButtons_PositionData& );
 
 protected:
 private:

@@ -469,6 +469,12 @@ void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
 }
 
+void PanelOrderButtons::Update( const PanelOrderButtons_PositionData& data ) {
+  m_txtSymbol->SetLabel( data.m_sSymbol );
+  m_txtQuantity->SetLabel( data.m_sQuantity );
+  m_txtProfitLoss->SetLabel( data.m_sProfitLoss );
+}
+
 bool PanelOrderButtons::ValidateFields() {
   bool bOk( true );
   if ( m_order.m_bPositionEntryEnable ) {

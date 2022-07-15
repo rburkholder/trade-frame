@@ -37,8 +37,6 @@ struct PanelOrderButtons_Order {
     SynthShort=32, CallOtm=12, PutItm=21
     };
 
-  bool m_bCockForCursor;
-
   std::string m_sQuanStock;
   std::string m_sQuanFuture;
   std::string m_sQuanOption;
@@ -62,8 +60,7 @@ struct PanelOrderButtons_Order {
   bool m_bStochastic3;
 
   PanelOrderButtons_Order()
-  : m_bCockForCursor( false )
-  , m_bPositionEntryEnable( true ), m_ePositionEntryMethod( EPositionEntryMethod::Market )
+  : m_bPositionEntryEnable( true ), m_ePositionEntryMethod( EPositionEntryMethod::Market )
   , m_bPositionExitProfitEnable( false ), m_ePositionExitProfitMethod( EPositionExitProfitMethod::Relative )
   , m_bPositionExitStopEnable( false ), m_ePositionExitStopMethod( EPositionExitStopMethod::TrailingAbsolute )
   , m_eInstrument( EInstrument::Underlying )
@@ -102,6 +99,12 @@ struct PanelOrderButtons_MarketData {
   std::string m_sPut2Ask;
   std::string m_sPut2Bid;
 
+};
+
+struct PanelOrderButtons_PositionData {
+  std::string m_sSymbol;
+  std::string m_sQuantity;
+  std::string m_sProfitLoss;
 };
 
 } // namespace tf
