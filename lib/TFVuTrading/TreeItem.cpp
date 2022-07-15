@@ -117,7 +117,16 @@ void TreeItem::UpdateText( const std::string& sText ) {
 void TreeItem::Delete() {
   //  if ( 0 < m_pTree->GetChildrenCount( id ) ) throw std::runtime_error( "item has children" );
   // everything should self delete
-  m_pTreeCtrl->Delete( m_idSelf );
+  if ( m_pTreeCtrl ) {
+    m_pTreeCtrl->Delete( m_idSelf );
+    Deleted( m_idSelf );
+  }
+}
+
+void TreeItem::Deleted( const wxTreeItemId& id ) {
+  if ( id == m_idSelf ) {
+    m_pTreeCtrl = nullptr;
+  }
 }
 
 void TreeItem::NewMenu() {
@@ -170,6 +179,17 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     },
     pTree->GetId()
     );
+
+  pTree->Bind(
+    wxEVT_TREE_DELETE_ITEM,
+    [pTree]( wxTreeEvent& event ){
+      wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
+      assert( nullptr != pData );
+      CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+      pCustom->GetTreeItem()->Deleted( event.GetItem() );
+    },
+    pTree->GetId()
+  );
 
 }
 

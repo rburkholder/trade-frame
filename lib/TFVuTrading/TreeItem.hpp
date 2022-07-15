@@ -51,6 +51,7 @@ public:
   void SortChildren();
 
   void Delete();
+  void Deleted( const wxTreeItemId& );
   void UpdateText( const std::string& );
 
   void NewMenu();
