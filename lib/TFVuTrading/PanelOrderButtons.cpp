@@ -106,7 +106,7 @@ void PanelOrderButtons::CreateControls() {
     wxStaticText* itemStaticText3 = new wxStaticText( itemPanel1, wxID_STATIC, _("Symbol:"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerPosition->Add(itemStaticText3, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtSymbol = new wxTextCtrl( itemPanel1, ID_TXT_Symbol, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+    m_txtSymbol = new wxTextCtrl( itemPanel1, ID_TXT_Symbol, wxEmptyString, wxDefaultPosition, wxSize(100, -1), wxTE_READONLY );
     sizerPosition->Add(m_txtSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxStaticText* itemStaticText5 = new wxStaticText( itemPanel1, wxID_STATIC, _("Quantity:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -118,7 +118,7 @@ void PanelOrderButtons::CreateControls() {
     wxStaticText* itemStaticText7 = new wxStaticText( itemPanel1, wxID_STATIC, _("P/L:"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerPosition->Add(itemStaticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtProfitLoss = new wxTextCtrl( itemPanel1, ID_TXT_ProfitLoss, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
+    m_txtProfitLoss = new wxTextCtrl( itemPanel1, ID_TXT_ProfitLoss, wxEmptyString, wxDefaultPosition, wxSize(70, -1), wxTE_READONLY|wxTE_RIGHT );
     sizerPosition->Add(m_txtProfitLoss, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     sizerQuantity = new wxBoxSizer(wxHORIZONTAL);
@@ -365,6 +365,7 @@ void PanelOrderButtons::CreateControls() {
     m_cbEnableStoch3 = new wxCheckBox( itemPanel1, ID_CB_Stoch3, _("Stoch 3"), wxDefaultPosition, wxDefaultSize, 0 );
     m_cbEnableStoch3->SetValue(false);
     sizerStochastic->Add(m_cbEnableStoch3, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
+
   m_txtPricePositionEntry->Connect(ID_TXT_PositionEntry, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionEntry), NULL, this);
   m_txtPriceProfitExit->Connect(ID_TXT_PositionExitProfit, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitProfit), NULL, this);
   m_txtPriceStopExit->Connect(ID_TXT_PositionExitStop, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitStop), NULL, this);
@@ -470,9 +471,9 @@ void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 }
 
 void PanelOrderButtons::Update( const PanelOrderButtons_PositionData& data ) {
-  m_txtSymbol->SetLabel( data.m_sSymbol );
-  m_txtQuantity->SetLabel( data.m_sQuantity );
-  m_txtProfitLoss->SetLabel( data.m_sProfitLoss );
+  m_txtSymbol->SetValue( data.m_sSymbol );
+  m_txtQuantity->SetValue( data.m_sQuantity );
+  m_txtProfitLoss->SetValue( data.m_sProfitLoss );
 }
 
 bool PanelOrderButtons::ValidateFields() {
