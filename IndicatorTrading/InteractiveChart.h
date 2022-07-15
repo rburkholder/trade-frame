@@ -83,7 +83,6 @@ class InteractiveChart:
 {
 public:
 
-  InteractiveChart();
   InteractiveChart(
     wxWindow* parent,
     wxWindowID id = SYMBOL_WIN_CHARTINTERACTIVE_IDNAME,

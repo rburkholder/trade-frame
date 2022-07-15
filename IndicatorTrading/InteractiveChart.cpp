@@ -43,35 +43,6 @@ namespace {
   static const size_t nPeriods = 14;
 }
 
-InteractiveChart::InteractiveChart()
-: ou::tf::WinChartView()
-, m_bConnected( false )
-, m_bOptionsReady( false )
-, m_bTriggerFeatureSetDump( false )
-
-, m_dblSumVolume {}
-, m_dblSumVolumePrice {}
-
-, m_bfPrice( nBarSeconds )
-, m_bfPriceUp( nBarSeconds )
-, m_bfPriceDn( nBarSeconds )
-
-, m_dblImbalanceMean {}, m_dblImbalanceSlope {}
-
-, m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
-, m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::LightBlue )
-, m_ceSellSubmit( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
-, m_ceSellFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Pink )
-, m_ceCancelled( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Orange )
-
-, m_ceBullCall( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
-, m_ceBullPut( ou::ChartEntryShape::EShape::Long, ou::Colour::LightBlue )
-, m_ceBearCall( ou::ChartEntryShape::EShape::Short, ou::Colour::Pink )
-, m_ceBearPut( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
-{
-  Init();
-}
-
 InteractiveChart::InteractiveChart(
   wxWindow* parent, wxWindowID id,
   const wxPoint& pos, const wxSize& size, long style
