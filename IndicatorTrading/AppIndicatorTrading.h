@@ -31,6 +31,8 @@
 
 #include <OUCharting/ChartEntryMark.h>
 
+#include <OUSound/PortAudio.hpp>
+
 #include <TFTrading/DBWrapper.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -74,6 +76,8 @@ private:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  ou::PortAudio m_PortAudio;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;

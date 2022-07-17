@@ -185,3 +185,9 @@ re-written for current use.
 
 * IQFeed testing: you can utilize the symbol TST$Y, this symbol sends a loop of data 24/7. (2019/03/12)
 
+##
+
+* 2022/07/16 additional package requirement (incorporated into libs-build/build):  
+  * sudo apt install portaudio19-dev
+
+

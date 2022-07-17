@@ -95,6 +95,7 @@ target_link_libraries(
       TFTrading
       TFHDF5TimeSeries
       OUCommon
+      OUSound
       OUSQL
       OUSqlite
       OUCharting
@@ -112,6 +113,7 @@ target_link_libraries(
       wx_gtk3u_adv-3.1
       wx_gtk3u_core-3.1
       wx_baseu-3.1
+      portaudio
       pthread
   )
 
