@@ -19,10 +19,13 @@
  * Created: July 16, 2022 16:10:52
  */
 
+// use libsndfile to load various files/file-formats for playback
+
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
 
+#include "Music.hpp"
 #include "PortAudio.hpp"
 
 namespace {
@@ -85,8 +88,8 @@ PortAudio::PortAudio()
       throw std::runtime_error( Pa_GetErrorText( pa_error ) );
     }
     else {
-      m_pSine1 = std::make_unique<Sine>( 440.0, defaultSampleRate );
-      m_pSine2 = std::make_unique<Sine>( 441.0, defaultSampleRate );
+      m_pSine1 = std::make_unique<Sine>( music::Frequency( 4, music::Note::A ), defaultSampleRate );
+      m_pSine2 = std::make_unique<Sine>( music::Frequency( 3, music::Note::A ) + 1.0f, defaultSampleRate );
     }
   }
 
@@ -99,15 +102,14 @@ PortAudio::PortAudio()
       2,          /* stereo output */
       paFloat32,  /* 32 bit floating point output */
       freqSampleRate,
-      //256,        /* frames per buffer, i.e. the number
-      paFramesPerBufferUnspecified, /*
+      paFramesPerBufferUnspecified, /*  could use 256 as a self-defined number ..
+                    frames per buffer, i.e. the number
                     of sample frames that PortAudio will
-                    request from the callback. Many apps
-                    may want to use
-                    paFramesPerBufferUnspecified, which
+                    request from the callback.
+                    paFramesPerBufferUnspecified:
                     tells PortAudio to pick the best,
                     possibly changing, buffer size.*/
-      &CallBack, // this is your callback function
+      &CallBack_Demo, // this is your callback function
       &m_Frame   // This is a pointer that will be passed to your callback
       );
 
@@ -151,7 +153,7 @@ PortAudio::~PortAudio() {
  * that could mess up the system like calling malloc() or free().
 */
 // http://portaudio.com/docs/v19-doxydocs/writing_a_callback.html
-int PortAudio::CallBack(
+int PortAudio::CallBack_Demo(
   const void* inputBuffer, void* outputBuffer
 , unsigned long framesPerBuffer
 , const PaStreamCallbackTimeInfo* timeInfo

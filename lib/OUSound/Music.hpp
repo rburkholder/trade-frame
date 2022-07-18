@@ -13,35 +13,21 @@
  ************************************************************************/
 
 /*
- * File:    WaveGen.cpp
+ * File:    Music.hpp
  * Author:  raymond@burkholder.net
  * Project: lib/OUSound
- * Created: July 17, 2022 20:25:27
+ * Created: July 18, 2022 13:54:58
  */
 
-#include <cmath>
-
-#include "WaveGen.hpp"
-
-// https://www.musicdsp.org/en/latest/Synthesis/9-fast-sine-wave-calculation.html
-
 namespace ou { // One Unified
+namespace music {
 
-Sine::Sine( double frequency, double sample_rate ) {
-  double initial_phase = 0.0; // radians
-  double w = frequency * 2.0 * M_PI / sample_rate;
-  m_b1 = 2.0 * std::cos( w );
-  m_y1 = std::sin( initial_phase - w );
-  m_y2 = std::sin( initial_phase - 2.0 * w );
-}
+enum class Note {
+  C = -9, Cs = -8, Df = -8, D = -7, Ds = -6, Ef = -6, E = -5,
+  F = -4, Fs = -3, Gf = -3, G = -2, Gs = -1, Af = -1, A = 0, As = 1, Bf = 1, B = 2
+};
 
-float Sine::Sample() {
+float Frequency( int octave, Note note );
 
-  float result = m_y0 = m_b1 * m_y1 - m_y2;
-  m_y2 = m_y1;
-  m_y1 = m_y0;
-
-  return result;
-}
-
+} // namespace music
 } // namespace ou

@@ -10,12 +10,14 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
+    Music.hpp
     PortAudio.hpp
     WaveGen.hpp
   )
 
 set(
   file_cpp
+    Music.cpp
     PortAudio.cpp
     WaveGen.cpp
   )

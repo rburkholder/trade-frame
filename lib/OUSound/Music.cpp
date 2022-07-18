@@ -13,35 +13,34 @@
  ************************************************************************/
 
 /*
- * File:    WaveGen.cpp
+ * File:    Music.cpp
  * Author:  raymond@burkholder.net
  * Project: lib/OUSound
- * Created: July 17, 2022 20:25:27
+ * Created: July 18, 2022 13:54:58
  */
 
+#include <cassert>
 #include <cmath>
 
-#include "WaveGen.hpp"
-
-// https://www.musicdsp.org/en/latest/Synthesis/9-fast-sine-wave-calculation.html
+#include "Music.hpp"
 
 namespace ou { // One Unified
+namespace music {
 
-Sine::Sine( double frequency, double sample_rate ) {
-  double initial_phase = 0.0; // radians
-  double w = frequency * 2.0 * M_PI / sample_rate;
-  m_b1 = 2.0 * std::cos( w );
-  m_y1 = std::sin( initial_phase - w );
-  m_y2 = std::sin( initial_phase - 2.0 * w );
+// https://en.wikipedia.org/wiki/Musical_note
+// A above middle C is A4 = 440 Hz
+// typical octave range A0 to C8
+// midi notes are 0 ( C-1 ) to 127 ( G9)
+// midi: f = 2^((p-69)/12) x 440Hz
+
+float Frequency( int octave, Note note_ ) {
+  assert( -1 <= octave );
+  assert(  8 >= octave );
+  static const int base_octave = 4;
+  int note = 12.0f * ( octave - base_octave ) + (int)note_;
+  return std::pow( 2.0f, (float)note / 12.0f ) * 440.0f;
 }
 
-float Sine::Sample() {
 
-  float result = m_y0 = m_b1 * m_y1 - m_y2;
-  m_y2 = m_y1;
-  m_y1 = m_y0;
-
-  return result;
-}
-
+} // namespace music
 } // namespace ou

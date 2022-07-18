@@ -54,7 +54,7 @@ private:
 
   PaStream* m_pStream;
 
-  static int CallBack(
+  static int CallBack_Demo(
     const void* inputBuffer, void* outputBuffer,
     unsigned long framesPerBuffer,
     const PaStreamCallbackTimeInfo* timeInfo,
