@@ -11,11 +11,13 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 set(
   file_h
     PortAudio.hpp
+    WaveGen.hpp
   )
 
 set(
   file_cpp
     PortAudio.cpp
+    WaveGen.cpp
   )
 
 add_library(

@@ -19,6 +19,7 @@
  * Created: July 16, 2022 16:10:52
  */
 
+#include <cassert>
 #include <iostream>
 #include <stdexcept>
 
@@ -43,35 +44,83 @@ PortAudio::PortAudio()
     throw std::runtime_error( Pa_GetErrorText( pa_error ) );
   }
 
-  // http://portaudio.com/docs/v19-doxydocs/open_default_stream.html
-  //std::cout << "Pa_OpenDefaultStream" << std::endl;
-  pa_error = Pa_OpenDefaultStream( // Open an audio I/O stream.
-    &m_pStream,
-    0,          /* no input channels */
-    2,          /* stereo output */
-    paFloat32,  /* 32 bit floating point output */
-    freqSampleRate,
-    //256,        /* frames per buffer, i.e. the number
-    paFramesPerBufferUnspecified, /*
-                  of sample frames that PortAudio will
-                  request from the callback. Many apps
-                  may want to use
-                  paFramesPerBufferUnspecified, which
-                  tells PortAudio to pick the best,
-                  possibly changing, buffer size.*/
-    &CallBack, // this is your callback function
-    &m_Frame   // This is a pointer that will be passed to your callback
-    );
 
-  if ( paNoError != pa_error ) {
-    std::cerr << "PortAudio open error: " << Pa_GetErrorText( pa_error ) << std::endl;
-    throw std::runtime_error( Pa_GetErrorText( pa_error ) );
+  int numDevices = Pa_GetDeviceCount();
+  if( 0 >= numDevices ) {
+    std::cerr << "PortAudio: Pa_CountDevices returned " << numDevices << " devices" << std::endl;
+  }
+  else {
+    PaDeviceIndex index = Pa_GetDefaultOutputDevice();
+    const PaDeviceInfo* pInfo = Pa_GetDeviceInfo( index );
+    double defaultSampleRate = pInfo->defaultSampleRate;
+
+    //std::cout
+    //  << "sound default device '" << pInfo->name
+    //  << "' channels " << pInfo->maxOutputChannels
+    //  << " sample rate " << defaultSampleRate
+    //  << std::endl;
+
+    assert( 2 <= pInfo->maxOutputChannels );
+
+    PaStreamParameters parameters;
+    parameters.device = index;
+    parameters.channelCount = 2;
+    parameters.sampleFormat = paFloat32;
+    parameters.suggestedLatency = pInfo->defaultLowOutputLatency;
+    parameters.hostApiSpecificStreamInfo = nullptr;
+
+    pa_error = Pa_OpenStream( // Open an audio I/O stream.
+      &m_pStream,
+      nullptr,          /* no input channels */
+      &parameters,      /* output channel */
+      defaultSampleRate,
+      paFramesPerBufferUnspecified,
+      paNoFlag,
+      &CallBack_Sine, // this is your callback function
+      this   // This is a pointer that will be passed to your callback
+      );
+
+    if ( paNoError != pa_error ) {
+      std::cerr << "PortAudio open error: " << Pa_GetErrorText( pa_error ) << std::endl;
+      throw std::runtime_error( Pa_GetErrorText( pa_error ) );
+    }
+    else {
+      m_pSine1 = std::make_unique<Sine>( 440.0, defaultSampleRate );
+      m_pSine2 = std::make_unique<Sine>( 441.0, defaultSampleRate );
+    }
+  }
+
+  if ( false ) {
+    // http://portaudio.com/docs/v19-doxydocs/open_default_stream.html
+    //std::cout << "Pa_OpenDefaultStream" << std::endl;
+    pa_error = Pa_OpenDefaultStream( // Open an audio I/O stream.
+      &m_pStream,
+      0,          /* no input channels */
+      2,          /* stereo output */
+      paFloat32,  /* 32 bit floating point output */
+      freqSampleRate,
+      //256,        /* frames per buffer, i.e. the number
+      paFramesPerBufferUnspecified, /*
+                    of sample frames that PortAudio will
+                    request from the callback. Many apps
+                    may want to use
+                    paFramesPerBufferUnspecified, which
+                    tells PortAudio to pick the best,
+                    possibly changing, buffer size.*/
+      &CallBack, // this is your callback function
+      &m_Frame   // This is a pointer that will be passed to your callback
+      );
+
+    if ( paNoError != pa_error ) {
+      std::cerr << "PortAudio open error: " << Pa_GetErrorText( pa_error ) << std::endl;
+      throw std::runtime_error( Pa_GetErrorText( pa_error ) );
+    }
   }
 
   // http://portaudio.com/docs/v19-doxydocs/utility_functions.html
-  const PaStreamInfo* pInfo;
+  //const PaStreamInfo* pInfo;
   //std::cout << "Pa_GetStreamInfo" << std::endl;
-  pInfo = Pa_GetStreamInfo ( m_pStream );
+  //pInfo = Pa_GetStreamInfo( m_pStream );
 
   Start();
 
@@ -112,12 +161,11 @@ int PortAudio::CallBack(
   /* Cast data passed through stream to our structure. */
   Frame* pFrame = reinterpret_cast<Frame*>( userData );
   float* pOutput = reinterpret_cast<float*>( outputBuffer );
-  unsigned long i;
   //(void) inputBuffer; /* Prevent unused variable warning. */
 
-  for( i = 0; i < framesPerBuffer; i++ ) {
-      *(pOutput++) = pFrame->phaseLeft;
-      *(pOutput++) = pFrame->phaseRight;
+  for( unsigned long cnt = 0; cnt < framesPerBuffer; cnt++ ) {
+    *(pOutput++) = pFrame->phaseLeft;
+    *(pOutput++) = pFrame->phaseRight;
     /* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
     pFrame->phaseLeft += 0.01f;
     /* When signal reaches top, drop back down. */
@@ -129,15 +177,35 @@ int PortAudio::CallBack(
   return 0;
 }
 
+int PortAudio::CallBack_Sine(
+  const void* inputBuffer, void* outputBuffer
+, unsigned long framesPerBuffer
+, const PaStreamCallbackTimeInfo* timeInfo
+, PaStreamCallbackFlags statusFlags
+, void* userData
+) {
+  /* Cast data passed through stream to our structure. */
+  //Frame* pFrame = reinterpret_cast<Frame*>( userData );
+  PortAudio* self = reinterpret_cast<PortAudio*>( userData );
+  float* pOutput = reinterpret_cast<float*>( outputBuffer );
+  //(void) inputBuffer; /* Prevent unused variable warning. */
+
+  for( unsigned long cnt = 0; cnt < framesPerBuffer; cnt++ ) {
+    *(pOutput++) = self->m_pSine1->Sample();
+    *(pOutput++) = self->m_pSine2->Sample();
+  }
+  return 0;
+}
+
 void PortAudio::Enumerate() {
   // http://portaudio.com/docs/v19-doxydocs/querying_devices.html
   int numDevices = Pa_GetDeviceCount();
-  if( numDevices <= 0 ) {
+  if( 0 >= numDevices ) {
     std::cerr << "PortAudio: Pa_CountDevices returned " << numDevices << " devices" << std::endl;
   }
   else {
     const PaDeviceInfo* pDeviceInfo;
-    for( int i = 0; i < numDevices; i++ ) {
+    for ( int i = 0; i < numDevices; i++ ) {
       pDeviceInfo = Pa_GetDeviceInfo( i );
       std::cout
         << "PortAudio device " << pDeviceInfo->name
@@ -164,7 +232,7 @@ void PortAudio::Stop() {
   PaError pa_error;
   if ( m_pStream ) {
     pa_error = Pa_StopStream( m_pStream );
-    if( pa_error != paNoError ) {
+    if ( paNoError != pa_error ) {
       std::cerr << "PortAudio stop error: " << Pa_GetErrorText( pa_error ) << std::endl;
     }
   }

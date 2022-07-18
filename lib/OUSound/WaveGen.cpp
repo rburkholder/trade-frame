@@ -13,62 +13,35 @@
  ************************************************************************/
 
 /*
- * File:    PortAudio.hpp
+ * File:    WaveGen.cpp
  * Author:  raymond@burkholder.net
  * Project: lib/OUSound
- * Created: July 16, 2022 16:10:52
+ * Created: July 17, 2022 20:25:27
  */
 
-#include <memory>
-
-#include <portaudio.h>
+#include <cmath>
 
 #include "WaveGen.hpp"
 
+// https://www.musicdsp.org/en/latest/Synthesis/9-fast-sine-wave-calculation.html
+
 namespace ou { // One Unified
 
-class PortAudio {
-public:
-  PortAudio();
-  ~PortAudio();
+Sine::Sine( double frequency, double sample_rate ) {
+  double initial_phase = 0.0;
+  double w = frequency * 2.0 * M_PI / sample_rate;
+  m_b1 = 2.0 * std::cos( w );
+  m_y1 = std::sin( initial_phase - w );
+  m_y2 = std::sin( initial_phase - 2.0 * w );
+}
 
-  void Enumerate();
+float Sine::Sample() {
 
-  void Start();
-  void Stop();
+  float result = m_y0 = m_b1 * m_y1 - m_y2;
+  m_y2 = m_y1;
+  m_y1 = m_y0;
 
-protected:
-private:
-
-  using pSine_t = std::unique_ptr<Sine>;
-  pSine_t m_pSine1;
-  pSine_t m_pSine2;
-
-  struct Frame {
-    float phaseLeft;
-    float phaseRight;
-    Frame(): phaseLeft {}, phaseRight {} {}
-  };
-
-  Frame m_Frame;
-
-  PaStream* m_pStream;
-
-  static int CallBack(
-    const void* inputBuffer, void* outputBuffer,
-    unsigned long framesPerBuffer,
-    const PaStreamCallbackTimeInfo* timeInfo,
-    PaStreamCallbackFlags statusFlags,
-    void* userData
-  );
-
-  static int CallBack_Sine(
-    const void* inputBuffer, void* outputBuffer,
-    unsigned long framesPerBuffer,
-    const PaStreamCallbackTimeInfo* timeInfo,
-    PaStreamCallbackFlags statusFlags,
-    void* userData
-  );
-};
+  return result;
+}
 
 } // namespace ou
