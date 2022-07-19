@@ -88,8 +88,8 @@ PortAudio::PortAudio()
       throw std::runtime_error( Pa_GetErrorText( pa_error ) );
     }
     else {
-      m_pSine1 = std::make_unique<Sine>( music::Frequency( 4, music::Note::A ), defaultSampleRate );
-      m_pSine2 = std::make_unique<Sine>( music::Frequency( 3, music::Note::A ) + 1.0f, defaultSampleRate );
+      m_pSine1 = std::make_unique<Sine>( music::Frequency( 4, music::PitchClass::A ), defaultSampleRate );
+      m_pSine2 = std::make_unique<Sine>( music::Frequency( 3, music::PitchClass::A ) + 1.0f, defaultSampleRate );
     }
   }
 

@@ -19,8 +19,8 @@
  * Created: July 18, 2022 13:54:58
  */
 
-#include <cassert>
 #include <cmath>
+#include <cassert>
 
 #include "Music.hpp"
 
@@ -33,11 +33,11 @@ namespace music {
 // midi notes are 0 ( C-1 ) to 127 ( G9)
 // midi: f = 2^((p-69)/12) x 440Hz
 
-float Frequency( int octave, Note note_ ) {
+float Frequency( int octave, PitchClass pc ) {
   assert( -1 <= octave );
   assert(  8 >= octave );
   static const int base_octave = 4;
-  int note = 12.0f * ( octave - base_octave ) + (int)note_;
+  int note = 12 * ( octave - base_octave ) + (int)pc;
   return std::pow( 2.0f, (float)note / 12.0f ) * 440.0f;
 }
 

@@ -22,12 +22,12 @@
 namespace ou { // One Unified
 namespace music {
 
-enum class Note {
+enum class PitchClass { // https://en.wikipedia.org/wiki/Pitch_class
   C = -9, Cs = -8, Df = -8, D = -7, Ds = -6, Ef = -6, E = -5,
   F = -4, Fs = -3, Gf = -3, G = -2, Gs = -1, Af = -1, A = 0, As = 1, Bf = 1, B = 2
 };
 
-float Frequency( int octave, Note note );
+float Frequency( int octave, PitchClass );
 
 } // namespace music
 } // namespace ou
