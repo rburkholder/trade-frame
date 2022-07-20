@@ -14,13 +14,11 @@
 #pragma once
 
 
+#include <mutex>
 #include <vector>
-#include <sstream>
-//#include <typeinfo.h>
+//#include <sstream>
 #include <cassert>
-
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
+#include <functional>
 
 // mechanism of re-usable buffers, removes the execution overhead of new/delete
 
@@ -30,7 +28,7 @@
 
 // issue statistics at destruction stage as to how many buffers were allocated (max size queue reached)
 
-// this whole thing may be obsolete as CCharBuffer can be a vector<>, 
+// this whole thing may be obsolete as CCharBuffer can be a vector<>,
 //   and CReusableCharBuffers is only need when running with multiple threads
 
 
@@ -56,21 +54,28 @@
 
 namespace ou {
 
-template<typename bufferT> 
+template<typename bufferT>
 class BufferRepository {
 public:
-  //typedef typename bufferT* buffer_t;
-  typedef bufferT* buffer_t;
-  BufferRepository(void);
-  ~BufferRepository(void);
-  inline void CheckIn( buffer_t Buffer );
-  inline buffer_t CheckOut();  
-  void CheckInL( buffer_t Buffer );  // locked version
-  buffer_t CheckOutL();  // locked version
-  bool Outstanding( void ) { return ( cntCheckins != cntCheckouts ); };
+  using pBuffer_t =  bufferT*;
+  using fLocked_t = std::function<void()>;
+  BufferRepository();
+  ~BufferRepository();
+  inline void CheckIn( pBuffer_t Buffer );
+  inline pBuffer_t CheckOut();
+  void CheckInL( pBuffer_t Buffer );  // locked version
+  pBuffer_t CheckOutL();  // locked version
+  bool Outstanding() { return ( cntCheckins != cntCheckouts ); };
+  void ScopedLock( fLocked_t&& fLocked ) {
+    if ( fLocked ) {
+      std::scoped_lock<std::mutex> lock(m_mutex);
+      fLocked();
+    }
+  }
+
 protected:
-  boost::mutex m_mutex;
-  std::vector<buffer_t> m_vStack;
+  std::mutex m_mutex;
+  std::vector<pBuffer_t> m_vStack;
 private:
   std::size_t cntCheckins, cntCheckouts;
 #ifdef _DEBUG
@@ -82,7 +87,7 @@ private:
 };
 
 
-template<typename bufferT> BufferRepository<bufferT>::BufferRepository() 
+template<typename bufferT> BufferRepository<bufferT>::BufferRepository()
 : cntCheckins( 0 ), cntCheckouts( 0 )
 #ifdef _DEBUG
   , cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 ),
@@ -95,8 +100,8 @@ template<typename bufferT> BufferRepository<bufferT>::BufferRepository()
 }
 
 template<typename bufferT> BufferRepository<bufferT>::~BufferRepository() {
-  bufferT* pBuffer;
-  boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a lock
+  pBuffer_t pBuffer;
+  std::scoped_lock<std::mutex> lock(m_mutex);  // for the methods requiring a lock
   while ( !m_vStack.empty() ) {
     pBuffer = m_vStack.back();
     m_vStack.pop_back();
@@ -108,11 +113,11 @@ template<typename bufferT> BufferRepository<bufferT>::~BufferRepository() {
 #ifdef _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name() << ": "
-    << cntCreated << " Created, " 
+    << cntCreated << " Created, "
     << cntDestroyed << " Destroyed, "
-    << cntCheckouts << " Checkouts, " 
-    << cntCheckins << " Checkins, " 
-    << maxQsize << " Max Q Size" 
+    << cntCheckouts << " Checkouts, "
+    << cntCheckins << " Checkins, "
+    << maxQsize << " Max Q Size"
     << std::endl;
 //  OutputDebugString( ss.str().c_str() );
   ss.str() = "";
@@ -126,7 +131,7 @@ template<typename bufferT> BufferRepository<bufferT>::~BufferRepository() {
 }
 
 template<typename bufferT> inline void BufferRepository<bufferT>::CheckInL(bufferT* pBuffer) {
-  boost::mutex::scoped_lock lock(m_mutex);
+  std::scoped_lock<std::mutex> lock(m_mutex);
   CheckIn( pBuffer );
 }
 
@@ -135,6 +140,7 @@ template<typename bufferT> inline void BufferRepository<bufferT>::CheckIn(buffer
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingIn = true;
 #endif
+  assert( pBuffer );
   m_vStack.push_back( pBuffer );
   ++cntCheckins;
 #ifdef _DEBUG
@@ -144,7 +150,7 @@ template<typename bufferT> inline void BufferRepository<bufferT>::CheckIn(buffer
 }
 
 template<typename bufferT> inline bufferT* BufferRepository<bufferT>::CheckOutL() {
-  boost::mutex::scoped_lock lock(m_mutex);
+  std::scoped_lock<std::mutex> lock(m_mutex);
   return CheckOut();
 }
 
