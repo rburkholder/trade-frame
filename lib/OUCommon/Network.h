@@ -533,7 +533,7 @@ void Network<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) 
     //InterlockedIncrement( &m_cntActiveSends );
     boost::interprocess::ipcdetail::atomic_inc32( &m_cntActiveSends );
 
-    typename linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
+    typename linerepository_t::pBuffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
     for ( char ch: send ) {
       (*pbuffer).push_back( ch );
