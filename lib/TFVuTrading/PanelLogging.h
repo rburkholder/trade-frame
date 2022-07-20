@@ -35,10 +35,10 @@ using csb_t = ou::ConsoleStreamBuf<char>;
 class ConsoleStringEvent: public wxEvent {
 public:
   ConsoleStringEvent( wxEventType eventType, csb_t::Buf* p ): wxEvent( 0, eventType ), m_pBuf( p ) {};
-  ConsoleStringEvent( const ConsoleStringEvent& event): wxEvent( event ), m_pBuf( event.m_pBuf ) {};
-  ~ConsoleStringEvent() { m_pBuf = 0; };
+  //ConsoleStringEvent( const ConsoleStringEvent& event): wxEvent( event ), m_pBuf( event.m_pBuf ) {};
+  virtual ~ConsoleStringEvent() { m_pBuf = nullptr; };
   ConsoleStringEvent* Clone() const { return new ConsoleStringEvent( *this ); };
-  csb_t::Buf* GetBuf() { return m_pBuf; };
+  csb_t::Buf* GetBuf() { assert( m_pBuf ); return m_pBuf; };
 private:
   csb_t::Buf* m_pBuf;
 };
@@ -54,19 +54,15 @@ public:
     const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION,
     const wxSize& size = SYMBOL_PANELLOGGING_SIZE,
     long style = SYMBOL_PANELLOGGING_STYLE );
-  ~PanelLogging();
+  virtual ~PanelLogging();
 
   bool Create( wxWindow* parent,
     wxWindowID id = SYMBOL_PANELLOGGING_IDNAME,
     const wxPoint& pos = SYMBOL_PANELLOGGING_POSITION,
     const wxSize& size = SYMBOL_PANELLOGGING_SIZE,
     long style = SYMBOL_PANELLOGGING_STYLE );
-  void Init();
-  void CreateControls();
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
+  void CreateControls();
 
 protected:
 private:
@@ -76,12 +72,18 @@ private:
   std::streambuf* m_pOldStreamBuf;
   csb_t m_csb;
 
+  void Init();
+
   void HandleConsoleLine0( csb_t::Buf* pBuf );
   void HandleConsoleLine1( ConsoleStringEvent& event );
 
-  //void OnClose( wxCloseEvent& event );
   void OnDestroy( wxWindowDestroyEvent& event );
+
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
 };
+
 
 } // namespace tf
 } // namespace ou

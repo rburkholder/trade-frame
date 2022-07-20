@@ -84,7 +84,7 @@ wxIcon PanelLogging::GetIconResource( const wxString& name ) {
 }
 
 void PanelLogging::HandleConsoleLine0( csb_t::Buf* pBuf ) {
-  this->QueueEvent( new ConsoleStringEvent( EVT_ConsoleString, pBuf ) );
+  QueueEvent( new ConsoleStringEvent( EVT_ConsoleString, pBuf ) );
 }
 
 void PanelLogging::HandleConsoleLine1( ConsoleStringEvent& event ) {
