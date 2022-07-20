@@ -102,6 +102,7 @@ private:
 
   void OnMenuExitClick( wxCommandEvent& event );
   void OnDynamicActionClick( wxCommandEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
   void OnClose( wxCloseEvent& event );
 
   template<typename Archive>

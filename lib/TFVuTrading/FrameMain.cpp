@@ -66,6 +66,7 @@ void FrameMain::CreateControls() {
 //    itemFrame1->SetStatusBar(m_statusBar);
 
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );
+    Bind( wxEVT_DESTROY, &FrameMain::OnDestroy, this );
     Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
 }
 
@@ -101,6 +102,11 @@ void FrameMain::OnDynamicActionClick( wxCommandEvent& event ) {
   structMenuItem* p = dynamic_cast<structMenuItem*>( event.m_callbackUserData );
   if ( 0 != p->OnActionHandler )
     p->OnActionHandler();
+}
+
+void FrameMain::OnDestroy( wxWindowDestroyEvent& event ) {
+  Unbind( wxEVT_DESTROY, &FrameMain::OnDestroy, this );
+  event.Skip();
 }
 
 void FrameMain::OnClose( wxCloseEvent& event ) {
