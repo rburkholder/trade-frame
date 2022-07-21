@@ -274,6 +274,7 @@ private:
 
   void StartDepthByMM();
   void StartDepthByOrder();
+  void StartDepthByOrderWithFVS();
 
   void OnFundamentals( const ou::tf::Watch::Fundamentals& );
   void OnQuote( const ou::tf::Quote& );
