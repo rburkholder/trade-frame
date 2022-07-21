@@ -19,20 +19,28 @@
  * Created: July 16, 2022 16:10:52
  */
 
-#include <memory>
+#include <functional>
 
 #include <portaudio.h>
-
-#include "WaveGen.hpp"
 
 namespace ou { // One Unified
 
 class PortAudio {
 public:
+
+  using fStream_t = std::function<bool(unsigned long count,float* frames)>;
+
   PortAudio();
   ~PortAudio();
 
+  double SampleRate() const { return m_dblSampleRate; }
+
+  void Stream( fStream_t&& );
+
   void Enumerate();
+
+  bool Active();
+  bool Stopped();
 
   void Start();
   void Stop();
@@ -40,21 +48,13 @@ public:
 protected:
 private:
 
-  using pSine_t = std::unique_ptr<Sine>;
-  pSine_t m_pSine1;
-  pSine_t m_pSine2;
-
-  struct Frame {
-    float phaseLeft;
-    float phaseRight;
-    Frame(): phaseLeft {}, phaseRight {} {}
-  };
-
-  Frame m_Frame;
+  double m_dblSampleRate;
 
   PaStream* m_pStream;
 
-  static int CallBack_Demo(
+  fStream_t m_fStream;
+
+  static int CallBack_Lambda(
     const void* inputBuffer, void* outputBuffer,
     unsigned long framesPerBuffer,
     const PaStreamCallbackTimeInfo* timeInfo,
@@ -62,13 +62,6 @@ private:
     void* userData
   );
 
-  static int CallBack_Sine(
-    const void* inputBuffer, void* outputBuffer,
-    unsigned long framesPerBuffer,
-    const PaStreamCallbackTimeInfo* timeInfo,
-    PaStreamCallbackFlags statusFlags,
-    void* userData
-  );
 };
 
 } // namespace ou

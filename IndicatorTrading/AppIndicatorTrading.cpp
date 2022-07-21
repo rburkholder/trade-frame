@@ -224,6 +224,14 @@ bool AppIndicatorTrading::OnInit() {
     }
   );
 
+  CallAfter(
+    [this](){
+      m_pPortAudio = std::make_unique<ou::PortAudio>();
+      m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
+      m_pChords->Play();
+    }
+  );
+
   return 1;
 }
 
