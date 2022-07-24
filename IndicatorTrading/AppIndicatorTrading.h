@@ -131,6 +131,7 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionEmitChainsSummary();
   void HandleMenuActionEmitChainsFull();
+  void HandleMenuActionTestChords();
   void HandleMenuActionProcessChains();
   void HandleMenuActionEmitOptionVolume();
   void HandleMenuActionStartChart();

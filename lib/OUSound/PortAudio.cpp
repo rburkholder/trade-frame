@@ -52,8 +52,10 @@ PortAudio::PortAudio()
     std::cerr << "PortAudio: Pa_CountDevices returned " << numDevices << " devices" << std::endl;
   }
   else {
+
     PaDeviceIndex index = Pa_GetDefaultOutputDevice();
     const PaDeviceInfo* pInfo = Pa_GetDeviceInfo( index );
+    //const PaDeviceInfo* pInfo = Pa_GetDeviceInfo( 14 ); // "pulse"
     m_dblSampleRate = pInfo->defaultSampleRate;
 
     //std::cout
@@ -68,7 +70,7 @@ PortAudio::PortAudio()
     parameters.device = index;
     parameters.channelCount = 2;
     parameters.sampleFormat = paFloat32;
-    parameters.suggestedLatency = pInfo->defaultLowOutputLatency;
+    parameters.suggestedLatency = pInfo->defaultHighOutputLatency;
     parameters.hostApiSpecificStreamInfo = nullptr;
 
     pa_error = Pa_OpenStream( // Open an audio I/O stream.
@@ -77,7 +79,7 @@ PortAudio::PortAudio()
       &parameters,      /* output channel */
       m_dblSampleRate,
       paFramesPerBufferUnspecified,
-      paNoFlag,
+      paClipOff|paDitherOff, //paNoFlag,
       &CallBack_Lambda,
       this              // reference self in the callback
       );
@@ -176,8 +178,10 @@ void PortAudio::Enumerate() {
     for ( int i = 0; i < numDevices; i++ ) {
       pDeviceInfo = Pa_GetDeviceInfo( i );
       std::cout
-        << "PortAudio device " << pDeviceInfo->name
-        << " sample rate " << pDeviceInfo->defaultSampleRate
+        << "PortAudio device "
+        << i
+        << ": '" << pDeviceInfo->name
+        << "' sample rate " << pDeviceInfo->defaultSampleRate
         << std::endl;
     }
   }

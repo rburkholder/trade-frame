@@ -179,6 +179,7 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
   vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
+  vItems.push_back( new mi( "Test Chords", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionTestChords ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   vItems.clear();
@@ -227,8 +228,8 @@ bool AppIndicatorTrading::OnInit() {
   CallAfter(
     [this](){
       m_pPortAudio = std::make_unique<ou::PortAudio>();
+      //m_pPortAudio->Enumerate();
       m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
-      m_pChords->Play();
     }
   );
 
@@ -418,6 +419,12 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
     [this](){
       m_pInteractiveChart->EmitChainFull();
     }
+  );
+}
+
+void AppIndicatorTrading::HandleMenuActionTestChords() {
+  CallAfter(
+    [this](){ m_pChords->Play(); }
   );
 }
 

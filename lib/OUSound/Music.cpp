@@ -22,6 +22,8 @@
 #include <cmath>
 #include <cassert>
 
+//#include <boost/log/trivial.hpp>
+
 #include "Music.hpp"
 #include "PortAudio.hpp"
 
@@ -57,53 +59,80 @@ Chords::Chords( PortAudio& pa )
 Chords::~Chords() {}
 
 void Chords::LoadChord() {
+  //BOOST_LOG_TRIVIAL(debug) << "Chords::LoadChord";
   double rate = m_pa.SampleRate();
   m_vGenerator.clear();
-  Chord::const_iterator iterNote = m_iterChord->cbegin();
   for ( Note note: *m_iterChord ) {
     if ( 0.0 != note ) {
       m_vGenerator.emplace_back( Generator( note, rate, m_envelope ) );
     }
   }
-  m_iterChord++;
+  assert( 0 < m_vGenerator.size() );
 }
 
 void Chords::Play() {
 
+  if ( !m_pa.Stopped() ) m_pa.Stop();
+
+  //m_start = std::chrono::high_resolution_clock::now();
+
+  // TODO: assert progression has > 0 entries
   m_iterChord = m_progression.cbegin();
   LoadChord();
 
   m_pa.Stream(
     [this](unsigned long count, float* frames) {
-      bool bContinue( true );
-      if ( m_progression.end() != m_iterChord ) {
-        bool bChordDone( true );
-        for ( const Generator& gen: m_vGenerator ) {
-          bChordDone &= gen.Done();
-        }
-        if ( bChordDone ) {
-          if ( m_progression.end() != m_iterChord ) {
-            LoadChord();
-          }
-          else {
-            bContinue = false;
-          }
-        }
-      }
+      // http://files.portaudio.com/docs/v19-doxydocs/portaudio_8h.html#a8a60fb2a5ec9cbade3f54a9c978e2710
+      // The callback must always fill the entire output buffer irrespective of its return value.
+
+      //auto start = std::chrono::high_resolution_clock::now();
+
       for ( unsigned long ix = 0; ix < count; ix++ ) {
         float sample {};
+        float result {};
         for ( Generator& gen: m_vGenerator ) {
-          float result = gen.Sample();
+          result = gen.Sample();
           assert( ( -1.1 <= result ) && ( 1.1 >= result ) );
           sample += result;
         }
-        auto size = m_vGenerator.size();
+        float size = m_vGenerator.size();
         assert( ( ( size * -1.1 ) <= sample ) && ( ( size * 1.1 ) >= sample ) );
         sample = sample / size;
         assert( ( -1.1 <= sample ) && ( 1.1 >= sample ) );
         *(frames++) = sample;
         *(frames++) = sample;
       }
+
+      bool bContinue( true );
+      bool bChordDone( true );
+
+      for ( const Generator& gen: m_vGenerator ) {
+        bChordDone &= gen.Done();
+      }
+      if ( bChordDone ) {
+        //assert( m_progression.end() != m_iterChord );
+
+        m_iterChord++;
+        if ( m_progression.end() == m_iterChord ) {
+          //BOOST_LOG_TRIVIAL(debug) << "Chords::Play done";
+          bContinue = false;
+        }
+        else {
+          LoadChord();
+        }
+      }
+
+      //auto stop = std::chrono::high_resolution_clock::now();
+      //auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+      //auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(stop - m_start);
+
+      //m_start = std::chrono::high_resolution_clock::now();
+
+      //BOOST_LOG_TRIVIAL(debug)
+      //  << "Chords play data, " << count << ","
+      //  << duration1.count() << ","
+      //  << duration2.count() << " microseconds";
+
       return bContinue;
     } );
 

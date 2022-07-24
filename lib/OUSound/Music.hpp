@@ -20,6 +20,7 @@
  */
 
 #include <array>
+//#include <chrono>
 #include <vector>
 
 #include "WaveGen.hpp"
@@ -59,6 +60,9 @@ private:
   vGenerator_t m_vGenerator;
 
   Progression::const_iterator m_iterChord;
+
+  //std::chrono::time_point<std::chrono::system_clock,std::chrono::duration<long,std::ratio<1,1000000000>>> m_start;
+  //std::chrono::time_point<std::chrono::system_clock,std::chrono::duration<long,std::ratio<1,1000000000>>> m_stop;
 
   void LoadChord();
 
