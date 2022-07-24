@@ -281,7 +281,7 @@ void web_socket::trade_updates( bool bEnable ) {
   json::object listen;
   listen[ "action" ] = "listen";
   if ( bEnable ) {
-    listen[ "data" ].emplace_object()[ "streams" ] = { "trade_updates" };
+    listen[ "data" ].emplace_object()[ "streams" ] = "trade_updates";
   }
   else {
     listen[ "data" ].emplace_object()[ "streams" ].emplace_array();
