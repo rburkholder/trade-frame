@@ -27,6 +27,27 @@
 #include "Music.hpp"
 #include "PortAudio.hpp"
 
+namespace {
+using PC = ou::music::PitchClass;
+ou::music::Progression progressionUp = {
+{
+    { Frequency( 4, PC::C ), Frequency( 4, PC::E  ), Frequency( 4, PC::G ), 0.0f },
+    { Frequency( 4, PC::E ), Frequency( 4, PC::Gs ), Frequency( 5, PC::B ), 0.0f },
+    { Frequency( 4, PC::D ), Frequency( 4, PC::Fs ), Frequency( 5, PC::A ), 0.0f },
+    { Frequency( 4, PC::F ), Frequency( 4, PC::A  ), Frequency( 5, PC::C ), 0.0f }
+  }
+};
+
+ou::music::Progression progressionDn = {
+{
+    { Frequency( 4, PC::F ), Frequency( 4, PC::A  ), Frequency( 5, PC::C ), 0.0f },
+    { Frequency( 4, PC::D ), Frequency( 4, PC::Fs ), Frequency( 5, PC::A ), 0.0f },
+    { Frequency( 4, PC::E ), Frequency( 4, PC::Gs ), Frequency( 5, PC::B ), 0.0f },
+    { Frequency( 4, PC::C ), Frequency( 4, PC::E  ), Frequency( 4, PC::G ), 0.0f }
+  }
+};
+} // namespace anonymous
+
 namespace ou { // One Unified
 namespace music {
 
@@ -46,12 +67,6 @@ Note Frequency( int octave, PitchClass pc ) {
 
 Chords::Chords( PortAudio& pa )
 : m_pa( pa )
-, m_progression { {
-    { Frequency( 4, PitchClass::C ), Frequency( 4, PitchClass::E  ), Frequency( 4, PitchClass::G ), 0.0f },
-    { Frequency( 4, PitchClass::E ), Frequency( 4, PitchClass::Gs ), Frequency( 5, PitchClass::B ), 0.0f },
-    { Frequency( 4, PitchClass::D ), Frequency( 4, PitchClass::Fs ), Frequency( 5, PitchClass::A ), 0.0f },
-    { Frequency( 4, PitchClass::F ), Frequency( 4, PitchClass::A  ), Frequency( 5, PitchClass::C ), 0.0f }
-  } }
 , m_envelope( 0.060f, 0.050f, 0.200f, 0.7f, 0.070f ) // fractional seconds
 {
 }
@@ -70,14 +85,24 @@ void Chords::LoadChord() {
   assert( 0 < m_vGenerator.size() );
 }
 
-void Chords::Play() {
+void Chords::Play( EProgression progression ) {
 
   if ( !m_pa.Stopped() ) m_pa.Stop();
 
   //m_start = std::chrono::high_resolution_clock::now();
 
   // TODO: assert progression has > 0 entries
-  m_iterChord = m_progression.cbegin();
+  switch ( progression ) {
+    case EProgression::Up:
+      m_iterChord = progressionUp.cbegin();
+      m_iterChord_End = progressionUp.cend();
+      break;
+    case EProgression::Down:
+      m_iterChord = progressionDn.cbegin();
+      m_iterChord_End = progressionDn.cend();
+      break;
+  }
+
   LoadChord();
 
   m_pa.Stream(
@@ -113,7 +138,7 @@ void Chords::Play() {
         //assert( m_progression.end() != m_iterChord );
 
         m_iterChord++;
-        if ( m_progression.end() == m_iterChord ) {
+        if ( m_iterChord_End == m_iterChord ) {
           //BOOST_LOG_TRIVIAL(debug) << "Chords::Play done";
           bContinue = false;
         }

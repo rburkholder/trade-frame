@@ -46,12 +46,13 @@ public:
   Chords( PortAudio& );
   ~Chords();
 
-  void Play();
+  enum class EProgression { Up, Down };
+  void Play( EProgression );
 
 protected:
 private:
 
-  const Progression m_progression;
+  //const Progression m_progression;
   PortAudio& m_pa;
 
   ADSR::Envelope_seconds m_envelope; // default envelope
@@ -60,6 +61,7 @@ private:
   vGenerator_t m_vGenerator;
 
   Progression::const_iterator m_iterChord;
+  Progression::const_iterator m_iterChord_End;
 
   //std::chrono::time_point<std::chrono::system_clock,std::chrono::duration<long,std::ratio<1,1000000000>>> m_start;
   //std::chrono::time_point<std::chrono::system_clock,std::chrono::duration<long,std::ratio<1,1000000000>>> m_stop;

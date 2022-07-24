@@ -131,11 +131,13 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionEmitChainsSummary();
   void HandleMenuActionEmitChainsFull();
-  void HandleMenuActionTestChords();
   void HandleMenuActionProcessChains();
   void HandleMenuActionEmitOptionVolume();
   void HandleMenuActionStartChart();
   void HandleMenuActionStopChart();
+
+  void HandleMenuActionTestChordsUp();
+  void HandleMenuActionTestChordsDn();
 
   void HandleMenuActionOptionWatchStart();
   void HandleMenuActionOptionQuoteShow();
