@@ -154,9 +154,10 @@ void Chords::Play( EProgression progression ) {
       //m_start = std::chrono::high_resolution_clock::now();
 
       //BOOST_LOG_TRIVIAL(debug)
-      //  << "Chords play data, " << count << ","
-      //  << duration1.count() << ","
-      //  << duration2.count() << " microseconds";
+      //  << "Chords play data, " << count
+      //  << "," << duration1.count()
+      //  << "," << duration2.count() << " microseconds"
+      //;
 
       return bContinue;
     } );
