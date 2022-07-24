@@ -1,17 +1,23 @@
-//
-// Copyright (c) 2016-2019 Vinnie Falco (vinnie dot falco at gmail dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-// Official repository: https://github.com/boostorg/beast
-//
+/************************************************************************
+ * Copyright(c) 2022, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
 
-//------------------------------------------------------------------------------
-//
-// Example: HTTP SSL client, asynchronous
-//
-//------------------------------------------------------------------------------
+/*
+ * File:    main.cpp
+ * Author:  raymond@burkholder.net
+ * Project: Alpaca
+ * Created: June 4, 2022 14:48:37
+ */
 
 #include <memory>
 #include <string>
