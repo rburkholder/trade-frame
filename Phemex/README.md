@@ -1,0 +1,6 @@
+```
+$ cat x64/debug/phemex.cfg
+phemex_key=PKSQ....
+phemex_secret=OUCNIm....
+phemex_domain=api.phemex.com
+```

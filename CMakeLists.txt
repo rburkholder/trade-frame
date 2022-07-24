@@ -29,6 +29,7 @@ add_subdirectory(IQFeedMarketSymbols)
 add_subdirectory(IQFeedGetHistory)
 add_subdirectory(LiveChart)
 add_subdirectory(MultipleFutures)
+add_subdirectory(Phemex)
 add_subdirectory(Scanner)
 add_subdirectory(Weeklies)
 
