@@ -112,6 +112,11 @@ void Chords::Play( EProgression progression ) {
 
       //auto start = std::chrono::high_resolution_clock::now();
 
+      bool bChordDone( true );
+      for ( const Generator& gen: m_vGenerator ) {
+        bChordDone &= gen.Done();
+      }
+
       for ( unsigned long ix = 0; ix < count; ix++ ) {
         float sample {};
         float result {};
@@ -129,11 +134,6 @@ void Chords::Play( EProgression progression ) {
       }
 
       bool bContinue( true );
-      bool bChordDone( true );
-
-      for ( const Generator& gen: m_vGenerator ) {
-        bChordDone &= gen.Done();
-      }
       if ( bChordDone ) {
         //assert( m_progression.end() != m_iterChord );
 
