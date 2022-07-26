@@ -88,7 +88,7 @@ void Provider::Set( const std::string& sHost, const std::string& sKey, const std
   auto size = decoder.MaxRetrievable();
 
   m_sDecodedSecret.resize( size );
-  decoder.Get( (CryptoPP::byte*)&m_sDecodedSecret[ 0 ], m_sDecodedSecret.size() );
+  decoder.Get( (CryptoPP::byte*)m_sDecodedSecret.data(), m_sDecodedSecret.size() );
 }
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
