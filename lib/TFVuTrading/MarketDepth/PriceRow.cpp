@@ -87,6 +87,7 @@ void PriceRow::SetRowElements( WinRow& wr ) {
   //m_pRowElements = re;
 
   //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
+  // TODO: is this set in another thread?  Do we lock it?
   m_dreBuyCount.SetWinRowElement(         wr[ (int)EField::BuyCount ] );
   m_dreBuyVolume.SetWinRowElement(        wr[ (int)EField::BuyVolume ] );
   m_dreBidSize.SetWinRowElement(          wr[ (int)EField::BidSize ] );

@@ -89,6 +89,8 @@ void WinRow::Clear() {
   if ( m_bParentIsAlive ) {
     for ( vWinRowElement_t::value_type& element: m_vWinRowElement ) {
       if ( nullptr != element ) {
+        // TODO need a way to determine when to delete
+        //   if exception occurs here, ensure all structures have been cleared
         bool bOk = element->Destroy();
         assert( bOk );
         element = nullptr;
