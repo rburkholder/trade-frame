@@ -19,6 +19,8 @@
  * Created: June 6, 2022 15:01
  */
 
+// TODO: look at http return codes
+
 #include <iostream>
 
 #include <boost/beast/version.hpp>
