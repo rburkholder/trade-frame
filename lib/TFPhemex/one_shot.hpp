@@ -15,7 +15,7 @@
 /*
  * File:    one_shot.hpp
  * Author:  raymond@burkholder.net
- * Project: lib/TFAlpaca
+ * Project: lib/TFPhemex
  * Created: June 6, 2022 15:01
  */
 
@@ -38,7 +38,7 @@ using tcp = boost::asio::ip::tcp;   // from <boost/asio/ip/tcp.hpp>
 
 namespace ou {
 namespace tf {
-namespace alpaca {
+namespace phemex {
 namespace session {
 
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/http/client/async-ssl/http_client_async_ssl.cpp
@@ -53,39 +53,22 @@ public:
 
   using fDone_t = std::function<void(bool,const std::string&)>; // false, not ok; true, fine
 
-  void run(
-    const std::string& sHost,
-    const std::string& sPort,
-    const std::string& sTarget,
-    int version,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret
-  );
-
   void get(
     const std::string& sHost,
     const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
+    const std::string& sKey,
+    const std::string& sHash,
+    const std::string& sExpiry,
     const std::string& sTarget,
-    fDone_t&&
-  );
-
-  void get(
-    const std::string& sHost,
-    const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
-    const std::string& sTarget,
-    const std::string& sBody,
     fDone_t&&
   );
 
   void post(
     const std::string& sHost,
     const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
+    const std::string& sKey,
+    const std::string& sHash,
+    const std::string& sExpiry,
     const std::string& sTarget,
     const std::string& sBody,
     fDone_t&&
@@ -94,8 +77,9 @@ public:
   void patch(
     const std::string& sHost,
     const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
+    const std::string& sKey,
+    const std::string& sHash,
+    const std::string& sExpiry,
     const std::string& sTarget,
     const std::string& sBody,
     fDone_t&&
@@ -104,8 +88,9 @@ public:
   void delete_(
     const std::string& sHost,
     const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
+    const std::string& sKey,
+    const std::string& sHash,
+    const std::string& sExpiry,
     const std::string& sTarget,
     fDone_t&&
   );
@@ -144,6 +129,6 @@ private:
 };
 
 } // namespace session
-} // namespace alpaca
+} // namespace phemex
 } // namespace tf
 } // namespace ou

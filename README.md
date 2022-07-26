@@ -187,7 +187,9 @@ re-written for current use.
 
 ##
 
-* 2022/07/16 additional package requirement (incorporated into libs-build/build):  
+* 2022/07/16 additional package requirement (incorporated into libs-build/build.sh):
   * sudo apt install portaudio19-dev
 
+* 2022/07/25 additional package requirement (incorporated into libs-build/build.sh);
+  * sudo apt install libcrypto++-dev
 

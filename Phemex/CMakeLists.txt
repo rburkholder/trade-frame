@@ -98,5 +98,6 @@ target_link_libraries(
       pthread
       crypto
       ssl
+      crypto++
   )
 

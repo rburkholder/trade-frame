@@ -27,6 +27,14 @@
 
 #include "Symbol.hpp"
 
+// The default Rest API base endpoint is: https://api.phemex.com.
+// The High rate limit Rest API base endpoint is: https://vapi.phemex.com.
+// Or for the testnet is: https://testnet-api.phemex.com
+
+// The WebSocket API url is: wss://phemex.com/ws.
+// The High rate limit WebSocket API url is: wss://vapi.phemex.com/ws.
+// Or for the testnet is: wss://testnet.phemex.com/ws
+
 namespace asio  = boost::asio; // from <boost/asio.hpp>
 namespace ssl   = asio::ssl;   // from <boost/asio/ssl.hpp>
 
@@ -70,6 +78,10 @@ public:
 
   void Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret );
 
+  // do these need to be virtual?  use crtp?
+  virtual void Connect();
+  virtual void Disconnect();
+
 protected:
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
@@ -83,7 +95,9 @@ private:
   std::string m_sHost;
   std::string m_sPort;
   std::string m_sKeyId;
-  std::string m_sSecret;
+  std::string m_sDecodedSecret;
+
+  void GetProducts();
 
 };
 

@@ -13,9 +13,9 @@
  ************************************************************************/
 
 /*
- * File:    one_shot.hpp
+ * File:    one_shot.cpp
  * Author:  raymond@burkholder.net
- * Project: lib/TFAlpaca
+ * Project: lib/TFPhemex
  * Created: June 6, 2022 15:01
  */
 
@@ -29,15 +29,16 @@
 
 namespace ou {
 namespace tf {
-namespace alpaca {
+namespace phemex {
 namespace session {
 
 namespace { // anonymous
 
 const static int nVersion( 11 );
 const static std::string sUserAgent( "ounl.tradeframe/1.0" );
-const static std::string sFieldAlpacaKeyId( "APCA-API-KEY-ID" );
-const static std::string sFieldAlpacaSecret( "APCA-API-SECRET-KEY" );
+const static std::string sFieldKeyId( "x-phemex-access-token" );
+const static std::string sFieldRequestExpiry( "x-phemex-request-expiry" );
+const static std::string sFieldRequestSignature( "x-phemex-request-signature" );
 
 // Report a failure
 void fail( beast::error_code ec, char const* what ) {
@@ -55,14 +56,14 @@ one_shot::one_shot(
 , m_fWriteRequest( nullptr )
 , m_fDone( nullptr )
 {
-  std::cout << "alpaca::one_shot construction" << std::endl; // ensuring proper timing of handling
+  std::cout << "phemex::one_shot construction" << std::endl; // ensuring proper timing of handling
 
   // Allow for an unlimited body size
   m_parser.body_limit( ( std::numeric_limits<std::uint64_t>::max )() );
   }
 
 one_shot::~one_shot() {
-  std::cout << "alpaca::one_shot destruction" << std::endl;  // ensuring proper timing of handling
+  std::cout << "phemex::one_shot destruction" << std::endl;  // ensuring proper timing of handling
   //m_stream.shutdown();  // doesn't like this
   m_buffer.clear();
   m_response.clear();
@@ -70,53 +71,12 @@ one_shot::~one_shot() {
   m_fDone = nullptr;
 }
 
-void one_shot::run(
-  const std::string& sHost,
-  const std::string& sPort,
-  const std::string& sTarget,
-  int version,
-  const std::string& sAlpacaKey,
-  const std::string& sAlpacaSecret
-) {
-  // Set SNI Hostname (many hosts need this to handshake successfully)
-  if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
-  {
-    beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    return;
-  }
-
-  // Set up an HTTP GET request message
-  m_request_empty.version( version );
-  m_request_empty.method( http::verb::get );
-  m_request_empty.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
-  m_request_empty.set( http::field::user_agent, sUserAgent );
-
-  m_request_empty.target( sTarget );
-  m_request_empty.set( sFieldAlpacaKeyId, sAlpacaKey );
-  m_request_empty.set( sFieldAlpacaSecret, sAlpacaSecret );
-  //req_.body() = json::serialize( jv );
-  //req_.prepare_payload();
-
-  m_fWriteRequest = [this](){ write_empty(); };
-  m_fDone = []( bool, const std::string& ){};
-
-  // Look up the domain name
-  m_resolver.async_resolve(
-    sHost, sPort,
-    beast::bind_front_handler(
-      &one_shot::on_resolve,
-      shared_from_this()
-    )
-  );
-}
-
 void one_shot::get(
   const std::string& sHost,
   const std::string& sPort,
-  const std::string& sAlpacaKey,
-  const std::string& sAlpacaSecret,
+  const std::string& sKey,
+  const std::string& sHash,
+  const std::string& sExpiry,
   const std::string& sTarget,
   fDone_t&& fDone
 ) {
@@ -137,62 +97,14 @@ void one_shot::get(
   m_request_empty.version( nVersion );
   m_request_empty.method( http::verb::get );
   m_request_empty.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_empty.set( http::field::user_agent, sUserAgent );
 
   m_request_empty.target( sTarget );
-  m_request_empty.set( sFieldAlpacaKeyId, sAlpacaKey );
-  m_request_empty.set( sFieldAlpacaSecret, sAlpacaSecret );
+  m_request_empty.set( sFieldKeyId, sKey );
+  m_request_empty.set( sFieldRequestExpiry, sExpiry );
+  m_request_empty.set( sFieldRequestSignature, sHash );
 
   m_fWriteRequest = [this](){ write_empty(); };
-
-  // Look up the domain name
-  m_resolver.async_resolve(
-    sHost, sPort,
-    beast::bind_front_handler(
-      &one_shot::on_resolve,
-      shared_from_this()
-    )
-  );
-}
-
-void one_shot::get(
-  const std::string& sHost,
-  const std::string& sPort,
-  const std::string& sAlpacaKey,
-  const std::string& sAlpacaSecret,
-  const std::string& sTarget,
-  const std::string& sBody,
-  fDone_t&& fDone
-) {
-
-  m_fDone = std::move( fDone );
-  assert( m_fDone );
-
-  // Set SNI Hostname (many hosts need this to handshake successfully)
-  if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
-  {
-    beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    m_fDone( false, ec.message() );
-    return;
-  }
-
-  // Set up an HTTP GET request message
-  m_request_body.version( nVersion );
-  m_request_body.method( http::verb::get );
-  m_request_body.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
-  m_request_body.set( http::field::user_agent, sUserAgent );
-
-  m_request_body.target( sTarget );
-  m_request_body.set( sFieldAlpacaKeyId, sAlpacaKey );
-  m_request_body.set( sFieldAlpacaSecret, sAlpacaSecret );
-
-  m_request_body.body() = sBody;
-  m_request_body.prepare_payload();
-
-  m_fWriteRequest = [this](){ write_body(); };
 
   // Look up the domain name
   m_resolver.async_resolve(
@@ -207,8 +119,9 @@ void one_shot::get(
 void one_shot::post(
   const std::string& sHost,
   const std::string& sPort,
-  const std::string& sAlpacaKey,
-  const std::string& sAlpacaSecret,
+  const std::string& sKey,
+  const std::string& sHash,
+  const std::string& sExpiry,
   const std::string& sTarget,
   const std::string& sBody,
   fDone_t&& fDone
@@ -230,13 +143,13 @@ void one_shot::post(
   m_request_body.version( nVersion );
   m_request_body.method( http::verb::post );
   m_request_body.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_body.set( http::field::user_agent, sUserAgent );
   //m_request_body.set( http::field::content_type, "application/json" );
 
   m_request_body.target( sTarget );
-  m_request_body.set( sFieldAlpacaKeyId, sAlpacaKey );
-  m_request_body.set( sFieldAlpacaSecret, sAlpacaSecret );
+  m_request_empty.set( sFieldKeyId, sKey );
+  m_request_empty.set( sFieldRequestExpiry, sExpiry );
+  m_request_empty.set( sFieldRequestSignature, sHash );
 
   m_request_body.body() = sBody;
   m_request_body.prepare_payload();
@@ -256,12 +169,13 @@ void one_shot::post(
 }
 
 void one_shot::delete_(
-    const std::string& sHost,
-    const std::string& sPort,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
-    const std::string& sTarget,
-    fDone_t&& fDone
+  const std::string& sHost,
+  const std::string& sPort,
+  const std::string& sKey,
+  const std::string& sHash,
+  const std::string& sExpiry,
+  const std::string& sTarget,
+  fDone_t&& fDone
 ) {
 
   m_fDone = std::move( fDone );
@@ -280,12 +194,12 @@ void one_shot::delete_(
   m_request_empty.version( nVersion );
   m_request_empty.method( http::verb::delete_ );
   m_request_empty.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_empty.set( http::field::user_agent, sUserAgent );
 
   m_request_empty.target( sTarget );
-  m_request_empty.set( sFieldAlpacaKeyId, sAlpacaKey );
-  m_request_empty.set( sFieldAlpacaSecret, sAlpacaSecret );
+  m_request_empty.set( sFieldKeyId, sKey );
+  m_request_empty.set( sFieldRequestExpiry, sExpiry );
+  m_request_empty.set( sFieldRequestSignature, sHash );
 
   m_fWriteRequest = [this](){ write_empty(); };
 
@@ -475,6 +389,6 @@ void one_shot::on_shutdown( beast::error_code ec ) {
 }
 
 } // namespace session
-} // namespace alpaca
+} // namespace phemex
 } // namespace tf
 } // namespace ou

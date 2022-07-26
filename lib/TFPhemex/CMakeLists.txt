@@ -9,7 +9,7 @@ PROJECT(TFPhemex)
 set(
   file_h
 #    root_certificates.hpp
-#    one_shot.hpp
+    one_shot.hpp
 #    web_socket.hpp
     Provider.hpp
     Symbol.hpp
@@ -17,7 +17,7 @@ set(
 
 set(
   file_cpp
-#    one_shot.cpp
+    one_shot.cpp
 #    web_socket.cpp
     Provider.cpp
     Symbol.cpp
