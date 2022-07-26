@@ -17,6 +17,8 @@
 #include <TFIndicators/TSSWStats.h>
 #include <TFTimeSeries/TimeSeries.h>
 
+// TODO: add the bollinger limits to a chart
+
 namespace ou { // One Unified
 
 class ChartEntryMark;
