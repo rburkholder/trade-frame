@@ -26,6 +26,7 @@
 #include <TFTrading/ProviderInterface.h>
 
 #include "Symbol.hpp"
+#include "Products.hpp"
 
 // The default Rest API base endpoint is: https://api.phemex.com.
 // The High rate limit Rest API base endpoint is: https://vapi.phemex.com.
@@ -96,6 +97,13 @@ private:
   std::string m_sPort;
   std::string m_sKeyId;
   std::string m_sDecodedSecret;
+
+  unsigned int m_ratioScale;
+
+  products::vCurrency_t m_vCurrency;
+  products::vProduct_t m_vProduct;
+  products::vriskLimits_t m_vriskLimits;
+  products::vLeverages_t m_vLeverages;
 
   void GetProducts();
 

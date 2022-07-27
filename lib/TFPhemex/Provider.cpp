@@ -28,6 +28,7 @@
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 
+#include <boost/json.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
@@ -38,6 +39,8 @@
 #include "one_shot.hpp"
 
 #include "Provider.hpp"
+
+namespace json = boost::json;
 
 namespace ou {
 namespace tf {
@@ -174,17 +177,68 @@ void Provider::GetProducts() {
 
   std::string sHash( reinterpret_cast<char const*>(hash.data()), hashLen );
 
-  auto osPositions = std::make_shared<ou::tf::phemex::session::one_shot>(
+  auto osProducts = std::make_shared<ou::tf::phemex::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  osPositions->get(
+  osProducts->get(
     m_sHost, m_sPort,
     m_sKeyId, sHash, sExpiry,
-    "/public/products",
+    sRequestPath,
     [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
-        std::cout << "products: " << message << std::endl;
+        try {
+          json::error_code jec;
+          json::value jv = json::parse( message, jec );
+          if ( jec.failed() ) {
+            BOOST_LOG_TRIVIAL(error) << "provider/phemex failed to parse " << sRequestPath;
+            std::cout << "products: " << message << std::endl;
+          }
+          else {
+            json::object const& obj = jv.as_object();
+            int code;
+            code = json::value_to<int>( obj.at( "code" ) );
+            if ( 0 != code ) {
+              std::string msg;
+              msg = json::value_to<std::string>( obj.at( "msg" ) );
+              BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " error: " << msg;
+            }
+            else {
+              json::object data = json::value_to<json::object>( obj.at( "data" ) );
+
+              m_ratioScale = json::value_to<unsigned int>( data.at( "ratioScale" ) );
+
+              json::array currencies = json::value_to<json::array>( data.at( "currencies" ) );
+              Decode( currencies, m_vCurrency );
+
+              json::array products   = json::value_to<json::array>( data.at( "products" ) );
+              Decode( products, m_vProduct );
+
+              json::array riskLimits = json::value_to<json::array>( data.at( "riskLimits" ) );
+              Decode( riskLimits, m_vriskLimits );
+
+              json::array leverages  = json::value_to<json::array>( data.at( "leverages" ) );
+              Decode( leverages, m_vLeverages );
+
+              std::string md5Checksum = json::value_to<std::string>( data.at( "md5Checksum" ) );
+
+              BOOST_LOG_TRIVIAL(error)
+                << "provider/phemex provider"
+                << " ratioScale=" << m_ratioScale
+                << " currencies=" << m_vCurrency.size()
+                << " products=" << m_vProduct.size()
+                << " riskLimits=" << m_vriskLimits.size()
+                << " leverages=" << m_vLeverages.size()
+                ;
+            }
+          }
+        }
+        catch (...) {
+          BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " exception";
+        }
+      }
+      else {
+        BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " failure: " << message;
       }
     });
 }

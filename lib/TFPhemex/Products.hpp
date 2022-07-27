@@ -26,15 +26,19 @@
 
 namespace boost {
 namespace json {
-  class object;
+  class array;
   class value;
 }
 }
+
+namespace json = boost::json;
 
 namespace ou {
 namespace tf {
 namespace phemex {
 namespace products {
+
+// == Currency ==
 
 struct Currency {
   std::string currency;
@@ -43,14 +47,15 @@ struct Currency {
   unsigned int valueScale;
   uint64_t minValueEv;
   uint64_t maxValueEv;
-  bool needAddrTag;
+  unsigned int needAddrTag;
   std::string status;
 };
 
 using vCurrency_t = std::vector<Currency>; // might need a map instead
 
-void Decode( const std::string&, vCurrency_t& );
-void Decode( boost::json::value const&, Currency& );
+void Decode( json::array const&, vCurrency_t& );
+
+// == Product ==
 
 struct Product {
   std::string symbol;
@@ -89,20 +94,21 @@ struct Product {
   std::string description;
   std::string status;
   uint64_t tipOrderQty;
-  double defaultTakerFee;
+  std::string defaultTakerFee;
   unsigned int defaultTakerFeeEr;
-  double defaultMakerFee;
+  std::string defaultMakerFee;
   unsigned int defaultMakerFeeEr;
   uint64_t listTime;
-  unsigned int ieoOpenPriceEp;
+  uint64_t ieoOpenPriceEp;
   unsigned int ieoInitDurationMs;
   unsigned int buyPriceUpperLimitPct;
   unsigned int sellPriceLowerLimitPct;
 };
 
 using vProduct_t = std::vector<Product>; // minght use a map instead
-void Decode( const std::string&, vProduct_t& );
-void Decode( boost::json::value const&, Product& );
+void Decode( json::array const&, vProduct_t& );
+
+// == riskLimits ==
 
 struct riskLimits_detail;
 using vRiskLimits_detail_t = std::vector<riskLimits_detail>;
@@ -111,6 +117,12 @@ struct riskLimits {
   std::string symbol;
   std::string steps;
   vRiskLimits_detail_t vRiskLimits_detail;
+  riskLimits( riskLimits&& rhs )
+  : symbol( std::move( rhs.symbol ) )
+  , steps( std::move( rhs.steps ) )
+  , vRiskLimits_detail( std::move( rhs.vRiskLimits_detail ) )
+  {}
+  riskLimits() {}
 };
 
 using vriskLimits_t = std::vector<riskLimits>;
@@ -123,8 +135,19 @@ struct riskLimits_detail {
   uint64_t maintenanceMarginEr;
 };
 
-void Decode( const std::string&, vriskLimits_t& ); // might use a map instead
-void Decode( boost::json::value const&, riskLimits& );
+void Decode( json::array const&, vriskLimits_t& );
+
+// == Leverages ==
+
+struct Leverages {
+  std::string initialMargin;
+  uint64_t initialMarginEr;
+  std::vector<unsigned int> options;
+};
+
+using vLeverages_t = std::vector<Leverages>;
+
+void Decode( json::array const&, vLeverages_t& );
 
 } // namespace products
 } // namespace phemex
