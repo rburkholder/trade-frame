@@ -357,11 +357,37 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 
     //std::cout << "os.on_read" << std::endl;
     //std::cout << "get():" << m_parser.get() << std::endl;
-    auto body = m_parser.get().body();
-    //std::cout << "body():" << m_parser.get().body() << std::endl;
+/*
+get():HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 437933
+Connection: keep-alive
+Date: Tue, 26 Jul 2022 23:18:43 GMT
+Server: nginx
+x-phemex-request-tracing: fec5e0cc-40f8-40f0-8c75-b17f57d95e30
+X-RateLimit-Remaining: 99
+X-RateLimit-Capacity: 100
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Xss-Protection: 1; mode=block
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Referrer-Policy: origin-when-cross-origin
+Vary: Accept-Encoding
+X-Cache: Miss from cloudfront
+Via: 1.1 591683988172c7980c4ebb318cbf18a8.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: SEA19-C2
+X-Amz-Cf-Id: qPl1jtxTG41G6zAxFytvVb7h7076vjhj0eIy17qUe15BEDMHTZNKYQ==
+*/
 
-    //m_fDone( true, m_response.body() );
-    m_fDone( true, body );
+
+    bool bResult = m_parser.get().result() == boost::beast::http::status::ok;
+    auto body = m_parser.get().body();
+    m_fDone( bResult, body );
+
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 
