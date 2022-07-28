@@ -63,7 +63,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_AlpacaKey.c_str(), po::value<std::string>( &choices.m_sAlpacaKey ), "alpaca key" )
       ( sChoice_AlpacaSecret.c_str(), po::value<std::string>( &choices.m_sAlpacaSecret ), "alpaca secret" )
-      ( sChoice_AlpacaDomain.c_str(), po::value<std::string>( &choices.m_sAlpacaDomain ), "alpaca secret" )
+      ( sChoice_AlpacaDomain.c_str(), po::value<std::string>( &choices.m_sAlpacaDomain ), "alpaca domain" )
       ;
     po::variables_map vm;
 
@@ -93,3 +93,4 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 }
 
 } // namespace config
+
