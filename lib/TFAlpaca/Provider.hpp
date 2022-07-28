@@ -33,8 +33,8 @@
 
 #include "Asset.hpp"
 
-namespace asio  = boost::asio; // from <boost/asio.hpp>
-namespace ssl   = asio::ssl;   // from <boost/asio/ssl.hpp>
+namespace asio = boost::asio; // from <boost/asio.hpp>
+namespace ssl  = asio::ssl;   // from <boost/asio/ssl.hpp>
 
 namespace boost {
 namespace json {

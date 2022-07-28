@@ -283,12 +283,12 @@ void Provider::TradeUpdates() {
   m_pTradeUpdates->connect(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
-    [this] (bool ){
+    [this] (bool ){ // fConnected_t
       m_pTradeUpdates->trade_updates( true );
       m_bConnected = true;
       ProviderInterfaceBase::OnConnected( 0 );
     },
-    [this]( std::string&& sMessage){
+    [this]( std::string&& sMessage){ // fMessage_t
       //std::cout << "order update message: " << sMessage << std::endl;
       json::error_code jec;
       json::value jv = json::parse( sMessage, jec );
