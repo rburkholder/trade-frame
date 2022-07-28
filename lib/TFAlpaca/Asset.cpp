@@ -23,7 +23,7 @@
 
 #include "Asset.hpp"
 
-namespace json = boost::json;           // from <boost/json.hpp>
+namespace json = boost::json;
 
 namespace ou {
 namespace tf {
