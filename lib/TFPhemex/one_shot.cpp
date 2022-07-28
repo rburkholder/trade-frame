@@ -383,7 +383,6 @@ X-Amz-Cf-Pop: SEA19-C2
 X-Amz-Cf-Id: qPl1jtxTG41G6zAxFytvVb7h7076vjhj0eIy17qUe15BEDMHTZNKYQ==
 */
 
-
     bool bResult = m_parser.get().result() == boost::beast::http::status::ok;
     auto body = m_parser.get().body();
     m_fDone( bResult, body );

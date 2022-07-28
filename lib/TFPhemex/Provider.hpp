@@ -36,8 +36,8 @@
 // The High rate limit WebSocket API url is: wss://vapi.phemex.com/ws.
 // Or for the testnet is: wss://testnet.phemex.com/ws
 
-namespace asio  = boost::asio; // from <boost/asio.hpp>
-namespace ssl   = asio::ssl;   // from <boost/asio/ssl.hpp>
+namespace asio = boost::asio; // from <boost/asio.hpp>
+namespace ssl  = asio::ssl;   // from <boost/asio/ssl.hpp>
 
 namespace boost {
 namespace json {
@@ -77,7 +77,10 @@ public:
     return std::dynamic_pointer_cast<Provider>( pProvider );
   }
 
-  void Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret );
+  void Set(
+    const std::string& sDomainAPI, const std::string& sDomainWS,
+    const std::string& sKey, const std::string& sSecret
+    );
 
   // do these need to be virtual?  use crtp?
   virtual void Connect();
@@ -93,19 +96,26 @@ private:
 
   ssl::context m_ssl_context;
 
-  std::string m_sHost;
+  std::string m_sDomainAPI;
+  std::string m_sDomainWS;
   std::string m_sPort;
   std::string m_sKeyId;
   std::string m_sDecodedSecret;
 
   unsigned int m_ratioScale;
 
+  using pDataGateWay_t = std::shared_ptr<ou::tf::phemex::session::web_socket>;
+  pDataGateWay_t m_pDataGateWay;
+
   products::vCurrency_t m_vCurrency;
   products::vProduct_t m_vProduct;
   products::vriskLimits_t m_vriskLimits;
   products::vLeverages_t m_vLeverages;
 
+  bool m_bSendHeartBeat;
+
   void GetProducts();
+  void DataGateWayUp();
 
 };
 

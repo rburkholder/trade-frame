@@ -32,7 +32,8 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_PhemexKey(    "phemex_key" );
   static const std::string sChoice_PhemexSecret( "phemex_secret" );
-  static const std::string sChoice_PhemexDomain( "phemex_domain" );
+  static const std::string sChoice_PhemexDomain_API( "phemex_domain_api" );
+  static const std::string sChoice_PhemexDomain_WS( "phemex_domain_ws" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -63,7 +64,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_PhemexKey.c_str(),    po::value<std::string>( &choices.m_sPhemexKey ),    "phemex key" )
       ( sChoice_PhemexSecret.c_str(), po::value<std::string>( &choices.m_sPhemexSecret ), "phemex secret" )
-      ( sChoice_PhemexDomain.c_str(), po::value<std::string>( &choices.m_sPhemexDomain ), "phemex secret" )
+      ( sChoice_PhemexDomain_API.c_str(), po::value<std::string>( &choices.m_sPhemexDomain_API ), "phemex domain for api" )
+      ( sChoice_PhemexDomain_WS.c_str(), po::value<std::string>( &choices.m_sPhemexDomain_WS ), "phemex domain for web socket" )
       ;
     po::variables_map vm;
 
@@ -78,7 +80,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_PhemexKey,    true, choices.m_sPhemexKey );
       bOk &= parse<std::string>( sFileName, vm, sChoice_PhemexSecret, true, choices.m_sPhemexSecret );
-      bOk &= parse<std::string>( sFileName, vm, sChoice_PhemexDomain, true, choices.m_sPhemexDomain );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_PhemexDomain_API, true, choices.m_sPhemexDomain_API );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_PhemexDomain_WS, true, choices.m_sPhemexDomain_WS );
 
     }
 

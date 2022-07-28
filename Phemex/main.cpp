@@ -66,7 +66,9 @@ int main( int argc, char** argv )
 
     // 1. load choices
     config::Choices choices;
-    config::Load( "phemex.cfg", choices );
+    if ( !config::Load( "phemex.cfg", choices ) ) {
+      return EXIT_FAILURE;
+    }
 
     // 2. construct manager & register
     using pProviderPhemex_t = ou::tf::phemex::Provider::pProvider_t;
@@ -74,7 +76,9 @@ int main( int argc, char** argv )
     pProviderPhemex->SetName( "phemex" );  // may already be set to this
     providers.Register( pProviderPhemex );
 
-    pProviderPhemex->Set( choices.m_sPhemexDomain, choices.m_sPhemexKey, choices.m_sPhemexSecret );
+    pProviderPhemex->Set(
+      choices.m_sPhemexDomain_API, choices.m_sPhemexDomain_WS,
+      choices.m_sPhemexKey, choices.m_sPhemexSecret );
     pProviderPhemex->Connect();
 
     // 3. database can then use the registered provider

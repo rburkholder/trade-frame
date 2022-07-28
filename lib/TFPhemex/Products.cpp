@@ -97,7 +97,7 @@ Product tag_invoke( json::value_to_tag<Product>, json::value const& jv ) {
   extract( obj, "contractUnderlyingAssets", msg.contractUnderlyingAssets );
   extract( obj, "settleCurrency", msg.settleCurrency );
   extract( obj, "quoteCurrency", msg.quoteCurrency );
-  extract( obj, "baseCurrency", msg.baseCurrency );//
+  extract( obj, "baseCurrency", msg.baseCurrency );
   extract( obj, "contractSize", msg.contractSize );
   extract( obj, "lotSize", msg.lotSize );
   extract( obj, "tickSize", msg.tickSize );
@@ -121,7 +121,7 @@ Product tag_invoke( json::value_to_tag<Product>, json::value const& jv ) {
   extract( obj, "maxOrderValueEv", msg.maxOrderValueEv );
   extract( obj, "description", msg.description );
   extract( obj, "status", msg.status );
-  extract( obj, "tipOrderQty", msg.tipOrderQty ); //
+  extract( obj, "tipOrderQty", msg.tipOrderQty );
   extract( obj, "defaultTakerFee", msg.defaultTakerFee );
   extract( obj, "defaultTakerFeeEr", msg.defaultTakerFeeEr );
   extract( obj, "defaultMakerFee", msg.defaultMakerFee );

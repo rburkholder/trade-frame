@@ -15,24 +15,24 @@
 /*
  * File:    web_socket.cpp
  * Author:  raymond@burkholder.net
- * Project: lib/TFAlpaca
+ * Project: lib/TFPhemex
  * Created: June 6, 2022 15:01
  */
 
 #include <iostream>
 
-#include <boost/asio/strand.hpp>
-
 #include <boost/json.hpp>
+
+#include <boost/asio/strand.hpp>
 
 #include "web_socket.hpp"
 
-namespace json  = boost::json;      // from <boost/json.hpp>
-namespace http  = beast::http;      // from <boost/beast/http.hpp>
+namespace json = boost::json;
+namespace http = beast::http; // from <boost/beast/http.hpp>
 
 namespace ou {
 namespace tf {
-namespace alpaca {
+namespace phemex {
 namespace session {
 
 namespace {
@@ -41,7 +41,7 @@ const static std::string sUserAgent( "ounl.tradeframe/1.0" );
 
 // Report a failure
 void fail( beast::error_code ec, char const* what ) {
-  std::cerr << what << ": " << ec.message() << "\n";
+  std::cerr << what << ": " << ec.message() << std::endl;
 }
 
 } // namespace anonymous
@@ -56,26 +56,21 @@ web_socket::web_socket( asio::io_context& ioc, ssl::context& ssl_ctx )
   , m_resolver( asio::make_strand( ioc ) )
   , m_ws( asio::make_strand(ioc), ssl_ctx )
 {
-  std::cout << "alpaca::web_socket construction" << std::endl; // ensuring proper timing of handling
+  std::cout << "phemex::web_socket construction" << std::endl; // ensuring proper timing of handling
 }
 
 web_socket::~web_socket() {
-  std::cout << "alpaca::web_socket destruction" << std::endl; // ensuring proper timing of handling
+  std::cout << "phemex::web_socket destruction" << std::endl; // ensuring proper timing of handling
 }
 
-// Start the asynchronous operation
+// Start the asynchronous operation - alpaca specific, needs to be replaced
 void web_socket::connect(
   const std::string& host
 , const std::string& port
-, const std::string& sAlpacaKey
-, const std::string& sAlpacaSecret
 , fConnected_t&& fConnected
 , fMessage_t&& fMessage
 ) {
   m_host = host;
-
-  m_key = sAlpacaKey;
-  m_secret = sAlpacaSecret;
 
   m_fConnected = std::move( fConnected );
   m_fMessage = std::move( fMessage );
@@ -179,7 +174,7 @@ void web_socket::on_ssl_handshake( beast::error_code ec ) {
 
   // Perform the websocket handshake
   m_ws.async_handshake(
-    m_host, "/stream",
+    m_host, "/ws",
     beast::bind_front_handler(
       &web_socket::on_handshake,
       shared_from_this()
@@ -195,30 +190,26 @@ void web_socket::on_handshake( beast::error_code ec ) {
     //std::cout << "ws.on_handshake" << std::endl;
   }
 
-  // https://alpaca.markets/deprecated/docs/api-documentation/api-v2/streaming/
-  // this does square brackets, undesirable
-  //json::value jv = {
-  //  { "action", "authenticate" },
-  //  { "data" ,
-  //    { "key_id", key_ },
-  //    { "secret_key", secret_ }
-  //  }
-  //};
+  // TODO:
+  //  1) start heart beat
+  //  2) perform phemex style authentication
 
-  json::object auth;
-  auth[ "action" ] = "authenticate";
-  auth[ "data" ] = { { "key_id", m_key}, { "secret_key", m_secret } };
+  // this is alpaca specific
+  //json::object auth;
+  //auth[ "action" ] = "authenticate";
+  //auth[ "data" ] = { { "key_id", m_key}, { "secret_key", m_secret } };
 
   // Send the message
-  m_ws.async_write(
-    asio::buffer( json::serialize( auth ) ),
-    beast::bind_front_handler(
-      &web_socket::on_write_auth,
-      shared_from_this()
-    )
-  );
+  //m_ws.async_write(
+  //  asio::buffer( json::serialize( auth ) ),
+  //  beast::bind_front_handler(
+  //    &web_socket::on_write_auth,
+  //    shared_from_this()
+  //  )
+  //);
 }
 
+// unused at the moment
 void web_socket::on_write_auth(
   beast::error_code ec,
   std::size_t bytes_transferred
@@ -241,6 +232,7 @@ void web_socket::on_write_auth(
   );
 }
 
+// unused at the moment
 void web_socket::on_read_auth(
   beast::error_code ec,
   std::size_t bytes_transferred
@@ -276,6 +268,8 @@ void web_socket::on_read_auth(
 
 }
 
+// this is alpaca specific
+/*
 void web_socket::trade_updates( bool bEnable ) {
 
   json::object listen;
@@ -298,7 +292,7 @@ void web_socket::trade_updates( bool bEnable ) {
     )
   );
 }
-
+*/
 void web_socket::on_write_listen(
   beast::error_code ec,
   std::size_t bytes_transferred
@@ -359,7 +353,8 @@ void web_socket::on_read_listen(
 void web_socket::disconnect() {
 
   // Close the WebSocket connection
-  m_ws.async_close( websocket::close_code::normal,
+  m_ws.async_close(
+    websocket::close_code::normal,
     beast::bind_front_handler(
       &web_socket::on_close,
       shared_from_this()
@@ -378,6 +373,6 @@ void web_socket::on_close(beast::error_code ec) {
 }
 
 } // namespace session
-} // namespace alpaca
+} // namespace phemex
 } // namespace tf
 } // namespace ou

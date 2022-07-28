@@ -10,7 +10,7 @@ set(
   file_h
 #    root_certificates.hpp
     one_shot.hpp
-#    web_socket.hpp
+    web_socket.hpp
     Products.hpp
     Provider.hpp
     Symbol.hpp
@@ -19,7 +19,7 @@ set(
 set(
   file_cpp
     one_shot.cpp
-#    web_socket.cpp
+    web_socket.cpp
     Products.cpp
     Provider.cpp
     Symbol.cpp

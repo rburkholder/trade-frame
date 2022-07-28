@@ -30,7 +30,8 @@ struct Choices {
 
   std::string m_sPhemexKey;
   std::string m_sPhemexSecret;
-  std::string m_sPhemexDomain;
+  std::string m_sPhemexDomain_API;
+  std::string m_sPhemexDomain_WS; // web socket
 };
 
 bool Load( const std::string& sFileName, Choices& );

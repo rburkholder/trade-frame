@@ -15,7 +15,7 @@
 /*
  * File:    web_socket.hpp
  * Author:  raymond@burkholder.net
- * Project: lib/TFAlpaca
+ * Project: lib/TFPhemex
  * Created: June 6, 2022 15:01
  */
 
@@ -40,7 +40,7 @@ using tcp = boost::asio::ip::tcp;   // from <boost/asio/ip/tcp.hpp>
 
 namespace ou {
 namespace tf {
-namespace alpaca {
+namespace phemex {
 namespace session {
 
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/websocket/client/async-ssl/websocket_client_async_ssl.cpp
@@ -52,7 +52,7 @@ public:
 
   // Resolver and socket require an io_context
   explicit web_socket( asio::io_context&, ssl::context& );
-  ~web_socket();
+  virtual ~web_socket();
 
   using fConnected_t = std::function<void(bool)>;
   using fMessage_t = std::function<void(std::string&&)>;
@@ -61,14 +61,10 @@ public:
   void connect(
     const std::string& host,
     const std::string& port,
-    const std::string& sAlpacaKey,
-    const std::string& sAlpacaSecret,
     fConnected_t&&,
     fMessage_t&&
   );
   void disconnect();
-
-  void trade_updates( bool );
 
 private:
 
@@ -80,9 +76,6 @@ private:
   beast::flat_buffer m_buffer;
 
   std::string m_host;
-
-  std::string m_key;
-  std::string m_secret;
 
   fConnected_t m_fConnected;
   fMessage_t m_fMessage;
@@ -124,6 +117,6 @@ private:
 };
 
 } // namespace session
-} // namespace alpaca
+} // namespace phemex
 } // namespace tf
 } // namespace ou

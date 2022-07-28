@@ -33,10 +33,9 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
-// this needs to be factored out properly
-#include "root_certificates.hpp"
-
 #include "one_shot.hpp"
+#include "web_socket.hpp"
+#include "root_certificates.hpp" // this needs to be factored out properly
 
 #include "Provider.hpp"
 
@@ -75,9 +74,13 @@ Provider::~Provider() {
   }
 }
 
-void Provider::Set( const std::string& sHost, const std::string& sKey, const std::string& sSecret ) {
+void Provider::Set(
+  const std::string& sDomainAPI, const std::string& sDomainWS,
+  const std::string& sKey, const std::string& sSecret
+) {
 
-  m_sHost = sHost;
+  m_sDomainAPI = sDomainAPI;
+  m_sDomainWS = sDomainWS;
   m_sPort = "443";
   m_sKeyId = sKey;
 
@@ -106,7 +109,8 @@ void Provider::Connect() {
 
     ProviderInterfaceBase::OnConnecting( 0 );
 
-    assert( 0 < m_sHost.size() );
+    assert( 0 < m_sDomainAPI.size() );
+    assert( 0 < m_sDomainWS.size() );
     assert( 0 < m_sPort.size() );
     assert( 0 < m_sKeyId.size() );
 
@@ -116,10 +120,10 @@ void Provider::Connect() {
 
       inherited_t::Connect();
 
-      GetProducts();
+      //GetProducts();
+      DataGateWayUp();
       //LastOrderId();
       //Positions();
-      //TradeUpdates();
     }
 
   }
@@ -128,6 +132,10 @@ void Provider::Connect() {
 void Provider::Disconnect() {
   if ( m_bConnected ) {
     ProviderInterfaceBase::OnDisconnecting( 0 );
+    if ( m_pDataGateWay ) {
+      m_pDataGateWay->disconnect();
+      m_pDataGateWay.reset();
+    }
     m_state = EState::start;
     //m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
     //m_pTradeUpdates->disconnect();
@@ -142,8 +150,8 @@ void Provider::GetProducts() {
   seconds += 60; // expiry for phemex processing
 
   static const std::string sRequestPath( "/public/products" );
-  static const std::string sRequestQuery( "" );
-  static const std::string sRequestBody( "" );
+  //static const std::string sRequestQuery( "" );
+  //static const std::string sRequestBody( "" );
 
   const std::string sExpiry( boost::lexical_cast<std::string>( seconds ) );
   const std::string sForSignature( sRequestPath + sExpiry );
@@ -160,7 +168,7 @@ void Provider::GetProducts() {
   //CryptoPP::StringSource( reinterpret_cast<CryptoPP::byte const*>( sQuery.data()), sQuery.size(), true, filter.get() ); // StringSource
   //filter.release();
 
-  // use the ssl version as the cryptopp seems to use lots of stack stuff with make_unique
+  // use the ssl version as the cryptopp seems to use lots of heap stuff with make_unique
 
   std::array<unsigned char, EVP_MAX_MD_SIZE> hash;
   unsigned int hashLen;
@@ -182,7 +190,7 @@ void Provider::GetProducts() {
     m_ssl_context
     );
   osProducts->get(
-    m_sHost, m_sPort,
+    m_sDomainAPI, m_sPort,
     m_sKeyId, sHash, sExpiry,
     sRequestPath,
     [this]( bool bStatus, const std::string& message ){
@@ -201,7 +209,7 @@ void Provider::GetProducts() {
             if ( 0 != code ) {
               std::string msg;
               msg = json::value_to<std::string>( obj.at( "msg" ) );
-              BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " error: " << msg;
+              BOOST_LOG_TRIVIAL(error) << "provider/phemex " << sRequestPath << " error: " << msg;
             }
             else {
               json::object data = json::value_to<json::object>( obj.at( "data" ) );
@@ -223,7 +231,7 @@ void Provider::GetProducts() {
               std::string md5Checksum = json::value_to<std::string>( data.at( "md5Checksum" ) );
 
               BOOST_LOG_TRIVIAL(error)
-                << "provider/phemex provider"
+                << "provider/phemex"
                 << " ratioScale=" << m_ratioScale
                 << " currencies=" << m_vCurrency.size()
                 << " products=" << m_vProduct.size()
@@ -234,11 +242,33 @@ void Provider::GetProducts() {
           }
         }
         catch (...) {
-          BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " exception";
+          BOOST_LOG_TRIVIAL(error) << "provider/phemex " << sRequestPath << " exception";
         }
       }
       else {
-        BOOST_LOG_TRIVIAL(error) << "provider/phemex provider " << sRequestPath << " failure: " << message;
+        BOOST_LOG_TRIVIAL(error) << "provider/phemex " << sRequestPath << " failure: " << message;
+      }
+    });
+}
+
+void Provider::DataGateWayUp() {
+  m_pDataGateWay = std::make_shared<ou::tf::phemex::session::web_socket>(
+    m_srvc, m_ssl_context
+  );
+  m_pDataGateWay->connect(
+    m_sDomainWS, m_sPort,
+    [this] (bool ){ // fConnected_t
+      m_bConnected = true;
+      ProviderInterfaceBase::OnConnected( 0 );
+    },
+    [this]( std::string&& sMessage){ // fMessage_t
+      std::cout << "gateway received: " << sMessage << std::endl;
+      json::error_code jec;
+      json::value jv = json::parse( sMessage, jec );
+      if ( jec.failed() ) {
+        BOOST_LOG_TRIVIAL(error) << "provider/phemex failed to parse web_socket stream: " << sMessage;
+      }
+      else {
       }
     });
 }
