@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <string>
+#include <atomic>
 #include <functional>
 
 #include <boost/beast/ssl.hpp>
@@ -55,6 +56,7 @@ public:
   virtual ~web_socket();
 
   using fConnected_t = std::function<void(bool)>;
+  using fDisconnected_t = std::function<void()>;
   using fMessage_t = std::function<void(std::string&&)>;
 
   // Start the asynchronous operation
@@ -62,6 +64,7 @@ public:
     const std::string& host,
     const std::string& port,
     fConnected_t&&,
+    fDisconnected_t&&,
     fMessage_t&&
   );
   void disconnect();
@@ -69,6 +72,10 @@ public:
 private:
 
   bool m_bConnected;
+  std::atomic_uint64_t m_id; // used for incrementing message id in messages
+
+  bool m_bSendHeartBeat;
+  boost::asio::deadline_timer m_timer;
 
   tcp::resolver m_resolver;
   websocket::stream<
@@ -78,6 +85,7 @@ private:
   std::string m_host;
 
   fConnected_t m_fConnected;
+  fDisconnected_t m_fDisconnected;
   fMessage_t m_fMessage;
 
   void on_resolve(
@@ -89,6 +97,12 @@ private:
 
   void on_ssl_handshake( beast::error_code );
   void on_handshake( beast::error_code );
+
+  void on_timer( const boost::system::error_code& );
+  void on_write_heart_beat(
+    beast::error_code,
+    std::size_t bytes_transferred
+  );
 
   // m_fConnected call back on completion - needs positive & negative calc
   void on_write_auth(

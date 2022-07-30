@@ -136,11 +136,6 @@ void Provider::Disconnect() {
       m_pDataGateWay->disconnect();
       m_pDataGateWay.reset();
     }
-    m_state = EState::start;
-    //m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
-    //m_pTradeUpdates->disconnect();
-    m_bConnected = false;
-    ProviderInterfaceBase::OnDisconnected( 0 );
   }
 }
 
@@ -260,6 +255,13 @@ void Provider::DataGateWayUp() {
     [this] (bool ){ // fConnected_t
       m_bConnected = true;
       ProviderInterfaceBase::OnConnected( 0 );
+    },
+    [this](){
+      m_bConnected = false;
+      m_state = EState::start;
+      //m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
+      //m_pTradeUpdates->disconnect();
+      ProviderInterfaceBase::OnDisconnected( 0 );
     },
     [this]( std::string&& sMessage){ // fMessage_t
       std::cout << "gateway received: " << sMessage << std::endl;

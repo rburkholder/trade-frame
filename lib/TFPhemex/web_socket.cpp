@@ -22,8 +22,9 @@
 #include <iostream>
 
 #include <boost/json.hpp>
-
 #include <boost/asio/strand.hpp>
+
+#include  <boost/beast/websocket/stream.hpp>
 
 #include "web_socket.hpp"
 
@@ -48,13 +49,21 @@ void fail( beast::error_code ec, char const* what ) {
 
 // ====
 
+// Clients can use WS built-in ping message
+// or the application level ping message to DataGW as heartbeat.
+// The heartbeat interval is recommended to be set as 5 seconds,
+// and actively reconnect to DataGW if don't receive messages in 3 heartbeat intervals.
+
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/websocket/client/async-ssl/websocket_client_async_ssl.cpp
 
 // Resolver and socket require an io_context
 web_socket::web_socket( asio::io_context& ioc, ssl::context& ssl_ctx )
-  : m_bConnected( false )
-  , m_resolver( asio::make_strand( ioc ) )
-  , m_ws( asio::make_strand(ioc), ssl_ctx )
+: m_timer( ioc )
+, m_bSendHeartBeat( false )
+, m_id( 0 )
+, m_bConnected( false )
+, m_resolver( asio::make_strand( ioc ) )
+, m_ws( asio::make_strand(ioc), ssl_ctx )
 {
   std::cout << "phemex::web_socket construction" << std::endl; // ensuring proper timing of handling
 }
@@ -68,11 +77,13 @@ void web_socket::connect(
   const std::string& host
 , const std::string& port
 , fConnected_t&& fConnected
+, fDisconnected_t&& fDisconnected
 , fMessage_t&& fMessage
 ) {
   m_host = host;
 
   m_fConnected = std::move( fConnected );
+  m_fDisconnected = std::move( fDisconnected );
   m_fMessage = std::move( fMessage );
 
   // Look up the domain name
@@ -190,6 +201,34 @@ void web_socket::on_handshake( beast::error_code ec ) {
     //std::cout << "ws.on_handshake" << std::endl;
   }
 
+  m_bConnected = true;
+  if ( m_fConnected ) m_fConnected( true );
+
+  // start up generic listener
+  m_ws.async_read(
+    m_buffer,
+    beast::bind_front_handler(
+      &web_socket::on_read_listen,
+      shared_from_this()
+    )
+  );
+
+  m_ws.control_callback(
+    []( beast::websocket::frame_type kind, boost::string_view payload)
+    {
+        // Do something with the payload
+        std::cout
+          << "ws.handshake.control_callback "
+          << (int)kind
+          << " view " << payload
+          << std::endl;
+        boost::ignore_unused(kind, payload);
+    });
+
+  m_bSendHeartBeat = true;
+  m_timer.expires_from_now(boost::posix_time::seconds(2));
+  m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
+
   // TODO:
   //  1) start heart beat
   //  2) perform phemex style authentication
@@ -204,6 +243,63 @@ void web_socket::on_handshake( beast::error_code ec ) {
   //  asio::buffer( json::serialize( auth ) ),
   //  beast::bind_front_handler(
   //    &web_socket::on_write_auth,
+  //    shared_from_this()
+  //  )
+  //);
+}
+
+void web_socket::on_timer( const boost::system::error_code& ec ) {
+  if ( ec ) {
+    switch ( ec.value() ) {
+      case boost::asio::error::operation_aborted:
+        // TODO: clean up
+        break;
+      default:
+        break;
+    }
+  }
+  else {
+    if ( m_bSendHeartBeat ) {
+      json::object heart_beat;
+      //heart_beat[ "id" ] = m_id.fetch_add( 1 );
+      heart_beat[ "id" ] = 1;
+      heart_beat[ "method" ] = "server.ping";
+      heart_beat[ "params" ] = json::array();
+
+      std::cout << "ws.on_timer send " << json::serialize( heart_beat ) << std::endl;
+
+      // Send the message, may need to fix this, may not need the strand
+      m_ws.async_write(
+        asio::buffer( json::serialize( heart_beat ) ),
+        beast::bind_front_handler(
+        &web_socket::on_write_heart_beat,
+        shared_from_this()
+      )
+    );
+
+      m_timer.expires_from_now(boost::posix_time::seconds(2));
+      m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
+    }
+  }
+}
+
+void web_socket::on_write_heart_beat(
+  beast::error_code ec,
+  std::size_t bytes_transferred
+) {
+  boost::ignore_unused(bytes_transferred);
+
+  if ( ec )
+    return fail( ec, "ws.on_write_heart_beat" );
+  else {
+    std::cout << "ws.on_write_heart_beat " << bytes_transferred << std::endl;
+  }
+
+  // Read a message into our buffer?
+  //m_ws.async_read(
+  //  m_buffer,
+  //  beast::bind_front_handler(
+  //    &web_socket::on_read_auth,
   //    shared_from_this()
   //  )
   //);
@@ -249,6 +345,8 @@ void web_socket::on_read_auth(
 
     std::string sMessage( beast::buffers_to_string( m_buffer.data() ) );
     //std::cout << "ws.on_read_auth: " << sMessage << std::endl;
+
+    // TODO: will need to intercept id=1 for heart_beat
 
     m_bConnected = true;
 
@@ -331,13 +429,14 @@ void web_socket::on_read_listen(
     //std::cout << "ws.on_read_listen: " << beast::make_printable( m_buffer.data() ) << std::endl;
 
     std::string sMessage( beast::buffers_to_string( m_buffer.data() ) );
-    //std::cout << "ws.on_read_listen: " << sMessage << std::endl;
+    std::cout << "ws.on_read_listen: " << sMessage << std::endl;
 
     if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
     m_buffer.clear();
 
     if ( m_bConnected ) {
       // wait for more reads
+      std::cout << "ws.on_read_listen: start again" << std::endl;
       m_ws.async_read(
         m_buffer,
         beast::bind_front_handler(
@@ -352,6 +451,9 @@ void web_socket::on_read_listen(
 
 void web_socket::disconnect() {
 
+  m_bSendHeartBeat = false;
+  m_timer.cancel();
+
   // Close the WebSocket connection
   m_ws.async_close(
     websocket::close_code::normal,
@@ -363,10 +465,15 @@ void web_socket::disconnect() {
 }
 
 void web_socket::on_close(beast::error_code ec) {
-  if( ec )
+  if( ec ) {
     return fail(ec, "ws.on_close");
-  else
+  }
+  else {
     std::cout << "ws.on_close" << std::endl;
+  }
+
+  m_bConnected = false;
+  if ( m_fDisconnected ) m_fDisconnected();
 
   // If we get here then the connection is closed gracefully
 
