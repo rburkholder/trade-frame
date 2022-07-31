@@ -79,9 +79,11 @@ Watch& Watch::operator=( const Watch& rhs ) {
 void Watch::Initialize() {
   assert( m_pInstrument );
   assert( m_pDataProvider );
-  assert( m_pDataProvider->ProvidesQuotes() );
+  //assert(  );
   assert( m_pDataProvider->ProvidesTrades() );
-  m_quotes.Reserve( 1024 );  // reduce startup allocations
+  if ( m_pDataProvider->ProvidesQuotes() ) {
+    m_quotes.Reserve( 1024 );  // reduce startup allocations
+  }
   m_trades.Reserve( 1024 );  // reduce startup allocations
   m_depths_mm.Reserve( 1024 );  // reduce startup allocations
   m_depths_order.Reserve( 1024 );  // reduce startup allocations
@@ -222,13 +224,22 @@ void Watch::EmitValues( bool bEmitName ) const {
   if ( bEmitName ) {
     std::cout << m_pInstrument->GetInstrumentName() << ": ";
   }
-  std::cout
-    << "Cnt=" << m_quotes.Size() << "(q)," << m_trades.Size() << "(t)"
-    << ",P=" << m_trade.Price()
-    << ",B=" << m_quote.Bid()
-    << ",A=" << m_quote.Ask()
-    //<< std::endl
-    ;
+  if ( m_pDataProvider->ProvidesQuotes() ) {
+    std::cout
+      << "Cnt=" << m_quotes.Size() << "(q)," << m_trades.Size() << "(t)"
+      << ",P=" << m_trade.Price()
+      << ",B=" << m_quote.Bid()
+      << ",A=" << m_quote.Ask()
+      //<< std::endl
+      ;
+  }
+  else {
+    std::cout
+      << "Cnt=" << m_trades.Size() << "(t)"
+      << ",P=" << m_trade.Price()
+      //<< std::endl
+      ;
+  }
 }
 
 void Watch::HandleQuote( const Quote& quote ) {
