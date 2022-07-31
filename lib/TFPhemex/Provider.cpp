@@ -21,8 +21,6 @@
 
 #include <ctime>
 
-//#include <cryptopp/sha.h>
-//#include <cryptopp/hmac.h>
 #include <cryptopp/base64.h>
 
 #include <openssl/sha.h>
@@ -51,7 +49,7 @@ Provider::Provider()
 {
   m_sName = "phemex"; // this needs to match provider used in the database
   m_nID = keytypes::EProviderPhemex;
-  m_bProvidesQuotes = true;
+//  m_bProvidesQuotes = true; // need to derive from order table
   m_bProvidesTrades = true;
 //m_bProvidesBrokerInterface = true;
 
@@ -98,6 +96,8 @@ void Provider::Set(
 }
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
+  // TODO: perform validation: name exists in the product table
+  //   place product table data into symbol for reference by client
   pSymbol_t pSymbol( new Symbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
@@ -256,7 +256,7 @@ void Provider::DataGateWayUp() {
       m_bConnected = true;
       ProviderInterfaceBase::OnConnected( 0 );
     },
-    [this](){
+    [this](){ // fDisconnected_t
       m_bConnected = false;
       m_state = EState::start;
       //m_pTradeUpdates->trade_updates( false ); // may need some state refinement for calling this
@@ -273,6 +273,28 @@ void Provider::DataGateWayUp() {
       else {
       }
     });
+}
+
+//void Provider::StartQuoteWatch( pSymbol_t pSymbol ) {
+  // no quotes to watch for now, will need to pull from order book
+//}
+
+//void Provider::StopQuoteWatch( pSymbol_t pSymbol ) {
+  // no quotes to watch for now, will need to pull from order book
+//}
+
+void Provider::StartTradeWatch( pSymbol_t pSymbol ) {
+  // does inherited handle watch count?
+  if ( m_pDataGateWay ) {
+    m_pDataGateWay->StartTradeWatch( pSymbol->GetInstrument()->GetInstrumentName() );
+  }
+}
+
+void Provider::StopTradeWatch( pSymbol_t pSymbol ) {
+  // does inherited handle watch count?
+  if ( m_pDataGateWay ) {
+    m_pDataGateWay->StopTradeWatch( pSymbol->GetInstrument()->GetInstrumentName() );
+  }
 }
 
 } // namespace phemex

@@ -28,6 +28,7 @@
 
 #include <boost/asio/strand.hpp>
 
+#include <TFTrading/Watch.h>
 #include <TFTrading/DBWrapper.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
@@ -89,7 +90,7 @@ int main( int argc, char** argv )
 
     std::cout << "construct symbol: " << std::endl;
 
-    const std::string sSymbol( "BTC" );
+    const std::string sSymbol( "BTCUSD" );
     const std::string sPortfolio( "USD" );
 
     using pInstrument_t = ou::tf::Instrument::pInstrument_t;
@@ -119,6 +120,10 @@ int main( int argc, char** argv )
         // TODO: will need to confirm names are ok, iqfeed might need to be changed in provider
       }
     }
+
+    ou::tf::Watch::pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pProviderPhemex );
+    pWatch->StartWatch();
+
 /*
     std::cout << "construct / transmit limit buy: " << std::endl;
 
@@ -146,7 +151,9 @@ int main( int argc, char** argv )
 
     std::cout << "wait for completion" << std::endl;
 
-    sleep( 10 );
+    sleep( 15 );
+
+    pWatch->StopWatch();
 
     std::cout << "disconnection: " << std::endl;
 

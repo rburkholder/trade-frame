@@ -88,6 +88,13 @@ public:
 
 protected:
 
+  // overridden from ProviderInterface, called when application adds/removes watches
+  //virtual void StartQuoteWatch( pSymbol_t pSymbol );
+  //virtual void  StopQuoteWatch( pSymbol_t pSymbol );
+
+  virtual void StartTradeWatch( pSymbol_t pSymbol );
+  virtual void  StopTradeWatch( pSymbol_t pSymbol );
+
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
 private:

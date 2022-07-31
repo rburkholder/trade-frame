@@ -38,6 +38,8 @@ namespace session {
 
 namespace {
 
+const static unsigned int nHeartBeatIntervalSeconds( 5 );
+
 const static std::string sUserAgent( "ounl.tradeframe/1.0" );
 
 // Report a failure
@@ -226,7 +228,7 @@ void web_socket::on_handshake( beast::error_code ec ) {
     });
 
   m_bSendHeartBeat = true;
-  m_timer.expires_from_now(boost::posix_time::seconds(2));
+  m_timer.expires_from_now(boost::posix_time::seconds( nHeartBeatIntervalSeconds ));
   m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
 
   // TODO:
@@ -272,12 +274,12 @@ void web_socket::on_timer( const boost::system::error_code& ec ) {
       m_ws.async_write(
         asio::buffer( json::serialize( heart_beat ) ),
         beast::bind_front_handler(
-        &web_socket::on_write_heart_beat,
-        shared_from_this()
-      )
-    );
+          &web_socket::on_write_heart_beat,
+          shared_from_this()
+        )
+      );
 
-      m_timer.expires_from_now(boost::posix_time::seconds(2));
+      m_timer.expires_from_now(boost::posix_time::seconds( nHeartBeatIntervalSeconds ));
       m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
     }
   }
@@ -292,7 +294,7 @@ void web_socket::on_write_heart_beat(
   if ( ec )
     return fail( ec, "ws.on_write_heart_beat" );
   else {
-    std::cout << "ws.on_write_heart_beat " << bytes_transferred << std::endl;
+    //std::cout << "ws.on_write_heart_beat " << bytes_transferred << std::endl;
   }
 
   // Read a message into our buffer?
@@ -415,8 +417,8 @@ void web_socket::on_write_listen(
 }
 
 void web_socket::on_read_listen(
-    beast::error_code ec,
-    std::size_t bytes_transferred
+  beast::error_code ec,
+  std::size_t bytes_transferred
 ) {
   boost::ignore_unused( bytes_transferred );
 
@@ -429,14 +431,14 @@ void web_socket::on_read_listen(
     //std::cout << "ws.on_read_listen: " << beast::make_printable( m_buffer.data() ) << std::endl;
 
     std::string sMessage( beast::buffers_to_string( m_buffer.data() ) );
-    std::cout << "ws.on_read_listen: " << sMessage << std::endl;
+    //std::cout << "ws.on_read_listen: " << sMessage << std::endl;
 
     if ( m_fMessage ) m_fMessage( std::move( sMessage ) );
     m_buffer.clear();
 
     if ( m_bConnected ) {
       // wait for more reads
-      std::cout << "ws.on_read_listen: start again" << std::endl;
+      //std::cout << "ws.on_read_listen: start again" << std::endl;
       m_ws.async_read(
         m_buffer,
         beast::bind_front_handler(
@@ -478,6 +480,77 @@ void web_socket::on_close(beast::error_code ec) {
   // If we get here then the connection is closed gracefully
 
 }
+
+void web_socket::StartTradeWatch( const std::string& sSymbol ) {
+
+  json::object subscribe_trade;
+  //heart_beat[ "id" ] = m_id.fetch_add( 1 );
+  subscribe_trade[ "id" ] = (int)EMessageId::StartTradeWatch;
+  subscribe_trade[ "method" ] = "trade.subscribe";
+  subscribe_trade[ "params" ] = { sSymbol };
+
+  std::cout << "ws.StartTradeWatch send " << json::serialize( subscribe_trade ) << std::endl;
+
+  // Send the message, may need to fix this, may not need the strand
+  m_ws.async_write(
+    asio::buffer( json::serialize( subscribe_trade ) ),
+    beast::bind_front_handler(
+      &web_socket::on_write_subscribe_trade,
+      shared_from_this()
+    )
+  );
+
+}
+
+void web_socket::on_write_subscribe_trade(
+  beast::error_code ec,
+  std::size_t bytes_transferred
+) {
+  boost::ignore_unused(bytes_transferred);
+
+  if ( ec )
+    return fail( ec, "ws.on_write_subscribe_trade" );
+  else {
+    //std::cout << "ws.on_write_subscribe_trade " << bytes_transferred << std::endl;
+  }
+}
+
+
+void web_socket::StopTradeWatch( const std::string& sSymbol ) {
+
+  json::object un_subscribe_trade;
+  //heart_beat[ "id" ] = m_id.fetch_add( 1 );
+  un_subscribe_trade[ "id" ] = (int)EMessageId::StopTradeWatch;
+  un_subscribe_trade[ "method" ] = "trade.unsubscribe";
+  un_subscribe_trade[ "params" ] = { sSymbol };
+
+  std::cout << "ws.StopTradeWatch send " << json::serialize( un_subscribe_trade ) << std::endl;
+
+  // Send the message, may need to fix this, may not need the strand
+  m_ws.async_write(
+    asio::buffer( json::serialize( un_subscribe_trade ) ),
+    beast::bind_front_handler(
+      &web_socket::on_write_un_subscribe_trade,
+      shared_from_this()
+    )
+  );
+
+}
+
+void web_socket::on_write_un_subscribe_trade(
+  beast::error_code ec,
+  std::size_t bytes_transferred
+) {
+  boost::ignore_unused(bytes_transferred);
+
+  if ( ec )
+    return fail( ec, "ws.on_write_un_subscribe_trade" );
+  else {
+    //std::cout << "ws.on_write_un_subscribe_trade " << bytes_transferred << std::endl;
+  }
+}
+
+
 
 } // namespace session
 } // namespace phemex

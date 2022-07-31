@@ -69,7 +69,12 @@ public:
   );
   void disconnect();
 
+  void StartTradeWatch( const std::string& );
+  void StopTradeWatch( const std::string& );
+
 private:
+
+  enum class EMessageId { HeartBeat, StartTradeWatch, StopTradeWatch };
 
   bool m_bConnected;
   std::atomic_uint64_t m_id; // used for incrementing message id in messages
@@ -100,6 +105,16 @@ private:
 
   void on_timer( const boost::system::error_code& );
   void on_write_heart_beat(
+    beast::error_code,
+    std::size_t bytes_transferred
+  );
+
+  void on_write_subscribe_trade(
+    beast::error_code,
+    std::size_t bytes_transferred
+  );
+
+  void on_write_un_subscribe_trade(
     beast::error_code,
     std::size_t bytes_transferred
   );
