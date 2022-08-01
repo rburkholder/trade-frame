@@ -53,7 +53,7 @@ Provider::Provider()
   m_bProvidesTrades = true;
 //m_bProvidesBrokerInterface = true;
 
-  if ( 0 == GetThreadCount() ) {
+  if ( 0 == GetThreadCount() ) { // affects m_srvc
     SetThreadCount( 1 ); // need at least one thread for websocket processing
   }
 
@@ -98,8 +98,15 @@ void Provider::Set(
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
   // TODO: perform validation: name exists in the product table
   //   place product table data into symbol for reference by client
-  pSymbol_t pSymbol( new Symbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
-  inherited_t::AddCSymbol( pSymbol );
+  pSymbol_t pSymbol;
+  try {
+    pSymbol = boost::make_shared<Symbol>( pInstrument->GetInstrumentName( ID() ), pInstrument );
+    inherited_t::AddCSymbol( pSymbol );
+  }
+  catch ( const std::runtime_error& e ) {
+    std::cerr << "phemex/NewCSymbol error: " << e.what() << std::endl;
+    assert( false );
+  }
   return pSymbol;
 }
 
