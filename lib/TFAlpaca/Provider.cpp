@@ -155,11 +155,11 @@ void Provider::Assets() {
   m_setExchange.clear();
   m_setClass.clear();
 
-  auto osSymbols = std::make_shared<ou::tf::alpaca::session::one_shot>(
+  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  osSymbols->get(
+  os->get(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/assets",
@@ -239,11 +239,11 @@ void Provider::Assets() {
 }
 
 void Provider::Positions() {
-  auto osPositions = std::make_shared<ou::tf::alpaca::session::one_shot>(
+  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  osPositions->get(
+  os->get(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/positions",
@@ -523,11 +523,11 @@ void Provider::LastOrderId() {
     << json::serialize( request )
     << std::endl;
 
-  auto osPositions = std::make_shared<ou::tf::alpaca::session::one_shot>(
+  auto os = std::make_shared<ou::tf::alpaca::session::one_shot>(
     asio::make_strand( m_srvc ),
     m_ssl_context
     );
-  osPositions->get(
+  os->get(
     m_sHost, m_sPort,
     m_sAlpacaKeyId, m_sAlpacaSecret,
     "/v2/orders?status=all&limit=1&direction=desc",

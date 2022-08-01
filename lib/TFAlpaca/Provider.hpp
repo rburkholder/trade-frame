@@ -80,7 +80,7 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
-  // From ProviderInterface Execution Section
+  // From ProviderInterface Execution Section (virtual?)
   void PlaceOrder( pOrder_t order );
   void CancelOrder( pOrder_t order );
 
