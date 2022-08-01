@@ -121,7 +121,7 @@ int main( int argc, char** argv )
       }
     }
 
-    ou::tf::Watch::pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pProviderPhemex );
+    ou::tf::Watch::pWatch_t pWatch = pPosition->GetWatch();
     pWatch->StartWatch();
 
 /*
@@ -154,6 +154,8 @@ int main( int argc, char** argv )
     sleep( 15 );
 
     pWatch->StopWatch();
+
+    sleep( 1 ); // will need to properly handle events between unwatch and disconnect
 
     std::cout << "disconnection: " << std::endl;
 
