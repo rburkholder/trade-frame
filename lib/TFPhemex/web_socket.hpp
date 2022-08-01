@@ -26,6 +26,8 @@
 #include <atomic>
 #include <functional>
 
+#include <boost/asio/io_context_strand.hpp>
+
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/core.hpp>
 
@@ -46,7 +48,6 @@ namespace session {
 
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/websocket/client/async-ssl/websocket_client_async_ssl.cpp
 
-// Sends a WebSocket message and prints the response
 class web_socket : public std::enable_shared_from_this<web_socket>
 {
 public:
@@ -81,6 +82,9 @@ private:
 
   bool m_bSendHeartBeat;
   boost::asio::deadline_timer m_timer;
+
+  asio::io_context& m_srvc;
+  asio::io_context::strand m_strand;
 
   tcp::resolver m_resolver;
   websocket::stream<

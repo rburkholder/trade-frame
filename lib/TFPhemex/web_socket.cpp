@@ -59,13 +59,15 @@ void fail( beast::error_code ec, char const* what ) {
 // https://www.boost.org/doc/libs/1_79_0/libs/beast/example/websocket/client/async-ssl/websocket_client_async_ssl.cpp
 
 // Resolver and socket require an io_context
-web_socket::web_socket( asio::io_context& ioc, ssl::context& ssl_ctx )
-: m_timer( ioc )
+web_socket::web_socket( asio::io_context& srvc, ssl::context& ssl_ctx )
+: m_srvc( srvc )
+, m_strand( srvc )
+, m_timer( srvc )
 , m_bSendHeartBeat( false )
 , m_id( 0 )
 , m_bConnected( false )
-, m_resolver( asio::make_strand( ioc ) )
-, m_ws( asio::make_strand(ioc), ssl_ctx )
+, m_resolver( asio::make_strand( srvc ) )
+, m_ws( asio::make_strand( srvc ), ssl_ctx )
 {
   std::cout << "phemex::web_socket construction" << std::endl; // ensuring proper timing of handling
 }
@@ -268,16 +270,22 @@ void web_socket::on_timer( const boost::system::error_code& ec ) {
       heart_beat[ "method" ] = "server.ping";
       heart_beat[ "params" ] = json::array();
 
-      std::cout << "ws.on_timer send " << json::serialize( heart_beat ) << std::endl;
+      auto sSerialized( json::serialize( heart_beat ) );
+
+      std::cout << "ws.on_timer send " << sSerialized << std::endl;
 
       // Send the message, may need to fix this, may not need the strand
-      m_ws.async_write(
-        asio::buffer( json::serialize( heart_beat ) ),
-        beast::bind_front_handler(
-          &web_socket::on_write_heart_beat,
-          shared_from_this()
-        )
-      );
+      asio::post(
+        m_strand,
+        [this,s=std::move(sSerialized)](){
+          m_ws.async_write(
+            asio::buffer( s ),
+            beast::bind_front_handler(
+              &web_socket::on_write_heart_beat,
+              shared_from_this()
+            )
+          );
+        } );
 
       m_timer.expires_from_now(boost::posix_time::seconds( nHeartBeatIntervalSeconds ));
       m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
@@ -393,6 +401,7 @@ void web_socket::trade_updates( bool bEnable ) {
   );
 }
 */
+// unused at the moment
 void web_socket::on_write_listen(
   beast::error_code ec,
   std::size_t bytes_transferred
@@ -489,16 +498,21 @@ void web_socket::StartTradeWatch( const std::string& sSymbol ) {
   subscribe_trade[ "method" ] = "trade.subscribe";
   subscribe_trade[ "params" ] = { sSymbol };
 
-  std::cout << "ws.StartTradeWatch send " << json::serialize( subscribe_trade ) << std::endl;
+  auto sSerialized( json::serialize( subscribe_trade ) );
 
-  // Send the message, may need to fix this, may not need the strand
-  m_ws.async_write(
-    asio::buffer( json::serialize( subscribe_trade ) ),
-    beast::bind_front_handler(
-      &web_socket::on_write_subscribe_trade,
-      shared_from_this()
-    )
-  );
+  std::cout << "ws.StartTradeWatch send " << sSerialized << std::endl;
+
+  asio::post(
+    m_strand,
+    [this,s=std::move(sSerialized)](){
+      m_ws.async_write(
+        asio::buffer( s ),
+        beast::bind_front_handler(
+          &web_socket::on_write_subscribe_trade,
+          shared_from_this()
+        )
+      );
+    } );
 
 }
 
@@ -524,17 +538,21 @@ void web_socket::StopTradeWatch( const std::string& sSymbol ) {
   un_subscribe_trade[ "method" ] = "trade.unsubscribe";
   un_subscribe_trade[ "params" ] = { sSymbol };
 
-  std::cout << "ws.StopTradeWatch send " << json::serialize( un_subscribe_trade ) << std::endl;
+  const std::string sSerialized( json::serialize( un_subscribe_trade ) );
 
-  // Send the message, may need to fix this, may not need the strand
-  m_ws.async_write(
-    asio::buffer( json::serialize( un_subscribe_trade ) ),
-    beast::bind_front_handler(
-      &web_socket::on_write_un_subscribe_trade,
-      shared_from_this()
-    )
-  );
+  std::cout << "ws.StopTradeWatch send " << sSerialized << std::endl;
 
+  asio::post(
+    m_strand,
+    [this,s=std::move(sSerialized)](){
+      m_ws.async_write(
+        asio::buffer( s ),
+        beast::bind_front_handler(
+          &web_socket::on_write_un_subscribe_trade,
+          shared_from_this()
+        )
+      );
+    } );
 }
 
 void web_socket::on_write_un_subscribe_trade(
