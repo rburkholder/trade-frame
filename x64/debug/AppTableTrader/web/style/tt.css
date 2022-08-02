@@ -1,0 +1,30 @@
+
+body {
+  font-family: Gill, Helvetica, sans-serif;
+  color: black;
+  background-color:  lightgrey;
+}
+
+.MainTitle {
+  font-weight: bolder;
+  font-size: 30px;
+//  color: black;
+  background-color: gray;
+  padding: 5px;
+  border: 2px;
+  margin: 10px;
+  text-align:center;
+  float: top
+}
+
+.classBlock {
+  display: block;
+}
+
+.classCenter {
+  text-align:center;
+}
+
+// display: inline;   to get li stuff in a row  
+// display: inline-block; to allow padding, border, margin
+
