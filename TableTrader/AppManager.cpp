@@ -29,13 +29,12 @@ static std::unique_ptr<Wt::WApplication> CreateAppTableTrader( const Wt::WEnviro
   //
   bool valid( true );
   std::unique_ptr<AppTableTrader> app;
+  app = std::make_unique<AppTableTrader>( env );
   if ( !valid ) {
-    app = std::make_unique<AppTableTrader>(env);
     app->redirect("error.html");
     app->quit();
   } else {
     // usually you will specialize your application class
-    app = std::make_unique<AppTableTrader>(env);
     //
     // Add widgets to app->root() and return the application object.
     //
@@ -43,8 +42,8 @@ static std::unique_ptr<Wt::WApplication> CreateAppTableTrader( const Wt::WEnviro
   return app;
 }
 
-AppManager::AppManager( int argc, char** argv )
-: m_server( argv[0] )
+AppManager::AppManager( int argc, char** argv, const config::Choices& choices )
+: m_server( argc, argv, choices )
 {
     m_server.setServerConfiguration( argc, argv, WTHTTP_CONFIGURATION );
     m_server.addEntryPoint( Wt::EntryPointType::Application, CreateAppTableTrader );

@@ -19,7 +19,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost 1.77.0 REQUIRED COMPONENTS system log log_setup)
+find_package(Boost 1.77.0 REQUIRED COMPONENTS program_options system log log_setup)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -27,6 +27,7 @@ set(
   file_h
     AppManager.hpp
     AppTableTrader.hpp
+    Config.hpp
     Server.h
   )
 
@@ -34,6 +35,7 @@ set(
   file_cpp
     AppManager.cpp
     AppTableTrader.cpp
+    Config.cpp
     Server.cpp
     main.cpp
   )

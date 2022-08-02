@@ -13,28 +13,24 @@
  ************************************************************************/
 
 /*
- * File:      AppManager.hpp
- * Author:    raymond@burkholder.net
- * Project:   TableTrader
- * Created:   2022/08/01 13:31:07
+ * File:    Config.hpp
+ * Author:  raymond@burkholder.net
+ * Project: TableTrader
+ * Created: 2022/08/02 15:15:19
  */
 
-#ifndef APPMANAGER_H
-#define APPMANAGER_H
+#pragma once
 
-#include "Config.hpp"
-#include "Server.h"
+#include <string>
 
-class AppManager {
-public:
-  AppManager( int argc, char** argv, const config::Choices& );
-  virtual ~AppManager( );
-  void Start();
-private:
+namespace config {
 
-  Server m_server;
+struct Choices {
 
+  std::string m_sUIUserName;
+  std::string m_sUIPassWord;
 };
 
-#endif /* APPMANAGER_H */
+bool Load( const std::string& sFileName, Choices& );
 
+} // namespace config

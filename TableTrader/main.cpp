@@ -19,6 +19,7 @@
  * Created:   2022/08/01 13:21:06
  */
 
+#include "Config.hpp"
 #include "AppManager.hpp"
 
 // run application in ./x64
@@ -32,11 +33,18 @@
 
 int main( int argc, char** argv ) {
 
-  AppManager manager( argc, argv );
+  static const std::string sAppName( "TableTrader" );
 
-  manager.Start();
+  config::Choices choices;
+  if ( Load( "etc/choices.cfg", choices ) ) {
+    AppManager manager( argc, argv, choices );
+    manager.Start();
+  }
+  else {
+    return EXIT_FAILURE;
+  }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 

@@ -12,23 +12,28 @@
 
 #include "Server.h"
 
-Server::Server(
-  const std::string &wtApplicationPath,
-  const std::string &wtConfigurationFile
-)
-: Wt::WServer( wtApplicationPath, wtConfigurationFile)
-{
-}
+//Server::Server(
+//  const std::string &wtApplicationPath,
+//  const std::string &wtConfigurationFile
+//)
+//: Wt::WServer( wtApplicationPath, wtConfigurationFile)
+//{
+//}
 
 Server::Server(
   int argc,
   char *argv[],
+  const config::Choices& choices,
   const std::string &wtConfigurationFile
 )
 : Wt::WServer( argc, argv, wtConfigurationFile )
+, m_choices( choices )
 {
 }
 
 Server::~Server() {
 }
 
+bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPassWord ) {
+  return ( ( sUserName == m_choices.m_sUIUserName ) && ( sPassWord == m_choices.m_sUIPassWord ) );
+}

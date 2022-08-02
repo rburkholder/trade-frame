@@ -12,21 +12,27 @@
 
 #include <Wt/WServer.h>
 
+#include "Config.hpp"
+
 class Server: public Wt::WServer {
 public:
-  Server(
-    const std::string &wtApplicationPath=std::string(),
-    const std::string &wtConfigurationFile=std::string()
-    );
+  //Server(
+  //  const std::string &wtApplicationPath=std::string(),
+  //  const std::string &wtConfigurationFile=std::string()
+  //  );
   Server(
     int argc,
     char *argv[],
+    const config::Choices&,
     const std::string &wtConfigurationFile=std::string()
     );
   virtual ~Server();
 
+  bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
+
 protected:
 private:
+  const config::Choices& m_choices;
 };
 
 #endif /* SERVER_H */
