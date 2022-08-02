@@ -31,7 +31,6 @@ add_subdirectory(LiveChart)
 add_subdirectory(MultipleFutures)
 add_subdirectory(Phemex)
 add_subdirectory(Scanner)
-add_subdirectory(TableTrader)
 add_subdirectory(Weeklies)
 
 add_subdirectory(lib)
@@ -39,3 +38,8 @@ add_subdirectory(lib)
 if(EXISTS /usr/local/lib/rdaf)
   add_subdirectory(rdaf)
 endif()
+
+if(EXISTS /usr/local/lib/libwt.so)
+  add_subdirectory(TableTrader)
+endif()
+
