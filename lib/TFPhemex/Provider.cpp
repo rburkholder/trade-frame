@@ -31,6 +31,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <TFTrading/OrderManager.h>
+
 #include "one_shot.hpp"
 #include "web_socket.hpp"
 #include "root_certificates.hpp" // this needs to be factored out properly
@@ -384,6 +386,15 @@ void Provider::StopTradeWatch( pSymbol_t pSymbol ) {
     m_pDataGateWay->StopTradeWatch( pSymbol->GetInstrument()->GetInstrumentName() );
   }
 }
+
+void Provider::PlaceOrder( pOrder_t pOrder ) {
+  const ou::tf::Order& order(*pOrder);
+  const ou::tf::Order::TableRowDef& trd( order.GetRow() );
+}
+
+void Provider::CancelOrder( pOrder_t pOrder ) {
+}
+
 
 } // namespace phemex
 } // namespace tf

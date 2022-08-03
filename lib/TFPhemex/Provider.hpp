@@ -90,6 +90,7 @@ public:
 protected:
 
   // overridden from ProviderInterface, called when application adds/removes watches
+  // for phemex: Subscribe tick event for symbol price?
   //virtual void StartQuoteWatch( pSymbol_t pSymbol );
   //virtual void  StopQuoteWatch( pSymbol_t pSymbol );
 
@@ -97,6 +98,10 @@ protected:
   virtual void  StopTradeWatch( pSymbol_t pSymbol );
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
+
+  // From ProviderInterface Execution Section
+  virtual void PlaceOrder( pOrder_t );
+  virtual void CancelOrder( pOrder_t );
 
 private:
 
