@@ -28,7 +28,7 @@ set(
     AppManager.hpp
     AppTableTrader.hpp
     Config.hpp
-    Server.h
+    Server.hpp
   )
 
 set(

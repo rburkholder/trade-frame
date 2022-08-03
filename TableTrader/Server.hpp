@@ -13,29 +13,39 @@
  ************************************************************************/
 
 /*
- * File:      AppManager.hpp
+ * File:      Server.h
  * Author:    raymond@burkholder.net
  * Project:   TableTrader
- * Created:   2022/08/01 13:31:07
+ * Created:   2022/08/02 09:58:23
  */
 
-#ifndef APPMANAGER_H
-#define APPMANAGER_H
+#ifndef SERVER_H
+#define SERVER_H
+
+#include <Wt/WServer.h>
 
 #include "Config.hpp"
 
-#include "Server.hpp"
-
-class AppManager {
+class Server: public Wt::WServer {
 public:
-  AppManager( int argc, char** argv, const config::Choices& );
-  virtual ~AppManager( );
-  void Start();
+
+  Server(
+    int argc,
+    char *argv[],
+    const config::Choices&,
+    const std::string &wtConfigurationFile=std::string()
+    );
+  virtual ~Server();
+
+  bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
+
+  using fAddUnderlyingFutures_t = std::function<void(const std::string&)>;
+  void AddUnderlyingFutures( fAddUnderlyingFutures_t&& );
+
+protected:
 private:
-
-  Server m_server;
-
+  const config::Choices& m_choices;
 };
 
-#endif /* APPMANAGER_H */
+#endif /* SERVER_H */
 

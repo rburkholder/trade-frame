@@ -28,7 +28,7 @@
 #include <Wt/WEnvironment.h>
 #include <Wt/WApplication.h>
 
-#include "Server.h"
+#include "Server.hpp"
 
 class AppTableTrader: public Wt::WApplication {
 public:

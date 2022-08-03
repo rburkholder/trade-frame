@@ -388,7 +388,7 @@ void Provider::StopTradeWatch( pSymbol_t pSymbol ) {
 }
 
 void Provider::PlaceOrder( pOrder_t pOrder ) {
-  const ou::tf::Order& order(*pOrder);
+  const ou::tf::Order& order( *pOrder );
   const ou::tf::Order::TableRowDef& trd( order.GetRow() );
 }
 
