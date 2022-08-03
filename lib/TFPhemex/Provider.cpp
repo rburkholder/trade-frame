@@ -281,7 +281,29 @@ void Provider::DataGateWayUp() {
         bool bMessageProcessed( false );
         json::object const& obj = jv.as_object();
         if ( auto p = obj.if_contains( "error" ) ) {
-          BOOST_LOG_TRIVIAL(error) << "provider/phemex gw sent error: " << sMessage;
+          int id = json::value_to<int>( obj.at( "id" ) );
+          switch ( id ) {
+            case (int)session::web_socket::EMessageId::HeartBeat:
+              // todo: signal back into web_socket for timeout reset
+              break;
+            case (int)session::web_socket::EMessageId::StartTradeWatch:
+              if ( !obj.at( "error" ).is_null() ) {
+                json::object error = json::value_to<json::object>( obj.at( "error" ) );
+                BOOST_LOG_TRIVIAL(error)
+                  << "provider/phemex gw start watch: " << sMessage;
+              }
+              break;
+            case (int)session::web_socket::EMessageId::StopTradeWatch:
+              if ( !obj.at( "error" ).is_null() ) {
+                json::object error = json::value_to<json::object>( obj.at( "error" ) );
+                BOOST_LOG_TRIVIAL(error)
+                  << "provider/phemex gw stop watch: " << sMessage;
+              }
+              break;
+            default:
+              BOOST_LOG_TRIVIAL(error) << "provider/phemex gw error: " << sMessage;
+              break;
+          }
           bMessageProcessed = true;
         }
         else {

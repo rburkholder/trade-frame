@@ -265,8 +265,7 @@ void web_socket::on_timer( const boost::system::error_code& ec ) {
   else {
     if ( m_bSendHeartBeat ) {
       json::object heart_beat;
-      //heart_beat[ "id" ] = m_id.fetch_add( 1 );
-      heart_beat[ "id" ] = 1;
+      heart_beat[ "id" ] = (int)EMessageId::HeartBeat;
       heart_beat[ "method" ] = "server.ping";
       heart_beat[ "params" ] = json::array();
 
@@ -493,7 +492,6 @@ void web_socket::on_close(beast::error_code ec) {
 void web_socket::StartTradeWatch( const std::string& sSymbol ) {
 
   json::object subscribe_trade;
-  //heart_beat[ "id" ] = m_id.fetch_add( 1 );
   subscribe_trade[ "id" ] = (int)EMessageId::StartTradeWatch;
   subscribe_trade[ "method" ] = "trade.subscribe";
   subscribe_trade[ "params" ] = { sSymbol };
@@ -533,7 +531,6 @@ void web_socket::on_write_subscribe_trade(
 void web_socket::StopTradeWatch( const std::string& sSymbol ) {
 
   json::object un_subscribe_trade;
-  //heart_beat[ "id" ] = m_id.fetch_add( 1 );
   un_subscribe_trade[ "id" ] = (int)EMessageId::StopTradeWatch;
   un_subscribe_trade[ "method" ] = "trade.unsubscribe";
   un_subscribe_trade[ "params" ] = { sSymbol };

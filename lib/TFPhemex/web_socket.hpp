@@ -52,6 +52,8 @@ class web_socket : public std::enable_shared_from_this<web_socket>
 {
 public:
 
+  enum class EMessageId { HeartBeat=1, StartTradeWatch, StopTradeWatch };
+
   // Resolver and socket require an io_context
   explicit web_socket( asio::io_context&, ssl::context& );
   virtual ~web_socket();
@@ -74,8 +76,6 @@ public:
   void StopTradeWatch( const std::string& );
 
 private:
-
-  enum class EMessageId { HeartBeat, StartTradeWatch, StopTradeWatch };
 
   bool m_bConnected;
   std::atomic_uint64_t m_id; // used for incrementing message id in messages
