@@ -75,7 +75,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_UIUserName, true, choices.m_sUIUserName );
+      bOk &= ( 0 < choices.m_sUIUserName.size() );
       bOk &= parse<std::string>( sFileName, vm, sChoice_UIPassWord, true, choices.m_sUIPassWord );
+      bOk &= ( 0 < choices.m_sUIPassWord.size() );
 
     }
 
