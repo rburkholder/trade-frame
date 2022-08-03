@@ -13,43 +13,18 @@
  ************************************************************************/
 
 /*
- * File:      Server.hpp
+ * File:      Server_impl.hpp
  * Author:    raymond@burkholder.net
  * Project:   TableTrader
- * Created:   2022/08/02 09:58:23
+ * Created:   2022/08/03 17:14:41
  */
 
-#ifndef SERVER_H
-#define SERVER_H
+#pragma once
 
-#include <Wt/WServer.h>
-
-#include "Config.hpp"
-
-class Server_impl;
-
-class Server: public Wt::WServer {
+class Server_impl {
 public:
-
-  Server(
-    int argc,
-    char *argv[],
-    const config::Choices&,
-    const std::string &wtConfigurationFile=std::string()
-    );
-  virtual ~Server();
-
-  bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
-
-  using fAddUnderlyingFutures_t = std::function<void(const std::string&)>;
-  void AddUnderlyingFutures( fAddUnderlyingFutures_t&& );
-
+  Server_impl();
+  ~Server_impl();
 protected:
 private:
-  const config::Choices& m_choices;
-
-  std::unique_ptr<Server_impl> m_implServer;
 };
-
-#endif /* SERVER_H */
-

@@ -20,6 +20,7 @@
  */
 
 #include "Server.hpp"
+#include "Server_impl.hpp"
 
 Server::Server(
   int argc,
@@ -30,6 +31,7 @@ Server::Server(
 : Wt::WServer( argc, argv, wtConfigurationFile )
 , m_choices( choices )
 {
+  m_implServer = std::make_unique<Server_impl>();
 }
 
 Server::~Server() {

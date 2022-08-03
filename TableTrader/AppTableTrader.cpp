@@ -215,8 +215,10 @@ void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
 
 void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
 
+  // TODO: will need to restore state if Server/Server_impl has something running
+
   Wt::WContainerWidget* pContainerLoginFrame = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  //pContainerWeight->addStyleClass( "classInputRow" );
+  pContainerLoginFrame->addStyleClass( "classInputRow" );
 
     Wt::WContainerWidget* pContainerTitle = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
 

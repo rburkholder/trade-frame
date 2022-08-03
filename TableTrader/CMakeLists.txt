@@ -29,6 +29,7 @@ set(
     AppTableTrader.hpp
     Config.hpp
     Server.hpp
+    Server_impl.hpp
   )
 
 set(
@@ -37,6 +38,7 @@ set(
     AppTableTrader.cpp
     Config.cpp
     Server.cpp
+    Server_impl.cpp
     main.cpp
   )
 
@@ -48,10 +50,14 @@ add_executable(
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 
-#target_include_directories(
-#  ${PROJECT_NAME} PUBLIC
-#    ".."
-#  )
+# SYSTEM turns the include directory into a system include directory.
+# Compilers will not issue warnings from header files originating from there.
+target_include_directories(
+${PROJECT_NAME} SYSTEM PUBLIC
+    "../lib"
+#    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
+#    "/usr/local/include/wx-3.0"
+)
 
 target_link_directories(
   ${PROJECT_NAME} PUBLIC
@@ -60,12 +66,45 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
-      wt
-      wthttp
+#      TFBitsNPieces
+    TFTrading
+    TFInteractiveBrokers
+    ib_client
+    bidgcc000
+    TFSimulation
+#      TFVuTrading
+    TFOptions
+    TFHDF5TimeSeries
+    OUSQL
+    OUSqlite
+#      OUCharting
+#      TFIndicators
+    TFIQFeed
+#    TFPhemex
+    TFTimeSeries
+    TFTrading
+    OUCommon
+    TFTrading
+    hdf5_cpp
+    hdf5
+    sz
+    dl
+    z
+#      curl
+#      chartdir
+#      wx_gtk3u_adv-3.0
+#      wx_gtk3u_core-3.0
+#      wx_baseu-3.0
+    pthread
+#    crypto
+#    ssl
+#    crypto++
+
+    wt
+    wthttp
   #    wtdbo
   #    wtdbopostgres
-      pthread
-      ${Boost_LIBRARIES}
+    ${Boost_LIBRARIES}
   )
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
