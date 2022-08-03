@@ -10,13 +10,33 @@
   },
   "configurations": [
 
-
     {
       "name": "(gdb) Phemex",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/Phemex/Phemex",
       "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
+      "name": "(gdb) TableTrader",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/TableTrader/AppTableTrader",
+      "args": ["--docroot='web;/favicon.ico,/resources,/style,/image'", "--http-address=0.0.0.0", "--http-port=8089", "--config=etc/wt_config.xml"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/x64/debug",
       "environment": [],

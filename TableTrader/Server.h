@@ -30,6 +30,9 @@ public:
 
   bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
 
+  using fAddUnderlyingFutures_t = std::function<void(const std::string&)>;
+  void AddUnderlyingFutures( fAddUnderlyingFutures_t&& );
+
 protected:
 private:
   const config::Choices& m_choices;

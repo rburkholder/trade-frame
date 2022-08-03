@@ -37,3 +37,9 @@ Server::~Server() {
 bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPassWord ) {
   return ( ( sUserName == m_choices.m_sUIUserName ) && ( sPassWord == m_choices.m_sUIPassWord ) );
 }
+
+void Server::AddUnderlyingFutures( fAddUnderlyingFutures_t&& f ) {
+  for ( const std::string& s: m_choices.m_vUnderlyingFuture ) {
+    f( s );
+  }
+}

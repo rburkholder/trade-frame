@@ -27,6 +27,7 @@
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WSelectionBox.h>
 #include <Wt/WContainerWidget.h>
 
 #include "AppTableTrader.hpp"
@@ -212,9 +213,9 @@ void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
   f( pcw );
 }
 
-void AppTableTrader::LoginPage( Wt::WContainerWidget* pBase ) {
+void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
 
-  Wt::WContainerWidget* pContainerLoginFrame = pBase->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerLoginFrame = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   //pContainerWeight->addStyleClass( "classInputRow" );
 
     Wt::WContainerWidget* pContainerTitle = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
@@ -294,5 +295,29 @@ void AppTableTrader::LoginPage( Wt::WContainerWidget* pBase ) {
 }
 
 void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
+
   pcw->clear();
+
+  Wt::WContainerWidget* pContainerDataEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    Wt::WContainerWidget* pContainerUnderlying = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WLabel* pLabelUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
+      Wt::WSelectionBox* pSelectUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WSelectionBox>() );
+      pSelectUnderlying->setSelectionMode( Wt::SelectionMode::Single );
+      pSelectUnderlying->setVerticalSize( 2 );
+      pLabelUnderlying->setBuddy( pSelectUnderlying );
+      m_pServer->AddUnderlyingFutures(
+        [pSelectUnderlying]( const std::string& sUnderlyingFuture ){
+          pSelectUnderlying->addItem( sUnderlyingFuture );
+        });
+  Wt::WContainerWidget* pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+  pSelectUnderlying->activated().connect(
+    [pSelectUnderlying,pContainerLiveData](){
+      pSelectUnderlying->setEnabled( false );
+      std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
+      Wt::WText* pText = pContainerLiveData->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
+    } );
 }

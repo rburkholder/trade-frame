@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace config {
 
@@ -29,6 +30,9 @@ struct Choices {
 
   std::string m_sUIUserName;
   std::string m_sUIPassWord;
+
+  using vUnderlyingFuture_t = std::vector<std::string>;
+  vUnderlyingFuture_t m_vUnderlyingFuture;
 };
 
 bool Load( const std::string& sFileName, Choices& );
