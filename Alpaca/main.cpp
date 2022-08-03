@@ -66,7 +66,9 @@ int main( int argc, char** argv )
 
     // 1. load choices
     config::Choices choices;
-    config::Load( "alpaca.cfg", choices );
+    if ( !config::Load( "alpaca.cfg", choices ) ) {
+      return EXIT_FAILURE;
+    }
 
     // 2. construct manager & register
     using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
