@@ -80,13 +80,13 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
-  // From ProviderInterface Execution Section (virtual?)
-  void PlaceOrder( pOrder_t order );
-  void CancelOrder( pOrder_t order );
-
 protected:
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
+
+  // From ProviderInterface Execution Section
+  virtual void PlaceOrder( pOrder_t );
+  virtual void CancelOrder( pOrder_t );
 
 private:
 
