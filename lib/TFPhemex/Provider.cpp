@@ -36,6 +36,7 @@
 #include "root_certificates.hpp" // this needs to be factored out properly
 
 #include "Provider.hpp"
+#include "GatewayTrades.hpp"
 
 namespace json = boost::json;
 
@@ -271,13 +272,71 @@ void Provider::DataGateWayUp() {
       ProviderInterfaceBase::OnDisconnected( 0 );
     },
     [this]( std::string&& sMessage){ // fMessage_t
-      std::cout << "gateway received: " << sMessage << std::endl;
       json::error_code jec;
       json::value jv = json::parse( sMessage, jec );
       if ( jec.failed() ) {
         BOOST_LOG_TRIVIAL(error) << "provider/phemex failed to parse web_socket stream: " << sMessage;
       }
-      else {
+      else { // TODO: use spirit here at some point
+        bool bMessageProcessed( false );
+        json::object const& obj = jv.as_object();
+        if ( auto p = obj.if_contains( "error" ) ) {
+          BOOST_LOG_TRIVIAL(error) << "provider/phemex gw sent error: " << sMessage;
+          bMessageProcessed = true;
+        }
+        else {
+          if ( auto p = obj.if_contains( "trades" ) ) {
+            uint64_t sequence = json::value_to<uint64_t>( obj.at( "sequence" ) );
+            std::string sSymbol = json::value_to<std::string>( obj.at( "symbol" ) );
+            json::array trades = json::value_to<json::array>( obj.at( "trades" ) );
+            std::string sType = json::value_to<std::string>( obj.at( "type" ) );
+
+            mapSymbols_t::iterator iterSymbol = m_mapSymbols.find( sSymbol );
+            if ( m_mapSymbols.end() == iterSymbol ) {
+              BOOST_LOG_TRIVIAL(error) << "provider/phemex DataGateway can not find symbol " << sSymbol;
+            }
+            else {
+              if ( "snapshot" == sType ) {}
+              if ( "incremental" == sType ) {
+                gateway::trades::v_trade_t v_trade;
+                try {
+                  for ( const auto& item: trades ) {
+
+                    json::array trade_items = json::value_to<json::array>( item );
+                    json::array::const_iterator citer = trade_items.begin();
+
+                    v_trade.push_back( gateway::trades::trade() );
+                    auto& back( v_trade.back() );
+                    back.time_stamp = json::value_to<uint64_t>( *citer ); citer++;
+                    back.side = json::value_to<std::string>( *citer ); citer++;
+                    back.price = json::value_to<uint64_t>( *citer ); citer++;
+                    back.quantity = json::value_to<uint64_t>( *citer );
+                  }
+                }
+                catch (...) {
+                  BOOST_LOG_TRIVIAL(error) << "provider/phemex DataGateWay error";
+                }
+
+                uint64_t value1 {}, value2 {};
+                for ( gateway::trades::v_trade_t::const_reverse_iterator iter = v_trade.rbegin(); v_trade.rend() != iter; iter++ ) {
+                  value2 = iter->time_stamp;
+                  if ( value2 < value1 ) {
+                    BOOST_LOG_TRIVIAL(error)
+                      << "phemex::DataGateWay trades not in expected sequence: "
+                      << value1 << "," << value2
+                      ;
+                  }
+                  value1 = value2;
+                  iterSymbol->second->HandleTrade( *iter );
+                }
+              }
+            }
+            bMessageProcessed = true;
+          }
+        }
+        if ( !bMessageProcessed ) {
+          BOOST_LOG_TRIVIAL(info) << "gateway received: " << sMessage;
+        }
       }
     });
 }

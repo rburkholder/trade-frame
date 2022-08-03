@@ -11,6 +11,7 @@ set(
 #    root_certificates.hpp
     one_shot.hpp
     web_socket.hpp
+    GatewayTrades.hpp
     Products.hpp
     Provider.hpp
     Symbol.hpp
@@ -20,6 +21,7 @@ set(
   file_cpp
     one_shot.cpp
     web_socket.cpp
+    GatewayTrades.cpp
     Products.cpp
     Provider.cpp
     Symbol.cpp

@@ -13,43 +13,22 @@
  ************************************************************************/
 
 /*
- * File:    Symbol.hpp
+ * File:    GatewayTrades.cpp
  * Author:  raymond@burkholder.net
  * Project: lib/TFPhemex
- * Created: July 24, 2022 12:59:37
+ * Created: 2022/08/02 21:34:35
  */
-
-#pragma once
-
-#include <TFTrading/Symbol.h>
 
 #include "GatewayTrades.hpp"
 
 namespace ou {
 namespace tf {
 namespace phemex {
+namespace gateway {
+namespace trades {
 
-class Provider;
-
-class Symbol
-: public ou::tf::Symbol<Symbol>
-{
-  friend class Provider;
-public:
-
-  using inherited_t = ou::tf::Symbol<Symbol>;
-  using pInstrument_t = inherited_t::pInstrument_t;
-
-  Symbol( const std::string &sName, pInstrument_t pInstrument );
-  virtual ~Symbol();
-
-protected:
-
-  void HandleTrade( const gateway::trades::trade& );
-
-private:
-};
-
+} // namespace trades
+} // namespace gateway
 } // namespace phemex
 } // namespace tf
 } // namespace ou

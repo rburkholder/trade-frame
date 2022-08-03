@@ -19,6 +19,10 @@
  * Created: July 24, 2022 12:59:37
  */
 
+#include <OUCommon/TimeSource.h>
+
+#include <TFTimeSeries/DatedDatum.h>
+
 #include "Symbol.hpp"
 
 namespace ou {
@@ -31,6 +35,12 @@ Symbol::Symbol( const idSymbol_t& sSymbol, pInstrument_t pInstrument )
 }
 
 Symbol::~Symbol() {
+}
+
+void Symbol::HandleTrade( const gateway::trades::trade& trade ) {
+  boost::posix_time::ptime dt( ou::TimeSource::GlobalInstance().External() );
+  ou::tf::Trade tf_trade( dt, (double)trade.price, trade.quantity );
+  m_OnTrade( tf_trade );
 }
 
 } // namespace phemex
