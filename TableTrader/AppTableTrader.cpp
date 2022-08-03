@@ -21,23 +21,26 @@
 //#include <Wt/WApplication.h>
 //#include <Wt/WLogger.h>
 //#include <Wt/WContainerWidget.h>
-#include <Wt/WAnchor.h>
+
 #include <Wt/WText.h>
+#include <Wt/WLabel.h>
+#include <Wt/WAnchor.h>
+#include <Wt/WLineEdit.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WContainerWidget.h>
 
 #include "AppTableTrader.hpp"
 
-namespace model {
-  class Account;
-  class Task;
-} // namespace model
+namespace {
+  static const std::string sTitle( "Table Trader" );
+}
 
 // https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WApplication.html
 
 AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
 : Wt::WApplication( env ),
-  m_pServer( nullptr )
+  m_pServer( dynamic_cast<Server*>( env.server() ) )
 {
-  m_pServer = dynamic_cast<Server*>( env.server() );
 
   useStyleSheet("style/tt.css");
 
@@ -48,15 +51,21 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
   RegisterPath( "/", std::bind( &AppTableTrader::HomeRoot, this, ph::_1 ) );
 
   struct callback {
-    void operator()( Wt::WContainerWidget* pcw ) {
-
-    }
+    void operator()( Wt::WContainerWidget* pcw ) {}
   };
 
-  namespace ph = std::placeholders;
-  TemplatePage( root(), [this](Wt::WContainerWidget* pcw){
-    ShowMainMenu( pcw );
-  } );
+  //TemplatePage(
+  //  root(),
+  //  [this](Wt::WContainerWidget* pcw){
+  //    ShowMainMenu( pcw );
+  //  } );
+
+  TemplatePage(
+    root(),
+    [this](Wt::WContainerWidget* pcw){
+      LoginPage( pcw );
+    } );
+
 }
 
 AppTableTrader::~AppTableTrader( ) { }
@@ -172,12 +181,11 @@ void AppTableTrader::Home( Wt::WContainerWidget* pcw ) {
 
 void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
 
-  static const std::string sTitle( "Table Trader" );
   setTitle( sTitle );
 
-  auto title = pcw->addWidget( std::make_unique<Wt::WText>( sTitle ) );
+  //auto title = pcw->addWidget( std::make_unique<Wt::WText>( sTitle ) );
 
-  pcw->addWidget( std::make_unique<Wt::WBreak>() );
+  //pcw->addWidget( std::make_unique<Wt::WBreak>() );
 
   //auto pTitle( new Wt::WText( sTitle ) );
   //pTitle->setStyleClass( "MainTitle" );
@@ -202,4 +210,89 @@ void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
 //  }
 
   f( pcw );
+}
+
+void AppTableTrader::LoginPage( Wt::WContainerWidget* pBase ) {
+
+  Wt::WContainerWidget* pContainerLoginFrame = pBase->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  //pContainerWeight->addStyleClass( "classInputRow" );
+
+    Wt::WContainerWidget* pContainerTitle = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+    Wt::WContainerWidget* pContainerFields = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+      Wt::WContainerWidget* pContainerLoginUserName = pContainerFields->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WLabel* pLabelUserName = pContainerLoginUserName->addWidget( std::make_unique<Wt::WLabel>( "UserName: " ) );
+      Wt::WLineEdit* pEditUserName = pContainerLoginUserName->addWidget( std::make_unique<Wt::WLineEdit>() );
+      pLabelUserName->setBuddy( pEditUserName );
+
+      Wt::WContainerWidget* pContainerLoginPassword = pContainerFields->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WLabel* pLabelPassWord = pContainerLoginPassword->addWidget( std::make_unique<Wt::WLabel>( "Password: " ) );
+      Wt::WLineEdit* pEditPassWord = pContainerLoginPassword->addWidget( std::make_unique<Wt::WLineEdit>() );
+      pEditPassWord->setEchoMode( Wt::EchoMode::Password );
+      pLabelPassWord->setBuddy( pEditPassWord );
+
+    Wt::WContainerWidget* pContainerButtons = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+      Wt::WPushButton *pbtnLogin = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Login" ) );
+
+    Wt::WContainerWidget* pContainerNotification = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+  pEditUserName->setFocus();
+
+  pbtnLogin->clicked().connect(
+    [this,
+      pbtnLogin,
+      pEditUserName, pEditPassWord,
+      pContainerNotification
+    ](){
+
+      pContainerNotification->clear();
+      bool bOk( true );
+
+      const std::string sUserName = pEditUserName->text().toUTF8();
+      if ( 0 == sUserName.size() ) {
+        Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "UserName: required" ) );
+        pText->addStyleClass( "classErrorMessage" );
+        bOk = false;
+      }
+
+      const std::string sPassWord = pEditPassWord->text().toUTF8();
+      if ( 0 == sPassWord.size() ) {
+        Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "PassWord: required" ) );
+        pText->addStyleClass( "classErrorMessage" );
+        bOk = false;
+      }
+
+      if ( bOk ) {
+
+        pEditUserName->setEnabled( false );
+        pEditPassWord->setEnabled( false );
+
+        bOk = m_pServer->ValidateLogin( sUserName, sPassWord );
+
+        if ( bOk ) {
+          TemplatePage(
+            root(),
+            [this]( Wt::WContainerWidget* pcw ){
+              ActionPage( pcw );
+            });
+        }
+        else {
+
+          pEditUserName->setEnabled( true );
+          pEditPassWord->setEnabled( true );
+
+          Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "UserName/PassWord: no match" ) );
+          pText->addStyleClass( "classErrorMessage" );
+          bOk = false;
+
+        }
+      }
+
+    });
+}
+
+void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
+  pcw->clear();
 }

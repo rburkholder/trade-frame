@@ -64,6 +64,8 @@ private:
   void HomeRoot( Wt::WContainerWidget* );
   void Home( Wt::WContainerWidget* );
 
-
   void TemplatePage( Wt::WContainerWidget*, fTemplate_t );
+
+  void LoginPage( Wt::WContainerWidget* );
+  void ActionPage( Wt::WContainerWidget* );
 };

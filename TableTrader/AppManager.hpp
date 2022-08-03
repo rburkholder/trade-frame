@@ -23,6 +23,7 @@
 #define APPMANAGER_H
 
 #include "Config.hpp"
+
 #include "Server.h"
 
 class AppManager {

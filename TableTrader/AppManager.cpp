@@ -49,7 +49,7 @@ AppManager::AppManager( int argc, char** argv, const config::Choices& choices )
     m_server.addEntryPoint( Wt::EntryPointType::Application, CreateAppTableTrader );
 }
 
-AppManager::~AppManager( ) { }
+AppManager::~AppManager() {}
 
 
 void AppManager::Start() {
