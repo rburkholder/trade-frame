@@ -77,7 +77,7 @@ void Decode( json::array const& array, vCurrency_t& vCurrency ) {
     }
   }
   catch (...) {
-    std::cout << "phemex::currency::decode error" << std::endl;
+    std::cerr << "phemex::currency::decode error" << std::endl;
   }
 }
 
@@ -140,7 +140,7 @@ void Decode( json::array const& array, vProduct_t& vProduct ) {
       vProduct.push_back( json::value_to<Product>( item ) );
     }
     catch (...) {
-      std::cout << "phemex::product::decode error" << std::endl;
+      std::cerr << "phemex::product::decode error" << std::endl;
     }
   }
 }
@@ -174,7 +174,7 @@ void Decode( json::array const& array, vriskLimits_t& vriskLimits ) {
       vriskLimits.emplace_back( std::move( limits ) ); // can change this to map based upon symbol
     }
     catch (...) {
-      std::cout << "phemex::riskLimits::decode error" << std::endl;
+      std::cerr << "phemex::riskLimits::decode error" << std::endl;
     }
   }
 }
@@ -197,7 +197,7 @@ void Decode( json::array const& array, vLeverages_t& vLeverages ) {
     }
   }
   catch (...) {
-    std::cout << "phemex::Leverages::decode error" << std::endl;
+    std::cerr << "phemex::Leverages::decode error" << std::endl;
   }
 }
 

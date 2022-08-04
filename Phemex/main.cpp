@@ -36,7 +36,6 @@
 #include <TFTrading/InstrumentManager.h>
 
 #include <TFIQFeed/Provider.h>
-
 #include <TFPhemex/Provider.hpp>
 
 #include "Config.hpp"
