@@ -10,6 +10,7 @@
   },
   "configurations": [
 
+
     {
       "name": "(gdb) Phemex",
       "type": "cppdbg",
@@ -38,7 +39,7 @@
       "program": "${workspaceFolder}/build/TableTrader/AppTableTrader",
       "args": ["--docroot='web;/favicon.ico,/resources,/style,/image'", "--http-address=0.0.0.0", "--http-port=8089", "--config=etc/wt_config.xml"],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/x64/debug",
+      "cwd": "${workspaceFolder}/x64/debug/AppTableTrader",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
