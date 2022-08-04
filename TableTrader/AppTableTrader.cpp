@@ -55,16 +55,11 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
     void operator()( Wt::WContainerWidget* pcw ) {}
   };
 
-  //TemplatePage(
-  //  root(),
-  //  [this](Wt::WContainerWidget* pcw){
-  //    ShowMainMenu( pcw );
-  //  } );
-
   TemplatePage(
     root(),
     [this](Wt::WContainerWidget* pcw){
-      LoginPage( pcw );
+      //LoginPage( pcw );
+      ActionPage( pcw ); // skip the login for now
     } );
 
 }
@@ -307,7 +302,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
       pSelectUnderlying->setSelectionMode( Wt::SelectionMode::Single );
       pSelectUnderlying->setVerticalSize( 2 );
       pLabelUnderlying->setBuddy( pSelectUnderlying );
-      m_pServer->AddUnderlyingFutures(
+      m_pServer->AddCandidateFutures(
         [pSelectUnderlying]( const std::string& sUnderlyingFuture ){
           pSelectUnderlying->addItem( sUnderlyingFuture );
         });
