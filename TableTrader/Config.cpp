@@ -32,14 +32,14 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_UIUserName( "ui_username" );
   static const std::string sChoice_UIPassWord( "ui_password" );
-  static const std::string sChoice_UnderlyingFuture( "underlying_future" );
+  static const std::string sChoice_CandidateFuture( "candidate_future" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      if constexpr( std::is_same<T, config::Choices::vUnderlyingFuture_t>::value ) {
+      if constexpr( std::is_same<T, config::Choices::vCandidateFutures_t>::value ) {
         for ( const auto& item: dest ) {
           BOOST_LOG_TRIVIAL(info) << name << " = " << item;
         }
@@ -71,7 +71,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_UIUserName.c_str(), po::value<std::string>( &choices.m_sUIUserName ), "ui username" )
       ( sChoice_UIPassWord.c_str(), po::value<std::string>( &choices.m_sUIPassWord ), "ui password" )
-      ( sChoice_UnderlyingFuture.c_str(), po::value<Choices::vUnderlyingFuture_t>( &choices.m_vUnderlyingFuture ), "underlying future" )
+      ( sChoice_CandidateFuture.c_str(), po::value<Choices::vCandidateFutures_t>( &choices.m_vCandidateFutures ), "candidate future" )
       ;
     po::variables_map vm;
 
@@ -90,8 +90,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<std::string>( sFileName, vm, sChoice_UIPassWord, true, choices.m_sUIPassWord );
       bOk &= ( 0 < choices.m_sUIPassWord.size() );
 
-      bOk &= parse<Choices::vUnderlyingFuture_t>( sFileName, vm, sChoice_UnderlyingFuture, true, choices.m_vUnderlyingFuture );
-      bOk &= ( 0 < choices.m_vUnderlyingFuture.size() );
+      bOk &= parse<Choices::vCandidateFutures_t>( sFileName, vm, sChoice_CandidateFuture, true, choices.m_vCandidateFutures );
+      bOk &= ( 0 < choices.m_vCandidateFutures.size() );
     }
 
   }

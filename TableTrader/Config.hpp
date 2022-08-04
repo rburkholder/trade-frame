@@ -31,8 +31,8 @@ struct Choices {
   std::string m_sUIUserName;
   std::string m_sUIPassWord;
 
-  using vUnderlyingFuture_t = std::vector<std::string>;
-  vUnderlyingFuture_t m_vUnderlyingFuture;
+  using vCandidateFutures_t = std::vector<std::string>;
+  vCandidateFutures_t m_vCandidateFutures;
 };
 
 bool Load( const std::string& sFileName, Choices& );

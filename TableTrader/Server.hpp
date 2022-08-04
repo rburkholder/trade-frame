@@ -41,8 +41,8 @@ public:
 
   bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
 
-  using fAddUnderlyingFutures_t = std::function<void(const std::string&)>;
-  void AddUnderlyingFutures( fAddUnderlyingFutures_t&& );
+  using fAddCandidateFutures_t = std::function<void(const std::string&)>;
+  void AddCandidateFutures( fAddCandidateFutures_t&& );
 
 protected:
 private:
