@@ -71,13 +71,17 @@ public:
   TWS( const std::string& acctCode = "", const std::string& address = "127.0.0.1", unsigned int port = 7496 );
   virtual ~TWS();
 
+  static pProvider_t Factory() {
+    return std::make_shared<TWS>();
+  }
+
   static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
     return std::dynamic_pointer_cast<TWS>( pProvider );
   }
 
   // From ProviderInterface:
-  void Connect();
-  void Disconnect();
+  virtual void Connect();
+  virtual void Disconnect();
 
   void SetClientId( int idClient ) { m_idClient = idClient; }
 
