@@ -44,6 +44,8 @@ public:
   using fAddCandidateFutures_t = std::function<void(const std::string&)>;
   void AddCandidateFutures( fAddCandidateFutures_t&& );
 
+  void Start( const std::string& sUnderlyingFuture );
+
 protected:
 private:
   const config::Choices& m_choices;

@@ -295,6 +295,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
   pcw->clear();
 
+  // TODO: will need to load pre-existing state
+
   Wt::WContainerWidget* pContainerDataEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
     Wt::WContainerWidget* pContainerUnderlying = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
       Wt::WLabel* pLabelUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
@@ -310,11 +312,13 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
   Wt::WContainerWidget* pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
 
   pSelectUnderlying->activated().connect(
-    [pSelectUnderlying,pContainerLiveData](){
+    [this,pSelectUnderlying,pContainerNotifications](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
-      Wt::WText* pText = pContainerLiveData->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
+      Wt::WText* pText = pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
+      m_pServer->Start( sUnderlying );
     } );
 }

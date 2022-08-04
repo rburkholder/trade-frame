@@ -46,3 +46,7 @@ void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
     f( s );
   }
 }
+
+void Server::Start( const std::string& sUnderlyingFuture ) {
+  m_implServer->Start( sUnderlyingFuture );
+}
