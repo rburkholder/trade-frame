@@ -55,6 +55,8 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
     void operator()( Wt::WContainerWidget* pcw ) {}
   };
 
+  enableUpdates(); // enable updates of async data
+
   TemplatePage(
     root(),
     [this](Wt::WContainerWidget* pcw){
@@ -310,15 +312,39 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
         });
   Wt::WContainerWidget* pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    Wt::WLabel* pLabel = pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Current Price: " ) );
+    Wt::WLabel* pLivePrice = pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "" ) );
   Wt::WContainerWidget* pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
 
   pSelectUnderlying->activated().connect(
-    [this,pSelectUnderlying,pContainerNotifications](){
+    [this,pSelectUnderlying,pContainerNotifications,pContainerDataEntry,pLivePrice](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
       Wt::WText* pText = pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
-      m_pServer->Start( sUnderlying );
+      pContainerDataEntry->clear();
+      m_pServer->Start(
+        sessionId(), sUnderlying,
+        [this,pContainerDataEntry]( const std::string& sName, const std::string& sMultiplier ){ // fUpdateUnderlyingInfo_t
+          Wt::WLabel* pLabelUnderlyingLabel = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
+          Wt::WLabel* pLabelUnderlyingName  = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( sName ) );
+          Wt::WLabel* pLabelMultiplierLabel = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
+          Wt::WLabel* pLabelMultiplierValue = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( sMultiplier ) );
+          triggerUpdate();
+        },
+        [this,pLivePrice]( const std::string& sPrice ){ // fUpdateUnderlyingPrice_t
+          pLivePrice->setText( sPrice );
+          triggerUpdate(); // TODO: trigger on timer to reduce traffic
+        },
+        [](){ // fUpdateOptionExpiries_t
+        }
+      );
     } );
+
+  //auto timer = addChild(std::make_unique<Wt::WTimer>());
+  //timer->setInterval( std::chrono::seconds( 1 ) );
+  //timer->timeout().connect(this, &TimeRecord::HandleTimer );
+  //timer->start();
+
 }

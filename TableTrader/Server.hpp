@@ -43,13 +43,26 @@ public:
   using fAddCandidateFutures_t = std::function<void(const std::string&)>;
   void AddCandidateFutures( fAddCandidateFutures_t&& );
 
-  void Start( const std::string& sUnderlyingFuture );
+  using fUpdateUnderlyingInfo_t = std::function<void(const std::string&, const std::string&)>; // name, multiplier
+  using fUpdateUnderlyingPrice_t = std::function<void(const std::string&)>; // price
+  using fUpdateOptionExpiries_t = std::function<void()>; // will need to convert of std::vector or a callback
+
+  void Start(
+    const std::string& sSessionId, const std::string& sUnderlyingFuture,
+    fUpdateUnderlyingInfo_t&&,
+    fUpdateUnderlyingPrice_t&&,
+    fUpdateOptionExpiries_t
+    );
 
 protected:
 private:
   const config::Choices& m_choices;
 
   std::unique_ptr<Server_impl> m_implServer;
+
+  fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
+  fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+  fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
 };
 
 #endif /* SERVER_H */

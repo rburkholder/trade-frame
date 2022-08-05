@@ -47,7 +47,14 @@ public:
   Server_impl();
   ~Server_impl();
 
-  void Start( const std::string& sUnderlyingFuture );
+  using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
+  using fUpdateUnderlyingPrice_t = std::function<void(double,int)>; // price,precision
+
+  void Start(
+    const std::string& sUnderlyingFuture,
+    fUpdateUnderlyingInfo_t&&,
+    fUpdateUnderlyingPrice_t&&
+    );
 
 protected:
 private:
@@ -71,6 +78,11 @@ private:
 
   pPortfolio_t m_pPortfolio;
 
+  fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
+  fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+
+  int m_nPrecision;
+
   ou::tf::Quote m_quoteUnderlying;
   ou::tf::Trade m_tradeUnderlying;
 
@@ -84,6 +96,7 @@ private:
 
   void UnderlyingInitialize( pInstrument_t pInstrument );
 
+  void UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& );
   void UnderlyingQuote( const ou::tf::Quote& );
   void UnderlyingTrade( const ou::tf::Trade& );
 };

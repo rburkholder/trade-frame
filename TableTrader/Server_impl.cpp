@@ -122,7 +122,17 @@ void Server_impl::Disconnected( int ) {
   }
 }
 
-void Server_impl::Start( const std::string& sUnderlyingFuture ) {
+void Server_impl::Start(
+  const std::string& sUnderlyingFuture,
+  fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
+  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
+) {
+
+  assert( fUpdateUnderlyingInfo );
+  assert( fUpdateUnderlyingPrice );
+
+  m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
+  m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
 
   m_pBuildInstrument->Queue(
     sUnderlyingFuture,
@@ -151,10 +161,16 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( pInstrument, m_pProviderIQFeed );
   m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
   m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
+  m_pWatchUnderlying->OnFundamentals.Add( MakeDelegate( this, &Server_impl::UnderlyingFundamentals ) );
   m_pWatchUnderlying->StartWatch();
 
   // don't really need underlying position at this time, just a watch
   //pPosition_t pPosition = ConstructPosition( pInstrument );
+}
+
+void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
+  m_nPrecision = fundamentals.nPrecision;
+  m_fUpdateUnderlyingInfo( m_pWatchUnderlying->GetInstrumentName(), fundamentals.nContractSize );
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
@@ -163,5 +179,9 @@ void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
 
 void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
   //BOOST_LOG_TRIVIAL(info) << "Trade " << trade.Volume() << "@" << trade.Price();
+  const double price = m_tradeUnderlying.Price();
+  if ( price != trade.Price() ) {
+    m_fUpdateUnderlyingPrice( price, m_nPrecision );
+  }
   m_tradeUnderlying = trade;
 }

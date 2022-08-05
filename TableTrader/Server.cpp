@@ -19,6 +19,8 @@
  * Created:   2022/08/02 09:58:23
  */
 
+#include <boost/lexical_cast.hpp>
+
 #include "Server.hpp"
 #include "Server_impl.hpp"
 
@@ -46,6 +48,39 @@ void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   }
 }
 
-void Server::Start( const std::string& sUnderlyingFuture ) {
-  m_implServer->Start( sUnderlyingFuture );
+void Server::Start(
+    const std::string& sSessionId, const std::string& sUnderlyingFuture,
+    fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
+    fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice,
+    fUpdateOptionExpiries_t fUpdateOptionExpiries
+) {
+  assert( fUpdateUnderlyingInfo );
+  assert( fUpdateUnderlyingPrice );
+  assert( fUpdateOptionExpiries );
+
+  m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
+  m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
+  m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
+
+  m_implServer->Start(
+    sUnderlyingFuture,
+    [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
+      post(
+        sSessionId,
+        [this, sName_=std::move(sName), multiplier ]() {
+          std::string sMultiplier = boost::lexical_cast<std::string>( multiplier );
+          m_fUpdateUnderlyingInfo( sName_, sMultiplier );
+        }
+      );
+    },
+    [this,sSessionId]( double price, int precision) { // fUpdateUnderlyingPrice_t
+      post(
+        sSessionId,
+        [this, price](){
+          std::string sPrice = boost::lexical_cast<std::string>( price );
+          m_fUpdateUnderlyingPrice( sPrice );
+        }
+      );
+    }
+  );
 }
