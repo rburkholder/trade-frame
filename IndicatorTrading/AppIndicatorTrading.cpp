@@ -253,6 +253,7 @@ void AppIndicatorTrading::ConstructUnderlying() {
       m_config.sSymbol,
       [this]( pInstrument_t pInstrument ){
 
+        // determine the specific future which matches the continuous generic contract
         boost::gregorian::date expiry( pInstrument->GetExpiry() );
         using OptionChainQuery = ou::tf::iqfeed::OptionChainQuery;
         std::string sBase( m_config.sSymbol.substr( 0, m_config.sSymbol.size() - 1 ) );

@@ -59,9 +59,9 @@ namespace tf {
   class PanelOrderButtons;
 namespace iqfeed {
   class OptionChainQuery;
-}
-}
-}
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou
 
 class AppIndicatorTrading:
   public wxApp,
