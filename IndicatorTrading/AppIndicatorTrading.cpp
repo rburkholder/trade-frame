@@ -226,25 +226,20 @@ bool AppIndicatorTrading::OnInit() {
     }
   );
 
-  CallAfter(
-    [this](){
-      m_pPortAudio = std::make_unique<ou::PortAudio>();
-      //m_pPortAudio->Enumerate();
-      m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
-    }
-  );
-
   return 1;
 }
 
 void AppIndicatorTrading::StartChainQuery() {
 
-  m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
-    [this](){
-      ConstructUnderlying();
-    }
-  );
-  m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+  if ( m_pOptionChainQuery ) {}
+  else {
+    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+      [this](){
+        ConstructUnderlying();
+      }
+    );
+    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+  }
 
 }
 
@@ -541,11 +536,9 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void AppIndicatorTrading::OnData1Connected( int ) {
+void AppIndicatorTrading::OnData1Connected( int n ) {
   m_bData1Connected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    StartChainQuery();
-  }
+  OnConnected( n );
 }
 
 void AppIndicatorTrading::OnData2Connected( int ) {
@@ -554,11 +547,9 @@ void AppIndicatorTrading::OnData2Connected( int ) {
   }
 }
 
-void AppIndicatorTrading::OnExecConnected( int ) {
+void AppIndicatorTrading::OnExecConnected( int n ) {
   m_bExecConnected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    StartChainQuery();
-  }
+  OnConnected( n );
 }
 
 void AppIndicatorTrading::OnData1Disconnected( int ) {
@@ -574,6 +565,27 @@ void AppIndicatorTrading::OnData2Disconnected( int ) {
 
 void AppIndicatorTrading::OnExecDisconnected( int ) {
   m_bExecConnected = false;
+}
+
+void AppIndicatorTrading::OnConnected( int ) {
+  if ( m_bData1Connected & m_bExecConnected ) {
+    StartChainQuery();
+
+    CallAfter(
+      [this](){
+        if ( m_pPortAudio ) {}
+        else {
+          m_pPortAudio = std::make_unique<ou::PortAudio>();
+          //m_pPortAudio->Enumerate();
+          if ( m_pChords ) {}
+          else {
+            m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
+          }
+        }
+      }
+    );
+
+  }
 }
 
 void AppIndicatorTrading::SaveState() {

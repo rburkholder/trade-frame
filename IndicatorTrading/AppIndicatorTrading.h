@@ -126,6 +126,8 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
+  void OnConnected( int );
+
   void HandleMenuActionStartWatch();
   void HandleMenuActionStopWatch();
   void HandleMenuActionSaveValues();
