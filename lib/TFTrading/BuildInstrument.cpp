@@ -162,7 +162,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
             << fundamentals.sExchangeRoot << ","
             //<< iterInProgress->first << ","
             << pInstrument->GetInstrumentName()
-            << sWaiting
+            //<< sWaiting
             ;
 
           if ( m_pIB ) {
