@@ -45,8 +45,8 @@ static std::unique_ptr<Wt::WApplication> CreateAppTableTrader( const Wt::WEnviro
 AppManager::AppManager( int argc, char** argv, const config::Choices& choices )
 : m_server( argc, argv, choices )
 {
-    m_server.setServerConfiguration( argc, argv, WTHTTP_CONFIGURATION );
-    m_server.addEntryPoint( Wt::EntryPointType::Application, CreateAppTableTrader );
+  m_server.setServerConfiguration( argc, argv, WTHTTP_CONFIGURATION );
+  m_server.addEntryPoint( Wt::EntryPointType::Application, CreateAppTableTrader );
 }
 
 AppManager::~AppManager() {}
