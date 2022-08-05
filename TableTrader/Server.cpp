@@ -23,8 +23,7 @@
 #include "Server_impl.hpp"
 
 Server::Server(
-  int argc,
-  char *argv[],
+  int argc, char *argv[],
   const config::Choices& choices,
   const std::string &wtConfigurationFile
 )

@@ -32,8 +32,7 @@ class Server: public Wt::WServer {
 public:
 
   Server(
-    int argc,
-    char *argv[],
+    int argc, char *argv[],
     const config::Choices&,
     const std::string &wtConfigurationFile=std::string()
     );
