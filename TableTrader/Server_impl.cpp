@@ -30,7 +30,11 @@
 
 #include <TFTrading/BuildInstrument.h>
 
+#include <TFOptions/Option.h>
+
 #include <TFIQFeed/Provider.h>
+#include <TFIQFeed/OptionChainQuery.h>
+
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include "Server_impl.hpp"
@@ -65,9 +69,9 @@ Server_impl::Server_impl()
   assert( m_pProviderIQFeed );
 
   // for testing, start fresh each time
-  if ( boost::filesystem::exists( sDataBaseName ) ) {
-    boost::filesystem::remove( sDataBaseName );
-  }
+  //if ( boost::filesystem::exists( sDataBaseName ) ) {
+  //  boost::filesystem::remove( sDataBaseName );
+  //}
 
   m_pdb = std::make_unique<ou::tf::db>( sDataBaseName );
 
@@ -83,6 +87,10 @@ Server_impl::~Server_impl() {
     m_pWatchUnderlying->StopWatch();
     m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
     m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
+  }
+  if ( m_pOptionChainQuery ) {
+    m_pOptionChainQuery->Disconnect();
+    m_pOptionChainQuery.reset();
   }
   m_pProviderTWS->Disconnect();
   m_pProviderIQFeed->Disconnect();
@@ -101,7 +109,8 @@ void Server_impl::Connected_IQFeed( int n ) {
 void Server_impl::Connected( int ) {
   if ( m_pProviderTWS->Connected() && m_pProviderIQFeed->Connected() ) {
     m_state = EState::connected;
-    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderTWS );
+    m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderTWS );
+    m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed );
     // TODO: generate signal or status to interface
   }
 }
@@ -134,7 +143,7 @@ void Server_impl::Start(
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
 
-  m_pBuildInstrument->Queue(
+  m_pBuildInstrumentBoth->Queue(
     sUnderlyingFuture,
     [this]( pInstrument_t pInstrument ){
       UnderlyingInitialize( pInstrument );
@@ -169,8 +178,77 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
 }
 
 void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
+
+  assert( 0 < fundamentals.nContractSize );
+  m_nMultiplier = fundamentals.nContractSize;
   m_nPrecision = fundamentals.nPrecision;
   m_fUpdateUnderlyingInfo( m_pWatchUnderlying->GetInstrumentName(), fundamentals.nContractSize );
+
+  using vSymbol_t = ou::tf::iqfeed::OptionChainQuery::vSymbol_t;
+  using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
+
+  if ( m_pOptionChainQuery ) {}
+  else {
+    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+      [this](){
+        m_pOptionChainQuery->QueryFuturesOptionChain(
+          m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::EProviderIQF ),
+          "cp", "", "234", "1",
+          [this]( const OptionList& list ){
+            m_nOptionsLoaded = 0;
+            m_nOptionsNames = list.vSymbol.size();
+            BOOST_LOG_TRIVIAL(info) << list.sUnderlying << " has " <<  list.vSymbol.size() << " options";
+
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+            for ( const vSymbol_t::value_type& sSymbol: list.vSymbol ) {
+              pInstrument_t pInstrument;
+
+              pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sSymbol );
+              if ( pInstrument ) { // skip the build
+                InstrumentToOption( pInstrument );
+              }
+              else {
+                m_pBuildInstrumentIQFeed->Queue(
+                  sSymbol,
+                  [this]( pInstrument_t pInstrument ) {
+
+                    assert( pInstrument->IsFuturesOption() );
+
+                    if ( 0 == pInstrument->GetMultiplier() ) {
+                      pInstrument->SetMultiplier( m_nMultiplier );
+                    }
+
+                    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                    im.Register( pInstrument );
+
+                    InstrumentToOption( pInstrument );
+                  }
+                );
+              }
+            }
+          }
+          );
+      }
+    );
+    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+  }
+}
+
+// arrival from two different threads
+void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
+
+  pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pProviderIQFeed );
+
+  BuiltOption* pBuiltOption;
+  {
+    std::scoped_lock<std::mutex> lock( m_mutex );
+    m_nOptionsLoaded++;
+    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
+    pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+  }
+
+  assert( pBuiltOption );
+  pBuiltOption->pOption = pOption;
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
@@ -181,7 +259,7 @@ void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
   //BOOST_LOG_TRIVIAL(info) << "Trade " << trade.Volume() << "@" << trade.Price();
   const double price = m_tradeUnderlying.Price();
   if ( price != trade.Price() ) {
-    m_fUpdateUnderlyingPrice( price, m_nPrecision );
+    //m_fUpdateUnderlyingPrice( price, m_nPrecision );
   }
   m_tradeUnderlying = trade;
 }
