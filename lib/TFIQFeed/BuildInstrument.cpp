@@ -175,6 +175,8 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
+      pInstrument->SetMultiplier( 0 ); // varies, IB probably can set this, IQFeed doesn't have this for all/many/most
+      // or populate from the underlying future?
       }
       break;
     case ESecurityType::Index:
