@@ -43,6 +43,7 @@ bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPa
 }
 
 void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
+  //TODO: need to query Server_impl to see if something in progress, if so, skip to the point of sync
   for ( const std::string& s: m_choices.m_vCandidateFutures ) {
     f( s );
   }

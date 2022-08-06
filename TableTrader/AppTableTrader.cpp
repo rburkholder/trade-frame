@@ -27,6 +27,7 @@
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WRadioButton.h>
 #include <Wt/WSelectionBox.h>
 #include <Wt/WContainerWidget.h>
 
@@ -317,6 +318,14 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
   Wt::WContainerWidget* pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   Wt::WContainerWidget* pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  Wt::WContainerWidget* pContainerControl = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    //Wt::WRadioButton* pRadioButtonStop = pContainerControl->addWidget( std::make_unique<Wt::WRadioButton>( "Stop" ) );
+
+  //pRadioButtonStop->checked().connect( // does not work due to Wt::WServer::waitForShutdown();
+  //  [this](){
+  //    m_pServer->stop();
+  //  }
+  //);
 
   pSelectUnderlying->activated().connect(
     [this,pSelectUnderlying,pContainerNotifications,pContainerDataEntry,pLivePrice](){
@@ -354,12 +363,13 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
           // TODO: implement timer to indicate duration
           pSelectExpiries->addItem( sDate );
         },
-        [this,pSelectExpiries](){ // fUpdateOptionExpiriesDone_t
+        [this,pSelectExpiries,pContainerDataEntry](){ // fUpdateOptionExpiriesDone_t
           // TODO: disable once filled
           pSelectExpiries->activated().connect(
-            [this,pSelectExpiries](){
+            [this,pSelectExpiries,pContainerDataEntry](){
               pSelectExpiries->setEnabled( false );
               std::string sDate = pSelectExpiries->valueText().toUTF8();
+              pContainerDataEntry->clear();
               m_pServer->PrepareStrikeSelection( sDate );
             });
           triggerUpdate();
