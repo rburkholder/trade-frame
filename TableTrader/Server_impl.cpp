@@ -46,7 +46,7 @@ namespace {
 }
 
 Server_impl::Server_impl()
-: m_state( EState::quiescent )
+: m_state( EConnection::quiescent )
 {
 
   ou::tf::ProviderManager& providers( ou::tf::ProviderManager::GlobalInstance() );
@@ -78,7 +78,7 @@ Server_impl::Server_impl()
   m_pProviderTWS->Connect();
   m_pProviderIQFeed->Connect();
 
-  m_state = EState::connecting;
+  m_state = EConnection::connecting;
 
 }
 
@@ -108,7 +108,7 @@ void Server_impl::Connected_IQFeed( int n ) {
 
 void Server_impl::Connected( int ) {
   if ( m_pProviderTWS->Connected() && m_pProviderIQFeed->Connected() ) {
-    m_state = EState::connected;
+    m_state = EConnection::connected;
     m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderTWS );
     m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed );
     // TODO: generate signal or status to interface
@@ -127,7 +127,7 @@ void Server_impl::Disconnected_IQFeed( int n ) {
 
 void Server_impl::Disconnected( int ) {
   if ( !m_pProviderTWS->Connected() && !m_pProviderIQFeed->Connected() ) {
-    m_state = EState::disconnected;
+    m_state = EConnection::disconnected;
   }
 }
 
@@ -195,7 +195,9 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
   using vSymbol_t = ou::tf::iqfeed::OptionChainQuery::vSymbol_t;
   using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
 
-  if ( m_pOptionChainQuery ) {}
+  if ( m_pOptionChainQuery ) {
+    PopulateExpiry(); // TODO: may need to skip further ahead
+  }
   else {
     m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
       [this](){
@@ -258,11 +260,15 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   pBuiltOption->pOption = pOption;
 
   if ( m_nOptionsNames == m_nOptionsLoaded ) {
-    for ( const mapChains_t::value_type& vt: m_mapChains ) {
-      m_fAddExpiry( vt.first );
-    }
-    m_fAddExpiryDone();
+    PopulateExpiry();
   }
+}
+
+void Server_impl::PopulateExpiry() {
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    m_fAddExpiry( vt.first );
+  }
+  m_fAddExpiryDone();
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {

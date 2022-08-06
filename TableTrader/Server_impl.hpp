@@ -74,8 +74,8 @@ private:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  enum EState { quiescent, connecting, connected, disconnecting, disconnected };
-  EState m_state;
+  enum EConnection { quiescent, connecting, connected, disconnecting, disconnected };
+  EConnection m_state;
 
   std::mutex m_mutex;
 
@@ -127,6 +127,7 @@ private:
   void UnderlyingInitialize( pInstrument_t );
 
   void InstrumentToOption( pInstrument_t );
+  void PopulateExpiry();
 
   void UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& );
   void UnderlyingQuote( const ou::tf::Quote& );
