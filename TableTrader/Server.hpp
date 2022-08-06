@@ -65,6 +65,9 @@ public:
     fPopulateStrikeDone_t&&
     );
 
+  void AddStrike( const std::string& );
+  void DelStrike( const std::string& );
+
 protected:
 private:
   const config::Choices& m_choices;

@@ -32,6 +32,7 @@
 
 namespace Wt {
   class WContainerWidget;
+  class WButtonGroup;
 } // namespace Wt
 
 class AppTableTrader: public Wt::WApplication {
@@ -65,6 +66,19 @@ private:
   Wt::WContainerWidget* m_pContainerTableEntryButtons;
   Wt::WContainerWidget* m_pContainerNotifications;
   Wt::WContainerWidget* m_pContainerControl;
+
+  using pButtonGroup_t = std::shared_ptr<Wt::WButtonGroup>;
+  pButtonGroup_t m_pButtonGroupOption;
+  pButtonGroup_t m_pButtonGroupSide;
+
+  struct OptionAtStrike {
+    bool m_bDrawn;
+    Wt::WContainerWidget* m_pcw;
+    OptionAtStrike( Wt::WContainerWidget* pcw ): m_bDrawn( false ), m_pcw( pcw ) {}
+  };
+
+  using mapOptionAtStrike_t = std::map<std::string,OptionAtStrike>;
+  mapOptionAtStrike_t m_mapOptionAtStrike;
 
   void AddLink( Wt::WContainerWidget*, const std::string& sClass, const std::string& sPath, const std::string& sAnchor );
 

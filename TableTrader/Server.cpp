@@ -152,3 +152,9 @@ void Server::PrepareStrikeSelection(
     }
   );
 }
+
+void Server::AddStrike( const std::string& ) {
+}
+
+void Server::DelStrike( const std::string& ) {
+}

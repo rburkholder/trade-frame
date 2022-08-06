@@ -24,7 +24,10 @@
 #include <Wt/WLabel.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
+#include <Wt/WTextArea.h>
+#include <Wt/WGroupBox.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WButtonGroup.h>
 #include <Wt/WRadioButton.h>
 #include <Wt/WSelectionBox.h>
 #include <Wt/WContainerWidget.h>
@@ -336,7 +339,6 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
     [this,pSelectUnderlying,pLivePrice,pLabelUnderlyingName,pLabelMultiplierValue](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
-      Wt::WText* pText = m_pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
 
       m_pContainerDataEntry->clear();
 
@@ -370,6 +372,38 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               std::string sDate = pSelectExpiries->valueText().toUTF8();
               m_pContainerDataEntry->clear();
 
+              {
+                enum class EOption { call = 1, put = 2 };
+                auto containerOption = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WGroupBox>("Call/Put") );
+                m_pButtonGroupOption = std::make_shared<Wt::WButtonGroup>();
+                Wt::WRadioButton* btnCall = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Call" ) );
+                //container->addWidget(std::make_unique<Wt::WBreak>());
+                m_pButtonGroupOption->addButton(btnCall, (int)EOption::call );
+                Wt::WRadioButton* btnPut = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Put" ) );
+                //container->addWidget(std::make_unique<Wt::WBreak>());
+                m_pButtonGroupOption->addButton( btnPut, (int)EOption::put );
+                m_pButtonGroupOption->setCheckedButton( m_pButtonGroupOption->button( (int)EOption::call ) );
+              }
+
+              {
+                enum class ESide { buy = 1, sell = 2 };
+                auto containerSide = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WGroupBox>("Buy/Sell") );
+                m_pButtonGroupSide = std::make_shared<Wt::WButtonGroup>();
+                Wt::WRadioButton* btnBuy = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Buy" ) );
+                //container->addWidget(std::make_unique<Wt::WBreak>());
+                m_pButtonGroupSide->addButton( btnBuy, (int)ESide::buy );
+                Wt::WRadioButton* btnSell = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Sell" ) );
+                //container->addWidget(std::make_unique<Wt::WBreak>());
+                m_pButtonGroupSide->addButton( btnSell, (int)ESide::sell );
+                m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
+              }
+
+              Wt::WLabel* pLabelInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Investment: " ) );
+              Wt::WTextArea* pTextAreaInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WTextArea>() );
+              pLabelInvestment->setBuddy( pTextAreaInvestment );
+              pTextAreaInvestment->setRows( 1 );
+              pTextAreaInvestment->setText( "100000" );
+
               Wt::WLabel* pLabelStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
               Wt::WSelectionBox* pSelectStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WSelectionBox>() );
               pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
@@ -381,15 +415,43 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
                   pSelectStrikes->addItem( sStrike );
                 },
-                [pSelectStrikes](){ // fPopulateStrikeDone_t
+                [this,pSelectStrikes](){ // fPopulateStrikeDone_t
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
-                    [pSelectStrikes](){
+                    [this,pSelectStrikes](){
                       auto set = pSelectStrikes->selectedIndexes();
                       std::string sSelections;
+                      using setStrike_t = std::set<std::string>;
+                      setStrike_t setStrike;
                       for ( auto& item :set ) {
-                        sSelections += " " + pSelectStrikes->itemText( item ).toUTF8();
+                        std::string sStrike( pSelectStrikes->itemText( item ).toUTF8() );
+                        sSelections += " " + sStrike;
+                        setStrike.insert( sStrike );
                       }
                       BOOST_LOG_TRIVIAL(info) << "changed " << sSelections;
+
+                      // delete removed entries
+                      setStrike_t setDelete;
+                      for ( const mapOptionAtStrike_t::value_type& vt: m_mapOptionAtStrike ) {
+                        if ( setStrike.end() == setStrike.find( vt.first ) ) {
+                          m_pServer->DelStrike( vt.first );
+                          setDelete.insert( vt.first );
+                        }
+                      }
+                      for ( const setStrike_t::value_type& vt: setDelete ) {
+                        mapOptionAtStrike_t::iterator iter = m_mapOptionAtStrike.find( vt );
+                        assert( m_mapOptionAtStrike.end() != iter );
+                        iter->second.m_pcw->removeFromParent();
+                        m_mapOptionAtStrike.erase( iter );
+                      }
+                      // insert added entries
+                      for ( const setStrike_t::value_type& vt: setStrike ) {
+                        if ( m_mapOptionAtStrike.end() == m_mapOptionAtStrike.find( vt ) ) {
+                          Wt::WContainerWidget* pOptionRow = m_pContainerTableEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+                          pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Option Strike " + vt ) );
+                          m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
+                          m_pServer->AddStrike( vt );
+                        }
+                      }
                     });
                 }
                 );
