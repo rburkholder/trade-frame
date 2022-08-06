@@ -18,9 +18,7 @@
  * Created:   2022/08/02 13:42:30
  */
 
-//#include <Wt/WApplication.h>
-//#include <Wt/WLogger.h>
-//#include <Wt/WContainerWidget.h>
+#include <boost/log/trivial.hpp>
 
 #include <Wt/WText.h>
 #include <Wt/WLabel.h>
@@ -166,7 +164,7 @@ void AppTableTrader::ShowMainMenu( Wt::WContainerWidget* pcw ) {
 }
 
 void AppTableTrader::HomeRoot( Wt::WContainerWidget* pcw ) {
-  std::cout << "root home" << std::endl;
+  //std::cout << "root home" << std::endl;
 
   namespace ph = std::placeholders;
   TemplatePage( pcw, std::bind( &AppTableTrader::ShowMainMenu, this, ph::_1 ) );
@@ -313,6 +311,13 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
         });
   m_pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   m_pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+
+    // TODO: put into own sub-container
+    Wt::WLabel* pLabelUnderlyingLabel = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
+    Wt::WLabel* pLabelUnderlyingName  = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>() );
+    Wt::WLabel* pLabelMultiplierLabel = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
+    Wt::WLabel* pLabelMultiplierValue = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>() );
+
     Wt::WLabel* pLabel = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Current Price: " ) );
     Wt::WLabel* pLivePrice = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "" ) );
   m_pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
@@ -328,18 +333,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
   //);
 
   pSelectUnderlying->activated().connect(
-    [this,pSelectUnderlying,pLivePrice](){
+    [this,pSelectUnderlying,pLivePrice,pLabelUnderlyingName,pLabelMultiplierValue](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
       Wt::WText* pText = m_pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
 
       m_pContainerDataEntry->clear();
-
-      Wt::WContainerWidget* pContainerUnderlying = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
-        Wt::WLabel* pLabelUnderlyingLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
-        Wt::WLabel* pLabelUnderlyingName  = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
-        Wt::WLabel* pLabelMultiplierLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
-        Wt::WLabel* pLabelMultiplierValue = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
 
       Wt::WContainerWidget* pContainerExpiries = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
         Wt::WLabel* pLabelExpiries = pContainerExpiries->addWidget( std::make_unique<Wt::WLabel>( "Option Chain Expiries: " ) );
@@ -379,10 +378,20 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
               m_pServer->PrepareStrikeSelection(
                 sDate,
-                [pSelectStrikes](const std::string& sStrike){
+                [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
                   pSelectStrikes->addItem( sStrike );
                 },
-                [](){}
+                [pSelectStrikes](){ // fPopulateStrikeDone_t
+                  pSelectStrikes->changed().connect( // only this one works with multiple selection
+                    [pSelectStrikes](){
+                      auto set = pSelectStrikes->selectedIndexes();
+                      std::string sSelections;
+                      for ( auto& item :set ) {
+                        sSelections += " " + pSelectStrikes->itemText( item ).toUTF8();
+                      }
+                      BOOST_LOG_TRIVIAL(info) << "changed " << sSelections;
+                    });
+                }
                 );
             });
           triggerUpdate();
