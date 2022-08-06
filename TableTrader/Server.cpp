@@ -52,15 +52,20 @@ void Server::Start(
     const std::string& sSessionId, const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
     fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice,
-    fUpdateOptionExpiries_t fUpdateOptionExpiries
+    fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
+    fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
 ) {
   assert( fUpdateUnderlyingInfo );
-  assert( fUpdateUnderlyingPrice );
-  assert( fUpdateOptionExpiries );
-
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
+
+  assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
+
+  assert( fUpdateOptionExpiries );
   m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
+
+  assert( fUpdateOptionExpiriesDone );
+  m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
 
   m_implServer->Start(
     sUnderlyingFuture,
@@ -81,6 +86,28 @@ void Server::Start(
           m_fUpdateUnderlyingPrice( sPrice );
         }
       );
+    },
+    [this,sSessionId]( boost::gregorian::date date ){ // fAddExpiry_t
+      post(
+        sSessionId,
+        [this,date](){
+          //std::string sDate = boost::lexical_cast<std::string>( date );
+          const std::string sDate = boost::gregorian::to_iso_string( date );
+          m_fUpdateOptionExpiries( sDate );
+        }
+      );
+    },
+    [this,sSessionId](){ // fAddExpiryDone_t
+      post(
+        sSessionId,
+        [this](){
+          m_fUpdateOptionExpiriesDone();
+        }
+      );
     }
   );
+}
+
+void Server::PrepareStrikeSelection( const std::string& sDate ) {
+  boost::gregorian::date date( boost::gregorian::date_from_iso_string( sDate ) );
 }

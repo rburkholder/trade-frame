@@ -323,21 +323,46 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
       Wt::WText* pText = pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
+
       pContainerDataEntry->clear();
+
+      Wt::WContainerWidget* pContainerUnderlying = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+        Wt::WLabel* pLabelUnderlyingLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
+        Wt::WLabel* pLabelUnderlyingName  = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
+        Wt::WLabel* pLabelMultiplierLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
+        Wt::WLabel* pLabelMultiplierValue = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
+
+      Wt::WContainerWidget* pContainerExpiries = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+        Wt::WLabel* pLabelExpiries = pContainerExpiries->addWidget( std::make_unique<Wt::WLabel>( "Option Chain Expiries: " ) );
+        Wt::WSelectionBox* pSelectExpiries = pContainerExpiries->addWidget( std::make_unique<Wt::WSelectionBox>() );
+        pSelectExpiries->setSelectionMode( Wt::SelectionMode::Single );
+        pSelectExpiries->setVerticalSize( 3 );
+        pLabelExpiries->setBuddy( pSelectExpiries );
+
       m_pServer->Start(
         sessionId(), sUnderlying,
-        [this,pContainerDataEntry]( const std::string& sName, const std::string& sMultiplier ){ // fUpdateUnderlyingInfo_t
-          Wt::WLabel* pLabelUnderlyingLabel = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
-          Wt::WLabel* pLabelUnderlyingName  = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( sName ) );
-          Wt::WLabel* pLabelMultiplierLabel = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
-          Wt::WLabel* pLabelMultiplierValue = pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( sMultiplier ) );
+        [this,pLabelUnderlyingName,pLabelMultiplierValue]( const std::string& sName, const std::string& sMultiplier ){ // fUpdateUnderlyingInfo_t
+          pLabelUnderlyingName->setText( sName );
+          pLabelMultiplierValue->setText( sMultiplier );
           triggerUpdate();
         },
         [this,pLivePrice]( const std::string& sPrice ){ // fUpdateUnderlyingPrice_t
           pLivePrice->setText( sPrice );
           triggerUpdate(); // TODO: trigger on timer to reduce traffic
         },
-        [](){ // fUpdateOptionExpiries_t
+        [pSelectExpiries]( const std::string& sDate ){ // fUpdateOptionExpiries_t
+          // TODO: implement timer to indicate duration
+          pSelectExpiries->addItem( sDate );
+        },
+        [this,pSelectExpiries](){ // fUpdateOptionExpiriesDone_t
+          // TODO: disable once filled
+          pSelectExpiries->activated().connect(
+            [this,pSelectExpiries](){
+              pSelectExpiries->setEnabled( false );
+              std::string sDate = pSelectExpiries->valueText().toUTF8();
+              m_pServer->PrepareStrikeSelection( sDate );
+            });
+          triggerUpdate();
         }
       );
     } );

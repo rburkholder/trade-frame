@@ -45,14 +45,18 @@ public:
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&, const std::string&)>; // name, multiplier
   using fUpdateUnderlyingPrice_t = std::function<void(const std::string&)>; // price
-  using fUpdateOptionExpiries_t = std::function<void()>; // will need to convert of std::vector or a callback
+  using fUpdateOptionExpiries_t = std::function<void(const std::string&)>;
+  using fUpdateOptionExpiriesDone_t = std::function<void()>;
 
   void Start(
     const std::string& sSessionId, const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
     fUpdateUnderlyingPrice_t&&,
-    fUpdateOptionExpiries_t
+    fUpdateOptionExpiries_t&&,
+    fUpdateOptionExpiriesDone_t&&
     );
+
+  void PrepareStrikeSelection( const std::string& sDate );
 
 protected:
 private:
@@ -63,6 +67,8 @@ private:
   fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
+  fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;
+
 };
 
 #endif /* SERVER_H */

@@ -134,14 +134,22 @@ void Server_impl::Disconnected( int ) {
 void Server_impl::Start(
   const std::string& sUnderlyingFuture,
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
-  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
+  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice,
+  fAddExpiry_t&& fAddExpiry,
+  fAddExpiryDone_t&& fAddExpiryDone
 ) {
 
   assert( fUpdateUnderlyingInfo );
-  assert( fUpdateUnderlyingPrice );
-
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
+
+  assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
+
+  assert( fAddExpiry );
+  m_fAddExpiry = std::move( fAddExpiry );
+
+  assert( fAddExpiryDone );
+  m_fAddExpiryDone = std::move( fAddExpiryDone );
 
   m_pBuildInstrumentBoth->Queue(
     sUnderlyingFuture,
@@ -210,7 +218,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
               else {
                 m_pBuildInstrumentIQFeed->Queue(
                   sSymbol,
-                  [this]( pInstrument_t pInstrument ) {
+                  [this,&im]( pInstrument_t pInstrument ) {
 
                     assert( pInstrument->IsFuturesOption() );
 
@@ -218,7 +226,6 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
                       pInstrument->SetMultiplier( m_nMultiplier );
                     }
 
-                    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
                     im.Register( pInstrument );
 
                     InstrumentToOption( pInstrument );
@@ -239,7 +246,7 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
 
   pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pProviderIQFeed );
 
-  BuiltOption* pBuiltOption;
+  BuiltOption* pBuiltOption( nullptr );
   {
     std::scoped_lock<std::mutex> lock( m_mutex );
     m_nOptionsLoaded++;
@@ -249,6 +256,13 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
 
   assert( pBuiltOption );
   pBuiltOption->pOption = pOption;
+
+  if ( m_nOptionsNames == m_nOptionsLoaded ) {
+    for ( const mapChains_t::value_type& vt: m_mapChains ) {
+      m_fAddExpiry( vt.first );
+    }
+    m_fAddExpiryDone();
+  }
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {

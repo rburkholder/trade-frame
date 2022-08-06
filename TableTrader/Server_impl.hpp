@@ -54,11 +54,15 @@ public:
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
   using fUpdateUnderlyingPrice_t = std::function<void(double,int)>; // price,precision
+  using fAddExpiry_t = std::function<void(boost::gregorian::date)>;
+  using fAddExpiryDone_t = std::function<void()>;
 
   void Start(
     const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
-    fUpdateUnderlyingPrice_t&&
+    fUpdateUnderlyingPrice_t&&,
+    fAddExpiry_t&&,
+    fAddExpiryDone_t&&
     );
 
 protected:
@@ -89,6 +93,8 @@ private:
 
   fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+  fAddExpiry_t m_fAddExpiry;
+  fAddExpiryDone_t m_fAddExpiryDone;
 
   int m_nPrecision;
   unsigned int m_nMultiplier; // used to populate futures options multiplier (not supplied by iqf)
