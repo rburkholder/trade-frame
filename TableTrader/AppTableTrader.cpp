@@ -300,8 +300,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
   // TODO: will need to load pre-existing state
 
-  Wt::WContainerWidget* pContainerDataEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    Wt::WContainerWidget* pContainerUnderlying = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerDataEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    Wt::WContainerWidget* pContainerUnderlying = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
       Wt::WLabel* pLabelUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
       Wt::WSelectionBox* pSelectUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WSelectionBox>() );
       pSelectUnderlying->setSelectionMode( Wt::SelectionMode::Single );
@@ -311,14 +311,14 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
         [pSelectUnderlying]( const std::string& sUnderlyingFuture ){
           pSelectUnderlying->addItem( sUnderlyingFuture );
         });
-  Wt::WContainerWidget* pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  Wt::WContainerWidget* pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    Wt::WLabel* pLabel = pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Current Price: " ) );
-    Wt::WLabel* pLivePrice = pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "" ) );
-  Wt::WContainerWidget* pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  Wt::WContainerWidget* pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  Wt::WContainerWidget* pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  Wt::WContainerWidget* pContainerControl = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    Wt::WLabel* pLabel = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Current Price: " ) );
+    Wt::WLabel* pLivePrice = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "" ) );
+  m_pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerControl = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
     //Wt::WRadioButton* pRadioButtonStop = pContainerControl->addWidget( std::make_unique<Wt::WRadioButton>( "Stop" ) );
 
   //pRadioButtonStop->checked().connect( // does not work due to Wt::WServer::waitForShutdown();
@@ -328,20 +328,20 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
   //);
 
   pSelectUnderlying->activated().connect(
-    [this,pSelectUnderlying,pContainerNotifications,pContainerDataEntry,pLivePrice](){
+    [this,pSelectUnderlying,pLivePrice](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
-      Wt::WText* pText = pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
+      Wt::WText* pText = m_pContainerNotifications->addWidget( std::make_unique<Wt::WText>( sUnderlying + ": connecting to live data" ) );
 
-      pContainerDataEntry->clear();
+      m_pContainerDataEntry->clear();
 
-      Wt::WContainerWidget* pContainerUnderlying = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WContainerWidget* pContainerUnderlying = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
         Wt::WLabel* pLabelUnderlyingLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
         Wt::WLabel* pLabelUnderlyingName  = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
         Wt::WLabel* pLabelMultiplierLabel = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
         Wt::WLabel* pLabelMultiplierValue = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>() );
 
-      Wt::WContainerWidget* pContainerExpiries = pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WContainerWidget* pContainerExpiries = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
         Wt::WLabel* pLabelExpiries = pContainerExpiries->addWidget( std::make_unique<Wt::WLabel>( "Option Chain Expiries: " ) );
         Wt::WSelectionBox* pSelectExpiries = pContainerExpiries->addWidget( std::make_unique<Wt::WSelectionBox>() );
         pSelectExpiries->setSelectionMode( Wt::SelectionMode::Single );
@@ -363,14 +363,27 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
           // TODO: implement timer to indicate duration
           pSelectExpiries->addItem( sDate );
         },
-        [this,pSelectExpiries,pContainerDataEntry](){ // fUpdateOptionExpiriesDone_t
+        [this,pSelectExpiries](){ // fUpdateOptionExpiriesDone_t
           // TODO: disable once filled
           pSelectExpiries->activated().connect(
-            [this,pSelectExpiries,pContainerDataEntry](){
+            [this,pSelectExpiries](){
               pSelectExpiries->setEnabled( false );
               std::string sDate = pSelectExpiries->valueText().toUTF8();
-              pContainerDataEntry->clear();
-              m_pServer->PrepareStrikeSelection( sDate );
+              m_pContainerDataEntry->clear();
+
+              Wt::WLabel* pLabelStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
+              Wt::WSelectionBox* pSelectStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WSelectionBox>() );
+              pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
+              pSelectStrikes->setVerticalSize( 10 );
+              pLabelStrikes->setBuddy( pSelectStrikes );
+
+              m_pServer->PrepareStrikeSelection(
+                sDate,
+                [pSelectStrikes](const std::string& sStrike){
+                  pSelectStrikes->addItem( sStrike );
+                },
+                [](){}
+                );
             });
           triggerUpdate();
         }

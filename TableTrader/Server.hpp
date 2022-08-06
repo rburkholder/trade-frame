@@ -48,6 +48,9 @@ public:
   using fUpdateOptionExpiries_t = std::function<void(const std::string&)>;
   using fUpdateOptionExpiriesDone_t = std::function<void()>;
 
+  using fPopulateStrike_t = std::function<void(const std::string&)>;
+  using fPopulateStrikeDone_t = std::function<void()>;
+
   void Start(
     const std::string& sSessionId, const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
@@ -56,7 +59,11 @@ public:
     fUpdateOptionExpiriesDone_t&&
     );
 
-  void PrepareStrikeSelection( const std::string& sDate );
+  void PrepareStrikeSelection(
+    const std::string& sDate,
+    fPopulateStrike_t&&,
+    fPopulateStrikeDone_t&&
+    );
 
 protected:
 private:

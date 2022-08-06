@@ -30,6 +30,10 @@
 
 #include "Server.hpp"
 
+namespace Wt {
+  class WContainerWidget;
+} // namespace Wt
+
 class AppTableTrader: public Wt::WApplication {
 public:
 
@@ -53,6 +57,14 @@ private:
   mapInternalPathChanged_t m_mapInternalPathChanged;
 
   Server* m_pServer; // object managed by wt
+
+  Wt::WContainerWidget* m_pContainerDataEntry;
+  Wt::WContainerWidget* m_pContainerDataEntryButtons;
+  Wt::WContainerWidget* m_pContainerLiveData;
+  Wt::WContainerWidget* m_pContainerTableEntry;
+  Wt::WContainerWidget* m_pContainerTableEntryButtons;
+  Wt::WContainerWidget* m_pContainerNotifications;
+  Wt::WContainerWidget* m_pContainerControl;
 
   void AddLink( Wt::WContainerWidget*, const std::string& sClass, const std::string& sPath, const std::string& sAnchor );
 

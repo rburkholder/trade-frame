@@ -57,6 +57,9 @@ public:
   using fAddExpiry_t = std::function<void(boost::gregorian::date)>;
   using fAddExpiryDone_t = std::function<void()>;
 
+  using fPopulateStrike_t = std::function<void(double,int)>; // strike, precision
+  using fPopulateStrikeDone_t = std::function<void()>;
+
   void Start(
     const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
@@ -64,6 +67,12 @@ public:
     fAddExpiry_t&&,
     fAddExpiryDone_t&&
     );
+
+  void PopulateStrikes(
+    boost::gregorian::date,
+    fPopulateStrike_t&&,
+    fPopulateStrikeDone_t&&
+  );
 
 protected:
 private:

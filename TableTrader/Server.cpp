@@ -19,10 +19,18 @@
  * Created:   2022/08/02 09:58:23
  */
 
+#include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <boost/format.hpp>
 
 #include "Server.hpp"
 #include "Server_impl.hpp"
+
+namespace {
+  //const std::string sFormatFloat( "%0.*f" ); // boost::format does not process variable precision
+  const std::string sFormatFloat( "%0.2f" );
+}
 
 Server::Server(
   int argc, char *argv[],
@@ -68,6 +76,8 @@ void Server::Start(
   assert( fUpdateOptionExpiriesDone );
   m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
 
+  boost::format format( sFormatFloat );
+
   m_implServer->Start(
     sUnderlyingFuture,
     [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
@@ -79,12 +89,14 @@ void Server::Start(
         }
       );
     },
-    [this,sSessionId]( double price, int precision) { // fUpdateUnderlyingPrice_t
+    [this,sSessionId,format_=std::move(format)]( double price, int precision) mutable { // fUpdateUnderlyingPrice_t
+      //format_ % precision % price;
+      format_ % price;
+      std::string sPrice( format_.str() );
       post(
         sSessionId,
-        [this, price](){
-          std::string sPrice = boost::lexical_cast<std::string>( price );
-          m_fUpdateUnderlyingPrice( sPrice );
+        [this,sPrice_=std::move(sPrice)](){
+          m_fUpdateUnderlyingPrice( sPrice_ );
         }
       );
     },
@@ -109,6 +121,34 @@ void Server::Start(
   );
 }
 
-void Server::PrepareStrikeSelection( const std::string& sDate ) {
+void Server::PrepareStrikeSelection(
+  const std::string& sDate,
+  fPopulateStrike_t&& fPopulateStrike,
+  fPopulateStrikeDone_t&& fPopulateStrikeDone
+) {
   boost::gregorian::date date( boost::gregorian::date_from_iso_string( sDate ) );
+  m_implServer->PopulateStrikes(
+    date,
+    [fPopulateStrike_=std::move(fPopulateStrike)]( double strike, int precision){
+      boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+      format % strike;
+      fPopulateStrike_( format.str() );
+
+      if ( false ) {
+        try {
+          format % precision % strike;
+          fPopulateStrike_( format.str() );
+        }
+        catch( boost::io::too_many_args& e ) {
+          BOOST_LOG_TRIVIAL(error) << "boost::format too many args " << strike << "," << precision ;
+        }
+        catch (boost::io::too_few_args& e ) {
+          BOOST_LOG_TRIVIAL(error) << "boost::format too few args " << strike << "," << precision;
+        }
+      }
+    },
+    [fPopulateStrikeDone_=std::move(fPopulateStrikeDone)](){
+      fPopulateStrikeDone_();
+    }
+  );
 }

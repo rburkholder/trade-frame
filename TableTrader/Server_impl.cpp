@@ -264,13 +264,6 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   }
 }
 
-void Server_impl::PopulateExpiry() {
-  for ( const mapChains_t::value_type& vt: m_mapChains ) {
-    m_fAddExpiry( vt.first );
-  }
-  m_fAddExpiryDone();
-}
-
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
   m_quoteUnderlying = quote;
 }
@@ -282,4 +275,26 @@ void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
     //m_fUpdateUnderlyingPrice( price, m_nPrecision );
   }
   m_tradeUnderlying = trade;
+}
+
+void Server_impl::PopulateExpiry() {
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    m_fAddExpiry( vt.first );
+  }
+  m_fAddExpiryDone();
+}
+
+void Server_impl::PopulateStrikes(
+  boost::gregorian::date date,
+  fPopulateStrike_t&& fPopulateStrike,
+  fPopulateStrikeDone_t&& fPopulateStrikeDone
+) {
+  mapChains_t::iterator iterChain = m_mapChains.find( date );
+  assert( m_mapChains.end() != iterChain );
+
+  iterChain->second.Strikes(
+    [this,fPopulateStrike_=std::move(fPopulateStrike)](double dblStrike, const chain_t::strike_t& strike ){
+      fPopulateStrike_( dblStrike, m_nPrecision );
+  } );
+  fPopulateStrikeDone();
 }
