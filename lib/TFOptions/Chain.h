@@ -101,7 +101,8 @@ public:
   const std::string GetIQFeedNameCall( double strike ) const;
   const std::string GetIQFeedNamePut(  double strike ) const;
 
-  const chain::Strike<Option>& GetStrike( double strike ) const;
+  const chain::Strike<Option>& GetExistingStrike( double strike ) const;
+  //const chain::Strike<Option>& GetStrike( double strike ) const;
   chain::Strike<Option>& GetStrike( double strike );
 
   double Put_Itm( double ) const ;
@@ -135,12 +136,13 @@ public:
   void Test( double price );
 
 protected:
-private:
-
-  mapChain_t m_mapChain;
 
   typename mapChain_t::const_iterator FindStrike( const double strike ) const;
   typename mapChain_t::iterator FindStrike( const double strike );
+
+private:
+
+  mapChain_t m_mapChain;
 
 };
 
@@ -377,13 +379,22 @@ const std::string Chain<Option>::GetIQFeedNamePut( double dblStrike ) const {
 }
 
 template<typename Option>
-const chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) const {
-  typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
-  if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+const chain::Strike<Option>& Chain<Option>::GetExistingStrike( double dblStrike ) const { // this one doesn't make much sense
+  typename mapChain_t::const_iterator citer = m_mapChain.find( dblStrike );
+  if ( m_mapChain.end() == citer ) {
+    throw exception_strike_not_found( "Chain::GetExistingStrike const: no strike" );
   }
-  return iter->second;
+  return citer->second;
 }
+
+//template<typename Option>
+//const chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) const { // this one doesn't make much sense
+//  typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
+//  if ( m_mapChain.end() == iter ) {
+//    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+//  }
+//  return iter->second;
+//}
 
 template<typename Option>
 chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) {
