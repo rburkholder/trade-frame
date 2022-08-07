@@ -74,6 +74,8 @@ public:
     fPopulateStrikeDone_t&&
   );
 
+  const std::string& Ticker( ou::tf::OptionSide::EOptionSide, double ) const;
+
 protected:
 private:
 
@@ -118,6 +120,7 @@ private:
   using chain_t = ou::tf::option::Chain<BuiltOption>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
+  mapChains_t::const_iterator m_citerChains; // chosen date
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t m_pOptionChainQuery;

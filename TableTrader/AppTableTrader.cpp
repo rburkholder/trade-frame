@@ -453,7 +453,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           assert( pair.second );
                           OptionAtStrike& oas( pair.first->second );
 
-                          pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ticker" ) );
+                          Wt::WLabel* pTicker = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ticker" ) );
 
                           switch ( m_pButtonGroupSide->checkedId() ) {
                             case (int)ESide::buy:
@@ -469,11 +469,14 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                           pOptionRow->addWidget( std::make_unique<Wt::WLabel>( vt ) ); // strike
 
+                          Server::EOptionType type;
                           switch ( m_pButtonGroupOption->checkedId() ) {
                             case (int)EOption::call:
+                              type = Server::EOptionType::call;
                               pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Call" ) );
                               break;
                             case (int)EOption::put:
+                              type = Server::EOptionType::put;
                               pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Put" ) );
                               break;
                             default:
@@ -481,29 +484,34 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               break;
                           }
 
+                          Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OpenInt" ) );
                           Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
                           Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
-                          Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OpenInt" ) );
                           Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Volume" ) );
                           Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
                           Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Allocated" ) );
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "#Contracts" ) );
                           Wt::WLineEdit* pEntry = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "mkt|bid|ask|man" ) );
                           Wt::WLineEdit* pScale = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "scale" ) );
-                          Wt::WLabel* pFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "FillPrice" ) );
                           Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "PnL" ) );
+                          Wt::WLabel* pFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "FillPrice" ) );
 
-                          switch ( m_pButtonGroupOption->checkedId() ) {
-                            case (int)EOption::call:
-                              m_pServer->AddStrike( Server::EOptionType::call, vt );
-                              break;
-                            case (int)EOption::put:
-                              m_pServer->AddStrike( Server::EOptionType::put, vt );
-                              break;
-                            default:
-                              assert( false );
-                              break;
-                          }
+                          m_pServer->AddStrike(
+                            type, vt,
+                            [pTicker,pOI](const std::string& sTicker, const std::string& sOpenInt ){ // fPopulateOption_t
+                              pTicker->setText( sTicker );
+                              pOI->setText( sOpenInt );
+                            },
+                            [pBid,pAsk,pVol,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sPnL ) { // fRealTime_t
+                              pBid->setText( sBid );
+                              pAsk->setText( sAsk );
+                              pVol->setText( sVolume );
+                              pPnL->setText( sPnL );
+                            },
+                            [pFillPrice](const std::string& sFill ){ // fFill_t
+                              pFillPrice->setText( sFill );
+                            }
+                            );
                         }
                         ix++;
                       }

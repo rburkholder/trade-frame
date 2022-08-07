@@ -51,6 +51,11 @@ public:
   using fPopulateStrike_t = std::function<void(const std::string&)>;
   using fPopulateStrikeDone_t = std::function<void()>;
 
+  using fPopulateOption_t = std::function<void(const std::string&, const std::string&)>; // ticker, open interest
+  using fRealTime_t = std::function<void( // bid, ask, volume, pnl
+    const std::string&, const std::string&, const std::string&, const std::string&)>;
+  using fFill_t = std::function<void(const std::string&)>; // #filled@price
+
   void Start(
     const std::string& sSessionId, const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
@@ -67,7 +72,10 @@ public:
 
   enum class EOptionType { call, put };
 
-  void AddStrike( EOptionType, const std::string& );
+  void AddStrike(
+    EOptionType, const std::string&, // type, strike
+    fPopulateOption_t&&, fRealTime_t&&, fFill_t&&
+    );
   void DelStrike( const std::string& );
 
 protected:
@@ -80,6 +88,9 @@ private:
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
   fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;
+
+  fRealTime_t m_fRealTime;
+  fFill_t m_fFill;
 
 };
 

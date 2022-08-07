@@ -153,7 +153,28 @@ void Server::PrepareStrikeSelection(
   );
 }
 
-void Server::AddStrike( EOptionType type, const std::string& ) {
+void Server::AddStrike(
+  EOptionType type, const std::string& sStrike,
+  fPopulateOption_t&& fPopulateOption, fRealTime_t&& fRealTime, fFill_t&& fFill
+) {
+  assert( fPopulateOption );
+
+  assert( fRealTime );
+  m_fRealTime = std::move( fRealTime );
+
+  assert( fFill );
+  m_fFill = std::move( fFill );
+
+  double strike = boost::lexical_cast<double>( sStrike );
+  // open interest will have to come during watch startup, and populate ticker again with open interest
+  switch ( type ) {
+    case EOptionType::call:
+      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Call, strike ), "" );
+      break;
+    case EOptionType::put:
+      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Put, strike ), "" );
+      break;
+  }
 }
 
 void Server::DelStrike( const std::string& ) {

@@ -289,12 +289,38 @@ void Server_impl::PopulateStrikes(
   fPopulateStrike_t&& fPopulateStrike,
   fPopulateStrikeDone_t&& fPopulateStrikeDone
 ) {
-  mapChains_t::iterator iterChain = m_mapChains.find( date );
-  assert( m_mapChains.end() != iterChain );
 
-  iterChain->second.Strikes(
+  m_citerChains = m_mapChains.find( date );
+  assert( m_mapChains.end() != m_citerChains );
+
+  m_citerChains->second.Strikes(
     [this,fPopulateStrike_=std::move(fPopulateStrike)](double dblStrike, const chain_t::strike_t& strike ){
       fPopulateStrike_( dblStrike, m_nPrecision );
   } );
   fPopulateStrikeDone();
+}
+
+const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, double strike ) const {
+  const chain_t& chain( m_citerChains->second );
+  double closest {};
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      {
+        closest = chain.Call_Atm( strike );
+        const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
+        assert( Strike.call.pOption );
+        return Strike.call.pOption->GetInstrumentName();
+      }
+      break;
+    case ou::tf::OptionSide::Put:
+      {
+        closest = chain.Put_Atm( strike );
+        const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
+        assert( Strike.put.pOption );
+        return Strike.put.pOption->GetInstrumentName();
+      }
+      break;
+    default:
+      assert( false );
+  }
 }
