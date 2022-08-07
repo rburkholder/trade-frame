@@ -302,11 +302,10 @@ void Server_impl::PopulateStrikes(
 
 const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, double strike ) const {
   const chain_t& chain( m_citerChains->second );
-  double closest {};
   switch ( side ) {
     case ou::tf::OptionSide::Call:
       {
-        closest = chain.Call_Atm( strike );
+        double closest = chain.Call_Atm( strike );
         const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
         assert( Strike.call.pOption );
         return Strike.call.pOption->GetInstrumentName();
@@ -314,7 +313,7 @@ const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, do
       break;
     case ou::tf::OptionSide::Put:
       {
-        closest = chain.Put_Atm( strike );
+        double closest = chain.Put_Atm( strike );
         const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
         assert( Strike.put.pOption );
         return Strike.put.pOption->GetInstrumentName();
@@ -323,4 +322,25 @@ const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, do
     default:
       assert( false );
   }
+}
+
+void Server_impl::AddStrike( double ) {
+}
+
+void Server_impl::DelStrike( double ) {
+}
+
+void Server_impl::ChangeInvestment( double dblInvestment ) {
+}
+
+void Server_impl::ChangeAllocation( double dblStrike, double dblPercent ) {
+}
+
+void Server_impl::PlaceOrders() {
+}
+
+void Server_impl::CancelAll() {
+}
+
+void Server_impl::CloseAll() {
 }

@@ -129,7 +129,7 @@ void Server::PrepareStrikeSelection(
   boost::gregorian::date date( boost::gregorian::date_from_iso_string( sDate ) );
   m_implServer->PopulateStrikes(
     date,
-    [fPopulateStrike_=std::move(fPopulateStrike)]( double strike, int precision){
+    [fPopulateStrike_=std::move(fPopulateStrike)]( double strike, int precision){ // fPopulateStrike_t
       boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
       format % strike;
       fPopulateStrike_( format.str() );
@@ -147,17 +147,31 @@ void Server::PrepareStrikeSelection(
         }
       }
     },
-    [fPopulateStrikeDone_=std::move(fPopulateStrikeDone)](){
+    [fPopulateStrikeDone_=std::move(fPopulateStrikeDone)](){ // fPopulateStrikeDone_t
       fPopulateStrikeDone_();
     }
   );
 }
 
+void Server::ChangeInvestment( const std::string& sInvestmentAmount ) {
+  try {
+    double amount = boost::lexical_cast<double>( sInvestmentAmount );
+    m_implServer->ChangeInvestment( amount );
+  }
+  catch ( boost::bad_lexical_cast& e ) {
+  }
+
+}
+
 void Server::AddStrike(
   EOptionType type, const std::string& sStrike,
-  fPopulateOption_t&& fPopulateOption, fRealTime_t&& fRealTime, fFill_t&& fFill
+  fPopulateOption_t&& fPopulateOption,
+  fUpdateAllocated_t&& fUpdateAllocated,
+  fRealTime_t&& fRealTime, fFill_t&& fFill
 ) {
-  assert( fPopulateOption );
+
+  assert( fUpdateAllocated );
+  m_fUpdateAllocated = std::move( fUpdateAllocated );
 
   assert( fRealTime );
   m_fRealTime = std::move( fRealTime );
@@ -165,17 +179,39 @@ void Server::AddStrike(
   assert( fFill );
   m_fFill = std::move( fFill );
 
+  assert( fPopulateOption );
+
   double strike = boost::lexical_cast<double>( sStrike );
-  // open interest will have to come during watch startup, and populate ticker again with open interest
+  // open interest will have to come during watch startup, and populate ticker again with real open interest, will need to use 'post' with session id for that
   switch ( type ) {
     case EOptionType::call:
-      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Call, strike ), "" );
+      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Call, strike ), "tbd" );
       break;
     case EOptionType::put:
-      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Put, strike ), "" );
+      fPopulateOption( m_implServer->Ticker( ou::tf::OptionSide::Put, strike ), "tbd" );
       break;
   }
 }
 
-void Server::DelStrike( const std::string& ) {
+void Server::DelStrike( const std::string& sStrike ) {
+  double strike = boost::lexical_cast<double>( sStrike );
+}
+
+void Server::ChangeAllocation( const std::string& sStrike, const std::string& sPercent ) {
+  try {
+    double strike = boost::lexical_cast<double>( sStrike );
+    double percent = boost::lexical_cast<double>( sPercent );
+    m_implServer->ChangeAllocation( strike, percent );
+  }
+  catch ( boost::bad_lexical_cast& e ) {
+  }
+}
+
+void Server::PlaceOrders() {
+}
+
+void Server::CancelAll() {
+}
+
+void Server::CloseAll() {
 }

@@ -26,6 +26,7 @@
 #include <Wt/WLineEdit.h>
 //#include <Wt/WTextArea.h>
 #include <Wt/WGroupBox.h>
+#include <Wt/WComboBox.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WButtonGroup.h>
 #include <Wt/WRadioButton.h>
@@ -398,28 +399,44 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
               }
 
-              Wt::WLabel* pLabelInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Investment: " ) );
-              Wt::WLineEdit* pWLineEditInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
-              pLabelInvestment->setBuddy( pWLineEditInvestment );
-              pWLineEditInvestment->setText( "100000" );
-
               Wt::WLabel* pLabelStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
               Wt::WSelectionBox* pSelectStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WSelectionBox>() );
               pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
               pSelectStrikes->setVerticalSize( 10 );
               pLabelStrikes->setBuddy( pSelectStrikes );
 
+              Wt::WLabel* pLabelInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Investment: " ) );
+              Wt::WLineEdit* pWLineEditInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
+              pLabelInvestment->setBuddy( pWLineEditInvestment );
+              pWLineEditInvestment->setText( "100000" );
+              m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() ); // prime the amount
+              pWLineEditInvestment->changed().connect(
+                [this,pWLineEditInvestment](){ // TODO: add validator for integer?
+                  m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() );
+                } );
+
+              Wt::WLabel* pLabelAllocated = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Allocated: " ) );
+              Wt::WLineEdit* pWLineEditAllocated = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
+              pLabelAllocated->setBuddy( pWLineEditInvestment );
+              pWLineEditAllocated->setReadOnly( true );
+              pWLineEditAllocated->setText( "0" );
+
+              m_pContainerDataEntry->addWidget( std::make_unique<Wt::WBreak>() );
+
               m_pServer->PrepareStrikeSelection(
                 sDate,
                 [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
                   pSelectStrikes->addItem( sStrike );
                 },
-                [this,pSelectStrikes](){ // fPopulateStrikeDone_t
+                [this,pSelectStrikes,pWLineEditAllocated](){ // fPopulateStrikeDone_t
                   Wt::WPushButton* pBtnCancelAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
-                  Wt::WPushButton* pBtnCloseAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Close All" ) );
-                  Wt::WPushButton* pBtnStart = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Start" ) );
+                  pBtnCancelAll->setEnabled( false );
+                  Wt::WPushButton* pBtnCloseAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
+                  pBtnCloseAll->setEnabled( false );
+                  Wt::WPushButton* pBtnStart = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
+                  pBtnStart->setEnabled( false );
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
-                    [this,pSelectStrikes](){
+                    [this,pSelectStrikes,pBtnStart,pWLineEditAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
                       using setStrike_t = std::set<std::string>;
                       setStrike_t setStrike;
@@ -491,16 +508,37 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
                           Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Allocated" ) );
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "#Contracts" ) );
-                          Wt::WLineEdit* pEntry = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "mkt|bid|ask|man" ) );
-                          Wt::WLineEdit* pScale = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "scale" ) );
+                          Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
+                          Wt::WLineEdit* pPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "price" ) ); // enabled with manual, scale
                           Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "PnL" ) );
                           Wt::WLabel* pFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "FillPrice" ) );
+
+                          pWLineEditAlloc->setText( "0.0" );
+                          //pWLineEditAlloc->keyWentUp().connect( [](){} );
+                          pWLineEditAlloc->changed().connect(
+                            [this,vt,pWLineEditAlloc](){
+                              m_pServer->ChangeAllocation( vt, pWLineEditAlloc->text().toUTF8() );
+                            } );
+
+                          pPrice->setEnabled( false );
+
+                          pOrderType->setEnabled( false );  // TODO: transmit fields for order type, default to 'market'
+                          pOrderType->addItem( "market" );
+                          pOrderType->addItem( "limit manual" );
+                          pOrderType->addItem( "limit on bid" );
+                          pOrderType->addItem( "limit on ask" );
+                          pOrderType->addItem( "scale" ); // need extra row of fields: initial quantity (validate), inc quantity (validate), inc price (validate)
 
                           m_pServer->AddStrike(
                             type, vt,
                             [pTicker,pOI](const std::string& sTicker, const std::string& sOpenInt ){ // fPopulateOption_t
                               pTicker->setText( sTicker );
                               pOI->setText( sOpenInt );
+                            },
+                            [pWLineEditAllocated,pAllocated,pNumContracts](const std::string& sTotalAllocated, const std::string& sOptionAllocated, const std::string& sContracts ){ // fUpdateAllocated_t
+                              pWLineEditAllocated->setText( sTotalAllocated );
+                              pAllocated->setText( sOptionAllocated );
+                              pNumContracts->setText( sContracts );
                             },
                             [pBid,pAsk,pVol,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sPnL ) { // fRealTime_t
                               pBid->setText( sBid );
@@ -514,15 +552,39 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                             );
                         }
                         ix++;
-                      }
-                    });
+                      } // end: add entries
+
+                      pBtnStart->setEnabled( 0 < m_mapOptionAtStrike.size() );
+                    }); // pSelectStrikes->changed()
+
+
+                    pBtnCancelAll->clicked().connect(
+                      [this,pBtnCancelAll](){
+                        pBtnCancelAll->setEnabled( false );
+                        m_pServer->CancelAll();
+                      });
+                    pBtnCloseAll->clicked().connect(
+                      [this,pBtnCancelAll,pBtnCloseAll](){
+                        pBtnCancelAll->setEnabled( false );
+                        m_pServer->CancelAll();
+                        pBtnCloseAll->setEnabled( false );
+                        m_pServer->CloseAll();
+                      });
+                    pBtnStart->clicked().connect(
+                      [this,pSelectStrikes,pBtnCancelAll,pBtnCloseAll,pBtnStart](){
+                        pSelectStrikes->setEnabled( false );
+                        pBtnCancelAll->setEnabled( true );
+                        pBtnCloseAll->setEnabled( true );
+                        pBtnStart->setEnabled (false );
+                        m_pServer->PlaceOrders();
+                      });
                 }
-                );
+                ); // m_pServer->PrepareStrikeSelection
             });
           triggerUpdate();
         }
-      );
-    } );
+      ); // m_pServer->Start
+    } ); // pSelectUnderlying->activated()
 
   //auto timer = addChild(std::make_unique<Wt::WTimer>());
   //timer->setInterval( std::chrono::seconds( 1 ) );

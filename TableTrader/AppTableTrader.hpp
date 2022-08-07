@@ -52,6 +52,22 @@ public:
 
 private:
 
+  // TODO: set timer to update quotes, p/l, scale
+
+  // TODO
+  /*  2022-07-30, 07:39
+      In Price to Buy/Sell, we currently have Market and Limit. Can you add SCALE. Behaviour will be like this.
+        If this is Market - Buy/Sell at Market
+        If it is Limit, allow user to enter Limit price
+        If it is SCALE
+          Display a popup window (for every row) and allow user to enter following:
+            Starting Price
+            Initial Quantity
+            Incremental Quantity
+            Increment/Decrement price
+
+    hard validation on invesment overage?
+  */
   using fTemplate_t = std::function<void(Wt::WContainerWidget*)>;
 
   using mapInternalPathChanged_t = std::map<const std::string, const slotInternalPathChanged_t>;

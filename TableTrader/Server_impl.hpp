@@ -68,6 +68,8 @@ public:
     fAddExpiryDone_t&&
     );
 
+  void ChangeInvestment( double dblInvestment );
+
   void PopulateStrikes(
     boost::gregorian::date,
     fPopulateStrike_t&&,
@@ -75,6 +77,15 @@ public:
   );
 
   const std::string& Ticker( ou::tf::OptionSide::EOptionSide, double ) const;
+
+  void AddStrike( double );
+  void DelStrike( double );
+
+  void ChangeAllocation( double dblStrike, double dblPercent );
+
+  void PlaceOrders();
+  void CancelAll();
+  void CloseAll();
 
 protected:
 private:

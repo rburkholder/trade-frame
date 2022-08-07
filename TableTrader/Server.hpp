@@ -52,6 +52,7 @@ public:
   using fPopulateStrikeDone_t = std::function<void()>;
 
   using fPopulateOption_t = std::function<void(const std::string&, const std::string&)>; // ticker, open interest
+  using fUpdateAllocated_t = std::function<void(const std::string&, const std::string&, const std::string&)>; // total allocation, option allocation, #contracts
   using fRealTime_t = std::function<void( // bid, ask, volume, pnl
     const std::string&, const std::string&, const std::string&, const std::string&)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
@@ -64,6 +65,8 @@ public:
     fUpdateOptionExpiriesDone_t&&
     );
 
+  void ChangeInvestment( const std::string& );
+
   void PrepareStrikeSelection(
     const std::string& sDate,
     fPopulateStrike_t&&,
@@ -74,9 +77,15 @@ public:
 
   void AddStrike(
     EOptionType, const std::string&, // type, strike
-    fPopulateOption_t&&, fRealTime_t&&, fFill_t&&
+    fPopulateOption_t&&, fUpdateAllocated_t&&, fRealTime_t&&, fFill_t&&
     );
-  void DelStrike( const std::string& );
+  void DelStrike( const std::string& ); // strike
+
+  void ChangeAllocation( const std::string& sStrike, const std::string& sPercent );
+
+  void PlaceOrders();
+  void CancelAll();
+  void CloseAll();
 
 protected:
 private:
@@ -89,6 +98,7 @@ private:
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
   fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;
 
+  fUpdateAllocated_t m_fUpdateAllocated;
   fRealTime_t m_fRealTime;
   fFill_t m_fFill;
 
