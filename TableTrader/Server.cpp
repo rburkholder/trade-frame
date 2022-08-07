@@ -153,7 +153,7 @@ void Server::PrepareStrikeSelection(
   );
 }
 
-void Server::AddStrike( const std::string& ) {
+void Server::AddStrike( EOptionType type, const std::string& ) {
 }
 
 void Server::DelStrike( const std::string& ) {

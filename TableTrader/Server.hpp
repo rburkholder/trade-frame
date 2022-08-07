@@ -65,7 +65,9 @@ public:
     fPopulateStrikeDone_t&&
     );
 
-  void AddStrike( const std::string& );
+  enum class EOptionType { call, put };
+
+  void AddStrike( EOptionType, const std::string& );
   void DelStrike( const std::string& );
 
 protected:

@@ -24,7 +24,7 @@
 #include <Wt/WLabel.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
-#include <Wt/WTextArea.h>
+//#include <Wt/WTextArea.h>
 #include <Wt/WGroupBox.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WButtonGroup.h>
@@ -372,8 +372,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               std::string sDate = pSelectExpiries->valueText().toUTF8();
               m_pContainerDataEntry->clear();
 
+              enum class EOption { call = 1, put = 2 };
               {
-                enum class EOption { call = 1, put = 2 };
                 auto containerOption = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WGroupBox>("Call/Put") );
                 m_pButtonGroupOption = std::make_shared<Wt::WButtonGroup>();
                 Wt::WRadioButton* btnCall = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Call" ) );
@@ -385,8 +385,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 m_pButtonGroupOption->setCheckedButton( m_pButtonGroupOption->button( (int)EOption::call ) );
               }
 
+              enum class ESide { buy = 1, sell = 2 };
               {
-                enum class ESide { buy = 1, sell = 2 };
                 auto containerSide = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WGroupBox>("Buy/Sell") );
                 m_pButtonGroupSide = std::make_shared<Wt::WButtonGroup>();
                 Wt::WRadioButton* btnBuy = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Buy" ) );
@@ -399,10 +399,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               }
 
               Wt::WLabel* pLabelInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Investment: " ) );
-              Wt::WTextArea* pTextAreaInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WTextArea>() );
-              pLabelInvestment->setBuddy( pTextAreaInvestment );
-              pTextAreaInvestment->setRows( 1 );
-              pTextAreaInvestment->setText( "100000" );
+              Wt::WLineEdit* pWLineEditInvestment = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
+              pLabelInvestment->setBuddy( pWLineEditInvestment );
+              pWLineEditInvestment->setText( "100000" );
 
               Wt::WLabel* pLabelStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
               Wt::WSelectionBox* pSelectStrikes = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WSelectionBox>() );
@@ -416,18 +415,18 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   pSelectStrikes->addItem( sStrike );
                 },
                 [this,pSelectStrikes](){ // fPopulateStrikeDone_t
+                  Wt::WPushButton* pBtnCancelAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
+                  Wt::WPushButton* pBtnCloseAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Close All" ) );
+                  Wt::WPushButton* pBtnStart = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Start" ) );
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
                     [this,pSelectStrikes](){
                       auto set = pSelectStrikes->selectedIndexes();
-                      std::string sSelections;
                       using setStrike_t = std::set<std::string>;
                       setStrike_t setStrike;
                       for ( auto& item :set ) {
                         std::string sStrike( pSelectStrikes->itemText( item ).toUTF8() );
-                        sSelections += " " + sStrike;
                         setStrike.insert( sStrike );
                       }
-                      BOOST_LOG_TRIVIAL(info) << "changed " << sSelections;
 
                       // delete removed entries
                       setStrike_t setDelete;
@@ -443,14 +442,70 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                         iter->second.m_pcw->removeFromParent();
                         m_mapOptionAtStrike.erase( iter );
                       }
+
                       // insert added entries
+                      int ix {};
                       for ( const setStrike_t::value_type& vt: setStrike ) {
                         if ( m_mapOptionAtStrike.end() == m_mapOptionAtStrike.find( vt ) ) {
-                          Wt::WContainerWidget* pOptionRow = m_pContainerTableEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
-                          pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Option Strike " + vt ) );
-                          m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
-                          m_pServer->AddStrike( vt );
+
+                          Wt::WContainerWidget* pOptionRow = m_pContainerTableEntry->insertWidget( ix, std::make_unique<Wt::WContainerWidget>() );
+                          auto pair = m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
+                          assert( pair.second );
+                          OptionAtStrike& oas( pair.first->second );
+
+                          pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ticker" ) );
+
+                          switch ( m_pButtonGroupSide->checkedId() ) {
+                            case (int)ESide::buy:
+                              pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Buy" ) );
+                              break;
+                            case (int)ESide::sell:
+                              pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Sell" ) );
+                              break;
+                            default:
+                              assert( false );
+                              break;
+                          }
+
+                          pOptionRow->addWidget( std::make_unique<Wt::WLabel>( vt ) ); // strike
+
+                          switch ( m_pButtonGroupOption->checkedId() ) {
+                            case (int)EOption::call:
+                              pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Call" ) );
+                              break;
+                            case (int)EOption::put:
+                              pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Put" ) );
+                              break;
+                            default:
+                              assert( false );
+                              break;
+                          }
+
+                          Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
+                          Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
+                          Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OpenInt" ) );
+                          Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Volume" ) );
+                          Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
+                          Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Allocated" ) );
+                          Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "#Contracts" ) );
+                          Wt::WLineEdit* pEntry = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "mkt|bid|ask|man" ) );
+                          Wt::WLineEdit* pScale = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "scale" ) );
+                          Wt::WLabel* pFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "FillPrice" ) );
+                          Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "PnL" ) );
+
+                          switch ( m_pButtonGroupOption->checkedId() ) {
+                            case (int)EOption::call:
+                              m_pServer->AddStrike( Server::EOptionType::call, vt );
+                              break;
+                            case (int)EOption::put:
+                              m_pServer->AddStrike( Server::EOptionType::put, vt );
+                              break;
+                            default:
+                              assert( false );
+                              break;
+                          }
                         }
+                        ix++;
                       }
                     });
                 }
