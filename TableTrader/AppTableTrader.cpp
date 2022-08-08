@@ -73,10 +73,12 @@ AppTableTrader::~AppTableTrader( ) { }
 
 void AppTableTrader::initialize() {
   Wt::WApplication::log( "info" ) << "AppTableTrader::initialize()";
+  m_pServer->SessionAttach( sessionId() );
 }
 
 void AppTableTrader::finalize() {
   Wt::WApplication::log( "info" ) << "AppTableTrader::finalize()";
+  m_pServer->SessionDetach( sessionId() );
 }
 
 void AppTableTrader::HandleInternalPathChanged( const std::string& sPath ) {

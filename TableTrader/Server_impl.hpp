@@ -24,6 +24,7 @@
 #include <mutex>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Portfolio.h>
@@ -60,6 +61,9 @@ public:
   using fPopulateStrike_t = std::function<void(double,int)>; // strike, precision
   using fPopulateStrikeDone_t = std::function<void()>;
 
+  void SessionAttach( const std::string& sSessionId );
+  void SessionDetach( const std::string& sSessionId );
+
   void Start(
     const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
@@ -68,19 +72,20 @@ public:
     fAddExpiryDone_t&&
     );
 
-  void ChangeInvestment( double dblInvestment );
-
   void PopulateStrikes(
     boost::gregorian::date,
     fPopulateStrike_t&&,
     fPopulateStrikeDone_t&&
   );
 
+  void TriggerUpdates();
+
   const std::string& Ticker( ou::tf::OptionSide::EOptionSide, double ) const;
 
   void AddStrike( double );
   void DelStrike( double );
 
+  void ChangeInvestment( double dblInvestment );
   void ChangeAllocation( double dblStrike, double dblPercent );
 
   void PlaceOrders();
@@ -138,6 +143,14 @@ private:
 
   size_t m_nOptionsNames;
   size_t m_nOptionsLoaded;
+
+  double m_dblInvestment;
+
+  struct Session {
+  };
+
+  using mapSession_t = std::unordered_map<std::string,Session>;
+  mapSession_t m_mapSession;
 
   void Connected_IQFeed( int );
   void Connected_TWS( int );

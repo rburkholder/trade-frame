@@ -57,6 +57,9 @@ public:
     const std::string&, const std::string&, const std::string&, const std::string&)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
+  void SessionAttach( const std::string& sSessionId );
+  void SessionDetach( const std::string& sSessionId );
+
   void Start(
     const std::string& sSessionId, const std::string& sUnderlyingFuture,
     fUpdateUnderlyingInfo_t&&,
@@ -66,6 +69,8 @@ public:
     );
 
   void ChangeInvestment( const std::string& );
+
+  void TriggerUpdates();
 
   void PrepareStrikeSelection(
     const std::string& sDate,

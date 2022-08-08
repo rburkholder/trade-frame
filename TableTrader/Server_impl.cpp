@@ -47,6 +47,9 @@ namespace {
 
 Server_impl::Server_impl()
 : m_state( EConnection::quiescent )
+, m_nOptionsNames {}
+, m_nOptionsLoaded {}
+, m_dblInvestment {}
 {
 
   ou::tf::ProviderManager& providers( ou::tf::ProviderManager::GlobalInstance() );
@@ -130,6 +133,18 @@ void Server_impl::Disconnected( int ) {
     m_state = EConnection::disconnected;
   }
 }
+
+void Server_impl::SessionAttach( const std::string& sSessionId ) {
+  assert( m_mapSession.end() == m_mapSession.find( sSessionId ) );
+}
+
+void Server_impl::SessionDetach( const std::string& sSessionId ) {
+  mapSession_t::iterator iter = m_mapSession.find( sSessionId );
+  assert( m_mapSession.end() != iter );
+  // TODO: perform any clean up here
+  m_mapSession.erase( iter );
+}
+
 
 void Server_impl::Start(
   const std::string& sUnderlyingFuture,
@@ -264,16 +279,17 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   }
 }
 
+void Server_impl::TriggerUpdates() {
+  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
+
+}
+
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
   m_quoteUnderlying = quote;
 }
 
 void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
   //BOOST_LOG_TRIVIAL(info) << "Trade " << trade.Volume() << "@" << trade.Price();
-  const double price = m_tradeUnderlying.Price();
-  if ( price != trade.Price() ) {
-    //m_fUpdateUnderlyingPrice( price, m_nPrecision );
-  }
   m_tradeUnderlying = trade;
 }
 
@@ -331,9 +347,15 @@ void Server_impl::DelStrike( double ) {
 }
 
 void Server_impl::ChangeInvestment( double dblInvestment ) {
+  m_dblInvestment = dblInvestment;
+  double dblTotalAllocated {};
 }
 
-void Server_impl::ChangeAllocation( double dblStrike, double dblPercent ) {
+void Server_impl::ChangeAllocation( double dblStrike, double dblPercent ) { // pct/100 by caller
+  const chain_t& chain( m_citerChains->second );
+  double closest = chain.Call_Atm( dblStrike );
+  //const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
+  double dblMaxAbleToAllocate = m_dblInvestment * dblPercent;
 }
 
 void Server_impl::PlaceOrders() {

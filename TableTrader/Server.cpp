@@ -46,6 +46,14 @@ Server::Server(
 Server::~Server() {
 }
 
+void Server::SessionAttach( const std::string& sSessionId ) {
+  m_implServer->SessionAttach( sSessionId );
+}
+
+void Server::SessionDetach( const std::string& sSessionId ) {
+  m_implServer->SessionDetach( sSessionId );
+}
+
 bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPassWord ) {
   return ( ( sUserName == m_choices.m_sUIUserName ) && ( sPassWord == m_choices.m_sUIPassWord ) );
 }
@@ -160,6 +168,9 @@ void Server::ChangeInvestment( const std::string& sInvestmentAmount ) {
   }
   catch ( boost::bad_lexical_cast& e ) {
   }
+}
+
+void Server::TriggerUpdates() {
 
 }
 
