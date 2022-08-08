@@ -83,8 +83,9 @@ public:
   const std::string& Ticker( double strike, ou::tf::OptionSide::EOptionSide ) const;
 
   using fRealTime_t = std::function<void( double bid, double ask, uint32_t volume, uint32_t contracts, double pnl )>;
+  using fAllocated_t = std::function<void( double allocatedTotal, double allocatedOption )>;
 
-  void AddStrike( double strike, ou::tf::OptionSide::EOptionSide, fRealTime_t&& );
+  void AddStrike( double strike, ou::tf::OptionSide::EOptionSide, fRealTime_t&&, fAllocated_t&& );
   void DelStrike( double strike );
 
   void ChangeInvestment( double dblInvestment );
@@ -144,6 +145,7 @@ private:
   size_t m_nOptionsLoaded;
 
   double m_dblInvestment;
+  double m_dblAllocated;
 
   struct Session {
     //fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
@@ -159,20 +161,25 @@ private:
 
     double m_dblRatioAllocation;
     double m_dblAllocated;
+    uint32_t m_nMultiplier; // keep local for some speed of lookup
     uint32_t m_nContracts;
     pOption_t m_pOption;
 
     fRealTime_t m_fRealTime;
+    fAllocated_t m_fAllocated;
 
     ou::tf::Quote m_quote;
 
     UIOption( pOption_t pOption )
     : m_dblRatioAllocation {}
     , m_dblAllocated {}
+    , m_nMultiplier {}
     , m_nContracts {}
     , m_fRealTime {}
+    , m_fAllocated {}
     , m_pOption( pOption )
     {
+      m_nMultiplier = m_pOption->GetInstrument()->GetMultiplier();
       m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
       m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
       assert( m_pOption->StartWatch() );
@@ -181,24 +188,26 @@ private:
     UIOption( UIOption&& rhs )
     : m_dblRatioAllocation( rhs.m_dblRatioAllocation )
     , m_dblAllocated( rhs.m_dblAllocated )
+    , m_nMultiplier( rhs.m_nMultiplier )
     , m_nContracts( rhs.m_nContracts )
     , m_fRealTime( std::move( rhs.m_fRealTime ) )
+    , m_fAllocated( std::move( rhs.m_fAllocated ) )
     {
       assert( rhs.m_pOption->StopWatch() );
-      rhs.m_pOption->OnTrade.Remove( MakeDelegate( &rhs, &UIOption::HandleTrade ) );
+      //rhs.m_pOption->OnTrade.Remove( MakeDelegate( &rhs, &UIOption::HandleTrade ) );
       rhs.m_pOption->OnQuote.Remove( MakeDelegate( &rhs, &UIOption::HandleQuote ) );
 
       m_pOption = std::move( rhs.m_pOption );
 
       m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
-      m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
+      //m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
       assert( m_pOption->StartWatch() );
     }
 
     ~UIOption() {
       if ( m_pOption ) {
         assert( m_pOption->StopWatch() );
-        m_pOption->OnTrade.Remove( MakeDelegate( this, &UIOption::HandleTrade ) );
+        //m_pOption->OnTrade.Remove( MakeDelegate( this, &UIOption::HandleTrade ) );
         m_pOption->OnQuote.Remove( MakeDelegate( this, &UIOption::HandleQuote ) );
       }
     }
@@ -206,7 +215,13 @@ private:
     void HandleQuote( const ou::tf::Quote& quote ) {
       m_quote = quote;
       double mid = quote.Midpoint();
-      m_nContracts = ( 0.0 < mid ) ? m_dblAllocated / mid : 0;
+      if ( 0 < m_nMultiplier ) {
+        m_nContracts = ( 0.0 < mid ) ? (m_dblAllocated / mid ) / m_nMultiplier : 0;
+      }
+      else {
+        m_nContracts = ( 0.0 < mid ) ? m_dblAllocated / mid : 0;
+      }
+
     }
 
     void HandleTrade( const ou::tf::Trade& trade ) {}
@@ -231,4 +246,6 @@ private:
   void UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& );
   void UnderlyingQuote( const ou::tf::Quote& );
   void UnderlyingTrade( const ou::tf::Trade& );
+
+  void UpdateAllocations();
 };

@@ -196,16 +196,31 @@ void Server::AddStrike(
       fRealTime_( sBid, sAsk, sVol, sCon, sPnL );
     };
 
+  Server_impl::fAllocated_t fAllocated_impl =
+    [fUpdateAllocated_=std::move(fUpdateAllocated)](double allocatedTotal, double allocatedOption ){
+      const std::string sTotal = boost::lexical_cast<std::string>( allocatedTotal );
+      const std::string sOption = boost::lexical_cast<std::string>( allocatedOption );
+      fUpdateAllocated_( sTotal, sOption );
+    };
+
   double strike = boost::lexical_cast<double>( sStrike );
   // open interest will have to come during watch startup, and populate ticker again with real open interest, will need to use 'post' with session id for that
   switch ( type ) {
     case EOptionType::call:
       fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Call ), "tbd" );
-      m_implServer->AddStrike( strike, ou::tf::OptionSide::Call, std::move( fRealTime_impl ) );
+      m_implServer->AddStrike(
+        strike, ou::tf::OptionSide::Call,
+        std::move( fRealTime_impl ),
+        std::move( fAllocated_impl )
+        );
       break;
     case EOptionType::put:
       fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Put ), "tbd" );
-      m_implServer->AddStrike( strike, ou::tf::OptionSide::Put, std::move( fRealTime_impl ) );
+      m_implServer->AddStrike(
+        strike, ou::tf::OptionSide::Put,
+        std::move( fRealTime_impl ),
+        std::move( fAllocated_impl )
+        );
       break;
   }
 }
@@ -222,6 +237,7 @@ void Server::ChangeAllocation( const std::string& sStrike, const std::string& sP
     m_implServer->ChangeAllocation( strike, percent / 100.0 );
   }
   catch ( boost::bad_lexical_cast& e ) {
+    assert( false );
   }
 }
 

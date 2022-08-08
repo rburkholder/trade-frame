@@ -428,10 +428,10 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 } );
 
               Wt::WLabel* pLabelAllocated = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLabel>( "Allocated: " ) );
-              Wt::WLineEdit* pWLineEditAllocated = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
+              Wt::WLineEdit* pWLineEditTotalAllocated = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WLineEdit>() );
               pLabelAllocated->setBuddy( pWLineEditInvestment );
-              pWLineEditAllocated->setReadOnly( true );
-              pWLineEditAllocated->setText( "0" );
+              pWLineEditTotalAllocated->setReadOnly( true );
+              pWLineEditTotalAllocated->setText( "0" );
 
               m_pContainerDataEntry->addWidget( std::make_unique<Wt::WBreak>() );
 
@@ -440,7 +440,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
                   pSelectStrikes->addItem( sStrike );
                 },
-                [this,pSelectStrikes,pWLineEditAllocated](){ // fPopulateStrikeDone_t
+                [this,pSelectStrikes,pWLineEditTotalAllocated](){ // fPopulateStrikeDone_t
                   Wt::WPushButton* pBtnCancelAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
                   pBtnCancelAll->setEnabled( false );
                   Wt::WPushButton* pBtnCloseAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
@@ -448,7 +448,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   Wt::WPushButton* pBtnStart = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
                   pBtnStart->setEnabled( false );
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
-                    [this,pSelectStrikes,pBtnStart,pWLineEditAllocated](){
+                    [this,pSelectStrikes,pBtnStart,pWLineEditTotalAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
                       using setStrike_t = std::set<std::string>;
                       setStrike_t setStrike;
@@ -546,8 +546,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               pTicker->setText( sTicker );
                               pOI->setText( sOpenInt );
                             },
-                            [pWLineEditAllocated,pAllocated](const std::string& sTotalAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
-                              pWLineEditAllocated->setText( sTotalAllocated );
+                            [pWLineEditTotalAllocated,pAllocated](const std::string& sTotalAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
+                              pWLineEditTotalAllocated->setText( sTotalAllocated );
                               pAllocated->setText( sOptionAllocated );
                             },
                             [pBid,pAsk,pVol,pNumContracts,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t

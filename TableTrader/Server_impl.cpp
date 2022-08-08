@@ -50,6 +50,7 @@ Server_impl::Server_impl()
 , m_nOptionsNames {}
 , m_nOptionsLoaded {}
 , m_dblInvestment {}
+, m_dblAllocated {}
 , m_fUpdateUnderlyingInfo {}
 , m_fUpdateUnderlyingPrice {}
 , m_fAddExpiry {}
@@ -359,7 +360,11 @@ const std::string& Server_impl::Ticker( double strike, ou::tf::OptionSide::EOpti
   }
 }
 
-void Server_impl::AddStrike( double dblStrike, ou::tf::OptionSide::EOptionSide side, fRealTime_t&& fRealTime ) {
+void Server_impl::AddStrike(
+  double dblStrike, ou::tf::OptionSide::EOptionSide side,
+  fRealTime_t&& fRealTime,
+  fAllocated_t&& fAllocated
+) {
 
   const chain_t& chain( m_citerChains->second );
   double closest = chain.Atm( dblStrike );
@@ -387,6 +392,7 @@ void Server_impl::AddStrike( double dblStrike, ou::tf::OptionSide::EOptionSide s
 
   UIOption& uio( pair.first->second );
   uio.m_fRealTime = std::move( fRealTime );
+  uio.m_fAllocated = std::move( fAllocated );
 
 }
 
@@ -400,27 +406,48 @@ void Server_impl::DelStrike( double dblStrike ) {
 
   m_mapUIOption.erase( iterUIOption );
 
-  // update total allocated
+  UpdateAllocations();
 }
 
 void Server_impl::ChangeInvestment( double dblInvestment ) {
+
   m_dblInvestment = dblInvestment;
-  double dblTotalAllocated {};
-  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
-    UIOption& uio( vt.second );
-    // recalculate allocation amounts
-  }
+
+  UpdateAllocations();
 }
 
 void Server_impl::ChangeAllocation( double dblStrike, double dblRatio ) { // pct/100 by caller
   const chain_t& chain( m_citerChains->second );
-  double closest = chain.Call_Atm( dblStrike );
+  double closest = chain.Atm( dblStrike );
   mapUIOption_t::iterator iter = m_mapUIOption.find( closest );
   assert( m_mapUIOption.end() != iter );
   UIOption& uio( iter->second );
 
+  m_dblAllocated -= uio.m_dblAllocated;
+
   uio.m_dblRatioAllocation = dblRatio;
-  double dblMaxAbleToAllocate = m_dblInvestment * dblRatio;
+  uio.m_dblAllocated = m_dblInvestment * dblRatio;
+
+  m_dblAllocated += uio.m_dblAllocated;
+
+  if ( uio.m_fAllocated ) {
+    uio.m_fAllocated( m_dblAllocated, uio.m_dblAllocated );
+  }
+}
+
+void Server_impl::UpdateAllocations() {
+
+  m_dblAllocated = 0;
+
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    UIOption& uio( vt.second );
+    uio.m_dblAllocated = m_dblInvestment * uio.m_dblRatioAllocation;
+    m_dblAllocated += uio.m_dblAllocated;
+
+    if ( uio.m_fAllocated ) {
+      uio.m_fAllocated( m_dblAllocated, uio.m_dblAllocated );
+    }
+  }
 }
 
 void Server_impl::PlaceOrders() {
