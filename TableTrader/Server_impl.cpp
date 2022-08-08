@@ -293,6 +293,7 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
 
   //if ( session.m_fUpdateUnderlyingPrice ) session.m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
   if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision );
+
   for ( const mapUIOption_t::value_type& vt: m_mapUIOption ) {
     const UIOption& uio( vt.second );
     if ( uio.m_fRealTime ) {

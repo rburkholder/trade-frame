@@ -212,6 +212,7 @@ void Server::AddStrike(
 
 void Server::DelStrike( const std::string& sStrike ) {
   double strike = boost::lexical_cast<double>( sStrike );
+  m_implServer->DelStrike( strike );
 }
 
 void Server::ChangeAllocation( const std::string& sStrike, const std::string& sPercent ) {
