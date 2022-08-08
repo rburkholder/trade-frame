@@ -50,6 +50,10 @@ Server_impl::Server_impl()
 , m_nOptionsNames {}
 , m_nOptionsLoaded {}
 , m_dblInvestment {}
+, m_fUpdateUnderlyingInfo {}
+, m_fUpdateUnderlyingPrice {}
+, m_fAddExpiry {}
+, m_fAddExpiryDone {}
 {
 
   ou::tf::ProviderManager& providers( ou::tf::ProviderManager::GlobalInstance() );
@@ -87,9 +91,10 @@ Server_impl::Server_impl()
 
 Server_impl::~Server_impl() {
   if ( m_pWatchUnderlying ) {
-    m_pWatchUnderlying->StopWatch();
-    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
-    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
+    //m_pWatchUnderlying->StopWatch();
+    m_pWatchUnderlying->OnFundamentals.Remove( MakeDelegate( this, &Server_impl::UnderlyingFundamentals ) );
+    //m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
+    //m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
   }
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
@@ -136,6 +141,7 @@ void Server_impl::Disconnected( int ) {
 
 void Server_impl::SessionAttach( const std::string& sSessionId ) {
   assert( m_mapSession.end() == m_mapSession.find( sSessionId ) );
+  m_mapSession.emplace( sSessionId, Session() );
 }
 
 void Server_impl::SessionDetach( const std::string& sSessionId ) {
@@ -191,8 +197,8 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   }
 
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( pInstrument, m_pProviderIQFeed );
-  m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
-  m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
+  //m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
+  //m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
   m_pWatchUnderlying->OnFundamentals.Add( MakeDelegate( this, &Server_impl::UnderlyingFundamentals ) );
   m_pWatchUnderlying->StartWatch();
 
@@ -279,18 +285,30 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   }
 }
 
-void Server_impl::TriggerUpdates() {
-  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
+void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
 
+  mapSession_t::iterator iterSession = m_mapSession.find( sSessionId );
+  assert( m_mapSession.end() != iterSession );
+  Session& session( iterSession->second ); // unused for now
+
+  //if ( session.m_fUpdateUnderlyingPrice ) session.m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
+  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision );
+  for ( const mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    const UIOption& uio( vt.second );
+    if ( uio.m_fRealTime ) {
+      const ou::tf::Quote& quote( uio.m_quote );
+      uio.m_fRealTime( quote.Bid(), quote.Ask(), 0, uio.m_nContracts, 0.0 );
+    }
+  }
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
-  m_quoteUnderlying = quote;
+  //m_quoteUnderlying = quote;
 }
 
 void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
   //BOOST_LOG_TRIVIAL(info) << "Trade " << trade.Volume() << "@" << trade.Price();
-  m_tradeUnderlying = trade;
+  //m_tradeUnderlying = trade;
 }
 
 void Server_impl::PopulateExpiry() {
@@ -316,7 +334,7 @@ void Server_impl::PopulateStrikes(
   fPopulateStrikeDone();
 }
 
-const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, double strike ) const {
+const std::string& Server_impl::Ticker( double strike, ou::tf::OptionSide::EOptionSide side ) const {
   const chain_t& chain( m_citerChains->second );
   switch ( side ) {
     case ou::tf::OptionSide::Call:
@@ -340,22 +358,68 @@ const std::string& Server_impl::Ticker( ou::tf::OptionSide::EOptionSide side, do
   }
 }
 
-void Server_impl::AddStrike( double ) {
+void Server_impl::AddStrike( double dblStrike, ou::tf::OptionSide::EOptionSide side, fRealTime_t&& fRealTime ) {
+
+  const chain_t& chain( m_citerChains->second );
+  double closest = chain.Atm( dblStrike );
+  const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
+
+  pOption_t pOption;
+
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      assert( Strike.call.pOption );
+      pOption = Strike.call.pOption;
+      break;
+    case ou::tf::OptionSide::Put:
+      assert( Strike.put.pOption );
+      pOption = Strike.put.pOption;
+      break;
+    default:
+      assert( false );
+  }
+
+  mapUIOption_t::iterator iterUIOption = m_mapUIOption.find( closest );
+  assert( m_mapUIOption.end() == iterUIOption );
+  auto pair = m_mapUIOption.emplace( closest, std::move( UIOption( pOption ) ) );
+  assert( pair.second );
+
+  UIOption& uio( pair.first->second );
+  uio.m_fRealTime = std::move( fRealTime );
+
 }
 
-void Server_impl::DelStrike( double ) {
+void Server_impl::DelStrike( double dblStrike ) {
+
+  const chain_t& chain( m_citerChains->second );
+  double closest = chain.Atm( dblStrike );
+
+  mapUIOption_t::iterator iterUIOption = m_mapUIOption.find( closest );
+  assert( m_mapUIOption.end() != iterUIOption );
+
+  m_mapUIOption.erase( iterUIOption );
+
+  // update total allocated
 }
 
 void Server_impl::ChangeInvestment( double dblInvestment ) {
   m_dblInvestment = dblInvestment;
   double dblTotalAllocated {};
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    UIOption& uio( vt.second );
+    // recalculate allocation amounts
+  }
 }
 
-void Server_impl::ChangeAllocation( double dblStrike, double dblPercent ) { // pct/100 by caller
+void Server_impl::ChangeAllocation( double dblStrike, double dblRatio ) { // pct/100 by caller
   const chain_t& chain( m_citerChains->second );
   double closest = chain.Call_Atm( dblStrike );
-  //const chain_t::strike_t& Strike( chain.GetExistingStrike( closest ) );
-  double dblMaxAbleToAllocate = m_dblInvestment * dblPercent;
+  mapUIOption_t::iterator iter = m_mapUIOption.find( closest );
+  assert( m_mapUIOption.end() != iter );
+  UIOption& uio( iter->second );
+
+  uio.m_dblRatioAllocation = dblRatio;
+  double dblMaxAbleToAllocate = m_dblInvestment * dblRatio;
 }
 
 void Server_impl::PlaceOrders() {

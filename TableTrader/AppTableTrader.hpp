@@ -31,8 +31,9 @@
 #include "Server.hpp"
 
 namespace Wt {
-  class WContainerWidget;
+  class WTimer;
   class WButtonGroup;
+  class WContainerWidget;
 } // namespace Wt
 
 class AppTableTrader: public Wt::WApplication {
@@ -75,6 +76,9 @@ private:
 
   Server* m_pServer; // object managed by wt
 
+  Wt::WTimer* m_timerLiveRefresh;
+
+  // listed in rough order of usage on page
   Wt::WContainerWidget* m_pContainerDataEntry;
   Wt::WContainerWidget* m_pContainerDataEntryButtons;
   Wt::WContainerWidget* m_pContainerLiveData;
@@ -100,6 +104,8 @@ private:
 
   void HandleInternalPathChanged( const std::string& );
   void HandleInternalPathInvalid( const std::string& );
+
+  void HandleLiveRefresh();
 
   void ShowMainMenu( Wt::WContainerWidget* );
 

@@ -22,6 +22,7 @@
 
 #include <Wt/WText.h>
 #include <Wt/WLabel.h>
+#include <Wt/WTimer.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
 //#include <Wt/WTextArea.h>
@@ -74,10 +75,15 @@ AppTableTrader::~AppTableTrader( ) { }
 void AppTableTrader::initialize() {
   Wt::WApplication::log( "info" ) << "AppTableTrader::initialize()";
   m_pServer->SessionAttach( sessionId() );
+  m_timerLiveRefresh = root()->addChild( std::make_unique<Wt::WTimer>() );
+  m_timerLiveRefresh->timeout().connect( this, &AppTableTrader::HandleLiveRefresh );
+  m_timerLiveRefresh->setInterval (std::chrono::seconds( 1 ) );
+  m_timerLiveRefresh->start();
 }
 
 void AppTableTrader::finalize() {
   Wt::WApplication::log( "info" ) << "AppTableTrader::finalize()";
+  m_timerLiveRefresh->stop();
   m_pServer->SessionDetach( sessionId() );
 }
 
@@ -213,6 +219,10 @@ void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
 //  }
 
   f( pcw );
+}
+
+void AppTableTrader::HandleLiveRefresh() {
+  m_pServer->TriggerUpdates( sessionId() );
 }
 
 void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
@@ -526,9 +536,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                           pOrderType->setEnabled( false );  // TODO: transmit fields for order type, default to 'market'
                           pOrderType->addItem( "market" );
+                          pOrderType->addItem( "limit bid/ask" );
                           pOrderType->addItem( "limit manual" );
-                          pOrderType->addItem( "limit on bid" );
-                          pOrderType->addItem( "limit on ask" );
                           pOrderType->addItem( "scale" ); // need extra row of fields: initial quantity (validate), inc quantity (validate), inc price (validate)
 
                           m_pServer->AddStrike(
@@ -537,15 +546,15 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               pTicker->setText( sTicker );
                               pOI->setText( sOpenInt );
                             },
-                            [pWLineEditAllocated,pAllocated,pNumContracts](const std::string& sTotalAllocated, const std::string& sOptionAllocated, const std::string& sContracts ){ // fUpdateAllocated_t
+                            [pWLineEditAllocated,pAllocated](const std::string& sTotalAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
                               pWLineEditAllocated->setText( sTotalAllocated );
                               pAllocated->setText( sOptionAllocated );
-                              pNumContracts->setText( sContracts );
                             },
-                            [pBid,pAsk,pVol,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sPnL ) { // fRealTime_t
+                            [pBid,pAsk,pVol,pNumContracts,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t
                               pBid->setText( sBid );
                               pAsk->setText( sAsk );
                               pVol->setText( sVolume );
+                              pNumContracts->setText( sContracts );
                               pPnL->setText( sPnL );
                             },
                             [pFillPrice](const std::string& sFill ){ // fFill_t

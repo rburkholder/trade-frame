@@ -52,9 +52,9 @@ public:
   using fPopulateStrikeDone_t = std::function<void()>;
 
   using fPopulateOption_t = std::function<void(const std::string&, const std::string&)>; // ticker, open interest
-  using fUpdateAllocated_t = std::function<void(const std::string&, const std::string&, const std::string&)>; // total allocation, option allocation, #contracts
-  using fRealTime_t = std::function<void( // bid, ask, volume, pnl
-    const std::string&, const std::string&, const std::string&, const std::string&)>;
+  using fUpdateAllocated_t = std::function<void(const std::string&, const std::string&)>; // total allocation, option allocation
+  using fRealTime_t = std::function<void( // bid, ask, volume, #contracts, pnl
+    const std::string&, const std::string&, const std::string&, const std::string&, const std::string&)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
   void SessionAttach( const std::string& sSessionId );
@@ -70,7 +70,7 @@ public:
 
   void ChangeInvestment( const std::string& );
 
-  void TriggerUpdates();
+  void TriggerUpdates( const std::string& sSessionId );
 
   void PrepareStrikeSelection(
     const std::string& sDate,
@@ -102,10 +102,6 @@ private:
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
   fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;
-
-  fUpdateAllocated_t m_fUpdateAllocated;
-  fRealTime_t m_fRealTime;
-  fFill_t m_fFill;
 
 };
 
