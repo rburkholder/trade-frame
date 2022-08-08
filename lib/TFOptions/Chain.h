@@ -117,6 +117,8 @@ public:
   double Call_OtmAtm( double ) const;
   double Call_Otm( double ) const;
 
+  double Atm( double ) const;  // Call_Atm and Put_Atm seem identical
+
   // returns 0, 1, 2 strikes found
   // needs exact match on strikeSource
   int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
@@ -310,6 +312,35 @@ double Chain<Option>::Call_Otm( double value ) const { // price < strike
     [](double value, const typename mapChain_t::value_type& vt)->bool{ return value < vt.first; } );
   if ( m_mapChain.end() == iter ) throw exception_strike_not_found( "Call_Otm not found" );
   return iter->first;
+}
+
+template<typename Option>
+double Chain<Option>::Atm( double value ) const { // closest strike (use itm vs otm)
+  double atm {};
+  typename mapChain_t::const_iterator iter1 = std::lower_bound(
+    m_mapChain.begin(), m_mapChain.end(), value,
+    [](const typename mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
+  if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Call_Atm not found" );
+  if ( value == iter1->first ) {
+    atm = value;
+  }
+  else {
+    if ( m_mapChain.begin() == iter1 ) {
+      atm = value;
+    }
+    else {
+      typename mapChain_t::const_iterator iter2 = iter1;
+      iter2--;
+      if ( ( iter1->first - value ) < ( value - iter2->first ) ) {
+        atm = iter1->first;
+      }
+      else {
+        atm = iter2->first;
+      }
+    }
+  }
+  assert( 0.0 != atm );
+  return atm;
 }
 
 template<typename Option>
