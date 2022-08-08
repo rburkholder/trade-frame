@@ -168,7 +168,7 @@ private:
     fRealTime_t m_fRealTime;
     fAllocated_t m_fAllocated;
 
-    ou::tf::Quote m_quote;
+    //ou::tf::Quote m_quote;
 
     UIOption( pOption_t pOption )
     : m_dblRatioAllocation {}
@@ -180,8 +180,8 @@ private:
     , m_pOption( pOption )
     {
       m_nMultiplier = m_pOption->GetInstrument()->GetMultiplier();
-      m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
-      m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
+      //m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
+      //m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
       assert( m_pOption->StartWatch() );
     }
 
@@ -195,11 +195,11 @@ private:
     {
       assert( rhs.m_pOption->StopWatch() );
       //rhs.m_pOption->OnTrade.Remove( MakeDelegate( &rhs, &UIOption::HandleTrade ) );
-      rhs.m_pOption->OnQuote.Remove( MakeDelegate( &rhs, &UIOption::HandleQuote ) );
+      //rhs.m_pOption->OnQuote.Remove( MakeDelegate( &rhs, &UIOption::HandleQuote ) );
 
       m_pOption = std::move( rhs.m_pOption );
 
-      m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
+      //m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
       //m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
       assert( m_pOption->StartWatch() );
     }
@@ -212,16 +212,17 @@ private:
       }
     }
 
-    void HandleQuote( const ou::tf::Quote& quote ) {
-      m_quote = quote;
-      double mid = quote.Midpoint();
+    void UpdateContracts( double price ) {
       if ( 0 < m_nMultiplier ) {
-        m_nContracts = ( 0.0 < mid ) ? (m_dblAllocated / mid ) / m_nMultiplier : 0;
+        m_nContracts = ( 0.0 < price ) ? (m_dblAllocated / price ) / m_nMultiplier : 0;
       }
       else {
-        m_nContracts = ( 0.0 < mid ) ? m_dblAllocated / mid : 0;
+        m_nContracts = ( 0.0 < price ) ? m_dblAllocated / price : 0;
       }
+    }
 
+    void HandleQuote( const ou::tf::Quote& quote ) {
+      UpdateContracts( quote.Midpoint() );
     }
 
     void HandleTrade( const ou::tf::Trade& trade ) {}

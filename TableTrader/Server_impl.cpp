@@ -295,10 +295,11 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
   //if ( session.m_fUpdateUnderlyingPrice ) session.m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
   if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision );
 
-  for ( const mapUIOption_t::value_type& vt: m_mapUIOption ) {
-    const UIOption& uio( vt.second );
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    UIOption& uio( vt.second );
     if ( uio.m_fRealTime ) {
-      const ou::tf::Quote& quote( uio.m_quote );
+      const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
+      uio.UpdateContracts( quote.Midpoint() );
       uio.m_fRealTime( quote.Bid(), quote.Ask(), 0, uio.m_nContracts, 0.0 );
     }
   }
