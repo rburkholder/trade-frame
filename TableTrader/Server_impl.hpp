@@ -82,7 +82,7 @@ public:
 
   const std::string& Ticker( double strike, ou::tf::OptionSide::EOptionSide ) const;
 
-  using fRealTime_t = std::function<void( double bid, double ask, uint32_t volume, uint32_t contracts, double pnl )>;
+  using fRealTime_t = std::function<void( double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl )>;
   using fAllocated_t = std::function<void( double allocatedTotal, double allocatedOption )>;
 
   void AddStrike( double strike, ou::tf::OptionSide::EOptionSide, fRealTime_t&&, fAllocated_t&& );

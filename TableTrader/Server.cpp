@@ -187,9 +187,16 @@ void Server::AddStrike(
   assert( fFill );
 
   Server_impl::fRealTime_t fRealTime_impl =
-    [fRealTime_=std::move(fRealTime)]( double bid, double ask, uint32_t volume, uint32_t contracts, double pnl ){
-      const std::string sBid = boost::lexical_cast<std::string>( bid );
-      const std::string sAsk = boost::lexical_cast<std::string>( ask );
+    [fRealTime_=std::move(fRealTime)]( double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl ){
+
+      boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+
+      format % bid;
+      const std::string sBid = boost::lexical_cast<std::string>( format.str() );
+
+      format % ask;
+      const std::string sAsk = boost::lexical_cast<std::string>( format.str() );
+
       const std::string sVol = boost::lexical_cast<std::string>( volume );
       const std::string sCon = boost::lexical_cast<std::string>( contracts );
       const std::string sPnL = boost::lexical_cast<std::string>( pnl );

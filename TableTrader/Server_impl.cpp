@@ -300,7 +300,7 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
     if ( uio.m_fRealTime ) {
       const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
       uio.UpdateContracts( quote.Midpoint() );
-      uio.m_fRealTime( quote.Bid(), quote.Ask(), 0, uio.m_nContracts, 0.0 );
+      uio.m_fRealTime( quote.Bid(), quote.Ask(), m_nPrecision, 0, uio.m_nContracts, 0.0 );
     }
   }
 }

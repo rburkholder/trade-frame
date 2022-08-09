@@ -8,7 +8,7 @@ body {
 .MainTitle {
   font-weight: bolder;
   font-size: 30px;
-//  color: black;
+/*  color: black; */
   background-color: gray;
   padding: 5px;
   border: 2px;
@@ -17,14 +17,104 @@ body {
   float: top
 }
 
-.classBlock {
+.block { /* vertical */
   display: block;
 }
 
-.classCenter {
+.inline { /* horizontal */
+  display: inline;
+}
+
+.inline_flex {
+  display: inline-flex;
+}
+
+.center {
   text-align:center;
 }
 
-// display: inline;   to get li stuff in a row  
-// display: inline-block; to allow padding, border, margin
+.w_label {
+  padding: 1px;
+  margin: 1px;
+}
+
+.w_line_edit {
+  padding: 1px;
+  margin: 1px;
+}
+
+.w_push_button {
+  padding: 1px;
+  margin-top: 2px;
+  margin-bottom: 0px;
+  margin-right: 4px;
+  margin-left: 4px;
+}
+
+.w_combo_box {
+  padding: 1px;
+  margin: 1px;
+}
+
+.fld_ticker {
+  display: inline-block;
+  width: 175px;
+}
+
+.fld_side {
+  display: inline-block;
+  width: 32px;
+  text-align:center;
+}
+
+.fld_strike {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+}
+
+.fld_type {
+  display: inline-block;
+  width: 30px;
+  text-align:center;
+}
+
+.fld_quote {
+  display: inline-block;
+  width: 50px;
+  text-align:right;
+}
+
+.fld_open_interest {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+}
+
+.fld_allocation {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+}
+
+.fld_num_contracts {
+  display: inline-block;
+  width: 40px;
+  text-align:right;
+}
+
+.fld_price {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+}
+
+.fld_pnl {
+  display: inline-block;
+  width: 50px;
+  text-align:right;
+}
+
+/* display: inline;   to get li stuff in a row    */
+/* display: inline-block; to allow padding, border, margin  */
 
