@@ -87,7 +87,13 @@ body {
 
 .fld_open_interest {
   display: inline-block;
-  width: 60px;
+  width: 40px;
+  text-align:right;
+}
+
+.fld_volume {
+  display: inline-block;
+  width: 50px;
   text-align:right;
 }
 

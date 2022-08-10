@@ -584,21 +584,24 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pType->addStyleClass( "w_label" );
                           pType->addStyleClass( "fld_type" );
 
-                          Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OpenInt" ) );
+                          Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OI" ) );
+                          Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Vol" ) );
                           Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
                           Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
-                          Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Volume" ) );
                           Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
                           Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
-                          Wt::WLineEdit* pPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "price" ) ); // enabled with manual, scale
+                          Wt::WLineEdit* pPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "-" ) ); // enabled with manual, scale
                           Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
                           Wt::WLabel* pEntryFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
                           Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
 
                           pOI->addStyleClass( "w_label" );
                           pOI->addStyleClass( "fld_open_interest" );
+
+                          pVol->addStyleClass( "w_label" );
+                          pVol->addStyleClass( "fld_volume" );
 
                           pBid->addStyleClass( "w_label" );
                           pBid->addStyleClass( "fld_quote" );
