@@ -30,22 +30,22 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 //Portfolio::Portfolio( // in memory
-//  const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
+//  const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription )
 //: m_row( idPortfolio, "", "", ePortfolioType, sCurrency, sDescription )
 //{
 //}
 
 //Portfolio::Portfolio( // master portfolio currency record
-//  const idPortfolio_t& idPortfolio, 
+//  const idPortfolio_t& idPortfolio,
 //  const idAccountOwner_t& idAccountOwner, currency_t sCurrency,
-//  const std::string& sDescription ) 
+//  const std::string& sDescription )
 //: m_row( idPortfolio, idAccountOwner, "", Master, sCurrency, sDescription )
 //{
 //}
 
 Portfolio::Portfolio( // portfolio record
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
-   EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
+   EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription )
 : m_row( idPortfolio, idAccountOwner, idOwner, ePortfolioType, sCurrency, sDescription )
 {
   bool bOk = true;
@@ -57,7 +57,7 @@ Portfolio::Portfolio( // portfolio record
   }
 }
 
-Portfolio::Portfolio( const TableRowDef& row ) 
+Portfolio::Portfolio( const TableRowDef& row )
   : m_row( row )
 {
   m_plCurrent.dblCommissionsPaid = m_row.dblCommissionsPaid;
@@ -173,7 +173,7 @@ void Portfolio::AddSubPortfolio( pPortfolio_t& pPortfolio ) {
     if ( Master == m_row.ePortfolioType ) {
       // if this portfolio is master, no problem
     }
-    else { 
+    else {
       // if sub portfolio is currency summary portfolio, and this isn't master, then this needs to be master portfolio
       if ( CurrencySummary == pPortfolio->GetRow().ePortfolioType ) {
         throw std::runtime_error( "Portfolio::AddSubPortfolio: alternate currency portfolio only attachable to master portfolio" );
@@ -219,7 +219,7 @@ void Portfolio::SetOwnerPortfolio( const idPortfolio_t& idOwner, pPortfolio_t& p
   m_pOwnerPortfolio = pPortfolio;
 }
 */
-// as positions and portfolios get attached, they should perform an initial update of 
+// as positions and portfolios get attached, they should perform an initial update of
 //   unrealized, realized, & commission (if non-zero)
 
 void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
@@ -270,14 +270,14 @@ void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
 }
 
 std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {
-  for ( Portfolio::mapPositions_t::const_iterator iter = portfolio.m_mapPositionsViaUserName.begin(); 
-    portfolio.m_mapPositionsViaUserName.end() != iter; 
+  for ( Portfolio::mapPositions_t::const_iterator iter = portfolio.m_mapPositionsViaUserName.begin();
+    portfolio.m_mapPositionsViaUserName.end() != iter;
     ++iter ) {
       os << iter->second;
   }
-  
+
   os << "Portfolio URPL=" << portfolio.m_plCurrent.dblUnRealized
-    << ", RPL=" << portfolio.m_plCurrent.dblRealized 
+    << ", RPL=" << portfolio.m_plCurrent.dblRealized
     << ", Comm=" << portfolio.m_plCurrent.dblCommissionsPaid
     << "=> PL-C=" << portfolio.m_plCurrent.dblRealized - portfolio.m_plCurrent.dblCommissionsPaid
     << ": Min=" << portfolio.m_plMin.dblNet
@@ -285,6 +285,12 @@ std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {
     << ", Max=" << portfolio.m_plMax.dblNet
     ;
   return os;
+}
+
+void Portfolio::SetActive( bool bActive ) {
+  if ( bActive != m_row.bActive ) {
+    m_row.bActive = bActive;
+  }
 }
 
 } // namespace tf

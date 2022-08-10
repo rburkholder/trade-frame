@@ -222,6 +222,31 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
 //////
 
 namespace PortfolioManagerQueries {
+  struct UpdatePortfolioActive {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "active", bActive );
+      ou::db::Field( a, "portfolioid", idPortfolio );
+    }
+    const ou::tf::keytypes::idPortfolio_t idPortfolio;
+    bool bActive;
+    UpdatePortfolioActive( const ou::tf::keytypes::idPortfolio_t idPortfolio_, bool bActive_ )
+      : idPortfolio( idPortfolio_ ), bActive( bActive_ ) {};
+  };
+}
+
+void PortfolioManager::PortfolioUpdfateActive( pPortfolio_t pPortfolio ) {
+  if ( nullptr != m_pSession ) {
+    const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
+    PortfolioManagerQueries::UpdatePortfolioActive update( row.idPortfolio, row.bActive );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioActive>::pQueryFields_t pQuery
+      = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioActive>( "update portfolios set active=?", update ).Where( "portfolioid=?" );
+  }
+}
+
+//////
+
+namespace PortfolioManagerQueries {
   struct UpdatePositionNotes {
     template<class A>
     void Fields( A& a ) {
@@ -288,23 +313,12 @@ void PortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
+  // NOTE: fix, this fails as there is no table registered as PortfolioManagerQueries::PortfolioUpdate
   UpdateRecord<idPortfolio_t, Portfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
     idPortfolio, p->GetRow(), m_mapPortfolios, "portfolioid = ?" );
 
-  //OnPortfolioUpdated( idPortfolio );
   OnPortfolioUpdated( p );
 
-}
-
-namespace PortfolioManagerQueries {
-  struct ActivePortfolios {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "active", bActive );
-    }
-    bool bActive;
-    ActivePortfolios( bool bActive_ ) : bActive( bActive_ ) {};
-  };
 }
 
 void PortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting ) {
@@ -316,6 +330,17 @@ void PortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfo
   }
   // add idReporting to idOwner as a reporting portfolio.
   iter->second.insert( iter->second.begin(), idReporting );
+}
+
+namespace PortfolioManagerQueries {
+  struct ActivePortfolios {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "active", bActive );
+    }
+    bool bActive;
+    ActivePortfolios( bool bActive_ ) : bActive( bActive_ ) {};
+  };
 }
 
 void PortfolioManager::LoadActivePortfolios() {

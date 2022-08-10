@@ -53,7 +53,6 @@ public:
   using idPortfolio_t = keytypes::idPortfolio_t;
   using idAccountOwner_t = keytypes::idAccountOwner_t;
 
-  //typedef ou::tf::Currency::enumCurrency currency_t;
   using currency_t = Currency::type;
 
   enum EPortfolioType { Master=1, CurrencySummary=2, Standard=10, MultiLeggedPosition, Basket, Aggregate };
@@ -76,7 +75,7 @@ public:
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commission", dblCommissionsPaid );
-      // unrealized is not here as it is a dynamic value, realized is non-dynamic
+      // unrealized is not here as it is a dynamic value, realized is non-dynamic, updated as position changes
     }
 
     idPortfolio_t idPortfolio;
@@ -134,9 +133,9 @@ public:
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, EPortfolioType ePortfolioType_,
     currency_t eCurrency, const std::string& sDescription );
   Portfolio( const TableRowDef& row );
-  virtual ~Portfolio(void);
+  virtual ~Portfolio();
 
-  const idPortfolio_t& Id( void ) { return m_row.idPortfolio; };
+  const idPortfolio_t& Id() { return m_row.idPortfolio; };
 
   pPosition_t AddPosition( const std::string& sName, pPosition_t pPosition );
   void DeletePosition( const std::string& sName );  // is this a delete, remove, or unlink?
@@ -160,6 +159,8 @@ public:
   }
 
   const TableRowDef& GetRow() const { return m_row; };
+
+  void SetActive( bool ); // ie, false, when portfolio is done
 
   ou::Delegate<const Portfolio&> OnUnRealizedPLUpdate;
   ou::Delegate<const Portfolio&> OnExecutionUpdate;
