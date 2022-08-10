@@ -89,7 +89,8 @@ public:
   void AddStrike(
     double strike,
     ou::tf::OptionSide::EOptionSide, ou::tf::OrderSide::EOrderSide,
-    fRealTime_t&&, fAllocated_t&&, fFill_t&& );
+    fRealTime_t&&, fAllocated_t&&,
+    fFill_t&& fEntry, fFill_t&& fExit );
   void DelStrike( double strike );
 
   void ChangeInvestment( double dblInvestment );
@@ -177,7 +178,8 @@ private:
 
     fRealTime_t m_fRealTime;
     fAllocated_t m_fAllocated;
-    fFill_t m_fFill;
+    fFill_t m_fFillEntry;
+    fFill_t m_fFillExit;
 
     enum IBContractState { unknown, acquiring, acquired } m_stateIBContract;
 
@@ -189,7 +191,8 @@ private:
     , m_nContracts {}
     , m_fRealTime {}
     , m_fAllocated {}
-    , m_fFill {}
+    , m_fFillEntry {}
+    , m_fFillExit {}
     , m_pOption( pOption )
     , m_stateIBContract( IBContractState::unknown )
     {
@@ -210,7 +213,8 @@ private:
     , m_pOrderEntry( std::move( rhs.m_pOrderEntry ) )
     , m_pOrderExit( std::move( rhs.m_pOrderExit ) )
     , m_fRealTime( std::move( rhs.m_fRealTime ) )
-    , m_fFill( std::move( rhs.m_fFill ) )
+    , m_fFillEntry( std::move( rhs.m_fFillEntry ) )
+    , m_fFillExit( std::move( rhs.m_fFillExit ) )
     , m_fAllocated( std::move( rhs.m_fAllocated ) )
     , m_stateIBContract( rhs.m_stateIBContract )
     {
@@ -249,8 +253,12 @@ private:
 
     void HandleTrade( const ou::tf::Trade& trade ) {}
 
-    void HandleOrderFilled( const ou::tf::Order& order ) {
-      m_fFill( order.GetAverageFillPrice() );
+    void HandleOrderFilledEntry( const ou::tf::Order& order ) {
+      m_fFillEntry( order.GetAverageFillPrice() );
+    }
+
+    void HandleOrderFilledExit( const ou::tf::Order& order ) {
+      m_fFillExit( order.GetAverageFillPrice() );
     }
   };
 

@@ -593,8 +593,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
                           Wt::WLineEdit* pPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "price" ) ); // enabled with manual, scale
-                          Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
-                          Wt::WLabel* pFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "fill" ) );
+                          Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+                          Wt::WLabel* pEntryFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+                          Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
 
                           pOI->addStyleClass( "w_label" );
                           pOI->addStyleClass( "fld_open_interest" );
@@ -634,8 +635,11 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pPnL->addStyleClass( "w_label" );
                           pPnL->addStyleClass( "fld_pnl" );
 
-                          pFillPrice->addStyleClass( "w_label" );
-                          pFillPrice->addStyleClass( "fld_price" );
+                          pEntryFillPrice->addStyleClass( "w_label" );
+                          pEntryFillPrice->addStyleClass( "fld_price" );
+
+                          pExitFillPrice->addStyleClass( "w_label" );
+                          pExitFillPrice->addStyleClass( "fld_price" );
 
                           m_pServer->AddStrike(
                             sessionId(),
@@ -655,8 +659,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               pNumContracts->setText( sContracts );
                               pPnL->setText( sPnL );
                             },
-                            [this,pFillPrice](const std::string& sFill ){ // fFill_t async
-                              pFillPrice->setText( sFill );
+                            [this,pEntryFillPrice](const std::string& sFill ){ // fFill_t async
+                              pEntryFillPrice->setText( sFill );
+                              triggerUpdate();
+                            },
+                            [this,pExitFillPrice](const std::string& sFill ){ // fFill_t async
+                              pExitFillPrice->setText( sFill );
                               triggerUpdate();
                             }
                             );

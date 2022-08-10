@@ -85,7 +85,8 @@ public:
     const std::string& sSessionId,
     EOptionType, EOrderSide,
     const std::string&, // type, strike
-    fPopulateOption_t&&, fUpdateAllocated_t&&, fRealTime_t&&, fFill_t&&
+    fPopulateOption_t&&, fUpdateAllocated_t&&, fRealTime_t&&,
+    fFill_t&& entry, fFill_t&& exit
     );
   void DelStrike( const std::string& ); // strike
 

@@ -418,7 +418,8 @@ void Server_impl::AddStrike(
 , ou::tf::OrderSide::EOrderSide orderSide
 , fRealTime_t&& fRealTime
 , fAllocated_t&& fAllocated
-, fFill_t&& fFill
+, fFill_t&& fFillEntry
+, fFill_t&& fFillExit
 ) {
 
   const chain_t& chain( m_citerChains->second );
@@ -449,7 +450,8 @@ void Server_impl::AddStrike(
 
   uio.m_fRealTime = std::move( fRealTime );
   uio.m_fAllocated = std::move( fAllocated );
-  uio.m_fFill = std::move( fFill );
+  uio.m_fFillEntry = std::move( fFillEntry );
+  uio.m_fFillExit = std::move( fFillExit );
 
 }
 
@@ -561,7 +563,7 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
           uio.m_orderSide,
           uio.m_nContracts
         );
-        uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilled ) );
+        uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntry ) );
         uio.m_pPosition->PlaceOrder( uio.m_pOrderEntry );
         nOrdersPlaced++;
 
@@ -587,7 +589,31 @@ void Server_impl::CloseAll() {
   for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
     UIOption& uio( vt.second );
     if ( uio.m_pPosition ) {
-      uio.m_pPosition->ClosePosition();
+
+      assert( !uio.m_pOrderExit );
+
+      if ( 0 < uio.m_pPosition->GetActiveSize() ) {
+        ou::tf::OrderSide::EOrderSide side( ou::tf::OrderSide::Unknown );
+        switch ( uio.m_orderSide ) {
+          case ou::tf::OrderSide::Buy:
+            side = ou::tf::OrderSide::Sell;
+            break;
+          case ou::tf::OrderSide::Sell:
+            side = ou::tf::OrderSide::Buy;
+            break;
+          default:
+            assert( false );
+        }
+
+        uio.m_pOrderExit = uio.m_pPosition->ConstructOrder(
+          ou::tf::OrderType::Market,
+          side,
+          uio.m_pPosition->GetActiveSize()
+        );
+        uio.m_pOrderExit->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledExit ) );
+        uio.m_pPosition->PlaceOrder( uio.m_pOrderExit );
+      }
+
     }
   }
 }

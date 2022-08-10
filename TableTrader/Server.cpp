@@ -185,13 +185,15 @@ void Server::AddStrike(
   const std::string& sStrike,
   fPopulateOption_t&& fPopulateOption,
   fUpdateAllocated_t&& fUpdateAllocated,
-  fRealTime_t&& fRealTime, fFill_t&& fFill
+  fRealTime_t&& fRealTime,
+  fFill_t&& fFillEntry, fFill_t&& fFillExit
 ) {
 
   assert( fUpdateAllocated );
   assert( fPopulateOption );
   assert( fRealTime );
-  assert( fFill );
+  assert( fFillEntry );
+  assert( fFillExit );
 
   Server_impl::fRealTime_t fRealTime_impl =
     [fRealTime_=std::move(fRealTime)]( double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl ){
@@ -219,8 +221,20 @@ void Server::AddStrike(
       fUpdateAllocated_( sTotal, sOption );
     };
 
-  Server_impl::fFill_t fFill_impl =
-    [this,sSessionId,fFill=std::move(fFill)]( double fill ){
+  Server_impl::fFill_t fFillEntry_impl =
+    [this,sSessionId,fFill=std::move(fFillEntry)]( double fill ){
+      post(
+        sSessionId,
+        [this, fill, fFill = std::move( fFill ) ]() {
+          boost::format format( sFormatUSD );
+          format % fill;
+          fFill( format.str() );
+        }
+      );
+    };
+
+  Server_impl::fFill_t fFillExit_impl =
+    [this,sSessionId,fFill=std::move(fFillExit)]( double fill ){
       post(
         sSessionId,
         [this, fill, fFill = std::move( fFill ) ]() {
@@ -252,7 +266,8 @@ void Server::AddStrike(
         strike, ou::tf::OptionSide::Call, side_,
         std::move( fRealTime_impl ),
         std::move( fAllocated_impl ),
-        std::move( fFill_impl )
+        std::move( fFillEntry_impl ),
+        std::move( fFillExit_impl )
         );
       break;
     case EOptionType::put:
@@ -261,7 +276,8 @@ void Server::AddStrike(
         strike, ou::tf::OptionSide::Put, side_,
         std::move( fRealTime_impl ),
         std::move( fAllocated_impl ),
-        std::move( fFill_impl )
+        std::move( fFillEntry_impl ),
+        std::move( fFillExit_impl )
         );
       break;
   }
