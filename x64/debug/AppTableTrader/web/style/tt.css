@@ -51,6 +51,14 @@ body {
   margin-left: 4px;
 }
 
+.w_push_button_x {
+  padding: 1px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
 .w_combo_box {
   padding: 1px;
   margin: 1px;

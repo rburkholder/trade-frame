@@ -446,6 +446,29 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
                 }
 
+                auto containerRange = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
+                Wt::WLabel* pLabelStrikeFrom = containerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
+                Wt::WLineEdit* pWLineEditStrikeFrom = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WLabel* pLabelStrikeTo = containerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
+                Wt::WLineEdit* pWLineEditStrikeTo = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WLabel* pLabelStrikeInc = containerRange->addWidget( std::make_unique<Wt::WLabel>( "inc" ) );
+                Wt::WLineEdit* pWLineEditStrikeInc = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WPushButton* pBtnStrikeAdd = containerRange->addWidget( std::make_unique<Wt::WPushButton>( "Add" ) );
+
+                pLabelStrikeFrom->addStyleClass( "w_label" );
+                pWLineEditStrikeFrom->addStyleClass( "w_line_edit" );
+                pWLineEditStrikeFrom->addStyleClass( "fld_strike" );
+
+                pLabelStrikeTo->addStyleClass( "w_label" );
+                pWLineEditStrikeTo->addStyleClass( "w_line_edit" );
+                pWLineEditStrikeTo->addStyleClass( "fld_strike" );
+
+                pLabelStrikeInc->addStyleClass( "w_label" );
+                pWLineEditStrikeInc->addStyleClass( "w_line_edit" );
+                pWLineEditStrikeInc->addStyleClass( "fld_strike" );
+
+                pBtnStrikeAdd->addStyleClass( "w_push_button" );
+
               m_pContainerDataEntry->addWidget( std::make_unique<Wt::WBreak>() );
 
               Wt::WContainerWidget* pContainerAllocationInfo = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
@@ -589,6 +612,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
                           Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
                           Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
+                          Wt::WPushButton* pBtnEditAllocDelete= pOptionRow->addWidget( std::make_unique<Wt::WPushButton>( "X" ) );
                           Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
@@ -608,6 +632,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                           pAsk->addStyleClass( "w_label" );
                           pAsk->addStyleClass( "fld_quote" );
+
+                          pBtnEditAllocDelete->addStyleClass( "w_push_button_x" );
 
                           pWLineEditAlloc->setText( "0" );
                           //pWLineEditAlloc->keyWentUp().connect( [](){} );
