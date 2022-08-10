@@ -91,6 +91,12 @@ body {
   text-align:right;
 }
 
+.fld_percent_allocation {
+  display: inline-block;
+  width: 40px;
+  text-align:right;
+}
+
 .fld_allocation {
   display: inline-block;
   width: 60px;
