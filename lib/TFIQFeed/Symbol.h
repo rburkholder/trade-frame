@@ -84,6 +84,8 @@ public:
 
   ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
+  pFundamentals_t GetFundamentals() { assert( m_pFundamentals ); return m_pFundamentals; }
+
   void SubmitMarketDepthByMM( const ou::tf::DepthByMM& );
   void SubmitMarketDepthByOrder( const ou::tf::DepthByOrder& );
 

@@ -160,6 +160,7 @@ void Watch::EnableWatch() {
         = ou::tf::iqfeed::IQFeedProvider::Cast( m_pDataProvider );
       ou::tf::iqfeed::IQFeedProvider::pSymbol_t pSymbol
         = pIQFeedProvider->GetSymbol( m_pInstrument );
+      m_pFundamentals = pSymbol->GetFundamentals(); // preload
       pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
     }
