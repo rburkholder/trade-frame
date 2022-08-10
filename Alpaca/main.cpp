@@ -134,9 +134,9 @@ int main( int argc, char** argv )
       100,
       150.0
     );
-    om.PlaceOrder( pProviderAlpaca.get(), pOrder );
+    pPosition->PlaceOrder( pOrder );
     sleep( 4 );
-    om.CancelOrder( pOrder->GetOrderId() );
+    pPosition->CancelOrder( pOrder->GetOrderId() );
 
     //std::cout << "construct / transmit limit sell: " << std::endl;
 
