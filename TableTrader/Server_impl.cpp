@@ -553,8 +553,6 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
           );
         }
 
-        ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
-
         assert( uio.m_pPosition );
         assert( !uio.m_pOrderEntry );
 
@@ -564,7 +562,7 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
           uio.m_nContracts
         );
         uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilled ) );
-        om.PlaceOrder( m_pProviderTWS.get(), uio.m_pOrderEntry );
+        uio.m_pPosition->PlaceOrder( uio.m_pOrderEntry );
         nOrdersPlaced++;
 
       }
