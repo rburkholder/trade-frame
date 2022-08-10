@@ -51,10 +51,13 @@ public:
   using fPopulateStrike_t = std::function<void(const std::string&)>;
   using fPopulateStrikeDone_t = std::function<void()>;
 
-  using fPopulateOption_t = std::function<void(const std::string&, const std::string&)>; // ticker, open interest
+  using fPopulateOption_t = std::function<void(const std::string&)>; // ticker
   using fUpdateAllocated_t = std::function<void(const std::string&, const std::string&)>; // total allocation, option allocation
-  using fRealTime_t = std::function<void( // bid, ask, volume, #contracts, pnl
-    const std::string&, const std::string&, const std::string&, const std::string&, const std::string&)>;
+  using fRealTime_t = std::function<void(
+    const std::string& oi,
+    const std::string& bid, const std::string& ask,
+    const std::string& vol, const std::string& num,
+    const std::string& pnl)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
   void SessionAttach( const std::string& sSessionId );

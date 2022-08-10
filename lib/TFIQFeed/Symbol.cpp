@@ -147,6 +147,9 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
         break;
       case 'O': // any non C,E trade
         break;
+      case 'v': // volume update
+        summary.nOpenInterest = pMsg->Integer( IQFDynamicFeedMessage<T>::DFOpenInterest );
+        break;
     }
   }
   if ( m_bWaitForFirstQuote ) {

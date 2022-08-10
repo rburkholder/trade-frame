@@ -351,7 +351,7 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
         //double dblTotal;
         uio.m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblPnL );
       }
-      uio.m_fRealTime( quote.Bid(), quote.Ask(), m_nPrecision, 0 /* vol */, uio.m_nContracts, dblPnL );
+      uio.m_fRealTime( summary.nOpenInterest, quote.Bid(), quote.Ask(), m_nPrecision, summary.nTotalVolume, uio.m_nContracts, dblPnL );
     }
   }
 }

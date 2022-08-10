@@ -408,6 +408,7 @@ public:
     DFMostRecentTradeMarketCenter = 13,
     DFMessageContents = 14,
     DFMostRecentTradeAggressor = 15,
+    DFOpenInterest = 16,
     _DFLastEntry
   };
 
@@ -427,7 +428,7 @@ private:
 };
 
 template <class T, class charT>
-const std::string IQFDynamicFeedMessage<T, charT>::selector( "Symbol,Total Volume,Bid,Ask,Bid Size,Ask Size,Number of Trades Today,Most Recent Trade,Most Recent Trade Size,Most Recent Trade Time,Most Recent Trade Conditions,Most Recent Trade Market Center,Message Contents,Most Recent Trade Aggressor" );
+const std::string IQFDynamicFeedMessage<T, charT>::selector( "Symbol,Total Volume,Bid,Ask,Bid Size,Ask Size,Number of Trades Today,Most Recent Trade,Most Recent Trade Size,Most Recent Trade Time,Most Recent Trade Conditions,Most Recent Trade Market Center,Message Contents,Most Recent Trade Aggressor,Open Interest" );
 //                                     S,SELECT UPDATE FIELDS,Symbol,Total Volume,Bid,Ask,Bid Size,Ask Size,Number of Trades Today,Most Recent Trade,Most Recent Trade Size,Most Recent Trade Time,Most Recent Trade Conditions,Most Recent Trade Market Center,Message Contents,Most Recent Trade Aggressor
 // S,SET PROTOCOL,6.1
 // rTST$Y

@@ -644,15 +644,15 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           m_pServer->AddStrike(
                             sessionId(),
                             type, side, vt,
-                            [pTicker,pOI](const std::string& sTicker, const std::string& sOpenInt ){ // fPopulateOption_t
+                            [pTicker](const std::string& sTicker){ // fPopulateOption_t
                               pTicker->setText( sTicker );
-                              pOI->setText( sOpenInt );
                             },
                             [pWLabelTotalAllocated,pAllocated](const std::string& sTotalAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
                               pWLabelTotalAllocated->setText( sTotalAllocated );
                               pAllocated->setText( sOptionAllocated );
                             },
-                            [pBid,pAsk,pVol,pNumContracts,pPnL](const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t
+                            [pBid,pAsk,pVol,pNumContracts,pPnL,pOI](const std::string& sOpenInt, const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t
+                              pOI->setText( sOpenInt );
                               pBid->setText( sBid );
                               pAsk->setText( sAsk );
                               pVol->setText( sVolume );

@@ -196,7 +196,9 @@ void Server::AddStrike(
   assert( fFillExit );
 
   Server_impl::fRealTime_t fRealTime_impl =
-    [fRealTime_=std::move(fRealTime)]( double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl ){
+    [fRealTime_=std::move(fRealTime)]( uint32_t oi, double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl ){
+
+      const std::string sOI = boost::lexical_cast<std::string>( oi );
 
       boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
 
@@ -211,7 +213,7 @@ void Server::AddStrike(
 
       boost::format formatPnL( sFormatUSD );
       formatPnL % pnl;
-      fRealTime_( sBid, sAsk, sVol, sCon, formatPnL.str() );
+      fRealTime_( sOI, sBid, sAsk, sVol, sCon, formatPnL.str() );
     };
 
   Server_impl::fAllocated_t fAllocated_impl =
@@ -261,7 +263,7 @@ void Server::AddStrike(
   // open interest will have to come during watch startup, and populate ticker again with real open interest, will need to use 'post' with session id for that
   switch ( type ) {
     case EOptionType::call:
-      fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Call ), "tbd" );
+      fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Call ) );
       m_implServer->AddStrike(
         strike, ou::tf::OptionSide::Call, side_,
         std::move( fRealTime_impl ),
@@ -271,7 +273,7 @@ void Server::AddStrike(
         );
       break;
     case EOptionType::put:
-      fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Put ), "tbd" );
+      fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Put ) );
       m_implServer->AddStrike(
         strike, ou::tf::OptionSide::Put, side_,
         std::move( fRealTime_impl ),
