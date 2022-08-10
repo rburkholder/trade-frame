@@ -134,7 +134,7 @@ int main( int argc, char** argv )
       100,
       150.0
     );
-    om.PlaceOrder( pProviderPhemex.get(), pOrder );
+    pPosition->PlaceOrder( pProviderPhemex.get(), pOrder );
     sleep( 4 );
     om.CancelOrder( pOrder->GetOrderId() );
 */
@@ -146,7 +146,7 @@ int main( int argc, char** argv )
     //  100,
     //  150.0
     //);
-    //om.PlaceOrder( pProviderPhemex.get(), pOrder );
+    //pPosition->PlaceOrder( pProviderPhemex.get(), pOrder );
 
     std::cout << "wait for completion" << std::endl;
 
