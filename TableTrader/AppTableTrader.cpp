@@ -223,6 +223,7 @@ void AppTableTrader::TemplatePage(Wt::WContainerWidget* pcw, fTemplate_t f) {
 
 void AppTableTrader::HandleLiveRefresh() {
   m_pServer->TriggerUpdates( sessionId() );
+  triggerUpdate();
 }
 
 void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
@@ -502,10 +503,10 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   Wt::WPushButton* pBtnCloseAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
                   pBtnCloseAll->setEnabled( false );
                   pBtnCloseAll->addStyleClass( "w_push_button" );
-                  Wt::WPushButton* pBtnStart = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
-                  pBtnStart->setEnabled( false );
+                  Wt::WPushButton* pBtnPlaceOrders = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
+                  pBtnPlaceOrders->setEnabled( false );
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
-                    [this,pSelectStrikes,pContainerTheTable,pBtnStart,pWLabelTotalAllocated](){
+                    [this,pSelectStrikes,pContainerTheTable,pBtnPlaceOrders,pWLabelTotalAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
                       using setStrike_t = std::set<std::string>;
                       setStrike_t setStrike;
@@ -544,11 +545,14 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pTicker->addStyleClass( "fld_ticker" );
 
                           Wt::WLabel* pSide;
+                          Server::EOrderSide side;
                           switch ( m_pButtonGroupSide->checkedId() ) {
                             case (int)ESide::buy:
+                              side = Server::EOrderSide::buy;
                               pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Buy" ) );
                               break;
                             case (int)ESide::sell:
+                              side = Server::EOrderSide::sell;
                               pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Sell" ) );
                               break;
                             default:
@@ -608,7 +612,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               m_pServer->ChangeAllocation( vt, pWLineEditAlloc->text().toUTF8() );
                             } );
                           pWLineEditAlloc->addStyleClass( "w_line_edit" );
-                          pWLineEditAlloc->addStyleClass( "fld_allocation" );
+                          pWLineEditAlloc->addStyleClass( "fld_percent_allocation" );
 
                           pAllocated->addStyleClass( "w_label" );
                           pAllocated->addStyleClass( "fld_allocation" );
@@ -634,7 +638,8 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pFillPrice->addStyleClass( "fld_price" );
 
                           m_pServer->AddStrike(
-                            type, vt,
+                            sessionId(),
+                            type, side, vt,
                             [pTicker,pOI](const std::string& sTicker, const std::string& sOpenInt ){ // fPopulateOption_t
                               pTicker->setText( sTicker );
                               pOI->setText( sOpenInt );
@@ -650,15 +655,16 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               pNumContracts->setText( sContracts );
                               pPnL->setText( sPnL );
                             },
-                            [pFillPrice](const std::string& sFill ){ // fFill_t
+                            [this,pFillPrice](const std::string& sFill ){ // fFill_t async
                               pFillPrice->setText( sFill );
+                              triggerUpdate();
                             }
                             );
                         }
                         ix++;
                       } // end: add entries
 
-                      pBtnStart->setEnabled( 0 < m_mapOptionAtStrike.size() );
+                      pBtnPlaceOrders->setEnabled( 0 < m_mapOptionAtStrike.size() );
                     }); // pSelectStrikes->changed()
 
 
@@ -674,13 +680,14 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                         pBtnCloseAll->setEnabled( false );
                         m_pServer->CloseAll();
                       });
-                    pBtnStart->clicked().connect(
-                      [this,pSelectStrikes,pBtnCancelAll,pBtnCloseAll,pBtnStart](){
-                        pSelectStrikes->setEnabled( false );
-                        pBtnCancelAll->setEnabled( true );
-                        pBtnCloseAll->setEnabled( true );
-                        pBtnStart->setEnabled (false );
-                        m_pServer->PlaceOrders();
+                    pBtnPlaceOrders->clicked().connect(
+                      [this,pSelectStrikes,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
+                        if ( m_pServer->PlaceOrders() ) {
+                          pSelectStrikes->setEnabled( false );
+                          pBtnCancelAll->setEnabled( true );
+                          pBtnCloseAll->setEnabled( true );
+                          pBtnPlaceOrders->setEnabled (false );
+                        }
                       });
                 }
                 ); // m_pServer->PrepareStrikeSelection
@@ -690,9 +697,5 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
       ); // m_pServer->Start
     } ); // pSelectUnderlying->activated()
 
-  //auto timer = addChild(std::make_unique<Wt::WTimer>());
-  //timer->setInterval( std::chrono::seconds( 1 ) );
-  //timer->timeout().connect(this, &TimeRecord::HandleTimer );
-  //timer->start();
 
 }

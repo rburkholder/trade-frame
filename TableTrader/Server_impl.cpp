@@ -39,6 +39,15 @@
 
 #include "Server_impl.hpp"
 
+/*
+  open interest in access summary message?
+    lib/TFIQFeed/HistoryQuery.h:134:    unsigned long OpenInterest;
+    lib/TFIQFeed/HistoryQuery.h:134:    unsigned long OpenInterest;
+    lib/TFIQFeed/Messages.h:507
+    lib/TFIQFeed/Symbol.cpp:206:      summary.nOpenInterest
+    lib/TFIQFeed/Symbol.h:57:    int nOpenInterest;
+*/
+
 namespace {
   static const std::string sTWS( "tws" );
   static const std::string sIQFeed( "iqfeed" );
@@ -186,14 +195,14 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 
   if ( pm.PortfolioExists( idInstrument ) ) {
-    m_pPortfolio = pm.GetPortfolio( idInstrument );
+    m_pPortfolioUnderlying = pm.GetPortfolio( idInstrument );
   }
   else {
     // TODO will need a portfolio per table instance
-    m_pPortfolio
+    m_pPortfolioUnderlying
       = pm.ConstructPortfolio(
           idInstrument, "aoTF", "USD",
-          ou::tf::Portfolio::EPortfolioType::Standard,
+          ou::tf::Portfolio::EPortfolioType::Aggregate,
           ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
   }
 
@@ -298,9 +307,51 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
   for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
     UIOption& uio( vt.second );
     if ( uio.m_fRealTime ) {
+
       const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
-      uio.UpdateContracts( quote.Midpoint() );
-      uio.m_fRealTime( quote.Bid(), quote.Ask(), m_nPrecision, 0, uio.m_nContracts, 0.0 );
+      double mid =  quote.Midpoint();
+      uio.UpdateContracts( mid );
+
+      if ( UIOption::IBContractState::unknown == uio.m_stateIBContract ) {
+        if ( 0.0 < mid ) {
+          uio.m_stateIBContract = UIOption::IBContractState::acquiring;
+
+          pInstrument_t pInstrument = uio.m_pOption->GetInstrument();
+          if ( 0 == pInstrument->GetContract() ) {
+            // let us see if we can get installed prior to fundamentals arriving
+            const ou::tf::iqfeed::Fundamentals& fundamentals( uio.m_pOption->GetFundamentals() );
+            // NOTE: may need to rate limit
+            m_pProviderTWS->RequestContractDetails(
+              fundamentals.sExchangeRoot,
+              pInstrument,
+              [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                assert( 0 != pInstrument->GetContract() );
+                m_pProviderTWS->Sync( pInstrument );
+                // TODO: need to write to database
+              },
+              [this,pInstrument]( bool bStatus ){
+                if ( !bStatus ) {
+                  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+                  BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
+                }
+              }
+            );
+          };
+        }
+
+      }
+
+      const auto& summary( uio.m_pOption->GetSummary() );  // look for open interest
+
+      double dblPnL {};
+      if ( uio.m_pPosition ) {
+        double dblUnRealized;
+        double dblRealized;
+        double dblCommissionsPaid;
+        //double dblTotal;
+        uio.m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblPnL );
+      }
+      uio.m_fRealTime( quote.Bid(), quote.Ask(), m_nPrecision, 0 /* vol */, uio.m_nContracts, dblPnL );
     }
   }
 }
@@ -362,9 +413,12 @@ const std::string& Server_impl::Ticker( double strike, ou::tf::OptionSide::EOpti
 }
 
 void Server_impl::AddStrike(
-  double dblStrike, ou::tf::OptionSide::EOptionSide side,
-  fRealTime_t&& fRealTime,
-  fAllocated_t&& fAllocated
+  double dblStrike
+, ou::tf::OptionSide::EOptionSide optionSide
+, ou::tf::OrderSide::EOrderSide orderSide
+, fRealTime_t&& fRealTime
+, fAllocated_t&& fAllocated
+, fFill_t&& fFill
 ) {
 
   const chain_t& chain( m_citerChains->second );
@@ -373,7 +427,7 @@ void Server_impl::AddStrike(
 
   pOption_t pOption;
 
-  switch ( side ) {
+  switch ( optionSide ) {
     case ou::tf::OptionSide::Call:
       assert( Strike.call.pOption );
       pOption = Strike.call.pOption;
@@ -388,12 +442,14 @@ void Server_impl::AddStrike(
 
   mapUIOption_t::iterator iterUIOption = m_mapUIOption.find( closest );
   assert( m_mapUIOption.end() == iterUIOption );
-  auto pair = m_mapUIOption.emplace( closest, std::move( UIOption( pOption ) ) );
+  auto pair = m_mapUIOption.emplace( closest, std::move( UIOption( pOption, orderSide ) ) );
   assert( pair.second );
 
   UIOption& uio( pair.first->second );
+
   uio.m_fRealTime = std::move( fRealTime );
   uio.m_fAllocated = std::move( fAllocated );
+  uio.m_fFill = std::move( fFill );
 
 }
 
@@ -451,11 +507,89 @@ void Server_impl::UpdateAllocations() {
   }
 }
 
-void Server_impl::PlaceOrders() {
+bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  const std::string& sUnderlying( m_pWatchUnderlying->GetInstrumentName() ); // aggregate portfolio name
+
+  const std::string sPortfolioName
+    = sUnderlying
+    + "-"
+    + sPortfolioTimeStamp
+    ;
+
+  if ( pm.PortfolioExists( sPortfolioName ) ) {
+    m_pPortfolioOptions = pm.GetPortfolio( sPortfolioName );
+  }
+  else {
+    m_pPortfolioOptions
+      = pm.ConstructPortfolio(
+          sPortfolioName, "aoTF", sUnderlying,  // TODO: pull account owner out of the db constants
+          ou::tf::Portfolio::EPortfolioType::Basket,
+          ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
+  }
+
+  size_t nOrdersPlaced {};
+
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+
+    UIOption& uio( vt.second );
+
+    if ( 0 < uio.m_nContracts ) {
+
+      if ( 0 < uio.m_pOption->GetInstrument()->GetContract() ) {
+
+        const std::string& sInstrumentName( uio.m_pOption->GetInstrumentName() );
+
+        if ( pm.PositionExists( sPortfolioName, sInstrumentName ) ) {
+          uio.m_pPosition = pm.GetPosition( sPortfolioName, sInstrumentName );
+        }
+        else {
+          uio.m_pPosition = pm.ConstructPosition(
+            sPortfolioName, sInstrumentName, "tt_auto",
+            sTWS, sIQFeed, m_pProviderTWS, m_pProviderIQFeed,
+            uio.m_pOption->GetInstrument()
+          );
+        }
+
+        ou::tf::OrderManager& om( ou::tf::OrderManager::GlobalInstance() );
+
+        assert( uio.m_pPosition );
+        assert( !uio.m_pOrderEntry );
+
+        uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+          ou::tf::OrderType::Market,
+          uio.m_orderSide,
+          uio.m_nContracts
+        );
+        uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilled ) );
+        om.PlaceOrder( m_pProviderTWS.get(), uio.m_pOrderEntry );
+        nOrdersPlaced++;
+
+      }
+      else {
+        assert( false );
+      }
+    }
+  }
+  return ( 0 < nOrdersPlaced );
 }
 
 void Server_impl::CancelAll() {
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    UIOption& uio( vt.second );
+    if ( uio.m_pPosition ) {
+      uio.m_pPosition->CancelOrders();
+    }
+  }
 }
 
 void Server_impl::CloseAll() {
+  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    UIOption& uio( vt.second );
+    if ( uio.m_pPosition ) {
+      uio.m_pPosition->ClosePosition();
+    }
+  }
 }

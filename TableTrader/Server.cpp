@@ -19,17 +19,21 @@
  * Created:   2022/08/02 09:58:23
  */
 
+#include <sstream>
+
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <boost/format.hpp>
+
+#include <OUCommon/TimeSource.h>
 
 #include "Server.hpp"
 #include "Server_impl.hpp"
 
 namespace {
   //const std::string sFormatFloat( "%0.*f" ); // boost::format does not process variable precision
-  const std::string sFormatFloat( "%0.2f" );
+  const std::string sFormatUSD( "%0.2f" );
 }
 
 Server::Server(
@@ -84,7 +88,7 @@ void Server::Start(
   assert( fUpdateOptionExpiriesDone );
   m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
 
-  boost::format format( sFormatFloat );
+  //boost::format format( sFormatFloat );
 
   m_implServer->Start(
     sUnderlyingFuture,
@@ -97,10 +101,11 @@ void Server::Start(
         }
       );
     },
-    [this,sSessionId,format_=std::move(format)]( double price, int precision) mutable { // fUpdateUnderlyingPrice_t
+    [this,sSessionId]( double price, int precision) mutable { // fUpdateUnderlyingPrice_t
       //format_ % precision % price;
-      format_ % price;
-      std::string sPrice( format_.str() );
+      boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+      format % price;
+      std::string sPrice( format.str() );
       //post(
       //  sSessionId,
       //  [this,sPrice_=std::move(sPrice)](){
@@ -175,7 +180,9 @@ void Server::TriggerUpdates( const std::string& sSessionId ) {
 }
 
 void Server::AddStrike(
-  EOptionType type, const std::string& sStrike,
+  const std::string& sSessionId,
+  EOptionType type, EOrderSide side,
+  const std::string& sStrike,
   fPopulateOption_t&& fPopulateOption,
   fUpdateAllocated_t&& fUpdateAllocated,
   fRealTime_t&& fRealTime, fFill_t&& fFill
@@ -189,18 +196,20 @@ void Server::AddStrike(
   Server_impl::fRealTime_t fRealTime_impl =
     [fRealTime_=std::move(fRealTime)]( double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl ){
 
-      boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+      boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
 
-      format % bid;
-      const std::string sBid = boost::lexical_cast<std::string>( format.str() );
+      formatPrice % bid;
+      const std::string sBid = boost::lexical_cast<std::string>( formatPrice.str() );
 
-      format % ask;
-      const std::string sAsk = boost::lexical_cast<std::string>( format.str() );
+      formatPrice % ask;
+      const std::string sAsk = boost::lexical_cast<std::string>( formatPrice.str() );
 
       const std::string sVol = boost::lexical_cast<std::string>( volume );
       const std::string sCon = boost::lexical_cast<std::string>( contracts );
-      const std::string sPnL = boost::lexical_cast<std::string>( pnl );
-      fRealTime_( sBid, sAsk, sVol, sCon, sPnL );
+
+      boost::format formatPnL( sFormatUSD );
+      formatPnL % pnl;
+      fRealTime_( sBid, sAsk, sVol, sCon, formatPnL.str() );
     };
 
   Server_impl::fAllocated_t fAllocated_impl =
@@ -210,23 +219,49 @@ void Server::AddStrike(
       fUpdateAllocated_( sTotal, sOption );
     };
 
+  Server_impl::fFill_t fFill_impl =
+    [this,sSessionId,fFill=std::move(fFill)]( double fill ){
+      post(
+        sSessionId,
+        [this, fill, fFill = std::move( fFill ) ]() {
+          boost::format format( sFormatUSD );
+          format % fill;
+          fFill( format.str() );
+        }
+      );
+    };
+
+  ou::tf::OrderSide::EOrderSide side_;
+  switch ( side ) {
+    case EOrderSide::buy:
+      side_ = ou::tf::OrderSide::Buy;
+      break;
+    case EOrderSide::sell:
+      side_ = ou::tf::OrderSide::Sell;
+      break;
+    default:
+      assert( false );
+  }
+
   double strike = boost::lexical_cast<double>( sStrike );
   // open interest will have to come during watch startup, and populate ticker again with real open interest, will need to use 'post' with session id for that
   switch ( type ) {
     case EOptionType::call:
       fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Call ), "tbd" );
       m_implServer->AddStrike(
-        strike, ou::tf::OptionSide::Call,
+        strike, ou::tf::OptionSide::Call, side_,
         std::move( fRealTime_impl ),
-        std::move( fAllocated_impl )
+        std::move( fAllocated_impl ),
+        std::move( fFill_impl )
         );
       break;
     case EOptionType::put:
       fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Put ), "tbd" );
       m_implServer->AddStrike(
-        strike, ou::tf::OptionSide::Put,
+        strike, ou::tf::OptionSide::Put, side_,
         std::move( fRealTime_impl ),
-        std::move( fAllocated_impl )
+        std::move( fAllocated_impl ),
+        std::move( fFill_impl )
         );
       break;
   }
@@ -248,11 +283,28 @@ void Server::ChangeAllocation( const std::string& sStrike, const std::string& sP
   }
 }
 
-void Server::PlaceOrders() {
+bool Server::PlaceOrders() {
+
+  std::string sDateTimeStamp;
+
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::GlobalInstance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << "-"
+      << dt.time_of_day()
+      ;
+    sDateTimeStamp = ss.str();
+  }
+
+  return m_implServer->PlaceOrders( sDateTimeStamp );
 }
 
 void Server::CancelAll() {
+  m_implServer->CancelAll();
 }
 
 void Server::CloseAll() {
+  m_implServer->CloseAll();
 }

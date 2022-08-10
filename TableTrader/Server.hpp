@@ -79,16 +79,19 @@ public:
     );
 
   enum class EOptionType { call, put };
+  enum class EOrderSide { buy , sell };
 
   void AddStrike(
-    EOptionType, const std::string&, // type, strike
+    const std::string& sSessionId,
+    EOptionType, EOrderSide,
+    const std::string&, // type, strike
     fPopulateOption_t&&, fUpdateAllocated_t&&, fRealTime_t&&, fFill_t&&
     );
   void DelStrike( const std::string& ); // strike
 
   void ChangeAllocation( const std::string& sStrike, const std::string& sPercent );
 
-  void PlaceOrders();
+  bool PlaceOrders();
   void CancelAll();
   void CloseAll();
 
