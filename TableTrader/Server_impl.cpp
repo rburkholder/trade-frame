@@ -476,11 +476,8 @@ void Server_impl::ChangeInvestment( double dblInvestment ) {
 }
 
 void Server_impl::ChangeAllocation( double dblStrike, double dblRatio ) { // pct/100 by caller
-  const chain_t& chain( m_citerChains->second );
-  double closest = chain.Atm( dblStrike );
-  mapUIOption_t::iterator iter = m_mapUIOption.find( closest );
-  assert( m_mapUIOption.end() != iter );
-  UIOption& uio( iter->second );
+
+  UIOption& uio( GetUIOption( dblStrike ) );
 
   m_dblAllocated -= uio.m_dblAllocated;
 
@@ -508,6 +505,39 @@ void Server_impl::UpdateAllocations() {
     }
   }
 }
+
+Server_impl::UIOption& Server_impl::GetUIOption( double dblStrike ) {
+  const chain_t& chain( m_citerChains->second );
+  const double closest = chain.Atm( dblStrike );
+  mapUIOption_t::iterator iter = m_mapUIOption.find( closest );
+  assert( m_mapUIOption.end() != iter );
+  //UIOption& uio( iter->second );
+  return iter->second;
+}
+
+std::string Server_impl::SetAsMarket( double dblStrike ) {
+  UIOption& uio( GetUIOption( dblStrike ) );
+  uio.m_eOrderType = UIOption::EOrderType::market;
+  return "";
+}
+
+std::string Server_impl::SetAsLimit( double dblStrike, double dblLimit ) {
+  UIOption& uio( GetUIOption( dblStrike ) );
+  uio.m_eOrderType = UIOption::EOrderType::limit;
+  uio.m_dblLimit = dblLimit;
+  return "";
+}
+
+std::string Server_impl::SetAsScale( double dblStrike, double dblLimit, uint32_t nInitialQuan, uint32_t nIncQuan, double dblIncPrice ) {
+  UIOption& uio( GetUIOption( dblStrike ) );
+  uio.m_eOrderType = UIOption::EOrderType::scale;
+  uio.m_dblLimit = dblLimit;
+  uio.m_nInitialQuantity = nInitialQuan;
+  uio.m_nIncrementalQuantity = nIncQuan;
+  uio.m_dblIncrementalPrice = dblIncPrice;
+  return "";
+}
+
 
 bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
 
@@ -558,11 +588,32 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
         assert( uio.m_pPosition );
         assert( !uio.m_pOrderEntry );
 
-        uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
-          ou::tf::OrderType::Market,
-          uio.m_orderSide,
-          uio.m_nContracts
-        );
+        switch( uio.m_eOrderType ) {
+          case UIOption::EOrderType::market:
+            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+              ou::tf::OrderType::Market,
+              uio.m_orderSide,
+              uio.m_nContracts
+            );
+            break;
+          case UIOption::EOrderType::limit:
+            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+              ou::tf::OrderType::Limit,
+              uio.m_orderSide,
+              uio.m_nContracts,
+              uio.m_dblLimit
+            );
+            break;
+          case UIOption::EOrderType::scale:
+            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+              ou::tf::OrderType::Limit,
+              uio.m_orderSide,
+              uio.m_nContracts,
+              uio.m_dblLimit
+            );
+            break;
+        }
+
         uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntry ) );
         uio.m_pPosition->PlaceOrder( uio.m_pOrderEntry );
         nOrdersPlaced++;

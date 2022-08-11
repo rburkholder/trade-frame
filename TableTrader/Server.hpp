@@ -95,6 +95,16 @@ public:
 
   void ChangeAllocation( const std::string& sStrike, const std::string& sPercent );
 
+  enum class EOrderType { market, limit_manual, limit_ask, limit_bid, scale };
+  std::string SetOrderType(
+    EOrderType,
+    const std::string& sStrike,
+    const std::string& sLimitPrice,
+    const std::string& sInitialQuantity,
+    const std::string& sIncrementQuantity,
+    const std::string& sIncrementPrice
+  );
+
   bool PlaceOrders();
   void CancelAll();
   void CloseAll();

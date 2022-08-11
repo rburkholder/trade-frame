@@ -96,6 +96,10 @@ public:
   void ChangeInvestment( double dblInvestment );
   void ChangeAllocation( double dblStrike, double dblRatio );
 
+  std::string SetAsMarket( double dblStrike );
+  std::string SetAsLimit( double dblStrike, double dblLimit );
+  std::string SetAsScale( double dblStrike, double dblLimit, uint32_t nInitialQuan, uint32_t nIncQuan, double dblIncPrice );
+
   bool PlaceOrders( const std::string& sPortfolioTimeStamp );
   void CancelAll();
   void CloseAll();
@@ -183,6 +187,12 @@ private:
 
     enum IBContractState { unknown, acquiring, acquired } m_stateIBContract;
 
+    enum EOrderType { market, limit, scale } m_eOrderType;
+    double m_dblLimit;
+    uint32_t m_nInitialQuantity;
+    uint32_t m_nIncrementalQuantity;
+    double m_dblIncrementalPrice;
+
     UIOption( pOption_t pOption, ou::tf::OrderSide::EOrderSide orderSide )
     : m_orderSide( orderSide )
     , m_dblRatioAllocation {}
@@ -195,6 +205,11 @@ private:
     , m_fFillExit {}
     , m_pOption( pOption )
     , m_stateIBContract( IBContractState::unknown )
+    , m_eOrderType( EOrderType::market )
+    , m_dblLimit {}
+    , m_nInitialQuantity {}
+    , m_nIncrementalQuantity {}
+    , m_dblIncrementalPrice {}
     {
       m_nMultiplier = m_pOption->GetInstrument()->GetMultiplier();
       //m_pOption->OnFundamentals.Add( MakeDelegate( this, &UIOption::HandleFundamentals ) );
@@ -217,6 +232,11 @@ private:
     , m_fFillExit( std::move( rhs.m_fFillExit ) )
     , m_fAllocated( std::move( rhs.m_fAllocated ) )
     , m_stateIBContract( rhs.m_stateIBContract )
+    , m_eOrderType( rhs.m_eOrderType )
+    , m_dblLimit( rhs.m_dblLimit )
+    , m_nInitialQuantity( rhs.m_nInitialQuantity )
+    , m_nIncrementalQuantity( rhs.m_nIncrementalQuantity )
+    , m_dblIncrementalPrice( rhs.m_dblIncrementalPrice )
     {
       assert( rhs.m_pOption->StopWatch() );
       //rhs.m_pOption->OnFundamentals.Remove( MakeDelegate( &rhs, &UIOption::HandleFundamentals ) );
@@ -283,4 +303,6 @@ private:
   void UnderlyingTrade( const ou::tf::Trade& );
 
   void UpdateAllocations();
+
+  UIOption& GetUIOption( double dblStrike );
 };

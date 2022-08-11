@@ -116,4 +116,15 @@ private:
 
   void LoginPage( Wt::WContainerWidget* );
   void ActionPage( Wt::WContainerWidget* );
+
+  std::string ComposeOrderType(
+    int ixOrderType,
+    const std::string& strike,
+    Wt::WLabel* pAsk,
+    Wt::WLabel* pBid,
+    Wt::WLineEdit* pLimitPrice,
+    Wt::WLineEdit* pInitialQuantity,
+    Wt::WLineEdit* IncrementQuantity,
+    Wt::WLineEdit* pIncrementPrice
+  );
 };

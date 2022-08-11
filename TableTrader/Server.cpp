@@ -301,6 +301,105 @@ void Server::ChangeAllocation( const std::string& sStrike, const std::string& sP
   }
 }
 
+std::string Server::SetOrderType(
+  EOrderType eOrderType,
+  const std::string& sStrike,
+  const std::string& sLimitPrice,
+  const std::string& sInitialQuantity,
+  const std::string& sIncrementQuantity,
+  const std::string& sIncrementPrice
+) {
+  std::string sMessage;
+
+  double dblStrike {};
+  double dblLimitPrice {};
+  uint32_t nInitialQuantity {};
+  uint32_t nIncrementQuantity {};
+  double dblIncrementPrice {};
+
+  bool bOk( true );
+
+  try {
+
+    dblStrike = boost::lexical_cast<double>( sStrike );
+
+    switch ( eOrderType ) {
+      case EOrderType::market:
+        sMessage += m_implServer->SetAsMarket( dblStrike );
+        break;
+      case EOrderType::limit_manual:
+      case EOrderType::limit_ask:
+      case EOrderType::limit_bid:
+        if ( sLimitPrice.empty() ) {}
+        else {
+          dblLimitPrice = boost::lexical_cast<double>( sLimitPrice );
+          if ( 0.0 < dblLimitPrice ) {
+            sMessage += m_implServer->SetAsLimit( dblStrike, dblLimitPrice );
+          }
+          else {
+            if ( !sMessage.empty() ) sMessage+= ", ";
+            sMessage += "limit price not gt 0.0";
+          }
+        }
+        break;
+      case EOrderType::scale:
+
+        if ( sLimitPrice.empty() ) {
+          if ( !sMessage.empty() ) sMessage+= ", ";
+          sMessage += "limit price is a required field";
+        }
+        else {
+          dblLimitPrice = boost::lexical_cast<double>( sLimitPrice );
+        }
+        bOk &= ( 0.0 < dblLimitPrice );
+
+        if ( sInitialQuantity.empty() ) {
+          if ( !sMessage.empty() ) sMessage+= ", ";
+          sMessage += "initial quantity is a required field";
+        }
+        else {
+          nInitialQuantity = boost::lexical_cast<uint32_t>( sInitialQuantity );
+        }
+        bOk &= ( 0 < nInitialQuantity );
+
+        if ( sIncrementQuantity.empty() ) {
+          if ( !sMessage.empty() ) sMessage+= ", ";
+          sMessage += "incremental quantity is a required field";
+        }
+        else {
+          nIncrementQuantity = boost::lexical_cast<uint32_t>( sIncrementQuantity );
+        }
+        bOk &= ( 0 < nIncrementQuantity );
+
+        if ( sIncrementPrice.empty() ) {
+          if ( !sMessage.empty() ) sMessage+= ", ";
+          sMessage += "increment price is a required field";
+        }
+        else {
+          dblIncrementPrice = boost::lexical_cast<double>( sIncrementPrice );
+        }
+        bOk &= ( 0.0 < dblIncrementPrice );
+
+        if ( bOk ) {
+          sMessage += m_implServer->SetAsScale( dblStrike, dblLimitPrice, nInitialQuantity, nIncrementQuantity, dblIncrementPrice );
+        }
+        else {
+          if ( !sMessage.empty() ) sMessage+= ", ";
+          sMessage += "all fields require positive non-zero value";
+        }
+
+        break;
+    }
+
+  }
+  catch ( const boost::bad_lexical_cast& e ) {
+    if ( !sMessage.empty() ) sMessage+= ", ";
+    sMessage += "field has illegal content";
+  }
+
+  return sMessage;
+}
+
 bool Server::PlaceOrders() {
 
   std::string sDateTimeStamp;

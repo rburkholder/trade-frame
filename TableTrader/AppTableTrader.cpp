@@ -322,7 +322,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
     pContainerUnderlying->addStyleClass( "block" );
 
       Wt::WLabel* pLabelUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Select Future: " ) );
-      pContainerUnderlying->addWidget( std::make_unique<Wt::WBreak>()  );
+      pContainerUnderlying->addWidget( std::make_unique<Wt::WBreak>() );
       Wt::WSelectionBox* pSelectUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WSelectionBox>() );
       pSelectUnderlying->setSelectionMode( Wt::SelectionMode::Single );
       pSelectUnderlying->setVerticalSize( 2 );
@@ -616,10 +616,15 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
                           Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
-                          Wt::WLineEdit* pPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "-" ) ); // enabled with manual, scale
+                          Wt::WLineEdit* pLimitPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // limit, scale
+                          Wt::WLineEdit* pScaleInitialQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
+                          Wt::WLineEdit* pScaleIncQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
+                          Wt::WLineEdit* pScaleIncPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
                           Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
                           Wt::WLabel* pEntryFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
                           Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+                          pOptionRow->addWidget( std::make_unique<Wt::WBreak>() );
+                          Wt::WLabel* pMessage = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "" ) );
 
                           pOI->addStyleClass( "w_label" );
                           pOI->addStyleClass( "fld_open_interest" );
@@ -650,16 +655,38 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pNumContracts->addStyleClass( "w_label" );
                           pNumContracts->addStyleClass( "fld_num_contracts" );
 
-                          pOrderType->setEnabled( false );  // TODO: transmit fields for order type, default to 'market'
                           pOrderType->addItem( "market" );
-                          pOrderType->addItem( "limit bid/ask" );
                           pOrderType->addItem( "limit manual" );
-                          pOrderType->addItem( "scale" ); // need extra row of fields: initial quantity (validate), inc quantity (validate), inc price (validate)
+                          pOrderType->addItem( "limit ask" );
+                          pOrderType->addItem( "limit bid" );
+                          pOrderType->addItem( "scale" );
                           pOrderType->addStyleClass( "w_combo_box" );
 
-                          pPrice->setEnabled( false );
-                          pPrice->addStyleClass( "w_line_edit" );
-                          pPrice->addStyleClass( "fld_price" );
+                          pOrderType->activated().connect(
+                            [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                              std::string sMessage = ComposeOrderType(
+                                pOrderType->currentIndex(),
+                                vt,
+                                pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                              );
+                              pMessage->setText( sMessage );
+                            } );
+
+                          pLimitPrice->setEnabled( false );
+                          pLimitPrice->addStyleClass( "w_line_edit" );
+                          pLimitPrice->addStyleClass( "fld_price" );
+
+                          pScaleInitialQuan->setEnabled( false );
+                          pScaleInitialQuan->addStyleClass( "w_line_edit" );
+                          pScaleInitialQuan->addStyleClass( "fld_num_contracts" );
+
+                          pScaleIncQuan->setEnabled( false );
+                          pScaleIncQuan->addStyleClass( "w_line_edit" );
+                          pScaleIncQuan->addStyleClass( "fld_num_contracts" );
+
+                          pScaleIncPrice->setEnabled( false );
+                          pScaleIncPrice->addStyleClass( "w_line_edit" );
+                          pScaleIncPrice->addStyleClass( "fld_price" );
 
                           pPnL->addStyleClass( "w_label" );
                           pPnL->addStyleClass( "fld_pnl" );
@@ -669,6 +696,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                           pExitFillPrice->addStyleClass( "w_label" );
                           pExitFillPrice->addStyleClass( "fld_price" );
+
+                          pMessage->addStyleClass( "w_label" );
+                          pMessage->addStyleClass( "fld_message_error" );
 
                           m_pServer->AddStrike(
                             sessionId(),
@@ -733,6 +763,61 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
         }
       ); // m_pServer->Start
     } ); // pSelectUnderlying->activated()
+}
 
+std::string AppTableTrader::ComposeOrderType(
+  int ixOrderType,
+  const std::string& strike,
+  Wt::WLabel* pAsk,
+  Wt::WLabel* pBid,
+  Wt::WLineEdit* pLimitPrice,
+  Wt::WLineEdit* pInitialQuantity,
+  Wt::WLineEdit* pIncrementQuantity,
+  Wt::WLineEdit* pIncrementPrice
+) {
 
+  pLimitPrice->setEnabled( false );
+  pInitialQuantity->setEnabled( false );
+  pIncrementQuantity->setEnabled( false );
+  pIncrementPrice->setEnabled( false );
+
+  Server::EOrderType eOrderType;
+
+  switch ( ixOrderType ) {
+    case (int) Server::EOrderType::market:
+      eOrderType = Server::EOrderType::market;
+      break;
+    case (int) Server::EOrderType::limit_manual:
+      eOrderType = Server::EOrderType::limit_manual;
+      pLimitPrice->setEnabled( true );
+      break;
+    case (int) Server::EOrderType::limit_ask:
+      eOrderType = Server::EOrderType::limit_ask;
+      pLimitPrice->setText( pAsk->text() );
+      pLimitPrice->setEnabled( true );
+      break;
+    case (int) Server::EOrderType::limit_bid:
+      eOrderType = Server::EOrderType::limit_bid;
+      pLimitPrice->setText( pBid->text() );
+      pLimitPrice->setEnabled( true );
+      break;
+    case (int) Server::EOrderType::scale:
+      eOrderType = Server::EOrderType::scale;
+      pLimitPrice->setEnabled( true );
+      pInitialQuantity->setEnabled( true );
+      pIncrementQuantity->setEnabled( true );
+      pIncrementPrice->setEnabled( true );
+      break;
+  }
+
+  // TODO: use validators on the original ui fields
+  std::string sMessage = m_pServer->SetOrderType(
+    eOrderType, strike,
+    pLimitPrice->text().toUTF8(),
+    pInitialQuantity->text().toUTF8(),
+    pIncrementQuantity->text().toUTF8(),
+    pIncrementPrice->text().toUTF8()
+  );
+
+  return sMessage;
 }

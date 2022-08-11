@@ -135,6 +135,11 @@ body {
   text-align:right;
 }
 
+.fld_message_error {
+  text-align:center;
+  color: red;
+}
+
 /* display: inline;   to get li stuff in a row    */
 /* display: inline-block; to allow padding, border, margin  */
 
