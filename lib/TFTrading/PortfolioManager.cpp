@@ -235,7 +235,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::PortfolioUpdfateActive( pPortfolio_t pPortfolio ) {
+void PortfolioManager::PortfolioUpdateActive( pPortfolio_t pPortfolio ) {
   if ( nullptr != m_pSession ) {
     const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioActive update( row.idPortfolio, row.bActive );

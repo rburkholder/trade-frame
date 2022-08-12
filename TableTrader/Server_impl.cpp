@@ -747,7 +747,7 @@ void Server_impl::CloseAll() {
     ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
     m_pPortfolioOptions->SetActive( false );
     //pm.UpdatePortfolio( m_pPortfolioOptions->GetRow().idPortfolio ); // UpdatePortfolio needs work
-    pm.PortfolioUpdfateActive( m_pPortfolioOptions );
+    pm.PortfolioUpdateActive( m_pPortfolioOptions );
   }
   catch ( const std::runtime_error &e ) {
     BOOST_LOG_TRIVIAL(debug) << "Server_impl active=false did not work - " << e.what();

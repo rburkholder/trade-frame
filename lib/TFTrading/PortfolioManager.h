@@ -105,7 +105,7 @@ public:
     OnPositionNeedsDetails = function;
   }
 
-  void PortfolioUpdfateActive( pPortfolio_t );
+  void PortfolioUpdateActive( pPortfolio_t );
   void PositionUpdateNotes( pPosition_t );
 
   ou::Delegate<pPortfolio_t&> OnPortfolioLoaded;
