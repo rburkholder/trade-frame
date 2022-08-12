@@ -101,15 +101,19 @@ void Server::Start(
         }
       );
     },
-    [this,sSessionId]( double price, int precision) mutable { // fUpdateUnderlyingPrice_t
+    [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) mutable { // fUpdateUnderlyingPrice_t
       //format_ % precision % price;
       boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
       format % price;
       std::string sPrice( format.str() );
+
+      boost::format formatPnL( sFormatUSD );
+      formatPnL % dblPortfolioPnL;
+      std::string sPortfolioPnL( formatPnL.str() );
       //post(
       //  sSessionId,
       //  [this,sPrice_=std::move(sPrice)](){
-          m_fUpdateUnderlyingPrice( sPrice );
+          m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
       //  }
       //);
     },
@@ -238,10 +242,10 @@ void Server::AddStrike(
     };
 
   Server_impl::fAllocated_t fAllocated_impl =
-    [fUpdateAllocated_=std::move(fUpdateAllocated)](double allocatedTotal, double allocatedOption ){
+    [fUpdateAllocated_=std::move(fUpdateAllocated)](double allocatedTotal, bool bOverAllocated, double allocatedOption ){
       const std::string sTotal = boost::lexical_cast<std::string>( allocatedTotal );
       const std::string sOption = boost::lexical_cast<std::string>( allocatedOption );
-      fUpdateAllocated_( sTotal, sOption );
+      fUpdateAllocated_( sTotal, bOverAllocated, sOption );
     };
 
   Server_impl::fFill_t fFillEntry_impl =

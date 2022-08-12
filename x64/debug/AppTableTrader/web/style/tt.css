@@ -2,7 +2,7 @@
 body {
   font-family: Gill, Helvetica, sans-serif;
   color: black;
-  background-color:  lightgrey;
+  background-color: floralwhite;
 }
 
 .MainTitle {
@@ -130,9 +130,18 @@ body {
 
 .fld_allocation_total {
   display: inline-block;
-  width: 50px;
+  width: 60px;
   text-align:right;
+  border-width: 1px;
+}
+
+.fld_allocation_total_ok {
   background-color: beige;
+}
+
+.fld_allocation_total_over {
+  border-color: red;
+  background-color: pink;
 }
 
 .fld_num_contracts {

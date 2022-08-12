@@ -302,7 +302,15 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
   assert( m_mapSession.end() != iterSession );
   Session& session( iterSession->second ); // unused for now
 
-  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision );
+  double dblPortfolioUnRealized {};
+  double dblPortfolioRealized {};
+  double dblPortfolioCommissionsPaid {};
+  double dblPortfolioTotal {};
+  if ( m_pPortfolioOptions ) {
+    m_pPortfolioOptions->QueryStats( dblPortfolioUnRealized, dblPortfolioRealized, dblPortfolioCommissionsPaid, dblPortfolioTotal );
+  }
+
+  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision, dblPortfolioTotal );
 
   for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
     UIOption& uio( vt.second );
@@ -513,7 +521,7 @@ void Server_impl::ChangeAllocation( double dblStrike, double dblRatio ) { // pct
   m_dblAllocated += uio.m_dblAllocated;
 
   if ( uio.m_fAllocated ) {
-    uio.m_fAllocated( m_dblAllocated, uio.m_dblAllocated );
+    uio.m_fAllocated( m_dblAllocated, m_dblAllocated > m_dblInvestment, uio.m_dblAllocated );
   }
 }
 
@@ -527,7 +535,7 @@ void Server_impl::UpdateAllocations() {
     m_dblAllocated += uio.m_dblAllocated;
 
     if ( uio.m_fAllocated ) {
-      uio.m_fAllocated( m_dblAllocated, uio.m_dblAllocated );
+      uio.m_fAllocated( m_dblAllocated, m_dblAllocated > m_dblInvestment, uio.m_dblAllocated );
     }
   }
 }

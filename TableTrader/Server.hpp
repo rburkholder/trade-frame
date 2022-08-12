@@ -44,7 +44,7 @@ public:
   void AddCandidateFutures( fAddCandidateFutures_t&& );
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&, const std::string&)>; // name, multiplier
-  using fUpdateUnderlyingPrice_t = std::function<void(const std::string&)>; // price
+  using fUpdateUnderlyingPrice_t = std::function<void(const std::string&,const std::string&)>; // price, portfolio pnl
   using fUpdateOptionExpiries_t = std::function<void(const std::string&)>;
   using fUpdateOptionExpiriesDone_t = std::function<void()>;
 
@@ -52,7 +52,7 @@ public:
   using fPopulateStrikeDone_t = std::function<void()>;
 
   using fPopulateOption_t = std::function<void(const std::string&)>; // ticker
-  using fUpdateAllocated_t = std::function<void(const std::string&, const std::string&)>; // total allocation, option allocation
+  using fUpdateAllocated_t = std::function<void(const std::string&, bool, const std::string&)>; // total allocation, over allocated, option allocation
   using fRealTime_t = std::function<void(
     const std::string& oi,
     const std::string& bid, const std::string& ask,

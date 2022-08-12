@@ -352,6 +352,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
     pLivePrice->addStyleClass( "w_label" );
     pLivePrice->addStyleClass( "fld_price" );
 
+    Wt::WLabel* pLabelPortfolioPLLabel = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>( "Portfolio P/L: " ) );
+    Wt::WLabel* pLabelPortfolioPLValue = m_pContainerLiveData->addWidget( std::make_unique<Wt::WLabel>() );
+
+    pLabelPortfolioPLLabel->addStyleClass( "w_label" );
+    pLabelPortfolioPLValue->addStyleClass( "w_label" );
+
   m_pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   m_pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   m_pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
@@ -365,7 +371,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
   //);
 
   pSelectUnderlying->activated().connect(
-    [this,pSelectUnderlying,pLivePrice,pLabelUnderlyingName,pLabelMultiplierValue](){
+    [this,pSelectUnderlying,pLivePrice,pLabelUnderlyingName,pLabelMultiplierValue,pLabelPortfolioPLValue](){
       pSelectUnderlying->setEnabled( false );
       std::string sUnderlying = pSelectUnderlying->valueText().toUTF8();
 
@@ -397,8 +403,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
           pLabelMultiplierValue->setText( sMultiplier );
           triggerUpdate();
         },
-        [this,pLivePrice]( const std::string& sPrice ){ // fUpdateUnderlyingPrice_t
+        [this,pLivePrice,pLabelPortfolioPLValue]( const std::string& sPrice, const std::string& sPortfolioPnL ){ // fUpdateUnderlyingPrice_t
           pLivePrice->setText( sPrice );
+          pLabelPortfolioPLValue->setText( sPortfolioPnL );
           triggerUpdate(); // TODO: trigger on timer to reduce traffic
         },
         [pLabelBackgroundLoading,pSelectExpiries]( const std::string& sDate ){ // fUpdateOptionExpiries_t
@@ -599,7 +606,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               vColumns_t vColumns = {
                 {"ticker", 175}, {"side", 32}, {"strike", 60}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
                 {"%alloc",40},{"",10},{"$alloc",60},{"#cont",40},{"order",80},
-                {"price",60},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",60},{"entry",60},{"exit",60}
+                {"price",60},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",60},{"fill_en",60},{"fill_ex",60}
               };
 
               for ( const vColumns_t::value_type& vt: vColumns ) {
@@ -881,8 +888,20 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                             [pTicker](const std::string& sTicker){ // fPopulateOption_t
                               pTicker->setText( sTicker );
                             },
-                            [pWLabelTotalAllocated,pAllocated](const std::string& sTotalAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
+                            [pWLabelTotalAllocated,pAllocated](const std::string& sTotalAllocated, bool bOverAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
                               pWLabelTotalAllocated->setText( sTotalAllocated );
+                              if ( bOverAllocated ) {
+                                pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_ok");
+                                if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_over") ) {
+                                  pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_over");
+                                }
+                              }
+                              else {
+                                pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_over");
+                                if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_ok") ) {
+                                  pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_ok");
+                                }
+                              }
                               pAllocated->setText( sOptionAllocated );
                             },
                             [pBid,pAsk,pVol,pNumContracts,pPnL,pOI](const std::string& sOpenInt, const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t

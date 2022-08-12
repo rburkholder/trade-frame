@@ -54,7 +54,7 @@ public:
   ~Server_impl();
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
-  using fUpdateUnderlyingPrice_t = std::function<void(double,int)>; // price,precision
+  using fUpdateUnderlyingPrice_t = std::function<void(double,int,double)>; // price,precision,portfolio
   using fAddExpiry_t = std::function<void(boost::gregorian::date)>;
   using fAddExpiryDone_t = std::function<void()>;
 
@@ -85,7 +85,7 @@ public:
   int Precision() const { return m_nPrecision; }
 
   using fRealTime_t = std::function<void( uint32_t oi, double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl )>;
-  using fAllocated_t = std::function<void( double allocatedTotal, double allocatedOption )>;
+  using fAllocated_t = std::function<void( double allocatedTotal, bool bOverAllocated, double allocatedOption )>;
   using fFill_t = std::function<void(uint32_t,double)>; // fill quan@price
 
   void AddStrike(
