@@ -530,12 +530,16 @@ std::string Server_impl::SetAsLimit( double dblStrike, double dblLimit ) {
 
 std::string Server_impl::SetAsScale( double dblStrike, double dblLimit, uint32_t nInitialQuan, uint32_t nIncQuan, double dblIncPrice ) {
   UIOption& uio( GetUIOption( dblStrike ) );
+  std::string sMessage;
   uio.m_eOrderType = UIOption::EOrderType::scale;
   uio.m_dblLimit = dblLimit;
   uio.m_nInitialQuantity = nInitialQuan;
   uio.m_nIncrementalQuantity = nIncQuan;
   uio.m_dblIncrementalPrice = dblIncPrice;
-  return "";
+  if ( uio.m_nContracts < ( nInitialQuan + nIncQuan ) ) {
+    sMessage += "(initial_quantity + incremental_quantity > total_quantity)";
+  }
+  return sMessage;
 }
 
 
@@ -586,36 +590,80 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
         }
 
         assert( uio.m_pPosition );
-        assert( !uio.m_pOrderEntry );
+        //assert( !uio.m_pOrderEntry );
+
+        pOrder_t pOrder;
 
         switch( uio.m_eOrderType ) {
           case UIOption::EOrderType::market:
-            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+            pOrder = uio.m_pPosition->ConstructOrder(
               ou::tf::OrderType::Market,
               uio.m_orderSide,
               uio.m_nContracts
             );
+            pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntry ) );
             break;
           case UIOption::EOrderType::limit:
-            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
+            pOrder = uio.m_pPosition->ConstructOrder(
               ou::tf::OrderType::Limit,
               uio.m_orderSide,
               uio.m_nContracts,
               uio.m_dblLimit
             );
+            pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntry ) );
             break;
           case UIOption::EOrderType::scale:
-            uio.m_pOrderEntry = uio.m_pPosition->ConstructOrder(
-              ou::tf::OrderType::Limit,
-              uio.m_orderSide,
-              uio.m_nContracts,
-              uio.m_dblLimit
-            );
+            {
+              uio.m_fScaling =
+                [this,&uio](){
+                  uint32_t nToOrder = uio.m_nIncrementalQuantity;
+                  uint32_t nRemaining = uio.m_nContracts - uio.m_nScaleOrderQuantity;
+                  if ( 0 == nRemaining ) {} // done
+                  else {
+                    if ( nToOrder > nRemaining ) nToOrder = nRemaining;
+                    uio.m_nScaleOrderQuantity += nToOrder;
+
+                    switch( uio.m_orderSide ) {
+                      case ou::tf::OrderSide::Buy:
+                        uio.m_dblScaleOrderPrice -= uio.m_dblIncrementalPrice;  // fade the price level
+                        assert( 0.0 < uio.m_dblScaleOrderPrice );
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        // this won't work properly, will need to use a stop
+                        uio.m_dblScaleOrderPrice += uio.m_dblIncrementalPrice;
+                        break;
+                      default:
+                        assert( false );
+                    }
+
+                    pOrder_t pOrder;
+                    pOrder = uio.m_pPosition->ConstructOrder(
+                      ou::tf::OrderType::Limit,
+                      uio.m_orderSide,
+                      uio.m_nInitialQuantity,
+                      uio.m_dblScaleOrderPrice
+                    );
+                    pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntryScaled ) );
+                    uio.m_pPosition->PlaceOrder( pOrder );
+
+                  }
+                }; // m_fScaling
+
+              uio.m_nScaleOrderQuantity = uio.m_nInitialQuantity;
+              uio.m_dblScaleOrderPrice = uio.m_dblLimit;
+
+              pOrder = uio.m_pPosition->ConstructOrder(
+                ou::tf::OrderType::Limit,
+                uio.m_orderSide,
+                uio.m_nInitialQuantity,
+                uio.m_dblScaleOrderPrice
+              );
+              pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntryScaled ) );
+            }
             break;
         }
 
-        uio.m_pOrderEntry->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntry ) );
-        uio.m_pPosition->PlaceOrder( uio.m_pOrderEntry );
+        uio.m_pPosition->PlaceOrder( pOrder ); // position probably has list of orders
         nOrdersPlaced++;
 
       }
@@ -641,7 +689,8 @@ void Server_impl::CloseAll() {
     UIOption& uio( vt.second );
     if ( uio.m_pPosition ) {
 
-      assert( !uio.m_pOrderExit );
+      //assert( !uio.m_pOrderExit );
+      pOrder_t pOrder;
 
       if ( 0 < uio.m_pPosition->GetActiveSize() ) {
         ou::tf::OrderSide::EOrderSide side( ou::tf::OrderSide::Unknown );
@@ -656,13 +705,13 @@ void Server_impl::CloseAll() {
             assert( false );
         }
 
-        uio.m_pOrderExit = uio.m_pPosition->ConstructOrder(
+        pOrder = uio.m_pPosition->ConstructOrder(
           ou::tf::OrderType::Market,
           side,
           uio.m_pPosition->GetActiveSize()
         );
-        uio.m_pOrderExit->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledExit ) );
-        uio.m_pPosition->PlaceOrder( uio.m_pOrderExit );
+        pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledExit ) );
+        uio.m_pPosition->PlaceOrder( pOrder );
       }
 
     }

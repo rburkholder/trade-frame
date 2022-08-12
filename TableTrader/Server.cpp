@@ -224,24 +224,24 @@ void Server::AddStrike(
     };
 
   Server_impl::fFill_t fFillEntry_impl =
-    [this,sSessionId,fFill=std::move(fFillEntry)]( double fill ){
+    [this,sSessionId,fFill=std::move(fFillEntry)]( uint32_t quan, double fill ){
       post(
         sSessionId,
-        [this, fill, fFill = std::move( fFill ) ]() {
-          boost::format format( sFormatUSD );
-          format % fill;
+        [this, quan, fill, fFill = std::move( fFill ) ]() {
+          boost::format format( "%d@" + sFormatUSD );
+          format % quan % fill;
           fFill( format.str() );
         }
       );
     };
 
   Server_impl::fFill_t fFillExit_impl =
-    [this,sSessionId,fFill=std::move(fFillExit)]( double fill ){
+    [this,sSessionId,fFill=std::move(fFillExit)]( uint32_t quan, double fill ){
       post(
         sSessionId,
-        [this, fill, fFill = std::move( fFill ) ]() {
-          boost::format format( sFormatUSD );
-          format % fill;
+        [this, quan, fill, fFill = std::move( fFill ) ]() {
+          boost::format format( "%d@" + sFormatUSD );
+          format % quan % fill;
           fFill( format.str() );
         }
       );

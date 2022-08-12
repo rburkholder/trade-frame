@@ -528,6 +528,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   pBtnCloseAll->addStyleClass( "w_push_button" );
                   Wt::WPushButton* pBtnPlaceOrders = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
                   pBtnPlaceOrders->setEnabled( false );
+
                   pSelectStrikes->changed().connect( // only this one works with multiple selection
                     [this,pSelectStrikes,pContainerTheTable,pBtnPlaceOrders,pWLabelTotalAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
@@ -625,6 +626,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
                           pOptionRow->addWidget( std::make_unique<Wt::WBreak>() );
                           Wt::WLabel* pMessage = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "" ) );
+                          pMessage->setHidden( true );
 
                           pOI->addStyleClass( "w_label" );
                           pOI->addStyleClass( "fld_open_interest" );
@@ -639,6 +641,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pAsk->addStyleClass( "fld_quote" );
 
                           pBtnEditAllocDelete->addStyleClass( "w_push_button_x" );
+                          pBtnEditAllocDelete->clicked().connect(
+                            [this](){
+                            });
 
                           pWLineEditAlloc->setText( "0" );
                           //pWLineEditAlloc->keyWentUp().connect( [](){} );
@@ -670,23 +675,79 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                                 pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
                               );
                               pMessage->setText( sMessage );
+                              if ( sMessage.empty() ) pMessage->setHidden( true );
+                              else {
+                                pMessage->setHidden( false );
+                              }
                             } );
 
                           pLimitPrice->setEnabled( false );
                           pLimitPrice->addStyleClass( "w_line_edit" );
                           pLimitPrice->addStyleClass( "fld_price" );
+                          pLimitPrice->changed().connect(
+                            [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                              std::string sMessage = ComposeOrderType(
+                                pOrderType->currentIndex(),
+                                vt,
+                                pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                              );
+                              pMessage->setText( sMessage );
+                              if ( sMessage.empty() ) pMessage->setHidden( true );
+                              else {
+                                pMessage->setHidden( false );
+                              }
+                            } );
 
                           pScaleInitialQuan->setEnabled( false );
                           pScaleInitialQuan->addStyleClass( "w_line_edit" );
                           pScaleInitialQuan->addStyleClass( "fld_num_contracts" );
+                          pScaleInitialQuan->changed().connect(
+                            [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                              std::string sMessage = ComposeOrderType(
+                                pOrderType->currentIndex(),
+                                vt,
+                                pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                              );
+                              pMessage->setText( sMessage );
+                              if ( sMessage.empty() ) pMessage->setHidden( true );
+                              else {
+                                pMessage->setHidden( false );
+                              }
+                            } );
 
                           pScaleIncQuan->setEnabled( false );
                           pScaleIncQuan->addStyleClass( "w_line_edit" );
                           pScaleIncQuan->addStyleClass( "fld_num_contracts" );
+                          pScaleIncQuan->changed().connect(
+                            [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                              std::string sMessage = ComposeOrderType(
+                                pOrderType->currentIndex(),
+                                vt,
+                                pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                              );
+                              pMessage->setText( sMessage );
+                              if ( sMessage.empty() ) pMessage->setHidden( true );
+                              else {
+                                pMessage->setHidden( false );
+                              }
+                            } );
 
                           pScaleIncPrice->setEnabled( false );
                           pScaleIncPrice->addStyleClass( "w_line_edit" );
                           pScaleIncPrice->addStyleClass( "fld_price" );
+                          pScaleIncPrice->changed().connect(
+                            [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                              std::string sMessage = ComposeOrderType(
+                                pOrderType->currentIndex(),
+                                vt,
+                                pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                              );
+                              pMessage->setText( sMessage );
+                              if ( sMessage.empty() ) pMessage->setHidden( true );
+                              else {
+                                pMessage->setHidden( false );
+                              }
+                            } );
 
                           pPnL->addStyleClass( "w_label" );
                           pPnL->addStyleClass( "fld_pnl" );
@@ -719,7 +780,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                               pPnL->setText( sPnL );
                             },
                             [this,pEntryFillPrice](const std::string& sFill ){ // fFill_t async
-                              pEntryFillPrice->setText( sFill );
+                              if ( pEntryFillPrice->text().empty() ) {
+                                pEntryFillPrice->setText( sFill );
+                              }
+                              else {
+                                pEntryFillPrice->text() += "," + sFill;
+                              }
                               triggerUpdate();
                             },
                             [this,pExitFillPrice](const std::string& sFill ){ // fFill_t async
@@ -733,7 +799,6 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                       pBtnPlaceOrders->setEnabled( 0 < m_mapOptionAtStrike.size() );
                     }); // pSelectStrikes->changed()
-
 
                     pBtnCancelAll->clicked().connect(
                       [this,pBtnCancelAll](){

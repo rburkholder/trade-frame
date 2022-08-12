@@ -84,7 +84,7 @@ public:
 
   using fRealTime_t = std::function<void( uint32_t oi, double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl )>;
   using fAllocated_t = std::function<void( double allocatedTotal, double allocatedOption )>;
-  using fFill_t = std::function<void(double)>; // fill price
+  using fFill_t = std::function<void(uint32_t,double)>; // fill quan@price
 
   void AddStrike(
     double strike,
@@ -177,8 +177,8 @@ private:
     uint32_t m_nContracts;
     pOption_t m_pOption;
     pPosition_t m_pPosition;
-    pOrder_t m_pOrderEntry;
-    pOrder_t m_pOrderExit;
+    //pOrder_t m_pOrderEntry;
+    //pOrder_t m_pOrderExit;
 
     fRealTime_t m_fRealTime;
     fAllocated_t m_fAllocated;
@@ -192,6 +192,9 @@ private:
     uint32_t m_nInitialQuantity;
     uint32_t m_nIncrementalQuantity;
     double m_dblIncrementalPrice;
+
+    double m_dblScaleOrderPrice; // current price level
+    uint32_t m_nScaleOrderQuantity;  // total ordered so far
 
     UIOption( pOption_t pOption, ou::tf::OrderSide::EOrderSide orderSide )
     : m_orderSide( orderSide )
@@ -225,8 +228,8 @@ private:
     , m_nMultiplier( rhs.m_nMultiplier )
     , m_nContracts( rhs.m_nContracts )
     , m_pPosition( std::move( rhs.m_pPosition ) )
-    , m_pOrderEntry( std::move( rhs.m_pOrderEntry ) )
-    , m_pOrderExit( std::move( rhs.m_pOrderExit ) )
+    //, m_pOrderEntry( std::move( rhs.m_pOrderEntry ) )
+    //, m_pOrderExit( std::move( rhs.m_pOrderExit ) )
     , m_fRealTime( std::move( rhs.m_fRealTime ) )
     , m_fFillEntry( std::move( rhs.m_fFillEntry ) )
     , m_fFillExit( std::move( rhs.m_fFillExit ) )
@@ -273,12 +276,22 @@ private:
 
     void HandleTrade( const ou::tf::Trade& trade ) {}
 
-    void HandleOrderFilledEntry( const ou::tf::Order& order ) {
-      m_fFillEntry( order.GetAverageFillPrice() );
+    void HandleOrderFilledEntry( const ou::tf::Order& order ) { // send quan@price
+      m_fFillEntry( order.GetQuanFilled(), order.GetAverageFillPrice() );
+    }
+
+    using fScaling_t = std::function<void()>;
+    fScaling_t m_fScaling;
+
+    void HandleOrderFilledEntryScaled( const ou::tf::Order& order ) {
+      m_fFillEntry( order.GetQuanFilled(), order.GetAverageFillPrice() );
+      if ( m_fScaling ) {
+        m_fScaling();
+      }
     }
 
     void HandleOrderFilledExit( const ou::tf::Order& order ) {
-      m_fFillExit( order.GetAverageFillPrice() );
+      m_fFillExit( order.GetQuanFilled(), order.GetAverageFillPrice() );
     }
   };
 
@@ -305,4 +318,5 @@ private:
   void UpdateAllocations();
 
   UIOption& GetUIOption( double dblStrike );
+
 };
