@@ -338,25 +338,28 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
                       BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
                     }
 
-                    std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
-                    m_fRequestContract_InProgress = nullptr;
-                    if ( 0 < m_vRequestContract_Pending.size() ) {
-                      m_fRequestContract_InProgress = std::move( m_vRequestContract_Pending.back() );
-                      m_vRequestContract_Pending.pop_back();
-                      m_fRequestContract_InProgress();
+                    {
+                      std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+                      m_fRequestContract_InProgress = nullptr;
+                      if ( 0 < m_vRequestContract_Pending.size() ) {
+                        m_fRequestContract_InProgress = std::move( m_vRequestContract_Pending.back() );
+                        m_vRequestContract_Pending.pop_back();
+                        m_fRequestContract_InProgress();
+                      }
                     }
                   }
                 );
               };
 
-            std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
-
-            if ( m_fRequestContract_InProgress ) { // queue the request
-              m_vRequestContract_Pending.emplace_back( std::move( fRequestContract ) );
-            }
-            else {
-              m_fRequestContract_InProgress = std::move( fRequestContract );
-              m_fRequestContract_InProgress();
+            {
+              std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+              if ( m_fRequestContract_InProgress ) { // queue the request
+                m_vRequestContract_Pending.emplace_back( std::move( fRequestContract ) );
+              }
+              else {
+                m_fRequestContract_InProgress = std::move( fRequestContract );
+                m_fRequestContract_InProgress();
+              }
             }
 
           };
