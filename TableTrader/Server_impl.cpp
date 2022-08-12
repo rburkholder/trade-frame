@@ -302,7 +302,6 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
   assert( m_mapSession.end() != iterSession );
   Session& session( iterSession->second ); // unused for now
 
-  //if ( session.m_fUpdateUnderlyingPrice ) session.m_fUpdateUnderlyingPrice( m_tradeUnderlying.Price(), m_nPrecision );
   if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision );
 
   for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
@@ -314,30 +313,52 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
       uio.UpdateContracts( mid );
 
       if ( UIOption::IBContractState::unknown == uio.m_stateIBContract ) {
-        if ( 0.0 < mid ) {
+        if ( 0.0 < mid ) { // simple way to identify fundamentals have arrived for symbol
+
           uio.m_stateIBContract = UIOption::IBContractState::acquiring;
 
           pInstrument_t pInstrument = uio.m_pOption->GetInstrument();
           if ( 0 == pInstrument->GetContract() ) {
-            // let us see if we can get installed prior to fundamentals arriving
             const ou::tf::iqfeed::Fundamentals& fundamentals( uio.m_pOption->GetFundamentals() );
-            // NOTE: may need to rate limit
-            usleep( 50000 );
-            m_pProviderTWS->RequestContractDetails(
-              fundamentals.sExchangeRoot,
-              pInstrument,
-              [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                assert( 0 != pInstrument->GetContract() );
-                m_pProviderTWS->Sync( pInstrument );
-                // TODO: need to write to database
-              },
-              [this,pInstrument]( bool bStatus ){
-                if ( !bStatus ) {
-                  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
-                  BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
-                }
-              }
-            );
+
+            fRequestContract_t fRequestContract =
+              [this,root=fundamentals.sExchangeRoot,pInstrument](){
+                pInstrument_t pInstrument_( pInstrument );
+                m_pProviderTWS->RequestContractDetails(
+                  root,
+                  pInstrument_,
+                  [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                    assert( 0 != pInstrument->GetContract() );
+                    m_pProviderTWS->Sync( pInstrument );
+                    // TODO: need to write to database
+                  },
+                  [this,pInstrument]( bool bStatus ){
+                    if ( !bStatus ) {
+                      const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+                      BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
+                    }
+
+                    std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+                    m_fRequestContract_InProgress = nullptr;
+                    if ( 0 < m_vRequestContract_Pending.size() ) {
+                      m_fRequestContract_InProgress = std::move( m_vRequestContract_Pending.back() );
+                      m_vRequestContract_Pending.pop_back();
+                      m_fRequestContract_InProgress();
+                    }
+                  }
+                );
+              };
+
+            std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+
+            if ( m_fRequestContract_InProgress ) { // queue the request
+              m_vRequestContract_Pending.emplace_back( std::move( fRequestContract ) );
+            }
+            else {
+              m_fRequestContract_InProgress = std::move( fRequestContract );
+              m_fRequestContract_InProgress();
+            }
+
           };
         }
 

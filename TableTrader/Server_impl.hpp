@@ -154,6 +154,14 @@ private:
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t m_pOptionChainQuery;
 
+  using fRequestContract_t = std::function<void()>;
+  fRequestContract_t m_fRequestContract_InProgress; // in transit to ib
+
+  using vRequestContract_t = std::vector<fRequestContract_t>;
+  vRequestContract_t m_vRequestContract_Pending; // lifo of requests
+
+  std::mutex m_mutexRequestContract; // play it safe with structure usage
+
   size_t m_nOptionsNames;
   size_t m_nOptionsLoaded;
 
