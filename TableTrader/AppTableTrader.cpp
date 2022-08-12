@@ -417,12 +417,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               std::string sDate = pSelectExpiries->valueText().toUTF8();
               m_pContainerDataEntry->clear();
 
-              Wt::WContainerWidget* pContainerTypeAndSide = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
-              pContainerTypeAndSide->addStyleClass( "inline_flex" );
+              Wt::WContainerWidget* pContainerTypeSideRange = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
+              pContainerTypeSideRange->addStyleClass( "inline_flex" );
 
                 enum class EOption { call = 1, put = 2 };
                 {
-                  auto containerOption = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Option Type") );
+                  auto containerOption = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Option Type") );
                   m_pButtonGroupOption = std::make_shared<Wt::WButtonGroup>();
                   Wt::WRadioButton* btnCall = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Call" ) );
                   //container->addWidget(std::make_unique<Wt::WBreak>());
@@ -435,7 +435,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                 enum class ESide { buy = 1, sell = 2 };
                 {
-                  auto containerSide = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Operation") );
+                  auto containerSide = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Operation") );
                   m_pButtonGroupSide = std::make_shared<Wt::WButtonGroup>();
                   Wt::WRadioButton* btnBuy = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Buy" ) );
                   //container->addWidget(std::make_unique<Wt::WBreak>());
@@ -446,7 +446,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
                 }
 
-                auto pContainerRange = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
+                auto pContainerRange = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
                 Wt::WLabel* pLabelStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
                 Wt::WLineEdit* pWLineEditStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
                 Wt::WLabel* pLabelStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
@@ -580,7 +580,34 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   }
                 });
 
-              Wt::WContainerWidget* pContainerTheTable = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
+              Wt::WContainerWidget* pContainerTableAndHeaders = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
+              pContainerStrikeList->addStyleClass( "block" );
+
+              Wt::WContainerWidget* pContainerTable_Headers = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
+              pContainerStrikeList->addStyleClass( "block" );
+
+              struct columns {
+                std::string name;
+                int width;
+                columns( const std::string& name_, int width_ ): name( name_ ), width( width_ ) {}
+              };
+              using vColumns_t = std::vector<columns>;
+              vColumns_t vColumns = {
+                {"ticker", 175}, {"side", 32}, {"strike", 60}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
+                {"%alloc",40},{"",10},{"$alloc",60},{"#cont",40},{"order",80},
+                {"price",60},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",60},{"entry",60},{"exit",60}
+              };
+
+              for ( const vColumns_t::value_type& vt: vColumns ) {
+                Wt::WLabel* pLabel = pContainerTable_Headers->addWidget( std::make_unique<Wt::WLabel>( vt.name ) );
+                pLabel->addStyleClass( "w_label" );
+                pLabel->addStyleClass( "table_header_column_name" );
+                pLabel->setWidth( vt.width );
+              }
+
+              //pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WBreak>() );
+
+              Wt::WContainerWidget* pContainerTable_DataRows = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
               pContainerStrikeList->addStyleClass( "block" );
 
               m_pServer->PrepareStrikeSelection(
@@ -588,7 +615,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
                   pSelectStrikes->addItem( sStrike );
                 },
-                [this,pSelectStrikes,pContainerTheTable,pWLabelTotalAllocated](){ // fPopulateStrikeDone_t
+                [this,pSelectStrikes,pContainerTable_DataRows,pWLabelTotalAllocated](){ // fPopulateStrikeDone_t
                   Wt::WPushButton* pBtnCancelAll = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
                   pBtnCancelAll->setEnabled( false );
                   pBtnCancelAll->addStyleClass( "w_push_button" );
@@ -599,7 +626,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   pBtnPlaceOrders->setEnabled( false );
 
                   m_fUpdateStrikeSelection = // used by pSelectStrikes & pBtnEditAllocDelete
-                    [this,pSelectStrikes,pContainerTheTable,pBtnPlaceOrders,pWLabelTotalAllocated](){
+                    [this,pSelectStrikes,pContainerTable_DataRows,pBtnPlaceOrders,pWLabelTotalAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
                       using setStrike_t = std::set<std::string>;
                       setStrike_t setStrike;
@@ -628,7 +655,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                       for ( const setStrike_t::value_type& vt: setStrike ) {
                         if ( m_mapOptionAtStrike.end() == m_mapOptionAtStrike.find( vt ) ) {
 
-                          Wt::WContainerWidget* pOptionRow = pContainerTheTable->insertWidget( ix, std::make_unique<Wt::WContainerWidget>() );
+                          Wt::WContainerWidget* pOptionRow = pContainerTable_DataRows->insertWidget( ix, std::make_unique<Wt::WContainerWidget>() );
                           auto pair = m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
                           assert( pair.second );
                           OptionAtStrike& oas( pair.first->second );

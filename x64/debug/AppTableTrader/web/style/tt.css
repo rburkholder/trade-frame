@@ -64,6 +64,12 @@ body {
   margin: 1px;
 }
 
+.table_header_column_name {
+  font-weight: bold;
+  text-align:center;
+  display: inline-block;
+}
+
 .fld_ticker {
   display: inline-block;
   width: 175px;
