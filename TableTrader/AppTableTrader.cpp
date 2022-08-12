@@ -724,6 +724,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                                     pSelectStrikes->setSelectedIndexes( selection );
                                     m_fUpdateStrikeSelection();
                                   }
+                                  triggerUpdate();
                                 });
                             });
 
