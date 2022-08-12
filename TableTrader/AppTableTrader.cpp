@@ -529,7 +529,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   Wt::WPushButton* pBtnPlaceOrders = m_pContainerTableEntryButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
                   pBtnPlaceOrders->setEnabled( false );
 
-                  pSelectStrikes->changed().connect( // only this one works with multiple selection
+                  m_fUpdateStrikeSelection = // used by pSelectStrikes & pBtnEditAllocDelete
                     [this,pSelectStrikes,pContainerTheTable,pBtnPlaceOrders,pWLabelTotalAllocated](){
                       auto set = pSelectStrikes->selectedIndexes();
                       using setStrike_t = std::set<std::string>;
@@ -642,7 +642,20 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
 
                           pBtnEditAllocDelete->addStyleClass( "w_push_button_x" );
                           pBtnEditAllocDelete->clicked().connect(
-                            [this](){
+                            [this,vt,pSelectStrikes](){
+                              int ixThisEntry = pSelectStrikes->findText( vt );
+                              m_pServer->post( // can't delete self while in code
+                                sessionId(),
+                                [this,pSelectStrikes,ixThisEntry](){
+                                  using setSelection_t = std::set<int>;
+                                  setSelection_t selection = pSelectStrikes->selectedIndexes();
+                                  setSelection_t::iterator iter = selection.find( ixThisEntry );
+                                  if ( selection.end() != iter ) {
+                                    selection.erase( iter );
+                                    pSelectStrikes->setSelectedIndexes( selection );
+                                    m_fUpdateStrikeSelection();
+                                  }
+                                });
                             });
 
                           pWLineEditAlloc->setText( "0" );
@@ -798,7 +811,12 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                       } // end: add entries
 
                       pBtnPlaceOrders->setEnabled( 0 < m_mapOptionAtStrike.size() );
-                    }); // pSelectStrikes->changed()
+                    }; // pSelectStrikes->changed()
+
+                    pSelectStrikes->changed().connect( // only this one works with multiple selection
+                      [this](){
+                        m_fUpdateStrikeSelection();
+                      });
 
                     pBtnCancelAll->clicked().connect(
                       [this,pBtnCancelAll](){

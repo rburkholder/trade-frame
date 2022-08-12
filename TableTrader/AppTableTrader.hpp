@@ -100,6 +100,9 @@ private:
   using mapOptionAtStrike_t = std::map<std::string,OptionAtStrike>;
   mapOptionAtStrike_t m_mapOptionAtStrike;
 
+  using fUpdateStrikeSelection_t = std::function<void()>;
+  fUpdateStrikeSelection_t m_fUpdateStrikeSelection;
+
   void AddLink( Wt::WContainerWidget*, const std::string& sClass, const std::string& sPath, const std::string& sAnchor );
 
   void HandleInternalPathChanged( const std::string& );
