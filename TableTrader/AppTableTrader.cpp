@@ -446,14 +446,19 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
                 }
 
-                auto containerRange = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
-                Wt::WLabel* pLabelStrikeFrom = containerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
-                Wt::WLineEdit* pWLineEditStrikeFrom = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-                Wt::WLabel* pLabelStrikeTo = containerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
-                Wt::WLineEdit* pWLineEditStrikeTo = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-                Wt::WLabel* pLabelStrikeInc = containerRange->addWidget( std::make_unique<Wt::WLabel>( "inc" ) );
-                Wt::WLineEdit* pWLineEditStrikeInc = containerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-                Wt::WPushButton* pBtnStrikeAdd = containerRange->addWidget( std::make_unique<Wt::WPushButton>( "Add" ) );
+                auto pContainerRange = pContainerTypeAndSide->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
+                Wt::WLabel* pLabelStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
+                Wt::WLineEdit* pWLineEditStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WLabel* pLabelStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
+                Wt::WLineEdit* pWLineEditStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WLabel* pLabelStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "inc" ) );
+                Wt::WLineEdit* pWLineEditStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+                Wt::WPushButton* pBtnStrikeAdd = pContainerRange->addWidget( std::make_unique<Wt::WPushButton>( "Add" ) );
+                pContainerRange->addWidget( std::make_unique<Wt::WBreak>() );
+                Wt::WLabel* pLabelRangeMessage = pContainerRange->addWidget( std::make_unique<Wt::WLabel>() );
+                pLabelRangeMessage->setHidden( true );
+                pLabelRangeMessage->addStyleClass( "w_label" );
+                pLabelRangeMessage->addStyleClass( "fld_message_error" );
 
                 pLabelStrikeFrom->addStyleClass( "w_label" );
                 pWLineEditStrikeFrom->addStyleClass( "w_line_edit" );
@@ -468,6 +473,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                 pWLineEditStrikeInc->addStyleClass( "fld_strike" );
 
                 pBtnStrikeAdd->addStyleClass( "w_push_button" );
+                // pBtnStrikeAdd.connect is lower down after dependency on pSelectStrikes
 
               m_pContainerDataEntry->addWidget( std::make_unique<Wt::WBreak>() );
 
@@ -510,6 +516,69 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                   pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
                   pSelectStrikes->setVerticalSize( 10 );
                   //pLabelStrikes->setBuddy( pSelectStrikes );
+
+              pBtnStrikeAdd->clicked().connect(
+                [this,pSelectStrikes,pWLineEditStrikeFrom,pWLineEditStrikeTo,pWLineEditStrikeInc,pLabelRangeMessage](){
+                  pLabelRangeMessage->setHidden( true );
+                  std::string sFrom = pWLineEditStrikeFrom->text().toUTF8();
+                  std::string sTo   = pWLineEditStrikeTo->text().toUTF8();
+                  std::string sInc  = pWLineEditStrikeInc->text().toUTF8();
+                  if ( sFrom.empty() || sTo.empty() || sInc.empty() ) {
+                    pLabelRangeMessage->setHidden( false );
+                    pLabelRangeMessage->setText( "all fields required, and greater than 0.0" );
+                  }
+                  else {
+                    std::string sMessage;
+                    double dblFrom = Server::FormatDouble( sFrom, sMessage );
+                    double dblTo   = Server::FormatDouble( sTo,   sMessage );
+                    double dblInc  = Server::FormatDouble( sInc,  sMessage );
+                    if ( sMessage.empty() ) {
+                      if ( ( 0.0 == dblFrom ) || ( 0.0 == dblTo ) || ( 0.0 == dblInc ) ) {
+                        pLabelRangeMessage->setHidden( false );
+                        pLabelRangeMessage->setText( "one or more fields convert to 0" );
+                      }
+                      else {
+                        if ( dblFrom >= dblTo ) {
+                          pLabelRangeMessage->setHidden( false );
+                          pLabelRangeMessage->setText( "'to' needs to be greater than 'from'" );
+                        }
+                        else {
+                          if ( dblInc > ( dblTo - dblFrom ) ) {
+                            pLabelRangeMessage->setHidden( false );
+                            pLabelRangeMessage->setText( "'inc' needs to be less than 'to' - 'from'" );
+                          }
+                          else {
+                            using setSelection_t = std::set<int>;
+                            setSelection_t selection = pSelectStrikes->selectedIndexes();
+
+                            for ( double value = dblFrom; value <= dblTo; value += dblInc ) {
+                              std::string sStrike = m_pServer->FormatStrike( value );
+                              int ix = pSelectStrikes->findText( sStrike );
+                              if ( 0 < ix ) { // not sure what an illegal value is
+                                if ( 20 <= selection.size() ) {
+                                  pLabelRangeMessage->setHidden( false );
+                                  pLabelRangeMessage->setText( "attempting insert of >20 strikes" );
+                                  break;
+                                }
+                                else {
+                                  selection.insert( ix );
+                                }
+                              }
+                            }
+
+                            pSelectStrikes->setSelectedIndexes( selection );
+                            m_fUpdateStrikeSelection();
+
+                          }
+                        }
+                      }
+                    }
+                    else {
+                      pLabelRangeMessage->setHidden( false );
+                      pLabelRangeMessage->setText( sMessage );
+                    }
+                  }
+                });
 
               Wt::WContainerWidget* pContainerTheTable = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
               pContainerStrikeList->addStyleClass( "block" );
@@ -674,9 +743,9 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
                           pNumContracts->addStyleClass( "fld_num_contracts" );
 
                           pOrderType->addItem( "market" );
-                          pOrderType->addItem( "limit manual" );
-                          pOrderType->addItem( "limit ask" );
-                          pOrderType->addItem( "limit bid" );
+                          pOrderType->addItem( "limit" );
+                          pOrderType->addItem( "lim ask" );
+                          pOrderType->addItem( "lim bid" );
                           pOrderType->addItem( "scale" );
                           pOrderType->addStyleClass( "w_combo_box" );
 

@@ -179,6 +179,27 @@ void Server::TriggerUpdates( const std::string& sSessionId ) {
   m_implServer->TriggerUpdates( sSessionId );
 }
 
+double Server::FormatDouble( const std::string sValue, std::string sMessage ) {
+  double dblReturn {};
+  try {
+    dblReturn = boost::lexical_cast<double>( sValue );
+  }
+  catch ( boost::bad_lexical_cast& e  ) {
+    if ( sMessage.empty() ) {}
+    else {
+      sMessage += ", ";
+    }
+    sMessage += "bad conversion on " + sValue;
+  }
+  return dblReturn;
+}
+
+std::string Server::FormatStrike( double strike ) const {
+  boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( m_implServer->Precision() ) + "f" );
+  formatPrice % strike;
+  return formatPrice.str();
+}
+
 void Server::AddStrike(
   const std::string& sSessionId,
   EOptionType type, EOrderSide side,

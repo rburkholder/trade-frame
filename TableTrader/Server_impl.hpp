@@ -82,6 +82,8 @@ public:
 
   const std::string& Ticker( double strike, ou::tf::OptionSide::EOptionSide ) const;
 
+  int Precision() const { return m_nPrecision; }
+
   using fRealTime_t = std::function<void( uint32_t oi, double bid, double ask, uint32_t precision, uint32_t volume, uint32_t contracts, double pnl )>;
   using fAllocated_t = std::function<void( double allocatedTotal, double allocatedOption )>;
   using fFill_t = std::function<void(uint32_t,double)>; // fill quan@price

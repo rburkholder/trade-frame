@@ -81,6 +81,9 @@ public:
     fPopulateStrikeDone_t&&
     );
 
+  static double FormatDouble( const std::string sValue, std::string sMessage );
+  std::string FormatStrike( double ) const;
+
   enum class EOptionType { call, put };
   enum class EOrderSide { buy , sell };
 
