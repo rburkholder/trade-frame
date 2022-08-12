@@ -321,6 +321,7 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
             // let us see if we can get installed prior to fundamentals arriving
             const ou::tf::iqfeed::Fundamentals& fundamentals( uio.m_pOption->GetFundamentals() );
             // NOTE: may need to rate limit
+            usleep( 50000 );
             m_pProviderTWS->RequestContractDetails(
               fundamentals.sExchangeRoot,
               pInstrument,
