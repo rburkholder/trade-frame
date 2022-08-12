@@ -480,11 +480,15 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               Wt::WContainerWidget* pContainerAllocationInfo = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
               pContainerAllocationInfo->addStyleClass( "inline" );
 
+                Wt::WLabel* pLabelChainExpiry = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( sDate ) );
+                pLabelChainExpiry->addStyleClass( "w_label" );
+                pLabelChainExpiry->addStyleClass( "fld_expiry" );
+
                 Wt::WLabel* pLabelAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( "Allocated: " ) );
                 pLabelAllocated->addStyleClass( "w_label" );
                 Wt::WLabel* pWLabelTotalAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>() );
                 pWLabelTotalAllocated->addStyleClass( "w_label" );
-                pWLabelTotalAllocated->addStyleClass( "fld_allocation" );
+                pWLabelTotalAllocated->addStyleClass( "fld_allocation_total" );
                 //pLabelAllocated->setBuddy( pWLabelTotalAllocated );
                 pWLabelTotalAllocated->setText( "0" );
 
