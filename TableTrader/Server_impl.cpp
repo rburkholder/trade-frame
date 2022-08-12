@@ -54,7 +54,7 @@ namespace {
   static const std::string sDataBaseName( "TableTrader.db" );
 }
 
-Server_impl::Server_impl()
+Server_impl::Server_impl( int ib_client_id )
 : m_state( EConnection::quiescent )
 , m_nOptionsNames {}
 , m_nOptionsLoaded {}
@@ -71,6 +71,7 @@ Server_impl::Server_impl()
   //using pProviderTWS_t = ou::tf::ib::TWS::pProvider_t;
   m_pProviderTWS = ou::tf::ib::TWS::Factory();
   m_pProviderTWS->SetName( sTWS ); // needs to match name in database
+  m_pProviderTWS->SetClientId( ib_client_id );
   providers.Register( m_pProviderTWS );
   m_pProviderTWS->OnConnected.Add( MakeDelegate( this, &Server_impl::Connected_TWS ) );
   m_pProviderTWS->OnDisconnected.Add( MakeDelegate( this, &Server_impl::Disconnected_TWS ) );

@@ -114,6 +114,7 @@ public:
 
 protected:
 private:
+
   const config::Choices& m_choices;
 
   std::unique_ptr<Server_impl> m_implServer;

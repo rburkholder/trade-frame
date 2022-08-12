@@ -44,7 +44,7 @@ Server::Server(
 : Wt::WServer( argc, argv, wtConfigurationFile )
 , m_choices( choices )
 {
-  m_implServer = std::make_unique<Server_impl>();
+  m_implServer = std::make_unique<Server_impl>( m_choices.ib_client_id );
 }
 
 Server::~Server() {

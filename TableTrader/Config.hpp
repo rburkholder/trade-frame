@@ -28,6 +28,10 @@ namespace config {
 
 struct Choices {
 
+  // Interactive Brokers api instance
+  int ib_client_id;
+
+  // simple auth
   std::string m_sUIUserName;
   std::string m_sUIPassWord;
 

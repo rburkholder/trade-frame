@@ -50,7 +50,7 @@ namespace ib {
 class Server_impl {
 public:
 
-  Server_impl();
+  Server_impl( int ib_client_id );
   ~Server_impl();
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
