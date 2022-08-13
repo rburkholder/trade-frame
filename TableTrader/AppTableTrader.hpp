@@ -117,8 +117,8 @@ private:
 
   void TemplatePage( Wt::WContainerWidget*, fTemplate_t );
 
-  void LoginPage( Wt::WContainerWidget* );
-  void ActionPage( Wt::WContainerWidget* );
+  void Page_Login( Wt::WContainerWidget* );
+  void Page_SelectUndelrying( Wt::WContainerWidget* );
 
   std::string ComposeOrderType(
     int ixOrderType,

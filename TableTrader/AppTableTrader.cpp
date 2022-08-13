@@ -65,7 +65,7 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
     root(),
     [this](Wt::WContainerWidget* pcw){
       //LoginPage( pcw );
-      ActionPage( pcw ); // skip the login for now
+      Page_SelectUndelrying( pcw ); // skip the login for now
     } );
 
 }
@@ -73,7 +73,7 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
 AppTableTrader::~AppTableTrader( ) { }
 
 void AppTableTrader::initialize() {
-  Wt::WApplication::log( "info" ) << "AppTableTrader::initialize()";
+  BOOST_LOG_TRIVIAL(info) << "AppTableTrader::initialize()";
   m_pServer->SessionAttach( sessionId() );
   m_timerLiveRefresh = root()->addChild( std::make_unique<Wt::WTimer>() );
   m_timerLiveRefresh->timeout().connect( this, &AppTableTrader::HandleLiveRefresh );
@@ -82,7 +82,7 @@ void AppTableTrader::initialize() {
 }
 
 void AppTableTrader::finalize() {
-  Wt::WApplication::log( "info" ) << "AppTableTrader::finalize()";
+  BOOST_LOG_TRIVIAL(info) << "AppTableTrader::finalize()";
   m_timerLiveRefresh->stop();
   m_pServer->SessionDetach( sessionId() );
 }
@@ -102,11 +102,11 @@ void AppTableTrader::HandleInternalPathChanged( const std::string& sPath ) {
     sMessage += "root";
     Home( root() );
   }
-  Wt::WApplication::log( "info" ) << sMessage;
+  BOOST_LOG_TRIVIAL(info) << sMessage;
 }
 
 void AppTableTrader::HandleInternalPathInvalid( const std::string& s ) {
-  Wt::WApplication::log( "warn" ) << "*** HandleInternalPathInvalid: " << s;
+  BOOST_LOG_TRIVIAL(warning) << "*** HandleInternalPathInvalid: " << s;
 }
 
 void AppTableTrader::RegisterPath( const std::string& sPath, const slotInternalPathChanged_t& slot ) {
@@ -226,12 +226,12 @@ void AppTableTrader::HandleLiveRefresh() {
   triggerUpdate();
 }
 
-void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
+void AppTableTrader::Page_Login( Wt::WContainerWidget* pcw ) {
 
   // TODO: will need to restore state if Server/Server_impl has something running
 
   Wt::WContainerWidget* pContainerLoginFrame = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  pContainerLoginFrame->addStyleClass( "classInputRow" );
+  //pContainerLoginFrame->addStyleClass( "classInputRow" );
 
     Wt::WContainerWidget* pContainerTitle = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
 
@@ -269,14 +269,14 @@ void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
       const std::string sUserName = pEditUserName->text().toUTF8();
       if ( 0 == sUserName.size() ) {
         Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "UserName: required" ) );
-        pText->addStyleClass( "classErrorMessage" );
+        pText->addStyleClass( "fld_message_error" );
         bOk = false;
       }
 
       const std::string sPassWord = pEditPassWord->text().toUTF8();
       if ( 0 == sPassWord.size() ) {
         Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "PassWord: required" ) );
-        pText->addStyleClass( "classErrorMessage" );
+        pText->addStyleClass( "fld_message_error" );
         bOk = false;
       }
 
@@ -291,7 +291,7 @@ void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
           TemplatePage(
             root(),
             [this]( Wt::WContainerWidget* pcw ){
-              ActionPage( pcw );
+              Page_SelectUndelrying( pcw );
             });
         }
         else {
@@ -300,7 +300,7 @@ void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
           pEditPassWord->setEnabled( true );
 
           Wt::WText* pText = pContainerNotification->addWidget( std::make_unique<Wt::WText>( "UserName/PassWord: no match" ) );
-          pText->addStyleClass( "classErrorMessage" );
+          pText->addStyleClass( "fld_message_error" );
           bOk = false;
 
         }
@@ -309,7 +309,7 @@ void AppTableTrader::LoginPage( Wt::WContainerWidget* pcw ) {
     });
 }
 
-void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
+void AppTableTrader::Page_SelectUndelrying( Wt::WContainerWidget* pcw ) {
 
   pcw->clear();
 
@@ -605,7 +605,7 @@ void AppTableTrader::ActionPage( Wt::WContainerWidget* pcw ) {
               using vColumns_t = std::vector<columns>;
               vColumns_t vColumns = {
                 {"ticker", 175}, {"side", 32}, {"strike", 60}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
-                {"%alloc",40},{"",10},{"$alloc",60},{"#cont",40},{"order",80},
+                {"%alloc",40},{"",10},{"$alloc",60},{"ttl_q",40},{"order",80},
                 {"price",60},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",60},{"fill_en",60},{"fill_ex",60}
               };
 
