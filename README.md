@@ -75,8 +75,9 @@ cd trade-frame
 mkdir build
 cd build
 cmake ..
-cmake --build . --config Debug
-# cmake --build . --config Release   # alternate build flavour
+# us--e parallel to use more cpu cores
+cmake --build . --parallel 4 --config Debug
+# cmake --build . --parallel 4 --config Release   # alternate build flavour
 
 ```
 
