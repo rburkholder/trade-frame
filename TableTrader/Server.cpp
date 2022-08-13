@@ -102,14 +102,18 @@ void Server::Start(
       );
     },
     [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) mutable { // fUpdateUnderlyingPrice_t
-      //format_ % precision % price;
-      boost::format format( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
-      format % price;
-      std::string sPrice( format.str() );
+      assert( 20 > precision );  // seems, on some random startup,
+                                 // caller sends correct value, but precision is stopmped on, will need a valgrind session
+                                 // may have to do with screen changing, is this in the timer?
+                                 // maybe only startup timer after chain/expiry selected
+                                 // otherwise implement the post below again
+      boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+      formatPrice % price;
+      const std::string sPrice( formatPrice.str() );
 
       boost::format formatPnL( sFormatUSD );
       formatPnL % dblPortfolioPnL;
-      std::string sPortfolioPnL( formatPnL.str() );
+      const std::string sPortfolioPnL( formatPnL.str() );
       //post(
       //  sSessionId,
       //  [this,sPrice_=std::move(sPrice)](){
