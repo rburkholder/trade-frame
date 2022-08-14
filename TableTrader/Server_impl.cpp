@@ -228,6 +228,8 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
   m_nPrecision = fundamentals.nPrecision;
   m_fUpdateUnderlyingInfo( m_pWatchUnderlying->GetInstrumentName(), fundamentals.nContractSize );
 
+  m_state = EConnection::fundamentals;
+
   using vSymbol_t = ou::tf::iqfeed::OptionChainQuery::vSymbol_t;
   using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
 
@@ -314,84 +316,88 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
     m_pPortfolioOptions->QueryStats( dblPortfolioUnRealized, dblPortfolioRealized, dblPortfolioCommissionsPaid, dblPortfolioTotal );
   }
 
-  if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision, dblPortfolioTotal );
+  if ( EConnection::fundamentals == m_state ) {
 
-  for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
-    UIOption& uio( vt.second );
-    if ( uio.m_fRealTime ) {
+    if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision, dblPortfolioTotal );
 
-      const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
-      double mid =  quote.Midpoint();
-      uio.UpdateContracts( mid );
+    for ( mapUIOption_t::value_type& vt: m_mapUIOption ) {
+      UIOption& uio( vt.second );
+      if ( uio.m_fRealTime ) {
 
-      if ( UIOption::IBContractState::unknown == uio.m_stateIBContract ) {
-        if ( 0.0 < mid ) { // simple way to identify fundamentals have arrived for symbol
+        const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
+        double mid =  quote.Midpoint();
+        uio.UpdateContracts( mid );
 
-          uio.m_stateIBContract = UIOption::IBContractState::acquiring;
+        if ( UIOption::IBContractState::unknown == uio.m_stateIBContract ) {
+          if ( 0.0 < mid ) { // simple way to identify fundamentals have arrived for symbol
 
-          pInstrument_t pInstrument = uio.m_pOption->GetInstrument();
-          if ( 0 == pInstrument->GetContract() ) {
-            const ou::tf::iqfeed::Fundamentals& fundamentals( uio.m_pOption->GetFundamentals() );
+            uio.m_stateIBContract = UIOption::IBContractState::acquiring;
 
-            fRequestContract_t fRequestContract =
-              [this,root=fundamentals.sExchangeRoot,pInstrument](){
-                pInstrument_t pInstrument_( pInstrument );
-                m_pProviderTWS->RequestContractDetails(
-                  root,
-                  pInstrument_,
-                  [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
-                    assert( 0 != pInstrument->GetContract() );
-                    m_pProviderTWS->Sync( pInstrument );
-                    // TODO: need to write to database
-                  },
-                  [this,pInstrument]( bool bStatus ){
-                    if ( !bStatus ) {
-                      const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
-                      BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
-                    }
+            pInstrument_t pInstrument = uio.m_pOption->GetInstrument();
+            if ( 0 == pInstrument->GetContract() ) {
+              const ou::tf::iqfeed::Fundamentals& fundamentals( uio.m_pOption->GetFundamentals() );
 
-                    {
-                      std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
-                      m_fRequestContract_InProgress = nullptr;
-                      if ( 0 < m_vRequestContract_Pending.size() ) {
-                        m_fRequestContract_InProgress = std::move( m_vRequestContract_Pending.back() );
-                        m_vRequestContract_Pending.pop_back();
-                        m_fRequestContract_InProgress();
+              fRequestContract_t fRequestContract =
+                [this,root=fundamentals.sExchangeRoot,pInstrument](){
+                  pInstrument_t pInstrument_( pInstrument );
+                  m_pProviderTWS->RequestContractDetails(
+                    root,
+                    pInstrument_,
+                    [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+                      assert( 0 != pInstrument->GetContract() );
+                      m_pProviderTWS->Sync( pInstrument );
+                      // TODO: need to write to database
+                    },
+                    [this,pInstrument]( bool bStatus ){
+                      if ( !bStatus ) {
+                        const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+                        BOOST_LOG_TRIVIAL(debug) << "TWS acquire contract failed: " << sInstrumentName;
+                      }
+
+                      {
+                        std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+                        m_fRequestContract_InProgress = nullptr;
+                        if ( 0 < m_vRequestContract_Pending.size() ) {
+                          m_fRequestContract_InProgress = std::move( m_vRequestContract_Pending.back() );
+                          m_vRequestContract_Pending.pop_back();
+                          m_fRequestContract_InProgress();
+                        }
                       }
                     }
-                  }
-                );
-              };
+                  );
+                };
 
-            {
-              std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
-              if ( m_fRequestContract_InProgress ) { // queue the request
-                m_vRequestContract_Pending.emplace_back( std::move( fRequestContract ) );
+              {
+                std::scoped_lock<std::mutex> lock( m_mutexRequestContract );
+                if ( m_fRequestContract_InProgress ) { // queue the request
+                  m_vRequestContract_Pending.emplace_back( std::move( fRequestContract ) );
+                }
+                else {
+                  m_fRequestContract_InProgress = std::move( fRequestContract );
+                  m_fRequestContract_InProgress();
+                }
               }
-              else {
-                m_fRequestContract_InProgress = std::move( fRequestContract );
-                m_fRequestContract_InProgress();
-              }
-            }
 
-          };
+            };
+          }
+
         }
 
-      }
+        const auto& summary( uio.m_pOption->GetSummary() );  // look for open interest
 
-      const auto& summary( uio.m_pOption->GetSummary() );  // look for open interest
-
-      double dblPnL {};
-      if ( uio.m_pPosition ) {
-        double dblUnRealized;
-        double dblRealized;
-        double dblCommissionsPaid;
-        //double dblTotal;
-        uio.m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblPnL );
+        double dblPnL {};
+        if ( uio.m_pPosition ) {
+          double dblUnRealized;
+          double dblRealized;
+          double dblCommissionsPaid;
+          //double dblTotal;
+          uio.m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblPnL );
+        }
+        uio.m_fRealTime( summary.nOpenInterest, quote.Bid(), quote.Ask(), m_nPrecision, summary.nTotalVolume, uio.m_nContracts, dblPnL );
       }
-      uio.m_fRealTime( summary.nOpenInterest, quote.Bid(), quote.Ask(), m_nPrecision, summary.nTotalVolume, uio.m_nContracts, dblPnL );
     }
   }
+
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {

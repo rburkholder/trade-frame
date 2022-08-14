@@ -119,7 +119,7 @@ private:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  enum EConnection { quiescent, connecting, connected, disconnecting, disconnected };
+  enum EConnection { quiescent, connecting, connected, fundamentals, disconnecting, disconnected };
   EConnection m_state;
 
   std::mutex m_mutex;
