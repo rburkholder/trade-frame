@@ -327,13 +327,17 @@ void Server::DelStrike( const std::string& sStrike ) {
 }
 
 void Server::ChangeAllocation( const std::string& sStrike, const std::string& sPercent ) {
+  double strike {};
+  double percent {};
   try {
-    double strike = boost::lexical_cast<double>( sStrike );
-    double percent = boost::lexical_cast<double>( sPercent );
-    m_implServer->ChangeAllocation( strike, percent / 100.0 );
+    strike = boost::lexical_cast<double>( sStrike );
+    percent = boost::lexical_cast<double>( sPercent );
   }
   catch ( boost::bad_lexical_cast& e ) {
-    assert( false );
+    //assert( false ); allow ChangeAllocation if strike successfuly converted, allocation can be zero or non-zero
+  }
+  if ( 0.0 != strike ) {
+    m_implServer->ChangeAllocation( strike, percent / 100.0 );
   }
 }
 
