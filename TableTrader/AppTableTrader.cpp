@@ -405,10 +405,16 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
     Wt::WLabel* pLabelExpiries = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WLabel>( "Option Chain Expiries: " ) );
     pContainerSelectExpiries->addWidget( std::make_unique<Wt::WBreak>() );
 
-    Wt::WLabel* pLabelBackgroundLoading = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WLabel>( "Loading (may take a few minutes) ..." ) );
-    // TODO: add statistics showing # of options total, # options processed, # chains processed
+    Wt::WContainerWidget* pContainerLoadingStatus = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WContainerWidget>() );
+      Wt::WLabel* pLabelBackgroundLoading = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "Loading (may take a few minutes) ..." ) );
+      pLabelBackgroundLoading->addStyleClass( "w_label" );
+      Wt::WLabel* pLabelNumberOptionNames = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>() );
+      pLabelNumberOptionNames->addStyleClass( "w_label" );
+      Wt::WLabel* pLabelNumberOptionsLoaded  = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>() );
+      pLabelNumberOptionsLoaded->addStyleClass( "w_label" );
 
     Wt::WSelectionBox* pSelectExpiry = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WSelectionBox>() );
+    pSelectExpiry->addStyleClass( "w_combo_box" );
     pSelectExpiry->setSelectionMode( Wt::SelectionMode::Single );
     pSelectExpiry->setVerticalSize( 4 );
     pSelectExpiry->setEnabled( false );
@@ -419,7 +425,11 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
 
   m_pServer->ChainSelection(
     sessionId(),
-    [this,pLabelBackgroundLoading,pSelectExpiry]( const std::string& sDate ){ // fUpdateOptionExpiries_t
+    [pLabelNumberOptionNames,pLabelNumberOptionsLoaded](const std::string& sOptionsNames, const std::string& sOptionsLoaded){
+      pLabelNumberOptionNames->setText( sOptionsNames );
+      pLabelNumberOptionsLoaded->setText( sOptionsLoaded );
+    },
+    [pLabelBackgroundLoading,pSelectExpiry]( const std::string& sDate ){ // fUpdateOptionExpiries_t
       // TODO: implement timer to indicate duration
       if ( pSelectExpiry->isHidden() ) {
         pLabelBackgroundLoading->setHidden( true );

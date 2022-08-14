@@ -93,11 +93,8 @@ void Server::Underlying(
     );
   },
   [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) { // fUpdateUnderlyingPrice_t
-    assert( 20 > precision );  // seems, on some random startup,
-                                // caller sends correct value, but precision is stopmped on, will need a valgrind session
-                                // may have to do with screen changing, is this in the timer?
-                                // maybe only startup timer after chain/expiry selected
-                                // otherwise implement the post below again
+    assert( 20 > precision );
+    assert(  0 < precision );
     boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
     formatPrice % price;
     const std::string sPrice( formatPrice.str() );
@@ -119,9 +116,13 @@ void Server::Underlying(
 
 void Server::ChainSelection(
     const std::string& sSessionId,
+    fOptionLoadingStatus_t&& fOptionLoadingStatus,
     fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
     fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
 ) {
+
+  assert( fOptionLoadingStatus );
+  m_fOptionLoadingStatus = std::move( fOptionLoadingStatus );
 
   assert( fUpdateOptionExpiries );
   m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
@@ -130,11 +131,20 @@ void Server::ChainSelection(
   m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
 
   m_implServer->ChainSelection(
+    [this,sSessionId](size_t nOptionNames, size_t nOptionsLoaded){
+      post(
+        sSessionId,
+        [this,nOptionNames,nOptionsLoaded](){
+          const std::string sOptionNames = boost::lexical_cast<std::string>( nOptionNames );
+          const std::string sOptionsLoaded = boost::lexical_cast<std::string>( nOptionsLoaded );
+          m_fOptionLoadingStatus( sOptionNames, sOptionsLoaded );
+        }
+      );
+    },
     [this,sSessionId]( boost::gregorian::date date ){ // fAddExpiry_t
       post(
         sSessionId,
         [this,date](){
-          //std::string sDate = boost::lexical_cast<std::string>( date );
           const std::string sDate = boost::gregorian::to_iso_string( date );
           m_fUpdateOptionExpiries( sDate );
         }

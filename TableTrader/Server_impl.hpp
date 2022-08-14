@@ -55,6 +55,9 @@ public:
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
   using fUpdateUnderlyingPrice_t = std::function<void(double,int,double)>; // price,precision,portfolio
+
+  using fOptionLoadingState_t = std::function<void(size_t,size_t)>;
+
   using fAddExpiry_t = std::function<void(boost::gregorian::date)>;
   using fAddExpiryDone_t = std::function<void()>;
 
@@ -71,6 +74,7 @@ public:
   );
 
   void ChainSelection(
+    fOptionLoadingState_t&&,
     fAddExpiry_t&&,
     fAddExpiryDone_t&&
     );
@@ -139,6 +143,9 @@ private:
 
   fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+
+  fOptionLoadingState_t m_fOptionLoadingState;
+
   fAddExpiry_t m_fAddExpiry;
   fAddExpiryDone_t m_fAddExpiryDone;
 
@@ -167,6 +174,7 @@ private:
 
   size_t m_nOptionsNames;
   size_t m_nOptionsLoaded;
+  size_t m_nOptionsLoadedReportingInterval;
 
   double m_dblInvestment;
   double m_dblAllocated;

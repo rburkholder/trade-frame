@@ -60,8 +60,11 @@ Server_impl::Server_impl( int ib_client_id )
 , m_nOptionsLoaded {}
 , m_dblInvestment {}
 , m_dblAllocated {}
+, m_nPrecision {}
+, m_nMultiplier {}
 , m_fUpdateUnderlyingInfo {}
 , m_fUpdateUnderlyingPrice {}
+, m_fOptionLoadingState {}
 , m_fAddExpiry {}
 , m_fAddExpiryDone {}
 {
@@ -182,9 +185,13 @@ void Server_impl::Underlying(
 }
 
 void Server_impl::ChainSelection(
+  fOptionLoadingState_t&& fOptionLoadingState,
   fAddExpiry_t&& fAddExpiry,
   fAddExpiryDone_t&& fAddExpiryDone
 ) {
+
+  assert( fOptionLoadingState );
+  m_fOptionLoadingState = std::move( fOptionLoadingState );
 
   assert( fAddExpiry );
   m_fAddExpiry = std::move( fAddExpiry );
@@ -221,6 +228,10 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   //pPosition_t pPosition = ConstructPosition( pInstrument );
 }
 
+namespace {
+  size_t nOptionsLoadedReportingIntervalStart( 200 );
+}
+
 void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
 
   assert( 0 < fundamentals.nContractSize );
@@ -245,6 +256,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
           [this]( const OptionList& list ){
             m_nOptionsLoaded = 0;
             m_nOptionsNames = list.vSymbol.size();
+            m_nOptionsLoadedReportingInterval = nOptionsLoadedReportingIntervalStart;
             BOOST_LOG_TRIVIAL(info) << list.sUnderlying << " has " <<  list.vSymbol.size() << " options";
 
             ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
@@ -297,8 +309,17 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   assert( pBuiltOption );
   pBuiltOption->pOption = pOption;
 
+  if ( m_fOptionLoadingState ) {
+    m_nOptionsLoadedReportingInterval--;
+    if ( 0 == m_nOptionsLoadedReportingInterval ) {
+      m_nOptionsLoadedReportingInterval = nOptionsLoadedReportingIntervalStart;
+      m_fOptionLoadingState( m_nOptionsNames, m_nOptionsLoaded );
+    }
+  }
+
   if ( m_nOptionsNames == m_nOptionsLoaded ) {
     PopulateExpiry();
+    m_fOptionLoadingState = nullptr;
   }
 }
 

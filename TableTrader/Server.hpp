@@ -45,6 +45,9 @@ public:
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&, const std::string&)>; // name, multiplier
   using fUpdateUnderlyingPrice_t = std::function<void(const std::string&,const std::string&)>; // price, portfolio pnl
+
+  using fOptionLoadingStatus_t = std::function<void(const std::string&, const std::string&)>;
+
   using fUpdateOptionExpiries_t = std::function<void(const std::string&)>;
   using fUpdateOptionExpiriesDone_t = std::function<void()>;
 
@@ -71,6 +74,7 @@ public:
 
   void ChainSelection(
     const std::string& sSessionId,
+    fOptionLoadingStatus_t&&,
     fUpdateOptionExpiries_t&&,
     fUpdateOptionExpiriesDone_t&&
   );
@@ -125,6 +129,9 @@ private:
 
   fUpdateUnderlyingInfo_t m_fUpdateUnderlyingInfo;
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+
+  fOptionLoadingStatus_t m_fOptionLoadingStatus;
+
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
   fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;
 
